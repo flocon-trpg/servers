@@ -1,10 +1,14 @@
 import { ParamNameState } from '@flocon-trpg/core';
 import { recordToMap } from '@flocon-trpg/utils';
 import React from 'react';
-import { useSelector } from '../../store';
+import { roomAtom } from '../../atoms/room/roomAtom';
+import { useAtomSelector } from '../../atoms/useAtomSelector';
 
 export const useBoolParamNames = (): ReadonlyMap<string, ParamNameState> | undefined => {
-    const boolParamNames = useSelector(state => state.roomModule.roomState?.state?.boolParamNames);
+    const boolParamNames = useAtomSelector(
+        roomAtom,
+        state => state.roomState?.state?.boolParamNames
+    );
     return React.useMemo(() => {
         if (boolParamNames == null) {
             return undefined;
@@ -14,7 +18,7 @@ export const useBoolParamNames = (): ReadonlyMap<string, ParamNameState> | undef
 };
 
 export const useNumParamNames = (): ReadonlyMap<string, ParamNameState> | undefined => {
-    const numParamNames = useSelector(state => state.roomModule.roomState?.state?.numParamNames);
+    const numParamNames = useAtomSelector(roomAtom, state => state.roomState?.state?.numParamNames);
     return React.useMemo(() => {
         if (numParamNames == null) {
             return undefined;
@@ -24,7 +28,7 @@ export const useNumParamNames = (): ReadonlyMap<string, ParamNameState> | undefi
 };
 
 export const useStrParamNames = (): ReadonlyMap<string, ParamNameState> | undefined => {
-    const strParamNames = useSelector(state => state.roomModule.roomState?.state?.strParamNames);
+    const strParamNames = useAtomSelector(roomAtom, state => state.roomState?.state?.strParamNames);
     return React.useMemo(() => {
         if (strParamNames == null) {
             return undefined;

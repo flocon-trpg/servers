@@ -1,11 +1,11 @@
 import localforage from 'localforage';
 import {
     defaultRoomConfig,
+    deserializeRoomConfig,
     RoomConfig,
     SerializedRoomConfig,
     serializedRoomConfig,
-    toCompleteRoomConfig,
-} from '../../states/RoomConfig';
+} from '../../atoms/roomConfig/types/roomConfig';
 import { tryParseJSON } from '../tryParseJSON';
 
 const roomConfigKey = (roomId: string) => `room@${roomId}`;
@@ -28,7 +28,7 @@ export const getRoomConfig = async (roomId: string): Promise<RoomConfig> => {
     if (result == null) {
         return defaultRoomConfig(roomId);
     }
-    return toCompleteRoomConfig(result, roomId);
+    return deserializeRoomConfig(result, roomId);
 };
 
 export const setRoomConfig = async (value: RoomConfig) => {

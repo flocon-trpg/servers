@@ -8,6 +8,8 @@ import { useDispatch } from 'react-redux';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useOperateAsState } from '../../hooks/useOperateAsState';
 import produce from 'immer';
+import { useAtomSelector } from '../../atoms/useAtomSelector';
+import { roomAtom } from '../../atoms/room/roomAtom';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -22,7 +24,7 @@ export const EditRoomDrawer: React.FC = () => {
     );
     const dispatch = useDispatch();
     const operateAsState = useOperateAsState();
-    const name = useSelector(state => state.roomModule.roomState?.state?.name);
+    const name = useAtomSelector(roomAtom,state => state.roomState?.state?.name);
 
     return (
         <Drawer

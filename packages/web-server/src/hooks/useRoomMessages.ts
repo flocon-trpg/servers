@@ -14,10 +14,10 @@ import {
 } from '@flocon-trpg/typed-document-node';
 import { appConsole } from '../utils/appConsole';
 import { PrivateChannelSet, PrivateChannelSets } from '../utils/PrivateChannelSet';
-import { Notification } from '../modules/roomModule';
-import { useSelector } from '../store';
 import { useMyUserUid } from './useMyUserUid';
 import { usePrevious } from 'react-use';
+import { useAtomSelector } from '../atoms/useAtomSelector';
+import { roomAtom, Notification } from '../atoms/room/roomAtom';
 
 // 使い方:
 // 1. どこかでuseAllRoomMessagesを呼ぶ。冗長な通信を避けるため、useAllRoomMessagesを呼ぶ箇所はなるべく少なくする。
@@ -497,8 +497,8 @@ export const useFilteredRoomMessages = ({
 }: {
     filter?: (message: Message) => boolean;
 }): ReadonlyArray<Message> => {
-    const logNotifications = useSelector(state => state.roomModule.notifications);
-    const allRoomMessagesResult = useSelector(state => state.roomModule.allRoomMessagesResult);
+    const logNotifications = useAtomSelector(roomAtom, state => state.notifications);
+    const allRoomMessagesResult = useAtomSelector(roomAtom, state => state.allRoomMessagesResult);
 
     const [result, setResult] = React.useState<Message[] | null>(null);
 

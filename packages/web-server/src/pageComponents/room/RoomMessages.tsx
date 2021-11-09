@@ -33,8 +33,6 @@ import {
 } from '../../hooks/useRoomMessages';
 import { PrivateChannelSet, PrivateChannelSets } from '../../utils/PrivateChannelSet';
 import { ChatInput } from '../../components/ChatInput/Main';
-import { useDispatch } from 'react-redux';
-import { roomConfigModule } from '../../modules/roomConfigModule';
 import {
     DeleteMessageDocument,
     EditMessageDocument,
@@ -42,7 +40,6 @@ import {
     WritingMessageStatusType,
 } from '@flocon-trpg/typed-document-node';
 import * as Icon from '@ant-design/icons';
-import { MessageFilter, TabConfig } from '../../states/MessagePanelConfig';
 import { Gutter } from 'antd/lib/grid/row';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { BufferedInput } from '../../components/BufferedInput';
@@ -51,15 +48,11 @@ import { useMessageFilter } from '../../hooks/useMessageFilter';
 import { RoomMessage as RoomMessageNameSpace } from './RoomMessage';
 import { useWritingMessageStatus } from '../../hooks/useWritingMessageStatus';
 import { isDeleted, toText } from '../../utils/message';
-import { Notification } from '../../modules/roomModule';
-import { useSelector } from '../../store';
 import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import { simpleId } from '@flocon-trpg/core';
 import { recordToArray, recordToMap } from '@flocon-trpg/utils';
 import { Color } from '../../utils/color';
-import { userConfigModule } from '../../modules/userConfigModule';
-import { UserConfig } from '../../states/UserConfig';
 import * as Icons from '@ant-design/icons';
 import { InputModal } from '../../components/InputModal';
 import { JumpToBottomVirtuoso } from '../../components/JumpToBottomVirtuoso';
@@ -69,6 +62,16 @@ import { getUserUid, MyAuthContext } from '../../contexts/MyAuthContext';
 import { useOperateAsState } from '../../hooks/useOperateAsState';
 import produce from 'immer';
 import { useMutation } from '@apollo/client';
+import { TabConfig } from '../../atoms/roomConfig/types/tabConfig';
+import { atom, useAtom } from 'jotai';
+import { roomAtom, Notification } from '../../atoms/room/roomAtom';
+import { userConfigAtom } from '../../atoms/userConfig/userConfigAtom';
+import { UserConfigUtils } from '../../atoms/userConfig/utils';
+import { MessageFilter } from '../../atoms/roomConfig/types/messageFilter';
+import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
+import { TabConfigUtils } from '../../atoms/roomConfig/types/tabConfig/utils';
+import { writeonlyAtom } from '../../atoms/writeonlyAtom';
+import { useImmerAtom } from 'jotai/immer';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -79,6 +82,13 @@ const none = 'none';
 const some = 'some';
 const custom = 'custom';
 type HiwaSelectValueType = typeof none | typeof some | typeof custom;
+
+const participantsAtom = atom(get => get(roomAtom).roomState?.state?.participants);
+const roomIdAtom = atom(get => get(roomAtom).roomId);
+const roomMessageFontSizeDeltaAtom = atom(get => get(userConfigAtom)?.roomMessagesFontSizeDelta);
+const allRoomMessagesResultAtom = atom(get => get(roomAtom).allRoomMessagesResult);
+const writeonlyRoomConfigAtom = writeonlyAtom(roomConfigAtom);
+const writeonlyUserConfigAtom = writeonlyAtom(userConfigAtom);
 
 type TabEditorDrawerProps = {
     // これがundefinedの場合、Drawerのvisibleがfalseとみなされる。
@@ -415,7 +425,7 @@ type RoomMessageComponentProps = {
 const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
     props: RoomMessageComponentProps
 ) => {
-    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
+    const [participants] = useAtom(participantsAtom);
 
     const { message, showPrivateMessageMembers, publicChannelNames } = props;
 
@@ -424,12 +434,10 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
     const [deleteMessageMutation] = useMutation(DeleteMessageDocument);
     const [makeMessageNotSecret] = useMutation(MakeMessageNotSecretDocument);
     const [isEditModalVisible, setIsEditModalVisible] = React.useState(false);
-    const roomId = useSelector(state => state.roomModule.roomId);
-    const roomMessagesFontSizeDelta = useSelector(
-        state => state.userConfigModule?.roomMessagesFontSizeDelta
-    );
+    const [roomId] = useAtom(roomIdAtom);
+    const [roomMessagesFontSizeDelta] = useAtom(roomMessageFontSizeDeltaAtom);
 
-    const fontSize = UserConfig.getRoomMessagesFontSize(roomMessagesFontSizeDelta ?? 0);
+    const fontSize = UserConfigUtils.getRoomMessagesFontSize(roomMessagesFontSizeDelta ?? 0);
 
     const participantsMap = React.useMemo(
         () => (participants == null ? null : recordToMap(participants)),
@@ -701,7 +709,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
     const myAuth = React.useContext(MyAuthContext);
     const writingMessageStatusResult = useWritingMessageStatus();
     const publicChannelNames = usePublicChannelNames();
-    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
+    const [participants] = useAtom(participantsAtom);
     const participantsMap = React.useMemo(
         () => (participants == null ? null : recordToMap(participants)),
         [participants]
@@ -793,14 +801,15 @@ type Props = {
 
 export const RoomMessages: React.FC<Props> = (props: Props) => {
     const { height, panelId } = props;
-    const tabs = useSelector(
-        state => state.roomConfigModule?.panels.messagePanels?.[panelId]?.tabs
-    );
+    const tabsAtom = React.useMemo(() => {
+        return atom(get => get(roomConfigAtom)?.panels.messagePanels?.[panelId]?.tabs);
+    }, [panelId]);
+    const [tabs] = useAtom(tabsAtom);
+    const [, setRoomConfig] = useImmerAtom(writeonlyRoomConfigAtom);
+    const [, setUserConfig] = useImmerAtom(writeonlyUserConfigAtom);
 
     const contentHeight = Math.max(0, height - 340);
     const tabsHeight = Math.max(0, height - 300);
-
-    const dispatch = useDispatch();
 
     const [editingTabConfigKey, setEditingTabConfigKey] = React.useState<string>();
     const editingTabConfig = React.useMemo(() => {
@@ -812,11 +821,9 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
 
     const [isChannelNamesEditorVisible, setIsChannelNamesEditorVisible] = React.useState(false);
 
-    const roomId = useSelector(state => state.roomModule.roomId);
-    const allRoomMessagesResult = useSelector(state => state.roomModule.allRoomMessagesResult);
-    const roomMessagesFontSizeDelta = useSelector(
-        state => state.userConfigModule?.roomMessagesFontSizeDelta
-    );
+    const [roomId] = useAtom(roomIdAtom);
+    const [allRoomMessagesResult] = useAtom(allRoomMessagesResultAtom);
+    const [roomMessagesFontSizeDelta] = useAtom(roomMessageFontSizeDeltaAtom);
 
     if (roomId == null || allRoomMessagesResult == null || tabs == null) {
         return null;
@@ -864,7 +871,7 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                                   }}
                               >
                                   <div style={{ flex: '0 0 auto', maxWidth: 100 }}>
-                                      {TabConfig.toTabName(tab)}
+                                      {TabConfigUtils.toTabName(tab)}
                                   </div>
                                   <div style={{ flex: 1 }} />
                                   <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>
@@ -883,21 +890,21 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                                                       onClick={() => {
                                                           Modal.warning({
                                                               onOk: () => {
-                                                                  dispatch(
-                                                                      roomConfigModule.actions.updateMessagePanel(
-                                                                          {
-                                                                              roomId,
-                                                                              panelId,
-                                                                              panel: {
-                                                                                  tabs: {
-                                                                                      ...tabs,
-                                                                                      [tabKey]:
-                                                                                          undefined,
-                                                                                  },
-                                                                              },
-                                                                          }
-                                                                      )
-                                                                  );
+                                                                  setRoomConfig(roomConfig => {
+                                                                      if (roomConfig == null) {
+                                                                          return;
+                                                                      }
+                                                                      const messagePanel =
+                                                                          roomConfig.panels
+                                                                              .messagePanels[
+                                                                              panelId
+                                                                          ];
+                                                                      if (messagePanel == null) {
+                                                                          return;
+                                                                      }
+                                                                      messagePanel.tabs[tabKey] =
+                                                                          undefined;
+                                                                  });
                                                               },
                                                               content:
                                                                   'タブを削除します。よろしいですか？',
@@ -947,18 +954,16 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                     if (editingTabConfigKey == null) {
                         return;
                     }
-                    dispatch(
-                        roomConfigModule.actions.updateMessagePanel({
-                            roomId,
-                            panelId,
-                            panel: {
-                                tabs: {
-                                    ...tabs,
-                                    [editingTabConfigKey]: newValue,
-                                },
-                            },
-                        })
-                    );
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        const messagePanel = roomConfig.panels.messagePanels[panelId];
+                        if (messagePanel == null) {
+                            return;
+                        }
+                        messagePanel.tabs[editingTabConfigKey] = newValue;
+                    });
                 }}
             />
             <ChannelNamesEditor
@@ -979,11 +984,13 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                 <Button
                     size='small'
                     onClick={() => {
-                        dispatch(
-                            userConfigModule.actions.set({
-                                roomMessagesFontSizeDelta: (roomMessagesFontSizeDelta ?? 0) - 1,
-                            })
-                        );
+                        setUserConfig(userConfig => {
+                            if (userConfig == null) {
+                                return;
+                            }
+                            userConfig.roomMessagesFontSizeDelta =
+                                (roomMessagesFontSizeDelta ?? 0) - 1;
+                        });
                     }}
                 >
                     <Icons.MinusOutlined />
@@ -991,11 +998,13 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                 <Button
                     size='small'
                     onClick={() => {
-                        dispatch(
-                            userConfigModule.actions.set({
-                                roomMessagesFontSizeDelta: (roomMessagesFontSizeDelta ?? 0) + 1,
-                            })
-                        );
+                        setUserConfig(userConfig => {
+                            if (userConfig == null) {
+                                return;
+                            }
+                            userConfig.roomMessagesFontSizeDelta =
+                                (roomMessagesFontSizeDelta ?? 0) + 1;
+                        });
                     }}
                 >
                     <Icons.PlusOutlined />
@@ -1009,32 +1018,28 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                         if (typeof e !== 'string') {
                             return;
                         }
-                        dispatch(
-                            roomConfigModule.actions.updateMessagePanel({
-                                roomId,
-                                panelId,
-                                panel: {
-                                    tabs: {
-                                        ...tabs,
-                                        [e]: undefined,
-                                    },
-                                },
-                            })
-                        );
+                        setRoomConfig(roomConfig => {
+                            if (roomConfig == null) {
+                                return;
+                            }
+                            const messagePanel = roomConfig.panels.messagePanels[panelId];
+                            if (messagePanel == null) {
+                                return;
+                            }
+                            messagePanel.tabs[e] = undefined;
+                        });
                         return;
                     }
-                    dispatch(
-                        roomConfigModule.actions.updateMessagePanel({
-                            roomId,
-                            panelId,
-                            panel: {
-                                tabs: {
-                                    ...tabs,
-                                    [simpleId()]: TabConfig.createEmpty({}),
-                                },
-                            },
-                        })
-                    );
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        const messagePanel = roomConfig.panels.messagePanels[panelId];
+                        if (messagePanel == null) {
+                            return;
+                        }
+                        messagePanel.tabs[simpleId()] = TabConfigUtils.createEmpty({});
+                    });
                 }}
             >
                 {tabPanels}
@@ -1044,14 +1049,17 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                 {...props}
                 style={{ flex: 'auto', margin: '0 4px' }}
                 roomId={roomId}
-                onConfigUpdate={value =>
-                    dispatch(
-                        roomConfigModule.actions.updateMessagePanel({
-                            roomId,
-                            panelId,
-                            panel: value,
-                        })
-                    )
+                onConfigUpdate={recipe =>
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        const messagePanel = roomConfig.panels.messagePanels[panelId];
+                        if (messagePanel == null) {
+                            return;
+                        }
+                        recipe(messagePanel);
+                    })
                 }
             />
         </div>

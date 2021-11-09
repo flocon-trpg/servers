@@ -3,11 +3,17 @@ import { Howl } from 'howler';
 import { done, useSrcArrayFromGraphQL } from './src';
 import { volumeCap } from '../utils/variables';
 import { useSelector } from '../store';
-import { defaultChannelVolume, defaultMasterVolume } from '../states/RoomConfig';
 import { BgmState } from '@flocon-trpg/core';
 import _ from 'lodash';
 import { analyzeUrl } from '../utils/analyzeUrl';
 import { useDeepCompareEffect } from 'react-use';
+import { useAtomSelector } from '../atoms/useAtomSelector';
+import { roomAtom } from '../atoms/room/roomAtom';
+import { roomConfigAtom } from '../atoms/roomConfig/roomConfigAtom';
+import {
+    defaultChannelVolume,
+    defaultMasterVolume,
+} from '../atoms/roomConfig/types/roomConfig/resources';
 
 type PlayBgmBehaviorCoreProps = {
     bgm: BgmState | null;
@@ -94,10 +100,10 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmBehaviorCoreProps): void {
 }
 
 export function usePlayBgm(): void {
-    const bgms = useSelector(state => state.roomModule.roomState?.state?.bgms) ?? {};
+    const bgms = useAtomSelector(roomAtom, state => state.roomState?.state?.bgms) ?? {};
     const masterVolume =
-        useSelector(state => state.roomConfigModule?.masterVolume) ?? defaultMasterVolume;
-    const channelVolumes = useSelector(state => state.roomConfigModule?.channelVolumes) ?? {};
+        useAtomSelector(roomConfigAtom, state => state?.masterVolume) ?? defaultMasterVolume;
+    const channelVolumes = useAtomSelector(roomConfigAtom, state => state?.channelVolumes) ?? {};
 
     usePlayBgmCore({
         bgm: bgms['1'] ?? null,

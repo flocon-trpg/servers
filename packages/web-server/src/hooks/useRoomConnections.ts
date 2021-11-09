@@ -1,27 +1,28 @@
 import { useLazyQuery } from '@apollo/client';
 import produce from 'immer';
 import React from 'react';
-import { useDispatch } from 'react-redux';
 import { GetRoomConnectionsDocument } from '@flocon-trpg/typed-document-node';
-import { Notification, roomModule } from '../modules/roomModule';
-import { useSelector } from '../store';
 import { useParticipants } from './state/useParticipants';
 import { useReadonlyRef } from './useReadonlyRef';
+import { addRoomNotificationAtom, roomAtom, Notification } from '../atoms/room/roomAtom';
+import { useAtomSelector } from '../atoms/useAtomSelector';
+import { useAtom } from 'jotai';
 
 export type RoomConnectionsResult = {
     readonly [userUid: string]: { readonly isConnected: boolean; readonly fetchedAt: number };
 };
 
 export function useRoomConnections() {
-    const roomId = useSelector(state => state.roomModule.roomId);
-    const roomConnectionEvent = useSelector(
-        state => state.roomModule.roomEventSubscription?.roomEvent?.roomConnectionEvent
+    const roomId = useAtomSelector(roomAtom, state => state.roomId);
+    const roomConnectionEvent = useAtomSelector(
+        roomAtom,
+        state => state.roomEventSubscription?.roomEvent?.roomConnectionEvent
     );
     const [result, setResult] = React.useState<RoomConnectionsResult>({});
     const [getRoomConnections, roomConnections] = useLazyQuery(GetRoomConnectionsDocument, {
         fetchPolicy: 'network-only',
     });
-    const dispatch = useDispatch();
+    const [, addRoomNotification] = useAtom(addRoomNotificationAtom);
     const participants = useParticipants();
     const participantsRef = useReadonlyRef(participants);
 
@@ -64,12 +65,10 @@ export function useRoomConnections() {
                           };
                 if (value == null) {
                     if (notification != null) {
-                        dispatch(
-                            roomModule.actions.addNotification({
-                                type: Notification.text,
-                                notification,
-                            })
-                        );
+                        addRoomNotification({
+                            type: Notification.text,
+                            notification,
+                        });
                     }
                     draft[roomConnectionEvent.userUid] = {
                         isConnected: roomConnectionEvent.isConnected,
@@ -82,12 +81,10 @@ export function useRoomConnections() {
                 }
 
                 if (notification != null) {
-                    dispatch(
-                        roomModule.actions.addNotification({
-                            type: Notification.text,
-                            notification,
-                        })
-                    );
+                    addRoomNotification({
+                        type: Notification.text,
+                        notification,
+                    });
                 }
                 draft[roomConnectionEvent.userUid] = {
                     isConnected: roomConnectionEvent.isConnected,
@@ -95,7 +92,7 @@ export function useRoomConnections() {
                 };
             })
         );
-    }, [roomConnectionEvent, dispatch, participantsRef]);
+    }, [roomConnectionEvent, participantsRef, addRoomNotification]);
 
     return result;
 }

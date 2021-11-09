@@ -1,7 +1,7 @@
-import { Button, Collapse, Drawer, Form, Input, Select, Space } from 'antd';
+import { Button, Collapse, Drawer, Form, Select, Space } from 'antd';
 import React from 'react';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
-import { replace, update } from '../../stateManagers/states/types';
+import { replace } from '../../stateManagers/states/types';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { BufferedInput } from '../../components/BufferedInput';
 import { useSelector } from '../../store';
@@ -15,6 +15,8 @@ import classNames from 'classnames';
 import { flex, flexRow } from '../../utils/className';
 import { useOperateAsState } from '../../hooks/useOperateAsState';
 import produce from 'immer';
+import { roomAtom } from '../../atoms/room/roomAtom';
+import { useAtomSelector } from '../../atoms/useAtomSelector';
 
 type VisibleParameterForm = {
     type: 'Bool' | 'Str' | 'Num';
@@ -32,9 +34,9 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
     const [addNumParamSelector, setAddNumParamSelector] = React.useState<StrIndex20>();
     const [addBoolParamSelector, setAddBoolParamSelector] = React.useState<StrIndex20>();
     const [addStrParamSelector, setAddStrParamSelector] = React.useState<StrIndex20>();
-    const boolParamNames = useSelector(state => state.roomModule.roomState?.state?.boolParamNames);
-    const numParamNames = useSelector(state => state.roomModule.roomState?.state?.numParamNames);
-    const strParamNames = useSelector(state => state.roomModule.roomState?.state?.strParamNames);
+    const boolParamNames = useAtomSelector(roomAtom,state => state.roomState?.state?.boolParamNames);
+    const numParamNames = useAtomSelector(roomAtom,state => state.roomState?.state?.numParamNames);
+    const strParamNames = useAtomSelector(roomAtom,state => state.roomState?.state?.strParamNames);
 
     const boolParamNamesMap = React.useMemo(
         () => (boolParamNames == null ? undefined : recordToMap(boolParamNames)),

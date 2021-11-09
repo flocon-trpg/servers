@@ -8410,6 +8410,7 @@ __metadata:
     io-ts-reporters: ^2.0.0
     jdenticon: ^3.1.1
     jest: 27.3.1
+    jotai: ^1.4.3
     js-file-download: ^0.4.12
     jszip: ^3.7.1
     konva: ^7.2.5
@@ -8430,7 +8431,6 @@ __metadata:
     react-rnd: ^10.3.5
     react-use: ^17.3.1
     react-virtuoso: ^2.2.1
-    redux-observable: ^2.0.0
     rxjs: ^7.3.0
     sass: ^1.42.1
     serve: ^13.0.0
@@ -11059,6 +11059,43 @@ __metadata:
   dependencies:
     "@panva/asn1.js": ^1.0.0
   checksum: 80a3447b51f794f8f2c7e21395dd880b55d374a055564595c69ff17722fb07aeb2dff722b5da9030651f67fafc7494e9ec5f5b56f5e1836d1ac94e604e6096ea
+  languageName: node
+  linkType: hard
+
+"jotai@npm:^1.4.3":
+  version: 1.4.3
+  resolution: "jotai@npm:1.4.3"
+  peerDependencies:
+    "@babel/core": "*"
+    "@babel/template": "*"
+    "@urql/core": "*"
+    immer: "*"
+    optics-ts: "*"
+    react: ">=16.8"
+    react-query: "*"
+    valtio: "*"
+    wonka: "*"
+    xstate: "*"
+  peerDependenciesMeta:
+    "@babel/core":
+      optional: true
+    "@babel/template":
+      optional: true
+    "@urql/core":
+      optional: true
+    immer:
+      optional: true
+    optics-ts:
+      optional: true
+    react-query:
+      optional: true
+    valtio:
+      optional: true
+    wonka:
+      optional: true
+    xstate:
+      optional: true
+  checksum: 5c83eb6b5f486c347ed557e3ce5590927ccac2002bccae86d6310fbf9878da4732a87c3b71a74d84213d85b3841779fa86e475ccdec6db1c9c6b4cd29db2acc5
   languageName: node
   linkType: hard
 
@@ -15351,18 +15388,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"redux-observable@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "redux-observable@npm:2.0.0"
-  dependencies:
-    rxjs: ^7.0.0
-    tslib: ~2.1.0
-  peerDependencies:
-    redux: ">=4 <5"
-  checksum: ad5c23019e662541339d5dadb8cb9418d4c29499b52c8557a2a2fb0c3384af0fe3640db124176712d2e60c997bd12c418291ff7d668f01a14d2c553dd191ddd6
-  languageName: node
-  linkType: hard
-
 "redux-thunk@npm:^2.3.0":
   version: 2.4.0
   resolution: "redux-thunk@npm:2.4.0"
@@ -15846,7 +15871,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rxjs@npm:^7.0.0, rxjs@npm:^7.3.0":
+"rxjs@npm:^7.3.0":
   version: 7.4.0
   resolution: "rxjs@npm:7.4.0"
   dependencies:

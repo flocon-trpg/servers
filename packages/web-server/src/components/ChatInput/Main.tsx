@@ -1,11 +1,13 @@
 import React from 'react';
-import { UpdateMessagePanelAction } from '../../modules/roomConfigModule';
 import { CharacterSelector } from './CharacterSelector';
 import { GameSelector } from './GameSelector';
 import { TextColorSelector } from './TextColorSelector';
 import { publicChannel, SelectedChannelType, SubmitMessage } from './SubmitMessage';
 import { getSelectedCharacterType } from './getSelectedCharacterType';
-import { useSelector } from '../../store';
+import { MessagePanelConfig } from '../../atoms/roomConfig/types/messagePanelConfig';
+import { atom, useAtom } from 'jotai';
+import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
+import { WritableDraft } from 'immer/dist/internal';
 
 const titleStyle: React.CSSProperties = {
     flexBasis: '80px',
@@ -15,13 +17,17 @@ type Props = {
     roomId: string;
     panelId: string;
     style?: Omit<React.CSSProperties, 'alignItems' | 'display' | 'flexDirection'>;
-    onConfigUpdate: (newValue: UpdateMessagePanelAction['panel']) => void;
+    onConfigUpdate: (recipe: (draft: WritableDraft<MessagePanelConfig>) => void) => void;
 };
 
 export const ChatInput: React.FC<Props> = ({ roomId, panelId, style, onConfigUpdate }: Props) => {
     const miniInputMaxWidth = 200;
 
-    const config = useSelector(state => state.roomConfigModule?.panels.messagePanels?.[panelId]);
+    const configAtom = React.useMemo(
+        () => atom(get => get(roomConfigAtom)?.panels.messagePanels?.[panelId]),
+        [panelId]
+    );
+    const [config] = useAtom(configAtom);
     const [selectedChannelType, setSelectedChannelType] =
         React.useState<SelectedChannelType>(publicChannel);
 

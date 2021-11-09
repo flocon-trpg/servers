@@ -5,13 +5,10 @@ import * as ReactKonva from 'react-konva';
 import { Button, Dropdown, InputNumber, Menu, Popover } from 'antd';
 import * as Icons from '@ant-design/icons';
 import { useDispatch } from 'react-redux';
-import { roomConfigModule } from '../../modules/roomConfigModule';
-import { BoardEditorPanelConfig } from '../../states/BoardEditorPanelConfig';
 import { KonvaEventObject } from 'konva/types/Node';
 import { update } from '../../stateManagers/states/types';
 import * as Icon from '@ant-design/icons';
 import { Message, publicMessage, useFilteredRoomMessages } from '../../hooks/useRoomMessages';
-import { useSelector } from '../../store';
 import { useOperate } from '../../hooks/useOperate';
 import { useMe } from '../../hooks/useMe';
 import { useCharacters } from '../../hooks/state/useCharacters';
@@ -19,8 +16,6 @@ import { useParticipants } from '../../hooks/state/useParticipants';
 import { Piece } from '../../utils/piece';
 import { useBoards } from '../../hooks/state/useBoards';
 import { BoardLocation } from '../../utils/boardLocation';
-import { BoardConfig, defaultBoardConfig } from '../../states/BoardConfig';
-import { ActiveBoardPanelConfig } from '../../states/ActiveBoardPanelConfig';
 import { ActiveBoardSelectorModal } from './ActiveBoardSelecterModal';
 import useConstant from 'use-constant';
 import { debounceTime } from 'rxjs/operators';
@@ -73,6 +68,17 @@ import { cancelRnd, flex, flexColumn, flexRow, itemsCenter } from '../../utils/c
 import { SketchPicker } from 'react-color';
 import { css } from '@emotion/react';
 import { rgba } from '../../utils/rgba';
+import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
+import { roomAtom } from '../../atoms/room/roomAtom';
+import { useAtomSelector } from '../../atoms/useAtomSelector';
+import { BoardConfig, defaultBoardConfig } from '../../atoms/roomConfig/types/boardConfig';
+import { writeonlyAtom } from '../../atoms/writeonlyAtom';
+import { useImmerAtom } from 'jotai/immer';
+import { RoomConfigUtils } from '../../atoms/roomConfig/types/roomConfig/utils';
+import { ActiveBoardPanelConfig } from '../../atoms/roomConfig/types/activeBoardPanelConfig';
+import { BoardEditorPanelConfig } from '../../atoms/roomConfig/types/boardEditorPanelConfig';
+
+const writeonlyRoomConfigAtom = writeonlyAtom(roomConfigAtom);
 
 const createPiecePostOperation = ({
     e,
@@ -205,7 +211,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
 }: BoardCoreProps) => {
     const allContext = useAllContext();
 
-    const roomId = useSelector(state => state.roomModule.roomId);
+    const roomId = useAtomSelector(roomAtom, state => state.roomId);
     const characters = useCharacters();
     const participants = useParticipants();
     const dicePieces = useDicePieces(boardKey);
@@ -240,7 +246,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const backgroundImage = useImageFromGraphQL(board.backgroundImage);
     const backgroundImageResult =
         backgroundImage.type === success ? backgroundImage.image : undefined;
-    const dispatch = useDispatch();
+    const [, setRoomConfig] = useImmerAtom(writeonlyRoomConfigAtom);
     const operate = useOperate();
     const publicMessages = useFilteredRoomMessages({ filter: publicMessageFilter });
     const myUserUid = useMyUserUid();
@@ -771,16 +777,19 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             scaleY={scale}
             onWheel={e => {
                 e.evt.preventDefault();
-                dispatch(
-                    roomConfigModule.actions.zoomBoard({
+                setRoomConfig(roomConfig => {
+                    if (roomConfig == null) {
+                        return;
+                    }
+                    RoomConfigUtils.zoomBoard(roomConfig, {
                         roomId,
                         boardKey,
                         boardEditorPanelId: boardEditorPanelId,
                         zoomDelta: e.evt.deltaY > 0 ? -0.25 : 0.25,
                         prevCanvasWidth: canvasWidth,
                         prevCanvasHeight: canvasHeight,
-                    })
-                );
+                    });
+                });
             }}
         >
             {/* background: ドラッグで全体を動かせる */}
@@ -808,15 +817,23 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             return;
                         }
                         const nonZeroScale = scale === 0 ? 0.01 : scale;
-                        dispatch(
-                            roomConfigModule.actions.updateBoard({
-                                roomId,
-                                boardKey,
-                                boardEditorPanelId: boardEditorPanelId,
-                                offsetXDelta: -e.evt.movementX / nonZeroScale,
-                                offsetYDelta: -e.evt.movementY / nonZeroScale,
-                            })
-                        );
+                        setRoomConfig(roomConfig => {
+                            if (roomConfig == null) {
+                                return;
+                            }
+                            let boardPanel;
+                            if (boardEditorPanelId == null) {
+                                boardPanel = roomConfig.panels.activeBoardPanel;
+                            } else {
+                                boardPanel =
+                                    roomConfig.panels.boardEditorPanels[boardEditorPanelId];
+                            }
+                            if (boardPanel == null) {
+                                return;
+                            }
+                            boardPanel.x -= e.evt.movementX / nonZeroScale;
+                            boardPanel.y -= e.evt.movementY / nonZeroScale;
+                        });
                     }}
                 >
                     {/* このRectがないと画像がないところで位置をドラッグで変えることができない。ただもっといい方法があるかも */}
@@ -863,14 +880,19 @@ const zoomButtonStyle: React.CSSProperties = {
 
 export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: Props) => {
     const dispatch = useDispatch();
-    const roomId = useSelector(state => state.roomModule.roomId);
+    const [, setRoomConfig] = useImmerAtom(writeonlyRoomConfigAtom);
+    const roomId = useAtomSelector(roomAtom, state => state.roomId);
     const boards = useBoards();
     const characters = useCharacters();
     const myUserUid = useMyUserUid();
     const me = useMe();
-    const activeBoardKey = useSelector(state => state.roomModule.roomState?.state?.activeBoardKey);
-    const activeBoardPanelConfig = useSelector(
-        state => state.roomConfigModule?.panels.activeBoardPanel
+    const activeBoardKey = useAtomSelector(
+        roomAtom,
+        state => state.roomState?.state?.activeBoardKey
+    );
+    const activeBoardPanelConfig = useAtomSelector(
+        roomConfigAtom,
+        state => state?.panels.activeBoardPanel
     );
     const [activeBoardSelectorModalVisibility, setActiveBoardSelectorModalVisibility] =
         React.useState(false);
@@ -1112,15 +1134,17 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                       <Menu.Item
                           key={keyNames(key)}
                           onClick={() =>
-                              dispatch(
-                                  roomConfigModule.actions.updateBoardEditorPanel({
-                                      boardEditorPanelId,
-                                      roomId,
-                                      panel: {
-                                          activeBoardKey: key.id,
-                                      },
-                                  })
-                              )
+                              setRoomConfig(roomConfig => {
+                                  if (roomConfig == null) {
+                                      return;
+                                  }
+                                  const boardEditorPanel =
+                                      roomConfig.panels.boardEditorPanels[boardEditorPanelId];
+                                  if (boardEditorPanel == null) {
+                                      return;
+                                  }
+                                  boardEditorPanel.activeBoardKey = key.id;
+                              })
                           }
                       >
                           {board.name === '' ? '(名前なし)' : board.name}
@@ -1203,14 +1227,19 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                 if (boardKeyToShow == null) {
                                     return;
                                 }
-                                dispatch(
-                                    roomConfigModule.actions.updateBoard({
-                                        roomId,
-                                        boardKey: boardKeyToShow,
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    RoomConfigUtils.editBoard(
+                                        roomConfig,
+                                        boardKeyToShow,
                                         boardEditorPanelId,
-                                        showGrid: !boardConfig.showGrid,
-                                    })
-                                );
+                                        boardConfig => {
+                                            boardConfig.showGrid = !boardConfig.showGrid;
+                                        }
+                                    );
+                                });
                             }}
                         >
                             グリッドの表示/非表示
@@ -1228,14 +1257,19 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                                 if (boardKeyToShow == null) {
                                                     return;
                                                 }
-                                                dispatch(
-                                                    roomConfigModule.actions.updateBoard({
-                                                        roomId,
-                                                        boardKey: boardKeyToShow,
+                                                setRoomConfig(roomConfig => {
+                                                    if (roomConfig == null) {
+                                                        return;
+                                                    }
+                                                    RoomConfigUtils.editBoard(
+                                                        roomConfig,
+                                                        boardKeyToShow,
                                                         boardEditorPanelId,
-                                                        gridLineTension: e,
-                                                    })
-                                                );
+                                                        boardConfig => {
+                                                            boardConfig.gridLineTension = e;
+                                                        }
+                                                    );
+                                                });
                                             }}
                                         />
                                     </div>
@@ -1254,14 +1288,20 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                                         if (boardKeyToShow == null) {
                                                             return;
                                                         }
-                                                        dispatch(
-                                                            roomConfigModule.actions.updateBoard({
-                                                                roomId,
-                                                                boardKey: boardKeyToShow,
+                                                        setRoomConfig(roomConfig => {
+                                                            if (roomConfig == null) {
+                                                                return;
+                                                            }
+                                                            RoomConfigUtils.editBoard(
+                                                                roomConfig,
+                                                                boardKeyToShow,
                                                                 boardEditorPanelId,
-                                                                gridLineColor: rgba(e.rgb),
-                                                            })
-                                                        );
+                                                                boardConfig => {
+                                                                    boardConfig.gridLineColor =
+                                                                        rgba(e.rgb);
+                                                                }
+                                                            );
+                                                        });
                                                     }}
                                                 />
                                             }
@@ -1283,16 +1323,19 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                             if (boardKeyToShow == null) {
                                 return;
                             }
-                            dispatch(
-                                roomConfigModule.actions.zoomBoard({
+                            setRoomConfig(roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                RoomConfigUtils.zoomBoard(roomConfig, {
                                     roomId,
                                     boardKey: boardKeyToShow,
                                     boardEditorPanelId,
                                     zoomDelta: 0.25,
                                     prevCanvasWidth: canvasWidth,
                                     prevCanvasHeight: canvasHeight,
-                                })
-                            );
+                                });
+                            });
                         }}
                     >
                         <Icon.ZoomInOutlined />
@@ -1302,16 +1345,19 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                             if (boardKeyToShow == null) {
                                 return;
                             }
-                            dispatch(
-                                roomConfigModule.actions.zoomBoard({
+                            setRoomConfig(roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                RoomConfigUtils.zoomBoard(roomConfig, {
                                     roomId,
                                     boardKey: boardKeyToShow,
                                     boardEditorPanelId,
                                     zoomDelta: -0.25,
                                     prevCanvasWidth: canvasWidth,
                                     prevCanvasHeight: canvasHeight,
-                                })
-                            );
+                                });
+                            });
                         }}
                     >
                         <Icon.ZoomOutOutlined />
@@ -1322,13 +1368,19 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                             if (boardKeyToShow == null) {
                                 return;
                             }
-                            dispatch(
-                                roomConfigModule.actions.resetBoard({
-                                    roomId,
-                                    boardKey: boardKeyToShow,
+                            setRoomConfig(roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                RoomConfigUtils.editBoard(
+                                    roomConfig,
+                                    boardKeyToShow,
                                     boardEditorPanelId,
-                                })
-                            );
+                                    () => {
+                                        return defaultBoardConfig();
+                                    }
+                                );
+                            });
                         }}
                     >
                         Boardの位置とズームをリセット

@@ -21,6 +21,8 @@ import classNames from 'classnames';
 import { sound } from '../../utils/fileType';
 import { FilePath as FilePathModule } from '../../utils/filePath';
 import { useMutation } from '@apollo/client';
+import { atom, useAtom } from 'jotai';
+import { roomAtom } from '../../atoms/room/roomAtom';
 
 const defaultVolume = 0.5;
 
@@ -264,11 +266,13 @@ type SePlayerDrawerProps = {
     onClose: () => void;
 };
 
+const roomIdAtom = atom(get => get(roomAtom).roomId);
+
 const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({
     visible,
     onClose,
 }: SePlayerDrawerProps) => {
-    const roomId = useSelector(state => state.roomModule.roomId);
+    const [roomId] = useAtom(roomIdAtom);
     const [filesManagerDrawerType, setFilesManagerDrawerType] =
         React.useState<FilesManagerDrawerType | null>(null);
 
@@ -505,8 +509,10 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
     );
 };
 
+const bgmsAtom = atom(get => get(roomAtom).roomState?.state?.bgms);
+
 export const SoundPlayer: React.FC = () => {
-    const bgmsState = useSelector(state => state.roomModule.roomState?.state?.bgms);
+    const [bgmsState] = useAtom(bgmsAtom);
     const [isSeDrawerVisible, setIsSeDrawerVisible] = React.useState(false);
 
     const padding = 16;

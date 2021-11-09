@@ -3,12 +3,13 @@ import { Button, Drawer, Row, Col, Checkbox, Alert } from 'antd';
 import { recordToArray } from '@flocon-trpg/utils';
 import _ from 'lodash';
 import { useParticipants } from '../../hooks/state/useParticipants';
-import { useSelector } from '../../store';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { Gutter } from 'antd/lib/grid/row';
 import { cancelRnd, flex, flexNone, flexRow, itemsCenter } from '../../utils/className';
 import classNames from 'classnames';
+import { roomAtom } from '../../atoms/room/roomAtom';
+import { useAtomSelector } from '../../atoms/useAtomSelector';
 
 type PrivateMessageDrawerProps = {
     visible: boolean;
@@ -28,7 +29,7 @@ const PrivateMessageDrawer: React.FC<PrivateMessageDrawerProps> = ({
     onClose,
 }: PrivateMessageDrawerProps) => {
     const myUserUid = useMyUserUid();
-    const participants = useSelector(state => state.roomModule.roomState?.state?.participants);
+    const participants = useAtomSelector(roomAtom,state => state.roomState?.state?.participants);
 
     if (myUserUid == null || participants == null) {
         return null;

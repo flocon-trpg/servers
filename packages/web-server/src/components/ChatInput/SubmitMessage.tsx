@@ -1,15 +1,8 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { Button, Input } from 'antd';
-import { ChatPalettePanelConfig } from '../../states/ChatPalettePanelConfig';
-import { MessagePanelConfig } from '../../states/MessagePanelConfig';
-import {
-    UpdateChatPalettePanelAction,
-    UpdateMessagePanelAction,
-} from '../../modules/roomConfigModule';
 import { TextAreaRef } from 'antd/lib/input/TextArea';
 import { useSelector } from '../../store';
-import { UserConfig } from '../../states/UserConfig';
 import * as Icon from '@ant-design/icons';
 import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import { custom, SelectedCharacterType, some } from './getSelectedCharacterType';
@@ -30,8 +23,15 @@ import { useReadonlyRef } from '../../hooks/useReadonlyRef';
 import classNames from 'classnames';
 import { flex, flexColumn, flexNone } from '../../utils/className';
 import { $free, PublicChannelKey } from '@flocon-trpg/core';
-import { Notification, roomModule } from '../../modules/roomModule';
 import { useMutation } from '@apollo/client';
+import { ChatPalettePanelConfig } from '../../atoms/roomConfig/types/chatPalettePanelConfig';
+import { MessagePanelConfig } from '../../atoms/roomConfig/types/messagePanelConfig';
+import { userConfigAtom } from '../../atoms/userConfig/userConfigAtom';
+import { UserConfigUtils } from '../../atoms/userConfig/utils';
+import { useAtomSelector } from '../../atoms/useAtomSelector';
+import { useAtom } from 'jotai';
+import { addRoomNotificationAtom, Notification } from '../../atoms/room/roomAtom';
+import { WritableDraft } from 'immer/dist/internal';
 
 /* react-virtuosoはおそらくheightを指定しなければ正常に動作しないため、もしこれが可変だとheightの指定が無理とは言わないまでも面倒になる。そのため、70pxという適当な値で固定している */
 const height = 70;
@@ -52,14 +52,16 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
     autoSubmitter,
 }: PrivateMessageElementProps) => {
     const dispatch = useDispatch();
+    const [, addRoomNotification] = useAtom(addRoomNotificationAtom);
     const text = useSelector(state => state.messageInputTextModule.privateMessage);
     const [writePrivateMessage] = useMutation(WritePrivateMessageDocument);
     const textAreaRef = React.useRef<TextAreaRef | null>(null);
     const [isPosting, setIsPosting] = React.useState(false); // 現状、並列投稿は「PublicMessage1つとPrivateMessage1つの最大2つまで」という制限になっているが、これは単に実装が楽だからというのが一番の理由。
-    const roomMessagesFontSizeDelta = useSelector(
-        state => state.userConfigModule?.roomMessagesFontSizeDelta
+    const roomMessagesFontSizeDelta = useAtomSelector(
+        userConfigAtom,
+        state => state?.roomMessagesFontSizeDelta
     );
-    const fontSize = UserConfig.getRoomMessagesFontSize(roomMessagesFontSizeDelta ?? 0);
+    const fontSize = UserConfigUtils.getRoomMessagesFontSize(roomMessagesFontSizeDelta ?? 0);
     const participants = useParticipants();
     const selectedParticipantsBase = React.useMemo(
         () =>
@@ -125,16 +127,14 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
                         dispatch(messageInputTextModule.actions.set({ privateMessage: '' }));
                         return;
                     case 'WriteRoomPrivateMessageFailureResult':
-                        dispatch(
-                            roomModule.actions.addNotification({
-                                type: Notification.text,
-                                notification: {
-                                    type: 'error',
-                                    message: `書き込みの際にエラーが発生しました: ${res.data.result.failureType}`,
-                                    createdAt: new Date().getTime(),
-                                },
-                            })
-                        );
+                        addRoomNotification({
+                            type: Notification.text,
+                            notification: {
+                                type: 'error',
+                                message: `書き込みの際にエラーが発生しました: ${res.data.result.failureType}`,
+                                createdAt: new Date().getTime(),
+                            },
+                        });
                 }
             })
             .finally(() => {
@@ -204,14 +204,16 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
     autoSubmitter,
 }: PublicMessageElementProps) => {
     const dispatch = useDispatch();
+    const [, addRoomNotification] = useAtom(addRoomNotificationAtom);
     const text = useSelector(state => state.messageInputTextModule.publicMessage);
     const [writePublicMessage] = useMutation(WritePublicMessageDocument);
     const textAreaRef = React.useRef<TextAreaRef | null>(null);
     const [isPosting, setIsPosting] = React.useState(false); // 現状、並列投稿は「PublicMessage1つとPrivateMessage1つの最大2つまで」という制限になっているが、これは単に実装が楽だからというのが一番の理由。
-    const roomMessagesFontSizeDelta = useSelector(
-        state => state.userConfigModule?.roomMessagesFontSizeDelta
+    const roomMessagesFontSizeDelta = useAtomSelector(
+        userConfigAtom,
+        state => state?.roomMessagesFontSizeDelta
     );
-    const fontSize = UserConfig.getRoomMessagesFontSize(roomMessagesFontSizeDelta ?? 0);
+    const fontSize = UserConfigUtils.getRoomMessagesFontSize(roomMessagesFontSizeDelta ?? 0);
     const publicChannelNames = usePublicChannelNames();
     let selectedPublicChannelKey: PublicChannelKey.Without$System.PublicChannelKey = $free;
     if (PublicChannelKey.Without$System.isPublicChannelKey(config.selectedPublicChannelKey)) {
@@ -269,29 +271,24 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
                     case 'WriteRoomPublicMessageFailureResult':
                         switch (res.data.result.failureType) {
                             case WriteRoomPublicMessageFailureType.NotAuthorized:
-                                dispatch(
-                                    roomModule.actions.addNotification({
-                                        type: Notification.text,
-                                        notification: {
-                                            type: 'error',
-                                            message:
-                                                '観戦者は雑談チャンネル以外には投稿できません。',
-                                            createdAt: new Date().getTime(),
-                                        },
-                                    })
-                                );
+                                addRoomNotification({
+                                    type: Notification.text,
+                                    notification: {
+                                        type: 'error',
+                                        message: '観戦者は雑談チャンネル以外には投稿できません。',
+                                        createdAt: new Date().getTime(),
+                                    },
+                                });
                                 return;
                             default:
-                                dispatch(
-                                    roomModule.actions.addNotification({
-                                        type: Notification.text,
-                                        notification: {
-                                            type: 'error',
-                                            message: `書き込みの際にエラーが発生しました: ${res.data.result.failureType}`,
-                                            createdAt: new Date().getTime(),
-                                        },
-                                    })
-                                );
+                                addRoomNotification({
+                                    type: Notification.text,
+                                    notification: {
+                                        type: 'error',
+                                        message: `書き込みの際にエラーが発生しました: ${res.data.result.failureType}`,
+                                        createdAt: new Date().getTime(),
+                                    },
+                                });
                         }
                 }
             })
@@ -356,7 +353,7 @@ type Props = {
     onSelectedChannelTypeChange: (newValue: SelectedChannelType) => void;
     config: ChatPalettePanelConfig | MessagePanelConfig;
     onConfigUpdate: (
-        newValue: UpdateChatPalettePanelAction['panel'] & UpdateMessagePanelAction['panel']
+        recipe: (draft: WritableDraft<ChatPalettePanelConfig> | WritableDraft<MessagePanelConfig>) => void
     ) => void;
     // ChatPalettePanelConfigにselectedCharacterTypeは存在しないので、独立させている
     selectedCharacterType: SelectedCharacterType | null;

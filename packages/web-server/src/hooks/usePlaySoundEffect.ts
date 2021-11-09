@@ -1,11 +1,13 @@
 import { Howl } from 'howler';
 import React from 'react';
 import { FilePathFragment } from '@flocon-trpg/typed-document-node';
-import { useSelector } from '../store';
 import { analyzeUrl } from '../utils/analyzeUrl';
 import { volumeCap } from '../utils/variables';
 import { success, useSrcFromGraphQL } from './src';
 import { newEvent } from './useRoomMessages';
+import { useAtomSelector } from '../atoms/useAtomSelector';
+import { roomConfigAtom } from '../atoms/roomConfig/roomConfigAtom';
+import { roomAtom } from '../atoms/room/roomAtom';
 
 // 長過ぎる曲をSEにしようとした場合、何もしないと部屋に再入室しない限りその曲を止めることができない。それを防ぐため、最大15秒までしか流れないようにしている。15秒という長さは適当。
 const musicLengthLimit = 15 * 1000;
@@ -21,8 +23,8 @@ type SoundEffect = {
 };
 
 function usePlaySoundEffectCore(value?: SoundEffect): void {
-    const masterVolume = useSelector(state => state.roomConfigModule?.masterVolume) ?? 0;
-    const seVolume = useSelector(state => state.roomConfigModule?.seVolume) ?? 0;
+    const masterVolume = useAtomSelector(roomConfigAtom, state => state?.masterVolume) ?? 0;
+    const seVolume = useAtomSelector(roomConfigAtom, state => state?.seVolume) ?? 0;
     const volumeConfig = masterVolume * seVolume;
 
     const volumeConfigRef = React.useRef(volumeConfig);
@@ -63,7 +65,7 @@ function usePlaySoundEffectCore(value?: SoundEffect): void {
 }
 
 export function usePlaySoundEffect(): void {
-    const allRoomMesssagesResult = useSelector(state => state.roomModule.allRoomMessagesResult);
+    const allRoomMesssagesResult = useAtomSelector(roomAtom, state => state.allRoomMessagesResult);
 
     let soundEffect: SoundEffect | undefined = undefined;
     if (allRoomMesssagesResult?.type === newEvent) {

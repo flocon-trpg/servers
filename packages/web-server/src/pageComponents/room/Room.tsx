@@ -2,20 +2,10 @@ import React from 'react';
 import { Layout as AntdLayout, Result, Modal } from 'antd';
 import { DraggableCard, horizontalPadding } from '../../components/DraggableCard';
 import { CharacterList } from './CharacterList';
-import { useSelector } from '../../store';
-import { roomConfigModule } from '../../modules/roomConfigModule';
-import { useDispatch } from 'react-redux';
 import { RoomMessages } from './RoomMessages';
 import { CharacterParameterNamesDrawer } from './CharacterParameterNamesDrawer';
 import { CharacterDrawer } from './CharacterDrawer';
 import { BoardDrawer } from './BoardDrawer';
-import {
-    activeBoardPanel,
-    boardEditorPanel,
-    chatPalettePanel,
-    memoPanel,
-    messagePanel,
-} from '../../states/RoomConfig';
 import { SoundPlayer } from './SoundPlayer';
 import { EditRoomDrawer } from './EditRoomDrawer';
 import { ParticipantList } from './ParticipantList';
@@ -35,10 +25,18 @@ import { ImagePieceDrawer } from './ImagePieceDrawer';
 import { CommandEditorModal } from './CommandEditorModal';
 import { ChatPalette } from './ChatPalettes';
 import { Board } from './Board';
+import { useAtomSelector } from '../../atoms/useAtomSelector';
+import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
+import { writeonlyAtom } from '../../atoms/writeonlyAtom';
+import { useImmerAtom } from 'jotai/immer';
+import { RoomConfigUtils } from '../../atoms/roomConfig/types/roomConfig/utils';
+import { roomAtom } from '../../atoms/room/roomAtom';
 
-const RoomMessagePanels: React.FC<{ roomId: string }> = ({ roomId }: { roomId: string }) => {
-    const dispatch = useDispatch();
-    const messagePanels = useSelector(state => state.roomConfigModule?.panels.messagePanels);
+const writeonlyRoomConfigAtom = writeonlyAtom(roomConfigAtom);
+
+const RoomMessagePanels: React.FC = () => {
+    const [, setRoomConfig] = useImmerAtom(writeonlyRoomConfigAtom);
+    const messagePanels = useAtomSelector(roomConfigAtom, state => state?.panels.messagePanels);
 
     return (
         <>
@@ -53,31 +51,43 @@ const RoomMessagePanels: React.FC<{ roomId: string }> = ({ roomId }: { roomId: s
                         key={pair.key}
                         header='Message'
                         onDragStop={e =>
-                            dispatch(
-                                roomConfigModule.actions.moveMessagePanel({
-                                    ...e,
-                                    roomId,
-                                    panelId: pair.key,
-                                })
-                            )
+                            setRoomConfig(roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                const messagePanel = roomConfig.panels.messagePanels[pair.key];
+                                if (messagePanel == null) {
+                                    return;
+                                }
+                                RoomConfigUtils.movePanel(messagePanel, e);
+                            })
                         }
                         onResizeStop={(dir, delta) =>
-                            dispatch(
-                                roomConfigModule.actions.resizeMessagePanel({
-                                    roomId,
-                                    panelId: pair.key,
-                                    dir,
-                                    delta,
-                                })
-                            )
+                            setRoomConfig(roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                const messagePanel = roomConfig.panels.messagePanels[pair.key];
+                                if (messagePanel == null) {
+                                    return;
+                                }
+                                RoomConfigUtils.resizePanel(messagePanel, dir, delta);
+                            })
                         }
                         onMoveToFront={() =>
-                            dispatch(
-                                roomConfigModule.actions.bringPanelToFront({
-                                    roomId,
-                                    target: { type: messagePanel, panelId: pair.key },
-                                })
-                            )
+                            setRoomConfig(roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                const messagePanel = roomConfig.panels.messagePanels[pair.key];
+                                if (messagePanel == null) {
+                                    return;
+                                }
+                                RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                    type: 'messagePanel',
+                                    panelId: pair.key,
+                                });
+                            })
                         }
                         onClose={() => {
                             Modal.confirm({
@@ -85,12 +95,12 @@ const RoomMessagePanels: React.FC<{ roomId: string }> = ({ roomId }: { roomId: s
                                 content:
                                     '選択されたメッセージウィンドウを削除します。よろしいですか？',
                                 onOk: () => {
-                                    dispatch(
-                                        roomConfigModule.actions.removeMessagePanel({
-                                            roomId,
-                                            panelId: pair.key,
-                                        })
-                                    );
+                                    setRoomConfig(roomConfig => {
+                                        if (roomConfig == null) {
+                                            return;
+                                        }
+                                        roomConfig.panels.messagePanels[pair.key] = undefined;
+                                    });
                                 },
                                 okText: '削除',
                                 cancelText: 'キャンセル',
@@ -118,29 +128,35 @@ const bottomContainerPadding = `0px ${horizontalPadding}px`;
 
 export const Room: React.FC = () => {
     const myUserUid = useMyUserUid();
-    const roomIdOfRoomConfig = useSelector(state => state.roomConfigModule?.roomId);
-    const activeBoardPanelConfig = useSelector(
-        state => state.roomConfigModule?.panels.activeBoardPanel
+    const roomIdOfRoomConfig = useAtomSelector(roomConfigAtom, state => state?.roomId);
+    const activeBoardPanelConfig = useAtomSelector(
+        roomConfigAtom,
+        state => state?.panels.activeBoardPanel
     );
-    const boardEditorPanelsConfig = useSelector(
-        state => state.roomConfigModule?.panels.boardEditorPanels
+    const boardEditorPanelsConfig = useAtomSelector(
+        roomConfigAtom,
+        state => state?.panels.boardEditorPanels
     );
-    const characterPanel = useSelector(state => state.roomConfigModule?.panels.characterPanel);
-    const chatPalettePanelsConfig = useSelector(
-        state => state.roomConfigModule?.panels.chatPalettePanels
+    const characterPanel = useAtomSelector(roomConfigAtom, state => state?.panels.characterPanel);
+    const chatPalettePanelsConfig = useAtomSelector(
+        roomConfigAtom,
+        state => state?.panels.chatPalettePanels
     );
-    const gameEffectPanel = useSelector(state => state.roomConfigModule?.panels.gameEffectPanel);
-    const memoPanelsConfig = useSelector(state => state.roomConfigModule?.panels.memoPanels);
-    const pieceValuePanel = useSelector(state => state.roomConfigModule?.panels.pieceValuePanel);
-    const participantPanel = useSelector(state => state.roomConfigModule?.panels.participantPanel);
+    const gameEffectPanel = useAtomSelector(roomConfigAtom, state => state?.panels.gameEffectPanel);
+    const memoPanelsConfig = useAtomSelector(roomConfigAtom, state => state?.panels.memoPanels);
+    const pieceValuePanel = useAtomSelector(roomConfigAtom, state => state?.panels.pieceValuePanel);
+    const participantPanel = useAtomSelector(
+        roomConfigAtom,
+        state => state?.panels.participantPanel
+    );
 
-    const dispatch = useDispatch();
+    const [, setRoomConfig] = useImmerAtom(writeonlyRoomConfigAtom);
 
     usePlayBgm();
     usePlaySoundEffect();
     useMessageNotification();
 
-    const roomId = useSelector(state => state.roomModule.roomId);
+    const roomId = useAtomSelector(roomAtom, state => state.roomId);
 
     if (
         roomIdOfRoomConfig == null ||
@@ -181,39 +197,51 @@ export const Room: React.FC = () => {
                 key={pair.key}
                 header='ボードエディター'
                 onDragStop={e =>
-                    dispatch(
-                        roomConfigModule.actions.moveBoardPanel({
-                            ...e,
-                            roomId,
-                            boardEditorPanelId: pair.key,
-                        })
-                    )
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        const boardEditorPanel = roomConfig.panels.boardEditorPanels[pair.key];
+                        if (boardEditorPanel == null) {
+                            return;
+                        }
+                        RoomConfigUtils.movePanel(boardEditorPanel, e);
+                    })
                 }
                 onResizeStop={(dir, delta) =>
-                    dispatch(
-                        roomConfigModule.actions.resizeBoardPanel({
-                            roomId,
-                            boardEditorPanelId: pair.key,
-                            dir,
-                            delta,
-                        })
-                    )
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        const boardEditorPanel = roomConfig.panels.boardEditorPanels[pair.key];
+                        if (boardEditorPanel == null) {
+                            return;
+                        }
+                        RoomConfigUtils.resizePanel(boardEditorPanel, dir, delta);
+                    })
                 }
                 onMoveToFront={() =>
-                    dispatch(
-                        roomConfigModule.actions.bringPanelToFront({
-                            roomId,
-                            target: { type: boardEditorPanel, panelId: pair.key },
-                        })
-                    )
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        const boardEditorPanel = roomConfig.panels.boardEditorPanels[pair.key];
+                        if (boardEditorPanel == null) {
+                            return;
+                        }
+                        RoomConfigUtils.bringPanelToFront(roomConfig, {
+                            type: 'boardEditorPanel',
+                            panelId: pair.key,
+                        });
+                    })
                 }
                 onClose={() =>
-                    dispatch(
-                        roomConfigModule.actions.removeBoardPanel({
-                            roomId,
-                            boardEditorPanelId: pair.key,
-                        })
-                    )
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        roomConfig.panels.boardEditorPanels[pair.key] = undefined;
+                    })
                 }
                 childrenContainerStyle={{ overflow: 'hidden' }}
                 position={pair.value}
@@ -243,39 +271,51 @@ export const Room: React.FC = () => {
                 key={pair.key}
                 header='チャットパレット'
                 onDragStop={e =>
-                    dispatch(
-                        roomConfigModule.actions.moveChatPalettePanel({
-                            ...e,
-                            roomId,
-                            panelId: pair.key,
-                        })
-                    )
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        const chatPalettePanel = roomConfig.panels.chatPalettePanels[pair.key];
+                        if (chatPalettePanel == null) {
+                            return;
+                        }
+                        RoomConfigUtils.movePanel(chatPalettePanel, e);
+                    })
                 }
                 onResizeStop={(dir, delta) =>
-                    dispatch(
-                        roomConfigModule.actions.resizeChatPalettePanel({
-                            roomId,
-                            panelId: pair.key,
-                            dir,
-                            delta,
-                        })
-                    )
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        const chatPalettePanel = roomConfig.panels.chatPalettePanels[pair.key];
+                        if (chatPalettePanel == null) {
+                            return;
+                        }
+                        RoomConfigUtils.resizePanel(chatPalettePanel, dir, delta);
+                    })
                 }
                 onMoveToFront={() =>
-                    dispatch(
-                        roomConfigModule.actions.bringPanelToFront({
-                            roomId,
-                            target: { type: chatPalettePanel, panelId: pair.key },
-                        })
-                    )
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        const chatPalettePanel = roomConfig.panels.chatPalettePanels[pair.key];
+                        if (chatPalettePanel == null) {
+                            return;
+                        }
+                        RoomConfigUtils.bringPanelToFront(roomConfig, {
+                            type: 'chatPalettePanel',
+                            panelId: pair.key,
+                        });
+                    })
                 }
                 onClose={() =>
-                    dispatch(
-                        roomConfigModule.actions.removeChatPalettePanel({
-                            roomId,
-                            panelId: pair.key,
-                        })
-                    )
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        roomConfig.panels.chatPalettePanels[pair.key] = undefined;
+                    })
                 }
                 childrenContainerStyle={{ overflow: 'hidden' }}
                 position={pair.value}
@@ -299,32 +339,51 @@ export const Room: React.FC = () => {
                 key={pair.key}
                 header='共有メモ（部屋）'
                 onDragStop={e =>
-                    dispatch(
-                        roomConfigModule.actions.moveMemoPanel({ ...e, roomId, panelId: pair.key })
-                    )
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        const memoPanel = roomConfig.panels.memoPanels[pair.key];
+                        if (memoPanel == null) {
+                            return;
+                        }
+                        RoomConfigUtils.movePanel(memoPanel, e);
+                    })
                 }
                 onResizeStop={(dir, delta) =>
-                    dispatch(
-                        roomConfigModule.actions.resizeMemoPanel({
-                            roomId,
-                            panelId: pair.key,
-                            dir,
-                            delta,
-                        })
-                    )
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        const memoPanel = roomConfig.panels.memoPanels[pair.key];
+                        if (memoPanel == null) {
+                            return;
+                        }
+                        RoomConfigUtils.resizePanel(memoPanel, dir, delta);
+                    })
                 }
                 onMoveToFront={() =>
-                    dispatch(
-                        roomConfigModule.actions.bringPanelToFront({
-                            roomId,
-                            target: { type: memoPanel, panelId: pair.key },
-                        })
-                    )
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        const memoPanel = roomConfig.panels.memoPanels[pair.key];
+                        if (memoPanel == null) {
+                            return;
+                        }
+                        RoomConfigUtils.bringPanelToFront(roomConfig, {
+                            type: 'memoPanel',
+                            panelId: pair.key,
+                        });
+                    })
                 }
                 onClose={() =>
-                    dispatch(
-                        roomConfigModule.actions.removeMemoPanel({ roomId, panelId: pair.key })
-                    )
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        roomConfig.panels.memoPanels[pair.key] = undefined;
+                    })
                 }
                 childrenContainerStyle={{ overflow: 'hidden' }}
                 position={pair.value}
@@ -336,13 +395,16 @@ export const Room: React.FC = () => {
                 <Memos
                     selectedMemoId={pair.value.selectedMemoId}
                     onSelectedMemoIdChange={newId =>
-                        dispatch(
-                            roomConfigModule.actions.updateMemoPanel({
-                                roomId,
-                                panelId: pair.key,
-                                panel: { selectedMemoId: newId },
-                            })
-                        )
+                        setRoomConfig(roomConfig => {
+                            if (roomConfig == null) {
+                                return;
+                            }
+                            const memoPanel = roomConfig.panels.memoPanels[pair.key];
+                            if (memoPanel == null) {
+                                return;
+                            }
+                            memoPanel.selectedMemoId = newId;
+                        })
                     }
                 />
             </DraggableCard>
@@ -358,40 +420,45 @@ export const Room: React.FC = () => {
                         <DraggableCard
                             header='ボードビュアー'
                             onDragStop={e =>
-                                dispatch(
-                                    roomConfigModule.actions.moveBoardPanel({
-                                        ...e,
-                                        roomId,
-                                        boardEditorPanelId: null,
-                                    })
-                                )
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    RoomConfigUtils.movePanel(
+                                        roomConfig.panels.activeBoardPanel,
+                                        e
+                                    );
+                                })
                             }
                             onResizeStop={(dir, delta) =>
-                                dispatch(
-                                    roomConfigModule.actions.resizeBoardPanel({
-                                        roomId,
-                                        boardEditorPanelId: null,
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    RoomConfigUtils.resizePanel(
+                                        roomConfig.panels.activeBoardPanel,
                                         dir,
-                                        delta,
-                                    })
-                                )
+                                        delta
+                                    );
+                                })
                             }
                             onMoveToFront={() =>
-                                dispatch(
-                                    roomConfigModule.actions.bringPanelToFront({
-                                        roomId,
-                                        target: { type: activeBoardPanel },
-                                    })
-                                )
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                        type: 'activeBoardPanel',
+                                    });
+                                })
                             }
                             onClose={() =>
-                                dispatch(
-                                    roomConfigModule.actions.setIsMinimized({
-                                        roomId,
-                                        target: { type: activeBoardPanel },
-                                        newValue: true,
-                                    })
-                                )
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    roomConfig.panels.activeBoardPanel.isMinimized = true;
+                                })
                             }
                             childrenContainerStyle={{ overflow: 'hidden' }}
                             position={activeBoardPanelConfig}
@@ -409,40 +476,50 @@ export const Room: React.FC = () => {
                         </DraggableCard>
                     )}
                     {boardEditorPanels}
-                    <RoomMessagePanels roomId={roomId} />
+                    <RoomMessagePanels />
                     {characterPanel.isMinimized ? null : (
                         <DraggableCard
                             header='Characters'
                             onDragStop={e =>
-                                dispatch(
-                                    roomConfigModule.actions.moveCharacterPanel({ ...e, roomId })
-                                )
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    RoomConfigUtils.movePanel(
+                                        roomConfig.panels.characterPanel,
+                                        e
+                                    );
+                                })
                             }
                             onResizeStop={(dir, delta) =>
-                                dispatch(
-                                    roomConfigModule.actions.resizeCharacterPanel({
-                                        roomId,
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    RoomConfigUtils.resizePanel(
+                                        roomConfig.panels.characterPanel,
                                         dir,
-                                        delta,
-                                    })
-                                )
+                                        delta
+                                    );
+                                })
                             }
                             onMoveToFront={() =>
-                                dispatch(
-                                    roomConfigModule.actions.bringPanelToFront({
-                                        roomId,
-                                        target: { type: 'characterPanel' },
-                                    })
-                                )
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                        type: 'characterPanel',
+                                    });
+                                })
                             }
                             onClose={() =>
-                                dispatch(
-                                    roomConfigModule.actions.setIsMinimized({
-                                        roomId,
-                                        target: { type: 'characterPanel' },
-                                        newValue: true,
-                                    })
-                                )
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    roomConfig.panels.characterPanel.isMinimized = true;
+                                })
                             }
                             childrenContainerStyle={{
                                 padding: childrenContainerPadding,
@@ -462,35 +539,45 @@ export const Room: React.FC = () => {
                         <DraggableCard
                             header='SE, BGM'
                             onDragStop={e =>
-                                dispatch(
-                                    roomConfigModule.actions.moveGameEffectPanel({ ...e, roomId })
-                                )
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    RoomConfigUtils.movePanel(
+                                        roomConfig.panels.gameEffectPanel,
+                                        e
+                                    );
+                                })
                             }
                             onResizeStop={(dir, delta) =>
-                                dispatch(
-                                    roomConfigModule.actions.resizeGameEffectPanel({
-                                        roomId,
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    RoomConfigUtils.resizePanel(
+                                        roomConfig.panels.gameEffectPanel,
                                         dir,
-                                        delta,
-                                    })
-                                )
+                                        delta
+                                    );
+                                })
                             }
                             onMoveToFront={() =>
-                                dispatch(
-                                    roomConfigModule.actions.bringPanelToFront({
-                                        roomId,
-                                        target: { type: 'gameEffectPanel' },
-                                    })
-                                )
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                        type: 'gameEffectPanel',
+                                    });
+                                })
                             }
                             onClose={() =>
-                                dispatch(
-                                    roomConfigModule.actions.setIsMinimized({
-                                        roomId,
-                                        target: { type: 'gameEffectPanel' },
-                                        newValue: true,
-                                    })
-                                )
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    roomConfig.panels.gameEffectPanel.isMinimized = true;
+                                })
                             }
                             childrenContainerStyle={{
                                 padding: childrenContainerPadding,
@@ -510,35 +597,45 @@ export const Room: React.FC = () => {
                         <DraggableCard
                             header='Participants'
                             onDragStop={e =>
-                                dispatch(
-                                    roomConfigModule.actions.moveParticipantPanel({ ...e, roomId })
-                                )
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    RoomConfigUtils.movePanel(
+                                        roomConfig.panels.participantPanel,
+                                        e
+                                    );
+                                })
                             }
                             onResizeStop={(dir, delta) =>
-                                dispatch(
-                                    roomConfigModule.actions.resizeParticipantPanel({
-                                        roomId,
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    RoomConfigUtils.resizePanel(
+                                        roomConfig.panels.participantPanel,
                                         dir,
-                                        delta,
-                                    })
-                                )
+                                        delta
+                                    );
+                                })
                             }
                             onMoveToFront={() =>
-                                dispatch(
-                                    roomConfigModule.actions.bringPanelToFront({
-                                        roomId,
-                                        target: { type: 'participantPanel' },
-                                    })
-                                )
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                        type: 'participantPanel',
+                                    });
+                                })
                             }
                             onClose={() =>
-                                dispatch(
-                                    roomConfigModule.actions.setIsMinimized({
-                                        roomId,
-                                        target: { type: 'participantPanel' },
-                                        newValue: true,
-                                    })
-                                )
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    roomConfig.panels.participantPanel.isMinimized = true;
+                                })
                             }
                             childrenContainerStyle={{
                                 padding: childrenContainerPadding,
@@ -557,35 +654,45 @@ export const Room: React.FC = () => {
                         <DraggableCard
                             header='コマ'
                             onDragStop={e =>
-                                dispatch(
-                                    roomConfigModule.actions.movePieceValuePanel({ ...e, roomId })
-                                )
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    RoomConfigUtils.movePanel(
+                                        roomConfig.panels.pieceValuePanel,
+                                        e
+                                    );
+                                })
                             }
                             onResizeStop={(dir, delta) =>
-                                dispatch(
-                                    roomConfigModule.actions.resizePieceValuePanel({
-                                        roomId,
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    RoomConfigUtils.resizePanel(
+                                        roomConfig.panels.pieceValuePanel,
                                         dir,
-                                        delta,
-                                    })
-                                )
+                                        delta
+                                    );
+                                })
                             }
                             onMoveToFront={() =>
-                                dispatch(
-                                    roomConfigModule.actions.bringPanelToFront({
-                                        roomId,
-                                        target: { type: 'pieceValuePanel' },
-                                    })
-                                )
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                        type: 'pieceValuePanel',
+                                    });
+                                })
                             }
                             onClose={() =>
-                                dispatch(
-                                    roomConfigModule.actions.setIsMinimized({
-                                        roomId,
-                                        target: { type: 'pieceValuePanel' },
-                                        newValue: true,
-                                    })
-                                )
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    roomConfig.panels.pieceValuePanel.isMinimized = true;
+                                })
                             }
                             childrenContainerStyle={{
                                 padding: childrenContainerPadding,

@@ -27,19 +27,24 @@ import {
 import { Center } from '../../components/Center';
 import { LoadingResult } from '../../components/Result/LoadingResult';
 import { usePublishRoomEventSubscription } from '../../hooks/usePublishRoomEventSubscription';
-import { useDispatch } from 'react-redux';
-import { roomModule } from '../../modules/roomModule';
 import { useAllRoomMessages } from '../../hooks/useRoomMessages';
 import { useSelector } from '../../store';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { messageInputTextModule } from '../../modules/messageInputTextModule';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
 import { usePrevious } from 'react-use';
-import { roomConfigModule } from '../../modules/roomConfigModule';
 import { getRoomConfig } from '../../utils/localStorage/roomConfig';
 import { MyAuthContext } from '../../contexts/MyAuthContext';
 import { bufferTime, Subject } from 'rxjs';
 import { Ref } from '../../utils/ref';
+import { atom, useAtom } from 'jotai';
+import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
+import { useDispatch } from 'react-redux';
+import { roomAtom } from '../../atoms/room/roomAtom';
+import { RoomConfig } from '../../atoms/roomConfig/types/roomConfig';
+import { writeonlyAtom } from '../../atoms/writeonlyAtom';
+import produce from 'immer';
+import { RoomConfigUtils } from '../../atoms/roomConfig/types/roomConfig/utils';
 
 type JoinRoomFormProps = {
     roomState: RoomAsListItemFragment;
@@ -194,31 +199,37 @@ function useBufferedWritingMessageStatusInputType() {
     return [result, onNext] as const;
 }
 
+const writeonlyRoomConfigAtom = writeonlyAtom(roomConfigAtom)
+
 // localForageを用いてRoomConfigを読み込み、ReduxのStateと紐付ける。
 // Roomが変わるたびに、useRoomConfigが更新される必要がある。RoomのComponentのどこか一箇所でuseRoomConfigを呼び出すだけでよい。
 const useRoomConfig = (roomId: string): boolean => {
     const [result, setResult] = React.useState<boolean>(false);
-    const dispatch = useDispatch();
+    const [, setRoomConfig] = useAtom(writeonlyRoomConfigAtom);
 
     React.useEffect(() => {
         let unmounted = false;
         const main = async () => {
-            dispatch(roomConfigModule.actions.setRoomConfig(null));
+            setRoomConfig(null);
             const roomConfig = await getRoomConfig(roomId);
             if (unmounted) {
                 return;
             }
-            dispatch(roomConfigModule.actions.setRoomConfig(roomConfig));
+            // immerを使わなくても問題ないが、コード変更があったときにエンバグする可能性を減らすことを狙ってimmerを使っている
+            setRoomConfig(produce(roomConfig, roomConfig => RoomConfigUtils.fixRoomConfig(roomConfig)));
             setResult(true);
         };
         main();
         return () => {
             unmounted = true;
         };
-    }, [roomId, dispatch]);
+    }, [roomId, setRoomConfig]);
 
     return result;
 };
+
+const writeonlyRoomAtom = writeonlyAtom(roomAtom);
+const newNotificationAtom = atom(get => get(roomAtom).notifications.newValue)
 
 const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
     roomId,
@@ -228,10 +239,11 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
     children: JSX.Element;
 }) => {
     const roomIdRef = useReadonlyRef(roomId);
+    const [, setRoomAtomValue] = useAtom(writeonlyRoomAtom);
+    const dispatch = useDispatch();
 
     useRoomConfig(roomId);
 
-    const dispatch = useDispatch();
     const [updateWritingMessageStatus] = useMutation(UpdateWritingMessageStatusDocument);
 
     React.useEffect(() => {
@@ -252,20 +264,19 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
     });
 
     React.useEffect(() => {
-        dispatch(roomModule.actions.reset());
-        dispatch(roomModule.actions.setRoom({ roomId }));
-    }, [dispatch, roomId]);
+        setRoomAtomValue({...roomAtom.init, roomId})
+    }, [roomId, setRoomAtomValue]);
     React.useEffect(() => {
-        dispatch(roomModule.actions.setRoom({ roomState }));
-    }, [dispatch, roomState]);
+        setRoomAtomValue(roomAtomValue => ({...roomAtomValue, roomState}))
+    }, [roomState, setRoomAtomValue]);
     React.useEffect(() => {
-        dispatch(roomModule.actions.setRoom({ roomEventSubscription }));
-    }, [dispatch, roomEventSubscription]);
+        setRoomAtomValue(roomAtomValue => ({...roomAtomValue, roomEventSubscription}))
+    }, [roomEventSubscription, setRoomAtomValue]);
     React.useEffect(() => {
-        dispatch(roomModule.actions.setRoom({ allRoomMessagesResult: allRoomMessages }));
-    }, [dispatch, allRoomMessages]);
+        setRoomAtomValue(roomAtomValue => ({...roomAtomValue, allRoomMessagesResult: allRoomMessages}))
+    }, [allRoomMessages, setRoomAtomValue]);
 
-    const newNotification = useSelector(state => state.roomModule.notifications.newValue);
+    const [newNotification] = useAtom(newNotificationAtom);
     React.useEffect(() => {
         if (newNotification == null) {
             return;

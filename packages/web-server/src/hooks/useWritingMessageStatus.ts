@@ -2,7 +2,8 @@ import produce from 'immer';
 import React from 'react';
 import { interval } from 'rxjs';
 import { WritingMessageStatusType } from '@flocon-trpg/typed-document-node';
-import { useSelector } from '../store';
+import { useAtomSelector } from '../atoms/useAtomSelector';
+import { roomAtom } from '../atoms/room/roomAtom';
 
 export type WritingMessageStatusResult = ReadonlyMap<
     string,
@@ -12,8 +13,8 @@ export type WritingMessageStatusResult = ReadonlyMap<
 export function useWritingMessageStatus() {
     const [result, setResult] = React.useState<WritingMessageStatusResult>(new Map());
 
-    const roomId = useSelector(state => state.roomModule.roomId);
-    const roomEventSubscription = useSelector(state => state.roomModule.roomEventSubscription);
+    const roomId = useAtomSelector(roomAtom, state => state.roomId);
+    const roomEventSubscription = useAtomSelector(roomAtom, state => state.roomEventSubscription);
 
     React.useEffect(() => {
         setResult(new Map());

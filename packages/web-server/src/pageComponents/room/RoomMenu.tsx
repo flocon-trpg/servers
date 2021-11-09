@@ -11,19 +11,13 @@ import {
     PromoteToPlayerDocument,
     GetRoomAsListItemDocument,
 } from '@flocon-trpg/typed-document-node';
-import { roomConfigModule } from '../../modules/roomConfigModule';
-import { useSelector } from '../../store';
 import * as Icon from '@ant-design/icons';
-import { boardEditorPanel, chatPalettePanel } from '../../states/RoomConfig';
 import { VolumeBarPanel } from './VolumeBarPanel';
 import { Jdenticon } from '../../components/Jdenticon';
-import { roomModule, Notification } from '../../modules/roomModule';
 import { path } from '../../utils/path';
 import { useRouter } from 'next/router';
-import { defaultMessagePanelConfig } from '../../states/MessagePanelConfig';
 import { recordToArray } from '@flocon-trpg/utils';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
-import { defaultMemoPanelConfig } from '../../states/MemoPanelConfig';
 import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';
 import { FilesManagerDrawerType, none } from '../../utils/types';
 import { useMe } from '../../hooks/useMe';
@@ -34,6 +28,18 @@ import { flex, flexRow, itemsCenter } from '../../utils/className';
 import { MyAuthContext } from '../../contexts/MyAuthContext';
 import { GenerateLogModal } from '../../components/GenerateLogModal';
 import { useLazyQuery, useMutation } from '@apollo/client';
+import { writeonlyAtom } from '../../atoms/writeonlyAtom';
+import { addRoomNotificationAtom, roomAtom, Notification } from '../../atoms/room/roomAtom';
+import { useAtom } from 'jotai';
+import { useAtomSelector } from '../../atoms/useAtomSelector';
+import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
+import { useImmerAtom } from 'jotai/immer';
+import { RoomConfigUtils } from '../../atoms/roomConfig/types/roomConfig/utils';
+import { simpleId } from '@flocon-trpg/core';
+import { defaultMessagePanelConfig } from '../../atoms/roomConfig/types/messagePanelConfig';
+import { defaultMemoPanelConfig } from '../../atoms/roomConfig/types/memoPanelConfig';
+
+const writeonlyRoomConfigAtom = writeonlyAtom(roomConfigAtom);
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -48,13 +54,11 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
     onOk,
     onCancel,
 }: BecomePlayerModalProps) => {
-    const dispatch = useDispatch();
+    const [, addRoomNotification] = useAtom(addRoomNotificationAtom);
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
     const [promoteToPlayer] = useMutation(PromoteToPlayerDocument);
-    const [getRoomAsListItem, getRoomAsListItemResult] = useLazyQuery(
-        GetRoomAsListItemDocument
-    );
+    const [getRoomAsListItem, getRoomAsListItemResult] = useLazyQuery(GetRoomAsListItemDocument);
     const requiresPhraseToJoinAsPlayerRef = React.useRef(getRoomAsListItem);
     React.useEffect(() => {
         requiresPhraseToJoinAsPlayerRef.current = getRoomAsListItem;
@@ -67,9 +71,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
 
     const title = '参加者に昇格';
 
-    if (
-        getRoomAsListItemResult.data?.result.__typename !== 'GetRoomAsListItemSuccessResult'
-    ) {
+    if (getRoomAsListItemResult.data?.result.__typename !== 'GetRoomAsListItemSuccessResult') {
         return (
             <Modal
                 visible={visible}
@@ -91,13 +93,11 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                     setIsPosting(true);
                     promoteToPlayer({ variables: { roomId, phrase: inputValue } }).then(e => {
                         if (e.errors != null) {
-                            dispatch(
-                                roomModule.actions.addNotification({
-                                    type: Notification.graphQLErrors,
-                                    createdAt: new Date().getTime(),
-                                    errors: e.errors,
-                                })
-                            );
+                            addRoomNotification({
+                                type: Notification.graphQLErrors,
+                                createdAt: new Date().getTime(),
+                                errors: e.errors,
+                            });
                             onOk();
                             return;
                         }
@@ -115,17 +115,15 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                                     text = undefined;
                                     break;
                             }
-                            dispatch(
-                                roomModule.actions.addNotification({
-                                    type: 'text',
-                                    notification: {
-                                        type: 'warning',
-                                        message: '参加者への昇格に失敗しました。',
-                                        description: text,
-                                        createdAt: new Date().getTime(),
-                                    },
-                                })
-                            );
+                            addRoomNotification({
+                                type: 'text',
+                                notification: {
+                                    type: 'warning',
+                                    message: '参加者への昇格に失敗しました。',
+                                    description: text,
+                                    createdAt: new Date().getTime(),
+                                },
+                            });
                             onOk();
                             return;
                         }
@@ -152,13 +150,11 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                 setIsPosting(true);
                 promoteToPlayer({ variables: { roomId } }).then(e => {
                     if (e.errors != null) {
-                        dispatch(
-                            roomModule.actions.addNotification({
-                                type: Notification.graphQLErrors,
-                                createdAt: new Date().getTime(),
-                                errors: e.errors,
-                            })
-                        );
+                        addRoomNotification({
+                            type: Notification.graphQLErrors,
+                            createdAt: new Date().getTime(),
+                            errors: e.errors,
+                        });
                         onOk();
                         return;
                     }
@@ -176,17 +172,15 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                                 text = undefined;
                                 break;
                         }
-                        dispatch(
-                            roomModule.actions.addNotification({
-                                type: 'text',
-                                notification: {
-                                    type: 'warning',
-                                    message: '参加者への昇格に失敗しました。',
-                                    description: text,
-                                    createdAt: new Date().getTime(),
-                                },
-                            })
-                        );
+                        addRoomNotification({
+                            type: 'text',
+                            notification: {
+                                type: 'warning',
+                                message: '参加者への昇格に失敗しました。',
+                                description: text,
+                                createdAt: new Date().getTime(),
+                            },
+                        });
                         onOk();
                         return;
                     }
@@ -216,7 +210,7 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
     onCancel,
     roomCreatedByMe,
 }: DeleteRoomModalProps) => {
-    const dispatch = useDispatch();
+    const [, addRoomNotification] = useAtom(addRoomNotificationAtom);
     const [isPosting, setIsPosting] = React.useState(false);
     const [deleteRoom] = useMutation(DeleteRoomDocument);
     React.useEffect(() => {
@@ -236,13 +230,11 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
                 setIsPosting(true);
                 deleteRoom({ variables: { id: roomId } }).then(e => {
                     if (e.errors != null) {
-                        dispatch(
-                            roomModule.actions.addNotification({
-                                type: Notification.graphQLErrors,
-                                createdAt: new Date().getTime(),
-                                errors: e.errors,
-                            })
-                        );
+                        addRoomNotification({
+                            type: Notification.graphQLErrors,
+                            createdAt: new Date().getTime(),
+                            errors: e.errors,
+                        });
                         onOk();
                         return;
                     }
@@ -257,17 +249,15 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
                                 text = undefined;
                                 break;
                         }
-                        dispatch(
-                            roomModule.actions.addNotification({
-                                type: 'text',
-                                notification: {
-                                    type: 'warning',
-                                    message: '部屋の削除に失敗しました。',
-                                    description: text,
-                                    createdAt: new Date().getTime(),
-                                },
-                            })
-                        );
+                        addRoomNotification({
+                            type: 'text',
+                            notification: {
+                                type: 'warning',
+                                message: '部屋の削除に失敗しました。',
+                                description: text,
+                                createdAt: new Date().getTime(),
+                            },
+                        });
                         onOk();
                         return;
                     }
@@ -307,7 +297,7 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
     onOk: onOkCore,
     onCancel,
 }: ChangeMyParticipantNameModalProps) => {
-    const dispatch = useDispatch();
+    const [, addRoomNotification] = useAtom(addRoomNotificationAtom);
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
     const [changeParticipantName] = useMutation(ChangeParticipantNameDocument);
@@ -320,28 +310,24 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
         setIsPosting(true);
         changeParticipantName({ variables: { roomId, newName: inputValue } }).then(e => {
             if (e.errors != null) {
-                dispatch(
-                    roomModule.actions.addNotification({
-                        type: Notification.graphQLErrors,
-                        createdAt: new Date().getTime(),
-                        errors: e.errors,
-                    })
-                );
+                addRoomNotification({
+                    type: Notification.graphQLErrors,
+                    createdAt: new Date().getTime(),
+                    errors: e.errors,
+                });
                 onOkCore();
                 return;
             }
 
             if (e.data?.result.failureType != null) {
-                dispatch(
-                    roomModule.actions.addNotification({
-                        type: Notification.text,
-                        notification: {
-                            type: 'warning',
-                            message: '名前の変更に失敗しました。',
-                            createdAt: new Date().getTime(),
-                        },
-                    })
-                );
+                addRoomNotification({
+                    type: Notification.text,
+                    notification: {
+                        type: 'warning',
+                        message: '名前の変更に失敗しました。',
+                        createdAt: new Date().getTime(),
+                    },
+                });
                 onOkCore();
                 return;
             }
@@ -374,22 +360,30 @@ export const RoomMenu: React.FC = () => {
     const myUserUid = useMyUserUid();
     const myAuth = React.useContext(MyAuthContext);
     const router = useRouter();
+    const [, setRoomConfig] = useImmerAtom(writeonlyRoomConfigAtom);
     const dispatch = useDispatch();
     const signOut = useSignOut();
-    const roomId = useSelector(state => state.roomModule.roomId);
-    const createdBy = useSelector(state => state.roomModule.roomState?.state?.createdBy);
+    const roomId = useAtomSelector(roomAtom, state => state.roomId);
+    const createdBy = useAtomSelector(roomAtom, state => state.roomState?.state?.createdBy);
 
-    const activeBoardPanel = useSelector(state => state.roomConfigModule?.panels.activeBoardPanel);
-    const boardPanels = useSelector(state => state.roomConfigModule?.panels.boardEditorPanels);
-    const characterPanel = useSelector(state => state.roomConfigModule?.panels.characterPanel);
-    const chatPalettePanels = useSelector(
-        state => state.roomConfigModule?.panels.chatPalettePanels
+    const activeBoardPanel = useAtomSelector(
+        roomConfigAtom,
+        state => state?.panels.activeBoardPanel
     );
-    const gameEffectPanel = useSelector(state => state.roomConfigModule?.panels.gameEffectPanel);
-    const participantPanel = useSelector(state => state.roomConfigModule?.panels.participantPanel);
-    const memoPanels = useSelector(state => state.roomConfigModule?.panels.memoPanels);
-    const messagePanels = useSelector(state => state.roomConfigModule?.panels.messagePanels);
-    const pieceValuePanel = useSelector(state => state.roomConfigModule?.panels.pieceValuePanel);
+    const boardPanels = useAtomSelector(roomConfigAtom, state => state?.panels.boardEditorPanels);
+    const characterPanel = useAtomSelector(roomConfigAtom, state => state?.panels.characterPanel);
+    const chatPalettePanels = useAtomSelector(
+        roomConfigAtom,
+        state => state?.panels.chatPalettePanels
+    );
+    const gameEffectPanel = useAtomSelector(roomConfigAtom, state => state?.panels.gameEffectPanel);
+    const participantPanel = useAtomSelector(
+        roomConfigAtom,
+        state => state?.panels.participantPanel
+    );
+    const memoPanels = useAtomSelector(roomConfigAtom, state => state?.panels.memoPanels);
+    const messagePanels = useAtomSelector(roomConfigAtom, state => state?.panels.messagePanels);
+    const pieceValuePanel = useAtomSelector(roomConfigAtom, state => state?.panels.pieceValuePanel);
     const [leaveRoomMutation] = useMutation(LeaveRoomDocument);
     const [isBecomePlayerModalVisible, setIsBecomePlayerModalVisible] = React.useState(false);
     const [isChangeMyParticipantNameModalVisible, setIsChangeMyParticipantNameModalVisible] =
@@ -446,19 +440,15 @@ export const RoomMenu: React.FC = () => {
                 <Menu.SubMenu title='ウィンドウ'>
                     <Menu.Item
                         onClick={() => {
-                            dispatch(
-                                roomConfigModule.actions.setIsMinimized({
-                                    roomId,
-                                    target: { type: 'characterPanel' },
-                                    newValue: false,
-                                })
-                            );
-                            dispatch(
-                                roomConfigModule.actions.bringPanelToFront({
-                                    roomId,
-                                    target: { type: 'characterPanel' },
-                                })
-                            );
+                            setRoomConfig(roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                roomConfig.panels.characterPanel.isMinimized = false;
+                                RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                    type: 'characterPanel',
+                                });
+                            });
                         }}
                     >
                         <div>
@@ -474,19 +464,15 @@ export const RoomMenu: React.FC = () => {
                     </Menu.Item>
                     <Menu.Item
                         onClick={() => {
-                            dispatch(
-                                roomConfigModule.actions.setIsMinimized({
-                                    roomId,
-                                    target: { type: 'activeBoardPanel' },
-                                    newValue: false,
-                                })
-                            );
-                            dispatch(
-                                roomConfigModule.actions.bringPanelToFront({
-                                    roomId,
-                                    target: { type: 'activeBoardPanel' },
-                                })
-                            );
+                            setRoomConfig(roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                roomConfig.panels.activeBoardPanel.isMinimized = false;
+                                RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                    type: 'activeBoardPanel',
+                                });
+                            });
                         }}
                     >
                         <div>
@@ -506,27 +492,24 @@ export const RoomMenu: React.FC = () => {
                                 <Menu.Item
                                     key={pair.key}
                                     onClick={() => {
-                                        // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
-                                        dispatch(
-                                            roomConfigModule.actions.setIsMinimized({
-                                                roomId,
-                                                target: {
-                                                    type: boardEditorPanel,
-                                                    panelId: pair.key,
-                                                },
-                                                newValue: false,
-                                            })
-                                        );
+                                        setRoomConfig(roomConfig => {
+                                            if (roomConfig == null) {
+                                                return;
+                                            }
+                                            const boardEditorPanel =
+                                                roomConfig?.panels.boardEditorPanels[pair.key];
+                                            if (boardEditorPanel == null) {
+                                                return;
+                                            }
 
-                                        dispatch(
-                                            roomConfigModule.actions.bringPanelToFront({
-                                                roomId,
-                                                target: {
-                                                    type: boardEditorPanel,
-                                                    panelId: pair.key,
-                                                },
-                                            })
-                                        );
+                                            // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
+                                            boardEditorPanel.isMinimized = false;
+
+                                            RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                                type: 'boardEditorPanel',
+                                                panelId: pair.key,
+                                            });
+                                        });
                                     }}
                                 >
                                     <div>
@@ -545,20 +528,26 @@ export const RoomMenu: React.FC = () => {
                         <Menu.Divider />
                         <Menu.Item
                             onClick={() => {
-                                dispatch(
-                                    roomConfigModule.actions.addBoardEditorPanelConfig({
-                                        roomId,
-                                        panel: {
-                                            activeBoardKey: null,
-                                            boards: {},
-                                            isMinimized: false,
-                                            x: 10,
-                                            y: 10,
-                                            width: 400,
-                                            height: 300,
-                                        },
-                                    })
-                                );
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    const panelId = simpleId();
+                                    roomConfig.panels.boardEditorPanels[panelId] = {
+                                        activeBoardKey: null,
+                                        boards: {},
+                                        isMinimized: false,
+                                        x: 10,
+                                        y: 10,
+                                        width: 400,
+                                        height: 300,
+                                        zIndex: 0,
+                                    };
+                                    RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                        type: 'boardEditorPanel',
+                                        panelId,
+                                    });
+                                });
                             }}
                         >
                             <div>
@@ -575,21 +564,24 @@ export const RoomMenu: React.FC = () => {
                                 <Menu.Item
                                     key={pair.key}
                                     onClick={() => {
-                                        // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
-                                        dispatch(
-                                            roomConfigModule.actions.setIsMinimized({
-                                                roomId,
-                                                target: { type: 'messagePanel', panelId: pair.key },
-                                                newValue: false,
-                                            })
-                                        );
+                                        setRoomConfig(roomConfig => {
+                                            if (roomConfig == null) {
+                                                return;
+                                            }
+                                            const messagePanel =
+                                                roomConfig?.panels.messagePanels[pair.key];
+                                            if (messagePanel == null) {
+                                                return;
+                                            }
 
-                                        dispatch(
-                                            roomConfigModule.actions.bringPanelToFront({
-                                                roomId,
-                                                target: { type: 'messagePanel', panelId: pair.key },
-                                            })
-                                        );
+                                            // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
+                                            messagePanel.isMinimized = false;
+
+                                            RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                                type: 'messagePanel',
+                                                panelId: pair.key,
+                                            });
+                                        });
                                     }}
                                 >
                                     <div>
@@ -608,14 +600,18 @@ export const RoomMenu: React.FC = () => {
                         <Menu.Divider />
                         <Menu.Item
                             onClick={() => {
-                                dispatch(
-                                    roomConfigModule.actions.addMessagePanelConfig({
-                                        roomId,
-                                        panel: {
-                                            ...defaultMessagePanelConfig(),
-                                        },
-                                    })
-                                );
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    const panelId = simpleId();
+                                    roomConfig.panels.messagePanels[panelId] =
+                                        defaultMessagePanelConfig();
+                                    RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                        type: 'messagePanel',
+                                        panelId,
+                                    });
+                                });
                             }}
                         >
                             <div>
@@ -632,27 +628,24 @@ export const RoomMenu: React.FC = () => {
                                 <Menu.Item
                                     key={pair.key}
                                     onClick={() => {
-                                        // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
-                                        dispatch(
-                                            roomConfigModule.actions.setIsMinimized({
-                                                roomId,
-                                                target: {
-                                                    type: chatPalettePanel,
-                                                    panelId: pair.key,
-                                                },
-                                                newValue: false,
-                                            })
-                                        );
+                                        setRoomConfig(roomConfig => {
+                                            if (roomConfig == null) {
+                                                return;
+                                            }
+                                            const chatPalettePanel =
+                                                roomConfig?.panels.chatPalettePanels[pair.key];
+                                            if (chatPalettePanel == null) {
+                                                return;
+                                            }
 
-                                        dispatch(
-                                            roomConfigModule.actions.bringPanelToFront({
-                                                roomId,
-                                                target: {
-                                                    type: chatPalettePanel,
-                                                    panelId: pair.key,
-                                                },
-                                            })
-                                        );
+                                            // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
+                                            chatPalettePanel.isMinimized = false;
+
+                                            RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                                type: 'chatPalettePanel',
+                                                panelId: pair.key,
+                                            });
+                                        });
                                     }}
                                 >
                                     <div>
@@ -671,20 +664,26 @@ export const RoomMenu: React.FC = () => {
                         <Menu.Divider />
                         <Menu.Item
                             onClick={() => {
-                                dispatch(
-                                    roomConfigModule.actions.addChatPalettePanelConfig({
-                                        roomId,
-                                        panel: {
-                                            isMinimized: false,
-                                            x: 10,
-                                            y: 10,
-                                            width: 400,
-                                            height: 300,
-                                            isPrivateMessageMode: false,
-                                            customCharacterName: '',
-                                        },
-                                    })
-                                );
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    const panelId = simpleId();
+                                    roomConfig.panels.chatPalettePanels[panelId] = {
+                                        isMinimized: false,
+                                        x: 10,
+                                        y: 10,
+                                        width: 400,
+                                        height: 300,
+                                        isPrivateMessageMode: false,
+                                        customCharacterName: '',
+                                        zIndex: 0,
+                                    };
+                                    RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                        type: 'chatPalettePanel',
+                                        panelId,
+                                    });
+                                });
                             }}
                         >
                             <div>
@@ -701,21 +700,24 @@ export const RoomMenu: React.FC = () => {
                                 <Menu.Item
                                     key={pair.key}
                                     onClick={() => {
-                                        // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
-                                        dispatch(
-                                            roomConfigModule.actions.setIsMinimized({
-                                                roomId,
-                                                target: { type: 'memoPanel', panelId: pair.key },
-                                                newValue: false,
-                                            })
-                                        );
+                                        setRoomConfig(roomConfig => {
+                                            if (roomConfig == null) {
+                                                return;
+                                            }
+                                            const memoPanel =
+                                                roomConfig?.panels.memoPanels[pair.key];
+                                            if (memoPanel == null) {
+                                                return;
+                                            }
 
-                                        dispatch(
-                                            roomConfigModule.actions.bringPanelToFront({
-                                                roomId,
-                                                target: { type: 'memoPanel', panelId: pair.key },
-                                            })
-                                        );
+                                            // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
+                                            memoPanel.isMinimized = false;
+
+                                            RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                                type: 'memoPanel',
+                                                panelId: pair.key,
+                                            });
+                                        });
                                     }}
                                 >
                                     <div>
@@ -734,14 +736,18 @@ export const RoomMenu: React.FC = () => {
                         <Menu.Divider />
                         <Menu.Item
                             onClick={() => {
-                                dispatch(
-                                    roomConfigModule.actions.addMemoPanelConfig({
-                                        roomId,
-                                        panel: {
-                                            ...defaultMemoPanelConfig(),
-                                        },
-                                    })
-                                );
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    const panelId = simpleId();
+                                    roomConfig.panels.memoPanels[panelId] =
+                                        defaultMemoPanelConfig();
+                                    RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                        type: 'memoPanel',
+                                        panelId,
+                                    });
+                                });
                             }}
                         >
                             <div>
@@ -754,19 +760,15 @@ export const RoomMenu: React.FC = () => {
                     </Menu.SubMenu>
                     <Menu.Item
                         onClick={() => {
-                            dispatch(
-                                roomConfigModule.actions.setIsMinimized({
-                                    roomId,
-                                    target: { type: 'pieceValuePanel' },
-                                    newValue: false,
-                                })
-                            );
-                            dispatch(
-                                roomConfigModule.actions.bringPanelToFront({
-                                    roomId,
-                                    target: { type: 'pieceValuePanel' },
-                                })
-                            );
+                            setRoomConfig(roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                roomConfig.panels.pieceValuePanel.isMinimized = true;
+                                RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                    type: 'pieceValuePanel',
+                                });
+                            });
                         }}
                     >
                         <div>
@@ -782,19 +784,15 @@ export const RoomMenu: React.FC = () => {
                     </Menu.Item>
                     <Menu.Item
                         onClick={() => {
-                            dispatch(
-                                roomConfigModule.actions.setIsMinimized({
-                                    roomId,
-                                    target: { type: 'gameEffectPanel' },
-                                    newValue: false,
-                                })
-                            );
-                            dispatch(
-                                roomConfigModule.actions.bringPanelToFront({
-                                    roomId,
-                                    target: { type: 'gameEffectPanel' },
-                                })
-                            );
+                            setRoomConfig(roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                roomConfig.panels.gameEffectPanel.isMinimized = true;
+                                RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                    type: 'gameEffectPanel',
+                                });
+                            });
                         }}
                     >
                         <div>
@@ -810,19 +808,15 @@ export const RoomMenu: React.FC = () => {
                     </Menu.Item>
                     <Menu.Item
                         onClick={() => {
-                            dispatch(
-                                roomConfigModule.actions.setIsMinimized({
-                                    roomId,
-                                    target: { type: 'participantPanel' },
-                                    newValue: false,
-                                })
-                            );
-                            dispatch(
-                                roomConfigModule.actions.bringPanelToFront({
-                                    roomId,
-                                    target: { type: 'participantPanel' },
-                                })
-                            );
+                            setRoomConfig(roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                roomConfig.panels.participantPanel.isMinimized = true;
+                                RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                    type: 'participantPanel',
+                                });
+                            });
                         }}
                     >
                         <div>

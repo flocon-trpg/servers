@@ -35,7 +35,6 @@ import {
     tachie,
 } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { replace, update } from '../../stateManagers/states/types';
-import { BoardConfig } from '../../states/BoardConfig';
 import { useSelector } from '../../store';
 import { testCommand } from '../../utils/command';
 import { noValue } from '../../utils/dice';
@@ -44,6 +43,9 @@ import { StringPieceValue } from '../../utils/stringPieceValue';
 import { Piece } from '../../utils/piece';
 import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 import { useMutation } from '@apollo/client';
+import { roomAtom } from '../../atoms/room/roomAtom';
+import { useAtomSelector } from '../../atoms/useAtomSelector';
+import { BoardConfig } from '../../atoms/roomConfig/types/boardConfig';
 
 /* absolute positionで表示するときにBoardの子として表示させると、Boardウィンドウから要素がはみ出ることができないため、ウィンドウ右端に近いところで要素を表示させるときに不便なことがある。そのため、ページ全体の子として持たせるようにしている。 */
 
@@ -1059,14 +1061,14 @@ namespace ContextMenuModule {
     export const Main: React.FC = () => {
         const dispatch = useDispatch();
         const operate = useOperate();
-        const room = useSelector(state => state.roomModule.roomState?.state);
+        const room = useAtomSelector(roomAtom,state => state.roomState?.state);
         const boards = useBoards();
         const characters = useCharacters();
         const myUserUid = useMyUserUid();
         const contextMenuState = useSelector(
             state => state.roomDrawerAndPopoverAndModalModule.boardContextMenu
         );
-        const roomId = useSelector(state => state.roomModule.roomId);
+        const roomId = useAtomSelector(roomAtom,state => state.roomId);
         const [writeSe] = useMutation(WriteRoomSoundEffectDocument);
 
         if (

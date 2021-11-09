@@ -1,11 +1,11 @@
 import localforage from 'localforage';
 import {
     defaultUserConfig,
+    deserializeUserConfig,
     SerializedUserConfig,
     serializedUserConfig,
-    toCompleteUserConfig,
     UserConfig,
-} from '../../states/UserConfig';
+} from '../../atoms/userConfig/types';
 import { tryParseJSON } from '../tryParseJSON';
 
 const userConfigKey = (userUid: string) => `user@${userUid}`;
@@ -28,7 +28,7 @@ export const getUserConfig = async (userUid: string): Promise<UserConfig> => {
     if (result == null) {
         return defaultUserConfig(userUid);
     }
-    return toCompleteUserConfig(result, userUid);
+    return deserializeUserConfig(result, userUid);
 };
 
 export const setUserConfig = async (value: UserConfig) => {

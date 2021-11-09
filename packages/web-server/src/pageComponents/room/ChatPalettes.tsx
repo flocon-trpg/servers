@@ -11,14 +11,8 @@ import {
     SelectedChannelType,
     SubmitMessage,
 } from '../../components/ChatInput/SubmitMessage';
-import {
-    roomConfigModule,
-    UpdateChatPalettePanelAction,
-    UpdateMessagePanelAction,
-} from '../../modules/roomConfigModule';
 import { messageInputTextModule } from '../../modules/messageInputTextModule';
 import { Subject } from 'rxjs';
-import { useSelector } from '../../store';
 import classNames from 'classnames';
 import { flex, flex1, flexColumn, flexNone, flexRow, itemsCenter } from '../../utils/className';
 import { ChatPaletteTomlInput } from '../../components/ChatPaletteTomlInput';
@@ -26,10 +20,19 @@ import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useOperateAsState } from '../../hooks/useOperateAsState';
 import produce from 'immer';
 import { UISelector } from '../../components/UISelector';
+import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
+import { useAtomSelector } from '../../atoms/useAtomSelector';
+import { writeonlyAtom } from '../../atoms/writeonlyAtom';
+import { useImmerAtom } from 'jotai/immer';
+import { WritableDraft } from 'immer/dist/internal';
+import { ChatPalettePanelConfig } from '../../atoms/roomConfig/types/chatPalettePanelConfig';
+import { MessagePanelConfig } from '../../atoms/roomConfig/types/messagePanelConfig';
 
 const titleStyle: React.CSSProperties = {
     flexBasis: '80px',
 };
+
+const writeonlyRoomConfigAtom = writeonlyAtom(roomConfigAtom);
 
 type ChatPaletteListProps = {
     chatPaletteToml: string | null;
@@ -123,9 +126,11 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
     const miniInputMaxWidth = 200;
 
     const dispatch = useDispatch();
-    const config = useSelector(
-        state => state.roomConfigModule?.panels.chatPalettePanels?.[panelId]
+    const config = useAtomSelector(
+        roomConfigAtom,
+        state => state?.panels.chatPalettePanels?.[panelId]
     );
+    const [, setRoomConfig] = useImmerAtom(writeonlyRoomConfigAtom);
     const subject = React.useMemo(() => new Subject<string>(), []);
     const myUserUid = useMyUserUid();
     const myCharacters = useMyCharacters();
@@ -158,11 +163,20 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
         selectedCharacterStateId == null ? undefined : myCharacters?.get(selectedCharacterStateId);
 
     const onConfigUpdate = (
-        newValue: UpdateChatPalettePanelAction['panel'] & UpdateMessagePanelAction['panel']
+        recipe: (
+            draft: WritableDraft<ChatPalettePanelConfig> | WritableDraft<MessagePanelConfig>
+        ) => void
     ) => {
-        dispatch(
-            roomConfigModule.actions.updateChatPalettePanel({ roomId, panelId, panel: newValue })
-        );
+        setRoomConfig(roomConfig => {
+            if (roomConfig == null) {
+                return;
+            }
+            const chatPalettePanel = roomConfig.panels.chatPalettePanels[panelId];
+            if (chatPalettePanel == null) {
+                return;
+            }
+            recipe(chatPalettePanel);
+        });
     };
 
     return (
@@ -174,11 +188,11 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
                     placeholder='キャラクター'
                     value={config.selectedCharacterStateId}
                     onSelect={(value, option) => {
-                        if (typeof option.key !== 'string') {
-                            return;
-                        }
-                        onConfigUpdate({
-                            selectedCharacterStateId: option.key,
+                        onConfigUpdate(draft => {
+                            if (typeof option.key !== 'string') {
+                                return;
+                            }
+                            draft.selectedCharacterStateId = option.key;
                         });
                     }}
                 >

@@ -1,7 +1,7 @@
 import { $free, $system } from '@flocon-trpg/core';
 import _ from 'lodash';
 import React from 'react';
-import { MessageFilter } from '../states/MessagePanelConfig';
+import { MessageFilter } from '../atoms/roomConfig/types/messageFilter';
 import { PrivateChannelSets } from '../utils/PrivateChannelSet';
 import {
     Message,
@@ -9,7 +9,6 @@ import {
     notification,
     privateMessage,
     publicMessage,
-    RoomMessage,
     soundEffect,
 } from './useRoomMessages';
 

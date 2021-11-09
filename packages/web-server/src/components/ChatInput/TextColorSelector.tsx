@@ -3,21 +3,17 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { Popover, Button } from 'antd';
 import { SketchPicker } from 'react-color';
-import { ChatPalettePanelConfig } from '../../states/ChatPalettePanelConfig';
-import { MessagePanelConfig } from '../../states/MessagePanelConfig';
-import { reset } from '../../utils/types';
 import classNames from 'classnames';
-import {
-    UpdateChatPalettePanelAction,
-    UpdateMessagePanelAction,
-} from '../../modules/roomConfigModule';
 import { cancelRnd, flex, flexNone, flexRow, itemsCenter } from '../../utils/className';
 import { rgb } from '../../utils/rgb';
+import { WritableDraft } from 'immer/dist/internal';
+import { ChatPalettePanelConfig } from '../../atoms/roomConfig/types/chatPalettePanelConfig';
+import { MessagePanelConfig } from '../../atoms/roomConfig/types/messagePanelConfig';
 
 type Props = {
     config: ChatPalettePanelConfig | MessagePanelConfig;
     onConfigUpdate: (
-        newValue: UpdateChatPalettePanelAction['panel'] & UpdateMessagePanelAction['panel']
+        recipe: (draft: WritableDraft<ChatPalettePanelConfig> | WritableDraft<MessagePanelConfig>) => void
     ) => void;
     titleStyle?: React.CSSProperties;
 };
@@ -42,7 +38,9 @@ export const TextColorSelector: React.FC<Props> = ({
                         color={
                             config.selectedTextColor == null ? '#000000' : config.selectedTextColor
                         }
-                        onChange={e => onConfigUpdate({ selectedTextColor: rgb(e.rgb) })}
+                        onChange={e => onConfigUpdate(draft => {
+                            draft.selectedTextColor = rgb(e.rgb)
+                        })}
                         presetColors={[
                             '#F26262',
                             '#F2A962',
@@ -75,7 +73,9 @@ export const TextColorSelector: React.FC<Props> = ({
             </Popover>
             <Button
                 size='small'
-                onClick={() => onConfigUpdate({ selectedTextColor: { type: reset } })}
+                onClick={() => onConfigUpdate(draft => {
+                    draft.selectedTextColor = undefined;
+                })}
             >
                 リセット
             </Button>

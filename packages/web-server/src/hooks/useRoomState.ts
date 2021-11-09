@@ -16,11 +16,12 @@ import { ApolloError, FetchResult, useApolloClient, useMutation } from '@apollo/
 import { create as createStateManager } from '../stateManagers/main';
 import { useClientId } from './useClientId';
 import { useDispatch } from 'react-redux';
-import { roomModule, Notification } from '../modules/roomModule';
 import { State, StateManager, UpOperation } from '@flocon-trpg/core';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { authNotFound, MyAuthContext, notSignIn } from '../contexts/MyAuthContext';
 import { Room } from '../stateManagers/states/room';
+import { addRoomNotificationAtom, Notification } from '../atoms/room/roomAtom';
+import { useAtom } from 'jotai';
 
 const sampleTime = 3000;
 
@@ -111,6 +112,7 @@ export const useRoomState = (
     // refetchとして単に () => setRefetchKey(refetchKey + 1) をそのまま返す（この値をfとする）と、レンダーのたびにfは変わるため、fをdepsに使用されたときに問題が起こる可能性が高いので、useMemoで軽減。
     const refetch = React.useMemo(() => () => setRefetchKey(refetchKey + 1), [refetchKey]);
     const dispatch = useDispatch();
+    const [, addRoomNotification] = useAtom(addRoomNotificationAtom);
 
     const userUid = typeof myAuth === 'string' ? null : myAuth.uid;
     const myAuthErrorType = typeof myAuth === 'string' ? myAuth : null;
@@ -225,24 +227,20 @@ export const useRoomState = (
                         });
                     } catch (e) {
                         if (e instanceof ApolloError) {
-                            dispatch(
-                                roomModule.actions.addNotification({
-                                    type: Notification.apolloError,
-                                    error: e,
-                                    createdAt: new Date().getTime(),
-                                })
-                            );
+                            addRoomNotification({
+                                type: Notification.apolloError,
+                                error: e,
+                                createdAt: new Date().getTime(),
+                            });
                         } else {
-                            dispatch(
-                                roomModule.actions.addNotification({
-                                    type: Notification.text,
-                                    notification: {
-                                        type: 'error',
-                                        message: 'Unknown error at operateMutation, useRoomState',
-                                        createdAt: new Date().getTime(),
-                                    },
-                                })
-                            );
+                            addRoomNotification({
+                                type: Notification.text,
+                                notification: {
+                                    type: 'error',
+                                    message: 'Unknown error at operateMutation, useRoomState',
+                                    createdAt: new Date().getTime(),
+                                },
+                            });
                         }
                         toPost.onPosted({ isSuccess: null });
                         return;
@@ -272,34 +270,29 @@ export const useRoomState = (
                             onRoomStateManagerUpdate();
                             break;
                         case 'OperateRoomNonJoinedResult':
-                            dispatch(
-                                roomModule.actions.addNotification({
-                                    type: Notification.text,
-                                    notification: {
-                                        type: 'error',
-                                        message:
-                                            '部屋に入室していないため、operateできませんでした。',
-                                        createdAt: new Date().getTime(),
-                                    },
-                                })
-                            );
+                            addRoomNotification({
+                                type: Notification.text,
+                                notification: {
+                                    type: 'error',
+                                    message: '部屋に入室していないため、operateできませんでした。',
+                                    createdAt: new Date().getTime(),
+                                },
+                            });
                             // TODO: 状況によって自動リトライを可能にする。
                             setState({
                                 type: mutationFailure,
                             });
                             break;
                         case 'OperateRoomFailureResult':
-                            dispatch(
-                                roomModule.actions.addNotification({
-                                    type: Notification.text,
-                                    notification: {
-                                        type: 'error',
-                                        message: 'operateで問題が発生しました。',
-                                        description: result.data.result.failureType,
-                                        createdAt: new Date().getTime(),
-                                    },
-                                })
-                            );
+                            addRoomNotification({
+                                type: Notification.text,
+                                notification: {
+                                    type: 'error',
+                                    message: 'operateで問題が発生しました。',
+                                    description: result.data.result.failureType,
+                                    createdAt: new Date().getTime(),
+                                },
+                            });
                             // TODO: 状況によって自動リトライを可能にする。
                             setState({
                                 type: mutationFailure,

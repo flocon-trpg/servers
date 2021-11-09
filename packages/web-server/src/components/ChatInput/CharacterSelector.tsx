@@ -1,16 +1,16 @@
 import React from 'react';
 import { Input, Select } from 'antd';
 import { useMyCharacters } from '../../hooks/state/useMyCharacters';
-import { MessagePanelConfig } from '../../states/MessagePanelConfig';
 import * as Icon from '@ant-design/icons';
-import { UpdateMessagePanelAction } from '../../modules/roomConfigModule';
 import { custom, getSelectedCharacterType, none, some } from './getSelectedCharacterType';
 import classNames from 'classnames';
 import { flex, flexRow, flexNone, itemsCenter } from '../../utils/className';
+import { MessagePanelConfig } from '../../atoms/roomConfig/types/messagePanelConfig';
+import { WritableDraft } from 'immer/dist/internal';
 
 type Props = {
     config: MessagePanelConfig;
-    onConfigUpdate: (newValue: UpdateMessagePanelAction['panel']) => void;
+    onConfigUpdate: (recipe: (draft: WritableDraft<MessagePanelConfig>) => void) => void;
     titleStyle?: React.CSSProperties;
     inputMaxWidth?: number;
 };
@@ -46,7 +46,11 @@ export const CharacterSelector: React.FC<Props> = ({
             <Select
                 style={{ flex: 1, maxWidth: inputMaxWidth }}
                 value={selectedCharacterType}
-                onSelect={newValue => onConfigUpdate({ selectedCharacterType: newValue })}
+                onSelect={newValue =>
+                    onConfigUpdate(draft => {
+                        draft.selectedCharacterType = newValue;
+                    })
+                }
             >
                 <Select.Option value={none}>なし</Select.Option>
                 <Select.Option value={some}>あり</Select.Option>
@@ -65,11 +69,11 @@ export const CharacterSelector: React.FC<Props> = ({
                     placeholder='キャラクター'
                     value={config.selectedCharacterStateId}
                     onSelect={(value, option) => {
-                        if (typeof option.key !== 'string') {
-                            return;
-                        }
-                        onConfigUpdate({
-                            selectedCharacterStateId: option.key,
+                        onConfigUpdate(draft => {
+                            if (typeof option.key !== 'string') {
+                                return;
+                            }
+                            draft.selectedCharacterStateId = option.key;
                         });
                     }}
                 >
@@ -81,7 +85,11 @@ export const CharacterSelector: React.FC<Props> = ({
                     style={{ flex: 1, maxWidth: inputMaxWidth }}
                     placeholder='名前'
                     value={config.customCharacterName}
-                    onChange={e => onConfigUpdate({ customCharacterName: e.target.value })}
+                    onChange={e =>
+                        onConfigUpdate(draft => {
+                            draft.customCharacterName = e.target.value;
+                        })
+                    }
                 />
             )}
             <div style={{ flex: 1 }} />

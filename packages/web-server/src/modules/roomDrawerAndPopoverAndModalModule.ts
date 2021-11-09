@@ -10,7 +10,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { DicePieceValueElement } from '../hooks/state/useDicePieceValues';
 import { ImagePieceValueElement } from '../hooks/state/useImagePieceValues';
 import { StringPieceValueElement } from '../hooks/state/useStringPieceValues';
-import { BoardConfig } from '../states/BoardConfig';
+import { BoardConfig } from '../atoms/roomConfig/types/boardConfig';
 import { Vector2 } from '../utils/types';
 
 export const create = 'create';

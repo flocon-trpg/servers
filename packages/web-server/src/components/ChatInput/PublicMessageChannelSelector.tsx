@@ -1,20 +1,19 @@
 import React from 'react';
 import { Select } from 'antd';
 import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
-import { ChatPalettePanelConfig } from '../../states/ChatPalettePanelConfig';
-import { MessagePanelConfig } from '../../states/MessagePanelConfig';
 import { $free, PublicChannelKey } from '@flocon-trpg/core';
-import {
-    UpdateChatPalettePanelAction,
-    UpdateMessagePanelAction,
-} from '../../modules/roomConfigModule';
 import classNames from 'classnames';
 import { flex, flexNone, flexRow, itemsCenter } from '../../utils/className';
+import { ChatPalettePanelConfig } from '../../atoms/roomConfig/types/chatPalettePanelConfig';
+import { MessagePanelConfig } from '../../atoms/roomConfig/types/messagePanelConfig';
+import { WritableDraft } from 'immer/dist/internal';
 
 type Props = {
     config: ChatPalettePanelConfig | MessagePanelConfig;
     onConfigUpdate: (
-        newValue: UpdateChatPalettePanelAction['panel'] & UpdateMessagePanelAction['panel']
+        recipe: (
+            draft: WritableDraft<ChatPalettePanelConfig> | WritableDraft<MessagePanelConfig>
+        ) => void
     ) => void;
     titleStyle?: React.CSSProperties;
     inputMaxWidth?: number;
@@ -39,7 +38,11 @@ export const PublicMessageChannelSelector: React.FC<Props> = ({
             <Select
                 style={{ flex: 1, maxWidth: inputMaxWidth }}
                 value={selectedPublicChannelKey}
-                onSelect={newValue => onConfigUpdate({ selectedPublicChannelKey: newValue })}
+                onSelect={newValue =>
+                    onConfigUpdate(draft => {
+                        draft.selectedPublicChannelKey = newValue;
+                    })
+                }
             >
                 <Select.Option key={$free} value={$free}>
                     雑談

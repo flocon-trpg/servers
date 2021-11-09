@@ -28,7 +28,7 @@ import { dualKeyRecordToDualKeyMap, keyNames, recordToMap } from '@flocon-trpg/u
 import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../../utils/className';
 import { IconView } from '../../components/IconView';
-import { Notification } from '../../modules/roomModule';
+import { Notification } from '../../atoms/room/roomAtom';
 
 // 改行荒らし対策として、maxHeightを設けている。200pxという値は適当
 export const messageContentMaxHeight = 200;

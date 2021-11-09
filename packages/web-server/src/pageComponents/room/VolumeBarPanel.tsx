@@ -1,21 +1,60 @@
 import classNames from 'classnames';
 import React from 'react';
-import { useDispatch } from 'react-redux';
 import { VolumeBar } from '../../components/VolumeBar';
-import { roomConfigModule } from '../../modules/roomConfigModule';
-import { defaultChannelVolume } from '../../states/RoomConfig';
-import { useSelector } from '../../store';
+import { defaultChannelVolume } from '../../atoms/roomConfig/types/roomConfig/resources';
 import { flex, flexColumn, flexRow, itemsCenter } from '../../utils/className';
+import { atom, useAtom } from 'jotai';
+import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
+import produce from 'immer';
+
+const masterVolumeAtom = atom(
+    get => get(roomConfigAtom)?.masterVolume,
+    (get, set, newValue: number) => {
+        set(roomConfigAtom, roomConfig => {
+            if (roomConfig == null) {
+                return roomConfig;
+            }
+            return produce(roomConfig, roomConfig => {
+                roomConfig.masterVolume = newValue;
+            });
+        });
+    }
+);
+const channelVolumesAtom = atom(
+    get => get(roomConfigAtom)?.channelVolumes,
+    (get, set, action: { channelKey: string; newVolume: number }) => {
+        set(roomConfigAtom, roomConfig => {
+            if (roomConfig == null) {
+                return roomConfig;
+            }
+            return produce(roomConfig, roomConfig => {
+                roomConfig.channelVolumes[action.channelKey] = action.newVolume;
+            });
+        });
+    }
+);
+const seVolumeAtom = atom(
+    get => get(roomConfigAtom)?.seVolume,
+    (get, set, newValue: number) => {
+        set(roomConfigAtom, roomConfig => {
+            if (roomConfig == null) {
+                return roomConfig;
+            }
+            return produce(roomConfig, roomConfig => {
+                roomConfig.seVolume = newValue;
+            });
+        });
+    }
+);
 
 type Props = {
     roomId: string;
 };
 
 export const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
-    const masterVolume = useSelector(state => state.roomConfigModule?.masterVolume);
-    const channelVolumes = useSelector(state => state.roomConfigModule?.channelVolumes);
-    const seVolume = useSelector(state => state.roomConfigModule?.seVolume);
-    const dispatch = useDispatch();
+    const [masterVolume, setMasterVolume] = useAtom(masterVolumeAtom);
+    const [channelVolumes, setChannelVolume] = useAtom(channelVolumesAtom);
+    const [seVolume, setSeVolume] = useAtom(seVolumeAtom);
 
     if (masterVolume == null || channelVolumes == null || seVolume == null) {
         return null;
@@ -36,9 +75,7 @@ export const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
             inputNumberType='0-1'
             readonly={false}
             value={masterVolume}
-            onChange={i =>
-                dispatch(roomConfigModule.actions.setOtherValues({ roomId, masterVolume: i }))
-            }
+            onChange={i => setMasterVolume(i)}
         />
     );
     const channel1VolumeBar = (
@@ -46,15 +83,7 @@ export const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
             inputNumberType='0-1'
             readonly={false}
             value={channelVolumes['1'] ?? defaultChannelVolume}
-            onChange={i =>
-                dispatch(
-                    roomConfigModule.actions.setChannelVolume({
-                        roomId,
-                        channelKey: '1',
-                        volume: i,
-                    })
-                )
-            }
+            onChange={i => setChannelVolume({ channelKey: '1', newVolume: i })}
         />
     );
     const channel2VolumeBar = (
@@ -62,15 +91,7 @@ export const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
             inputNumberType='0-1'
             readonly={false}
             value={channelVolumes['2'] ?? defaultChannelVolume}
-            onChange={i =>
-                dispatch(
-                    roomConfigModule.actions.setChannelVolume({
-                        roomId,
-                        channelKey: '2',
-                        volume: i,
-                    })
-                )
-            }
+            onChange={i => setChannelVolume({ channelKey: '2', newVolume: i })}
         />
     );
     const channel3VolumeBar = (
@@ -78,15 +99,7 @@ export const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
             inputNumberType='0-1'
             readonly={false}
             value={channelVolumes['3'] ?? defaultChannelVolume}
-            onChange={i =>
-                dispatch(
-                    roomConfigModule.actions.setChannelVolume({
-                        roomId,
-                        channelKey: '3',
-                        volume: i,
-                    })
-                )
-            }
+            onChange={i => setChannelVolume({ channelKey: '3', newVolume: i })}
         />
     );
     const channel4VolumeBar = (
@@ -94,15 +107,7 @@ export const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
             inputNumberType='0-1'
             readonly={false}
             value={channelVolumes['4'] ?? defaultChannelVolume}
-            onChange={i =>
-                dispatch(
-                    roomConfigModule.actions.setChannelVolume({
-                        roomId,
-                        channelKey: '4',
-                        volume: i,
-                    })
-                )
-            }
+            onChange={i => setChannelVolume({ channelKey: '4', newVolume: i })}
         />
     );
     const channel5VolumeBar = (
@@ -110,15 +115,7 @@ export const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
             inputNumberType='0-1'
             readonly={false}
             value={channelVolumes['5'] ?? defaultChannelVolume}
-            onChange={i =>
-                dispatch(
-                    roomConfigModule.actions.setChannelVolume({
-                        roomId,
-                        channelKey: '5',
-                        volume: i,
-                    })
-                )
-            }
+            onChange={i => setChannelVolume({ channelKey: '5', newVolume: i })}
         />
     );
     const seVolumeBar = (
@@ -126,9 +123,7 @@ export const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
             inputNumberType='0-1'
             readonly={false}
             value={seVolume}
-            onChange={i =>
-                dispatch(roomConfigModule.actions.setOtherValues({ roomId, seVolume: i }))
-            }
+            onChange={i => setSeVolume(i)}
         />
     );
 

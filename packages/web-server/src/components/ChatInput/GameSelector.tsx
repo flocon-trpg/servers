@@ -1,14 +1,7 @@
 import React from 'react';
 import { Button, Popover, Select } from 'antd';
-import { ChatPalettePanelConfig } from '../../states/ChatPalettePanelConfig';
-import { MessagePanelConfig } from '../../states/MessagePanelConfig';
 import { useDispatch } from 'react-redux';
 import { apolloError } from '../../hooks/useRoomMessages';
-import { roomModule } from '../../modules/roomModule';
-import {
-    UpdateChatPalettePanelAction,
-    UpdateMessagePanelAction,
-} from '../../modules/roomConfigModule';
 import classNames from 'classnames';
 import { flex, flexNone, flexRow, itemsCenter } from '../../utils/className';
 import * as Icons from '@ant-design/icons';
@@ -18,6 +11,12 @@ import {
     GetDiceHelpMessagesDocument,
 } from '@flocon-trpg/typed-document-node';
 import { useQuery } from '@apollo/client';
+import { ChatPalettePanelConfig } from '../../atoms/roomConfig/types/chatPalettePanelConfig';
+import { MessagePanelConfig } from '../../atoms/roomConfig/types/messagePanelConfig';
+import { useAtom } from 'jotai';
+import { addRoomNotificationAtom } from '../../atoms/room/roomAtom';
+import produce from 'immer';
+import { WritableDraft } from 'immer/dist/internal';
 
 type HelpMessageProps = {
     gameSystemId: string;
@@ -49,7 +48,7 @@ const HelpMessage = ({ gameSystemId }: HelpMessageProps) => {
 type Props = {
     config: ChatPalettePanelConfig | MessagePanelConfig;
     onConfigUpdate: (
-        newValue: UpdateChatPalettePanelAction['panel'] & UpdateMessagePanelAction['panel']
+        recipe: (draft: WritableDraft<ChatPalettePanelConfig> | WritableDraft<MessagePanelConfig>) => void
     ) => void;
     titleStyle?: React.CSSProperties;
     inputMaxWidth?: number;
@@ -61,21 +60,19 @@ export const GameSelector: React.FC<Props> = ({
     config,
     onConfigUpdate,
 }: Props) => {
-    const dispatch = useDispatch();
+    const [, addRoomNotification] = useAtom(addRoomNotificationAtom);
 
     const availableGameSystems = useQuery(GetAvailableGameSystemsDocument);
     React.useEffect(() => {
         if (availableGameSystems.error == null) {
             return;
         }
-        dispatch(
-            roomModule.actions.addNotification({
+        addRoomNotification({
                 type: apolloError,
                 error: availableGameSystems.error,
                 createdAt: new Date().getTime(),
-            })
-        );
-    }, [availableGameSystems.error, dispatch]);
+        })
+    }, [addRoomNotification, availableGameSystems.error]);
 
     return (
         <div className={classNames(flexNone, flex, flexRow, itemsCenter)}>
@@ -86,10 +83,12 @@ export const GameSelector: React.FC<Props> = ({
                 showSearch
                 value={config.selectedGameSystem}
                 onSelect={(value, option) => {
-                    if (typeof option.key !== 'string') {
+                    onConfigUpdate(state => {
+                        if (typeof option.key !== 'string') {
                         return;
                     }
-                    onConfigUpdate({ selectedGameSystem: option.key });
+                        state.selectedGameSystem = option.key
+                    })
                 }}
                 filterOption={(input, option) => {
                     const value: unknown = option?.value;
