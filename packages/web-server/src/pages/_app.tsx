@@ -31,9 +31,11 @@ import { useAtom } from 'jotai';
 import { userConfigAtom } from '../atoms/userConfig/userConfigAtom';
 import { addRoomNotificationAtom, Notification } from '../atoms/room/roomAtom';
 import { writeonlyAtom } from '../atoms/writeonlyAtom';
-import { useAsync,useThrottle } from 'react-use';
+import { useAsync,useDebounce } from 'react-use';
 import { roomConfigAtom } from '../atoms/roomConfig/roomConfigAtom';
 import { setRoomConfig } from '../utils/localStorage/roomConfig';
+import { UserConfig } from '../atoms/userConfig/types';
+import { RoomConfig } from '../atoms/roomConfig/types/roomConfig';
 
 enableMapSet();
 
@@ -70,32 +72,44 @@ const useUserConfig = (userUid: string | null): void => {
 const useAutoSaveUserConfig = () => {
     const throttleTimespan = 500;
     const [userConfig] = useAtom(userConfigAtom);
-    const throttledUserConfig = useThrottle(userConfig, throttleTimespan);
+
+    // throttleでは非常に重くなるため、debounceを使っている
+    const [debouncedUserConfig, setDebouncedUserConfig] = React.useState<UserConfig | null>(null);
+    useDebounce(() => {
+        setDebouncedUserConfig(userConfig);
+    }, throttleTimespan, [userConfig]);
+
     useAsync(async () => {
-        if (throttledUserConfig == null) {
+        if (debouncedUserConfig == null) {
             return;
         }
 
         // localForageから値を読み込んだ直後は常に値の書き込みが1回発生する仕様となっている。これはこれはほとんどのケースで無意味な処理だが、シンプルなコードを優先している。
         // CONSIDER: configをユーザーが更新した直後にすぐブラウザを閉じると、閉じる直前のconfigが保存されないケースがある。余裕があれば直したい（閉じるときに強制保存orダイアログを出すなど）。
-        await setUserConfig(throttledUserConfig);
-    }, [throttledUserConfig]);
+        await setUserConfig(debouncedUserConfig);
+    }, [debouncedUserConfig]);
 };
 
 // _app.tsxで1回のみ呼ばれることを想定。
 const useAutoSaveRoomConfig = () => {
     const throttleTimespan = 500;
     const [roomConfig] = useAtom(roomConfigAtom);
-    const throttledRoomConfig = useThrottle(roomConfig, throttleTimespan);
+
+    // throttleでは非常に重くなるため、debounceを使っている
+    const [debouncedUserConfig, setDebouncedUserConfig] = React.useState<RoomConfig | null>(null);
+    useDebounce(() => {
+        setDebouncedUserConfig(roomConfig);
+    }, throttleTimespan, [roomConfig]);
+
     useAsync(async () => {
-        if (throttledRoomConfig == null) {
+        if (debouncedUserConfig == null) {
             return;
         }
 
         // localForageから値を読み込んだ直後は常に値の書き込みが1回発生する仕様となっている。RoomConfigの場合はUserConfigと比べて、不正な値が自動的されることがあるため、この仕様はより正当化される。
         // CONSIDER: configをユーザーが更新した直後にすぐブラウザを閉じると、閉じる直前のconfigが保存されないケースがある。余裕があれば直したい（閉じるときに強制保存orダイアログを出すなど）。
-        await setRoomConfig(throttledRoomConfig);
-    }, [throttledRoomConfig]);
+        await setRoomConfig(debouncedUserConfig);
+    }, [debouncedUserConfig]);
 };
 
 // _app.tsxで1回のみ呼ばれることを想定。firebase authのデータを取得したい場合はContextで行う。
