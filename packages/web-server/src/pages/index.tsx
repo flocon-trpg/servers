@@ -137,7 +137,7 @@ const Index: React.FC = () => {
                 </ul>
                 <div style={{ height: spacing }} />
                 <Typography.Title level={3}>バージョン情報</Typography.Title>
-                <div>{`クライアント: ${(VERSION}`}</div>
+                <div>{`クライアント: ${VERSION}`}</div>
                 <div>
                     APIサーバー:{' '}
                     {loading ? (
