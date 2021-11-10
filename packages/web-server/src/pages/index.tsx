@@ -58,20 +58,16 @@ const Index: React.FC = () => {
     } else {
         const supportedApiServersAsString =
             SupportedApiServers.reduce((seed, elem, i) => {
+                // Node.jsとはpreleaseの比較方法が異なるため、"^x.y.z" という（おそらく）Node.js特有の表記方法は混乱を招くと思い使っていない。 
+
                 if (i === 0) {
-                    return `${seed}">=${elem.toString()}"`;
+                    return `${seed}">=${elem.toString()} <${elem.major + 1}.*"`;
                 }
-                return `${seed}, ">=${elem.toString()}"`;
-            }, '[') + ']';
-        let alert: JSX.Element;
+                return `${seed}, ">=${elem.toString()} <${elem.major + 1}.*"`;
+            }, '[ ') + ' ]';
+        let alert: JSX.Element | null;
         if (apiServerSatisfies({ actual: apiServerSemVer, expected: SupportedApiServers })) {
-            alert = (
-                <Alert
-                    type='success'
-                    showIcon
-                    message='利用しているAPIサーバーのバージョンに対応したクライアントが使われています。'
-                />
-            );
+            alert = null;
         } else {
             alert = (
                 <Alert
@@ -87,10 +83,9 @@ const Index: React.FC = () => {
                 <Collapse ghost>
                     <Collapse.Panel header='APIサーバー詳細' key='version-info-detais-panel'>
                         <div className={classNames(flex, flexColumn)}>
-                            <div>{`expected: ${supportedApiServersAsString}, actual: "${apiServerSemVer.toString()}"`}</div>
+                            <div>{`actual: "${apiServerSemVer.toString()}", supported: ${supportedApiServersAsString}`}</div>
                             <div>
-                                ※
-                                prereleaseの比較は、npmのSemVer比較と異なった方法を採用しています
+                                ※ prereleaseの比較は、Node.jsにおけるSemVerとは異なった方法を採用しています
                             </div>
                         </div>
                     </Collapse.Panel>

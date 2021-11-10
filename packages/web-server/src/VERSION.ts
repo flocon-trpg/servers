@@ -30,7 +30,10 @@ export const apiServerSatisfies = ({
     actual: SemVer;
 }): boolean => {
     for (const expectedElement of expected) {
-        if (SemVer.compare(expectedElement, '<=', actual)) {
+        if (
+            expectedElement.major === actual.major &&
+            SemVer.compare(expectedElement, '<=', actual)
+        ) {
             return true;
         }
     }
