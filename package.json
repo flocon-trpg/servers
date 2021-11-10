@@ -6,7 +6,7 @@
     "scripts": {
         "postinstall": "husky install",
         "build": "yarn workspaces foreach -pt run build",
-        "build-dist": "yarn workspaces foreach -pt run build-dist",
+        "dist": "yarn workspaces foreach -pt run dist",
         "lint": "eslint \"packages/**/*.{ts,tsx}\"",
         "prettier": "yarn prettier:base --write",
         "prettier:base": "prettier \"**/*.{ts,js,json,yml,md}\""

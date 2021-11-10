@@ -28,13 +28,13 @@ jobs:
                   node-version: ${{ matrix.node }}
                   cache: yarn
 
-            # Installing "devDependencies" cannot be skipped to run build-dist because "dependencies" does not have typescript.
+            # Installing "devDependencies" cannot be skipped to run dist because "dependencies" does not have typescript.
             # Given npm publish, "dependencies" should not have typescript.
             - run: yarn install
               working-directory: '.'
 
             - name: Prepare other packages
-              run: yarn build-dist
+              run: yarn dist
               working-directory: '.'
 
             - name: Build (as type checking)
