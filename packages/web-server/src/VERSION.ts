@@ -1,5 +1,6 @@
 import { beta, SemVer } from '@flocon-trpg/utils';
 import * as packageJson from '../package.json';
+import { SemVerRange } from './versioning/semVerRange';
 
 /* セキュリティ向上を目的としたversionの非表示はしていない。理由は下のとおり。
 - バージョン情報がなくとも、各種ファイルを解析するなどによりバージョンの推定はおそらく可能。
@@ -9,33 +10,18 @@ import * as packageJson from '../package.json';
 */
 export const VERSION = packageJson.version;
 
-// 例えば >=1.2.0 と >=3.0.0 の両方に対応可能なケースも考えられるため、配列を用いている。
-export const SupportedApiServers: ReadonlyArray<SemVer> = [
-    new SemVer({
-        major: 0,
-        minor: 1,
-        patch: 0,
-        prerelease: {
-            type: beta,
-            version: 1,
-        },
-    }),
+// 例えば ~1.2.0 と ~3.0.0 の両方に対応可能なケースも考えられるため、配列を用いている。
+export const SupportedApiServers: ReadonlyArray<SemVerRange> = [
+    {
+        min: new SemVer({
+            major: 0,
+            minor: 1,
+            patch: 0,
+            prerelease: {
+                type: beta,
+                version: 1,
+            },
+        }),
+        range: { type: '~' },
+    },
 ];
-
-export const apiServerSatisfies = ({
-    expected,
-    actual,
-}: {
-    expected: ReadonlyArray<SemVer>;
-    actual: SemVer;
-}): boolean => {
-    for (const expectedElement of expected) {
-        if (
-            expectedElement.major === actual.major &&
-            SemVer.compare(expectedElement, '<=', actual)
-        ) {
-            return true;
-        }
-    }
-    return false;
-};

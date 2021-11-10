@@ -6,13 +6,15 @@ import { QueryResultViewer } from '../components/QueryResultViewer';
 import { GetServerInfoDocument, PrereleaseType } from '@flocon-trpg/typed-document-node';
 import { Layout } from '../layouts/Layout';
 import { FilesManagerDrawerType, none } from '../utils/types';
-import { apiServerSatisfies, SupportedApiServers, VERSION } from '../VERSION';
+import { SupportedApiServers, VERSION } from '../VERSION';
 import * as Icon from '@ant-design/icons';
 import { alpha, beta, rc, SemVer } from '@flocon-trpg/utils';
 import { useRouter } from 'next/router';
 import classNames from 'classnames';
 import { flex, flexColumn } from '../utils/className';
 import { useQuery } from '@apollo/client';
+import { apiServerSatisfies } from '../versioning/apiServerSatisfies';
+import { semVerRangeToString } from '../versioning/semVerRange';
 
 const Index: React.FC = () => {
     const [drawerType, setDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
@@ -58,12 +60,12 @@ const Index: React.FC = () => {
     } else {
         const supportedApiServersAsString =
             SupportedApiServers.reduce((seed, elem, i) => {
-                // Node.jsとはpreleaseの比較方法が異なるため、"^x.y.z" という（おそらく）Node.js特有の表記方法は混乱を招くと思い使っていない。 
+                // Node.jsとはpreleaseの比較方法が異なるため、"^x.y.z" という（おそらく）Node.js特有の表記方法は混乱を招くと思い使っていない。
 
                 if (i === 0) {
-                    return `${seed}">=${elem.toString()} <${elem.major + 1}.*"`;
+                    return `${seed}"${semVerRangeToString(elem)}"`;
                 }
-                return `${seed}, ">=${elem.toString()} <${elem.major + 1}.*"`;
+                return `${seed}, "${semVerRangeToString(elem)}"`;
             }, '[ ') + ' ]';
         let alert: JSX.Element | null;
         if (apiServerSatisfies({ actual: apiServerSemVer, expected: SupportedApiServers })) {
@@ -85,7 +87,8 @@ const Index: React.FC = () => {
                         <div className={classNames(flex, flexColumn)}>
                             <div>{`actual: "${apiServerSemVer.toString()}", supported: ${supportedApiServersAsString}`}</div>
                             <div>
-                                ※ prereleaseの比較は、Node.jsにおけるSemVerとは異なった方法を採用しています
+                                ※
+                                prereleaseの比較は、Node.jsにおけるSemVerとは異なった方法を採用しています
                             </div>
                         </div>
                     </Collapse.Panel>
