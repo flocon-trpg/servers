@@ -205,6 +205,7 @@ export namespace RoomConfigUtils {
                 state.y -= actionDelta.height;
                 break;
         }
+        fixPosition(state);
     };
 
     export const zoomBoard = (state: RoomConfig, action: ZoomBoardAction): void => {
