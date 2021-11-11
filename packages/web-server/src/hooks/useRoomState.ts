@@ -15,7 +15,6 @@ import * as Rx from 'rxjs/operators';
 import { ApolloError, FetchResult, useApolloClient, useMutation } from '@apollo/client';
 import { create as createStateManager } from '../stateManagers/main';
 import { useClientId } from './useClientId';
-import { useDispatch } from 'react-redux';
 import { State, StateManager, UpOperation } from '@flocon-trpg/core';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { authNotFound, MyAuthContext, notSignIn } from '../contexts/MyAuthContext';
@@ -111,7 +110,6 @@ export const useRoomState = (
     const [refetchKey, setRefetchKey] = React.useState(0);
     // refetchとして単に () => setRefetchKey(refetchKey + 1) をそのまま返す（この値をfとする）と、レンダーのたびにfは変わるため、fをdepsに使用されたときに問題が起こる可能性が高いので、useMemoで軽減。
     const refetch = React.useMemo(() => () => setRefetchKey(refetchKey + 1), [refetchKey]);
-    const dispatch = useDispatch();
     const [, addRoomNotification] = useAtom(addRoomNotificationAtom);
 
     const userUid = typeof myAuth === 'string' ? null : myAuth.uid;
@@ -421,7 +419,7 @@ export const useRoomState = (
         userUid,
         myAuthErrorType,
         operateMutation,
-        dispatch,
+        addRoomNotification,
         clientId,
         roomEventSubscription,
         hasIdToken,
