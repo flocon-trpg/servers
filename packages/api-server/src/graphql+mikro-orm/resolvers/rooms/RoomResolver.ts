@@ -151,7 +151,12 @@ import {
     $system,
     MaxLength100String,
 } from '@flocon-trpg/core';
-import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
+import {
+    ApplyError,
+    ComposeAndTransformError,
+    NonEmptyString,
+    PositiveInt,
+} from '@kizahasi/ot-string';
 import { ParticipantRole as ParticipantRoleEnum } from '../../../enums/ParticipantRole';
 import { ENTRY } from '../../../roles';
 import { ParticipantRoleType } from '../../../enums/ParticipantRoleType';
@@ -1464,7 +1469,14 @@ export class RoomResolver {
         // Spectatorであっても自分の名前などはoperateで変更する必要があるため、Spectatorならば無条件で弾くという手法は使えない
 
         const queue = async (): Promise<
-            Result<OperateCoreResult, string | ApplyError<PositiveInt> | ComposeAndTransformError>
+            Result<
+                OperateCoreResult,
+                | string
+                | ApplyError<PositiveInt>
+                | ComposeAndTransformError<NonEmptyString, PositiveInt>
+                | ComposeAndTransformError<PositiveInt, NonEmptyString>
+                | ComposeAndTransformError<NonEmptyString, NonEmptyString>
+            >
         > => {
             const em = context.em;
             const authorizedUserUid = ensureAuthorizedUser(context).userUid;
