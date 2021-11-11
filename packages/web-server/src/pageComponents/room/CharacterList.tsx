@@ -42,8 +42,7 @@ import { SortOrder } from 'antd/lib/table/interface';
 import { IconView } from '../../components/IconView';
 import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 import { getUserUid, MyAuthContext } from '../../contexts/MyAuthContext';
-import { useOperateAsState } from '../../hooks/useOperateAsState';
-import produce from 'immer';
+import { useOperateAsStateWithImmer } from '../../hooks/useOperateAsStateWithImmer';
 
 type DataSource = {
     key: string;
@@ -203,7 +202,7 @@ export const CharacterList: React.FC = () => {
     const myAuth = React.useContext(MyAuthContext);
     const dispatch = useDispatch();
     const operate = useOperate();
-    const operateAsState = useOperateAsState();
+    const operateAsStateWithImmer = useOperateAsStateWithImmer();
 
     const characters = useCharacters();
     const participants = useParticipants();
@@ -312,17 +311,16 @@ export const CharacterList: React.FC = () => {
                         value={character.state.name}
                         size='small'
                         onChange={newValue => {
-                            operateAsState(state =>
-                                produce(state, state => {
-                                    const targetCharacter =
-                                        state.participants[character.stateKey.createdBy]
-                                            ?.characters[character.stateKey.id];
-                                    if (targetCharacter == null) {
-                                        return;
-                                    }
-                                    targetCharacter.name = newValue.target.value;
-                                })
-                            );
+                            operateAsStateWithImmer(state => {
+                                const targetCharacter =
+                                    state.participants[character.stateKey.createdBy]?.characters[
+                                        character.stateKey.id
+                                    ];
+                                if (targetCharacter == null) {
+                                    return;
+                                }
+                                targetCharacter.name = newValue.target.value;
+                            });
                         }}
                     />
                 </div>

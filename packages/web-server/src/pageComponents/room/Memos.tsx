@@ -18,8 +18,7 @@ import classNames from 'classnames';
 import { cancelRnd, flex, flex1, flexColumn, flexRow, itemsCenter } from '../../utils/className';
 import _ from 'lodash';
 import moment from 'moment';
-import { useOperateAsState } from '../../hooks/useOperateAsState';
-import produce from 'immer';
+import { useOperateAsStateWithImmer } from '../../hooks/useOperateAsStateWithImmer';
 
 const padding = 4;
 const splitterPadding = 8;
@@ -294,7 +293,7 @@ type MemoProps = {
 
 const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
     const operate = useOperate();
-    const operateAsState = useOperateAsState();
+    const operateAsStateWithImmer = useOperateAsStateWithImmer();
 
     if (memoId == null) {
         return <div style={{ padding }}>表示するメモが指定されていません。</div>;
@@ -321,13 +320,11 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
                     bufferDuration='default'
                     value={memo.name}
                     onChange={e =>
-                        operateAsState(prevState => {
-                            return produce(prevState, prevState => {
-                                const memo = prevState.memos[memoId];
-                                if (memo != null) {
-                                    memo.name = e.currentValue;
-                                }
-                            });
+                        operateAsStateWithImmer(prevState => {
+                            const memo = prevState.memos[memoId];
+                            if (memo != null) {
+                                memo.name = e.currentValue;
+                            }
                         })
                     }
                 />

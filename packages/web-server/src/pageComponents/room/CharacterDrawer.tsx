@@ -53,7 +53,7 @@ import { BufferedTextArea } from '../../components/BufferedTextArea';
 import { FilePath } from '../../utils/filePath';
 import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 import { characterReplaceOperation } from '../../utils/characterReplaceOperation';
-import { useOperateAsState } from '../../hooks/useOperateAsState';
+import { useOperateAsStateWithImmer } from '../../hooks/useOperateAsStateWithImmer';
 import produce from 'immer';
 
 const notFound = 'notFound';
@@ -94,7 +94,7 @@ export const CharacterDrawer: React.FC = () => {
     );
     const dispatch = useDispatch();
     const operate = useOperate();
-    const operateAsState = useOperateAsState();
+    const operateAsStateWithImmer = useOperateAsStateWithImmer();
     const characters = useCharacters();
     const boolParamNames = useBoolParamNames();
     const numParamNames = useNumParamNames();
@@ -182,8 +182,7 @@ export const CharacterDrawer: React.FC = () => {
                 return;
             }
             case update: {
-                operateAsState(prevRoom => {
-                    return produce(prevRoom, prevRoom => {
+                operateAsStateWithImmer(prevRoom => {
                         const character =
                             prevRoom.participants[drawerType.stateKey.createdBy]?.characters?.[
                                 drawerType.stateKey.id
@@ -192,7 +191,6 @@ export const CharacterDrawer: React.FC = () => {
                             return;
                         }
                         recipe(character);
-                    });
                 });
                 return;
             }

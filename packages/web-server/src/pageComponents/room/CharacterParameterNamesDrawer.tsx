@@ -13,8 +13,7 @@ import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndP
 import { InputModal } from '../../components/InputModal';
 import classNames from 'classnames';
 import { flex, flexRow } from '../../utils/className';
-import { useOperateAsState } from '../../hooks/useOperateAsState';
-import produce from 'immer';
+import { useOperateAsStateWithImmer } from '../../hooks/useOperateAsStateWithImmer';
 import { roomAtom } from '../../atoms/room/roomAtom';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
 
@@ -28,15 +27,18 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
         state => state.roomDrawerAndPopoverAndModalModule.characterParameterNamesDrawerVisibility
     );
     const operate = useOperate();
-    const operateAsState = useOperateAsState();
+    const operateAsStateWithImmer = useOperateAsStateWithImmer();
     const dispatch = useDispatch();
     const [visibleParameterForm, setVisibleParameterForm] = React.useState<VisibleParameterForm>();
     const [addNumParamSelector, setAddNumParamSelector] = React.useState<StrIndex20>();
     const [addBoolParamSelector, setAddBoolParamSelector] = React.useState<StrIndex20>();
     const [addStrParamSelector, setAddStrParamSelector] = React.useState<StrIndex20>();
-    const boolParamNames = useAtomSelector(roomAtom,state => state.roomState?.state?.boolParamNames);
-    const numParamNames = useAtomSelector(roomAtom,state => state.roomState?.state?.numParamNames);
-    const strParamNames = useAtomSelector(roomAtom,state => state.roomState?.state?.strParamNames);
+    const boolParamNames = useAtomSelector(
+        roomAtom,
+        state => state.roomState?.state?.boolParamNames
+    );
+    const numParamNames = useAtomSelector(roomAtom, state => state.roomState?.state?.numParamNames);
+    const strParamNames = useAtomSelector(roomAtom, state => state.roomState?.state?.strParamNames);
 
     const boolParamNamesMap = React.useMemo(
         () => (boolParamNames == null ? undefined : recordToMap(boolParamNames)),
@@ -97,15 +99,13 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
                             if (e.previousValue === e.currentValue) {
                                 return;
                             }
-                            operateAsState(state =>
-                                produce(state, state => {
-                                    const targetNumParamName = state.numParamNames[key];
-                                    if (targetNumParamName == null) {
-                                        return;
-                                    }
-                                    targetNumParamName.name = e.currentValue;
-                                })
-                            );
+                            operateAsStateWithImmer(state => {
+                                const targetNumParamName = state.numParamNames[key];
+                                if (targetNumParamName == null) {
+                                    return;
+                                }
+                                targetNumParamName.name = e.currentValue;
+                            });
                         }}
                     />
                     <Button
@@ -154,15 +154,13 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
                             if (e.previousValue === e.currentValue) {
                                 return;
                             }
-                            operateAsState(state =>
-                                produce(state, state => {
-                                    const targetBoolParamName = state.boolParamNames[key];
-                                    if (targetBoolParamName == null) {
-                                        return;
-                                    }
-                                    targetBoolParamName.name = e.currentValue;
-                                })
-                            );
+                            operateAsStateWithImmer(state => {
+                                const targetBoolParamName = state.boolParamNames[key];
+                                if (targetBoolParamName == null) {
+                                    return;
+                                }
+                                targetBoolParamName.name = e.currentValue;
+                            });
                         }}
                     />
                     <Button
@@ -211,15 +209,13 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
                             if (e.previousValue === e.currentValue) {
                                 return;
                             }
-                            operateAsState(state =>
-                                produce(state, state => {
-                                    const targetStrParamName = state.strParamNames[key];
-                                    if (targetStrParamName == null) {
-                                        return;
-                                    }
-                                    targetStrParamName.name = e.currentValue;
-                                })
-                            );
+                            operateAsStateWithImmer(state => {
+                                const targetStrParamName = state.strParamNames[key];
+                                if (targetStrParamName == null) {
+                                    return;
+                                }
+                                targetStrParamName.name = e.currentValue;
+                            });
                         }}
                     />
                     <Button
