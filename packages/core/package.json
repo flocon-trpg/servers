@@ -34,7 +34,7 @@
         "@flocon-trpg/flocon-script": "workspace:^",
         "@flocon-trpg/utils": "workspace:^",
         "@kizahasi/option": "^1.0.0",
-        "@kizahasi/ot-string": "^0.2.3",
+        "@kizahasi/ot-string": "^0.3.0",
         "@kizahasi/result": "^1.0.1",
         "@ltd/j-toml": "^1.23.0",
         "fp-ts": "^2.11.5",
