@@ -8,13 +8,16 @@ import {
     ClientTransform,
     Compose,
     Diff,
+    DownError,
     RequestedBy,
     Restore,
+    ScalarError,
     ServerTransform,
+    TwoWayError,
+    UpError,
 } from '../../../../util/type';
 import { isIdRecord } from '../../../../util/record';
 import { Result } from '@kizahasi/result';
-import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
 import { chooseRecord, CompositeKey } from '@flocon-trpg/utils';
 import * as RecordOperation from '../../../../util/recordOperation';
 import {
@@ -46,17 +49,15 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
 export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, operation }) => {
     const result: State = { ...state };
 
-    const dice = RecordOperation.apply<
-        DieValueTypes.State,
-        DieValueTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
-        prevState: state.dice,
-        operation: operation.dice,
-        innerApply: ({ prevState, operation: upOperation }) => {
-            return DieValue.apply({ state: prevState, operation: upOperation });
-        },
-    });
+    const dice = RecordOperation.apply<DieValueTypes.State, DieValueTypes.UpOperation, ScalarError>(
+        {
+            prevState: state.dice,
+            operation: operation.dice,
+            innerApply: ({ prevState, operation: upOperation }) => {
+                return DieValue.apply({ state: prevState, operation: upOperation });
+            },
+        }
+    );
     if (dice.isError) {
         return dice;
     }
@@ -65,7 +66,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     const pieces = DualKeyRecordOperation.apply<
         PieceTypes.State,
         PieceTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         prevState: state.pieces,
         operation: operation.pieces,
@@ -87,7 +88,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     const dice = RecordOperation.applyBack<
         DieValueTypes.State,
         DieValueTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: state.dice,
         operation: operation.dice,
@@ -103,7 +104,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     const pieces = DualKeyRecordOperation.applyBack<
         PieceTypes.State,
         PieceTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: state.pieces,
         operation: operation.pieces,
@@ -119,11 +120,11 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     return Result.ok(result);
 };
 
-export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
+export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
     const dice = RecordOperation.composeDownOperation<
         DieValueTypes.State,
         DieValueTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        DownError
     >({
         first: first.dice,
         second: second.dice,
@@ -139,7 +140,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     const pieces = DualKeyRecordOperation.composeDownOperation<
         PieceTypes.State,
         PieceTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        DownError
     >({
         first: first.pieces,
         second: second.pieces,
@@ -173,7 +174,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         DieValueTypes.State,
         DieValueTypes.DownOperation,
         DieValueTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: nextState.dice,
         downOperation: downOperation.dice,
@@ -188,7 +189,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         PieceTypes.State,
         PieceTypes.DownOperation,
         PieceTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: nextState.pieces,
         downOperation: downOperation.pieces,
@@ -250,7 +251,7 @@ export const serverTransform =
             DieValueTypes.State,
             DieValueTypes.TwoWayOperation,
             DieValueTypes.UpOperation,
-            string | ApplyError<PositiveInt> | ComposeAndTransformError
+            TwoWayError
         >({
             prevState: prevState.dice,
             nextState: currentState.dice,
@@ -280,7 +281,7 @@ export const serverTransform =
             PieceTypes.State,
             PieceTypes.TwoWayOperation,
             PieceTypes.UpOperation,
-            string | ApplyError<PositiveInt> | ComposeAndTransformError
+            TwoWayError
         >({
             prevState: prevState.pieces,
             nextState: currentState.pieces,
@@ -322,7 +323,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     const dice = RecordOperation.clientTransform<
         DieValueTypes.State,
         DieValueTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        UpError
     >({
         first: first.dice,
         second: second.dice,
@@ -336,7 +337,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     const pieces = DualKeyRecordOperation.clientTransform<
         PieceTypes.State,
         PieceTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        UpError
     >({
         first: first.pieces,
         second: second.pieces,

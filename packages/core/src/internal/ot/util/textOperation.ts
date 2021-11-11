@@ -82,7 +82,13 @@ export const applyBack = (state: string, action: DownOperation) => {
 export const composeUpOperation = (
     first: UpOperation | undefined,
     second: UpOperation | undefined
-): Result<UpOperation | undefined, TextOperationCore.ComposeAndTransformError> => {
+): Result<
+    UpOperation | undefined,
+    TextOperationCore.ComposeAndTransformError<
+        TextOperationCore.NonEmptyString,
+        TextOperationCore.PositiveInt
+    >
+> => {
     const first$ = first == null ? undefined : TextOperationCore.TextUpOperation.ofUnit(first);
     const second$ = second == null ? undefined : TextOperationCore.TextUpOperation.ofUnit(second);
     if (first$ == null) {
@@ -104,7 +110,13 @@ export const composeUpOperation = (
 export const composeDownOperation = (
     first: DownOperation | undefined,
     second: DownOperation | undefined
-): Result<DownOperation | undefined, TextOperationCore.ComposeAndTransformError> => {
+): Result<
+    DownOperation | undefined,
+    TextOperationCore.ComposeAndTransformError<
+        TextOperationCore.PositiveInt,
+        TextOperationCore.NonEmptyString
+    >
+> => {
     const first$ = first == null ? undefined : TextOperationCore.TextDownOperation.ofUnit(first);
     const second$ = second == null ? undefined : TextOperationCore.TextDownOperation.ofUnit(second);
     if (first$ == null) {

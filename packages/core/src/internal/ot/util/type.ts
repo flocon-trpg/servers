@@ -1,14 +1,31 @@
-import { ApplyError, PositiveInt, ComposeAndTransformError } from '@kizahasi/ot-string';
+import {
+    ApplyError,
+    PositiveInt,
+    ComposeAndTransformError,
+    NonEmptyString,
+} from '@kizahasi/ot-string';
 import { Result } from '@kizahasi/result';
 
-type Error = string | ApplyError<PositiveInt> | ComposeAndTransformError;
+export type ScalarError = string | ApplyError<PositiveInt>;
+export type UpError =
+    | string
+    | ApplyError<PositiveInt>
+    | ComposeAndTransformError<NonEmptyString, PositiveInt>;
+export type DownError =
+    | string
+    | ApplyError<PositiveInt>
+    | ComposeAndTransformError<PositiveInt, NonEmptyString>;
+export type TwoWayError =
+    | string
+    | ApplyError<PositiveInt>
+    | ComposeAndTransformError<NonEmptyString, NonEmptyString>;
 
 export type Apply<TState, TOperation> = (params: {
     state: TState;
     operation: TOperation;
-}) => Result<TState, Error>;
+}) => Result<TState, ScalarError>;
 
-export type Compose<TOperation> = (params: {
+export type Compose<TOperation, Error> = (params: {
     first: TOperation;
     second: TOperation;
 }) => Result<TOperation | undefined, Error>;
@@ -26,7 +43,7 @@ export type Restore<TState, TDownOperation, TTwoWayOperation> = (params: {
         prevState: TState;
         twoWayOperation: TTwoWayOperation | undefined;
     },
-    Error
+    ScalarError
 >;
 
 export type ServerTransform<TServerState, TTwoWayOperation, TUpOperation> = (params: {
@@ -34,12 +51,12 @@ export type ServerTransform<TServerState, TTwoWayOperation, TUpOperation> = (par
     currentState: TServerState;
     serverOperation: TTwoWayOperation | undefined;
     clientOperation: TUpOperation;
-}) => Result<TTwoWayOperation | undefined, Error>;
+}) => Result<TTwoWayOperation | undefined, TwoWayError>;
 
 export type ClientTransform<TOperation> = (params: {
     first: TOperation;
     second: TOperation;
-}) => Result<{ firstPrime: TOperation | undefined; secondPrime: TOperation | undefined }, Error>;
+}) => Result<{ firstPrime: TOperation | undefined; secondPrime: TOperation | undefined }, UpError>;
 
 // Ensure this:
 // - diff(prevState) = nextState

@@ -17,9 +17,13 @@ import {
     ClientTransform,
     Compose,
     Diff,
+    DownError,
     RequestedBy,
     Restore,
+    ScalarError,
     ServerTransform,
+    TwoWayError,
+    UpError,
 } from '../../../util/type';
 import * as BoolParamTypes from './boolParam/types';
 import * as Command from './command/functions';
@@ -30,7 +34,6 @@ import * as StrParamType from './strParam/types';
 import * as SimpleValueParam from './simpleValueParam/functions';
 import { isIdRecord } from '../../../util/record';
 import { Result } from '@kizahasi/result';
-import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
 import { chooseDualKeyRecord, chooseRecord, CompositeKey } from '@flocon-trpg/utils';
 import { Maybe } from '../../../../maybe';
 import { isBoardVisible } from '../../../util/isBoardVisible';
@@ -357,7 +360,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     const boolParams = ParamRecordOperation.apply<
         BoolParamTypes.State,
         BoolParamTypes.UpOperation | BoolParamTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         prevState: state.boolParams,
         operation: operation.boolParams,
@@ -377,7 +380,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     const numParams = ParamRecordOperation.apply<
         NumParamTypes.State,
         NumParamTypes.UpOperation | NumParamTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         prevState: state.numParams,
         operation: operation.numParams,
@@ -397,7 +400,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     const numMaxParams = ParamRecordOperation.apply<
         NumParamTypes.State,
         NumParamTypes.UpOperation | NumParamTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         prevState: state.numMaxParams,
         operation: operation.numMaxParams,
@@ -417,7 +420,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     const strParams = ParamRecordOperation.apply<
         StrParamType.State,
         StrParamType.UpOperation | StrParamType.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         prevState: state.strParams,
         operation: operation.strParams,
@@ -434,7 +437,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     const pieces = DualKeyRecordOperation.apply<
         PieceTypes.State,
         PieceTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         prevState: state.pieces,
         operation: operation.pieces,
@@ -450,7 +453,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     const privateCommandsResult = RecordOperation.apply<
         CommandTypes.State,
         CommandTypes.UpOperation | CommandTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         prevState: state.privateCommands,
         operation: operation.privateCommands,
@@ -466,7 +469,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     const tachieLocations = DualKeyRecordOperation.apply<
         BoardLocationTypes.State,
         BoardLocationTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         prevState: state.tachieLocations,
         operation: operation.tachieLocations,
@@ -482,7 +485,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     const dicePieceValues = RecordOperation.apply<
         DicePieceValueTypes.State,
         DicePieceValueTypes.UpOperation | DicePieceValueTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         prevState: state.dicePieceValues,
         operation: operation.dicePieceValues,
@@ -501,7 +504,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     const stringPieceValues = RecordOperation.apply<
         StringPieceValueTypes.State,
         StringPieceValueTypes.UpOperation | StringPieceValueTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         prevState: state.stringPieceValues,
         operation: operation.stringPieceValues,
@@ -570,7 +573,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     const boolParams = ParamRecordOperation.applyBack<
         BoolParamTypes.State,
         BoolParamTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: state.boolParams,
         operation: operation.boolParams,
@@ -590,7 +593,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     const numParams = ParamRecordOperation.applyBack<
         NumParamTypes.State,
         NumParamTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: state.numParams,
         operation: operation.numParams,
@@ -610,7 +613,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     const numMaxParams = ParamRecordOperation.applyBack<
         NumParamTypes.State,
         NumParamTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: state.numMaxParams,
         operation: operation.numMaxParams,
@@ -630,7 +633,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     const strParams = ParamRecordOperation.applyBack<
         StrParamType.State,
         StrParamType.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: state.strParams,
         operation: operation.strParams,
@@ -647,7 +650,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     const pieces = DualKeyRecordOperation.applyBack<
         PieceTypes.State,
         PieceTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: state.pieces,
         operation: operation.pieces,
@@ -663,7 +666,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     const privateCommandsResult = RecordOperation.applyBack<
         CommandTypes.State,
         CommandTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: state.privateCommands,
         operation: operation.privateCommands,
@@ -679,7 +682,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     const tachieLocations = DualKeyRecordOperation.applyBack<
         BoardLocationTypes.State,
         BoardLocationTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: state.tachieLocations,
         operation: operation.tachieLocations,
@@ -695,7 +698,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     const dicePieceValues = RecordOperation.applyBack<
         DicePieceValueTypes.State,
         DicePieceValueTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: state.dicePieceValues,
         operation: operation.dicePieceValues,
@@ -711,7 +714,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     const stringPieceValues = RecordOperation.applyBack<
         StringPieceValueTypes.State,
         StringPieceValueTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: state.stringPieceValues,
         operation: operation.stringPieceValues,
@@ -727,7 +730,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     return Result.ok(result);
 };
 
-export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
+export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
     const boolParams = ParamRecordOperation.compose({
         first: first.boolParams,
         second: second.boolParams,
@@ -767,7 +770,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     const pieces = DualKeyRecordOperation.composeDownOperation<
         PieceTypes.State,
         PieceTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        DownError
     >({
         first: first.pieces,
         second: second.pieces,
@@ -781,7 +784,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     const privateCommands = RecordOperation.composeDownOperation<
         CommandTypes.State,
         CommandTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        DownError
     >({
         first: first.privateCommands,
         second: second.privateCommands,
@@ -795,7 +798,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     const tachieLocations = DualKeyRecordOperation.composeDownOperation<
         BoardLocationTypes.State,
         BoardLocationTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        DownError
     >({
         first: first.tachieLocations,
         second: second.tachieLocations,
@@ -809,7 +812,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     const dicePieceValues = RecordOperation.composeDownOperation<
         DicePieceValueTypes.State,
         DicePieceValueTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        DownError
     >({
         first: first.dicePieceValues,
         second: second.dicePieceValues,
@@ -823,7 +826,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     const stringPieceValues = RecordOperation.composeDownOperation<
         StringPieceValueTypes.State,
         StringPieceValueTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        DownError
     >({
         first: first.stringPieceValues,
         second: second.stringPieceValues,
@@ -934,7 +937,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         PieceTypes.State,
         PieceTypes.DownOperation,
         PieceTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: nextState.pieces,
         downOperation: downOperation.pieces,
@@ -949,7 +952,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         CommandTypes.State,
         CommandTypes.DownOperation,
         CommandTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: nextState.privateCommands,
         downOperation: downOperation.privateCommands,
@@ -964,7 +967,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         BoardLocationTypes.State,
         BoardLocationTypes.DownOperation,
         BoardLocationTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: nextState.tachieLocations,
         downOperation: downOperation.tachieLocations,
@@ -979,7 +982,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         DicePieceValueTypes.State,
         DicePieceValueTypes.DownOperation,
         DicePieceValueTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: nextState.dicePieceValues,
         downOperation: downOperation.dicePieceValues,
@@ -994,7 +997,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         StringPieceValueTypes.State,
         StringPieceValueTypes.DownOperation,
         StringPieceValueTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: nextState.stringPieceValues,
         downOperation: downOperation.stringPieceValues,
@@ -1374,7 +1377,7 @@ export const serverTransform =
             PieceTypes.State,
             PieceTypes.TwoWayOperation,
             PieceTypes.UpOperation,
-            string | ApplyError<PositiveInt> | ComposeAndTransformError
+            TwoWayError
         >({
             prevState: prevState.pieces,
             nextState: currentState.pieces,
@@ -1427,7 +1430,7 @@ export const serverTransform =
             CommandTypes.State,
             CommandTypes.TwoWayOperation,
             CommandTypes.UpOperation,
-            string | ApplyError<PositiveInt> | ComposeAndTransformError
+            TwoWayError
         >({
             prevState: prevState.privateCommands,
             nextState: currentState.privateCommands,
@@ -1456,7 +1459,7 @@ export const serverTransform =
             BoardLocationTypes.State,
             BoardLocationTypes.TwoWayOperation,
             BoardLocationTypes.UpOperation,
-            string | ApplyError<PositiveInt> | ComposeAndTransformError
+            TwoWayError
         >({
             prevState: prevState.tachieLocations,
             nextState: currentState.tachieLocations,
@@ -1509,7 +1512,7 @@ export const serverTransform =
             DicePieceValueTypes.State,
             DicePieceValueTypes.TwoWayOperation,
             DicePieceValueTypes.UpOperation,
-            string | ApplyError<PositiveInt> | ComposeAndTransformError
+            TwoWayError
         >({
             first: serverOperation?.dicePieceValues,
             second: clientOperation.dicePieceValues,
@@ -1538,7 +1541,7 @@ export const serverTransform =
             StringPieceValueTypes.State,
             StringPieceValueTypes.TwoWayOperation,
             StringPieceValueTypes.UpOperation,
-            string | ApplyError<PositiveInt> | ComposeAndTransformError
+            TwoWayError
         >({
             first: serverOperation?.stringPieceValues,
             second: clientOperation.stringPieceValues,
@@ -1689,7 +1692,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     const pieces = DualKeyRecordOperation.clientTransform<
         PieceTypes.State,
         PieceTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        UpError
     >({
         first: first.pieces,
         second: second.pieces,
@@ -1703,7 +1706,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     const privateCommands = RecordOperation.clientTransform<
         CommandTypes.State,
         CommandTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        UpError
     >({
         first: first.privateCommands,
         second: second.privateCommands,
@@ -1723,7 +1726,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     const tachieLocations = DualKeyRecordOperation.clientTransform<
         BoardLocationTypes.State,
         BoardLocationTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        UpError
     >({
         first: first.tachieLocations,
         second: second.tachieLocations,
@@ -1737,7 +1740,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     const dicePieceValues = RecordOperation.clientTransform<
         DicePieceValueTypes.State,
         DicePieceValueTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        UpError
     >({
         first: first.dicePieceValues,
         second: second.dicePieceValues,
@@ -1757,7 +1760,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     const stringPieceValues = RecordOperation.clientTransform<
         StringPieceValueTypes.State,
         StringPieceValueTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        UpError
     >({
         first: first.stringPieceValues,
         second: second.stringPieceValues,

@@ -2,7 +2,15 @@ import { Result } from '@kizahasi/result';
 import { isIdRecord } from '../../util/record';
 import * as ReplaceOperation from '../../util/replaceOperation';
 import * as TextOperation from '../../util/textOperation';
-import { Apply, ClientTransform, Compose, Diff, Restore, ServerTransform } from '../../util/type';
+import {
+    Apply,
+    ClientTransform,
+    Compose,
+    Diff,
+    DownError,
+    Restore,
+    ServerTransform,
+} from '../../util/type';
 import { DownOperation, State, TwoWayOperation, UpOperation } from './types';
 
 export const toClientState = (source: State): State => source;
@@ -77,7 +85,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     return Result.ok(result);
 };
 
-export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
+export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
     const name = TextOperation.composeDownOperation(first.name, second.name);
     if (name.isError) {
         return name;

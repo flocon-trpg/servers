@@ -3,6 +3,7 @@ import {
     ClientTransform,
     Compose,
     Diff,
+    DownError,
     Restore,
     ServerTransform,
 } from '../../../../util/type';
@@ -87,7 +88,7 @@ export const applyBack =
     };
 
 export const composeDownOperation =
-    <T>(): Compose<DownOperation<T>> =>
+    <T>(): Compose<DownOperation<T>, DownError> =>
     ({ first, second }) => {
         const valueProps: DownOperation<T> = {
             $v: 1,

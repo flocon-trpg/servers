@@ -16,13 +16,16 @@ import {
     ClientTransform,
     Compose,
     Diff,
+    DownError,
     RequestedBy,
     Restore,
+    ScalarError,
     ServerTransform,
+    TwoWayError,
+    UpError,
 } from '../util/type';
 import { isIdRecord } from '../util/record';
 import { Result } from '@kizahasi/result';
-import { ApplyError, PositiveInt, ComposeAndTransformError } from '@kizahasi/ot-string';
 import { chooseRecord } from '@flocon-trpg/utils';
 import { isStrIndex20, isStrIndex5 } from '../../indexes';
 import { DownOperation, State, TwoWayOperation, UpOperation } from './types';
@@ -294,7 +297,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     const bgms = RecordOperation.apply<
         BgmTypes.State,
         BgmTypes.UpOperation | BgmTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         prevState: state.bgms,
         operation: operation.bgms,
@@ -310,7 +313,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     const boolParamNames = RecordOperation.apply<
         ParamNamesTypes.State,
         ParamNamesTypes.UpOperation | ParamNamesTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         prevState: state.boolParamNames,
         operation: operation.boolParamNames,
@@ -334,7 +337,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     const numParamNames = RecordOperation.apply<
         ParamNamesTypes.State,
         ParamNamesTypes.UpOperation | ParamNamesTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         prevState: state.numParamNames,
         operation: operation.numParamNames,
@@ -350,7 +353,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     const memo = RecordOperation.apply<
         MemoTypes.State,
         MemoTypes.UpOperation | MemoTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         prevState: state.memos,
         operation: operation.memos,
@@ -366,7 +369,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     const participants = RecordOperation.apply<
         ParticipantTypes.State,
         ParticipantTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         prevState: state.participants,
         operation: operation.participants,
@@ -394,7 +397,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     const strParamNames = RecordOperation.apply<
         ParamNamesTypes.State,
         ParamNamesTypes.UpOperation | ParamNamesTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         prevState: state.strParamNames,
         operation: operation.strParamNames,
@@ -417,11 +420,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
         result.activeBoardKey = operation.activeBoardKey.oldValue;
     }
 
-    const bgms = RecordOperation.applyBack<
-        BgmTypes.State,
-        BgmTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
+    const bgms = RecordOperation.applyBack<BgmTypes.State, BgmTypes.DownOperation, ScalarError>({
         nextState: state.bgms,
         operation: operation.bgms,
         innerApplyBack: ({ state, operation }) => {
@@ -436,7 +435,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     const boolParamNames = RecordOperation.applyBack<
         ParamNamesTypes.State,
         ParamNamesTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: state.boolParamNames,
         operation: operation.boolParamNames,
@@ -460,7 +459,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     const numParamNames = RecordOperation.applyBack<
         ParamNamesTypes.State,
         ParamNamesTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: state.numParamNames,
         operation: operation.numParamNames,
@@ -473,11 +472,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     }
     result.numParamNames = numParamNames.value;
 
-    const memo = RecordOperation.applyBack<
-        MemoTypes.State,
-        MemoTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
+    const memo = RecordOperation.applyBack<MemoTypes.State, MemoTypes.DownOperation, ScalarError>({
         nextState: state.memos,
         operation: operation.memos,
         innerApplyBack: ({ state, operation }) => {
@@ -492,7 +487,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     const participants = RecordOperation.applyBack<
         ParticipantTypes.State,
         ParticipantTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: state.participants,
         operation: operation.participants,
@@ -520,7 +515,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     const strParamNames = RecordOperation.applyBack<
         ParamNamesTypes.State,
         ParamNamesTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: state.strParamNames,
         operation: operation.strParamNames,
@@ -536,7 +531,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     return Result.ok(result);
 };
 
-export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
+export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
     const bgms = RecordOperation.composeDownOperation({
         first: first.bgms,
         second: second.bgms,
@@ -839,7 +834,7 @@ export const serverTransform =
             BgmTypes.State,
             BgmTypes.TwoWayOperation,
             BgmTypes.UpOperation,
-            string | ApplyError<PositiveInt> | ComposeAndTransformError
+            TwoWayError
         >({
             prevState: prevState.bgms,
             nextState: currentState.bgms,
@@ -866,7 +861,7 @@ export const serverTransform =
             ParamNamesTypes.State,
             ParamNamesTypes.TwoWayOperation,
             ParamNamesTypes.UpOperation,
-            string | ApplyError<PositiveInt> | ComposeAndTransformError
+            TwoWayError
         >({
             prevState: prevState.boolParamNames,
             nextState: currentState.boolParamNames,
@@ -894,7 +889,7 @@ export const serverTransform =
             MemoTypes.State,
             MemoTypes.TwoWayOperation,
             MemoTypes.UpOperation,
-            string | ApplyError<PositiveInt> | ComposeAndTransformError
+            TwoWayError
         >({
             prevState: prevState.memos,
             nextState: currentState.memos,
@@ -919,7 +914,7 @@ export const serverTransform =
             ParamNamesTypes.State,
             ParamNamesTypes.TwoWayOperation,
             ParamNamesTypes.UpOperation,
-            string | ApplyError<PositiveInt> | ComposeAndTransformError
+            TwoWayError
         >({
             prevState: prevState.numParamNames,
             nextState: currentState.numParamNames,
@@ -946,7 +941,7 @@ export const serverTransform =
             ParamNamesTypes.State,
             ParamNamesTypes.TwoWayOperation,
             ParamNamesTypes.UpOperation,
-            string | ApplyError<PositiveInt> | ComposeAndTransformError
+            TwoWayError
         >({
             prevState: prevState.strParamNames,
             nextState: currentState.strParamNames,
@@ -973,7 +968,7 @@ export const serverTransform =
             ParticipantTypes.State,
             ParticipantTypes.TwoWayOperation,
             ParticipantTypes.UpOperation,
-            string | ApplyError<PositiveInt> | ComposeAndTransformError
+            TwoWayError
         >({
             prevState: prevState.participants,
             nextState: currentState.participants,
@@ -1061,11 +1056,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         second: second.activeBoardKey,
     });
 
-    const bgms = RecordOperation.clientTransform<
-        BgmTypes.State,
-        BgmTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
+    const bgms = RecordOperation.clientTransform<BgmTypes.State, BgmTypes.UpOperation, UpError>({
         first: first.bgms,
         second: second.bgms,
         innerTransform: params => Bgm.clientTransform(params),
@@ -1084,7 +1075,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     const boolParamNames = RecordOperation.clientTransform<
         ParamNamesTypes.State,
         ParamNamesTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        UpError
     >({
         first: first.boolParamNames,
         second: second.boolParamNames,
@@ -1101,11 +1092,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         return boolParamNames;
     }
 
-    const memos = RecordOperation.clientTransform<
-        MemoTypes.State,
-        MemoTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
+    const memos = RecordOperation.clientTransform<MemoTypes.State, MemoTypes.UpOperation, UpError>({
         first: first.memos,
         second: second.memos,
         innerTransform: params => Memo.clientTransform(params),
@@ -1124,7 +1111,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     const numParamNames = RecordOperation.clientTransform<
         ParamNamesTypes.State,
         ParamNamesTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        UpError
     >({
         first: first.numParamNames,
         second: second.numParamNames,
@@ -1144,7 +1131,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     const strParamNames = RecordOperation.clientTransform<
         ParamNamesTypes.State,
         ParamNamesTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        UpError
     >({
         first: first.strParamNames,
         second: second.strParamNames,
@@ -1164,7 +1151,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     const participants = RecordOperation.clientTransform<
         ParticipantTypes.State,
         ParticipantTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        UpError
     >({
         first: first.participants,
         second: second.participants,
