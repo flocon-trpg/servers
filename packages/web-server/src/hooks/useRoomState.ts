@@ -36,7 +36,6 @@ export const deleted = 'deleted';
 
 type SetAction<State> = State | ((prevState: State) => State);
 
-// operate === undefined ⇔ operateAsState === undefined
 export type RoomState =
     | {
           type: typeof loading;
@@ -45,15 +44,24 @@ export type RoomState =
           operateAsState?: undefined;
       }
     | {
+          // refetchが必要なく、通常通りoperateとoperateAsStateが使える状態。
+
           type: typeof joined;
           state: State;
 
-          // operateとoperateAsStateは、undefinedならばrefetchが必要。
-          operate: ((operation: UpOperation) => void) | undefined;
-
-          operateAsState: ((setState: SetAction<State>) => void) | undefined;
+          operate: (operation: UpOperation) => void;
+          operateAsState: (setState: SetAction<State>) => void;
 
           // participantの更新は、mutationを直接呼び出すことで行う。
+      }
+    | {
+          // refetchが必要な状態。
+
+          type: typeof joined;
+          state: State;
+
+          operate: undefined;
+          operateAsState: undefined;
       }
     | {
           type: typeof myAuthIsUnavailable;
@@ -145,10 +153,19 @@ export const useRoomState = (
                     return oldValue;
                 }
                 const newState = $stateManager.uiState;
+                if (oldValue.operate == null || $stateManager.requiresReload) {
+                    return {
+                        type: oldValue.type,
+                        state: newState,
+                        operate: undefined,
+                        operateAsState: undefined,
+                    };
+                }
                 return {
-                    ...oldValue,
+                    type: oldValue.type,
                     state: newState,
-                    operate: $stateManager.requiresReload ? undefined : oldValue.operate,
+                    operate: oldValue.operate,
+                    operateAsState: oldValue.operateAsState,
                 };
             });
         };
@@ -352,6 +369,7 @@ export const useRoomState = (
                                     return {
                                         ...oldValue,
                                         operate: undefined,
+                                        operateAsState: undefined,
                                     };
                                 });
                                 return;
@@ -365,24 +383,29 @@ export const useRoomState = (
                             postTrigger.next();
                         };
 
+                        if (newRoomStateManager.requiresReload) {
+                            setState({
+                                type: joined,
+                                state: newRoomStateManager.uiState,
+                                operate: undefined,
+                                operateAsState: undefined,
+                            });
+                        }
+
                         setState({
                             type: joined,
                             state: newRoomStateManager.uiState,
-                            operate: newRoomStateManager.requiresReload
-                                ? undefined
-                                : operation => operateCore({ type: 'operation', operation }),
-                            operateAsState: newRoomStateManager.requiresReload
-                                ? undefined
-                                : setState => {
-                                      if (typeof setState === 'function') {
-                                          operateCore({
-                                              type: 'state',
-                                              state: setState(newRoomStateManager.uiState),
-                                          });
-                                          return;
-                                      }
-                                      operateCore({ type: 'state', state: setState });
-                                  },
+                            operate: operation => operateCore({ type: 'operation', operation }),
+                            operateAsState: setState => {
+                                if (typeof setState === 'function') {
+                                    operateCore({
+                                        type: 'state',
+                                        state: setState(newRoomStateManager.uiState),
+                                    });
+                                    return;
+                                }
+                                operateCore({ type: 'state', state: setState });
+                            },
                         });
 
                         break;
