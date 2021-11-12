@@ -306,7 +306,7 @@ export { updateType, createType, deleteType } from './internal/ot/piece/log';
 
 export { createLogs } from './internal/ot/room/log';
 
-export { StateManager } from './internal/stateManagers/main';
+export { StateManager } from './internal/stateManagers/stateManager';
 
 export {
     Apply,

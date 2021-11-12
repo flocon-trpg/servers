@@ -1,3 +1,4 @@
+import { StateManagerHistoryQueue } from './stateManagerHistory';
 import { StateManagerCore } from './stateManagerCore';
 import { StateManagerParameters } from './types';
 
@@ -17,12 +18,22 @@ type OnPosted<T> =
           isSuccess: false | null; // 確実に失敗したときはfalse、成功したか失敗したかわからないときはnull
       };
 
+export type PostResult<TState, TOperation> = {
+    operationToPost: TOperation;
+    syncedState: TState;
+    revision: number;
+    requestId: string;
+    onPosted: (onPosted: OnPosted<TOperation>) => void;
+};
+
 export class StateManager<TState, TOperation> {
     private core: StateManagerCore<TState, TOperation>;
     private _requiresReload = false;
+    private _history?: StateManagerHistoryQueue<TState, TOperation>;
 
     public constructor(private readonly params: StateManagerParameters<TState, TOperation>) {
         this.core = new StateManagerCore<TState, TOperation>(params);
+        this._history = params.enableHistory === true ? new StateManagerHistoryQueue() : undefined;
     }
 
     public get isPosting(): boolean {
@@ -56,7 +67,9 @@ export class StateManager<TState, TOperation> {
             throw new Error('this.requiresReload === true');
         }
 
+        this._history?.beforeOtherClientsGet(this, operation, revisionTo);
         this.core.onGet(operation, revisionTo, false);
+        this._history?.afterOtherClientsGet(this);
     }
 
     public operateAsState(state: TState): void {
@@ -64,6 +77,7 @@ export class StateManager<TState, TOperation> {
             throw new Error('this.requiresReload === true');
         }
 
+        this._history?.operateAsState(this, state);
         this.core.operateAsState(state);
     }
 
@@ -73,20 +87,14 @@ export class StateManager<TState, TOperation> {
         this.operateAsState(newState);
     }
 
-    public post():
-        | {
-              operationToPost: TOperation;
-              syncedState: TState;
-              revision: number;
-              requestId: string;
-              onPosted: (onPosted: OnPosted<TOperation>) => void;
-          }
-        | undefined {
+    public post(): PostResult<TState, TOperation> | undefined {
         if (this.requiresReload) {
             throw new Error('this.requiresReload === true');
         }
 
+        this._history?.beforePost(this);
         const toPost = this.core.post();
+        this._history?.beginPost(this, toPost);
         if (toPost === undefined) {
             return undefined;
         }
@@ -99,15 +107,26 @@ export class StateManager<TState, TOperation> {
             switch (onPosted.isSuccess) {
                 case true:
                     if (onPosted.isId) {
+                        this._history?.beforeEndPostAsId(this, onPosted.requestId);
                         this.core.endPostAsId(onPosted.requestId);
+                        this._history?.afterEndPostAsId(this);
                         return;
                     }
+                    this._history?.beforeEndPostAsSuccess(
+                        this,
+                        onPosted.result,
+                        onPosted.revisionTo
+                    );
                     this.core.onGet(onPosted.result, onPosted.revisionTo, true);
+                    this._history?.afterEndPostAsSuccess(this);
                     return;
                 case false:
+                    this._history?.beforeEndPostAsNotSuccess(this);
                     this.core.cancelPost();
+                    this._history?.afterEndPostAsNotSuccess(this);
                     return;
                 case null:
+                    this._history?.endPostAsUnknown(this);
                     this._requiresReload = true;
                     return;
             }
@@ -122,5 +141,10 @@ export class StateManager<TState, TOperation> {
             state,
         });
         this._requiresReload = false;
+    }
+
+    // コンストラクタでenableHistoryにtrueを渡したときにのみnon-undefinedとなる
+    public get history() {
+        return this._history?.history;
     }
 }
