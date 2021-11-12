@@ -9,7 +9,7 @@ import { KonvaEventObject } from 'konva/types/Node';
 import { update } from '../../stateManagers/states/types';
 import * as Icon from '@ant-design/icons';
 import { Message, publicMessage, useFilteredRoomMessages } from '../../hooks/useRoomMessages';
-import { useOperate } from '../../hooks/useOperate';
+import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import { useMe } from '../../hooks/useMe';
 import { useCharacters } from '../../hooks/state/useCharacters';
 import { useParticipants } from '../../hooks/state/useParticipants';
@@ -247,7 +247,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const backgroundImageResult =
         backgroundImage.type === success ? backgroundImage.image : undefined;
     const [, setRoomConfig] = useImmerAtom(writeonlyRoomConfigAtom);
-    const operate = useOperate();
+    const operate = useSetRoomStateByApply();
     const publicMessages = useFilteredRoomMessages({ filter: publicMessageFilter });
     const myUserUid = useMyUserUid();
 

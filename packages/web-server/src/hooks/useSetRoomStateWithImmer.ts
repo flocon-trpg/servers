@@ -6,24 +6,24 @@ import { roomAtom } from '../atoms/room/roomAtom';
 
 type Result = (stateOrRecipe: State | ((prevState: State) => void)) => void;
 
-const emptyOperateAsStateWithImmer: Result = (): void => {
+const emptySetRoomStateWithImmer: Result = (): void => {
     throw new Error('useOperateAsState is not ready');
 };
 
-const operateAsStateAtom = atom(get => get(roomAtom).roomState?.operateAsState);
+const setStateAtom = atom(get => get(roomAtom).roomState?.setState);
 
-export const useOperateAsStateWithImmer = (): Result => {
-    const [operateAsStateCore] = useAtom(operateAsStateAtom);
+export const useSetRoomStateWithImmer = (): Result => {
+    const [setRoomStateCore] = useAtom(setStateAtom);
     return React.useMemo(() => {
-        if (operateAsStateCore == null) {
-            return emptyOperateAsStateWithImmer;
+        if (setRoomStateCore == null) {
+            return emptySetRoomStateWithImmer;
         }
         return (stateOrRecipe: State | ((prevState: State) => void)): void => {
             if (typeof stateOrRecipe === 'function') {
-                operateAsStateCore(prevState => produce(prevState, stateOrRecipe));
+                setRoomStateCore(prevState => produce(prevState, stateOrRecipe));
                 return;
             }
-            operateAsStateCore(stateOrRecipe);
+            setRoomStateCore(stateOrRecipe);
         };
-    }, [operateAsStateCore]);
+    }, [setRoomStateCore]);
 };

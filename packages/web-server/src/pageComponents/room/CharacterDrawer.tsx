@@ -17,7 +17,7 @@ import {
     characterIsNotPrivateAndNotCreatedByMe,
 } from '../../resource/text/main';
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
-import { useOperate } from '../../hooks/useOperate';
+import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import { BufferedInput } from '../../components/BufferedInput';
 import { TomlInput } from '../../components/Tomllnput';
 import { useCharacters } from '../../hooks/state/useCharacters';
@@ -53,7 +53,7 @@ import { BufferedTextArea } from '../../components/BufferedTextArea';
 import { FilePath } from '../../utils/filePath';
 import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 import { characterReplaceOperation } from '../../utils/characterReplaceOperation';
-import { useOperateAsStateWithImmer } from '../../hooks/useOperateAsStateWithImmer';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import produce from 'immer';
 
 const notFound = 'notFound';
@@ -93,8 +93,8 @@ export const CharacterDrawer: React.FC = () => {
         state => state.roomDrawerAndPopoverAndModalModule.characterDrawerType
     );
     const dispatch = useDispatch();
-    const operate = useOperate();
-    const operateAsStateWithImmer = useOperateAsStateWithImmer();
+    const operate = useSetRoomStateByApply();
+    const operateAsStateWithImmer = useSetRoomStateWithImmer();
     const characters = useCharacters();
     const boolParamNames = useBoolParamNames();
     const numParamNames = useNumParamNames();

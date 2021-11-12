@@ -6,7 +6,7 @@ import { Gutter } from 'antd/lib/grid/row';
 import { useSelector } from '../../store';
 import { useDispatch } from 'react-redux';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
-import { useOperateAsStateWithImmer } from '../../hooks/useOperateAsStateWithImmer';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import produce from 'immer';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
 import { roomAtom } from '../../atoms/room/roomAtom';
@@ -23,7 +23,7 @@ export const EditRoomDrawer: React.FC = () => {
         state => state.roomDrawerAndPopoverAndModalModule.editRoomDrawerVisibility
     );
     const dispatch = useDispatch();
-    const operateAsStateWithImmer = useOperateAsStateWithImmer();
+    const operateAsStateWithImmer = useSetRoomStateWithImmer();
     const name = useAtomSelector(roomAtom, state => state.roomState?.state?.name);
 
     return (

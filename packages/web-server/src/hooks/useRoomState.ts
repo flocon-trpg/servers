@@ -40,17 +40,17 @@ export type RoomState =
     | {
           type: typeof loading;
           state?: undefined;
-          operate?: undefined;
-          operateAsState?: undefined;
+          setState?: undefined;
+          setStateByApply?: undefined;
       }
     | {
-          // refetchが必要なく、通常通りoperateとoperateAsStateが使える状態。
+          // refetchが必要なく、通常通りsetStateなどが使える状態。
 
           type: typeof joined;
           state: State;
 
-          operate: (operation: UpOperation) => void;
-          operateAsState: (setState: SetAction<State>) => void;
+          setState: (setState: SetAction<State>) => void;
+          setStateByApply: (operation: UpOperation) => void;
 
           // participantの更新は、mutationを直接呼び出すことで行う。
       }
@@ -60,42 +60,42 @@ export type RoomState =
           type: typeof joined;
           state: State;
 
-          operate: undefined;
-          operateAsState: undefined;
+          setState: undefined;
+          setStateByApply: undefined;
       }
     | {
           type: typeof myAuthIsUnavailable;
           state?: undefined;
-          operate?: undefined;
-          operateAsState?: undefined;
+          setState?: undefined;
+          setStateByApply?: undefined;
           error: typeof loading | typeof notSignIn | typeof authNotFound;
       }
     | {
           type: typeof nonJoined;
           state?: undefined;
-          operate?: undefined;
-          operateAsState?: undefined;
+          setState?: undefined;
+          setStateByApply?: undefined;
           nonJoinedRoom: RoomAsListItemFragment;
       }
     | {
           type: typeof getRoomFailure;
           state?: undefined;
-          operate?: undefined;
-          operateAsState?: undefined;
+          setState?: undefined;
+          setStateByApply?: undefined;
           getRoomFailureType: GetRoomFailureType;
       }
     | {
           // TODO: エラーの内容を返したり、unionを細分化する。
           type: typeof mutationFailure;
           state?: undefined;
-          operate?: undefined;
-          operateAsState?: undefined;
+          setState?: undefined;
+          setStateByApply?: undefined;
       }
     | {
           type: typeof deleted;
           state?: undefined;
-          operate?: undefined;
-          operateAsState?: undefined;
+          setState?: undefined;
+          setStateByApply?: undefined;
           deletedBy: string;
       };
 
@@ -153,7 +153,7 @@ export const useRoomState = (
                     return oldValue;
                 }
                 const newState = $stateManager.uiState;
-                if (oldValue.operate == null || $stateManager.requiresReload) {
+                if (oldValue.setStateByApply == null || $stateManager.requiresReload) {
                     if ($stateManager.requiresReload) {
                         console.info(
                             '[調査用ログ]onRoomStateManagerUpdate:',
@@ -163,15 +163,15 @@ export const useRoomState = (
                     return {
                         type: oldValue.type,
                         state: newState,
-                        operate: undefined,
-                        operateAsState: undefined,
+                        setStateByApply: undefined,
+                        setState: undefined,
                     };
                 }
                 return {
                     type: oldValue.type,
                     state: newState,
-                    operate: oldValue.operate,
-                    operateAsState: oldValue.operateAsState,
+                    setStateByApply: oldValue.setStateByApply,
+                    setState: oldValue.setState,
                 };
             });
         };
@@ -352,7 +352,7 @@ export const useRoomState = (
 
                         roomOperationCache.clear(); // 早めのメモリ解放
                         roomStateManager = newRoomStateManager;
-                        const operateCore = (
+                        const setStateCore = (
                             operation:
                                 | {
                                       type: 'operation';
@@ -370,7 +370,7 @@ export const useRoomState = (
                             if ($stateManager.requiresReload) {
                                 if ($stateManager.requiresReload) {
                                     console.info(
-                                        '[調査用ログ]operateCore',
+                                        '[調査用ログ]setStateCore',
                                         JSON.stringify($stateManager.history)
                                     );
                                 }
@@ -380,16 +380,16 @@ export const useRoomState = (
                                     }
                                     return {
                                         ...oldValue,
-                                        operate: undefined,
-                                        operateAsState: undefined,
+                                        setStateByApply: undefined,
+                                        setState: undefined,
                                     };
                                 });
                                 return;
                             }
                             if (operation.type === 'state') {
-                                $stateManager.operateAsState(operation.state);
+                                $stateManager.setUiState(operation.state);
                             } else {
-                                $stateManager.operate(operation.operation);
+                                $stateManager.setUiStateByApply(operation.operation);
                             }
                             onRoomStateManagerUpdate();
                             postTrigger.next();
@@ -403,24 +403,25 @@ export const useRoomState = (
                             setState({
                                 type: joined,
                                 state: newRoomStateManager.uiState,
-                                operate: undefined,
-                                operateAsState: undefined,
+                                setStateByApply: undefined,
+                                setState: undefined,
                             });
                         }
 
                         setState({
                             type: joined,
                             state: newRoomStateManager.uiState,
-                            operate: operation => operateCore({ type: 'operation', operation }),
-                            operateAsState: setState => {
+                            setStateByApply: operation =>
+                                setStateCore({ type: 'operation', operation }),
+                            setState: setState => {
                                 if (typeof setState === 'function') {
-                                    operateCore({
+                                    setStateCore({
                                         type: 'state',
                                         state: setState(newRoomStateManager.uiState),
                                     });
                                     return;
                                 }
-                                operateCore({ type: 'state', state: setState });
+                                setStateCore({ type: 'state', state: setState });
                             },
                         });
 

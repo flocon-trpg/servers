@@ -7,6 +7,6 @@ const emptyOperate = (operation: UpOperation): void => {
 };
 
 // useOperateAsStateとimmerを組み合わせたほうが使いやすいと思われる。パフォーマンスもほぼ変わらないと考えられる。useOperateは互換性のために残している
-export const useOperate = () => {
-    return useAtomSelector(roomAtom, state => state.roomState?.operate) ?? emptyOperate;
+export const useSetRoomStateByApply = () => {
+    return useAtomSelector(roomAtom, state => state.roomState?.setStateByApply) ?? emptyOperate;
 };

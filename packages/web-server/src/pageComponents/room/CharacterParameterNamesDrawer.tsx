@@ -5,7 +5,7 @@ import { replace } from '../../stateManagers/states/types';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { BufferedInput } from '../../components/BufferedInput';
 import { useSelector } from '../../store';
-import { useOperate } from '../../hooks/useOperate';
+import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import { recordToMap } from '@flocon-trpg/utils';
 import { StrIndex20, strIndex20Array, UpOperation } from '@flocon-trpg/core';
 import { useDispatch } from 'react-redux';
@@ -13,7 +13,7 @@ import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndP
 import { InputModal } from '../../components/InputModal';
 import classNames from 'classnames';
 import { flex, flexRow } from '../../utils/className';
-import { useOperateAsStateWithImmer } from '../../hooks/useOperateAsStateWithImmer';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { roomAtom } from '../../atoms/room/roomAtom';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
 
@@ -26,8 +26,8 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
     const characterParameterNamesDrawerVisibility = useSelector(
         state => state.roomDrawerAndPopoverAndModalModule.characterParameterNamesDrawerVisibility
     );
-    const operate = useOperate();
-    const operateAsStateWithImmer = useOperateAsStateWithImmer();
+    const operate = useSetRoomStateByApply();
+    const operateAsStateWithImmer = useSetRoomStateWithImmer();
     const dispatch = useDispatch();
     const [visibleParameterForm, setVisibleParameterForm] = React.useState<VisibleParameterForm>();
     const [addNumParamSelector, setAddNumParamSelector] = React.useState<StrIndex20>();

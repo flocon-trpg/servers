@@ -17,7 +17,7 @@ import classNames from 'classnames';
 import { flex, flex1, flexColumn, flexNone, flexRow, itemsCenter } from '../../utils/className';
 import { ChatPaletteTomlInput } from '../../components/ChatPaletteTomlInput';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
-import { useOperateAsStateWithImmer } from '../../hooks/useOperateAsStateWithImmer';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import produce from 'immer';
 import { UISelector } from '../../components/UISelector';
 import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
@@ -137,7 +137,7 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
     const [selectedChannelType, setSelectedChannelType] =
         React.useState<SelectedChannelType>(publicChannel);
     const [isEditMode, setIsEditMode] = React.useState(false);
-    const operateAsStateWithImmer = useOperateAsStateWithImmer();
+    const operateAsStateWithImmer = useSetRoomStateWithImmer();
 
     const myCharactersOptions = React.useMemo(() => {
         if (myCharacters == null) {

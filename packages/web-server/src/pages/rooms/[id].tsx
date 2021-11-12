@@ -339,7 +339,7 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
 
     switch (roomState.type) {
         case joined: {
-            if (roomState.operate == null) {
+            if (roomState.setStateByApply == null) {
                 // TODO: Buttonなどを用いたreloadに対応させる。
                 return (
                     <Result

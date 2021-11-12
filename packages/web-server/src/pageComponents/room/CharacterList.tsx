@@ -12,7 +12,7 @@ import {
     characterIsNotPrivate,
     characterIsNotPrivateAndNotCreatedByMe,
 } from '../../resource/text/main';
-import { useOperate } from '../../hooks/useOperate';
+import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import { useCharacters } from '../../hooks/state/useCharacters';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import {
@@ -42,7 +42,7 @@ import { SortOrder } from 'antd/lib/table/interface';
 import { IconView } from '../../components/IconView';
 import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 import { getUserUid, MyAuthContext } from '../../contexts/MyAuthContext';
-import { useOperateAsStateWithImmer } from '../../hooks/useOperateAsStateWithImmer';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 
 type DataSource = {
     key: string;
@@ -201,8 +201,8 @@ const createStringParameterColumn = ({
 export const CharacterList: React.FC = () => {
     const myAuth = React.useContext(MyAuthContext);
     const dispatch = useDispatch();
-    const operate = useOperate();
-    const operateAsStateWithImmer = useOperateAsStateWithImmer();
+    const operate = useSetRoomStateByApply();
+    const operateAsStateWithImmer = useSetRoomStateWithImmer();
 
     const characters = useCharacters();
     const participants = useParticipants();

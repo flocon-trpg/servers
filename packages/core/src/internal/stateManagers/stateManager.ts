@@ -72,19 +72,19 @@ export class StateManager<TState, TOperation> {
         this._history?.afterOtherClientsGet(this);
     }
 
-    public operateAsState(state: TState): void {
+    public setUiState(state: TState): void {
         if (this.requiresReload) {
             throw new Error('this.requiresReload === true');
         }
 
         this._history?.operateAsState(this, state);
-        this.core.operateAsState(state);
+        this.core.setUiState(state);
     }
 
-    // このメソッドは「operateAsStateを使えばよい」と判断して一時削除していたが、Operationを書いて適用させたいという場面が少なくなく、必要なapply関数もStateManager内部で保持しているため復帰させた。
-    public operate(operation: TOperation): void {
+    // このメソッドは「setUiStateを使えばよい」と判断して一時削除していたが、Operationを書いて適用させたいという場面が少なくなく、必要なapply関数もStateManager内部で保持しているため復帰させた。
+    public setUiStateByApply(operation: TOperation): void {
         const newState = this.params.apply({ state: this.uiState, operation });
-        this.operateAsState(newState);
+        this.setUiState(newState);
     }
 
     public post(): PostResult<TState, TOperation> | undefined {

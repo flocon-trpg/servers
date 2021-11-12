@@ -5,7 +5,7 @@ import { replace } from '../../stateManagers/states/types';
 import { DrawerProps } from 'antd/lib/drawer';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
-import { useOperate } from '../../hooks/useOperate';
+import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import {
     UpOperation,
     ImagePieceValueState,
@@ -78,7 +78,7 @@ export const ImagePieceDrawer: React.FC = () => {
         state => state.roomDrawerAndPopoverAndModalModule.imagePieceDrawerType
     );
     const dispatch = useDispatch();
-    const operate = useOperate();
+    const operate = useSetRoomStateByApply();
     const myUserUid = useMyUserUid();
     const imagePieces = useImagePieceValues();
     let stateEditorParams: StateEditorParams<ImagePieceValueState | undefined>;
