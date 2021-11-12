@@ -7,7 +7,7 @@ import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';
 import { FilesManagerDrawerType } from '../../utils/types';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
-import { useOperate } from '../../hooks/useOperate';
+import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import { useSelector } from '../../store';
 import { BufferedInput } from '../../components/BufferedInput';
 import { useBoards } from '../../hooks/state/useBoards';
@@ -52,7 +52,7 @@ const inputSpan = 16;
 export const BoardDrawer: React.FC = () => {
     const myUserUid = useMyUserUid();
     const dispatch = useDispatch();
-    const operate = useOperate();
+    const operate = useSetRoomStateByApply();
     const drawerType = useSelector(
         state => state.roomDrawerAndPopoverAndModalModule.boardDrawerType
     );

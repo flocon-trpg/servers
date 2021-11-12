@@ -13,7 +13,7 @@ import { VolumeBar } from '../../components/VolumeBar';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { MyStyle } from '../../utils/myStyle';
 import { useSelector } from '../../store';
-import { useOperate } from '../../hooks/useOperate';
+import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import { BgmState, FilePath, StrIndex5, UpOperation } from '@flocon-trpg/core';
 import _ from 'lodash';
 import { cancelRnd, flex, flexColumn, flexRow, itemsCenter } from '../../utils/className';
@@ -116,7 +116,7 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({
     visible,
     onClose,
 }: BgmPlayerDrawerProps) => {
-    const operate = useOperate();
+    const operate = useSetRoomStateByApply();
 
     const [filesManagerDrawerType, setFilesManagerDrawerType] =
         React.useState<FilesManagerDrawerType | null>(null);
@@ -370,7 +370,7 @@ type BgmPlayerProps = {
 const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayerProps) => {
     const defaultVolume = 0.5;
 
-    const operate = useOperate();
+    const operate = useSetRoomStateByApply();
     const [isDrawerVisible, setIsDrawerVisible] = React.useState(false);
     const [volumeInput, setVolumeInput] = React.useState<number>();
 

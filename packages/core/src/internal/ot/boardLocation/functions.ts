@@ -2,7 +2,15 @@ import { Result } from '@kizahasi/result';
 import { compositeKeyEquals } from '@flocon-trpg/utils';
 import { isIdRecord } from '../util/record';
 import * as ReplaceOperation from '../util/replaceOperation';
-import { Apply, ClientTransform, Compose, Diff, Restore, ServerTransform } from '../util/type';
+import {
+    Apply,
+    ClientTransform,
+    Compose,
+    Diff,
+    DownError,
+    Restore,
+    ServerTransform,
+} from '../util/type';
 import { DownOperation, State, TwoWayOperation, UpOperation } from './types';
 
 export const toClientState = (source: State): State => {
@@ -65,7 +73,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     return Result.ok(result);
 };
 
-export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
+export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
     const valueProps: DownOperation = {
         $v: 1,
         $r: 1,

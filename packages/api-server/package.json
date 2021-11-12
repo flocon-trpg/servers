@@ -4,7 +4,7 @@
     "dependencies": {
         "@flocon-trpg/core": "workspace:^",
         "@flocon-trpg/utils": "workspace:^",
-        "@kizahasi/ot-string": "^0.2.3",
+        "@kizahasi/ot-string": "^0.3.0",
         "@kizahasi/result": "^1.0.0",
         "@mikro-orm/core": "^4.5.7",
         "@mikro-orm/migrations": "^4.5.7",

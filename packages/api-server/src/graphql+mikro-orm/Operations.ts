@@ -1,7 +1,14 @@
-import { ApplyError, ComposeAndTransformError } from '@kizahasi/ot-string';
+import {
+    ApplyError,
+    ComposeAndTransformError,
+    NonEmptyString,
+    PositiveInt,
+} from '@kizahasi/ot-string';
 
 export const TextOperationErrorModule = {
-    toString: (error: ApplyError<unknown> | ComposeAndTransformError): string => {
+    toString: (
+        error: ApplyError<unknown> | ComposeAndTransformError<NonEmptyString, PositiveInt>
+    ): string => {
         return error.type;
     },
 };

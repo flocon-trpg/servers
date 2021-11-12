@@ -59,8 +59,7 @@ import { JumpToBottomVirtuoso } from '../../components/JumpToBottomVirtuoso';
 import { cancelRnd, flex, flexColumn, flexNone, flexRow, itemsCenter } from '../../utils/className';
 import classNames from 'classnames';
 import { getUserUid, MyAuthContext } from '../../contexts/MyAuthContext';
-import { useOperateAsState } from '../../hooks/useOperateAsState';
-import produce from 'immer';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { useMutation } from '@apollo/client';
 import { TabConfig } from '../../atoms/roomConfig/types/tabConfig';
 import { atom, useAtom } from 'jotai';
@@ -362,7 +361,7 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (
 ) => {
     const { visible, onClose } = props;
     const publicChannelNames = usePublicChannelNames();
-    const operateAsState = useOperateAsState();
+    const operateAsStateWithImmer = useSetRoomStateWithImmer();
 
     return (
         <Drawer
@@ -395,10 +394,8 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (
                                     if (e.previousValue === e.currentValue) {
                                         return;
                                     }
-                                    operateAsState(state => {
-                                        return produce(state, state => {
+                                    operateAsStateWithImmer(state => {
                                             state[key] = e.currentValue;
-                                        });
                                     });
                                 }}
                             />

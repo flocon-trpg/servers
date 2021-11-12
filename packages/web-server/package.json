@@ -1,6 +1,6 @@
 {
     "name": "flocon-web",
-    "version": "0.5.0-beta.1",
+    "version": "0.5.0-beta.2",
     "description": "Flocon Web server",
     "dependencies": {
         "@apollo/client": "^3.4.15",

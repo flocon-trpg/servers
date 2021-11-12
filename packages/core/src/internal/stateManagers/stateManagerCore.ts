@@ -62,7 +62,7 @@ export class StateManagerCore<TState, TOperation> {
         return this._revision;
     }
 
-    public operateAsState(state: TState) {
+    public setUiState(state: TState) {
         this._stateGetter.setUiState(state);
     }
 

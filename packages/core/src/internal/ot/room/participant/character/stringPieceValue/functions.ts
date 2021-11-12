@@ -7,13 +7,16 @@ import {
     ClientTransform,
     Compose,
     Diff,
+    DownError,
     RequestedBy,
     Restore,
+    ScalarError,
     ServerTransform,
+    TwoWayError,
+    UpError,
 } from '../../../../util/type';
 import { isIdRecord } from '../../../../util/record';
 import { Result } from '@kizahasi/result';
-import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
 import { CompositeKey } from '@flocon-trpg/utils';
 import { DownOperation, State, TwoWayOperation, UpOperation } from './types';
 import * as TextOperation from '../../../../util/textOperation';
@@ -58,7 +61,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     const pieces = DualKeyRecordOperation.apply<
         PieceTypes.State,
         PieceTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         prevState: state.pieces,
         operation: operation.pieces,
@@ -90,7 +93,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     const pieces = DualKeyRecordOperation.applyBack<
         PieceTypes.State,
         PieceTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: state.pieces,
         operation: operation.pieces,
@@ -106,7 +109,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     return Result.ok(result);
 };
 
-export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
+export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
     const value = TextOperation.composeDownOperation(first.value, second.value);
     if (value.isError) {
         return value;
@@ -115,7 +118,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     const pieces = DualKeyRecordOperation.composeDownOperation<
         PieceTypes.State,
         PieceTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        DownError
     >({
         first: first.pieces,
         second: second.pieces,
@@ -153,7 +156,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         PieceTypes.State,
         PieceTypes.DownOperation,
         PieceTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: nextState.pieces,
         downOperation: downOperation.pieces,
@@ -235,7 +238,7 @@ export const serverTransform =
             PieceTypes.State,
             PieceTypes.TwoWayOperation,
             PieceTypes.UpOperation,
-            string | ApplyError<PositiveInt> | ComposeAndTransformError
+            TwoWayError
         >({
             prevState: prevState.pieces,
             nextState: currentState.pieces,
@@ -292,7 +295,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     const pieces = DualKeyRecordOperation.clientTransform<
         PieceTypes.State,
         PieceTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        UpError
     >({
         first: first.pieces,
         second: second.pieces,

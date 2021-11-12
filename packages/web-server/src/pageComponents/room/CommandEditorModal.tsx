@@ -7,7 +7,7 @@ import { useSelector } from '../../store';
 import MonacoEditor, { useMonaco } from '@monaco-editor/react';
 import { useBufferValue } from '../../hooks/useBufferValue';
 import { testCommand } from '../../utils/command';
-import { useOperate } from '../../hooks/useOperate';
+import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import { privateCommandsDiff, simpleId } from '@flocon-trpg/core';
 import { useDispatch } from 'react-redux';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
@@ -112,7 +112,7 @@ type CommandState = {
 export const CommandEditorModal: React.FC = () => {
     const modalWidth = 10000;
 
-    const operate = useOperate();
+    const operate = useSetRoomStateByApply();
     const dispatch = useDispatch();
     const commandEditorModalType = useSelector(
         state => state.roomDrawerAndPopoverAndModalModule.commandEditorModalType

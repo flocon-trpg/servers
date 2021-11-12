@@ -65,7 +65,7 @@ export class StateGetter<TState, TOperation, TMetadata> {
     // まだpostしていないoperationを表す。
     // 詳しく書くと、post中の場合は、post後にクライアント側でたまっているoperationを表す。post中でないときは、単にクライアント側でたまっているoperationを表す。
     public getLocalOperation(): TOperation | undefined {
-        if (this.uiState === undefined) {
+        if (this._uiStateCore.isNone) {
             return undefined;
         }
         const result = this._diff({

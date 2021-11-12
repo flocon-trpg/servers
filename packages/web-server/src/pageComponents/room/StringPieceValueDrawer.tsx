@@ -5,7 +5,7 @@ import { replace } from '../../stateManagers/states/types';
 import { DrawerProps } from 'antd/lib/drawer';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
-import { useOperate } from '../../hooks/useOperate';
+import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import {
     StringPieceValueState,
     UpOperation,
@@ -78,7 +78,7 @@ export const StringPieceValueDrawer: React.FC = () => {
         state => state.roomDrawerAndPopoverAndModalModule.stringPieceValueDrawerType
     );
     const dispatch = useDispatch();
-    const operate = useOperate();
+    const operate = useSetRoomStateByApply();
     const myUserUid = useMyUserUid();
     const stringPieceValues = useStringPieceValues();
     const [activeCharacter, setActiveCharacter] = React.useState<{

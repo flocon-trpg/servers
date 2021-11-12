@@ -9,7 +9,7 @@ import {
     toTextUpOperation,
     update,
 } from '@flocon-trpg/core';
-import { useOperate } from '../../hooks/useOperate';
+import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import { Button, Popover, Tree, Modal, Menu, Dropdown, Input } from 'antd';
 import { DataNode } from 'rc-tree/lib/interface';
 import { BufferedInput } from '../../components/BufferedInput';
@@ -18,8 +18,7 @@ import classNames from 'classnames';
 import { cancelRnd, flex, flex1, flexColumn, flexRow, itemsCenter } from '../../utils/className';
 import _ from 'lodash';
 import moment from 'moment';
-import { useOperateAsState } from '../../hooks/useOperateAsState';
-import produce from 'immer';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 
 const padding = 4;
 const splitterPadding = 8;
@@ -205,7 +204,7 @@ type DirSelectProps = {
 const defaultNewDirName = 'a new group';
 const DirSelect = ({ memoId, memo }: DirSelectProps) => {
     const memos = useMemos();
-    const operate = useOperate();
+    const operate = useSetRoomStateByApply();
     const [isModalVisible, setIsModalVisible] = React.useState(false);
     const [newDirName, setNewDirName] = React.useState(defaultNewDirName);
 
@@ -293,8 +292,8 @@ type MemoProps = {
 };
 
 const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
-    const operate = useOperate();
-    const operateAsState = useOperateAsState();
+    const operate = useSetRoomStateByApply();
+    const operateAsStateWithImmer = useSetRoomStateWithImmer();
 
     if (memoId == null) {
         return <div style={{ padding }}>表示するメモが指定されていません。</div>;
@@ -321,13 +320,11 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
                     bufferDuration='default'
                     value={memo.name}
                     onChange={e =>
-                        operateAsState(prevState => {
-                            return produce(prevState, prevState => {
-                                const memo = prevState.memos[memoId];
-                                if (memo != null) {
-                                    memo.name = e.currentValue;
-                                }
-                            });
+                        operateAsStateWithImmer(prevState => {
+                            const memo = prevState.memos[memoId];
+                            if (memo != null) {
+                                memo.name = e.currentValue;
+                            }
                         })
                     }
                 />
@@ -393,7 +390,7 @@ type Props = {
 };
 
 export const Memos: React.FC<Props> = ({ selectedMemoId, onSelectedMemoIdChange }: Props) => {
-    const operate = useOperate();
+    const operate = useSetRoomStateByApply();
     const memos = useMemos();
     const memo = selectedMemoId == null ? undefined : memos?.get(selectedMemoId);
     const [popoverVisible, setPopoverVisible] = React.useState(false);

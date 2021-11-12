@@ -24,7 +24,7 @@ import { useBoards } from '../../hooks/state/useBoards';
 import { useCharacters } from '../../hooks/state/useCharacters';
 import { DicePieceValueElement } from '../../hooks/state/useDicePieceValues';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
-import { useOperate } from '../../hooks/useOperate';
+import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import {
     character,
     ContextMenuState,
@@ -129,7 +129,7 @@ namespace PopupEditorBase {
     export const DicePieceValue: React.FC<DicePieceValueProps> = ({
         element,
     }: DicePieceValueProps) => {
-        const operate = useOperate();
+        const operate = useSetRoomStateByApply();
 
         const characters = useCharacters();
         const dicePieceValue = (() => {
@@ -329,7 +329,7 @@ namespace ContextMenuModule {
         onContextMenuClear: () => void;
         boardKey: CompositeKey;
         dispatch: ReturnType<typeof useDispatch>;
-        operate: ReturnType<typeof useOperate>;
+        operate: ReturnType<typeof useSetRoomStateByApply>;
     };
 
     const selectedCharacterPiecesMenu = ({
@@ -399,7 +399,7 @@ namespace ContextMenuModule {
         onContextMenuClear: () => void;
         boardKey: CompositeKey;
         dispatch: ReturnType<typeof useDispatch>;
-        operate: ReturnType<typeof useOperate>;
+        operate: ReturnType<typeof useSetRoomStateByApply>;
     };
 
     const selectedTachiePiecesMenu = ({
@@ -475,7 +475,7 @@ namespace ContextMenuModule {
         characterPiecesOnCursor: ContextMenuState['characterPiecesOnCursor'];
         tachiesOnCursor: ContextMenuState['tachiesOnCursor'];
         onContextMenuClear: () => void;
-        operate: ReturnType<typeof useOperate>;
+        operate: ReturnType<typeof useSetRoomStateByApply>;
         room: State;
         onSe: (filePath: FilePath, volume: number) => void;
     }): JSX.Element | null => {
@@ -567,7 +567,7 @@ namespace ContextMenuModule {
         boardKey: CompositeKey;
         myUserUid: string;
         dispatch: ReturnType<typeof useDispatch>;
-        operate: ReturnType<typeof useOperate>;
+        operate: ReturnType<typeof useSetRoomStateByApply>;
     };
 
     const selectedDicePiecesMenu = ({
@@ -652,7 +652,7 @@ namespace ContextMenuModule {
         boardKey: CompositeKey;
         myUserUid: string;
         dispatch: ReturnType<typeof useDispatch>;
-        operate: ReturnType<typeof useOperate>;
+        operate: ReturnType<typeof useSetRoomStateByApply>;
     };
 
     const selectedStringPiecesMenu = ({
@@ -734,7 +734,7 @@ namespace ContextMenuModule {
         onContextMenuClear: () => void;
         boardKey: CompositeKey;
         dispatch: ReturnType<typeof useDispatch>;
-        operate: ReturnType<typeof useOperate>;
+        operate: ReturnType<typeof useSetRoomStateByApply>;
     };
 
     const selectedImagePiecesMenu = ({
@@ -806,7 +806,7 @@ namespace ContextMenuModule {
         contextMenuState: ContextMenuState;
         onContextMenuClear: () => void;
         dispatch: ReturnType<typeof useDispatch>;
-        operate: ReturnType<typeof useOperate>;
+        operate: ReturnType<typeof useSetRoomStateByApply>;
         characters: ReadonlyStateMap<CharacterState>;
         board: BoardState;
         myUserUid: string;
@@ -1060,7 +1060,7 @@ namespace ContextMenuModule {
 
     export const Main: React.FC = () => {
         const dispatch = useDispatch();
-        const operate = useOperate();
+        const operate = useSetRoomStateByApply();
         const room = useAtomSelector(roomAtom,state => state.roomState?.state);
         const boards = useBoards();
         const characters = useCharacters();

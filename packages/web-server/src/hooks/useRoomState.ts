@@ -15,7 +15,6 @@ import * as Rx from 'rxjs/operators';
 import { ApolloError, FetchResult, useApolloClient, useMutation } from '@apollo/client';
 import { create as createStateManager } from '../stateManagers/main';
 import { useClientId } from './useClientId';
-import { useDispatch } from 'react-redux';
 import { State, StateManager, UpOperation } from '@flocon-trpg/core';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { authNotFound, MyAuthContext, notSignIn } from '../contexts/MyAuthContext';
@@ -37,58 +36,66 @@ export const deleted = 'deleted';
 
 type SetAction<State> = State | ((prevState: State) => State);
 
-// operate === undefined ⇔ operateAsState === undefined
 export type RoomState =
     | {
           type: typeof loading;
           state?: undefined;
-          operate?: undefined;
-          operateAsState?: undefined;
+          setState?: undefined;
+          setStateByApply?: undefined;
       }
     | {
+          // refetchが必要なく、通常通りsetStateなどが使える状態。
+
           type: typeof joined;
           state: State;
 
-          // operateとoperateAsStateは、undefinedならばrefetchが必要。
-          operate: ((operation: UpOperation) => void) | undefined;
-
-          operateAsState: ((setState: SetAction<State>) => void) | undefined;
+          setState: (setState: SetAction<State>) => void;
+          setStateByApply: (operation: UpOperation) => void;
 
           // participantの更新は、mutationを直接呼び出すことで行う。
       }
     | {
+          // refetchが必要な状態。
+
+          type: typeof joined;
+          state: State;
+
+          setState: undefined;
+          setStateByApply: undefined;
+      }
+    | {
           type: typeof myAuthIsUnavailable;
           state?: undefined;
-          operate?: undefined;
-          operateAsState?: undefined;
+          setState?: undefined;
+          setStateByApply?: undefined;
           error: typeof loading | typeof notSignIn | typeof authNotFound;
       }
     | {
           type: typeof nonJoined;
           state?: undefined;
-          operate?: undefined;
-          operateAsState?: undefined;
+          setState?: undefined;
+          setStateByApply?: undefined;
           nonJoinedRoom: RoomAsListItemFragment;
       }
     | {
           type: typeof getRoomFailure;
           state?: undefined;
-          operate?: undefined;
-          operateAsState?: undefined;
+          setState?: undefined;
+          setStateByApply?: undefined;
           getRoomFailureType: GetRoomFailureType;
       }
     | {
           // TODO: エラーの内容を返したり、unionを細分化する。
           type: typeof mutationFailure;
           state?: undefined;
-          operate?: undefined;
-          operateAsState?: undefined;
+          setState?: undefined;
+          setStateByApply?: undefined;
       }
     | {
           type: typeof deleted;
           state?: undefined;
-          operate?: undefined;
-          operateAsState?: undefined;
+          setState?: undefined;
+          setStateByApply?: undefined;
           deletedBy: string;
       };
 
@@ -111,7 +118,6 @@ export const useRoomState = (
     const [refetchKey, setRefetchKey] = React.useState(0);
     // refetchとして単に () => setRefetchKey(refetchKey + 1) をそのまま返す（この値をfとする）と、レンダーのたびにfは変わるため、fをdepsに使用されたときに問題が起こる可能性が高いので、useMemoで軽減。
     const refetch = React.useMemo(() => () => setRefetchKey(refetchKey + 1), [refetchKey]);
-    const dispatch = useDispatch();
     const [, addRoomNotification] = useAtom(addRoomNotificationAtom);
 
     const userUid = typeof myAuth === 'string' ? null : myAuth.uid;
@@ -147,10 +153,25 @@ export const useRoomState = (
                     return oldValue;
                 }
                 const newState = $stateManager.uiState;
+                if (oldValue.setStateByApply == null || $stateManager.requiresReload) {
+                    if ($stateManager.requiresReload) {
+                        console.info(
+                            '[調査用ログ]onRoomStateManagerUpdate:',
+                            JSON.stringify($stateManager.history)
+                        );
+                    }
+                    return {
+                        type: oldValue.type,
+                        state: newState,
+                        setStateByApply: undefined,
+                        setState: undefined,
+                    };
+                }
                 return {
-                    ...oldValue,
+                    type: oldValue.type,
                     state: newState,
-                    operate: $stateManager.requiresReload ? undefined : oldValue.operate,
+                    setStateByApply: oldValue.setStateByApply,
+                    setState: oldValue.setState,
                 };
             });
         };
@@ -331,7 +352,7 @@ export const useRoomState = (
 
                         roomOperationCache.clear(); // 早めのメモリ解放
                         roomStateManager = newRoomStateManager;
-                        const operateCore = (
+                        const setStateCore = (
                             operation:
                                 | {
                                       type: 'operation';
@@ -347,44 +368,61 @@ export const useRoomState = (
                                 return;
                             }
                             if ($stateManager.requiresReload) {
+                                if ($stateManager.requiresReload) {
+                                    console.info(
+                                        '[調査用ログ]setStateCore',
+                                        JSON.stringify($stateManager.history)
+                                    );
+                                }
                                 setState(oldValue => {
                                     if (oldValue.type !== joined) {
                                         return oldValue;
                                     }
                                     return {
                                         ...oldValue,
-                                        operate: undefined,
+                                        setStateByApply: undefined,
+                                        setState: undefined,
                                     };
                                 });
                                 return;
                             }
                             if (operation.type === 'state') {
-                                $stateManager.operateAsState(operation.state);
+                                $stateManager.setUiState(operation.state);
                             } else {
-                                $stateManager.operate(operation.operation);
+                                $stateManager.setUiStateByApply(operation.operation);
                             }
                             onRoomStateManagerUpdate();
                             postTrigger.next();
                         };
 
+                        if (newRoomStateManager.requiresReload) {
+                            console.info(
+                                '[調査用ログ]onRoomStateManagerCreate',
+                                JSON.stringify(newRoomStateManager.history)
+                            );
+                            setState({
+                                type: joined,
+                                state: newRoomStateManager.uiState,
+                                setStateByApply: undefined,
+                                setState: undefined,
+                            });
+                        }
+
                         setState({
                             type: joined,
                             state: newRoomStateManager.uiState,
-                            operate: newRoomStateManager.requiresReload
-                                ? undefined
-                                : operation => operateCore({ type: 'operation', operation }),
-                            operateAsState: newRoomStateManager.requiresReload
-                                ? undefined
-                                : setState => {
-                                      if (typeof setState === 'function') {
-                                          operateCore({
-                                              type: 'state',
-                                              state: setState(newRoomStateManager.uiState),
-                                          });
-                                          return;
-                                      }
-                                      operateCore({ type: 'state', state: setState });
-                                  },
+                            setStateByApply: operation =>
+                                setStateCore({ type: 'operation', operation }),
+                            setState: setState => {
+                                if (typeof setState === 'function') {
+                                    setStateCore({
+                                        type: 'state',
+                                        state: setState(newRoomStateManager.uiState),
+                                    });
+                                    return;
+                                }
+                                setStateCore({ type: 'state', state: setState });
+                            },
                         });
 
                         break;
@@ -421,7 +459,7 @@ export const useRoomState = (
         userUid,
         myAuthErrorType,
         operateMutation,
-        dispatch,
+        addRoomNotification,
         clientId,
         roomEventSubscription,
         hasIdToken,

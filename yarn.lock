@@ -1700,7 +1700,7 @@ __metadata:
     "@graphql-codegen/typed-document-node": 2.2.0
     "@graphql-codegen/typescript": 2.3.0
     "@graphql-codegen/typescript-operations": 2.2.0
-    "@kizahasi/ot-string": ^0.2.3
+    "@kizahasi/ot-string": ^0.3.0
     "@kizahasi/result": ^1.0.0
     "@mikro-orm/core": ^4.5.7
     "@mikro-orm/migrations": ^4.5.7
@@ -1771,7 +1771,7 @@ __metadata:
     "@flocon-trpg/flocon-script": "workspace:^"
     "@flocon-trpg/utils": "workspace:^"
     "@kizahasi/option": ^1.0.0
-    "@kizahasi/ot-string": ^0.2.3
+    "@kizahasi/ot-string": ^0.3.0
     "@kizahasi/result": ^1.0.1
     "@ltd/j-toml": ^1.23.0
     "@types/estree": 0.0.50
@@ -2706,14 +2706,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@kizahasi/ot-string@npm:^0.2.3":
-  version: 0.2.4
-  resolution: "@kizahasi/ot-string@npm:0.2.4"
+"@kizahasi/ot-string@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "@kizahasi/ot-string@npm:0.3.0"
   dependencies:
     "@kizahasi/option": ^1.0.0
     "@kizahasi/result": ^1.0.0
     diff-match-patch: ^1.0.5
-  checksum: 78ff1a5f704f7157683540feade55ad68dd54889655c1a6d3e02ecdb181a2a619cd5666bdb6b3ee3fdc27fee234a27ab4664fdaf97302bbd0eaaa5ea23123915
+  checksum: 84e7880b06163d2b1801a8f98ae3defdce6f01790f999177065f77b606f9aed941a56026ecb71b0c471ccd0de1cb8c10fb046bbbe19401ce2248d1313df07f24
   languageName: node
   linkType: hard
 

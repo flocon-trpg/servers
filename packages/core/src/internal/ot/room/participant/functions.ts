@@ -7,6 +7,10 @@ import {
     Restore,
     admin,
     ServerTransform,
+    UpError,
+    TwoWayError,
+    ScalarError,
+    DownError,
 } from '../../util/type';
 import * as ReplaceOperation from '../../util/replaceOperation';
 import { isIdRecord } from '../../util/record';
@@ -14,7 +18,6 @@ import { Result } from '@kizahasi/result';
 import { chooseRecord, CompositeKey } from '@flocon-trpg/utils';
 import { mapRecordOperationElement } from '../../util/recordOperationElement';
 import * as RecordOperation from '../../util/recordOperation';
-import { ApplyError, ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-string';
 import * as Board from './board/functions';
 import * as BoardTypes from './board/types';
 import * as Character from './character/functions';
@@ -148,11 +151,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
         result.role = operation.role.newValue;
     }
 
-    const boards = RecordOperation.apply<
-        BoardTypes.State,
-        BoardTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
-    >({
+    const boards = RecordOperation.apply<BoardTypes.State, BoardTypes.UpOperation, ScalarError>({
         prevState: state.boards,
         operation: operation.boards,
         innerApply: ({ prevState, operation: upOperation }) => {
@@ -167,7 +166,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     const characters = RecordOperation.apply<
         CharacterTypes.State,
         CharacterTypes.UpOperation | CharacterTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         prevState: state.characters,
         operation: operation.characters,
@@ -186,7 +185,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     const imagePieceValues = RecordOperation.apply<
         ImagePieceValueTypes.State,
         ImagePieceValueTypes.UpOperation | ImagePieceValueTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         prevState: state.imagePieceValues,
         operation: operation.imagePieceValues,
@@ -217,7 +216,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     const boards = RecordOperation.applyBack<
         BoardTypes.State,
         BoardTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: state.boards,
         operation: operation.boards,
@@ -233,7 +232,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     const characters = RecordOperation.applyBack<
         CharacterTypes.State,
         CharacterTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: state.characters,
         operation: operation.characters,
@@ -249,7 +248,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     const imagePieceValues = RecordOperation.applyBack<
         ImagePieceValueTypes.State,
         ImagePieceValueTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: state.imagePieceValues,
         operation: operation.imagePieceValues,
@@ -268,11 +267,11 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     return Result.ok(result);
 };
 
-export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
+export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
     const boards = RecordOperation.composeDownOperation<
         BoardTypes.State,
         BoardTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        DownError
     >({
         first: first.boards,
         second: second.boards,
@@ -286,7 +285,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     const characters = RecordOperation.composeDownOperation<
         CharacterTypes.State,
         CharacterTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        DownError
     >({
         first: first.characters,
         second: second.characters,
@@ -300,7 +299,7 @@ export const composeDownOperation: Compose<DownOperation> = ({ first, second }) 
     const imagePieceValues = RecordOperation.composeDownOperation<
         ImagePieceValueTypes.State,
         ImagePieceValueTypes.DownOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        DownError
     >({
         first: first.imagePieceValues,
         second: second.imagePieceValues,
@@ -341,7 +340,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         BoardTypes.State,
         BoardTypes.DownOperation,
         BoardTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: nextState.boards,
         downOperation: downOperation.boards,
@@ -356,7 +355,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         CharacterTypes.State,
         CharacterTypes.DownOperation,
         CharacterTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: nextState.characters,
         downOperation: downOperation.characters,
@@ -371,7 +370,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         ImagePieceValueTypes.State,
         ImagePieceValueTypes.DownOperation,
         ImagePieceValueTypes.TwoWayOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        ScalarError
     >({
         nextState: nextState.imagePieceValues,
         downOperation: downOperation.imagePieceValues,
@@ -470,7 +469,7 @@ export const serverTransform =
             BoardTypes.State,
             BoardTypes.TwoWayOperation,
             BoardTypes.UpOperation,
-            string | ApplyError<PositiveInt> | ComposeAndTransformError
+            TwoWayError
         >({
             first: serverOperation?.boards,
             second: clientOperation.boards,
@@ -513,7 +512,7 @@ export const serverTransform =
             CharacterTypes.State,
             CharacterTypes.TwoWayOperation,
             CharacterTypes.UpOperation,
-            string | ApplyError<PositiveInt> | ComposeAndTransformError
+            TwoWayError
         >({
             first: serverOperation?.characters,
             second: clientOperation.characters,
@@ -554,7 +553,7 @@ export const serverTransform =
             ImagePieceValueTypes.State,
             ImagePieceValueTypes.TwoWayOperation,
             ImagePieceValueTypes.UpOperation,
-            string | ApplyError<PositiveInt> | ComposeAndTransformError
+            TwoWayError
         >({
             first: serverOperation?.imagePieceValues,
             second: clientOperation.imagePieceValues,
@@ -614,7 +613,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     const boards = RecordOperation.clientTransform<
         BoardTypes.State,
         BoardTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        UpError
     >({
         first: first.boards,
         second: second.boards,
@@ -634,7 +633,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     const characters = RecordOperation.clientTransform<
         CharacterTypes.State,
         CharacterTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        UpError
     >({
         first: first.characters,
         second: second.characters,
@@ -654,7 +653,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     const imagePieceValues = RecordOperation.clientTransform<
         ImagePieceValueTypes.State,
         ImagePieceValueTypes.UpOperation,
-        string | ApplyError<PositiveInt> | ComposeAndTransformError
+        UpError
     >({
         first: first.imagePieceValues,
         second: second.imagePieceValues,

@@ -17,7 +17,7 @@ import classNames from 'classnames';
 import { flex, flex1, flexColumn, flexNone, flexRow, itemsCenter } from '../../utils/className';
 import { ChatPaletteTomlInput } from '../../components/ChatPaletteTomlInput';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
-import { useOperateAsState } from '../../hooks/useOperateAsState';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import produce from 'immer';
 import { UISelector } from '../../components/UISelector';
 import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
@@ -137,7 +137,7 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
     const [selectedChannelType, setSelectedChannelType] =
         React.useState<SelectedChannelType>(publicChannel);
     const [isEditMode, setIsEditMode] = React.useState(false);
-    const operateAsState = useOperateAsState();
+    const operateAsStateWithImmer = useSetRoomStateWithImmer();
 
     const myCharactersOptions = React.useMemo(() => {
         if (myCharacters == null) {
@@ -232,21 +232,19 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
                         onDoubleClick={text => subject.next(text)}
                         isEditMode={isEditMode}
                         onChange={toml => {
-                            operateAsState(prevRoom =>
-                                produce(prevRoom, prevRoom => {
-                                    if (myUserUid == null || selectedCharacterStateId == null) {
-                                        return;
-                                    }
-                                    const character =
-                                        prevRoom.participants[myUserUid]?.characters?.[
-                                            selectedCharacterStateId
-                                        ];
-                                    if (character == null) {
-                                        return;
-                                    }
-                                    character.chatPalette = toml;
-                                })
-                            );
+                            operateAsStateWithImmer(prevRoom => {
+                                if (myUserUid == null || selectedCharacterStateId == null) {
+                                    return;
+                                }
+                                const character =
+                                    prevRoom.participants[myUserUid]?.characters?.[
+                                        selectedCharacterStateId
+                                    ];
+                                if (character == null) {
+                                    return;
+                                }
+                                character.chatPalette = toml;
+                            });
                         }}
                     />
                 )}

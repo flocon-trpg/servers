@@ -1,5 +1,13 @@
 import * as ReplaceOperation from '../../util/replaceOperation';
-import { Apply, ClientTransform, Compose, Diff, Restore, ServerTransform } from '../../util/type';
+import {
+    Apply,
+    ClientTransform,
+    Compose,
+    Diff,
+    DownError,
+    Restore,
+    ServerTransform,
+} from '../../util/type';
 import { isIdRecord } from '../../util/record';
 import { Result } from '@kizahasi/result';
 import { DownOperation, State, TwoWayOperation, UpOperation } from './types';
@@ -42,7 +50,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     return Result.ok(result);
 };
 
-export const composeDownOperation: Compose<DownOperation> = ({ first, second }) => {
+export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
     const valueProps: DownOperation = {
         $v: 1,
         $r: 1,

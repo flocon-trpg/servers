@@ -5,7 +5,7 @@ import { replace } from '../../stateManagers/states/types';
 import { DrawerProps } from 'antd/lib/drawer';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
-import { useOperate } from '../../hooks/useOperate';
+import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import {
     toDicePieceValueUpOperation,
     dicePieceValueDiff,
@@ -71,7 +71,7 @@ export const DicePieceValueDrawer: React.FC = () => {
         state => state.roomDrawerAndPopoverAndModalModule.dicePieceValueDrawerType
     );
     const dispatch = useDispatch();
-    const operate = useOperate();
+    const operate = useSetRoomStateByApply();
     const myUserUid = useMyUserUid();
     const dicePieceValues = useDicePieceValues();
     const [activeCharacter, setActiveCharacter] = React.useState<{

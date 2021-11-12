@@ -47,11 +47,11 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).toBeNull();
     });
 
-    test('operate', () => {
+    test('setUiState', () => {
         const target = createStateManager();
 
         const newState = 2;
-        target.operateAsState(newState);
+        target.setUiState(newState);
 
         expect(target.isPosting).toBe(false);
         expect(target.requiresReload).toBe(false);
@@ -60,12 +60,12 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).toBeNull();
     });
 
-    test('post', () => {
+    test('setUiState -> post', () => {
         const operation = { oldValue: initState, newValue: 2 };
 
         const target = createStateManager();
 
-        target.operateAsState(operation.newValue);
+        target.setUiState(operation.newValue);
         const postResult = target.post();
 
         expect(target.isPosting).toBe(true);
@@ -74,22 +74,18 @@ describe('StateManager', () => {
         expect(target.uiState).toBe(operation.newValue);
         expect(target.waitingResponseSince()).not.toBeNull();
 
-        if (postResult === undefined) {
-            expect(postResult).not.toBeUndefined();
-            throw new Error('Guard');
-        }
-        expect(postResult.syncedState).toBe(0);
-        expect(postResult.operationToPost).toEqual(operation);
-        expect(postResult.revision).toBe(initRevision);
+        expect(postResult?.syncedState).toBe(0);
+        expect(postResult?.operationToPost).toEqual(operation);
+        expect(postResult?.revision).toBe(initRevision);
     });
 
-    test('operate -> post -> non-id onPosted', () => {
+    test('setUiState -> post -> non-id onPosted', () => {
         const operation = { oldValue: initState, newValue: 2 };
         const resultOperation = { oldValue: initState, newValue: 20 };
 
         const target = createStateManager();
 
-        target.operateAsState(operation.newValue);
+        target.setUiState(operation.newValue);
         const postResult = target.post();
         if (postResult === undefined) {
             throw new Error('Guard');
@@ -109,12 +105,12 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).toBeNull();
     });
 
-    test('operate -> post -> onPosted({ isId: true })', () => {
+    test('setUiState -> post -> onPosted({ isId: true })', () => {
         const operation = { oldValue: initState, newValue: 2 };
 
         const target = createStateManager();
 
-        target.operateAsState(operation.newValue);
+        target.setUiState(operation.newValue);
         const postResult = target.post();
         if (postResult === undefined) {
             throw new Error('Guard');
@@ -133,12 +129,12 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).toBeNull();
     });
 
-    test('operate -> post -> onPosted({ isSuccess: null })', () => {
+    test('setUiState -> post -> onPosted({ isSuccess: null })', () => {
         const operation = { oldValue: initState, newValue: 2 };
 
         const target = createStateManager();
 
-        target.operateAsState(operation.newValue);
+        target.setUiState(operation.newValue);
         const postResult = target.post();
         if (postResult === undefined) {
             throw new Error('Guard');
@@ -153,12 +149,12 @@ describe('StateManager', () => {
         expect(target.uiState).toBe(operation.newValue);
     });
 
-    test('operate -> post -> onPosted({ isSuccess: false })', () => {
+    test('setUiState -> post -> onPosted({ isSuccess: false })', () => {
         const operation = { oldValue: initState, newValue: 2 };
 
         const target = createStateManager();
 
-        target.operateAsState(operation.newValue);
+        target.setUiState(operation.newValue);
         const postResult = target.post();
         if (postResult === undefined) {
             throw new Error('Guard');
@@ -233,14 +229,14 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).toBeNull();
     });
 
-    test('operate -> post -> onPosted -> onOthersGet(initRevision + 1)', () => {
+    test('setUiState -> post -> onPosted -> onOthersGet(initRevision + 1)', () => {
         const operation = { oldValue: initState, newValue: 2 };
         const operationResult = { oldValue: 20, newValue: 200 };
         const otherClientsGet = { oldValue: initState, newValue: 20 };
 
         const target = createStateManager();
 
-        target.operateAsState(operation.newValue);
+        target.setUiState(operation.newValue);
         const postResult = target.post();
         if (postResult === undefined) {
             throw new Error('Guard');
@@ -261,14 +257,14 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).toBeNull();
     });
 
-    test('operate -> post -> onPosted -> onOthersGet(initRevision + 2)', () => {
+    test('setUiState -> post -> onPosted -> onOthersGet(initRevision + 2)', () => {
         const operation = { oldValue: initState, newValue: 2 };
         const operationResult = { oldValue: initState, newValue: 20 };
         const otherClientsGet = { oldValue: 20, newValue: 200 };
 
         const target = createStateManager();
 
-        target.operateAsState(operation.newValue);
+        target.setUiState(operation.newValue);
         const postResult = target.post();
         if (postResult === undefined) {
             throw new Error('Guard');
@@ -289,14 +285,14 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).toBeNull();
     });
 
-    test('operate -> post -> onOthersGet(initRevision + 2) -> onPosted', () => {
+    test('setUiState -> post -> onOthersGet(initRevision + 2) -> onPosted', () => {
         const firstOperation = { oldValue: initState, newValue: 2 };
         const secondOperation = { oldValue: 20, newValue: 200 };
         const firstOperationResult = { oldValue: initState, newValue: 20 };
 
         const target = createStateManager();
 
-        target.operateAsState(firstOperation.newValue);
+        target.setUiState(firstOperation.newValue);
         const postResult = target.post();
         if (postResult === undefined) {
             throw new Error('Guard');
@@ -317,21 +313,21 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).toBeNull();
     });
 
-    test('operate -> post -> operate -> onPosted({ isSuccess: true })', () => {
+    test('setUiState -> post -> setUiState -> onPosted({ isSuccess: true })', () => {
         const firstOperation = { oldValue: initState, newValue: 2 };
         const secondOperation = { oldValue: 2, newValue: 20 };
         const firstOperationResult = { oldValue: initState, newValue: 200 };
 
         const target = createStateManager();
 
-        target.operateAsState(firstOperation.newValue);
+        target.setUiState(firstOperation.newValue);
 
         const postResult = target.post();
         if (postResult === undefined) {
             throw new Error('Guard');
         }
 
-        target.operateAsState(secondOperation.newValue);
+        target.setUiState(secondOperation.newValue);
 
         postResult.onPosted({
             isSuccess: true,
@@ -347,20 +343,20 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).toBeNull();
     });
 
-    test('operate -> post -> operate -> onPosted({ isId: true })', () => {
+    test('setUiState -> post -> setUiState -> onPosted({ isId: true })', () => {
         const firstOperation = { oldValue: initState, newValue: 2 };
         const secondOperation = { oldValue: 2, newValue: 20 };
 
         const target = createStateManager();
 
-        target.operateAsState(firstOperation.newValue);
+        target.setUiState(firstOperation.newValue);
 
         const postResult = target.post();
         if (postResult === undefined) {
             throw new Error('Guard');
         }
 
-        target.operateAsState(secondOperation.newValue);
+        target.setUiState(secondOperation.newValue);
 
         postResult.onPosted({
             isSuccess: true,
