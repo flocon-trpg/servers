@@ -60,7 +60,7 @@ describe('StateManager', () => {
         expect(target.waitingResponseSince()).toBeNull();
     });
 
-    test('post', () => {
+    test('operate -> post', () => {
         const operation = { oldValue: initState, newValue: 2 };
 
         const target = createStateManager();
@@ -74,13 +74,9 @@ describe('StateManager', () => {
         expect(target.uiState).toBe(operation.newValue);
         expect(target.waitingResponseSince()).not.toBeNull();
 
-        if (postResult === undefined) {
-            expect(postResult).not.toBeUndefined();
-            throw new Error('Guard');
-        }
-        expect(postResult.syncedState).toBe(0);
-        expect(postResult.operationToPost).toEqual(operation);
-        expect(postResult.revision).toBe(initRevision);
+        expect(postResult?.syncedState).toBe(0);
+        expect(postResult?.operationToPost).toEqual(operation);
+        expect(postResult?.revision).toBe(initRevision);
     });
 
     test('operate -> post -> non-id onPosted', () => {
