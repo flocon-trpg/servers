@@ -1029,7 +1029,7 @@ export class RoomResolver {
                 connectedUserUids: [
                     ...(await context.connectionManager.listRoomConnections({ roomId })),
                 ]
-                    .filter(([key, value]) => value > 0)
+                    .filter(([, value]) => value > 0)
                     .map(([key]) => key),
                 fetchedAt: new Date().getTime(),
             });
@@ -1309,7 +1309,7 @@ export class RoomResolver {
                     payload: undefined,
                 };
             }
-            const { room, me, roomState } = findResult;
+            const { room, me } = findResult;
             const participantUserUids = findResult.participantIds();
             // me.role == nullのときは弾かないようにしてもいいかも？
             if (me == null || me.role == null) {
