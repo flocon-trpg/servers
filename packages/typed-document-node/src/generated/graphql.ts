@@ -333,6 +333,7 @@ export type Mutation = {
     operate: OperateRoomResult;
     ping: Pong;
     promoteToPlayer: PromoteResult;
+    resetMessages: ResetRoomMessagesResult;
     updateWritingMessageStatus: Scalars['Boolean'];
     writePrivateMessage: WriteRoomPrivateMessageResult;
     writePublicMessage: WriteRoomPublicMessageResult;
@@ -417,6 +418,10 @@ export type MutationPingArgs = {
 
 export type MutationPromoteToPlayerArgs = {
     phrase?: Maybe<Scalars['String']>;
+    roomId: Scalars['String'];
+};
+
+export type MutationResetMessagesArgs = {
     roomId: Scalars['String'];
 };
 
@@ -584,6 +589,17 @@ export type QueryGetRoomConnectionsArgs = {
     roomId: Scalars['String'];
 };
 
+export enum ResetRoomMessagesFailureType {
+    NotAuthorized = 'NotAuthorized',
+    NotParticipant = 'NotParticipant',
+    RoomNotFound = 'RoomNotFound',
+}
+
+export type ResetRoomMessagesResult = {
+    __typename?: 'ResetRoomMessagesResult';
+    failureType?: Maybe<ResetRoomMessagesFailureType>;
+};
+
 export type RoomAsListItem = {
     __typename?: 'RoomAsListItem';
     createdBy: Scalars['String'];
@@ -603,6 +619,7 @@ export type RoomConnectionEvent = {
 export type RoomEvent = {
     __typename?: 'RoomEvent';
     deleteRoomOperation?: Maybe<DeleteRoomOperation>;
+    isRoomMessagesResetEvent: Scalars['Boolean'];
     roomConnectionEvent?: Maybe<RoomConnectionEvent>;
     roomMessageEvent?: Maybe<RoomMessageEvent>;
     roomOperation?: Maybe<RoomOperation>;
@@ -618,6 +635,7 @@ export type RoomGetState = {
 
 export type RoomMessageEvent =
     | PieceValueLog
+    | RoomMessagesReset
     | RoomPrivateMessage
     | RoomPrivateMessageUpdate
     | RoomPublicChannel
@@ -633,6 +651,11 @@ export type RoomMessages = {
     publicChannels: Array<RoomPublicChannel>;
     publicMessages: Array<RoomPublicMessage>;
     soundEffects: Array<RoomSoundEffect>;
+};
+
+export type RoomMessagesReset = {
+    __typename?: 'RoomMessagesReset';
+    publicMessagesDeleted: Scalars['Boolean'];
 };
 
 export type RoomOperation = {
@@ -1096,6 +1119,8 @@ type RoomMessageEvent_PieceValueLog_Fragment = {
     valueJson: string;
 };
 
+type RoomMessageEvent_RoomMessagesReset_Fragment = { __typename: 'RoomMessagesReset' };
+
 type RoomMessageEvent_RoomPrivateMessage_Fragment = {
     __typename: 'RoomPrivateMessage';
     messageId: string;
@@ -1235,6 +1260,7 @@ type RoomMessageEvent_RoomSoundEffect_Fragment = {
 
 export type RoomMessageEventFragment =
     | RoomMessageEvent_PieceValueLog_Fragment
+    | RoomMessageEvent_RoomMessagesReset_Fragment
     | RoomMessageEvent_RoomPrivateMessage_Fragment
     | RoomMessageEvent_RoomPrivateMessageUpdate_Fragment
     | RoomMessageEvent_RoomPublicChannel_Fragment
@@ -1902,6 +1928,18 @@ export type PromoteToPlayerMutation = {
     result: { __typename?: 'PromoteResult'; failureType?: PromoteFailureType | null | undefined };
 };
 
+export type ResetMessagesMutationVariables = Exact<{
+    roomId: Scalars['String'];
+}>;
+
+export type ResetMessagesMutation = {
+    __typename?: 'Mutation';
+    result: {
+        __typename?: 'ResetRoomMessagesResult';
+        failureType?: ResetRoomMessagesFailureType | null | undefined;
+    };
+};
+
 export type WritePublicMessageMutationVariables = Exact<{
     roomId: Scalars['String'];
     text: Scalars['String'];
@@ -2113,6 +2151,7 @@ export type RoomEventSubscription = {
     roomEvent?:
         | {
               __typename?: 'RoomEvent';
+              isRoomMessagesResetEvent: boolean;
               roomOperation?:
                   | {
                         __typename?: 'RoomOperation';
@@ -2140,6 +2179,7 @@ export type RoomEventSubscription = {
                         logType: PieceValueLogType;
                         valueJson: string;
                     }
+                  | { __typename: 'RoomMessagesReset' }
                   | {
                         __typename: 'RoomPrivateMessage';
                         messageId: string;
@@ -5016,6 +5056,52 @@ export const PromoteToPlayerDocument = {
         },
     ],
 } as unknown as DocumentNode<PromoteToPlayerMutation, PromoteToPlayerMutationVariables>;
+export const ResetMessagesDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'ResetMessages' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'roomId' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'resetMessages' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'roomId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'roomId' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'failureType' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<ResetMessagesMutation, ResetMessagesMutationVariables>;
 export const WritePublicMessageDocument = {
     kind: 'Document',
     definitions: [
@@ -5767,6 +5853,10 @@ export const RoomEventDocument = {
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'isRoomMessagesResetEvent' },
+                                },
                                 {
                                     kind: 'Field',
                                     name: { kind: 'Name', value: 'roomOperation' },

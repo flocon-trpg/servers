@@ -1,5 +1,6 @@
 import { $free, $system } from '@flocon-trpg/core';
 import { createUnionType, Field, ObjectType } from 'type-graphql';
+import { ResetRoomMessagesFailureType } from '../../../enums/ResetRoomMessagesFailureType';
 import { DeleteMessageFailureType } from '../../../enums/DeleteMessageFailureType';
 import { EditMessageFailureType } from '../../../enums/EditMessageFailureType';
 import { GetRoomLogFailureType } from '../../../enums/GetRoomLogFailureType';
@@ -437,6 +438,16 @@ export class EditMessageResult {
     public failureType?: EditMessageFailureType;
 }
 
+export const ResetRoomMessagesResultType = 'ResetRoomMessagesResult';
+
+@ObjectType()
+export class ResetRoomMessagesResult {
+    public __tstype!: typeof ResetRoomMessagesResultType;
+
+    @Field(() => ResetRoomMessagesFailureType, { nullable: true })
+    public failureType?: ResetRoomMessagesFailureType;
+}
+
 export const RoomPublicChannelUpdateType = 'RoomPublicChannelUpdate';
 
 @ObjectType()
@@ -515,6 +526,19 @@ export class RoomPrivateMessageUpdate {
     public updatedAt?: number;
 }
 
+export const RoomMessagesResetType = 'RoomMessagesReset';
+
+@ObjectType()
+export class RoomMessagesReset {
+    public __tstype!: typeof RoomMessagesResetType;
+
+    @Field()
+    public publicMessagesDeleted!: boolean;
+
+    // @Field()
+    // public privateMessagesDeleted!: boolean;
+}
+
 export const RoomMessageEvent = createUnionType({
     name: 'RoomMessageEvent',
     types: () =>
@@ -527,6 +551,7 @@ export const RoomMessageEvent = createUnionType({
             RoomPublicChannelUpdate,
             RoomPublicMessageUpdate,
             RoomPrivateMessageUpdate,
+            RoomMessagesReset,
         ] as const,
     resolveType: value => {
         switch (value.__tstype) {
@@ -546,6 +571,8 @@ export const RoomMessageEvent = createUnionType({
                 return RoomPublicMessageUpdate;
             case RoomPrivateMessageUpdateType:
                 return RoomPrivateMessageUpdate;
+            case RoomMessagesResetType:
+                return RoomMessagesReset;
         }
     },
 });

@@ -75,6 +75,7 @@ import {
 } from './object+args+input';
 import {
     CharacterValueForMessage,
+    ResetRoomMessagesResult,
     DeleteMessageResult,
     EditMessageResult,
     GetRoomLogFailureResultType,
@@ -105,6 +106,7 @@ import {
     WriteRoomPublicMessageResult,
     WriteRoomSoundEffectFailureResultType,
     WriteRoomSoundEffectResult,
+    ResetRoomMessagesResultType,
 } from '../../entities/roomMessage/graphql';
 import { WriteRoomPublicMessageFailureType } from '../../../enums/WriteRoomPublicMessageFailureType';
 import { analyze, Context } from '../../../messageAnalyzer/main';
@@ -163,6 +165,8 @@ import { ParticipantRoleType } from '../../../enums/ParticipantRoleType';
 import { RateLimitMiddleware } from '../../middlewares/RateLimitMiddleware';
 import { convertToMaxLength100String } from '../../../utils/convertToMaxLength100String';
 import { GetRoomAsListItemResult } from '../../results/GetRoomAsListItemResult';
+import { ResetRoomMessagesFailureType } from '../../../enums/ResetRoomMessagesFailureType';
+import { boolean } from 'fp-ts';
 
 const find = <T>(source: Record<string, T | undefined>, key: string): T | undefined => source[key];
 
@@ -211,12 +215,18 @@ export type WritingMessageStatusUpdatePayload = {
     updatedAt: number;
 };
 
+type RoomMessagesResetPayload = {
+    type: 'roomMessagesResetPayload';
+    roomId: string;
+};
+
 export type RoomEventPayload =
     | MessageUpdatePayload
     | RoomOperationPayload
     | DeleteRoomPayload
     | RoomConnectionUpdatePayload
-    | WritingMessageStatusUpdatePayload;
+    | WritingMessageStatusUpdatePayload
+    | RoomMessagesResetPayload;
 
 type OperateCoreResult =
     | {
@@ -2473,6 +2483,92 @@ export class RoomResolver {
         return true;
     }
 
+    // TODO: テストを書く
+    @Mutation(() => ResetRoomMessagesResult)
+    @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(5))
+    public async resetMessages(
+        @Arg('roomId') roomId: string,
+        @Ctx() context: ResolverContext,
+        @PubSub() pubSub: PubSubEngine
+    ): Promise<ResetRoomMessagesResult> {
+        const queue = async (): Promise<
+            Result<{ result: ResetRoomMessagesResult; payload?: RoomMessagesResetPayload }>
+        > => {
+            const em = context.em;
+            const authorizedUser = ensureAuthorizedUser(context);
+            const findResult = await findRoomAndMyParticipant({
+                em,
+                userUid: authorizedUser.userUid,
+                roomId,
+            });
+            if (findResult == null) {
+                return Result.ok({
+                    result: {
+                        __tstype: ResetRoomMessagesResultType,
+                        failureType: ResetRoomMessagesFailureType.RoomNotFound,
+                    },
+                });
+            }
+            const { room, me } = findResult;
+            if (me === undefined) {
+                return Result.ok({
+                    result: {
+                        __tstype: ResetRoomMessagesResultType,
+                        failureType: ResetRoomMessagesFailureType.NotParticipant,
+                    },
+                });
+            }
+            if (me.role === Spectator) {
+                return Result.ok({
+                    result: {
+                        __tstype: ResetRoomMessagesResultType,
+                        failureType: ResetRoomMessagesFailureType.NotAuthorized,
+                    },
+                });
+            }
+
+            for (const chatCh of await room.roomChatChs.loadItems()) {
+                await chatCh.roomPubMsgs.init();
+                chatCh.roomPubMsgs.removeAll();
+                em.persist(chatCh);
+            }
+
+            await room.roomPrvMsgs.init();
+            room.roomPrvMsgs.removeAll();
+
+            await room.dicePieceValueLogs.init();
+            room.dicePieceValueLogs.removeAll();
+
+            await room.numberPieceValueLogs.init();
+            room.numberPieceValueLogs.removeAll();
+
+            em.persist(room);
+            await em.flush();
+
+            return Result.ok({
+                result: {
+                    __tstype: 'ResetRoomMessagesResult',
+                },
+                payload: {
+                    type: 'roomMessagesResetPayload',
+                    roomId,
+                },
+            });
+        };
+        const result = await context.promiseQueue.next(queue);
+        if (result.type === queueLimitReached) {
+            throw serverTooBusyMessage;
+        }
+        if (result.value.isError) {
+            throw result.value.error;
+        }
+        if (result.value.value.payload != null) {
+            await publishRoomEvent(pubSub, result.value.value.payload);
+        }
+        return result.value.value.result;
+    }
+
     // graphql-wsでRoomOperatedのConnectionを検知しているので、もしこれのメソッドやArgsがリネームもしくは削除されるときはそちらも変える。
     // CONSIDER: return undefined; とすると、{ roomEvent: null } というオブジェクトが全員に通知される。そのため、それを見るとイベントの内容を予想できてしまう可能性がある。例えば1セッションしか行われていない場合、秘話が送られた可能性が高い、など。この問題はおそらくfilterプロパティで解決できるかもしれない。
     @Subscription(() => RoomEvent, {
@@ -2502,6 +2598,7 @@ export class RoomResolver {
                     isConnected: payload.isConnected,
                     updatedAt: payload.updatedAt,
                 },
+                isRoomMessagesResetEvent: false,
             };
         }
 
@@ -2512,6 +2609,13 @@ export class RoomResolver {
                     status: payload.status,
                     updatedAt: payload.updatedAt,
                 },
+                isRoomMessagesResetEvent: false,
+            };
+        }
+
+        if (payload.type === 'roomMessagesResetPayload') {
+            return {
+                isRoomMessagesResetEvent: true,
             };
         }
 
@@ -2541,6 +2645,7 @@ export class RoomResolver {
                                 initTextSource: undefined,
                                 commandResult: undefined,
                             },
+                            isRoomMessagesResetEvent: false,
                         };
                     }
                     break;
@@ -2555,12 +2660,17 @@ export class RoomResolver {
                                 initTextSource: undefined,
                                 commandResult: undefined,
                             },
+                            isRoomMessagesResetEvent: false,
                         };
                     }
                     break;
             }
 
-            return { roomMessageEvent: payload.value };
+            return {
+                roomMessageEvent: payload.value,
+
+                isRoomMessagesResetEvent: false,
+            };
         }
 
         // userUidが同じでも例えば異なるタブで同じRoomを開いているケースがある。そのため、Mutationを行ったuserUidにだけSubscriptionを送信しないことで通信量を節約、ということはできない。
@@ -2572,8 +2682,10 @@ export class RoomResolver {
                     __tstype: deleteRoomOperation,
                     deletedBy: payload.deletedBy,
                 },
+                isRoomMessagesResetEvent: false,
             };
         }
+
         if (!payload.participants.has(userUid)) {
             return undefined;
         }
@@ -2581,6 +2693,7 @@ export class RoomResolver {
             // TODO: DeleteRoomOperationも返す
             return {
                 roomOperation: payload.generateOperation(userUid),
+                isRoomMessagesResetEvent: false,
             };
         }
     }

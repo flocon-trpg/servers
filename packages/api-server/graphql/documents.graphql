@@ -501,6 +501,12 @@ mutation PromoteToPlayer($roomId: String!, $phrase: String) {
   }
 }
 
+mutation ResetMessages($roomId: String!) {
+  result: resetMessages(roomId: $roomId) {
+    failureType
+  }
+}
+
 mutation WritePublicMessage($roomId: String!, $text: String!, $textColor: String, $channelKey: String!, $characterStateId: String, $customName: String, $gameType: String) {
   result: writePublicMessage(roomId: $roomId, text: $text, textColor: $textColor, channelKey: $channelKey, characterStateId: $characterStateId, customName: $customName, gameType: $gameType) {
     __typename
@@ -561,6 +567,7 @@ mutation UpdateWritingMessageStatus($roomId: String!, $newStatus: WritingMessage
 
 subscription RoomEvent($id: String!) {
   roomEvent(id: $id) {
+    isRoomMessagesResetEvent
     roomOperation {
       ...RoomOperation
     }
