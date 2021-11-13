@@ -1,6 +1,5 @@
 import React from 'react';
 import { Button, Popover, Select } from 'antd';
-import { useDispatch } from 'react-redux';
 import { apolloError } from '../../hooks/useRoomMessages';
 import classNames from 'classnames';
 import { flex, flexNone, flexRow, itemsCenter } from '../../utils/className';
@@ -15,7 +14,6 @@ import { ChatPalettePanelConfig } from '../../atoms/roomConfig/types/chatPalette
 import { MessagePanelConfig } from '../../atoms/roomConfig/types/messagePanelConfig';
 import { useAtom } from 'jotai';
 import { addRoomNotificationAtom } from '../../atoms/room/roomAtom';
-import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
 
 type HelpMessageProps = {
