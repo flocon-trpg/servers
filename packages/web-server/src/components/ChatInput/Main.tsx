@@ -5,9 +5,10 @@ import { TextColorSelector } from './TextColorSelector';
 import { publicChannel, SelectedChannelType, SubmitMessage } from './SubmitMessage';
 import { getSelectedCharacterType } from './getSelectedCharacterType';
 import { MessagePanelConfig } from '../../atoms/roomConfig/types/messagePanelConfig';
-import { atom, useAtom } from 'jotai';
+import { atom, } from 'jotai';
 import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
-import { WritableDraft } from 'immer/dist/internal';
+import { Draft } from 'immer';
+import { useAtomValue } from 'jotai/utils';
 
 const titleStyle: React.CSSProperties = {
     flexBasis: '80px',
@@ -17,7 +18,7 @@ type Props = {
     roomId: string;
     panelId: string;
     style?: Omit<React.CSSProperties, 'alignItems' | 'display' | 'flexDirection'>;
-    onConfigUpdate: (recipe: (draft: WritableDraft<MessagePanelConfig>) => void) => void;
+    onConfigUpdate: (recipe: (draft: Draft<MessagePanelConfig>) => void) => void;
 };
 
 export const ChatInput: React.FC<Props> = ({ roomId, panelId, style, onConfigUpdate }: Props) => {
@@ -27,7 +28,7 @@ export const ChatInput: React.FC<Props> = ({ roomId, panelId, style, onConfigUpd
         () => atom(get => get(roomConfigAtom)?.panels.messagePanels?.[panelId]),
         [panelId]
     );
-    const [config] = useAtom(configAtom);
+    const config = useAtomValue(configAtom);
     const [selectedChannelType, setSelectedChannelType] =
         React.useState<SelectedChannelType>(publicChannel);
 

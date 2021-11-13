@@ -19,8 +19,8 @@ import { State, StateManager, UpOperation } from '@flocon-trpg/core';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { authNotFound, MyAuthContext, notSignIn } from '../contexts/MyAuthContext';
 import { Room } from '../stateManagers/states/room';
-import { addRoomNotificationAtom, Notification } from '../atoms/room/roomAtom';
-import { useAtom } from 'jotai';
+import { roomNotificationsAtom, Notification } from '../atoms/room/roomAtom';
+import { useUpdateAtom } from 'jotai/utils';
 
 const sampleTime = 3000;
 
@@ -118,7 +118,7 @@ export const useRoomState = (
     const [refetchKey, setRefetchKey] = React.useState(0);
     // refetchとして単に () => setRefetchKey(refetchKey + 1) をそのまま返す（この値をfとする）と、レンダーのたびにfは変わるため、fをdepsに使用されたときに問題が起こる可能性が高いので、useMemoで軽減。
     const refetch = React.useMemo(() => () => setRefetchKey(refetchKey + 1), [refetchKey]);
-    const [, addRoomNotification] = useAtom(addRoomNotificationAtom);
+    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
 
     const userUid = typeof myAuth === 'string' ? null : myAuth.uid;
     const myAuthErrorType = typeof myAuth === 'string' ? myAuth : null;

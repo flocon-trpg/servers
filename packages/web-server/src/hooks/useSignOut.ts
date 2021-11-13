@@ -1,21 +1,17 @@
-import { useAtom } from 'jotai';
 import { useUpdateAtom } from 'jotai/utils';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { publicFilesAtom } from '../atoms/firebaseStorage/publicFilesAtom';
 import { unlistedFilesAtom } from '../atoms/firebaseStorage/unlistedFilesAtom';
 import { roomAtom } from '../atoms/room/roomAtom';
-import { writeonlyAtom } from '../atoms/writeonlyAtom';
 import { ConfigContext } from '../contexts/ConfigContext';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
 import { roomDrawerAndPopoverAndModalModule } from '../modules/roomDrawerAndPopoverAndModalModule';
 import { getAuth } from '../utils/firebaseHelpers';
 import { useReadonlyRef } from './useReadonlyRef';
 
-const writeonlyRoomAtom = writeonlyAtom(roomAtom);
-
 export function useSignOut() {
-    const [, setRoom] = useAtom(writeonlyRoomAtom);
+    const setRoom = useUpdateAtom(roomAtom);
     const dispatch = useDispatch();
     const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
     const config = React.useContext(ConfigContext);

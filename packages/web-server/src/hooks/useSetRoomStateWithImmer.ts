@@ -1,6 +1,7 @@
 import { State } from '@flocon-trpg/core';
 import produce from 'immer';
-import { atom, useAtom } from 'jotai';
+import { atom } from 'jotai';
+import { useAtomValue } from 'jotai/utils';
 import React from 'react';
 import { roomAtom } from '../atoms/room/roomAtom';
 
@@ -13,7 +14,7 @@ const emptySetRoomStateWithImmer: Result = (): void => {
 const setStateAtom = atom(get => get(roomAtom).roomState?.setState);
 
 export const useSetRoomStateWithImmer = (): Result => {
-    const [setRoomStateCore] = useAtom(setStateAtom);
+    const setRoomStateCore = useAtomValue(setStateAtom);
     return React.useMemo(() => {
         if (setRoomStateCore == null) {
             return emptySetRoomStateWithImmer;

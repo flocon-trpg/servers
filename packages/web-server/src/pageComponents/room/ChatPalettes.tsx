@@ -19,20 +19,17 @@ import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { UISelector } from '../../components/UISelector';
 import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
-import { writeonlyAtom } from '../../atoms/writeonlyAtom';
-import { useImmerAtom } from 'jotai/immer';
-import { WritableDraft } from 'immer/dist/internal';
+import { Draft } from 'immer';
 import { ChatPalettePanelConfig } from '../../atoms/roomConfig/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '../../atoms/roomConfig/types/messagePanelConfig';
 import { useUpdateAtom } from 'jotai/utils';
 import { roomPublicMessageInputAtom } from '../../atoms/inputs/roomPublicMessageInputAtom';
 import { roomPrivateMessageInputAtom } from '../../atoms/inputs/roomPrivateMessageInputAtom';
+import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
 
 const titleStyle: React.CSSProperties = {
     flexBasis: '80px',
 };
-
-const writeonlyRoomConfigAtom = writeonlyAtom(roomConfigAtom);
 
 type ChatPaletteListProps = {
     chatPaletteToml: string | null;
@@ -131,7 +128,7 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
         roomConfigAtom,
         state => state?.panels.chatPalettePanels?.[panelId]
     );
-    const [, setRoomConfig] = useImmerAtom(writeonlyRoomConfigAtom);
+    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
     const subject = React.useMemo(() => new Subject<string>(), []);
     const myUserUid = useMyUserUid();
     const myCharacters = useMyCharacters();
@@ -165,7 +162,7 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
 
     const onConfigUpdate = (
         recipe: (
-            draft: WritableDraft<ChatPalettePanelConfig> | WritableDraft<MessagePanelConfig>
+            draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>
         ) => void
     ) => {
         setRoomConfig(roomConfig => {

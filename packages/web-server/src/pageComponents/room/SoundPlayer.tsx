@@ -12,7 +12,6 @@ import { replace, update } from '../../stateManagers/states/types';
 import { VolumeBar } from '../../components/VolumeBar';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { MyStyle } from '../../utils/myStyle';
-import { useSelector } from '../../store';
 import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import { BgmState, FilePath, StrIndex5, UpOperation } from '@flocon-trpg/core';
 import _ from 'lodash';
@@ -21,8 +20,9 @@ import classNames from 'classnames';
 import { sound } from '../../utils/fileType';
 import { FilePath as FilePathModule } from '../../utils/filePath';
 import { useMutation } from '@apollo/client';
-import { atom, useAtom } from 'jotai';
+import { atom, } from 'jotai';
 import { roomAtom } from '../../atoms/room/roomAtom';
+import { useAtomValue } from 'jotai/utils';
 
 const defaultVolume = 0.5;
 
@@ -272,7 +272,7 @@ const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({
     visible,
     onClose,
 }: SePlayerDrawerProps) => {
-    const [roomId] = useAtom(roomIdAtom);
+    const roomId = useAtomValue(roomIdAtom);
     const [filesManagerDrawerType, setFilesManagerDrawerType] =
         React.useState<FilesManagerDrawerType | null>(null);
 
@@ -512,7 +512,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
 const bgmsAtom = atom(get => get(roomAtom).roomState?.state?.bgms);
 
 export const SoundPlayer: React.FC = () => {
-    const [bgmsState] = useAtom(bgmsAtom);
+    const bgmsState = useAtomValue(bgmsAtom);
     const [isSeDrawerVisible, setIsSeDrawerVisible] = React.useState(false);
 
     const padding = 16;

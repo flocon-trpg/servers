@@ -72,13 +72,10 @@ import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
 import { roomAtom } from '../../atoms/room/roomAtom';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
 import { BoardConfig, defaultBoardConfig } from '../../atoms/roomConfig/types/boardConfig';
-import { writeonlyAtom } from '../../atoms/writeonlyAtom';
-import { useImmerAtom } from 'jotai/immer';
 import { RoomConfigUtils } from '../../atoms/roomConfig/types/roomConfig/utils';
 import { ActiveBoardPanelConfig } from '../../atoms/roomConfig/types/activeBoardPanelConfig';
 import { BoardEditorPanelConfig } from '../../atoms/roomConfig/types/boardEditorPanelConfig';
-
-const writeonlyRoomConfigAtom = writeonlyAtom(roomConfigAtom);
+import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
 
 const createPiecePostOperation = ({
     e,
@@ -246,7 +243,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const backgroundImage = useImageFromGraphQL(board.backgroundImage);
     const backgroundImageResult =
         backgroundImage.type === success ? backgroundImage.image : undefined;
-    const [, setRoomConfig] = useImmerAtom(writeonlyRoomConfigAtom);
+    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
     const operate = useSetRoomStateByApply();
     const publicMessages = useFilteredRoomMessages({ filter: publicMessageFilter });
     const myUserUid = useMyUserUid();
@@ -880,7 +877,7 @@ const zoomButtonStyle: React.CSSProperties = {
 
 export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: Props) => {
     const dispatch = useDispatch();
-    const [, setRoomConfig] = useImmerAtom(writeonlyRoomConfigAtom);
+    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
     const roomId = useAtomSelector(roomAtom, state => state.roomId);
     const boards = useBoards();
     const characters = useCharacters();

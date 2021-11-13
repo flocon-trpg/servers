@@ -12,7 +12,6 @@ import { InformationIcon } from '../InformationIcon';
 import { FilterValue } from 'antd/lib/table/interface';
 import moment from 'moment';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
-import { useDispatch } from 'react-redux';
 import { $public, StorageType, unlisted } from '../../utils/firebaseStorage';
 import { DeleteFirebaseStorageFileModal } from '../DeleteFirebaseStorageFileModal';
 import { accept } from './helper';
@@ -21,9 +20,9 @@ import { FileState, Reference } from '../../atoms/firebaseStorage/fileState';
 import { useAtom } from 'jotai';
 import { unlistedFilesAtom } from '../../atoms/firebaseStorage/unlistedFilesAtom';
 import { publicFilesAtom } from '../../atoms/firebaseStorage/publicFilesAtom';
-import { writeonlyAtom } from '../../atoms/writeonlyAtom';
 import { reloadUnlistedFilesKeyAtom } from '../../atoms/firebaseStorage/reloadUnlistedFilesKeyAtom';
 import { reloadPublicFilesKeyAtom } from '../../atoms/firebaseStorage/reloadPublicFilesKeyAtom';
+import { useAtomValue, useUpdateAtom } from 'jotai/utils';
 
 type DataSource = FileState;
 
@@ -204,8 +203,6 @@ const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({
     reference,
     storageType,
 }: FileOptionsMenuProps) => {
-    const dispatch = useDispatch();
-
     return (
         <div>
             <Menu>
@@ -224,7 +221,7 @@ const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({
                 </Menu.Item>
                 <Menu.Item
                     icon={<Icons.DeleteOutlined />}
-                    onClick={() => DeleteFirebaseStorageFileModal(storageType, reference, dispatch)}
+                    onClick={() => DeleteFirebaseStorageFileModal(storageType, reference)}
                 >
                     削除
                 </Menu.Item>
@@ -260,10 +257,9 @@ const FirebaseFilesList: React.FC<FirebaseFilesListProps> = ({
     storageType,
     defaultFilteredValue,
 }: FirebaseFilesListProps) => {
-    const [unlistedFiles] = useAtom(unlistedFilesAtom);
-    const [publicFiles] = useAtom(publicFilesAtom);
+    const unlistedFiles = useAtomValue(unlistedFilesAtom);
+    const publicFiles = useAtomValue(publicFilesAtom);
     const [selectedRowKeys, setSelectedRowKeys] = React.useState<React.Key[]>([]);
-    const dispatch = useDispatch();
 
     const columns = (() => {
         if (onFlieOpen != null) {
@@ -305,8 +301,7 @@ const FirebaseFilesList: React.FC<FirebaseFilesListProps> = ({
                     }
                     DeleteFirebaseStorageFileModal(
                         storageType,
-                        selectedFiles.map(s => s.reference),
-                        dispatch
+                        selectedFiles.map(s => s.reference)
                     );
                 }}
             >
@@ -352,9 +347,6 @@ type FirebaseFilesManagerProps = {
     defaultFilteredValue?: FilterValue;
 };
 
-const writeOnlyUnlistedFilesAtom = writeonlyAtom(unlistedFilesAtom);
-const writeOnlyPublicFilesAtom = writeonlyAtom(publicFilesAtom);
-
 export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
     onFlieOpen,
     defaultFilteredValue,
@@ -362,8 +354,8 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
     const myUserUid = useMyUserUid();
     const [reloadUnlistedFilesKey, setReloadUnlistedFilesKey] = useAtom(reloadUnlistedFilesKeyAtom)
     const [reloadPublicFilesKey, setReloadPublicFilesKey] = useAtom(reloadPublicFilesKeyAtom)
-    const [, setUnlistedFiles] = useAtom(writeOnlyUnlistedFilesAtom);
-    const [, setPublicFiles] = useAtom(writeOnlyPublicFilesAtom);
+    const setUnlistedFiles = useUpdateAtom(unlistedFilesAtom);
+    const setPublicFiles = useUpdateAtom(publicFilesAtom);
     const config = React.useContext(ConfigContext);
 
     React.useEffect(() => {

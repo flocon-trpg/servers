@@ -62,15 +62,15 @@ import { getUserUid, MyAuthContext } from '../../contexts/MyAuthContext';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { useMutation } from '@apollo/client';
 import { TabConfig } from '../../atoms/roomConfig/types/tabConfig';
-import { atom, useAtom } from 'jotai';
+import { atom } from 'jotai';
 import { roomAtom, Notification } from '../../atoms/room/roomAtom';
 import { userConfigAtom } from '../../atoms/userConfig/userConfigAtom';
 import { UserConfigUtils } from '../../atoms/userConfig/utils';
 import { MessageFilter } from '../../atoms/roomConfig/types/messageFilter';
 import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
 import { TabConfigUtils } from '../../atoms/roomConfig/types/tabConfig/utils';
-import { writeonlyAtom } from '../../atoms/writeonlyAtom';
-import { useImmerAtom } from 'jotai/immer';
+import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
+import { useAtomValue } from 'jotai/utils';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -86,8 +86,6 @@ const participantsAtom = atom(get => get(roomAtom).roomState?.state?.participant
 const roomIdAtom = atom(get => get(roomAtom).roomId);
 const roomMessageFontSizeDeltaAtom = atom(get => get(userConfigAtom)?.roomMessagesFontSizeDelta);
 const allRoomMessagesResultAtom = atom(get => get(roomAtom).allRoomMessagesResult);
-const writeonlyRoomConfigAtom = writeonlyAtom(roomConfigAtom);
-const writeonlyUserConfigAtom = writeonlyAtom(userConfigAtom);
 
 type TabEditorDrawerProps = {
     // これがundefinedの場合、Drawerのvisibleがfalseとみなされる。
@@ -422,7 +420,7 @@ type RoomMessageComponentProps = {
 const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
     props: RoomMessageComponentProps
 ) => {
-    const [participants] = useAtom(participantsAtom);
+    const participants = useAtomValue(participantsAtom);
 
     const { message, showPrivateMessageMembers, publicChannelNames } = props;
 
@@ -431,8 +429,8 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
     const [deleteMessageMutation] = useMutation(DeleteMessageDocument);
     const [makeMessageNotSecret] = useMutation(MakeMessageNotSecretDocument);
     const [isEditModalVisible, setIsEditModalVisible] = React.useState(false);
-    const [roomId] = useAtom(roomIdAtom);
-    const [roomMessagesFontSizeDelta] = useAtom(roomMessageFontSizeDeltaAtom);
+    const roomId = useAtomValue(roomIdAtom);
+    const roomMessagesFontSizeDelta = useAtomValue(roomMessageFontSizeDeltaAtom);
 
     const fontSize = UserConfigUtils.getRoomMessagesFontSize(roomMessagesFontSizeDelta ?? 0);
 
@@ -706,7 +704,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
     const myAuth = React.useContext(MyAuthContext);
     const writingMessageStatusResult = useWritingMessageStatus();
     const publicChannelNames = usePublicChannelNames();
-    const [participants] = useAtom(participantsAtom);
+    const participants = useAtomValue(participantsAtom);
     const participantsMap = React.useMemo(
         () => (participants == null ? null : recordToMap(participants)),
         [participants]
@@ -801,9 +799,9 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
     const tabsAtom = React.useMemo(() => {
         return atom(get => get(roomConfigAtom)?.panels.messagePanels?.[panelId]?.tabs);
     }, [panelId]);
-    const [tabs] = useAtom(tabsAtom);
-    const [, setRoomConfig] = useImmerAtom(writeonlyRoomConfigAtom);
-    const [, setUserConfig] = useImmerAtom(writeonlyUserConfigAtom);
+    const tabs = useAtomValue(tabsAtom);
+    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setUserConfig = useImmerUpdateAtom(userConfigAtom);
 
     const contentHeight = Math.max(0, height - 340);
     const tabsHeight = Math.max(0, height - 300);
@@ -818,9 +816,9 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
 
     const [isChannelNamesEditorVisible, setIsChannelNamesEditorVisible] = React.useState(false);
 
-    const [roomId] = useAtom(roomIdAtom);
-    const [allRoomMessagesResult] = useAtom(allRoomMessagesResultAtom);
-    const [roomMessagesFontSizeDelta] = useAtom(roomMessageFontSizeDeltaAtom);
+    const roomId = useAtomValue(roomIdAtom);
+    const allRoomMessagesResult = useAtomValue(allRoomMessagesResultAtom);
+    const roomMessagesFontSizeDelta = useAtomValue(roomMessageFontSizeDeltaAtom);
 
     if (roomId == null || allRoomMessagesResult == null || tabs == null) {
         return null;

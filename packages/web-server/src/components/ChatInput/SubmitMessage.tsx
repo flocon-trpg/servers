@@ -27,10 +27,11 @@ import { userConfigAtom } from '../../atoms/userConfig/userConfigAtom';
 import { UserConfigUtils } from '../../atoms/userConfig/utils';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
 import { useAtom } from 'jotai';
-import { addRoomNotificationAtom, Notification } from '../../atoms/room/roomAtom';
-import { WritableDraft } from 'immer/dist/internal';
+import { roomNotificationsAtom, Notification } from '../../atoms/room/roomAtom';
+import { Draft } from 'immer';
 import { roomPrivateMessageInputAtom } from '../../atoms/inputs/roomPrivateMessageInputAtom';
 import { roomPublicMessageInputAtom } from '../../atoms/inputs/roomPublicMessageInputAtom';
+import { useUpdateAtom } from 'jotai/utils';
 
 /* react-virtuosoはおそらくheightを指定しなければ正常に動作しないため、もしこれが可変だとheightの指定が無理とは言わないまでも面倒になる。そのため、70pxという適当な値で固定している */
 const height = 70;
@@ -50,7 +51,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
     selectedCharacterType,
     autoSubmitter,
 }: PrivateMessageElementProps) => {
-    const [, addRoomNotification] = useAtom(addRoomNotificationAtom);
+    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
     const [text, setText] = useAtom(roomPrivateMessageInputAtom);
     const [writePrivateMessage] = useMutation(WritePrivateMessageDocument);
     const textAreaRef = React.useRef<TextAreaRef | null>(null);
@@ -199,7 +200,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
     selectedCharacterType,
     autoSubmitter,
 }: PublicMessageElementProps) => {
-    const [, addRoomNotification] = useAtom(addRoomNotificationAtom);
+    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
     const [text, setText] = useAtom(roomPublicMessageInputAtom);
     const [writePublicMessage] = useMutation(WritePublicMessageDocument);
     const textAreaRef = React.useRef<TextAreaRef | null>(null);
@@ -348,7 +349,7 @@ type Props = {
     onSelectedChannelTypeChange: (newValue: SelectedChannelType) => void;
     config: ChatPalettePanelConfig | MessagePanelConfig;
     onConfigUpdate: (
-        recipe: (draft: WritableDraft<ChatPalettePanelConfig> | WritableDraft<MessagePanelConfig>) => void
+        recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void
     ) => void;
     // ChatPalettePanelConfigにselectedCharacterTypeは存在しないので、独立させている
     selectedCharacterType: SelectedCharacterType | null;

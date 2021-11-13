@@ -6,14 +6,14 @@ import { SketchPicker } from 'react-color';
 import classNames from 'classnames';
 import { cancelRnd, flex, flexNone, flexRow, itemsCenter } from '../../utils/className';
 import { rgb } from '../../utils/rgb';
-import { WritableDraft } from 'immer/dist/internal';
+import { Draft } from 'immer';
 import { ChatPalettePanelConfig } from '../../atoms/roomConfig/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '../../atoms/roomConfig/types/messagePanelConfig';
 
 type Props = {
     config: ChatPalettePanelConfig | MessagePanelConfig;
     onConfigUpdate: (
-        recipe: (draft: WritableDraft<ChatPalettePanelConfig> | WritableDraft<MessagePanelConfig>) => void
+        recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void
     ) => void;
     titleStyle?: React.CSSProperties;
 };

@@ -6,11 +6,11 @@ import { custom, getSelectedCharacterType, none, some } from './getSelectedChara
 import classNames from 'classnames';
 import { flex, flexRow, flexNone, itemsCenter } from '../../utils/className';
 import { MessagePanelConfig } from '../../atoms/roomConfig/types/messagePanelConfig';
-import { WritableDraft } from 'immer/dist/internal';
+import { Draft } from 'immer';
 
 type Props = {
     config: MessagePanelConfig;
-    onConfigUpdate: (recipe: (draft: WritableDraft<MessagePanelConfig>) => void) => void;
+    onConfigUpdate: (recipe: (draft: Draft<MessagePanelConfig>) => void) => void;
     titleStyle?: React.CSSProperties;
     inputMaxWidth?: number;
 };

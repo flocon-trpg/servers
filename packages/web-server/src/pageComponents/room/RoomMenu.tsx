@@ -28,18 +28,15 @@ import { flex, flexRow, itemsCenter } from '../../utils/className';
 import { MyAuthContext } from '../../contexts/MyAuthContext';
 import { GenerateLogModal } from '../../components/GenerateLogModal';
 import { useLazyQuery, useMutation } from '@apollo/client';
-import { writeonlyAtom } from '../../atoms/writeonlyAtom';
-import { addRoomNotificationAtom, roomAtom, Notification } from '../../atoms/room/roomAtom';
-import { useAtom } from 'jotai';
+import { roomNotificationsAtom, roomAtom, Notification } from '../../atoms/room/roomAtom';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
 import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
-import { useImmerAtom } from 'jotai/immer';
 import { RoomConfigUtils } from '../../atoms/roomConfig/types/roomConfig/utils';
 import { simpleId } from '@flocon-trpg/core';
 import { defaultMessagePanelConfig } from '../../atoms/roomConfig/types/messagePanelConfig';
 import { defaultMemoPanelConfig } from '../../atoms/roomConfig/types/memoPanelConfig';
-
-const writeonlyRoomConfigAtom = writeonlyAtom(roomConfigAtom);
+import { useUpdateAtom } from 'jotai/utils';
+import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -54,7 +51,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
     onOk,
     onCancel,
 }: BecomePlayerModalProps) => {
-    const [, addRoomNotification] = useAtom(addRoomNotificationAtom);
+    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
     const [promoteToPlayer] = useMutation(PromoteToPlayerDocument);
@@ -210,7 +207,7 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
     onCancel,
     roomCreatedByMe,
 }: DeleteRoomModalProps) => {
-    const [, addRoomNotification] = useAtom(addRoomNotificationAtom);
+    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
     const [isPosting, setIsPosting] = React.useState(false);
     const [deleteRoom] = useMutation(DeleteRoomDocument);
     React.useEffect(() => {
@@ -297,7 +294,7 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
     onOk: onOkCore,
     onCancel,
 }: ChangeMyParticipantNameModalProps) => {
-    const [, addRoomNotification] = useAtom(addRoomNotificationAtom);
+    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
     const [changeParticipantName] = useMutation(ChangeParticipantNameDocument);
@@ -360,7 +357,7 @@ export const RoomMenu: React.FC = () => {
     const myUserUid = useMyUserUid();
     const myAuth = React.useContext(MyAuthContext);
     const router = useRouter();
-    const [, setRoomConfig] = useImmerAtom(writeonlyRoomConfigAtom);
+    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
     const dispatch = useDispatch();
     const signOut = useSignOut();
     const roomId = useAtomSelector(roomAtom, state => state.roomId);

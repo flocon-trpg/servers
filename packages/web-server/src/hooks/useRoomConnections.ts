@@ -4,9 +4,9 @@ import React from 'react';
 import { GetRoomConnectionsDocument } from '@flocon-trpg/typed-document-node';
 import { useParticipants } from './state/useParticipants';
 import { useReadonlyRef } from './useReadonlyRef';
-import { addRoomNotificationAtom, roomAtom, Notification } from '../atoms/room/roomAtom';
+import { roomNotificationsAtom, roomAtom, Notification } from '../atoms/room/roomAtom';
 import { useAtomSelector } from '../atoms/useAtomSelector';
-import { useAtom } from 'jotai';
+import { useUpdateAtom } from 'jotai/utils';
 
 export type RoomConnectionsResult = {
     readonly [userUid: string]: { readonly isConnected: boolean; readonly fetchedAt: number };
@@ -22,7 +22,7 @@ export function useRoomConnections() {
     const [getRoomConnections, roomConnections] = useLazyQuery(GetRoomConnectionsDocument, {
         fetchPolicy: 'network-only',
     });
-    const [, addRoomNotification] = useAtom(addRoomNotificationAtom);
+    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
     const participants = useParticipants();
     const participantsRef = useReadonlyRef(participants);
 
