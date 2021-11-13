@@ -28,9 +28,7 @@ import { Center } from '../../components/Center';
 import { LoadingResult } from '../../components/Result/LoadingResult';
 import { usePublishRoomEventSubscription } from '../../hooks/usePublishRoomEventSubscription';
 import { useAllRoomMessages } from '../../hooks/useRoomMessages';
-import { useSelector } from '../../store';
 import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
-import { messageInputTextModule } from '../../modules/messageInputTextModule';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
 import { usePrevious } from 'react-use';
 import { getRoomConfig } from '../../utils/localStorage/roomConfig';
@@ -41,10 +39,12 @@ import { atom, useAtom } from 'jotai';
 import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
 import { useDispatch } from 'react-redux';
 import { roomAtom } from '../../atoms/room/roomAtom';
-import { RoomConfig } from '../../atoms/roomConfig/types/roomConfig';
 import { writeonlyAtom } from '../../atoms/writeonlyAtom';
 import produce from 'immer';
 import { RoomConfigUtils } from '../../atoms/roomConfig/types/roomConfig/utils';
+import { roomPublicMessageInputAtom } from '../../atoms/inputs/roomPublicMessageInputAtom';
+import { roomPrivateMessageInputAtom } from '../../atoms/inputs/roomPrivateMessageInputAtom';
+import { useUpdateAtom } from 'jotai/utils';
 
 type JoinRoomFormProps = {
     roomState: RoomAsListItemFragment;
@@ -241,6 +241,8 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
     const roomIdRef = useReadonlyRef(roomId);
     const [, setRoomAtomValue] = useAtom(writeonlyRoomAtom);
     const dispatch = useDispatch();
+    const setRoomPublicMessageInput = useUpdateAtom(roomPublicMessageInputAtom);
+    const setRoomPrivateMessageInput = useUpdateAtom(roomPrivateMessageInputAtom);
 
     useRoomConfig(roomId);
 
@@ -248,8 +250,9 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
 
     React.useEffect(() => {
         dispatch(roomDrawerAndPopoverAndModalModule.actions.reset());
-        dispatch(messageInputTextModule.actions.reset());
-    }, [roomId, dispatch]);
+        setRoomPublicMessageInput('');
+        setRoomPrivateMessageInput('');
+    }, [roomId, dispatch, setRoomPublicMessageInput, setRoomPrivateMessageInput]);
 
     const {
         observable,
@@ -302,7 +305,7 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
         });
     }, [roomIdRef, updateWritingMessageStatus, writingMessageStatusInputType]);
 
-    const publicMessage = useSelector(state => state.messageInputTextModule.publicMessage);
+    const [publicMessage] = useAtom(roomPublicMessageInputAtom);
     const prevPublicMessage = usePrevious(publicMessage);
     React.useEffect(() => {
         const prevMessage = prevPublicMessage ?? '';

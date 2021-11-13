@@ -3,14 +3,10 @@ import { configureStore } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook } from 'react-redux';
 import { useSelector as useReduxSelector } from 'react-redux';
 import { roomDrawerAndPopoverAndModalModule } from './modules/roomDrawerAndPopoverAndModalModule';
-import { fileModule } from './modules/fileModule';
-import { messageInputTextModule } from './modules/messageInputTextModule';
 
 // rootReducer の準備
 const rootReducer = combineReducers({
-    fileModule: fileModule.reducer,
     roomDrawerAndPopoverAndModalModule: roomDrawerAndPopoverAndModalModule.reducer,
-    messageInputTextModule: messageInputTextModule.reducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

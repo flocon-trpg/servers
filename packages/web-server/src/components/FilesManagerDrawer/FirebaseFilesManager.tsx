@@ -12,16 +12,20 @@ import { InformationIcon } from '../InformationIcon';
 import { FilterValue } from 'antd/lib/table/interface';
 import moment from 'moment';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
-import { FirebaseStorageFile } from '../../modules/fileModule';
-import { useSelector } from '../../store';
 import { useDispatch } from 'react-redux';
-import { fileModule } from '../../modules/fileModule';
 import { $public, StorageType, unlisted } from '../../utils/firebaseStorage';
 import { DeleteFirebaseStorageFileModal } from '../DeleteFirebaseStorageFileModal';
 import { accept } from './helper';
 import { FileType, guessFileType, image, others, sound } from '../../utils/fileType';
+import { FileState, Reference } from '../../atoms/firebaseStorage/fileState';
+import { useAtom } from 'jotai';
+import { unlistedFilesAtom } from '../../atoms/firebaseStorage/unlistedFilesAtom';
+import { publicFilesAtom } from '../../atoms/firebaseStorage/publicFilesAtom';
+import { writeonlyAtom } from '../../atoms/writeonlyAtom';
+import { reloadUnlistedFilesKeyAtom } from '../../atoms/firebaseStorage/reloadUnlistedFilesKeyAtom';
+import { reloadPublicFilesKeyAtom } from '../../atoms/firebaseStorage/reloadPublicFilesKeyAtom';
 
-type DataSource = FirebaseStorageFile.State;
+type DataSource = FileState;
 
 type Column = ColumnGroupType<DataSource> | ColumnType<DataSource>;
 
@@ -178,7 +182,7 @@ const createdAtColumn: Column = {
     },
 };
 
-const openButtonColumn = (onClick: (ref: FirebaseStorageFile.Reference) => void): Column => ({
+const openButtonColumn = (onClick: (ref: Reference) => void): Column => ({
     title: 'Open',
     key: 'Open',
     // eslint-disable-next-line react/display-name
@@ -192,7 +196,7 @@ const openButtonColumn = (onClick: (ref: FirebaseStorageFile.Reference) => void)
 });
 
 type FileOptionsMenuProps = {
-    reference: FirebaseStorageFile.Reference;
+    reference: Reference;
     storageType: StorageType;
 };
 
@@ -246,7 +250,7 @@ const fileOptionsColumn = (storageType: StorageType): Column => ({
 });
 
 type FirebaseFilesListProps = {
-    onFlieOpen?: (ref: FirebaseStorageFile.Reference) => void;
+    onFlieOpen?: (ref: Reference) => void;
     storageType: StorageType;
     defaultFilteredValue?: FilterValue;
 };
@@ -256,8 +260,8 @@ const FirebaseFilesList: React.FC<FirebaseFilesListProps> = ({
     storageType,
     defaultFilteredValue,
 }: FirebaseFilesListProps) => {
-    const unlistedFiles = useSelector(state => state.fileModule.firebaseStorageUnlistedFiles);
-    const publicFiles = useSelector(state => state.fileModule.firebaseStoragePublicFiles);
+    const [unlistedFiles] = useAtom(unlistedFilesAtom);
+    const [publicFiles] = useAtom(publicFilesAtom);
     const [selectedRowKeys, setSelectedRowKeys] = React.useState<React.Key[]>([]);
     const dispatch = useDispatch();
 
@@ -283,7 +287,7 @@ const FirebaseFilesList: React.FC<FirebaseFilesListProps> = ({
             <Button
                 disabled={selectedRowKeys.length === 0}
                 onClick={() => {
-                    let selectedFiles: FirebaseStorageFile.State[];
+                    let selectedFiles: FileState[];
                     if (storageType === $public) {
                         if (publicFiles == null) {
                             return;
@@ -326,7 +330,7 @@ const FirebaseFilesList: React.FC<FirebaseFilesListProps> = ({
 };
 
 const referencesToDataSource = (
-    files: ReadonlyArray<FirebaseStorageFile.Reference>
+    files: ReadonlyArray<Reference>
 ): Promise<DataSource[]> => {
     const promises = files.map(async file => {
         const metadata = await file.getMetadata();
@@ -348,18 +352,18 @@ type FirebaseFilesManagerProps = {
     defaultFilteredValue?: FilterValue;
 };
 
+const writeOnlyUnlistedFilesAtom = writeonlyAtom(unlistedFilesAtom);
+const writeOnlyPublicFilesAtom = writeonlyAtom(publicFilesAtom);
+
 export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
     onFlieOpen,
     defaultFilteredValue,
 }: FirebaseFilesManagerProps) => {
     const myUserUid = useMyUserUid();
-    const dispatch = useDispatch();
-    const reloadFirebaseStorageUnlistedFilesKey = useSelector(
-        state => state.fileModule.reloadFirebaseStorageUnlistedFilesKey
-    );
-    const reloadFirebaseStoragePublicFilesKey = useSelector(
-        state => state.fileModule.reloadFirebaseStoragePublicFilesKey
-    );
+    const [reloadUnlistedFilesKey, setReloadUnlistedFilesKey] = useAtom(reloadUnlistedFilesKeyAtom)
+    const [reloadPublicFilesKey, setReloadPublicFilesKey] = useAtom(reloadPublicFilesKeyAtom)
+    const [, setUnlistedFiles] = useAtom(writeOnlyUnlistedFilesAtom);
+    const [, setPublicFiles] = useAtom(writeOnlyPublicFilesAtom);
     const config = React.useContext(ConfigContext);
 
     React.useEffect(() => {
@@ -373,13 +377,13 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
             if (unsubscribed) {
                 return;
             }
-            dispatch(fileModule.actions.set({ firebaseStoragePublicFiles: newState }));
+            setPublicFiles(newState);
         };
         main();
         return () => {
             unsubscribed = true;
         };
-    }, [dispatch, reloadFirebaseStoragePublicFilesKey, config]); // もしpublicでアクセスできるファイルがUserによって異なるように変更した場合、depsにmyAuth.uidなどを含めるほうがいい。
+    }, [setPublicFiles, reloadPublicFilesKey, config]); // もしpublicでアクセスできるファイルがUserによって異なるように変更した場合、depsにmyAuth.uidなどを含めるほうがいい。
 
     React.useEffect(() => {
         if (myUserUid == null) {
@@ -397,13 +401,13 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
             if (unsubscribed) {
                 return;
             }
-            dispatch(fileModule.actions.set({ firebaseStorageUnlistedFiles: newState }));
+            setUnlistedFiles(newState)
         };
         main();
         return () => {
             unsubscribed = true;
         };
-    }, [myUserUid, dispatch, reloadFirebaseStorageUnlistedFilesKey, config]);
+    }, [myUserUid, setUnlistedFiles, reloadUnlistedFilesKey, config]);
 
     if (
         config.web.firebase?.storage?.enablePublic !== true &&
@@ -412,7 +416,7 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
         return <div>Firebase StorageのUIは管理者によって全て無効化されています。</div>;
     }
 
-    let onFirebaseFileOpen: ((ref: FirebaseStorageFile.Reference) => void) | undefined = undefined;
+    let onFirebaseFileOpen: ((ref: Reference) => void) | undefined = undefined;
     if (onFlieOpen != null) {
         onFirebaseFileOpen = ref => {
             const path = {
@@ -431,7 +435,7 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
                         <Uploader
                             storageType={unlisted}
                             onUploaded={() => {
-                                dispatch(fileModule.actions.reloadFirebaseStorageUnlistedFiles());
+                                setReloadUnlistedFilesKey(i => i + 1)
                             }}
                         />
                         <FirebaseFilesList
@@ -454,7 +458,7 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
                         <Uploader
                             storageType={$public}
                             onUploaded={() => {
-                                dispatch(fileModule.actions.reloadFirebaseStoragePublicFiles());
+                                setReloadPublicFilesKey(i => i + 1);
                             }}
                         />
                         <FirebaseFilesList

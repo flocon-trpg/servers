@@ -1,12 +1,13 @@
 import { useAtom } from 'jotai';
-import { useImmerAtom } from 'jotai/immer';
+import { useUpdateAtom } from 'jotai/utils';
 import React from 'react';
 import { useDispatch } from 'react-redux';
+import { publicFilesAtom } from '../atoms/firebaseStorage/publicFilesAtom';
+import { unlistedFilesAtom } from '../atoms/firebaseStorage/unlistedFilesAtom';
 import { roomAtom } from '../atoms/room/roomAtom';
 import { writeonlyAtom } from '../atoms/writeonlyAtom';
 import { ConfigContext } from '../contexts/ConfigContext';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
-import { fileModule } from '../modules/fileModule';
 import { roomDrawerAndPopoverAndModalModule } from '../modules/roomDrawerAndPopoverAndModalModule';
 import { getAuth } from '../utils/firebaseHelpers';
 import { useReadonlyRef } from './useReadonlyRef';
@@ -20,6 +21,8 @@ export function useSignOut() {
     const config = React.useContext(ConfigContext);
     const auth = getAuth(config);
     const firebaseStorageUrlCacheContextRef = useReadonlyRef(firebaseStorageUrlCacheContext);
+    const setPublicFiles = useUpdateAtom(publicFilesAtom);
+    const setUnlistedFiles = useUpdateAtom(unlistedFilesAtom);
 
     return React.useCallback(async () => {
         if (auth == null) {
@@ -28,9 +31,17 @@ export function useSignOut() {
         await auth.signOut();
         // 前にログインしていたユーザーの部屋やファイル一覧などといったデータの閲覧を防いでいる
         setRoom(roomAtom.init);
-        dispatch(fileModule.actions.reset());
+        setPublicFiles([]);
+        setUnlistedFiles([]);
         dispatch(roomDrawerAndPopoverAndModalModule.actions.reset());
         firebaseStorageUrlCacheContextRef.current?.clear();
         return true;
-    }, [auth, dispatch, firebaseStorageUrlCacheContextRef, setRoom]);
+    }, [
+        auth,
+        dispatch,
+        firebaseStorageUrlCacheContextRef,
+        setPublicFiles,
+        setRoom,
+        setUnlistedFiles,
+    ]);
 }
