@@ -88,6 +88,7 @@ export class Room {
     @OneToMany(() => DicePieceValueLogEntity, x => x.room, { orphanRemoval: true })
     public dicePieceValueLogs = new Collection<DicePieceValueLogEntity>(this);
 
+    // TODO: forgot to rename to stringPieceValueLogs...
     @OneToMany(() => StringPieceValueLogEntity, x => x.room, { orphanRemoval: true })
     public numberPieceValueLogs = new Collection<StringPieceValueLogEntity>(this);
 

@@ -27,6 +27,7 @@ import { BaasType } from '../enums/BaasType';
 import { GetFileItemsFailureType } from '../enums/GetFileItemsFailureType';
 import { CreateRoomFailureType } from '../enums/CreateRoomFailureType';
 import { GetRoomsListFailureType } from '../enums/GetRoomsListFailureType';
+import { ResetRoomMessagesFailureType } from '../enums/ResetRoomMessagesFailureType';
 
 let hasRegistered = false;
 export const registerEnumTypes = (): void => {
@@ -99,6 +100,9 @@ export const registerEnumTypes = (): void => {
     });
     registerEnumType(PromoteFailureType, {
         name: 'PromoteFailureType',
+    });
+    registerEnumType(ResetRoomMessagesFailureType, {
+        name: 'ResetRoomMessagesFailureType',
     });
     registerEnumType(RoomParameterNameType, {
         name: 'RoomParameterNameType',

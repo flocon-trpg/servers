@@ -6,13 +6,13 @@ import classNames from 'classnames';
 import { flex, flexNone, flexRow, itemsCenter } from '../../utils/className';
 import { ChatPalettePanelConfig } from '../../atoms/roomConfig/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '../../atoms/roomConfig/types/messagePanelConfig';
-import { WritableDraft } from 'immer/dist/internal';
+import { Draft } from 'immer';
 
 type Props = {
     config: ChatPalettePanelConfig | MessagePanelConfig;
     onConfigUpdate: (
         recipe: (
-            draft: WritableDraft<ChatPalettePanelConfig> | WritableDraft<MessagePanelConfig>
+            draft: Draft<ChatPalettePanelConfig> |Draft<MessagePanelConfig>
         ) => void
     ) => void;
     titleStyle?: React.CSSProperties;

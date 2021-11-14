@@ -8,24 +8,21 @@ import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
 import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import {
     StringPieceValueState,
-    UpOperation,
     toStringPieceValueUpOperation,
     stringPieceValueDiff,
     CharacterState,
     simpleId,
 } from '@flocon-trpg/core';
 import { useStringPieceValues } from '../../hooks/state/useStringPieceValues';
-import { useDispatch } from 'react-redux';
-import { useSelector } from '../../store';
-import {
-    create,
-    roomDrawerAndPopoverAndModalModule,
-    update,
-} from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { MyCharactersSelect } from '../../components/MyCharactersSelect';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { keyNames } from '@flocon-trpg/utils';
 import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
+import { useAtomValue } from 'jotai/utils';
+import { dicePieceDrawerAtom } from '../../atoms/overlay/dicePieceDrawerAtom';
+import { create, update } from '../../utils/constants';
+import { stringPieceDrawerAtom } from '../../atoms/overlay/stringPieceDrawerAtom';
+import { useAtom } from 'jotai';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -43,9 +40,7 @@ const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
 const IdView: React.FC = () => {
-    const drawerType = useSelector(
-        state => state.roomDrawerAndPopoverAndModalModule.dicePieceValueDrawerType
-    );
+    const drawerType = useAtomValue(dicePieceDrawerAtom);
     const myUserUid = useMyUserUid();
 
     if (drawerType == null || myUserUid == null) {
@@ -74,10 +69,7 @@ const parseIntSafe = (value: string) => {
 };
 
 export const StringPieceValueDrawer: React.FC = () => {
-    const drawerType = useSelector(
-        state => state.roomDrawerAndPopoverAndModalModule.stringPieceValueDrawerType
-    );
-    const dispatch = useDispatch();
+    const [drawerType, setDrawerType] = useAtom(stringPieceDrawerAtom)
     const operate = useSetRoomStateByApply();
     const myUserUid = useMyUserUid();
     const stringPieceValues = useStringPieceValues();
@@ -85,6 +77,7 @@ export const StringPieceValueDrawer: React.FC = () => {
         key: string;
         state: CharacterState;
     }>();
+
     let stateEditorParams: StateEditorParams<StringPieceValueState | undefined>;
     switch (drawerType?.type) {
         case create:
@@ -172,9 +165,7 @@ export const StringPieceValueDrawer: React.FC = () => {
                     }
                 )
             );
-            dispatch(
-                roomDrawerAndPopoverAndModalModule.actions.set({ stringPieceValueDrawerType: null })
-            );
+            setDrawerType(null);
             setActiveCharacter(undefined);
             setState(defaultStringPieceValue);
         };
@@ -187,22 +178,14 @@ export const StringPieceValueDrawer: React.FC = () => {
             visible={drawerType != null}
             closable
             onClose={() =>
-                dispatch(
-                    roomDrawerAndPopoverAndModalModule.actions.set({
-                        stringPieceValueDrawerType: null,
-                    })
-                )
+                setDrawerType(null)
             }
             footer={
                 <DrawerFooter
                     close={{
                         textType: drawerType?.type === update ? 'close' : 'cancel',
                         onClick: () =>
-                            dispatch(
-                                roomDrawerAndPopoverAndModalModule.actions.set({
-                                    stringPieceValueDrawerType: null,
-                                })
-                            ),
+                        setDrawerType(null)
                     }}
                     ok={onCreate == null ? undefined : { textType: 'create', onClick: onCreate }}
                 />

@@ -30,11 +30,6 @@ import {
 } from '@flocon-trpg/core';
 import { CompositeKey, keyNames } from '@flocon-trpg/utils';
 import _ from 'lodash';
-import { useDispatch } from 'react-redux';
-import {
-    create,
-    roomDrawerAndPopoverAndModalModule,
-} from '../../modules/roomDrawerAndPopoverAndModalModule';
 import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../../utils/className';
 import { ColumnType } from 'antd/lib/table';
@@ -43,6 +38,10 @@ import { IconView } from '../../components/IconView';
 import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 import { getUserUid, MyAuthContext } from '../../contexts/MyAuthContext';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
+import { create } from '../../utils/constants';
+import { useUpdateAtom } from 'jotai/utils';
+import { characterEditorDrawerAtom } from '../../atoms/overlay/characterEditorDrawerAtom';
+import { characterParameterNamesDrawerVisibilityAtom } from '../../atoms/overlay/characterParameterNamesDrawerVisibilityAtom';
 
 type DataSource = {
     key: string;
@@ -200,9 +199,10 @@ const createStringParameterColumn = ({
 
 export const CharacterList: React.FC = () => {
     const myAuth = React.useContext(MyAuthContext);
-    const dispatch = useDispatch();
     const operate = useSetRoomStateByApply();
     const operateAsStateWithImmer = useSetRoomStateWithImmer();
+    const setCharacterEditorDrawer = useUpdateAtom(characterEditorDrawerAtom);
+    const setCharacterParameterNamesDrawerVisibility = useUpdateAtom(characterParameterNamesDrawerVisibilityAtom);
 
     const characters = useCharacters();
     const participants = useParticipants();
@@ -246,14 +246,10 @@ export const CharacterList: React.FC = () => {
                         style={{ alignSelf: 'center' }}
                         size='small'
                         onClick={() =>
-                            dispatch(
-                                roomDrawerAndPopoverAndModalModule.actions.set({
-                                    characterDrawerType: {
+                            setCharacterEditorDrawer({
                                         type: update,
                                         stateKey: character.stateKey,
-                                    },
-                                })
-                            )
+                            })
                         }
                     >
                         <Icon.SettingOutlined />
@@ -338,11 +334,7 @@ export const CharacterList: React.FC = () => {
             <Button
                 size='small'
                 onClick={() =>
-                    dispatch(
-                        roomDrawerAndPopoverAndModalModule.actions.set({
-                            characterDrawerType: { type: create },
-                        })
-                    )
+                    setCharacterEditorDrawer({type: create})
                 }
             >
                 キャラクターを作成
@@ -350,11 +342,7 @@ export const CharacterList: React.FC = () => {
             <Button
                 size='small'
                 onClick={() =>
-                    dispatch(
-                        roomDrawerAndPopoverAndModalModule.actions.set({
-                            characterParameterNamesDrawerVisibility: true,
-                        })
-                    )
+                    setCharacterParameterNamesDrawerVisibility(true)
                 }
             >
                 パラメーターを追加・編集・削除

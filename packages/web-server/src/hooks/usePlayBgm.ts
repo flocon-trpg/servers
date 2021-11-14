@@ -2,7 +2,6 @@ import React from 'react';
 import { Howl } from 'howler';
 import { done, useSrcArrayFromGraphQL } from './src';
 import { volumeCap } from '../utils/variables';
-import { useSelector } from '../store';
 import { BgmState } from '@flocon-trpg/core';
 import _ from 'lodash';
 import { analyzeUrl } from '../utils/analyzeUrl';

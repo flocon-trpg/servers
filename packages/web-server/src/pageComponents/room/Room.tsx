@@ -27,15 +27,12 @@ import { ChatPalette } from './ChatPalettes';
 import { Board } from './Board';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
 import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
-import { writeonlyAtom } from '../../atoms/writeonlyAtom';
-import { useImmerAtom } from 'jotai/immer';
 import { RoomConfigUtils } from '../../atoms/roomConfig/types/roomConfig/utils';
 import { roomAtom } from '../../atoms/room/roomAtom';
-
-const writeonlyRoomConfigAtom = writeonlyAtom(roomConfigAtom);
+import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
 
 const RoomMessagePanels: React.FC = () => {
-    const [, setRoomConfig] = useImmerAtom(writeonlyRoomConfigAtom);
+    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
     const messagePanels = useAtomSelector(roomConfigAtom, state => state?.panels.messagePanels);
 
     return (
@@ -150,7 +147,7 @@ export const Room: React.FC = () => {
         state => state?.panels.participantPanel
     );
 
-    const [, setRoomConfig] = useImmerAtom(writeonlyRoomConfigAtom);
+    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
 
     usePlayBgm();
     usePlaySoundEffect();

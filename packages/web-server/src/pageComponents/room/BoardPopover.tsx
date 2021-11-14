@@ -16,7 +16,6 @@ import { CompositeKey, keyNames, ReadonlyStateMap, recordToArray } from '@flocon
 import { Menu, Tooltip } from 'antd';
 import _ from 'lodash';
 import React from 'react';
-import { useDispatch } from 'react-redux';
 import { InputDie } from '../../components/InputDie';
 import { NewTabLinkify } from '../../components/NewTabLinkify';
 import { FileSourceType, WriteRoomSoundEffectDocument } from '@flocon-trpg/typed-document-node';
@@ -25,17 +24,7 @@ import { useCharacters } from '../../hooks/state/useCharacters';
 import { DicePieceValueElement } from '../../hooks/state/useDicePieceValues';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
-import {
-    character,
-    ContextMenuState,
-    create,
-    dicePieceValue,
-    imagePieceValue,
-    roomDrawerAndPopoverAndModalModule,
-    tachie,
-} from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { replace, update } from '../../stateManagers/states/types';
-import { useSelector } from '../../store';
 import { testCommand } from '../../utils/command';
 import { noValue } from '../../utils/dice';
 import { DicePieceValue } from '../../utils/dicePieceValue';
@@ -46,6 +35,25 @@ import { useMutation } from '@apollo/client';
 import { roomAtom } from '../../atoms/room/roomAtom';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
 import { BoardConfig } from '../../atoms/roomConfig/types/boardConfig';
+import { boardTooltipAtom } from '../../atoms/overlay/board/boardTooltipAtom';
+import { useAtomValue, useUpdateAtom } from 'jotai/utils';
+import {
+    character,
+    dicePieceValue,
+    imagePieceValue,
+    tachie,
+} from '../../atoms/overlay/board/types';
+import { boardPopoverEditorAtom } from '../../atoms/overlay/board/boardPopoverEditorAtom';
+import {
+    boardContextMenuAtom,
+    ContextMenuState,
+} from '../../atoms/overlay/board/boardContextMenuAtom';
+import { characterEditorDrawerAtom } from '../../atoms/overlay/characterEditorDrawerAtom';
+import { dicePieceDrawerAtom } from '../../atoms/overlay/dicePieceDrawerAtom';
+import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
+import { stringPieceDrawerAtom } from '../../atoms/overlay/stringPieceDrawerAtom';
+import { imagePieceDrawerAtom } from '../../atoms/overlay/imagePieceDrawerAtom';
+import { create } from '../../utils/constants';
 
 /* absolute positionで表示するときにBoardの子として表示させると、Boardウィンドウから要素がはみ出ることができないため、ウィンドウ右端に近いところで要素を表示させるときに不便なことがある。そのため、ページ全体の子として持たせるようにしている。 */
 
@@ -54,16 +62,14 @@ const padding = 8;
 const zIndex = 500; // .ant-drawerによると、antdのDrawerのz-indexは100
 
 export const PieceTooltip: React.FC = () => {
-    const boardTooltipState = useSelector(
-        state => state.roomDrawerAndPopoverAndModalModule.boardTooltip
-    );
+    const boardTooltipState = useAtomValue(boardTooltipAtom);
 
     if (boardTooltipState == null) {
         return null;
     }
 
-    const left = boardTooltipState.pagePosition.x - 30;
-    const top = boardTooltipState.pagePosition.y + 1;
+    const left = boardTooltipState.pageX - 30;
+    const top = boardTooltipState.pageY + 1;
 
     const style: React.CSSProperties = {
         position: 'absolute',
@@ -266,16 +272,14 @@ namespace PopupEditorBase {
 }
 
 export const PopoverEditor: React.FC = () => {
-    const popoverEditor = useSelector(
-        state => state.roomDrawerAndPopoverAndModalModule.boardPopoverEditor
-    );
+    const popoverEditor = useAtomValue(boardPopoverEditorAtom);
 
     if (popoverEditor == null) {
         return null;
     }
 
-    const left = popoverEditor.pagePosition.x - 30;
-    const top = popoverEditor.pagePosition.y - 3;
+    const left = popoverEditor.pageX - 30;
+    const top = popoverEditor.pageY - 3;
 
     let children: JSX.Element | null;
     switch (popoverEditor.dblClickOn.type) {
@@ -323,12 +327,29 @@ const toBoardPosition = ({
     };
 };
 
+// 1つ1つ個別に渡すコードを書くのが面倒なのでこのように1つにまとめて全て渡している
+const useSetAtomValue = () => {
+    const setCharacterDrawer = useUpdateAtom(characterEditorDrawerAtom);
+    const setDicePieceDrawer = useUpdateAtom(dicePieceDrawerAtom);
+    const setStringPieceDrawer = useUpdateAtom(stringPieceDrawerAtom);
+    const setImagePieceDrawer = useUpdateAtom(imagePieceDrawerAtom);
+    return React.useMemo(
+        () => ({
+            setCharacterDrawer,
+            setDicePieceDrawer,
+            setStringPieceDrawer,
+            setImagePieceDrawer,
+        }),
+        [setCharacterDrawer, setDicePieceDrawer, setStringPieceDrawer, setImagePieceDrawer]
+    );
+};
+
 namespace ContextMenuModule {
     type SelectedCharacterPiecesMenuProps = {
         characterPiecesOnCursor: ContextMenuState['characterPiecesOnCursor'];
         onContextMenuClear: () => void;
         boardKey: CompositeKey;
-        dispatch: ReturnType<typeof useDispatch>;
+        setAtomValue: ReturnType<typeof useSetAtomValue>;
         operate: ReturnType<typeof useSetRoomStateByApply>;
     };
 
@@ -336,7 +357,7 @@ namespace ContextMenuModule {
         characterPiecesOnCursor,
         onContextMenuClear,
         boardKey,
-        dispatch,
+        setAtomValue,
         operate,
     }: SelectedCharacterPiecesMenuProps): JSX.Element | null => {
         if (characterPiecesOnCursor.length === 0) {
@@ -352,15 +373,11 @@ namespace ContextMenuModule {
                     >
                         <Menu.Item
                             onClick={() => {
-                                dispatch(
-                                    roomDrawerAndPopoverAndModalModule.actions.set({
-                                        characterDrawerType: {
-                                            type: update,
-                                            boardKey,
-                                            stateKey: characterKey,
-                                        },
-                                    })
-                                );
+                                setAtomValue.setCharacterDrawer({
+                                    type: update,
+                                    boardKey,
+                                    stateKey: characterKey,
+                                });
                                 onContextMenuClear();
                             }}
                         >
@@ -398,7 +415,7 @@ namespace ContextMenuModule {
         tachiesOnCursor: ContextMenuState['tachiesOnCursor'];
         onContextMenuClear: () => void;
         boardKey: CompositeKey;
-        dispatch: ReturnType<typeof useDispatch>;
+        setAtomValue: ReturnType<typeof useSetAtomValue>;
         operate: ReturnType<typeof useSetRoomStateByApply>;
     };
 
@@ -406,7 +423,7 @@ namespace ContextMenuModule {
         tachiesOnCursor,
         onContextMenuClear,
         boardKey,
-        dispatch,
+        setAtomValue,
         operate,
     }: SelectedTachiesPiecesMenuProps): JSX.Element | null => {
         if (tachiesOnCursor.length === 0) {
@@ -422,15 +439,11 @@ namespace ContextMenuModule {
                     >
                         <Menu.Item
                             onClick={() => {
-                                dispatch(
-                                    roomDrawerAndPopoverAndModalModule.actions.set({
-                                        characterDrawerType: {
-                                            type: update,
-                                            boardKey: boardKey,
-                                            stateKey: characterKey,
-                                        },
-                                    })
-                                );
+                                setAtomValue.setCharacterDrawer({
+                                    type: update,
+                                    boardKey: boardKey,
+                                    stateKey: characterKey,
+                                });
                                 onContextMenuClear();
                             }}
                         >
@@ -566,7 +579,7 @@ namespace ContextMenuModule {
         onContextMenuClear: () => void;
         boardKey: CompositeKey;
         myUserUid: string;
-        dispatch: ReturnType<typeof useDispatch>;
+        setAtomValue: ReturnType<typeof useSetAtomValue>;
         operate: ReturnType<typeof useSetRoomStateByApply>;
     };
 
@@ -575,7 +588,7 @@ namespace ContextMenuModule {
         onContextMenuClear,
         boardKey: boardKeyToShow,
         myUserUid,
-        dispatch,
+        setAtomValue,
         operate,
     }: SelectedDicePiecesMenuProps): JSX.Element | null => {
         if (dicePieceValuesOnCursor.length === 0) {
@@ -599,16 +612,12 @@ namespace ContextMenuModule {
                             {characterKey.createdBy === myUserUid ? (
                                 <Menu.Item
                                     onClick={() => {
-                                        dispatch(
-                                            roomDrawerAndPopoverAndModalModule.actions.set({
-                                                dicePieceValueDrawerType: {
-                                                    type: update,
-                                                    boardKey: boardKeyToShow,
-                                                    stateKey: dicePieceValueKey,
-                                                    characterKey,
-                                                },
-                                            })
-                                        );
+                                        setAtomValue.setDicePieceDrawer({
+                                            type: update,
+                                            boardKey: boardKeyToShow,
+                                            stateKey: dicePieceValueKey,
+                                            characterKey,
+                                        });
                                         onContextMenuClear();
                                     }}
                                 >
@@ -651,7 +660,7 @@ namespace ContextMenuModule {
         onContextMenuClear: () => void;
         boardKey: CompositeKey;
         myUserUid: string;
-        dispatch: ReturnType<typeof useDispatch>;
+        setAtomValue: ReturnType<typeof useSetAtomValue>;
         operate: ReturnType<typeof useSetRoomStateByApply>;
     };
 
@@ -660,7 +669,7 @@ namespace ContextMenuModule {
         onContextMenuClear,
         boardKey: boardKeyToShow,
         myUserUid,
-        dispatch,
+        setAtomValue,
         operate,
     }: SelectedNumberPiecesMenuProps): JSX.Element | null => {
         if (stringPieceValuesOnCursor.length === 0) {
@@ -682,16 +691,12 @@ namespace ContextMenuModule {
                             {characterKey.createdBy === myUserUid ? (
                                 <Menu.Item
                                     onClick={() => {
-                                        dispatch(
-                                            roomDrawerAndPopoverAndModalModule.actions.set({
-                                                stringPieceValueDrawerType: {
-                                                    type: update,
-                                                    boardKey: boardKeyToShow,
-                                                    stateKey: stringPieceValueKey,
-                                                    characterKey,
-                                                },
-                                            })
-                                        );
+                                        setAtomValue.setStringPieceDrawer({
+                                            type: update,
+                                            boardKey: boardKeyToShow,
+                                            stateKey: stringPieceValueKey,
+                                            characterKey,
+                                        });
                                         onContextMenuClear();
                                     }}
                                 >
@@ -733,7 +738,7 @@ namespace ContextMenuModule {
         imagePieceValuesOnCursor: ContextMenuState['imagePieceValuesOnCursor'];
         onContextMenuClear: () => void;
         boardKey: CompositeKey;
-        dispatch: ReturnType<typeof useDispatch>;
+        setAtomValue: ReturnType<typeof useSetAtomValue>;
         operate: ReturnType<typeof useSetRoomStateByApply>;
     };
 
@@ -741,7 +746,7 @@ namespace ContextMenuModule {
         imagePieceValuesOnCursor,
         onContextMenuClear,
         boardKey: boardKeyToShow,
-        dispatch,
+        setAtomValue,
         operate,
     }: SelectedImagePiecesMenuProps): JSX.Element | null => {
         if (imagePieceValuesOnCursor.length === 0) {
@@ -753,16 +758,12 @@ namespace ContextMenuModule {
                     <Menu.SubMenu key={`${participantKey}@${valueId}`} title={value.name}>
                         <Menu.Item
                             onClick={() => {
-                                dispatch(
-                                    roomDrawerAndPopoverAndModalModule.actions.set({
-                                        imagePieceDrawerType: {
-                                            type: update,
-                                            boardKey: boardKeyToShow,
-                                            participantKey,
-                                            stateKey: valueId,
-                                        },
-                                    })
-                                );
+                                setAtomValue.setImagePieceDrawer({
+                                    type: update,
+                                    boardKey: boardKeyToShow,
+                                    participantKey,
+                                    stateKey: valueId,
+                                });
                                 onContextMenuClear();
                             }}
                         >
@@ -805,7 +806,7 @@ namespace ContextMenuModule {
     type BasicMenuProps = {
         contextMenuState: ContextMenuState;
         onContextMenuClear: () => void;
-        dispatch: ReturnType<typeof useDispatch>;
+        setAtomValue: ReturnType<typeof useSetAtomValue>;
         operate: ReturnType<typeof useSetRoomStateByApply>;
         characters: ReadonlyStateMap<CharacterState>;
         board: BoardState;
@@ -815,8 +816,8 @@ namespace ContextMenuModule {
     const basicMenu = ({
         contextMenuState,
         onContextMenuClear,
+        setAtomValue,
         operate,
-        dispatch,
         characters,
         board,
         myUserUid,
@@ -961,14 +962,10 @@ namespace ContextMenuModule {
                 <Menu.SubMenu title='ダイスコマ'>
                     <Menu.Item
                         onClick={() => {
-                            dispatch(
-                                roomDrawerAndPopoverAndModalModule.actions.set({
-                                    dicePieceValueDrawerType: {
-                                        type: create,
-                                        piece: pieceLocationWhichIsCellMode,
-                                    },
-                                })
-                            );
+                            setAtomValue.setDicePieceDrawer({
+                                type: create,
+                                piece: pieceLocationWhichIsCellMode,
+                            });
                             onContextMenuClear();
                         }}
                     >
@@ -976,14 +973,10 @@ namespace ContextMenuModule {
                     </Menu.Item>
                     <Menu.Item
                         onClick={() => {
-                            dispatch(
-                                roomDrawerAndPopoverAndModalModule.actions.set({
-                                    dicePieceValueDrawerType: {
-                                        type: create,
-                                        piece: pieceLocationWhichIsNotCellMode,
-                                    },
-                                })
-                            );
+                            setAtomValue.setDicePieceDrawer({
+                                type: create,
+                                piece: pieceLocationWhichIsNotCellMode,
+                            });
                             onContextMenuClear();
                         }}
                     >
@@ -993,14 +986,10 @@ namespace ContextMenuModule {
                 <Menu.SubMenu title='数値コマ'>
                     <Menu.Item
                         onClick={() => {
-                            dispatch(
-                                roomDrawerAndPopoverAndModalModule.actions.set({
-                                    stringPieceValueDrawerType: {
-                                        type: create,
-                                        piece: pieceLocationWhichIsCellMode,
-                                    },
-                                })
-                            );
+                            setAtomValue.setStringPieceDrawer({
+                                type: create,
+                                piece: pieceLocationWhichIsCellMode,
+                            });
                             onContextMenuClear();
                         }}
                     >
@@ -1008,14 +997,10 @@ namespace ContextMenuModule {
                     </Menu.Item>
                     <Menu.Item
                         onClick={() => {
-                            dispatch(
-                                roomDrawerAndPopoverAndModalModule.actions.set({
-                                    stringPieceValueDrawerType: {
-                                        type: create,
-                                        piece: pieceLocationWhichIsNotCellMode,
-                                    },
-                                })
-                            );
+                            setAtomValue.setDicePieceDrawer({
+                                type: create,
+                                piece: pieceLocationWhichIsNotCellMode,
+                            });
                             onContextMenuClear();
                         }}
                     >
@@ -1025,14 +1010,10 @@ namespace ContextMenuModule {
                 <Menu.SubMenu title='画像コマ'>
                     <Menu.Item
                         onClick={() => {
-                            dispatch(
-                                roomDrawerAndPopoverAndModalModule.actions.set({
-                                    imagePieceDrawerType: {
-                                        type: create,
-                                        piece: pieceLocationWhichIsCellMode,
-                                    },
-                                })
-                            );
+                            setAtomValue.setImagePieceDrawer({
+                                type: create,
+                                piece: pieceLocationWhichIsCellMode,
+                            });
                             onContextMenuClear();
                         }}
                     >
@@ -1040,14 +1021,10 @@ namespace ContextMenuModule {
                     </Menu.Item>
                     <Menu.Item
                         onClick={() => {
-                            dispatch(
-                                roomDrawerAndPopoverAndModalModule.actions.set({
-                                    imagePieceDrawerType: {
-                                        type: create,
-                                        piece: pieceLocationWhichIsNotCellMode,
-                                    },
-                                })
-                            );
+                            setAtomValue.setImagePieceDrawer({
+                                type: create,
+                                piece: pieceLocationWhichIsNotCellMode,
+                            });
                             onContextMenuClear();
                         }}
                     >
@@ -1059,17 +1036,16 @@ namespace ContextMenuModule {
     };
 
     export const Main: React.FC = () => {
-        const dispatch = useDispatch();
         const operate = useSetRoomStateByApply();
-        const room = useAtomSelector(roomAtom,state => state.roomState?.state);
+        const room = useAtomSelector(roomAtom, state => state.roomState?.state);
         const boards = useBoards();
         const characters = useCharacters();
         const myUserUid = useMyUserUid();
-        const contextMenuState = useSelector(
-            state => state.roomDrawerAndPopoverAndModalModule.boardContextMenu
-        );
-        const roomId = useAtomSelector(roomAtom,state => state.roomId);
+        const contextMenuState = useAtomValue(boardContextMenuAtom);
+        const roomId = useAtomSelector(roomAtom, state => state.roomId);
         const [writeSe] = useMutation(WriteRoomSoundEffectDocument);
+        const setBoardContextMenu = useUpdateAtom(boardContextMenuAtom);
+        const setAtomValue = useSetAtomValue();
 
         if (
             contextMenuState == null ||
@@ -1088,8 +1064,7 @@ namespace ContextMenuModule {
             return null;
         }
 
-        const onContextMenuClear = () =>
-            dispatch(roomDrawerAndPopoverAndModalModule.actions.set({ boardContextMenu: null }));
+        const onContextMenuClear = () => setBoardContextMenu(null);
 
         return (
             <div
@@ -1107,21 +1082,21 @@ namespace ContextMenuModule {
                         ...contextMenuState,
                         onContextMenuClear,
                         boardKey,
-                        dispatch,
+                        setAtomValue,
                         operate,
                     })}
                     {selectedTachiePiecesMenu({
                         ...contextMenuState,
                         onContextMenuClear,
                         boardKey,
-                        dispatch,
+                        setAtomValue,
                         operate,
                     })}
                     {selectedDicePiecesMenu({
                         ...contextMenuState,
                         onContextMenuClear,
                         boardKey,
-                        dispatch,
+                        setAtomValue,
                         operate,
                         myUserUid,
                     })}
@@ -1129,7 +1104,7 @@ namespace ContextMenuModule {
                         ...contextMenuState,
                         onContextMenuClear,
                         boardKey,
-                        dispatch,
+                        setAtomValue,
                         operate,
                         myUserUid,
                     })}
@@ -1137,7 +1112,7 @@ namespace ContextMenuModule {
                         ...contextMenuState,
                         onContextMenuClear,
                         boardKey,
-                        dispatch,
+                        setAtomValue,
                         operate,
                     })}
                     {selectedCharacterCommandsMenu({
@@ -1165,7 +1140,7 @@ namespace ContextMenuModule {
                         : basicMenu({
                               contextMenuState,
                               onContextMenuClear,
-                              dispatch,
+                              setAtomValue,
                               operate,
                               characters,
                               board,

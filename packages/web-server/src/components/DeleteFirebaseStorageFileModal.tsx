@@ -1,14 +1,17 @@
 import { Modal } from 'antd';
-import { useDispatch } from 'react-redux';
-import { fileModule, FirebaseStorageFile } from '../modules/fileModule';
+import { useUpdateAtom } from 'jotai/utils';
+import { Reference } from '../atoms/firebaseStorage/fileState';
+import { reloadPublicFilesKeyAtom } from '../atoms/firebaseStorage/reloadPublicFilesKeyAtom';
+import { reloadUnlistedFilesKeyAtom } from '../atoms/firebaseStorage/reloadUnlistedFilesKeyAtom';
 import { $public, StorageType, unlisted } from '../utils/firebaseStorage';
 
 export const DeleteFirebaseStorageFileModal = (
     storageType: StorageType,
-    reference: FirebaseStorageFile.Reference | FirebaseStorageFile.Reference[],
-    dispatch: ReturnType<typeof useDispatch>
+    reference: Reference | Reference[],
 ) => {
     const referenceArray = Array.isArray(reference) ? reference : [reference];
+    const setReloadUnlistedFilesKey = useUpdateAtom(reloadUnlistedFilesKeyAtom);
+    const setReloadPublicFilesKey = useUpdateAtom(reloadPublicFilesKeyAtom);
     const fileName =
         referenceArray.length === 1
             ? referenceArray[0]?.name
@@ -19,10 +22,10 @@ export const DeleteFirebaseStorageFileModal = (
         }
         switch (storageType) {
             case $public:
-                dispatch(fileModule.actions.reloadFirebaseStoragePublicFiles());
+                setReloadPublicFilesKey(i => i + 1)
                 break;
             case unlisted:
-                dispatch(fileModule.actions.reloadFirebaseStorageUnlistedFiles());
+                setReloadUnlistedFilesKey(i => i + 1)
                 break;
         }
     };

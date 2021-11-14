@@ -2,7 +2,6 @@
 import React from 'react';
 import { Button, Input } from 'antd';
 import { TextAreaRef } from 'antd/lib/input/TextArea';
-import { useSelector } from '../../store';
 import * as Icon from '@ant-design/icons';
 import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import { custom, SelectedCharacterType, some } from './getSelectedCharacterType';
@@ -16,8 +15,6 @@ import {
 import { UISelector } from '../UISelector';
 import { PrivateMessageChannelSelector } from './PrivateMessageChannelSelector';
 import { PublicMessageChannelSelector } from './PublicMessageChannelSelector';
-import { useDispatch } from 'react-redux';
-import { messageInputTextModule } from '../../modules/messageInputTextModule';
 import { Observable } from 'rxjs';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
 import classNames from 'classnames';
@@ -30,8 +27,11 @@ import { userConfigAtom } from '../../atoms/userConfig/userConfigAtom';
 import { UserConfigUtils } from '../../atoms/userConfig/utils';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
 import { useAtom } from 'jotai';
-import { addRoomNotificationAtom, Notification } from '../../atoms/room/roomAtom';
-import { WritableDraft } from 'immer/dist/internal';
+import { roomNotificationsAtom, Notification } from '../../atoms/room/roomAtom';
+import { Draft } from 'immer';
+import { roomPrivateMessageInputAtom } from '../../atoms/inputs/roomPrivateMessageInputAtom';
+import { roomPublicMessageInputAtom } from '../../atoms/inputs/roomPublicMessageInputAtom';
+import { useUpdateAtom } from 'jotai/utils';
 
 /* react-virtuosoはおそらくheightを指定しなければ正常に動作しないため、もしこれが可変だとheightの指定が無理とは言わないまでも面倒になる。そのため、70pxという適当な値で固定している */
 const height = 70;
@@ -51,9 +51,8 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
     selectedCharacterType,
     autoSubmitter,
 }: PrivateMessageElementProps) => {
-    const dispatch = useDispatch();
-    const [, addRoomNotification] = useAtom(addRoomNotificationAtom);
-    const text = useSelector(state => state.messageInputTextModule.privateMessage);
+    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
+    const [text, setText] = useAtom(roomPrivateMessageInputAtom);
     const [writePrivateMessage] = useMutation(WritePrivateMessageDocument);
     const textAreaRef = React.useRef<TextAreaRef | null>(null);
     const [isPosting, setIsPosting] = React.useState(false); // 現状、並列投稿は「PublicMessage1つとPrivateMessage1つの最大2つまで」という制限になっているが、これは単に実装が楽だからというのが一番の理由。
@@ -124,7 +123,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
             .then(res => {
                 switch (res.data?.result.__typename) {
                     case 'RoomPrivateMessage':
-                        dispatch(messageInputTextModule.actions.set({ privateMessage: '' }));
+                        setText('');
                         return;
                     case 'WriteRoomPrivateMessageFailureResult':
                         addRoomNotification({
@@ -173,9 +172,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
                 value={text}
                 placeholder={placeholder}
                 onChange={e => {
-                    dispatch(
-                        messageInputTextModule.actions.set({ privateMessage: e.target.value })
-                    );
+                    setText(e.target.value);
                 }}
                 onPressEnter={e => (e.shiftKey ? undefined : onPost(text))}
             />
@@ -203,9 +200,8 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
     selectedCharacterType,
     autoSubmitter,
 }: PublicMessageElementProps) => {
-    const dispatch = useDispatch();
-    const [, addRoomNotification] = useAtom(addRoomNotificationAtom);
-    const text = useSelector(state => state.messageInputTextModule.publicMessage);
+    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
+    const [text, setText] = useAtom(roomPublicMessageInputAtom);
     const [writePublicMessage] = useMutation(WritePublicMessageDocument);
     const textAreaRef = React.useRef<TextAreaRef | null>(null);
     const [isPosting, setIsPosting] = React.useState(false); // 現状、並列投稿は「PublicMessage1つとPrivateMessage1つの最大2つまで」という制限になっているが、これは単に実装が楽だからというのが一番の理由。
@@ -266,7 +262,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
             .then(res => {
                 switch (res.data?.result.__typename) {
                     case 'RoomPublicMessage':
-                        dispatch(messageInputTextModule.actions.set({ publicMessage: '' }));
+                        setText('');
                         return;
                     case 'WriteRoomPublicMessageFailureResult':
                         switch (res.data.result.failureType) {
@@ -328,7 +324,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
                 value={text}
                 placeholder={placeholder}
                 onChange={e => {
-                    dispatch(messageInputTextModule.actions.set({ publicMessage: e.target.value }));
+                    setText(e.target.value);
                 }}
                 onPressEnter={e => (e.shiftKey ? undefined : onPost(text))}
             />
@@ -353,7 +349,7 @@ type Props = {
     onSelectedChannelTypeChange: (newValue: SelectedChannelType) => void;
     config: ChatPalettePanelConfig | MessagePanelConfig;
     onConfigUpdate: (
-        recipe: (draft: WritableDraft<ChatPalettePanelConfig> | WritableDraft<MessagePanelConfig>) => void
+        recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void
     ) => void;
     // ChatPalettePanelConfigにselectedCharacterTypeは存在しないので、独立させている
     selectedCharacterType: SelectedCharacterType | null;

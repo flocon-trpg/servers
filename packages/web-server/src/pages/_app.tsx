@@ -11,7 +11,6 @@ import 'firebase/auth';
 import 'firebase/storage';
 import useConstant from 'use-constant';
 import { authNotFound, FirebaseUserState, loading, notSignIn } from '../contexts/MyAuthContext';
-import { store } from '../store';
 import { appConsole } from '../utils/appConsole';
 import { getConfig, getHttpUri, getWsUri } from '../config';
 import { enableMapSet } from 'immer';
@@ -27,26 +26,23 @@ import { useMyUserUid } from '../hooks/useMyUserUid';
 import { AllContextProvider } from '../components/AllContextProvider';
 import { simpleId } from '@flocon-trpg/core';
 import { Ref } from '../utils/ref';
-import { useAtom } from 'jotai';
 import { userConfigAtom } from '../atoms/userConfig/userConfigAtom';
-import { addRoomNotificationAtom, Notification } from '../atoms/room/roomAtom';
-import { writeonlyAtom } from '../atoms/writeonlyAtom';
+import { roomNotificationsAtom, Notification } from '../atoms/room/roomAtom';
 import { useAsync,useDebounce } from 'react-use';
 import { roomConfigAtom } from '../atoms/roomConfig/roomConfigAtom';
 import { setRoomConfig } from '../utils/localStorage/roomConfig';
 import { UserConfig } from '../atoms/userConfig/types';
 import { RoomConfig } from '../atoms/roomConfig/types/roomConfig';
+import { useAtomValue, useUpdateAtom } from 'jotai/utils';
 
 enableMapSet();
 
 const config = getConfig();
 
-const writeonlyUserConfigAtom = writeonlyAtom(userConfigAtom);
-
 // localForageを用いてRoomConfigを読み込み、ReduxのStateと紐付ける。
 // Userが変わるたびに、useUserConfigが更新される必要がある。_app.tsxなどどこか一箇所でuseUserConfigを呼び出すだけでよい。
 const useUserConfig = (userUid: string | null): void => {
-    const [, setUserConfig] = useAtom(writeonlyUserConfigAtom);
+    const setUserConfig = useUpdateAtom(userConfigAtom);
 
     React.useEffect(() => {
         let unmounted = false;
@@ -71,7 +67,7 @@ const useUserConfig = (userUid: string | null): void => {
 // _app.tsxで1回のみ呼ばれることを想定。
 const useAutoSaveUserConfig = () => {
     const throttleTimespan = 500;
-    const [userConfig] = useAtom(userConfigAtom);
+    const userConfig = useAtomValue(userConfigAtom);
 
     // throttleでは非常に重くなるため、debounceを使っている
     const [debouncedUserConfig, setDebouncedUserConfig] = React.useState<UserConfig | null>(null);
@@ -93,7 +89,7 @@ const useAutoSaveUserConfig = () => {
 // _app.tsxで1回のみ呼ばれることを想定。
 const useAutoSaveRoomConfig = () => {
     const throttleTimespan = 500;
-    const [roomConfig] = useAtom(roomConfigAtom);
+    const roomConfig = useAtomValue(roomConfigAtom);
 
     // throttleでは非常に重くなるため、debounceを使っている
     const [debouncedUserConfig, setDebouncedUserConfig] = React.useState<RoomConfig | null>(null);
@@ -134,7 +130,7 @@ const useFirebaseUser = (): FirebaseUserState => {
 };
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
-    const [, setRoomNotification] = useAtom(addRoomNotificationAtom);
+    const setRoomNotification = useUpdateAtom(roomNotificationsAtom);
 
     const httpUri = urljoin(getHttpUri(config), 'graphql');
     const wsUri = urljoin(getWsUri(config), 'graphql');
@@ -218,7 +214,6 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
             <AllContextProvider
                 clientId={clientId}
                 apolloClient={apolloClient}
-                store={store}
                 user={user}
                 firebaseStorageUrlCache={firebaseStorageUrlCache}
                 getIdToken={

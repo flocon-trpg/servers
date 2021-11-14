@@ -1,6 +1,5 @@
 import React from 'react';
 import { Button, Popover, Select } from 'antd';
-import { useDispatch } from 'react-redux';
 import { apolloError } from '../../hooks/useRoomMessages';
 import classNames from 'classnames';
 import { flex, flexNone, flexRow, itemsCenter } from '../../utils/className';
@@ -13,10 +12,9 @@ import {
 import { useQuery } from '@apollo/client';
 import { ChatPalettePanelConfig } from '../../atoms/roomConfig/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '../../atoms/roomConfig/types/messagePanelConfig';
-import { useAtom } from 'jotai';
-import { addRoomNotificationAtom } from '../../atoms/room/roomAtom';
-import produce from 'immer';
-import { WritableDraft } from 'immer/dist/internal';
+import { roomNotificationsAtom } from '../../atoms/room/roomAtom';
+import { Draft } from 'immer';
+import { useUpdateAtom } from 'jotai/utils';
 
 type HelpMessageProps = {
     gameSystemId: string;
@@ -48,7 +46,7 @@ const HelpMessage = ({ gameSystemId }: HelpMessageProps) => {
 type Props = {
     config: ChatPalettePanelConfig | MessagePanelConfig;
     onConfigUpdate: (
-        recipe: (draft: WritableDraft<ChatPalettePanelConfig> | WritableDraft<MessagePanelConfig>) => void
+        recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void
     ) => void;
     titleStyle?: React.CSSProperties;
     inputMaxWidth?: number;
@@ -60,7 +58,7 @@ export const GameSelector: React.FC<Props> = ({
     config,
     onConfigUpdate,
 }: Props) => {
-    const [, addRoomNotification] = useAtom(addRoomNotificationAtom);
+    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
 
     const availableGameSystems = useQuery(GetAvailableGameSystemsDocument);
     React.useEffect(() => {

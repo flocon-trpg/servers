@@ -254,7 +254,7 @@ export class WritingMessageStatus {
 
 @ObjectType()
 export class RoomEvent {
-    // 現状は、2つ以上同時にnon-nullishになることはない。
+    // 現状は、2つ以上同時にnon-nullish|trueになることはない。
 
     @Field(() => RoomOperation, { nullable: true })
     public roomOperation?: RoomOperation;
@@ -264,6 +264,9 @@ export class RoomEvent {
 
     @Field(() => RoomMessageEvent, { nullable: true })
     public roomMessageEvent?: typeof RoomMessageEvent;
+
+    @Field()
+    public isRoomMessagesResetEvent!: boolean;
 
     @Field(() => RoomConnectionEvent, { nullable: true })
     public roomConnectionEvent?: RoomConnectionEvent;

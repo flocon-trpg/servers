@@ -78,13 +78,16 @@ const initialValue: RoomAtomValue = {
 
 export const roomAtom = atom(initialValue);
 
-export const addRoomNotificationAtom = atom(null, (get, set, payload: Notification.Payload) => {
-    set(roomAtom, roomState =>
-        produce(roomState, roomState => {
-            if (roomState.notifications.newValue != null) {
-                roomState.notifications.values.push(roomState.notifications.newValue);
-            }
-            roomState.notifications.newValue = Notification.toTextNotification(payload);
-        })
-    );
-});
+export const roomNotificationsAtom = atom(
+    get => get(roomAtom).notifications,
+    (get, set, payload: Notification.Payload) => {
+        set(roomAtom, roomState =>
+            produce(roomState, roomState => {
+                if (roomState.notifications.newValue != null) {
+                    roomState.notifications.values.push(roomState.notifications.newValue);
+                }
+                roomState.notifications.newValue = Notification.toTextNotification(payload);
+            })
+        );
+    }
+);

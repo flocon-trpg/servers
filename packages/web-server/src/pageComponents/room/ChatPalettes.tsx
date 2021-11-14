@@ -2,7 +2,6 @@ import React from 'react';
 import { generateChatPalette } from '@flocon-trpg/core';
 import { Select } from 'antd';
 import { useBufferValue } from '../../hooks/useBufferValue';
-import { useDispatch } from 'react-redux';
 import { useMyCharacters } from '../../hooks/state/useMyCharacters';
 import { GameSelector } from '../../components/ChatInput/GameSelector';
 import { TextColorSelector } from '../../components/ChatInput/TextColorSelector';
@@ -11,28 +10,26 @@ import {
     SelectedChannelType,
     SubmitMessage,
 } from '../../components/ChatInput/SubmitMessage';
-import { messageInputTextModule } from '../../modules/messageInputTextModule';
 import { Subject } from 'rxjs';
 import classNames from 'classnames';
 import { flex, flex1, flexColumn, flexNone, flexRow, itemsCenter } from '../../utils/className';
 import { ChatPaletteTomlInput } from '../../components/ChatPaletteTomlInput';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
-import produce from 'immer';
 import { UISelector } from '../../components/UISelector';
 import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
-import { writeonlyAtom } from '../../atoms/writeonlyAtom';
-import { useImmerAtom } from 'jotai/immer';
-import { WritableDraft } from 'immer/dist/internal';
+import { Draft } from 'immer';
 import { ChatPalettePanelConfig } from '../../atoms/roomConfig/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '../../atoms/roomConfig/types/messagePanelConfig';
+import { useUpdateAtom } from 'jotai/utils';
+import { roomPublicMessageInputAtom } from '../../atoms/inputs/roomPublicMessageInputAtom';
+import { roomPrivateMessageInputAtom } from '../../atoms/inputs/roomPrivateMessageInputAtom';
+import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
 
 const titleStyle: React.CSSProperties = {
     flexBasis: '80px',
 };
-
-const writeonlyRoomConfigAtom = writeonlyAtom(roomConfigAtom);
 
 type ChatPaletteListProps = {
     chatPaletteToml: string | null;
@@ -125,12 +122,13 @@ type ChatPaletteProps = {
 export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: ChatPaletteProps) => {
     const miniInputMaxWidth = 200;
 
-    const dispatch = useDispatch();
+    const setPublicMessageInput = useUpdateAtom(roomPublicMessageInputAtom);
+    const setPrivateMessageInput = useUpdateAtom(roomPrivateMessageInputAtom);
     const config = useAtomSelector(
         roomConfigAtom,
         state => state?.panels.chatPalettePanels?.[panelId]
     );
-    const [, setRoomConfig] = useImmerAtom(writeonlyRoomConfigAtom);
+    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
     const subject = React.useMemo(() => new Subject<string>(), []);
     const myUserUid = useMyUserUid();
     const myCharacters = useMyCharacters();
@@ -164,7 +162,7 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
 
     const onConfigUpdate = (
         recipe: (
-            draft: WritableDraft<ChatPalettePanelConfig> | WritableDraft<MessagePanelConfig>
+            draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>
         ) => void
     ) => {
         setRoomConfig(roomConfig => {
@@ -222,12 +220,10 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
                         chatPaletteToml={selectedCharacter?.chatPalette ?? null}
                         onClick={text => {
                             if (selectedChannelType === publicChannel) {
-                                dispatch(
-                                    messageInputTextModule.actions.set({ publicMessage: text })
-                                );
+                                setPublicMessageInput(text);
                                 return;
                             }
-                            dispatch(messageInputTextModule.actions.set({ privateMessage: text }));
+                            setPrivateMessageInput(text)
                         }}
                         onDoubleClick={text => subject.next(text)}
                         isEditMode={isEditMode}

@@ -1,6 +1,5 @@
 import { useApolloClient } from '@apollo/client';
 import React from 'react';
-import { useStore } from 'react-redux';
 import { Props } from '../components/AllContextProvider';
 import { ClientIdContext } from '../contexts/ClientIdContext';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
@@ -11,7 +10,6 @@ import { MyAuthContext } from '../contexts/MyAuthContext';
 export const useAllContext = (): Props => {
     const clientId = React.useContext(ClientIdContext);
     const apolloClient = useApolloClient();
-    const store = useStore();
     const user = React.useContext(MyAuthContext);
     const firebaseStorageUrlCache = React.useContext(FirebaseStorageUrlCacheContext);
     const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);
@@ -19,7 +17,6 @@ export const useAllContext = (): Props => {
     return {
         clientId,
         apolloClient,
-        store,
         user,
         firebaseStorageUrlCache,
         getIdToken,

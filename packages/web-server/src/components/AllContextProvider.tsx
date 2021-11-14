@@ -1,7 +1,5 @@
 import { ApolloClient, ApolloProvider } from '@apollo/client';
 import React, { PropsWithChildren } from 'react';
-import { Provider } from 'react-redux';
-import { AnyAction, Store } from 'redux';
 import { ClientIdContext } from '../contexts/ClientIdContext';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
@@ -11,7 +9,6 @@ import { ExpiryMap } from '../utils/expiryMap';
 export type Props = {
     clientId: string | null;
     apolloClient: ApolloClient<unknown>;
-    store: Store<unknown, AnyAction>;
     user: FirebaseUserState;
     firebaseStorageUrlCache: ExpiryMap<string, string> | null;
     getIdToken: (() => Promise<string | null>) | null;
@@ -20,7 +17,6 @@ export type Props = {
 export const AllContextProvider: React.FC<PropsWithChildren<Props>> = ({
     clientId,
     apolloClient,
-    store,
     user,
     firebaseStorageUrlCache,
     getIdToken,
@@ -29,7 +25,6 @@ export const AllContextProvider: React.FC<PropsWithChildren<Props>> = ({
     return (
         <ClientIdContext.Provider value={clientId}>
             <ApolloProvider client={apolloClient}>
-                <Provider store={store}>
                     <MyAuthContext.Provider value={user}>
                         <FirebaseStorageUrlCacheContext.Provider value={firebaseStorageUrlCache}>
                             <FirebaseAuthenticationIdTokenContext.Provider value={getIdToken}>
@@ -37,7 +32,6 @@ export const AllContextProvider: React.FC<PropsWithChildren<Props>> = ({
                             </FirebaseAuthenticationIdTokenContext.Provider>
                         </FirebaseStorageUrlCacheContext.Provider>
                     </MyAuthContext.Provider>
-                </Provider>
             </ApolloProvider>
         </ClientIdContext.Provider>
     );

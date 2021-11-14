@@ -1,6 +1,5 @@
 import { Input, Menu, Modal, Popover, Tooltip } from 'antd';
 import React from 'react';
-import { useDispatch } from 'react-redux';
 import {
     ChangeParticipantNameDocument,
     DeleteRoomDocument,
@@ -10,6 +9,8 @@ import {
     PromoteFailureType,
     PromoteToPlayerDocument,
     GetRoomAsListItemDocument,
+    ResetMessagesDocument,
+    ResetRoomMessagesFailureType,
 } from '@flocon-trpg/typed-document-node';
 import * as Icon from '@ant-design/icons';
 import { VolumeBarPanel } from './VolumeBarPanel';
@@ -17,7 +18,6 @@ import { Jdenticon } from '../../components/Jdenticon';
 import { path } from '../../utils/path';
 import { useRouter } from 'next/router';
 import { recordToArray } from '@flocon-trpg/utils';
-import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';
 import { FilesManagerDrawerType, none } from '../../utils/types';
 import { useMe } from '../../hooks/useMe';
@@ -28,18 +28,16 @@ import { flex, flexRow, itemsCenter } from '../../utils/className';
 import { MyAuthContext } from '../../contexts/MyAuthContext';
 import { GenerateLogModal } from '../../components/GenerateLogModal';
 import { useLazyQuery, useMutation } from '@apollo/client';
-import { writeonlyAtom } from '../../atoms/writeonlyAtom';
-import { addRoomNotificationAtom, roomAtom, Notification } from '../../atoms/room/roomAtom';
-import { useAtom } from 'jotai';
+import { roomNotificationsAtom, roomAtom, Notification } from '../../atoms/room/roomAtom';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
 import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
-import { useImmerAtom } from 'jotai/immer';
 import { RoomConfigUtils } from '../../atoms/roomConfig/types/roomConfig/utils';
 import { simpleId } from '@flocon-trpg/core';
 import { defaultMessagePanelConfig } from '../../atoms/roomConfig/types/messagePanelConfig';
 import { defaultMemoPanelConfig } from '../../atoms/roomConfig/types/memoPanelConfig';
-
-const writeonlyRoomConfigAtom = writeonlyAtom(roomConfigAtom);
+import { useUpdateAtom } from 'jotai/utils';
+import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
+import { editRoomDrawerVisibilityAtom } from '../../atoms/overlay/editRoomDrawerVisibilityAtom';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -54,7 +52,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
     onOk,
     onCancel,
 }: BecomePlayerModalProps) => {
-    const [, addRoomNotification] = useAtom(addRoomNotificationAtom);
+    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
     const [promoteToPlayer] = useMutation(PromoteToPlayerDocument);
@@ -210,7 +208,7 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
     onCancel,
     roomCreatedByMe,
 }: DeleteRoomModalProps) => {
-    const [, addRoomNotification] = useAtom(addRoomNotificationAtom);
+    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
     const [isPosting, setIsPosting] = React.useState(false);
     const [deleteRoom] = useMutation(DeleteRoomDocument);
     React.useEffect(() => {
@@ -244,6 +242,9 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
                         switch (e.data?.result.failureType) {
                             case DeleteRoomFailureType.NotCreatedByYou:
                                 text = 'この部屋の作成者でないため、削除できません。';
+                                break;
+                            case DeleteRoomFailureType.NotFound:
+                                text = '部屋が見つかりませんでした。'
                                 break;
                             default:
                                 text = undefined;
@@ -284,6 +285,99 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
     );
 };
 
+type ResetMessagesModalProps = {
+    roomId: string;
+    roomCreatedByMe: boolean;
+    visible: boolean;
+    onOk: () => void;
+    onCancel: () => void;
+};
+
+const ResetMessagesModal: React.FC<ResetMessagesModalProps> = ({
+    roomId,
+    visible,
+    onOk,
+    onCancel,
+    roomCreatedByMe,
+}: DeleteRoomModalProps) => {
+    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
+    const [isPosting, setIsPosting] = React.useState(false);
+    const [resetMessages] = useMutation(ResetMessagesDocument);
+    React.useEffect(() => {
+        setIsPosting(false);
+    }, [visible, roomId]);
+
+    const disabled = isPosting || !roomCreatedByMe;
+    return (
+        <Modal
+            visible={visible}
+            title='ログの初期化'
+            okButtonProps={{ disabled }}
+            okType='danger'
+            okText='削除する'
+            cancelText={disabled ? '閉じる' : 'キャンセル'}
+            onOk={() => {
+                setIsPosting(true);
+                resetMessages({ variables: { roomId } }).then(e => {
+                    if (e.errors != null) {
+                        addRoomNotification({
+                            type: Notification.graphQLErrors,
+                            createdAt: new Date().getTime(),
+                            errors: e.errors,
+                        });
+                        onOk();
+                        return;
+                    }
+
+                    if (e.data?.result.failureType != null) {
+                        let text: string | undefined;
+                        switch (e.data?.result.failureType) {
+                            case ResetRoomMessagesFailureType.NotAuthorized:
+                            case ResetRoomMessagesFailureType.NotParticipant:
+                                text = 'この部屋の参加者でないため、削除できません。';
+                                break;
+                            case ResetRoomMessagesFailureType.RoomNotFound:
+                                text = '部屋が存在しません。'
+                                break;
+                            default:
+                                text = undefined;
+                                break;
+                        }
+                        addRoomNotification({
+                            type: 'text',
+                            notification: {
+                                type: 'warning',
+                                message: '部屋の削除に失敗しました。',
+                                description: text,
+                                createdAt: new Date().getTime(),
+                            },
+                        });
+                        onOk();
+                        return;
+                    }
+
+                    onOk();
+                });
+            }}
+            onCancel={() => onCancel()}
+        >
+            {roomCreatedByMe ? (
+                <div>
+                    <p>
+                        この部屋のログを全て削除します。この部屋の参加者でない限り、部屋を削除することはできません。
+                    </p>
+                    <p style={{ fontWeight: 'bold' }}>
+                        ログを削除すると元に戻すことはできません。
+                    </p>
+                    <p>本当によろしいですか？</p>
+                </div>
+            ) : (
+                <div>この部屋の参加者でないため、削除することができません。</div>
+            )}
+        </Modal>
+    );
+};
+
 type ChangeMyParticipantNameModalProps = {
     roomId: string;
     visible: boolean;
@@ -297,7 +391,7 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
     onOk: onOkCore,
     onCancel,
 }: ChangeMyParticipantNameModalProps) => {
-    const [, addRoomNotification] = useAtom(addRoomNotificationAtom);
+    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
     const [changeParticipantName] = useMutation(ChangeParticipantNameDocument);
@@ -360,8 +454,7 @@ export const RoomMenu: React.FC = () => {
     const myUserUid = useMyUserUid();
     const myAuth = React.useContext(MyAuthContext);
     const router = useRouter();
-    const [, setRoomConfig] = useImmerAtom(writeonlyRoomConfigAtom);
-    const dispatch = useDispatch();
+    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
     const signOut = useSignOut();
     const roomId = useAtomSelector(roomAtom, state => state.roomId);
     const createdBy = useAtomSelector(roomAtom, state => state.roomState?.state?.createdBy);
@@ -389,9 +482,11 @@ export const RoomMenu: React.FC = () => {
     const [isChangeMyParticipantNameModalVisible, setIsChangeMyParticipantNameModalVisible] =
         React.useState(false);
     const [isDeleteRoomModalVisible, setIsDeleteRoomModalVisible] = React.useState(false);
+    const [isResetMessagesModalVisible, setIsResetMessagesModalVisible] = React.useState(false);
     const [isGenerateLogModalVisible, setIsGenerateSimpleLogModalVisible] = React.useState(false);
     const [filesManagerDrawerType, setFilesManagerDrawerType] =
         React.useState<FilesManagerDrawerType | null>(null);
+    const setEditRoomDrawerVisibility = useUpdateAtom(editRoomDrawerVisibilityAtom);
 
     if (
         me == null ||
@@ -420,17 +515,16 @@ export const RoomMenu: React.FC = () => {
                 <Menu.SubMenu title='部屋'>
                     <Menu.Item
                         onClick={() =>
-                            dispatch(
-                                roomDrawerAndPopoverAndModalModule.actions.set({
-                                    editRoomDrawerVisibility: true,
-                                })
-                            )
+                            setEditRoomDrawerVisibility(true)
                         }
                     >
                         編集
                     </Menu.Item>
                     <Menu.Item onClick={() => setIsDeleteRoomModalVisible(true)}>
                         <span style={{ color: 'red' }}>削除</span>
+                    </Menu.Item>
+                    <Menu.Item onClick={() => setIsResetMessagesModalVisible(true)}>
+                        <span style={{ color: 'red' }}>ログの初期化</span>
                     </Menu.Item>
                     <Menu.Divider />
                     <Menu.Item onClick={() => setIsGenerateSimpleLogModalVisible(true)}>
@@ -911,6 +1005,13 @@ export const RoomMenu: React.FC = () => {
                 visible={isDeleteRoomModalVisible}
                 onOk={() => setIsDeleteRoomModalVisible(false)}
                 onCancel={() => setIsDeleteRoomModalVisible(false)}
+                roomId={roomId}
+                roomCreatedByMe={myUserUid === createdBy}
+            />
+            <ResetMessagesModal
+                visible={isResetMessagesModalVisible}
+                onOk={() => setIsResetMessagesModalVisible(false)}
+                onCancel={() => setIsResetMessagesModalVisible(false)}
                 roomId={roomId}
                 roomCreatedByMe={myUserUid === createdBy}
             />
