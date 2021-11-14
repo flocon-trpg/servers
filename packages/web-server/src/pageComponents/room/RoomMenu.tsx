@@ -9,6 +9,8 @@ import {
     PromoteFailureType,
     PromoteToPlayerDocument,
     GetRoomAsListItemDocument,
+    ResetMessagesDocument,
+    ResetRoomMessagesFailureType,
 } from '@flocon-trpg/typed-document-node';
 import * as Icon from '@ant-design/icons';
 import { VolumeBarPanel } from './VolumeBarPanel';
@@ -241,6 +243,9 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
                             case DeleteRoomFailureType.NotCreatedByYou:
                                 text = 'この部屋の作成者でないため、削除できません。';
                                 break;
+                            case DeleteRoomFailureType.NotFound:
+                                text = '部屋が見つかりませんでした。'
+                                break;
                             default:
                                 text = undefined;
                                 break;
@@ -275,6 +280,99 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
                 </div>
             ) : (
                 <div>この部屋の作成者でないため、削除することができません。</div>
+            )}
+        </Modal>
+    );
+};
+
+type ResetMessagesModalProps = {
+    roomId: string;
+    roomCreatedByMe: boolean;
+    visible: boolean;
+    onOk: () => void;
+    onCancel: () => void;
+};
+
+const ResetMessagesModal: React.FC<ResetMessagesModalProps> = ({
+    roomId,
+    visible,
+    onOk,
+    onCancel,
+    roomCreatedByMe,
+}: DeleteRoomModalProps) => {
+    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
+    const [isPosting, setIsPosting] = React.useState(false);
+    const [resetMessages] = useMutation(ResetMessagesDocument);
+    React.useEffect(() => {
+        setIsPosting(false);
+    }, [visible, roomId]);
+
+    const disabled = isPosting || !roomCreatedByMe;
+    return (
+        <Modal
+            visible={visible}
+            title='ログの初期化'
+            okButtonProps={{ disabled }}
+            okType='danger'
+            okText='削除する'
+            cancelText={disabled ? '閉じる' : 'キャンセル'}
+            onOk={() => {
+                setIsPosting(true);
+                resetMessages({ variables: { roomId } }).then(e => {
+                    if (e.errors != null) {
+                        addRoomNotification({
+                            type: Notification.graphQLErrors,
+                            createdAt: new Date().getTime(),
+                            errors: e.errors,
+                        });
+                        onOk();
+                        return;
+                    }
+
+                    if (e.data?.result.failureType != null) {
+                        let text: string | undefined;
+                        switch (e.data?.result.failureType) {
+                            case ResetRoomMessagesFailureType.NotAuthorized:
+                            case ResetRoomMessagesFailureType.NotParticipant:
+                                text = 'この部屋の参加者でないため、削除できません。';
+                                break;
+                            case ResetRoomMessagesFailureType.RoomNotFound:
+                                text = '部屋が存在しません。'
+                                break;
+                            default:
+                                text = undefined;
+                                break;
+                        }
+                        addRoomNotification({
+                            type: 'text',
+                            notification: {
+                                type: 'warning',
+                                message: '部屋の削除に失敗しました。',
+                                description: text,
+                                createdAt: new Date().getTime(),
+                            },
+                        });
+                        onOk();
+                        return;
+                    }
+
+                    onOk();
+                });
+            }}
+            onCancel={() => onCancel()}
+        >
+            {roomCreatedByMe ? (
+                <div>
+                    <p>
+                        この部屋のログを全て削除します。この部屋の参加者でない限り、部屋を削除することはできません。
+                    </p>
+                    <p style={{ fontWeight: 'bold' }}>
+                        ログを削除すると元に戻すことはできません。
+                    </p>
+                    <p>本当によろしいですか？</p>
+                </div>
+            ) : (
+                <div>この部屋の参加者でないため、削除することができません。</div>
             )}
         </Modal>
     );
@@ -384,6 +482,7 @@ export const RoomMenu: React.FC = () => {
     const [isChangeMyParticipantNameModalVisible, setIsChangeMyParticipantNameModalVisible] =
         React.useState(false);
     const [isDeleteRoomModalVisible, setIsDeleteRoomModalVisible] = React.useState(false);
+    const [isResetMessagesModalVisible, setIsResetMessagesModalVisible] = React.useState(false);
     const [isGenerateLogModalVisible, setIsGenerateSimpleLogModalVisible] = React.useState(false);
     const [filesManagerDrawerType, setFilesManagerDrawerType] =
         React.useState<FilesManagerDrawerType | null>(null);
@@ -423,6 +522,9 @@ export const RoomMenu: React.FC = () => {
                     </Menu.Item>
                     <Menu.Item onClick={() => setIsDeleteRoomModalVisible(true)}>
                         <span style={{ color: 'red' }}>削除</span>
+                    </Menu.Item>
+                    <Menu.Item onClick={() => setIsResetMessagesModalVisible(true)}>
+                        <span style={{ color: 'red' }}>ログの初期化</span>
                     </Menu.Item>
                     <Menu.Divider />
                     <Menu.Item onClick={() => setIsGenerateSimpleLogModalVisible(true)}>
@@ -903,6 +1005,13 @@ export const RoomMenu: React.FC = () => {
                 visible={isDeleteRoomModalVisible}
                 onOk={() => setIsDeleteRoomModalVisible(false)}
                 onCancel={() => setIsDeleteRoomModalVisible(false)}
+                roomId={roomId}
+                roomCreatedByMe={myUserUid === createdBy}
+            />
+            <ResetMessagesModal
+                visible={isResetMessagesModalVisible}
+                onOk={() => setIsResetMessagesModalVisible(false)}
+                onCancel={() => setIsResetMessagesModalVisible(false)}
                 roomId={roomId}
                 roomCreatedByMe={myUserUid === createdBy}
             />
