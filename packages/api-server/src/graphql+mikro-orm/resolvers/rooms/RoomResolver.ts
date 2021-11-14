@@ -166,7 +166,6 @@ import { RateLimitMiddleware } from '../../middlewares/RateLimitMiddleware';
 import { convertToMaxLength100String } from '../../../utils/convertToMaxLength100String';
 import { GetRoomAsListItemResult } from '../../results/GetRoomAsListItemResult';
 import { ResetRoomMessagesFailureType } from '../../../enums/ResetRoomMessagesFailureType';
-import { boolean } from 'fp-ts';
 
 const find = <T>(source: Record<string, T | undefined>, key: string): T | undefined => source[key];
 
@@ -2530,17 +2529,21 @@ export class RoomResolver {
 
             for (const chatCh of await room.roomChatChs.loadItems()) {
                 await chatCh.roomPubMsgs.init();
+                chatCh.roomPubMsgs.getItems().forEach(x => em.remove(x));
                 chatCh.roomPubMsgs.removeAll();
                 em.persist(chatCh);
             }
 
             await room.roomPrvMsgs.init();
+            room.roomPrvMsgs.getItems().forEach(x => em.remove(x));
             room.roomPrvMsgs.removeAll();
 
             await room.dicePieceValueLogs.init();
+            room.dicePieceValueLogs.getItems().forEach(x => em.remove(x));
             room.dicePieceValueLogs.removeAll();
 
             await room.numberPieceValueLogs.init();
+            room.numberPieceValueLogs.getItems().forEach(x => em.remove(x));
             room.numberPieceValueLogs.removeAll();
 
             em.persist(room);
