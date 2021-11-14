@@ -11,7 +11,6 @@ import 'firebase/auth';
 import 'firebase/storage';
 import useConstant from 'use-constant';
 import { authNotFound, FirebaseUserState, loading, notSignIn } from '../contexts/MyAuthContext';
-import { store } from '../store';
 import { appConsole } from '../utils/appConsole';
 import { getConfig, getHttpUri, getWsUri } from '../config';
 import { enableMapSet } from 'immer';
@@ -215,7 +214,6 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
             <AllContextProvider
                 clientId={clientId}
                 apolloClient={apolloClient}
-                store={store}
                 user={user}
                 firebaseStorageUrlCache={firebaseStorageUrlCache}
                 getIdToken={

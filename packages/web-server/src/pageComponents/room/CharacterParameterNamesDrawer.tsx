@@ -4,18 +4,17 @@ import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { replace } from '../../stateManagers/states/types';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { BufferedInput } from '../../components/BufferedInput';
-import { useSelector } from '../../store';
 import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import { recordToMap } from '@flocon-trpg/utils';
 import { StrIndex20, strIndex20Array, UpOperation } from '@flocon-trpg/core';
-import { useDispatch } from 'react-redux';
-import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { InputModal } from '../../components/InputModal';
 import classNames from 'classnames';
 import { flex, flexRow } from '../../utils/className';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { roomAtom } from '../../atoms/room/roomAtom';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
+import { useAtom } from 'jotai';
+import { characterParameterNamesDrawerVisibilityAtom } from '../../atoms/overlay/characterParameterNamesDrawerVisibilityAtom';
 
 type VisibleParameterForm = {
     type: 'Bool' | 'Str' | 'Num';
@@ -23,12 +22,11 @@ type VisibleParameterForm = {
 };
 
 export const CharacterParameterNamesDrawer: React.FC = () => {
-    const characterParameterNamesDrawerVisibility = useSelector(
-        state => state.roomDrawerAndPopoverAndModalModule.characterParameterNamesDrawerVisibility
+    const [characterParameterNamesDrawerVisibility, setVisibility] = useAtom(
+        characterParameterNamesDrawerVisibilityAtom
     );
     const operate = useSetRoomStateByApply();
     const operateAsStateWithImmer = useSetRoomStateWithImmer();
-    const dispatch = useDispatch();
     const [visibleParameterForm, setVisibleParameterForm] = React.useState<VisibleParameterForm>();
     const [addNumParamSelector, setAddNumParamSelector] = React.useState<StrIndex20>();
     const [addBoolParamSelector, setAddBoolParamSelector] = React.useState<StrIndex20>();
@@ -249,23 +247,12 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
             width={600}
             visible={characterParameterNamesDrawerVisibility}
             closable
-            onClose={() =>
-                dispatch(
-                    roomDrawerAndPopoverAndModalModule.actions.set({
-                        characterParameterNamesDrawerVisibility: false,
-                    })
-                )
-            }
+            onClose={() => setVisibility(false)}
             footer={
                 <DrawerFooter
                     close={{
                         textType: 'close',
-                        onClick: () =>
-                            dispatch(
-                                roomDrawerAndPopoverAndModalModule.actions.set({
-                                    characterParameterNamesDrawerVisibility: false,
-                                })
-                            ),
+                        onClick: () => setVisibility(false),
                     }}
                 />
             }

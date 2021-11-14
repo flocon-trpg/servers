@@ -8,20 +8,16 @@ import { FilesManagerDrawerType } from '../../utils/types';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
 import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
-import { useSelector } from '../../store';
 import { BufferedInput } from '../../components/BufferedInput';
 import { useBoards } from '../../hooks/state/useBoards';
 import { boardDiff, BoardState, simpleId, toBoardUpOperation } from '@flocon-trpg/core';
-import { useDispatch } from 'react-redux';
-import {
-    create,
-    roomDrawerAndPopoverAndModalModule,
-    update,
-} from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { FilePath } from '../../utils/filePath';
 import { boardUpdateOperation } from '../../utils/boardUpdateOperation';
 import { boardReplaceOperation } from '../../utils/boardReplaceOperation';
+import { useAtom } from 'jotai';
+import { boardEditorDrawerAtom } from '../../atoms/overlay/boardDrawerAtom';
+import { create, update } from '../../utils/constants';
 
 const notFound = 'notFound';
 
@@ -51,11 +47,8 @@ const inputSpan = 16;
 
 export const BoardDrawer: React.FC = () => {
     const myUserUid = useMyUserUid();
-    const dispatch = useDispatch();
     const operate = useSetRoomStateByApply();
-    const drawerType = useSelector(
-        state => state.roomDrawerAndPopoverAndModalModule.boardDrawerType
-    );
+    const [drawerType, setDrawerType] = useAtom(boardEditorDrawerAtom);
     const boards = useBoards();
     let stateEditorParams: StateEditorParams<BoardState | undefined>;
     switch (drawerType?.type) {
@@ -125,7 +118,7 @@ export const BoardDrawer: React.FC = () => {
             operate(boardReplaceOperation({ createdBy: myUserUid, id }, board));
             setBoard(defaultBoard);
             resetBoardToCreate();
-            dispatch(roomDrawerAndPopoverAndModalModule.actions.set({ boardDrawerType: null }));
+            setDrawerType(null);
         };
     }
 
@@ -133,7 +126,7 @@ export const BoardDrawer: React.FC = () => {
     if (drawerType?.type === update) {
         onDestroy = () => {
             operate(boardReplaceOperation(drawerType.stateKey, undefined));
-            dispatch(roomDrawerAndPopoverAndModalModule.actions.set({ boardDrawerType: null }));
+            setDrawerType(null);
         };
     }
 
@@ -143,19 +136,12 @@ export const BoardDrawer: React.FC = () => {
             title={drawerType?.type === create ? 'Boardの新規作成' : 'Boardの編集'}
             visible={drawerType != null}
             closable
-            onClose={() =>
-                dispatch(roomDrawerAndPopoverAndModalModule.actions.set({ boardDrawerType: null }))
-            }
+            onClose={() => setDrawerType(null)}
             footer={
                 <DrawerFooter
                     close={{
                         textType: drawerType?.type === create ? 'cancel' : 'close',
-                        onClick: () =>
-                            dispatch(
-                                roomDrawerAndPopoverAndModalModule.actions.set({
-                                    boardDrawerType: null,
-                                })
-                            ),
+                        onClick: () => setDrawerType(null),
                     }}
                     ok={onOkClick == null ? undefined : { textType: 'create', onClick: onOkClick }}
                     destroy={

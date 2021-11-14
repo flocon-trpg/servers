@@ -40,14 +40,6 @@ import {
     strIndex20Array,
     simpleId,
 } from '@flocon-trpg/core';
-import { useSelector } from '../../store';
-import { useDispatch } from 'react-redux';
-import {
-    characterCommand,
-    create,
-    roomDrawerAndPopoverAndModalModule,
-    update,
-} from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
 import { FilePath } from '../../utils/filePath';
@@ -55,6 +47,11 @@ import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 import { characterReplaceOperation } from '../../utils/characterReplaceOperation';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import produce from 'immer';
+import { useAtom } from 'jotai';
+import { characterEditorDrawerAtom } from '../../atoms/overlay/characterEditorDrawerAtom';
+import { create, update } from '../../utils/constants';
+import { useUpdateAtom } from 'jotai/utils';
+import { commandEditorModalAtom } from '../../atoms/overlay/commandEditorModalAtom';
 
 const notFound = 'notFound';
 
@@ -89,10 +86,8 @@ const inputSpan = 16;
 
 export const CharacterDrawer: React.FC = () => {
     const myUserUid = useMyUserUid();
-    const drawerType = useSelector(
-        state => state.roomDrawerAndPopoverAndModalModule.characterDrawerType
-    );
-    const dispatch = useDispatch();
+    const [drawerType, setDrawerType] = useAtom(characterEditorDrawerAtom);
+    const setCommandEditorModal = useUpdateAtom(commandEditorModalAtom);
     const operate = useSetRoomStateByApply();
     const operateAsStateWithImmer = useSetRoomStateWithImmer();
     const characters = useCharacters();
@@ -183,14 +178,14 @@ export const CharacterDrawer: React.FC = () => {
             }
             case update: {
                 operateAsStateWithImmer(prevRoom => {
-                        const character =
-                            prevRoom.participants[drawerType.stateKey.createdBy]?.characters?.[
-                                drawerType.stateKey.id
-                            ];
-                        if (character == null) {
-                            return;
-                        }
-                        recipe(character);
+                    const character =
+                        prevRoom.participants[drawerType.stateKey.createdBy]?.characters?.[
+                            drawerType.stateKey.id
+                        ];
+                    if (character == null) {
+                        return;
+                    }
+                    recipe(character);
                 });
                 return;
             }
@@ -273,7 +268,7 @@ export const CharacterDrawer: React.FC = () => {
             const id = simpleId();
             operate(characterReplaceOperation({ createdBy: myUserUid, id }, character));
             resetCharacterToCreate();
-            dispatch(roomDrawerAndPopoverAndModalModule.actions.set({ characterDrawerType: null }));
+            setDrawerType(null);
         };
     }
 
@@ -281,7 +276,7 @@ export const CharacterDrawer: React.FC = () => {
     if (drawerType?.type === update) {
         onDestroy = () => {
             operate(characterReplaceOperation(drawerType.stateKey, undefined));
-            dispatch(roomDrawerAndPopoverAndModalModule.actions.set({ characterDrawerType: null }));
+            setDrawerType(null);
         };
     }
 
@@ -498,21 +493,12 @@ export const CharacterDrawer: React.FC = () => {
             title={drawerType?.type === create ? 'キャラクターの新規作成' : 'キャラクターの編集'}
             visible={drawerType != null}
             closable
-            onClose={() =>
-                dispatch(
-                    roomDrawerAndPopoverAndModalModule.actions.set({ characterDrawerType: null })
-                )
-            }
+            onClose={() => setDrawerType(null)}
             footer={
                 <DrawerFooter
                     close={{
                         textType: drawerType?.type === create ? 'cancel' : 'close',
-                        onClick: () =>
-                            dispatch(
-                                roomDrawerAndPopoverAndModalModule.actions.set({
-                                    characterDrawerType: null,
-                                })
-                            ),
+                        onClick: () => setDrawerType(null),
                     }}
                     ok={onOkClick == null ? undefined : { textType: 'create', onClick: onOkClick }}
                     destroy={
@@ -818,14 +804,9 @@ export const CharacterDrawer: React.FC = () => {
                             <Col span={inputSpan}>
                                 <Button
                                     onClick={() =>
-                                        dispatch(
-                                            roomDrawerAndPopoverAndModalModule.actions.set({
-                                                commandEditorModalType: {
-                                                    type: characterCommand,
-                                                    characterKey: drawerType.stateKey,
-                                                },
-                                            })
-                                        )
+                                        setCommandEditorModal({
+                                            characterKey: drawerType.stateKey,
+                                        })
                                     }
                                 >
                                     編集

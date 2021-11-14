@@ -1,24 +1,23 @@
 import { useUpdateAtom } from 'jotai/utils';
 import React from 'react';
-import { useDispatch } from 'react-redux';
 import { publicFilesAtom } from '../atoms/firebaseStorage/publicFilesAtom';
 import { unlistedFilesAtom } from '../atoms/firebaseStorage/unlistedFilesAtom';
+import { hideAllOverlayActionAtom } from '../atoms/overlay/hideAllOverlayActionAtom';
 import { roomAtom } from '../atoms/room/roomAtom';
 import { ConfigContext } from '../contexts/ConfigContext';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
-import { roomDrawerAndPopoverAndModalModule } from '../modules/roomDrawerAndPopoverAndModalModule';
 import { getAuth } from '../utils/firebaseHelpers';
 import { useReadonlyRef } from './useReadonlyRef';
 
 export function useSignOut() {
     const setRoom = useUpdateAtom(roomAtom);
-    const dispatch = useDispatch();
     const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
     const config = React.useContext(ConfigContext);
     const auth = getAuth(config);
     const firebaseStorageUrlCacheContextRef = useReadonlyRef(firebaseStorageUrlCacheContext);
     const setPublicFiles = useUpdateAtom(publicFilesAtom);
     const setUnlistedFiles = useUpdateAtom(unlistedFilesAtom);
+    const hideAllOverlay = useUpdateAtom(hideAllOverlayActionAtom);
 
     return React.useCallback(async () => {
         if (auth == null) {
@@ -29,13 +28,13 @@ export function useSignOut() {
         setRoom(roomAtom.init);
         setPublicFiles([]);
         setUnlistedFiles([]);
-        dispatch(roomDrawerAndPopoverAndModalModule.actions.reset());
+        hideAllOverlay();
         firebaseStorageUrlCacheContextRef.current?.clear();
         return true;
     }, [
         auth,
-        dispatch,
         firebaseStorageUrlCacheContextRef,
+        hideAllOverlay,
         setPublicFiles,
         setRoom,
         setUnlistedFiles,

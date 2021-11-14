@@ -13,13 +13,6 @@ import {
     toImagePieceValueUpOperation,
     simpleId,
 } from '@flocon-trpg/core';
-import { useDispatch } from 'react-redux';
-import { useSelector } from '../../store';
-import {
-    create,
-    roomDrawerAndPopoverAndModalModule,
-    update,
-} from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useImagePieceValues } from '../../hooks/state/useImagePieceValues';
 import { InputFile } from '../../components/InputFile';
@@ -29,6 +22,10 @@ import { BufferedInput } from '../../components/BufferedInput';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
 import { FilePath } from '../../utils/filePath';
 import { keyNames } from '@flocon-trpg/utils';
+import { useAtomValue } from 'jotai/utils';
+import { imagePieceDrawerAtom } from '../../atoms/overlay/imagePieceDrawerAtom';
+import { create, update } from '../../utils/constants';
+import { useAtom } from 'jotai';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -48,9 +45,7 @@ const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
 const IdView: React.FC = () => {
-    const drawerType = useSelector(
-        state => state.roomDrawerAndPopoverAndModalModule.imagePieceDrawerType
-    );
+    const drawerType = useAtomValue(imagePieceDrawerAtom);
     const myUserUid = useMyUserUid();
 
     if (drawerType == null || myUserUid == null) {
@@ -74,10 +69,7 @@ const IdView: React.FC = () => {
 };
 
 export const ImagePieceDrawer: React.FC = () => {
-    const drawerType = useSelector(
-        state => state.roomDrawerAndPopoverAndModalModule.imagePieceDrawerType
-    );
-    const dispatch = useDispatch();
+    const [drawerType, setDrawerType] = useAtom(imagePieceDrawerAtom);
     const operate = useSetRoomStateByApply();
     const myUserUid = useMyUserUid();
     const imagePieces = useImagePieceValues();
@@ -182,9 +174,7 @@ export const ImagePieceDrawer: React.FC = () => {
                 },
             };
             operate(operation);
-            dispatch(
-                roomDrawerAndPopoverAndModalModule.actions.set({ imagePieceDrawerType: null })
-            );
+            setDrawerType(null);
             setState(defaultImagePieceValue);
         };
     }
@@ -195,21 +185,12 @@ export const ImagePieceDrawer: React.FC = () => {
             title={drawerType?.type == update ? '画像コマの編集' : '画像コマの新規作成'}
             visible={drawerType != null}
             closable
-            onClose={() =>
-                dispatch(
-                    roomDrawerAndPopoverAndModalModule.actions.set({ imagePieceDrawerType: null })
-                )
-            }
+            onClose={() => setDrawerType(null)}
             footer={
                 <DrawerFooter
                     close={{
                         textType: drawerType?.type === update ? 'close' : 'cancel',
-                        onClick: () =>
-                            dispatch(
-                                roomDrawerAndPopoverAndModalModule.actions.set({
-                                    imagePieceDrawerType: null,
-                                })
-                            ),
+                        onClick: () => setDrawerType(null),
                     }}
                     ok={onCreate == null ? undefined : { textType: 'create', onClick: onCreate }}
                 />

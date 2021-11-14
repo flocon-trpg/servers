@@ -14,13 +14,6 @@ import {
     dicePieceValueStrIndexes,
     simpleId,
 } from '@flocon-trpg/core';
-import { useDispatch } from 'react-redux';
-import { useSelector } from '../../store';
-import {
-    create,
-    roomDrawerAndPopoverAndModalModule,
-    update,
-} from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useDicePieceValues } from '../../hooks/state/useDicePieceValues';
 import { MyCharactersSelect } from '../../components/MyCharactersSelect';
 import { InputDie } from '../../components/InputDie';
@@ -28,6 +21,10 @@ import { noValue } from '../../utils/dice';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { keyNames } from '@flocon-trpg/utils';
 import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
+import { useAtomValue } from 'jotai/utils';
+import { dicePieceDrawerAtom } from '../../atoms/overlay/dicePieceDrawerAtom';
+import { create, update } from '../../utils/constants';
+import { useAtom } from 'jotai';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -44,9 +41,7 @@ const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
 const IdView: React.FC = () => {
-    const drawerType = useSelector(
-        state => state.roomDrawerAndPopoverAndModalModule.dicePieceValueDrawerType
-    );
+    const drawerType = useAtomValue(dicePieceDrawerAtom);
     const myUserUid = useMyUserUid();
 
     if (drawerType == null || myUserUid == null) {
@@ -67,10 +62,7 @@ const IdView: React.FC = () => {
 };
 
 export const DicePieceValueDrawer: React.FC = () => {
-    const drawerType = useSelector(
-        state => state.roomDrawerAndPopoverAndModalModule.dicePieceValueDrawerType
-    );
-    const dispatch = useDispatch();
+    const [drawerType, setDrawerType] = useAtom(dicePieceDrawerAtom);
     const operate = useSetRoomStateByApply();
     const myUserUid = useMyUserUid();
     const dicePieceValues = useDicePieceValues();
@@ -165,9 +157,7 @@ export const DicePieceValueDrawer: React.FC = () => {
                     }
                 )
             );
-            dispatch(
-                roomDrawerAndPopoverAndModalModule.actions.set({ dicePieceValueDrawerType: null })
-            );
+            setDrawerType(null);
             setActiveCharacter(undefined);
             setState(defaultDicePieceValue);
         };
@@ -179,23 +169,12 @@ export const DicePieceValueDrawer: React.FC = () => {
             title={drawerType?.type === update ? 'ダイスコマの編集' : 'ダイスコマの新規作成'}
             visible={drawerType != null}
             closable
-            onClose={() =>
-                dispatch(
-                    roomDrawerAndPopoverAndModalModule.actions.set({
-                        dicePieceValueDrawerType: null,
-                    })
-                )
-            }
+            onClose={() => setDrawerType(null)}
             footer={
                 <DrawerFooter
                     close={{
                         textType: drawerType?.type === update ? 'close' : 'cancel',
-                        onClick: () =>
-                            dispatch(
-                                roomDrawerAndPopoverAndModalModule.actions.set({
-                                    dicePieceValueDrawerType: null,
-                                })
-                            ),
+                        onClick: () => setDrawerType(null),
                     }}
                     ok={onCreate == null ? undefined : { textType: 'create', onClick: onCreate }}
                 />

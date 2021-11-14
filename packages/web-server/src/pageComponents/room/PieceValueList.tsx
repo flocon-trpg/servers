@@ -8,13 +8,14 @@ import {
     StringPieceValueElement,
     useStringPieceValues,
 } from '../../hooks/state/useStringPieceValues';
-import { useDispatch } from 'react-redux';
-import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { DicePieceValueElement, useDicePieceValues } from '../../hooks/state/useDicePieceValues';
 import { DicePieceValue } from '../../utils/dicePieceValue';
 import { StringPieceValue } from '../../utils/stringPieceValue';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { keyNames } from '@flocon-trpg/utils';
+import { useUpdateAtom } from 'jotai/utils';
+import { dicePieceDrawerAtom } from '../../atoms/overlay/dicePieceDrawerAtom';
+import { stringPieceDrawerAtom } from '../../atoms/overlay/stringPieceDrawerAtom';
 
 type DataSource =
     | {
@@ -29,10 +30,11 @@ type DataSource =
       };
 export const PieceValueList: React.FC = () => {
     const myUserUid = useMyUserUid();
-    const dispatch = useDispatch();
     const participants = useParticipants();
     const dicePieceValues = useDicePieceValues();
     const numberPieceValues = useStringPieceValues();
+    const setDicePieceDrawer = useUpdateAtom(dicePieceDrawerAtom);
+    const setStringPieceDrawer = useUpdateAtom(stringPieceDrawerAtom);
 
     if (dicePieceValues == null || numberPieceValues == null || participants == null) {
         return null;
@@ -49,30 +51,24 @@ export const PieceValueList: React.FC = () => {
                         <Button
                             style={{ alignSelf: 'center' }}
                             size='small'
-                            onClick={() =>
-                                dispatch(
-                                    roomDrawerAndPopoverAndModalModule.actions.set({
-                                        dicePieceValueDrawerType:
-                                            dataSource.type === 'dice'
-                                                ? {
-                                                      type: update,
-                                                      boardKey: null,
-                                                      stateKey: dataSource.value.valueId,
-                                                      characterKey: dataSource.value.characterKey,
-                                                  }
-                                                : undefined,
-                                        stringPieceValueDrawerType:
-                                            dataSource.type === 'number'
-                                                ? {
-                                                      type: update,
-                                                      boardKey: null,
-                                                      stateKey: dataSource.value.valueId,
-                                                      characterKey: dataSource.value.characterKey,
-                                                  }
-                                                : undefined,
-                                    })
-                                )
-                            }
+                            onClick={() => {
+                                if (dataSource.type === 'dice') {
+                                    setDicePieceDrawer({
+                                        type: update,
+                                        boardKey: null,
+                                        stateKey: dataSource.value.valueId,
+                                        characterKey: dataSource.value.characterKey,
+                                    });
+                                }
+                                if (dataSource.type === 'number') {
+                                    setStringPieceDrawer({
+                                        type: update,
+                                        boardKey: null,
+                                        stateKey: dataSource.value.valueId,
+                                        characterKey: dataSource.value.characterKey,
+                                    });
+                                }
+                            }}
                         >
                             <Icon.SettingOutlined />
                         </Button>

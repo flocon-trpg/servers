@@ -1,6 +1,5 @@
 import { Input, Menu, Modal, Popover, Tooltip } from 'antd';
 import React from 'react';
-import { useDispatch } from 'react-redux';
 import {
     ChangeParticipantNameDocument,
     DeleteRoomDocument,
@@ -17,7 +16,6 @@ import { Jdenticon } from '../../components/Jdenticon';
 import { path } from '../../utils/path';
 import { useRouter } from 'next/router';
 import { recordToArray } from '@flocon-trpg/utils';
-import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';
 import { FilesManagerDrawerType, none } from '../../utils/types';
 import { useMe } from '../../hooks/useMe';
@@ -37,6 +35,7 @@ import { defaultMessagePanelConfig } from '../../atoms/roomConfig/types/messageP
 import { defaultMemoPanelConfig } from '../../atoms/roomConfig/types/memoPanelConfig';
 import { useUpdateAtom } from 'jotai/utils';
 import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
+import { editRoomDrawerVisibilityAtom } from '../../atoms/overlay/editRoomDrawerVisibilityAtom';
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -358,7 +357,6 @@ export const RoomMenu: React.FC = () => {
     const myAuth = React.useContext(MyAuthContext);
     const router = useRouter();
     const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
-    const dispatch = useDispatch();
     const signOut = useSignOut();
     const roomId = useAtomSelector(roomAtom, state => state.roomId);
     const createdBy = useAtomSelector(roomAtom, state => state.roomState?.state?.createdBy);
@@ -389,6 +387,7 @@ export const RoomMenu: React.FC = () => {
     const [isGenerateLogModalVisible, setIsGenerateSimpleLogModalVisible] = React.useState(false);
     const [filesManagerDrawerType, setFilesManagerDrawerType] =
         React.useState<FilesManagerDrawerType | null>(null);
+    const setEditRoomDrawerVisibility = useUpdateAtom(editRoomDrawerVisibilityAtom);
 
     if (
         me == null ||
@@ -417,11 +416,7 @@ export const RoomMenu: React.FC = () => {
                 <Menu.SubMenu title='部屋'>
                     <Menu.Item
                         onClick={() =>
-                            dispatch(
-                                roomDrawerAndPopoverAndModalModule.actions.set({
-                                    editRoomDrawerVisibility: true,
-                                })
-                            )
+                            setEditRoomDrawerVisibility(true)
                         }
                     >
                         編集

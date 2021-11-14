@@ -3,13 +3,11 @@ import React from 'react';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { DrawerProps } from 'antd/lib/drawer';
 import { Gutter } from 'antd/lib/grid/row';
-import { useSelector } from '../../store';
-import { useDispatch } from 'react-redux';
-import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
-import produce from 'immer';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
 import { roomAtom } from '../../atoms/room/roomAtom';
+import { editRoomDrawerVisibilityAtom } from '../../atoms/overlay/editRoomDrawerVisibilityAtom';
+import { useAtom } from 'jotai';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -19,10 +17,7 @@ const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
 export const EditRoomDrawer: React.FC = () => {
-    const editRoomDrawerVisibility = useSelector(
-        state => state.roomDrawerAndPopoverAndModalModule.editRoomDrawerVisibility
-    );
-    const dispatch = useDispatch();
+    const [editRoomDrawerVisibility, setEditRoomDrawerVisibility] = useAtom(editRoomDrawerVisibilityAtom);
     const operateAsStateWithImmer = useSetRoomStateWithImmer();
     const name = useAtomSelector(roomAtom, state => state.roomState?.state?.name);
 
@@ -32,23 +27,12 @@ export const EditRoomDrawer: React.FC = () => {
             title='部屋の設定'
             visible={editRoomDrawerVisibility}
             closable
-            onClose={() =>
-                dispatch(
-                    roomDrawerAndPopoverAndModalModule.actions.set({
-                        editRoomDrawerVisibility: false,
-                    })
-                )
-            }
+            onClose={() => setEditRoomDrawerVisibility(false)}
             footer={
                 <DrawerFooter
                     close={{
                         textType: 'close',
-                        onClick: () =>
-                            dispatch(
-                                roomDrawerAndPopoverAndModalModule.actions.set({
-                                    editRoomDrawerVisibility: false,
-                                })
-                            ),
+                        onClick: () => setEditRoomDrawerVisibility(false),
                     }}
                 />
             }

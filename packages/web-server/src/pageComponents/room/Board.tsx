@@ -4,7 +4,6 @@ import { success, useImageFromGraphQL } from '../../hooks/image';
 import * as ReactKonva from 'react-konva';
 import { Button, Dropdown, InputNumber, Menu, Popover } from 'antd';
 import * as Icons from '@ant-design/icons';
-import { useDispatch } from 'react-redux';
 import { KonvaEventObject } from 'konva/types/Node';
 import { update } from '../../stateManagers/states/types';
 import * as Icon from '@ant-design/icons';
@@ -37,13 +36,6 @@ import {
     dualKeyRecordToDualKeyMap,
     keyNames,
 } from '@flocon-trpg/utils';
-import {
-    BoardTooltipState,
-    create,
-    MouseOverOn,
-    BoardPopoverEditorState,
-    roomDrawerAndPopoverAndModalModule,
-} from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { FilePath, FileSourceType } from '@flocon-trpg/typed-document-node';
 import { ImagePiece } from '../../components/Konva/ImagePiece';
@@ -76,6 +68,16 @@ import { RoomConfigUtils } from '../../atoms/roomConfig/types/roomConfig/utils';
 import { ActiveBoardPanelConfig } from '../../atoms/roomConfig/types/activeBoardPanelConfig';
 import { BoardEditorPanelConfig } from '../../atoms/roomConfig/types/boardEditorPanelConfig';
 import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
+import { boardTooltipAtom, BoardTooltipState } from '../../atoms/overlay/board/boardTooltipAtom';
+import {
+    boardPopoverEditorAtom,
+    BoardPopoverEditorState,
+} from '../../atoms/overlay/board/boardPopoverEditorAtom';
+import { MouseOverOn } from '../../atoms/overlay/board/types';
+import { useUpdateAtom } from 'jotai/utils';
+import { boardContextMenuAtom } from '../../atoms/overlay/board/boardContextMenuAtom';
+import { boardEditorDrawerAtom } from '../../atoms/overlay/boardDrawerAtom';
+import { create } from '../../utils/constants';
 
 const createPiecePostOperation = ({
     e,
@@ -236,7 +238,11 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             onTooltipRef.current(null);
             return;
         }
-        onTooltipRef.current({ pagePosition: stoppedCursor, mouseOverOn: mouseOverOnRef.current });
+        onTooltipRef.current({
+            pageX: stoppedCursor.x,
+            pageY: stoppedCursor.y,
+            mouseOverOn: mouseOverOnRef.current,
+        });
     }, [stoppedCursor, onTooltipRef]);
     const [selectedPieceKey, setSelectedPieceKey] = React.useState<SelectedPieceKey>();
     const [isBackgroundDragging, setIsBackgroundDragging] = React.useState(false); // これがないと、pieceをドラッグでリサイズする際に背景が少し動いてしまう。
@@ -367,7 +373,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                                 return;
                             }
                             onPopoverEditorRef.current({
-                                pagePosition: { x: e.evt.pageX, y: e.evt.pageY },
+                                pageX: e.evt.pageX,
+                                pageY: e.evt.pageY,
                                 dblClickOn: { type: 'character', character, characterKey },
                             });
                         }}
@@ -451,7 +458,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                                 return;
                             }
                             onPopoverEditorRef.current({
-                                pagePosition: { x: e.evt.pageX, y: e.evt.pageY },
+                                pageX: e.evt.pageX,
+                                pageY: e.evt.pageY,
                                 dblClickOn: { type: 'tachie', character, characterKey },
                             });
                         }}
@@ -517,7 +525,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                                 return;
                             }
                             onPopoverEditorRef.current({
-                                pagePosition: { x: e.evt.pageX, y: e.evt.pageY },
+                                pageX: e.evt.pageX,
+                                pageY: e.evt.pageY,
                                 dblClickOn: { type: 'imagePieceValue', element },
                             });
                         }}
@@ -601,7 +610,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                                 return;
                             }
                             onPopoverEditorRef.current({
-                                pagePosition: { x: e.evt.pageX, y: e.evt.pageY },
+                                pageX: e.evt.pageX,
+                                pageY: e.evt.pageY,
                                 dblClickOn: { type: 'dicePieceValue', element },
                             });
                         }}
@@ -674,7 +684,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                                 return;
                             }
                             onPopoverEditorRef.current({
-                                pagePosition: { x: e.evt.pageX, y: e.evt.pageY },
+                                pageX: e.evt.pageX,
+                                pageY: e.evt.pageY,
                                 dblClickOn: { type: 'numberPieceValue', element },
                             });
                         }}
@@ -876,8 +887,11 @@ const zoomButtonStyle: React.CSSProperties = {
 };
 
 export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: Props) => {
-    const dispatch = useDispatch();
     const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setBoardContextMenu = useUpdateAtom(boardContextMenuAtom);
+    const setBoardTooltip = useUpdateAtom(boardTooltipAtom);
+    const setBoardPopoverEditor = useUpdateAtom(boardPopoverEditorAtom);
+    const setBoardEditorDrawer = useUpdateAtom(boardEditorDrawerAtom);
     const roomId = useAtomSelector(roomAtom, state => state.roomId);
     const boards = useBoards();
     const characters = useCharacters();
@@ -964,156 +978,126 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                 boardKey={boardKeyToShow}
                 boardConfig={boardConfig}
                 boardEditorPanelId={boardEditorPanelId}
-                onClick={() =>
-                    dispatch(
-                        roomDrawerAndPopoverAndModalModule.actions.set({ boardContextMenu: null })
-                    )
-                }
-                onTooltip={newValue =>
-                    dispatch(
-                        roomDrawerAndPopoverAndModalModule.actions.set({ boardTooltip: newValue })
-                    )
-                }
-                onPopupEditor={newValue =>
-                    dispatch(
-                        roomDrawerAndPopoverAndModalModule.actions.set({
-                            boardPopoverEditor: newValue,
-                        })
-                    )
-                }
+                onClick={() => setBoardContextMenu(null)}
+                onTooltip={newValue => setBoardTooltip(newValue)}
+                onPopupEditor={newValue => setBoardPopoverEditor(newValue)}
                 onContextMenu={(e, stateOffset) => {
                     e.evt.preventDefault();
-                    dispatch(
-                        roomDrawerAndPopoverAndModalModule.actions.set({
-                            boardContextMenu: {
-                                boardKey: boardKeyToShow,
-                                boardConfig,
-                                offsetX: e.evt.offsetX,
-                                offsetY: e.evt.offsetY,
-                                pageX: e.evt.pageX,
-                                pageY: e.evt.pageY,
-                                characterPiecesOnCursor: characters
+                    setBoardContextMenu({
+                        boardKey: boardKeyToShow,
+                        boardConfig,
+                        offsetX: e.evt.offsetX,
+                        offsetY: e.evt.offsetY,
+                        pageX: e.evt.pageX,
+                        pageY: e.evt.pageY,
+                        characterPiecesOnCursor: characters
+                            .toArray()
+                            .flatMap(([characterKey, character]) => {
+                                return dualKeyRecordToDualKeyMap<PieceState>(character.pieces)
                                     .toArray()
-                                    .flatMap(([characterKey, character]) => {
-                                        return dualKeyRecordToDualKeyMap<PieceState>(
-                                            character.pieces
-                                        )
-                                            .toArray()
-                                            .filter(([, piece]) => {
-                                                if (
-                                                    !compositeKeyEquals(
-                                                        boardKeyToShow,
-                                                        piece.boardKey
-                                                    )
-                                                ) {
-                                                    return false;
-                                                }
-                                                return Piece.isCursorOnIcon({
-                                                    ...board,
-                                                    state: piece,
-                                                    cursorPosition: stateOffset,
-                                                });
-                                            })
-                                            .map(([pieceKey, piece]) => {
-                                                return {
-                                                    characterKey,
-                                                    character,
-                                                    pieceKey: {
-                                                        createdBy: pieceKey.first,
-                                                        id: pieceKey.second,
-                                                    },
-                                                    piece,
-                                                };
-                                            });
-                                    }),
-                                tachiesOnCursor: characters
+                                    .filter(([, piece]) => {
+                                        if (!compositeKeyEquals(boardKeyToShow, piece.boardKey)) {
+                                            return false;
+                                        }
+                                        return Piece.isCursorOnIcon({
+                                            ...board,
+                                            state: piece,
+                                            cursorPosition: stateOffset,
+                                        });
+                                    })
+                                    .map(([pieceKey, piece]) => {
+                                        return {
+                                            characterKey,
+                                            character,
+                                            pieceKey: {
+                                                createdBy: pieceKey.first,
+                                                id: pieceKey.second,
+                                            },
+                                            piece,
+                                        };
+                                    });
+                            }),
+                        tachiesOnCursor: characters
+                            .toArray()
+                            .flatMap(([characterKey, character]) => {
+                                return dualKeyRecordToDualKeyMap<BoardLocationState>(
+                                    character.tachieLocations
+                                )
                                     .toArray()
-                                    .flatMap(([characterKey, character]) => {
-                                        return dualKeyRecordToDualKeyMap<BoardLocationState>(
-                                            character.tachieLocations
-                                        )
-                                            .toArray()
-                                            .filter(([, tachie]) => {
-                                                if (
-                                                    !compositeKeyEquals(
-                                                        boardKeyToShow,
-                                                        tachie.boardKey
-                                                    )
-                                                ) {
-                                                    return false;
-                                                }
-                                                return BoardLocation.isCursorOnIcon({
-                                                    state: tachie,
-                                                    cursorPosition: stateOffset,
-                                                });
-                                            })
-                                            .map(([tachieLocationKey, tachieLocation]) => {
-                                                return {
-                                                    characterKey,
-                                                    character,
-                                                    tachieLocationKey: {
-                                                        createdBy: tachieLocationKey.first,
-                                                        id: tachieLocationKey.second,
-                                                    },
-                                                    tachieLocation,
-                                                };
-                                            });
-                                    }),
-                                imagePieceValuesOnCursor: (imagePieces ?? [])
-                                    .filter(pieceValueElement => {
-                                        if (pieceValueElement.piece == null) {
+                                    .filter(([, tachie]) => {
+                                        if (!compositeKeyEquals(boardKeyToShow, tachie.boardKey)) {
                                             return false;
                                         }
-                                        return Piece.isCursorOnIcon({
-                                            ...board,
-                                            state: pieceValueElement.piece,
+                                        return BoardLocation.isCursorOnIcon({
+                                            state: tachie,
                                             cursorPosition: stateOffset,
                                         });
                                     })
-                                    .map(x => x.value),
-                                dicePieceValuesOnCursor: (dicePieceValues ?? [])
-                                    .filter(pieceValueElement => {
-                                        if (pieceValueElement.piece == null) {
-                                            return false;
-                                        }
-                                        return Piece.isCursorOnIcon({
-                                            ...board,
-                                            state: pieceValueElement.piece,
-                                            cursorPosition: stateOffset,
-                                        });
-                                    })
-                                    .map(({ value: element, piece }) => ({
-                                        dicePieceValueKey: element.valueId,
-                                        dicePieceValue: element.value,
-                                        piece,
-                                        characterKey: {
-                                            createdBy: element.characterKey.createdBy,
-                                            id: element.characterKey.id,
-                                        },
-                                    })),
-                                stringPieceValuesOnCursor: (stringPieceValues ?? [])
-                                    .filter(pieceValueElement => {
-                                        if (pieceValueElement.piece == null) {
-                                            return false;
-                                        }
-                                        return Piece.isCursorOnIcon({
-                                            ...board,
-                                            state: pieceValueElement.piece,
-                                            cursorPosition: stateOffset,
-                                        });
-                                    })
-                                    .map(({ value: element, piece }) => ({
-                                        stringPieceValueKey: element.valueId,
-                                        stringPieceValue: element.value,
-                                        piece,
-                                        characterKey: {
-                                            createdBy: element.characterKey.createdBy,
-                                            id: element.characterKey.id,
-                                        },
-                                    })),
-                            },
-                        })
-                    );
+                                    .map(([tachieLocationKey, tachieLocation]) => {
+                                        return {
+                                            characterKey,
+                                            character,
+                                            tachieLocationKey: {
+                                                createdBy: tachieLocationKey.first,
+                                                id: tachieLocationKey.second,
+                                            },
+                                            tachieLocation,
+                                        };
+                                    });
+                            }),
+                        imagePieceValuesOnCursor: (imagePieces ?? [])
+                            .filter(pieceValueElement => {
+                                if (pieceValueElement.piece == null) {
+                                    return false;
+                                }
+                                return Piece.isCursorOnIcon({
+                                    ...board,
+                                    state: pieceValueElement.piece,
+                                    cursorPosition: stateOffset,
+                                });
+                            })
+                            .map(x => x.value),
+                        dicePieceValuesOnCursor: (dicePieceValues ?? [])
+                            .filter(pieceValueElement => {
+                                if (pieceValueElement.piece == null) {
+                                    return false;
+                                }
+                                return Piece.isCursorOnIcon({
+                                    ...board,
+                                    state: pieceValueElement.piece,
+                                    cursorPosition: stateOffset,
+                                });
+                            })
+                            .map(({ value: element, piece }) => ({
+                                dicePieceValueKey: element.valueId,
+                                dicePieceValue: element.value,
+                                piece,
+                                characterKey: {
+                                    createdBy: element.characterKey.createdBy,
+                                    id: element.characterKey.id,
+                                },
+                            })),
+                        stringPieceValuesOnCursor: (stringPieceValues ?? [])
+                            .filter(pieceValueElement => {
+                                if (pieceValueElement.piece == null) {
+                                    return false;
+                                }
+                                return Piece.isCursorOnIcon({
+                                    ...board,
+                                    state: pieceValueElement.piece,
+                                    cursorPosition: stateOffset,
+                                });
+                            })
+                            .map(({ value: element, piece }) => ({
+                                stringPieceValueKey: element.valueId,
+                                stringPieceValue: element.value,
+                                piece,
+                                characterKey: {
+                                    createdBy: element.characterKey.createdBy,
+                                    id: element.characterKey.id,
+                                },
+                            })),
+                    });
                 }}
             />
         );
@@ -1157,13 +1141,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                 <Menu.Divider />
                 <Menu.Item
                     icon={<Icons.PlusOutlined />}
-                    onClick={() =>
-                        dispatch(
-                            roomDrawerAndPopoverAndModalModule.actions.set({
-                                boardDrawerType: { type: create },
-                            })
-                        )
-                    }
+                    onClick={() => setBoardEditorDrawer({ type: create })}
                 >
                     新規作成
                 </Menu.Item>
@@ -1206,11 +1184,10 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                         if (boardKeyToShow == null) {
                             return;
                         }
-                        dispatch(
-                            roomDrawerAndPopoverAndModalModule.actions.set({
-                                boardDrawerType: { type: update, stateKey: boardKeyToShow },
-                            })
-                        );
+                        setBoardEditorDrawer({
+                            type: update,
+                            stateKey: boardKeyToShow,
+                        });
                     }}
                 >
                     編集

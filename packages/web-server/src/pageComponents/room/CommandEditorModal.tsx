@@ -3,20 +3,19 @@ import { Button, Input, Modal, Select } from 'antd';
 import React from 'react';
 import { useCharacter } from '../../hooks/state/useCharacter';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
-import { useSelector } from '../../store';
 import MonacoEditor, { useMonaco } from '@monaco-editor/react';
 import { useBufferValue } from '../../hooks/useBufferValue';
 import { testCommand } from '../../utils/command';
 import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import { privateCommandsDiff, simpleId } from '@flocon-trpg/core';
-import { useDispatch } from 'react-redux';
-import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import classNames from 'classnames';
 import { flex, flexRow } from '../../utils/className';
 import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 import { usePrevious } from 'react-use';
 import { characterCommandLibSource } from '../../monaco/characterCommandLibSource';
 import { defaultLibSource } from '../../monaco/defaultLibSource';
+import { useAtom } from 'jotai';
+import { commandEditorModalAtom } from '../../atoms/overlay/commandEditorModalAtom';
 
 /*
 Monaco Editorでは、複数のエディターごとに異なるextraLibなどを個別に設定することはできない( https://github.com/microsoft/monaco-editor/issues/2098 , https://stackoverflow.com/questions/53881473/monaco-editor-configure-libs-by-editor )。
@@ -113,11 +112,8 @@ export const CommandEditorModal: React.FC = () => {
     const modalWidth = 10000;
 
     const operate = useSetRoomStateByApply();
-    const dispatch = useDispatch();
-    const commandEditorModalType = useSelector(
-        state => state.roomDrawerAndPopoverAndModalModule.commandEditorModalType
-    );
-    const character = useCharacter(commandEditorModalType?.characterKey);
+    const [commandEditorModalType, setCommandEditorModalType] = useAtom(commandEditorModalAtom) 
+        const character = useCharacter(commandEditorModalType?.characterKey);
     const characterRef = useReadonlyRef(character);
     const [privateCommands, setPrivateCommands] = React.useState<Map<string, CommandState>>(
         new Map()
@@ -213,9 +209,7 @@ export const CommandEditorModal: React.FC = () => {
             content:
                 '閉じてもよろしいですか？もしコマンドに変更があった場合、その変更は破棄されます。',
             onOk: () => {
-                dispatch(
-                    roomDrawerAndPopoverAndModalModule.actions.set({ commandEditorModalType: null })
-                );
+                setCommandEditorModalType(null)
             },
         });
     };
@@ -239,9 +233,7 @@ export const CommandEditorModal: React.FC = () => {
                         }),
                     })
                 );
-                dispatch(
-                    roomDrawerAndPopoverAndModalModule.actions.set({ commandEditorModalType: null })
-                );
+                setCommandEditorModalType(null)
             }}
             onCancel={() => close()}
         >

@@ -28,7 +28,6 @@ import { Center } from '../../components/Center';
 import { LoadingResult } from '../../components/Result/LoadingResult';
 import { usePublishRoomEventSubscription } from '../../hooks/usePublishRoomEventSubscription';
 import { useAllRoomMessages } from '../../hooks/useRoomMessages';
-import { roomDrawerAndPopoverAndModalModule } from '../../modules/roomDrawerAndPopoverAndModalModule';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
 import { usePrevious } from 'react-use';
 import { getRoomConfig } from '../../utils/localStorage/roomConfig';
@@ -36,7 +35,6 @@ import { MyAuthContext } from '../../contexts/MyAuthContext';
 import { bufferTime, Subject } from 'rxjs';
 import { Ref } from '../../utils/ref';
 import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
-import { useDispatch } from 'react-redux';
 import { roomAtom } from '../../atoms/room/roomAtom';
 import produce from 'immer';
 import { RoomConfigUtils } from '../../atoms/roomConfig/types/roomConfig/utils';
@@ -44,6 +42,7 @@ import { roomPublicMessageInputAtom } from '../../atoms/inputs/roomPublicMessage
 import { roomPrivateMessageInputAtom } from '../../atoms/inputs/roomPrivateMessageInputAtom';
 import { useAtomValue, useUpdateAtom } from 'jotai/utils';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
+import { hideAllOverlayActionAtom } from '../../atoms/overlay/hideAllOverlayActionAtom';
 
 type JoinRoomFormProps = {
     roomState: RoomAsListItemFragment;
@@ -234,19 +233,19 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
 }) => {
     const roomIdRef = useReadonlyRef(roomId);
     const setRoomAtomValue = useUpdateAtom(roomAtom);
-    const dispatch = useDispatch();
     const setRoomPublicMessageInput = useUpdateAtom(roomPublicMessageInputAtom);
     const setRoomPrivateMessageInput = useUpdateAtom(roomPrivateMessageInputAtom);
+    const hideAllOverlay = useUpdateAtom(hideAllOverlayActionAtom);
 
     useRoomConfig(roomId);
 
     const [updateWritingMessageStatus] = useMutation(UpdateWritingMessageStatusDocument);
 
     React.useEffect(() => {
-        dispatch(roomDrawerAndPopoverAndModalModule.actions.reset());
+        hideAllOverlay();
         setRoomPublicMessageInput('');
         setRoomPrivateMessageInput('');
-    }, [roomId, dispatch, setRoomPublicMessageInput, setRoomPrivateMessageInput]);
+    }, [roomId, setRoomPublicMessageInput, setRoomPrivateMessageInput, hideAllOverlay]);
 
     const {
         observable,
