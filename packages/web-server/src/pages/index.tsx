@@ -83,9 +83,9 @@ const Index: React.FC = () => {
             <div className={classNames(flex, flexColumn)}>
                 {alert}
                 <Collapse ghost>
-                    <Collapse.Panel header='APIサーバー詳細' key='version-info-detais-panel'>
+                    <Collapse.Panel header='詳細' key='version-info-detais-panel'>
                         <div className={classNames(flex, flexColumn)}>
-                            <div>{`actual: "${apiServerSemVer.toString()}", supported: ${supportedApiServersAsString}`}</div>
+                            <div>{`supported API server versions: ${supportedApiServersAsString}`}</div>
                             <div>
                                 ※
                                 prereleaseの比較は、Node.jsにおけるSemVerとは異なった方法を採用しています
