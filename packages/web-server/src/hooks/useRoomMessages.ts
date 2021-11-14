@@ -258,6 +258,8 @@ const reduceMessages = (
                 target.value.updatedAt = action.updatedAt;
             });
         }
+        case 'RoomMessagesReset':
+            return [];
         case undefined:
             return state;
     }
@@ -314,6 +316,7 @@ const reduce = (
         case 'RoomPublicMessageUpdate':
         case 'PieceValueLog':
         case 'RoomSoundEffect':
+        case 'RoomMessagesReset':
         case undefined: {
             return {
                 ...state,
