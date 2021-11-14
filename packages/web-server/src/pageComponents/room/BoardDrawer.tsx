@@ -18,6 +18,8 @@ import { boardReplaceOperation } from '../../utils/boardReplaceOperation';
 import { useAtom } from 'jotai';
 import { boardEditorDrawerAtom } from '../../atoms/overlay/boardDrawerAtom';
 import { create, update } from '../../utils/constants';
+import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
+import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
 
 const notFound = 'notFound';
 
@@ -49,6 +51,7 @@ export const BoardDrawer: React.FC = () => {
     const myUserUid = useMyUserUid();
     const operate = useSetRoomStateByApply();
     const [drawerType, setDrawerType] = useAtom(boardEditorDrawerAtom);
+    const setRoomConfigAtom = useImmerUpdateAtom(roomConfigAtom);
     const boards = useBoards();
     let stateEditorParams: StateEditorParams<BoardState | undefined>;
     switch (drawerType?.type) {
@@ -119,6 +122,17 @@ export const BoardDrawer: React.FC = () => {
             setBoard(defaultBoard);
             resetBoardToCreate();
             setDrawerType(null);
+            setRoomConfigAtom(roomConfig => {
+                if (drawerType.boardEditorPanelId == null) {
+                    return;
+                }
+                const originBoardEditorPanel =
+                    roomConfig?.panels.boardEditorPanels[drawerType.boardEditorPanelId];
+                if (originBoardEditorPanel == null) {
+                    return;
+                }
+                originBoardEditorPanel.activeBoardKey = id;
+            });
         };
     }
 
@@ -133,7 +147,7 @@ export const BoardDrawer: React.FC = () => {
     return (
         <Drawer
             {...drawerBaseProps}
-            title={drawerType?.type === create ? 'Boardの新規作成' : 'Boardの編集'}
+            title={drawerType?.type === create ? 'ボードの新規作成' : 'ボードの編集'}
             visible={drawerType != null}
             closable
             onClose={() => setDrawerType(null)}
@@ -149,8 +163,8 @@ export const BoardDrawer: React.FC = () => {
                             ? undefined
                             : {
                                   modal: {
-                                      title: 'Boardの削除の確認',
-                                      content: `このBoard "${board.name}" を削除します。よろしいですか？`,
+                                      title: 'ボードの削除の確認',
+                                      content: `このボード "${board.name}" を削除します。よろしいですか？`,
                                   },
                                   onClick: onDestroy,
                               }
