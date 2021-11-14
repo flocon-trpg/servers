@@ -869,7 +869,7 @@ namespace ContextMenuModule {
             x,
             y,
             w: 100,
-            h: 150,
+            h: 100,
             isPrivate: false,
         };
 
