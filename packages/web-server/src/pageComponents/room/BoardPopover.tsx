@@ -54,6 +54,9 @@ import { stringPieceDrawerAtom } from '../../atoms/overlay/stringPieceDrawerAtom
 import { imagePieceDrawerAtom } from '../../atoms/overlay/imagePieceDrawerAtom';
 import { create } from '../../utils/constants';
 import { useCloneImagePiece } from '../../hooks/state/useCloneImagePiece';
+import { ImageView } from '../../components/ImageView';
+import classNames from 'classnames';
+import { flex, flexRow, itemsCenter, justifyItemsCenter } from '../../utils/className';
 
 /* absolute positionで表示するときにBoardの子として表示させると、Boardウィンドウから要素がはみ出ることができないため、ウィンドウ右端に近いところで要素を表示させるときに不便なことがある。そのため、ページ全体の子として持たせるようにしている。 */
 
@@ -765,7 +768,17 @@ namespace ContextMenuModule {
         return (
             <Menu.ItemGroup title='画像コマ'>
                 {imagePieceValuesOnCursor.map(({ participantKey, valueId, value }) => (
-                    <Menu.SubMenu key={`${participantKey}@${valueId}`} title={value.name}>
+                    <Menu.SubMenu
+                        key={`${participantKey}@${valueId}`}
+                        title={
+                            <div className={classNames(flex, flexRow, itemsCenter)}>
+                                {value.image == null ? null : (
+                                    <ImageView filePath={value.image} size={26} />
+                                )}
+                                <div style={{ paddingLeft: 3 }}>{value.name}</div>
+                            </div>
+                        }
+                    >
                         <Menu.Item
                             onClick={() => {
                                 hooks.setImagePieceDrawer({
