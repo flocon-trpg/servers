@@ -8,7 +8,7 @@ import { roomAtom } from '../atoms/room/roomAtom';
 type Result = (stateOrRecipe: State | ((prevState: State) => void)) => void;
 
 const emptySetRoomStateWithImmer: Result = (): void => {
-    throw new Error('useOperateAsState is not ready');
+    throw new Error('setRoomStateWithImmer is not ready');
 };
 
 const setStateAtom = atom(get => get(roomAtom).roomState?.setState);

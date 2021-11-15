@@ -21,6 +21,7 @@ import { authNotFound, MyAuthContext, notSignIn } from '../contexts/MyAuthContex
 import { Room } from '../stateManagers/states/room';
 import { roomNotificationsAtom, Notification } from '../atoms/room/roomAtom';
 import { useUpdateAtom } from 'jotai/utils';
+import { SetAction } from '../utils/setAction';
 
 const sampleTime = 3000;
 
@@ -33,8 +34,6 @@ export const nonJoined = 'nonJoined';
 export const getRoomFailure = 'getRoomFailure';
 export const mutationFailure = 'mutationFailure';
 export const deleted = 'deleted';
-
-type SetAction<State> = State | ((prevState: State) => State);
 
 export type RoomState =
     | {
