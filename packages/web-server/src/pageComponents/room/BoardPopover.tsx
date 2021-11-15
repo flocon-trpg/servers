@@ -50,10 +50,13 @@ import {
 } from '../../atoms/overlay/board/boardContextMenuAtom';
 import { characterEditorDrawerAtom } from '../../atoms/overlay/characterEditorDrawerAtom';
 import { dicePieceDrawerAtom } from '../../atoms/overlay/dicePieceDrawerAtom';
-import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
 import { stringPieceDrawerAtom } from '../../atoms/overlay/stringPieceDrawerAtom';
 import { imagePieceDrawerAtom } from '../../atoms/overlay/imagePieceDrawerAtom';
 import { create } from '../../utils/constants';
+import { useCloneImagePiece } from '../../hooks/state/useCloneImagePiece';
+import { ImageView } from '../../components/ImageView';
+import classNames from 'classnames';
+import { flex, flexRow, itemsCenter, justifyItemsCenter } from '../../utils/className';
 
 /* absolute positionで表示するときにBoardの子として表示させると、Boardウィンドウから要素がはみ出ることができないため、ウィンドウ右端に近いところで要素を表示させるときに不便なことがある。そのため、ページ全体の子として持たせるようにしている。 */
 
@@ -328,19 +331,27 @@ const toBoardPosition = ({
 };
 
 // 1つ1つ個別に渡すコードを書くのが面倒なのでこのように1つにまとめて全て渡している
-const useSetAtomValue = () => {
+const useHooks = () => {
     const setCharacterDrawer = useUpdateAtom(characterEditorDrawerAtom);
     const setDicePieceDrawer = useUpdateAtom(dicePieceDrawerAtom);
     const setStringPieceDrawer = useUpdateAtom(stringPieceDrawerAtom);
     const setImagePieceDrawer = useUpdateAtom(imagePieceDrawerAtom);
+    const cloneImagePiece = useCloneImagePiece();
     return React.useMemo(
         () => ({
             setCharacterDrawer,
             setDicePieceDrawer,
             setStringPieceDrawer,
             setImagePieceDrawer,
+            cloneImagePiece,
         }),
-        [setCharacterDrawer, setDicePieceDrawer, setStringPieceDrawer, setImagePieceDrawer]
+        [
+            setCharacterDrawer,
+            setDicePieceDrawer,
+            setStringPieceDrawer,
+            setImagePieceDrawer,
+            cloneImagePiece,
+        ]
     );
 };
 
@@ -349,7 +360,7 @@ namespace ContextMenuModule {
         characterPiecesOnCursor: ContextMenuState['characterPiecesOnCursor'];
         onContextMenuClear: () => void;
         boardKey: CompositeKey;
-        setAtomValue: ReturnType<typeof useSetAtomValue>;
+        hooks: ReturnType<typeof useHooks>;
         operate: ReturnType<typeof useSetRoomStateByApply>;
     };
 
@@ -357,7 +368,7 @@ namespace ContextMenuModule {
         characterPiecesOnCursor,
         onContextMenuClear,
         boardKey,
-        setAtomValue,
+        hooks,
         operate,
     }: SelectedCharacterPiecesMenuProps): JSX.Element | null => {
         if (characterPiecesOnCursor.length === 0) {
@@ -373,7 +384,7 @@ namespace ContextMenuModule {
                     >
                         <Menu.Item
                             onClick={() => {
-                                setAtomValue.setCharacterDrawer({
+                                hooks.setCharacterDrawer({
                                     type: update,
                                     boardKey,
                                     stateKey: characterKey,
@@ -415,7 +426,7 @@ namespace ContextMenuModule {
         tachiesOnCursor: ContextMenuState['tachiesOnCursor'];
         onContextMenuClear: () => void;
         boardKey: CompositeKey;
-        setAtomValue: ReturnType<typeof useSetAtomValue>;
+        hooks: ReturnType<typeof useHooks>;
         operate: ReturnType<typeof useSetRoomStateByApply>;
     };
 
@@ -423,7 +434,7 @@ namespace ContextMenuModule {
         tachiesOnCursor,
         onContextMenuClear,
         boardKey,
-        setAtomValue,
+        hooks,
         operate,
     }: SelectedTachiesPiecesMenuProps): JSX.Element | null => {
         if (tachiesOnCursor.length === 0) {
@@ -439,7 +450,7 @@ namespace ContextMenuModule {
                     >
                         <Menu.Item
                             onClick={() => {
-                                setAtomValue.setCharacterDrawer({
+                                hooks.setCharacterDrawer({
                                     type: update,
                                     boardKey: boardKey,
                                     stateKey: characterKey,
@@ -579,7 +590,7 @@ namespace ContextMenuModule {
         onContextMenuClear: () => void;
         boardKey: CompositeKey;
         myUserUid: string;
-        setAtomValue: ReturnType<typeof useSetAtomValue>;
+        hooks: ReturnType<typeof useHooks>;
         operate: ReturnType<typeof useSetRoomStateByApply>;
     };
 
@@ -588,7 +599,7 @@ namespace ContextMenuModule {
         onContextMenuClear,
         boardKey: boardKeyToShow,
         myUserUid,
-        setAtomValue,
+        hooks,
         operate,
     }: SelectedDicePiecesMenuProps): JSX.Element | null => {
         if (dicePieceValuesOnCursor.length === 0) {
@@ -612,7 +623,7 @@ namespace ContextMenuModule {
                             {characterKey.createdBy === myUserUid ? (
                                 <Menu.Item
                                     onClick={() => {
-                                        setAtomValue.setDicePieceDrawer({
+                                        hooks.setDicePieceDrawer({
                                             type: update,
                                             boardKey: boardKeyToShow,
                                             stateKey: dicePieceValueKey,
@@ -660,7 +671,7 @@ namespace ContextMenuModule {
         onContextMenuClear: () => void;
         boardKey: CompositeKey;
         myUserUid: string;
-        setAtomValue: ReturnType<typeof useSetAtomValue>;
+        hooks: ReturnType<typeof useHooks>;
         operate: ReturnType<typeof useSetRoomStateByApply>;
     };
 
@@ -669,7 +680,7 @@ namespace ContextMenuModule {
         onContextMenuClear,
         boardKey: boardKeyToShow,
         myUserUid,
-        setAtomValue,
+        hooks,
         operate,
     }: SelectedNumberPiecesMenuProps): JSX.Element | null => {
         if (stringPieceValuesOnCursor.length === 0) {
@@ -691,7 +702,7 @@ namespace ContextMenuModule {
                             {characterKey.createdBy === myUserUid ? (
                                 <Menu.Item
                                     onClick={() => {
-                                        setAtomValue.setStringPieceDrawer({
+                                        hooks.setStringPieceDrawer({
                                             type: update,
                                             boardKey: boardKeyToShow,
                                             stateKey: stringPieceValueKey,
@@ -738,16 +749,18 @@ namespace ContextMenuModule {
         imagePieceValuesOnCursor: ContextMenuState['imagePieceValuesOnCursor'];
         onContextMenuClear: () => void;
         boardKey: CompositeKey;
-        setAtomValue: ReturnType<typeof useSetAtomValue>;
+        hooks: ReturnType<typeof useHooks>;
         operate: ReturnType<typeof useSetRoomStateByApply>;
+        myUserUid: string;
     };
 
     const selectedImagePiecesMenu = ({
         imagePieceValuesOnCursor,
         onContextMenuClear,
         boardKey: boardKeyToShow,
-        setAtomValue,
+        hooks,
         operate,
+        myUserUid,
     }: SelectedImagePiecesMenuProps): JSX.Element | null => {
         if (imagePieceValuesOnCursor.length === 0) {
             return null;
@@ -755,10 +768,20 @@ namespace ContextMenuModule {
         return (
             <Menu.ItemGroup title='画像コマ'>
                 {imagePieceValuesOnCursor.map(({ participantKey, valueId, value }) => (
-                    <Menu.SubMenu key={`${participantKey}@${valueId}`} title={value.name}>
+                    <Menu.SubMenu
+                        key={`${participantKey}@${valueId}`}
+                        title={
+                            <div className={classNames(flex, flexRow, itemsCenter)}>
+                                {value.image == null ? null : (
+                                    <ImageView filePath={value.image} size={26} />
+                                )}
+                                <div style={{ paddingLeft: 3 }}>{value.name}</div>
+                            </div>
+                        }
+                    >
                         <Menu.Item
                             onClick={() => {
-                                setAtomValue.setImagePieceDrawer({
+                                hooks.setImagePieceDrawer({
                                     type: update,
                                     boardKey: boardKeyToShow,
                                     participantKey,
@@ -768,6 +791,17 @@ namespace ContextMenuModule {
                             }}
                         >
                             編集
+                        </Menu.Item>
+                        <Menu.Item
+                            onClick={() => {
+                                hooks.cloneImagePiece({
+                                    myUserUid,
+                                    source: value,
+                                });
+                                onContextMenuClear();
+                            }}
+                        >
+                            複製
                         </Menu.Item>
                         <Menu.Item
                             onClick={() => {
@@ -806,7 +840,7 @@ namespace ContextMenuModule {
     type BasicMenuProps = {
         contextMenuState: ContextMenuState;
         onContextMenuClear: () => void;
-        setAtomValue: ReturnType<typeof useSetAtomValue>;
+        hooks: ReturnType<typeof useHooks>;
         operate: ReturnType<typeof useSetRoomStateByApply>;
         characters: ReadonlyStateMap<CharacterState>;
         board: BoardState;
@@ -816,7 +850,7 @@ namespace ContextMenuModule {
     const basicMenu = ({
         contextMenuState,
         onContextMenuClear,
-        setAtomValue,
+        hooks,
         operate,
         characters,
         board,
@@ -869,7 +903,7 @@ namespace ContextMenuModule {
             x,
             y,
             w: 100,
-            h: 150,
+            h: 100,
             isPrivate: false,
         };
 
@@ -962,7 +996,7 @@ namespace ContextMenuModule {
                 <Menu.SubMenu title='ダイスコマ'>
                     <Menu.Item
                         onClick={() => {
-                            setAtomValue.setDicePieceDrawer({
+                            hooks.setDicePieceDrawer({
                                 type: create,
                                 piece: pieceLocationWhichIsCellMode,
                             });
@@ -973,7 +1007,7 @@ namespace ContextMenuModule {
                     </Menu.Item>
                     <Menu.Item
                         onClick={() => {
-                            setAtomValue.setDicePieceDrawer({
+                            hooks.setDicePieceDrawer({
                                 type: create,
                                 piece: pieceLocationWhichIsNotCellMode,
                             });
@@ -986,7 +1020,7 @@ namespace ContextMenuModule {
                 <Menu.SubMenu title='数値コマ'>
                     <Menu.Item
                         onClick={() => {
-                            setAtomValue.setStringPieceDrawer({
+                            hooks.setStringPieceDrawer({
                                 type: create,
                                 piece: pieceLocationWhichIsCellMode,
                             });
@@ -997,7 +1031,7 @@ namespace ContextMenuModule {
                     </Menu.Item>
                     <Menu.Item
                         onClick={() => {
-                            setAtomValue.setDicePieceDrawer({
+                            hooks.setDicePieceDrawer({
                                 type: create,
                                 piece: pieceLocationWhichIsNotCellMode,
                             });
@@ -1010,7 +1044,7 @@ namespace ContextMenuModule {
                 <Menu.SubMenu title='画像コマ'>
                     <Menu.Item
                         onClick={() => {
-                            setAtomValue.setImagePieceDrawer({
+                            hooks.setImagePieceDrawer({
                                 type: create,
                                 piece: pieceLocationWhichIsCellMode,
                             });
@@ -1021,7 +1055,7 @@ namespace ContextMenuModule {
                     </Menu.Item>
                     <Menu.Item
                         onClick={() => {
-                            setAtomValue.setImagePieceDrawer({
+                            hooks.setImagePieceDrawer({
                                 type: create,
                                 piece: pieceLocationWhichIsNotCellMode,
                             });
@@ -1045,7 +1079,7 @@ namespace ContextMenuModule {
         const roomId = useAtomSelector(roomAtom, state => state.roomId);
         const [writeSe] = useMutation(WriteRoomSoundEffectDocument);
         const setBoardContextMenu = useUpdateAtom(boardContextMenuAtom);
-        const setAtomValue = useSetAtomValue();
+        const hooks = useHooks();
 
         if (
             contextMenuState == null ||
@@ -1082,21 +1116,21 @@ namespace ContextMenuModule {
                         ...contextMenuState,
                         onContextMenuClear,
                         boardKey,
-                        setAtomValue,
+                        hooks,
                         operate,
                     })}
                     {selectedTachiePiecesMenu({
                         ...contextMenuState,
                         onContextMenuClear,
                         boardKey,
-                        setAtomValue,
+                        hooks,
                         operate,
                     })}
                     {selectedDicePiecesMenu({
                         ...contextMenuState,
                         onContextMenuClear,
                         boardKey,
-                        setAtomValue,
+                        hooks,
                         operate,
                         myUserUid,
                     })}
@@ -1104,7 +1138,7 @@ namespace ContextMenuModule {
                         ...contextMenuState,
                         onContextMenuClear,
                         boardKey,
-                        setAtomValue,
+                        hooks,
                         operate,
                         myUserUid,
                     })}
@@ -1112,8 +1146,9 @@ namespace ContextMenuModule {
                         ...contextMenuState,
                         onContextMenuClear,
                         boardKey,
-                        setAtomValue,
+                        hooks,
                         operate,
+                        myUserUid,
                     })}
                     {selectedCharacterCommandsMenu({
                         ...contextMenuState,
@@ -1140,7 +1175,7 @@ namespace ContextMenuModule {
                         : basicMenu({
                               contextMenuState,
                               onContextMenuClear,
-                              setAtomValue,
+                              hooks,
                               operate,
                               characters,
                               board,

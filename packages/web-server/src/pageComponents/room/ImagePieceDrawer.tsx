@@ -1,4 +1,4 @@
-import { Col, Drawer, Row, Typography } from 'antd';
+import { Button, Col, Drawer, Row, Tooltip, Typography } from 'antd';
 import React from 'react';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { replace } from '../../stateManagers/states/types';
@@ -12,6 +12,7 @@ import {
     imagePieceValueDiff,
     toImagePieceValueUpOperation,
     simpleId,
+    PieceState,
 } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useImagePieceValues } from '../../hooks/state/useImagePieceValues';
@@ -21,11 +22,13 @@ import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';
 import { BufferedInput } from '../../components/BufferedInput';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
 import { FilePath } from '../../utils/filePath';
-import { keyNames } from '@flocon-trpg/utils';
+import { dualKeyRecordForEach, keyNames } from '@flocon-trpg/utils';
 import { useAtomValue } from 'jotai/utils';
 import { imagePieceDrawerAtom } from '../../atoms/overlay/imagePieceDrawerAtom';
 import { create, update } from '../../utils/constants';
 import { useAtom } from 'jotai';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
+import { useCloneImagePiece } from '../../hooks/state/useCloneImagePiece';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -70,9 +73,10 @@ const IdView: React.FC = () => {
 
 export const ImagePieceDrawer: React.FC = () => {
     const [drawerType, setDrawerType] = useAtom(imagePieceDrawerAtom);
-    const operate = useSetRoomStateByApply();
+    const setRoomStateByApply = useSetRoomStateByApply();
     const myUserUid = useMyUserUid();
     const imagePieces = useImagePieceValues();
+    const clone = useCloneImagePiece();
     let stateEditorParams: StateEditorParams<ImagePieceValueState | undefined>;
     switch (drawerType?.type) {
         case create:
@@ -120,7 +124,7 @@ export const ImagePieceDrawer: React.FC = () => {
                             },
                         },
                     };
-                    operate(operation);
+                    setRoomStateByApply(operation);
                 },
             };
             break;
@@ -173,7 +177,7 @@ export const ImagePieceDrawer: React.FC = () => {
                     },
                 },
             };
-            operate(operation);
+            setRoomStateByApply(operation);
             setDrawerType(null);
             setState(defaultImagePieceValue);
         };
@@ -198,6 +202,30 @@ export const ImagePieceDrawer: React.FC = () => {
         >
             <div>
                 <IdView />
+
+                {drawerType?.type !== update ? null : (
+                    <>
+                        <Typography.Title level={4}>複製</Typography.Title>
+
+                        <Row gutter={gutter} align='middle'>
+                            <Col flex='auto' />
+                            <Col flex={0}></Col>
+                            <Col span={inputSpan}>
+                                {/* TODO: 複製したことを何らかの形で通知したほうがいい */}
+                                <Tooltip title='このコマを複製します。'>
+                                    <Button
+                                        size='small'
+                                        onClick={() => {
+                                            clone({ myUserUid, source: state });
+                                        }}
+                                    >
+                                        このコマを複製
+                                    </Button>
+                                </Tooltip>
+                            </Col>
+                        </Row>
+                    </>
+                )}
 
                 {/* TODO: isPrivateがまだ未実装 */}
 

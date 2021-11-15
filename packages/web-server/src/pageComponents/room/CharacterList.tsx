@@ -129,6 +129,7 @@ const createNumParameterColumn = ({
                 (y.character.state.numParams[key]?.value ?? defaultValue)
             );
         },
+        sortDirections: ['descend', 'ascend'],
         // eslint-disable-next-line react/display-name
         render: (_: unknown, { character, operate }: DataSource) => {
             return (

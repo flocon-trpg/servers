@@ -957,9 +957,11 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
     const boardComponent = (() => {
         if (boardKeyToShow == null) {
             return (
-                <div>{`${
-                    panel.type === 'activeBoard' ? 'ボードビュアー' : 'ボードエディター'
-                }に表示するボードが指定されていません。`}</div>
+                <div style={{ padding: 20 }}>
+                    {`${
+                        panel.type === 'activeBoard' ? 'ボードビュアー' : 'ボードエディター'
+                    }に表示するボードが指定されていません。`}
+                </div>
             );
         }
         if (board == null) {
@@ -1141,7 +1143,12 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                 <Menu.Divider />
                 <Menu.Item
                     icon={<Icons.PlusOutlined />}
-                    onClick={() => setBoardEditorDrawer({ type: create })}
+                    onClick={() =>
+                        setBoardEditorDrawer({
+                            type: create,
+                            boardEditorPanelId,
+                        })
+                    }
                 >
                     新規作成
                 </Menu.Item>
@@ -1357,7 +1364,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                             });
                         }}
                     >
-                        Boardの位置とズームをリセット
+                        ボードの位置とズームをリセット
                     </Button>
                 </div>
             </div>
