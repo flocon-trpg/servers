@@ -107,6 +107,7 @@ import {
     WriteRoomSoundEffectFailureResultType,
     WriteRoomSoundEffectResult,
     ResetRoomMessagesResultType,
+    RoomMessageSyntaxErrorType,
 } from '../../entities/roomMessage/graphql';
 import { WriteRoomPublicMessageFailureType } from '../../../enums/WriteRoomPublicMessageFailureType';
 import { analyze, Context } from '../../../messageAnalyzer/main';
@@ -1730,7 +1731,12 @@ export class RoomResolver {
                 gameType: args.gameType,
             });
             if (entityResult.isError) {
-                return entityResult;
+                return Result.ok({
+                    result: {
+                        __tstype: RoomMessageSyntaxErrorType,
+                        errorMessage: entityResult.error,
+                    },
+                });
             }
             const entity = entityResult.value as RoomPubMsg;
             entity.textColor = args.textColor == null ? undefined : fixTextColor(args.textColor);
@@ -1849,7 +1855,12 @@ export class RoomResolver {
                 gameType: args.gameType,
             });
             if (entityResult.isError) {
-                return entityResult;
+                return Result.ok({
+                    result: {
+                        __tstype: RoomMessageSyntaxErrorType,
+                        errorMessage: entityResult.error,
+                    },
+                });
             }
             const entity = entityResult.value as RoomPrvMsg;
             args.textColor == null ? undefined : fixTextColor(args.textColor);

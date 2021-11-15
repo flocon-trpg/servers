@@ -134,6 +134,17 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
                                 createdAt: new Date().getTime(),
                             },
                         });
+                        return;
+                    case 'RoomMessageSyntaxError':
+                        addRoomNotification({
+                            type: Notification.text,
+                            notification: {
+                                type: 'error',
+                                message: `文法エラーがあります: ${res.data.result.errorMessage}`,
+                                createdAt: new Date().getTime(),
+                            },
+                        });
+                        return;
                 }
             })
             .finally(() => {
@@ -285,7 +296,18 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
                                         createdAt: new Date().getTime(),
                                     },
                                 });
+                                return;
                         }
+                    case 'RoomMessageSyntaxError':
+                        addRoomNotification({
+                            type: Notification.text,
+                            notification: {
+                                type: 'error',
+                                message: `文法エラーがあります: ${res.data.result.errorMessage}`,
+                                createdAt: new Date().getTime(),
+                            },
+                        });
+                        return;
                 }
             })
             .finally(() => {

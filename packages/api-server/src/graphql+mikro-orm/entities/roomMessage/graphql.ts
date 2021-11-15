@@ -351,6 +351,16 @@ export const GetRoomLogResult = createUnionType({
     },
 });
 
+export const RoomMessageSyntaxErrorType = 'RoomMessageSyntaxError';
+
+@ObjectType()
+export class RoomMessageSyntaxError {
+    public __tstype!: typeof RoomMessageSyntaxErrorType;
+
+    @Field()
+    public errorMessage!: string;
+}
+
 export const WriteRoomPrivateMessageFailureResultType = 'WriteRoomPrivateMessageFailureResult';
 
 @ObjectType()
@@ -363,13 +373,16 @@ export class WriteRoomPrivateMessageFailureResult {
 
 export const WriteRoomPrivateMessageResult = createUnionType({
     name: 'WriteRoomPrivateMessageResult',
-    types: () => [RoomPrivateMessage, WriteRoomPrivateMessageFailureResult] as const,
+    types: () =>
+        [RoomPrivateMessage, WriteRoomPrivateMessageFailureResult, RoomMessageSyntaxError] as const,
     resolveType: value => {
         switch (value.__tstype) {
             case RoomPrivateMessageType:
                 return RoomPrivateMessage;
             case WriteRoomPrivateMessageFailureResultType:
                 return WriteRoomPrivateMessageFailureResult;
+            case RoomMessageSyntaxErrorType:
+                return RoomMessageSyntaxError;
         }
     },
 });
@@ -386,13 +399,16 @@ export class WriteRoomPublicMessageFailureResult {
 
 export const WriteRoomPublicMessageResult = createUnionType({
     name: 'WriteRoomPublicMessageResult',
-    types: () => [RoomPublicMessage, WriteRoomPublicMessageFailureResult] as const,
+    types: () =>
+        [RoomPublicMessage, WriteRoomPublicMessageFailureResult, RoomMessageSyntaxError] as const,
     resolveType: value => {
         switch (value.__tstype) {
             case RoomPublicMessageType:
                 return RoomPublicMessage;
             case WriteRoomPublicMessageFailureResultType:
                 return WriteRoomPublicMessageFailureResult;
+            case RoomMessageSyntaxErrorType:
+                return RoomMessageSyntaxError;
         }
     },
 });
