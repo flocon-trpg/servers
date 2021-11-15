@@ -63,10 +63,15 @@ export namespace RoomConfigUtils {
     };
 
     export const fixRoomConfig = (config: RoomConfig): void => {
+        fixPosition(config.panels.activeBoardPanel);
         recordToArray(config.panels.boardEditorPanels).forEach(pair => fixPosition(pair.value));
         fixPosition(config.panels.characterPanel);
+        recordToArray(config.panels.chatPalettePanels).forEach(pair => fixPosition(pair.value));
+        fixPosition(config.panels.gameEffectPanel);
         recordToArray(config.panels.memoPanels).forEach(pair => fixPosition(pair.value));
         recordToArray(config.panels.messagePanels).forEach(pair => fixPosition(pair.value));
+        fixPosition(config.panels.participantPanel);
+        fixPosition(config.panels.pieceValuePanel);
     };
 
     // DraggablePanelが移動できない位置に行くのを防ぐ処理。

@@ -829,18 +829,24 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             if (roomConfig == null) {
                                 return;
                             }
-                            let boardPanel;
                             if (boardEditorPanelId == null) {
-                                boardPanel = roomConfig.panels.activeBoardPanel;
-                            } else {
-                                boardPanel =
-                                    roomConfig.panels.boardEditorPanels[boardEditorPanelId];
-                            }
-                            if (boardPanel == null) {
+                                const boardPanel = roomConfig.panels.activeBoardPanel;
+                                if (boardPanel == null) {
+                                    return;
+                                }
+                                boardPanel.board.offsetX -= e.evt.movementX / nonZeroScale;
+                                boardPanel.board.offsetY -= e.evt.movementY / nonZeroScale;
                                 return;
                             }
-                            boardPanel.x -= e.evt.movementX / nonZeroScale;
-                            boardPanel.y -= e.evt.movementY / nonZeroScale;
+                            const board =
+                                roomConfig.panels.boardEditorPanels[boardEditorPanelId]?.boards?.[
+                                    keyNames(boardKey)
+                                ];
+                            if (board == null) {
+                                return;
+                            }
+                            board.offsetX -= e.evt.movementX / nonZeroScale;
+                            board.offsetY -= e.evt.movementY / nonZeroScale;
                         });
                     }}
                 >
