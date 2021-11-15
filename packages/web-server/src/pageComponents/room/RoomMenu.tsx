@@ -858,7 +858,7 @@ export const RoomMenu: React.FC = () => {
                                 if (roomConfig == null) {
                                     return;
                                 }
-                                roomConfig.panels.pieceValuePanel.isMinimized = true;
+                                roomConfig.panels.pieceValuePanel.isMinimized = false;
                                 RoomConfigUtils.bringPanelToFront(roomConfig, {
                                     type: 'pieceValuePanel',
                                 });
@@ -882,7 +882,7 @@ export const RoomMenu: React.FC = () => {
                                 if (roomConfig == null) {
                                     return;
                                 }
-                                roomConfig.panels.gameEffectPanel.isMinimized = true;
+                                roomConfig.panels.gameEffectPanel.isMinimized = false;
                                 RoomConfigUtils.bringPanelToFront(roomConfig, {
                                     type: 'gameEffectPanel',
                                 });
@@ -906,7 +906,7 @@ export const RoomMenu: React.FC = () => {
                                 if (roomConfig == null) {
                                     return;
                                 }
-                                roomConfig.panels.participantPanel.isMinimized = true;
+                                roomConfig.panels.participantPanel.isMinimized = false;
                                 RoomConfigUtils.bringPanelToFront(roomConfig, {
                                     type: 'participantPanel',
                                 });
