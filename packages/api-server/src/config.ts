@@ -97,6 +97,7 @@ const loadServerConfig = ({
         database,
         entryPassword: right.entryPassword,
         uploader: right.uploader,
+        autoMigration: right.autoMigration,
         accessControlAllowOrigin: right.accessControlAllowOrigin,
         '-experimental-disableRateLimit': right['-experimental-disableRateLimit'],
     };
@@ -125,7 +126,7 @@ let serverConfigAsMigrationCreateCache: ServerConfig | null = null;
 export const loadServerConfigAsMigrationCreate = async (): Promise<ServerConfig> => {
     if (serverConfigAsMigrationCreateCache == null) {
         serverConfigAsMigrationCreateCache = loadServerConfig({
-            databaseArg: (await loadMigrationCreate()).db,
+            databaseArg: (await loadMigrationCreate()).db ?? null,
         });
     }
     return serverConfigAsMigrationCreateCache;
@@ -135,7 +136,7 @@ let serverConfigAsMigrationUpCache: ServerConfig | null = null;
 export const loadServerConfigAsMigrationUp = async (): Promise<ServerConfig> => {
     if (serverConfigAsMigrationUpCache == null) {
         serverConfigAsMigrationUpCache = loadServerConfig({
-            databaseArg: (await loadMigrationUp()).db,
+            databaseArg: (await loadMigrationUp()).db ?? null,
         });
     }
     return serverConfigAsMigrationUpCache;
@@ -148,7 +149,7 @@ export const loadServerConfigAsMigrationDown = async (): Promise<
     if (serverConfigAsMigrationDownCache == null) {
         const loaded = await loadMigrationDown();
         serverConfigAsMigrationDownCache = {
-            ...loadServerConfig({ databaseArg: loaded.db }),
+            ...loadServerConfig({ databaseArg: loaded.db ?? null }),
             count: loaded.count,
         };
     }

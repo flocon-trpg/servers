@@ -1,11 +1,12 @@
 import { maybe } from '@flocon-trpg/core';
 import * as t from 'io-ts';
-import { boolean } from 'yargs';
 
 export const postgresql = 'postgresql';
 export const sqlite = 'sqlite';
 export const plain = 'plain';
 export const bcrypt = 'bcrypt';
+export const always = 'always';
+export const disabled = 'disabled';
 
 const database = t.type({
     postgresql: maybe(
@@ -60,6 +61,9 @@ export const serverConfigJson = t.type({
     database,
     entryPassword: maybe(entryPassword),
     uploader: maybe(uploader),
+
+    // 他にもオプションを追加する可能性があるため、booleanではなくliteralで定義している
+    autoMigration: t.union([t.literal(always), t.literal(disabled)]),
 
     // この文字が Access-Control-Allow-Origin と等しくなる。uploaderが有効でapi_serverとweb_serverが同一ドメインでない場合、これを設定しないとアップロードができない。現状、uploaderが有効なときにのみ使われる。キー名を 'Access-Control-Allow-Origin' ではなくcamelCaseにしているのは、「JSONに書いたヘッダーがすべて反映される」という勘違いを防ぐため。
     accessControlAllowOrigin: maybe(t.string),

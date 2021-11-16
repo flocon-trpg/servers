@@ -28,21 +28,13 @@ const getMain = async (): Promise<Main> => {
             nargs: 1,
             choices: [postgresql, sqlite],
         })
-        .option('debug', {
-            type: 'boolean',
-        })
+        .option('debug', { type: 'boolean' })
         .version(VERSION.toString()).argv;
 
     const result: Main = {
         debug: options.debug === true,
     };
-    const databaseOption = options.db;
-    result.db = (() => {
-        if (typeof databaseOption === 'string') {
-            return toDbType(databaseOption.toString());
-        }
-        return undefined;
-    })();
+    result.db = options.db == null ? undefined : toDbType(options.db);
     return result;
 };
 let mainCache: Main | null = null;
@@ -54,31 +46,19 @@ export const loadAsMain = async (): Promise<Main> => {
 };
 
 type MigrationUp = {
-    db: DbType;
+    db?: DbType;
 };
 const getMigrationUp = async (): Promise<MigrationUp> => {
     const options = await yargs(process.argv.slice(2)).options({
         db: {
             type: 'string',
-            demandOption: true,
             nargs: 1,
             choices: [postgresql, sqlite],
         },
     }).argv;
 
-    const databaseOption = options.db;
-    const database = (() => {
-        if (typeof databaseOption === 'string') {
-            const result = toDbType(databaseOption);
-            if (result == null) {
-                throw new Error('This should not happen');
-            }
-            return result;
-        }
-        throw new Error('This should not happen');
-    })();
     return {
-        db: database,
+        db: options.db == null ? undefined : toDbType(options.db),
     };
 };
 let migrationUpCache: MigrationUp | null = null;
@@ -90,7 +70,7 @@ export const loadMigrationUp = async (): Promise<MigrationUp> => {
 };
 
 type MigrationDown = {
-    db: DbType;
+    db?: DbType;
     count: number;
 };
 const getMigrationDown = async (): Promise<MigrationDown> => {
@@ -108,18 +88,6 @@ const getMigrationDown = async (): Promise<MigrationDown> => {
         },
     }).argv;
 
-    const databaseOption = options.db;
-    let database: DbType;
-    if (typeof databaseOption === 'string') {
-        const result = toDbType(databaseOption);
-        if (result == null) {
-            throw new Error('This should not happen');
-        }
-        database = result;
-    } else {
-        throw new Error('This should not happen');
-    }
-
     const countOption = options.count;
     let count: number;
     if (typeof countOption === 'number') {
@@ -129,7 +97,7 @@ const getMigrationDown = async (): Promise<MigrationDown> => {
     }
 
     return {
-        db: database,
+        db: options.db == null ? undefined : toDbType(options.db),
         count,
     };
 };
@@ -142,7 +110,7 @@ export const loadMigrationDown = async (): Promise<MigrationDown> => {
 };
 
 type MigrationCreate = {
-    db: DbType;
+    db?: DbType;
     init: boolean;
 };
 const getMigrationCreate = async (): Promise<MigrationCreate> => {
@@ -158,19 +126,8 @@ const getMigrationCreate = async (): Promise<MigrationCreate> => {
         },
     }).argv;
 
-    const databaseOption = options.db;
-    const database = (() => {
-        if (typeof databaseOption === 'string') {
-            const result = toDbType(databaseOption);
-            if (result == null) {
-                throw new Error('This should not happen');
-            }
-            return result;
-        }
-        throw new Error('This should not happen');
-    })();
     return {
-        db: database,
+        db: options.db == null ? undefined : toDbType(options.db),
         init: options.init === true,
     };
 };

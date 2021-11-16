@@ -4,14 +4,14 @@ import { PromiseQueue } from './utils/promiseQueue';
 import { prepareORM } from './mikro-orm';
 import { loadFirebaseConfig, loadServerConfigAsMain } from './config';
 import { Extra } from 'graphql-ws/lib/use/ws';
-import { checkMigrationsBeforeStart } from './migrate';
+import { doAutoMigrationBeforeStart, checkMigrationsBeforeStart } from './migrate';
 import { InMemoryConnectionManager, pubSub } from './connection/main';
 import { Result } from '@kizahasi/result';
 import { authToken } from '@flocon-trpg/core';
 import { Context } from 'graphql-ws/lib/server';
 import { BaasType } from './enums/BaasType';
 import { AppConsole } from './utils/appConsole';
-import { ServerConfig } from './configType';
+import { always, disabled, ServerConfig } from './configType';
 import { createServer } from './createServer';
 
 const logEntryPasswordConfig = (serverConfig: ServerConfig) => {
@@ -41,6 +41,11 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
     const schema = await buildSchema(serverConfig)({ emitSchemaFile: false, pubSub });
     const dbType = serverConfig.database.__type;
     const orm = await prepareORM(serverConfig.database, params.debug);
+    switch (serverConfig.autoMigration) {
+        case always:
+            await doAutoMigrationBeforeStart(orm, dbType);
+            break;
+    }
     await checkMigrationsBeforeStart(orm, dbType);
     logEntryPasswordConfig(serverConfig);
 
