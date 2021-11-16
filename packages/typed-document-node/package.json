@@ -9,8 +9,7 @@
     ],
     "scripts": {
         "build": "rimraf ./dist && yarn dist",
-        "dist": "tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-types.json",
-        "test": "jest"
+        "dist": "tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-types.json"
     },
     "name": "@flocon-trpg/typed-document-node",
     "author": "kizahasi",
