@@ -9,7 +9,7 @@ const TEST_SKIP_REDIS = process.env.TEST_SKIP_REDIS;
 const skipRedis = TEST_SKIP_REDIS?.toLowerCase() === 'true';
 
 if (skipRedis) {
-    console.log('SKIPS Redis tests because `TEST_SKIP_REDIS` is true');
+    console.info('SKIPS Redis tests because `TEST_SKIP_REDIS` is true');
 } else {
     console.log('DO Redis tests because `TEST_SKIP_REDIS` is not true');
 }

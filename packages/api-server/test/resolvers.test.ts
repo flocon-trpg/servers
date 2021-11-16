@@ -69,6 +69,13 @@ import { OperationResult } from '@urql/core';
 import { maskTypeNames } from './maskTypenames';
 import { TestClients } from './testClients';
 
+/*
+To run tests in this file, you need to prepare SQLite and PostgreSQL. If you want to skip them, set TEST_SKIP_RESOLVERS env to "true".
+*/
+
+const TEST_SKIP_RESOLVERS = process.env.TEST_SKIP_RESOLVERS;
+const skipResolvers = TEST_SKIP_RESOLVERS?.toLowerCase() === 'true';
+
 const timeout = 20000;
 
 const textDiff = ({ prev, next }: { prev: string; next: string }) => {
@@ -460,6 +467,11 @@ describe.each([
     [sqlite2Type, plainEntryPassword],
     [postgresqlType, plainEntryPassword],
 ] as const)('integration test', (dbType, entryPasswordConfig) => {
+    if (skipResolvers) {
+        console.info('SKIPS resolver tests because `TEST_SKIP_RESOLVERS` is true');
+        return;
+    }
+
     afterEach(async () => {
         // Userは各テストで使い回すため削除していない
 
