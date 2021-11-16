@@ -40,7 +40,7 @@ jobs:
                   NEXT_PUBLIC_FLOCON_WEB_CONFIG: ${{ secrets.NEXT_PUBLIC_FLOCON_WEB_CONFIG }}
 
     test-core-redis:
-        name: Test with Redis on Node ${{ matrix.node }} and ${{ matrix.os }}
+        name: Tests core with Redis on Node ${{ matrix.node }} and ${{ matrix.os }}
 
         runs-on: ubuntu-latest
         defaults:
@@ -75,7 +75,7 @@ jobs:
               run: yarn test --ci --coverage --maxWorkers=2
 
     test-api-server:
-        name: Type-check and test on ${{ matrix.container }}
+        name: Type-check and tests api-server on ${{ matrix.container }}
 
         strategy:
             matrix:
