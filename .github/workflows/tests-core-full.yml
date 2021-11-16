@@ -2,11 +2,10 @@ name: tests packages/core
 
 on:
     pull_request:
-        paths-ignore:
-            - 'packages/**'
-            - '!packages/core/**'
+        branches:
+            - release
 
-# to see more appropriate coverage, this has redis tests
+# to see more appropriate coverage, redis tests are included
 jobs:
     full-test:
         name: Large test & Redis test on Node ${{ matrix.node }} and ${{ matrix.os }}

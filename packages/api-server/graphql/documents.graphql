@@ -516,6 +516,9 @@ mutation WritePublicMessage($roomId: String!, $text: String!, $textColor: String
     ... on WriteRoomPublicMessageFailureResult {
       failureType
     }
+    ... on RoomMessageSyntaxError {
+      errorMessage
+    }
   }
 }
 
@@ -527,6 +530,9 @@ mutation WritePrivateMessage($roomId: String!, $visibleTo: [String!]!, $text: St
     }
     ... on WriteRoomPrivateMessageFailureResult {
       failureType
+    }
+    ... on RoomMessageSyntaxError {
+      errorMessage
     }
   }
 }

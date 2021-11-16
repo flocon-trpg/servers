@@ -644,6 +644,11 @@ export type RoomMessageEvent =
     | RoomPublicMessageUpdate
     | RoomSoundEffect;
 
+export type RoomMessageSyntaxError = {
+    __typename?: 'RoomMessageSyntaxError';
+    errorMessage: Scalars['String'];
+};
+
 export type RoomMessages = {
     __typename?: 'RoomMessages';
     pieceValueLogs: Array<PieceValueLog>;
@@ -789,10 +794,12 @@ export type WriteRoomPrivateMessageFailureResult = {
 export enum WriteRoomPrivateMessageFailureType {
     NotParticipant = 'NotParticipant',
     RoomNotFound = 'RoomNotFound',
+    SyntaxError = 'SyntaxError',
     VisibleToIsInvalid = 'VisibleToIsInvalid',
 }
 
 export type WriteRoomPrivateMessageResult =
+    | RoomMessageSyntaxError
     | RoomPrivateMessage
     | WriteRoomPrivateMessageFailureResult;
 
@@ -806,9 +813,13 @@ export enum WriteRoomPublicMessageFailureType {
     NotAuthorized = 'NotAuthorized',
     NotParticipant = 'NotParticipant',
     RoomNotFound = 'RoomNotFound',
+    SyntaxError = 'SyntaxError',
 }
 
-export type WriteRoomPublicMessageResult = RoomPublicMessage | WriteRoomPublicMessageFailureResult;
+export type WriteRoomPublicMessageResult =
+    | RoomMessageSyntaxError
+    | RoomPublicMessage
+    | WriteRoomPublicMessageFailureResult;
 
 export type WriteRoomSoundEffectFailureResult = {
     __typename?: 'WriteRoomSoundEffectFailureResult';
@@ -1953,6 +1964,7 @@ export type WritePublicMessageMutationVariables = Exact<{
 export type WritePublicMessageMutation = {
     __typename?: 'Mutation';
     result:
+        | { __typename: 'RoomMessageSyntaxError'; errorMessage: string }
         | {
               __typename: 'RoomPublicMessage';
               messageId: string;
@@ -2019,6 +2031,7 @@ export type WritePrivateMessageMutationVariables = Exact<{
 export type WritePrivateMessageMutation = {
     __typename?: 'Mutation';
     result:
+        | { __typename: 'RoomMessageSyntaxError'; errorMessage: string }
         | {
               __typename: 'RoomPrivateMessage';
               messageId: string;
@@ -5259,6 +5272,22 @@ export const WritePublicMessageDocument = {
                                         ],
                                     },
                                 },
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: { kind: 'Name', value: 'RoomMessageSyntaxError' },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'errorMessage' },
+                                            },
+                                        ],
+                                    },
+                                },
                             ],
                         },
                     },
@@ -5432,6 +5461,22 @@ export const WritePrivateMessageDocument = {
                                             {
                                                 kind: 'Field',
                                                 name: { kind: 'Name', value: 'failureType' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: { kind: 'Name', value: 'RoomMessageSyntaxError' },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'errorMessage' },
                                             },
                                         ],
                                     },
