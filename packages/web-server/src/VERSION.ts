@@ -16,7 +16,7 @@ export const SupportedApiServers: ReadonlyArray<SemVerRange> = [
         min: new SemVer({
             major: 0,
             minor: 5,
-            patch: 0,
+            patch: 2,
             prerelease: {
                 type: beta,
                 version: 1,
