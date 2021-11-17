@@ -1,4 +1,4 @@
-import { Cache, createNodeCache, createRedisCache, simpleId } from '../src';
+import { Cache, createNodeCache, createRedisCache } from '../src';
 import Redis from 'ioredis';
 
 /*
@@ -20,7 +20,7 @@ const createEach = (): Cache[] => {
     if (!skipRedis) {
         result.push(
             createRedisCache({
-                keyPrefix: simpleId(),
+                keyPrefix: Math.random().toString(),
                 redis: new Redis(),
             })
         );

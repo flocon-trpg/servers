@@ -39,13 +39,13 @@ jobs:
                   NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG: ${{ secrets.NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG }}
                   NEXT_PUBLIC_FLOCON_WEB_CONFIG: ${{ secrets.NEXT_PUBLIC_FLOCON_WEB_CONFIG }}
 
-    test-core-redis:
-        name: Tests core with Redis on Node ${{ matrix.node }} and ${{ matrix.os }}
+    test-cache-redis:
+        name: Tests cache with Redis on Node ${{ matrix.node }} and ${{ matrix.os }}
 
         runs-on: ubuntu-latest
         defaults:
             run:
-                working-directory: ./packages/core
+                working-directory: ./packages/cache
         strategy:
             matrix:
                 node: ['16.x']

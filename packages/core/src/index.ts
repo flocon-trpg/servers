@@ -49,8 +49,6 @@ export { PublicChannelKey } from './internal/publicChannelKey';
 
 export { simpleId } from './internal/simpleId';
 
-export { Cache, createNodeCache, createRedisCache } from './internal/cache/main';
-
 export {
     isValidVarToml,
     parseToml,

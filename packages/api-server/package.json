@@ -2,6 +2,7 @@
     "name": "@flocon-trpg/api-server",
     "description": "Flocon API server",
     "dependencies": {
+        "@flocon-trpg/cache": "workspace:^",
         "@flocon-trpg/core": "workspace:^",
         "@flocon-trpg/utils": "workspace:^",
         "@kizahasi/ot-string": "^0.3.0",
