@@ -9,6 +9,9 @@ import {
 } from './utils/commandLineArgs';
 import * as E from 'fp-ts/Either';
 import { formatValidationErrors } from './utils/io-ts-reporters';
+import { loadDotenv } from './env';
+
+loadDotenv();
 
 const loadFirebaseConfigCore = (): FirebaseConfig => {
     let env = process.env['FLOCON_FIREBASE_CONFIG'];

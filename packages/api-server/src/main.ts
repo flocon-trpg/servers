@@ -11,7 +11,7 @@ import { authToken } from '@flocon-trpg/core';
 import { Context } from 'graphql-ws/lib/server';
 import { BaasType } from './enums/BaasType';
 import { AppConsole } from './utils/appConsole';
-import { always, disabled, ServerConfig } from './configType';
+import { always, ServerConfig } from './configType';
 import { createServer } from './createServer';
 
 const logEntryPasswordConfig = (serverConfig: ServerConfig) => {
