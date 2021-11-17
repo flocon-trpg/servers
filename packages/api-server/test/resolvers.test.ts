@@ -469,9 +469,10 @@ describe.each([
 ] as const)('integration test', (dbType, entryPasswordConfig) => {
     if (skipResolvers) {
         console.info('SKIPS resolver tests because `TEST_SKIP_RESOLVERS` is true');
+        // これがないと、テストがないため失敗とみなされる
+        test('FAKE-TEST', () => undefined);
         return;
     }
-
     afterEach(async () => {
         // Userは各テストで使い回すため削除していない
 
@@ -549,7 +550,9 @@ describe.each([
             let thumbFilename: string | null | undefined;
             {
                 const filesResult = Assert.GetFilesQuery.toBeSuccess(
-                    await GraphQL.getFilesQuery(clientToUploadFiles, { input: { fileTagIds: [] } })
+                    await GraphQL.getFilesQuery(clientToUploadFiles, {
+                        input: { fileTagIds: [] },
+                    })
                 );
                 console.log('GetFilesQuery result: %o', filesResult);
                 expect(filesResult).toHaveLength(1);
