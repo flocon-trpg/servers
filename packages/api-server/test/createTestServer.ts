@@ -71,6 +71,7 @@ export const createTestServer = async (
         admin: adminConfig,
         database: databaseConfig,
         entryPassword: entryPasswordConfig,
+        autoMigration: undefined,
         uploader: {
             maxFileSize: 1000 * 1000,
             sizeQuota: 100 * 1000 * 1000,
