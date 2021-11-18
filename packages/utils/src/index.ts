@@ -27,6 +27,7 @@ export {
     ReadonlyStateMap,
     createStateMap,
 } from './internal/stateMap';
+export { toBeNever } from './internal/toBeNever';
 export { left, right, both } from './internal/types';
 export {
     chooseDualKeyRecord,
