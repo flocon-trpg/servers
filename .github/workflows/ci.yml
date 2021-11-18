@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
     main:
-        name: Tests on Node ${{ matrix.node }} and ${{ matrix.os }}
+        name: Tests and exec Next.js export on Node ${{ matrix.node }} and ${{ matrix.os }}
 
         runs-on: ${{ matrix.os }}
         strategy:
