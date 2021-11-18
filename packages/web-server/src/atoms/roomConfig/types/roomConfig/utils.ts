@@ -2,7 +2,6 @@ import { RoomConfig } from '.';
 import { ResizeDirection } from 're-resizable';
 import { CompositeKey, keyNames, recordToArray } from '@flocon-trpg/utils';
 import { BoardConfig, defaultBoardConfig } from '../boardConfig';
-import { roomMenuHeight } from './resources';
 
 export namespace RoomConfigUtils {
     export const activeBoardPanel = 'activeBoardPanel';
@@ -59,7 +58,7 @@ export namespace RoomConfigUtils {
 
     const fixPosition = (position: { x: number; y: number }): void => {
         position.x = Math.max(0, position.x);
-        position.y = Math.max(roomMenuHeight, position.y);
+        position.y = Math.max(0, position.y);
     };
 
     export const fixRoomConfig = (config: RoomConfig): void => {
