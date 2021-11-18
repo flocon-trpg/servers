@@ -1,8 +1,9 @@
 import React, { PropsWithChildren } from 'react';
-import { Rnd, Props as RndProps, Position, ResizableDelta } from 'react-rnd';
-import { ResizeDirection } from 're-resizable';
+import { NumberSize,ResizeDirection } from 're-resizable';
 import { CloseOutlined } from '@ant-design/icons';
 import { cancelRnd } from '../utils/className';
+import { Rnd, Props as RndProps } from './Rnd';
+import { ControlPosition } from 'react-draggable';
 
 // 上からheader、topElement、children、bottomElementの順で描画される。children以外はheightが固定されている。
 // それぞれの要素は、styleにheightやpaddingなどが自動的に設定されたdivに包まれる。このdivのstyleは、自動的に設定されていない値であれば、*ContainerStyleというプロパティに渡すことで好きな値をセットすることができる。
@@ -23,12 +24,11 @@ type Props = {
     bottomElement?: React.ReactNode;
     bottomElementContainerHeight?: number;
     bottomElementContainerStyle?: Omit<React.CSSProperties, 'height' | 'backgroundColor'>;
-    bounds?: string;
     childrenContainerStyle?: Omit<React.CSSProperties, 'height' | 'backgroundColor'>;
     position: RndProps['position'];
     size: RndProps['size'];
-    onDragStop: (data: Position) => void;
-    onResizeStop: (dir: ResizeDirection, delta: ResizableDelta) => void;
+    onDragStop: (data: ControlPosition) => void;
+    onResizeStop: (dir: ResizeDirection, delta: NumberSize) => void;
     // 当初、onDragStartやOnResizeStartでもトリガーするようにしていたが、reduxのmoveToFrontの処理が重いためパネルの動きが一瞬止まってしまうので却下している。
     onMoveToFront: () => void;
     onClose: () => void;
@@ -54,14 +54,13 @@ export const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) 
 
     return (
         <Rnd
-            bounds={props.bounds}
             cancel='.cancel-rnd'
             position={props.position}
             size={props.size}
             minHeight={props.minHeight}
             minWidth={props.minWidth}
-            onDragStop={(e, data) => props.onDragStop(data)}
-            onResizeStop={(e, dir, elementRef, delta) => props.onResizeStop(dir, delta)}
+            onDragStop={props.onDragStop}
+            onResizeStop={props.onResizeStop}
             style={{ zIndex: props.zIndex }}
             onMouseDown={e => {
                 if ((e.buttons & 1) !== 1) {
