@@ -118,38 +118,26 @@ jobs:
             - name: Migration-up SQLite(1)
               run: yarn migration-up --db sqlite
               env:
-                  FLOCON_API_CONFIG: >
+                  FLOCON_API_SQLITE: >
                       {
-                          "database": {
-                              "sqlite": {
-                                  "dbName": "./test1.sqlite3"
-                              }
-                          }
+                          "dbName": "./test1.sqlite3"
                       }
 
             - name: Migration-up SQLite(2)
               run: yarn migration-up --db sqlite
               env:
-                  FLOCON_API_CONFIG: >
+                  FLOCON_API_SQLITE: >
                       {
-                          "database": {
-                              "sqlite": {
-                                  "dbName": "./test2.sqlite3"
-                              }
-                          }
+                          "dbName": "./test2.sqlite3"
                       }
 
             - name: Migration-up PostgreSQL
               run: yarn migration-up --db postgresql
               env:
-                  FLOCON_API_CONFIG: >
+                  FLOCON_API_POSTGRESQL: >
                       {
-                          "database": {
-                              "postgresql": {
-                                  "dbName": "test",
-                                  "clientUrl": "postgresql://postgres:postgres@postgres:5432"
-                              }
-                          }
+                          "dbName": "test",
+                          "clientUrl": "postgresql://postgres:postgres@postgres:5432"
                       }
 
             # skips `yarn build` because it already has js files
