@@ -7,6 +7,7 @@
         "postinstall": "husky install",
         "build": "yarn workspaces foreach -ptv run build",
         "dist": "yarn workspaces foreach -ptv run dist",
+        "dist-s": "yarn workspaces foreach -tv run dist",
         "test": "yarn workspaces foreach -pv run test",
         "lint": "eslint \"packages/**/*.{ts,tsx}\"",
         "prettier": "yarn prettier:base --write",
