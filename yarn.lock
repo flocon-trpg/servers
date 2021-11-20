@@ -1722,7 +1722,7 @@ __metadata:
     "@types/uuid": ^8.3.1
     "@types/ws": ^7.4.7
     "@types/yargs": ^17.0.3
-    "@urql/core": 2.3.4
+    "@urql/core": 2.3.5
     apollo-server-express: ^3.3.0
     axios: 0.24.0
     bcdice: ^3.3.0
@@ -4166,15 +4166,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@urql/core@npm:2.3.4":
-  version: 2.3.4
-  resolution: "@urql/core@npm:2.3.4"
+"@urql/core@npm:2.3.5":
+  version: 2.3.5
+  resolution: "@urql/core@npm:2.3.5"
   dependencies:
     "@graphql-typed-document-node/core": ^3.1.0
     wonka: ^4.0.14
   peerDependencies:
     graphql: ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0
-  checksum: 36c2f6ad83a406f5dc8fbae4cbe58e6bb6f6580a934b24e6a73e99098d10fd47fd9f084aacf45bc84ba35588b9c46e8830fc433e8f4f686d281439fca2504593
+  checksum: 597119560b2261043d5b210fdb5d80ece39d7e52db4c52e6ccadfa57e4e05fa9a2873f11b3f5e067051545e28012d2e0e41c8edaec3e26b797cf3212202e6800
   languageName: node
   linkType: hard
 
