@@ -8,6 +8,7 @@ import {
     postgresqlDatabase,
     PostgresqlDatabaseConfig,
     ServerConfig,
+    sqliteDatabase,
     SqliteDatabaseConfig,
 } from './configType';
 import {
@@ -105,7 +106,7 @@ const loadServerConfig = ({
             sqliteConfig = null;
         } else {
             const json = JSON.parse(sqliteObject);
-            const j = E.mapLeft(formatValidationErrors)(postgresqlDatabase.decode(json));
+            const j = E.mapLeft(formatValidationErrors)(sqliteDatabase.decode(json));
             if (j._tag === 'Left') {
                 throw new Error(j.left);
             }
