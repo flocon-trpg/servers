@@ -41,10 +41,8 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
     const schema = await buildSchema(serverConfig)({ emitSchemaFile: false, pubSub });
     const dbType = serverConfig.database.__type;
     const orm = await prepareORM(serverConfig.database, params.debug);
-    switch (serverConfig.autoMigration) {
-        case always:
-            await doAutoMigrationBeforeStart(orm, dbType);
-            break;
+    if (serverConfig.autoMigration) {
+        await doAutoMigrationBeforeStart(orm, dbType);
     }
     await checkMigrationsBeforeStart(orm, dbType);
     logEntryPasswordConfig(serverConfig);

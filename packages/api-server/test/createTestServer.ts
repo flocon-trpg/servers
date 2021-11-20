@@ -65,20 +65,19 @@ export const createTestServer = async (
 
     const $orm = await createOrm(dbConfig);
     const databaseConfig = createDatabaseConfig(dbConfig);
-    const adminConfig: ServerConfig['admin'] = undefined;
     const serverConfig: ServerConfig = {
         accessControlAllowOrigin: '*',
-        admin: adminConfig,
+        admins: [],
         database: databaseConfig,
         entryPassword: entryPasswordConfig,
-        autoMigration: undefined,
+        autoMigration: false,
         uploader: {
             maxFileSize: 1000 * 1000,
             sizeQuota: 100 * 1000 * 1000,
             countQuota: 10,
             directory: './uploader',
         },
-        '-experimental-disableRateLimit': true,
+        disableRateLimitExperimental: true,
     };
 
     const schema = await buildSchema(serverConfig)({
