@@ -28,7 +28,7 @@ const createParameters = (state: State, revision: number): Parameters => {
             const result = diff(params);
             return toUpOperation(result ?? { $v: 1, $r: 2 });
         },
-        enableHistory: true,
+        enableHistory: false,
     };
 };
 
