@@ -84,13 +84,16 @@ class EnvPrompts {
         const parentFolderValue = 'parentFolder';
         const saveValue = 'save';
 
+        // 上下にループするため、Separatorは2つで挟んでいる
         if (node.parent == null) {
             saveChoices.push(new Separator());
             saveChoices.push({
                 name: this.getSaveMessage(),
                 value: saveValue,
             });
+            saveChoices.push(new Separator());
         } else {
+            saveChoices.push(new Separator());
             dirChoices.push({ name: this.getGoBackMessage(), value: parentFolderValue });
             dirChoices.push(new Separator());
         }
