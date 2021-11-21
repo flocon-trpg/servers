@@ -68,13 +68,14 @@ import { TextTwoWayOperation, TextUpOperation } from '@kizahasi/ot-string';
 import { OperationResult } from '@urql/core';
 import { maskTypeNames } from './maskTypenames';
 import { TestClients } from './testClients';
+import { isTruthyString } from '@flocon-trpg/utils';
 
 /*
 To run tests in this file, you need to prepare SQLite and PostgreSQL. If you want to skip them, set TEST_SKIP_RESOLVERS env to "true".
 */
 
 const TEST_SKIP_RESOLVERS = process.env.TEST_SKIP_RESOLVERS;
-const skipResolvers = TEST_SKIP_RESOLVERS?.toLowerCase() === 'true';
+const skipResolvers = isTruthyString(TEST_SKIP_RESOLVERS);
 
 const timeout = 20000;
 
