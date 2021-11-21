@@ -76,22 +76,22 @@ const CreateRoomCore: React.FC = () => {
             <Form.Item label='自分の名前' name={participantName}>
                 <Input />
             </Form.Item>
-            <Form.Item label='参加フレーズを有効化'>
+            <Form.Item label='参加パスワードを有効化'>
                 <Switch
                     checked={isJoinAsPlayerPhraseEnabled}
                     onChange={setIsJoinAsPlayerPhraseEnabled}
                 />
             </Form.Item>
-            <Form.Item label='参加フレーズ' name={joinAsPlayerPhrase}>
+            <Form.Item label='参加パスワード' name={joinAsPlayerPhrase}>
                 <Input disabled={!isJoinAsPlayerPhraseEnabled} />
             </Form.Item>
-            <Form.Item label='観戦フレーズを有効化'>
+            <Form.Item label='観戦パスワードを有効化'>
                 <Switch
                     checked={isJoinAsSpectatorPhraseEnabled}
                     onChange={setIsJoinAsSpectatorPhraseEnabled}
                 />
             </Form.Item>
-            <Form.Item label='観戦フレーズ' name={joinAsSpectatorPhrase}>
+            <Form.Item label='観戦パスワード' name={joinAsSpectatorPhrase}>
                 <Input disabled={!isJoinAsSpectatorPhraseEnabled} />
             </Form.Item>
 

@@ -134,11 +134,11 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                         style={{ gridColumn: 2, gridRow: 3 }}
                         onChange={e => setPlayerPhrase(e.target.value)}
                         value={playerPhrase}
-                        placeholder='参加フレーズ'
+                        placeholder='参加パスワード'
                     />
                 ) : (
                     <div style={{ gridColumn: 2, gridRow: 3, marginLeft: 4, fontSize: 'small' }}>
-                        (参加フレーズなしで入室できます)
+                        (参加パスワードなしで入室できます)
                     </div>
                 )}
                 <Button
@@ -156,11 +156,11 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                         style={{ gridColumn: 2, gridRow: 4 }}
                         onChange={e => setSpectatorPhrase(e.target.value)}
                         value={spectatorPhrase}
-                        placeholder='観戦フレーズ'
+                        placeholder='観戦パスワード'
                     />
                 ) : (
                     <div style={{ gridColumn: 2, gridRow: 4, marginLeft: 4, fontSize: 'small' }}>
-                        (観戦フレーズなしで入室できます)
+                        (観戦パスワードなしで入室できます)
                     </div>
                 )}
                 <Button

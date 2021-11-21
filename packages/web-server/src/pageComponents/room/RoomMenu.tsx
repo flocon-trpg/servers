@@ -104,7 +104,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                             let text: string | undefined;
                             switch (e.data?.result.failureType) {
                                 case PromoteFailureType.WrongPhrase:
-                                    text = 'フレーズが誤っています。';
+                                    text = 'パスワードが誤っています。';
                                     break;
                                 case PromoteFailureType.NoNeedToPromote:
                                     text = '既に昇格済みです。';
@@ -132,7 +132,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                 onCancel={() => onCancel()}
             >
                 <Input
-                    placeholder='フレーズ'
+                    placeholder='パスワード'
                     value={inputValue}
                     onChange={e => setInputValue(e.target.value)}
                 />
@@ -161,7 +161,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                         let text: string | undefined;
                         switch (e.data?.result.failureType) {
                             case PromoteFailureType.WrongPhrase:
-                                text = 'フレーズが誤っています。';
+                                text = 'パスワードが誤っています。';
                                 break;
                             case PromoteFailureType.NoNeedToPromote:
                                 text = '既に昇格済みです。';
@@ -188,7 +188,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
             }}
             onCancel={() => onCancel()}
         >
-            フレーズなしで参加者に昇格できます。昇格しますか？
+            パスワードなしで参加者に昇格できます。昇格しますか？
         </Modal>
     );
 };
