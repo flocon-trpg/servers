@@ -92,7 +92,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
               }, '' as string)
     }) へ投稿`;
 
-    const onPost = (text: string) => {
+    const onPost = (text: string, focusOnFinish: boolean) => {
         if (isPosting || text.trim() === '') {
             return;
         }
@@ -149,7 +149,9 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
             })
             .finally(() => {
                 setIsPosting(false);
-                textAreaRef.current?.focus();
+                if (focusOnFinish) {
+                    textAreaRef.current?.focus();
+                }
             });
     };
     const onPostRef = useReadonlyRef(onPost);
@@ -158,7 +160,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
         if (autoSubmitter == null) {
             return;
         }
-        const subscription = autoSubmitter.subscribe(text => onPostRef.current(text));
+        const subscription = autoSubmitter.subscribe(text => onPostRef.current(text, false));
         return () => subscription.unsubscribe();
     }, [autoSubmitter, onPostRef]);
 
@@ -185,12 +187,12 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
                 onChange={e => {
                     setText(e.target.value);
                 }}
-                onPressEnter={e => (e.shiftKey ? undefined : onPost(text))}
+                onPressEnter={e => (e.shiftKey ? undefined : onPost(text, true))}
             />
             <Button
                 style={{ width: 80 }}
                 disabled={isPosting || text.trim() === ''}
-                onClick={() => onPost(text)}
+                onClick={() => onPost(text, true)}
             >
                 {isPosting ? <Icon.LoadingOutlined /> : '投稿'}
             </Button>
@@ -241,7 +243,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
             break;
     }
 
-    const onPost = (text: string) => {
+    const onPost = (text: string, focusOnFinish: boolean) => {
         if (isPosting || text.trim() === '') {
             return;
         }
@@ -312,7 +314,9 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
             })
             .finally(() => {
                 setIsPosting(false);
-                textAreaRef.current?.focus();
+                if (focusOnFinish) {
+                    textAreaRef.current?.focus();
+                }
             });
     };
     const onPostRef = useReadonlyRef(onPost);
@@ -321,7 +325,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
         if (autoSubmitter == null) {
             return;
         }
-        const subscription = autoSubmitter.subscribe(text => onPostRef.current(text));
+        const subscription = autoSubmitter.subscribe(text => onPostRef.current(text, false));
         return () => subscription.unsubscribe();
     }, [autoSubmitter, onPostRef]);
 
@@ -348,12 +352,12 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
                 onChange={e => {
                     setText(e.target.value);
                 }}
-                onPressEnter={e => (e.shiftKey ? undefined : onPost(text))}
+                onPressEnter={e => (e.shiftKey ? undefined : onPost(text, true))}
             />
             <Button
                 style={{ width: 80 }}
                 disabled={isPosting || text.trim() === ''}
-                onClick={() => onPost(text)}
+                onClick={() => onPost(text, true)}
             >
                 {isPosting ? <Icon.LoadingOutlined /> : '投稿'}
             </Button>
