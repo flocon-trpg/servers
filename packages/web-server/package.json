@@ -1,5 +1,5 @@
 {
-    "name": "flocon-web",
+    "name": "@flocon-trpg/web-server",
     "version": "0.5.3-beta.2",
     "description": "Flocon Web server",
     "dependencies": {
