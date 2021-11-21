@@ -1,6 +1,7 @@
 import axios from 'axios';
 import urljoin from 'url-join';
-import { Config, getHttpUri } from '../config';
+import { getHttpUri } from '../config';
+import { WebConfig } from '../configType';
 
 export const files = 'files';
 export const thumbs = 'thumbs';
@@ -11,7 +12,7 @@ export const getFloconUploaderFile = async ({
     idToken,
     mode,
 }: {
-    config: Config;
+    config: WebConfig;
     filename: string;
     idToken: string;
     mode: typeof files | typeof thumbs;

@@ -6,6 +6,7 @@
         "@apollo/client": "^3.4.15",
         "@emotion/react": "^11.4.1",
         "@flocon-trpg/core": "workspace:^",
+        "@flocon-trpg/set-env-interactive-core": "workspace:^",
         "@flocon-trpg/typed-document-node": "workspace:^",
         "@flocon-trpg/utils": "workspace:^",
         "@kizahasi/result": "^1.0.0",
@@ -100,6 +101,7 @@
         "export:next": "next export",
         "start": "next start",
         "serve": "serve ./out",
+        "set-env-interactive": "ts-node -P ./tsconfig.ts-node.json run-setEnvInteractive.ts",
         "test": "jest",
         "type-check": "tsc",
         "tc": "yarn run type-check"

@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Button, Dropdown, Menu, notification, Table, Tooltip, Upload } from 'antd';
 import { accept } from './helper';
-import { ConfigContext } from '../../contexts/ConfigContext';
 import { getHttpUri } from '../../config';
 import urljoin from 'url-join';
 import axios from 'axios';
@@ -25,6 +24,7 @@ import { useAsync } from 'react-use';
 import { LazyAndPreloadImage } from '../LazyAndPreloadImage';
 import { getFloconUploaderFile, thumbs } from '../../utils/getFloconUploaderFile';
 import { useMutation, useQuery } from '@apollo/client';
+import { useWebConfig } from '../../hooks/useWebConfig';
 
 type DataSource = FileItemFragment;
 
@@ -36,7 +36,7 @@ type UploaderProps = {
 };
 
 const Uploader: React.FC<UploaderProps> = ({ unlistedMode, onUploaded }: UploaderProps) => {
-    const config = React.useContext(ConfigContext);
+    const config = useWebConfig();
     const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);
 
     if (getIdToken == null) {
@@ -109,7 +109,7 @@ type ThumbProps = {
 };
 
 const Thumb: React.FC<ThumbProps> = ({ thumbFilePath, size }: ThumbProps) => {
-    const config = React.useContext(ConfigContext);
+    const config = useWebConfig();
     const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);
     const loadingIcon = <Icons.LoadingOutlined style={{ fontSize: size }} />;
     const src = useAsync(async () => {

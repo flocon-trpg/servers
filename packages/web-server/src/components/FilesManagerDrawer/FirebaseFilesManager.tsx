@@ -5,7 +5,6 @@ import { ColumnGroupType, ColumnType } from 'antd/lib/table';
 import { getStorageForce } from '../../utils/firebaseHelpers';
 import * as Icons from '@ant-design/icons';
 import { FirebaseStorageLink } from '../FirebaseStorageLink';
-import { ConfigContext } from '../../contexts/ConfigContext';
 import copy from 'clipboard-copy';
 import { fileName } from '../../utils/filename';
 import { InformationIcon } from '../InformationIcon';
@@ -23,6 +22,7 @@ import { publicFilesAtom } from '../../atoms/firebaseStorage/publicFilesAtom';
 import { reloadUnlistedFilesKeyAtom } from '../../atoms/firebaseStorage/reloadUnlistedFilesKeyAtom';
 import { reloadPublicFilesKeyAtom } from '../../atoms/firebaseStorage/reloadPublicFilesKeyAtom';
 import { useAtomValue, useUpdateAtom } from 'jotai/utils';
+import { useWebConfig } from '../../hooks/useWebConfig';
 
 type DataSource = FileState;
 
@@ -47,7 +47,7 @@ type UploaderProps = {
 
 const Uploader: React.FC<UploaderProps> = ({ onUploaded, storageType }: UploaderProps) => {
     const myUserUid = useMyUserUid();
-    const config = React.useContext(ConfigContext);
+    const config = useWebConfig();
 
     if (storageType === $public) {
         return (
@@ -57,8 +57,6 @@ const Uploader: React.FC<UploaderProps> = ({ onUploaded, storageType }: Uploader
             </span>
         );
     }
-
-    const webConfig = config.web;
 
     // TODO: antdのUploaderでアップロードが完了したとき、そのログを消すメッセージが「remove file」でアイコンがゴミ箱なのは紛らわしいと思うので直したい。
     // TODO: 同一ファイル名のファイルをアップロードすると上書きされるので、そのときは失敗させるかダイアログを出したほうが親切か。
@@ -73,7 +71,7 @@ const Uploader: React.FC<UploaderProps> = ({ onUploaded, storageType }: Uploader
                     return;
                 }
                 const storageRef = (() => {
-                    if (webConfig.firebase?.storage?.enableUnlisted !== true) {
+                    if (config.isUnlistedFirebaseStorageEnabled !== true) {
                         return null;
                     }
                     return getStorageForce(config).ref(
@@ -356,12 +354,12 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
     const [reloadPublicFilesKey, setReloadPublicFilesKey] = useAtom(reloadPublicFilesKeyAtom)
     const setUnlistedFiles = useUpdateAtom(unlistedFilesAtom);
     const setPublicFiles = useUpdateAtom(publicFilesAtom);
-    const config = React.useContext(ConfigContext);
+    const config = useWebConfig();
 
     React.useEffect(() => {
         let unsubscribed = false;
         const main = async () => {
-            if (config.web.firebase?.storage?.enablePublic !== true) {
+            if (config.isPublicFirebaseStorageEnabled !== true) {
                 return;
             }
             const $public = await getStorageForce(config).ref(Path.public.list).listAll();
@@ -383,7 +381,7 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
         }
         let unsubscribed = false;
         const main = async () => {
-            if (config.web.firebase?.storage?.enableUnlisted !== true) {
+            if (config.isUnlistedFirebaseStorageEnabled !== true) {
                 return;
             }
             const unlisted = await getStorageForce(config)
@@ -402,8 +400,8 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
     }, [myUserUid, setUnlistedFiles, reloadUnlistedFilesKey, config]);
 
     if (
-        config.web.firebase?.storage?.enablePublic !== true &&
-        config.web.firebase?.storage?.enableUnlisted !== true
+        config.isPublicFirebaseStorageEnabled !== true &&
+        config.isUnlistedFirebaseStorageEnabled !== true
     ) {
         return <div>Firebase StorageのUIは管理者によって全て無効化されています。</div>;
     }
@@ -420,7 +418,7 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
     }
 
     const unlistedTabPane: JSX.Element = (() => {
-        if (config.web.firebase.storage.enableUnlisted) {
+        if (config.isUnlistedFirebaseStorageEnabled) {
             return (
                 <Tabs.TabPane tab='unlisted' key='storage1'>
                     <div>
@@ -443,7 +441,7 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
     })();
 
     const publicTabPane: JSX.Element = (() => {
-        if (config.web.firebase.storage.enablePublic) {
+        if (config.isPublicFirebaseStorageEnabled) {
             return (
                 <Tabs.TabPane tab='public' key='storage2'>
                     <div>

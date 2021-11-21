@@ -1,7 +1,7 @@
 import React from 'react';
-import { ConfigContext } from '../contexts/ConfigContext';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
 import { useReadonlyRef } from '../hooks/useReadonlyRef';
+import { useWebConfig } from '../hooks/useWebConfig';
 import { fileName } from '../utils/filename';
 import { getStorageForce } from '../utils/firebaseHelpers';
 
@@ -16,7 +16,7 @@ export const FirebaseStorageLink: React.FC<Props> = ({ reference }: Props) => {
     const [fullPath, setFullPath] = React.useState<string>(
         typeof reference === 'string' ? '' : reference.fullPath
     );
-    const config = React.useContext(ConfigContext);
+    const config = useWebConfig();
 
     React.useEffect(() => {
         let unsubscribed = false;

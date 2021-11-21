@@ -1,6 +1,5 @@
 import React from 'react';
 import firebase from 'firebase/app';
-import { Ref } from '../utils/ref';
 
 export const loading = 'loading';
 export const notSignIn = 'notSignIn';

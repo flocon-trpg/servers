@@ -19,6 +19,7 @@ export { isTruthyString } from './internal/isTruthyString';
 export { keyNames } from './internal/keyNames';
 export { groupJoinMap } from './internal/groupJoinMap';
 export { groupJoinSet } from './internal/groupJoinSet';
+export { parseEnvListValue } from './internal/parseEnvListValue';
 export { SemVer, alpha, beta, rc, Operator, SemverOption } from './internal/semver';
 export {
     CompositeKey,

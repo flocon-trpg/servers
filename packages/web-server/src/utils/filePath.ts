@@ -1,10 +1,9 @@
 import { FilePathFragment, FileSourceType } from '@flocon-trpg/typed-document-node';
 import * as Core from '@flocon-trpg/core';
 import { getStorageForce } from './firebaseHelpers';
-import { Config } from '../config';
 import { ExpiryMap } from './expiryMap';
 import { files, getFloconUploaderFile } from './getFloconUploaderFile';
-import { boolean } from 'fp-ts';
+import { WebConfig } from '../configType';
 
 export type FilePath = {
     path: string;
@@ -90,7 +89,7 @@ export namespace FilePath {
 
     export const getSrc = async (
         path: FilePath | Omit<Core.FilePath, '$v' | '$r'>,
-        config: Config,
+        config: WebConfig,
         idToken: string,
         cache: ExpiryMap<string, string> | null
     ): Promise<SrcResult> => {

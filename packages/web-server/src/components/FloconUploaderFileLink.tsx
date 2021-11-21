@@ -1,9 +1,9 @@
 import React from 'react';
-import { ConfigContext } from '../contexts/ConfigContext';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { FileItemFragment } from '@flocon-trpg/typed-document-node';
 import { files, getFloconUploaderFile } from '../utils/getFloconUploaderFile';
 import fileDownload from 'js-file-download';
+import { useWebConfig } from '../hooks/useWebConfig';
 
 type Props = {
     state: FileItemFragment;
@@ -11,7 +11,7 @@ type Props = {
 
 export const FloconUploaderFileLink: React.FC<Props> = ({ state }: Props) => {
     const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);
-    const config = React.useContext(ConfigContext);
+    const config = useWebConfig();
     const [isDownloading, setIsDownloading] = React.useState(false);
 
     if (isDownloading) {

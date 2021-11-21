@@ -359,7 +359,7 @@ export const startApp = async (rootNode: RootNode) => {
             case ja:
                 console.info(
                     chalk.yellow(
-                        '指定されたファイルはすでに存在します。保存すると、ファイル内の一部のテキスト (コメントなど) は削除されることがあります。'
+                        '指定されたファイルはすでに存在します。保存すると、ファイル内の一部のテキスト (コメントなど) が削除されることがあります。'
                     )
                 );
                 break;
