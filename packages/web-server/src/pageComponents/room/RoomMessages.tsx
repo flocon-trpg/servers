@@ -462,7 +462,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
 
     let updatedInfo: JSX.Element | null = null;
     if (roomMessage?.updatedAt != null) {
-        if (isDeleted(roomMessage) == null) {
+        if (isDeleted(roomMessage)) {
             updatedInfo = (
                 <Tooltip
                     title={`${moment(new Date(roomMessage.updatedAt)).format(
@@ -883,7 +883,7 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                                                   <Menu.Item
                                                       icon={<Icon.DeleteOutlined />}
                                                       onClick={() => {
-                                                          Modal.warning({
+                                                          Modal.warn({
                                                               onOk: () => {
                                                                   setRoomConfig(roomConfig => {
                                                                       if (roomConfig == null) {
@@ -901,6 +901,9 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                                                                           undefined;
                                                                   });
                                                               },
+                                                              okCancel: true,
+                                                              maskClosable: true,
+                                                              closable: true,
                                                               content:
                                                                   'タブを削除します。よろしいですか？',
                                                           });

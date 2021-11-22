@@ -1,6 +1,6 @@
 {
     "name": "@flocon-trpg/web-server",
-    "version": "0.5.4-beta.1",
+    "version": "0.5.5-beta.1",
     "description": "Flocon Web server",
     "dependencies": {
         "@apollo/client": "^3.4.15",
@@ -68,7 +68,7 @@
     "devDependencies": {
         "@testing-library/react": "12.1.2",
         "@testing-library/react-hooks": "7.0.2",
-        "@types/jest": "27.0.2",
+        "@types/jest": "27.0.3",
         "jest": "27.3.1",
         "monaco-editor": "0.26.1",
         "ts-jest": "27.0.7"

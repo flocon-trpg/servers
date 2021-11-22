@@ -1,6 +1,5 @@
 import {
     Entity,
-    Enum,
     IdentifiedReference,
     ManyToOne,
     PrimaryKey,

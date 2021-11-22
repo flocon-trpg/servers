@@ -1,17 +1,29 @@
 import { Modal } from 'antd';
 import { useUpdateAtom } from 'jotai/utils';
+import React from 'react';
 import { Reference } from '../atoms/firebaseStorage/fileState';
 import { reloadPublicFilesKeyAtom } from '../atoms/firebaseStorage/reloadPublicFilesKeyAtom';
 import { reloadUnlistedFilesKeyAtom } from '../atoms/firebaseStorage/reloadUnlistedFilesKeyAtom';
 import { $public, StorageType, unlisted } from '../utils/firebaseStorage';
 
+export const useDeleteFirebaseStorageFileModalActions = () => {
+    const setReloadUnlistedFilesKey = useUpdateAtom(reloadUnlistedFilesKeyAtom);
+    const setReloadPublicFilesKey = useUpdateAtom(reloadPublicFilesKeyAtom);
+    return React.useMemo(
+        () => ({
+            setReloadUnlistedFilesKey,
+            setReloadPublicFilesKey,
+        }),
+        [setReloadPublicFilesKey, setReloadUnlistedFilesKey]
+    );
+};
+
 export const DeleteFirebaseStorageFileModal = (
     storageType: StorageType,
     reference: Reference | Reference[],
+    actions: ReturnType<typeof useDeleteFirebaseStorageFileModalActions>
 ) => {
     const referenceArray = Array.isArray(reference) ? reference : [reference];
-    const setReloadUnlistedFilesKey = useUpdateAtom(reloadUnlistedFilesKeyAtom);
-    const setReloadPublicFilesKey = useUpdateAtom(reloadPublicFilesKeyAtom);
     const fileName =
         referenceArray.length === 1
             ? referenceArray[0]?.name
@@ -22,10 +34,10 @@ export const DeleteFirebaseStorageFileModal = (
         }
         switch (storageType) {
             case $public:
-                setReloadPublicFilesKey(i => i + 1)
+                actions.setReloadPublicFilesKey(i => i + 1);
                 break;
             case unlisted:
-                setReloadUnlistedFilesKey(i => i + 1)
+                actions.setReloadUnlistedFilesKey(i => i + 1);
                 break;
         }
     };

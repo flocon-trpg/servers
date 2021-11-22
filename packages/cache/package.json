@@ -20,7 +20,7 @@
     "description": "Core library for Flocon project(not released yet).",
     "devDependencies": {
         "@types/ioredis": "4.28.1",
-        "@types/jest": "27.0.2",
+        "@types/jest": "27.0.3",
         "jest": "27.3.1",
         "rimraf": "3.0.2",
         "ts-jest": "27.0.7",

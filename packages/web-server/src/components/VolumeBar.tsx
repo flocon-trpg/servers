@@ -10,6 +10,7 @@ type InputNumberType = '0-1' | '0-100';
 // eslint-disable-next-line @typescript-eslint/ban-types
 type Props = {
     value: number;
+    minValue?: number;
     onChange: (newValue: number) => void;
     readonly: boolean;
     inputNumberType: InputNumberType;
@@ -19,17 +20,19 @@ const textStyle: React.CSSProperties = { flex: '100px', margin: '0 4px', width: 
 
 export const VolumeBar: React.FC<Props> = ({
     value,
+    minValue,
     onChange,
     readonly,
     inputNumberType,
 }: Props) => {
+    // Math.roundがないと60.000000001のような中途半端な値が表示されることがある
     const roundedValue = Math.round(inputNumberType === '0-1' ? value * 100 : value);
     return (
         <div className={classNames(flex, flexRow, itemsCenter)}>
             <Slider
                 disabled={readonly}
                 style={{ flex: 1, minWidth: 50 }}
-                min={0}
+                min={minValue == null ? 0 : (inputNumberType === '0-1' ? (minValue * 100) : minValue)}
                 max={inputNumberType === '0-1' ? 100 : 1}
                 step={1}
                 onChange={(newValue: unknown) => {
@@ -46,7 +49,7 @@ export const VolumeBar: React.FC<Props> = ({
             ) : (
                 <InputNumber
                     size='small'
-                    min={0}
+                    min={minValue ?? 0}
                     max={100}
                     step={1}
                     style={textStyle}
@@ -62,3 +65,5 @@ export const VolumeBar: React.FC<Props> = ({
         </div>
     );
 };
+
+export const OpacityBar = VolumeBar;

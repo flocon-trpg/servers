@@ -5,7 +5,6 @@ import {
 import {
     Collection,
     Entity,
-    Enum,
     IdentifiedReference,
     JsonType,
     ManyToMany,

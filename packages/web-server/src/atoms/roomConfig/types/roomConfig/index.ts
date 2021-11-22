@@ -8,13 +8,14 @@ import {
     PanelsConfig,
     serializedPanelsConfig,
 } from '../panelsConfig';
-import { defaultMasterVolume, defaultSeVolume } from './resources';
+import { defaultMasterVolume, defaultPanelOpacity, defaultSeVolume } from './resources';
 
 export type RoomConfig = {
     roomId: string;
 
     messageNotificationFilter: MessageFilter;
     panels: PanelsConfig;
+    panelOpacity: number;
     masterVolume: number;
     channelVolumes: Record<string, number | undefined>;
     seVolume: number;
@@ -27,6 +28,7 @@ export const serializedRoomConfig = t.partial({
 
     messageNotificationFilter: serializedMessageFilter,
     panels: serializedPanelsConfig,
+    panelOpacity: t.number,
     masterVolume: t.number,
     channelVolumes: record(t.string, t.number),
     seVolume: t.number,
@@ -40,6 +42,7 @@ export const deserializeRoomConfig = (source: SerializedRoomConfig, roomId: stri
         panels:
             source.panels == null ? defaultPanelsConfig() : deserializePanelsConfig(source.panels),
         messageNotificationFilter: deserializeMessageFilter(source.messageNotificationFilter ?? {}),
+        panelOpacity: source.panelOpacity ?? defaultPanelOpacity,
         masterVolume: source.masterVolume ?? defaultMasterVolume,
         channelVolumes: source.channelVolumes ?? {},
         seVolume: source.seVolume ?? defaultSeVolume,
@@ -51,6 +54,7 @@ export const defaultRoomConfig = (roomId: string): RoomConfig => {
         roomId,
         panels: defaultPanelsConfig(),
         messageNotificationFilter: MessageFilterUtils.createAll(),
+        panelOpacity: defaultPanelOpacity,
         masterVolume: defaultMasterVolume,
         channelVolumes: {},
         seVolume: defaultSeVolume,
