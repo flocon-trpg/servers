@@ -1,3 +1,4 @@
+import { filterInt } from '@flocon-trpg/utils';
 import Redis from 'ioredis';
 import NodeCacheCore from 'node-cache';
 
@@ -6,15 +7,6 @@ type Value = string | number;
 
 const stringToNumber = (source: string) => {
     return parseFloat(source);
-};
-
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseInt#a_stricter_parse_function
-const filterInt = (value: string) => {
-    if (/^[-+]?\d+$/.test(value)) {
-        return Number(value);
-    } else {
-        return null;
-    }
 };
 
 type NodeCacheConfig = {

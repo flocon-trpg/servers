@@ -1,6 +1,5 @@
 import fileDownload from 'js-file-download';
 import React from 'react';
-import { ConfigContext } from '../contexts/ConfigContext';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
 import {
@@ -19,6 +18,7 @@ import { Button, Modal, Progress, Radio } from 'antd';
 import classNames from 'classnames';
 import { flex, flexColumn } from '../utils/className';
 import { useApolloClient } from '@apollo/client';
+import { useWebConfig } from '../hooks/useWebConfig';
 
 const simple = 'simple';
 const rich = 'rich';
@@ -35,7 +35,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
 
     const apolloClient = useApolloClient();
     const apolloClientRef = useReadonlyRef(apolloClient);
-    const config = React.useContext(ConfigContext);
+    const config = useWebConfig();
     const configRef = useReadonlyRef(config);
     const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
     const firebaseStorageUrlCacheContextRef = useReadonlyRef(firebaseStorageUrlCacheContext);

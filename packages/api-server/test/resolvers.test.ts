@@ -68,13 +68,14 @@ import { TextTwoWayOperation, TextUpOperation } from '@kizahasi/ot-string';
 import { OperationResult } from '@urql/core';
 import { maskTypeNames } from './maskTypenames';
 import { TestClients } from './testClients';
+import { isTruthyString } from '@flocon-trpg/utils';
 
 /*
 To run tests in this file, you need to prepare SQLite and PostgreSQL. If you want to skip them, set TEST_SKIP_RESOLVERS env to "true".
 */
 
 const TEST_SKIP_RESOLVERS = process.env.TEST_SKIP_RESOLVERS;
-const skipResolvers = TEST_SKIP_RESOLVERS?.toLowerCase() === 'true';
+const skipResolvers = isTruthyString(TEST_SKIP_RESOLVERS);
 
 const timeout = 20000;
 
@@ -469,9 +470,10 @@ describe.each([
 ] as const)('integration test', (dbType, entryPasswordConfig) => {
     if (skipResolvers) {
         console.info('SKIPS resolver tests because `TEST_SKIP_RESOLVERS` is true');
+        // これがないと、テストがないため失敗とみなされる
+        test('FAKE-TEST', () => undefined);
         return;
     }
-
     afterEach(async () => {
         // Userは各テストで使い回すため削除していない
 
@@ -549,7 +551,9 @@ describe.each([
             let thumbFilename: string | null | undefined;
             {
                 const filesResult = Assert.GetFilesQuery.toBeSuccess(
-                    await GraphQL.getFilesQuery(clientToUploadFiles, { input: { fileTagIds: [] } })
+                    await GraphQL.getFilesQuery(clientToUploadFiles, {
+                        input: { fileTagIds: [] },
+                    })
                 );
                 console.log('GetFilesQuery result: %o', filesResult);
                 expect(filesResult).toHaveLength(1);

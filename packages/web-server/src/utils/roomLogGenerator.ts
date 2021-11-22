@@ -14,12 +14,12 @@ import { Color } from './color';
 import { FilePath } from './filePath';
 import axios from 'axios';
 import JSZip from 'jszip';
-import { Config } from '../config';
 import { analyzeUrl } from './analyzeUrl';
 import { ExpiryMap } from './expiryMap';
 import { logCss } from './richLogResource/logCss';
 import { logHtml } from './richLogResource/logHtml';
 import { RoomMessageFilter } from '../components/ChannelsFilter';
+import { WebConfig } from '../configType';
 
 const privateMessage = 'privateMessage';
 const publicMessage = 'publicMessage';
@@ -314,7 +314,7 @@ class ImageDownloader {
     private readonly uploaderImages = new Map<string, ImageResult | null>();
 
     public constructor(
-        private readonly config: Config,
+        private readonly config: WebConfig,
         private readonly firebaseStorageUrlCache: ExpiryMap<string, string>
     ) {}
 
@@ -445,7 +445,7 @@ export const generateAsRichLog = async ({
     onProgressChange,
 }: {
     params: GenerateLogParams;
-    config: Config;
+    config: WebConfig;
     idToken: string;
     firebaseStorageUrlCache: ExpiryMap<string, string>;
     onProgressChange: (p: RichLogProgress) => void;

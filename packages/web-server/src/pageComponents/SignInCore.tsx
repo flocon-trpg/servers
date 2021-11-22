@@ -6,34 +6,34 @@ import React from 'react';
 import firebase from 'firebase/app';
 import * as firebaseui from 'firebaseui';
 import { getAuth } from '../utils/firebaseHelpers';
-import { ConfigContext } from '../contexts/ConfigContext';
-import { Config } from '../config';
+import { email, facebook, github, google, phone, twitter } from '../env';
+import { useWebConfig } from '../hooks/useWebConfig';
 
-const toSignInOptions = (provider: Config['web']['firebase']['auth']['provider']) => {
+const toSignInOptions = (providers: string[]) => {
     const signInOptions: firebaseui.auth.Config['signInOptions'] = [];
-    if (provider.email === true) {
+    if (providers.includes(email)) {
         signInOptions.push(firebase.auth.EmailAuthProvider.PROVIDER_ID);
     }
-    if (provider.facebook === true) {
+    if (providers.includes(facebook)) {
         signInOptions.push(firebase.auth.FacebookAuthProvider.PROVIDER_ID);
     }
-    if (provider.github === true) {
+    if (providers.includes(github)) {
         signInOptions.push(firebase.auth.GithubAuthProvider.PROVIDER_ID);
     }
-    if (provider.google === true) {
+    if (providers.includes(google)) {
         signInOptions.push(firebase.auth.GoogleAuthProvider.PROVIDER_ID);
     }
-    if (provider.phone === true) {
+    if (providers.includes(phone)) {
         signInOptions.push(firebase.auth.PhoneAuthProvider.PROVIDER_ID);
     }
-    if (provider.twitter === true) {
+    if (providers.includes(twitter)) {
         signInOptions.push(firebase.auth.TwitterAuthProvider.PROVIDER_ID);
     }
     return signInOptions;
 };
 
 const SignInCore: React.FC = () => {
-    const config = React.useContext(ConfigContext);
+    const config = useWebConfig();
     const auth = getAuth(config);
     const [altMessage, setAltMessage] = React.useState<string | null>('loading...');
     const authContainerRef = React.useRef<HTMLDivElement | null>(null);
@@ -43,7 +43,7 @@ const SignInCore: React.FC = () => {
             return;
         }
 
-        const signInOptions = toSignInOptions(config.web.firebase.auth.provider);
+        const signInOptions = toSignInOptions(config.authProviders);
         if (signInOptions.length === 0) {
             setAltMessage(
                 'エラー: config 内の firebase.auth.provider でログインプロバイダが1つも指定されていないため、ログインできません。この問題を解決するには、サーバー管理者に問い合わせてください。'
@@ -78,7 +78,7 @@ const SignInCore: React.FC = () => {
         };
         const authUI = firebaseui.auth.AuthUI.getInstance() ?? new firebaseui.auth.AuthUI(auth);
         authUI.start(authContainerRef.current, firebaseAuthConfig);
-    }, [auth, authContainerRef, config.web.firebase.auth.provider]);
+    }, [auth, authContainerRef, config.authProviders]);
 
     return (
         <div>

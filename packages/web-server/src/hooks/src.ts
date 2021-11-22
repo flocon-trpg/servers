@@ -1,11 +1,11 @@
 import { FilePath } from '@flocon-trpg/core';
 import React from 'react';
 import { useDeepCompareEffect } from 'react-use';
-import { ConfigContext } from '../contexts/ConfigContext';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
 import { FilePathFragment } from '@flocon-trpg/typed-document-node';
 import { FilePath as FilePathModule } from '../utils/filePath';
+import { useWebConfig } from './useWebConfig';
 
 export const done = 'done';
 export const success = 'success';
@@ -32,7 +32,7 @@ type SrcArrayResult =
 export function useSrcArrayFromGraphQL(
     pathArray: ReadonlyArray<FilePathFragment | FilePath> | null | undefined
 ): SrcArrayResult {
-    const config = React.useContext(ConfigContext);
+    const config = useWebConfig();
     const [result, setResult] = React.useState<SrcArrayResult>({ type: loading });
     const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
     const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);

@@ -1,0 +1,34 @@
+{
+    "version": "0.21.0-beta.1",
+    "license": "MIT",
+    "main": "dist/cjs/index.js",
+    "module": "dist/esm/index.js",
+    "typings": "dist/types/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "engines": {
+        "node": ">=14"
+    },
+    "scripts": {
+        "build": "rimraf ./dist && yarn dist",
+        "dist": "tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-types.json",
+        "test": "jest"
+    },
+    "name": "@flocon-trpg/cache",
+    "author": "kizahasi",
+    "description": "Core library for Flocon project(not released yet).",
+    "devDependencies": {
+        "@types/ioredis": "4.28.1",
+        "@types/jest": "27.0.2",
+        "jest": "27.3.1",
+        "rimraf": "3.0.2",
+        "ts-jest": "27.0.7",
+        "typescript": "4.5.2"
+    },
+    "dependencies": {
+        "@flocon-trpg/utils": "workspace:^",
+        "ioredis": "^4.28.0",
+        "node-cache": "^5.1.2"
+    }
+}

@@ -47,7 +47,7 @@ const authChecker =
             return true;
         }
 
-        const adminConfig = serverConfig.admin;
+        const adminConfig = serverConfig.admins;
         let adminUserUids: string[];
         if (typeof adminConfig === 'string') {
             adminUserUids = [adminConfig];

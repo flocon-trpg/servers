@@ -9,7 +9,8 @@ export const useMyBoards = (): ReadonlyMap<string, BoardState> | undefined => {
     const myUserUid = useMyUserUid();
     const boards = useAtomSelector(
         roomAtom,
-        state => state.roomState?.state?.participants?.[myUserUid ?? '']?.boards
+        state => state.roomState?.state?.participants?.[myUserUid ?? '']?.boards,
+        [myUserUid]
     );
     return React.useMemo(() => {
         if (boards == null) {

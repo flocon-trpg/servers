@@ -4,15 +4,15 @@ import { publicFilesAtom } from '../atoms/firebaseStorage/publicFilesAtom';
 import { unlistedFilesAtom } from '../atoms/firebaseStorage/unlistedFilesAtom';
 import { hideAllOverlayActionAtom } from '../atoms/overlay/hideAllOverlayActionAtom';
 import { roomAtom } from '../atoms/room/roomAtom';
-import { ConfigContext } from '../contexts/ConfigContext';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
 import { getAuth } from '../utils/firebaseHelpers';
 import { useReadonlyRef } from './useReadonlyRef';
+import { useWebConfig } from './useWebConfig';
 
 export function useSignOut() {
     const setRoom = useUpdateAtom(roomAtom);
     const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
-    const config = React.useContext(ConfigContext);
+    const config = useWebConfig();
     const auth = getAuth(config);
     const firebaseStorageUrlCacheContextRef = useReadonlyRef(firebaseStorageUrlCacheContext);
     const setPublicFiles = useUpdateAtom(publicFilesAtom);

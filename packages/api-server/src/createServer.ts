@@ -54,7 +54,7 @@ export const createServer = async ({
     port: string | number;
 }) => {
     let rateLimiter: RateLimiterAbstract | null = null;
-    if (serverConfig['-experimental-disableRateLimit'] !== true) {
+    if (!serverConfig.disableRateLimitExperimental) {
         rateLimiter = new RateLimiterMemory({
             // TODO: 値をちゃんと決める
             duration: 60,
@@ -110,18 +110,17 @@ export const createServer = async ({
         });
     }
 
-    if (serverConfig.uploader != null) {
+    const directory = serverConfig.uploader.directory;
+    if (directory != null) {
         AppConsole.log({
             en: `The uploader of API server is enabled.`,
             ja: `APIサーバーのアップローダーは有効化されています。`,
         });
 
-        const uploaderConfig = serverConfig.uploader;
-
-        await ensureDir(path.resolve(uploaderConfig.directory));
+        await ensureDir(path.resolve(directory));
         const storage = multer.diskStorage({
             destination: function (req, file, cb) {
-                cb(null, path.resolve(uploaderConfig.directory));
+                cb(null, path.resolve(directory));
             },
             filename: function (req, file, cb) {
                 cb(null, easyFlake() + path.extname(file.originalname));
@@ -163,16 +162,22 @@ export const createServer = async ({
                 const upload = multer({
                     storage,
                     limits: {
-                        fileSize: uploaderConfig.maxFileSize,
+                        fileSize: serverConfig.uploader.maxFileSize,
                     },
                     fileFilter: (req, file, cb) => {
-                        if (uploaderConfig.countQuota <= filesCount) {
+                        if (
+                            serverConfig.uploader.countQuota != null &&
+                            serverConfig.uploader.countQuota <= filesCount
+                        ) {
                             cb(null, false);
                             res.status(400).send('File count quota exceeded');
                             return;
                         }
                         const totalSize = files.reduce((seed, elem) => seed + elem.size, 0);
-                        if (uploaderConfig.sizeQuota <= totalSize) {
+                        if (
+                            serverConfig.uploader.sizeQuota != null &&
+                            serverConfig.uploader.sizeQuota <= totalSize
+                        ) {
                             cb(null, false);
                             res.status(400).send('File size quota exceeded');
                             return;
@@ -258,7 +263,7 @@ export const createServer = async ({
                 return;
         }
 
-        if (serverConfig.uploader == null) {
+        if (directory == null) {
             res.status(403).send('Flocon uploader is disabled by server config');
             return;
         }
@@ -291,18 +296,14 @@ export const createServer = async ({
                 res.sendStatus(404);
                 return;
             }
-            filepath = path.join(path.resolve(serverConfig.uploader.directory), filename);
+            filepath = path.join(path.resolve(directory), filename);
         } else {
             const fileCount = await forkedEm.count(File, { thumbFilename: filename });
             if (fileCount === 0) {
                 res.sendStatus(404);
                 return;
             }
-            filepath = path.join(
-                path.resolve(serverConfig.uploader.directory),
-                'thumbs',
-                sanitize(filename)
-            );
+            filepath = path.join(path.resolve(directory), 'thumbs', sanitize(filename));
         }
 
         // SVGを直接開くことによるXSSを防いでいる https://qiita.com/itizawa/items/e98ecd67910492d5c2af ただし、現状では必要ないかもしれない

@@ -28,7 +28,7 @@ import { toTypeName } from './scriptValue/toTypeName';
 import { toJObject } from './utils/toJObject';
 import { FObjectBase } from './scriptValue/types';
 import { FPattern } from './fPattern';
-import { toBeNever } from './toBeNever';
+import { toBeNever } from '@flocon-trpg/utils';
 import { getRestValues } from './getRestValues';
 
 function ofFLiteral(literal: FLiteral): FBoolean | FNumber | FString | null {

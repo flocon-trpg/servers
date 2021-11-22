@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
     main:
-        name: Tests on Node ${{ matrix.node }} and ${{ matrix.os }}
+        name: Tests and exec Next.js export on Node ${{ matrix.node }} and ${{ matrix.os }}
 
         runs-on: ${{ matrix.os }}
         strategy:
@@ -39,13 +39,13 @@ jobs:
                   NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG: ${{ secrets.NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG }}
                   NEXT_PUBLIC_FLOCON_WEB_CONFIG: ${{ secrets.NEXT_PUBLIC_FLOCON_WEB_CONFIG }}
 
-    test-core-redis:
-        name: Test with Redis on Node ${{ matrix.node }} and ${{ matrix.os }}
+    test-cache-redis:
+        name: Tests cache with Redis on Node ${{ matrix.node }} and ${{ matrix.os }}
 
         runs-on: ubuntu-latest
         defaults:
             run:
-                working-directory: ./packages/core
+                working-directory: ./packages/cache
         strategy:
             matrix:
                 node: ['16.x']
@@ -75,7 +75,7 @@ jobs:
               run: yarn test --ci --coverage --maxWorkers=2
 
     test-api-server:
-        name: Type-check and test on ${{ matrix.container }}
+        name: Type-check and tests api-server on ${{ matrix.container }}
 
         strategy:
             matrix:
@@ -118,38 +118,26 @@ jobs:
             - name: Migration-up SQLite(1)
               run: yarn migration-up --db sqlite
               env:
-                  FLOCON_API_CONFIG: >
+                  FLOCON_API_SQLITE: >
                       {
-                          "database": {
-                              "sqlite": {
-                                  "dbName": "./test1.sqlite3"
-                              }
-                          }
+                          "dbName": "./test1.sqlite3"
                       }
 
             - name: Migration-up SQLite(2)
               run: yarn migration-up --db sqlite
               env:
-                  FLOCON_API_CONFIG: >
+                  FLOCON_API_SQLITE: >
                       {
-                          "database": {
-                              "sqlite": {
-                                  "dbName": "./test2.sqlite3"
-                              }
-                          }
+                          "dbName": "./test2.sqlite3"
                       }
 
             - name: Migration-up PostgreSQL
               run: yarn migration-up --db postgresql
               env:
-                  FLOCON_API_CONFIG: >
+                  FLOCON_API_POSTGRESQL: >
                       {
-                          "database": {
-                              "postgresql": {
-                                  "dbName": "test",
-                                  "clientUrl": "postgresql://postgres:postgres@postgres:5432"
-                              }
-                          }
+                          "dbName": "test",
+                          "clientUrl": "postgresql://postgres:postgres@postgres:5432"
                       }
 
             # skips `yarn build` because it already has js files

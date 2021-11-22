@@ -14,9 +14,12 @@ export {
     groupJoin3DualKeyMap,
     groupJoin4DualKeyMap,
 } from './internal/dualKeyMap';
+export { filterInt } from './internal/filterInt';
+export { isTruthyString } from './internal/isTruthyString';
 export { keyNames } from './internal/keyNames';
 export { groupJoinMap } from './internal/groupJoinMap';
 export { groupJoinSet } from './internal/groupJoinSet';
+export { parseEnvListValue } from './internal/parseEnvListValue';
 export { SemVer, alpha, beta, rc, Operator, SemverOption } from './internal/semver';
 export {
     CompositeKey,
@@ -27,6 +30,7 @@ export {
     ReadonlyStateMap,
     createStateMap,
 } from './internal/stateMap';
+export { toBeNever } from './internal/toBeNever';
 export { left, right, both } from './internal/types';
 export {
     chooseDualKeyRecord,

@@ -12,7 +12,7 @@ import 'firebase/storage';
 import useConstant from 'use-constant';
 import { authNotFound, FirebaseUserState, loading, notSignIn } from '../contexts/MyAuthContext';
 import { appConsole } from '../utils/appConsole';
-import { getConfig, getHttpUri, getWsUri } from '../config';
+import { getHttpUri, getWsUri } from '../config';
 import { enableMapSet } from 'immer';
 import Head from 'next/head';
 import { loader } from '@monaco-editor/react';
@@ -21,23 +21,22 @@ import urljoin from 'url-join';
 import { createApolloClient } from '../utils/createApolloClient';
 import { getUserConfig, setUserConfig } from '../utils/localStorage/userConfig';
 import { getAuth } from '../utils/firebaseHelpers';
-import { ConfigContext } from '../contexts/ConfigContext';
 import { useMyUserUid } from '../hooks/useMyUserUid';
 import { AllContextProvider } from '../components/AllContextProvider';
 import { simpleId } from '@flocon-trpg/core';
 import { Ref } from '../utils/ref';
 import { userConfigAtom } from '../atoms/userConfig/userConfigAtom';
 import { roomNotificationsAtom, Notification } from '../atoms/room/roomAtom';
-import { useAsync,useDebounce } from 'react-use';
+import { useAsync, useDebounce } from 'react-use';
 import { roomConfigAtom } from '../atoms/roomConfig/roomConfigAtom';
 import { setRoomConfig } from '../utils/localStorage/roomConfig';
 import { UserConfig } from '../atoms/userConfig/types';
 import { RoomConfig } from '../atoms/roomConfig/types/roomConfig';
 import { useAtomValue, useUpdateAtom } from 'jotai/utils';
+import { webConfigAtom } from '../atoms/webConfig/webConfigAtom';
+import { useWebConfig } from '../hooks/useWebConfig';
 
 enableMapSet();
-
-const config = getConfig();
 
 // localForageを用いてRoomConfigを読み込み、ReduxのStateと紐付ける。
 // Userが変わるたびに、useUserConfigが更新される必要がある。_app.tsxなどどこか一箇所でuseUserConfigを呼び出すだけでよい。
@@ -71,9 +70,13 @@ const useAutoSaveUserConfig = () => {
 
     // throttleでは非常に重くなるため、debounceを使っている
     const [debouncedUserConfig, setDebouncedUserConfig] = React.useState<UserConfig | null>(null);
-    useDebounce(() => {
-        setDebouncedUserConfig(userConfig);
-    }, throttleTimespan, [userConfig]);
+    useDebounce(
+        () => {
+            setDebouncedUserConfig(userConfig);
+        },
+        throttleTimespan,
+        [userConfig]
+    );
 
     useAsync(async () => {
         if (debouncedUserConfig == null) {
@@ -93,9 +96,13 @@ const useAutoSaveRoomConfig = () => {
 
     // throttleでは非常に重くなるため、debounceを使っている
     const [debouncedUserConfig, setDebouncedUserConfig] = React.useState<RoomConfig | null>(null);
-    useDebounce(() => {
-        setDebouncedUserConfig(roomConfig);
-    }, throttleTimespan, [roomConfig]);
+    useDebounce(
+        () => {
+            setDebouncedUserConfig(roomConfig);
+        },
+        throttleTimespan,
+        [roomConfig]
+    );
 
     useAsync(async () => {
         if (debouncedUserConfig == null) {
@@ -110,7 +117,7 @@ const useAutoSaveRoomConfig = () => {
 
 // _app.tsxで1回のみ呼ばれることを想定。firebase authのデータを取得したい場合はContextで行う。
 const useFirebaseUser = (): FirebaseUserState => {
-    const config = React.useContext(ConfigContext);
+    const config = useAtomValue(webConfigAtom);
     const auth = getAuth(config);
     const [user, setUser] = React.useState<FirebaseUserState>(loading);
     React.useEffect(() => {
@@ -130,14 +137,27 @@ const useFirebaseUser = (): FirebaseUserState => {
 };
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
+    const config = useWebConfig();
     const setRoomNotification = useUpdateAtom(roomNotificationsAtom);
 
-    const httpUri = urljoin(getHttpUri(config), 'graphql');
-    const wsUri = urljoin(getWsUri(config), 'graphql');
+    const [httpUri, setHttpUri] = React.useState<string>();
+    const [wsUri, setWsUri] = React.useState<string>();
     React.useEffect(() => {
+        setHttpUri(urljoin(getHttpUri(config), 'graphql'));
+    }, [config]);
+    React.useEffect(() => {
+        setWsUri(urljoin(getWsUri(config), 'graphql'));
+    }, [config]);
+    React.useEffect(() => {
+        if (httpUri == null) {
+            return;
+        }
         appConsole.log(`GraphQL HTTP URL: ${httpUri}`);
     }, [httpUri]);
     React.useEffect(() => {
+        if (wsUri == null) {
+            return;
+        }
         appConsole.log(`GraphQL WebSocket URL: ${wsUri}`);
     }, [wsUri]);
 
@@ -174,6 +194,9 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         value: getIdToken,
     });
     React.useEffect(() => {
+        if (httpUri == null || wsUri == null) {
+            return;
+        }
         setApolloClient(createApolloClient(httpUri, wsUri, getIdToken));
         setGetIdTokenState({ value: getIdToken });
     }, [httpUri, wsUri, getIdToken]);

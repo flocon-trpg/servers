@@ -412,7 +412,7 @@ export const Room: React.FC = () => {
         <AntdLayout>
             <AntdLayout.Content>
                 <RoomMenu />
-                <div>
+                <div style={{ position: 'relative' }}>
                     {activeBoardPanelConfig.isMinimized ? null : (
                         <DraggableCard
                             header='ボードビュアー'
@@ -482,10 +482,7 @@ export const Room: React.FC = () => {
                                     if (roomConfig == null) {
                                         return;
                                     }
-                                    RoomConfigUtils.movePanel(
-                                        roomConfig.panels.characterPanel,
-                                        e
-                                    );
+                                    RoomConfigUtils.movePanel(roomConfig.panels.characterPanel, e);
                                 })
                             }
                             onResizeStop={(dir, delta) =>
@@ -540,10 +537,7 @@ export const Room: React.FC = () => {
                                     if (roomConfig == null) {
                                         return;
                                     }
-                                    RoomConfigUtils.movePanel(
-                                        roomConfig.panels.gameEffectPanel,
-                                        e
-                                    );
+                                    RoomConfigUtils.movePanel(roomConfig.panels.gameEffectPanel, e);
                                 })
                             }
                             onResizeStop={(dir, delta) =>
@@ -655,10 +649,7 @@ export const Room: React.FC = () => {
                                     if (roomConfig == null) {
                                         return;
                                     }
-                                    RoomConfigUtils.movePanel(
-                                        roomConfig.panels.pieceValuePanel,
-                                        e
-                                    );
+                                    RoomConfigUtils.movePanel(roomConfig.panels.pieceValuePanel, e);
                                 })
                             }
                             onResizeStop={(dir, delta) =>

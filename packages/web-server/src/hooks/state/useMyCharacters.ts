@@ -9,7 +9,8 @@ export const useMyCharacters = (): ReadonlyMap<string, CharacterState> | undefin
     const myUserUid = useMyUserUid();
     const characters = useAtomSelector(
         roomAtom,
-        state => state.roomState?.state?.participants?.[myUserUid ?? '']?.characters
+        state => state.roomState?.state?.participants?.[myUserUid ?? '']?.characters,
+        [myUserUid]
     );
     return React.useMemo(() => {
         if (characters == null) {
