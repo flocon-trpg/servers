@@ -8,7 +8,6 @@ export const firebaseConfig = t.type({
     storageBucket: t.string,
     messagingSenderId: t.string,
     appId: t.string,
-    measurementId: t.string,
 });
 
 export type FirebaseConfig = t.TypeOf<typeof firebaseConfig>;
