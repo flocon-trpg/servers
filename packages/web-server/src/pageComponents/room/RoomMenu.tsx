@@ -24,7 +24,7 @@ import { useMe } from '../../hooks/useMe';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useSignOut } from '../../hooks/useSignOut';
 import classNames from 'classnames';
-import { flex, flexRow, itemsCenter } from '../../utils/className';
+import { flex, flexRow, itemsCenter, justifyItemsCenter } from '../../utils/className';
 import { MyAuthContext } from '../../contexts/MyAuthContext';
 import { GenerateLogModal } from '../../components/GenerateLogModal';
 import { useLazyQuery, useMutation } from '@apollo/client';
@@ -38,6 +38,24 @@ import { defaultMemoPanelConfig } from '../../atoms/roomConfig/types/memoPanelCo
 import { useUpdateAtom } from 'jotai/utils';
 import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
 import { editRoomDrawerVisibilityAtom } from '../../atoms/overlay/editRoomDrawerVisibilityAtom';
+import { OpacityBar } from '../../components/VolumeBar';
+import { atom, useAtom } from 'jotai';
+import produce from 'immer';
+import { defaultPanelOpacity, minPanelOpacity } from '../../atoms/roomConfig/types/roomConfig/resources';
+
+const panelOpacityAtom = atom(
+    get => get(roomConfigAtom)?.panelOpacity,
+    (get, set, newValue: number) => {
+        set(roomConfigAtom, roomConfig => {
+            if (roomConfig == null) {
+                return roomConfig;
+            }
+            return produce(roomConfig, roomConfig => {
+                roomConfig.panelOpacity = newValue;
+            });
+        });
+    }
+);
 
 type BecomePlayerModalProps = {
     roomId: string;
@@ -244,7 +262,7 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
                                 text = 'この部屋の作成者でないため、削除できません。';
                                 break;
                             case DeleteRoomFailureType.NotFound:
-                                text = '部屋が見つかりませんでした。'
+                                text = '部屋が見つかりませんでした。';
                                 break;
                             default:
                                 text = undefined;
@@ -337,7 +355,7 @@ const ResetMessagesModal: React.FC<ResetMessagesModalProps> = ({
                                 text = 'この部屋の参加者でないため、削除できません。';
                                 break;
                             case ResetRoomMessagesFailureType.RoomNotFound:
-                                text = '部屋が存在しません。'
+                                text = '部屋が存在しません。';
                                 break;
                             default:
                                 text = undefined;
@@ -366,9 +384,7 @@ const ResetMessagesModal: React.FC<ResetMessagesModalProps> = ({
                     <p>
                         この部屋のログを全て削除します。この部屋の参加者でない限り、部屋を削除することはできません。
                     </p>
-                    <p style={{ fontWeight: 'bold' }}>
-                        ログを削除すると元に戻すことはできません。
-                    </p>
+                    <p style={{ fontWeight: 'bold' }}>ログを削除すると元に戻すことはできません。</p>
                     <p>本当によろしいですか？</p>
                 </div>
             ) : (
@@ -477,6 +493,9 @@ export const RoomMenu: React.FC = () => {
     const memoPanels = useAtomSelector(roomConfigAtom, state => state?.panels.memoPanels);
     const messagePanels = useAtomSelector(roomConfigAtom, state => state?.panels.messagePanels);
     const pieceValuePanel = useAtomSelector(roomConfigAtom, state => state?.panels.pieceValuePanel);
+
+    const [panelOpacity, setPanelOpacity] = useAtom(panelOpacityAtom);
+
     const [leaveRoomMutation] = useMutation(LeaveRoomDocument);
     const [isBecomePlayerModalVisible, setIsBecomePlayerModalVisible] = React.useState(false);
     const [isChangeMyParticipantNameModalVisible, setIsChangeMyParticipantNameModalVisible] =
@@ -513,13 +532,7 @@ export const RoomMenu: React.FC = () => {
                     <img src='/logo.png' width={24} height={24} />
                 </Menu.Item>
                 <Menu.SubMenu title='部屋'>
-                    <Menu.Item
-                        onClick={() =>
-                            setEditRoomDrawerVisibility(true)
-                        }
-                    >
-                        編集
-                    </Menu.Item>
+                    <Menu.Item onClick={() => setEditRoomDrawerVisibility(true)}>編集</Menu.Item>
                     <Menu.Item onClick={() => setIsDeleteRoomModalVisible(true)}>
                         <span style={{ color: 'red' }}>削除</span>
                     </Menu.Item>
@@ -924,6 +937,17 @@ export const RoomMenu: React.FC = () => {
                             <span>入室者</span>
                         </div>
                     </Menu.Item>
+                    <Menu.Divider />
+                    <div className={classNames(flex, flexRow, itemsCenter)} style={{padding: '0 4px'}}>
+                        <div>透過度</div>
+                        <OpacityBar
+                            value={panelOpacity ?? defaultPanelOpacity}
+                            minValue={minPanelOpacity}
+                            onChange={setPanelOpacity}
+                            inputNumberType='0-1'
+                            readonly={false}
+                        />
+                    </div>
                 </Menu.SubMenu>
                 <Menu.Item>
                     <Popover trigger='click' content={<VolumeBarPanel roomId={roomId} />}>

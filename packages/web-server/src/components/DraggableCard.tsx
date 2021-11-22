@@ -4,6 +4,9 @@ import { CloseOutlined } from '@ant-design/icons';
 import { cancelRnd } from '../utils/className';
 import { Rnd, Props as RndProps } from './Rnd';
 import { ControlPosition } from 'react-draggable';
+import { useAtomSelector } from '../atoms/useAtomSelector';
+import { roomConfigAtom } from '../atoms/roomConfig/roomConfigAtom';
+import { defaultPanelOpacity, minPanelOpacity } from '../atoms/roomConfig/types/roomConfig/resources';
 
 // 上からheader、topElement、children、bottomElementの順で描画される。children以外はheightが固定されている。
 // それぞれの要素は、styleにheightやpaddingなどが自動的に設定されたdivに包まれる。このdivのstyleは、自動的に設定されていない値であれば、*ContainerStyleというプロパティに渡すことで好きな値をセットすることができる。
@@ -51,6 +54,12 @@ export const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) 
         props.topElement == null
             ? 0
             : props.topElementContainerHeight ?? defaultTopElementContainerHeight;
+            
+    const rawPanelOpacity =
+        useAtomSelector(roomConfigAtom, state => state?.panelOpacity) ?? defaultPanelOpacity;
+    let panelOpacity = rawPanelOpacity;
+    panelOpacity = Math.max(minPanelOpacity, panelOpacity);
+    panelOpacity = Math.min(1, panelOpacity);
 
     return (
         <Rnd
@@ -77,6 +86,7 @@ export const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) 
                     backgroundColor,
                     height: '100%', // heightとwidthを設定することで、childrenの（親要素の）大きさがDraggableCardの大きさに連動するようになる
                     width: '100%',
+                    opacity: panelOpacity,
                 }}
             >
                 <div

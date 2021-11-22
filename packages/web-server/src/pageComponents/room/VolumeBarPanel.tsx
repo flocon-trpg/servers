@@ -69,7 +69,6 @@ export const VolumeBarPanel: React.FC<Props> = ({ roomId }: Props) => {
         </div>
     );
 
-    // Math.roundがないと60.000000001のような中途半端な値が表示されることがある
     const masterVolumeBar = (
         <VolumeBar
             inputNumberType='0-1'
