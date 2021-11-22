@@ -883,7 +883,7 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                                                   <Menu.Item
                                                       icon={<Icon.DeleteOutlined />}
                                                       onClick={() => {
-                                                          Modal.warning({
+                                                          Modal.warn({
                                                               onOk: () => {
                                                                   setRoomConfig(roomConfig => {
                                                                       if (roomConfig == null) {
@@ -901,6 +901,9 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                                                                           undefined;
                                                                   });
                                                               },
+                                                              okCancel: true,
+                                                              maskClosable: true,
+                                                              closable: true,
                                                               content:
                                                                   'タブを削除します。よろしいですか？',
                                                           });
