@@ -12,7 +12,7 @@ import { FilterValue } from 'antd/lib/table/interface';
 import moment from 'moment';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { $public, StorageType, unlisted } from '../../utils/firebaseStorage';
-import { DeleteFirebaseStorageFileModal } from '../DeleteFirebaseStorageFileModal';
+import { DeleteFirebaseStorageFileModal, useDeleteFirebaseStorageFileModalActions } from '../DeleteFirebaseStorageFileModal';
 import { accept } from './helper';
 import { FileType, guessFileType, image, others, sound } from '../../utils/fileType';
 import { FileState, Reference } from '../../atoms/firebaseStorage/fileState';
@@ -201,6 +201,8 @@ const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({
     reference,
     storageType,
 }: FileOptionsMenuProps) => {
+    const modalActions = useDeleteFirebaseStorageFileModalActions();
+
     return (
         <div>
             <Menu>
@@ -219,7 +221,7 @@ const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({
                 </Menu.Item>
                 <Menu.Item
                     icon={<Icons.DeleteOutlined />}
-                    onClick={() => DeleteFirebaseStorageFileModal(storageType, reference)}
+                    onClick={() => DeleteFirebaseStorageFileModal(storageType, reference, modalActions)}
                 >
                     削除
                 </Menu.Item>
@@ -258,6 +260,7 @@ const FirebaseFilesList: React.FC<FirebaseFilesListProps> = ({
     const unlistedFiles = useAtomValue(unlistedFilesAtom);
     const publicFiles = useAtomValue(publicFilesAtom);
     const [selectedRowKeys, setSelectedRowKeys] = React.useState<React.Key[]>([]);
+    const deleteFirebaseStorageFileModalActions = useDeleteFirebaseStorageFileModalActions();
 
     const columns = (() => {
         if (onFlieOpen != null) {
@@ -299,7 +302,8 @@ const FirebaseFilesList: React.FC<FirebaseFilesListProps> = ({
                     }
                     DeleteFirebaseStorageFileModal(
                         storageType,
-                        selectedFiles.map(s => s.reference)
+                        selectedFiles.map(s => s.reference),
+                        deleteFirebaseStorageFileModalActions
                     );
                 }}
             >
