@@ -140,12 +140,24 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     const config = useWebConfig();
     const setRoomNotification = useUpdateAtom(roomNotificationsAtom);
 
-    const httpUri = urljoin(getHttpUri(config), 'graphql');
-    const wsUri = urljoin(getWsUri(config), 'graphql');
+    const [httpUri, setHttpUri] = React.useState<string>();
+    const [wsUri, setWsUri] = React.useState<string>();
     React.useEffect(() => {
+        setHttpUri(urljoin(getHttpUri(config), 'graphql'));
+    }, [config]);
+    React.useEffect(() => {
+        setWsUri(urljoin(getWsUri(config), 'graphql'));
+    }, [config]);
+    React.useEffect(() => {
+        if (httpUri == null) {
+            return;
+        }
         appConsole.log(`GraphQL HTTP URL: ${httpUri}`);
     }, [httpUri]);
     React.useEffect(() => {
+        if (wsUri == null) {
+            return;
+        }
         appConsole.log(`GraphQL WebSocket URL: ${wsUri}`);
     }, [wsUri]);
 
@@ -182,6 +194,9 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         value: getIdToken,
     });
     React.useEffect(() => {
+        if (httpUri == null || wsUri == null) {
+            return;
+        }
         setApolloClient(createApolloClient(httpUri, wsUri, getIdToken));
         setGetIdTokenState({ value: getIdToken });
     }, [httpUri, wsUri, getIdToken]);
