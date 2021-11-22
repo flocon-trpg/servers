@@ -534,7 +534,7 @@ export const CharacterDrawer: React.FC = () => {
                     </>
                 )}
 
-                {character == null || drawerType?.type !== update ? null : (
+                {drawerType?.type !== update ? null : (
                     <>
                         <Typography.Title level={4}>複製</Typography.Title>
 

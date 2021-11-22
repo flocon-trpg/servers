@@ -2,12 +2,10 @@ import {
     Collection,
     Entity,
     IdentifiedReference,
-    Index,
     ManyToMany,
     ManyToOne,
     PrimaryKey,
     Property,
-    Unique,
 } from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { File } from '../file/mikro-orm';

@@ -1170,17 +1170,15 @@ namespace ContextMenuModule {
                                 },
                             }),
                     })}
-                    {board == null
-                        ? null
-                        : basicMenu({
-                              contextMenuState,
-                              onContextMenuClear,
-                              hooks,
-                              operate,
-                              characters,
-                              board,
-                              myUserUid,
-                          })}
+                    {basicMenu({
+                        contextMenuState,
+                        onContextMenuClear,
+                        hooks,
+                        operate,
+                        characters,
+                        board,
+                        myUserUid,
+                    })}
                 </Menu>
             </div>
         );

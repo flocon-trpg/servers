@@ -462,7 +462,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
 
     let updatedInfo: JSX.Element | null = null;
     if (roomMessage?.updatedAt != null) {
-        if (isDeleted(roomMessage) == null) {
+        if (isDeleted(roomMessage)) {
             updatedInfo = (
                 <Tooltip
                     title={`${moment(new Date(roomMessage.updatedAt)).format(

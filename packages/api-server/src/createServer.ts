@@ -63,7 +63,6 @@ export const createServer = async ({
     }
 
     const context = async (context: ExpressContext): Promise<ResolverContext> => {
-        context.req.socket.remoteAddress;
         return {
             decodedIdToken: await getDecodedIdTokenFromExpressRequest(context.req),
             rateLimiter,

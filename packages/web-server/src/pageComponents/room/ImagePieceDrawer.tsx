@@ -12,7 +12,6 @@ import {
     imagePieceValueDiff,
     toImagePieceValueUpOperation,
     simpleId,
-    PieceState,
 } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useImagePieceValues } from '../../hooks/state/useImagePieceValues';
@@ -22,12 +21,11 @@ import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';
 import { BufferedInput } from '../../components/BufferedInput';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
 import { FilePath } from '../../utils/filePath';
-import { dualKeyRecordForEach, keyNames } from '@flocon-trpg/utils';
+import { keyNames } from '@flocon-trpg/utils';
 import { useAtomValue } from 'jotai/utils';
 import { imagePieceDrawerAtom } from '../../atoms/overlay/imagePieceDrawerAtom';
 import { create, update } from '../../utils/constants';
 import { useAtom } from 'jotai';
-import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { useCloneImagePiece } from '../../hooks/state/useCloneImagePiece';
 
 const drawerBaseProps: Partial<DrawerProps> = {
