@@ -21,7 +21,7 @@
         "@kizahasi/option": "^1.0.0"
     },
     "devDependencies": {
-        "@types/jest": "27.0.2",
+        "@types/jest": "27.0.3",
         "jest": "27.3.1",
         "rimraf": "3.0.2",
         "ts-jest": "27.0.7",
