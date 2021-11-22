@@ -24,7 +24,7 @@ import { useMe } from '../../hooks/useMe';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useSignOut } from '../../hooks/useSignOut';
 import classNames from 'classnames';
-import { flex, flexRow, itemsCenter, justifyItemsCenter } from '../../utils/className';
+import { flex, flexRow, itemsCenter } from '../../utils/className';
 import { MyAuthContext } from '../../contexts/MyAuthContext';
 import { GenerateLogModal } from '../../components/GenerateLogModal';
 import { useLazyQuery, useMutation } from '@apollo/client';
