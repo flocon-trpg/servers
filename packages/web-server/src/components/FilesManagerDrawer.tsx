@@ -47,7 +47,7 @@ export const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Pro
                 <Tabs.TabPane
                     tab={
                         isUploaderDisabled ? (
-                            <Tooltip title='APIサーバーの設定で有効化されていないため、使用できません'>
+                            <Tooltip title='APIサーバーが稼働していないか、APIサーバーの設定で有効化されていないため、使用できません'>
                                 内蔵アップローダー
                             </Tooltip>
                         ) : (

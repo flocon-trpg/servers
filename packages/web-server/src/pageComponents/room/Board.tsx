@@ -495,7 +495,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             ({ value: element, pieceBoardKey, piece }) => {
                 const defaultImageFilePath: FilePath = {
                     // TODO: 適切な画像に変える
-                    path: '/logo.png',
+                    path: '/kari.png',
                     sourceType: FileSourceType.Default,
                 };
                 return (
