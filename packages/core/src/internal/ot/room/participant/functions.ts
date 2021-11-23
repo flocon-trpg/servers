@@ -3,143 +3,26 @@ import {
     ClientTransform,
     Compose,
     Diff,
-    RequestedBy,
     Restore,
-    admin,
     ServerTransform,
-    UpError,
-    TwoWayError,
-    ScalarError,
     DownError,
 } from '../../util/type';
 import * as ReplaceOperation from '../../util/replaceOperation';
 import { isIdRecord } from '../../util/record';
 import { Result } from '@kizahasi/result';
-import { chooseRecord, CompositeKey } from '@flocon-trpg/utils';
-import { mapRecordOperationElement } from '../../util/recordOperationElement';
-import * as RecordOperation from '../../util/recordOperation';
-import * as Board from './board/functions';
-import * as BoardTypes from './board/types';
-import * as Character from './character/functions';
-import * as CharacterTypes from './character/types';
-import * as ImagePieceValue from './imagePieceValue/functions';
-import * as ImagePieceValueTypes from './imagePieceValue/types';
-import { isBoardVisible } from '../../util/isBoardVisible';
 import { DownOperation, State, TwoWayOperation, UpOperation } from './types';
+import { admin, RequestedBy, isOwner } from '../../util/requestedBy';
 
-export const toClientState =
-    (requestedBy: RequestedBy, participantKey: string, activeBoardKey: CompositeKey | null) =>
-    (source: State): State => {
-        const isAuthorized = RequestedBy.isAuthorized({ requestedBy, userUid: participantKey });
-        return {
-            ...source,
-            boards: RecordOperation.toClientState<BoardTypes.State, BoardTypes.State>({
-                serverState: source.boards,
-                isPrivate: (state, key) => {
-                    return !isBoardVisible({
-                        requestedBy,
-                        boardKey: { createdBy: participantKey, id: key },
-                        activeBoardKey,
-                    });
-                },
-                toClientState: ({ state }) => Board.toClientState(state),
-            }),
-            characters: RecordOperation.toClientState<CharacterTypes.State, CharacterTypes.State>({
-                serverState: source.characters,
-                isPrivate: state =>
-                    !RequestedBy.isAuthorized({
-                        requestedBy,
-                        userUid: participantKey,
-                    }) && state.isPrivate,
-                toClientState: ({ state }) =>
-                    Character.toClientState(
-                        RequestedBy.isAuthorized({ requestedBy, userUid: participantKey }),
-                        requestedBy,
-                        activeBoardKey ?? null
-                    )(state),
-            }),
-            imagePieceValues: RecordOperation.toClientState<
-                ImagePieceValueTypes.State,
-                ImagePieceValueTypes.State
-            >({
-                serverState: source.imagePieceValues,
-                isPrivate: state => state.isPrivate && !isAuthorized,
-                toClientState: ({ state }) =>
-                    ImagePieceValue.toClientState(requestedBy, activeBoardKey)(state),
-            }),
-        };
-    };
+export const toClientState = (source: State): State => {
+    return source;
+};
 
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
-    return {
-        ...source,
-        boards:
-            source.boards == null
-                ? undefined
-                : chooseRecord(source.boards, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: Board.toDownOperation,
-                      })
-                  ),
-        characters:
-            source.characters == null
-                ? undefined
-                : chooseRecord(source.characters, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: Character.toDownOperation,
-                      })
-                  ),
-        imagePieceValues:
-            source.imagePieceValues == null
-                ? undefined
-                : chooseRecord(source.imagePieceValues, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: ImagePieceValue.toDownOperation,
-                      })
-                  ),
-    };
+    return source;
 };
 
 export const toUpOperation = (source: TwoWayOperation): UpOperation => {
-    return {
-        ...source,
-        boards:
-            source.boards == null
-                ? undefined
-                : chooseRecord(source.boards, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: Board.toUpOperation,
-                      })
-                  ),
-        characters:
-            source.characters == null
-                ? undefined
-                : chooseRecord(source.characters, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: Character.toUpOperation,
-                      })
-                  ),
-        imagePieceValues:
-            source.imagePieceValues == null
-                ? undefined
-                : chooseRecord(source.imagePieceValues, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: ImagePieceValue.toUpOperation,
-                      })
-                  ),
-    };
+    return source;
 };
 
 export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
@@ -150,56 +33,6 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     if (operation.role != null) {
         result.role = operation.role.newValue;
     }
-
-    const boards = RecordOperation.apply<BoardTypes.State, BoardTypes.UpOperation, ScalarError>({
-        prevState: state.boards,
-        operation: operation.boards,
-        innerApply: ({ prevState, operation: upOperation }) => {
-            return Board.apply({ state: prevState, operation: upOperation });
-        },
-    });
-    if (boards.isError) {
-        return boards;
-    }
-    result.boards = boards.value;
-
-    const characters = RecordOperation.apply<
-        CharacterTypes.State,
-        CharacterTypes.UpOperation | CharacterTypes.TwoWayOperation,
-        ScalarError
-    >({
-        prevState: state.characters,
-        operation: operation.characters,
-        innerApply: ({ prevState, operation: upOperation }) => {
-            return Character.apply({
-                state: prevState,
-                operation: upOperation,
-            });
-        },
-    });
-    if (characters.isError) {
-        return characters;
-    }
-    result.characters = characters.value;
-
-    const imagePieceValues = RecordOperation.apply<
-        ImagePieceValueTypes.State,
-        ImagePieceValueTypes.UpOperation | ImagePieceValueTypes.TwoWayOperation,
-        ScalarError
-    >({
-        prevState: state.imagePieceValues,
-        operation: operation.imagePieceValues,
-        innerApply: ({ prevState, operation: upOperation }) => {
-            return ImagePieceValue.apply({
-                state: prevState,
-                operation: upOperation,
-            });
-        },
-    });
-    if (imagePieceValues.isError) {
-        return imagePieceValues;
-    }
-    result.imagePieceValues = imagePieceValues.value;
 
     return Result.ok(result);
 };
@@ -213,106 +46,13 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
         result.role = operation.role.oldValue;
     }
 
-    const boards = RecordOperation.applyBack<
-        BoardTypes.State,
-        BoardTypes.DownOperation,
-        ScalarError
-    >({
-        nextState: state.boards,
-        operation: operation.boards,
-        innerApplyBack: ({ state, operation }) => {
-            return Board.applyBack({ state, operation });
-        },
-    });
-    if (boards.isError) {
-        return boards;
-    }
-    result.boards = boards.value;
-
-    const characters = RecordOperation.applyBack<
-        CharacterTypes.State,
-        CharacterTypes.DownOperation,
-        ScalarError
-    >({
-        nextState: state.characters,
-        operation: operation.characters,
-        innerApplyBack: ({ state, operation }) => {
-            return Character.applyBack({ state, operation });
-        },
-    });
-    if (characters.isError) {
-        return characters;
-    }
-    result.characters = characters.value;
-
-    const imagePieceValues = RecordOperation.applyBack<
-        ImagePieceValueTypes.State,
-        ImagePieceValueTypes.DownOperation,
-        ScalarError
-    >({
-        nextState: state.imagePieceValues,
-        operation: operation.imagePieceValues,
-        innerApplyBack: ({ state, operation }) => {
-            return ImagePieceValue.applyBack({
-                state,
-                operation,
-            });
-        },
-    });
-    if (imagePieceValues.isError) {
-        return imagePieceValues;
-    }
-    result.imagePieceValues = imagePieceValues.value;
-
     return Result.ok(result);
 };
 
 export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
-    const boards = RecordOperation.composeDownOperation<
-        BoardTypes.State,
-        BoardTypes.DownOperation,
-        DownError
-    >({
-        first: first.boards,
-        second: second.boards,
-        innerApplyBack: params => Board.applyBack(params),
-        innerCompose: params => Board.composeDownOperation(params),
-    });
-    if (boards.isError) {
-        return boards;
-    }
-
-    const characters = RecordOperation.composeDownOperation<
-        CharacterTypes.State,
-        CharacterTypes.DownOperation,
-        DownError
-    >({
-        first: first.characters,
-        second: second.characters,
-        innerApplyBack: params => Character.applyBack(params),
-        innerCompose: params => Character.composeDownOperation(params),
-    });
-    if (characters.isError) {
-        return characters;
-    }
-
-    const imagePieceValues = RecordOperation.composeDownOperation<
-        ImagePieceValueTypes.State,
-        ImagePieceValueTypes.DownOperation,
-        DownError
-    >({
-        first: first.imagePieceValues,
-        second: second.imagePieceValues,
-        innerApplyBack: params => ImagePieceValue.applyBack(params),
-        innerCompose: params => ImagePieceValue.composeDownOperation(params),
-    });
-    if (imagePieceValues.isError) {
-        return imagePieceValues;
-    }
-
     const valueProps: DownOperation = {
-        $v: 1,
-        $r: 2,
+        $v: 2,
+        $r: 1,
         name: ReplaceOperation.composeDownOperation(
             first.name ?? undefined,
             second.name ?? undefined
@@ -321,9 +61,6 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
             first.role ?? undefined,
             second.role ?? undefined
         ),
-        boards: boards.value,
-        characters: characters.value,
-        imagePieceValues: imagePieceValues.value,
     };
     return Result.ok(valueProps);
 };
@@ -336,63 +73,12 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         return Result.ok({ prevState: nextState, twoWayOperation: undefined });
     }
 
-    const boards = RecordOperation.restore<
-        BoardTypes.State,
-        BoardTypes.DownOperation,
-        BoardTypes.TwoWayOperation,
-        ScalarError
-    >({
-        nextState: nextState.boards,
-        downOperation: downOperation.boards,
-        innerDiff: params => Board.diff(params),
-        innerRestore: params => Board.restore(params),
-    });
-    if (boards.isError) {
-        return boards;
-    }
-
-    const characters = RecordOperation.restore<
-        CharacterTypes.State,
-        CharacterTypes.DownOperation,
-        CharacterTypes.TwoWayOperation,
-        ScalarError
-    >({
-        nextState: nextState.characters,
-        downOperation: downOperation.characters,
-        innerDiff: params => Character.diff(params),
-        innerRestore: params => Character.restore(params),
-    });
-    if (characters.isError) {
-        return characters;
-    }
-
-    const imagePieceValues = RecordOperation.restore<
-        ImagePieceValueTypes.State,
-        ImagePieceValueTypes.DownOperation,
-        ImagePieceValueTypes.TwoWayOperation,
-        ScalarError
-    >({
-        nextState: nextState.imagePieceValues,
-        downOperation: downOperation.imagePieceValues,
-        innerDiff: params => ImagePieceValue.diff(params),
-        innerRestore: params => ImagePieceValue.restore(params),
-    });
-    if (imagePieceValues.isError) {
-        return imagePieceValues;
-    }
-
     const prevState: State = {
         ...nextState,
-        boards: boards.value.prevState,
-        characters: characters.value.prevState,
-        imagePieceValues: imagePieceValues.value.prevState,
     };
     const twoWayOperation: TwoWayOperation = {
-        $v: 1,
-        $r: 2,
-        boards: boards.value.twoWayOperation,
-        characters: characters.value.twoWayOperation,
-        imagePieceValues: imagePieceValues.value.twoWayOperation,
+        $v: 2,
+        $r: 1,
     };
 
     if (downOperation.name != null) {
@@ -414,30 +100,9 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 };
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const boards = RecordOperation.diff<BoardTypes.State, BoardTypes.TwoWayOperation>({
-        prevState: prevState.boards,
-        nextState: nextState.boards,
-        innerDiff: params => Board.diff(params),
-    });
-    const characters = RecordOperation.diff<CharacterTypes.State, CharacterTypes.TwoWayOperation>({
-        prevState: prevState.characters,
-        nextState: nextState.characters,
-        innerDiff: params => Character.diff(params),
-    });
-    const imagePieceValues = RecordOperation.diff<
-        ImagePieceValueTypes.State,
-        ImagePieceValueTypes.TwoWayOperation
-    >({
-        prevState: prevState.imagePieceValues,
-        nextState: nextState.imagePieceValues,
-        innerDiff: params => ImagePieceValue.diff(params),
-    });
     const result: TwoWayOperation = {
-        $v: 1,
-        $r: 2,
-        boards,
-        characters,
-        imagePieceValues,
+        $v: 2,
+        $r: 1,
     };
     if (prevState.name !== nextState.name) {
         result.name = { oldValue: prevState.name, newValue: nextState.name };
@@ -455,134 +120,19 @@ export const serverTransform =
     ({
         requestedBy,
         participantKey,
-        activeBoardKey,
     }: {
         requestedBy: RequestedBy;
         participantKey: string;
-        activeBoardKey: CompositeKey | null;
     }): ServerTransform<State, TwoWayOperation, UpOperation> =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
-        const isAuthorized = RequestedBy.isAuthorized({ requestedBy, userUid: participantKey });
-
-        const boards = RecordOperation.serverTransform<
-            BoardTypes.State,
-            BoardTypes.State,
-            BoardTypes.TwoWayOperation,
-            BoardTypes.UpOperation,
-            TwoWayError
-        >({
-            first: serverOperation?.boards,
-            second: clientOperation.boards,
-            prevState: prevState.boards,
-            nextState: currentState.boards,
-            innerTransform: ({ first, second, prevState, nextState }) =>
-                Board.serverTransform(requestedBy)({
-                    prevState,
-                    currentState: nextState,
-                    serverOperation: first,
-                    clientOperation: second,
-                }),
-            toServerState: state => state,
-            cancellationPolicy: {
-                cancelCreate: () =>
-                    !RequestedBy.isAuthorized({
-                        requestedBy,
-                        userUid: participantKey,
-                    }),
-                cancelUpdate: ({ key }) => {
-                    return !isBoardVisible({
-                        boardKey: { createdBy: participantKey, id: key },
-                        activeBoardKey,
-                        requestedBy,
-                    });
-                },
-                cancelRemove: () =>
-                    !RequestedBy.isAuthorized({
-                        requestedBy,
-                        userUid: participantKey,
-                    }),
-            },
+        const isAuthorized = isOwner({
+            requestedBy,
+            ownerParticipantId: participantKey,
         });
-        if (boards.isError) {
-            return boards;
-        }
-
-        const characters = RecordOperation.serverTransform<
-            CharacterTypes.State,
-            CharacterTypes.State,
-            CharacterTypes.TwoWayOperation,
-            CharacterTypes.UpOperation,
-            TwoWayError
-        >({
-            first: serverOperation?.characters,
-            second: clientOperation.characters,
-            prevState: prevState.characters,
-            nextState: currentState.characters,
-            innerTransform: ({ first, second, prevState, nextState }) =>
-                Character.serverTransform(
-                    RequestedBy.isAuthorized({
-                        requestedBy,
-                        userUid: participantKey,
-                    }),
-                    requestedBy,
-                    activeBoardKey
-                )({
-                    prevState,
-                    currentState: nextState,
-                    serverOperation: first,
-                    clientOperation: second,
-                }),
-            toServerState: state => state,
-            cancellationPolicy: {
-                cancelCreate: () =>
-                    !RequestedBy.isAuthorized({ requestedBy, userUid: participantKey }),
-                cancelUpdate: ({ nextState }) =>
-                    !RequestedBy.isAuthorized({ requestedBy, userUid: participantKey }) &&
-                    nextState.isPrivate,
-                cancelRemove: ({ state: nextState }) =>
-                    !RequestedBy.isAuthorized({ requestedBy, userUid: participantKey }) &&
-                    nextState.isPrivate,
-            },
-        });
-        if (characters.isError) {
-            return characters;
-        }
-
-        const imagePieceValues = RecordOperation.serverTransform<
-            ImagePieceValueTypes.State,
-            ImagePieceValueTypes.State,
-            ImagePieceValueTypes.TwoWayOperation,
-            ImagePieceValueTypes.UpOperation,
-            TwoWayError
-        >({
-            first: serverOperation?.imagePieceValues,
-            second: clientOperation.imagePieceValues,
-            prevState: prevState.imagePieceValues,
-            nextState: currentState.imagePieceValues,
-            innerTransform: ({ first, second, prevState, nextState }) =>
-                ImagePieceValue.serverTransform(isAuthorized)({
-                    prevState,
-                    currentState: nextState,
-                    serverOperation: first,
-                    clientOperation: second,
-                }),
-            toServerState: state => state,
-            cancellationPolicy: {
-                cancelCreate: () => !isAuthorized,
-                cancelUpdate: state => !isAuthorized && state.nextState.isPrivate,
-                cancelRemove: state => !isAuthorized && state.state.isPrivate,
-            },
-        });
-        if (imagePieceValues.isError) {
-            return imagePieceValues;
-        }
 
         const twoWayOperation: TwoWayOperation = {
-            $v: 1,
-            $r: 2,
-            boards: boards.value,
-            characters: characters.value,
-            imagePieceValues: imagePieceValues.value,
+            $v: 2,
+            $r: 1,
         };
 
         if (isAuthorized) {
@@ -610,66 +160,6 @@ export const serverTransform =
     };
 
 export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
-    const boards = RecordOperation.clientTransform<
-        BoardTypes.State,
-        BoardTypes.UpOperation,
-        UpError
-    >({
-        first: first.boards,
-        second: second.boards,
-        innerTransform: params => Board.clientTransform(params),
-        innerDiff: params => {
-            const diff = Board.diff(params);
-            if (diff == null) {
-                return diff;
-            }
-            return Board.toUpOperation(diff);
-        },
-    });
-    if (boards.isError) {
-        return boards;
-    }
-
-    const characters = RecordOperation.clientTransform<
-        CharacterTypes.State,
-        CharacterTypes.UpOperation,
-        UpError
-    >({
-        first: first.characters,
-        second: second.characters,
-        innerTransform: params => Character.clientTransform(params),
-        innerDiff: params => {
-            const diff = Character.diff(params);
-            if (diff == null) {
-                return diff;
-            }
-            return Character.toUpOperation(diff);
-        },
-    });
-    if (characters.isError) {
-        return characters;
-    }
-
-    const imagePieceValues = RecordOperation.clientTransform<
-        ImagePieceValueTypes.State,
-        ImagePieceValueTypes.UpOperation,
-        UpError
-    >({
-        first: first.imagePieceValues,
-        second: second.imagePieceValues,
-        innerTransform: params => ImagePieceValue.clientTransform(params),
-        innerDiff: params => {
-            const diff = ImagePieceValue.diff(params);
-            if (diff == null) {
-                return diff;
-            }
-            return ImagePieceValue.toUpOperation(diff);
-        },
-    });
-    if (imagePieceValues.isError) {
-        return imagePieceValues;
-    }
-
     const name = ReplaceOperation.clientTransform({
         first: first.name,
         second: second.name,
@@ -681,21 +171,15 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     });
 
     const firstPrime: UpOperation = {
-        $v: 1,
-        $r: 2,
-        boards: boards.value.firstPrime,
-        characters: characters.value.firstPrime,
-        imagePieceValues: imagePieceValues.value.firstPrime,
+        $v: 2,
+        $r: 1,
         name: name.firstPrime,
         role: role.firstPrime,
     };
 
     const secondPrime: UpOperation = {
-        $v: 1,
-        $r: 2,
-        boards: boards.value.secondPrime,
-        characters: characters.value.secondPrime,
-        imagePieceValues: imagePieceValues.value.secondPrime,
+        $v: 2,
+        $r: 1,
         name: name.secondPrime,
         role: role.secondPrime,
     };

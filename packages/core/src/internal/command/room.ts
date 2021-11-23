@@ -8,20 +8,21 @@ import {
     SetCoreParams,
 } from '@flocon-trpg/flocon-script';
 import * as Room from '../ot/room/types';
-import { CompositeKey } from '@flocon-trpg/utils';
 import { FCharacter } from './character';
 import cloneDeep from 'lodash.clonedeep';
 import { FParamNames } from './paramNames';
 import { FStateRecord } from './stateRecord';
 import { FParticipant } from './participant';
+import * as Character from '../ot/room/character/types';
 
 const name = 'name';
+const characters = 'characters';
 
 export class FRoom extends FObject {
     // FRoom内のRoom.Stateは全てmutableとして扱う。FCharacter内のCharacter.Stateなども同様。
     private readonly _room: Room.State;
 
-    public constructor(source: Room.State) {
+    public constructor(source: Room.State, private readonly ownerParticipantId: string) {
         super();
         this._room = cloneDeep(source);
     }
@@ -30,8 +31,8 @@ export class FRoom extends FObject {
         return this._room;
     }
 
-    public findCharacter(key: CompositeKey): FCharacter | undefined {
-        const character = this._room.participants[key.createdBy]?.characters?.[key.id];
+    public findCharacter(stateId: string): FCharacter | undefined {
+        const character = this._room.characters[stateId];
         if (character == null) {
             return undefined;
         }
@@ -44,6 +45,39 @@ export class FRoom extends FObject {
                 return new FString(this._room.name);
             case 'booleanParameterNames':
                 return new FParamNames(this.room, 'Boolean');
+            case characters:
+                return new FStateRecord<Character.State, FCharacter>({
+                    states: this.room.characters,
+                    createNewState: () => ({
+                        $v: 2,
+                        $r: 1,
+                        ownerParticipantId: this.ownerParticipantId,
+                        image: null,
+                        isPrivate: false,
+                        memo: '',
+                        name: '',
+                        chatPalette: '',
+                        dicePieceValues: {},
+                        pieces: {},
+                        privateCommand: '',
+                        privateCommands: {},
+                        privateVarToml: '',
+                        tachieImage: null,
+                        tachieLocations: {},
+                        boolParams: {},
+                        numParams: {},
+                        numMaxParams: {},
+                        strParams: {},
+                        stringPieceValues: {},
+                    }),
+                    toRef: x => new FCharacter(x, this.room),
+                    unRef: x => {
+                        if (x instanceof FCharacter) {
+                            return x.character;
+                        }
+                        throw new Error('this should not happen');
+                    },
+                });
             case 'numberParameterNames':
                 return new FParamNames(this.room, 'Number');
             case 'stringParameterNames':
@@ -52,7 +86,7 @@ export class FRoom extends FObject {
                 return new FStateRecord({
                     states: this.room.participants,
                     createNewState: undefined,
-                    toRef: x => new FParticipant(x, this.room),
+                    toRef: x => new FParticipant(x),
                     unRef: x => {
                         if (x instanceof FParticipant) {
                             return x.participant;

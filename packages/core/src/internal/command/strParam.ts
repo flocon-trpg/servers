@@ -8,7 +8,7 @@ import {
     OnSettingParams,
     FString,
 } from '@flocon-trpg/flocon-script';
-import * as StrParam from '../ot/room/participant/character/strParam/types';
+import * as StrParam from '../ot/room/character/strParam/types';
 
 const value = 'value';
 const isValueSecret = 'isValueSecret';

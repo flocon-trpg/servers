@@ -8,8 +8,8 @@ import {
     ScriptError,
 } from '@flocon-trpg/flocon-script';
 import { recordToArray } from '@flocon-trpg/utils';
-import * as Character from '../ot/room/participant/character/types';
-import * as NumParam from '../ot/room/participant/character/numParam/types';
+import * as Character from '../ot/room/character/types';
+import * as NumParam from '../ot/room/character/numParam/types';
 import * as Room from '../ot/room/types';
 import { FNumParam } from './numParam';
 

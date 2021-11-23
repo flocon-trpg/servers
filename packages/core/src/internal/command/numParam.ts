@@ -8,7 +8,7 @@ import {
     OnGettingParams,
     OnSettingParams,
 } from '@flocon-trpg/flocon-script';
-import * as NumParam from '../ot/room/participant/character/numParam/types';
+import * as NumParam from '../ot/room/character/numParam/types';
 
 const value = 'value';
 const isValueSecret = 'isValueSecret';

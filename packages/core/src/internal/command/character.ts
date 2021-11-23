@@ -7,7 +7,7 @@ import {
     ScriptError,
     beginCast,
 } from '@flocon-trpg/flocon-script';
-import * as Character from '../ot/room/participant/character/types';
+import * as Character from '../ot/room/character/types';
 import * as Room from '../ot/room/types';
 import { FBoolParams } from './boolParams';
 import { toFFilePath, toFilePathOrUndefined } from './filePath';

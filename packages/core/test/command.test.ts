@@ -3,28 +3,27 @@ import { execCharacterCommand, State } from '../src';
 import { Resources } from './resources';
 
 describe('characterCommand', () => {
-    const characterKey = 'CHARA_ID';
+    const characterId = 'CHARA_ID';
 
     it('tests room.name', () => {
+        const participantId = Resources.Participant.Player1.userUid;
         const prevRoomName = 'NAME_0';
         const nextRoomName = 'NAME_1';
 
         const room: State = {
             ...Resources.minimumState,
             name: prevRoomName,
+            characters: {
+                [characterId]: {
+                    ...Resources.Character.emptyState(participantId),
+                },
+            },
             participants: {
-                [Resources.Participant.Player1.userUid]: {
-                    $v: 1,
-                    $r: 2,
+                [participantId]: {
+                    $v: 2,
+                    $r: 1,
                     name: Resources.Participant.Player1.name,
                     role: 'Player',
-                    boards: {},
-                    characters: {
-                        [characterKey]: {
-                            ...Resources.Character.emptyState,
-                        },
-                    },
-                    imagePieceValues: {},
                 },
             },
         };
@@ -32,7 +31,8 @@ describe('characterCommand', () => {
         const actual = execCharacterCommand({
             script: `room.name = '${nextRoomName}'`,
             room,
-            characterKey: { createdBy: Resources.Participant.Player1.userUid, id: characterKey },
+            characterId,
+            ownerParticipantId: participantId,
         });
         if (actual.isError) {
             throw actual.error;
@@ -45,25 +45,24 @@ describe('characterCommand', () => {
     });
 
     it('tests character.name', () => {
+        const participantId = Resources.Participant.Player1.userUid;
         const prevCharacterName = 'NAME_0';
         const nextCharacterName = 'NAME_1';
 
         const room: State = {
             ...Resources.minimumState,
+            characters: {
+                [characterId]: {
+                    ...Resources.Character.emptyState(participantId),
+                    name: prevCharacterName,
+                },
+            },
             participants: {
-                [Resources.Participant.Player1.userUid]: {
-                    $v: 1,
-                    $r: 2,
+                [participantId]: {
+                    $v: 2,
+                    $r: 1,
                     name: Resources.Participant.Player1.name,
                     role: 'Player',
-                    boards: {},
-                    characters: {
-                        [characterKey]: {
-                            ...Resources.Character.emptyState,
-                            name: prevCharacterName,
-                        },
-                    },
-                    imagePieceValues: {},
                 },
             },
         };
@@ -71,195 +70,191 @@ describe('characterCommand', () => {
         const actual = execCharacterCommand({
             script: `character.name = '${nextCharacterName}'`,
             room,
-            characterKey: { createdBy: Resources.Participant.Player1.userUid, id: characterKey },
+            characterId,
+            ownerParticipantId: participantId,
         });
         if (actual.isError) {
             throw actual.error;
         }
+
         expect(actual.value).not.toBe(room);
-        expect(actual.value).toEqual({
+        const expected: State = {
             ...room,
-            participants: {
-                [Resources.Participant.Player1.userUid]: {
-                    $v: 1,
-                    $r: 2,
-                    name: Resources.Participant.Player1.name,
-                    role: 'Player',
-                    boards: {},
-                    characters: {
-                        [characterKey]: {
-                            ...Resources.Character.emptyState,
-                            name: nextCharacterName,
-                        },
-                    },
-                    imagePieceValues: {},
+            characters: {
+                [characterId]: {
+                    ...Resources.Character.emptyState(participantId),
+                    name: nextCharacterName,
                 },
             },
-        });
+            participants: {
+                [participantId]: {
+                    $v: 2,
+                    $r: 1,
+                    name: Resources.Participant.Player1.name,
+                    role: 'Player',
+                },
+            },
+        };
+        expect(actual.value).toEqual(expected);
     });
 
     it('tests finding participant and character', () => {
+        const participantId = Resources.Participant.Player1.userUid;
         const prevCharacterName = 'NAME_0';
         const nextCharacterName = 'NAME_1';
 
         const room: State = {
             ...Resources.minimumState,
+            characters: {
+                [characterId]: {
+                    ...Resources.Character.emptyState(participantId),
+                    name: prevCharacterName,
+                },
+            },
             participants: {
-                [Resources.Participant.Player1.userUid]: {
-                    $v: 1,
-                    $r: 2,
+                [participantId]: {
+                    $v: 2,
+                    $r: 1,
                     name: Resources.Participant.Player1.name,
                     role: 'Player',
-                    boards: {},
-                    characters: {
-                        [characterKey]: {
-                            ...Resources.Character.emptyState,
-                            name: prevCharacterName,
-                        },
-                    },
-                    imagePieceValues: {},
                 },
             },
         };
 
         const actual = execCharacterCommand({
             script: `
-let myParticipant = this.room.participants.get('${Resources.Participant.Player1.userUid}');
-let myCharacter = myParticipant.characters.get('${characterKey}');
+let myCharacter = this.room.characters.get('${characterId}');
 myCharacter.name = '${nextCharacterName}';
             `,
             room,
-            characterKey: { createdBy: Resources.Participant.Player1.userUid, id: characterKey },
+            characterId,
+            ownerParticipantId: participantId,
         });
         if (actual.isError) {
             throw actual.error;
         }
-        expect(actual.value).toEqual({
+
+        const expected: State = {
             ...room,
-            participants: {
-                [Resources.Participant.Player1.userUid]: {
-                    $v: 1,
-                    $r: 2,
-                    name: Resources.Participant.Player1.name,
-                    role: 'Player',
-                    boards: {},
-                    characters: {
-                        [characterKey]: {
-                            ...Resources.Character.emptyState,
-                            name: nextCharacterName,
-                        },
-                    },
-                    imagePieceValues: {},
+            characters: {
+                [characterId]: {
+                    ...Resources.Character.emptyState(participantId),
+                    name: nextCharacterName,
                 },
             },
-        });
+            participants: {
+                [participantId]: {
+                    $v: 2,
+                    $r: 1,
+                    name: Resources.Participant.Player1.name,
+                    role: 'Player',
+                },
+            },
+        };
+        expect(actual.value).toEqual(expected);
     });
 
     it('tests creating character', () => {
+        const participantId = Resources.Participant.Player1.userUid;
         const characterName = 'CHARA_NAME';
 
         const room: State = {
             ...Resources.minimumState,
+            characters: {
+                [characterId]: {
+                    ...Resources.Character.emptyState(participantId),
+                    name: characterName,
+                },
+            },
             participants: {
-                [Resources.Participant.Player1.userUid]: {
-                    $v: 1,
-                    $r: 2,
+                [participantId]: {
+                    $v: 2,
+                    $r: 1,
                     name: Resources.Participant.Player1.name,
                     role: 'Player',
-                    boards: {},
-                    characters: {
-                        [characterKey]: {
-                            ...Resources.Character.emptyState,
-                            name: characterName,
-                        },
-                    },
-                    imagePieceValues: {},
                 },
             },
         };
 
         const actual = execCharacterCommand({
             script: `
-let myParticipant = this.room.participants.get('${Resources.Participant.Player1.userUid}');
-let newCharacter = myParticipant.characters.create();
+let newCharacter = this.room.characters.create();
 newCharacter.value.name = 'NEW_CHARA_NAME';
-let newCharacterById = myParticipant.characters.get(newCharacter.id);
+let newCharacterById = this.room.characters.get(newCharacter.id);
 newCharacter.value.name = newCharacterById.name + '!!';
             `,
             room,
-            characterKey: { createdBy: Resources.Participant.Player1.userUid, id: characterKey },
+            characterId,
+            ownerParticipantId: participantId,
         });
         if (actual.isError) {
             throw actual.error;
         }
-        const actualCharacters = recordToMap(
-            actual.value.participants[Resources.Participant.Player1.userUid]?.characters ?? {}
-        );
+        const actualCharacters = recordToMap(actual.value.characters);
         expect(actualCharacters.size).toBe(2);
-        actualCharacters.delete(characterKey);
+        actualCharacters.delete(characterId);
         expect(actualCharacters.size).toBe(1);
         const actualCreatedCharacter = [...actualCharacters][0]?.[1];
         expect(actualCreatedCharacter?.name).toBe('NEW_CHARA_NAME!!');
     });
 
     it('tests deleting character', () => {
+        const participantId = Resources.Participant.Player1.userUid;
         const characterName = 'CHARA_NAME';
         const anotherCharacterName = 'CHARA_NAME2';
-        const anotherCharacterKey = 'CHARA_ID2';
+        const anotherCharacterId = 'CHARA_ID2';
 
         const room: State = {
             ...Resources.minimumState,
+            characters: {
+                [characterId]: {
+                    ...Resources.Character.emptyState(participantId),
+                    name: characterName,
+                },
+                [anotherCharacterId]: {
+                    ...Resources.Character.emptyState(participantId),
+                    name: anotherCharacterName,
+                },
+            },
             participants: {
-                [Resources.Participant.Player1.userUid]: {
-                    $v: 1,
-                    $r: 2,
+                [participantId]: {
+                    $v: 2,
+                    $r: 1,
                     name: Resources.Participant.Player1.name,
                     role: 'Player',
-                    boards: {},
-                    characters: {
-                        [characterKey]: {
-                            ...Resources.Character.emptyState,
-                            name: characterName,
-                        },
-                        [anotherCharacterKey]: {
-                            ...Resources.Character.emptyState,
-                            name: anotherCharacterName,
-                        },
-                    },
-                    imagePieceValues: {},
                 },
             },
         };
 
         const actual = execCharacterCommand({
             script: `
-let myParticipant = this.room.participants.get('${Resources.Participant.Player1.userUid}');
-myParticipant.characters.delete('${characterKey}');
+this.room.characters.delete('${characterId}');
             `,
             room,
-            characterKey: { createdBy: Resources.Participant.Player1.userUid, id: characterKey },
+            characterId,
+            ownerParticipantId: participantId,
         });
         if (actual.isError) {
             throw actual.error;
         }
-        expect(actual.value).toEqual({
+
+        const expected: State = {
             ...room,
-            participants: {
-                [Resources.Participant.Player1.userUid]: {
-                    $v: 1,
-                    $r: 2,
-                    name: Resources.Participant.Player1.name,
-                    role: 'Player',
-                    boards: {},
-                    characters: {
-                        [anotherCharacterKey]: {
-                            ...Resources.Character.emptyState,
-                            name: anotherCharacterName,
-                        },
-                    },
-                    imagePieceValues: {},
+            characters: {
+                [anotherCharacterId]: {
+                    ...Resources.Character.emptyState(participantId),
+                    name: anotherCharacterName,
                 },
             },
-        });
+            participants: {
+                [participantId]: {
+                    $v: 2,
+                    $r: 1,
+                    name: Resources.Participant.Player1.name,
+                    role: 'Player',
+                },
+            },
+        };
+        expect(actual.value).toEqual(expected);
     });
 });
