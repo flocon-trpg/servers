@@ -129,7 +129,6 @@ export {
     Spectator,
     ParticipantRole,
     State as ParticipantState,
-    DbState as ParticipantDbState,
     UpOperation as ParticipantUpOperation,
     DownOperation as ParticipantDownOperation,
 } from './internal/ot/room/participant/types';
@@ -298,7 +297,15 @@ export {
     toUpOperation as toTextUpOperation,
 } from './internal/ot/util/textOperation';
 
-export { client, admin, restrict, RequestedBy } from './internal/ot/util/requestedBy';
+export {
+    client,
+    admin,
+    restrict,
+    RequestedBy,
+    isCharacterOwner,
+    isBoardOwner,
+    isOwner,
+} from './internal/ot/util/requestedBy';
 
 export { updateType, createType, deleteType } from './internal/ot/piece/log';
 

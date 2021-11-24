@@ -15,17 +15,14 @@ export const Master = 'Master';
 const participantRole = t.union([t.literal(Player), t.literal(Spectator), t.literal(Master)]);
 export type ParticipantRole = t.TypeOf<typeof participantRole>;
 
-export const dbState = t.type({
+export const state = t.type({
     $v: t.literal(2),
     $r: t.literal(1),
     name: maybe(maxLength100String),
     role: maybe(participantRole),
 });
 
-export type DbState = t.TypeOf<typeof dbState>;
-
-export const state = dbState;
-export type State = DbState;
+export type State = t.TypeOf<typeof state>;
 
 export const downOperation = createOperation(2, 1, {
     name: t.type({ oldValue: maybe(maxLength100String) }),

@@ -304,20 +304,14 @@ export class RoomPrvMsg {
 @Entity()
 export class DicePieceValueLog {
     public constructor({
-        characterCreatedBy,
-        characterId,
         room,
         stateId,
         value,
     }: {
-        characterCreatedBy: string;
-        characterId: string;
         room: Room;
         stateId: string;
         value: DicePieceValueLogState;
     }) {
-        this.characterCreatedBy = characterCreatedBy;
-        this.characterId = characterId;
         this.room = Reference.create(room);
         this.stateId = stateId;
         this.value = value;
@@ -325,12 +319,6 @@ export class DicePieceValueLog {
 
     @PrimaryKey()
     public id: string = easyFlake();
-
-    @Property({ index: true })
-    public characterCreatedBy: string;
-
-    @Property({ index: true })
-    public characterId: string;
 
     @Property({ type: Date, onCreate: () => new Date() })
     public createdAt: Date = new Date();
@@ -348,20 +336,14 @@ export class DicePieceValueLog {
 @Entity()
 export class StringPieceValueLog {
     public constructor({
-        characterCreatedBy,
-        characterId,
         room,
         stateId,
         value,
     }: {
-        characterCreatedBy: string;
-        characterId: string;
         room: Room;
         stateId: string;
         value: StringPieceValueLogState;
     }) {
-        this.characterCreatedBy = characterCreatedBy;
-        this.characterId = characterId;
         this.room = Reference.create(room);
         this.stateId = stateId;
         this.value = value;
@@ -369,12 +351,6 @@ export class StringPieceValueLog {
 
     @PrimaryKey()
     public id: string = easyFlake();
-
-    @Property({ index: true })
-    public characterCreatedBy: string;
-
-    @Property({ index: true })
-    public characterId: string;
 
     @Property({ type: Date, onCreate: () => new Date() })
     public createdAt: Date = new Date();

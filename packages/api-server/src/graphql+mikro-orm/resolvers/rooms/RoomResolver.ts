@@ -153,6 +153,7 @@ import {
     $free,
     $system,
     MaxLength100String,
+    isCharacterOwner,
 } from '@flocon-trpg/core';
 import {
     ApplyError,
@@ -281,13 +282,10 @@ const operateParticipantAndFlush = async ({
                 type: replace,
                 replace: {
                     newValue: {
-                        $v: 1,
-                        $r: 2,
+                        $v: 2,
+                        $r: 1,
                         name: create.name,
                         role: create.role,
-                        boards: {},
-                        characters: {},
-                        imagePieceValues: {},
                     },
                 },
             };
@@ -297,8 +295,8 @@ const operateParticipantAndFlush = async ({
             participantOperation = {
                 type: 'update',
                 update: {
-                    $v: 1,
-                    $r: 2,
+                    $v: 2,
+                    $r: 1,
                     role: update.role,
                     name: update.name,
                 },
@@ -314,8 +312,8 @@ const operateParticipantAndFlush = async ({
     }
 
     const roomUpOperation: UpOperation = {
-        $v: 1,
-        $r: 2,
+        $v: 2,
+        $r: 1,
         participants: {
             [myUserUid]: participantOperation,
         },
@@ -1069,18 +1067,9 @@ export class RoomResolver {
                 name: input.roomName,
                 createdBy: authorizedUser.userUid,
                 value: {
-                    $v: 1,
-                    $r: 2,
-                    participants: {
-                        [authorizedUser.userUid]: {
-                            $v: 1,
-                            $r: 2,
-                            boards: {},
-                            characters: {},
-                            imagePieceValues: {},
-                        },
-                    },
-                    activeBoardKey: null,
+                    $v: 2,
+                    $r: 1,
+                    activeBoardId: undefined,
                     publicChannel1Name: 'メイン',
                     publicChannel2Name: 'メイン2',
                     publicChannel3Name: 'メイン3',
@@ -1093,7 +1082,12 @@ export class RoomResolver {
                     publicChannel10Name: 'メイン10',
                     bgms: {},
                     boolParamNames: {},
+                    boards: {},
+                    characters: {},
+                    dicePieceValues: {},
+                    imagePieceValues: {},
                     numParamNames: {},
+                    stringPieceValues: {},
                     strParamNames: {},
                     memos: {},
                 },
@@ -1561,8 +1555,6 @@ export class RoomResolver {
             const dicePieceLogEntities: DicePieceValueLog$MikroORM[] = [];
             logs?.dicePieceValueLogs.forEach(log => {
                 const entity = new DicePieceValueLog$MikroORM({
-                    characterCreatedBy: log.characterKey.createdBy,
-                    characterId: log.characterKey.id,
                     stateId: log.stateId,
                     room,
                     value: log.value,
@@ -1573,8 +1565,6 @@ export class RoomResolver {
             const stringPieceLogEntities: StringPieceValueLog$MikroORM[] = [];
             logs?.stringPieceValueLogs.forEach(log => {
                 const entity = new StringPieceValueLog$MikroORM({
-                    characterCreatedBy: log.characterKey.createdBy,
-                    characterId: log.characterKey.id,
                     stateId: log.stateId,
                     room,
                     value: log.value,
@@ -1717,10 +1707,14 @@ export class RoomResolver {
 
             let chara: CharacterState | undefined = undefined;
             if (args.characterStateId != null) {
-                chara =
-                    roomState.participants[authorizedUser.userUid]?.characters?.[
-                        args.characterStateId
-                    ];
+                if (
+                    isCharacterOwner({
+                        requestedBy: { type: client, userUid: authorizedUser.userUid },
+                        characterId: args.characterStateId,
+                        currentRoomState: roomState,
+                    })
+                )
+                    chara = roomState.characters[args.characterStateId];
             }
             const entityResult = await analyzeTextAndSetToEntity({
                 type: 'RoomPubMsg',
@@ -1841,10 +1835,14 @@ export class RoomResolver {
 
             let chara: CharacterState | undefined = undefined;
             if (args.characterStateId != null) {
-                chara =
-                    roomState.participants[authorizedUser.userUid]?.characters?.[
-                        args.characterStateId
-                    ];
+                if (
+                    isCharacterOwner({
+                        requestedBy: { type: client, userUid: authorizedUser.userUid },
+                        characterId: args.characterStateId,
+                        currentRoomState: roomState,
+                    })
+                )
+                    chara = roomState.characters[args.characterStateId];
             }
             const entityResult = await analyzeTextAndSetToEntity({
                 type: 'RoomPrvMsg',

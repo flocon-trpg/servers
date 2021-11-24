@@ -217,12 +217,6 @@ export class PieceValueLog {
     public messageId!: string;
 
     @Field()
-    public characterCreatedBy!: string;
-
-    @Field()
-    public characterId!: string;
-
-    @Field()
     public stateId!: string;
 
     @Field()
