@@ -101,7 +101,7 @@ export class WritePublicMessageArgs {
     public channelKey!: string;
 
     @Field({ nullable: true })
-    public characterStateId?: string;
+    public characterId?: string;
 
     @Field({ nullable: true })
     @MaxLength(1_000)
@@ -128,7 +128,7 @@ export class WritePrivateMessageArgs {
     public textColor?: string;
 
     @Field({ nullable: true })
-    public characterStateId?: string;
+    public characterId?: string;
 
     @Field({ nullable: true })
     @MaxLength(1_000)

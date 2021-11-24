@@ -1706,15 +1706,15 @@ export class RoomResolver {
             }
 
             let chara: CharacterState | undefined = undefined;
-            if (args.characterStateId != null) {
+            if (args.characterId != null) {
                 if (
                     isCharacterOwner({
                         requestedBy: { type: client, userUid: authorizedUser.userUid },
-                        characterId: args.characterStateId,
+                        characterId: args.characterId,
                         currentRoomState: roomState,
                     })
                 )
-                    chara = roomState.characters[args.characterStateId];
+                    chara = roomState.characters[args.characterId];
             }
             const entityResult = await analyzeTextAndSetToEntity({
                 type: 'RoomPubMsg',
@@ -1743,7 +1743,7 @@ export class RoomResolver {
             entity.customName = args.customName;
 
             if (chara != null) {
-                entity.charaStateId = args.characterStateId;
+                entity.charaStateId = args.characterId;
                 entity.charaName = chara.name;
                 entity.charaIsPrivate = chara.isPrivate;
                 entity.charaImagePath = chara.image?.path;
@@ -1834,15 +1834,15 @@ export class RoomResolver {
             await authorizedUser.visibleRoomPrvMsgs.init({ where: { room: { id: room.id } } });
 
             let chara: CharacterState | undefined = undefined;
-            if (args.characterStateId != null) {
+            if (args.characterId != null) {
                 if (
                     isCharacterOwner({
                         requestedBy: { type: client, userUid: authorizedUser.userUid },
-                        characterId: args.characterStateId,
+                        characterId: args.characterId,
                         currentRoomState: roomState,
                     })
                 )
-                    chara = roomState.characters[args.characterStateId];
+                    chara = roomState.characters[args.characterId];
             }
             const entityResult = await analyzeTextAndSetToEntity({
                 type: 'RoomPrvMsg',
@@ -1879,7 +1879,7 @@ export class RoomResolver {
             entity.customName = args.customName;
 
             if (chara != null) {
-                entity.charaStateId = args.characterStateId;
+                entity.charaStateId = args.characterId;
                 entity.charaName = chara.name;
                 entity.charaIsPrivate = chara.isPrivate;
                 entity.charaImagePath = chara.image?.path;
