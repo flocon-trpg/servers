@@ -44,14 +44,14 @@ const defaultBoolParamState: BoolParamTypes.State = {
     $v: 1,
     $r: 1,
     isValuePrivate: false,
-    value: null,
+    value: undefined,
 };
 
 const defaultNumParamState: NumParamTypes.State = {
     $v: 1,
     $r: 1,
     isValuePrivate: false,
-    value: null,
+    value: undefined,
 };
 
 const defaultStrParamState: StrParamType.State = {
@@ -73,19 +73,19 @@ export const toClientState =
                 serverState: source.boolParams,
                 isPrivate: () => false,
                 toClientState: ({ state }) =>
-                    SimpleValueParam.toClientState<Maybe<boolean>>(isAuthorized, null)(state),
+                    SimpleValueParam.toClientState<Maybe<boolean>>(isAuthorized, undefined)(state),
             }),
             numParams: RecordOperation.toClientState({
                 serverState: source.numParams,
                 isPrivate: () => false,
                 toClientState: ({ state }) =>
-                    SimpleValueParam.toClientState<Maybe<number>>(isAuthorized, null)(state),
+                    SimpleValueParam.toClientState<Maybe<number>>(isAuthorized, undefined)(state),
             }),
             numMaxParams: RecordOperation.toClientState({
                 serverState: source.numMaxParams,
                 isPrivate: () => false,
                 toClientState: ({ state }) =>
-                    SimpleValueParam.toClientState<Maybe<number>>(isAuthorized, null)(state),
+                    SimpleValueParam.toClientState<Maybe<number>>(isAuthorized, undefined)(state),
             }),
             strParams: RecordOperation.toClientState({
                 serverState: source.strParams,
@@ -940,13 +940,13 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
                     $v: 1,
                     $r: 1,
                     isValuePrivate: false,
-                    value: null,
+                    value: undefined,
                 },
                 nextState: nextState ?? {
                     $v: 1,
                     $r: 1,
                     isValuePrivate: false,
-                    value: null,
+                    value: undefined,
                 },
             }),
     });
@@ -959,13 +959,13 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
                     $v: 1,
                     $r: 1,
                     isValuePrivate: false,
-                    value: null,
+                    value: undefined,
                 },
                 nextState: nextState ?? {
                     $v: 1,
                     $r: 1,
                     isValuePrivate: false,
-                    value: null,
+                    value: undefined,
                 },
             }),
     });
@@ -978,13 +978,13 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
                     $v: 1,
                     $r: 1,
                     isValuePrivate: false,
-                    value: null,
+                    value: undefined,
                 },
                 nextState: nextState ?? {
                     $v: 1,
                     $r: 1,
                     isValuePrivate: false,
-                    value: null,
+                    value: undefined,
                 },
             }),
     });

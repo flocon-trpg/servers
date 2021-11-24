@@ -36,7 +36,7 @@ export class FParticipant extends FObject {
             case name: {
                 const $newValue = beginCast(newValue, astInfo).addString().addNull().cast();
                 if ($newValue === null) {
-                    this.participant.name = null;
+                    this.participant.name = undefined;
                     return;
                 }
                 if (!maxLength100String.is($newValue)) {

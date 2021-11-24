@@ -17,7 +17,7 @@ export const toClientState =
     (source: State): State => {
         return {
             ...source,
-            value: source.isValuePrivate && !isAuthorized ? null : source.value,
+            value: source.isValuePrivate && !isAuthorized ? undefined : source.value,
         };
     };
 

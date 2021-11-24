@@ -120,11 +120,10 @@ export const isCharacterOwner = ({
 type CurrentOwnerParticipant =
     // ParticipantのIDで指定するパターン
     | string
-    | null
     | undefined
     // currentStateを渡すパターン
     | {
-          ownerParticipantId: string | null | undefined;
+          ownerParticipantId: string | undefined;
       };
 
 export const canChangeOwnerParticipantId = ({
@@ -137,7 +136,7 @@ export const canChangeOwnerParticipantId = ({
     if (requestedBy.type === admin) {
         return true;
     }
-    let currentOwnerParticipantId: string | null | undefined;
+    let currentOwnerParticipantId: string | undefined;
     if (typeof currentOwnerParticipant === 'string') {
         currentOwnerParticipantId = currentOwnerParticipant;
     } else {
@@ -149,11 +148,10 @@ export const canChangeOwnerParticipantId = ({
 type CurrentOwnerCharacter =
     // CharacterのIDで指定するパターン
     | string
-    | null
     | undefined
     // currentStateを渡すパターン
     | {
-          ownerCharacterId: string | null | undefined;
+          ownerCharacterId: string | undefined;
       };
 
 export const canChangeOwnerCharacterId = ({
@@ -168,7 +166,7 @@ export const canChangeOwnerCharacterId = ({
     if (requestedBy.type === admin) {
         return true;
     }
-    let currentOwnerCharacterId: string | null | undefined;
+    let currentOwnerCharacterId: string | undefined;
     if (typeof currentOwnerCharacter === 'string') {
         currentOwnerCharacterId = currentOwnerCharacter;
     } else {

@@ -61,7 +61,7 @@ export type TwoWayOperation = {
     $r: 1;
 
     backgroundImage?: ReplaceOperation.ReplaceValueTwoWayOperation<
-        t.TypeOf<typeof filePath> | null | undefined
+        t.TypeOf<typeof filePath> | undefined
     >;
     backgroundImageZoom?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     cellColumnCount?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;

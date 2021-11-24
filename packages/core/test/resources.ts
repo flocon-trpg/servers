@@ -56,7 +56,7 @@ export namespace Resources {
     export const minimumState: State = {
         $v: 2,
         $r: 1,
-        activeBoardId: null,
+        activeBoardId: undefined,
         createdBy: 'CREATED_BY',
         name: 'ROOM_NAME',
         bgms: {},
@@ -87,7 +87,7 @@ export namespace Resources {
                 $v: 2,
                 $r: 1,
                 name: Participant.Null.name,
-                role: null,
+                role: undefined,
             },
         },
         stringPieceValues: {},
@@ -110,7 +110,7 @@ export namespace Resources {
     export const complexState: State = {
         $v: 2,
         $r: 1,
-        activeBoardId: null,
+        activeBoardId: undefined,
         createdBy: 'CREATED_BY',
         name: 'ROOM_NAME',
         bgms: {
