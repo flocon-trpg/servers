@@ -88,9 +88,8 @@ export class Room {
     @OneToMany(() => DicePieceValueLogEntity, x => x.room, { orphanRemoval: true })
     public dicePieceValueLogs = new Collection<DicePieceValueLogEntity>(this);
 
-    // TODO: forgot to rename to stringPieceValueLogs...
     @OneToMany(() => StringPieceValueLogEntity, x => x.room, { orphanRemoval: true })
-    public numberPieceValueLogs = new Collection<StringPieceValueLogEntity>(this);
+    public stringPieceValueLogs = new Collection<StringPieceValueLogEntity>(this);
 
     @OneToMany(() => RoomSe, x => x.room, { orphanRemoval: true })
     public roomSes = new Collection<RoomSe>(this);
@@ -147,9 +146,9 @@ export const deleteRoom = async (em: EM, room: Room): Promise<void> => {
     room.dicePieceValueLogs.getItems().forEach(x => em.remove(x));
     room.dicePieceValueLogs.removeAll();
 
-    await room.numberPieceValueLogs.init();
-    room.numberPieceValueLogs.getItems().forEach(x => em.remove(x));
-    room.numberPieceValueLogs.removeAll();
+    await room.stringPieceValueLogs.init();
+    room.stringPieceValueLogs.getItems().forEach(x => em.remove(x));
+    room.stringPieceValueLogs.removeAll();
 
     em.remove(room);
 };

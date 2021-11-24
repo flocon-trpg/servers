@@ -848,7 +848,7 @@ export class RoomResolver {
         for (const msg of await room.dicePieceValueLogs.loadItems()) {
             pieceValueLogs.push(DicePieceValueLogNameSpace.MikroORM.ToGraphQL.state(msg));
         }
-        for (const msg of await room.numberPieceValueLogs.loadItems()) {
+        for (const msg of await room.stringPieceValueLogs.loadItems()) {
             pieceValueLogs.push(StringPieceValueLogNameSpace.MikroORM.ToGraphQL.state(msg));
         }
 
@@ -2551,9 +2551,9 @@ export class RoomResolver {
             room.dicePieceValueLogs.getItems().forEach(x => em.remove(x));
             room.dicePieceValueLogs.removeAll();
 
-            await room.numberPieceValueLogs.init();
-            room.numberPieceValueLogs.getItems().forEach(x => em.remove(x));
-            room.numberPieceValueLogs.removeAll();
+            await room.stringPieceValueLogs.init();
+            room.stringPieceValueLogs.getItems().forEach(x => em.remove(x));
+            room.stringPieceValueLogs.removeAll();
 
             em.persist(room);
             await em.flush();
