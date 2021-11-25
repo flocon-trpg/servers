@@ -33,6 +33,8 @@ import {
     isCharacterOwner,
     canChangeOwnerCharacterId,
 } from '../../util/requestedBy';
+import * as TextOperation from '../../util/textOperation';
+import * as NullableTextOperation from '../../util/nullableTextOperation';
 
 export const toClientState =
     (requestedBy: RequestedBy, currentRoomState: Room.State) =>
@@ -50,11 +52,19 @@ export const toClientState =
     };
 
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
-    return source;
+    return {
+        ...source,
+        memo: source.memo == null ? undefined : TextOperation.toDownOperation(source.memo),
+        name: source.name == null ? undefined : NullableTextOperation.toDownOperation(source.name),
+    };
 };
 
 export const toUpOperation = (source: TwoWayOperation): UpOperation => {
-    return source;
+    return {
+        ...source,
+        memo: source.memo == null ? undefined : TextOperation.toUpOperation(source.memo),
+        name: source.name == null ? undefined : NullableTextOperation.toUpOperation(source.name),
+    };
 };
 
 export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, operation }) => {
@@ -62,6 +72,20 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
 
     if (operation.ownerCharacterId != null) {
         result.ownerCharacterId = operation.ownerCharacterId.newValue;
+    }
+    if (operation.memo != null) {
+        const valueResult = TextOperation.apply(state.memo, operation.memo);
+        if (valueResult.isError) {
+            return valueResult;
+        }
+        result.memo = valueResult.value;
+    }
+    if (operation.name != null) {
+        const valueResult = NullableTextOperation.apply(state.name, operation.name);
+        if (valueResult.isError) {
+            return valueResult;
+        }
+        result.name = valueResult.value;
     }
 
     const dice = RecordOperation.apply<DieValueTypes.State, DieValueTypes.UpOperation, ScalarError>(
@@ -98,6 +122,20 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 
     if (operation.ownerCharacterId != null) {
         result.ownerCharacterId = operation.ownerCharacterId.oldValue;
+    }
+    if (operation.memo != null) {
+        const valueResult = TextOperation.applyBack(state.memo, operation.memo);
+        if (valueResult.isError) {
+            return valueResult;
+        }
+        result.memo = valueResult.value;
+    }
+    if (operation.name != null) {
+        const valueResult = NullableTextOperation.applyBack(state.name, operation.name);
+        if (valueResult.isError) {
+            return valueResult;
+        }
+        result.name = valueResult.value;
     }
 
     const dice = RecordOperation.applyBack<
@@ -136,6 +174,16 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 };
 
 export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
+    const memo = TextOperation.composeDownOperation(first.memo, second.memo);
+    if (memo.isError) {
+        return memo;
+    }
+
+    const name = NullableTextOperation.composeDownOperation(first.name, second.name);
+    if (name.isError) {
+        return name;
+    }
+
     const dice = RecordOperation.composeDownOperation<
         DieValueTypes.State,
         DieValueTypes.DownOperation,
@@ -175,6 +223,8 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
             first.ownerCharacterId,
             second.ownerCharacterId
         ),
+        memo: memo.value,
+        name: name.value,
         dice: dice.value,
         pieces: pieces.value,
     };
@@ -238,6 +288,28 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
             newValue: nextState.ownerCharacterId,
         };
     }
+    if (downOperation.memo !== undefined) {
+        const restored = TextOperation.restore({
+            nextState: nextState.memo,
+            downOperation: downOperation.memo,
+        });
+        if (restored.isError) {
+            return restored;
+        }
+        prevState.memo = restored.value.prevState;
+        twoWayOperation.memo = restored.value.twoWayOperation;
+    }
+    if (downOperation.name !== undefined) {
+        const restored = NullableTextOperation.restore({
+            nextState: nextState.name,
+            downOperation: downOperation.name,
+        });
+        if (restored.isError) {
+            return restored;
+        }
+        prevState.name = restored.value.prevState;
+        twoWayOperation.name = restored.value.twoWayOperation;
+    }
 
     return Result.ok({ prevState, nextState, twoWayOperation });
 };
@@ -266,6 +338,18 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
             oldValue: prevState.ownerCharacterId,
             newValue: nextState.ownerCharacterId,
         };
+    }
+    if (prevState.memo !== nextState.memo) {
+        result.memo = TextOperation.diff({
+            prev: prevState.memo,
+            next: nextState.memo,
+        });
+    }
+    if (prevState.name !== nextState.name) {
+        result.name = NullableTextOperation.diff({
+            prev: prevState.name,
+            next: nextState.name,
+        });
     }
 
     if (isIdRecord(result)) {
@@ -371,6 +455,26 @@ export const serverTransform =
             });
         }
 
+        const transformedMemo = TextOperation.serverTransform({
+            first: serverOperation?.memo,
+            second: clientOperation.memo,
+            prevState: prevState.memo,
+        });
+        if (transformedMemo.isError) {
+            return transformedMemo;
+        }
+        twoWayOperation.memo = transformedMemo.value;
+
+        const transformedName = NullableTextOperation.serverTransform({
+            first: serverOperation?.name,
+            second: clientOperation.name,
+            prevState: prevState.name,
+        });
+        if (transformedName.isError) {
+            return transformedName;
+        }
+        twoWayOperation.name = transformedName.value;
+
         if (isIdRecord(twoWayOperation)) {
             return Result.ok(undefined);
         }
@@ -412,12 +516,30 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         second: second.ownerCharacterId,
     });
 
+    const memo = TextOperation.clientTransform({
+        first: first.memo,
+        second: second.memo,
+    });
+    if (memo.isError) {
+        return memo;
+    }
+
+    const name = NullableTextOperation.clientTransform({
+        first: first.name,
+        second: second.name,
+    });
+    if (name.isError) {
+        return name;
+    }
+
     const firstPrime: UpOperation = {
         $v: 2,
         $r: 1,
         dice: dice.value.firstPrime,
         pieces: pieces.value.firstPrime,
         ownerCharacterId: ownerCharacterId.firstPrime,
+        memo: memo.value.firstPrime,
+        name: name.value.firstPrime,
     };
 
     const secondPrime: UpOperation = {
@@ -426,6 +548,8 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         dice: dice.value.secondPrime,
         pieces: pieces.value.secondPrime,
         ownerCharacterId: ownerCharacterId.secondPrime,
+        memo: memo.value.secondPrime,
+        name: name.value.secondPrime,
     };
 
     return Result.ok({

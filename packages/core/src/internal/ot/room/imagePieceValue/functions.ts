@@ -359,16 +359,19 @@ export const serverTransform =
                 prevState: prevState.ownerParticipantId,
             });
         }
+
         twoWayOperation.image = ReplaceOperation.serverTransform({
             first: serverOperation?.image,
             second: clientOperation.image,
             prevState: prevState.image,
         });
+
         twoWayOperation.isPrivate = ReplaceOperation.serverTransform({
             first: serverOperation?.isPrivate,
             second: clientOperation.isPrivate,
             prevState: prevState.isPrivate,
         });
+
         const transformedMemo = TextOperation.serverTransform({
             first: serverOperation?.memo,
             second: clientOperation.memo,
@@ -378,6 +381,7 @@ export const serverTransform =
             return transformedMemo;
         }
         twoWayOperation.memo = transformedMemo.value;
+
         const transformedName = NullableTextOperation.serverTransform({
             first: serverOperation?.name,
             second: clientOperation.name,
