@@ -127,7 +127,7 @@ it.concurrent('tests Room.composeDownOperation', () => {
                               operation: Room.toDownOperation(expectedTwoWayOperation),
                           });
                 if (actualState.isError || expectedState.isError) {
-                    fail('isError should not be true');
+                    throw new Error('isError should not be true');
                 }
                 expectRoomStateToEqual(actualState.value, expectedState.value);
             }

@@ -11,7 +11,7 @@ import * as ReplaceValueOperation from '../../../util/replaceOperation';
 import { isIdRecord } from '../../../util/record';
 import * as ReplaceOperation from '../../../util/replaceOperation';
 import { Result } from '@kizahasi/result';
-import * as TextOperation from '../../../util/nullableTextOperation';
+import * as NullableTextOperation from '../../../util/nullableTextOperation';
 
 type State<T> = {
     $v: 2;
@@ -28,7 +28,7 @@ type DownOperation<T> = {
 
     isValuePrivate?: { oldValue: boolean };
     value?: { oldValue: T };
-    overriddenParameterName?: TextOperation.DownOperation;
+    overriddenParameterName?: NullableTextOperation.DownOperation;
 };
 
 type UpOperation<T> = {
@@ -37,7 +37,7 @@ type UpOperation<T> = {
 
     isValuePrivate?: { newValue: boolean };
     value?: { newValue: T };
-    overriddenParameterName?: TextOperation.UpOperation;
+    overriddenParameterName?: NullableTextOperation.UpOperation;
 };
 
 type TwoWayOperation<T> = {
@@ -46,7 +46,7 @@ type TwoWayOperation<T> = {
 
     isValuePrivate?: { oldValue: boolean; newValue: boolean };
     value?: { oldValue: T; newValue: T };
-    overriddenParameterName?: TextOperation.TwoWayOperation;
+    overriddenParameterName?: NullableTextOperation.TwoWayOperation;
 };
 
 export const toClientState =
@@ -64,7 +64,7 @@ export const toDownOperation = <T>(source: TwoWayOperation<T>): DownOperation<T>
         overriddenParameterName:
             source.overriddenParameterName == null
                 ? undefined
-                : TextOperation.toDownOperation(source.overriddenParameterName),
+                : NullableTextOperation.toDownOperation(source.overriddenParameterName),
     };
 };
 
@@ -74,7 +74,7 @@ export const toUpOperation = <T>(source: TwoWayOperation<T>): UpOperation<T> => 
         overriddenParameterName:
             source.overriddenParameterName == null
                 ? undefined
-                : TextOperation.toUpOperation(source.overriddenParameterName),
+                : NullableTextOperation.toUpOperation(source.overriddenParameterName),
     };
 };
 
@@ -89,7 +89,7 @@ export const apply =
             result.value = operation.value.newValue;
         }
         if (operation.overriddenParameterName != null) {
-            const appliedResult = TextOperation.apply(
+            const appliedResult = NullableTextOperation.apply(
                 state.overriddenParameterName,
                 operation.overriddenParameterName
             );
@@ -112,7 +112,7 @@ export const applyBack =
             result.value = operation.value.oldValue;
         }
         if (operation.overriddenParameterName != null) {
-            const appliedResult = TextOperation.applyBack(
+            const appliedResult = NullableTextOperation.applyBack(
                 state.overriddenParameterName,
                 operation.overriddenParameterName
             );
@@ -127,7 +127,7 @@ export const applyBack =
 export const composeDownOperation =
     <T>(): Compose<DownOperation<T>, DownError> =>
     ({ first, second }) => {
-        const overriddenParameterName = TextOperation.composeDownOperation(
+        const overriddenParameterName = NullableTextOperation.composeDownOperation(
             first.overriddenParameterName,
             second.overriddenParameterName
         );
@@ -176,7 +176,7 @@ export const restore =
             };
         }
         {
-            const restoredResult = TextOperation.restore({
+            const restoredResult = NullableTextOperation.restore({
                 nextState: nextState.overriddenParameterName,
                 downOperation: downOperation.overriddenParameterName,
             });
@@ -207,7 +207,7 @@ export const diff =
             };
         }
         if (prevState.overriddenParameterName !== nextState.overriddenParameterName) {
-            resultType.overriddenParameterName = TextOperation.diff({
+            resultType.overriddenParameterName = NullableTextOperation.diff({
                 prev: prevState.overriddenParameterName,
                 next: nextState.overriddenParameterName,
             });
@@ -238,7 +238,7 @@ export const serverTransform =
             });
         }
         {
-            const xformResult = TextOperation.serverTransform({
+            const xformResult = NullableTextOperation.serverTransform({
                 first: serverOperation?.overriddenParameterName,
                 second: clientOperation.overriddenParameterName,
                 prevState: prevState.overriddenParameterName,
@@ -269,7 +269,7 @@ export const clientTransform =
             second: second.value,
         });
 
-        const overriddenParameterName = TextOperation.clientTransform({
+        const overriddenParameterName = NullableTextOperation.clientTransform({
             first: first?.overriddenParameterName,
             second: second.overriddenParameterName,
         });

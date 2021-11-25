@@ -176,34 +176,38 @@ export namespace Resources {
                 },
                 boolParams: {
                     '1': {
-                        $v: 1,
+                        $v: 2,
                         $r: 1,
                         isValuePrivate: false,
                         value: false,
+                        overriddenParameterName: undefined,
                     },
                 },
                 numParams: {
                     '1': {
-                        $v: 1,
+                        $v: 2,
                         $r: 1,
                         isValuePrivate: false,
                         value: 10,
+                        overriddenParameterName: undefined,
                     },
                 },
                 numMaxParams: {
                     '1': {
-                        $v: 1,
+                        $v: 2,
                         $r: 1,
                         isValuePrivate: false,
                         value: 20,
+                        overriddenParameterName: undefined,
                     },
                 },
                 strParams: {
                     '1': {
-                        $v: 1,
+                        $v: 2,
                         $r: 1,
                         isValuePrivate: false,
                         value: 'STR_PARAM_VALUE',
+                        overriddenParameterName: undefined,
                     },
                 },
                 pieces: {
@@ -216,6 +220,7 @@ export namespace Resources {
                         cellX: 3,
                         cellY: 4,
                         isCellMode: false,
+                        isPositionLocked: false,
                         isPrivate: false,
                         h: 5,
                         w: 6,
@@ -268,6 +273,7 @@ export namespace Resources {
                         cellX: 3,
                         cellY: 4,
                         isCellMode: false,
+                        isPositionLocked: false,
                         isPrivate: false,
                         h: 5,
                         w: 6,
@@ -344,6 +350,7 @@ export namespace Resources {
                         cellX: 3,
                         cellY: 4,
                         isCellMode: false,
+                        isPositionLocked: false,
                         isPrivate: false,
                         h: 5,
                         w: 6,
