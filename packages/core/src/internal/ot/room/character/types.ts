@@ -32,7 +32,6 @@ export const state = t.type({
     memo: t.string,
     name: t.string,
     chatPalette: t.string,
-    privateCommand: t.string,
     privateVarToml: t.string,
     tachieImage: maybe(filePath),
 
@@ -55,7 +54,6 @@ export const downOperation = createOperation(2, 1, {
     memo: TextOperation.downOperation,
     name: TextOperation.downOperation,
     chatPalette: TextOperation.downOperation,
-    privateCommand: TextOperation.downOperation,
     privateVarToml: TextOperation.downOperation,
     tachieImage: t.type({ oldValue: maybe(filePath) }),
 
@@ -85,7 +83,6 @@ export const upOperation = createOperation(2, 1, {
     memo: TextOperation.upOperation,
     name: TextOperation.upOperation,
     chatPalette: TextOperation.upOperation,
-    privateCommand: TextOperation.upOperation,
     privateVarToml: TextOperation.upOperation,
     tachieImage: t.type({ newValue: maybe(filePath) }),
 

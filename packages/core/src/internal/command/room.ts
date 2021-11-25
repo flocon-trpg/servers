@@ -59,7 +59,6 @@ export class FRoom extends FObject {
                         chatPalette: '',
                         dicePieceValues: {},
                         pieces: {},
-                        privateCommand: '',
                         privateCommands: {},
                         privateVarToml: '',
                         tachieImage: undefined,

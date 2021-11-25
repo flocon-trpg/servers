@@ -39,7 +39,6 @@ export namespace Resources {
             name: '',
             image: undefined,
             privateVarToml: '',
-            privateCommand: '',
             privateCommands: {},
             tachieImage: undefined,
             isPrivate: false,
@@ -165,7 +164,6 @@ export namespace Resources {
                 chatPalette: '',
                 memo: 'CHARA_MEMO',
                 name: 'CHARA_NAME',
-                privateCommand: 'CHARA_PRIVATE_COMMAND',
                 privateCommands: {},
                 privateVarToml: '',
                 tachieImage: {

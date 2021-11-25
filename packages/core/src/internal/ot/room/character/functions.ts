@@ -70,7 +70,6 @@ export const toClientState =
         return {
             ...source,
             chatPalette: isAuthorized ? source.chatPalette : '',
-            privateCommand: isAuthorized ? source.privateCommand : '',
             privateVarToml: isAuthorized ? source.privateVarToml : '',
             boolParams: RecordOperation.toClientState({
                 serverState: source.boolParams,
@@ -126,10 +125,6 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
             source.chatPalette == null
                 ? undefined
                 : TextOperation.toDownOperation(source.chatPalette),
-        privateCommand:
-            source.privateCommand == null
-                ? undefined
-                : TextOperation.toDownOperation(source.privateCommand),
         privateVarToml:
             source.privateVarToml == null
                 ? undefined
@@ -192,10 +187,6 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
             source.chatPalette == null
                 ? undefined
                 : TextOperation.toUpOperation(source.chatPalette),
-        privateCommand:
-            source.privateCommand == null
-                ? undefined
-                : TextOperation.toUpOperation(source.privateCommand),
         privateVarToml:
             source.privateVarToml == null
                 ? undefined
@@ -281,13 +272,6 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
             return valueResult;
         }
         result.chatPalette = valueResult.value;
-    }
-    if (operation.privateCommand != null) {
-        const valueResult = TextOperation.apply(state.privateCommand, operation.privateCommand);
-        if (valueResult.isError) {
-            return valueResult;
-        }
-        result.privateCommand = valueResult.value;
     }
     if (operation.privateVarToml != null) {
         const valueResult = TextOperation.apply(state.privateVarToml, operation.privateVarToml);
@@ -455,13 +439,6 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
             return valueResult;
         }
         result.chatPalette = valueResult.value;
-    }
-    if (operation.privateCommand != null) {
-        const valueResult = TextOperation.applyBack(state.privateCommand, operation.privateCommand);
-        if (valueResult.isError) {
-            return valueResult;
-        }
-        result.privateCommand = valueResult.value;
     }
     if (operation.privateVarToml != null) {
         const valueResult = TextOperation.applyBack(state.privateVarToml, operation.privateVarToml);
@@ -693,13 +670,6 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
     if (chatPalette.isError) {
         return chatPalette;
     }
-    const privateCommand = TextOperation.composeDownOperation(
-        first.privateCommand,
-        second.privateCommand
-    );
-    if (privateCommand.isError) {
-        return privateCommand;
-    }
     const privateVarToml = TextOperation.composeDownOperation(
         first.privateVarToml,
         second.privateVarToml
@@ -720,7 +690,6 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
         memo: memo.value,
         name: name.value,
         chatPalette: chatPalette.value,
-        privateCommand: privateCommand.value,
         privateVarToml: privateVarToml.value,
         image: ReplaceOperation.composeDownOperation(first.image, second.image),
         tachieImage: ReplaceOperation.composeDownOperation(first.tachieImage, second.tachieImage),
@@ -907,17 +876,6 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         prevState.chatPalette = restored.value.prevState;
         twoWayOperation.chatPalette = restored.value.twoWayOperation;
     }
-    if (downOperation.privateCommand !== undefined) {
-        const restored = TextOperation.restore({
-            nextState: nextState.privateCommand,
-            downOperation: downOperation.privateCommand,
-        });
-        if (restored.isError) {
-            return restored;
-        }
-        prevState.privateCommand = restored.value.prevState;
-        twoWayOperation.privateCommand = restored.value.twoWayOperation;
-    }
     if (downOperation.privateVarToml !== undefined) {
         const restored = TextOperation.restore({
             nextState: nextState.privateVarToml,
@@ -1036,12 +994,6 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         result.chatPalette = TextOperation.diff({
             prev: prevState.chatPalette,
             next: nextState.chatPalette,
-        });
-    }
-    if (prevState.privateCommand !== nextState.privateCommand) {
-        result.privateCommand = TextOperation.diff({
-            prev: prevState.privateCommand,
-            next: nextState.privateCommand,
         });
     }
     if (prevState.privateVarToml !== nextState.privateVarToml) {
@@ -1499,14 +1451,6 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         return chatPalette;
     }
 
-    const privateCommand = TextOperation.clientTransform({
-        first: first.privateCommand,
-        second: second.privateCommand,
-    });
-    if (privateCommand.isError) {
-        return privateCommand;
-    }
-
     const privateVarToml = TextOperation.clientTransform({
         first: first.privateVarToml,
         second: second.privateVarToml,
@@ -1533,7 +1477,6 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         memo: memo.value.firstPrime,
         name: name.value.firstPrime,
         chatPalette: chatPalette.value.firstPrime,
-        privateCommand: privateCommand.value.firstPrime,
         privateVarToml: privateVarToml.value.firstPrime,
         tachieImage: tachieImage.firstPrime,
     };
@@ -1554,7 +1497,6 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         memo: memo.value.secondPrime,
         name: name.value.secondPrime,
         chatPalette: chatPalette.value.secondPrime,
-        privateCommand: privateCommand.value.secondPrime,
         privateVarToml: privateVarToml.value.secondPrime,
         tachieImage: tachieImage.secondPrime,
     };
