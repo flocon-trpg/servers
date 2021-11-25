@@ -5,7 +5,6 @@ import { replace, update } from './recordOperationElement';
 import * as TextOperation from './textOperation';
 import * as ReplaceOperation from './replaceOperation';
 
-const stateShouldBeUndefinedMessage = 'state should be undefined';
 const stateShouldNotBeUndefinedMessage = 'state should not be undefined';
 const firstTypeShouldBeSameAsSecondType = 'first type and second type should be same';
 
@@ -103,27 +102,21 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
 };
 
 export const apply = (state: string | undefined, action: UpOperation | TwoWayOperation) => {
-    if (state == null) {
-        if (action.type === update) {
-            return Result.error(stateShouldNotBeUndefinedMessage);
-        }
+    if (action.type === replace) {
         return Result.ok(action.replace.newValue);
     }
-    if (action.type === replace) {
-        return Result.error(stateShouldBeUndefinedMessage);
+    if (state == null) {
+        return Result.error(stateShouldNotBeUndefinedMessage);
     }
     return TextOperation.apply(state, action.update);
 };
 
 export const applyBack = (state: string | undefined, action: DownOperation) => {
-    if (state == null) {
-        if (action.type === update) {
-            return Result.error(stateShouldNotBeUndefinedMessage);
-        }
+    if (action.type === replace) {
         return Result.ok(action.replace.oldValue);
     }
-    if (action.type === replace) {
-        return Result.error(stateShouldBeUndefinedMessage);
+    if (state == null) {
+        return Result.error(stateShouldNotBeUndefinedMessage);
     }
     return TextOperation.applyBack(state, action.update);
 };
@@ -188,19 +181,6 @@ export const diff = ({
     prev: string | undefined;
     next: string | undefined;
 }): TwoWayOperation | undefined => {
-    if (prev == null && next == null) {
-        return undefined;
-    }
-    if (prev != null && next != null) {
-        const diff = TextOperation.diff({ prev, next });
-        if (diff == null) {
-            return undefined;
-        }
-        return {
-            type: update,
-            update: diff,
-        };
-    }
     if (prev == null) {
         if (next == null) {
             return undefined;
