@@ -33,7 +33,7 @@ export const state = t.type({
     name: t.string,
     chatPalette: t.string,
     privateVarToml: t.string,
-    tachieImage: maybe(filePath),
+    portraitImage: maybe(filePath),
 
     boolParams: record(t.string, BoolParam.state),
     numParams: record(t.string, NumParam.state),
@@ -55,7 +55,7 @@ export const downOperation = createOperation(2, 1, {
     name: TextOperation.downOperation,
     chatPalette: TextOperation.downOperation,
     privateVarToml: TextOperation.downOperation,
-    tachieImage: t.type({ oldValue: maybe(filePath) }),
+    portraitImage: t.type({ oldValue: maybe(filePath) }),
 
     boolParams: record(t.string, BoolParam.downOperation),
     numParams: record(t.string, NumParam.downOperation),
@@ -84,7 +84,7 @@ export const upOperation = createOperation(2, 1, {
     name: TextOperation.upOperation,
     chatPalette: TextOperation.upOperation,
     privateVarToml: TextOperation.upOperation,
-    tachieImage: t.type({ newValue: maybe(filePath) }),
+    portraitImage: t.type({ newValue: maybe(filePath) }),
 
     boolParams: record(t.string, BoolParam.upOperation),
     numParams: record(t.string, NumParam.upOperation),
@@ -116,7 +116,7 @@ export type TwoWayOperation = {
     chatPalette?: TextOperation.TwoWayOperation;
     privateCommand?: TextOperation.TwoWayOperation;
     privateVarToml?: TextOperation.TwoWayOperation;
-    tachieImage?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<FilePath>>;
+    portraitImage?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<FilePath>>;
 
     boolParams?: StringKeyRecord<BoolParam.TwoWayOperation>;
     numParams?: StringKeyRecord<NumParam.TwoWayOperation>;

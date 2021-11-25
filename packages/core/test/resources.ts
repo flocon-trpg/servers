@@ -40,7 +40,7 @@ export namespace Resources {
             image: undefined,
             privateVarToml: '',
             privateCommands: {},
-            tachieImage: undefined,
+            portraitImage: undefined,
             isPrivate: false,
             boolParams: {},
             numParams: {},
@@ -166,7 +166,7 @@ export namespace Resources {
                 name: 'CHARA_NAME',
                 privateCommands: {},
                 privateVarToml: '',
-                tachieImage: {
+                portraitImage: {
                     $v: 1,
                     $r: 1,
                     path: 'TACHIE_IMAGE_PATH',

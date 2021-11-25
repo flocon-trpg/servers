@@ -280,8 +280,8 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
         }
         result.privateVarToml = valueResult.value;
     }
-    if (operation.tachieImage != null) {
-        result.tachieImage = operation.tachieImage.newValue;
+    if (operation.portraitImage != null) {
+        result.portraitImage = operation.portraitImage.newValue;
     }
 
     const boolParams = ParamRecordOperation.apply<
@@ -447,8 +447,8 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
         }
         result.privateVarToml = valueResult.value;
     }
-    if (operation.tachieImage != null) {
-        result.tachieImage = operation.tachieImage.oldValue;
+    if (operation.portraitImage != null) {
+        result.portraitImage = operation.portraitImage.oldValue;
     }
 
     const boolParams = ParamRecordOperation.applyBack<
@@ -692,7 +692,10 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
         chatPalette: chatPalette.value,
         privateVarToml: privateVarToml.value,
         image: ReplaceOperation.composeDownOperation(first.image, second.image),
-        tachieImage: ReplaceOperation.composeDownOperation(first.tachieImage, second.tachieImage),
+        portraitImage: ReplaceOperation.composeDownOperation(
+            first.portraitImage,
+            second.portraitImage
+        ),
         boolParams: boolParams.value,
         numParams: numParams.value,
         numMaxParams: numMaxParams.value,
@@ -829,11 +832,11 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
             newValue: nextState.image,
         };
     }
-    if (downOperation.tachieImage !== undefined) {
-        prevState.tachieImage = downOperation.tachieImage.oldValue ?? undefined;
-        twoWayOperation.tachieImage = {
-            oldValue: downOperation.tachieImage.oldValue ?? undefined,
-            newValue: nextState.tachieImage,
+    if (downOperation.portraitImage !== undefined) {
+        prevState.portraitImage = downOperation.portraitImage.oldValue ?? undefined;
+        twoWayOperation.portraitImage = {
+            oldValue: downOperation.portraitImage.oldValue ?? undefined,
+            newValue: nextState.portraitImage,
         };
     }
     if (downOperation.isPrivate !== undefined) {
@@ -966,10 +969,10 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     if (prevState.image !== nextState.image) {
         result.image = { oldValue: prevState.image, newValue: nextState.image };
     }
-    if (prevState.tachieImage !== nextState.tachieImage) {
-        result.tachieImage = {
-            oldValue: prevState.tachieImage,
-            newValue: nextState.tachieImage,
+    if (prevState.portraitImage !== nextState.portraitImage) {
+        result.portraitImage = {
+            oldValue: prevState.portraitImage,
+            newValue: nextState.portraitImage,
         };
     }
     if (prevState.isPrivate !== nextState.isPrivate) {
@@ -1264,10 +1267,10 @@ export const serverTransform =
             second: clientOperation.image,
             prevState: prevState.image,
         });
-        twoWayOperation.tachieImage = ReplaceOperation.serverTransform({
-            first: serverOperation?.tachieImage,
-            second: clientOperation.tachieImage,
-            prevState: prevState.tachieImage,
+        twoWayOperation.portraitImage = ReplaceOperation.serverTransform({
+            first: serverOperation?.portraitImage,
+            second: clientOperation.portraitImage,
+            prevState: prevState.portraitImage,
         });
         twoWayOperation.isPrivate = ReplaceOperation.serverTransform({
             first: serverOperation?.isPrivate,
@@ -1417,9 +1420,9 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         second: second.image,
     });
 
-    const tachieImage = ReplaceOperation.clientTransform({
-        first: first.tachieImage,
-        second: second.tachieImage,
+    const portraitImage = ReplaceOperation.clientTransform({
+        first: first.portraitImage,
+        second: second.portraitImage,
     });
 
     const isPrivate = ReplaceOperation.clientTransform({
@@ -1478,7 +1481,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         name: name.value.firstPrime,
         chatPalette: chatPalette.value.firstPrime,
         privateVarToml: privateVarToml.value.firstPrime,
-        tachieImage: tachieImage.firstPrime,
+        portraitImage: portraitImage.firstPrime,
     };
     const secondPrime: UpOperation = {
         $v: 2,
@@ -1498,7 +1501,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         name: name.value.secondPrime,
         chatPalette: chatPalette.value.secondPrime,
         privateVarToml: privateVarToml.value.secondPrime,
-        tachieImage: tachieImage.secondPrime,
+        portraitImage: portraitImage.secondPrime,
     };
 
     return Result.ok({
