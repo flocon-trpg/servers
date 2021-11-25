@@ -376,7 +376,7 @@ export const serverTransform =
         if (transformedMemo.isError) {
             return transformedMemo;
         }
-        twoWayOperation.memo = transformedMemo.value.secondPrime;
+        twoWayOperation.memo = transformedMemo.value;
         const transformedName = TextOperation.serverTransform({
             first: serverOperation?.name,
             second: clientOperation.name,
@@ -385,7 +385,7 @@ export const serverTransform =
         if (transformedName.isError) {
             return transformedName;
         }
-        twoWayOperation.name = transformedName.value.secondPrime;
+        twoWayOperation.name = transformedName.value;
 
         if (isIdRecord(twoWayOperation)) {
             return Result.ok(undefined);

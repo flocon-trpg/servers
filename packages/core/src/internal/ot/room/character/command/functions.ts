@@ -184,7 +184,7 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
     if (name.isError) {
         return name;
     }
-    twoWayOperation.name = name.value.secondPrime;
+    twoWayOperation.name = name.value;
 
     const value = TextOperation.serverTransform({
         first: serverOperation?.value,
@@ -194,7 +194,7 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
     if (value.isError) {
         return value;
     }
-    twoWayOperation.value = value.value.secondPrime;
+    twoWayOperation.value = value.value;
 
     if (isIdRecord(twoWayOperation)) {
         return Result.ok(undefined);

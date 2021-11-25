@@ -14,10 +14,11 @@ import * as Room from '../ot/room/types';
 import { FBoolParam } from './boolParam';
 
 const createDefaultState = (): BoolParam.State => ({
-    $v: 1,
+    $v: 2,
     $r: 1,
     value: false,
     isValuePrivate: false,
+    overriddenParameterName: undefined,
 });
 
 export class FBoolParams extends FObject {

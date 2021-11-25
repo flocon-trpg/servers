@@ -344,7 +344,7 @@ export const serverTransform =
         if (valueResult.isError) {
             return valueResult;
         }
-        twoWayOperation.value = valueResult.value.secondPrime;
+        twoWayOperation.value = valueResult.value;
 
         if (isIdRecord(twoWayOperation)) {
             return Result.ok(undefined);

@@ -208,7 +208,7 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
     if (name.isError) {
         return name;
     }
-    twoWayOperation.name = name.value.secondPrime;
+    twoWayOperation.name = name.value;
 
     const text = TextOperation.serverTransform({
         first: serverOperation?.text,
@@ -218,7 +218,7 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
     if (text.isError) {
         return text;
     }
-    twoWayOperation.text = text.value.secondPrime;
+    twoWayOperation.text = text.value;
 
     twoWayOperation.textType = ReplaceOperation.serverTransform({
         first: serverOperation?.textType,

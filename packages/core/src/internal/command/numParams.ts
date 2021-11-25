@@ -14,10 +14,11 @@ import * as Room from '../ot/room/types';
 import { FNumParam } from './numParam';
 
 const createDefaultState = (): NumParam.State => ({
-    $v: 1,
+    $v: 2,
     $r: 1,
     value: 0,
     isValuePrivate: false,
+    overriddenParameterName: undefined,
 });
 
 export class FNumParams extends FObject {

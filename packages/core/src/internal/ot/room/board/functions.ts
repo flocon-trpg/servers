@@ -366,7 +366,7 @@ export const serverTransform =
         if (name.isError) {
             return name;
         }
-        twoWayOperation.name = name.value.secondPrime;
+        twoWayOperation.name = name.value;
 
         if (
             canChangeOwnerParticipantId({

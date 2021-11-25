@@ -41,24 +41,27 @@ import {
 } from '../../util/requestedBy';
 
 const defaultBoolParamState: BoolParamTypes.State = {
-    $v: 1,
+    $v: 2,
     $r: 1,
     isValuePrivate: false,
     value: undefined,
+    overriddenParameterName: undefined,
 };
 
 const defaultNumParamState: NumParamTypes.State = {
-    $v: 1,
+    $v: 2,
     $r: 1,
     isValuePrivate: false,
     value: undefined,
+    overriddenParameterName: undefined,
 };
 
 const defaultStrParamState: StrParamType.State = {
-    $v: 1,
+    $v: 2,
     $r: 1,
     isValuePrivate: false,
     value: '',
+    overriddenParameterName: undefined,
 };
 
 export const toClientState =
@@ -936,18 +939,8 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         nextState: nextState.boolParams,
         innerDiff: ({ prevState, nextState }) =>
             SimpleValueParam.diff<Maybe<boolean>>()({
-                prevState: prevState ?? {
-                    $v: 1,
-                    $r: 1,
-                    isValuePrivate: false,
-                    value: undefined,
-                },
-                nextState: nextState ?? {
-                    $v: 1,
-                    $r: 1,
-                    isValuePrivate: false,
-                    value: undefined,
-                },
+                prevState: prevState ?? defaultBoolParamState,
+                nextState: nextState ?? defaultBoolParamState,
             }),
     });
     const numParams = ParamRecordOperation.diff({
@@ -955,18 +948,8 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         nextState: nextState.numParams,
         innerDiff: ({ prevState, nextState }) =>
             SimpleValueParam.diff<Maybe<number>>()({
-                prevState: prevState ?? {
-                    $v: 1,
-                    $r: 1,
-                    isValuePrivate: false,
-                    value: undefined,
-                },
-                nextState: nextState ?? {
-                    $v: 1,
-                    $r: 1,
-                    isValuePrivate: false,
-                    value: undefined,
-                },
+                prevState: prevState ?? defaultNumParamState,
+                nextState: nextState ?? defaultNumParamState,
             }),
     });
     const numMaxParams = ParamRecordOperation.diff({
@@ -974,18 +957,8 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         nextState: nextState.numMaxParams,
         innerDiff: ({ prevState, nextState }) =>
             SimpleValueParam.diff<Maybe<number>>()({
-                prevState: prevState ?? {
-                    $v: 1,
-                    $r: 1,
-                    isValuePrivate: false,
-                    value: undefined,
-                },
-                nextState: nextState ?? {
-                    $v: 1,
-                    $r: 1,
-                    isValuePrivate: false,
-                    value: undefined,
-                },
+                prevState: prevState ?? defaultNumParamState,
+                nextState: nextState ?? defaultNumParamState,
             }),
     });
     const strParams = ParamRecordOperation.diff({
@@ -993,18 +966,8 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         nextState: nextState.strParams,
         innerDiff: ({ prevState, nextState }) =>
             StrParam.diff({
-                prevState: prevState ?? {
-                    $v: 1,
-                    $r: 1,
-                    isValuePrivate: false,
-                    value: '',
-                },
-                nextState: nextState ?? {
-                    $v: 1,
-                    $r: 1,
-                    isValuePrivate: false,
-                    value: '',
-                },
+                prevState: prevState ?? defaultStrParamState,
+                nextState: nextState ?? defaultStrParamState,
             }),
     });
     const pieces = RecordOperation.diff<PieceTypes.State, PieceTypes.TwoWayOperation>({
@@ -1367,7 +1330,7 @@ export const serverTransform =
         if (transformedMemo.isError) {
             return transformedMemo;
         }
-        twoWayOperation.memo = transformedMemo.value.secondPrime;
+        twoWayOperation.memo = transformedMemo.value;
         const transformedName = TextOperation.serverTransform({
             first: serverOperation?.name,
             second: clientOperation.name,
@@ -1376,7 +1339,7 @@ export const serverTransform =
         if (transformedName.isError) {
             return transformedName;
         }
-        twoWayOperation.name = transformedName.value.secondPrime;
+        twoWayOperation.name = transformedName.value;
         if (isAuthorized) {
             const transformedChatPalette = TextOperation.serverTransform({
                 first: serverOperation?.chatPalette,
@@ -1386,7 +1349,7 @@ export const serverTransform =
             if (transformedChatPalette.isError) {
                 return transformedChatPalette;
             }
-            twoWayOperation.chatPalette = transformedChatPalette.value.secondPrime;
+            twoWayOperation.chatPalette = transformedChatPalette.value;
         }
         if (isAuthorized) {
             const transformed = TextOperation.serverTransform({
@@ -1397,7 +1360,7 @@ export const serverTransform =
             if (transformed.isError) {
                 return transformed;
             }
-            twoWayOperation.privateVarToml = transformed.value.secondPrime;
+            twoWayOperation.privateVarToml = transformed.value;
         }
 
         if (isIdRecord(twoWayOperation)) {

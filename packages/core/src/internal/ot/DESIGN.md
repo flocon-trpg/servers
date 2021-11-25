@@ -20,7 +20,7 @@ types.ts の定義を変更した場合、変更した型自身および影響�
 
 Participant の Role などは、クライアント側による operation では変更できず、サーバーによる operation でしか変更できない仕様にしている。そのため、クライアント側で Role を変更する Operation を作成するべきではない(もしそのような Operation をサーバーに送信しても無視される)。ただし、サーバーから受け取った Operation に Role の変更が含まれていて、その Operation をクライアントの State に apply したり、clientTransform することは頻繁に行われる。
 
-composeDownOperation は、例えば { oldValue: 1, newValue: undefined }, { oldValue:undefined, newValue: 2 } を compose したときにこれは update になるべきだが実際は{oldValue:undefined}の replace となるという仕様がある。このままでは不具合が起こるが、restore で TwoWayOperation に変換する工程で update になるため、最終的に正常な状態になる。
+composeDownOperation は、例えば { oldValue: 1, newValue: undefined }, { oldValue:undefined, newValue: 2 } を compose したときにこれは update になるべきだが実際は{ oldValue:1 }の replace となるという仕様がある。このままでは不具合が起こるが、restore で TwoWayOperation に変換する工程で update になるため、最終的に正常な状態になる。
 
 現状の仕様だと、API 側の OT は、「composeDownOperation でまとめる →restore で正常な twoWayOperation にする」という流れになっている。だが、これは「逐次 restore していく →composeTwoWayOperation でまとめる」にするほうが綺麗。パフォーマンスに関しては restore の回数が増えるので state を更新する回数も増えるため、この点でパフォーマンスが悪くなる可能性があるが、operation が肥大でない限り、diff と比べればそこまで重くないと思われる。あわせて composeDownOperation は廃止できる。ただし、書き換えが面倒なのと、newValue の設定をしなくていいというメリットはあるのと、restore による正常化という特殊な工程はすべて recordOperation 系が担っているので、とりあえず現状維持の方針。
 

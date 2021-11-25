@@ -1796,7 +1796,7 @@ export const serverTransform =
         if (name.isError) {
             return name;
         }
-        twoWayOperation.name = name.value.secondPrime;
+        twoWayOperation.name = name.value;
 
         for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const) {
             const key = `publicChannel${i}Name` as const;
@@ -1808,7 +1808,7 @@ export const serverTransform =
             if (transformed.isError) {
                 return transformed;
             }
-            twoWayOperation[key] = transformed.value.secondPrime;
+            twoWayOperation[key] = transformed.value;
         }
 
         if (isIdRecord(twoWayOperation)) {

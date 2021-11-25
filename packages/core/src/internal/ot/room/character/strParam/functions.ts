@@ -1,4 +1,5 @@
 import * as TextOperation from '../../../util/textOperation';
+import * as NullableTextOperation from '../../../util/nullableTextOperation';
 import * as ReplaceOperation from '../../../util/replaceOperation';
 import {
     Apply,
@@ -26,6 +27,10 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return {
         ...source,
         value: source.value == null ? undefined : TextOperation.toDownOperation(source.value),
+        overriddenParameterName:
+            source.overriddenParameterName == null
+                ? undefined
+                : NullableTextOperation.toDownOperation(source.overriddenParameterName),
     };
 };
 
@@ -33,6 +38,10 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
     return {
         ...source,
         value: source.value == null ? undefined : TextOperation.toUpOperation(source.value),
+        overriddenParameterName:
+            source.overriddenParameterName == null
+                ? undefined
+                : NullableTextOperation.toUpOperation(source.overriddenParameterName),
     };
 };
 
@@ -47,6 +56,16 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
             return valueResult;
         }
         result.value = valueResult.value;
+    }
+    if (operation.overriddenParameterName != null) {
+        const appliedResult = NullableTextOperation.apply(
+            state.overriddenParameterName,
+            operation.overriddenParameterName
+        );
+        if (appliedResult.isError) {
+            return appliedResult;
+        }
+        result.overriddenParameterName = appliedResult.value;
     }
     return Result.ok(result);
 };
@@ -64,6 +83,16 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
         }
         result.value = prevValue.value;
     }
+    if (operation.overriddenParameterName != null) {
+        const appliedResult = NullableTextOperation.applyBack(
+            state.overriddenParameterName,
+            operation.overriddenParameterName
+        );
+        if (appliedResult.isError) {
+            return appliedResult;
+        }
+        result.overriddenParameterName = appliedResult.value;
+    }
 
     return Result.ok(result);
 };
@@ -73,8 +102,15 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
     if (value.isError) {
         return value;
     }
+    const overriddenParameterName = NullableTextOperation.composeDownOperation(
+        first.overriddenParameterName,
+        second.overriddenParameterName
+    );
+    if (overriddenParameterName.isError) {
+        return overriddenParameterName;
+    }
     const valueProps: DownOperation = {
-        $v: 1,
+        $v: 2,
         $r: 1,
         isValuePrivate: ReplaceOperation.composeDownOperation(
             first.isValuePrivate,
@@ -98,7 +134,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     }
 
     const prevState: State = { ...nextState };
-    const twoWayOperation: TwoWayOperation = { $v: 1, $r: 1 };
+    const twoWayOperation: TwoWayOperation = { $v: 2, $r: 1 };
 
     if (downOperation.isValuePrivate !== undefined) {
         prevState.isValuePrivate = downOperation.isValuePrivate.oldValue;
@@ -118,12 +154,23 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         prevState.value = restored.value.prevState;
         twoWayOperation.value = restored.value.twoWayOperation;
     }
+    {
+        const restoredResult = NullableTextOperation.restore({
+            nextState: nextState.overriddenParameterName,
+            downOperation: downOperation.overriddenParameterName,
+        });
+        if (restoredResult.isError) {
+            return restoredResult;
+        }
+        prevState.overriddenParameterName = restoredResult.value.prevState;
+        twoWayOperation.overriddenParameterName = restoredResult.value.twoWayOperation;
+    }
 
     return Result.ok({ prevState, nextState, twoWayOperation });
 };
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const resultType: TwoWayOperation = { $v: 1, $r: 1 };
+    const resultType: TwoWayOperation = { $v: 2, $r: 1 };
     if (prevState.isValuePrivate !== nextState.isValuePrivate) {
         resultType.isValuePrivate = {
             oldValue: prevState.isValuePrivate,
@@ -136,6 +183,12 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
             next: nextState.value,
         });
     }
+    if (prevState.overriddenParameterName !== nextState.overriddenParameterName) {
+        resultType.overriddenParameterName = NullableTextOperation.diff({
+            prev: prevState.overriddenParameterName,
+            next: nextState.overriddenParameterName,
+        });
+    }
     if (isIdRecord(resultType)) {
         return undefined;
     }
@@ -145,7 +198,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
 export const serverTransform =
     (isAuthorized: boolean): ServerTransform<State, TwoWayOperation, UpOperation> =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
-        const twoWayOperation: TwoWayOperation = { $v: 1, $r: 1 };
+        const twoWayOperation: TwoWayOperation = { $v: 2, $r: 1 };
 
         if (isAuthorized) {
             twoWayOperation.isValuePrivate = ReplaceOperation.serverTransform({
@@ -163,7 +216,18 @@ export const serverTransform =
             if (transformed.isError) {
                 return transformed;
             }
-            twoWayOperation.value = transformed.value.secondPrime;
+            twoWayOperation.value = transformed.value;
+        }
+        {
+            const xformResult = NullableTextOperation.serverTransform({
+                first: serverOperation?.overriddenParameterName,
+                second: clientOperation.overriddenParameterName,
+                prevState: prevState.overriddenParameterName,
+            });
+            if (xformResult.isError) {
+                return xformResult;
+            }
+            twoWayOperation.overriddenParameterName = xformResult.value;
         }
 
         if (isIdRecord(twoWayOperation)) {
@@ -187,15 +251,23 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         return value;
     }
 
+    const overriddenParameterName = NullableTextOperation.clientTransform({
+        first: first?.overriddenParameterName,
+        second: second.overriddenParameterName,
+    });
+    if (overriddenParameterName.isError) {
+        return overriddenParameterName;
+    }
+
     const firstPrime: UpOperation = {
-        $v: 1,
+        $v: 2,
         $r: 1,
         isValuePrivate: isValuePrivate.firstPrime,
         value: value.value.firstPrime,
     };
 
     const secondPrime: UpOperation = {
-        $v: 1,
+        $v: 2,
         $r: 1,
         isValuePrivate: isValuePrivate.secondPrime,
         value: value.value.secondPrime,
