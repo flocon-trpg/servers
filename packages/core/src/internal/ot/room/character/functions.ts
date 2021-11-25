@@ -2,8 +2,8 @@ import { mapRecordOperationElement } from '../../util/recordOperationElement';
 import * as TextOperation from '../../util/textOperation';
 import * as Piece from '../../piece/functions';
 import * as PieceTypes from '../../piece/types';
-import * as BoardLocation from '../../boardLocation/functions';
-import * as BoardLocationTypes from '../../boardLocation/types';
+import * as BoardPosition from '../../boardPosition/functions';
+import * as BoardPositionTypes from '../../boardPosition/types';
 import * as ReplaceOperation from '../../util/replaceOperation';
 import * as RecordOperation from '../../util/recordOperation';
 import * as ParamRecordOperation from '../../util/paramRecordOperation';
@@ -101,8 +101,8 @@ export const toClientState =
                 toClientState: ({ state }) => Command.toClientState(state),
             }),
             tachieLocations: RecordOperation.toClientState<
-                BoardLocationTypes.State,
-                BoardLocationTypes.State
+                BoardPositionTypes.State,
+                BoardPositionTypes.State
             >({
                 serverState: source.tachieLocations,
                 isPrivate: state =>
@@ -111,7 +111,7 @@ export const toClientState =
                         boardId: state.boardId,
                         currentRoomState,
                     }),
-                toClientState: ({ state }) => BoardLocation.toClientState(state),
+                toClientState: ({ state }) => BoardPosition.toClientState(state),
             }),
         };
     };
@@ -172,7 +172,7 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
                       mapRecordOperationElement({
                           source: operation,
                           mapReplace: x => x,
-                          mapOperation: BoardLocation.toDownOperation,
+                          mapOperation: BoardPosition.toDownOperation,
                       })
                   ),
     };
@@ -234,7 +234,7 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
                       mapRecordOperationElement({
                           source: operation,
                           mapReplace: x => x,
-                          mapOperation: BoardLocation.toUpOperation,
+                          mapOperation: BoardPosition.toUpOperation,
                       })
                   ),
     };
@@ -390,14 +390,14 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     result.privateCommands = privateCommandsResult.value;
 
     const tachieLocations = RecordOperation.apply<
-        BoardLocationTypes.State,
-        BoardLocationTypes.UpOperation,
+        BoardPositionTypes.State,
+        BoardPositionTypes.UpOperation,
         ScalarError
     >({
         prevState: state.tachieLocations,
         operation: operation.tachieLocations,
         innerApply: ({ prevState, operation }) => {
-            return BoardLocation.apply({ state: prevState, operation });
+            return BoardPosition.apply({ state: prevState, operation });
         },
     });
     if (tachieLocations.isError) {
@@ -561,14 +561,14 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     result.privateCommands = privateCommandsResult.value;
 
     const tachieLocations = RecordOperation.applyBack<
-        BoardLocationTypes.State,
-        BoardLocationTypes.DownOperation,
+        BoardPositionTypes.State,
+        BoardPositionTypes.DownOperation,
         ScalarError
     >({
         nextState: state.tachieLocations,
         operation: operation.tachieLocations,
         innerApplyBack: ({ state: nextState, operation }) => {
-            return BoardLocation.applyBack({ state: nextState, operation });
+            return BoardPosition.applyBack({ state: nextState, operation });
         },
     });
     if (tachieLocations.isError) {
@@ -645,14 +645,14 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
     }
 
     const tachieLocations = RecordOperation.composeDownOperation<
-        BoardLocationTypes.State,
-        BoardLocationTypes.DownOperation,
+        BoardPositionTypes.State,
+        BoardPositionTypes.DownOperation,
         DownError
     >({
         first: first.tachieLocations,
         second: second.tachieLocations,
-        innerApplyBack: ({ state, operation }) => BoardLocation.applyBack({ state, operation }),
-        innerCompose: params => BoardLocation.composeDownOperation(params),
+        innerApplyBack: ({ state, operation }) => BoardPosition.applyBack({ state, operation }),
+        innerCompose: params => BoardPosition.composeDownOperation(params),
     });
     if (tachieLocations.isError) {
         return tachieLocations;
@@ -779,15 +779,15 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     }
 
     const tachieLocations = RecordOperation.restore<
-        BoardLocationTypes.State,
-        BoardLocationTypes.DownOperation,
-        BoardLocationTypes.TwoWayOperation,
+        BoardPositionTypes.State,
+        BoardPositionTypes.DownOperation,
+        BoardPositionTypes.TwoWayOperation,
         ScalarError
     >({
         nextState: nextState.tachieLocations,
         downOperation: downOperation.tachieLocations,
-        innerDiff: params => BoardLocation.diff(params),
-        innerRestore: params => BoardLocation.restore(params),
+        innerDiff: params => BoardPosition.diff(params),
+        innerRestore: params => BoardPosition.restore(params),
     });
     if (tachieLocations.isError) {
         return tachieLocations;
@@ -939,12 +939,12 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         innerDiff: params => Command.diff(params),
     });
     const tachieLocations = RecordOperation.diff<
-        BoardLocationTypes.State,
-        BoardLocationTypes.TwoWayOperation
+        BoardPositionTypes.State,
+        BoardPositionTypes.TwoWayOperation
     >({
         prevState: prevState.tachieLocations,
         nextState: nextState.tachieLocations,
-        innerDiff: params => BoardLocation.diff(params),
+        innerDiff: params => BoardPosition.diff(params),
     });
     const result: TwoWayOperation = {
         $v: 2,
@@ -1181,10 +1181,10 @@ export const serverTransform =
         }
 
         const tachieLocations = RecordOperation.serverTransform<
-            BoardLocationTypes.State,
-            BoardLocationTypes.State,
-            BoardLocationTypes.TwoWayOperation,
-            BoardLocationTypes.UpOperation,
+            BoardPositionTypes.State,
+            BoardPositionTypes.State,
+            BoardPositionTypes.TwoWayOperation,
+            BoardPositionTypes.UpOperation,
             TwoWayError
         >({
             prevState: prevState.tachieLocations,
@@ -1192,7 +1192,7 @@ export const serverTransform =
             first: serverOperation?.tachieLocations,
             second: clientOperation.tachieLocations,
             innerTransform: ({ prevState, nextState, first, second }) =>
-                BoardLocation.serverTransform({
+                BoardPosition.serverTransform({
                     prevState,
                     currentState: nextState,
                     serverOperation: first,
@@ -1394,14 +1394,14 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     }
 
     const tachieLocations = RecordOperation.clientTransform<
-        BoardLocationTypes.State,
-        BoardLocationTypes.UpOperation,
+        BoardPositionTypes.State,
+        BoardPositionTypes.UpOperation,
         UpError
     >({
         first: first.tachieLocations,
         second: second.tachieLocations,
-        innerTransform: params => BoardLocation.clientTransform(params),
-        innerDiff: params => BoardLocation.diff(params),
+        innerTransform: params => BoardPosition.clientTransform(params),
+        innerDiff: params => BoardPosition.diff(params),
     });
     if (tachieLocations.isError) {
         return tachieLocations;

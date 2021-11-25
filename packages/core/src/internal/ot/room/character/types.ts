@@ -6,7 +6,7 @@ import {
 import { FilePath, filePath } from '../../filePath/types';
 import * as TextOperation from '../../util/textOperation';
 import * as Piece from '../../piece/types';
-import * as BoardLocation from '../../boardLocation/types';
+import * as BoardPosition from '../../boardPosition/types';
 import * as ReplaceOperation from '../../util/replaceOperation';
 import { RecordTwoWayOperation } from '../../util/recordOperation';
 import * as BoolParam from './boolParam/types';
@@ -41,7 +41,7 @@ export const state = t.type({
     strParams: record(t.string, StrParam.state),
     pieces: record(t.string, Piece.state),
     privateCommands: record(t.string, Command.state),
-    tachieLocations: record(t.string, BoardLocation.state),
+    tachieLocations: record(t.string, BoardPosition.state),
 });
 
 export type State = t.TypeOf<typeof state>;
@@ -68,7 +68,7 @@ export const downOperation = createOperation(2, 1, {
     ),
     tachieLocations: record(
         t.string,
-        recordDownOperationElementFactory(BoardLocation.state, BoardLocation.downOperation)
+        recordDownOperationElementFactory(BoardPosition.state, BoardPosition.downOperation)
     ),
 });
 
@@ -97,7 +97,7 @@ export const upOperation = createOperation(2, 1, {
     ),
     tachieLocations: record(
         t.string,
-        recordUpOperationElementFactory(BoardLocation.state, BoardLocation.upOperation)
+        recordUpOperationElementFactory(BoardPosition.state, BoardPosition.upOperation)
     ),
 });
 
@@ -124,5 +124,5 @@ export type TwoWayOperation = {
     strParams?: StringKeyRecord<StrParam.TwoWayOperation>;
     pieces?: RecordTwoWayOperation<Piece.State, Piece.TwoWayOperation>;
     privateCommands?: RecordTwoWayOperation<Command.State, Command.TwoWayOperation>;
-    tachieLocations?: RecordTwoWayOperation<BoardLocation.State, BoardLocation.TwoWayOperation>;
+    tachieLocations?: RecordTwoWayOperation<BoardPosition.State, BoardPosition.TwoWayOperation>;
 };

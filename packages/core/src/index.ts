@@ -112,16 +112,16 @@ export {
 } from './internal/ot/room/converter';
 
 export {
-    apply as applyBoardLocation,
-    diff as boardLocationDiff,
-    toUpOperation as toBoardLocationUpOperation,
-} from './internal/ot/boardLocation/functions';
+    apply as applyBoardPosition,
+    diff as boardPositionDiff,
+    toUpOperation as toBoardPositionUpOperation,
+} from './internal/ot/boardPosition/functions';
 
 export {
-    State as BoardLocationState,
-    UpOperation as BoardLocationUpOperation,
-    DownOperation as BoardLocationDownOperation,
-} from './internal/ot/boardLocation/types';
+    State as BoardPositionState,
+    UpOperation as BoardPositionUpOperation,
+    DownOperation as BoardPositionDownOperation,
+} from './internal/ot/boardPosition/types';
 
 export {
     Master,
