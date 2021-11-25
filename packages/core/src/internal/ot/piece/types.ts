@@ -20,6 +20,7 @@ export const state = t.type({
     cellY: t.number,
     h: t.number,
     isCellMode: t.boolean,
+    isPositionLocked: t.boolean,
     isPrivate: t.boolean,
     w: t.number,
     x: t.number,
@@ -36,6 +37,7 @@ export const downOperation = createOperation(2, 1, {
     cellY: numberDownOperation,
     h: numberDownOperation,
     isCellMode: booleanDownOperation,
+    isPositionLocked: booleanDownOperation,
     isPrivate: booleanDownOperation,
     w: numberDownOperation,
     x: numberDownOperation,
@@ -52,6 +54,7 @@ export const upOperation = createOperation(2, 1, {
     cellY: numberUpOperation,
     h: numberUpOperation,
     isCellMode: booleanUpOperation,
+    isPositionLocked: booleanUpOperation,
     isPrivate: booleanUpOperation,
     w: numberUpOperation,
     x: numberUpOperation,
@@ -71,6 +74,7 @@ export type TwoWayOperation = {
     cellY?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     h?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     isCellMode?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
+    isPositionLocked?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
     isPrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
     w?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     x?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;

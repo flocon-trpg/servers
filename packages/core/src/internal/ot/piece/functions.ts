@@ -62,6 +62,9 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     if (operation.isCellMode != null) {
         result.isCellMode = operation.isCellMode.newValue;
     }
+    if (operation.isPositionLocked != null) {
+        result.isPositionLocked = operation.isPositionLocked.newValue;
+    }
     if (operation.isPrivate != null) {
         result.isPrivate = operation.isPrivate.newValue;
     }
@@ -101,6 +104,9 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     if (operation.isCellMode !== undefined) {
         result.isCellMode = operation.isCellMode.oldValue;
     }
+    if (operation.isPositionLocked !== undefined) {
+        result.isPositionLocked = operation.isPositionLocked.oldValue;
+    }
     if (operation.isPrivate !== undefined) {
         result.isPrivate = operation.isPrivate.oldValue;
     }
@@ -128,6 +134,10 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
         cellY: ReplaceOperation.composeDownOperation(first.cellY, second.cellY),
         h: ReplaceOperation.composeDownOperation(first.h, second.h),
         isCellMode: ReplaceOperation.composeDownOperation(first.isCellMode, second.isCellMode),
+        isPositionLocked: ReplaceOperation.composeDownOperation(
+            first.isPositionLocked,
+            second.isPositionLocked
+        ),
         isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
         w: ReplaceOperation.composeDownOperation(first.w, second.w),
         x: ReplaceOperation.composeDownOperation(first.x, second.x),
@@ -192,6 +202,13 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
             newValue: nextState.isCellMode,
         };
     }
+    if (downOperation.isPositionLocked !== undefined) {
+        prevState.isPositionLocked = downOperation.isPositionLocked.oldValue;
+        twoWayOperation.isPositionLocked = {
+            ...downOperation.isPositionLocked,
+            newValue: nextState.isPositionLocked,
+        };
+    }
     if (downOperation.isPrivate !== undefined) {
         prevState.isPrivate = downOperation.isPrivate.oldValue;
         twoWayOperation.isPrivate = {
@@ -253,6 +270,12 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
             newValue: nextState.isCellMode,
         };
     }
+    if (prevState.isPositionLocked !== nextState.isPositionLocked) {
+        resultType.isPositionLocked = {
+            oldValue: prevState.isPositionLocked,
+            newValue: nextState.isPositionLocked,
+        };
+    }
     if (prevState.isPrivate !== nextState.isPrivate) {
         resultType.isPrivate = {
             oldValue: prevState.isPrivate,
@@ -310,6 +333,11 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
         first: serverOperation?.isCellMode,
         second: clientOperation.isCellMode,
         prevState: prevState.isCellMode,
+    });
+    twoWayOperation.isPositionLocked = ReplaceOperation.serverTransform({
+        first: serverOperation?.isPositionLocked,
+        second: clientOperation.isPositionLocked,
+        prevState: prevState.isPositionLocked,
     });
     twoWayOperation.isPrivate = ReplaceOperation.serverTransform({
         first: serverOperation?.isPrivate,
@@ -369,6 +397,10 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         first: first.isCellMode,
         second: second.isCellMode,
     });
+    const isPositionLocked = ReplaceOperation.clientTransform({
+        first: first.isPositionLocked,
+        second: second.isPositionLocked,
+    });
     const isPrivate = ReplaceOperation.clientTransform({
         first: first.isPrivate,
         second: second.isPrivate,
@@ -400,6 +432,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         cellY: cellY.firstPrime,
         h: h.firstPrime,
         isCellMode: isCellMode.firstPrime,
+        isPositionLocked: isPositionLocked.firstPrime,
         isPrivate: isPrivate.firstPrime,
         w: w.firstPrime,
         x: x.firstPrime,
@@ -416,6 +449,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         cellY: cellY.secondPrime,
         h: h.secondPrime,
         isCellMode: isCellMode.secondPrime,
+        isPositionLocked: isPositionLocked.secondPrime,
         isPrivate: isPrivate.secondPrime,
         w: w.secondPrime,
         x: x.secondPrime,
