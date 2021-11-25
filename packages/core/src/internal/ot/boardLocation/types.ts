@@ -14,6 +14,7 @@ export const state = t.type({
     $r: t.literal(1),
     boardId: t.string,
     h: t.number,
+    isPositionLocked: t.boolean,
     isPrivate: t.boolean,
     w: t.number,
     x: t.number,
@@ -25,6 +26,7 @@ export type State = t.TypeOf<typeof state>;
 export const downOperation = createOperation(2, 1, {
     boardId: t.type({ oldValue: t.string }),
     h: numberDownOperation,
+    isPositionLocked: booleanDownOperation,
     isPrivate: booleanDownOperation,
     w: numberDownOperation,
     x: numberDownOperation,
@@ -36,6 +38,7 @@ export type DownOperation = t.TypeOf<typeof downOperation>;
 export const upOperation = createOperation(2, 1, {
     boardId: t.type({ newValue: t.string }),
     h: numberUpOperation,
+    isPositionLocked: booleanUpOperation,
     isPrivate: booleanUpOperation,
     w: numberUpOperation,
     x: numberUpOperation,
@@ -50,6 +53,7 @@ export type TwoWayOperation = {
 
     boardId?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
     h?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
+    isPositionLocked?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
     isPrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
     w?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     x?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;

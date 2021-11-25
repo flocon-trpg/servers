@@ -32,6 +32,9 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     if (operation.h != null) {
         result.h = operation.h.newValue;
     }
+    if (operation.isPositionLocked != null) {
+        result.isPositionLocked = operation.isPositionLocked.newValue;
+    }
     if (operation.isPrivate != null) {
         result.isPrivate = operation.isPrivate.newValue;
     }
@@ -56,6 +59,9 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     if (operation.h !== undefined) {
         result.h = operation.h.oldValue;
     }
+    if (operation.isPositionLocked != null) {
+        result.isPositionLocked = operation.isPositionLocked.oldValue;
+    }
     if (operation.isPrivate !== undefined) {
         result.isPrivate = operation.isPrivate.oldValue;
     }
@@ -78,6 +84,10 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
         $r: 1,
         boardId: ReplaceOperation.composeDownOperation(first.boardId, second.boardId),
         h: ReplaceOperation.composeDownOperation(first.h, second.h),
+        isPositionLocked: ReplaceOperation.composeDownOperation(
+            first.isPositionLocked,
+            second.isPositionLocked
+        ),
         isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
         w: ReplaceOperation.composeDownOperation(first.w, second.w),
         x: ReplaceOperation.composeDownOperation(first.x, second.x),
@@ -103,6 +113,13 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     if (downOperation.h !== undefined) {
         prevState.h = downOperation.h.oldValue;
         twoWayOperation.h = { ...downOperation.h, newValue: nextState.h };
+    }
+    if (downOperation.isPositionLocked !== undefined) {
+        prevState.isPositionLocked = downOperation.isPositionLocked.oldValue;
+        twoWayOperation.isPositionLocked = {
+            ...downOperation.isPositionLocked,
+            newValue: nextState.isPositionLocked,
+        };
     }
     if (downOperation.isPrivate !== undefined) {
         prevState.isPrivate = downOperation.isPrivate.oldValue;
@@ -134,6 +151,12 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     }
     if (prevState.h !== nextState.h) {
         resultType.h = { oldValue: prevState.h, newValue: nextState.h };
+    }
+    if (prevState.isPositionLocked !== nextState.isPositionLocked) {
+        resultType.isPositionLocked = {
+            oldValue: prevState.isPositionLocked,
+            newValue: nextState.isPositionLocked,
+        };
     }
     if (prevState.isPrivate !== nextState.isPrivate) {
         resultType.isPrivate = {
@@ -173,6 +196,11 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
         second: clientOperation.h,
         prevState: prevState.h,
     });
+    twoWayOperation.isPositionLocked = ReplaceOperation.serverTransform({
+        first: serverOperation?.isPositionLocked,
+        second: clientOperation.isPositionLocked,
+        prevState: prevState.isPositionLocked,
+    });
     twoWayOperation.isPrivate = ReplaceOperation.serverTransform({
         first: serverOperation?.isPrivate,
         second: clientOperation.isPrivate,
@@ -210,6 +238,10 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         first: first.h,
         second: second.h,
     });
+    const isPositionLocked = ReplaceOperation.clientTransform({
+        first: first.isPositionLocked,
+        second: second.isPositionLocked,
+    });
     const isPrivate = ReplaceOperation.clientTransform({
         first: first.isPrivate,
         second: second.isPrivate,
@@ -232,6 +264,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         $r: 1,
         boardId: boardId.firstPrime,
         h: h.firstPrime,
+        isPositionLocked: isPositionLocked.firstPrime,
         isPrivate: isPrivate.firstPrime,
         w: w.firstPrime,
         x: x.firstPrime,
@@ -243,6 +276,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         $r: 1,
         boardId: boardId.secondPrime,
         h: h.secondPrime,
+        isPositionLocked: isPositionLocked.secondPrime,
         isPrivate: isPrivate.secondPrime,
         w: w.secondPrime,
         x: x.secondPrime,

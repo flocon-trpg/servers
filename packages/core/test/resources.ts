@@ -231,6 +231,7 @@ export namespace Resources {
                         $v: 2,
                         $r: 1,
                         boardId,
+                        isPositionLocked: false,
                         isPrivate: false,
                         h: 5,
                         w: 6,
