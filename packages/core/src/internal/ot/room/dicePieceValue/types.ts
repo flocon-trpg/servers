@@ -10,7 +10,6 @@ import { record } from '../../util/record';
 import { RecordTwoWayOperation } from '../../util/recordOperation';
 import { Maybe, maybe } from '../../../maybe';
 import { ReplaceValueTwoWayOperation } from '../../util/replaceOperation';
-import * as TextOperation from '../../util/textOperation';
 import * as NullableTextOperation from '../../util/nullableTextOperation';
 
 export const dicePieceValueStrIndexes = ['1', '2', '3', '4'] as const;
@@ -20,7 +19,7 @@ export const state = t.type({
     $r: t.literal(1),
 
     ownerCharacterId: maybe(t.string),
-    memo: t.string,
+    memo: maybe(t.string),
     name: maybe(t.string),
     dice: record(t.string, DieValueTypes.state),
     pieces: record(t.string, PieceTypes.state),
@@ -30,7 +29,7 @@ export type State = t.TypeOf<typeof state>;
 
 export const downOperation = createOperation(2, 1, {
     ownerCharacterId: t.type({ oldValue: maybe(t.string) }),
-    memo: TextOperation.downOperation,
+    memo: NullableTextOperation.downOperation,
     name: NullableTextOperation.downOperation,
     dice: record(
         t.string,
@@ -46,7 +45,7 @@ export type DownOperation = t.TypeOf<typeof downOperation>;
 
 export const upOperation = createOperation(2, 1, {
     ownerCharacterId: t.type({ newValue: maybe(t.string) }),
-    memo: TextOperation.upOperation,
+    memo: NullableTextOperation.upOperation,
     name: NullableTextOperation.upOperation,
     dice: record(
         t.string,
@@ -65,7 +64,7 @@ export type TwoWayOperation = {
     $r: 1;
 
     ownerCharacterId?: ReplaceValueTwoWayOperation<Maybe<string>>;
-    memo?: TextOperation.TwoWayOperation;
+    memo?: NullableTextOperation.TwoWayOperation;
     name?: NullableTextOperation.TwoWayOperation;
     dice?: RecordTwoWayOperation<DieValueTypes.State, DieValueTypes.TwoWayOperation>;
     pieces?: RecordTwoWayOperation<PieceTypes.State, PieceTypes.TwoWayOperation>;

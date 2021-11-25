@@ -19,7 +19,7 @@ export const state = t.type({
     ownerCharacterId: maybe(t.string),
     isValuePrivate: t.boolean,
     value: t.string,
-    memo: t.string,
+    memo: maybe(t.string),
     name: maybe(t.string),
     pieces: record(t.string, PieceTypes.state),
 });
@@ -30,7 +30,7 @@ export const downOperation = createOperation(2, 1, {
     ownerCharacterId: t.type({ oldValue: maybe(t.string) }),
     isValuePrivate: t.type({ oldValue: t.boolean }),
     value: TextOperation.downOperation,
-    memo: TextOperation.downOperation,
+    memo: NullableTextOperation.downOperation,
     name: NullableTextOperation.downOperation,
     pieces: record(
         t.string,
@@ -44,7 +44,7 @@ export const upOperation = createOperation(2, 1, {
     ownerCharacterId: t.type({ newValue: maybe(t.string) }),
     isValuePrivate: t.type({ newValue: t.boolean }),
     value: TextOperation.upOperation,
-    memo: TextOperation.upOperation,
+    memo: NullableTextOperation.upOperation,
     name: NullableTextOperation.upOperation,
     pieces: record(
         t.string,
@@ -61,7 +61,7 @@ export type TwoWayOperation = {
     ownerCharacterId?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<string>>;
     isValuePrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
     value?: TextOperation.TwoWayOperation;
-    memo?: TextOperation.TwoWayOperation;
+    memo?: NullableTextOperation.TwoWayOperation;
     name?: NullableTextOperation.TwoWayOperation;
     pieces?: RecordTwoWayOperation<PieceTypes.State, PieceTypes.TwoWayOperation>;
 };

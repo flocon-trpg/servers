@@ -33,7 +33,6 @@ import {
     isCharacterOwner,
     canChangeOwnerCharacterId,
 } from '../../util/requestedBy';
-import * as TextOperation from '../../util/textOperation';
 import * as NullableTextOperation from '../../util/nullableTextOperation';
 
 export const toClientState =
@@ -54,7 +53,7 @@ export const toClientState =
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return {
         ...source,
-        memo: source.memo == null ? undefined : TextOperation.toDownOperation(source.memo),
+        memo: source.memo == null ? undefined : NullableTextOperation.toDownOperation(source.memo),
         name: source.name == null ? undefined : NullableTextOperation.toDownOperation(source.name),
     };
 };
@@ -62,7 +61,7 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
 export const toUpOperation = (source: TwoWayOperation): UpOperation => {
     return {
         ...source,
-        memo: source.memo == null ? undefined : TextOperation.toUpOperation(source.memo),
+        memo: source.memo == null ? undefined : NullableTextOperation.toUpOperation(source.memo),
         name: source.name == null ? undefined : NullableTextOperation.toUpOperation(source.name),
     };
 };
@@ -74,7 +73,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
         result.ownerCharacterId = operation.ownerCharacterId.newValue;
     }
     if (operation.memo != null) {
-        const valueResult = TextOperation.apply(state.memo, operation.memo);
+        const valueResult = NullableTextOperation.apply(state.memo, operation.memo);
         if (valueResult.isError) {
             return valueResult;
         }
@@ -124,7 +123,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
         result.ownerCharacterId = operation.ownerCharacterId.oldValue;
     }
     if (operation.memo != null) {
-        const valueResult = TextOperation.applyBack(state.memo, operation.memo);
+        const valueResult = NullableTextOperation.applyBack(state.memo, operation.memo);
         if (valueResult.isError) {
             return valueResult;
         }
@@ -174,7 +173,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 };
 
 export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
-    const memo = TextOperation.composeDownOperation(first.memo, second.memo);
+    const memo = NullableTextOperation.composeDownOperation(first.memo, second.memo);
     if (memo.isError) {
         return memo;
     }
@@ -289,7 +288,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         };
     }
     if (downOperation.memo !== undefined) {
-        const restored = TextOperation.restore({
+        const restored = NullableTextOperation.restore({
             nextState: nextState.memo,
             downOperation: downOperation.memo,
         });
@@ -340,7 +339,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         };
     }
     if (prevState.memo !== nextState.memo) {
-        result.memo = TextOperation.diff({
+        result.memo = NullableTextOperation.diff({
             prev: prevState.memo,
             next: nextState.memo,
         });
@@ -455,7 +454,7 @@ export const serverTransform =
             });
         }
 
-        const transformedMemo = TextOperation.serverTransform({
+        const transformedMemo = NullableTextOperation.serverTransform({
             first: serverOperation?.memo,
             second: clientOperation.memo,
             prevState: prevState.memo,
@@ -516,7 +515,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         second: second.ownerCharacterId,
     });
 
-    const memo = TextOperation.clientTransform({
+    const memo = NullableTextOperation.clientTransform({
         first: first.memo,
         second: second.memo,
     });
