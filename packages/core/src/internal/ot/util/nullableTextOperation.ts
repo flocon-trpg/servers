@@ -5,9 +5,9 @@ import { replace, update } from './recordOperationElement';
 import * as TextOperation from './textOperation';
 import * as ReplaceOperation from './replaceOperation';
 
-const stateShouldBeUndefinedMessage = '';
-const stateShouldNotBeUndefinedMessage = '';
-const firstTypeShouldBeSameAsSecondType = '';
+const stateShouldBeUndefinedMessage = 'state should be undefined';
+const stateShouldNotBeUndefinedMessage = 'state should not be undefined';
+const firstTypeShouldBeSameAsSecondType = 'first type and second type should be same';
 
 const stringOrUndefined = t.union([t.string, t.undefined]);
 
