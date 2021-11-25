@@ -252,6 +252,8 @@ export namespace Resources {
             DICE_PIECE_KEY: {
                 $v: 2,
                 $r: 1,
+                name: undefined,
+                memo: undefined,
                 dice: {
                     '1': {
                         $v: 1,
@@ -338,6 +340,8 @@ export namespace Resources {
                 $r: 1,
                 isValuePrivate: false,
                 value: 'STR_PIECE_VALUE',
+                name: undefined,
+                memo: undefined,
                 ownerCharacterId: Participant.Player2.userUid,
                 pieces: {
                     DICE_PIECE_KEY: {

@@ -325,6 +325,8 @@ describe('tests creating DicePieceValue', () => {
                     newValue: {
                         $v: 2,
                         $r: 1,
+                        memo: undefined,
+                        name: undefined,
                         dice: {
                             '1': {
                                 $v: 1,
@@ -366,6 +368,8 @@ describe('tests creating DicePieceValue', () => {
                     newValue: {
                         $v: 2,
                         $r: 1,
+                        memo: undefined,
+                        name: undefined,
                         dice: {
                             '1': {
                                 $v: 1,
