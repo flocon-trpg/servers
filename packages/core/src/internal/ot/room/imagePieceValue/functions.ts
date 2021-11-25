@@ -1,5 +1,6 @@
 import * as ReplaceOperation from '../../util/replaceOperation';
 import * as TextOperation from '../../util/textOperation';
+import * as NullableTextOperation from '../../util/nullableTextOperation';
 import {
     Apply,
     ClientTransform,
@@ -39,7 +40,7 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return {
         ...source,
         memo: source.memo == null ? undefined : TextOperation.toDownOperation(source.memo),
-        name: source.name == null ? undefined : TextOperation.toDownOperation(source.name),
+        name: source.name == null ? undefined : NullableTextOperation.toDownOperation(source.name),
     };
 };
 
@@ -47,7 +48,7 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
     return {
         ...source,
         memo: source.memo == null ? undefined : TextOperation.toUpOperation(source.memo),
-        name: source.name == null ? undefined : TextOperation.toUpOperation(source.name),
+        name: source.name == null ? undefined : NullableTextOperation.toUpOperation(source.name),
     };
 };
 
@@ -71,7 +72,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
         result.memo = valueResult.value;
     }
     if (operation.name != null) {
-        const valueResult = TextOperation.apply(state.name, operation.name);
+        const valueResult = NullableTextOperation.apply(state.name, operation.name);
         if (valueResult.isError) {
             return valueResult;
         }
@@ -113,7 +114,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
         result.memo = valueResult.value;
     }
     if (operation.name != null) {
-        const valueResult = TextOperation.applyBack(state.name, operation.name);
+        const valueResult = NullableTextOperation.applyBack(state.name, operation.name);
         if (valueResult.isError) {
             return valueResult;
         }
@@ -145,7 +146,7 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
         return memo;
     }
 
-    const name = TextOperation.composeDownOperation(first.name, second.name);
+    const name = NullableTextOperation.composeDownOperation(first.name, second.name);
     if (name.isError) {
         return name;
     }
@@ -248,7 +249,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         twoWayOperation.memo = restored.value.twoWayOperation;
     }
     if (downOperation.name !== undefined) {
-        const restored = TextOperation.restore({
+        const restored = NullableTextOperation.restore({
             nextState: nextState.name,
             downOperation: downOperation.name,
         });
@@ -292,7 +293,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         });
     }
     if (prevState.name !== nextState.name) {
-        result.name = TextOperation.diff({
+        result.name = NullableTextOperation.diff({
             prev: prevState.name,
             next: nextState.name,
         });
@@ -377,7 +378,7 @@ export const serverTransform =
             return transformedMemo;
         }
         twoWayOperation.memo = transformedMemo.value;
-        const transformedName = TextOperation.serverTransform({
+        const transformedName = NullableTextOperation.serverTransform({
             first: serverOperation?.name,
             second: clientOperation.name,
             prevState: prevState.name,
@@ -418,7 +419,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         return memo;
     }
 
-    const name = TextOperation.clientTransform({
+    const name = NullableTextOperation.clientTransform({
         first: first.name,
         second: second.name,
     });
