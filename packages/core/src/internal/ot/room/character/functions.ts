@@ -100,11 +100,11 @@ export const toClientState =
                 isPrivate: () => !isAuthorized,
                 toClientState: ({ state }) => Command.toClientState(state),
             }),
-            tachieLocations: RecordOperation.toClientState<
+            portraitPositions: RecordOperation.toClientState<
                 BoardPositionTypes.State,
                 BoardPositionTypes.State
             >({
-                serverState: source.tachieLocations,
+                serverState: source.portraitPositions,
                 isPrivate: state =>
                     !isBoardVisible({
                         requestedBy,
@@ -165,10 +165,10 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
                           mapOperation: Command.toDownOperation,
                       })
                   ),
-        tachieLocations:
-            source.tachieLocations == null
+        portraitPositions:
+            source.portraitPositions == null
                 ? undefined
-                : chooseRecord(source.tachieLocations, operation =>
+                : chooseRecord(source.portraitPositions, operation =>
                       mapRecordOperationElement({
                           source: operation,
                           mapReplace: x => x,
@@ -227,10 +227,10 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
                           mapOperation: Command.toUpOperation,
                       })
                   ),
-        tachieLocations:
-            source.tachieLocations == null
+        portraitPositions:
+            source.portraitPositions == null
                 ? undefined
-                : chooseRecord(source.tachieLocations, operation =>
+                : chooseRecord(source.portraitPositions, operation =>
                       mapRecordOperationElement({
                           source: operation,
                           mapReplace: x => x,
@@ -389,21 +389,21 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     }
     result.privateCommands = privateCommandsResult.value;
 
-    const tachieLocations = RecordOperation.apply<
+    const portraitPositions = RecordOperation.apply<
         BoardPositionTypes.State,
         BoardPositionTypes.UpOperation,
         ScalarError
     >({
-        prevState: state.tachieLocations,
-        operation: operation.tachieLocations,
+        prevState: state.portraitPositions,
+        operation: operation.portraitPositions,
         innerApply: ({ prevState, operation }) => {
             return BoardPosition.apply({ state: prevState, operation });
         },
     });
-    if (tachieLocations.isError) {
-        return tachieLocations;
+    if (portraitPositions.isError) {
+        return portraitPositions;
     }
-    result.tachieLocations = tachieLocations.value;
+    result.portraitPositions = portraitPositions.value;
 
     return Result.ok(result);
 };
@@ -560,21 +560,21 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     }
     result.privateCommands = privateCommandsResult.value;
 
-    const tachieLocations = RecordOperation.applyBack<
+    const portraitPositions = RecordOperation.applyBack<
         BoardPositionTypes.State,
         BoardPositionTypes.DownOperation,
         ScalarError
     >({
-        nextState: state.tachieLocations,
-        operation: operation.tachieLocations,
+        nextState: state.portraitPositions,
+        operation: operation.portraitPositions,
         innerApplyBack: ({ state: nextState, operation }) => {
             return BoardPosition.applyBack({ state: nextState, operation });
         },
     });
-    if (tachieLocations.isError) {
-        return tachieLocations;
+    if (portraitPositions.isError) {
+        return portraitPositions;
     }
-    result.tachieLocations = tachieLocations.value;
+    result.portraitPositions = portraitPositions.value;
 
     return Result.ok(result);
 };
@@ -644,18 +644,18 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
         return privateCommands;
     }
 
-    const tachieLocations = RecordOperation.composeDownOperation<
+    const portraitPositions = RecordOperation.composeDownOperation<
         BoardPositionTypes.State,
         BoardPositionTypes.DownOperation,
         DownError
     >({
-        first: first.tachieLocations,
-        second: second.tachieLocations,
+        first: first.portraitPositions,
+        second: second.portraitPositions,
         innerApplyBack: ({ state, operation }) => BoardPosition.applyBack({ state, operation }),
         innerCompose: params => BoardPosition.composeDownOperation(params),
     });
-    if (tachieLocations.isError) {
-        return tachieLocations;
+    if (portraitPositions.isError) {
+        return portraitPositions;
     }
 
     const memo = TextOperation.composeDownOperation(first.memo, second.memo);
@@ -699,7 +699,7 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
         strParams: strParams.value,
         pieces: pieces.value,
         privateCommands: privateCommands.value,
-        tachieLocations: tachieLocations.value,
+        portraitPositions: portraitPositions.value,
     };
     return Result.ok(valueProps);
 };
@@ -778,19 +778,19 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         return privateCommands;
     }
 
-    const tachieLocations = RecordOperation.restore<
+    const portraitPositions = RecordOperation.restore<
         BoardPositionTypes.State,
         BoardPositionTypes.DownOperation,
         BoardPositionTypes.TwoWayOperation,
         ScalarError
     >({
-        nextState: nextState.tachieLocations,
-        downOperation: downOperation.tachieLocations,
+        nextState: nextState.portraitPositions,
+        downOperation: downOperation.portraitPositions,
         innerDiff: params => BoardPosition.diff(params),
         innerRestore: params => BoardPosition.restore(params),
     });
-    if (tachieLocations.isError) {
-        return tachieLocations;
+    if (portraitPositions.isError) {
+        return portraitPositions;
     }
 
     const prevState: State = {
@@ -801,7 +801,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         strParams: strParams.value.prevState,
         pieces: pieces.value.prevState,
         privateCommands: privateCommands.value.prevState,
-        tachieLocations: tachieLocations.value.prevState,
+        portraitPositions: portraitPositions.value.prevState,
     };
     const twoWayOperation: TwoWayOperation = {
         $v: 2,
@@ -812,7 +812,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         strParams: strParams.value.twoWayOperation,
         pieces: pieces.value.twoWayOperation,
         privateCommands: privateCommands.value.twoWayOperation,
-        tachieLocations: tachieLocations.value.twoWayOperation,
+        portraitPositions: portraitPositions.value.twoWayOperation,
     };
 
     if (downOperation.ownerParticipantId !== undefined) {
@@ -938,12 +938,12 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         nextState: nextState.privateCommands,
         innerDiff: params => Command.diff(params),
     });
-    const tachieLocations = RecordOperation.diff<
+    const portraitPositions = RecordOperation.diff<
         BoardPositionTypes.State,
         BoardPositionTypes.TwoWayOperation
     >({
-        prevState: prevState.tachieLocations,
-        nextState: nextState.tachieLocations,
+        prevState: prevState.portraitPositions,
+        nextState: nextState.portraitPositions,
         innerDiff: params => BoardPosition.diff(params),
     });
     const result: TwoWayOperation = {
@@ -955,7 +955,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         strParams,
         pieces,
         privateCommands,
-        tachieLocations,
+        portraitPositions,
     };
     if (prevState.ownerParticipantId !== nextState.ownerParticipantId) {
         result.ownerParticipantId = {
@@ -1180,17 +1180,17 @@ export const serverTransform =
             return privateCommands;
         }
 
-        const tachieLocations = RecordOperation.serverTransform<
+        const portraitPositions = RecordOperation.serverTransform<
             BoardPositionTypes.State,
             BoardPositionTypes.State,
             BoardPositionTypes.TwoWayOperation,
             BoardPositionTypes.UpOperation,
             TwoWayError
         >({
-            prevState: prevState.tachieLocations,
-            nextState: currentState.tachieLocations,
-            first: serverOperation?.tachieLocations,
-            second: clientOperation.tachieLocations,
+            prevState: prevState.portraitPositions,
+            nextState: currentState.portraitPositions,
+            first: serverOperation?.portraitPositions,
+            second: clientOperation.portraitPositions,
             innerTransform: ({ prevState, nextState, first, second }) =>
                 BoardPosition.serverTransform({
                     prevState,
@@ -1236,8 +1236,8 @@ export const serverTransform =
                 },
             },
         });
-        if (tachieLocations.isError) {
-            return tachieLocations;
+        if (portraitPositions.isError) {
+            return portraitPositions;
         }
 
         const twoWayOperation: TwoWayOperation = {
@@ -1249,7 +1249,7 @@ export const serverTransform =
             strParams: strParams.value,
             pieces: pieces.value,
             privateCommands: privateCommands.value,
-            tachieLocations: tachieLocations.value,
+            portraitPositions: portraitPositions.value,
         };
 
         if (canChangeOwnerParticipantId({ requestedBy, currentOwnerParticipant: currentState })) {
@@ -1393,18 +1393,18 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         return privateCommands;
     }
 
-    const tachieLocations = RecordOperation.clientTransform<
+    const portraitPositions = RecordOperation.clientTransform<
         BoardPositionTypes.State,
         BoardPositionTypes.UpOperation,
         UpError
     >({
-        first: first.tachieLocations,
-        second: second.tachieLocations,
+        first: first.portraitPositions,
+        second: second.portraitPositions,
         innerTransform: params => BoardPosition.clientTransform(params),
         innerDiff: params => BoardPosition.diff(params),
     });
-    if (tachieLocations.isError) {
-        return tachieLocations;
+    if (portraitPositions.isError) {
+        return portraitPositions;
     }
 
     const ownerParticipantId = ReplaceOperation.clientTransform({
@@ -1469,7 +1469,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         pieces: pieces.value.firstPrime,
         privateCommands: privateCommands.value.firstPrime,
         strParams: strParams.value.firstPrime,
-        tachieLocations: tachieLocations.value.firstPrime,
+        portraitPositions: portraitPositions.value.firstPrime,
 
         ownerParticipantId: ownerParticipantId.firstPrime,
         isPrivate: isPrivate.firstPrime,
@@ -1489,7 +1489,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         pieces: pieces.value.secondPrime,
         privateCommands: privateCommands.value.secondPrime,
         strParams: strParams.value.secondPrime,
-        tachieLocations: tachieLocations.value.secondPrime,
+        portraitPositions: portraitPositions.value.secondPrime,
 
         ownerParticipantId: ownerParticipantId.secondPrime,
         isPrivate: isPrivate.secondPrime,

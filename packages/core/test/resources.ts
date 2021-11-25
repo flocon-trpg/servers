@@ -47,7 +47,7 @@ export namespace Resources {
             numMaxParams: {},
             strParams: {},
             pieces: {},
-            tachieLocations: {},
+            portraitPositions: {},
             ownerParticipantId,
         });
     }
@@ -226,7 +226,7 @@ export namespace Resources {
                         y: 8,
                     },
                 },
-                tachieLocations: {
+                portraitPositions: {
                     TACHIE_LOCATION: {
                         $v: 2,
                         $r: 1,

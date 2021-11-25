@@ -18,9 +18,9 @@ import { record, StringKeyRecord } from '../../util/record';
 import { Maybe, maybe } from '../../../maybe';
 
 // boolParams, numParams, numMaxParams, strParams: keyはstrIndex20などの固定キーを想定。
-// pieces, tachieLocations: 誰でも作成できる値。keyはboardのkey。
+// pieces, portraitPositions: 誰でも作成できる値。keyはboardのkey。
 
-// キャラクター全体非公開機能との兼ね合いがあるため、piecesとtachieLocationsをRoom.Stateに置くのは綺麗ではない。
+// キャラクター全体非公開機能との兼ね合いがあるため、piecesとportraitPositionsをRoom.Stateに置くのは綺麗ではない。
 export const state = t.type({
     $v: t.literal(2),
     $r: t.literal(1),
@@ -41,7 +41,7 @@ export const state = t.type({
     strParams: record(t.string, StrParam.state),
     pieces: record(t.string, Piece.state),
     privateCommands: record(t.string, Command.state),
-    tachieLocations: record(t.string, BoardPosition.state),
+    portraitPositions: record(t.string, BoardPosition.state),
 });
 
 export type State = t.TypeOf<typeof state>;
@@ -66,7 +66,7 @@ export const downOperation = createOperation(2, 1, {
         t.string,
         recordDownOperationElementFactory(Command.state, Command.downOperation)
     ),
-    tachieLocations: record(
+    portraitPositions: record(
         t.string,
         recordDownOperationElementFactory(BoardPosition.state, BoardPosition.downOperation)
     ),
@@ -95,7 +95,7 @@ export const upOperation = createOperation(2, 1, {
         t.string,
         recordUpOperationElementFactory(Command.state, Command.upOperation)
     ),
-    tachieLocations: record(
+    portraitPositions: record(
         t.string,
         recordUpOperationElementFactory(BoardPosition.state, BoardPosition.upOperation)
     ),
@@ -124,5 +124,5 @@ export type TwoWayOperation = {
     strParams?: StringKeyRecord<StrParam.TwoWayOperation>;
     pieces?: RecordTwoWayOperation<Piece.State, Piece.TwoWayOperation>;
     privateCommands?: RecordTwoWayOperation<Command.State, Command.TwoWayOperation>;
-    tachieLocations?: RecordTwoWayOperation<BoardPosition.State, BoardPosition.TwoWayOperation>;
+    portraitPositions?: RecordTwoWayOperation<BoardPosition.State, BoardPosition.TwoWayOperation>;
 };
