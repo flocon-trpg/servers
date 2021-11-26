@@ -1070,6 +1070,16 @@ export class RoomResolver {
                     $v: 2,
                     $r: 1,
                     activeBoardId: undefined,
+                    characterTag1Name: undefined,
+                    characterTag2Name: undefined,
+                    characterTag3Name: undefined,
+                    characterTag4Name: undefined,
+                    characterTag5Name: undefined,
+                    characterTag6Name: undefined,
+                    characterTag7Name: undefined,
+                    characterTag8Name: undefined,
+                    characterTag9Name: undefined,
+                    characterTag10Name: undefined,
                     publicChannel1Name: 'メイン',
                     publicChannel2Name: 'メイン2',
                     publicChannel3Name: 'メイン3',
@@ -1087,6 +1097,7 @@ export class RoomResolver {
                     dicePieceValues: {},
                     imagePieceValues: {},
                     numParamNames: {},
+                    rollCalls: {},
                     stringPieceValues: {},
                     strParamNames: {},
                     memos: {},
@@ -1750,9 +1761,9 @@ export class RoomResolver {
                 entity.charaImageSourceType = FileSourceTypeModule.ofNullishString(
                     chara.image?.sourceType
                 );
-                entity.charaTachieImagePath = chara.tachieImage?.path;
+                entity.charaTachieImagePath = chara.portraitImage?.path;
                 entity.charaTachieImageSourceType = FileSourceTypeModule.ofNullishString(
-                    chara.tachieImage?.sourceType
+                    chara.portraitImage?.sourceType
                 );
             }
 
@@ -1884,11 +1895,11 @@ export class RoomResolver {
                 entity.charaIsPrivate = chara.isPrivate;
                 entity.charaImagePath = chara.image?.path;
                 entity.charaImageSourceType = FileSourceTypeModule.ofNullishString(
-                    chara.tachieImage?.sourceType
+                    chara.portraitImage?.sourceType
                 );
-                entity.charaTachieImagePath = chara.tachieImage?.path;
+                entity.charaTachieImagePath = chara.portraitImage?.path;
                 entity.charaTachieImageSourceType = FileSourceTypeModule.ofNullishString(
-                    chara.tachieImage?.sourceType
+                    chara.portraitImage?.sourceType
                 );
             }
 
