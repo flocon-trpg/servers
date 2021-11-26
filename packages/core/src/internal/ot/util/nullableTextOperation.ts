@@ -3,7 +3,6 @@ import * as t from 'io-ts';
 import * as TextOperationCore from '@kizahasi/ot-string';
 import { replace, update } from './recordOperationElement';
 import * as TextOperation from './textOperation';
-import * as ReplaceOperation from './replaceOperation';
 
 const stateShouldNotBeUndefinedMessage = 'state should not be undefined';
 const firstTypeShouldBeSameAsSecondType = 'first type and second type should be same';
@@ -338,8 +337,8 @@ export const clientTransform = ({
     first,
     second,
 }: {
-    first?: UpOperation;
-    second?: UpOperation;
+    first: UpOperation | undefined;
+    second: UpOperation | undefined;
 }): Result<
     {
         firstPrime?: UpOperation;
@@ -347,35 +346,53 @@ export const clientTransform = ({
     },
     string | ComposeAndTransformDownError
 > => {
-    if (first?.type === replace || second?.type === replace) {
-        if (first?.type === update || second?.type === update) {
-            return Result.error(firstTypeShouldBeSameAsSecondType);
+    if (first == null || second == null) {
+        return Result.ok({
+            firstPrime: first,
+            secondPrime: second,
+        });
+    }
+
+    if (first.type === replace) {
+        if (second.type === update) {
+            if (first.replace.newValue != null) {
+                throw new Error(
+                    'because second is update, first replace.newValue must not be undefined'
+                );
+            }
+            return Result.ok({
+                firstPrime: first,
+            });
         }
-        const xformResult = ReplaceOperation.clientTransform({
-            first: first?.replace,
-            second: second?.replace,
+
+        if (first.replace.newValue == null) {
+            if (second.replace.newValue != null) {
+                throw new Error('first or second should be update');
+            }
+            return Result.ok({});
+        }
+        if (second.replace.newValue == null) {
+            throw new Error('first or second should be update');
+        }
+        const diff = TextOperation.diff({
+            prev: second.replace.newValue,
+            next: first.replace.newValue,
         });
         return Result.ok({
             firstPrime:
-                xformResult.firstPrime == null
+                diff == null
                     ? undefined
                     : {
-                          type: replace,
-                          replace: xformResult.firstPrime,
-                      },
-            secondPrime:
-                xformResult.secondPrime == null
-                    ? undefined
-                    : {
-                          type: replace,
-                          replace: xformResult.secondPrime,
+                          type: update,
+                          update: TextOperation.toUpOperation(diff),
                       },
         });
     }
-    if (first?.type === update || second?.type === update) {
+
+    if (second.type === update) {
         const xformResult = TextOperation.clientTransform({
-            first: first?.update,
-            second: second?.update,
+            first: first.update,
+            second: second.update,
         });
         if (xformResult.isError) {
             return xformResult;
@@ -397,5 +414,11 @@ export const clientTransform = ({
                       },
         });
     }
-    return Result.ok({});
+
+    if (second.replace.newValue != null) {
+        throw new Error('because first is update, second replace.newValue must not be undefined');
+    }
+    return Result.ok({
+        secondPrime: second,
+    });
 };

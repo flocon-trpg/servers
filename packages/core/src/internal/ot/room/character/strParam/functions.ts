@@ -262,6 +262,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     const firstPrime: UpOperation = {
         $v: 2,
         $r: 1,
+        overriddenParameterName: overriddenParameterName.value.firstPrime,
         isValuePrivate: isValuePrivate.firstPrime,
         value: value.value.firstPrime,
     };
@@ -269,6 +270,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     const secondPrime: UpOperation = {
         $v: 2,
         $r: 1,
+        overriddenParameterName: overriddenParameterName.value.secondPrime,
         isValuePrivate: isValuePrivate.secondPrime,
         value: value.value.secondPrime,
     };
