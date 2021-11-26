@@ -64,6 +64,8 @@ const defaultStrParamState: StrParamType.State = {
     overriddenParameterName: undefined,
 };
 
+const oneToTenArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
+
 export const toClientState =
     (isAuthorized: boolean, requestedBy: RequestedBy, currentRoomState: Room.State) =>
     (source: State): State => {
@@ -284,6 +286,14 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
         result.portraitImage = operation.portraitImage.newValue;
     }
 
+    for (const index of oneToTenArray) {
+        const key = `hasTag${index}` as const;
+        const operationValue = operation[key];
+        if (operationValue != null) {
+            result[key] = operationValue.newValue;
+        }
+    }
+
     const boolParams = ParamRecordOperation.apply<
         BoolParamTypes.State,
         BoolParamTypes.UpOperation | BoolParamTypes.TwoWayOperation,
@@ -449,6 +459,13 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     }
     if (operation.portraitImage != null) {
         result.portraitImage = operation.portraitImage.oldValue;
+    }
+    for (const index of oneToTenArray) {
+        const key = `hasTag${index}` as const;
+        const operationValue = operation[key];
+        if (operationValue != null) {
+            result[key] = operationValue.oldValue;
+        }
     }
 
     const boolParams = ParamRecordOperation.applyBack<
@@ -704,6 +721,10 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
         privateCommands: privateCommands.value,
         portraitPositions: portraitPositions.value,
     };
+    for (const index of oneToTenArray) {
+        const key = `hasTag${index}` as const;
+        valueProps[key] = ReplaceOperation.composeDownOperation(first[key], second[key]);
+    }
     return Result.ok(valueProps);
 };
 
@@ -890,6 +911,17 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         prevState.privateVarToml = restored.value.prevState;
         twoWayOperation.privateVarToml = restored.value.twoWayOperation;
     }
+    for (const index of oneToTenArray) {
+        const key = `hasTag${index}` as const;
+        const operationValue = downOperation[key];
+        if (operationValue !== undefined) {
+            prevState[key] = operationValue.oldValue;
+            twoWayOperation[key] = {
+                oldValue: operationValue.oldValue,
+                newValue: nextState[key],
+            };
+        }
+    }
 
     return Result.ok({ prevState, twoWayOperation });
 };
@@ -981,6 +1013,13 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
             newValue: nextState.isPrivate,
         };
     }
+    for (const index of oneToTenArray) {
+        const key = `hasTag${index}` as const;
+        result[key] = {
+            oldValue: prevState[key],
+            newValue: nextState[key],
+        };
+    }
     if (prevState.memo !== nextState.memo) {
         result.memo = TextOperation.diff({
             prev: prevState.memo,
@@ -1005,6 +1044,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
             next: nextState.privateVarToml,
         });
     }
+
     if (isIdRecord(result)) {
         return undefined;
     }
@@ -1277,6 +1317,14 @@ export const serverTransform =
             second: clientOperation.isPrivate,
             prevState: prevState.isPrivate,
         });
+        for (const index of oneToTenArray) {
+            const key = `hasTag${index}` as const;
+            twoWayOperation[key] = ReplaceOperation.serverTransform({
+                first: serverOperation?.[key],
+                second: clientOperation[key],
+                prevState: prevState[key],
+            });
+        }
         const transformedMemo = TextOperation.serverTransform({
             first: serverOperation?.memo,
             second: clientOperation.memo,
@@ -1503,6 +1551,16 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         privateVarToml: privateVarToml.value.secondPrime,
         portraitImage: portraitImage.secondPrime,
     };
+
+    for (const index of oneToTenArray) {
+        const key = `hasTag${index}` as const;
+        const xformResult = ReplaceOperation.clientTransform({
+            first: first[key],
+            second: second[key],
+        });
+        firstPrime[key] = xformResult.firstPrime;
+        secondPrime[key] = xformResult.secondPrime;
+    }
 
     return Result.ok({
         firstPrime: isIdRecord(firstPrime) ? undefined : firstPrime,

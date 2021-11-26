@@ -35,6 +35,17 @@ export const state = t.type({
     privateVarToml: t.string,
     portraitImage: maybe(filePath),
 
+    hasTag1: t.boolean,
+    hasTag2: t.boolean,
+    hasTag3: t.boolean,
+    hasTag4: t.boolean,
+    hasTag5: t.boolean,
+    hasTag6: t.boolean,
+    hasTag7: t.boolean,
+    hasTag8: t.boolean,
+    hasTag9: t.boolean,
+    hasTag10: t.boolean,
+
     boolParams: record(t.string, BoolParam.state),
     numParams: record(t.string, NumParam.state),
     numMaxParams: record(t.string, NumParam.state),
@@ -56,6 +67,17 @@ export const downOperation = createOperation(2, 1, {
     chatPalette: TextOperation.downOperation,
     privateVarToml: TextOperation.downOperation,
     portraitImage: t.type({ oldValue: maybe(filePath) }),
+
+    hasTag1: t.type({ oldValue: t.boolean }),
+    hasTag2: t.type({ oldValue: t.boolean }),
+    hasTag3: t.type({ oldValue: t.boolean }),
+    hasTag4: t.type({ oldValue: t.boolean }),
+    hasTag5: t.type({ oldValue: t.boolean }),
+    hasTag6: t.type({ oldValue: t.boolean }),
+    hasTag7: t.type({ oldValue: t.boolean }),
+    hasTag8: t.type({ oldValue: t.boolean }),
+    hasTag9: t.type({ oldValue: t.boolean }),
+    hasTag10: t.type({ oldValue: t.boolean }),
 
     boolParams: record(t.string, BoolParam.downOperation),
     numParams: record(t.string, NumParam.downOperation),
@@ -85,6 +107,17 @@ export const upOperation = createOperation(2, 1, {
     chatPalette: TextOperation.upOperation,
     privateVarToml: TextOperation.upOperation,
     portraitImage: t.type({ newValue: maybe(filePath) }),
+
+    hasTag1: t.type({ newValue: t.boolean }),
+    hasTag2: t.type({ newValue: t.boolean }),
+    hasTag3: t.type({ newValue: t.boolean }),
+    hasTag4: t.type({ newValue: t.boolean }),
+    hasTag5: t.type({ newValue: t.boolean }),
+    hasTag6: t.type({ newValue: t.boolean }),
+    hasTag7: t.type({ newValue: t.boolean }),
+    hasTag8: t.type({ newValue: t.boolean }),
+    hasTag9: t.type({ newValue: t.boolean }),
+    hasTag10: t.type({ newValue: t.boolean }),
 
     boolParams: record(t.string, BoolParam.upOperation),
     numParams: record(t.string, NumParam.upOperation),
@@ -117,6 +150,17 @@ export type TwoWayOperation = {
     privateCommand?: TextOperation.TwoWayOperation;
     privateVarToml?: TextOperation.TwoWayOperation;
     portraitImage?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<FilePath>>;
+
+    hasTag1?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
+    hasTag2?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
+    hasTag3?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
+    hasTag4?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
+    hasTag5?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
+    hasTag6?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
+    hasTag7?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
+    hasTag8?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
+    hasTag9?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
+    hasTag10?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
 
     boolParams?: StringKeyRecord<BoolParam.TwoWayOperation>;
     numParams?: StringKeyRecord<NumParam.TwoWayOperation>;
