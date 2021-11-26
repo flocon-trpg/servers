@@ -68,6 +68,9 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     if (operation.isPrivate != null) {
         result.isPrivate = operation.isPrivate.newValue;
     }
+    if (operation.opacity != null) {
+        result.opacity = operation.opacity.newValue;
+    }
     if (operation.w != null) {
         result.w = operation.w.newValue;
     }
@@ -110,6 +113,9 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     if (operation.isPrivate !== undefined) {
         result.isPrivate = operation.isPrivate.oldValue;
     }
+    if (operation.opacity != null) {
+        result.opacity = operation.opacity.oldValue;
+    }
     if (operation.w !== undefined) {
         result.w = operation.w.oldValue;
     }
@@ -139,6 +145,7 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
             second.isPositionLocked
         ),
         isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
+        opacity: ReplaceOperation.composeDownOperation(first.opacity, second.opacity),
         w: ReplaceOperation.composeDownOperation(first.w, second.w),
         x: ReplaceOperation.composeDownOperation(first.x, second.x),
         y: ReplaceOperation.composeDownOperation(first.y, second.y),
@@ -216,6 +223,10 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
             newValue: nextState.isPrivate,
         };
     }
+    if (downOperation.opacity !== undefined) {
+        prevState.opacity = downOperation.opacity.oldValue;
+        twoWayOperation.opacity = { ...downOperation.opacity, newValue: nextState.opacity };
+    }
     if (downOperation.w !== undefined) {
         prevState.w = downOperation.w.oldValue;
         twoWayOperation.w = { ...downOperation.w, newValue: nextState.w };
@@ -282,6 +293,9 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
             newValue: nextState.isPrivate,
         };
     }
+    if (prevState.opacity !== nextState.opacity) {
+        resultType.opacity = { oldValue: prevState.opacity, newValue: nextState.opacity };
+    }
     if (prevState.w !== nextState.w) {
         resultType.w = { oldValue: prevState.w, newValue: nextState.w };
     }
@@ -344,6 +358,11 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
         second: clientOperation.isPrivate,
         prevState: prevState.isPrivate,
     });
+    twoWayOperation.opacity = ReplaceOperation.serverTransform({
+        first: serverOperation?.opacity,
+        second: clientOperation.opacity,
+        prevState: prevState.opacity,
+    });
     twoWayOperation.h = ReplaceOperation.serverTransform({
         first: serverOperation?.h,
         second: clientOperation.h,
@@ -405,6 +424,10 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         first: first.isPrivate,
         second: second.isPrivate,
     });
+    const opacity = ReplaceOperation.clientTransform({
+        first: first.opacity,
+        second: second.opacity,
+    });
     const h = ReplaceOperation.clientTransform({
         first: first.h,
         second: second.h,
@@ -434,6 +457,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         isCellMode: isCellMode.firstPrime,
         isPositionLocked: isPositionLocked.firstPrime,
         isPrivate: isPrivate.firstPrime,
+        opacity: opacity.firstPrime,
         w: w.firstPrime,
         x: x.firstPrime,
         y: y.firstPrime,
@@ -451,6 +475,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         isCellMode: isCellMode.secondPrime,
         isPositionLocked: isPositionLocked.secondPrime,
         isPrivate: isPrivate.secondPrime,
+        opacity: opacity.secondPrime,
         w: w.secondPrime,
         x: x.secondPrime,
         y: y.secondPrime,
