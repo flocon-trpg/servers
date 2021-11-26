@@ -54,6 +54,7 @@ export const createLogs = ({
                     dicePieceValueLogs.push({
                         stateId,
                         value: {
+                            $v: 2,
                             $r: 1,
                             type: deleteType,
                             value: DicePieceValue.toClientState(
@@ -68,6 +69,7 @@ export const createLogs = ({
             dicePieceValueLogs.push({
                 stateId,
                 value: {
+                    $v: 2,
                     $r: 1,
                     type: createType,
                     value: DicePieceValue.toClientState(
@@ -97,6 +99,7 @@ export const createLogs = ({
                     stringPieceValueLogs.push({
                         stateId,
                         value: {
+                            $v: 2,
                             $r: 1,
                             type: deleteType,
                             value: StringPieceValue.toClientState(
@@ -111,6 +114,7 @@ export const createLogs = ({
             stringPieceValueLogs.push({
                 stateId,
                 value: {
+                    $v: 2,
                     $r: 1,
                     type: createType,
                     value: StringPieceValue.toClientState(
