@@ -1015,10 +1015,14 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     }
     for (const index of oneToTenArray) {
         const key = `hasTag${index}` as const;
-        result[key] = {
-            oldValue: prevState[key],
-            newValue: nextState[key],
-        };
+        const oldValue = prevState[key];
+        const newValue = nextState[key];
+        if (oldValue !== newValue) {
+            result[key] = {
+                oldValue: prevState[key],
+                newValue: nextState[key],
+            };
+        }
     }
     if (prevState.memo !== nextState.memo) {
         result.memo = TextOperation.diff({
