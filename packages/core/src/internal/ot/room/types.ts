@@ -10,6 +10,7 @@ import {
 } from '../util/recordOperationElement';
 import * as ReplaceOperation from '../util/replaceOperation';
 import * as TextOperation from '../util/textOperation';
+import * as NullableTextOperation from '../util/nullableTextOperation';
 import { createOperation } from '../util/createOperation';
 import { record } from '../util/record';
 import { Maybe, maybe } from '../../maybe';
@@ -25,6 +26,16 @@ const stateBase = t.type({
     boolParamNames: record(t.string, ParamNames.state), //keyはStrIndex20
     boards: record(t.string, Board.state), // keyはランダムなID
     characters: record(t.string, Character.state), // keyはランダムなID
+    characterTag1Name: maybe(t.string),
+    characterTag2Name: maybe(t.string),
+    characterTag3Name: maybe(t.string),
+    characterTag4Name: maybe(t.string),
+    characterTag5Name: maybe(t.string),
+    characterTag6Name: maybe(t.string),
+    characterTag7Name: maybe(t.string),
+    characterTag8Name: maybe(t.string),
+    characterTag9Name: maybe(t.string),
+    characterTag10Name: maybe(t.string),
     dicePieceValues: record(t.string, DicePieceValue.state), // keyはランダムなID
     imagePieceValues: record(t.string, ImagePieceValue.state), // keyはランダムなID
     memos: record(t.string, Memo.state), // keyはランダムなID
@@ -79,6 +90,16 @@ export const downOperation = createOperation(2, 1, {
         t.string,
         recordDownOperationElementFactory(Character.state, Character.downOperation)
     ),
+    characterTag1Name: NullableTextOperation.downOperation,
+    characterTag2Name: NullableTextOperation.downOperation,
+    characterTag3Name: NullableTextOperation.downOperation,
+    characterTag4Name: NullableTextOperation.downOperation,
+    characterTag5Name: NullableTextOperation.downOperation,
+    characterTag6Name: NullableTextOperation.downOperation,
+    characterTag7Name: NullableTextOperation.downOperation,
+    characterTag8Name: NullableTextOperation.downOperation,
+    characterTag9Name: NullableTextOperation.downOperation,
+    characterTag10Name: NullableTextOperation.downOperation,
     dicePieceValues: record(
         t.string,
         recordDownOperationElementFactory(DicePieceValue.state, DicePieceValue.downOperation)
@@ -131,6 +152,16 @@ export const upOperation = createOperation(2, 1, {
         t.string,
         recordUpOperationElementFactory(Character.state, Character.upOperation)
     ),
+    characterTag1Name: NullableTextOperation.upOperation,
+    characterTag2Name: NullableTextOperation.upOperation,
+    characterTag3Name: NullableTextOperation.upOperation,
+    characterTag4Name: NullableTextOperation.upOperation,
+    characterTag5Name: NullableTextOperation.upOperation,
+    characterTag6Name: NullableTextOperation.upOperation,
+    characterTag7Name: NullableTextOperation.upOperation,
+    characterTag8Name: NullableTextOperation.upOperation,
+    characterTag9Name: NullableTextOperation.upOperation,
+    characterTag10Name: NullableTextOperation.upOperation,
     dicePieceValues: record(
         t.string,
         recordUpOperationElementFactory(DicePieceValue.state, DicePieceValue.upOperation)
@@ -183,6 +214,16 @@ export type TwoWayOperation = {
     >;
     boards?: RecordOperation.RecordTwoWayOperation<Board.State, Board.TwoWayOperation>;
     characters?: RecordOperation.RecordTwoWayOperation<Character.State, Character.TwoWayOperation>;
+    characterTag1Name?: NullableTextOperation.TwoWayOperation;
+    characterTag2Name?: NullableTextOperation.TwoWayOperation;
+    characterTag3Name?: NullableTextOperation.TwoWayOperation;
+    characterTag4Name?: NullableTextOperation.TwoWayOperation;
+    characterTag5Name?: NullableTextOperation.TwoWayOperation;
+    characterTag6Name?: NullableTextOperation.TwoWayOperation;
+    characterTag7Name?: NullableTextOperation.TwoWayOperation;
+    characterTag8Name?: NullableTextOperation.TwoWayOperation;
+    characterTag9Name?: NullableTextOperation.TwoWayOperation;
+    characterTag10Name?: NullableTextOperation.TwoWayOperation;
     dicePieceValues?: RecordOperation.RecordTwoWayOperation<
         DicePieceValue.State,
         DicePieceValue.TwoWayOperation

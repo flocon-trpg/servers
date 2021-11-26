@@ -10,6 +10,7 @@ import * as ImagePieceValue from './imagePieceValue/functions';
 import * as ImagePieceValueTypes from './imagePieceValue/types';
 import * as Memo from './memo/functions';
 import * as MemoTypes from './memo/types';
+import * as NullableTextOperation from '../util/nullableTextOperation';
 import * as ParamNames from './paramName/functions';
 import * as ParamNamesTypes from './paramName/types';
 import * as Participant from './participant/functions';
@@ -47,6 +48,8 @@ import {
     isCharacterOwner,
     isBoardOwner,
 } from '../util/requestedBy';
+
+const oneToTenArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 
 export const toClientState =
     (requestedBy: RequestedBy) =>
@@ -188,6 +191,46 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
                           mapOperation: Character.toDownOperation,
                       })
                   ),
+        characterTag1Name:
+            source.characterTag1Name == null
+                ? undefined
+                : NullableTextOperation.toDownOperation(source.characterTag1Name),
+        characterTag2Name:
+            source.characterTag2Name == null
+                ? undefined
+                : NullableTextOperation.toDownOperation(source.characterTag2Name),
+        characterTag3Name:
+            source.characterTag3Name == null
+                ? undefined
+                : NullableTextOperation.toDownOperation(source.characterTag3Name),
+        characterTag4Name:
+            source.characterTag4Name == null
+                ? undefined
+                : NullableTextOperation.toDownOperation(source.characterTag4Name),
+        characterTag5Name:
+            source.characterTag5Name == null
+                ? undefined
+                : NullableTextOperation.toDownOperation(source.characterTag5Name),
+        characterTag6Name:
+            source.characterTag6Name == null
+                ? undefined
+                : NullableTextOperation.toDownOperation(source.characterTag6Name),
+        characterTag7Name:
+            source.characterTag7Name == null
+                ? undefined
+                : NullableTextOperation.toDownOperation(source.characterTag7Name),
+        characterTag8Name:
+            source.characterTag8Name == null
+                ? undefined
+                : NullableTextOperation.toDownOperation(source.characterTag8Name),
+        characterTag9Name:
+            source.characterTag9Name == null
+                ? undefined
+                : NullableTextOperation.toDownOperation(source.characterTag9Name),
+        characterTag10Name:
+            source.characterTag10Name == null
+                ? undefined
+                : NullableTextOperation.toDownOperation(source.characterTag10Name),
         dicePieceValues:
             source.dicePieceValues == null
                 ? undefined
@@ -345,6 +388,46 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
                           mapOperation: Character.toUpOperation,
                       })
                   ),
+        characterTag1Name:
+            source.characterTag1Name == null
+                ? undefined
+                : NullableTextOperation.toUpOperation(source.characterTag1Name),
+        characterTag2Name:
+            source.characterTag2Name == null
+                ? undefined
+                : NullableTextOperation.toUpOperation(source.characterTag2Name),
+        characterTag3Name:
+            source.characterTag3Name == null
+                ? undefined
+                : NullableTextOperation.toUpOperation(source.characterTag3Name),
+        characterTag4Name:
+            source.characterTag4Name == null
+                ? undefined
+                : NullableTextOperation.toUpOperation(source.characterTag4Name),
+        characterTag5Name:
+            source.characterTag5Name == null
+                ? undefined
+                : NullableTextOperation.toUpOperation(source.characterTag5Name),
+        characterTag6Name:
+            source.characterTag6Name == null
+                ? undefined
+                : NullableTextOperation.toUpOperation(source.characterTag6Name),
+        characterTag7Name:
+            source.characterTag7Name == null
+                ? undefined
+                : NullableTextOperation.toUpOperation(source.characterTag7Name),
+        characterTag8Name:
+            source.characterTag8Name == null
+                ? undefined
+                : NullableTextOperation.toUpOperation(source.characterTag8Name),
+        characterTag9Name:
+            source.characterTag9Name == null
+                ? undefined
+                : NullableTextOperation.toUpOperation(source.characterTag9Name),
+        characterTag10Name:
+            source.characterTag10Name == null
+                ? undefined
+                : NullableTextOperation.toUpOperation(source.characterTag10Name),
         dicePieceValues:
             source.dicePieceValues == null
                 ? undefined
@@ -529,6 +612,18 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     }
     result.characters = characters.value;
 
+    for (const i of oneToTenArray) {
+        const key = `characterTag${i}Name` as const;
+        const operationElement = operation[key];
+        if (operationElement != null) {
+            const applied = NullableTextOperation.apply(state[key], operationElement);
+            if (applied.isError) {
+                return applied;
+            }
+            result[key] = applied.value;
+        }
+    }
+
     const dicePieceValues = RecordOperation.apply<
         DicePieceValueTypes.State,
         DicePieceValueTypes.UpOperation | DicePieceValueTypes.TwoWayOperation,
@@ -623,7 +718,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     }
     result.participants = participants.value;
 
-    for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const) {
+    for (const i of oneToTenArray) {
         const key = `publicChannel${i}Name` as const;
         const operationElement = operation[key];
         if (operationElement != null) {
@@ -740,6 +835,18 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     }
     result.characters = characters.value;
 
+    for (const i of oneToTenArray) {
+        const key = `characterTag${i}Name` as const;
+        const operationElement = operation[key];
+        if (operationElement != null) {
+            const applied = NullableTextOperation.applyBack(state[key], operationElement);
+            if (applied.isError) {
+                return applied;
+            }
+            result[key] = applied.value;
+        }
+    }
+
     const dicePieceValues = RecordOperation.applyBack<
         DicePieceValueTypes.State,
         DicePieceValueTypes.DownOperation,
@@ -827,7 +934,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     }
     result.participants = participants.value;
 
-    for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const) {
+    for (const i of oneToTenArray) {
         const key = `publicChannel${i}Name` as const;
         const operationElement = operation[key];
         if (operationElement != null) {
@@ -1031,7 +1138,16 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
         participants: participants.value,
     };
 
-    for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const) {
+    for (const i of oneToTenArray) {
+        const key = `characterTag${i}Name` as const;
+        const composed = NullableTextOperation.composeDownOperation(first[key], second[key]);
+        if (composed.isError) {
+            return composed;
+        }
+        valueProps[key] = composed.value;
+    }
+
+    for (const i of oneToTenArray) {
         const key = `publicChannel${i}Name` as const;
         const composed = TextOperation.composeDownOperation(first[key], second[key]);
         if (composed.isError) {
@@ -1235,7 +1351,23 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         twoWayOperation.name = restored.value.twoWayOperation;
     }
 
-    for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const) {
+    for (const i of oneToTenArray) {
+        const key = `characterTag${i}Name` as const;
+        const downOperationValue = downOperation[key];
+        if (downOperationValue !== undefined) {
+            const restored = NullableTextOperation.restore({
+                nextState: nextState[key],
+                downOperation: downOperationValue,
+            });
+            if (restored.isError) {
+                return restored;
+            }
+            prevState[key] = restored.value.prevState;
+            twoWayOperation[key] = restored.value.twoWayOperation;
+        }
+    }
+
+    for (const i of oneToTenArray) {
         const key = `publicChannel${i}Name` as const;
         const downOperationValue = downOperation[key];
         if (downOperationValue !== undefined) {
@@ -1343,7 +1475,16 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     if (prevState.name !== nextState.name) {
         result.name = TextOperation.diff({ prev: prevState.name, next: nextState.name });
     }
-    for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const) {
+    for (const i of oneToTenArray) {
+        const key = `characterTag${i}Name` as const;
+        if (prevState[key] !== nextState[key]) {
+            result[key] = NullableTextOperation.diff({
+                prev: prevState[key],
+                next: nextState[key],
+            });
+        }
+    }
+    for (const i of oneToTenArray) {
         const key = `publicChannel${i}Name` as const;
         if (prevState[key] !== nextState[key]) {
             result[key] = TextOperation.diff({ prev: prevState[key], next: nextState[key] });
@@ -1798,7 +1939,20 @@ export const serverTransform =
         }
         twoWayOperation.name = name.value;
 
-        for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const) {
+        for (const i of oneToTenArray) {
+            const key = `characterTag${i}Name` as const;
+            const transformed = NullableTextOperation.serverTransform({
+                first: serverOperation?.[key],
+                second: clientOperation[key],
+                prevState: prevState[key],
+            });
+            if (transformed.isError) {
+                return transformed;
+            }
+            twoWayOperation[key] = transformed.value;
+        }
+
+        for (const i of oneToTenArray) {
             const key = `publicChannel${i}Name` as const;
             const transformed = TextOperation.serverTransform({
                 first: serverOperation?.[key],
@@ -2080,7 +2234,20 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         name: name.value.secondPrime,
     };
 
-    for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const) {
+    for (const i of oneToTenArray) {
+        const key = `characterTag${i}Name` as const;
+        const operation = NullableTextOperation.clientTransform({
+            first: first[key],
+            second: second[key],
+        });
+        if (operation.isError) {
+            return operation;
+        }
+        firstPrime[key] = operation.value.firstPrime;
+        secondPrime[key] = operation.value.secondPrime;
+    }
+
+    for (const i of oneToTenArray) {
         const key = `publicChannel${i}Name` as const;
         const operation = TextOperation.clientTransform({
             first: first[key],
