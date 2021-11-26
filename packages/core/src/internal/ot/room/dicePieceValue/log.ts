@@ -30,6 +30,7 @@ const update = t.intersection([
         type: t.literal(updateType),
     }),
     t.partial({
+        ownerCharacterId: t.type({ newValue: maybe(t.string) }),
         dice: record(
             t.string,
             recordUpOperationElementFactory(DieValueTypes.state, dieValueUpOperation)
@@ -83,6 +84,7 @@ export const ofOperation = (
         $v: 2,
         $r: 1,
         type: updateType,
+        ownerCharacterId: operation.ownerCharacterId,
         dice:
             operation.dice == null
                 ? undefined

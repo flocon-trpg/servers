@@ -14,6 +14,7 @@ const update = t.intersection([
         type: t.literal(updateType),
     }),
     t.partial({
+        ownerCharacterId: t.type({ newValue: maybe(t.string) }),
         isValuePrivateChanged: t.type({ newValue: maybe(t.string) }),
         isValueChanged: t.boolean,
         pieces: record(
@@ -65,6 +66,7 @@ export const ofOperation = (
         $v: 2,
         $r: 1,
         type: updateType,
+        ownerCharacterId: operation.ownerCharacterId,
         isValueChanged: operation.value != null,
         isValuePrivateChanged:
             operation.isValuePrivate == null ||
