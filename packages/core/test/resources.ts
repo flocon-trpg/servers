@@ -104,6 +104,7 @@ export namespace Resources {
         numParamNames: {},
         strParamNames: {},
         memos: {},
+        rollCalls: {},
         characterTag1Name: undefined,
         characterTag2Name: undefined,
         characterTag3Name: undefined,
@@ -334,6 +335,7 @@ export namespace Resources {
                 name: 'NUM_PARAM_NAME',
             },
         },
+        rollCalls: {},
         strParamNames: {
             '1': {
                 $v: 1,
