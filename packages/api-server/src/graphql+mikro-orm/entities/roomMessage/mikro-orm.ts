@@ -177,11 +177,11 @@ export class RoomPubMsg {
     // 「書き込んだとき」のCharaのimagePath
     // CONSIDER: デフォルトではPostgreSQLの場合varchar(255)になるため、lengthを設定している。値は適当（MySQLの最大値）。
     @Property({ nullable: true, length: 65535, default: null })
-    public charaTachieImagePath?: string;
+    public charaPortraitImagePath?: string;
 
     // 「書き込んだとき」のCharaのimageSourceType
     @Property({ type: 'string', nullable: true, default: null })
-    public charaTachieImageSourceType?: FileSourceType;
+    public charaPortraitImageSourceType?: FileSourceType;
 
     @Property({ nullable: true })
     public customName?: string;
@@ -281,11 +281,11 @@ export class RoomPrvMsg {
     // 「書き込んだとき」のCharaのimagePath
     // CONSIDER: デフォルトではPostgreSQLの場合varchar(255)になるため、lengthを設定している。値は適当（MySQLの最大値）。
     @Property({ nullable: true, length: 65535, default: null })
-    public charaTachieImagePath?: string;
+    public charaPortraitImagePath?: string;
 
     // 「書き込んだとき」のCharaのimageSourceType
     @Property({ type: 'string', nullable: true, default: null })
-    public charaTachieImageSourceType?: FileSourceType;
+    public charaPortraitImageSourceType?: FileSourceType;
 
     @Property({ nullable: true })
     public customName?: string;

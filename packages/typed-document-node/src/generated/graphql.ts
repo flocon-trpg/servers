@@ -35,8 +35,8 @@ export type CharacterValueForMessage = {
     image?: Maybe<FilePath>;
     isPrivate: Scalars['Boolean'];
     name: Scalars['String'];
+    portraitImage?: Maybe<FilePath>;
     stateId: Scalars['String'];
-    tachieImage?: Maybe<FilePath>;
 };
 
 export type CommandResult = {
@@ -862,7 +862,7 @@ export type CharacterValueForMessageFragment = {
         | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
         | null
         | undefined;
-    tachieImage?:
+    portraitImage?:
         | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
         | null
         | undefined;
@@ -1058,7 +1058,7 @@ export type RoomPublicMessageFragment = {
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
-              tachieImage?:
+              portraitImage?:
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
@@ -1098,7 +1098,7 @@ export type RoomPrivateMessageFragment = {
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
-              tachieImage?:
+              portraitImage?:
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
@@ -1158,7 +1158,7 @@ type RoomMessageEvent_RoomPrivateMessage_Fragment = {
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
-              tachieImage?:
+              portraitImage?:
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
@@ -1228,7 +1228,7 @@ type RoomMessageEvent_RoomPublicMessage_Fragment = {
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
-              tachieImage?:
+              portraitImage?:
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
@@ -1429,7 +1429,7 @@ export type GetMessagesQuery = {
                                   }
                                 | null
                                 | undefined;
-                            tachieImage?:
+                            portraitImage?:
                                 | {
                                       __typename?: 'FilePath';
                                       sourceType: FileSourceType;
@@ -1484,7 +1484,7 @@ export type GetMessagesQuery = {
                                   }
                                 | null
                                 | undefined;
-                            tachieImage?:
+                            portraitImage?:
                                 | {
                                       __typename?: 'FilePath';
                                       sourceType: FileSourceType;
@@ -1573,7 +1573,7 @@ export type GetLogQuery = {
                                   }
                                 | null
                                 | undefined;
-                            tachieImage?:
+                            portraitImage?:
                                 | {
                                       __typename?: 'FilePath';
                                       sourceType: FileSourceType;
@@ -1628,7 +1628,7 @@ export type GetLogQuery = {
                                   }
                                 | null
                                 | undefined;
-                            tachieImage?:
+                            portraitImage?:
                                 | {
                                       __typename?: 'FilePath';
                                       sourceType: FileSourceType;
@@ -1995,7 +1995,7 @@ export type WritePublicMessageMutation = {
                             | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                             | null
                             | undefined;
-                        tachieImage?:
+                        portraitImage?:
                             | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                             | null
                             | undefined;
@@ -2062,7 +2062,7 @@ export type WritePrivateMessageMutation = {
                             | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                             | null
                             | undefined;
-                        tachieImage?:
+                        portraitImage?:
                             | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                             | null
                             | undefined;
@@ -2225,7 +2225,7 @@ export type RoomEventSubscription = {
                                         }
                                       | null
                                       | undefined;
-                                  tachieImage?:
+                                  portraitImage?:
                                       | {
                                             __typename?: 'FilePath';
                                             sourceType: FileSourceType;
@@ -2315,7 +2315,7 @@ export type RoomEventSubscription = {
                                         }
                                       | null
                                       | undefined;
-                                  tachieImage?:
+                                  portraitImage?:
                                       | {
                                             __typename?: 'FilePath';
                                             sourceType: FileSourceType;
@@ -2848,7 +2848,7 @@ export const CharacterValueForMessageFragmentDoc = {
                     },
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'tachieImage' },
+                        name: { kind: 'Name', value: 'portraitImage' },
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [

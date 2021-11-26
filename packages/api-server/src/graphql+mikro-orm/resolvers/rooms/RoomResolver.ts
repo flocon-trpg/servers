@@ -649,12 +649,12 @@ const toCharacterValueForMessage = (
                       path: message.charaImagePath,
                       sourceType: message.charaImageSourceType,
                   },
-        tachieImage:
-            message.charaTachieImagePath == null || message.charaTachieImageSourceType == null
+        portraitImage:
+            message.charaPortraitImagePath == null || message.charaPortraitImageSourceType == null
                 ? undefined
                 : {
-                      path: message.charaTachieImagePath,
-                      sourceType: message.charaTachieImageSourceType,
+                      path: message.charaPortraitImagePath,
+                      sourceType: message.charaPortraitImageSourceType,
                   },
     };
 };
@@ -1761,8 +1761,8 @@ export class RoomResolver {
                 entity.charaImageSourceType = FileSourceTypeModule.ofNullishString(
                     chara.image?.sourceType
                 );
-                entity.charaTachieImagePath = chara.portraitImage?.path;
-                entity.charaTachieImageSourceType = FileSourceTypeModule.ofNullishString(
+                entity.charaPortraitImagePath = chara.portraitImage?.path;
+                entity.charaPortraitImageSourceType = FileSourceTypeModule.ofNullishString(
                     chara.portraitImage?.sourceType
                 );
             }
@@ -1897,8 +1897,8 @@ export class RoomResolver {
                 entity.charaImageSourceType = FileSourceTypeModule.ofNullishString(
                     chara.portraitImage?.sourceType
                 );
-                entity.charaTachieImagePath = chara.portraitImage?.path;
-                entity.charaTachieImageSourceType = FileSourceTypeModule.ofNullishString(
+                entity.charaPortraitImagePath = chara.portraitImage?.path;
+                entity.charaPortraitImageSourceType = FileSourceTypeModule.ofNullishString(
                     chara.portraitImage?.sourceType
                 );
             }

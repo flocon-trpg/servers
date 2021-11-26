@@ -86,7 +86,7 @@ export class CharacterValueForMessage {
     public image?: FilePath;
 
     @Field(() => FilePath, { nullable: true })
-    public tachieImage?: FilePath;
+    public portraitImage?: FilePath;
 }
 
 @ObjectType()
