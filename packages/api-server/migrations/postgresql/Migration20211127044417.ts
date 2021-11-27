@@ -1,6 +1,6 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20211026154452 extends Migration {
+export class Migration20211127044417 extends Migration {
     async up(): Promise<void> {
         this.addSql(
             'create table "user" ("user_uid" varchar(255) not null, "baas_type" varchar(255) not null, "is_entry" bool not null);'
@@ -50,7 +50,7 @@ export class Migration20211026154452 extends Migration {
         this.addSql('create index "room_op_prev_revision_index" on "room_op" ("prev_revision");');
 
         this.addSql(
-            'create table "room_prv_msg" ("id" varchar(255) not null, "version" int4 not null default 1, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) null, "init_text_source" varchar(65535) null default \'\', "init_text" varchar(65535) not null default \'\', "updated_text" varchar(65535) null, "text_updated_at" int4 null default null, "text_color" varchar(255) null, "command_result" varchar(65535) null, "command_is_success" bool null default null, "alt_text_to_secret" varchar(65535) null, "is_secret" bool not null, "chara_state_id" varchar(255) null, "chara_name" varchar(255) null, "chara_is_private" bool null default null, "chara_image_path" varchar(65535) null default null, "chara_image_source_type" jsonb null default null, "chara_tachie_image_path" varchar(65535) null default null, "chara_tachie_image_source_type" varchar(255) null default null, "custom_name" varchar(255) null, "created_by_user_uid" varchar(255) null, "room_id" varchar(255) not null);'
+            'create table "room_prv_msg" ("id" varchar(255) not null, "version" int4 not null default 1, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) null, "init_text_source" varchar(65535) null default \'\', "init_text" varchar(65535) not null default \'\', "updated_text" varchar(65535) null, "text_updated_at" int4 null default null, "text_color" varchar(255) null, "command_result" varchar(65535) null, "command_is_success" bool null default null, "alt_text_to_secret" varchar(65535) null, "is_secret" bool not null, "chara_state_id" varchar(255) null, "chara_name" varchar(255) null, "chara_is_private" bool null default null, "chara_image_path" varchar(65535) null default null, "chara_image_source_type" jsonb null default null, "chara_portrait_image_path" varchar(65535) null default null, "chara_portrait_image_source_type" varchar(255) null default null, "custom_name" varchar(255) null, "created_by_user_uid" varchar(255) null, "room_id" varchar(255) not null);'
         );
         this.addSql(
             'alter table "room_prv_msg" add constraint "room_prv_msg_pkey" primary key ("id");'
@@ -75,32 +75,20 @@ export class Migration20211026154452 extends Migration {
         );
 
         this.addSql(
-            'create table "dice_piece_value_log" ("id" varchar(255) not null, "character_created_by" varchar(255) not null, "character_id" varchar(255) not null, "created_at" timestamptz(0) not null, "state_id" varchar(255) not null, "value" jsonb null, "room_id" varchar(255) not null);'
+            'create table "dice_piece_value_log" ("id" varchar(255) not null, "created_at" timestamptz(0) not null, "state_id" varchar(255) not null, "value" jsonb null, "room_id" varchar(255) not null);'
         );
         this.addSql(
             'alter table "dice_piece_value_log" add constraint "dice_piece_value_log_pkey" primary key ("id");'
-        );
-        this.addSql(
-            'create index "dice_piece_value_log_character_created_by_index" on "dice_piece_value_log" ("character_created_by");'
-        );
-        this.addSql(
-            'create index "dice_piece_value_log_character_id_index" on "dice_piece_value_log" ("character_id");'
         );
         this.addSql(
             'create index "dice_piece_value_log_state_id_index" on "dice_piece_value_log" ("state_id");'
         );
 
         this.addSql(
-            'create table "string_piece_value_log" ("id" varchar(255) not null, "character_created_by" varchar(255) not null, "character_id" varchar(255) not null, "created_at" timestamptz(0) not null, "state_id" varchar(255) not null, "value" jsonb null, "room_id" varchar(255) not null);'
+            'create table "string_piece_value_log" ("id" varchar(255) not null, "created_at" timestamptz(0) not null, "state_id" varchar(255) not null, "value" jsonb null, "room_id" varchar(255) not null);'
         );
         this.addSql(
             'alter table "string_piece_value_log" add constraint "string_piece_value_log_pkey" primary key ("id");'
-        );
-        this.addSql(
-            'create index "string_piece_value_log_character_created_by_index" on "string_piece_value_log" ("character_created_by");'
-        );
-        this.addSql(
-            'create index "string_piece_value_log_character_id_index" on "string_piece_value_log" ("character_id");'
         );
         this.addSql(
             'create index "string_piece_value_log_state_id_index" on "string_piece_value_log" ("state_id");'
@@ -117,7 +105,7 @@ export class Migration20211026154452 extends Migration {
         this.addSql('create index "room_pub_ch_key_index" on "room_pub_ch" ("key");');
 
         this.addSql(
-            'create table "room_pub_msg" ("id" varchar(255) not null, "version" int4 not null default 1, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) null, "init_text_source" varchar(65535) null default \'\', "init_text" varchar(65535) not null default \'\', "updated_text" varchar(65535) null, "text_updated_at" int4 null default null, "text_color" varchar(255) null, "command_result" varchar(65535) null, "command_is_success" bool null default null, "alt_text_to_secret" varchar(65535) null, "is_secret" bool not null, "chara_state_id" varchar(255) null, "chara_name" varchar(255) null, "chara_is_private" bool null default null, "chara_image_path" varchar(65535) null default null, "chara_image_source_type" varchar(255) null default null, "chara_tachie_image_path" varchar(65535) null default null, "chara_tachie_image_source_type" varchar(255) null default null, "custom_name" varchar(255) null, "room_pub_ch_id" varchar(255) not null, "created_by_user_uid" varchar(255) null);'
+            'create table "room_pub_msg" ("id" varchar(255) not null, "version" int4 not null default 1, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) null, "init_text_source" varchar(65535) null default \'\', "init_text" varchar(65535) not null default \'\', "updated_text" varchar(65535) null, "text_updated_at" int4 null default null, "text_color" varchar(255) null, "command_result" varchar(65535) null, "command_is_success" bool null default null, "alt_text_to_secret" varchar(65535) null, "is_secret" bool not null, "chara_state_id" varchar(255) null, "chara_name" varchar(255) null, "chara_is_private" bool null default null, "chara_image_path" varchar(65535) null default null, "chara_image_source_type" varchar(255) null default null, "chara_portrait_image_path" varchar(65535) null default null, "chara_portrait_image_source_type" varchar(255) null default null, "custom_name" varchar(255) null, "room_pub_ch_id" varchar(255) not null, "created_by_user_uid" varchar(255) null);'
         );
         this.addSql(
             'alter table "room_pub_msg" add constraint "room_pub_msg_pkey" primary key ("id");'

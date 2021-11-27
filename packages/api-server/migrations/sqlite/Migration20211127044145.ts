@@ -1,6 +1,6 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20211026154204 extends Migration {
+export class Migration20211127044145 extends Migration {
     async up(): Promise<void> {
         this.addSql(
             'create table `user` (`user_uid` varchar not null, `baas_type` varchar not null, `is_entry` integer not null, primary key (`user_uid`));'
@@ -48,7 +48,7 @@ export class Migration20211026154204 extends Migration {
         this.addSql('create index `room_op_prev_revision_index` on `room_op` (`prev_revision`);');
 
         this.addSql(
-            "create table `room_prv_msg` (`id` varchar not null, `version` integer not null default 1, `created_at` datetime not null, `updated_at` datetime null, `init_text_source` varchar null default '', `init_text` varchar not null default '', `updated_text` varchar null, `text_updated_at` integer null default null, `text_color` varchar null, `command_result` varchar null, `command_is_success` integer null default null, `alt_text_to_secret` varchar null, `is_secret` integer not null, `chara_state_id` varchar null, `chara_name` varchar null, `chara_is_private` integer null default null, `chara_image_path` varchar null default null, `chara_image_source_type` varchar null default null, `chara_tachie_image_path` varchar null default null, `chara_tachie_image_source_type` varchar null default null, `custom_name` varchar null, primary key (`id`));"
+            "create table `room_prv_msg` (`id` varchar not null, `version` integer not null default 1, `created_at` datetime not null, `updated_at` datetime null, `init_text_source` varchar null default '', `init_text` varchar not null default '', `updated_text` varchar null, `text_updated_at` integer null default null, `text_color` varchar null, `command_result` varchar null, `command_is_success` integer null default null, `alt_text_to_secret` varchar null, `is_secret` integer not null, `chara_state_id` varchar null, `chara_name` varchar null, `chara_is_private` integer null default null, `chara_image_path` varchar null default null, `chara_image_source_type` varchar null default null, `chara_portrait_image_path` varchar null default null, `chara_portrait_image_source_type` varchar null default null, `custom_name` varchar null, primary key (`id`));"
         );
         this.addSql('create index `room_prv_msg_version_index` on `room_prv_msg` (`version`);');
         this.addSql(
@@ -73,26 +73,14 @@ export class Migration20211026154204 extends Migration {
         );
 
         this.addSql(
-            'create table `dice_piece_value_log` (`id` varchar not null, `character_created_by` varchar not null, `character_id` varchar not null, `created_at` datetime not null, `state_id` varchar not null, `value` json null, primary key (`id`));'
-        );
-        this.addSql(
-            'create index `dice_piece_value_log_character_created_by_index` on `dice_piece_value_log` (`character_created_by`);'
-        );
-        this.addSql(
-            'create index `dice_piece_value_log_character_id_index` on `dice_piece_value_log` (`character_id`);'
+            'create table `dice_piece_value_log` (`id` varchar not null, `created_at` datetime not null, `state_id` varchar not null, `value` json null, primary key (`id`));'
         );
         this.addSql(
             'create index `dice_piece_value_log_state_id_index` on `dice_piece_value_log` (`state_id`);'
         );
 
         this.addSql(
-            'create table `string_piece_value_log` (`id` varchar not null, `character_created_by` varchar not null, `character_id` varchar not null, `created_at` datetime not null, `state_id` varchar not null, `value` json null, primary key (`id`));'
-        );
-        this.addSql(
-            'create index `string_piece_value_log_character_created_by_index` on `string_piece_value_log` (`character_created_by`);'
-        );
-        this.addSql(
-            'create index `string_piece_value_log_character_id_index` on `string_piece_value_log` (`character_id`);'
+            'create table `string_piece_value_log` (`id` varchar not null, `created_at` datetime not null, `state_id` varchar not null, `value` json null, primary key (`id`));'
         );
         this.addSql(
             'create index `string_piece_value_log_state_id_index` on `string_piece_value_log` (`state_id`);'
@@ -106,7 +94,7 @@ export class Migration20211026154204 extends Migration {
         this.addSql('create index `room_pub_ch_key_index` on `room_pub_ch` (`key`);');
 
         this.addSql(
-            "create table `room_pub_msg` (`id` varchar not null, `version` integer not null default 1, `created_at` datetime not null, `updated_at` datetime null, `init_text_source` varchar null default '', `init_text` varchar not null default '', `updated_text` varchar null, `text_updated_at` integer null default null, `text_color` varchar null, `command_result` varchar null, `command_is_success` integer null default null, `alt_text_to_secret` varchar null, `is_secret` integer not null, `chara_state_id` varchar null, `chara_name` varchar null, `chara_is_private` integer null default null, `chara_image_path` varchar null default null, `chara_image_source_type` varchar null default null, `chara_tachie_image_path` varchar null default null, `chara_tachie_image_source_type` varchar null default null, `custom_name` varchar null, primary key (`id`));"
+            "create table `room_pub_msg` (`id` varchar not null, `version` integer not null default 1, `created_at` datetime not null, `updated_at` datetime null, `init_text_source` varchar null default '', `init_text` varchar not null default '', `updated_text` varchar null, `text_updated_at` integer null default null, `text_color` varchar null, `command_result` varchar null, `command_is_success` integer null default null, `alt_text_to_secret` varchar null, `is_secret` integer not null, `chara_state_id` varchar null, `chara_name` varchar null, `chara_is_private` integer null default null, `chara_image_path` varchar null default null, `chara_image_source_type` varchar null default null, `chara_portrait_image_path` varchar null default null, `chara_portrait_image_source_type` varchar null default null, `custom_name` varchar null, primary key (`id`));"
         );
         this.addSql('create index `room_pub_msg_version_index` on `room_pub_msg` (`version`);');
         this.addSql(
