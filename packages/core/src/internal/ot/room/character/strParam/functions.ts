@@ -117,6 +117,7 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
             second.isValuePrivate
         ),
         value: value.value,
+        overriddenParameterName: overriddenParameterName.value,
     };
     return Result.ok(valueProps);
 };
