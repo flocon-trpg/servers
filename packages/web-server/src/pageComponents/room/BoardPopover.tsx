@@ -782,6 +782,7 @@ namespace ContextMenuModule {
             y,
             w: 100,
             h: 100,
+            opacity: 0.7,
             isPrivate: false,
             isPositionLocked: false,
         };
