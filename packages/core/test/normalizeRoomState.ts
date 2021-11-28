@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { StrParamState } from '../src';
 
 const isEmpty = (source: Record<string, unknown>): boolean => {
     for (const key in source) {
@@ -21,13 +22,14 @@ const isDefaultSimpleParam = (source: Record<string, unknown>) => {
 };
 
 const isDefaultStrParam = (source: Record<string, unknown>) => {
-    return _.isEqual(source, {
+    const defaultStrParam: StrParamState = {
         $v: 2,
         $r: 1,
         isValuePrivate: false,
         value: '',
         overriddenParameterName: undefined,
-    });
+    };
+    return _.isEqual(source, defaultStrParam);
 };
 
 const isDefaultParam = (source: Record<string, unknown>) => {
