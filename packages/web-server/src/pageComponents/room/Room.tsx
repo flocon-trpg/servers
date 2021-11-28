@@ -46,7 +46,7 @@ const RoomMessagePanels: React.FC = () => {
                 return (
                     <DraggableCard
                         key={pair.key}
-                        header='Message'
+                        header='メッセージ'
                         onDragStop={e =>
                             setRoomConfig(roomConfig => {
                                 if (roomConfig == null) {
@@ -476,7 +476,7 @@ export const Room: React.FC = () => {
                     <RoomMessagePanels />
                     {characterPanel.isMinimized ? null : (
                         <DraggableCard
-                            header='Characters'
+                            header='キャラクター'
                             onDragStop={e =>
                                 setRoomConfig(roomConfig => {
                                     if (roomConfig == null) {
@@ -586,7 +586,7 @@ export const Room: React.FC = () => {
                     {memoPanels}
                     {participantPanel.isMinimized ? null : (
                         <DraggableCard
-                            header='Participants'
+                            header='入室者'
                             onDragStop={e =>
                                 setRoomConfig(roomConfig => {
                                     if (roomConfig == null) {
