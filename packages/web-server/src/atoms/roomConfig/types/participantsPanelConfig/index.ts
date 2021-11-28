@@ -5,29 +5,29 @@ import {
     serializedDraggablePanelConfigBase,
 } from '../draggablePanelConfig';
 
-export type ParticipantPanelConfig = {
+export type ParticipantsPanelConfig = {
     isMinimized: boolean;
 } & DraggablePanelConfigBase;
 
-export const serializedParticipantPanelConfig = t.intersection([
+export const serializedParticipantsPanelConfig = t.intersection([
     t.partial({
         isMinimized: t.boolean,
     }),
     serializedDraggablePanelConfigBase,
 ]);
 
-export type SerializedParticipantPanelConfig = t.TypeOf<typeof serializedParticipantPanelConfig>;
+export type SerializedParticipantsPanelConfig = t.TypeOf<typeof serializedParticipantsPanelConfig>;
 
 export const deserializeParticipantsPanelConfig = (
-    source: SerializedParticipantPanelConfig
-): ParticipantPanelConfig => {
+    source: SerializedParticipantsPanelConfig
+): ParticipantsPanelConfig => {
     return {
         ...deserializeDraggablePanelConfigBase(source),
         isMinimized: source.isMinimized ?? false,
     };
 };
 
-export const defaultParticipantPanelConfig = (): ParticipantPanelConfig => {
+export const defaultParticipantsPanelConfig = (): ParticipantsPanelConfig => {
     return {
         x: 1000,
         y: 400,
