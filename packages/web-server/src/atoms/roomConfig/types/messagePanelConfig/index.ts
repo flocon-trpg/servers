@@ -9,6 +9,7 @@ import {
 } from '../draggablePanelConfig';
 import { record } from '../../../../utils/io-ts/record';
 import { TabConfigUtils } from '../tabConfig/utils';
+import { defaultMessagePanelPosition } from '../defaultPanelPositions';
 
 export type MessagePanelConfig = {
     isMinimized: boolean;
@@ -58,12 +59,7 @@ export const deserializeMessagePanelConfig = (
 
 export const defaultMessagePanelConfig = (): MessagePanelConfig => {
     return {
-        x: 0,
-        y: 400,
-        width: 300,
-        height: 300,
-        zIndex: 0,
-        isMinimized: false,
+        ...defaultMessagePanelPosition,
         tabs: { [simpleId()]: TabConfigUtils.createAll({}) },
         isPrivateMessageMode: false,
         customCharacterName: '',

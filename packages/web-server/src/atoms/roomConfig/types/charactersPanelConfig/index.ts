@@ -1,4 +1,5 @@
 import * as t from 'io-ts';
+import { defaultCharactersPanelPosition } from '../defaultPanelPositions';
 import {
     deserializeDraggablePanelConfigBase,
     DraggablePanelConfigBase,
@@ -29,11 +30,6 @@ export const deserializeCharactersPanelConfig = (
 
 export const defaultCharactersPanelConfig = (): CharactersPanelConfig => {
     return {
-        x: 400,
-        y: 0,
-        width: 300,
-        height: 300,
-        zIndex: 1,
-        isMinimized: false,
+        ...defaultCharactersPanelPosition,
     };
 };

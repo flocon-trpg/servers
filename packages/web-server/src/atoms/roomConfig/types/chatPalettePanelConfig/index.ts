@@ -1,5 +1,6 @@
 import { simpleId } from '@flocon-trpg/core';
 import * as t from 'io-ts';
+import { defaultChatPalettePanelPosition } from '../defaultPanelPositions';
 import {
     deserializeDraggablePanelConfigBase,
     DraggablePanelConfigBase,
@@ -48,14 +49,9 @@ export const deserializeChatPalettePanelConfig = (
 
 export const defaultChatPalettePanelsConfig = (): Record<string, ChatPalettePanelConfig> => {
     const config: ChatPalettePanelConfig = {
-        x: 50,
-        y: 50,
-        width: 400,
-        height: 400,
-        zIndex: 0,
+        ...defaultChatPalettePanelPosition,
         customCharacterName: '',
         isPrivateMessageMode: false,
-        isMinimized: false,
     };
     const result: Record<string, ChatPalettePanelConfig> = {};
     const id = simpleId();

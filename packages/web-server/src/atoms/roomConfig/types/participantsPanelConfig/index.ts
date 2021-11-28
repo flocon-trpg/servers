@@ -1,4 +1,5 @@
 import * as t from 'io-ts';
+import { defaultParticipantsPanelPosition } from '../defaultPanelPositions';
 import {
     deserializeDraggablePanelConfigBase,
     DraggablePanelConfigBase,
@@ -29,11 +30,6 @@ export const deserializeParticipantsPanelConfig = (
 
 export const defaultParticipantsPanelConfig = (): ParticipantsPanelConfig => {
     return {
-        x: 1000,
-        y: 400,
-        width: 300,
-        height: 300,
-        zIndex: 0,
-        isMinimized: false,
+        ...defaultParticipantsPanelPosition,
     };
 };
