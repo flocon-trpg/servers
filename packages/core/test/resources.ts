@@ -265,6 +265,7 @@ export namespace Resources {
                         boardId,
                         isPositionLocked: false,
                         isPrivate: false,
+                        opacity: 1,
                         h: 5,
                         w: 6,
                         x: 7,
