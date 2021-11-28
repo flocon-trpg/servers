@@ -1720,7 +1720,7 @@ __metadata:
     "@types/sharp": ^0.29.2
     "@types/url-join": 4.0.1
     "@types/uuid": ^8.3.1
-    "@types/ws": ^7.4.7
+    "@types/ws": ^8.0.0
     "@types/yargs": ^17.0.3
     "@urql/core": 2.3.5
     apollo-server-express: ^3.3.0
@@ -1762,7 +1762,7 @@ __metadata:
     typescript: 4.4.4
     url-join: 4.0.1
     uuid: ^8.3.2
-    ws: 8.2.3
+    ws: 8.3.0
     yargs: ^17.2.1
   languageName: unknown
   linkType: soft
@@ -4100,15 +4100,6 @@ __metadata:
     "@types/node": "*"
     "@types/webidl-conversions": "*"
   checksum: 975987a9ca14a8d5a883523acb4fa0df7760cd8ca8dee56cd57753821e56060bfbead94df84f4504fe0b4270776d81cbb40fcd1f8643dab86da3a9abe926fb5c
-  languageName: node
-  linkType: hard
-
-"@types/ws@npm:^7.4.7":
-  version: 7.4.7
-  resolution: "@types/ws@npm:7.4.7"
-  dependencies:
-    "@types/node": "*"
-  checksum: b4c9b8ad209620c9b21e78314ce4ff07515c0cadab9af101c1651e7bfb992d7fd933bd8b9c99d110738fd6db523ed15f82f29f50b45510288da72e964dedb1a3
   languageName: node
   linkType: hard
 
@@ -18700,6 +18691,21 @@ __metadata:
     utf-8-validate:
       optional: true
   checksum: c869296ccb45f218ac6d32f8f614cd85b50a21fd434caf11646008eef92173be53490810c5c23aea31bc527902261fbfd7b062197eea341b26128d4be56a85e4
+  languageName: node
+  linkType: hard
+
+"ws@npm:8.3.0":
+  version: 8.3.0
+  resolution: "ws@npm:8.3.0"
+  peerDependencies:
+    bufferutil: ^4.0.1
+    utf-8-validate: ^5.0.2
+  peerDependenciesMeta:
+    bufferutil:
+      optional: true
+    utf-8-validate:
+      optional: true
+  checksum: 71f6919e3cb2c60ae53e00b13d7782bb77005750641855153a1716c23b7011259fe3a29a432522a3044dc7c579a7e2f5a495bb79ba9f823ce6c2e763300ef99b
   languageName: node
   linkType: hard
 
