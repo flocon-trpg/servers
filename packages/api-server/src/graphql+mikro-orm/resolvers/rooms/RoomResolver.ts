@@ -14,7 +14,11 @@ import {
 } from 'type-graphql';
 import { ResolverContext } from '../../utils/Contexts';
 import { GetRoomFailureType } from '../../../enums/GetRoomFailureType';
-import { ensureAuthorizedUser, findRoomAndMyParticipant } from '../utils/helpers';
+import {
+    bcryptCompareNullable,
+    ensureAuthorizedUser,
+    findRoomAndMyParticipant,
+} from '../utils/helpers';
 import { JoinRoomFailureType } from '../../../enums/JoinRoomFailureType';
 import * as Room$MikroORM from '../../entities/room/mikro-orm';
 import * as Participant$MikroORM from '../../entities/participant/mikro-orm';
@@ -168,6 +172,9 @@ import { RateLimitMiddleware } from '../../middlewares/RateLimitMiddleware';
 import { convertToMaxLength100String } from '../../../utils/convertToMaxLength100String';
 import { GetRoomAsListItemResult } from '../../results/GetRoomAsListItemResult';
 import { ResetRoomMessagesFailureType } from '../../../enums/ResetRoomMessagesFailureType';
+import { compare, hash } from 'bcrypt';
+
+const bcryptSaltRounds = 10;
 
 const find = <T>(source: Record<string, T | undefined>, key: string): T | undefined => source[key];
 
@@ -384,11 +391,12 @@ const joinRoomCore = async ({
         room: Room$MikroORM.Room;
         args: JoinRoomArgs;
         me: ParticipantState | undefined;
-    }) =>
+    }) => Promise<
         | ParticipantRole
         | JoinRoomFailureType.WrongPhrase
         | JoinRoomFailureType.AlreadyParticipant
-        | 'id';
+        | 'id'
+    >;
 }): Promise<{ result: typeof JoinRoomResult; payload: RoomEventPayload | undefined }> => {
     const queue = async (): Promise<{
         result: typeof JoinRoomResult;
@@ -411,7 +419,7 @@ const joinRoomCore = async ({
         }
         const { room, me } = findResult;
         const participantUserUids = findResult.participantIds();
-        const strategyResult = strategy({ me, room, args });
+        const strategyResult = await strategy({ me, room, args });
         switch (strategyResult) {
             case 'id': {
                 return {
@@ -472,11 +480,12 @@ const promoteMeCore = async ({
     strategy: (params: {
         room: Room$MikroORM.Room;
         me: ParticipantState;
-    }) =>
+    }) => Promise<
         | ParticipantRole
         | PromoteFailureType.WrongPhrase
         | PromoteFailureType.NoNeedToPromote
-        | PromoteFailureType.NotParticipant;
+        | PromoteFailureType.NotParticipant
+    >;
 }): Promise<{ result: PromoteResult; payload: RoomEventPayload | undefined }> => {
     const queue = async (): Promise<{
         result: PromoteResult;
@@ -507,7 +516,7 @@ const promoteMeCore = async ({
                 payload: undefined,
             };
         }
-        const strategyResult = strategy({ me, room });
+        const strategyResult = await strategy({ me, room });
         switch (strategyResult) {
             case PromoteFailureType.NoNeedToPromote: {
                 return {
@@ -1112,8 +1121,15 @@ export class RoomResolver {
             authorizedUser.participants.add(newParticipant);
 
             // このRoomのroomOperatedを購読しているユーザーはいないので、roomOperatedは実行する必要がない。
-            newRoom.joinAsPlayerPhrase = input.joinAsPlayerPhrase;
-            newRoom.joinAsSpectatorPhrase = input.joinAsSpectatorPhrase;
+            if (input.joinAsPlayerPhrase != null) {
+                newRoom.joinAsPlayerPhrase = await hash(input.joinAsPlayerPhrase, bcryptSaltRounds);
+            }
+            if (input.joinAsSpectatorPhrase != null) {
+                newRoom.joinAsSpectatorPhrase = await hash(
+                    input.joinAsSpectatorPhrase,
+                    bcryptSaltRounds
+                );
+            }
             const revision = newRoom.revision;
             em.persist(newRoom);
 
@@ -1204,7 +1220,7 @@ export class RoomResolver {
         const { result, payload } = await joinRoomCore({
             args,
             context,
-            strategy: ({ me, room }) => {
+            strategy: async ({ me, room }) => {
                 if (me != null) {
                     switch (me.role) {
                         case undefined:
@@ -1213,7 +1229,7 @@ export class RoomResolver {
                             return JoinRoomFailureType.AlreadyParticipant;
                     }
                 }
-                if (room.joinAsPlayerPhrase != null && room.joinAsPlayerPhrase !== args.phrase) {
+                if (!(await bcryptCompareNullable(args.phrase, room.joinAsPlayerPhrase))) {
                     return JoinRoomFailureType.WrongPhrase;
                 }
                 return Player;
@@ -1236,7 +1252,7 @@ export class RoomResolver {
         const { result, payload } = await joinRoomCore({
             args,
             context,
-            strategy: ({ me, room }) => {
+            strategy: async ({ me, room }) => {
                 if (me != null) {
                     switch (me.role) {
                         case undefined:
@@ -1245,10 +1261,7 @@ export class RoomResolver {
                             return JoinRoomFailureType.AlreadyParticipant;
                     }
                 }
-                if (
-                    room.joinAsSpectatorPhrase != null &&
-                    room.joinAsSpectatorPhrase !== args.phrase
-                ) {
+                if (!(await bcryptCompareNullable(args.phrase, room.joinAsSpectatorPhrase))) {
                     return JoinRoomFailureType.WrongPhrase;
                 }
                 return Spectator;
@@ -1271,16 +1284,13 @@ export class RoomResolver {
         const { result, payload } = await promoteMeCore({
             ...args,
             context,
-            strategy: ({ me, room }) => {
+            strategy: async ({ me, room }) => {
                 switch (me.role) {
                     case Master:
                     case Player:
                         return PromoteFailureType.NoNeedToPromote;
                     case Spectator: {
-                        if (
-                            room.joinAsPlayerPhrase != null &&
-                            room.joinAsPlayerPhrase !== args.phrase
-                        ) {
+                        if (!(await bcryptCompareNullable(args.phrase, room.joinAsPlayerPhrase))) {
                             return PromoteFailureType.WrongPhrase;
                         }
                         return Player;

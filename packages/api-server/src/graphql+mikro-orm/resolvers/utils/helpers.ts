@@ -9,6 +9,7 @@ import { BaasType } from '../../../enums/BaasType';
 import { EntryPasswordConfig, plain, ServerConfig } from '../../../configType';
 import safeCompare from 'safe-compare';
 import bcrypt from 'bcrypt';
+import { string } from 'fp-ts';
 
 const find = <T>(source: Record<string, T | undefined>, key: string): T | undefined => source[key];
 
@@ -152,4 +153,17 @@ export const comparePassword = async (
         return safeCompare(plainPassword, config.value);
     }
     return await bcrypt.compare(plainPassword, config.value);
+};
+
+export const bcryptCompareNullable = async (
+    plainPassword: string | undefined,
+    hash: string | undefined
+) => {
+    if (hash == null) {
+        return true;
+    }
+    if (plainPassword == null) {
+        return false;
+    }
+    return await bcrypt.compare(plainPassword, hash);
 };
