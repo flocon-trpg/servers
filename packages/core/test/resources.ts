@@ -200,7 +200,7 @@ export namespace Resources {
                 portraitImage: {
                     $v: 1,
                     $r: 1,
-                    path: 'TACHIE_IMAGE_PATH',
+                    path: 'PORTRAIT_IMAGE_PATH',
                     sourceType: 'Default',
                 },
                 boolParams: {
@@ -259,7 +259,7 @@ export namespace Resources {
                     },
                 },
                 portraitPositions: {
-                    TACHIE_LOCATION: {
+                    PORTRAIT_LOCATION: {
                         $v: 2,
                         $r: 1,
                         boardId,
