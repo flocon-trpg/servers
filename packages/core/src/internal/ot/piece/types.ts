@@ -1,4 +1,5 @@
 import * as t from 'io-ts';
+import { Maybe, maybe } from '../../maybe';
 import { createOperation } from '../util/createOperation';
 import * as ReplaceOperation from '../util/replaceOperation';
 
@@ -22,7 +23,7 @@ export const state = t.type({
     isCellMode: t.boolean,
     isPositionLocked: t.boolean,
     isPrivate: t.boolean,
-    opacity: t.number,
+    opacity: maybe(t.number),
     w: t.number,
     x: t.number,
     y: t.number,
@@ -40,7 +41,7 @@ export const downOperation = createOperation(2, 1, {
     isCellMode: booleanDownOperation,
     isPositionLocked: booleanDownOperation,
     isPrivate: booleanDownOperation,
-    opacity: numberDownOperation,
+    opacity: t.type({ oldValue: maybe(t.number) }),
     w: numberDownOperation,
     x: numberDownOperation,
     y: numberDownOperation,
@@ -58,7 +59,7 @@ export const upOperation = createOperation(2, 1, {
     isCellMode: booleanUpOperation,
     isPositionLocked: booleanUpOperation,
     isPrivate: booleanUpOperation,
-    opacity: numberUpOperation,
+    opacity: t.type({ newValue: maybe(t.number) }),
     w: numberUpOperation,
     x: numberUpOperation,
     y: numberUpOperation,
@@ -79,7 +80,7 @@ export type TwoWayOperation = {
     isCellMode?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
     isPositionLocked?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
     isPrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
-    opacity?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
+    opacity?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<number>>;
     w?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     x?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     y?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
