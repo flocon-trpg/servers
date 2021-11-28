@@ -16,6 +16,7 @@ export const state = t.type({
     h: t.number,
     isPositionLocked: t.boolean,
     isPrivate: t.boolean,
+    opacity: t.number,
     w: t.number,
     x: t.number,
     y: t.number,
@@ -28,6 +29,7 @@ export const downOperation = createOperation(2, 1, {
     h: numberDownOperation,
     isPositionLocked: booleanDownOperation,
     isPrivate: booleanDownOperation,
+    opacity: numberDownOperation,
     w: numberDownOperation,
     x: numberDownOperation,
     y: numberDownOperation,
@@ -40,6 +42,7 @@ export const upOperation = createOperation(2, 1, {
     h: numberUpOperation,
     isPositionLocked: booleanUpOperation,
     isPrivate: booleanUpOperation,
+    opacity: numberUpOperation,
     w: numberUpOperation,
     x: numberUpOperation,
     y: numberUpOperation,
@@ -55,6 +58,7 @@ export type TwoWayOperation = {
     h?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     isPositionLocked?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
     isPrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
+    opacity?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     w?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     x?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     y?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;

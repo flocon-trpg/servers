@@ -412,6 +412,10 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         first: first.cellY,
         second: second.cellY,
     });
+    const h = ReplaceOperation.clientTransform({
+        first: first.h,
+        second: second.h,
+    });
     const isCellMode = ReplaceOperation.clientTransform({
         first: first.isCellMode,
         second: second.isCellMode,
@@ -427,10 +431,6 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     const opacity = ReplaceOperation.clientTransform({
         first: first.opacity,
         second: second.opacity,
-    });
-    const h = ReplaceOperation.clientTransform({
-        first: first.h,
-        second: second.h,
     });
     const w = ReplaceOperation.clientTransform({
         first: first.w,
