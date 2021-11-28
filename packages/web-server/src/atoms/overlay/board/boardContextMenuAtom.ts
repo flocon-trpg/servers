@@ -1,47 +1,49 @@
 import {
     CharacterState,
     PieceState,
-    BoardLocationState,
     DicePieceValueState,
     StringPieceValueState,
+    BoardPositionState,
+    ImagePieceValueState,
 } from '@flocon-trpg/core';
-import { CompositeKey } from '@flocon-trpg/utils';
 import { atom } from 'jotai';
 import { ImagePieceValueElement } from '../../../hooks/state/useImagePieceValues';
 import { BoardConfig } from '../../roomConfig/types/boardConfig';
 
 export type ContextMenuState = {
-    boardKey: CompositeKey;
+    boardId: string;
     boardConfig: BoardConfig;
     offsetX: number;
     offsetY: number;
     pageX: number;
     pageY: number;
     characterPiecesOnCursor: ReadonlyArray<{
-        characterKey: CompositeKey;
+        characterId: string;
         character: CharacterState;
-        pieceKey: CompositeKey;
+        pieceId: string;
         piece: PieceState;
     }>;
-    tachiesOnCursor: ReadonlyArray<{
-        characterKey: CompositeKey;
+    portraitsOnCursor: ReadonlyArray<{
+        characterId: string;
         character: CharacterState;
-        tachieLocationKey: CompositeKey;
-        tachieLocation: BoardLocationState;
+        portraitPositionId: string;
+        portraitPosition: BoardPositionState;
     }>;
     dicePieceValuesOnCursor: ReadonlyArray<{
-        characterKey: CompositeKey;
-        dicePieceValueKey: string;
+        dicePieceValueId: string;
         dicePieceValue: DicePieceValueState;
         piece: PieceState;
     }>;
     stringPieceValuesOnCursor: ReadonlyArray<{
-        characterKey: CompositeKey;
-        stringPieceValueKey: string;
+        stringPieceValueId: string;
         stringPieceValue: StringPieceValueState;
         piece: PieceState;
     }>;
-    imagePieceValuesOnCursor: ReadonlyArray<ImagePieceValueElement>;
+    imagePieceValuesOnCursor: ReadonlyArray<{
+        imagePieceValueId: string;
+        imagePieceValue: ImagePieceValueState;
+        piece: PieceState;
+    }>;
 };
 
 export const boardContextMenuAtom = atom<ContextMenuState | null>(null);

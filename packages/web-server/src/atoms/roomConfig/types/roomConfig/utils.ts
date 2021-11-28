@@ -1,6 +1,6 @@
 import { RoomConfig } from '.';
 import { ResizeDirection } from 're-resizable';
-import { CompositeKey, keyNames, recordToArray } from '@flocon-trpg/utils';
+import { recordToArray } from '@flocon-trpg/utils';
 import { BoardConfig, defaultBoardConfig } from '../boardConfig';
 
 export namespace RoomConfigUtils {
@@ -50,7 +50,7 @@ export namespace RoomConfigUtils {
     export type ZoomBoardAction = {
         roomId: string;
         boardEditorPanelId: string | null; // nullならばActiveBoardPanelが対象になる。
-        boardKey: CompositeKey;
+        boardId: string;
         zoomDelta: number;
         prevCanvasWidth: number;
         prevCanvasHeight: number;
@@ -213,7 +213,7 @@ export namespace RoomConfigUtils {
     };
 
     export const zoomBoard = (state: RoomConfig, action: ZoomBoardAction): void => {
-        RoomConfigUtils.editBoard(state, action.boardKey, action.boardEditorPanelId, board => {
+        RoomConfigUtils.editBoard(state, action.boardId, action.boardEditorPanelId, board => {
             const prevZoom = board.zoom;
             const nextZoom = prevZoom + action.zoomDelta;
             const prevScale = Math.pow(2, prevZoom);
@@ -227,7 +227,7 @@ export namespace RoomConfigUtils {
 
     export const editBoard = (
         state: RoomConfig,
-        boardKey: CompositeKey,
+        boardId: string,
         boardEditorPanelId: string | null /* nullならばactiveBoardPanelが対象となる */,
         action: (source: BoardConfig) => void
     ): void => {
@@ -242,9 +242,9 @@ export namespace RoomConfigUtils {
             if (targetPanel == null) {
                 return;
             }
-            const board = targetPanel.boards[keyNames(boardKey)] ?? defaultBoardConfig();
+            const board = targetPanel.boards[boardId] ?? defaultBoardConfig();
             action(board);
-            targetPanel.boards[keyNames(boardKey)] = board;
+            targetPanel.boards[boardId] = board;
         }
     };
 }

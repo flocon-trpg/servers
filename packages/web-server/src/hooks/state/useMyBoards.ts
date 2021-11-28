@@ -1,25 +1,21 @@
 import { BoardState } from '@flocon-trpg/core';
-import { recordForEach } from '@flocon-trpg/utils';
 import React from 'react';
-import { roomAtom } from '../../atoms/room/roomAtom';
-import { useAtomSelector } from '../../atoms/useAtomSelector';
 import { useMyUserUid } from '../useMyUserUid';
+import { useBoards } from './useBoards';
 
 export const useMyBoards = (): ReadonlyMap<string, BoardState> | undefined => {
     const myUserUid = useMyUserUid();
-    const boards = useAtomSelector(
-        roomAtom,
-        state => state.roomState?.state?.participants?.[myUserUid ?? '']?.boards,
-        [myUserUid]
-    );
+    const boards = useBoards();
     return React.useMemo(() => {
         if (boards == null) {
             return undefined;
         }
         const result = new Map<string, BoardState>();
-        recordForEach<BoardState>(boards, (value, key) => {
-            result.set(key, value);
+        boards.forEach((value, key) => {
+            if (value.ownerParticipantId === myUserUid) {
+                result.set(key, value);
+            }
         });
         return result;
-    }, [boards]);
+    }, [boards, myUserUid]);
 };

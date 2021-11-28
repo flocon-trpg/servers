@@ -267,7 +267,7 @@ const DicePieceValueContent: React.FC<DicePieceValueContentProps> = ({
                     y={positions[count][0].y}
                     width={positions[count][0].w}
                     height={positions[count][0].h}
-                    value={dice[0].value}
+                    value={dice[0].value ?? null}
                     opacity={diceOpacity(dice[0].isValuePrivate)}
                 />
             )}
@@ -277,7 +277,7 @@ const DicePieceValueContent: React.FC<DicePieceValueContentProps> = ({
                     y={positions[count][1].y}
                     width={positions[count][1].w}
                     height={positions[count][1].h}
-                    value={dice[1].value}
+                    value={dice[1].value ?? null}
                     opacity={diceOpacity(dice[1].isValuePrivate)}
                 />
             )}
@@ -287,7 +287,7 @@ const DicePieceValueContent: React.FC<DicePieceValueContentProps> = ({
                     y={positions[count][2].y}
                     width={positions[count][2].w}
                     height={positions[count][2].h}
-                    value={dice[2].value}
+                    value={dice[2].value ?? null}
                     opacity={diceOpacity(dice[2].isValuePrivate)}
                 />
             )}
@@ -297,7 +297,7 @@ const DicePieceValueContent: React.FC<DicePieceValueContentProps> = ({
                     y={positions[count][3].y}
                     width={positions[count][3].w}
                     height={positions[count][3].h}
-                    value={dice[3].value}
+                    value={dice[3].value ?? null}
                     opacity={diceOpacity(dice[3].isValuePrivate)}
                 />
             )}

@@ -10,7 +10,13 @@ import {
     parameterIsPrivate,
     parameterIsPrivateAndNotCreatedByMe,
 } from '../resource/text/main';
-import { BoolParamState, CharacterUpOperation, StrIndex20 } from '@flocon-trpg/core';
+import {
+    BoolParamState,
+    CharacterState,
+    CharacterUpOperation,
+    StrIndex20,
+    applyCharacter,
+} from '@flocon-trpg/core';
 
 type Props = {
     isCharacterPrivate: boolean;
@@ -18,7 +24,7 @@ type Props = {
     parameterKey: StrIndex20;
     parameter: BoolParamState | undefined;
     createdByMe: boolean;
-    onOperate: (operation: CharacterUpOperation) => void;
+    onOperate: (mapping: (character: CharacterState) => CharacterState) => void;
     compact: boolean;
 };
 
@@ -31,23 +37,33 @@ export const BooleanParameterInput: React.FC<Props> = ({
     onOperate,
     compact,
 }: Props) => {
+    const apply =
+        (operation: CharacterUpOperation) =>
+        (state: CharacterState): CharacterState => {
+            const result = applyCharacter({ state, operation });
+            if (result.isError) {
+                throw result.error;
+            }
+            return result.value;
+        };
+
     const checkbox = ({ disabled }: { disabled: boolean }) => (
         <Checkbox
             disabled={disabled}
             checked={parameter?.value ?? false}
             onChange={e => {
                 const operation: CharacterUpOperation = {
-                    $v: 1,
-                    $r: 2,
+                    $v: 2,
+                    $r: 1,
                     boolParams: {
                         [parameterKey]: {
-                            $v: 1,
+                            $v: 2,
                             $r: 1,
                             value: { newValue: e.target.checked },
                         },
                     },
                 };
-                onOperate(operation);
+                onOperate(apply(operation));
             }}
         />
     );
@@ -64,17 +80,17 @@ export const BooleanParameterInput: React.FC<Props> = ({
                         disabled={disabled}
                         onClick={() => {
                             const operation: CharacterUpOperation = {
-                                $v: 1,
-                                $r: 2,
+                                $v: 2,
+                                $r: 1,
                                 boolParams: {
                                     [parameterKey]: {
-                                        $v: 1,
+                                        $v: 2,
                                         $r: 1,
                                         value: { newValue: false },
                                     },
                                 },
                             };
-                            onOperate(operation);
+                            onOperate(apply(operation));
                         }}
                     >
                         <PlusOutlined />
@@ -89,17 +105,17 @@ export const BooleanParameterInput: React.FC<Props> = ({
                     disabled={disabled}
                     onClick={() => {
                         const operation: CharacterUpOperation = {
-                            $v: 1,
-                            $r: 2,
+                            $v: 2,
+                            $r: 1,
                             boolParams: {
                                 [parameterKey]: {
-                                    $v: 1,
+                                    $v: 2,
                                     $r: 1,
                                     value: { newValue: undefined },
                                 },
                             },
                         };
-                        onOperate(operation);
+                        onOperate(apply(operation));
                     }}
                 >
                     <DeleteOutlined />
@@ -142,17 +158,17 @@ export const BooleanParameterInput: React.FC<Props> = ({
             size='small'
             onChange={e => {
                 const operation: CharacterUpOperation = {
-                    $v: 1,
-                    $r: 2,
+                    $v: 2,
+                    $r: 1,
                     boolParams: {
                         [parameterKey]: {
-                            $v: 1,
+                            $v: 2,
                             $r: 1,
                             isValuePrivate: { newValue: !e },
                         },
                     },
                 };
-                onOperate(operation);
+                onOperate(apply(operation));
             }}
         />
     );

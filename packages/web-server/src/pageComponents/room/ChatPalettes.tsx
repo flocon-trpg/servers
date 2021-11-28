@@ -135,7 +135,7 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
     const [selectedChannelType, setSelectedChannelType] =
         React.useState<SelectedChannelType>(publicChannel);
     const [isEditMode, setIsEditMode] = React.useState(false);
-    const operateAsStateWithImmer = useSetRoomStateWithImmer();
+    const setRoomState = useSetRoomStateWithImmer();
 
     const myCharactersOptions = React.useMemo(() => {
         if (myCharacters == null) {
@@ -228,14 +228,11 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
                         onDoubleClick={text => subject.next(text)}
                         isEditMode={isEditMode}
                         onChange={toml => {
-                            operateAsStateWithImmer(prevRoom => {
+                            setRoomState(prevRoom => {
                                 if (myUserUid == null || selectedCharacterStateId == null) {
                                     return;
                                 }
-                                const character =
-                                    prevRoom.participants[myUserUid]?.characters?.[
-                                        selectedCharacterStateId
-                                    ];
+                                const character = prevRoom.characters[selectedCharacterStateId]
                                 if (character == null) {
                                     return;
                                 }

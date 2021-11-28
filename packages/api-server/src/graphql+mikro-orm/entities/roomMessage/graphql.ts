@@ -86,7 +86,7 @@ export class CharacterValueForMessage {
     public image?: FilePath;
 
     @Field(() => FilePath, { nullable: true })
-    public tachieImage?: FilePath;
+    public portraitImage?: FilePath;
 }
 
 @ObjectType()
@@ -215,12 +215,6 @@ export class PieceValueLog {
 
     @Field()
     public messageId!: string;
-
-    @Field()
-    public characterCreatedBy!: string;
-
-    @Field()
-    public characterId!: string;
 
     @Field()
     public stateId!: string;

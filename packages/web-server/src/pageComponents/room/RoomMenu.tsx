@@ -641,7 +641,7 @@ export const RoomMenu: React.FC = () => {
                                     }
                                     const panelId = simpleId();
                                     roomConfig.panels.boardEditorPanels[panelId] = {
-                                        activeBoardKey: null,
+                                        activeBoardId: undefined,
                                         boards: {},
                                         isMinimized: false,
                                         x: 10,

@@ -10,7 +10,7 @@ import {
     parameterIsPrivateAndNotCreatedByMe,
     parameterIsNotPrivateAndNotCreatedByMe,
 } from '../resource/text/main';
-import { CharacterUpOperation, NumParamState, StrIndex20 } from '@flocon-trpg/core';
+import { applyCharacter, CharacterState, CharacterUpOperation, NumParamState, StrIndex20 } from '@flocon-trpg/core';
 
 const inputWidth = 50;
 
@@ -21,7 +21,7 @@ type Props = {
     numberParameter: NumParamState | undefined;
     numberMaxParameter: NumParamState | undefined;
     createdByMe: boolean;
-    onOperate: (operation: CharacterUpOperation) => void;
+    onOperate: (mapping: (character: CharacterState) => CharacterState) => void;
     compact: boolean;
 };
 
@@ -37,6 +37,14 @@ export const NumberParameterInput: React.FC<Props> = ({
     onOperate,
     compact,
 }: Props) => {
+    const apply = (operation: CharacterUpOperation) => (state: CharacterState): CharacterState => {
+        const result = applyCharacter({state, operation});
+        if (result.isError) {
+            throw result.error;
+        }
+        return result.value;
+    }
+
     const addOrDeleteNumberParameterButton = ({
         disabled,
     }: {
@@ -53,17 +61,17 @@ export const NumberParameterInput: React.FC<Props> = ({
                         disabled={disabled}
                         onClick={() => {
                             const operation: CharacterUpOperation = {
-                                $v: 1,
-                                $r: 2,
+                                $v: 2,
+                                $r: 1,
                                 numParams: {
                                     [parameterKey]: {
-                                        $v: 1,
+                                        $v: 2,
                                         $r: 1,
                                         value: { newValue: 0 },
                                     },
                                 },
                             };
-                            onOperate(operation);
+                            onOperate(apply(operation));
                         }}
                     >
                         <PlusOutlined />
@@ -78,17 +86,17 @@ export const NumberParameterInput: React.FC<Props> = ({
                     disabled={disabled}
                     onClick={() => {
                         const operation: CharacterUpOperation = {
-                            $v: 1,
-                            $r: 2,
+                            $v: 2,
+                            $r: 1,
                             numParams: {
                                 [parameterKey]: {
-                                    $v: 1,
+                                    $v: 2,
                                     $r: 1,
                                     value: { newValue: undefined },
                                 },
                             },
                         };
-                        onOperate(operation);
+                            onOperate(apply(operation));
                     }}
                 >
                     <DeleteOutlined />
@@ -113,17 +121,17 @@ export const NumberParameterInput: React.FC<Props> = ({
                         disabled={disabled}
                         onClick={() => {
                             const operation: CharacterUpOperation = {
-                                $v: 1,
-                                $r: 2,
+                                $v: 2,
+                                $r: 1,
                                 numMaxParams: {
                                     [parameterKey]: {
-                                        $v: 1,
+                                        $v: 2,
                                         $r: 1,
                                         value: { newValue: 0 },
                                     },
                                 },
                             };
-                            onOperate(operation);
+                            onOperate(apply(operation));
                         }}
                     >
                         <PlusOutlined />
@@ -138,17 +146,17 @@ export const NumberParameterInput: React.FC<Props> = ({
                     disabled={disabled}
                     onClick={() => {
                         const operation: CharacterUpOperation = {
-                            $v: 1,
-                            $r: 2,
+                            $v: 2,
+                            $r: 1,
                             numMaxParams: {
                                 [parameterKey]: {
-                                    $v: 1,
+                                    $v: 2,
                                     $r: 1,
                                     value: { newValue: undefined },
                                 },
                             },
                         };
-                        onOperate(operation);
+                            onOperate(apply(operation));
                     }}
                 >
                     <DeleteOutlined />
@@ -192,17 +200,17 @@ export const NumberParameterInput: React.FC<Props> = ({
                 size='small'
                 onChange={e => {
                     const operation: CharacterUpOperation = {
-                        $v: 1,
-                        $r: 2,
+                        $v: 2,
+                        $r: 1,
                         numParams: {
                             [parameterKey]: {
-                                $v: 1,
+                                $v: 2,
                                 $r: 1,
                                 isValuePrivate: { newValue: !e },
                             },
                         },
                     };
-                    onOperate(operation);
+                            onOperate(apply(operation));
                 }}
             />
         );
@@ -230,17 +238,17 @@ export const NumberParameterInput: React.FC<Props> = ({
                             return;
                         }
                         const operation: CharacterUpOperation = {
-                            $v: 1,
-                            $r: 2,
+                            $v: 2,
+                            $r: 1,
                             numParams: {
                                 [parameterKey]: {
-                                    $v: 1,
+                                    $v: 2,
                                     $r: 1,
                                     value: { newValue },
                                 },
                             },
                         };
-                        onOperate(operation);
+                            onOperate(apply(operation));
                     }}
                 />
                 {addOrDeleteNumberParameterButton({ disabled: false })}
@@ -283,17 +291,17 @@ export const NumberParameterInput: React.FC<Props> = ({
                 size='small'
                 onChange={e => {
                     const operation: CharacterUpOperation = {
-                        $v: 1,
-                        $r: 2,
+                        $v: 2,
+                        $r: 1,
                         numMaxParams: {
                             [parameterKey]: {
-                                $v: 1,
+                                $v: 2,
                                 $r: 1,
                                 isValuePrivate: { newValue: !e },
                             },
                         },
                     };
-                    onOperate(operation);
+                            onOperate(apply(operation));
                 }}
             />
         );
@@ -321,17 +329,17 @@ export const NumberParameterInput: React.FC<Props> = ({
                             return;
                         }
                         const operation: CharacterUpOperation = {
-                            $v: 1,
-                            $r: 2,
+                            $v: 2,
+                            $r: 1,
                             numMaxParams: {
                                 [parameterKey]: {
-                                    $v: 1,
+                                    $v: 2,
                                     $r: 1,
                                     value: { newValue },
                                 },
                             },
                         };
-                        onOperate(operation);
+                            onOperate(apply(operation));
                     }}
                 />
                 {addOrDeleteNumberMaxParameterButton({ disabled: false })}

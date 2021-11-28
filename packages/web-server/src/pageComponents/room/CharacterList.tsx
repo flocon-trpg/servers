@@ -12,7 +12,6 @@ import {
     characterIsNotPrivate,
     characterIsNotPrivateAndNotCreatedByMe,
 } from '../../resource/text/main';
-import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import { useCharacters } from '../../hooks/state/useCharacters';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import {
@@ -26,16 +25,13 @@ import {
     ParticipantState,
     StrIndex20,
     strIndex20Array,
-    UpOperation,
 } from '@flocon-trpg/core';
-import { CompositeKey, keyNames } from '@flocon-trpg/utils';
 import _ from 'lodash';
 import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../../utils/className';
 import { ColumnType } from 'antd/lib/table';
 import { SortOrder } from 'antd/lib/table/interface';
 import { IconView } from '../../components/IconView';
-import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 import { getUserUid, MyAuthContext } from '../../contexts/MyAuthContext';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { create } from '../../utils/constants';
@@ -46,12 +42,12 @@ import { characterParameterNamesDrawerVisibilityAtom } from '../../atoms/overlay
 type DataSource = {
     key: string;
     character: {
-        stateKey: CompositeKey;
+        stateId: string;
         state: CharacterState;
         createdByMe: boolean | null;
     };
     participants: ReadonlyMap<string, ParticipantState>;
-    operate: (operation: UpOperation) => void;
+    onOperateCharacter: (mapping: (operation: CharacterState) => CharacterState) => void;
 };
 
 const minNumParameter = -1000000;
@@ -85,7 +81,7 @@ const createBooleanParameterColumn = ({
             booleanToNumber(x.character.state.boolParams[key]?.value, sortOrder) -
             booleanToNumber(y.character.state.boolParams[key]?.value, sortOrder),
         // eslint-disable-next-line react/display-name
-        render: (_: unknown, { character, operate }: DataSource) => {
+        render: (_: unknown, { character, onOperateCharacter }: DataSource) => {
             return (
                 <>
                     <BooleanParameterInput
@@ -95,10 +91,8 @@ const createBooleanParameterColumn = ({
                         parameterKey={key}
                         parameter={character.state.boolParams[key]}
                         createdByMe={character.createdByMe ?? false}
-                        onOperate={characterOperation => {
-                            operate(
-                                characterUpdateOperation(character.stateKey, characterOperation)
-                            );
+                        onOperate={mapping => {
+                            onOperateCharacter(mapping);
                         }}
                     />
                 </>
@@ -131,7 +125,7 @@ const createNumParameterColumn = ({
         },
         sortDirections: ['descend', 'ascend'],
         // eslint-disable-next-line react/display-name
-        render: (_: unknown, { character, operate }: DataSource) => {
+        render: (_: unknown, { character, onOperateCharacter }: DataSource) => {
             return (
                 <>
                     <NumberParameterInput
@@ -142,10 +136,8 @@ const createNumParameterColumn = ({
                         numberParameter={character.state.numParams[key]}
                         numberMaxParameter={character.state.numMaxParams[key]}
                         createdByMe={character.createdByMe ?? false}
-                        onOperate={characterOperation => {
-                            operate(
-                                characterUpdateOperation(character.stateKey, characterOperation)
-                            );
+                        onOperate={mapping => {
+                            onOperateCharacter(mapping);
                         }}
                     />
                 </>
@@ -176,7 +168,7 @@ const createStringParameterColumn = ({
             return xValue.localeCompare(yValue);
         },
         // eslint-disable-next-line react/display-name
-        render: (_: unknown, { character, operate }: DataSource) => {
+        render: (_: unknown, { character, onOperateCharacter }: DataSource) => {
             return (
                 <>
                     <StringParameterInput
@@ -186,10 +178,8 @@ const createStringParameterColumn = ({
                         parameterKey={key}
                         parameter={character.state.strParams[key]}
                         createdByMe={character.createdByMe ?? false}
-                        onOperate={characterOperation => {
-                            operate(
-                                characterUpdateOperation(character.stateKey, characterOperation)
-                            );
+                        onOperate={mapping => {
+                            onOperateCharacter(mapping);
                         }}
                     />
                 </>
@@ -200,10 +190,11 @@ const createStringParameterColumn = ({
 
 export const CharacterList: React.FC = () => {
     const myAuth = React.useContext(MyAuthContext);
-    const operate = useSetRoomStateByApply();
-    const operateAsStateWithImmer = useSetRoomStateWithImmer();
+    const setRoomState = useSetRoomStateWithImmer();
     const setCharacterEditorDrawer = useUpdateAtom(characterEditorDrawerAtom);
-    const setCharacterParameterNamesDrawerVisibility = useUpdateAtom(characterParameterNamesDrawerVisibilityAtom);
+    const setCharacterParameterNamesDrawerVisibility = useUpdateAtom(
+        characterParameterNamesDrawerVisibilityAtom
+    );
 
     const characters = useCharacters();
     const participants = useParticipants();
@@ -221,17 +212,28 @@ export const CharacterList: React.FC = () => {
         return null;
     }
 
-    const charactersDataSource: DataSource[] = characters.toArray().map(([key, character]) => {
-        const createdByMe = getUserUid(myAuth) === key.createdBy;
+    const operateCharacter =
+        (characterId: string) => (mapping: (character: CharacterState) => CharacterState) => {
+            setRoomState(roomState => {
+                const character = roomState.characters[characterId];
+                if (character == null) {
+                    return;
+                }
+                roomState.characters[characterId] = mapping(character);
+            });
+        };
+
+    const charactersDataSource: DataSource[] = [...characters].map(([characterId, character]) => {
+        const createdByMe = getUserUid(myAuth) === characterId;
         return {
-            key: keyNames(key), // antdのtableのkeyとして必要
+            key: characterId, // antdのtableのkeyとして必要
             character: {
-                stateKey: key,
+                stateId: characterId,
                 state: character,
                 createdByMe,
             },
             participants,
-            operate,
+            onOperateCharacter: operateCharacter(characterId),
         };
     });
 
@@ -248,8 +250,8 @@ export const CharacterList: React.FC = () => {
                         size='small'
                         onClick={() =>
                             setCharacterEditorDrawer({
-                                        type: update,
-                                        stateKey: character.stateKey,
+                                type: update,
+                                stateId: character.stateId,
                             })
                         }
                     >
@@ -263,7 +265,7 @@ export const CharacterList: React.FC = () => {
             key: '全体公開',
             width: 36,
             // eslint-disable-next-line react/display-name
-            render: (_: unknown, { character, operate }: DataSource) => (
+            render: (_: unknown, { character }: DataSource) => (
                 <ToggleButton
                     size='small'
                     checked={!character.state.isPrivate}
@@ -279,13 +281,13 @@ export const CharacterList: React.FC = () => {
                             : characterIsNotPrivate({ isCreate: false })
                     }
                     onChange={newValue => {
-                        operate(
-                            characterUpdateOperation(character.stateKey, {
-                                $v: 1,
-                                $r: 2,
-                                isPrivate: { newValue: !newValue },
-                            })
-                        );
+                        setRoomState(roomState => {
+                            const targetCharacter = roomState.characters[character.stateId];
+                            if (targetCharacter == null) {
+                                return;
+                            }
+                            targetCharacter.isPrivate = !newValue;
+                        });
                     }}
                 />
             ),
@@ -308,11 +310,8 @@ export const CharacterList: React.FC = () => {
                         value={character.state.name}
                         size='small'
                         onChange={newValue => {
-                            operateAsStateWithImmer(state => {
-                                const targetCharacter =
-                                    state.participants[character.stateKey.createdBy]?.characters[
-                                        character.stateKey.id
-                                    ];
+                            setRoomState(state => {
+                                const targetCharacter = state.characters[character.stateId];
                                 if (targetCharacter == null) {
                                     return;
                                 }
@@ -332,20 +331,10 @@ export const CharacterList: React.FC = () => {
 
     return (
         <div>
-            <Button
-                size='small'
-                onClick={() =>
-                    setCharacterEditorDrawer({type: create})
-                }
-            >
+            <Button size='small' onClick={() => setCharacterEditorDrawer({ type: create })}>
                 キャラクターを作成
             </Button>
-            <Button
-                size='small'
-                onClick={() =>
-                    setCharacterParameterNamesDrawerVisibility(true)
-                }
-            >
+            <Button size='small' onClick={() => setCharacterParameterNamesDrawerVisibility(true)}>
                 パラメーターを追加・編集・削除
             </Button>
             <Table

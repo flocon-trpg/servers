@@ -3,7 +3,7 @@ import { Select } from 'antd';
 import React from 'react';
 import { useMyCharacters } from '../hooks/state/useMyCharacters';
 
-type Value = { key: string; state: CharacterState };
+type Value = { id: string; state: CharacterState };
 
 type Props = {
     onSelect: (value: Value | undefined) => void;
@@ -55,7 +55,7 @@ export const MyCharactersSelect: React.FC<Props> = ({
                         onSelect(undefined);
                         return;
                     }
-                    onSelect({ key: value, state: selected });
+                    onSelect({ id: value, state: selected });
                     return;
                 }
             }}

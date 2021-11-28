@@ -1,5 +1,6 @@
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
+export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
@@ -34,8 +35,8 @@ export type CharacterValueForMessage = {
     image?: Maybe<FilePath>;
     isPrivate: Scalars['Boolean'];
     name: Scalars['String'];
+    portraitImage?: Maybe<FilePath>;
     stateId: Scalars['String'];
-    tachieImage?: Maybe<FilePath>;
 };
 
 export type CommandResult = {
@@ -54,8 +55,8 @@ export enum CreateRoomFailureType {
 }
 
 export type CreateRoomInput = {
-    joinAsPlayerPhrase?: Maybe<Scalars['String']>;
-    joinAsSpectatorPhrase?: Maybe<Scalars['String']>;
+    joinAsPlayerPhrase?: InputMaybe<Scalars['String']>;
+    joinAsSpectatorPhrase?: InputMaybe<Scalars['String']>;
     participantName: Scalars['String'];
     roomName: Scalars['String'];
 };
@@ -381,19 +382,19 @@ export type MutationEditMessageArgs = {
 };
 
 export type MutationEntryToServerArgs = {
-    phrase?: Maybe<Scalars['String']>;
+    phrase?: InputMaybe<Scalars['String']>;
 };
 
 export type MutationJoinRoomAsPlayerArgs = {
     id: Scalars['String'];
     name: Scalars['String'];
-    phrase?: Maybe<Scalars['String']>;
+    phrase?: InputMaybe<Scalars['String']>;
 };
 
 export type MutationJoinRoomAsSpectatorArgs = {
     id: Scalars['String'];
     name: Scalars['String'];
-    phrase?: Maybe<Scalars['String']>;
+    phrase?: InputMaybe<Scalars['String']>;
 };
 
 export type MutationLeaveRoomArgs = {
@@ -417,7 +418,7 @@ export type MutationPingArgs = {
 };
 
 export type MutationPromoteToPlayerArgs = {
-    phrase?: Maybe<Scalars['String']>;
+    phrase?: InputMaybe<Scalars['String']>;
     roomId: Scalars['String'];
 };
 
@@ -431,23 +432,23 @@ export type MutationUpdateWritingMessageStatusArgs = {
 };
 
 export type MutationWritePrivateMessageArgs = {
-    characterStateId?: Maybe<Scalars['String']>;
-    customName?: Maybe<Scalars['String']>;
-    gameType?: Maybe<Scalars['String']>;
+    characterId?: InputMaybe<Scalars['String']>;
+    customName?: InputMaybe<Scalars['String']>;
+    gameType?: InputMaybe<Scalars['String']>;
     roomId: Scalars['String'];
     text: Scalars['String'];
-    textColor?: Maybe<Scalars['String']>;
+    textColor?: InputMaybe<Scalars['String']>;
     visibleTo: Array<Scalars['String']>;
 };
 
 export type MutationWritePublicMessageArgs = {
     channelKey: Scalars['String'];
-    characterStateId?: Maybe<Scalars['String']>;
-    customName?: Maybe<Scalars['String']>;
-    gameType?: Maybe<Scalars['String']>;
+    characterId?: InputMaybe<Scalars['String']>;
+    customName?: InputMaybe<Scalars['String']>;
+    gameType?: InputMaybe<Scalars['String']>;
     roomId: Scalars['String'];
     text: Scalars['String'];
-    textColor?: Maybe<Scalars['String']>;
+    textColor?: InputMaybe<Scalars['String']>;
 };
 
 export type MutationWriteRoomSoundEffectArgs = {
@@ -502,8 +503,6 @@ export enum ParticipantRole {
 
 export type PieceValueLog = {
     __typename?: 'PieceValueLog';
-    characterCreatedBy: Scalars['String'];
-    characterId: Scalars['String'];
     createdAt: Scalars['Float'];
     logType: PieceValueLogType;
     messageId: Scalars['String'];
@@ -863,7 +862,7 @@ export type CharacterValueForMessageFragment = {
         | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
         | null
         | undefined;
-    tachieImage?:
+    portraitImage?:
         | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
         | null
         | undefined;
@@ -990,8 +989,6 @@ export type JoinRoomResultFragment =
 export type PieceValueLogFragment = {
     __typename?: 'PieceValueLog';
     messageId: string;
-    characterCreatedBy: string;
-    characterId: string;
     stateId: string;
     createdAt: number;
     logType: PieceValueLogType;
@@ -1061,7 +1058,7 @@ export type RoomPublicMessageFragment = {
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
-              tachieImage?:
+              portraitImage?:
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
@@ -1101,7 +1098,7 @@ export type RoomPrivateMessageFragment = {
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
-              tachieImage?:
+              portraitImage?:
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
@@ -1122,8 +1119,6 @@ export type RoomSoundEffectFragment = {
 type RoomMessageEvent_PieceValueLog_Fragment = {
     __typename: 'PieceValueLog';
     messageId: string;
-    characterCreatedBy: string;
-    characterId: string;
     stateId: string;
     createdAt: number;
     logType: PieceValueLogType;
@@ -1163,7 +1158,7 @@ type RoomMessageEvent_RoomPrivateMessage_Fragment = {
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
-              tachieImage?:
+              portraitImage?:
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
@@ -1233,7 +1228,7 @@ type RoomMessageEvent_RoomPublicMessage_Fragment = {
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
-              tachieImage?:
+              portraitImage?:
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
@@ -1434,7 +1429,7 @@ export type GetMessagesQuery = {
                                   }
                                 | null
                                 | undefined;
-                            tachieImage?:
+                            portraitImage?:
                                 | {
                                       __typename?: 'FilePath';
                                       sourceType: FileSourceType;
@@ -1489,7 +1484,7 @@ export type GetMessagesQuery = {
                                   }
                                 | null
                                 | undefined;
-                            tachieImage?:
+                            portraitImage?:
                                 | {
                                       __typename?: 'FilePath';
                                       sourceType: FileSourceType;
@@ -1504,8 +1499,6 @@ export type GetMessagesQuery = {
               pieceValueLogs: Array<{
                   __typename?: 'PieceValueLog';
                   messageId: string;
-                  characterCreatedBy: string;
-                  characterId: string;
                   stateId: string;
                   createdAt: number;
                   logType: PieceValueLogType;
@@ -1580,7 +1573,7 @@ export type GetLogQuery = {
                                   }
                                 | null
                                 | undefined;
-                            tachieImage?:
+                            portraitImage?:
                                 | {
                                       __typename?: 'FilePath';
                                       sourceType: FileSourceType;
@@ -1635,7 +1628,7 @@ export type GetLogQuery = {
                                   }
                                 | null
                                 | undefined;
-                            tachieImage?:
+                            portraitImage?:
                                 | {
                                       __typename?: 'FilePath';
                                       sourceType: FileSourceType;
@@ -1650,8 +1643,6 @@ export type GetLogQuery = {
               pieceValueLogs: Array<{
                   __typename?: 'PieceValueLog';
                   messageId: string;
-                  characterCreatedBy: string;
-                  characterId: string;
                   stateId: string;
                   createdAt: number;
                   logType: PieceValueLogType;
@@ -1811,7 +1802,7 @@ export type EditFileTagsMutation = { __typename?: 'Mutation'; result: boolean };
 export type JoinRoomAsPlayerMutationVariables = Exact<{
     id: Scalars['String'];
     name: Scalars['String'];
-    phrase?: Maybe<Scalars['String']>;
+    phrase?: InputMaybe<Scalars['String']>;
 }>;
 
 export type JoinRoomAsPlayerMutation = {
@@ -1838,7 +1829,7 @@ export type JoinRoomAsPlayerMutation = {
 export type JoinRoomAsSpectatorMutationVariables = Exact<{
     id: Scalars['String'];
     name: Scalars['String'];
-    phrase?: Maybe<Scalars['String']>;
+    phrase?: InputMaybe<Scalars['String']>;
 }>;
 
 export type JoinRoomAsSpectatorMutation = {
@@ -1931,7 +1922,7 @@ export type PingMutation = {
 
 export type PromoteToPlayerMutationVariables = Exact<{
     roomId: Scalars['String'];
-    phrase?: Maybe<Scalars['String']>;
+    phrase?: InputMaybe<Scalars['String']>;
 }>;
 
 export type PromoteToPlayerMutation = {
@@ -1954,11 +1945,11 @@ export type ResetMessagesMutation = {
 export type WritePublicMessageMutationVariables = Exact<{
     roomId: Scalars['String'];
     text: Scalars['String'];
-    textColor?: Maybe<Scalars['String']>;
+    textColor?: InputMaybe<Scalars['String']>;
     channelKey: Scalars['String'];
-    characterStateId?: Maybe<Scalars['String']>;
-    customName?: Maybe<Scalars['String']>;
-    gameType?: Maybe<Scalars['String']>;
+    characterId?: InputMaybe<Scalars['String']>;
+    customName?: InputMaybe<Scalars['String']>;
+    gameType?: InputMaybe<Scalars['String']>;
 }>;
 
 export type WritePublicMessageMutation = {
@@ -2004,7 +1995,7 @@ export type WritePublicMessageMutation = {
                             | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                             | null
                             | undefined;
-                        tachieImage?:
+                        portraitImage?:
                             | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                             | null
                             | undefined;
@@ -2022,10 +2013,10 @@ export type WritePrivateMessageMutationVariables = Exact<{
     roomId: Scalars['String'];
     visibleTo: Array<Scalars['String']> | Scalars['String'];
     text: Scalars['String'];
-    textColor?: Maybe<Scalars['String']>;
-    characterStateId?: Maybe<Scalars['String']>;
-    customName?: Maybe<Scalars['String']>;
-    gameType?: Maybe<Scalars['String']>;
+    textColor?: InputMaybe<Scalars['String']>;
+    characterId?: InputMaybe<Scalars['String']>;
+    customName?: InputMaybe<Scalars['String']>;
+    gameType?: InputMaybe<Scalars['String']>;
 }>;
 
 export type WritePrivateMessageMutation = {
@@ -2071,7 +2062,7 @@ export type WritePrivateMessageMutation = {
                             | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                             | null
                             | undefined;
-                        tachieImage?:
+                        portraitImage?:
                             | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                             | null
                             | undefined;
@@ -2185,8 +2176,6 @@ export type RoomEventSubscription = {
                   | {
                         __typename: 'PieceValueLog';
                         messageId: string;
-                        characterCreatedBy: string;
-                        characterId: string;
                         stateId: string;
                         createdAt: number;
                         logType: PieceValueLogType;
@@ -2236,7 +2225,7 @@ export type RoomEventSubscription = {
                                         }
                                       | null
                                       | undefined;
-                                  tachieImage?:
+                                  portraitImage?:
                                       | {
                                             __typename?: 'FilePath';
                                             sourceType: FileSourceType;
@@ -2326,7 +2315,7 @@ export type RoomEventSubscription = {
                                         }
                                       | null
                                       | undefined;
-                                  tachieImage?:
+                                  portraitImage?:
                                       | {
                                             __typename?: 'FilePath';
                                             sourceType: FileSourceType;
@@ -2859,7 +2848,7 @@ export const CharacterValueForMessageFragmentDoc = {
                     },
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'tachieImage' },
+                        name: { kind: 'Name', value: 'portraitImage' },
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
@@ -3034,8 +3023,6 @@ export const PieceValueLogFragmentDoc = {
                 kind: 'SelectionSet',
                 selections: [
                     { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
-                    { kind: 'Field', name: { kind: 'Name', value: 'characterCreatedBy' } },
-                    { kind: 'Field', name: { kind: 'Name', value: 'characterId' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'stateId' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'logType' } },
@@ -5154,10 +5141,7 @@ export const WritePublicMessageDocument = {
                 },
                 {
                     kind: 'VariableDefinition',
-                    variable: {
-                        kind: 'Variable',
-                        name: { kind: 'Name', value: 'characterStateId' },
-                    },
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'characterId' } },
                     type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
                 },
                 {
@@ -5210,10 +5194,10 @@ export const WritePublicMessageDocument = {
                             },
                             {
                                 kind: 'Argument',
-                                name: { kind: 'Name', value: 'characterStateId' },
+                                name: { kind: 'Name', value: 'characterId' },
                                 value: {
                                     kind: 'Variable',
-                                    name: { kind: 'Name', value: 'characterStateId' },
+                                    name: { kind: 'Name', value: 'characterId' },
                                 },
                             },
                             {
@@ -5347,10 +5331,7 @@ export const WritePrivateMessageDocument = {
                 },
                 {
                     kind: 'VariableDefinition',
-                    variable: {
-                        kind: 'Variable',
-                        name: { kind: 'Name', value: 'characterStateId' },
-                    },
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'characterId' } },
                     type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
                 },
                 {
@@ -5403,10 +5384,10 @@ export const WritePrivateMessageDocument = {
                             },
                             {
                                 kind: 'Argument',
-                                name: { kind: 'Name', value: 'characterStateId' },
+                                name: { kind: 'Name', value: 'characterId' },
                                 value: {
                                     kind: 'Variable',
-                                    name: { kind: 'Name', value: 'characterStateId' },
+                                    name: { kind: 'Name', value: 'characterId' },
                                 },
                             },
                             {

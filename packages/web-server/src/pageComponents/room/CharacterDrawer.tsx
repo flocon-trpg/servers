@@ -17,7 +17,6 @@ import {
     characterIsNotPrivateAndNotCreatedByMe,
 } from '../../resource/text/main';
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
-import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import { BufferedInput } from '../../components/BufferedInput';
 import { TomlInput } from '../../components/Tomllnput';
 import { useCharacters } from '../../hooks/state/useCharacters';
@@ -28,57 +27,58 @@ import {
     useStrParamNames,
 } from '../../hooks/state/useParamNames';
 import {
-    applyCharacter,
-    boardLocationDiff,
-    BoardLocationState,
-    characterDiff,
     CharacterState,
-    CharacterUpOperation,
     PieceState,
-    toCharacterUpOperation,
-    pieceDiff,
     strIndex20Array,
     simpleId,
+    BoardPositionState,
 } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
 import { FilePath } from '../../utils/filePath';
-import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
-import { characterReplaceOperation } from '../../utils/characterReplaceOperation';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
-import produce from 'immer';
 import { useAtom } from 'jotai';
 import { characterEditorDrawerAtom } from '../../atoms/overlay/characterEditorDrawerAtom';
 import { create, update } from '../../utils/constants';
 import { useUpdateAtom } from 'jotai/utils';
 import { commandEditorModalAtom } from '../../atoms/overlay/commandEditorModalAtom';
-
-const notFound = 'notFound';
+import { useIsMyCharacter } from '../../hooks/state/useIsMyCharacter';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
 };
 
 const defaultCharacter: CharacterState = {
-    $v: 1,
-    $r: 2,
+    $v: 2,
+    $r: 1,
+
+    // createするときはこれに自身のIDを入れなければならない
+    ownerParticipantId: undefined,
+
     chatPalette: '',
     memo: '',
     name: '',
+    hasTag1: false,
+    hasTag2: false,
+    hasTag3: false,
+    hasTag4: false,
+    hasTag5: false,
+    hasTag6: false,
+    hasTag7: false,
+    hasTag8: false,
+    hasTag9: false,
+    hasTag10: false,
     isPrivate: false,
-    image: null,
-    privateCommand: '',
+    image: undefined,
     privateCommands: {},
     privateVarToml: '',
-    tachieImage: null,
-    tachieLocations: {},
+    portraitImage: undefined,
+    portraitPositions: {},
     boolParams: {},
     numParams: {},
     numMaxParams: {},
     strParams: {},
     pieces: {},
-    dicePieceValues: {},
-    stringPieceValues: {},
 };
 
 const gutter: [Gutter, Gutter] = [16, 16];
@@ -88,8 +88,8 @@ export const CharacterDrawer: React.FC = () => {
     const myUserUid = useMyUserUid();
     const [drawerType, setDrawerType] = useAtom(characterEditorDrawerAtom);
     const setCommandEditorModal = useUpdateAtom(commandEditorModalAtom);
-    const operate = useSetRoomStateByApply();
-    const operateAsStateWithImmer = useSetRoomStateWithImmer();
+    const setRoomState = useSetRoomStateWithImmer();
+    const isMyCharacter = useIsMyCharacter();
     const characters = useCharacters();
     const boolParamNames = useBoolParamNames();
     const numParamNames = useNumParamNames();
@@ -107,28 +107,18 @@ export const CharacterDrawer: React.FC = () => {
         case update:
             stateEditorParams = {
                 type: update,
-                state: characters?.get(drawerType.stateKey),
-                onUpdate: ({ prevState, nextState }) => {
-                    if (prevState == null || nextState == null) {
-                        return;
-                    }
-                    const diffOperation = characterDiff({ prevState, nextState });
-                    if (diffOperation == null) {
-                        return;
-                    }
-                    operate(
-                        characterUpdateOperation(
-                            drawerType.stateKey,
-                            toCharacterUpOperation(diffOperation)
-                        )
-                    );
+                state: characters?.get(drawerType.stateId),
+                onUpdate: nextState => {
+                    setRoomState(roomState => {
+                        roomState.characters[drawerType.stateId] = nextState;
+                    });
                 },
             };
             break;
     }
     const {
         uiState: character,
-        updateUiState: setCharacter,
+        updateUiState: updateCharacter,
         resetUiState: resetCharacterToCreate,
     } = useStateEditor(stateEditorParams);
     const [filesManagerDrawerType, setFilesManagerDrawerType] =
@@ -149,124 +139,61 @@ export const CharacterDrawer: React.FC = () => {
         if (drawerType?.type !== update) {
             return true;
         }
-        return drawerType.stateKey.createdBy === myUserUid;
+        return isMyCharacter(drawerType.stateId);
     })();
 
     const piece = (() => {
-        if (drawerType?.type !== update || drawerType.boardKey == null) {
+        if (drawerType?.type !== update || drawerType.boardId == null) {
             return null;
         }
-        return character.pieces[drawerType.boardKey.createdBy]?.[drawerType.boardKey.id] ?? null;
+        return character.pieces[drawerType.boardId] ?? null;
     })();
 
-    const tachieLocation = (() => {
-        if (drawerType?.type !== update || drawerType.boardKey == null) {
+    const updatePiece = (recipe: (piece: PieceState) => void) => {
+        if (drawerType?.type !== update || drawerType.boardId == null) {
+            return;
+        }
+        const boardId = drawerType.boardId;
+        updateCharacter(character => {
+            const piece = character?.pieces?.[boardId];
+            if (piece == null) {
+                return;
+            }
+            recipe(piece);
+        });
+    };
+
+    const portraitPosition = (() => {
+        if (drawerType?.type !== update || drawerType.boardId == null) {
             return null;
         }
-        return (
-            character.tachieLocations[drawerType.boardKey.createdBy]?.[drawerType.boardKey.id] ??
-            null
-        );
+        return character.portraitPositions[drawerType.boardId] ?? null;
     })();
 
-    const updateCharacterByImmer = (recipe: (state: CharacterState) => void) => {
-        switch (drawerType?.type) {
-            case create: {
-                const newCharacter = produce(character, recipe);
-                setCharacter(newCharacter);
-                return;
-            }
-            case update: {
-                operateAsStateWithImmer(prevRoom => {
-                    const character =
-                        prevRoom.participants[drawerType.stateKey.createdBy]?.characters?.[
-                            drawerType.stateKey.id
-                        ];
-                    if (character == null) {
-                        return;
-                    }
-                    recipe(character);
-                });
-                return;
-            }
-        }
-    };
-    const updateCharacterByOperation = (operation: CharacterUpOperation) => {
-        switch (drawerType?.type) {
-            case create: {
-                const newCharacter = applyCharacter({ state: character, operation });
-                if (newCharacter.isError) {
-                    throw newCharacter.error;
-                }
-                setCharacter(newCharacter.value);
-                return;
-            }
-            case update: {
-                operate(characterUpdateOperation(drawerType.stateKey, operation));
-                return;
-            }
-        }
-    };
-
-    const updatePiece = (partialState: Partial<PieceState>) => {
-        if (piece == null || drawerType?.type !== update || drawerType.boardKey == null) {
+    const updatePortraitPosition = (recipe: (position: BoardPositionState) => void) => {
+        if (drawerType?.type !== update || drawerType.boardId == null) {
             return;
         }
-        const diffOperation = pieceDiff({
-            prevState: piece,
-            nextState: { ...piece, ...partialState },
+        const boardId = drawerType.boardId;
+        updateCharacter(character => {
+            const position = character?.portraitPositions?.[boardId];
+            if (position == null) {
+                return;
+            }
+            recipe(position);
         });
-        if (diffOperation == null) {
-            return;
-        }
-        operate(
-            characterUpdateOperation(drawerType.stateKey, {
-                $v: 1,
-                $r: 2,
-                pieces: {
-                    [drawerType.boardKey.createdBy]: {
-                        [drawerType.boardKey.id]: {
-                            type: update,
-                            update: diffOperation,
-                        },
-                    },
-                },
-            })
-        );
-    };
-
-    const updateTachieLocation = (partialState: Partial<BoardLocationState>) => {
-        if (tachieLocation == null || drawerType?.type !== update || drawerType.boardKey == null) {
-            return;
-        }
-        const diffOperation = boardLocationDiff({
-            prevState: tachieLocation,
-            nextState: { ...tachieLocation, ...partialState },
-        });
-        if (diffOperation == null) {
-            return;
-        }
-        operate(
-            characterUpdateOperation(drawerType.stateKey, {
-                $v: 1,
-                $r: 2,
-                tachieLocations: {
-                    [drawerType.boardKey.createdBy]: {
-                        [drawerType.boardKey.id]: {
-                            type: update,
-                            update: diffOperation,
-                        },
-                    },
-                },
-            })
-        );
     };
 
     let onOkClick: (() => void) | undefined = undefined;
     if (drawerType?.type === create) {
         onOkClick = () => {
             const id = simpleId();
-            operate(characterReplaceOperation({ createdBy: myUserUid, id }, character));
+            setRoomState(roomState => {
+                roomState.characters[id] = {
+                    ...character,
+                    ownerParticipantId: myUserUid,
+                };
+            });
             resetCharacterToCreate();
             setDrawerType(null);
         };
@@ -275,7 +202,9 @@ export const CharacterDrawer: React.FC = () => {
     let onDestroy: (() => void) | undefined = undefined;
     if (drawerType?.type === update) {
         onDestroy = () => {
-            operate(characterReplaceOperation(drawerType.stateKey, undefined));
+            setRoomState(roomState => {
+                delete roomState.characters[drawerType.stateId];
+            });
             setDrawerType(null);
         };
     }
@@ -292,7 +221,11 @@ export const CharacterDrawer: React.FC = () => {
                     <Col span={inputSpan}>
                         <Checkbox
                             checked={piece.isPrivate}
-                            onChange={e => updatePiece({ isPrivate: e.target.checked })}
+                            onChange={e =>
+                                updatePiece(piece => {
+                                    piece.isPrivate = e.target.checked;
+                                })
+                            }
                         >
                             コマを非公開にする
                         </Checkbox>
@@ -305,7 +238,11 @@ export const CharacterDrawer: React.FC = () => {
                     <Col span={inputSpan}>
                         <Checkbox
                             checked={piece.isCellMode}
-                            onChange={e => updatePiece({ isCellMode: e.target.checked })}
+                            onChange={e =>
+                                updatePiece(piece => {
+                                    piece.isCellMode = e.target.checked;
+                                })
+                            }
                         >
                             セルにスナップする
                         </Checkbox>
@@ -323,7 +260,9 @@ export const CharacterDrawer: React.FC = () => {
                                         value={piece.cellX}
                                         onChange={newValue =>
                                             typeof newValue === 'number'
-                                                ? updatePiece({ cellX: newValue })
+                                                ? updatePiece(piece => {
+                                                      piece.cellX = newValue;
+                                                  })
                                                 : undefined
                                         }
                                     />
@@ -332,7 +271,9 @@ export const CharacterDrawer: React.FC = () => {
                                         value={piece.cellY}
                                         onChange={newValue =>
                                             typeof newValue === 'number'
-                                                ? updatePiece({ cellY: newValue })
+                                                ? updatePiece(piece => {
+                                                      piece.cellY = newValue;
+                                                  })
                                                 : undefined
                                         }
                                     />
@@ -348,7 +289,9 @@ export const CharacterDrawer: React.FC = () => {
                                         value={piece.cellW}
                                         onChange={newValue =>
                                             typeof newValue === 'number'
-                                                ? updatePiece({ cellW: newValue })
+                                                ? updatePiece(piece => {
+                                                      piece.cellW = newValue;
+                                                  })
                                                 : undefined
                                         }
                                     />
@@ -357,7 +300,9 @@ export const CharacterDrawer: React.FC = () => {
                                         value={piece.cellH}
                                         onChange={newValue =>
                                             typeof newValue === 'number'
-                                                ? updatePiece({ cellH: newValue })
+                                                ? updatePiece(piece => {
+                                                      piece.cellH = newValue;
+                                                  })
                                                 : undefined
                                         }
                                     />
@@ -376,7 +321,9 @@ export const CharacterDrawer: React.FC = () => {
                                         value={piece.x}
                                         onChange={newValue =>
                                             typeof newValue === 'number'
-                                                ? updatePiece({ x: newValue })
+                                                ? updatePiece(piece => {
+                                                      piece.x = newValue;
+                                                  })
                                                 : undefined
                                         }
                                     />
@@ -385,7 +332,9 @@ export const CharacterDrawer: React.FC = () => {
                                         value={piece.y}
                                         onChange={newValue =>
                                             typeof newValue === 'number'
-                                                ? updatePiece({ y: newValue })
+                                                ? updatePiece(piece => {
+                                                      piece.y = newValue;
+                                                  })
                                                 : undefined
                                         }
                                     />
@@ -401,7 +350,9 @@ export const CharacterDrawer: React.FC = () => {
                                         value={piece.w}
                                         onChange={newValue =>
                                             typeof newValue === 'number'
-                                                ? updatePiece({ w: newValue })
+                                                ? updatePiece(piece => {
+                                                      piece.w = newValue;
+                                                  })
                                                 : undefined
                                         }
                                     />
@@ -410,7 +361,9 @@ export const CharacterDrawer: React.FC = () => {
                                         value={piece.h}
                                         onChange={newValue =>
                                             typeof newValue === 'number'
-                                                ? updatePiece({ h: newValue })
+                                                ? updatePiece(piece => {
+                                                      piece.h = newValue;
+                                                  })
                                                 : undefined
                                         }
                                     />
@@ -423,8 +376,8 @@ export const CharacterDrawer: React.FC = () => {
         );
     })();
 
-    const tachieLocationElement = (() => {
-        if (tachieLocation == null) {
+    const portraitPositionElement = (() => {
+        if (portraitPosition == null) {
             return null;
         }
         return (
@@ -437,19 +390,23 @@ export const CharacterDrawer: React.FC = () => {
                             <Col span={inputSpan}>
                                 <Space>
                                     <InputNumber
-                                        value={tachieLocation.x}
+                                        value={portraitPosition.x}
                                         onChange={newValue =>
                                             typeof newValue === 'number'
-                                                ? updateTachieLocation({ x: newValue })
+                                                ? updatePortraitPosition(pos => {
+                                                      pos.x = newValue;
+                                                  })
                                                 : undefined
                                         }
                                     />
                                     <span>*</span>
                                     <InputNumber
-                                        value={tachieLocation.y}
+                                        value={portraitPosition.y}
                                         onChange={newValue =>
                                             typeof newValue === 'number'
-                                                ? updateTachieLocation({ y: newValue })
+                                                ? updatePortraitPosition(pos => {
+                                                      pos.y = newValue;
+                                                  })
                                                 : undefined
                                         }
                                     />
@@ -462,19 +419,23 @@ export const CharacterDrawer: React.FC = () => {
                             <Col span={inputSpan}>
                                 <Space>
                                     <InputNumber
-                                        value={tachieLocation.w}
+                                        value={portraitPosition.w}
                                         onChange={newValue =>
                                             typeof newValue === 'number'
-                                                ? updateTachieLocation({ w: newValue })
+                                                ? updatePortraitPosition(pos => {
+                                                      pos.w = newValue;
+                                                  })
                                                 : undefined
                                         }
                                     />
                                     <span>*</span>
                                     <InputNumber
-                                        value={tachieLocation.h}
+                                        value={portraitPosition.h}
                                         onChange={newValue =>
                                             typeof newValue === 'number'
-                                                ? updateTachieLocation({ h: newValue })
+                                                ? updatePortraitPosition(pos => {
+                                                      pos.h = newValue;
+                                                  })
                                                 : undefined
                                         }
                                     />
@@ -523,7 +484,7 @@ export const CharacterDrawer: React.FC = () => {
                             <Col flex='auto' />
                             <Col flex={0}>作成者</Col>
                             <Col span={inputSpan}>
-                                <span>{participants.get(drawerType.stateKey.createdBy)?.name}</span>
+                                <span>{participants.get(drawerType.stateId)?.name}</span>
                                 {createdByMe && (
                                     <span style={{ paddingLeft: 2, fontWeight: 'bold' }}>
                                         (自分)
@@ -543,20 +504,17 @@ export const CharacterDrawer: React.FC = () => {
                             <Col flex={0}></Col>
                             <Col span={inputSpan}>
                                 {/* TODO: 複製したことを何らかの形で通知したほうがいい */}
-                                <Tooltip title='コマの情報を除き、このキャラクターを複製します。'>
+                                <Tooltip title='コマを除き、このキャラクターを複製します。'>
                                     <Button
                                         size='small'
                                         onClick={() => {
                                             const id = simpleId();
-                                            operate(
-                                                characterReplaceOperation(
-                                                    { createdBy: myUserUid, id },
-                                                    {
-                                                        ...character,
-                                                        name: `${character.name} (複製)`,
-                                                    }
-                                                )
-                                            );
+                                            setRoomState(roomState => {
+                                                roomState.characters[id] = {
+                                                    ...character,
+                                                    name: `${character.name} (複製)`,
+                                                };
+                                            });
                                         }}
                                     >
                                         このキャラクターを複製
@@ -595,7 +553,10 @@ export const CharacterDrawer: React.FC = () => {
                                       })
                             }
                             onChange={newValue =>
-                                updateCharacterByImmer(character => {
+                                updateCharacter(character => {
+                                    if (character == null) {
+                                        return;
+                                    }
                                     character.isPrivate = !newValue;
                                 })
                             }
@@ -603,13 +564,13 @@ export const CharacterDrawer: React.FC = () => {
                     </Col>
                 </Row>
 
-                {tachieLocationElement == null ? null : (
+                {portraitPositionElement == null ? null : (
                     <>
                         <Typography.Title level={4}>立ち絵</Typography.Title>
                     </>
                 )}
 
-                {tachieLocationElement}
+                {portraitPositionElement}
 
                 <Typography.Title level={4}>パラメーター</Typography.Title>
 
@@ -625,7 +586,10 @@ export const CharacterDrawer: React.FC = () => {
                                 if (e.previousValue === e.currentValue) {
                                     return;
                                 }
-                                updateCharacterByImmer(character => {
+                                updateCharacter(character => {
+                                    if (character == null) {
+                                        return;
+                                    }
                                     character.name = e.currentValue;
                                 });
                             }}
@@ -640,7 +604,10 @@ export const CharacterDrawer: React.FC = () => {
                         <InputFile
                             filePath={character.image ?? undefined}
                             onPathChange={path =>
-                                updateCharacterByImmer(character => {
+                                updateCharacter(character => {
+                                    if (character == null) {
+                                        return;
+                                    }
                                     character.image =
                                         path == null ? undefined : FilePath.toOt(path);
                                 })
@@ -656,10 +623,13 @@ export const CharacterDrawer: React.FC = () => {
                     <Col flex={0}>立ち絵画像</Col>
                     <Col span={inputSpan}>
                         <InputFile
-                            filePath={character.tachieImage ?? undefined}
+                            filePath={character.portraitImage ?? undefined}
                             onPathChange={path =>
-                                updateCharacterByImmer(character => {
-                                    character.tachieImage =
+                                updateCharacter(character => {
+                                    if (character == null) {
+                                        return;
+                                    }
+                                    character.portraitImage =
                                         path == null ? undefined : FilePath.toOt(path);
                                 })
                             }
@@ -689,8 +659,13 @@ export const CharacterDrawer: React.FC = () => {
                                     numberParameter={value}
                                     numberMaxParameter={maxValue}
                                     createdByMe={createdByMe}
-                                    onOperate={operation => {
-                                        updateCharacterByOperation(operation);
+                                    onOperate={mapping => {
+                                        updateCharacter(character => {
+                                            if (character == null) {
+                                                return;
+                                            }
+                                            return mapping(character);
+                                        });
                                     }}
                                 />
                             </Col>
@@ -715,8 +690,13 @@ export const CharacterDrawer: React.FC = () => {
                                     parameterKey={key}
                                     parameter={value}
                                     createdByMe={createdByMe}
-                                    onOperate={operation => {
-                                        updateCharacterByOperation(operation);
+                                    onOperate={mapping => {
+                                        updateCharacter(character => {
+                                            if (character == null) {
+                                                return;
+                                            }
+                                            return mapping(character);
+                                        });
                                     }}
                                 />
                             </Col>
@@ -741,8 +721,13 @@ export const CharacterDrawer: React.FC = () => {
                                     parameterKey={key}
                                     parameter={value}
                                     createdByMe={createdByMe}
-                                    onOperate={operation => {
-                                        updateCharacterByOperation(operation);
+                                    onOperate={mapping => {
+                                        updateCharacter(character => {
+                                            if (character == null) {
+                                                return;
+                                            }
+                                            return mapping(character);
+                                        });
                                     }}
                                 />
                             </Col>
@@ -762,7 +747,10 @@ export const CharacterDrawer: React.FC = () => {
                             value={character.memo}
                             rows={8}
                             onChange={e =>
-                                updateCharacterByImmer(character => {
+                                updateCharacter(character => {
+                                    if (character == null) {
+                                        return;
+                                    }
                                     character.memo = e.currentValue;
                                 })
                             }
@@ -784,7 +772,10 @@ export const CharacterDrawer: React.FC = () => {
                                     value={character.privateVarToml}
                                     rows={8}
                                     onChange={e =>
-                                        updateCharacterByImmer(character => {
+                                        updateCharacter(character => {
+                                            if (character == null) {
+                                                return;
+                                            }
                                             character.privateVarToml = e.currentValue;
                                         })
                                     }
@@ -805,7 +796,7 @@ export const CharacterDrawer: React.FC = () => {
                                 <Button
                                     onClick={() =>
                                         setCommandEditorModal({
-                                            characterKey: drawerType.stateKey,
+                                            characterId: drawerType.stateId,
                                         })
                                     }
                                 >

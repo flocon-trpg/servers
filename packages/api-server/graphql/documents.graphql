@@ -7,7 +7,7 @@ fragment CharacterValueForMessage on CharacterValueForMessage {
   image {
     ...FilePath
   }
-  tachieImage {
+  portraitImage {
     ...FilePath
   }
 }
@@ -91,8 +91,6 @@ fragment JoinRoomResult on JoinRoomResult {
 
 fragment PieceValueLog on PieceValueLog {
   messageId
-  characterCreatedBy
-  characterId
   stateId
   createdAt
   logType
@@ -507,8 +505,8 @@ mutation ResetMessages($roomId: String!) {
   }
 }
 
-mutation WritePublicMessage($roomId: String!, $text: String!, $textColor: String, $channelKey: String!, $characterStateId: String, $customName: String, $gameType: String) {
-  result: writePublicMessage(roomId: $roomId, text: $text, textColor: $textColor, channelKey: $channelKey, characterStateId: $characterStateId, customName: $customName, gameType: $gameType) {
+mutation WritePublicMessage($roomId: String!, $text: String!, $textColor: String, $channelKey: String!, $characterId: String, $customName: String, $gameType: String) {
+  result: writePublicMessage(roomId: $roomId, text: $text, textColor: $textColor, channelKey: $channelKey, characterId: $characterId, customName: $customName, gameType: $gameType) {
     __typename
     ... on RoomPublicMessage {
       ...RoomPublicMessage
@@ -522,8 +520,8 @@ mutation WritePublicMessage($roomId: String!, $text: String!, $textColor: String
   }
 }
 
-mutation WritePrivateMessage($roomId: String!, $visibleTo: [String!]!, $text: String!, $textColor: String, $characterStateId: String, $customName: String, $gameType: String) {
-  result: writePrivateMessage(roomId: $roomId, visibleTo: $visibleTo, text: $text, textColor: $textColor, characterStateId: $characterStateId, customName: $customName, gameType: $gameType) {
+mutation WritePrivateMessage($roomId: String!, $visibleTo: [String!]!, $text: String!, $textColor: String, $characterId: String, $customName: String, $gameType: String) {
+  result: writePrivateMessage(roomId: $roomId, visibleTo: $visibleTo, text: $text, textColor: $textColor, characterId: $characterId, customName: $customName, gameType: $gameType) {
     __typename
     ... on RoomPrivateMessage {
       ...RoomPrivateMessage

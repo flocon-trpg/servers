@@ -24,7 +24,11 @@ import {
     parseDicePieceValue,
     $free,
 } from '@flocon-trpg/core';
-import { dualKeyRecordToDualKeyMap, keyNames, recordToMap } from '@flocon-trpg/utils';
+import {
+    keyNames,
+    recordToArray,
+    recordToMap,
+} from '@flocon-trpg/utils';
 import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../../utils/className';
 import { IconView } from '../../components/IconView';
@@ -94,7 +98,7 @@ export namespace RoomMessage {
                         );
                     }
 
-                    const pieces = dualKeyRecordToDualKeyMap<
+                    const pieces = recordToArray<
                         RecordUpOperationElement<PieceState, PieceUpOperation>
                     >(value.pieces ?? {});
                     const dice = recordToMap(value.dice ?? {});
@@ -125,25 +129,21 @@ export namespace RoomMessage {
                     });
 
                     changed.push(
-                        pieces
-                            .toArray()
-                            .some(
-                                ([, piece]) =>
-                                    piece.type === replace && piece.replace.newValue != null
-                            )
+                        pieces.some(
+                            ({ value: piece }) =>
+                                piece.type === replace && piece.replace.newValue != null
+                        )
                             ? 'コマ作成'
                             : null,
-                        pieces
-                            .toArray()
-                            .some(
-                                ([, piece]) =>
-                                    piece.type === replace && piece.replace.newValue == null
-                            )
+                        pieces.some(
+                            ({ value: piece }) =>
+                                piece.type === replace && piece.replace.newValue == null
+                        )
                             ? 'コマ削除'
                             : null,
-                        pieces
-                            .toArray()
-                            .some(([, piece]) => piece.type === update && !isIdRecord(piece.update))
+                        pieces.some(
+                            ({ value: piece }) => piece.type === update && !isIdRecord(piece.update)
+                        )
                             ? 'コマ編集'
                             : null
                     );
@@ -207,32 +207,28 @@ export namespace RoomMessage {
                         );
                     }
 
-                    const pieces = dualKeyRecordToDualKeyMap<
+                    const pieces = recordToArray<
                         RecordUpOperationElement<PieceState, PieceUpOperation>
                     >(value.pieces ?? {});
 
                     const changed = [
                         value.isValueChanged ? '値' : null,
                         value.isValuePrivateChanged ? '公開状態' : null,
-                        pieces
-                            .toArray()
-                            .some(
-                                ([, piece]) =>
-                                    piece.type === replace && piece.replace.newValue != null
-                            )
+                        pieces.some(
+                            ({ value: piece }) =>
+                                piece.type === replace && piece.replace.newValue != null
+                        )
                             ? 'コマ作成'
                             : null,
-                        pieces
-                            .toArray()
-                            .some(
-                                ([, piece]) =>
-                                    piece.type === replace && piece.replace.newValue == null
-                            )
+                        pieces.some(
+                            ({ value: piece }) =>
+                                piece.type === replace && piece.replace.newValue == null
+                        )
                             ? 'コマ削除'
                             : null,
-                        pieces
-                            .toArray()
-                            .some(([, piece]) => piece.type === update && !isIdRecord(piece.update))
+                        pieces.some(
+                            ({ value: piece }) => piece.type === update && !isIdRecord(piece.update)
+                        )
                             ? 'コマ編集'
                             : null,
                     ].reduce((seed, elem) => {

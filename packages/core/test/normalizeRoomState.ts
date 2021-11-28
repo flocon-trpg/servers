@@ -11,30 +11,22 @@ const isEmpty = (source: Record<string, unknown>): boolean => {
 };
 
 const isDefaultSimpleParam = (source: Record<string, unknown>) => {
-    if (
-        _.isEqual(source, {
-            $v: 1,
-            $r: 1,
-            isValuePrivate: false,
-            value: null,
-        })
-    ) {
-        return true;
-    }
     return _.isEqual(source, {
-        $v: 1,
+        $v: 2,
         $r: 1,
         isValuePrivate: false,
         value: undefined,
+        overriddenParameterName: undefined,
     });
 };
 
 const isDefaultStrParam = (source: Record<string, unknown>) => {
     return _.isEqual(source, {
-        $v: 1,
+        $v: 2,
         $r: 1,
         isValuePrivate: false,
         value: '',
+        overriddenParameterName: undefined,
     });
 };
 

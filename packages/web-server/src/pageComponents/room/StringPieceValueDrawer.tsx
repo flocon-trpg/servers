@@ -1,15 +1,11 @@
 import { Checkbox, Col, Drawer, InputNumber, Row } from 'antd';
 import React from 'react';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
-import { replace } from '../../stateManagers/states/types';
 import { DrawerProps } from 'antd/lib/drawer';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
-import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import {
     StringPieceValueState,
-    toStringPieceValueUpOperation,
-    stringPieceValueDiff,
     CharacterState,
     simpleId,
 } from '@flocon-trpg/core';
@@ -17,22 +13,28 @@ import { useStringPieceValues } from '../../hooks/state/useStringPieceValues';
 import { MyCharactersSelect } from '../../components/MyCharactersSelect';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { keyNames } from '@flocon-trpg/utils';
-import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 import { useAtomValue } from 'jotai/utils';
 import { dicePieceDrawerAtom } from '../../atoms/overlay/dicePieceDrawerAtom';
 import { create, update } from '../../utils/constants';
 import { stringPieceDrawerAtom } from '../../atoms/overlay/stringPieceDrawerAtom';
 import { useAtom } from 'jotai';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
 };
 
 const defaultStringPieceValue: StringPieceValueState = {
-    $v: 1,
+    $v: 2,
     $r: 1,
+
+    // createするときはこれに自身のIDを入れなければならない
+    ownerCharacterId: undefined,
+
     value: '',
     isValuePrivate: false,
+    memo: undefined,
+    name: undefined,
     pieces: {},
 };
 
@@ -53,7 +55,7 @@ const IdView: React.FC = () => {
             <Col flex={0}>ID</Col>
             <Col span={inputSpan}>
                 {drawerType.type === update
-                    ? keyNames({ createdBy: myUserUid, id: drawerType.stateKey })
+                    ? keyNames({ createdBy: myUserUid, id: drawerType.stateId })
                     : '(なし)'}
             </Col>
         </Row>
@@ -69,16 +71,16 @@ const parseIntSafe = (value: string) => {
 };
 
 export const StringPieceValueDrawer: React.FC = () => {
-    const [drawerType, setDrawerType] = useAtom(stringPieceDrawerAtom)
-    const operate = useSetRoomStateByApply();
+    const [drawerType, setDrawerType] = useAtom(stringPieceDrawerAtom);
+    const setRoomState = useSetRoomStateWithImmer();
     const myUserUid = useMyUserUid();
     const stringPieceValues = useStringPieceValues();
     const [activeCharacter, setActiveCharacter] = React.useState<{
-        key: string;
+        id: string;
         state: CharacterState;
     }>();
 
-    let stateEditorParams: StateEditorParams<StringPieceValueState | undefined>;
+    let stateEditorParams: StateEditorParams<typeof defaultStringPieceValue | undefined>;
     switch (drawerType?.type) {
         case create:
         case undefined:
@@ -92,39 +94,24 @@ export const StringPieceValueDrawer: React.FC = () => {
                 type: update,
                 state: stringPieceValues?.find(
                     value =>
-                        value.characterKey.createdBy === myUserUid &&
-                        value.valueId === drawerType.stateKey
+                        value.value.ownerCharacterId === myUserUid &&
+                        value.id === drawerType.stateId
                 )?.value,
-                onUpdate: ({ prevState, nextState }) => {
+                onUpdate: newState => {
                     if (myUserUid == null || drawerType?.type !== update) {
                         return;
                     }
-                    if (prevState == null || nextState == null) {
-                        return;
-                    }
-                    const diff = stringPieceValueDiff({ prevState, nextState });
-                    if (diff == null) {
-                        return;
-                    }
-                    operate(
-                        characterUpdateOperation(drawerType.characterKey, {
-                            $v: 1,
-                            $r: 2,
-                            stringPieceValues: {
-                                [drawerType.stateKey]: {
-                                    type: update,
-                                    update: toStringPieceValueUpOperation(diff),
-                                },
-                            },
-                        })
-                    );
+                    const stateId = drawerType.stateId;
+                    setRoomState(roomState => {
+                        roomState.stringPieceValues[stateId] = newState;
+                    });
                 },
             };
             break;
     }
-    const { uiState: state, updateUiState: setState } = useStateEditor(stateEditorParams);
+    const { uiState, updateUiState, resetUiState } = useStateEditor(stateEditorParams);
 
-    if (myUserUid == null || state == null) {
+    if (myUserUid == null || uiState == null) {
         return null;
     }
 
@@ -136,38 +123,23 @@ export const StringPieceValueDrawer: React.FC = () => {
                 return;
             }
 
+            const piece = drawerType.piece;
             const id = simpleId();
-            operate(
-                characterUpdateOperation(
-                    { createdBy: myUserUid, id: activeCharacter.key },
-                    {
-                        $v: 1,
-                        $r: 2,
-                        stringPieceValues: {
-                            [id]: {
-                                type: replace,
-                                replace: {
-                                    newValue: {
-                                        ...state,
-                                        pieces:
-                                            drawerType.piece?.boardKey == null
-                                                ? {}
-                                                : {
-                                                      [drawerType.piece.boardKey.createdBy]: {
-                                                          [drawerType.piece.boardKey.id]:
-                                                              drawerType.piece,
-                                                      },
-                                                  },
-                                    },
-                                },
-                            },
-                        },
-                    }
-                )
-            );
+            setRoomState(roomState => {
+                roomState.stringPieceValues[id] = {
+                    ...uiState,
+                    ownerCharacterId: activeCharacter.id,
+                    pieces:
+                        piece == null
+                            ? {}
+                            : {
+                                  [drawerType.piece.boardId]: piece,
+                              },
+                };
+            });
             setDrawerType(null);
             setActiveCharacter(undefined);
-            setState(defaultStringPieceValue);
+            resetUiState(defaultStringPieceValue);
         };
     }
 
@@ -177,15 +149,12 @@ export const StringPieceValueDrawer: React.FC = () => {
             title={drawerType?.type == update ? '数値コマの編集' : '数値コマの新規作成'}
             visible={drawerType != null}
             closable
-            onClose={() =>
-                setDrawerType(null)
-            }
+            onClose={() => setDrawerType(null)}
             footer={
                 <DrawerFooter
                     close={{
                         textType: drawerType?.type === update ? 'close' : 'cancel',
-                        onClick: () =>
-                        setDrawerType(null)
+                        onClick: () => setDrawerType(null),
                     }}
                     ok={onCreate == null ? undefined : { textType: 'create', onClick: onCreate }}
                 />
@@ -200,8 +169,8 @@ export const StringPieceValueDrawer: React.FC = () => {
                         <MyCharactersSelect
                             selectedCharacterId={
                                 drawerType?.type === update
-                                    ? drawerType.characterKey.id
-                                    : activeCharacter?.key
+                                    ? uiState.ownerCharacterId
+                                    : activeCharacter?.id
                             }
                             readOnly={drawerType?.type === update}
                             onSelect={setActiveCharacter}
@@ -214,9 +183,14 @@ export const StringPieceValueDrawer: React.FC = () => {
                     <Col span={inputSpan}>
                         <InputNumber
                             size='small'
-                            value={parseIntSafe(state.value)}
+                            value={parseIntSafe(uiState.value)}
                             onChange={e => {
-                                setState({ ...state, value: e.toString() });
+                                updateUiState(uiState => {
+                                    if (uiState == null) {
+                                        return;
+                                    }
+                                    uiState.value = e.toString();
+                                });
                             }}
                         />
                     </Col>
@@ -226,8 +200,15 @@ export const StringPieceValueDrawer: React.FC = () => {
                     <Col flex={0}>値を非公開にする</Col>
                     <Col span={inputSpan}>
                         <Checkbox
-                            checked={state.isValuePrivate}
-                            onChange={e => setState({ ...state, isValuePrivate: e.target.checked })}
+                            checked={uiState.isValuePrivate}
+                            onChange={e =>
+                                updateUiState(uiState => {
+                                    if (uiState == null) {
+                                        return;
+                                    }
+                                    uiState.isValuePrivate = e.target.checked;
+                                })
+                            }
                         />
                     </Col>
                 </Row>

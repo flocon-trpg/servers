@@ -4,7 +4,6 @@ import {
     testCommand as testCommandCore,
 } from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
-import { CompositeKey } from '@flocon-trpg/utils';
 import { transform } from 'sucrase';
 
 const transpile = (script: string): Result<string> => {
@@ -35,17 +34,24 @@ export const testCommand = (script: string): Result<undefined> => {
 export const execCharacterCommand = ({
     script,
     room,
-    characterKey,
+    characterId,
+    myUserUid,
 }: {
     script: string;
     room: State;
-    characterKey: CompositeKey;
+    characterId: string;
+    myUserUid: string;
 }) => {
     const transpiled = transpile(script);
     if (transpiled.isError) {
         return transpiled;
     }
-    const result = execCharacterCommandCore({ script: transpiled.value, room, characterKey });
+    const result = execCharacterCommandCore({
+        script: transpiled.value,
+        room,
+        characterId,
+        ownerParticipantId: myUserUid,
+    });
     if (result.isError) {
         return Result.error(result.error.message);
     }

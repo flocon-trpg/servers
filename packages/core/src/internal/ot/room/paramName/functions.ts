@@ -119,7 +119,7 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
     if (name.isError) {
         return name;
     }
-    twoWayOperation.name = name.value.secondPrime;
+    twoWayOperation.name = name.value;
 
     if (isIdRecord(twoWayOperation)) {
         return Result.ok(undefined);

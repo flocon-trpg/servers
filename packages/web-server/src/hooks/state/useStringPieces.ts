@@ -1,41 +1,36 @@
 import React from 'react';
-import { CompositeKey, compositeKeyEquals, dualKeyRecordToDualKeyMap } from '@flocon-trpg/utils';
+import { recordToArray } from '@flocon-trpg/utils';
 import { PieceState } from '@flocon-trpg/core';
 import { StringPieceValueElement, useStringPieceValues } from './useStringPieceValues';
-import { useBooleanOrCompositeKeyMemo } from '../useBooleanOrCompositeKeyMemo';
 
 export type StringPieceElement = {
     value: StringPieceValueElement;
-    pieceBoardKey: CompositeKey;
     piece: PieceState;
 };
 
 export const useStringPieces = (
-    boardKey: CompositeKey | boolean
+    boardId: string | boolean
 ): ReadonlyArray<StringPieceElement> | undefined => {
-    const boardKeyMemo = useBooleanOrCompositeKeyMemo(boardKey);
-    const numberPieceValues = useStringPieceValues();
+    const imagePieceValues = useStringPieceValues();
     return React.useMemo(() => {
-        if (numberPieceValues == null) {
+        if (imagePieceValues == null) {
             return undefined;
         }
-        return numberPieceValues.flatMap(element => {
-            return dualKeyRecordToDualKeyMap<PieceState>(element.value.pieces)
-                .toArray()
-                .filter(([, piece]) => {
-                    if (boardKeyMemo === true || boardKeyMemo === false) {
-                        return boardKeyMemo;
+        return imagePieceValues.flatMap(element => {
+            return recordToArray(element.value.pieces)
+                .filter(({ value: piece }) => {
+                    if (boardId === true || boardId === false) {
+                        return boardId;
                     }
-                    return compositeKeyEquals(boardKeyMemo, piece.boardKey);
+                    return boardId === piece.boardId;
                 })
                 .map(
-                    ([pieceKey, piece]) =>
+                    ({ value: piece }) =>
                         ({
                             value: element,
-                            pieceBoardKey: { createdBy: pieceKey.first, id: pieceKey.second },
                             piece,
                         } as const)
                 );
         });
-    }, [numberPieceValues, boardKeyMemo]);
+    }, [boardId, imagePieceValues]);
 };

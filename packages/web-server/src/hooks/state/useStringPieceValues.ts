@@ -1,33 +1,30 @@
 import React from 'react';
-import { CompositeKey, keyNames, recordForEach } from '@flocon-trpg/utils';
+import { recordForEach } from '@flocon-trpg/utils';
 import { StringPieceValueState } from '@flocon-trpg/core';
-import { useCharacters } from './useCharacters';
 import _ from 'lodash';
+import { useAtomSelector } from '../../atoms/useAtomSelector';
+import { roomAtom } from '../../atoms/room/roomAtom';
 
 export type StringPieceValueElement = {
-    characterKey: CompositeKey;
-    valueId: string;
+    id: string;
     value: StringPieceValueState;
 };
 
 export const useStringPieceValues = (): ReadonlyArray<StringPieceValueElement> | undefined => {
-    const characters = useCharacters();
+    const stringPieceValues = useAtomSelector(
+        roomAtom,
+        state => state.roomState?.state?.stringPieceValues
+    );
     return React.useMemo(() => {
-        if (characters == null) {
-            return undefined;
-        }
         const result: StringPieceValueElement[] = [];
-        characters.forEach((character, characterKey) => {
-            recordForEach(character.stringPieceValues, (value, key) => {
-                result.push({
-                    characterKey,
-                    valueId: key,
-                    value,
-                });
+        recordForEach(stringPieceValues ?? {}, (value, id) => {
+            result.push({
+                id,
+                value,
             });
         });
         return _(result)
-            .sortBy(x => keyNames(x.characterKey, x.valueId))
+            .sortBy(x => x.id)
             .value();
-    }, [characters]);
+    }, [stringPieceValues]);
 };

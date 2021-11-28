@@ -7,7 +7,7 @@ import {
     OnGettingParams,
     OnSettingParams,
 } from '@flocon-trpg/flocon-script';
-import * as BoolParam from '../ot/room/participant/character/boolParam/types';
+import * as BoolParam from '../ot/room/character/boolParam/types';
 
 const value = 'value';
 const isValueSecret = 'isValueSecret';

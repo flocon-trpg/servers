@@ -7,7 +7,7 @@ import {
     ScriptError,
     beginCast,
 } from '@flocon-trpg/flocon-script';
-import * as Character from '../ot/room/participant/character/types';
+import * as Character from '../ot/room/character/types';
 import * as Room from '../ot/room/types';
 import { FBoolParams } from './boolParams';
 import { toFFilePath, toFilePathOrUndefined } from './filePath';
@@ -45,9 +45,9 @@ export class FCharacter extends FObject {
             case numberParameters:
                 return new FNumParams(this.character.numParams, this.room);
             case portrait:
-                return this.character.tachieImage == null
+                return this.character.portraitImage == null
                     ? null
-                    : toFFilePath(this.character.tachieImage, astInfo);
+                    : toFFilePath(this.character.portraitImage, astInfo);
             case stringParameters:
                 return new FStrParams(this.character.strParams, this.room);
             default:
@@ -75,7 +75,7 @@ export class FCharacter extends FObject {
             }
             case portrait: {
                 const $newValue = beginCast(newValue, astInfo).addObject().cast();
-                this.character.tachieImage = toFilePathOrUndefined($newValue, astInfo);
+                this.character.portraitImage = toFilePathOrUndefined($newValue, astInfo);
                 return;
             }
             default:

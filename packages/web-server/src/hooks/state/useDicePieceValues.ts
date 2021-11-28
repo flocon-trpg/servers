@@ -1,33 +1,30 @@
 import React from 'react';
-import { CompositeKey, keyNames, recordForEach } from '@flocon-trpg/utils';
+import { recordForEach } from '@flocon-trpg/utils';
 import { DicePieceValueState } from '@flocon-trpg/core';
-import { useCharacters } from './useCharacters';
 import _ from 'lodash';
+import { useAtomSelector } from '../../atoms/useAtomSelector';
+import { roomAtom } from '../../atoms/room/roomAtom';
 
 export type DicePieceValueElement = {
-    characterKey: CompositeKey;
-    valueId: string;
+    id: string;
     value: DicePieceValueState;
 };
 
 export const useDicePieceValues = (): ReadonlyArray<DicePieceValueElement> | undefined => {
-    const characters = useCharacters();
+    const dicePieceValues = useAtomSelector(
+        roomAtom,
+        state => state.roomState?.state?.dicePieceValues
+    );
     return React.useMemo(() => {
-        if (characters == null) {
-            return undefined;
-        }
         const result: DicePieceValueElement[] = [];
-        characters.forEach((character, characterKey) => {
-            recordForEach(character.dicePieceValues, (value, key) => {
-                result.push({
-                    characterKey,
-                    valueId: key,
-                    value,
-                });
+        recordForEach(dicePieceValues ?? {}, (value, id) => {
+            result.push({
+                id,
+                value,
             });
         });
         return _(result)
-            .sortBy(x => keyNames(x.characterKey, x.valueId))
+            .sortBy(x => x.id)
             .value();
-    }, [characters]);
+    }, [dicePieceValues]);
 };
