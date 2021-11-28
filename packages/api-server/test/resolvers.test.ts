@@ -850,8 +850,8 @@ describe.each([
             const newRoomName = 'NEW_ROOM_NAME';
             {
                 const operation: UpOperation = {
-                    $v: 1,
-                    $r: 2,
+                    $v: 2,
+                    $r: 1,
                     name: textDiff({ prev: Resources.Room.name, next: newRoomName }),
                 };
                 const operationResult = await Assert.OperateMutation.toBeSuccess(
