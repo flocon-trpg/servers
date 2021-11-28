@@ -1,6 +1,6 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20211127044145 extends Migration {
+export class Migration20211128171539 extends Migration {
     async up(): Promise<void> {
         this.addSql(
             'create table `user` (`user_uid` varchar not null, `baas_type` varchar not null, `is_entry` integer not null, primary key (`user_uid`));'
@@ -35,7 +35,7 @@ export class Migration20211127044145 extends Migration {
         );
 
         this.addSql(
-            'create table `room` (`id` varchar not null, `version` integer not null default 1, `created_at` datetime null, `updated_at` datetime null, `join_as_player_phrase` varchar null, `join_as_spectator_phrase` varchar null, `created_by` varchar not null, `name` varchar not null, `value` json not null, `revision` integer not null, primary key (`id`));'
+            'create table `room` (`id` varchar not null, `version` integer not null default 1, `created_at` datetime null, `updated_at` datetime null, `player_password_hash` varchar null, `spectator_password_hash` varchar null, `created_by` varchar not null, `name` varchar not null, `value` json not null, `revision` integer not null, primary key (`id`));'
         );
         this.addSql('create index `room_version_index` on `room` (`version`);');
         this.addSql('create index `room_created_at_index` on `room` (`created_at`);');

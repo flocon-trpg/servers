@@ -12,8 +12,8 @@ export class RoomAsListItem {
     public createdBy!: string;
 
     @Field()
-    public requiresPhraseToJoinAsPlayer!: boolean;
+    public requiresPlayerPassword!: boolean;
 
     @Field()
-    public requiresPhraseToJoinAsSpectator!: boolean;
+    public requiresSpectatorPassword!: boolean;
 }

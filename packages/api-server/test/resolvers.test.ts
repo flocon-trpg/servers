@@ -334,7 +334,7 @@ namespace GraphQL {
         return await client
             .mutation<EntryToServerMutation, EntryToServerMutationVariables>(
                 EntryToServerDocument,
-                { phrase: Resources.entryPassword },
+                { password: Resources.entryPassword },
                 { requestPolicy: 'network-only' }
             )
             .toPromise();
@@ -675,8 +675,8 @@ describe.each([
                         input: {
                             roomName: Resources.Room.name,
                             participantName: Resources.ParticipantName.master,
-                            joinAsPlayerPhrase: Resources.Room.playerPassword,
-                            joinAsSpectatorPhrase: Resources.Room.spectatorPassword,
+                            playerPassword: Resources.Room.playerPassword,
+                            spectatorPassword: Resources.Room.spectatorPassword,
                         },
                     })
                     .toPromise();
@@ -726,7 +726,7 @@ describe.each([
                     await GraphQL.joinRoomAsPlayerMutation(roomPlayer1Client, {
                         id: roomId,
                         name: Resources.User.player1,
-                        phrase: Resources.Room.playerPassword,
+                        password: Resources.Room.playerPassword,
                     })
                 );
                 roomMasterClientSubscription.toBeExactlyOneRoomOperationEvent();
@@ -743,7 +743,7 @@ describe.each([
                     await GraphQL.joinRoomAsPlayerMutation(roomPlayer2Client, {
                         id: roomId,
                         name: Resources.User.player2,
-                        phrase: undefined,
+                        password: undefined,
                     })
                 );
                 allSubscriptions.toBeEmpty();
@@ -755,7 +755,7 @@ describe.each([
                     await GraphQL.joinRoomAsPlayerMutation(roomPlayer2Client, {
                         id: roomId,
                         name: Resources.User.player2,
-                        phrase: Resources.Room.spectatorPassword,
+                        password: Resources.Room.spectatorPassword,
                     })
                 );
                 allSubscriptions.toBeEmpty();
@@ -767,7 +767,7 @@ describe.each([
                     await GraphQL.joinRoomAsPlayerMutation(roomPlayer2Client, {
                         id: roomId,
                         name: Resources.User.player2,
-                        phrase: Resources.Room.playerPassword,
+                        password: Resources.Room.playerPassword,
                     })
                 );
 
@@ -791,7 +791,7 @@ describe.each([
                     await GraphQL.joinRoomAsSpectatorMutation(roomSpectatorClient, {
                         id: roomId,
                         name: Resources.User.spectator,
-                        phrase: undefined,
+                        password: undefined,
                     })
                 );
 
@@ -799,7 +799,7 @@ describe.each([
                     await GraphQL.joinRoomAsSpectatorMutation(roomSpectatorClient, {
                         id: roomId,
                         name: Resources.User.spectator,
-                        phrase: Resources.Room.playerPassword,
+                        password: Resources.Room.playerPassword,
                     })
                 );
 
@@ -807,7 +807,7 @@ describe.each([
                     await GraphQL.joinRoomAsSpectatorMutation(roomSpectatorClient, {
                         id: roomId,
                         name: Resources.User.spectator,
-                        phrase: Resources.Room.spectatorPassword,
+                        password: Resources.Room.spectatorPassword,
                     })
                 );
 

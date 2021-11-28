@@ -393,7 +393,7 @@ const joinRoomCore = async ({
         me: ParticipantState | undefined;
     }) => Promise<
         | ParticipantRole
-        | JoinRoomFailureType.WrongPhrase
+        | JoinRoomFailureType.WrongPassword
         | JoinRoomFailureType.AlreadyParticipant
         | 'id'
     >;
@@ -429,10 +429,10 @@ const joinRoomCore = async ({
                     payload: undefined,
                 };
             }
-            case JoinRoomFailureType.WrongPhrase: {
+            case JoinRoomFailureType.WrongPassword: {
                 return {
                     result: {
-                        failureType: JoinRoomFailureType.WrongPhrase,
+                        failureType: JoinRoomFailureType.WrongPassword,
                     },
                     payload: undefined,
                 };
@@ -482,7 +482,7 @@ const promoteMeCore = async ({
         me: ParticipantState;
     }) => Promise<
         | ParticipantRole
-        | PromoteFailureType.WrongPhrase
+        | PromoteFailureType.WrongPassword
         | PromoteFailureType.NoNeedToPromote
         | PromoteFailureType.NotParticipant
     >;
@@ -526,10 +526,10 @@ const promoteMeCore = async ({
                     payload: undefined,
                 };
             }
-            case PromoteFailureType.WrongPhrase: {
+            case PromoteFailureType.WrongPassword: {
                 return {
                     result: {
-                        failureType: PromoteFailureType.WrongPhrase,
+                        failureType: PromoteFailureType.WrongPassword,
                     },
                     payload: undefined,
                 };
@@ -1121,12 +1121,12 @@ export class RoomResolver {
             authorizedUser.participants.add(newParticipant);
 
             // このRoomのroomOperatedを購読しているユーザーはいないので、roomOperatedは実行する必要がない。
-            if (input.joinAsPlayerPhrase != null) {
-                newRoom.joinAsPlayerPhrase = await hash(input.joinAsPlayerPhrase, bcryptSaltRounds);
+            if (input.playerPassword != null) {
+                newRoom.playerPasswordHash = await hash(input.playerPassword, bcryptSaltRounds);
             }
-            if (input.joinAsSpectatorPhrase != null) {
-                newRoom.joinAsSpectatorPhrase = await hash(
-                    input.joinAsSpectatorPhrase,
+            if (input.spectatorPassword != null) {
+                newRoom.spectatorPasswordHash = await hash(
+                    input.spectatorPassword,
                     bcryptSaltRounds
                 );
             }
@@ -1229,8 +1229,8 @@ export class RoomResolver {
                             return JoinRoomFailureType.AlreadyParticipant;
                     }
                 }
-                if (!(await bcryptCompareNullable(args.phrase, room.joinAsPlayerPhrase))) {
-                    return JoinRoomFailureType.WrongPhrase;
+                if (!(await bcryptCompareNullable(args.password, room.playerPasswordHash))) {
+                    return JoinRoomFailureType.WrongPassword;
                 }
                 return Player;
             },
@@ -1261,8 +1261,8 @@ export class RoomResolver {
                             return JoinRoomFailureType.AlreadyParticipant;
                     }
                 }
-                if (!(await bcryptCompareNullable(args.phrase, room.joinAsSpectatorPhrase))) {
-                    return JoinRoomFailureType.WrongPhrase;
+                if (!(await bcryptCompareNullable(args.password, room.spectatorPasswordHash))) {
+                    return JoinRoomFailureType.WrongPassword;
                 }
                 return Spectator;
             },
@@ -1290,8 +1290,10 @@ export class RoomResolver {
                     case Player:
                         return PromoteFailureType.NoNeedToPromote;
                     case Spectator: {
-                        if (!(await bcryptCompareNullable(args.phrase, room.joinAsPlayerPhrase))) {
-                            return PromoteFailureType.WrongPhrase;
+                        if (
+                            !(await bcryptCompareNullable(args.password, room.playerPasswordHash))
+                        ) {
+                            return PromoteFailureType.WrongPassword;
                         }
                         return Player;
                     }

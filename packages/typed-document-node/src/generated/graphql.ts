@@ -55,10 +55,10 @@ export enum CreateRoomFailureType {
 }
 
 export type CreateRoomInput = {
-    joinAsPlayerPhrase?: InputMaybe<Scalars['String']>;
-    joinAsSpectatorPhrase?: InputMaybe<Scalars['String']>;
     participantName: Scalars['String'];
+    playerPassword?: InputMaybe<Scalars['String']>;
     roomName: Scalars['String'];
+    spectatorPassword?: InputMaybe<Scalars['String']>;
 };
 
 export type CreateRoomResult = CreateRoomFailureResult | CreateRoomSuccessResult;
@@ -127,10 +127,10 @@ export type EntryToServerResult = {
 
 export enum EntryToServerResultType {
     AlreadyEntried = 'AlreadyEntried',
-    NoPhraseRequired = 'NoPhraseRequired',
+    NoPasswordRequired = 'NoPasswordRequired',
     NotSignIn = 'NotSignIn',
     Success = 'Success',
-    WrongPhrase = 'WrongPhrase',
+    WrongPassword = 'WrongPassword',
 }
 
 export type FileItem = {
@@ -282,7 +282,7 @@ export enum JoinRoomFailureType {
     AlreadyParticipant = 'AlreadyParticipant',
     NotFound = 'NotFound',
     TransformError = 'TransformError',
-    WrongPhrase = 'WrongPhrase',
+    WrongPassword = 'WrongPassword',
 }
 
 export type JoinRoomResult = JoinRoomFailureResult | JoinRoomSuccessResult;
@@ -382,19 +382,19 @@ export type MutationEditMessageArgs = {
 };
 
 export type MutationEntryToServerArgs = {
-    phrase?: InputMaybe<Scalars['String']>;
+    password?: InputMaybe<Scalars['String']>;
 };
 
 export type MutationJoinRoomAsPlayerArgs = {
     id: Scalars['String'];
     name: Scalars['String'];
-    phrase?: InputMaybe<Scalars['String']>;
+    password?: InputMaybe<Scalars['String']>;
 };
 
 export type MutationJoinRoomAsSpectatorArgs = {
     id: Scalars['String'];
     name: Scalars['String'];
-    phrase?: InputMaybe<Scalars['String']>;
+    password?: InputMaybe<Scalars['String']>;
 };
 
 export type MutationLeaveRoomArgs = {
@@ -418,7 +418,7 @@ export type MutationPingArgs = {
 };
 
 export type MutationPromoteToPlayerArgs = {
-    phrase?: InputMaybe<Scalars['String']>;
+    password?: InputMaybe<Scalars['String']>;
     roomId: Scalars['String'];
 };
 
@@ -537,7 +537,7 @@ export enum PromoteFailureType {
     NoNeedToPromote = 'NoNeedToPromote',
     NotFound = 'NotFound',
     NotParticipant = 'NotParticipant',
-    WrongPhrase = 'WrongPhrase',
+    WrongPassword = 'WrongPassword',
 }
 
 export type PromoteResult = {
@@ -604,8 +604,8 @@ export type RoomAsListItem = {
     createdBy: Scalars['String'];
     id: Scalars['ID'];
     name: Scalars['String'];
-    requiresPhraseToJoinAsPlayer: Scalars['Boolean'];
-    requiresPhraseToJoinAsSpectator: Scalars['Boolean'];
+    requiresPlayerPassword: Scalars['Boolean'];
+    requiresSpectatorPassword: Scalars['Boolean'];
 };
 
 export type RoomConnectionEvent = {
@@ -907,8 +907,8 @@ export type GetNonJoinedRoomResultFragment = {
         id: string;
         name: string;
         createdBy: string;
-        requiresPhraseToJoinAsPlayer: boolean;
-        requiresPhraseToJoinAsSpectator: boolean;
+        requiresPlayerPassword: boolean;
+        requiresSpectatorPassword: boolean;
     };
 };
 
@@ -924,8 +924,8 @@ type GetRoomListResult_GetRoomsListSuccessResult_Fragment = {
         id: string;
         name: string;
         createdBy: string;
-        requiresPhraseToJoinAsPlayer: boolean;
-        requiresPhraseToJoinAsSpectator: boolean;
+        requiresPlayerPassword: boolean;
+        requiresSpectatorPassword: boolean;
     }>;
 };
 
@@ -946,8 +946,8 @@ type GetRoomResult_GetNonJoinedRoomResult_Fragment = {
         id: string;
         name: string;
         createdBy: string;
-        requiresPhraseToJoinAsPlayer: boolean;
-        requiresPhraseToJoinAsSpectator: boolean;
+        requiresPlayerPassword: boolean;
+        requiresSpectatorPassword: boolean;
     };
 };
 
@@ -1000,8 +1000,8 @@ export type RoomAsListItemFragment = {
     id: string;
     name: string;
     createdBy: string;
-    requiresPhraseToJoinAsPlayer: boolean;
-    requiresPhraseToJoinAsSpectator: boolean;
+    requiresPlayerPassword: boolean;
+    requiresSpectatorPassword: boolean;
 };
 
 export type RoomGetStateFragment = {
@@ -1350,8 +1350,8 @@ export type GetRoomQuery = {
                   id: string;
                   name: string;
                   createdBy: string;
-                  requiresPhraseToJoinAsPlayer: boolean;
-                  requiresPhraseToJoinAsSpectator: boolean;
+                  requiresPlayerPassword: boolean;
+                  requiresSpectatorPassword: boolean;
               };
           }
         | { __typename: 'GetRoomFailureResult'; failureType: GetRoomFailureType };
@@ -1370,8 +1370,8 @@ export type GetRoomsListQuery = {
                   id: string;
                   name: string;
                   createdBy: string;
-                  requiresPhraseToJoinAsPlayer: boolean;
-                  requiresPhraseToJoinAsSpectator: boolean;
+                  requiresPlayerPassword: boolean;
+                  requiresSpectatorPassword: boolean;
               }>;
           };
 };
@@ -1721,8 +1721,8 @@ export type GetRoomAsListItemQuery = {
                   id: string;
                   name: string;
                   createdBy: string;
-                  requiresPhraseToJoinAsPlayer: boolean;
-                  requiresPhraseToJoinAsSpectator: boolean;
+                  requiresPlayerPassword: boolean;
+                  requiresSpectatorPassword: boolean;
               };
           };
 };
@@ -1802,7 +1802,7 @@ export type EditFileTagsMutation = { __typename?: 'Mutation'; result: boolean };
 export type JoinRoomAsPlayerMutationVariables = Exact<{
     id: Scalars['String'];
     name: Scalars['String'];
-    phrase?: InputMaybe<Scalars['String']>;
+    password?: InputMaybe<Scalars['String']>;
 }>;
 
 export type JoinRoomAsPlayerMutation = {
@@ -1829,7 +1829,7 @@ export type JoinRoomAsPlayerMutation = {
 export type JoinRoomAsSpectatorMutationVariables = Exact<{
     id: Scalars['String'];
     name: Scalars['String'];
-    phrase?: InputMaybe<Scalars['String']>;
+    password?: InputMaybe<Scalars['String']>;
 }>;
 
 export type JoinRoomAsSpectatorMutation = {
@@ -1854,7 +1854,7 @@ export type JoinRoomAsSpectatorMutation = {
 };
 
 export type EntryToServerMutationVariables = Exact<{
-    phrase: Scalars['String'];
+    password: Scalars['String'];
 }>;
 
 export type EntryToServerMutation = {
@@ -1893,8 +1893,8 @@ export type OperateMutation = {
                   id: string;
                   name: string;
                   createdBy: string;
-                  requiresPhraseToJoinAsPlayer: boolean;
-                  requiresPhraseToJoinAsSpectator: boolean;
+                  requiresPlayerPassword: boolean;
+                  requiresSpectatorPassword: boolean;
               };
           }
         | {
@@ -1922,7 +1922,7 @@ export type PingMutation = {
 
 export type PromoteToPlayerMutationVariables = Exact<{
     roomId: Scalars['String'];
-    phrase?: InputMaybe<Scalars['String']>;
+    password?: InputMaybe<Scalars['String']>;
 }>;
 
 export type PromoteToPlayerMutation = {
@@ -2514,14 +2514,8 @@ export const RoomAsListItemFragmentDoc = {
                     { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'name' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
-                    {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'requiresPhraseToJoinAsPlayer' },
-                    },
-                    {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'requiresPhraseToJoinAsSpectator' },
-                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'requiresPlayerPassword' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'requiresSpectatorPassword' } },
                 ],
             },
         },
@@ -4560,7 +4554,7 @@ export const JoinRoomAsPlayerDocument = {
                 },
                 {
                     kind: 'VariableDefinition',
-                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'phrase' } },
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'password' } },
                     type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
                 },
             ],
@@ -4584,10 +4578,10 @@ export const JoinRoomAsPlayerDocument = {
                             },
                             {
                                 kind: 'Argument',
-                                name: { kind: 'Name', value: 'phrase' },
+                                name: { kind: 'Name', value: 'password' },
                                 value: {
                                     kind: 'Variable',
-                                    name: { kind: 'Name', value: 'phrase' },
+                                    name: { kind: 'Name', value: 'password' },
                                 },
                             },
                         ],
@@ -4634,7 +4628,7 @@ export const JoinRoomAsSpectatorDocument = {
                 },
                 {
                     kind: 'VariableDefinition',
-                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'phrase' } },
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'password' } },
                     type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
                 },
             ],
@@ -4658,10 +4652,10 @@ export const JoinRoomAsSpectatorDocument = {
                             },
                             {
                                 kind: 'Argument',
-                                name: { kind: 'Name', value: 'phrase' },
+                                name: { kind: 'Name', value: 'password' },
                                 value: {
                                     kind: 'Variable',
-                                    name: { kind: 'Name', value: 'phrase' },
+                                    name: { kind: 'Name', value: 'password' },
                                 },
                             },
                         ],
@@ -4692,7 +4686,7 @@ export const EntryToServerDocument = {
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
-                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'phrase' } },
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'password' } },
                     type: {
                         kind: 'NonNullType',
                         type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
@@ -4709,10 +4703,10 @@ export const EntryToServerDocument = {
                         arguments: [
                             {
                                 kind: 'Argument',
-                                name: { kind: 'Name', value: 'phrase' },
+                                name: { kind: 'Name', value: 'password' },
                                 value: {
                                     kind: 'Variable',
-                                    name: { kind: 'Name', value: 'phrase' },
+                                    name: { kind: 'Name', value: 'password' },
                                 },
                             },
                         ],
@@ -5015,7 +5009,7 @@ export const PromoteToPlayerDocument = {
                 },
                 {
                     kind: 'VariableDefinition',
-                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'phrase' } },
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'password' } },
                     type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
                 },
             ],
@@ -5037,10 +5031,10 @@ export const PromoteToPlayerDocument = {
                             },
                             {
                                 kind: 'Argument',
-                                name: { kind: 'Name', value: 'phrase' },
+                                name: { kind: 'Name', value: 'password' },
                                 value: {
                                     kind: 'Variable',
-                                    name: { kind: 'Name', value: 'phrase' },
+                                    name: { kind: 'Name', value: 'password' },
                                 },
                             },
                         ],

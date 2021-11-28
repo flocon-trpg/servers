@@ -1,6 +1,6 @@
 export enum PromoteFailureType {
     NotFound = 'NotFound',
-    WrongPhrase = 'WrongPhrase',
+    WrongPassword = 'WrongPassword',
     NoNeedToPromote = 'NoNeedToPromote',
     NotParticipant = 'NotParticipant',
 }

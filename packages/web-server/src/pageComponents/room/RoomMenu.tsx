@@ -75,14 +75,14 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
     const [isPosting, setIsPosting] = React.useState(false);
     const [promoteToPlayer] = useMutation(PromoteToPlayerDocument);
     const [getRoomAsListItem, getRoomAsListItemResult] = useLazyQuery(GetRoomAsListItemDocument);
-    const requiresPhraseToJoinAsPlayerRef = React.useRef(getRoomAsListItem);
+    const requiresPlayerPasswordRef = React.useRef(getRoomAsListItem);
     React.useEffect(() => {
-        requiresPhraseToJoinAsPlayerRef.current = getRoomAsListItem;
+        requiresPlayerPasswordRef.current = getRoomAsListItem;
     }, [getRoomAsListItem]);
     React.useEffect(() => {
         setInputValue('');
         setIsPosting(false);
-        requiresPhraseToJoinAsPlayerRef.current({ variables: { roomId } });
+        requiresPlayerPasswordRef.current({ variables: { roomId } });
     }, [visible, roomId]);
 
     const title = '参加者に昇格';
@@ -99,7 +99,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
             </Modal>
         );
     }
-    if (getRoomAsListItemResult.data.result.room.requiresPhraseToJoinAsPlayer) {
+    if (getRoomAsListItemResult.data.result.room.requiresPlayerPassword) {
         return (
             <Modal
                 visible={visible}
@@ -107,7 +107,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                 okButtonProps={{ disabled: isPosting }}
                 onOk={() => {
                     setIsPosting(true);
-                    promoteToPlayer({ variables: { roomId, phrase: inputValue } }).then(e => {
+                    promoteToPlayer({ variables: { roomId, password: inputValue } }).then(e => {
                         if (e.errors != null) {
                             addRoomNotification({
                                 type: Notification.graphQLErrors,
@@ -121,7 +121,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                         if (e.data?.result.failureType != null) {
                             let text: string | undefined;
                             switch (e.data?.result.failureType) {
-                                case PromoteFailureType.WrongPhrase:
+                                case PromoteFailureType.WrongPassword:
                                     text = 'パスワードが誤っています。';
                                     break;
                                 case PromoteFailureType.NoNeedToPromote:
@@ -178,7 +178,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                     if (e.data?.result.failureType != null) {
                         let text: string | undefined;
                         switch (e.data?.result.failureType) {
-                            case PromoteFailureType.WrongPhrase:
+                            case PromoteFailureType.WrongPassword:
                                 text = 'パスワードが誤っています。';
                                 break;
                             case PromoteFailureType.NoNeedToPromote:

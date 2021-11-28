@@ -54,8 +54,8 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
     const [name, setName] = React.useState<string>(
         typeof myAuth === 'string' ? '' : myAuth.displayName ?? ''
     );
-    const [playerPhrase, setPlayerPhrase] = React.useState<string>('');
-    const [spectatorPhrase, setSpectatorPhrase] = React.useState<string>('');
+    const [playerPassword, setPlayerPassword] = React.useState<string>('');
+    const [spectatorPassword, setSpectatorPassword] = React.useState<string>('');
     const [joinRoomAsPlayer, joinRoomAsPlayerResult] = useMutation(JoinRoomAsPlayerDocument);
     const [joinRoomAsSpectator, joinRoomAsSpectatorResult] = useMutation(
         JoinRoomAsSpectatorDocument
@@ -79,8 +79,8 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                 return;
             case 'JoinRoomFailureResult':
                 switch (result.data.result.failureType) {
-                    case JoinRoomFailureType.WrongPhrase: {
-                        setErrorMessage('Wrong phrase');
+                    case JoinRoomFailureType.WrongPassword: {
+                        setErrorMessage('Wrong password');
                         return;
                     }
                     case JoinRoomFailureType.NotFound: {
@@ -94,15 +94,15 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
         if (disableJoinActions) {
             return;
         }
-        const phrase = roomState.requiresPhraseToJoinAsPlayer ? playerPhrase : undefined;
-        await joinRoomAsPlayer({ variables: { id: roomState.id, phrase, name } }).then(OnGetResult);
+        const password = roomState.requiresPlayerPassword? playerPassword : undefined;
+        await joinRoomAsPlayer({ variables: { id: roomState.id, password, name } }).then(OnGetResult);
     };
     const onJoinAsSpectatorButtonClick = async () => {
         if (disableJoinActions) {
             return;
         }
-        const phrase = roomState.requiresPhraseToJoinAsSpectator ? spectatorPhrase : undefined;
-        await joinRoomAsSpectator({ variables: { id: roomState.id, phrase, name } }).then(
+        const password = roomState.requiresSpectatorPassword ? spectatorPassword : undefined;
+        await joinRoomAsSpectator({ variables: { id: roomState.id, password, name } }).then(
             OnGetResult
         );
     };
@@ -129,11 +129,11 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                 <div style={{ gridColumn: 1, gridRow: 3, marginRight: 8, justifySelf: 'right' }}>
                     参加者として入室
                 </div>
-                {roomState.requiresPhraseToJoinAsPlayer ? (
+                {roomState.requiresPlayerPassword ? (
                     <Input
                         style={{ gridColumn: 2, gridRow: 3 }}
-                        onChange={e => setPlayerPhrase(e.target.value)}
-                        value={playerPhrase}
+                        onChange={e => setPlayerPassword(e.target.value)}
+                        value={playerPassword}
                         placeholder='参加パスワード'
                     />
                 ) : (
@@ -151,11 +151,11 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                 <div style={{ gridColumn: 1, gridRow: 4, marginRight: 8, justifySelf: 'right' }}>
                     観戦者として入室
                 </div>
-                {roomState.requiresPhraseToJoinAsSpectator ? (
+                {roomState.requiresSpectatorPassword ? (
                     <Input
                         style={{ gridColumn: 2, gridRow: 4 }}
-                        onChange={e => setSpectatorPhrase(e.target.value)}
-                        value={spectatorPhrase}
+                        onChange={e => setSpectatorPassword(e.target.value)}
+                        value={spectatorPassword}
                         placeholder='観戦パスワード'
                     />
                 ) : (

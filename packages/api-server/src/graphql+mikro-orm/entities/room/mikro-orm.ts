@@ -54,10 +54,10 @@ export class Room {
     public updatedAt?: Date;
 
     @Property({ nullable: true })
-    public joinAsPlayerPhrase?: string;
+    public playerPasswordHash?: string;
 
     @Property({ nullable: true })
-    public joinAsSpectatorPhrase?: string;
+    public spectatorPasswordHash?: string;
 
     // userUid
     @Property({ index: true })
