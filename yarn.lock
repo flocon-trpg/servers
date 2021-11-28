@@ -1797,7 +1797,7 @@ __metadata:
     "@types/estree": 0.0.50
     "@types/jest": 27.0.3
     "@types/lodash.clonedeep": 4.5.6
-    fast-check: 2.19.0
+    fast-check: 2.20.0
     fast-check-io-ts: 0.5.0
     fp-ts: ^2.11.5
     io-ts: ^2.2.16
@@ -8134,12 +8134,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-check@npm:2.19.0":
-  version: 2.19.0
-  resolution: "fast-check@npm:2.19.0"
+"fast-check@npm:2.20.0":
+  version: 2.20.0
+  resolution: "fast-check@npm:2.20.0"
   dependencies:
     pure-rand: ^5.0.0
-  checksum: 93fd9b37c4ee54ba43fdf58c436290c304e6c7ea402b4c54dbbd7039717bed2f03ea5924aaaa36283fd51ecf6bebe622d7190942f9967c1d594d342544f16e73
+  checksum: 2f8c0bbb089556e51ad9669b21d14611e557ddd11037b26a5a0a9c32c41b23f792cf4c13b58083c735261b0ce8e840c865ea25dc07651deb2045c2d73b63bf57
   languageName: node
   linkType: hard
 
