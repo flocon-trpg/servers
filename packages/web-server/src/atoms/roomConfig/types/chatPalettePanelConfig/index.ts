@@ -10,7 +10,7 @@ export type ChatPalettePanelConfig = {
     selectedTextColor?: string;
     isPrivateMessageMode: boolean;
     selectedPublicChannelKey?: string;
-    selectedCharacterStateId?: string;
+    selectedCharacterId?: string;
     customCharacterName: string;
     selectedGameSystem?: string;
     isMinimized: boolean;
@@ -21,7 +21,7 @@ export const serializedChatPalettePanelConfig = t.intersection([
         selectedTextColor: t.string,
         isPrivateMessageMode: t.boolean,
         selectedPublicChannelKey: t.string,
-        selectedCharacterStateId: t.string,
+        selectedCharacterId: t.string,
         customCharacterName: t.string,
         selectedGameSystem: t.string,
         isMinimized: t.boolean,
@@ -39,7 +39,7 @@ export const deserializeChatPalettePanelConfig = (
         selectedTextColor: source.selectedTextColor,
         isPrivateMessageMode: source.isPrivateMessageMode ?? false,
         selectedPublicChannelKey: source.selectedPublicChannelKey,
-        selectedCharacterStateId: source.selectedCharacterStateId,
+        selectedCharacterId: source.selectedCharacterId,
         customCharacterName: source.customCharacterName ?? '',
         selectedGameSystem: source.selectedGameSystem,
         isMinimized: source.isMinimized ?? false,

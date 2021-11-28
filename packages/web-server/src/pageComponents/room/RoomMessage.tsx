@@ -24,11 +24,7 @@ import {
     parseDicePieceValue,
     $free,
 } from '@flocon-trpg/core';
-import {
-    keyNames,
-    recordToArray,
-    recordToMap,
-} from '@flocon-trpg/utils';
+import { recordToArray, recordToMap } from '@flocon-trpg/utils';
 import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../../utils/className';
 import { IconView } from '../../components/IconView';
@@ -61,11 +57,7 @@ export namespace RoomMessage {
         if (message.type === pieceValueLog) {
             switch (message.value.logType) {
                 case PieceValueLogType.Dice: {
-                    const key = keyNames(
-                        message.value.characterCreatedBy,
-                        message.value.characterId,
-                        message.value.stateId
-                    );
+                    const key = message.value.stateId;
                     const value = parseDicePieceValue(message.value.valueJson);
                     if (value.type === 'create') {
                         return (
@@ -169,11 +161,7 @@ export namespace RoomMessage {
                     );
                 }
                 case PieceValueLogType.Number: {
-                    const key = keyNames(
-                        message.value.characterCreatedBy,
-                        message.value.characterId,
-                        message.value.stateId
-                    );
+                    const key = message.value.stateId;
                     const value = parseStringPieceValue(message.value.valueJson);
 
                     if (value.type === 'create') {

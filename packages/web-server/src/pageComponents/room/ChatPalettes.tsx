@@ -156,9 +156,9 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
         return null;
     }
 
-    const selectedCharacterStateId = config.selectedCharacterStateId;
+    const selectedCharacterId = config.selectedCharacterId;
     const selectedCharacter =
-        selectedCharacterStateId == null ? undefined : myCharacters?.get(selectedCharacterStateId);
+        selectedCharacterId == null ? undefined : myCharacters?.get(selectedCharacterId);
 
     const onConfigUpdate = (
         recipe: (
@@ -184,13 +184,13 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
                 <Select
                     style={{ flex: 1, maxWidth: miniInputMaxWidth }}
                     placeholder='キャラクター'
-                    value={config.selectedCharacterStateId}
+                    value={config.selectedCharacterId}
                     onSelect={(value, option) => {
                         onConfigUpdate(draft => {
                             if (typeof option.key !== 'string') {
                                 return;
                             }
-                            draft.selectedCharacterStateId = option.key;
+                            draft.selectedCharacterId = option.key;
                         });
                     }}
                 >
@@ -229,10 +229,10 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
                         isEditMode={isEditMode}
                         onChange={toml => {
                             setRoomState(prevRoom => {
-                                if (myUserUid == null || selectedCharacterStateId == null) {
+                                if (myUserUid == null || selectedCharacterId == null) {
                                     return;
                                 }
-                                const character = prevRoom.characters[selectedCharacterStateId]
+                                const character = prevRoom.characters[selectedCharacterId]
                                 if (character == null) {
                                     return;
                                 }

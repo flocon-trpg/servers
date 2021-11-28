@@ -67,13 +67,13 @@ export const CharacterSelector: React.FC<Props> = ({
                 <Select
                     style={{ flex: 1, maxWidth: inputMaxWidth }}
                     placeholder='キャラクター'
-                    value={config.selectedCharacterStateId}
+                    value={config.selectedCharacterId}
                     onSelect={(value, option) => {
                         onConfigUpdate(draft => {
                             if (typeof option.key !== 'string') {
                                 return;
                             }
-                            draft.selectedCharacterStateId = option.key;
+                            draft.selectedCharacterId = option.key;
                         });
                     }}
                 >

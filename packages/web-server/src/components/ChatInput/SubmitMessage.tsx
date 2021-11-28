@@ -96,11 +96,11 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
         if (isPosting || text.trim() === '') {
             return;
         }
-        let characterStateId: string | undefined;
+        let characterId: string | undefined;
         if (selectedCharacterType === some) {
-            characterStateId = config.selectedCharacterStateId;
+            characterId = config.selectedCharacterId;
         } else {
-            characterStateId = undefined;
+            characterId = undefined;
         }
         let customNameVariable: string | undefined;
         if (selectedCharacterType === custom) {
@@ -115,7 +115,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
                 text,
                 textColor: config.selectedTextColor,
                 visibleTo: [...participantIdsOfSendTo],
-                characterStateId,
+                characterId,
                 customName: customNameVariable,
                 gameType: config.selectedGameSystem,
             },
@@ -247,11 +247,11 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
         if (isPosting || text.trim() === '') {
             return;
         }
-        let characterStateId: string | undefined;
+        let characterId: string | undefined;
         if (selectedCharacterType === some) {
-            characterStateId = config.selectedCharacterStateId;
+            characterId = config.selectedCharacterId;
         } else {
-            characterStateId = undefined;
+            characterId = undefined;
         }
         let customNameVariable: string | undefined;
         if (selectedCharacterType === custom) {
@@ -267,7 +267,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
                 text,
                 textColor: config.selectedTextColor,
                 channelKey: selectedPublicChannelKey,
-                characterStateId,
+                characterId,
                 customName: customNameVariable,
                 gameType: config.selectedGameSystem,
             },

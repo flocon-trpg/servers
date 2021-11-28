@@ -17,7 +17,7 @@ export type MessagePanelConfig = {
     isPrivateMessageMode: boolean;
     selectedPublicChannelKey?: string;
     selectedCharacterType?: string;
-    selectedCharacterStateId?: string;
+    selectedCharacterId?: string;
     customCharacterName: string;
     selectedGameSystem?: string;
 } & DraggablePanelConfigBase;
@@ -30,7 +30,7 @@ export const serializedMessagePanelConfig = t.intersection([
         isPrivateMessageMode: t.boolean,
         selectedPublicChannelKey: t.string,
         selectedCharacterType: t.string,
-        selectedCharacterStateId: t.string,
+        selectedCharacterId: t.string,
         customCharacterName: t.string,
         selectedGameSystem: t.string,
     }),
@@ -50,7 +50,7 @@ export const deserializeMessagePanelConfig = (
         isPrivateMessageMode: source.isPrivateMessageMode ?? false,
         selectedPublicChannelKey: source.selectedPublicChannelKey,
         selectedCharacterType: source.selectedCharacterType,
-        selectedCharacterStateId: source.selectedCharacterStateId,
+        selectedCharacterId: source.selectedCharacterId,
         customCharacterName: source.customCharacterName ?? '',
         selectedGameSystem: source.selectedGameSystem,
     };
