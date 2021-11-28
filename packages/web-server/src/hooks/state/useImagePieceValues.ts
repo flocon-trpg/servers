@@ -1,33 +1,30 @@
 import React from 'react';
-import { keyNames, recordForEach } from '@flocon-trpg/utils';
+import { recordForEach } from '@flocon-trpg/utils';
 import { ImagePieceValueState } from '@flocon-trpg/core';
-import { useParticipants } from './useParticipants';
 import _ from 'lodash';
+import { useAtomSelector } from '../../atoms/useAtomSelector';
+import { roomAtom } from '../../atoms/room/roomAtom';
 
 export type ImagePieceValueElement = {
-    participantKey: string;
-    valueId: string;
+    id: string;
     value: ImagePieceValueState;
 };
 
 export const useImagePieceValues = (): ReadonlyArray<ImagePieceValueElement> | undefined => {
-    const participants = useParticipants();
+    const imagePieceValues = useAtomSelector(
+        roomAtom,
+        state => state.roomState?.state?.imagePieceValues
+    );
     return React.useMemo(() => {
-        if (participants == null) {
-            return undefined;
-        }
         const result: ImagePieceValueElement[] = [];
-        participants.forEach((participant, participantKey) => {
-            recordForEach(participant.imagePieceValues, (value, key) => {
-                result.push({
-                    participantKey,
-                    valueId: key,
-                    value,
-                });
+        recordForEach(imagePieceValues ?? {}, (value, id) => {
+            result.push({
+                id,
+                value,
             });
         });
         return _(result)
-            .sortBy(x => keyNames(x.participantKey, x.valueId))
+            .sortBy(x => x.id)
             .value();
-    }, [participants]);
+    }, [imagePieceValues]);
 };

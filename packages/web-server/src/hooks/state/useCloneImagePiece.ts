@@ -1,5 +1,5 @@
-import { ImagePieceValueState, PieceState, simpleId } from '@flocon-trpg/core';
-import { dualKeyRecordForEach } from '@flocon-trpg/utils';
+import { ImagePieceValueState, simpleId } from '@flocon-trpg/core';
+import { recordForEach } from '@flocon-trpg/utils';
 import produce from 'immer';
 import React from 'react';
 import { useSetRoomState } from '../useSetRoomState';
@@ -17,19 +17,16 @@ export const useCloneImagePiece = () => {
 
                 const newImagePieceValue = produce(source, piece => {
                     // 少なくとも現状では1つの画像コマにつき1ボードにしか置かれていないため、このようにすべてのボードの位置を変更するだけで構わない。
-                    dualKeyRecordForEach<PieceState>(piece.pieces, value => {
+                    recordForEach(piece.pieces, value => {
                         value.x += 20;
                         value.y += 20;
                     });
                 });
+                newImagePieceValue.ownerParticipantId = myUserUid;
 
                 return produce(room, room => {
-                    const me = room.participants[myUserUid];
-                    if (me == null) {
-                        return;
-                    }
                     const newId = simpleId();
-                    me.imagePieceValues[newId] = newImagePieceValue;
+                    room.imagePieceValues[newId] = newImagePieceValue;
                 });
             });
         },

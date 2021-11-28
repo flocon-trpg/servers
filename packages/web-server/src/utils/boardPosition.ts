@@ -1,11 +1,11 @@
-import { BoardLocationState } from '@flocon-trpg/core';
+import { BoardPositionState } from '@flocon-trpg/core';
 
-export namespace BoardLocation {
+export namespace BoardPosition {
     export const isCursorOnIcon = ({
         state,
         cursorPosition,
     }: {
-        state: BoardLocationState;
+        state: BoardPositionState;
         cursorPosition: { x: number; y: number };
     }): boolean => {
         const { x, y, w, h } = state;

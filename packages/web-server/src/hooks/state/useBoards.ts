@@ -1,10 +1,13 @@
-import { ReadonlyStateMap } from '@flocon-trpg/utils';
-import { BoardState } from '@flocon-trpg/core';
-import { useCreateStateMap } from '../useCreateStateMap';
-import { roomAtom } from '../../atoms/room/roomAtom';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
+import { roomAtom } from '../../atoms/room/roomAtom';
+import React from 'react';
+import { BoardState } from '@flocon-trpg/core';
+import { recordToMap } from '@flocon-trpg/utils';
 
-export const useBoards = (): ReadonlyStateMap<BoardState> | undefined => {
-    const participants = useAtomSelector(roomAtom, state => state.roomState?.state?.participants);
-    return useCreateStateMap(participants ?? {}, x => x.boards);
+export const useBoards = (): ReadonlyMap<string, BoardState> => {
+    const record = useAtomSelector(roomAtom, state => state.roomState?.state?.boards);
+    return React.useMemo(
+        () => (record == null ? new Map<string, BoardState>() : recordToMap(record)),
+        [record]
+    );
 };

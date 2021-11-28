@@ -26,7 +26,7 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
         characterParameterNamesDrawerVisibilityAtom
     );
     const operate = useSetRoomStateByApply();
-    const operateAsStateWithImmer = useSetRoomStateWithImmer();
+    const setRoomState = useSetRoomStateWithImmer();
     const [visibleParameterForm, setVisibleParameterForm] = React.useState<VisibleParameterForm>();
     const [addNumParamSelector, setAddNumParamSelector] = React.useState<StrIndex20>();
     const [addBoolParamSelector, setAddBoolParamSelector] = React.useState<StrIndex20>();
@@ -97,7 +97,7 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
                             if (e.previousValue === e.currentValue) {
                                 return;
                             }
-                            operateAsStateWithImmer(state => {
+                            setRoomState(state => {
                                 const targetNumParamName = state.numParamNames[key];
                                 if (targetNumParamName == null) {
                                     return;
@@ -110,8 +110,8 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
                         size='small'
                         onClick={() => {
                             const operation: UpOperation = {
-                                $v: 1,
-                                $r: 2,
+                                $v: 2,
+                                $r: 1,
                                 numParamNames: {
                                     [key]: {
                                         type: replace,
@@ -152,7 +152,7 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
                             if (e.previousValue === e.currentValue) {
                                 return;
                             }
-                            operateAsStateWithImmer(state => {
+                            setRoomState(state => {
                                 const targetBoolParamName = state.boolParamNames[key];
                                 if (targetBoolParamName == null) {
                                     return;
@@ -165,8 +165,8 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
                         size='small'
                         onClick={() => {
                             const operation: UpOperation = {
-                                $v: 1,
-                                $r: 2,
+                                $v: 2,
+                                $r: 1,
                                 boolParamNames: {
                                     [key]: {
                                         type: replace,
@@ -207,7 +207,7 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
                             if (e.previousValue === e.currentValue) {
                                 return;
                             }
-                            operateAsStateWithImmer(state => {
+                            setRoomState(state => {
                                 const targetStrParamName = state.strParamNames[key];
                                 if (targetStrParamName == null) {
                                     return;
@@ -220,8 +220,8 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
                         size='small'
                         onClick={() => {
                             const operation: UpOperation = {
-                                $v: 1,
-                                $r: 2,
+                                $v: 2,
+                                $r: 1,
                                 strParamNames: {
                                     [key]: {
                                         type: replace,
@@ -430,8 +430,8 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
                         switch (visibleParameterForm.type) {
                             case 'Bool':
                                 operation = {
-                                    $v: 1,
-                                    $r: 2,
+                                    $v: 2,
+                                    $r: 1,
                                     boolParamNames: {
                                         [visibleParameterForm.key]: {
                                             type: replace,
@@ -448,8 +448,8 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
                                 break;
                             case 'Num':
                                 operation = {
-                                    $v: 1,
-                                    $r: 2,
+                                    $v: 2,
+                                    $r: 1,
                                     numParamNames: {
                                         [visibleParameterForm.key]: {
                                             type: replace,
@@ -466,8 +466,8 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
                                 break;
                             case 'Str':
                                 operation = {
-                                    $v: 1,
-                                    $r: 2,
+                                    $v: 2,
+                                    $r: 1,
                                     strParamNames: {
                                         [visibleParameterForm.key]: {
                                             type: replace,

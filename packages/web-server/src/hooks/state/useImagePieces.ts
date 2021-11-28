@@ -1,41 +1,36 @@
 import React from 'react';
-import { CompositeKey, compositeKeyEquals, dualKeyRecordToDualKeyMap } from '@flocon-trpg/utils';
 import { PieceState } from '@flocon-trpg/core';
 import { ImagePieceValueElement, useImagePieceValues } from './useImagePieceValues';
-import { useBooleanOrCompositeKeyMemo } from '../useBooleanOrCompositeKeyMemo';
+import { recordToArray } from '@flocon-trpg/utils';
 
 export type ImagePieceElement = {
     value: ImagePieceValueElement;
-    pieceBoardKey: CompositeKey;
     piece: PieceState;
 };
 
 export const useImagePieces = (
-    boardKey: CompositeKey | boolean
+    boardId: string | boolean
 ): ReadonlyArray<ImagePieceElement> | undefined => {
-    const boardKeyMemo = useBooleanOrCompositeKeyMemo(boardKey);
     const imagePieceValues = useImagePieceValues();
     return React.useMemo(() => {
         if (imagePieceValues == null) {
             return undefined;
         }
         return imagePieceValues.flatMap(element => {
-            return dualKeyRecordToDualKeyMap<PieceState>(element.value.pieces)
-                .toArray()
-                .filter(([, piece]) => {
-                    if (boardKeyMemo === true || boardKeyMemo === false) {
-                        return boardKeyMemo;
+            return recordToArray(element.value.pieces)
+                .filter(({ value: piece }) => {
+                    if (boardId === true || boardId === false) {
+                        return boardId;
                     }
-                    return compositeKeyEquals(boardKeyMemo, piece.boardKey);
+                    return boardId === piece.boardId;
                 })
                 .map(
-                    ([pieceKey, piece]) =>
+                    ({ value: piece }) =>
                         ({
                             value: element,
-                            pieceBoardKey: { createdBy: pieceKey.first, id: pieceKey.second },
                             piece,
                         } as const)
                 );
         });
-    }, [imagePieceValues, boardKeyMemo]);
+    }, [boardId, imagePieceValues]);
 };

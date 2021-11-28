@@ -7,29 +7,29 @@ import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';
 import { FilesManagerDrawerType } from '../../utils/types';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
-import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import { BufferedInput } from '../../components/BufferedInput';
 import { useBoards } from '../../hooks/state/useBoards';
-import { boardDiff, BoardState, simpleId, toBoardUpOperation } from '@flocon-trpg/core';
+import {  BoardState, simpleId, } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { FilePath } from '../../utils/filePath';
-import { boardUpdateOperation } from '../../utils/boardUpdateOperation';
-import { boardReplaceOperation } from '../../utils/boardReplaceOperation';
 import { useAtom } from 'jotai';
 import { boardEditorDrawerAtom } from '../../atoms/overlay/boardDrawerAtom';
 import { create, update } from '../../utils/constants';
 import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
 import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
-
-const notFound = 'notFound';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
 };
 
 const defaultBoard: BoardState = {
-    $v: 1,
+    $v: 2,
     $r: 1,
+
+    // createするときはこれに自身のIDを入れなければならない
+    ownerParticipantId: undefined,
+
     name: '',
 
     // cellColumnCountとcellRowCountは現在使われていない
@@ -40,7 +40,7 @@ const defaultBoard: BoardState = {
     cellWidth: 50,
     cellOffsetX: 0,
     cellOffsetY: 0,
-    backgroundImage: null,
+    backgroundImage: undefined,
     backgroundImageZoom: 1,
 };
 
@@ -49,7 +49,7 @@ const inputSpan = 16;
 
 export const BoardDrawer: React.FC = () => {
     const myUserUid = useMyUserUid();
-    const operate = useSetRoomStateByApply();
+    const setRoomState = useSetRoomStateWithImmer();
     const [drawerType, setDrawerType] = useAtom(boardEditorDrawerAtom);
     const setRoomConfigAtom = useImmerUpdateAtom(roomConfigAtom);
     const boards = useBoards();
@@ -65,25 +65,18 @@ export const BoardDrawer: React.FC = () => {
         case update:
             stateEditorParams = {
                 type: update,
-                state: boards?.get(drawerType.stateKey),
-                onUpdate: ({ prevState, nextState }) => {
-                    if (prevState == null || nextState == null) {
-                        return;
-                    }
-                    const diffOperation = boardDiff({ prevState, nextState });
-                    if (diffOperation == null) {
-                        return;
-                    }
-                    operate(
-                        boardUpdateOperation(drawerType.stateKey, toBoardUpOperation(diffOperation))
-                    );
+                state: boards?.get(drawerType.stateId),
+                onUpdate: nextState => {
+                    setRoomState(roomState => {
+                        roomState.boards[drawerType.stateId] = nextState;
+                    });
                 },
             };
             break;
     }
     const {
         uiState: board,
-        updateUiState: setBoard,
+        updateUiState: updateBoard,
         resetUiState: resetBoardToCreate,
     } = useStateEditor(stateEditorParams);
     const [filesManagerDrawerType, setFilesManagerDrawerType] =
@@ -93,34 +86,17 @@ export const BoardDrawer: React.FC = () => {
         return null;
     }
 
-    const updateBoard = (partialState: Partial<BoardState>) => {
-        switch (drawerType?.type) {
-            case create:
-                setBoard({ ...board, ...partialState });
-                return;
-            case update: {
-                const diffOperation = boardDiff({
-                    prevState: board,
-                    nextState: { ...board, ...partialState },
-                });
-                if (diffOperation == null) {
-                    return;
-                }
-                operate(
-                    boardUpdateOperation(drawerType.stateKey, toBoardUpOperation(diffOperation))
-                );
-                return;
-            }
-        }
-    };
-
     let onOkClick: (() => void) | undefined = undefined;
     if (drawerType?.type === create) {
         onOkClick = () => {
             const id = simpleId();
-            operate(boardReplaceOperation({ createdBy: myUserUid, id }, board));
-            setBoard(defaultBoard);
-            resetBoardToCreate();
+            setRoomState(roomState => {
+                roomState.boards[id] = {
+                    ...board,
+                    ownerParticipantId: myUserUid
+                };
+            })
+            resetBoardToCreate(defaultBoard);
             setDrawerType(null);
             setRoomConfigAtom(roomConfig => {
                 if (drawerType.boardEditorPanelId == null) {
@@ -131,7 +107,7 @@ export const BoardDrawer: React.FC = () => {
                 if (originBoardEditorPanel == null) {
                     return;
                 }
-                originBoardEditorPanel.activeBoardKey = id;
+                originBoardEditorPanel.activeBoardId = id;
             });
         };
     }
@@ -139,7 +115,9 @@ export const BoardDrawer: React.FC = () => {
     let onDestroy: (() => void) | undefined = undefined;
     if (drawerType?.type === update) {
         onDestroy = () => {
-            operate(boardReplaceOperation(drawerType.stateKey, undefined));
+            setRoomState(roomState => {
+                delete roomState.boards[drawerType.stateId]
+            })
             setDrawerType(null);
         };
     }
@@ -185,7 +163,12 @@ export const BoardDrawer: React.FC = () => {
                                 if (e.previousValue === e.currentValue) {
                                     return;
                                 }
-                                updateBoard({ name: e.currentValue });
+                                updateBoard(board => {
+                                    if (board == null) {
+                                        return;
+                                    }
+                                    board.name = e.currentValue;
+                                });
                             }}
                         />
                     </Col>
@@ -197,8 +180,12 @@ export const BoardDrawer: React.FC = () => {
                         <InputFile
                             filePath={board.backgroundImage ?? undefined}
                             onPathChange={path =>
-                                updateBoard({
-                                    backgroundImage: path == null ? undefined : FilePath.toOt(path),
+                                updateBoard(board => {
+                                    if (board == null) {
+                                        return;
+                                    }
+                                    board.backgroundImage =
+                                        path == null ? undefined : FilePath.toOt(path);
                                 })
                             }
                             openFilesManager={setFilesManagerDrawerType}
@@ -226,7 +213,12 @@ export const BoardDrawer: React.FC = () => {
                             }}
                             onChange={newValue =>
                                 typeof newValue === 'number'
-                                    ? updateBoard({ backgroundImageZoom: newValue / 100 })
+                                    ? updateBoard(board => {
+                                          if (board == null) {
+                                              return;
+                                          }
+                                          board.backgroundImageZoom = newValue / 100;
+                                      })
                                     : undefined
                             }
                         />
@@ -242,7 +234,13 @@ export const BoardDrawer: React.FC = () => {
                             value={board.cellWidth}
                             onChange={newValue =>
                                 typeof newValue === 'number'
-                                    ? updateBoard({ cellWidth: newValue, cellHeight: newValue })
+                                    ? updateBoard(board => {
+                                          if (board == null) {
+                                              return;
+                                          }
+                                          board.cellHeight = newValue;
+                                          board.cellWidth = newValue;
+                                      })
                                     : undefined
                             }
                         />
@@ -258,7 +256,12 @@ export const BoardDrawer: React.FC = () => {
                             value={board.cellOffsetX}
                             onChange={newValue =>
                                 typeof newValue === 'number'
-                                    ? updateBoard({ cellOffsetX: newValue })
+                                    ? updateBoard(board => {
+                                          if (board == null) {
+                                              return;
+                                          }
+                                          board.cellOffsetX = newValue;
+                                      })
                                     : undefined
                             }
                         />
@@ -268,7 +271,12 @@ export const BoardDrawer: React.FC = () => {
                             value={board.cellOffsetY}
                             onChange={newValue =>
                                 typeof newValue === 'number'
-                                    ? updateBoard({ cellOffsetY: newValue })
+                                    ? updateBoard(board => {
+                                          if (board == null) {
+                                              return;
+                                          }
+                                          board.cellOffsetY = newValue;
+                                      })
                                     : undefined
                             }
                         />

@@ -16,10 +16,9 @@ export type ImagePieceDrawerType =
       }
     | {
           type: typeof update;
-          participantKey: string;
           // boardKey != nullならば、pieceが指定されたupdate。そうでないならばpieceが指定されないupdate。
-          boardKey: CompositeKey | null;
-          stateKey: string;
+          boardId: string | null;
+          stateId: string;
       };
 
 export const imagePieceDrawerAtom = atom<ImagePieceDrawerType | null>(null);

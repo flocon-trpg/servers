@@ -1,16 +1,11 @@
 import { Button, Col, Drawer, Row, Tooltip, Typography } from 'antd';
 import React from 'react';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
-import { replace } from '../../stateManagers/states/types';
 import { DrawerProps } from 'antd/lib/drawer';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
-import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import {
-    UpOperation,
     ImagePieceValueState,
-    imagePieceValueDiff,
-    toImagePieceValueUpOperation,
     simpleId,
 } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
@@ -21,20 +16,24 @@ import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';
 import { BufferedInput } from '../../components/BufferedInput';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
 import { FilePath } from '../../utils/filePath';
-import { keyNames } from '@flocon-trpg/utils';
 import { useAtomValue } from 'jotai/utils';
 import { imagePieceDrawerAtom } from '../../atoms/overlay/imagePieceDrawerAtom';
 import { create, update } from '../../utils/constants';
 import { useAtom } from 'jotai';
 import { useCloneImagePiece } from '../../hooks/state/useCloneImagePiece';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
 };
 
 const defaultImagePieceValue: ImagePieceValueState = {
-    $v: 1,
+    $v: 2,
     $r: 1,
+
+    // createするときはこれに自身のIDを入れなければならない
+    ownerParticipantId: undefined,
+
     image: undefined,
     isPrivate: false,
     memo: '',
@@ -57,21 +56,14 @@ const IdView: React.FC = () => {
         <Row gutter={gutter} align='middle'>
             <Col flex='auto' />
             <Col flex={0}>ID</Col>
-            <Col span={inputSpan}>
-                {drawerType.type === update
-                    ? keyNames({
-                          createdBy: drawerType.participantKey,
-                          id: drawerType.stateKey,
-                      })
-                    : '(なし)'}
-            </Col>
+            <Col span={inputSpan}>{drawerType.type === update ? drawerType.stateId : '(なし)'}</Col>
         </Row>
     );
 };
 
 export const ImagePieceDrawer: React.FC = () => {
     const [drawerType, setDrawerType] = useAtom(imagePieceDrawerAtom);
-    const setRoomStateByApply = useSetRoomStateByApply();
+    const setRoomState = useSetRoomStateWithImmer();
     const myUserUid = useMyUserUid();
     const imagePieces = useImagePieceValues();
     const clone = useCloneImagePiece();
@@ -87,54 +79,27 @@ export const ImagePieceDrawer: React.FC = () => {
         case update:
             stateEditorParams = {
                 type: update,
-                state: imagePieces?.find(
-                    value =>
-                        value.participantKey === drawerType.participantKey &&
-                        value.valueId === drawerType.stateKey
-                )?.value,
-                onUpdate: ({ prevState, nextState }) => {
+                state: imagePieces?.find(value => value.id === drawerType.stateId)?.value,
+                onUpdate: newState => {
                     if (myUserUid == null || drawerType?.type !== update) {
                         return;
                     }
-                    if (prevState == null || nextState == null) {
-                        return;
-                    }
-                    const diff = imagePieceValueDiff({ prevState, nextState });
-                    if (diff == null) {
-                        return;
-                    }
-                    const operation: UpOperation = {
-                        $v: 1,
-                        $r: 2,
-                        participants: {
-                            [drawerType.participantKey]: {
-                                type: update,
-                                update: {
-                                    $v: 1,
-                                    $r: 2,
-                                    imagePieceValues: {
-                                        [drawerType.stateKey]: {
-                                            type: update,
-                                            update: toImagePieceValueUpOperation(diff),
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    };
-                    setRoomStateByApply(operation);
+                    const stateId = drawerType.stateId;
+                    setRoomState(roomState => {
+                        roomState.imagePieceValues[stateId] = newState;
+                    });
                 },
             };
             break;
     }
 
-    const { uiState: state, updateUiState: setState } = useStateEditor<
+    const { uiState, updateUiState, resetUiState } = useStateEditor<
         ImagePieceValueState | undefined
     >(stateEditorParams);
     const [filesManagerDrawerType, setFilesManagerDrawerType] =
         React.useState<FilesManagerDrawerType | null>(null);
 
-    if (myUserUid == null || state == null) {
+    if (myUserUid == null || uiState == null) {
         return null;
     }
 
@@ -142,42 +107,22 @@ export const ImagePieceDrawer: React.FC = () => {
     // drawerType != nullを付けていることで、updateから閉じる際に一瞬onCreateボタンが出るのを防いでいる。ただし、これで適切なのかどうかは吟味していない
     if (drawerType != null && drawerType?.type === create) {
         onCreate = () => {
+            const piece = drawerType.piece;
             const id = simpleId();
-            const operation: UpOperation = {
-                $v: 1,
-                $r: 2,
-                participants: {
-                    [myUserUid]: {
-                        type: update,
-                        update: {
-                            $v: 1,
-                            $r: 2,
-                            imagePieceValues: {
-                                [id]: {
-                                    type: replace,
-                                    replace: {
-                                        newValue: {
-                                            ...state,
-                                            pieces:
-                                                drawerType.piece?.boardKey == null
-                                                    ? {}
-                                                    : {
-                                                          [drawerType.piece.boardKey.createdBy]: {
-                                                              [drawerType.piece.boardKey.id]:
-                                                                  drawerType.piece,
-                                                          },
-                                                      },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            };
-            setRoomStateByApply(operation);
+            setRoomState(roomState => {
+                roomState.imagePieceValues[id] = {
+                    ...uiState,
+                    ownerParticipantId: myUserUid,
+                    pieces:
+                        piece == null
+                            ? {}
+                            : {
+                                  [drawerType.piece.boardId]: piece,
+                              },
+                };
+            });
             setDrawerType(null);
-            setState(defaultImagePieceValue);
+            resetUiState(defaultImagePieceValue);
         };
     }
 
@@ -214,7 +159,7 @@ export const ImagePieceDrawer: React.FC = () => {
                                     <Button
                                         size='small'
                                         onClick={() => {
-                                            clone({ myUserUid, source: state });
+                                            clone({ myUserUid, source: uiState });
                                         }}
                                     >
                                         このコマを複製
@@ -232,11 +177,14 @@ export const ImagePieceDrawer: React.FC = () => {
                     <Col flex={0}>画像</Col>
                     <Col span={inputSpan}>
                         <InputFile
-                            filePath={state.image ?? undefined}
+                            filePath={uiState.image ?? undefined}
                             onPathChange={path =>
-                                setState({
-                                    ...state,
-                                    image: path == null ? undefined : FilePath.toOt(path),
+                                updateUiState(pieceValue => {
+                                    if (pieceValue == null) {
+                                        return;
+                                    }
+                                    pieceValue.image =
+                                        path == null ? undefined : FilePath.toOt(path);
                                 })
                             }
                             openFilesManager={setFilesManagerDrawerType}
@@ -252,12 +200,17 @@ export const ImagePieceDrawer: React.FC = () => {
                         <BufferedInput
                             bufferDuration='default'
                             size='small'
-                            value={state.name}
+                            value={uiState.name ?? ''}
                             onChange={e => {
                                 if (e.previousValue === e.currentValue) {
                                     return;
                                 }
-                                setState({ ...state, name: e.currentValue });
+                                updateUiState(pieceValue => {
+                                    if (pieceValue == null) {
+                                        return;
+                                    }
+                                    pieceValue.name = e.currentValue;
+                                });
                             }}
                         />
                     </Col>
@@ -271,9 +224,16 @@ export const ImagePieceDrawer: React.FC = () => {
                         <BufferedTextArea
                             size='small'
                             bufferDuration='default'
-                            value={state.memo}
+                            value={uiState.memo ?? ''}
                             rows={8}
-                            onChange={e => setState({ ...state, memo: e.currentValue })}
+                            onChange={e =>
+                                updateUiState(pieceValue => {
+                                    if (pieceValue == null) {
+                                        return;
+                                    }
+                                    pieceValue.memo = e.currentValue;
+                                })
+                            }
                         />
                     </Col>
                 </Row>

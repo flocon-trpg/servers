@@ -1,39 +1,26 @@
 import React from 'react';
-import {
-    CompositeKey,
-    compositeKeyEquals,
-    dualKeyRecordToDualKeyMap,
-    keyNames,
-} from '@flocon-trpg/utils';
-import { PieceState } from '@flocon-trpg/core';
+import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { useCharacters } from './useCharacters';
 import _ from 'lodash';
-import { useCompositeKeyMemo } from '../useCompositeKeyMemo';
 
-export const useCharacterPieces = (boardKey: CompositeKey) => {
+export const useCharacterPieces = (boardId: string) => {
     const characters = useCharacters();
-    const boardKeyMemo = useCompositeKeyMemo(boardKey);
 
     return React.useMemo(() => {
         if (characters == null) {
             return undefined;
         }
-        return _(characters.toArray())
-            .flatMap(([characterKey, character]) => {
-                return dualKeyRecordToDualKeyMap<PieceState>(character.pieces)
-                    .toArray()
-                    .filter(([, piece]) => {
-                        return compositeKeyEquals(boardKeyMemo, piece.boardKey);
+        return _([...characters])
+            .flatMap(([characterId, character]) => {
+                return recordToArray(character.pieces)
+                    .filter(({ key }) => {
+                        return key === boardId;
                     })
-                    .map(([pieceKeyAsDualKey, pieceValue]) => {
-                        const pieceKey: CompositeKey = {
-                            createdBy: pieceKeyAsDualKey.first,
-                            id: pieceKeyAsDualKey.second,
-                        };
-                        return { characterKey, character, pieceKey, piece: pieceValue };
+                    .map(({ value, key }) => {
+                        return { characterId, character, pieceId: key, piece: value };
                     });
             })
-            .sortBy(x => keyNames(x.characterKey, x.pieceKey))
+            .sortBy(x => keyNames(x.characterId, x.pieceId))
             .value();
-    }, [boardKeyMemo, characters]);
+    }, [boardId, characters]);
 };

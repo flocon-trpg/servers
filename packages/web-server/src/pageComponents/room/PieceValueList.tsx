@@ -2,8 +2,6 @@ import React from 'react';
 import { Table, Button, Tooltip } from 'antd';
 import { update } from '../../stateManagers/states/types';
 import * as Icon from '@ant-design/icons';
-import { useParticipants } from '../../hooks/state/useParticipants';
-import _ from 'lodash';
 import {
     StringPieceValueElement,
     useStringPieceValues,
@@ -11,11 +9,11 @@ import {
 import { DicePieceValueElement, useDicePieceValues } from '../../hooks/state/useDicePieceValues';
 import { DicePieceValue } from '../../utils/dicePieceValue';
 import { StringPieceValue } from '../../utils/stringPieceValue';
-import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { keyNames } from '@flocon-trpg/utils';
 import { useUpdateAtom } from 'jotai/utils';
 import { dicePieceDrawerAtom } from '../../atoms/overlay/dicePieceDrawerAtom';
 import { stringPieceDrawerAtom } from '../../atoms/overlay/stringPieceDrawerAtom';
+import { useCharacters } from '../../hooks/state/useCharacters';
 
 type DataSource =
     | {
@@ -24,19 +22,18 @@ type DataSource =
           value: DicePieceValueElement;
       }
     | {
-          type: 'number';
+          type: 'string';
           key: string;
           value: StringPieceValueElement;
       };
 export const PieceValueList: React.FC = () => {
-    const myUserUid = useMyUserUid();
-    const participants = useParticipants();
+    const characters = useCharacters();
     const dicePieceValues = useDicePieceValues();
-    const numberPieceValues = useStringPieceValues();
+    const stringPieceValues = useStringPieceValues();
     const setDicePieceDrawer = useUpdateAtom(dicePieceDrawerAtom);
     const setStringPieceDrawer = useUpdateAtom(stringPieceDrawerAtom);
 
-    if (dicePieceValues == null || numberPieceValues == null || participants == null) {
+    if (dicePieceValues == null || stringPieceValues == null ) {
         return null;
     }
 
@@ -55,17 +52,15 @@ export const PieceValueList: React.FC = () => {
                                 if (dataSource.type === 'dice') {
                                     setDicePieceDrawer({
                                         type: update,
-                                        boardKey: null,
-                                        stateKey: dataSource.value.valueId,
-                                        characterKey: dataSource.value.characterKey,
+                                        boardId: null,
+                                        stateId: dataSource.value.id,
                                     });
                                 }
-                                if (dataSource.type === 'number') {
+                                if (dataSource.type === 'string') {
                                     setStringPieceDrawer({
                                         type: update,
-                                        boardKey: null,
-                                        stateKey: dataSource.value.valueId,
-                                        characterKey: dataSource.value.characterKey,
+                                        boardId: null,
+                                        stateId: dataSource.value.id,
                                     });
                                 }
                             }}
@@ -107,7 +102,7 @@ export const PieceValueList: React.FC = () => {
                             textOverflow: 'ellipsis',
                         }}
                     >
-                        {keyNames(dataSource.value.characterKey, dataSource.value.valueId)}
+                        {dataSource.value.id}
                     </div>
                 );
             },
@@ -128,13 +123,10 @@ export const PieceValueList: React.FC = () => {
             title: '作成者',
             // eslint-disable-next-line react/display-name
             render: (_: unknown, dataSource: DataSource) => {
-                const createdBy = dataSource.value.characterKey.createdBy;
+                const createdBy = dataSource.value.value.ownerCharacterId;
                 return (
                     <span>
-                        {participants.get(createdBy)?.name}
-                        {createdBy === myUserUid && (
-                            <span style={{ fontWeight: 'bold', paddingLeft: 2 }}>(自分)</span>
-                        )}
+                        {(createdBy == null ? undefined : characters.get(createdBy)?.name) ?? '?'}
                     </span>
                 );
             },
@@ -145,12 +137,12 @@ export const PieceValueList: React.FC = () => {
         ...dicePieceValues.map(value => ({
             type: 'dice' as const,
             value,
-            key: keyNames(value.characterKey, value.valueId, 'dice'),
+            key: keyNames( value.id, 'dice'),
         })),
-        ...numberPieceValues.map(value => ({
-            type: 'number' as const,
+        ...stringPieceValues.map(value => ({
+            type: 'string' as const,
             value,
-            key: keyNames(value.characterKey, value.valueId, 'number'),
+            key: keyNames(value.id, 'string'),
         })),
     ];
     return (

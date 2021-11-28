@@ -10,11 +10,13 @@ import {
 } from '../resource/text/main';
 import { BufferedInput } from './BufferedInput';
 import {
+    CharacterState,
     CharacterUpOperation,
     StrIndex20,
     StrParamState,
     textDiff,
     toTextUpOperation,
+    applyCharacter,
 } from '@flocon-trpg/core';
 
 const inputWidth = 150;
@@ -24,8 +26,8 @@ type Props = {
     isCreate: boolean;
     parameterKey: StrIndex20;
     parameter: StrParamState | undefined;
-    createdByMe: boolean;
-    onOperate: (operation: CharacterUpOperation) => void;
+    createdByMe: boolean;   
+    onOperate: (mapping: (character: CharacterState) => CharacterState) => void;
     compact: boolean;
 };
 
@@ -38,6 +40,14 @@ export const StringParameterInput: React.FC<Props> = ({
     onOperate,
     compact,
 }: Props) => {
+    const apply = (operation: CharacterUpOperation) => (state: CharacterState): CharacterState => {
+        const result = applyCharacter({state, operation});
+        if (result.isError) {
+            throw result.error;
+        }
+        return result.value;
+    }
+
     const input = ({ disabled }: { disabled: boolean }) => (
         <BufferedInput
             style={{ width: inputWidth }}
@@ -51,17 +61,17 @@ export const StringParameterInput: React.FC<Props> = ({
                 }
                 const diff2 = textDiff({ prev: e.previousValue, next: e.currentValue });
                 const operation: CharacterUpOperation = {
-                    $v: 1,
-                    $r: 2,
+                    $v: 2,
+                    $r: 1,
                     strParams: {
                         [parameterKey]: {
-                            $v: 1,
+                            $v: 2,
                             $r: 1,
                             value: diff2 === undefined ? undefined : toTextUpOperation(diff2),
                         },
                     },
                 };
-                onOperate(operation);
+                                           onOperate(apply(operation));
             }}
         />
     );
@@ -99,17 +109,17 @@ export const StringParameterInput: React.FC<Props> = ({
             size='small'
             onChange={e => {
                 const operation: CharacterUpOperation = {
-                    $v: 1,
-                    $r: 2,
+                    $v: 2,
+                    $r: 1,
                     strParams: {
                         [parameterKey]: {
-                            $v: 1,
+                            $v: 2,
                             $r: 1,
                             isValuePrivate: { newValue: !e },
                         },
                     },
-                };
-                onOperate(operation);
+                }; 
+                                           onOperate(apply(operation));
             }}
         />
     );

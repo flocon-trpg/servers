@@ -1,3 +1,4 @@
+import produce from 'immer';
 import React from 'react';
 import { usePrevious } from 'react-use';
 import { useReadonlyRef } from './useReadonlyRef';
@@ -5,11 +6,13 @@ import { useReadonlyRef } from './useReadonlyRef';
 export const update = 'update';
 export const create = 'create';
 
+type Recipe<T> = (state: T) => T | void;
+
 export type StateEditorParams<T> =
     | {
           type: typeof update;
           state: T;
-          onUpdate: (params: { prevState: T; nextState: T }) => void;
+          onUpdate: (newState: T) => void;
       }
     | {
           type: typeof create;
@@ -35,21 +38,24 @@ export function useStateEditor<T>(state: StateEditorParams<T>) {
 
     const stateRef = useReadonlyRef(state);
 
-    const resetUiState = React.useCallback(() => {
-        if (stateRef.current.type !== create) {
-            return false;
-        }
-        setUiState(stateRef.current.initState);
-        return true;
-    }, [stateRef]);
+    const resetUiState = React.useCallback(
+        (newState?: T) => {
+            if (stateRef.current.type !== create) {
+                return false;
+            }
+            setUiState(newState == null ? stateRef.current.initState : newState);
+            return true;
+        },
+        [stateRef]
+    );
 
     const updateUiState = React.useCallback(
-        (newState: T) => {
+        (recipe: Recipe<T>) => {
             if (stateRef.current.type === create) {
-                setUiState(newState);
+                setUiState(uiState => produce(uiState, recipe));
                 return;
             }
-            stateRef.current.onUpdate({ prevState: stateRef.current.state, nextState: newState });
+            stateRef.current.onUpdate(produce(stateRef.current.state, recipe));
         },
         [stateRef]
     );
@@ -76,7 +82,7 @@ export function useStateEditor<T>(state: StateEditorParams<T>) {
         uiState,
 
         // stateを更新する。
-        // updateモードのときは、onUpdateが実行される（通常はこれによりstate.stateの値が変わるため、それによりuiStateも変わるという流れ）。
+        // updateモードのときは、onUpdateが実行される（通常は、onUpdateによってStateEditorParams.stateが変更され、それによりuiStateも変わるという流れ）。
         // createモードのときは、このhook内部で変更が処理されてuiStateが変更される。
         updateUiState,
 

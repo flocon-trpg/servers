@@ -1,5 +1,4 @@
 import { PieceState } from '@flocon-trpg/core';
-import { CompositeKey } from '@flocon-trpg/utils';
 import { create, update } from '../../utils/constants';
 
 export type PieceValueDrawerType =
@@ -15,8 +14,7 @@ export type PieceValueDrawerType =
       }
     | {
           type: typeof update;
-          characterKey: CompositeKey;
           // boardKey != nullならば、pieceが指定されたupdate。そうでないならばpieceが指定されないupdate。
-          boardKey: CompositeKey | null;
-          stateKey: string;
+          boardId: string | null;
+          stateId: string;
       };

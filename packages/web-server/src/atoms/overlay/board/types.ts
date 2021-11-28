@@ -1,12 +1,11 @@
 import { CharacterState } from '@flocon-trpg/core';
-import { CompositeKey } from '@flocon-trpg/utils';
 import { DicePieceValueElement } from '../../../hooks/state/useDicePieceValues';
 import { ImagePieceValueElement } from '../../../hooks/state/useImagePieceValues';
 import { StringPieceValueElement } from '../../../hooks/state/useStringPieceValues';
 
 export const background = 'background';
 export const character = 'character';
-export const tachie = 'tachie';
+export const portrait = 'portrait';
 export const dicePieceValue = 'dicePieceValue';
 export const numberPieceValue = 'numberPieceValue';
 export const imagePieceValue = 'imagePieceValue';
@@ -25,8 +24,8 @@ export type ClickOn =
           element: ImagePieceValueElement;
       }
     | {
-          type: typeof character | typeof tachie;
-          characterKey: CompositeKey;
+          type: typeof character | typeof portrait;
+          characterId: string;
           character: CharacterState;
       };
 

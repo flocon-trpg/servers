@@ -5,10 +5,7 @@ import { replace } from '../../stateManagers/states/types';
 import { DrawerProps } from 'antd/lib/drawer';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
-import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import {
-    toDicePieceValueUpOperation,
-    dicePieceValueDiff,
     DicePieceValueState,
     CharacterState,
     dicePieceValueStrIndexes,
@@ -19,20 +16,25 @@ import { MyCharactersSelect } from '../../components/MyCharactersSelect';
 import { InputDie } from '../../components/InputDie';
 import { noValue } from '../../utils/dice';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
-import { keyNames } from '@flocon-trpg/utils';
-import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
 import { useAtomValue } from 'jotai/utils';
 import { dicePieceDrawerAtom } from '../../atoms/overlay/dicePieceDrawerAtom';
 import { create, update } from '../../utils/constants';
 import { useAtom } from 'jotai';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
 };
 
 const defaultDicePieceValue: DicePieceValueState = {
-    $v: 1,
+    $v: 2,
     $r: 1,
+
+    // createするときはこれに自身のIDを入れなければならない
+    ownerCharacterId: undefined,
+
+    memo: undefined,
+    name: undefined,
     dice: {},
     pieces: {},
 };
@@ -52,22 +54,18 @@ const IdView: React.FC = () => {
         <Row gutter={gutter} align='middle'>
             <Col flex='auto' />
             <Col flex={0}>ID</Col>
-            <Col span={inputSpan}>
-                {drawerType.type === update
-                    ? keyNames({ createdBy: myUserUid, id: drawerType.stateKey })
-                    : '(なし)'}
-            </Col>
+            <Col span={inputSpan}>{drawerType.type === update ? drawerType.stateId : '(なし)'}</Col>
         </Row>
     );
 };
 
 export const DicePieceValueDrawer: React.FC = () => {
     const [drawerType, setDrawerType] = useAtom(dicePieceDrawerAtom);
-    const operate = useSetRoomStateByApply();
+    const setRoomState = useSetRoomStateWithImmer();
     const myUserUid = useMyUserUid();
     const dicePieceValues = useDicePieceValues();
     const [activeCharacter, setActiveCharacter] = React.useState<{
-        key: string;
+        id: string;
         state: CharacterState;
     }>();
     let stateEditorParams: StateEditorParams<DicePieceValueState | undefined>;
@@ -82,41 +80,22 @@ export const DicePieceValueDrawer: React.FC = () => {
         case update:
             stateEditorParams = {
                 type: update,
-                state: dicePieceValues?.find(
-                    value =>
-                        value.characterKey.createdBy === myUserUid &&
-                        value.valueId === drawerType.stateKey
-                )?.value,
-                onUpdate: ({ prevState, nextState }) => {
+                state: dicePieceValues?.find(value => value.id === drawerType.stateId)?.value,
+                onUpdate: newState => {
                     if (myUserUid == null || drawerType?.type !== update) {
                         return;
                     }
-                    if (prevState == null || nextState == null) {
-                        return;
-                    }
-                    const diff = dicePieceValueDiff({ prevState, nextState });
-                    if (diff == null) {
-                        return;
-                    }
-                    operate(
-                        characterUpdateOperation(drawerType.characterKey, {
-                            $v: 1,
-                            $r: 2,
-                            dicePieceValues: {
-                                [drawerType.stateKey]: {
-                                    type: update,
-                                    update: toDicePieceValueUpOperation(diff),
-                                },
-                            },
-                        })
-                    );
+                    const stateId = drawerType.stateId;
+                    setRoomState(roomState => {
+                        roomState.dicePieceValues[stateId] = newState;
+                    });
                 },
             };
             break;
     }
-    const { uiState: state, updateUiState: setState } = useStateEditor(stateEditorParams);
+    const { uiState, updateUiState, resetUiState } = useStateEditor(stateEditorParams);
 
-    if (myUserUid == null || state == null) {
+    if (myUserUid == null || uiState == null) {
         return null;
     }
 
@@ -128,38 +107,23 @@ export const DicePieceValueDrawer: React.FC = () => {
                 return;
             }
 
+            const piece = drawerType.piece;
             const id = simpleId();
-            operate(
-                characterUpdateOperation(
-                    { createdBy: myUserUid, id: activeCharacter.key },
-                    {
-                        $v: 1,
-                        $r: 2,
-                        dicePieceValues: {
-                            [id]: {
-                                type: replace,
-                                replace: {
-                                    newValue: {
-                                        ...state,
-                                        pieces:
-                                            drawerType?.piece?.boardKey == null
-                                                ? {}
-                                                : {
-                                                      [drawerType.piece.boardKey.createdBy]: {
-                                                          [drawerType.piece.boardKey.id]:
-                                                              drawerType.piece,
-                                                      },
-                                                  },
-                                    },
-                                },
-                            },
-                        },
-                    }
-                )
-            );
+            setRoomState(roomState => {
+                roomState.dicePieceValues[id] = {
+                    ...uiState,
+                    ownerCharacterId: activeCharacter.id,
+                    pieces:
+                        piece == null
+                            ? {}
+                            : {
+                                  [drawerType.piece.boardId]: piece,
+                              },
+                };
+            });
             setDrawerType(null);
             setActiveCharacter(undefined);
-            setState(defaultDicePieceValue);
+            resetUiState(defaultDicePieceValue);
         };
     }
 
@@ -189,8 +153,8 @@ export const DicePieceValueDrawer: React.FC = () => {
                         <MyCharactersSelect
                             selectedCharacterId={
                                 drawerType?.type === update
-                                    ? drawerType.characterKey.id
-                                    : activeCharacter?.key
+                                    ? uiState.ownerCharacterId
+                                    : activeCharacter?.id
                             }
                             readOnly={drawerType?.type === update}
                             onSelect={setActiveCharacter}
@@ -199,7 +163,7 @@ export const DicePieceValueDrawer: React.FC = () => {
                 </Row>
 
                 {dicePieceValueStrIndexes.map(key => {
-                    const die = state.dice[key];
+                    const die = uiState.dice[key];
 
                     return (
                         <Row key={key} style={{ minHeight: 28 }} gutter={gutter} align='middle'>
@@ -210,55 +174,38 @@ export const DicePieceValueDrawer: React.FC = () => {
                                     size='small'
                                     state={die ?? null}
                                     onChange={e => {
-                                        if (e.type === replace) {
-                                            setState({
-                                                ...state,
-                                                dice: {
-                                                    ...state.dice,
-                                                    [key]:
-                                                        e.newValue == null
-                                                            ? undefined
-                                                            : {
-                                                                  $v: 1,
-                                                                  $r: 1,
-                                                                  dieType: e.newValue.dieType,
-                                                                  isValuePrivate: false,
-                                                                  value: null,
-                                                              },
-                                                },
-                                            });
-                                            return;
-                                        }
-                                        setState({
-                                            ...state,
-                                            dice: {
-                                                ...state.dice,
-                                                [key]:
-                                                    die == null
+                                        updateUiState(pieceValue => {
+                                            if (pieceValue == null) {
+                                                return;
+                                            }
+                                            if (e.type === replace) {
+                                                pieceValue.dice[key] =
+                                                    e.newValue == null
                                                         ? undefined
                                                         : {
-                                                              ...die,
-                                                              value:
-                                                                  e.newValue === noValue
-                                                                      ? null
-                                                                      : e.newValue,
-                                                          },
-                                            },
+                                                              $v: 1,
+                                                              $r: 1,
+                                                              dieType: e.newValue.dieType,
+                                                              isValuePrivate: false,
+                                                              value: undefined,
+                                                          };
+                                                return;
+                                            }
+                                            const die = pieceValue.dice[key];
+                                            if (die == null) {
+                                                return;
+                                            }
+                                            die.value =
+                                                e.newValue === noValue ? undefined : e.newValue;
                                         });
                                     }}
                                     onIsValuePrivateChange={e => {
-                                        if (die == null) {
-                                            return;
-                                        }
-                                        setState({
-                                            ...state,
-                                            dice: {
-                                                ...state.dice,
-                                                [key]: {
-                                                    ...die,
-                                                    isValuePrivate: e,
-                                                },
-                                            },
+                                        updateUiState(pieceValue => {
+                                            const die = pieceValue?.dice[key];
+                                            if (die == null) {
+                                                return;
+                                            }
+                                            die.isValuePrivate = e;
                                         });
                                     }}
                                 />
