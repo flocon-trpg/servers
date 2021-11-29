@@ -16,7 +16,7 @@ import { useMessageNotification } from '../../hooks/useMessageNotification';
 import { RoomMenu } from './RoomMenu';
 import { recordToArray } from '@flocon-trpg/utils';
 import { PieceValueList } from './PieceValueList';
-import { StringPieceValueDrawer } from './StringPieceValueDrawer';
+import { StringPieceValueDrawer } from './StringPieceValueEditorModal';
 import { DicePieceValueEditorModal } from './DicePieceValueEditorModal';
 import { Memos } from './Memos';
 import { BoardContextMenu, PieceTooltip, PopoverEditor } from './BoardPopover';

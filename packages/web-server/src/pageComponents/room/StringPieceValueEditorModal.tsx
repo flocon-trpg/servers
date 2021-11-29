@@ -1,7 +1,6 @@
-import { Checkbox, Col, Drawer, InputNumber, Row } from 'antd';
+import { Checkbox, Col, InputNumber, Modal, Row } from 'antd';
 import React from 'react';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
-import { DrawerProps } from 'antd/lib/drawer';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
 import {
@@ -15,14 +14,12 @@ import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { keyNames } from '@flocon-trpg/utils';
 import { useAtomValue } from 'jotai/utils';
 import { create, update } from '../../utils/constants';
-import { stringPieceDrawerAtom } from '../../atoms/overlay/stringPieceDrawerAtom';
-import { useAtom } from 'jotai';
+import { atom, useAtom } from 'jotai';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { dicePieceValueEditorModalAtom } from './DicePieceValueEditorModal';
+import { PieceValueEditorType } from '../../utils/pieceValueEditorType';
 
-const drawerBaseProps: Partial<DrawerProps> = {
-    width: 600,
-};
+export const stringPieceEditorModalAtom = atom<PieceValueEditorType | null>(null);
 
 const defaultStringPieceValue: StringPieceValueState = {
     $v: 2,
@@ -71,7 +68,7 @@ const parseIntSafe = (value: string) => {
 };
 
 export const StringPieceValueDrawer: React.FC = () => {
-    const [drawerType, setDrawerType] = useAtom(stringPieceDrawerAtom);
+    const [drawerType, setDrawerType] = useAtom(stringPieceEditorModalAtom);
     const setRoomState = useSetRoomStateWithImmer();
     const myUserUid = useMyUserUid();
     const stringPieceValues = useStringPieceValues();
@@ -144,12 +141,11 @@ export const StringPieceValueDrawer: React.FC = () => {
     }
 
     return (
-        <Drawer
-            {...drawerBaseProps}
+        <Modal
             title={drawerType?.type == update ? '数値コマの編集' : '数値コマの新規作成'}
             visible={drawerType != null}
             closable
-            onClose={() => setDrawerType(null)}
+            onCancel={() => setDrawerType(null)}
             footer={
                 <DrawerFooter
                     close={{
@@ -213,6 +209,6 @@ export const StringPieceValueDrawer: React.FC = () => {
                     </Col>
                 </Row>
             </div>
-        </Drawer>
+        </Modal>
     );
 };

@@ -46,7 +46,6 @@ import {
     boardContextMenuAtom,
     ContextMenuState,
 } from '../../atoms/overlay/board/boardContextMenuAtom';
-import { stringPieceDrawerAtom } from '../../atoms/overlay/stringPieceDrawerAtom';
 import { imagePieceDrawerAtom } from '../../atoms/overlay/imagePieceDrawerAtom';
 import { create } from '../../utils/constants';
 import { useCloneImagePiece } from '../../hooks/state/useCloneImagePiece';
@@ -62,6 +61,7 @@ import {
 } from './BoardPositionAndPieceEditorModal';
 import { characterEditorModalAtom } from './CharacterEditorModal';
 import { dicePieceValueEditorModalAtom } from './DicePieceValueEditorModal';
+import { stringPieceEditorModalAtom } from './StringPieceValueEditorModal';
 
 /* absolute positionで表示するときにBoardの子として表示させると、Boardウィンドウから要素がはみ出ることができないため、ウィンドウ右端に近いところで要素を表示させるときに不便なことがある。そのため、ページ全体の子として持たせるようにしている。 */
 
@@ -281,7 +281,7 @@ const toBoardPosition = ({
 const useHooks = () => {
     const setCharacterEditor = useUpdateAtom(characterEditorModalAtom);
     const setDicePieceEditor = useUpdateAtom(dicePieceValueEditorModalAtom);
-    const setStringPieceDrawer = useUpdateAtom(stringPieceDrawerAtom);
+    const setStringPieceEditor = useUpdateAtom(stringPieceEditorModalAtom);
     const setImagePieceDrawer = useUpdateAtom(imagePieceDrawerAtom);
     const setBoardPositionAndPieceEditorModal = useUpdateAtom(boardPositionAndPieceEditorModalAtom);
     const cloneImagePiece = useCloneImagePiece();
@@ -289,7 +289,7 @@ const useHooks = () => {
         () => ({
             setCharacterEditor,
             setDicePieceEditor,
-            setStringPieceDrawer,
+            setStringPieceEditor,
             setImagePieceDrawer,
             setBoardPositionAndPieceEditorModal,
             cloneImagePiece,
@@ -297,7 +297,7 @@ const useHooks = () => {
         [
             setCharacterEditor,
             setDicePieceEditor,
-            setStringPieceDrawer,
+            setStringPieceEditor,
             setImagePieceDrawer,
             setBoardPositionAndPieceEditorModal,
             cloneImagePiece,
@@ -634,7 +634,7 @@ namespace ContextMenuModule {
                             {isMyCharacter(stringPieceValue.ownerCharacterId) ? (
                                 <Menu.Item
                                     onClick={() => {
-                                        hooks.setStringPieceDrawer({
+                                        hooks.setStringPieceEditor({
                                             type: update,
                                             boardId: boardIdToShow,
                                             stateId: stringPieceValueId,
@@ -907,7 +907,7 @@ namespace ContextMenuModule {
                 <Menu.SubMenu title='数値コマ'>
                     <Menu.Item
                         onClick={() => {
-                            hooks.setStringPieceDrawer({
+                            hooks.setStringPieceEditor({
                                 type: create,
                                 piece: piecePositionWhichIsCellMode,
                             });
