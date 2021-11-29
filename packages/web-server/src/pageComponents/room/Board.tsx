@@ -29,10 +29,7 @@ import {
     $free,
     BoardPositionUpOperation,
 } from '@flocon-trpg/core';
-import {
-    keyNames,
-    recordToArray,
-} from '@flocon-trpg/utils';
+import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { FilePath, FileSourceType } from '@flocon-trpg/typed-document-node';
 import { ImagePiece } from '../../components/Konva/ImagePiece';
@@ -348,7 +345,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         opacity={1}
                         key={keyNames(characterId, pieceId)}
                         filePath={character.image}
-                        draggable
+                        draggable={!piece.isPositionLocked}
+                        resizable={!piece.isPositionLocked}
                         listening
                         isSelected={
                             selectedPieceId?.type === 'character' &&
@@ -428,7 +426,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         w={boardPosition.w}
                         h={boardPosition.h}
                         filePath={character.portraitImage}
-                        draggable
+                        draggable={!boardPosition.isPositionLocked}
+                        resizable={!boardPosition.isPositionLocked}
                         listening
                         isSelected={
                             selectedPieceId?.type === 'portrait' &&
@@ -491,7 +490,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     opacity={1}
                     key={element.id}
                     filePath={element.value.image ?? defaultImageFilePath}
-                    draggable
+                    draggable={!piece.isPositionLocked}
+                    resizable={!piece.isPositionLocked}
                     listening
                     isSelected={
                         selectedPieceId?.type === 'imagePiece' &&
@@ -562,7 +562,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     opacity={1}
                     state={{ type: dicePiece, state: element.value }}
                     createdByMe={element.value.ownerCharacterId === myUserUid}
-                    draggable
+                    draggable={!piece.isPositionLocked}
+                    resizable={!piece.isPositionLocked}
                     listening
                     isSelected={
                         selectedPieceId?.type === 'dicePieceValue' &&
@@ -629,7 +630,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     opacity={1}
                     state={{ type: stringPiece, state: element.value }}
                     createdByMe={element.value.ownerCharacterId === myUserUid}
-                    draggable
+                    draggable={!piece.isPositionLocked}
+                    resizable={!piece.isPositionLocked}
                     listening
                     isSelected={
                         selectedPieceId?.type === 'numberPieceValue' &&
@@ -1059,7 +1061,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                   }
                   return (
                       <Menu.Item
-                          key={(boardId)}
+                          key={boardId}
                           onClick={() =>
                               setRoomConfig(roomConfig => {
                                   if (roomConfig == null) {
