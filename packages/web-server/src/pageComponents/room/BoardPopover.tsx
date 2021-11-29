@@ -57,6 +57,11 @@ import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../../utils/className';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { useIsMyCharacter } from '../../hooks/state/useIsMyCharacter';
+import {
+    boardPositionAndPieceEditorModalAtom,
+    characterPiece,
+    characterPortrait,
+} from './BoardPositionAndPieceEditorModal';
 
 /* absolute positionで表示するときにBoardの子として表示させると、Boardウィンドウから要素がはみ出ることができないため、ウィンドウ右端に近いところで要素を表示させるときに不便なことがある。そのため、ページ全体の子として持たせるようにしている。 */
 
@@ -278,6 +283,7 @@ const useHooks = () => {
     const setDicePieceDrawer = useUpdateAtom(dicePieceDrawerAtom);
     const setStringPieceDrawer = useUpdateAtom(stringPieceDrawerAtom);
     const setImagePieceDrawer = useUpdateAtom(imagePieceDrawerAtom);
+    const setBoardPositionAndPieceEditorModal = useUpdateAtom(boardPositionAndPieceEditorModalAtom);
     const cloneImagePiece = useCloneImagePiece();
     return React.useMemo(
         () => ({
@@ -285,6 +291,7 @@ const useHooks = () => {
             setDicePieceDrawer,
             setStringPieceDrawer,
             setImagePieceDrawer,
+            setBoardPositionAndPieceEditorModal,
             cloneImagePiece,
         }),
         [
@@ -292,6 +299,7 @@ const useHooks = () => {
             setDicePieceDrawer,
             setStringPieceDrawer,
             setImagePieceDrawer,
+            setBoardPositionAndPieceEditorModal,
             cloneImagePiece,
         ]
     );
@@ -301,7 +309,6 @@ namespace ContextMenuModule {
     type SelectedCharacterPiecesMenuProps = {
         characterPiecesOnCursor: ContextMenuState['characterPiecesOnCursor'];
         onContextMenuClear: () => void;
-        boardId: string;
         hooks: ReturnType<typeof useHooks>;
         setRoomState: ReturnType<typeof useSetRoomStateWithImmer>;
     };
@@ -309,7 +316,6 @@ namespace ContextMenuModule {
     const selectedCharacterPiecesMenu = ({
         characterPiecesOnCursor,
         onContextMenuClear,
-        boardId,
         hooks,
         setRoomState,
     }: SelectedCharacterPiecesMenuProps): JSX.Element | null => {
@@ -320,18 +326,21 @@ namespace ContextMenuModule {
             <Menu.ItemGroup title='コマ'>
                 {characterPiecesOnCursor.map(({ characterId: characterId, character, pieceId }) => (
                     // characterIdとpieceIdを組み合わせてkeyにしている場所が他にもあるため、キーを互いに異なるものにするように文字列を付加している。
-                    <Menu.SubMenu key={keyNames(characterId, pieceId, 'selected-piece')} title={character.name}>
+                    <Menu.SubMenu
+                        key={keyNames(characterId, pieceId, 'selected-piece')}
+                        title={character.name}
+                    >
                         <Menu.Item
                             onClick={() => {
-                                hooks.setCharacterDrawer({
-                                    type: update,
-                                    boardId,
-                                    stateId: characterId,
+                                hooks.setBoardPositionAndPieceEditorModal({
+                                    type: characterPiece,
+                                    characterId,
+                                    pieceId,
                                 });
                                 onContextMenuClear();
                             }}
                         >
-                            編集
+                            コマの編集
                         </Menu.Item>
                         <Menu.Item
                             onClick={() => {
@@ -341,7 +350,19 @@ namespace ContextMenuModule {
                                 onContextMenuClear();
                             }}
                         >
-                            削除
+                            コマを削除
+                        </Menu.Item>
+                        <Menu.Divider />
+                        <Menu.Item
+                            onClick={() => {
+                                hooks.setCharacterDrawer({
+                                    type: update,
+                                    stateId: characterId,
+                                });
+                                onContextMenuClear();
+                            }}
+                        >
+                            キャラクターの編集
                         </Menu.Item>
                     </Menu.SubMenu>
                 ))}
@@ -353,7 +374,6 @@ namespace ContextMenuModule {
     type SelectedTachiesPiecesMenuProps = {
         portraitsOnCursor: ContextMenuState['portraitsOnCursor'];
         onContextMenuClear: () => void;
-        boardId: string;
         hooks: ReturnType<typeof useHooks>;
         setRoomState: ReturnType<typeof useSetRoomStateWithImmer>;
     };
@@ -361,7 +381,6 @@ namespace ContextMenuModule {
     const selectedTachiePiecesMenu = ({
         portraitsOnCursor,
         onContextMenuClear,
-        boardId,
         hooks,
         setRoomState,
     }: SelectedTachiesPiecesMenuProps): JSX.Element | null => {
@@ -378,15 +397,15 @@ namespace ContextMenuModule {
                     >
                         <Menu.Item
                             onClick={() => {
-                                hooks.setCharacterDrawer({
-                                    type: update,
-                                    boardId: boardId,
-                                    stateId: characterId,
+                                hooks.setBoardPositionAndPieceEditorModal({
+                                    type: characterPortrait,
+                                    characterId,
+                                    boardPositionId: portraitPositionId,
                                 });
                                 onContextMenuClear();
                             }}
                         >
-                            編集
+                            立ち絵の編集
                         </Menu.Item>
                         <Menu.Item
                             onClick={() => {
@@ -398,7 +417,19 @@ namespace ContextMenuModule {
                                 onContextMenuClear();
                             }}
                         >
-                            削除
+                            立ち絵を削除
+                        </Menu.Item>
+                        <Menu.Divider />
+                        <Menu.Item
+                            onClick={() => {
+                                hooks.setCharacterDrawer({
+                                    type: update,
+                                    stateId: characterId,
+                                });
+                                onContextMenuClear();
+                            }}
+                        >
+                            キャラクターを編集
                         </Menu.Item>
                     </Menu.SubMenu>
                 ))}
@@ -973,14 +1004,12 @@ namespace ContextMenuModule {
                     {selectedCharacterPiecesMenu({
                         ...contextMenuState,
                         onContextMenuClear,
-                        boardId,
                         hooks,
                         setRoomState,
                     })}
                     {selectedTachiePiecesMenu({
                         ...contextMenuState,
                         onContextMenuClear,
-                        boardId,
                         hooks,
                         setRoomState,
                     })}

@@ -1,4 +1,4 @@
-import { Button, Checkbox, Col, Drawer, InputNumber, Row, Space, Tooltip, Typography } from 'antd';
+import { Button, Col, Drawer, Row, Tooltip, Typography } from 'antd';
 import React from 'react';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { DrawerProps } from 'antd/lib/drawer';
@@ -18,7 +18,6 @@ import {
 } from '../../resource/text/main';
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
 import { BufferedInput } from '../../components/BufferedInput';
-import { TomlInput } from '../../components/Tomllnput';
 import { useCharacters } from '../../hooks/state/useCharacters';
 import { useParticipants } from '../../hooks/state/useParticipants';
 import {
@@ -28,10 +27,8 @@ import {
 } from '../../hooks/state/useParamNames';
 import {
     CharacterState,
-    PieceState,
     strIndex20Array,
     simpleId,
-    BoardPositionState,
 } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
@@ -143,48 +140,6 @@ export const CharacterDrawer: React.FC = () => {
         return isMyCharacter(drawerType.stateId);
     })();
 
-    const piece = (() => {
-        if (drawerType?.type !== update || drawerType.boardId == null) {
-            return null;
-        }
-        return character.pieces[drawerType.boardId] ?? null;
-    })();
-
-    const updatePiece = (recipe: (piece: PieceState) => void) => {
-        if (drawerType?.type !== update || drawerType.boardId == null) {
-            return;
-        }
-        const boardId = drawerType.boardId;
-        updateCharacter(character => {
-            const piece = character?.pieces?.[boardId];
-            if (piece == null) {
-                return;
-            }
-            recipe(piece);
-        });
-    };
-
-    const portraitPosition = (() => {
-        if (drawerType?.type !== update || drawerType.boardId == null) {
-            return null;
-        }
-        return character.portraitPositions[drawerType.boardId] ?? null;
-    })();
-
-    const updatePortraitPosition = (recipe: (position: BoardPositionState) => void) => {
-        if (drawerType?.type !== update || drawerType.boardId == null) {
-            return;
-        }
-        const boardId = drawerType.boardId;
-        updateCharacter(character => {
-            const position = character?.portraitPositions?.[boardId];
-            if (position == null) {
-                return;
-            }
-            recipe(position);
-        });
-    };
-
     let onOkClick: (() => void) | undefined = undefined;
     if (drawerType?.type === create) {
         onOkClick = () => {
@@ -209,245 +164,6 @@ export const CharacterDrawer: React.FC = () => {
             setDrawerType(null);
         };
     }
-
-    const pieceElement = (() => {
-        if (piece == null) {
-            return null;
-        }
-        return (
-            <>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
-                    <Col flex={0}></Col>
-                    <Col span={inputSpan}>
-                        <Checkbox
-                            checked={piece.isPrivate}
-                            onChange={e =>
-                                updatePiece(piece => {
-                                    piece.isPrivate = e.target.checked;
-                                })
-                            }
-                        >
-                            コマを非公開にする
-                        </Checkbox>
-                    </Col>
-                </Row>
-
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
-                    <Col flex={0}></Col>
-                    <Col span={inputSpan}>
-                        <Checkbox
-                            checked={piece.isCellMode}
-                            onChange={e =>
-                                updatePiece(piece => {
-                                    piece.isCellMode = e.target.checked;
-                                })
-                            }
-                        >
-                            セルにスナップする
-                        </Checkbox>
-                    </Col>
-                </Row>
-
-                {piece.isCellMode ? (
-                    <>
-                        <Row gutter={gutter} align='middle'>
-                            <Col flex='auto' />
-                            <Col flex={0}>位置</Col>
-                            <Col span={inputSpan}>
-                                <Space>
-                                    <InputNumber
-                                        value={piece.cellX}
-                                        onChange={newValue =>
-                                            typeof newValue === 'number'
-                                                ? updatePiece(piece => {
-                                                      piece.cellX = newValue;
-                                                  })
-                                                : undefined
-                                        }
-                                    />
-                                    <span>*</span>
-                                    <InputNumber
-                                        value={piece.cellY}
-                                        onChange={newValue =>
-                                            typeof newValue === 'number'
-                                                ? updatePiece(piece => {
-                                                      piece.cellY = newValue;
-                                                  })
-                                                : undefined
-                                        }
-                                    />
-                                </Space>
-                            </Col>
-                        </Row>
-                        <Row gutter={gutter} align='middle'>
-                            <Col flex='auto' />
-                            <Col flex={0}>大きさ</Col>
-                            <Col span={inputSpan}>
-                                <Space>
-                                    <InputNumber
-                                        value={piece.cellW}
-                                        onChange={newValue =>
-                                            typeof newValue === 'number'
-                                                ? updatePiece(piece => {
-                                                      piece.cellW = newValue;
-                                                  })
-                                                : undefined
-                                        }
-                                    />
-                                    <span>*</span>
-                                    <InputNumber
-                                        value={piece.cellH}
-                                        onChange={newValue =>
-                                            typeof newValue === 'number'
-                                                ? updatePiece(piece => {
-                                                      piece.cellH = newValue;
-                                                  })
-                                                : undefined
-                                        }
-                                    />
-                                </Space>
-                            </Col>
-                        </Row>
-                    </>
-                ) : (
-                    <>
-                        <Row gutter={gutter} align='middle'>
-                            <Col flex='auto' />
-                            <Col flex={0}>位置</Col>
-                            <Col span={inputSpan}>
-                                <Space>
-                                    <InputNumber
-                                        value={piece.x}
-                                        onChange={newValue =>
-                                            typeof newValue === 'number'
-                                                ? updatePiece(piece => {
-                                                      piece.x = newValue;
-                                                  })
-                                                : undefined
-                                        }
-                                    />
-                                    <span>*</span>
-                                    <InputNumber
-                                        value={piece.y}
-                                        onChange={newValue =>
-                                            typeof newValue === 'number'
-                                                ? updatePiece(piece => {
-                                                      piece.y = newValue;
-                                                  })
-                                                : undefined
-                                        }
-                                    />
-                                </Space>
-                            </Col>
-                        </Row>
-                        <Row gutter={gutter} align='middle'>
-                            <Col flex='auto' />
-                            <Col flex={0}>大きさ</Col>
-                            <Col span={inputSpan}>
-                                <Space>
-                                    <InputNumber
-                                        value={piece.w}
-                                        onChange={newValue =>
-                                            typeof newValue === 'number'
-                                                ? updatePiece(piece => {
-                                                      piece.w = newValue;
-                                                  })
-                                                : undefined
-                                        }
-                                    />
-                                    <span>*</span>
-                                    <InputNumber
-                                        value={piece.h}
-                                        onChange={newValue =>
-                                            typeof newValue === 'number'
-                                                ? updatePiece(piece => {
-                                                      piece.h = newValue;
-                                                  })
-                                                : undefined
-                                        }
-                                    />
-                                </Space>
-                            </Col>
-                        </Row>
-                    </>
-                )}
-            </>
-        );
-    })();
-
-    const portraitPositionElement = (() => {
-        if (portraitPosition == null) {
-            return null;
-        }
-        return (
-            <>
-                {
-                    <>
-                        <Row gutter={gutter} align='middle'>
-                            <Col flex='auto' />
-                            <Col flex={0}>位置</Col>
-                            <Col span={inputSpan}>
-                                <Space>
-                                    <InputNumber
-                                        value={portraitPosition.x}
-                                        onChange={newValue =>
-                                            typeof newValue === 'number'
-                                                ? updatePortraitPosition(pos => {
-                                                      pos.x = newValue;
-                                                  })
-                                                : undefined
-                                        }
-                                    />
-                                    <span>*</span>
-                                    <InputNumber
-                                        value={portraitPosition.y}
-                                        onChange={newValue =>
-                                            typeof newValue === 'number'
-                                                ? updatePortraitPosition(pos => {
-                                                      pos.y = newValue;
-                                                  })
-                                                : undefined
-                                        }
-                                    />
-                                </Space>
-                            </Col>
-                        </Row>
-                        <Row gutter={gutter} align='middle'>
-                            <Col flex='auto' />
-                            <Col flex={0}>大きさ</Col>
-                            <Col span={inputSpan}>
-                                <Space>
-                                    <InputNumber
-                                        value={portraitPosition.w}
-                                        onChange={newValue =>
-                                            typeof newValue === 'number'
-                                                ? updatePortraitPosition(pos => {
-                                                      pos.w = newValue;
-                                                  })
-                                                : undefined
-                                        }
-                                    />
-                                    <span>*</span>
-                                    <InputNumber
-                                        value={portraitPosition.h}
-                                        onChange={newValue =>
-                                            typeof newValue === 'number'
-                                                ? updatePortraitPosition(pos => {
-                                                      pos.h = newValue;
-                                                  })
-                                                : undefined
-                                        }
-                                    />
-                                </Space>
-                            </Col>
-                        </Row>
-                    </>
-                }
-            </>
-        );
-    })();
 
     return (
         <Drawer
@@ -526,10 +242,6 @@ export const CharacterDrawer: React.FC = () => {
                     </>
                 )}
 
-                {pieceElement != null && <Typography.Title level={4}>コマ</Typography.Title>}
-
-                {pieceElement}
-
                 <Typography.Title level={4}>全体公開</Typography.Title>
                 <Row gutter={gutter} align='middle'>
                     <Col flex='auto' />
@@ -564,14 +276,6 @@ export const CharacterDrawer: React.FC = () => {
                         />
                     </Col>
                 </Row>
-
-                {portraitPositionElement == null ? null : (
-                    <>
-                        <Typography.Title level={4}>立ち絵</Typography.Title>
-                    </>
-                )}
-
-                {portraitPositionElement}
 
                 <Typography.Title level={4}>パラメーター</Typography.Title>
 
