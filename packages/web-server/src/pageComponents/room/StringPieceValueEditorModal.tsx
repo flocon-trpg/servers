@@ -7,6 +7,7 @@ import {
     StringPieceValueState,
     CharacterState,
     simpleId,
+    String
 } from '@flocon-trpg/core';
 import { useStringPieceValues } from '../../hooks/state/useStringPieceValues';
 import { MyCharactersSelect } from '../../components/MyCharactersSelect';
@@ -31,6 +32,7 @@ const defaultStringPieceValue: StringPieceValueState = {
 
     value: '',
     isValuePrivate: false,
+    valueInputType: String,
     memo: undefined,
     name: undefined,
     pieces: {},

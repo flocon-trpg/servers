@@ -251,6 +251,8 @@ export {
     State as StringPieceValueState,
     UpOperation as StringPieceValueUpOperation,
     DownOperation as StringPieceValueDownOperation,
+    String,
+    Number,
 } from './internal/ot/room/stringPieceValue/types';
 
 export {
