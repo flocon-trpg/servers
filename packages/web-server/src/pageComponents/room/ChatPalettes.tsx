@@ -12,7 +12,6 @@ import {
 import { Subject } from 'rxjs';
 import classNames from 'classnames';
 import { flex, flex1, flexColumn, flexNone, flexRow, itemsCenter } from '../../utils/className';
-import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { UISelector } from '../../components/UISelector';
 import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
@@ -25,6 +24,7 @@ import { roomPublicMessageInputAtom } from '../../atoms/inputs/roomPublicMessage
 import { roomPrivateMessageInputAtom } from '../../atoms/inputs/roomPrivateMessageInputAtom';
 import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
+import { CharacterVarInput } from '../../components/CharacterVarInput';
 
 const titleStyle: React.CSSProperties = {
     flexBasis: '80px',
@@ -109,6 +109,11 @@ const ChatPaletteList: React.FC<ChatPaletteListProps> = ({
     );
 };
 
+const nonEditKey = 'nonEdit';
+const editKey = 'edit';
+const editVarKey = 'editVar';
+type UISelectorKey = typeof nonEditKey | typeof editKey | typeof editVarKey;
+
 type ChatPaletteProps = {
     roomId: string;
     panelId: string;
@@ -125,11 +130,10 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
     );
     const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
     const subject = React.useMemo(() => new Subject<string>(), []);
-    const myUserUid = useMyUserUid();
     const myCharacters = useMyCharacters();
     const [selectedChannelType, setSelectedChannelType] =
         React.useState<SelectedChannelType>(publicChannel);
-    const [isEditMode, setIsEditMode] = React.useState(false);
+    const [uiSelectorKey, setUiSelectorKey] = React.useState<UISelectorKey>(nonEditKey);
     const setRoomState = useSetRoomStateWithImmer();
 
     const myCharactersOptions = React.useMemo(() => {
@@ -204,36 +208,70 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
             <UISelector
                 style={{ padding: '2px 0' }}
                 className={classNames(flex1, flex, flexColumn)}
-                keys={[false, true]}
-                activeKey={isEditMode}
-                getName={key => (key ? '編集' : '通常')}
-                onChange={setIsEditMode}
-                render={isEditMode => (
-                    <ChatPaletteList
-                        chatPaletteText={selectedCharacter?.chatPalette ?? null}
-                        onClick={text => {
-                            if (selectedChannelType === publicChannel) {
-                                setPublicMessageInput(text);
-                                return;
-                            }
-                            setPrivateMessageInput(text);
-                        }}
-                        onDoubleClick={text => subject.next(text)}
-                        isEditMode={isEditMode}
-                        onChange={toml => {
-                            setRoomState(prevRoom => {
-                                if (myUserUid == null || selectedCharacterId == null) {
+                keys={[nonEditKey, editKey, editVarKey] as const}
+                activeKey={uiSelectorKey}
+                getName={key => {
+                    switch (key) {
+                        case nonEditKey:
+                            return '通常';
+                        case editKey:
+                            return '編集';
+                        case editVarKey:
+                            return '編集（キャラクター変数）';
+                    }
+                }}
+                onChange={setUiSelectorKey}
+                render={uiSelectorKey => {
+                    if (uiSelectorKey === editVarKey) {
+                        return (
+                            <CharacterVarInput
+                            style={{padding: '0 0 2px 0'}}
+                                classNames={classNames(flex1)}
+                                disableResize
+                                character={selectedCharacter}
+                                onChange={newValue =>
+                                    setRoomState(roomState => {
+                                        if (selectedCharacterId == null) {
+                                            return;
+                                        }
+                                        const character = roomState.characters[selectedCharacterId];
+                                        if (character == null) {
+                                            return;
+                                        }
+                                        character.privateVarToml = newValue;
+                                    })
+                                }
+                            />
+                        );
+                    }
+
+                    return (
+                        <ChatPaletteList
+                            chatPaletteText={selectedCharacter?.chatPalette ?? null}
+                            onClick={text => {
+                                if (selectedChannelType === publicChannel) {
+                                    setPublicMessageInput(text);
                                     return;
                                 }
-                                const character = prevRoom.characters[selectedCharacterId];
-                                if (character == null) {
-                                    return;
-                                }
-                                character.chatPalette = toml;
-                            });
-                        }}
-                    />
-                )}
+                                setPrivateMessageInput(text);
+                            }}
+                            onDoubleClick={text => subject.next(text)}
+                            isEditMode={uiSelectorKey === editKey}
+                            onChange={toml => {
+                                setRoomState(roomState => {
+                                    if (selectedCharacterId == null) {
+                                        return;
+                                    }
+                                    const character = roomState.characters[selectedCharacterId];
+                                    if (character == null) {
+                                        return;
+                                    }
+                                    character.chatPalette = toml;
+                                });
+                            }}
+                        />
+                    );
+                }}
             />
             <SubmitMessage
                 roomId={roomId}

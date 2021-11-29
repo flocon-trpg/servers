@@ -43,6 +43,7 @@ import { create, update } from '../../utils/constants';
 import { useUpdateAtom } from 'jotai/utils';
 import { commandEditorModalAtom } from '../../atoms/overlay/commandEditorModalAtom';
 import { useIsMyCharacter } from '../../hooks/state/useIsMyCharacter';
+import { CharacterVarInput } from '../../components/CharacterVarInput';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -766,17 +767,15 @@ export const CharacterDrawer: React.FC = () => {
                             <Col flex='auto' />
                             <Col flex={0}></Col>
                             <Col span={inputSpan}>
-                                <TomlInput
-                                    size='small'
-                                    bufferDuration='default'
-                                    value={character.privateVarToml}
+                                <CharacterVarInput
+                                    character={character}
                                     rows={8}
-                                    onChange={e =>
+                                    onChange={newValue => 
                                         updateCharacter(character => {
                                             if (character == null) {
                                                 return;
                                             }
-                                            character.privateVarToml = e.currentValue;
+                                            character.privateVarToml = newValue;
                                         })
                                     }
                                 />
