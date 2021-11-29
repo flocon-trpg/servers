@@ -60,7 +60,7 @@ import {
     characterPiece,
     characterPortrait,
 } from './BoardPositionAndPieceEditorModal';
-import { characterEditorDrawerAtom } from './CharacterEditorModal';
+import { characterEditorModalAtom } from './CharacterEditorModal';
 import { dicePieceValueEditorModalAtom } from './DicePieceValueEditorModal';
 
 /* absolute positionで表示するときにBoardの子として表示させると、Boardウィンドウから要素がはみ出ることができないため、ウィンドウ右端に近いところで要素を表示させるときに不便なことがある。そのため、ページ全体の子として持たせるようにしている。 */
@@ -279,7 +279,7 @@ const toBoardPosition = ({
 
 // 1つ1つ個別に渡すコードを書くのが面倒なのでこのように1つにまとめて全て渡している
 const useHooks = () => {
-    const setCharacterDrawer = useUpdateAtom(characterEditorDrawerAtom);
+    const setCharacterEditor = useUpdateAtom(characterEditorModalAtom);
     const setDicePieceEditor = useUpdateAtom(dicePieceValueEditorModalAtom);
     const setStringPieceDrawer = useUpdateAtom(stringPieceDrawerAtom);
     const setImagePieceDrawer = useUpdateAtom(imagePieceDrawerAtom);
@@ -287,7 +287,7 @@ const useHooks = () => {
     const cloneImagePiece = useCloneImagePiece();
     return React.useMemo(
         () => ({
-            setCharacterDrawer,
+            setCharacterEditor,
             setDicePieceEditor,
             setStringPieceDrawer,
             setImagePieceDrawer,
@@ -295,7 +295,7 @@ const useHooks = () => {
             cloneImagePiece,
         }),
         [
-            setCharacterDrawer,
+            setCharacterEditor,
             setDicePieceEditor,
             setStringPieceDrawer,
             setImagePieceDrawer,
@@ -355,7 +355,7 @@ namespace ContextMenuModule {
                         <Menu.Divider />
                         <Menu.Item
                             onClick={() => {
-                                hooks.setCharacterDrawer({
+                                hooks.setCharacterEditor({
                                     type: update,
                                     stateId: characterId,
                                 });
@@ -422,7 +422,7 @@ namespace ContextMenuModule {
                         <Menu.Divider />
                         <Menu.Item
                             onClick={() => {
-                                hooks.setCharacterDrawer({
+                                hooks.setCharacterEditor({
                                     type: update,
                                     stateId: characterId,
                                 });

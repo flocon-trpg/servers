@@ -37,7 +37,7 @@ import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { create } from '../../utils/constants';
 import { useUpdateAtom } from 'jotai/utils';
 import { characterParameterNamesDrawerVisibilityAtom } from '../../atoms/overlay/characterParameterNamesDrawerVisibilityAtom';
-import { characterEditorDrawerAtom } from './CharacterEditorModal';
+import { characterEditorModalAtom } from './CharacterEditorModal';
 
 type DataSource = {
     key: string;
@@ -191,7 +191,7 @@ const createStringParameterColumn = ({
 export const CharacterList: React.FC = () => {
     const myAuth = React.useContext(MyAuthContext);
     const setRoomState = useSetRoomStateWithImmer();
-    const setCharacterEditorDrawer = useUpdateAtom(characterEditorDrawerAtom);
+    const setCharacterEditorDrawer = useUpdateAtom(characterEditorModalAtom);
     const setCharacterParameterNamesDrawerVisibility = useUpdateAtom(
         characterParameterNamesDrawerVisibilityAtom
     );

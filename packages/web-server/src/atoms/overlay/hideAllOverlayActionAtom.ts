@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import { characterEditorDrawerAtom } from '../../pageComponents/room/CharacterEditorModal';
+import { characterEditorModalAtom } from '../../pageComponents/room/CharacterEditorModal';
 import { dicePieceValueEditorModalAtom } from '../../pageComponents/room/DicePieceValueEditorModal';
 import { boardContextMenuAtom } from './board/boardContextMenuAtom';
 import { boardPopoverEditorAtom } from './board/boardPopoverEditorAtom';
@@ -13,7 +13,7 @@ import { stringPieceDrawerAtom } from './stringPieceDrawerAtom';
 
 export const hideAllOverlayActionAtom = atom<null, void>(null, (get, set) => {
     set(boardEditorDrawerAtom, null);
-    set(characterEditorDrawerAtom, null);
+    set(characterEditorModalAtom, null);
     set(characterParameterNamesDrawerVisibilityAtom, false);
     set(commandEditorModalAtom, null);
     set(dicePieceValueEditorModalAtom, null);

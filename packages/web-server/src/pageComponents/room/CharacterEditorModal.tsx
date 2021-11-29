@@ -40,7 +40,7 @@ import { commandEditorModalAtom } from '../../atoms/overlay/commandEditorModalAt
 import { useIsMyCharacter } from '../../hooks/state/useIsMyCharacter';
 import { CharacterVarInput } from '../../components/CharacterVarInput';
 
-export type CharacterEditorDrawerType =
+export type CharacterEditorModalType =
     | {
           type: typeof create;
       }
@@ -49,7 +49,7 @@ export type CharacterEditorDrawerType =
           stateId: string;
       };
 
-export const characterEditorDrawerAtom = atom<CharacterEditorDrawerType | null>(null);
+export const characterEditorModalAtom = atom<CharacterEditorModalType | null>(null);
 
 const defaultCharacter: CharacterState = {
     $v: 2,
@@ -89,7 +89,7 @@ const inputSpan = 16;
 
 export const CharacterEditorModal: React.FC = () => {
     const myUserUid = useMyUserUid();
-    const [atomValue, setAtomValue] = useAtom(characterEditorDrawerAtom);
+    const [atomValue, setAtomValue] = useAtom(characterEditorModalAtom);
     const setCommandEditorModal = useUpdateAtom(commandEditorModalAtom);
     const setRoomState = useSetRoomStateWithImmer();
     const isMyCharacter = useIsMyCharacter();
