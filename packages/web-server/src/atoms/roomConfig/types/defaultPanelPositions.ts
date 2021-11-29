@@ -35,8 +35,8 @@ export const defaultCharactersPanelPosition: PanelPosition = {
 export const defaultChatPalettePanelPosition: PanelPosition = {
     x: xRatio * 2,
     y: yRatio * 2,
-    width: 500,
-    height: 500,
+    width: 600,
+    height: 700,
     zIndex: 2,
     isMinimized: false,
 };
