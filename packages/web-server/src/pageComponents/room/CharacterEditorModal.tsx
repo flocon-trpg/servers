@@ -175,6 +175,7 @@ export const CharacterEditorModal: React.FC = () => {
             title={atomValue?.type === create ? 'キャラクターの新規作成' : 'キャラクターの編集'}
             visible={atomValue != null}
             closable
+            onCancel={() => setAtomValue(null)}
             footer={
                 <DrawerFooter
                     close={{
