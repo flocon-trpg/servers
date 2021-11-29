@@ -1,5 +1,4 @@
 import React from 'react';
-import { generateChatPalette } from '@flocon-trpg/core';
 import { Select } from 'antd';
 import { useBufferValue } from '../../hooks/useBufferValue';
 import { useMyCharacters } from '../../hooks/state/useMyCharacters';
@@ -13,7 +12,6 @@ import {
 import { Subject } from 'rxjs';
 import classNames from 'classnames';
 import { flex, flex1, flexColumn, flexNone, flexRow, itemsCenter } from '../../utils/className';
-import { ChatPaletteTomlInput } from '../../components/ChatPaletteTomlInput';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { UISelector } from '../../components/UISelector';
@@ -26,13 +24,14 @@ import { useUpdateAtom } from 'jotai/utils';
 import { roomPublicMessageInputAtom } from '../../atoms/inputs/roomPublicMessageInputAtom';
 import { roomPrivateMessageInputAtom } from '../../atoms/inputs/roomPrivateMessageInputAtom';
 import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
+import { BufferedTextArea } from '../../components/BufferedTextArea';
 
 const titleStyle: React.CSSProperties = {
     flexBasis: '80px',
 };
 
 type ChatPaletteListProps = {
-    chatPaletteToml: string | null;
+    chatPaletteText: string | null;
     onClick: (text: string) => void;
     onDoubleClick: (text: string) => void;
     isEditMode: boolean;
@@ -40,21 +39,23 @@ type ChatPaletteListProps = {
 };
 
 const ChatPaletteList: React.FC<ChatPaletteListProps> = ({
-    chatPaletteToml,
+    chatPaletteText,
     onClick,
     onDoubleClick,
     isEditMode,
     onChange,
 }: ChatPaletteListProps) => {
-    const { currentValue: bufferedChatPaletteToml } = useBufferValue({
-        value: chatPaletteToml,
+    const { currentValue: bufferedChatPaletteText } = useBufferValue({
+        value: chatPaletteText,
         bufferDuration: 1000,
     });
 
     const chatPaletteResult = React.useMemo(
         () =>
-            bufferedChatPaletteToml == null ? null : generateChatPalette(bufferedChatPaletteToml),
-        [bufferedChatPaletteToml]
+            bufferedChatPaletteText == null
+                ? null
+                : bufferedChatPaletteText.replace(/(\r\n|\r)/g, '\n').split('\n'),
+        [bufferedChatPaletteText]
     );
 
     const baseStyle: React.CSSProperties = {
@@ -68,25 +69,19 @@ const ChatPaletteList: React.FC<ChatPaletteListProps> = ({
 
     if (isEditMode) {
         return (
-            <ChatPaletteTomlInput
+            <BufferedTextArea
                 style={{ minHeight: 'calc(100% - 32px)' }}
                 disableResize
                 size='small'
                 bufferDuration='default'
-                value={chatPaletteToml ?? ''}
+                value={chatPaletteText ?? ''}
                 onChange={e => onChange(e.currentValue)}
+                spellCheck={false}
             />
         );
     }
 
-    if (chatPaletteResult.isError) {
-        if (bufferedChatPaletteToml?.trim() === '') {
-            return <div style={baseStyle}>チャットパレットが空です。</div>;
-        }
-        return <div style={baseStyle}>文法エラー: {chatPaletteResult.error}</div>;
-    }
-
-    const options = chatPaletteResult.value.map((value, i) => (
+    const options = chatPaletteResult.map((value, i) => (
         <option
             style={{ backgroundColor: i % 2 === 0 ? undefined : '#FFFFFF10' }}
             key={i}
@@ -161,9 +156,7 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
         selectedCharacterId == null ? undefined : myCharacters?.get(selectedCharacterId);
 
     const onConfigUpdate = (
-        recipe: (
-            draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>
-        ) => void
+        recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void
     ) => {
         setRoomConfig(roomConfig => {
             if (roomConfig == null) {
@@ -217,13 +210,13 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
                 onChange={setIsEditMode}
                 render={isEditMode => (
                     <ChatPaletteList
-                        chatPaletteToml={selectedCharacter?.chatPalette ?? null}
+                        chatPaletteText={selectedCharacter?.chatPalette ?? null}
                         onClick={text => {
                             if (selectedChannelType === publicChannel) {
                                 setPublicMessageInput(text);
                                 return;
                             }
-                            setPrivateMessageInput(text)
+                            setPrivateMessageInput(text);
                         }}
                         onDoubleClick={text => subject.next(text)}
                         isEditMode={isEditMode}
@@ -232,7 +225,7 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
                                 if (myUserUid == null || selectedCharacterId == null) {
                                     return;
                                 }
-                                const character = prevRoom.characters[selectedCharacterId]
+                                const character = prevRoom.characters[selectedCharacterId];
                                 if (character == null) {
                                     return;
                                 }
