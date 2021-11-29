@@ -203,7 +203,6 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const allContext = useAllContext();
 
     const roomId = useAtomSelector(roomAtom, state => state.roomId);
-    const characters = useCharacters();
     const participants = useParticipants();
     const dicePieces = useDicePieces(boardId);
     const numberPieces = useStringPieces(boardId);
@@ -258,7 +257,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
         leave: image => ({ opacity: 0, image }),
     });
 
-    if (myUserUid == null || roomId == null || characters == null || participants == null) {
+    if (myUserUid == null || roomId == null ||  participants == null) {
         return null;
     }
 
