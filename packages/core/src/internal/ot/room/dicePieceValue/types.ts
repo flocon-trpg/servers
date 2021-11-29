@@ -19,7 +19,12 @@ export const state = t.type({
     $r: t.literal(1),
 
     ownerCharacterId: maybe(t.string),
+
+    /**
+     * To 3rd-party developers: Please always set undefined or empty string because it is not implemented yet in the official web-server.
+     */
     memo: maybe(t.string),
+
     name: maybe(t.string),
     dice: record(t.string, DieValueTypes.state),
     pieces: record(t.string, PieceTypes.state),

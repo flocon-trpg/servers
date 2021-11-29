@@ -17,7 +17,12 @@ export const state = t.type({
     h: t.number,
     isPositionLocked: t.boolean,
     isPrivate: t.boolean,
+
+    /**
+     * To 3rd-party developers: Please always set undefined because it is not implemented yet in the official web-server.
+     */
     opacity: maybe(t.number),
+
     w: t.number,
     x: t.number,
     y: t.number,

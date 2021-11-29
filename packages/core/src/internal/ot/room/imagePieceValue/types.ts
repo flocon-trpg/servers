@@ -19,7 +19,12 @@ export const state = t.type({
     ownerParticipantId: maybe(t.string),
     image: maybe(filePath),
     isPrivate: t.boolean,
+
+    /**
+     * To 3rd-party developers: Please always set undefined or empty string because it is not implemented yet in the official web-server.
+     */
     memo: maybe(t.string),
+
     name: maybe(t.string),
     pieces: record(t.string, Piece.state),
 });

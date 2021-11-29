@@ -8,7 +8,7 @@ const booleanDownOperation = t.type({ oldValue: t.boolean });
 const numberUpOperation = t.type({ newValue: t.number });
 const booleanUpOperation = t.type({ newValue: t.boolean });
 
-// boardId:変更機能は今の所UIに存在しないので定義していない
+// boardId変更機能は今の所UIに存在しないので定義していない
 
 export const state = t.type({
     $v: t.literal(2),
@@ -23,7 +23,12 @@ export const state = t.type({
     isCellMode: t.boolean,
     isPositionLocked: t.boolean,
     isPrivate: t.boolean,
+
+    /**
+     * To 3rd-party developers: Please always set undefined because it is not implemented yet in the official web-server.
+     */
     opacity: maybe(t.number),
+
     w: t.number,
     x: t.number,
     y: t.number,

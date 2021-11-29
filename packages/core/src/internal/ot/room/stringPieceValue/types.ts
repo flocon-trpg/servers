@@ -19,7 +19,12 @@ export const state = t.type({
     ownerCharacterId: maybe(t.string),
     isValuePrivate: t.boolean,
     value: t.string,
+
+    /**
+     * To 3rd-party developers: Please always set undefined or empty string because it is not implemented yet in the official web-server.
+     */
     memo: maybe(t.string),
+
     name: maybe(t.string),
     pieces: record(t.string, PieceTypes.state),
 });
