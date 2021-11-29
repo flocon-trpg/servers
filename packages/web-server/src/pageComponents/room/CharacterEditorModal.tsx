@@ -1,7 +1,6 @@
-import { Button, Col, Drawer, Row, Tooltip, Typography } from 'antd';
+import { Button, Col, Modal, Row, Tooltip, Typography } from 'antd';
 import React from 'react';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
-import { DrawerProps } from 'antd/lib/drawer';
 import { InputFile } from '../../components/InputFile';
 import { FilesManagerDrawerType } from '../../utils/types';
 import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';
@@ -34,17 +33,23 @@ import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
 import { FilePath } from '../../utils/filePath';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
-import { useAtom } from 'jotai';
-import { characterEditorDrawerAtom } from '../../atoms/overlay/characterEditorDrawerAtom';
+import { atom, useAtom } from 'jotai';
 import { create, update } from '../../utils/constants';
 import { useUpdateAtom } from 'jotai/utils';
 import { commandEditorModalAtom } from '../../atoms/overlay/commandEditorModalAtom';
 import { useIsMyCharacter } from '../../hooks/state/useIsMyCharacter';
 import { CharacterVarInput } from '../../components/CharacterVarInput';
 
-const drawerBaseProps: Partial<DrawerProps> = {
-    width: 600,
-};
+export type CharacterEditorDrawerType =
+    | {
+          type: typeof create;
+      }
+    | {
+          type: typeof update;
+          stateId: string;
+      };
+
+export const characterEditorDrawerAtom = atom<CharacterEditorDrawerType | null>(null);
 
 const defaultCharacter: CharacterState = {
     $v: 2,
@@ -82,9 +87,9 @@ const defaultCharacter: CharacterState = {
 const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
-export const CharacterDrawer: React.FC = () => {
+export const CharacterEditorModal: React.FC = () => {
     const myUserUid = useMyUserUid();
-    const [drawerType, setDrawerType] = useAtom(characterEditorDrawerAtom);
+    const [atomValue, setAtomValue] = useAtom(characterEditorDrawerAtom);
     const setCommandEditorModal = useUpdateAtom(commandEditorModalAtom);
     const setRoomState = useSetRoomStateWithImmer();
     const isMyCharacter = useIsMyCharacter();
@@ -94,7 +99,7 @@ export const CharacterDrawer: React.FC = () => {
     const strParamNames = useStrParamNames();
     const participants = useParticipants();
     let stateEditorParams: StateEditorParams<CharacterState | undefined>;
-    switch (drawerType?.type) {
+    switch (atomValue?.type) {
         case create:
         case undefined:
             stateEditorParams = {
@@ -105,10 +110,10 @@ export const CharacterDrawer: React.FC = () => {
         case update:
             stateEditorParams = {
                 type: update,
-                state: characters?.get(drawerType.stateId),
+                state: characters?.get(atomValue.stateId),
                 onUpdate: nextState => {
                     setRoomState(roomState => {
-                        roomState.characters[drawerType.stateId] = nextState;
+                        roomState.characters[atomValue.stateId] = nextState;
                     });
                 },
             };
@@ -134,14 +139,14 @@ export const CharacterDrawer: React.FC = () => {
     }
 
     const createdByMe = (() => {
-        if (drawerType?.type !== update) {
+        if (atomValue?.type !== update) {
             return true;
         }
-        return isMyCharacter(drawerType.stateId);
+        return isMyCharacter(atomValue.stateId);
     })();
 
     let onOkClick: (() => void) | undefined = undefined;
-    if (drawerType?.type === create) {
+    if (atomValue?.type === create) {
         onOkClick = () => {
             const id = simpleId();
             setRoomState(roomState => {
@@ -151,32 +156,30 @@ export const CharacterDrawer: React.FC = () => {
                 };
             });
             resetCharacterToCreate();
-            setDrawerType(null);
+            setAtomValue(null);
         };
     }
 
     let onDestroy: (() => void) | undefined = undefined;
-    if (drawerType?.type === update) {
+    if (atomValue?.type === update) {
         onDestroy = () => {
             setRoomState(roomState => {
-                delete roomState.characters[drawerType.stateId];
+                delete roomState.characters[atomValue.stateId];
             });
-            setDrawerType(null);
+            setAtomValue(null);
         };
     }
 
     return (
-        <Drawer
-            {...drawerBaseProps}
-            title={drawerType?.type === create ? 'キャラクターの新規作成' : 'キャラクターの編集'}
-            visible={drawerType != null}
+        <Modal
+            title={atomValue?.type === create ? 'キャラクターの新規作成' : 'キャラクターの編集'}
+            visible={atomValue != null}
             closable
-            onClose={() => setDrawerType(null)}
             footer={
                 <DrawerFooter
                     close={{
-                        textType: drawerType?.type === create ? 'cancel' : 'close',
-                        onClick: () => setDrawerType(null),
+                        textType: atomValue?.type === create ? 'cancel' : 'close',
+                        onClick: () => setAtomValue(null),
                     }}
                     ok={onOkClick == null ? undefined : { textType: 'create', onClick: onOkClick }}
                     destroy={
@@ -194,14 +197,14 @@ export const CharacterDrawer: React.FC = () => {
             }
         >
             <div>
-                {drawerType?.type === update && (
+                {atomValue?.type === update && (
                     <>
                         <Typography.Title level={4}>作成者</Typography.Title>
                         <Row gutter={gutter} align='middle'>
                             <Col flex='auto' />
                             <Col flex={0}>作成者</Col>
                             <Col span={inputSpan}>
-                                <span>{participants.get(drawerType.stateId)?.name}</span>
+                                <span>{participants.get(atomValue.stateId)?.name}</span>
                                 {createdByMe && (
                                     <span style={{ paddingLeft: 2, fontWeight: 'bold' }}>
                                         (自分)
@@ -212,7 +215,7 @@ export const CharacterDrawer: React.FC = () => {
                     </>
                 )}
 
-                {drawerType?.type !== update ? null : (
+                {atomValue?.type !== update ? null : (
                     <>
                         <Typography.Title level={4}>複製</Typography.Title>
 
@@ -250,7 +253,7 @@ export const CharacterDrawer: React.FC = () => {
                         <ToggleButton
                             size='small'
                             disabled={
-                                createdByMe || drawerType?.type === create
+                                createdByMe || atomValue?.type === create
                                     ? false
                                     : characterIsNotPrivateAndNotCreatedByMe
                             }
@@ -260,9 +263,9 @@ export const CharacterDrawer: React.FC = () => {
                             unCheckedChildren={<EyeInvisibleOutlined />}
                             tooltip={
                                 character.isPrivate
-                                    ? characterIsPrivate({ isCreate: drawerType?.type === create })
+                                    ? characterIsPrivate({ isCreate: atomValue?.type === create })
                                     : characterIsNotPrivate({
-                                          isCreate: drawerType?.type === create,
+                                          isCreate: atomValue?.type === create,
                                       })
                             }
                             onChange={newValue =>
@@ -488,7 +491,7 @@ export const CharacterDrawer: React.FC = () => {
                     </>
                 )}
 
-                {createdByMe && drawerType?.type === update && (
+                {createdByMe && atomValue?.type === update && (
                     <>
                         <Typography.Title level={4}>コマンド</Typography.Title>
 
@@ -499,7 +502,7 @@ export const CharacterDrawer: React.FC = () => {
                                 <Button
                                     onClick={() =>
                                         setCommandEditorModal({
-                                            characterId: drawerType.stateId,
+                                            characterId: atomValue.stateId,
                                         })
                                     }
                                 >
@@ -515,6 +518,6 @@ export const CharacterDrawer: React.FC = () => {
                 drawerType={filesManagerDrawerType}
                 onClose={() => setFilesManagerDrawerType(null)}
             />
-        </Drawer>
+        </Modal>
     );
 };

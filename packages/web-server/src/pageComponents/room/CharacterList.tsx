@@ -36,8 +36,8 @@ import { getUserUid, MyAuthContext } from '../../contexts/MyAuthContext';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { create } from '../../utils/constants';
 import { useUpdateAtom } from 'jotai/utils';
-import { characterEditorDrawerAtom } from '../../atoms/overlay/characterEditorDrawerAtom';
 import { characterParameterNamesDrawerVisibilityAtom } from '../../atoms/overlay/characterParameterNamesDrawerVisibilityAtom';
+import { characterEditorDrawerAtom } from './CharacterEditorModal';
 
 type DataSource = {
     key: string;

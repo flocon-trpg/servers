@@ -1,9 +1,9 @@
 import { atom } from 'jotai';
+import { characterEditorDrawerAtom } from '../../pageComponents/room/CharacterEditorModal';
 import { boardContextMenuAtom } from './board/boardContextMenuAtom';
 import { boardPopoverEditorAtom } from './board/boardPopoverEditorAtom';
 import { boardTooltipAtom } from './board/boardTooltipAtom';
 import { boardEditorDrawerAtom } from './boardDrawerAtom';
-import { characterEditorDrawerAtom } from './characterEditorDrawerAtom';
 import { characterParameterNamesDrawerVisibilityAtom } from './characterParameterNamesDrawerVisibilityAtom';
 import { commandEditorModalAtom } from './commandEditorModalAtom';
 import { dicePieceDrawerAtom } from './dicePieceDrawerAtom';

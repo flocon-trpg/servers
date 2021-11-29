@@ -46,7 +46,6 @@ import {
     boardContextMenuAtom,
     ContextMenuState,
 } from '../../atoms/overlay/board/boardContextMenuAtom';
-import { characterEditorDrawerAtom } from '../../atoms/overlay/characterEditorDrawerAtom';
 import { dicePieceDrawerAtom } from '../../atoms/overlay/dicePieceDrawerAtom';
 import { stringPieceDrawerAtom } from '../../atoms/overlay/stringPieceDrawerAtom';
 import { imagePieceDrawerAtom } from '../../atoms/overlay/imagePieceDrawerAtom';
@@ -62,6 +61,7 @@ import {
     characterPiece,
     characterPortrait,
 } from './BoardPositionAndPieceEditorModal';
+import { characterEditorDrawerAtom } from './CharacterEditorModal';
 
 /* absolute positionで表示するときにBoardの子として表示させると、Boardウィンドウから要素がはみ出ることができないため、ウィンドウ右端に近いところで要素を表示させるときに不便なことがある。そのため、ページ全体の子として持たせるようにしている。 */
 

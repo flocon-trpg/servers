@@ -4,7 +4,7 @@ import { DraggableCard, horizontalPadding } from '../../components/DraggableCard
 import { CharacterList } from './CharacterList';
 import { RoomMessages } from './RoomMessages';
 import { CharacterParameterNamesDrawer } from './CharacterParameterNamesDrawer';
-import { CharacterDrawer } from './CharacterDrawer';
+import { CharacterEditorModal } from './CharacterEditorModal';
 import { BoardDrawer } from './BoardDrawer';
 import { SoundPlayer } from './SoundPlayer';
 import { EditRoomDrawer } from './EditRoomDrawer';
@@ -703,7 +703,7 @@ export const Room: React.FC = () => {
                 <PopoverEditor />
 
                 <BoardDrawer />
-                <CharacterDrawer />
+                <CharacterEditorModal />
                 <BoardPositionAndPieceEditorModal />
                 <DicePieceValueDrawer />
                 <ImagePieceDrawer />
