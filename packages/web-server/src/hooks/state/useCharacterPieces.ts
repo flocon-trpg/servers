@@ -13,8 +13,8 @@ export const useCharacterPieces = (boardId: string) => {
         return _([...characters])
             .flatMap(([characterId, character]) => {
                 return recordToArray(character.pieces)
-                    .filter(({ key }) => {
-                        return key === boardId;
+                    .filter(({ value }) => {
+                        return value.boardId === boardId;
                     })
                     .map(({ value, key }) => {
                         return { characterId, character, pieceId: key, piece: value };
