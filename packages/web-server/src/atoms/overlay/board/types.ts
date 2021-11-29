@@ -7,7 +7,7 @@ export const background = 'background';
 export const character = 'character';
 export const portrait = 'portrait';
 export const dicePieceValue = 'dicePieceValue';
-export const numberPieceValue = 'numberPieceValue';
+export const stringPieceValue = 'stringPieceValue';
 export const imagePieceValue = 'imagePieceValue';
 
 export type ClickOn =
@@ -16,7 +16,7 @@ export type ClickOn =
           element: DicePieceValueElement;
       }
     | {
-          type: typeof numberPieceValue;
+          type: typeof stringPieceValue;
           element: StringPieceValueElement;
       }
     | {

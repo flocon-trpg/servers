@@ -652,11 +652,11 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         onPopoverEditorRef.current({
                             pageX: e.evt.pageX,
                             pageY: e.evt.pageY,
-                            dblClickOn: { type: 'numberPieceValue', element },
+                            dblClickOn: { type: 'stringPieceValue', element },
                         });
                     }}
                     onMouseEnter={() =>
-                        (mouseOverOnRef.current = { type: 'numberPieceValue', element })
+                        (mouseOverOnRef.current = { type: 'stringPieceValue', element })
                     }
                     onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
                     onDragEnd={e => {

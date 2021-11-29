@@ -38,6 +38,7 @@ import { useAtomValue, useUpdateAtom } from 'jotai/utils';
 import {
     character,
     dicePieceValue,
+    stringPieceValue,
     imagePieceValue,
     portrait,
 } from '../../atoms/overlay/board/types';
@@ -100,15 +101,23 @@ export const PieceTooltip: React.FC = () => {
     switch (boardTooltipState.mouseOverOn.type) {
         case character:
         case portrait:
-        case imagePieceValue: {
+        case imagePieceValue:
+        case dicePieceValue:
+        case stringPieceValue: {
             let name: string;
             let memo: string;
-            if (boardTooltipState.mouseOverOn.type === imagePieceValue) {
-                name = boardTooltipState.mouseOverOn.element.value.name ?? '';
-                memo = boardTooltipState.mouseOverOn.element.value.memo ?? '';
-            } else {
-                name = boardTooltipState.mouseOverOn.character.name ?? '';
-                memo = boardTooltipState.mouseOverOn.character.memo ?? '';
+            switch (boardTooltipState.mouseOverOn.type) {
+                case character:
+                case portrait: {
+                    name = boardTooltipState.mouseOverOn.character.name ?? '';
+                    memo = boardTooltipState.mouseOverOn.character.memo ?? '';
+                    break;
+                }
+                default: {
+                    name = boardTooltipState.mouseOverOn.element.value.name ?? '';
+                    memo = boardTooltipState.mouseOverOn.element.value.memo ?? '';
+                    break;
+                }
             }
             if (name === '' && memo === '') {
                 return null;

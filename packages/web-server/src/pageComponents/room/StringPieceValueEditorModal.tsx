@@ -18,6 +18,7 @@ import { atom, useAtom } from 'jotai';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { dicePieceValueEditorModalAtom } from './DicePieceValueEditorModal';
 import { PieceValueEditorType } from '../../utils/pieceValueEditorType';
+import { BufferedInput } from '../../components/BufferedInput';
 
 export const stringPieceEditorModalAtom = atom<PieceValueEditorType | null>(null);
 
@@ -170,6 +171,28 @@ export const StringPieceValueDrawer: React.FC = () => {
                             }
                             readOnly={drawerType?.type === update}
                             onSelect={setActiveCharacter}
+                        />
+                    </Col>
+                </Row>
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
+                    <Col flex={0}>名前</Col>
+                    <Col span={inputSpan}>
+                        <BufferedInput
+                            bufferDuration='default'
+                            size='small'
+                            value={uiState.name ?? ''}
+                            onChange={e => {
+                                if (e.previousValue === e.currentValue) {
+                                    return;
+                                }
+                                updateUiState(pieceValue => {
+                                    if (pieceValue == null) {
+                                        return;
+                                    }
+                                    pieceValue.name = e.currentValue;
+                                });
+                            }}
                         />
                     </Col>
                 </Row>
