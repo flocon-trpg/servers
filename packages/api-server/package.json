@@ -70,7 +70,7 @@
         "form-data": "4.0.0",
         "isomorphic-fetch": "3.0.0",
         "isomorphic-ws": "4.0.1",
-        "jest": "27.3.1",
+        "jest": "27.4.0",
         "rimraf": "3.0.2",
         "ts-jest": "27.0.7",
         "url-join": "4.0.1",
