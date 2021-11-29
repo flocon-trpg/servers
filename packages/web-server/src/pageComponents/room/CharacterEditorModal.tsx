@@ -24,11 +24,7 @@ import {
     useNumParamNames,
     useStrParamNames,
 } from '../../hooks/state/useParamNames';
-import {
-    CharacterState,
-    strIndex20Array,
-    simpleId,
-} from '@flocon-trpg/core';
+import { CharacterState, strIndex20Array, simpleId } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
 import { FilePath } from '../../utils/filePath';
@@ -39,6 +35,8 @@ import { useUpdateAtom } from 'jotai/utils';
 import { commandEditorModalAtom } from '../../atoms/overlay/commandEditorModalAtom';
 import { useIsMyCharacter } from '../../hooks/state/useIsMyCharacter';
 import { CharacterVarInput } from '../../components/CharacterVarInput';
+import classNames from 'classnames';
+import { flex, flexAuto, flexRow } from '../../utils/className';
 
 export type CharacterEditorModalType =
     | {
@@ -172,6 +170,7 @@ export const CharacterEditorModal: React.FC = () => {
 
     return (
         <Modal
+            width={1000}
             title={atomValue?.type === create ? 'キャラクターの新規作成' : 'キャラクターの編集'}
             visible={atomValue != null}
             closable
@@ -197,264 +196,267 @@ export const CharacterEditorModal: React.FC = () => {
                 />
             }
         >
-            <div>
-                {atomValue?.type === update && (
-                    <>
-                        <Typography.Title level={4}>作成者</Typography.Title>
-                        <Row gutter={gutter} align='middle'>
-                            <Col flex='auto' />
-                            <Col flex={0}>作成者</Col>
-                            <Col span={inputSpan}>
-                                <span>{participants.get(atomValue.stateId)?.name}</span>
-                                {createdByMe && (
-                                    <span style={{ paddingLeft: 2, fontWeight: 'bold' }}>
-                                        (自分)
-                                    </span>
-                                )}
-                            </Col>
-                        </Row>
-                    </>
-                )}
+            <div className={classNames(flex, flexRow)}>
+                <div style={{ minWidth: 500 }}>
+                    {atomValue?.type === update && (
+                        <>
+                            <Typography.Title level={4}>作成者</Typography.Title>
+                            <Row gutter={gutter} align='middle'>
+                                <Col flex='auto' />
+                                <Col flex={0}>作成者</Col>
+                                <Col span={inputSpan}>
+                                    <span>{participants.get(atomValue.stateId)?.name}</span>
+                                    {createdByMe && (
+                                        <span style={{ paddingLeft: 2, fontWeight: 'bold' }}>
+                                            (自分)
+                                        </span>
+                                    )}
+                                </Col>
+                            </Row>
+                        </>
+                    )}
 
-                {atomValue?.type !== update ? null : (
-                    <>
-                        <Typography.Title level={4}>複製</Typography.Title>
+                    {atomValue?.type !== update ? null : (
+                        <>
+                            <Typography.Title level={4}>複製</Typography.Title>
 
-                        <Row gutter={gutter} align='middle'>
-                            <Col flex='auto' />
-                            <Col flex={0}></Col>
-                            <Col span={inputSpan}>
-                                {/* TODO: 複製したことを何らかの形で通知したほうがいい */}
-                                <Tooltip title='コマを除き、このキャラクターを複製します。'>
-                                    <Button
-                                        size='small'
-                                        onClick={() => {
-                                            const id = simpleId();
-                                            setRoomState(roomState => {
-                                                roomState.characters[id] = {
-                                                    ...character,
-                                                    name: `${character.name} (複製)`,
-                                                };
+                            <Row gutter={gutter} align='middle'>
+                                <Col flex='auto' />
+                                <Col flex={0}></Col>
+                                <Col span={inputSpan}>
+                                    {/* TODO: 複製したことを何らかの形で通知したほうがいい */}
+                                    <Tooltip title='コマを除き、このキャラクターを複製します。'>
+                                        <Button
+                                            size='small'
+                                            onClick={() => {
+                                                const id = simpleId();
+                                                setRoomState(roomState => {
+                                                    roomState.characters[id] = {
+                                                        ...character,
+                                                        name: `${character.name} (複製)`,
+                                                    };
+                                                });
+                                            }}
+                                        >
+                                            このキャラクターを複製
+                                        </Button>
+                                    </Tooltip>
+                                </Col>
+                            </Row>
+                        </>
+                    )}
+
+                    <Typography.Title level={4}>全体公開</Typography.Title>
+                    <Row gutter={gutter} align='middle'>
+                        <Col flex='auto' />
+                        <Col flex={0}>全体公開</Col>
+                        <Col span={inputSpan}>
+                            <ToggleButton
+                                size='small'
+                                disabled={
+                                    createdByMe || atomValue?.type === create
+                                        ? false
+                                        : characterIsNotPrivateAndNotCreatedByMe
+                                }
+                                showAsTextWhenDisabled
+                                checked={!character.isPrivate}
+                                checkedChildren={<EyeOutlined />}
+                                unCheckedChildren={<EyeInvisibleOutlined />}
+                                tooltip={
+                                    character.isPrivate
+                                        ? characterIsPrivate({
+                                              isCreate: atomValue?.type === create,
+                                          })
+                                        : characterIsNotPrivate({
+                                              isCreate: atomValue?.type === create,
+                                          })
+                                }
+                                onChange={newValue =>
+                                    updateCharacter(character => {
+                                        if (character == null) {
+                                            return;
+                                        }
+                                        character.isPrivate = !newValue;
+                                    })
+                                }
+                            />
+                        </Col>
+                    </Row>
+
+                    <Typography.Title level={4}>パラメーター</Typography.Title>
+
+                    <Row gutter={gutter} align='middle'>
+                        <Col flex='auto' />
+                        <Col flex={0}>名前</Col>
+                        <Col span={inputSpan}>
+                            <BufferedInput
+                                bufferDuration='default'
+                                size='small'
+                                value={character.name}
+                                onChange={e => {
+                                    if (e.previousValue === e.currentValue) {
+                                        return;
+                                    }
+                                    updateCharacter(character => {
+                                        if (character == null) {
+                                            return;
+                                        }
+                                        character.name = e.currentValue;
+                                    });
+                                }}
+                            />
+                        </Col>
+                    </Row>
+
+                    <Row gutter={gutter} align='middle'>
+                        <Col flex='auto' />
+                        <Col flex={0}>アイコン画像</Col>
+                        <Col span={inputSpan}>
+                            <InputFile
+                                filePath={character.image ?? undefined}
+                                onPathChange={path =>
+                                    updateCharacter(character => {
+                                        if (character == null) {
+                                            return;
+                                        }
+                                        character.image =
+                                            path == null ? undefined : FilePath.toOt(path);
+                                    })
+                                }
+                                openFilesManager={setFilesManagerDrawerType}
+                                showImage
+                            />
+                        </Col>
+                    </Row>
+
+                    <Row gutter={gutter} align='middle'>
+                        <Col flex='auto' />
+                        <Col flex={0}>立ち絵画像</Col>
+                        <Col span={inputSpan}>
+                            <InputFile
+                                filePath={character.portraitImage ?? undefined}
+                                onPathChange={path =>
+                                    updateCharacter(character => {
+                                        if (character == null) {
+                                            return;
+                                        }
+                                        character.portraitImage =
+                                            path == null ? undefined : FilePath.toOt(path);
+                                    })
+                                }
+                                openFilesManager={setFilesManagerDrawerType}
+                                showImage
+                            />
+                        </Col>
+                    </Row>
+
+                    {strIndex20Array.map(key => {
+                        const paramName = numParamNames.get(key);
+                        if (paramName === undefined) {
+                            return null;
+                        }
+                        const value = character.numParams[key];
+                        const maxValue = character.numMaxParams[key];
+                        return (
+                            <Row key={`numParam${key}Row`} gutter={gutter} align='middle'>
+                                <Col flex='auto' />
+                                <Col flex={0}>{paramName.name}</Col>
+                                <Col span={inputSpan}>
+                                    <NumberParameterInput
+                                        isCharacterPrivate={character.isPrivate}
+                                        isCreate
+                                        compact={false}
+                                        parameterKey={key}
+                                        numberParameter={value}
+                                        numberMaxParameter={maxValue}
+                                        createdByMe={createdByMe}
+                                        onOperate={mapping => {
+                                            updateCharacter(character => {
+                                                if (character == null) {
+                                                    return;
+                                                }
+                                                return mapping(character);
                                             });
                                         }}
-                                    >
-                                        このキャラクターを複製
-                                    </Button>
-                                </Tooltip>
-                            </Col>
-                        </Row>
-                    </>
-                )}
+                                    />
+                                </Col>
+                            </Row>
+                        );
+                    })}
+                    {strIndex20Array.map(key => {
+                        const paramName = boolParamNames.get(key);
+                        if (paramName === undefined) {
+                            return null;
+                        }
+                        const value = character.boolParams[key];
+                        return (
+                            <Row key={`boolParam${key}Row`} gutter={gutter} align='middle'>
+                                <Col flex='auto' />
+                                <Col flex={0}>{paramName.name}</Col>
+                                <Col span={inputSpan}>
+                                    <BooleanParameterInput
+                                        isCharacterPrivate={character.isPrivate}
+                                        isCreate
+                                        compact={false}
+                                        parameterKey={key}
+                                        parameter={value}
+                                        createdByMe={createdByMe}
+                                        onOperate={mapping => {
+                                            updateCharacter(character => {
+                                                if (character == null) {
+                                                    return;
+                                                }
+                                                return mapping(character);
+                                            });
+                                        }}
+                                    />
+                                </Col>
+                            </Row>
+                        );
+                    })}
+                    {strIndex20Array.map(key => {
+                        const paramName = strParamNames.get(key);
+                        if (paramName === undefined) {
+                            return null;
+                        }
+                        const value = character.strParams[key];
+                        return (
+                            <Row key={`strParam${key}Row`} gutter={gutter} align='middle'>
+                                <Col flex='auto' />
+                                <Col flex={0}>{paramName.name}</Col>
+                                <Col span={inputSpan}>
+                                    <StringParameterInput
+                                        compact={false}
+                                        isCharacterPrivate={character.isPrivate}
+                                        isCreate
+                                        parameterKey={key}
+                                        parameter={value}
+                                        createdByMe={createdByMe}
+                                        onOperate={mapping => {
+                                            updateCharacter(character => {
+                                                if (character == null) {
+                                                    return;
+                                                }
+                                                return mapping(character);
+                                            });
+                                        }}
+                                    />
+                                </Col>
+                            </Row>
+                        );
+                    })}
+                </div>
 
-                <Typography.Title level={4}>全体公開</Typography.Title>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
-                    <Col flex={0}>全体公開</Col>
-                    <Col span={inputSpan}>
-                        <ToggleButton
-                            size='small'
-                            disabled={
-                                createdByMe || atomValue?.type === create
-                                    ? false
-                                    : characterIsNotPrivateAndNotCreatedByMe
-                            }
-                            showAsTextWhenDisabled
-                            checked={!character.isPrivate}
-                            checkedChildren={<EyeOutlined />}
-                            unCheckedChildren={<EyeInvisibleOutlined />}
-                            tooltip={
-                                character.isPrivate
-                                    ? characterIsPrivate({ isCreate: atomValue?.type === create })
-                                    : characterIsNotPrivate({
-                                          isCreate: atomValue?.type === create,
-                                      })
-                            }
-                            onChange={newValue =>
-                                updateCharacter(character => {
-                                    if (character == null) {
-                                        return;
-                                    }
-                                    character.isPrivate = !newValue;
-                                })
-                            }
-                        />
-                    </Col>
-                </Row>
+                <div className={flexAuto} style={{ paddingLeft: 60 }}>
+                    <div>
+                        <Typography.Title level={4}>メモ</Typography.Title>
 
-                <Typography.Title level={4}>パラメーター</Typography.Title>
-
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
-                    <Col flex={0}>名前</Col>
-                    <Col span={inputSpan}>
-                        <BufferedInput
-                            bufferDuration='default'
-                            size='small'
-                            value={character.name}
-                            onChange={e => {
-                                if (e.previousValue === e.currentValue) {
-                                    return;
-                                }
-                                updateCharacter(character => {
-                                    if (character == null) {
-                                        return;
-                                    }
-                                    character.name = e.currentValue;
-                                });
-                            }}
-                        />
-                    </Col>
-                </Row>
-
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
-                    <Col flex={0}>アイコン画像</Col>
-                    <Col span={inputSpan}>
-                        <InputFile
-                            filePath={character.image ?? undefined}
-                            onPathChange={path =>
-                                updateCharacter(character => {
-                                    if (character == null) {
-                                        return;
-                                    }
-                                    character.image =
-                                        path == null ? undefined : FilePath.toOt(path);
-                                })
-                            }
-                            openFilesManager={setFilesManagerDrawerType}
-                            showImage
-                        />
-                    </Col>
-                </Row>
-
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
-                    <Col flex={0}>立ち絵画像</Col>
-                    <Col span={inputSpan}>
-                        <InputFile
-                            filePath={character.portraitImage ?? undefined}
-                            onPathChange={path =>
-                                updateCharacter(character => {
-                                    if (character == null) {
-                                        return;
-                                    }
-                                    character.portraitImage =
-                                        path == null ? undefined : FilePath.toOt(path);
-                                })
-                            }
-                            openFilesManager={setFilesManagerDrawerType}
-                            showImage
-                        />
-                    </Col>
-                </Row>
-
-                {strIndex20Array.map(key => {
-                    const paramName = numParamNames.get(key);
-                    if (paramName === undefined) {
-                        return null;
-                    }
-                    const value = character.numParams[key];
-                    const maxValue = character.numMaxParams[key];
-                    return (
-                        <Row key={`numParam${key}Row`} gutter={gutter} align='middle'>
-                            <Col flex='auto' />
-                            <Col flex={0}>{paramName.name}</Col>
-                            <Col span={inputSpan}>
-                                <NumberParameterInput
-                                    isCharacterPrivate={character.isPrivate}
-                                    isCreate
-                                    compact={false}
-                                    parameterKey={key}
-                                    numberParameter={value}
-                                    numberMaxParameter={maxValue}
-                                    createdByMe={createdByMe}
-                                    onOperate={mapping => {
-                                        updateCharacter(character => {
-                                            if (character == null) {
-                                                return;
-                                            }
-                                            return mapping(character);
-                                        });
-                                    }}
-                                />
-                            </Col>
-                        </Row>
-                    );
-                })}
-                {strIndex20Array.map(key => {
-                    const paramName = boolParamNames.get(key);
-                    if (paramName === undefined) {
-                        return null;
-                    }
-                    const value = character.boolParams[key];
-                    return (
-                        <Row key={`boolParam${key}Row`} gutter={gutter} align='middle'>
-                            <Col flex='auto' />
-                            <Col flex={0}>{paramName.name}</Col>
-                            <Col span={inputSpan}>
-                                <BooleanParameterInput
-                                    isCharacterPrivate={character.isPrivate}
-                                    isCreate
-                                    compact={false}
-                                    parameterKey={key}
-                                    parameter={value}
-                                    createdByMe={createdByMe}
-                                    onOperate={mapping => {
-                                        updateCharacter(character => {
-                                            if (character == null) {
-                                                return;
-                                            }
-                                            return mapping(character);
-                                        });
-                                    }}
-                                />
-                            </Col>
-                        </Row>
-                    );
-                })}
-                {strIndex20Array.map(key => {
-                    const paramName = strParamNames.get(key);
-                    if (paramName === undefined) {
-                        return null;
-                    }
-                    const value = character.strParams[key];
-                    return (
-                        <Row key={`strParam${key}Row`} gutter={gutter} align='middle'>
-                            <Col flex='auto' />
-                            <Col flex={0}>{paramName.name}</Col>
-                            <Col span={inputSpan}>
-                                <StringParameterInput
-                                    compact={false}
-                                    isCharacterPrivate={character.isPrivate}
-                                    isCreate
-                                    parameterKey={key}
-                                    parameter={value}
-                                    createdByMe={createdByMe}
-                                    onOperate={mapping => {
-                                        updateCharacter(character => {
-                                            if (character == null) {
-                                                return;
-                                            }
-                                            return mapping(character);
-                                        });
-                                    }}
-                                />
-                            </Col>
-                        </Row>
-                    );
-                })}
-
-                <Typography.Title level={4}>メモ</Typography.Title>
-
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
-                    <Col flex={0}></Col>
-                    <Col span={inputSpan}>
                         <BufferedTextArea
                             size='small'
                             bufferDuration='default'
                             value={character.memo}
-                            rows={8}
+                            rows={10}
+                            disableResize
                             onChange={e =>
                                 updateCharacter(character => {
                                     if (character == null) {
@@ -464,21 +466,16 @@ export const CharacterEditorModal: React.FC = () => {
                                 })
                             }
                         />
-                    </Col>
-                </Row>
 
-                {createdByMe && (
-                    <>
-                        <Typography.Title level={4}>変数</Typography.Title>
+                        {createdByMe && (
+                            <>
+                                <Typography.Title level={4}>変数</Typography.Title>
 
-                        <Row gutter={gutter} align='middle'>
-                            <Col flex='auto' />
-                            <Col flex={0}></Col>
-                            <Col span={inputSpan}>
                                 <CharacterVarInput
                                     character={character}
-                                    rows={8}
-                                    onChange={newValue => 
+                                    rows={10}
+                                    disableResize
+                                    onChange={newValue =>
                                         updateCharacter(character => {
                                             if (character == null) {
                                                 return;
@@ -487,19 +484,13 @@ export const CharacterEditorModal: React.FC = () => {
                                         })
                                     }
                                 />
-                            </Col>
-                        </Row>
-                    </>
-                )}
+                            </>
+                        )}
 
-                {createdByMe && atomValue?.type === update && (
-                    <>
-                        <Typography.Title level={4}>コマンド</Typography.Title>
+                        {createdByMe && atomValue?.type === update && (
+                            <>
+                                <Typography.Title level={4}>コマンド</Typography.Title>
 
-                        <Row gutter={gutter} align='middle'>
-                            <Col flex='auto' />
-                            <Col flex={0}></Col>
-                            <Col span={inputSpan}>
                                 <Button
                                     onClick={() =>
                                         setCommandEditorModal({
@@ -509,10 +500,10 @@ export const CharacterEditorModal: React.FC = () => {
                                 >
                                     編集
                                 </Button>
-                            </Col>
-                        </Row>
-                    </>
-                )}
+                            </>
+                        )}
+                    </div>
+                </div>
             </div>
 
             <FilesManagerDrawer
