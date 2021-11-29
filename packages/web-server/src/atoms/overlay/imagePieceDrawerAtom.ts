@@ -1,5 +1,4 @@
 import { PieceState } from '@flocon-trpg/core';
-import { CompositeKey } from '@flocon-trpg/utils';
 import { atom } from 'jotai';
 import { create, update } from '../../utils/constants';
 

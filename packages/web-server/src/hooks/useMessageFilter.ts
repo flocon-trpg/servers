@@ -1,5 +1,4 @@
 import { $free, $system } from '@flocon-trpg/core';
-import _ from 'lodash';
 import React from 'react';
 import { MessageFilter } from '../atoms/roomConfig/types/messageFilter';
 import { PrivateChannelSets } from '../utils/PrivateChannelSet';

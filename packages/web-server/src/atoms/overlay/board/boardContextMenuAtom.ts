@@ -7,7 +7,6 @@ import {
     ImagePieceValueState,
 } from '@flocon-trpg/core';
 import { atom } from 'jotai';
-import { ImagePieceValueElement } from '../../../hooks/state/useImagePieceValues';
 import { BoardConfig } from '../../roomConfig/types/boardConfig';
 
 export type ContextMenuState = {
