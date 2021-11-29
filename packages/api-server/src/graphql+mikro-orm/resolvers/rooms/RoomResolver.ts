@@ -172,7 +172,7 @@ import { RateLimitMiddleware } from '../../middlewares/RateLimitMiddleware';
 import { convertToMaxLength100String } from '../../../utils/convertToMaxLength100String';
 import { GetRoomAsListItemResult } from '../../results/GetRoomAsListItemResult';
 import { ResetRoomMessagesFailureType } from '../../../enums/ResetRoomMessagesFailureType';
-import { compare, hash } from 'bcrypt';
+import { hash } from 'bcrypt';
 
 const bcryptSaltRounds = 10;
 
