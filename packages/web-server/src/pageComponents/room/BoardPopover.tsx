@@ -319,8 +319,8 @@ namespace ContextMenuModule {
         return (
             <Menu.ItemGroup title='コマ'>
                 {characterPiecesOnCursor.map(({ characterId: characterId, character, pieceId }) => (
-                    // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が他にもあるため、キーを互いに異なるものにするように文字列を付加している。
-                    <Menu.SubMenu key={characterId + '@selected-piece'} title={character.name}>
+                    // characterIdとpieceIdを組み合わせてkeyにしている場所が他にもあるため、キーを互いに異なるものにするように文字列を付加している。
+                    <Menu.SubMenu key={keyNames(characterId, pieceId, 'selected-piece')} title={character.name}>
                         <Menu.Item
                             onClick={() => {
                                 hooks.setCharacterDrawer({
