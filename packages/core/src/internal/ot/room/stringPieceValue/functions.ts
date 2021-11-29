@@ -79,6 +79,10 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
         result.value = newValue.value;
     }
 
+    if (operation.valueInputType != null) {
+        result.valueInputType = operation.valueInputType.newValue;
+    }
+
     if (operation.memo != null) {
         const valueResult = NullableTextOperation.apply(state.memo, operation.memo);
         if (valueResult.isError) {
@@ -127,6 +131,10 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
             return newValue;
         }
         result.value = newValue.value;
+    }
+
+    if (operation.valueInputType != null) {
+        result.valueInputType = operation.valueInputType.oldValue;
     }
 
     if (operation.memo != null) {
@@ -207,6 +215,10 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
             second.isValuePrivate ?? undefined
         ),
         value: value.value,
+        valueInputType: ReplaceOperation.composeDownOperation(
+            first.valueInputType ?? undefined,
+            second.valueInputType ?? undefined
+        ),
         memo: memo.value,
         name: name.value,
         pieces: pieces.value,
@@ -269,6 +281,13 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         prevState.value = restored.value.prevState;
         twoWayOperation.value = restored.value.twoWayOperation;
     }
+    if (downOperation.valueInputType != null) {
+        prevState.valueInputType = downOperation.valueInputType.oldValue;
+        twoWayOperation.valueInputType = {
+            ...downOperation.valueInputType,
+            newValue: nextState.valueInputType,
+        };
+    }
     if (downOperation.memo !== undefined) {
         const restored = NullableTextOperation.restore({
             nextState: nextState.memo,
@@ -325,6 +344,12 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
             prev: prevState.value,
             next: nextState.value,
         });
+    }
+    if (prevState.valueInputType !== nextState.valueInputType) {
+        result.valueInputType = {
+            oldValue: prevState.valueInputType,
+            newValue: nextState.valueInputType,
+        };
     }
     if (prevState.memo !== nextState.memo) {
         result.memo = NullableTextOperation.diff({
@@ -428,6 +453,12 @@ export const serverTransform =
         }
         twoWayOperation.value = valueResult.value;
 
+        twoWayOperation.valueInputType = ReplaceOperation.serverTransform({
+            first: serverOperation?.valueInputType ?? undefined,
+            second: clientOperation.valueInputType ?? undefined,
+            prevState: prevState.valueInputType,
+        });
+
         const transformedMemo = NullableTextOperation.serverTransform({
             first: serverOperation?.memo,
             second: clientOperation.memo,
@@ -488,6 +519,11 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         return value;
     }
 
+    const valueInputType = ReplaceOperation.clientTransform({
+        first: first.valueInputType,
+        second: second.valueInputType,
+    });
+
     const memo = NullableTextOperation.clientTransform({
         first: first.memo,
         second: second.memo,
@@ -511,6 +547,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         ownerCharacterId: ownerCharacterId.firstPrime,
         isValuePrivate: isValuePrivate.firstPrime,
         value: value.value.firstPrime,
+        valueInputType: valueInputType.firstPrime,
         memo: memo.value.firstPrime,
         name: name.value.firstPrime,
     };
@@ -522,6 +559,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         ownerCharacterId: ownerCharacterId.secondPrime,
         isValuePrivate: isValuePrivate.secondPrime,
         value: value.value.secondPrime,
+        valueInputType: valueInputType.secondPrime,
         memo: memo.value.secondPrime,
         name: name.value.secondPrime,
     };
