@@ -22,6 +22,7 @@ import { atom } from 'jotai';
 import { roomAtom } from '../../atoms/room/roomAtom';
 import { useAtomValue } from 'jotai/utils';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
+import { EditorGroupHeader } from '../../components/EditorGroupHeader';
 
 const defaultVolume = 0.5;
 
@@ -205,7 +206,7 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({
                     すぐ再生を開始する
                 </Checkbox>
                 <Divider />
-                <Typography.Title level={4}>BGMプレイリスト</Typography.Title>
+                <EditorGroupHeader>BGMプレイリスト</EditorGroupHeader>
                 {tags.length === 0 ? 'BGMに指定するファイルが1つも選択されていません。' : tags}
                 <Button
                     icon={<Icon.PlusOutlined />}
@@ -296,7 +297,7 @@ const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({
                     onVolumeBarValueChange={i => setVolumeInput(i)}
                 />
                 <Divider />
-                <Typography.Title level={4}>ファイル</Typography.Title>
+                <EditorGroupHeader>ファイル</EditorGroupHeader>
                 {fileInput && (
                     <FilePathView
                         closable

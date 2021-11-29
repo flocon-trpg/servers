@@ -22,6 +22,7 @@ import { create, update } from '../../utils/constants';
 import { useAtom } from 'jotai';
 import { useCloneImagePiece } from '../../hooks/state/useCloneImagePiece';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
+import { EditorGroupHeader } from '../../components/EditorGroupHeader';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -148,7 +149,7 @@ export const ImagePieceDrawer: React.FC = () => {
 
                 {drawerType?.type !== update ? null : (
                     <>
-                        <Typography.Title level={4}>複製</Typography.Title>
+                        <EditorGroupHeader>複製</EditorGroupHeader>
 
                         <Row gutter={gutter} align='middle'>
                             <Col flex='auto' />
@@ -216,7 +217,7 @@ export const ImagePieceDrawer: React.FC = () => {
                     </Col>
                 </Row>
 
-                <Typography.Title level={4}>メモ</Typography.Title>
+                <EditorGroupHeader>メモ</EditorGroupHeader>
                 <Row gutter={gutter} align='middle'>
                     <Col flex='auto' />
                     <Col flex={0}></Col>

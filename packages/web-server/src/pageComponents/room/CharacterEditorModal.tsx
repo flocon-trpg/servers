@@ -1,4 +1,4 @@
-import { Button, Col, Modal, Row, Tooltip, Typography } from 'antd';
+import { Button, Col, Modal, Row, Tooltip } from 'antd';
 import React from 'react';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { InputFile } from '../../components/InputFile';
@@ -37,6 +37,7 @@ import { useIsMyCharacter } from '../../hooks/state/useIsMyCharacter';
 import { CharacterVarInput } from '../../components/CharacterVarInput';
 import classNames from 'classnames';
 import { flex, flexAuto, flexRow } from '../../utils/className';
+import { EditorGroupHeader } from '../../components/EditorGroupHeader';
 
 export type CharacterEditorModalType =
     | {
@@ -200,7 +201,7 @@ export const CharacterEditorModal: React.FC = () => {
                 <div style={{ minWidth: 500 }}>
                     {atomValue?.type === update && (
                         <>
-                            <Typography.Title level={4}>作成者</Typography.Title>
+                            <EditorGroupHeader>作成者</EditorGroupHeader>
                             <Row gutter={gutter} align='middle'>
                                 <Col flex='auto' />
                                 <Col flex={0}>作成者</Col>
@@ -218,7 +219,7 @@ export const CharacterEditorModal: React.FC = () => {
 
                     {atomValue?.type !== update ? null : (
                         <>
-                            <Typography.Title level={4}>複製</Typography.Title>
+                            <EditorGroupHeader>複製</EditorGroupHeader>
 
                             <Row gutter={gutter} align='middle'>
                                 <Col flex='auto' />
@@ -246,7 +247,7 @@ export const CharacterEditorModal: React.FC = () => {
                         </>
                     )}
 
-                    <Typography.Title level={4}>全体公開</Typography.Title>
+                    <EditorGroupHeader>全体公開</EditorGroupHeader>
                     <Row gutter={gutter} align='middle'>
                         <Col flex='auto' />
                         <Col flex={0}>全体公開</Col>
@@ -283,7 +284,7 @@ export const CharacterEditorModal: React.FC = () => {
                         </Col>
                     </Row>
 
-                    <Typography.Title level={4}>パラメーター</Typography.Title>
+                    <EditorGroupHeader>共通パラメーター</EditorGroupHeader>
 
                     <Row gutter={gutter} align='middle'>
                         <Col flex='auto' />
@@ -350,6 +351,8 @@ export const CharacterEditorModal: React.FC = () => {
                         </Col>
                     </Row>
 
+                    <EditorGroupHeader>数値パラメーター</EditorGroupHeader>
+
                     {strIndex20Array.map(key => {
                         const paramName = numParamNames.get(key);
                         if (paramName === undefined) {
@@ -383,6 +386,11 @@ export const CharacterEditorModal: React.FC = () => {
                             </Row>
                         );
                     })}
+
+                    {numParamNames.size === 0 && <div>数値パラメーターはありません。</div>}
+
+                    <EditorGroupHeader>チェックマークパラメーター</EditorGroupHeader>
+
                     {strIndex20Array.map(key => {
                         const paramName = boolParamNames.get(key);
                         if (paramName === undefined) {
@@ -414,6 +422,11 @@ export const CharacterEditorModal: React.FC = () => {
                             </Row>
                         );
                     })}
+
+                    {boolParamNames.size === 0 && <div>チェックマークパラメーターはありません。</div>}
+
+                    <EditorGroupHeader>文字列パラメーター</EditorGroupHeader>
+
                     {strIndex20Array.map(key => {
                         const paramName = strParamNames.get(key);
                         if (paramName === undefined) {
@@ -445,11 +458,13 @@ export const CharacterEditorModal: React.FC = () => {
                             </Row>
                         );
                     })}
+
+                    {strParamNames.size === 0 && <div>文字列パラメーターはありません。</div>}
                 </div>
 
                 <div className={flexAuto} style={{ paddingLeft: 60 }}>
                     <div>
-                        <Typography.Title level={4}>メモ</Typography.Title>
+                        <EditorGroupHeader>メモ</EditorGroupHeader>
 
                         <BufferedTextArea
                             size='small'
@@ -469,7 +484,7 @@ export const CharacterEditorModal: React.FC = () => {
 
                         {createdByMe && (
                             <>
-                                <Typography.Title level={4}>変数</Typography.Title>
+                                <EditorGroupHeader>変数</EditorGroupHeader>
 
                                 <CharacterVarInput
                                     character={character}
@@ -489,7 +504,7 @@ export const CharacterEditorModal: React.FC = () => {
 
                         {createdByMe && atomValue?.type === update && (
                             <>
-                                <Typography.Title level={4}>コマンド</Typography.Title>
+                                <EditorGroupHeader>コマンド</EditorGroupHeader>
 
                                 <Button
                                     onClick={() =>
