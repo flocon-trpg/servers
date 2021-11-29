@@ -385,6 +385,7 @@ export namespace Resources {
                 $r: 1,
                 isValuePrivate: false,
                 value: 'STR_PIECE_VALUE',
+                valueInputType: undefined,
                 name: undefined,
                 memo: undefined,
                 ownerCharacterId: Participant.Player2.userUid,
