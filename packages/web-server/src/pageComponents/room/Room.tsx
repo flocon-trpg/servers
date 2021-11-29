@@ -17,7 +17,7 @@ import { RoomMenu } from './RoomMenu';
 import { recordToArray } from '@flocon-trpg/utils';
 import { PieceValueList } from './PieceValueList';
 import { StringPieceValueDrawer } from './StringPieceValueDrawer';
-import { DicePieceValueDrawer } from './DicePieceValueDrawer';
+import { DicePieceValueEditorModal } from './DicePieceValueEditorModal';
 import { Memos } from './Memos';
 import { BoardContextMenu, PieceTooltip, PopoverEditor } from './BoardPopover';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
@@ -705,7 +705,7 @@ export const Room: React.FC = () => {
                 <BoardDrawer />
                 <CharacterEditorModal />
                 <BoardPositionAndPieceEditorModal />
-                <DicePieceValueDrawer />
+                <DicePieceValueEditorModal />
                 <ImagePieceDrawer />
                 <StringPieceValueDrawer />
                 <CharacterParameterNamesDrawer />

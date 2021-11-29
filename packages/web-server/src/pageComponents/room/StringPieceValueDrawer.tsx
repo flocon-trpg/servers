@@ -14,11 +14,11 @@ import { MyCharactersSelect } from '../../components/MyCharactersSelect';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { keyNames } from '@flocon-trpg/utils';
 import { useAtomValue } from 'jotai/utils';
-import { dicePieceDrawerAtom } from '../../atoms/overlay/dicePieceDrawerAtom';
 import { create, update } from '../../utils/constants';
 import { stringPieceDrawerAtom } from '../../atoms/overlay/stringPieceDrawerAtom';
 import { useAtom } from 'jotai';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
+import { dicePieceValueEditorModalAtom } from './DicePieceValueEditorModal';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -42,7 +42,7 @@ const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
 const IdView: React.FC = () => {
-    const drawerType = useAtomValue(dicePieceDrawerAtom);
+    const drawerType = useAtomValue(dicePieceValueEditorModalAtom);
     const myUserUid = useMyUserUid();
 
     if (drawerType == null || myUserUid == null) {

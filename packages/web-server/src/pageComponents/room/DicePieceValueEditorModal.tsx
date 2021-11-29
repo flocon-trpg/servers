@@ -1,8 +1,7 @@
-import { Col, Drawer, Row } from 'antd';
+import { Col, Modal, Row } from 'antd';
 import React from 'react';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { replace } from '../../stateManagers/states/types';
-import { DrawerProps } from 'antd/lib/drawer';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
 import {
@@ -17,14 +16,12 @@ import { InputDie } from '../../components/InputDie';
 import { noValue } from '../../utils/dice';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useAtomValue } from 'jotai/utils';
-import { dicePieceDrawerAtom } from '../../atoms/overlay/dicePieceDrawerAtom';
 import { create, update } from '../../utils/constants';
-import { useAtom } from 'jotai';
+import { atom, useAtom } from 'jotai';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
+import { PieceValueEditorType } from '../../utils/pieceValueEditorType';
 
-const drawerBaseProps: Partial<DrawerProps> = {
-    width: 600,
-};
+export const dicePieceValueEditorModalAtom = atom<PieceValueEditorType | null>(null);
 
 const defaultDicePieceValue: DicePieceValueState = {
     $v: 2,
@@ -43,7 +40,7 @@ const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
 const IdView: React.FC = () => {
-    const drawerType = useAtomValue(dicePieceDrawerAtom);
+    const drawerType = useAtomValue(dicePieceValueEditorModalAtom);
     const myUserUid = useMyUserUid();
 
     if (drawerType == null || myUserUid == null) {
@@ -59,8 +56,8 @@ const IdView: React.FC = () => {
     );
 };
 
-export const DicePieceValueDrawer: React.FC = () => {
-    const [drawerType, setDrawerType] = useAtom(dicePieceDrawerAtom);
+export const DicePieceValueEditorModal: React.FC = () => {
+    const [atomValue, setAtomValue] = useAtom(dicePieceValueEditorModalAtom);
     const setRoomState = useSetRoomStateWithImmer();
     const myUserUid = useMyUserUid();
     const dicePieceValues = useDicePieceValues();
@@ -69,7 +66,7 @@ export const DicePieceValueDrawer: React.FC = () => {
         state: CharacterState;
     }>();
     let stateEditorParams: StateEditorParams<DicePieceValueState | undefined>;
-    switch (drawerType?.type) {
+    switch (atomValue?.type) {
         case create:
         case undefined:
             stateEditorParams = {
@@ -80,12 +77,12 @@ export const DicePieceValueDrawer: React.FC = () => {
         case update:
             stateEditorParams = {
                 type: update,
-                state: dicePieceValues?.find(value => value.id === drawerType.stateId)?.value,
+                state: dicePieceValues?.find(value => value.id === atomValue.stateId)?.value,
                 onUpdate: newState => {
-                    if (myUserUid == null || drawerType?.type !== update) {
+                    if (myUserUid == null || atomValue?.type !== update) {
                         return;
                     }
-                    const stateId = drawerType.stateId;
+                    const stateId = atomValue.stateId;
                     setRoomState(roomState => {
                         roomState.dicePieceValues[stateId] = newState;
                     });
@@ -101,13 +98,13 @@ export const DicePieceValueDrawer: React.FC = () => {
 
     let onCreate: (() => void) | undefined = undefined;
     // drawerType != nullを付けていることで、updateから閉じる際に一瞬onCreateボタンが出るのを防いでいる。ただし、これで適切なのかどうかは吟味していない
-    if (drawerType != null && drawerType.type === create) {
+    if (atomValue != null && atomValue.type === create) {
         onCreate = () => {
             if (activeCharacter == null) {
                 return;
             }
 
-            const piece = drawerType.piece;
+            const piece = atomValue.piece;
             const id = simpleId();
             setRoomState(roomState => {
                 roomState.dicePieceValues[id] = {
@@ -117,28 +114,27 @@ export const DicePieceValueDrawer: React.FC = () => {
                         piece == null
                             ? {}
                             : {
-                                  [drawerType.piece.boardId]: piece,
+                                  [atomValue.piece.boardId]: piece,
                               },
                 };
             });
-            setDrawerType(null);
+            setAtomValue(null);
             setActiveCharacter(undefined);
             resetUiState(defaultDicePieceValue);
         };
     }
 
     return (
-        <Drawer
-            {...drawerBaseProps}
-            title={drawerType?.type === update ? 'ダイスコマの編集' : 'ダイスコマの新規作成'}
-            visible={drawerType != null}
+        <Modal
+            title={atomValue?.type === update ? 'ダイスコマの編集' : 'ダイスコマの新規作成'}
+            visible={atomValue != null}
             closable
-            onClose={() => setDrawerType(null)}
+            onCancel={() => setAtomValue(null)}
             footer={
                 <DrawerFooter
                     close={{
-                        textType: drawerType?.type === update ? 'close' : 'cancel',
-                        onClick: () => setDrawerType(null),
+                        textType: atomValue?.type === update ? 'close' : 'cancel',
+                        onClick: () => setAtomValue(null),
                     }}
                     ok={onCreate == null ? undefined : { textType: 'create', onClick: onCreate }}
                 />
@@ -152,11 +148,11 @@ export const DicePieceValueDrawer: React.FC = () => {
                     <Col span={inputSpan}>
                         <MyCharactersSelect
                             selectedCharacterId={
-                                drawerType?.type === update
+                                atomValue?.type === update
                                     ? uiState.ownerCharacterId
                                     : activeCharacter?.id
                             }
-                            readOnly={drawerType?.type === update}
+                            readOnly={atomValue?.type === update}
                             onSelect={setActiveCharacter}
                         />
                     </Col>
@@ -214,6 +210,6 @@ export const DicePieceValueDrawer: React.FC = () => {
                     );
                 })}
             </div>
-        </Drawer>
+        </Modal>
     );
 };

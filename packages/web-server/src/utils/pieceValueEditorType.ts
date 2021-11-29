@@ -1,7 +1,7 @@
 import { PieceState } from '@flocon-trpg/core';
-import { create, update } from '../../utils/constants';
+import { create, update } from './constants';
 
-export type PieceValueDrawerType =
+export type PieceValueEditorType =
     | {
           // pieceとともに作成するケース
           type: typeof create;

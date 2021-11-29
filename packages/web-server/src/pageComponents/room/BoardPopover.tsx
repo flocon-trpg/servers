@@ -46,7 +46,6 @@ import {
     boardContextMenuAtom,
     ContextMenuState,
 } from '../../atoms/overlay/board/boardContextMenuAtom';
-import { dicePieceDrawerAtom } from '../../atoms/overlay/dicePieceDrawerAtom';
 import { stringPieceDrawerAtom } from '../../atoms/overlay/stringPieceDrawerAtom';
 import { imagePieceDrawerAtom } from '../../atoms/overlay/imagePieceDrawerAtom';
 import { create } from '../../utils/constants';
@@ -62,6 +61,7 @@ import {
     characterPortrait,
 } from './BoardPositionAndPieceEditorModal';
 import { characterEditorDrawerAtom } from './CharacterEditorModal';
+import { dicePieceValueEditorModalAtom } from './DicePieceValueEditorModal';
 
 /* absolute positionで表示するときにBoardの子として表示させると、Boardウィンドウから要素がはみ出ることができないため、ウィンドウ右端に近いところで要素を表示させるときに不便なことがある。そのため、ページ全体の子として持たせるようにしている。 */
 
@@ -280,7 +280,7 @@ const toBoardPosition = ({
 // 1つ1つ個別に渡すコードを書くのが面倒なのでこのように1つにまとめて全て渡している
 const useHooks = () => {
     const setCharacterDrawer = useUpdateAtom(characterEditorDrawerAtom);
-    const setDicePieceDrawer = useUpdateAtom(dicePieceDrawerAtom);
+    const setDicePieceEditor = useUpdateAtom(dicePieceValueEditorModalAtom);
     const setStringPieceDrawer = useUpdateAtom(stringPieceDrawerAtom);
     const setImagePieceDrawer = useUpdateAtom(imagePieceDrawerAtom);
     const setBoardPositionAndPieceEditorModal = useUpdateAtom(boardPositionAndPieceEditorModalAtom);
@@ -288,7 +288,7 @@ const useHooks = () => {
     return React.useMemo(
         () => ({
             setCharacterDrawer,
-            setDicePieceDrawer,
+            setDicePieceEditor,
             setStringPieceDrawer,
             setImagePieceDrawer,
             setBoardPositionAndPieceEditorModal,
@@ -296,7 +296,7 @@ const useHooks = () => {
         }),
         [
             setCharacterDrawer,
-            setDicePieceDrawer,
+            setDicePieceEditor,
             setStringPieceDrawer,
             setImagePieceDrawer,
             setBoardPositionAndPieceEditorModal,
@@ -568,7 +568,7 @@ namespace ContextMenuModule {
                         {isMyCharacter(dicePieceValue.ownerCharacterId) ? (
                             <Menu.Item
                                 onClick={() => {
-                                    hooks.setDicePieceDrawer({
+                                    hooks.setDicePieceEditor({
                                         type: update,
                                         boardId: boardIdToShow,
                                         stateId: dicePieceValueId,
@@ -883,7 +883,7 @@ namespace ContextMenuModule {
                 <Menu.SubMenu title='ダイスコマ'>
                     <Menu.Item
                         onClick={() => {
-                            hooks.setDicePieceDrawer({
+                            hooks.setDicePieceEditor({
                                 type: create,
                                 piece: piecePositionWhichIsCellMode,
                             });
@@ -894,7 +894,7 @@ namespace ContextMenuModule {
                     </Menu.Item>
                     <Menu.Item
                         onClick={() => {
-                            hooks.setDicePieceDrawer({
+                            hooks.setDicePieceEditor({
                                 type: create,
                                 piece: piecePositionWhichIsNotCellMode,
                             });
@@ -918,7 +918,7 @@ namespace ContextMenuModule {
                     </Menu.Item>
                     <Menu.Item
                         onClick={() => {
-                            hooks.setDicePieceDrawer({
+                            hooks.setDicePieceEditor({
                                 type: create,
                                 piece: piecePositionWhichIsNotCellMode,
                             });

@@ -11,9 +11,9 @@ import { DicePieceValue } from '../../utils/dicePieceValue';
 import { StringPieceValue } from '../../utils/stringPieceValue';
 import { keyNames } from '@flocon-trpg/utils';
 import { useUpdateAtom } from 'jotai/utils';
-import { dicePieceDrawerAtom } from '../../atoms/overlay/dicePieceDrawerAtom';
 import { stringPieceDrawerAtom } from '../../atoms/overlay/stringPieceDrawerAtom';
 import { useCharacters } from '../../hooks/state/useCharacters';
+import { dicePieceValueEditorModalAtom } from './DicePieceValueEditorModal';
 
 type DataSource =
     | {
@@ -30,7 +30,7 @@ export const PieceValueList: React.FC = () => {
     const characters = useCharacters();
     const dicePieceValues = useDicePieceValues();
     const stringPieceValues = useStringPieceValues();
-    const setDicePieceDrawer = useUpdateAtom(dicePieceDrawerAtom);
+    const setDicePieceEditor = useUpdateAtom(dicePieceValueEditorModalAtom);
     const setStringPieceDrawer = useUpdateAtom(stringPieceDrawerAtom);
 
     if (dicePieceValues == null || stringPieceValues == null ) {
@@ -50,7 +50,7 @@ export const PieceValueList: React.FC = () => {
                             size='small'
                             onClick={() => {
                                 if (dataSource.type === 'dice') {
-                                    setDicePieceDrawer({
+                                    setDicePieceEditor({
                                         type: update,
                                         boardId: null,
                                         stateId: dataSource.value.id,
