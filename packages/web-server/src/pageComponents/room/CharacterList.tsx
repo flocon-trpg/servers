@@ -13,7 +13,6 @@ import {
     characterIsNotPrivateAndNotCreatedByMe,
 } from '../../resource/text/main';
 import { useCharacters } from '../../hooks/state/useCharacters';
-import { useParticipants } from '../../hooks/state/useParticipants';
 import {
     useBoolParamNames,
     useNumParamNames,
@@ -22,7 +21,6 @@ import {
 import {
     CharacterState,
     ParamNameState,
-    ParticipantState,
     StrIndex20,
     strIndex20Array,
 } from '@flocon-trpg/core';
@@ -46,7 +44,6 @@ type DataSource = {
         state: CharacterState;
         createdByMe: boolean | null;
     };
-    participants: ReadonlyMap<string, ParticipantState>;
     onOperateCharacter: (mapping: (operation: CharacterState) => CharacterState) => void;
 };
 
@@ -197,14 +194,12 @@ export const CharacterList: React.FC = () => {
     );
 
     const characters = useCharacters();
-    const participants = useParticipants();
     const boolParamNames = useBoolParamNames();
     const numParamNames = useNumParamNames();
     const strParamNames = useStrParamNames();
 
     if (
         characters == null ||
-        participants == null ||
         boolParamNames == null ||
         numParamNames == null ||
         strParamNames == null
@@ -232,7 +227,6 @@ export const CharacterList: React.FC = () => {
                 state: character,
                 createdByMe,
             },
-            participants,
             onOperateCharacter: operateCharacter(characterId),
         };
     });
