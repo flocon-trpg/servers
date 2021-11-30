@@ -1,4 +1,4 @@
-import { Button, Collapse, Drawer, Form, Select, Space } from 'antd';
+import { Button, Collapse, Form, Modal, Select, Space } from 'antd';
 import React from 'react';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { replace } from '../../stateManagers/states/types';
@@ -13,17 +13,18 @@ import { flex, flexRow } from '../../utils/className';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { roomAtom } from '../../atoms/room/roomAtom';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
-import { useAtom } from 'jotai';
-import { characterParameterNamesDrawerVisibilityAtom } from '../../atoms/overlay/characterParameterNamesDrawerVisibilityAtom';
+import { atom, useAtom } from 'jotai';
+
+export const characterParameterNamesEditorVisibilityAtom = atom(false);
 
 type VisibleParameterForm = {
     type: 'Bool' | 'Str' | 'Num';
     key: StrIndex20;
 };
 
-export const CharacterParameterNamesDrawer: React.FC = () => {
-    const [characterParameterNamesDrawerVisibility, setVisibility] = useAtom(
-        characterParameterNamesDrawerVisibilityAtom
+export const CharacterParameterNamesEditorModal: React.FC = () => {
+    const [editorVisibility, setEditorVisibility] = useAtom(
+        characterParameterNamesEditorVisibilityAtom
     );
     const operate = useSetRoomStateByApply();
     const setRoomState = useSetRoomStateWithImmer();
@@ -242,17 +243,17 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
     };
 
     return (
-        <Drawer
+        <Modal
             title='キャラクターのパラメーター名の追加・編集・削除'
             width={600}
-            visible={characterParameterNamesDrawerVisibility}
+            visible={editorVisibility}
             closable
-            onClose={() => setVisibility(false)}
+            onCancel={() => setEditorVisibility(false)}
             footer={
                 <DrawerFooter
                     close={{
                         textType: 'close',
-                        onClick: () => setVisibility(false),
+                        onClick: () => setEditorVisibility(false),
                     }}
                 />
             }
@@ -501,6 +502,6 @@ export const CharacterParameterNamesDrawer: React.FC = () => {
                     onClose={() => setVisibleParameterForm(undefined)}
                 />
             )}
-        </Drawer>
+        </Modal>
     );
 };

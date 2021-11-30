@@ -29,10 +29,10 @@ import { getUserUid, MyAuthContext } from '../../contexts/MyAuthContext';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { create } from '../../utils/constants';
 import { useUpdateAtom } from 'jotai/utils';
-import { characterParameterNamesDrawerVisibilityAtom } from '../../atoms/overlay/characterParameterNamesDrawerVisibilityAtom';
 import { characterEditorModalAtom } from './CharacterEditorModal';
 import { OverriddenParameterNameEditor } from '../../components/OverriddenParameterNameEditor';
 import produce from 'immer';
+import { characterParameterNamesEditorVisibilityAtom } from './CharacterParameterNamesEditorModal';
 
 type DataSource = {
     key: string;
@@ -241,8 +241,8 @@ export const CharacterList: React.FC = () => {
     const myAuth = React.useContext(MyAuthContext);
     const setRoomState = useSetRoomStateWithImmer();
     const setCharacterEditorDrawer = useUpdateAtom(characterEditorModalAtom);
-    const setCharacterParameterNamesDrawerVisibility = useUpdateAtom(
-        characterParameterNamesDrawerVisibilityAtom
+    const setCharacterParameterNamesEditorVisibility = useUpdateAtom(
+        characterParameterNamesEditorVisibilityAtom
     );
 
     const characters = useCharacters();
@@ -380,7 +380,7 @@ export const CharacterList: React.FC = () => {
             <Button size='small' onClick={() => setCharacterEditorDrawer({ type: create })}>
                 キャラクターを作成
             </Button>
-            <Button size='small' onClick={() => setCharacterParameterNamesDrawerVisibility(true)}>
+            <Button size='small' onClick={() => setCharacterParameterNamesEditorVisibility(true)}>
                 パラメーターを追加・編集・削除
             </Button>
             <Table

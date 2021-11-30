@@ -3,7 +3,7 @@ import { Layout as AntdLayout, Result, Modal } from 'antd';
 import { DraggableCard, horizontalPadding } from '../../components/DraggableCard';
 import { CharacterList } from './CharacterList';
 import { RoomMessages } from './RoomMessages';
-import { CharacterParameterNamesDrawer } from './CharacterParameterNamesDrawer';
+import { CharacterParameterNamesEditorModal } from './CharacterParameterNamesEditorModal';
 import { CharacterEditorModal } from './CharacterEditorModal';
 import { BoardDrawer } from './BoardDrawer';
 import { SoundPlayer } from './SoundPlayer';
@@ -708,7 +708,7 @@ export const Room: React.FC = () => {
                 <DicePieceValueEditorModal />
                 <ImagePieceDrawer />
                 <StringPieceValueDrawer />
-                <CharacterParameterNamesDrawer />
+                <CharacterParameterNamesEditorModal />
                 <EditRoomDrawer />
 
                 <CommandEditorModal />
