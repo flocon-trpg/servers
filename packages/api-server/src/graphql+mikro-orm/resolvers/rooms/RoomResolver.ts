@@ -1079,7 +1079,7 @@ export class RoomResolver {
                     $v: 2,
                     $r: 1,
                     activeBoardId: undefined,
-                    characterTag1Name: undefined,
+                    characterTag1Name: 'NPC',
                     characterTag2Name: undefined,
                     characterTag3Name: undefined,
                     characterTag4Name: undefined,
