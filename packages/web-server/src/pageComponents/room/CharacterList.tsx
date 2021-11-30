@@ -25,7 +25,6 @@ import { flex, flexRow, itemsCenter } from '../../utils/className';
 import { ColumnType } from 'antd/lib/table';
 import { SortOrder } from 'antd/lib/table/interface';
 import { IconView } from '../../components/IconView';
-import { getUserUid, MyAuthContext } from '../../contexts/MyAuthContext';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { create } from '../../utils/constants';
 import { useUpdateAtom } from 'jotai/utils';
@@ -34,6 +33,7 @@ import { OverriddenParameterNameEditor } from '../../components/OverriddenParame
 import produce from 'immer';
 import { characterParameterNamesEditorVisibilityAtom } from './CharacterParameterNamesEditorModal';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
+import { characterTagNamesEditorVisibilityAtom } from './CharacterTagNamesEditorModal';
 
 type DataSource = {
     key: string;
@@ -245,6 +245,9 @@ export const CharacterList: React.FC = () => {
     const setCharacterParameterNamesEditorVisibility = useUpdateAtom(
         characterParameterNamesEditorVisibilityAtom
     );
+    const setCharacterTagNamesEditorVisibility = useUpdateAtom(
+        characterTagNamesEditorVisibilityAtom
+    );
 
     const characters = useCharacters();
     const boolParamNames = useBoolParamNames();
@@ -383,6 +386,9 @@ export const CharacterList: React.FC = () => {
             </Button>
             <Button size='small' onClick={() => setCharacterParameterNamesEditorVisibility(true)}>
                 パラメーターを追加・編集・削除
+            </Button>
+            <Button size='small' onClick={() => setCharacterTagNamesEditorVisibility(true)}>
+                タグを追加・編集・削除
             </Button>
             <Table
                 columns={columns}

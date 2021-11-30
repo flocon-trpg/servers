@@ -38,6 +38,7 @@ import classNames from 'classnames';
 import { flex, flex1, flexAuto, flexRow, itemsCenter, justifyEnd } from '../../utils/className';
 import { EditorGroupHeader } from '../../components/EditorGroupHeader';
 import { OverriddenParameterNameEditor } from '../../components/OverriddenParameterNameEditor';
+import { CharacterTagsSelect } from '../../components/CharacterTagsSelect';
 
 export type CharacterEditorModalType =
     | {
@@ -365,6 +366,20 @@ export const CharacterEditorModal: React.FC = () => {
                         }
                     />
 
+                    <EditorGroupHeader>タグ</EditorGroupHeader>
+
+                    <CharacterTagsSelect
+                        character={character}
+                        onChange={recipe =>
+                            updateCharacter(character => {
+                                if (character == null) {
+                                    return;
+                                }
+                                recipe(character);
+                            })
+                        }
+                    />
+
                     <EditorGroupHeader>数値パラメーター</EditorGroupHeader>
 
                     {strIndex20Array.map(key => {
@@ -431,7 +446,7 @@ export const CharacterEditorModal: React.FC = () => {
                                 key={`boolParam${key}Row`}
                                 leftContent={
                                     <OverriddenParameterNameEditor
-                                    type='editor'
+                                        type='editor'
                                         baseName={paramName.name}
                                         overriddenParameterName={value?.overriddenParameterName}
                                         onOverriddenParameterNameChange={newValue =>

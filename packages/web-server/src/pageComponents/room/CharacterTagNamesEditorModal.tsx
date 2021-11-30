@@ -1,0 +1,70 @@
+import { Button, Modal } from 'antd';
+import React from 'react';
+import { DrawerFooter } from '../../layouts/DrawerFooter';
+import { BufferedInput } from '../../components/BufferedInput';
+import { strIndex10Array } from '@flocon-trpg/core';
+import classNames from 'classnames';
+import { flex, flexColumn, flexRow } from '../../utils/className';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
+import { atom, useAtom } from 'jotai';
+import { useCharacterTagNames } from '../../hooks/state/useCharacterTagNames';
+import * as Icons from '@ant-design/icons';
+
+export const characterTagNamesEditorVisibilityAtom = atom(false);
+
+export const CharacterTagNamesEditorModal: React.FC = () => {
+    const [editorVisibility, setEditorVisibility] = useAtom(characterTagNamesEditorVisibilityAtom);
+    const setRoomState = useSetRoomStateWithImmer();
+
+    const characterTagNames = useCharacterTagNames();
+
+    const inputs = strIndex10Array.map(index => {
+        const characterTagName = characterTagNames?.[`characterTag${index}Name`];
+        return (
+            <div key={`tag${index}Input`} className={classNames(flex, flexRow)}>
+                <div>{`タグ${index}`}</div>
+                <BufferedInput
+                    style={{ width: 150 }}
+                    readOnly={characterTagName == null}
+                    value={characterTagName ?? ''}
+                    bufferDuration='default'
+                    onChange={({ currentValue }) => {
+                        setRoomState(roomState => {
+                            roomState[`characterTag${index}Name`] = currentValue;
+                        });
+                    }}
+                />
+                <Button
+                    onClick={() => {
+                        setRoomState(roomState => {
+                            roomState[`characterTag${index}Name`] =
+                                characterTagName == null ? '' : undefined;
+                        });
+                    }}
+                >
+                    {characterTagName == null ? <Icons.PlusOutlined /> : <Icons.DeleteOutlined />}
+                </Button>
+            </div>
+        );
+    });
+
+    return (
+        <Modal
+            title='キャラクターのタグの追加・編集・削除'
+            width={600}
+            visible={editorVisibility}
+            closable
+            onCancel={() => setEditorVisibility(false)}
+            footer={
+                <DrawerFooter
+                    close={{
+                        textType: 'close',
+                        onClick: () => setEditorVisibility(false),
+                    }}
+                />
+            }
+        >
+            <div className={classNames(flex, flexColumn)}>{inputs}</div>
+        </Modal>
+    );
+};
