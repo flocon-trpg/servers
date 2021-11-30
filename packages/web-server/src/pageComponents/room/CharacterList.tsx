@@ -18,12 +18,7 @@ import {
     useNumParamNames,
     useStrParamNames,
 } from '../../hooks/state/useParamNames';
-import {
-    CharacterState,
-    ParamNameState,
-    StrIndex20,
-    strIndex20Array,
-} from '@flocon-trpg/core';
+import { CharacterState, ParamNameState, StrIndex20, strIndex20Array } from '@flocon-trpg/core';
 import _ from 'lodash';
 import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../../utils/className';
@@ -36,6 +31,8 @@ import { create } from '../../utils/constants';
 import { useUpdateAtom } from 'jotai/utils';
 import { characterParameterNamesDrawerVisibilityAtom } from '../../atoms/overlay/characterParameterNamesDrawerVisibilityAtom';
 import { characterEditorModalAtom } from './CharacterEditorModal';
+import { OverriddenParameterNameEditor } from '../../components/OverriddenParameterNameEditor';
+import produce from 'immer';
 
 type DataSource = {
     key: string;
@@ -49,6 +46,7 @@ type DataSource = {
 
 const minNumParameter = -1000000;
 const maxNumParameter = 1000000;
+const overriddenParameterNamePadding = 6;
 
 const createBooleanParameterColumn = ({
     key,
@@ -80,7 +78,25 @@ const createBooleanParameterColumn = ({
         // eslint-disable-next-line react/display-name
         render: (_: unknown, { character, onOperateCharacter }: DataSource) => {
             return (
-                <>
+                <div className={classNames(flex, flexRow)}>
+                    <OverriddenParameterNameEditor
+                        type='table'
+                        overriddenParameterName={
+                            character.state.boolParams[key]?.overriddenParameterName
+                        }
+                        onOverriddenParameterNameChange={newName =>
+                            onOperateCharacter(character =>
+                                produce(character, character => {
+                                    const boolParam = character.boolParams[key];
+                                    if (boolParam == null) {
+                                        return;
+                                    }
+                                    boolParam.overriddenParameterName = newName;
+                                })
+                            )
+                        }
+                    />
+                    <div style={{ paddingLeft: overriddenParameterNamePadding }} />
                     <BooleanParameterInput
                         isCharacterPrivate={character.state.isPrivate}
                         isCreate={false}
@@ -92,7 +108,7 @@ const createBooleanParameterColumn = ({
                             onOperateCharacter(mapping);
                         }}
                     />
-                </>
+                </div>
             );
         },
     };
@@ -124,7 +140,25 @@ const createNumParameterColumn = ({
         // eslint-disable-next-line react/display-name
         render: (_: unknown, { character, onOperateCharacter }: DataSource) => {
             return (
-                <>
+                <div className={classNames(flex, flexRow)}>
+                    <OverriddenParameterNameEditor
+                        type='table'
+                        overriddenParameterName={
+                            character.state.numParams[key]?.overriddenParameterName
+                        }
+                        onOverriddenParameterNameChange={newName =>
+                            onOperateCharacter(character =>
+                                produce(character, character => {
+                                    const numParam = character.numParams[key];
+                                    if (numParam == null) {
+                                        return;
+                                    }
+                                    numParam.overriddenParameterName = newName;
+                                })
+                            )
+                        }
+                    />
+                    <div style={{ paddingLeft: overriddenParameterNamePadding }} />
                     <NumberParameterInput
                         isCharacterPrivate={character.state.isPrivate}
                         isCreate={false}
@@ -137,7 +171,7 @@ const createNumParameterColumn = ({
                             onOperateCharacter(mapping);
                         }}
                     />
-                </>
+                </div>
             );
         },
     };
@@ -167,7 +201,25 @@ const createStringParameterColumn = ({
         // eslint-disable-next-line react/display-name
         render: (_: unknown, { character, onOperateCharacter }: DataSource) => {
             return (
-                <>
+                <div className={classNames(flex, flexRow)}>
+                    <OverriddenParameterNameEditor
+                        type='table'
+                        overriddenParameterName={
+                            character.state.strParams[key]?.overriddenParameterName
+                        }
+                        onOverriddenParameterNameChange={newName =>
+                            onOperateCharacter(character =>
+                                produce(character, character => {
+                                    const strParam = character.strParams[key];
+                                    if (strParam == null) {
+                                        return;
+                                    }
+                                    strParam.overriddenParameterName = newName;
+                                })
+                            )
+                        }
+                    />
+                    <div style={{ paddingLeft: overriddenParameterNamePadding }} />
                     <StringParameterInput
                         compact
                         isCharacterPrivate={character.state.isPrivate}
@@ -179,7 +231,7 @@ const createStringParameterColumn = ({
                             onOperateCharacter(mapping);
                         }}
                     />
-                </>
+                </div>
             );
         },
     };

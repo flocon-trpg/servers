@@ -37,7 +37,7 @@ import { CharacterVarInput } from '../../components/CharacterVarInput';
 import classNames from 'classnames';
 import { flex, flex1, flexAuto, flexRow, itemsCenter, justifyEnd } from '../../utils/className';
 import { EditorGroupHeader } from '../../components/EditorGroupHeader';
-import * as Icons from '@ant-design/icons';
+import { OverriddenParameterNameEditor } from '../../components/OverriddenParameterNameEditor';
 
 export type CharacterEditorModalType =
     | {
@@ -50,61 +50,7 @@ export type CharacterEditorModalType =
 
 export const characterEditorModalAtom = atom<CharacterEditorModalType | null>(null);
 
-type ParamNameProps = {
-    style?: React.CSSProperties;
-    className?: string;
-    name: string;
-    overriddenParameterName: string | undefined;
-    onOverriddenParameterNameChange: (newValue: string | undefined) => void;
-};
 
-const ParamName: React.FC<ParamNameProps> = ({
-    style,
-    className: className,
-    name,
-    overriddenParameterName,
-    onOverriddenParameterNameChange,
-}: ParamNameProps) => {
-    let overriddenParameterNameArea: JSX.Element;
-    if (overriddenParameterName == null) {
-        overriddenParameterNameArea = (
-            <Tooltip title='クリックすることで、このキャラクターにのみ代わりに用いられる変数名を定義できます。'>
-                <Button size='small' onClick={() => onOverriddenParameterNameChange('')}>
-                    <Icons.EditOutlined />
-                </Button>
-            </Tooltip>
-        );
-    } else {
-        overriddenParameterNameArea = (
-            <>
-                <BufferedInput
-                    style={{ maxWidth: 100 }}
-                    size='small'
-                    value={overriddenParameterName ?? ''}
-                    bufferDuration='default'
-                    onChange={({ currentValue }) => {
-                        onOverriddenParameterNameChange(currentValue);
-                    }}
-                />
-                <Button size='small' onClick={() => onOverriddenParameterNameChange(undefined)}>
-                    <Icons.DeleteOutlined />
-                </Button>
-            </>
-        );
-    }
-    return (
-        <div className={classNames(className, flex, flexRow)} style={style}>
-            <div
-                style={{
-                    textDecoration: overriddenParameterName == null ? undefined : 'line-through',
-                }}
-            >
-                {name}
-            </div>
-            {overriddenParameterNameArea}
-        </div>
-    );
-};
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 type MyRowProps = {
@@ -434,8 +380,9 @@ export const CharacterEditorModal: React.FC = () => {
                             <MyRow
                                 key={`numParam${key}Row`}
                                 leftContent={
-                                    <ParamName
-                                        name={paramName.name}
+                                    <OverriddenParameterNameEditor
+                                        type='editor'
+                                        baseName={paramName.name}
                                         overriddenParameterName={value?.overriddenParameterName}
                                         onOverriddenParameterNameChange={newValue =>
                                             updateCharacter(character => {
@@ -484,9 +431,10 @@ export const CharacterEditorModal: React.FC = () => {
                         return (
                             <MyRow
                                 key={`boolParam${key}Row`}
-                                rightContent={
-                                    <ParamName
-                                        name={paramName.name}
+                                leftContent={
+                                    <OverriddenParameterNameEditor
+                                    type='editor'
+                                        baseName={paramName.name}
                                         overriddenParameterName={value?.overriddenParameterName}
                                         onOverriddenParameterNameChange={newValue =>
                                             updateCharacter(character => {
@@ -499,7 +447,7 @@ export const CharacterEditorModal: React.FC = () => {
                                         }
                                     />
                                 }
-                                leftContent={
+                                rightContent={
                                     <BooleanParameterInput
                                         isCharacterPrivate={character.isPrivate}
                                         isCreate={isCreate}
@@ -537,8 +485,9 @@ export const CharacterEditorModal: React.FC = () => {
                             <MyRow
                                 key={`strParam${key}Row`}
                                 leftContent={
-                                    <ParamName
-                                        name={paramName.name}
+                                    <OverriddenParameterNameEditor
+                                        type='editor'
+                                        baseName={paramName.name}
                                         overriddenParameterName={value?.overriddenParameterName}
                                         onOverriddenParameterNameChange={newValue =>
                                             updateCharacter(character => {
