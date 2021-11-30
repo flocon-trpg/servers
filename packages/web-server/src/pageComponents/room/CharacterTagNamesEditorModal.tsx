@@ -22,10 +22,12 @@ export const CharacterTagNamesEditorModal: React.FC = () => {
         const characterTagName = characterTagNames?.[`characterTag${index}Name`];
         return (
             <div key={`tag${index}Input`} className={classNames(flex, flexRow)}>
-                <div>{`タグ${index}`}</div>
+                <div style={{ width: 60 }}>{`タグ${index}`}</div>
                 <BufferedInput
                     style={{ width: 150 }}
+                    size='small'
                     readOnly={characterTagName == null}
+                    disabled={characterTagName == null}
                     value={characterTagName ?? ''}
                     bufferDuration='default'
                     onChange={({ currentValue }) => {
@@ -35,6 +37,7 @@ export const CharacterTagNamesEditorModal: React.FC = () => {
                     }}
                 />
                 <Button
+                    size='small'
                     onClick={() => {
                         setRoomState(roomState => {
                             roomState[`characterTag${index}Name`] =

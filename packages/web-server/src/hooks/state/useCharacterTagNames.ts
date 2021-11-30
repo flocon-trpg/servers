@@ -48,21 +48,6 @@ export function useCharacterTagNames(): CharacterTagNames | null {
     const [resultState, setResultState] = React.useState<CharacterTagNames | null>(null);
 
     React.useEffect(() => {
-        if (
-            characterTag1Name == null ||
-            characterTag2Name == null ||
-            characterTag3Name == null ||
-            characterTag4Name == null ||
-            characterTag5Name == null ||
-            characterTag6Name == null ||
-            characterTag7Name == null ||
-            characterTag8Name == null ||
-            characterTag9Name == null ||
-            characterTag10Name == null
-        ) {
-            setResultState(null);
-            return;
-        }
         setResultState({
             characterTag1Name,
             characterTag2Name,

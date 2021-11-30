@@ -2,29 +2,16 @@ import { FilterValue } from 'antd/lib/table/interface';
 import { FilePath } from './filePath';
 
 export type CharacterTagNames = {
-    characterTag1Name: string;
-    characterTag2Name: string;
-    characterTag3Name: string;
-    characterTag4Name: string;
-    characterTag5Name: string;
-    characterTag6Name: string;
-    characterTag7Name: string;
-    characterTag8Name: string;
-    characterTag9Name: string;
-    characterTag10Name: string;
-};
-
-export const emptyCharacterTagNames: CharacterTagNames = {
-    characterTag1Name: '',
-    characterTag2Name: '',
-    characterTag3Name: '',
-    characterTag4Name: '',
-    characterTag5Name: '',
-    characterTag6Name: '',
-    characterTag7Name: '',
-    characterTag8Name: '',
-    characterTag9Name: '',
-    characterTag10Name: '',
+    characterTag1Name: string | undefined;
+    characterTag2Name: string | undefined;
+    characterTag3Name: string | undefined;
+    characterTag4Name: string | undefined;
+    characterTag5Name: string | undefined;
+    characterTag6Name: string | undefined;
+    characterTag7Name: string | undefined;
+    characterTag8Name: string | undefined;
+    characterTag9Name: string | undefined;
+    characterTag10Name: string | undefined;
 };
 
 export const none = 'none';
