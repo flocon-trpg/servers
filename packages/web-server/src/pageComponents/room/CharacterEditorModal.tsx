@@ -1,10 +1,9 @@
-import { Button, Col, Modal, Row, Tooltip } from 'antd';
+import { Button, Modal, Tooltip } from 'antd';
 import React from 'react';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { InputFile } from '../../components/InputFile';
 import { FilesManagerDrawerType } from '../../utils/types';
 import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';
-import { Gutter } from 'antd/lib/grid/row';
 import { NumberParameterInput } from '../../components/NumberParameterInput';
 import { BooleanParameterInput } from '../../components/BooleanParameterInput';
 import { StringParameterInput } from '../../components/StringParameterInput';
@@ -36,8 +35,9 @@ import { commandEditorModalAtom } from '../../atoms/overlay/commandEditorModalAt
 import { useIsMyCharacter } from '../../hooks/state/useIsMyCharacter';
 import { CharacterVarInput } from '../../components/CharacterVarInput';
 import classNames from 'classnames';
-import { flex, flexAuto, flexRow } from '../../utils/className';
+import { flex, flex1, flexAuto, flexRow, itemsCenter, justifyEnd } from '../../utils/className';
 import { EditorGroupHeader } from '../../components/EditorGroupHeader';
+import * as Icons from '@ant-design/icons';
 
 export type CharacterEditorModalType =
     | {
@@ -49,6 +49,82 @@ export type CharacterEditorModalType =
       };
 
 export const characterEditorModalAtom = atom<CharacterEditorModalType | null>(null);
+
+type ParamNameProps = {
+    style?: React.CSSProperties;
+    className?: string;
+    name: string;
+    overriddenParameterName: string | undefined;
+    onOverriddenParameterNameChange: (newValue: string | undefined) => void;
+};
+
+const ParamName: React.FC<ParamNameProps> = ({
+    style,
+    className: className,
+    name,
+    overriddenParameterName,
+    onOverriddenParameterNameChange,
+}: ParamNameProps) => {
+    let overriddenParameterNameArea: JSX.Element;
+    if (overriddenParameterName == null) {
+        overriddenParameterNameArea = (
+            <Tooltip title='クリックすることで、このキャラクターにのみ代わりに用いられる変数名を定義できます。'>
+                <Button size='small' onClick={() => onOverriddenParameterNameChange('')}>
+                    <Icons.EditOutlined />
+                </Button>
+            </Tooltip>
+        );
+    } else {
+        overriddenParameterNameArea = (
+            <>
+                <BufferedInput
+                    style={{ maxWidth: 100 }}
+                    size='small'
+                    value={overriddenParameterName ?? ''}
+                    bufferDuration='default'
+                    onChange={({ currentValue }) => {
+                        onOverriddenParameterNameChange(currentValue);
+                    }}
+                />
+                <Button size='small' onClick={() => onOverriddenParameterNameChange(undefined)}>
+                    <Icons.DeleteOutlined />
+                </Button>
+            </>
+        );
+    }
+    return (
+        <div className={classNames(className, flex, flexRow)} style={style}>
+            <div
+                style={{
+                    textDecoration: overriddenParameterName == null ? undefined : 'line-through',
+                }}
+            >
+                {name}
+            </div>
+            {overriddenParameterNameArea}
+        </div>
+    );
+};
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+type MyRowProps = {
+    leftContent?: React.ReactNode;
+    rightContent?: React.ReactNode;
+};
+
+const MyRow: React.FC<MyRowProps> = ({ leftContent, rightContent }: MyRowProps) => {
+    return (
+        <div className={classNames(flex, flexRow, itemsCenter)}>
+            <div
+                className={classNames(justifyEnd, flex)}
+                style={{ flexBasis: 240, paddingRight: 20 }}
+            >
+                {leftContent}
+            </div>
+            <div className={flex1}>{rightContent}</div>
+        </div>
+    );
+};
 
 const defaultCharacter: CharacterState = {
     $v: 2,
@@ -82,9 +158,6 @@ const defaultCharacter: CharacterState = {
     strParams: {},
     pieces: {},
 };
-
-const gutter: [Gutter, Gutter] = [16, 16];
-const inputSpan = 16;
 
 export const CharacterEditorModal: React.FC = () => {
     const myUserUid = useMyUserUid();
@@ -137,6 +210,7 @@ export const CharacterEditorModal: React.FC = () => {
         return null;
     }
 
+    const isCreate = atomValue?.type === create;
     const createdByMe = (() => {
         if (atomValue?.type !== update) {
             return true;
@@ -202,31 +276,30 @@ export const CharacterEditorModal: React.FC = () => {
                     {atomValue?.type === update && (
                         <>
                             <EditorGroupHeader>作成者</EditorGroupHeader>
-                            <Row gutter={gutter} align='middle'>
-                                <Col flex='auto' />
-                                <Col flex={0}>作成者</Col>
-                                <Col span={inputSpan}>
-                                    <span>{participants.get(atomValue.stateId)?.name}</span>
-                                    {createdByMe && (
-                                        <span style={{ paddingLeft: 2, fontWeight: 'bold' }}>
-                                            (自分)
-                                        </span>
-                                    )}
-                                </Col>
-                            </Row>
+                            <MyRow
+                                leftContent='作成者'
+                                rightContent={
+                                    <>
+                                        <span>{participants.get(atomValue.stateId)?.name}</span>
+                                        {createdByMe && (
+                                            <span style={{ paddingLeft: 2, fontWeight: 'bold' }}>
+                                                (自分)
+                                            </span>
+                                        )}
+                                    </>
+                                }
+                            />
                         </>
                     )}
 
                     {atomValue?.type !== update ? null : (
                         <>
-                            <EditorGroupHeader>複製</EditorGroupHeader>
+                            <EditorGroupHeader>アクション</EditorGroupHeader>
 
-                            <Row gutter={gutter} align='middle'>
-                                <Col flex='auto' />
-                                <Col flex={0}></Col>
-                                <Col span={inputSpan}>
-                                    {/* TODO: 複製したことを何らかの形で通知したほうがいい */}
+                            <MyRow
+                                rightContent={
                                     <Tooltip title='コマを除き、このキャラクターを複製します。'>
+                                        {/* TODO: 複製したことを何らかの形で通知したほうがいい */}
                                         <Button
                                             size='small'
                                             onClick={() => {
@@ -242,16 +315,16 @@ export const CharacterEditorModal: React.FC = () => {
                                             このキャラクターを複製
                                         </Button>
                                     </Tooltip>
-                                </Col>
-                            </Row>
+                                }
+                            />
                         </>
                     )}
 
                     <EditorGroupHeader>全体公開</EditorGroupHeader>
-                    <Row gutter={gutter} align='middle'>
-                        <Col flex='auto' />
-                        <Col flex={0}>全体公開</Col>
-                        <Col span={inputSpan}>
+
+                    <MyRow
+                        leftContent='全体公開'
+                        rightContent={
                             <ToggleButton
                                 size='small'
                                 disabled={
@@ -266,10 +339,10 @@ export const CharacterEditorModal: React.FC = () => {
                                 tooltip={
                                     character.isPrivate
                                         ? characterIsPrivate({
-                                              isCreate: atomValue?.type === create,
+                                              isCreate,
                                           })
                                         : characterIsNotPrivate({
-                                              isCreate: atomValue?.type === create,
+                                              isCreate,
                                           })
                                 }
                                 onChange={newValue =>
@@ -281,15 +354,14 @@ export const CharacterEditorModal: React.FC = () => {
                                     })
                                 }
                             />
-                        </Col>
-                    </Row>
+                        }
+                    />
 
                     <EditorGroupHeader>共通パラメーター</EditorGroupHeader>
 
-                    <Row gutter={gutter} align='middle'>
-                        <Col flex='auto' />
-                        <Col flex={0}>名前</Col>
-                        <Col span={inputSpan}>
+                    <MyRow
+                        leftContent='名前'
+                        rightContent={
                             <BufferedInput
                                 bufferDuration='default'
                                 size='small'
@@ -306,13 +378,12 @@ export const CharacterEditorModal: React.FC = () => {
                                     });
                                 }}
                             />
-                        </Col>
-                    </Row>
+                        }
+                    />
 
-                    <Row gutter={gutter} align='middle'>
-                        <Col flex='auto' />
-                        <Col flex={0}>アイコン画像</Col>
-                        <Col span={inputSpan}>
+                    <MyRow
+                        leftContent='アイコン画像'
+                        rightContent={
                             <InputFile
                                 filePath={character.image ?? undefined}
                                 onPathChange={path =>
@@ -327,13 +398,12 @@ export const CharacterEditorModal: React.FC = () => {
                                 openFilesManager={setFilesManagerDrawerType}
                                 showImage
                             />
-                        </Col>
-                    </Row>
+                        }
+                    />
 
-                    <Row gutter={gutter} align='middle'>
-                        <Col flex='auto' />
-                        <Col flex={0}>立ち絵画像</Col>
-                        <Col span={inputSpan}>
+                    <MyRow
+                        leftContent='立ち絵画像'
+                        rightContent={
                             <InputFile
                                 filePath={character.portraitImage ?? undefined}
                                 onPathChange={path =>
@@ -348,8 +418,8 @@ export const CharacterEditorModal: React.FC = () => {
                                 openFilesManager={setFilesManagerDrawerType}
                                 showImage
                             />
-                        </Col>
-                    </Row>
+                        }
+                    />
 
                     <EditorGroupHeader>数値パラメーター</EditorGroupHeader>
 
@@ -361,13 +431,27 @@ export const CharacterEditorModal: React.FC = () => {
                         const value = character.numParams[key];
                         const maxValue = character.numMaxParams[key];
                         return (
-                            <Row key={`numParam${key}Row`} gutter={gutter} align='middle'>
-                                <Col flex='auto' />
-                                <Col flex={0}>{paramName.name}</Col>
-                                <Col span={inputSpan}>
+                            <MyRow
+                                key={`numParam${key}Row`}
+                                leftContent={
+                                    <ParamName
+                                        name={paramName.name}
+                                        overriddenParameterName={value?.overriddenParameterName}
+                                        onOverriddenParameterNameChange={newValue =>
+                                            updateCharacter(character => {
+                                                const param = character?.numParams[key];
+                                                if (param == null) {
+                                                    return;
+                                                }
+                                                param.overriddenParameterName = newValue;
+                                            })
+                                        }
+                                    />
+                                }
+                                rightContent={
                                     <NumberParameterInput
                                         isCharacterPrivate={character.isPrivate}
-                                        isCreate
+                                        isCreate={isCreate}
                                         compact={false}
                                         parameterKey={key}
                                         numberParameter={value}
@@ -382,8 +466,8 @@ export const CharacterEditorModal: React.FC = () => {
                                             });
                                         }}
                                     />
-                                </Col>
-                            </Row>
+                                }
+                            />
                         );
                     })}
 
@@ -398,13 +482,27 @@ export const CharacterEditorModal: React.FC = () => {
                         }
                         const value = character.boolParams[key];
                         return (
-                            <Row key={`boolParam${key}Row`} gutter={gutter} align='middle'>
-                                <Col flex='auto' />
-                                <Col flex={0}>{paramName.name}</Col>
-                                <Col span={inputSpan}>
+                            <MyRow
+                                key={`boolParam${key}Row`}
+                                rightContent={
+                                    <ParamName
+                                        name={paramName.name}
+                                        overriddenParameterName={value?.overriddenParameterName}
+                                        onOverriddenParameterNameChange={newValue =>
+                                            updateCharacter(character => {
+                                                const param = character?.boolParams[key];
+                                                if (param == null) {
+                                                    return;
+                                                }
+                                                param.overriddenParameterName = newValue;
+                                            })
+                                        }
+                                    />
+                                }
+                                leftContent={
                                     <BooleanParameterInput
                                         isCharacterPrivate={character.isPrivate}
-                                        isCreate
+                                        isCreate={isCreate}
                                         compact={false}
                                         parameterKey={key}
                                         parameter={value}
@@ -418,12 +516,14 @@ export const CharacterEditorModal: React.FC = () => {
                                             });
                                         }}
                                     />
-                                </Col>
-                            </Row>
+                                }
+                            />
                         );
                     })}
 
-                    {boolParamNames.size === 0 && <div>チェックマークパラメーターはありません。</div>}
+                    {boolParamNames.size === 0 && (
+                        <div>チェックマークパラメーターはありません。</div>
+                    )}
 
                     <EditorGroupHeader>文字列パラメーター</EditorGroupHeader>
 
@@ -434,14 +534,28 @@ export const CharacterEditorModal: React.FC = () => {
                         }
                         const value = character.strParams[key];
                         return (
-                            <Row key={`strParam${key}Row`} gutter={gutter} align='middle'>
-                                <Col flex='auto' />
-                                <Col flex={0}>{paramName.name}</Col>
-                                <Col span={inputSpan}>
+                            <MyRow
+                                key={`strParam${key}Row`}
+                                leftContent={
+                                    <ParamName
+                                        name={paramName.name}
+                                        overriddenParameterName={value?.overriddenParameterName}
+                                        onOverriddenParameterNameChange={newValue =>
+                                            updateCharacter(character => {
+                                                const param = character?.strParams[key];
+                                                if (param == null) {
+                                                    return;
+                                                }
+                                                param.overriddenParameterName = newValue;
+                                            })
+                                        }
+                                    />
+                                }
+                                rightContent={
                                     <StringParameterInput
                                         compact={false}
                                         isCharacterPrivate={character.isPrivate}
-                                        isCreate
+                                        isCreate={isCreate}
                                         parameterKey={key}
                                         parameter={value}
                                         createdByMe={createdByMe}
@@ -454,8 +568,8 @@ export const CharacterEditorModal: React.FC = () => {
                                             });
                                         }}
                                     />
-                                </Col>
-                            </Row>
+                                }
+                            />
                         );
                     })}
 
