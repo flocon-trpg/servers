@@ -33,6 +33,7 @@ import { characterEditorModalAtom } from './CharacterEditorModal';
 import { OverriddenParameterNameEditor } from '../../components/OverriddenParameterNameEditor';
 import produce from 'immer';
 import { characterParameterNamesEditorVisibilityAtom } from './CharacterParameterNamesEditorModal';
+import { useMyUserUid } from '../../hooks/useMyUserUid';
 
 type DataSource = {
     key: string;
@@ -238,7 +239,7 @@ const createStringParameterColumn = ({
 };
 
 export const CharacterList: React.FC = () => {
-    const myAuth = React.useContext(MyAuthContext);
+    const myUserUid = useMyUserUid();
     const setRoomState = useSetRoomStateWithImmer();
     const setCharacterEditorDrawer = useUpdateAtom(characterEditorModalAtom);
     const setCharacterParameterNamesEditorVisibility = useUpdateAtom(
@@ -271,7 +272,7 @@ export const CharacterList: React.FC = () => {
         };
 
     const charactersDataSource: DataSource[] = [...characters].map(([characterId, character]) => {
-        const createdByMe = getUserUid(myAuth) === characterId;
+        const createdByMe = myUserUid != null && myUserUid === character.ownerParticipantId;
         return {
             key: characterId, // antdのtableのkeyとして必要
             character: {
