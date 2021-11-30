@@ -50,15 +50,13 @@ export type CharacterEditorModalType =
 
 export const characterEditorModalAtom = atom<CharacterEditorModalType | null>(null);
 
-
-
 // eslint-disable-next-line @typescript-eslint/ban-types
-type MyRowProps = {
+type RowProps = {
     leftContent?: React.ReactNode;
     rightContent?: React.ReactNode;
 };
 
-const MyRow: React.FC<MyRowProps> = ({ leftContent, rightContent }: MyRowProps) => {
+const Row: React.FC<RowProps> = ({ leftContent, rightContent }: RowProps) => {
     return (
         <div className={classNames(flex, flexRow, itemsCenter)}>
             <div
@@ -222,7 +220,7 @@ export const CharacterEditorModal: React.FC = () => {
                     {atomValue?.type === update && (
                         <>
                             <EditorGroupHeader>作成者</EditorGroupHeader>
-                            <MyRow
+                            <Row
                                 leftContent='作成者'
                                 rightContent={
                                     <>
@@ -242,7 +240,7 @@ export const CharacterEditorModal: React.FC = () => {
                         <>
                             <EditorGroupHeader>アクション</EditorGroupHeader>
 
-                            <MyRow
+                            <Row
                                 rightContent={
                                     <Tooltip title='コマを除き、このキャラクターを複製します。'>
                                         {/* TODO: 複製したことを何らかの形で通知したほうがいい */}
@@ -268,7 +266,7 @@ export const CharacterEditorModal: React.FC = () => {
 
                     <EditorGroupHeader>全体公開</EditorGroupHeader>
 
-                    <MyRow
+                    <Row
                         leftContent='全体公開'
                         rightContent={
                             <ToggleButton
@@ -305,7 +303,7 @@ export const CharacterEditorModal: React.FC = () => {
 
                     <EditorGroupHeader>共通パラメーター</EditorGroupHeader>
 
-                    <MyRow
+                    <Row
                         leftContent='名前'
                         rightContent={
                             <BufferedInput
@@ -327,7 +325,7 @@ export const CharacterEditorModal: React.FC = () => {
                         }
                     />
 
-                    <MyRow
+                    <Row
                         leftContent='アイコン画像'
                         rightContent={
                             <InputFile
@@ -347,7 +345,7 @@ export const CharacterEditorModal: React.FC = () => {
                         }
                     />
 
-                    <MyRow
+                    <Row
                         leftContent='立ち絵画像'
                         rightContent={
                             <InputFile
@@ -377,7 +375,7 @@ export const CharacterEditorModal: React.FC = () => {
                         const value = character.numParams[key];
                         const maxValue = character.numMaxParams[key];
                         return (
-                            <MyRow
+                            <Row
                                 key={`numParam${key}Row`}
                                 leftContent={
                                     <OverriddenParameterNameEditor
@@ -429,7 +427,7 @@ export const CharacterEditorModal: React.FC = () => {
                         }
                         const value = character.boolParams[key];
                         return (
-                            <MyRow
+                            <Row
                                 key={`boolParam${key}Row`}
                                 leftContent={
                                     <OverriddenParameterNameEditor
@@ -482,7 +480,7 @@ export const CharacterEditorModal: React.FC = () => {
                         }
                         const value = character.strParams[key];
                         return (
-                            <MyRow
+                            <Row
                                 key={`strParam${key}Row`}
                                 leftContent={
                                     <OverriddenParameterNameEditor
