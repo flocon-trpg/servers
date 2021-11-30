@@ -7,7 +7,7 @@ export const Plain = 'Plain';
 export const Markdown = 'Markdown';
 
 /**
- * To 3rd-party developers: Please always use 'Plain' because 'Markdown' is not implemented yet in the official web-server.
+ * @description To 3rd-party developers: Please always use 'Plain' because 'Markdown' is not implemented yet in the official web-server.
  */
 const textType = t.union([t.literal(Plain), t.literal(Markdown)]);
 type TextType = t.TypeOf<typeof textType>;
@@ -21,7 +21,7 @@ export const state = t.type({
     text: t.string,
 
     /**
-     * To 3rd-party developers: Please always use 'Plain' because 'Markdown' is not implemented yet in the official web-server.
+     * @description To 3rd-party developers: Please always use 'Plain' because 'Markdown' is not implemented yet in the official web-server.
      */
     textType,
 });

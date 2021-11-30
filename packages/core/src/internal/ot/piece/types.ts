@@ -25,7 +25,7 @@ export const state = t.type({
     isPrivate: t.boolean,
 
     /**
-     * To 3rd-party developers: Please always set undefined because it is not implemented yet in the official web-server.
+     * @description To 3rd-party developers: Please always set undefined because it is not implemented yet in the official web-server.
      */
     opacity: maybe(t.number),
 

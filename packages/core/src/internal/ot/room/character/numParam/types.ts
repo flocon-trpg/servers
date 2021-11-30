@@ -10,6 +10,10 @@ export const state = t.type({
 
     isValuePrivate: t.boolean,
     value: maybe(t.number),
+
+    /**
+     * @description Do not use this value for numMaxParam.
+     */
     overriddenParameterName: maybe(t.string),
 });
 

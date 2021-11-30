@@ -28,7 +28,7 @@ export const state = t.type({
     valueInputType: maybe(valueInputType),
 
     /**
-     * To 3rd-party developers: Please always set undefined or empty string because it is not implemented yet in the official web-server.
+     * @description To 3rd-party developers: Please always set undefined or empty string because it is not implemented yet in the official web-server.
      */
     memo: maybe(t.string),
 
