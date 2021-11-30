@@ -16,37 +16,50 @@ export const CharacterTagsSelect: React.FC<Props> = ({ character, onChange }: Pr
     const values: string[] = [];
     const children: React.ReactNode[] = [];
     strIndex10Array.forEach(i => {
-        const tagName = characterTagNames?.[`characterTag${i}Name`]
+        const tagName = characterTagNames?.[`characterTag${i}Name`];
         if (tagName == null) {
             return null;
         }
-        values.push(tagName);
+        children.push(
+            <Select.Option
+                key={tagKey(i)}
+                value={tagKey(i)}
+            >
+                {tagName.trim() === '' ? '(空)' : tagName}
+            </Select.Option>
+        );
         const hasTagPropKey = `hasTag${i}` as const;
         const hasTag = character[hasTagPropKey];
         if (!hasTag) {
             return;
         }
-        children.push(
-            <Select.Option key={tagKey(i)} value={tagKey(i)}>
-                {tagName}
-            </Select.Option>
-        );
+        values.push(tagKey(i));
     });
 
     return (
         <Select
             mode='multiple'
-            allowClear
             style={{ width: '100%' }}
-            placeholder='Please select'
-            defaultValue={['a10', 'c12']}
             value={values}
-            onChange={values => {
+            onSelect={value => {
                 onChange(character => {
                     strIndex10Array.forEach(i => {
-                        character[`hasTag${i}`] = values.includes(tagKey(i));
+                        if (value === tagKey(i)) {
+                            character[`hasTag${i}`] = true;
+                        }
                     });
-                })
+                });
+            }}
+            onDeselect={(value, option) => {
+                console.info(value);
+                console.info(option);
+                onChange(character => {
+                    strIndex10Array.forEach(i => {
+                        if (option.key === tagKey(i)) {
+                            character[`hasTag${i}`] = false;
+                        }
+                    });
+                });
             }}
         >
             {children}
