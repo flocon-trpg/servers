@@ -274,6 +274,15 @@ export {
     Markdown,
 } from './internal/ot/room/memo/types';
 
+export {
+    DownOperation as NullableTextDownOperation,
+    UpOperation as NullableTextUpOperation,
+    TwoWayOperation as NullableTextTwoWayOperation,
+    apply as applyNullableText,
+    diff as nullableTextDiff,
+    toUpOperation as toNullableTextUpOperation,
+} from './internal/ot/util/nullableTextOperation';
+
 export { isIdRecord } from './internal/ot/util/record';
 
 export {

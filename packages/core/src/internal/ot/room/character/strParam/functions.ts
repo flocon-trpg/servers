@@ -1,4 +1,3 @@
-import * as TextOperation from '../../../util/textOperation';
 import * as NullableTextOperation from '../../../util/nullableTextOperation';
 import * as ReplaceOperation from '../../../util/replaceOperation';
 import {
@@ -26,7 +25,8 @@ export const toClientState =
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return {
         ...source,
-        value: source.value == null ? undefined : TextOperation.toDownOperation(source.value),
+        value:
+            source.value == null ? undefined : NullableTextOperation.toDownOperation(source.value),
         overriddenParameterName:
             source.overriddenParameterName == null
                 ? undefined
@@ -37,7 +37,7 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
 export const toUpOperation = (source: TwoWayOperation): UpOperation => {
     return {
         ...source,
-        value: source.value == null ? undefined : TextOperation.toUpOperation(source.value),
+        value: source.value == null ? undefined : NullableTextOperation.toUpOperation(source.value),
         overriddenParameterName:
             source.overriddenParameterName == null
                 ? undefined
@@ -51,7 +51,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
         result.isValuePrivate = operation.isValuePrivate.newValue;
     }
     if (operation.value != null) {
-        const valueResult = TextOperation.apply(state.value, operation.value);
+        const valueResult = NullableTextOperation.apply(state.value, operation.value);
         if (valueResult.isError) {
             return valueResult;
         }
@@ -77,7 +77,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
         result.isValuePrivate = operation.isValuePrivate.oldValue;
     }
     if (operation.value !== undefined) {
-        const prevValue = TextOperation.applyBack(state.value, operation.value);
+        const prevValue = NullableTextOperation.applyBack(state.value, operation.value);
         if (prevValue.isError) {
             return prevValue;
         }
@@ -98,7 +98,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 };
 
 export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
-    const value = TextOperation.composeDownOperation(first.value, second.value);
+    const value = NullableTextOperation.composeDownOperation(first.value, second.value);
     if (value.isError) {
         return value;
     }
@@ -145,7 +145,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         };
     }
     if (downOperation.value !== undefined) {
-        const restored = TextOperation.restore({
+        const restored = NullableTextOperation.restore({
             nextState: nextState.value,
             downOperation: downOperation.value,
         });
@@ -179,7 +179,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         };
     }
     if (prevState.value !== nextState.value) {
-        resultType.value = TextOperation.diff({
+        resultType.value = NullableTextOperation.diff({
             prev: prevState.value,
             next: nextState.value,
         });
@@ -209,7 +209,7 @@ export const serverTransform =
             });
         }
         if (isAuthorized || !currentState.isValuePrivate) {
-            const transformed = TextOperation.serverTransform({
+            const transformed = NullableTextOperation.serverTransform({
                 first: serverOperation?.value,
                 second: clientOperation.value,
                 prevState: prevState.value,
@@ -244,7 +244,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         second: second.isValuePrivate,
     });
 
-    const value = TextOperation.clientTransform({
+    const value = NullableTextOperation.clientTransform({
         first: first.value,
         second: second.value,
     });

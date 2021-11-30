@@ -26,7 +26,7 @@ const isDefaultStrParam = (source: Record<string, unknown>) => {
         $v: 2,
         $r: 1,
         isValuePrivate: false,
-        value: '',
+        value: undefined,
         overriddenParameterName: undefined,
     };
     return _.isEqual(source, defaultStrParam);

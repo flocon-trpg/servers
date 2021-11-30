@@ -60,7 +60,7 @@ const defaultStrParamState: StrParamType.State = {
     $v: 2,
     $r: 1,
     isValuePrivate: false,
-    value: '',
+    value: undefined,
     overriddenParameterName: undefined,
 };
 
