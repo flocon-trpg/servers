@@ -71,6 +71,7 @@ import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
 import { MessageTabConfigUtils } from '../../atoms/roomConfig/types/messageTabConfig/utils';
 import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
 import { useAtomValue } from 'jotai/utils';
+import { MessageTabName } from '../../components/MessageTabName';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -866,7 +867,7 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                                   }}
                               >
                                   <div style={{ flex: '0 0 auto', maxWidth: 100 }}>
-                                      {MessageTabConfigUtils.toTabName(tab)}
+                                     <MessageTabName tabConfig={tab} />
                                   </div>
                                   <div style={{ flex: 1 }} />
                                   <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>

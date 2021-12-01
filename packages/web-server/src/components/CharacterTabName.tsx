@@ -28,7 +28,7 @@ const generateTabName = (
             elements.push(characterTagNames?.[`characterTag${index}Name`] ?? `(タグ${index})`);
         }
     });
-    if (elements.length >= 5) {
+    if (elements.length >= 4) {
         return `複数のタグ`;
     }
     return elements.reduce((seed, elem, i) => {
