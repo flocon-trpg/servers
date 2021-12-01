@@ -239,7 +239,7 @@ export {
 } from './internal/ot/room/board/imagePiece/types';
 
 export {
-    apply as applyNumberPiece,
+    apply as applyStringPiece,
     diff as stringPieceDiff,
     toUpOperation as toStringPieceUpOperation,
 } from './internal/ot/room/board/stringPiece/functions';
