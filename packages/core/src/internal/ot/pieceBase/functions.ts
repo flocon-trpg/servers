@@ -65,7 +65,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     if (boardPosition.isError) {
         return boardPosition;
     }
-    const result = { ...state };
+    const result = { ...state, ...boardPosition.value };
 
     if (operation.cellH !== undefined) {
         result.cellH = operation.cellH.oldValue;
