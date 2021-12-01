@@ -9,12 +9,14 @@ import { record } from '../../../util/record';
 import { RecordTwoWayOperation } from '../../../util/recordOperation';
 import { Maybe, maybe } from '../../../../maybe';
 import { ReplaceValueTwoWayOperation } from '../../../util/replaceOperation';
+import * as BoardPosition from '../../../boardPositionBase/types';
 import * as Piece from '../../../pieceBase/types';
 
 export const dicePieceStrIndexes = ['1', '2', '3', '4'] as const;
 
 export const state = t.intersection([
-    Piece.state,
+    BoardPosition.state,
+    Piece.stateBase,
     t.type({
         $v: t.literal(2),
         $r: t.literal(1),
@@ -27,7 +29,8 @@ export const state = t.intersection([
 export type State = t.TypeOf<typeof state>;
 
 export const downOperation = t.intersection([
-    Piece.downOperation,
+    BoardPosition.downOperation,
+    Piece.downOperationBase,
     createOperation(2, 1, {
         ownerCharacterId: t.type({ oldValue: maybe(t.string) }),
         dice: record(
@@ -40,7 +43,8 @@ export const downOperation = t.intersection([
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
 export const upOperation = t.intersection([
-    Piece.upOperation,
+    BoardPosition.upOperation,
+    Piece.upOperationBase,
     createOperation(2, 1, {
         ownerCharacterId: t.type({ newValue: maybe(t.string) }),
         dice: record(

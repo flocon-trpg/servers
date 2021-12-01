@@ -1,4 +1,5 @@
 import * as t from 'io-ts';
+import * as BoardPosition from '../../../boardPositionBase/types';
 import * as Piece from '../../../pieceBase/types';
 import * as ReplaceOperation from '../../../util/replaceOperation';
 import { createOperation } from '../../../util/createOperation';
@@ -12,7 +13,8 @@ const valueInputType = t.union([t.literal(String), t.literal(Number)]);
 type ValueInputType = t.TypeOf<typeof valueInputType>;
 
 export const state = t.intersection([
-    Piece.state,
+    BoardPosition.state,
+    Piece.stateBase,
     t.type({
         $v: t.literal(2),
         $r: t.literal(1),
@@ -27,7 +29,8 @@ export const state = t.intersection([
 export type State = t.TypeOf<typeof state>;
 
 export const downOperation = t.intersection([
-    Piece.downOperation,
+    BoardPosition.downOperation,
+    Piece.downOperationBase,
     createOperation(2, 1, {
         ownerCharacterId: t.type({ oldValue: maybe(t.string) }),
         isValuePrivate: t.type({ oldValue: t.boolean }),
@@ -39,7 +42,8 @@ export const downOperation = t.intersection([
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
 export const upOperation = t.intersection([
-    Piece.upOperation,
+    BoardPosition.upOperation,
+    Piece.upOperationBase,
     createOperation(2, 1, {
         ownerCharacterId: t.type({ newValue: maybe(t.string) }),
         isValuePrivate: t.type({ newValue: t.boolean }),
