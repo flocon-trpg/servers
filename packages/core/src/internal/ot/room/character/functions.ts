@@ -1,9 +1,9 @@
 import { mapRecordOperationElement } from '../../util/recordOperationElement';
 import * as TextOperation from '../../util/textOperation';
-import * as Piece from '../../piece/functions';
-import * as PieceTypes from '../../piece/types';
-import * as BoardPosition from '../../boardPosition/functions';
-import * as BoardPositionTypes from '../../boardPosition/types';
+import * as CharacterPiece from './characterPiece/functions';
+import * as CharacterPieceTypes from './characterPiece/types';
+import * as PortraitPiece from './portraitPiece/functions';
+import * as PortraitPieceTypes from './portraitPiece/types';
 import * as ReplaceOperation from '../../util/replaceOperation';
 import * as RecordOperation from '../../util/recordOperation';
 import * as ParamRecordOperation from '../../util/paramRecordOperation';
@@ -96,24 +96,31 @@ export const toClientState =
                 isPrivate: () => false,
                 toClientState: ({ state }) => StrParam.toClientState(isAuthorized)(state),
             }),
-            pieces: Piece.toClientStateMany(requestedBy, currentRoomState)(source.pieces),
+            pieces: RecordOperation.toClientState<
+                CharacterPieceTypes.State,
+                CharacterPieceTypes.State
+            >({
+                serverState: source.pieces,
+                isPrivate: () => !isAuthorized,
+                toClientState: ({ state }) => CharacterPiece.toClientState(state),
+            }),
             privateCommands: RecordOperation.toClientState<CommandTypes.State, CommandTypes.State>({
                 serverState: source.privateCommands,
                 isPrivate: () => !isAuthorized,
                 toClientState: ({ state }) => Command.toClientState(state),
             }),
-            portraitPositions: RecordOperation.toClientState<
-                BoardPositionTypes.State,
-                BoardPositionTypes.State
+            portraitPieces: RecordOperation.toClientState<
+                PortraitPieceTypes.State,
+                PortraitPieceTypes.State
             >({
-                serverState: source.portraitPositions,
+                serverState: source.portraitPieces,
                 isPrivate: state =>
                     !isBoardVisible({
                         requestedBy,
                         boardId: state.boardId,
                         currentRoomState,
                     }),
-                toClientState: ({ state }) => BoardPosition.toClientState(state),
+                toClientState: ({ state }) => PortraitPiece.toClientState(state),
             }),
         };
     };
@@ -154,7 +161,7 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
                       mapRecordOperationElement({
                           source: operation,
                           mapReplace: x => x,
-                          mapOperation: Piece.toDownOperation,
+                          mapOperation: CharacterPiece.toDownOperation,
                       })
                   ),
         privateCommands:
@@ -167,14 +174,14 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
                           mapOperation: Command.toDownOperation,
                       })
                   ),
-        portraitPositions:
-            source.portraitPositions == null
+        portraitPieces:
+            source.portraitPieces == null
                 ? undefined
-                : chooseRecord(source.portraitPositions, operation =>
+                : chooseRecord(source.portraitPieces, operation =>
                       mapRecordOperationElement({
                           source: operation,
                           mapReplace: x => x,
-                          mapOperation: BoardPosition.toDownOperation,
+                          mapOperation: PortraitPiece.toDownOperation,
                       })
                   ),
     };
@@ -216,7 +223,7 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
                       mapRecordOperationElement({
                           source: operation,
                           mapReplace: x => x,
-                          mapOperation: Piece.toUpOperation,
+                          mapOperation: CharacterPiece.toUpOperation,
                       })
                   ),
         privateCommands:
@@ -229,20 +236,20 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
                           mapOperation: Command.toUpOperation,
                       })
                   ),
-        portraitPositions:
-            source.portraitPositions == null
+        portraitPieces:
+            source.portraitPieces == null
                 ? undefined
-                : chooseRecord(source.portraitPositions, operation =>
+                : chooseRecord(source.portraitPieces, operation =>
                       mapRecordOperationElement({
                           source: operation,
                           mapReplace: x => x,
-                          mapOperation: BoardPosition.toUpOperation,
+                          mapOperation: PortraitPiece.toUpOperation,
                       })
                   ),
     };
 };
 
-export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, operation }) => {
+export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     const result: State = { ...state };
     if (operation.ownerParticipantId != null) {
         result.ownerParticipantId = operation.ownerParticipantId.newValue;
@@ -296,7 +303,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
 
     const boolParams = ParamRecordOperation.apply<
         BoolParamTypes.State,
-        BoolParamTypes.UpOperation | BoolParamTypes.TwoWayOperation,
+        BoolParamTypes.UpOperation,
         ScalarError
     >({
         prevState: state.boolParams,
@@ -316,7 +323,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
 
     const numParams = ParamRecordOperation.apply<
         NumParamTypes.State,
-        NumParamTypes.UpOperation | NumParamTypes.TwoWayOperation,
+        NumParamTypes.UpOperation,
         ScalarError
     >({
         prevState: state.numParams,
@@ -336,7 +343,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
 
     const numMaxParams = ParamRecordOperation.apply<
         NumParamTypes.State,
-        NumParamTypes.UpOperation | NumParamTypes.TwoWayOperation,
+        NumParamTypes.UpOperation,
         ScalarError
     >({
         prevState: state.numMaxParams,
@@ -356,7 +363,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
 
     const strParams = ParamRecordOperation.apply<
         StrParamType.State,
-        StrParamType.UpOperation | StrParamType.TwoWayOperation,
+        StrParamType.UpOperation,
         ScalarError
     >({
         prevState: state.strParams,
@@ -371,11 +378,15 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     }
     result.strParams = strParams.value;
 
-    const pieces = RecordOperation.apply<PieceTypes.State, PieceTypes.UpOperation, ScalarError>({
+    const pieces = RecordOperation.apply<
+        CharacterPieceTypes.State,
+        CharacterPieceTypes.UpOperation,
+        ScalarError
+    >({
         prevState: state.pieces,
         operation: operation.pieces,
         innerApply: ({ prevState, operation }) => {
-            return Piece.apply({ state: prevState, operation });
+            return CharacterPiece.apply({ state: prevState, operation });
         },
     });
     if (pieces.isError) {
@@ -385,7 +396,7 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
 
     const privateCommandsResult = RecordOperation.apply<
         CommandTypes.State,
-        CommandTypes.UpOperation | CommandTypes.TwoWayOperation,
+        CommandTypes.UpOperation,
         ScalarError
     >({
         prevState: state.privateCommands,
@@ -400,20 +411,20 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     result.privateCommands = privateCommandsResult.value;
 
     const portraitPositions = RecordOperation.apply<
-        BoardPositionTypes.State,
-        BoardPositionTypes.UpOperation,
+        PortraitPieceTypes.State,
+        PortraitPieceTypes.UpOperation,
         ScalarError
     >({
-        prevState: state.portraitPositions,
-        operation: operation.portraitPositions,
+        prevState: state.portraitPieces,
+        operation: operation.portraitPieces,
         innerApply: ({ prevState, operation }) => {
-            return BoardPosition.apply({ state: prevState, operation });
+            return PortraitPiece.apply({ state: prevState, operation });
         },
     });
     if (portraitPositions.isError) {
         return portraitPositions;
     }
-    result.portraitPositions = portraitPositions.value;
+    result.portraitPieces = portraitPositions.value;
 
     return Result.ok(result);
 };
@@ -546,14 +557,14 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     result.strParams = strParams.value;
 
     const pieces = RecordOperation.applyBack<
-        PieceTypes.State,
-        PieceTypes.DownOperation,
+        CharacterPieceTypes.State,
+        CharacterPieceTypes.DownOperation,
         ScalarError
     >({
         nextState: state.pieces,
         operation: operation.pieces,
         innerApplyBack: ({ state: nextState, operation }) => {
-            return Piece.applyBack({ state: nextState, operation });
+            return CharacterPiece.applyBack({ state: nextState, operation });
         },
     });
     if (pieces.isError) {
@@ -578,20 +589,20 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     result.privateCommands = privateCommandsResult.value;
 
     const portraitPositions = RecordOperation.applyBack<
-        BoardPositionTypes.State,
-        BoardPositionTypes.DownOperation,
+        PortraitPieceTypes.State,
+        PortraitPieceTypes.DownOperation,
         ScalarError
     >({
-        nextState: state.portraitPositions,
-        operation: operation.portraitPositions,
+        nextState: state.portraitPieces,
+        operation: operation.portraitPieces,
         innerApplyBack: ({ state: nextState, operation }) => {
-            return BoardPosition.applyBack({ state: nextState, operation });
+            return PortraitPiece.applyBack({ state: nextState, operation });
         },
     });
     if (portraitPositions.isError) {
         return portraitPositions;
     }
-    result.portraitPositions = portraitPositions.value;
+    result.portraitPieces = portraitPositions.value;
 
     return Result.ok(result);
 };
@@ -634,14 +645,14 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
     }
 
     const pieces = RecordOperation.composeDownOperation<
-        PieceTypes.State,
-        PieceTypes.DownOperation,
+        CharacterPieceTypes.State,
+        CharacterPieceTypes.DownOperation,
         DownError
     >({
         first: first.pieces,
         second: second.pieces,
-        innerApplyBack: ({ state, operation }) => Piece.applyBack({ state, operation }),
-        innerCompose: params => Piece.composeDownOperation(params),
+        innerApplyBack: ({ state, operation }) => CharacterPiece.applyBack({ state, operation }),
+        innerCompose: params => CharacterPiece.composeDownOperation(params),
     });
     if (pieces.isError) {
         return pieces;
@@ -662,14 +673,14 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
     }
 
     const portraitPositions = RecordOperation.composeDownOperation<
-        BoardPositionTypes.State,
-        BoardPositionTypes.DownOperation,
+        PortraitPieceTypes.State,
+        PortraitPieceTypes.DownOperation,
         DownError
     >({
-        first: first.portraitPositions,
-        second: second.portraitPositions,
-        innerApplyBack: ({ state, operation }) => BoardPosition.applyBack({ state, operation }),
-        innerCompose: params => BoardPosition.composeDownOperation(params),
+        first: first.portraitPieces,
+        second: second.portraitPieces,
+        innerApplyBack: ({ state, operation }) => PortraitPiece.applyBack({ state, operation }),
+        innerCompose: params => PortraitPiece.composeDownOperation(params),
     });
     if (portraitPositions.isError) {
         return portraitPositions;
@@ -719,7 +730,7 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
         strParams: strParams.value,
         pieces: pieces.value,
         privateCommands: privateCommands.value,
-        portraitPositions: portraitPositions.value,
+        portraitPieces: portraitPositions.value,
     };
     for (const index of oneToTenArray) {
         const key = `hasTag${index}` as const;
@@ -773,15 +784,15 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     }
 
     const pieces = RecordOperation.restore<
-        PieceTypes.State,
-        PieceTypes.DownOperation,
-        PieceTypes.TwoWayOperation,
+        CharacterPieceTypes.State,
+        CharacterPieceTypes.DownOperation,
+        CharacterPieceTypes.TwoWayOperation,
         ScalarError
     >({
         nextState: nextState.pieces,
         downOperation: downOperation.pieces,
-        innerDiff: params => Piece.diff(params),
-        innerRestore: params => Piece.restore(params),
+        innerDiff: params => CharacterPiece.diff(params),
+        innerRestore: params => CharacterPiece.restore(params),
     });
     if (pieces.isError) {
         return pieces;
@@ -803,15 +814,15 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     }
 
     const portraitPositions = RecordOperation.restore<
-        BoardPositionTypes.State,
-        BoardPositionTypes.DownOperation,
-        BoardPositionTypes.TwoWayOperation,
+        PortraitPieceTypes.State,
+        PortraitPieceTypes.DownOperation,
+        PortraitPieceTypes.TwoWayOperation,
         ScalarError
     >({
-        nextState: nextState.portraitPositions,
-        downOperation: downOperation.portraitPositions,
-        innerDiff: params => BoardPosition.diff(params),
-        innerRestore: params => BoardPosition.restore(params),
+        nextState: nextState.portraitPieces,
+        downOperation: downOperation.portraitPieces,
+        innerDiff: params => PortraitPiece.diff(params),
+        innerRestore: params => PortraitPiece.restore(params),
     });
     if (portraitPositions.isError) {
         return portraitPositions;
@@ -825,7 +836,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         strParams: strParams.value.prevState,
         pieces: pieces.value.prevState,
         privateCommands: privateCommands.value.prevState,
-        portraitPositions: portraitPositions.value.prevState,
+        portraitPieces: portraitPositions.value.prevState,
     };
     const twoWayOperation: TwoWayOperation = {
         $v: 2,
@@ -836,7 +847,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         strParams: strParams.value.twoWayOperation,
         pieces: pieces.value.twoWayOperation,
         privateCommands: privateCommands.value.twoWayOperation,
-        portraitPositions: portraitPositions.value.twoWayOperation,
+        portraitPieces: portraitPositions.value.twoWayOperation,
     };
 
     if (downOperation.ownerParticipantId !== undefined) {
@@ -963,10 +974,13 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
                 nextState: nextState ?? defaultStrParamState,
             }),
     });
-    const pieces = RecordOperation.diff<PieceTypes.State, PieceTypes.TwoWayOperation>({
+    const pieces = RecordOperation.diff<
+        CharacterPieceTypes.State,
+        CharacterPieceTypes.TwoWayOperation
+    >({
         prevState: prevState.pieces,
         nextState: nextState.pieces,
-        innerDiff: params => Piece.diff(params),
+        innerDiff: params => CharacterPiece.diff(params),
     });
     const privateCommands = RecordOperation.diff<CommandTypes.State, CommandTypes.TwoWayOperation>({
         prevState: prevState.privateCommands,
@@ -974,12 +988,12 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         innerDiff: params => Command.diff(params),
     });
     const portraitPositions = RecordOperation.diff<
-        BoardPositionTypes.State,
-        BoardPositionTypes.TwoWayOperation
+        PortraitPieceTypes.State,
+        PortraitPieceTypes.TwoWayOperation
     >({
-        prevState: prevState.portraitPositions,
-        nextState: nextState.portraitPositions,
-        innerDiff: params => BoardPosition.diff(params),
+        prevState: prevState.portraitPieces,
+        nextState: nextState.portraitPieces,
+        innerDiff: params => PortraitPiece.diff(params),
     });
     const result: TwoWayOperation = {
         $v: 2,
@@ -990,7 +1004,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         strParams,
         pieces,
         privateCommands,
-        portraitPositions,
+        portraitPieces: portraitPositions,
     };
     if (prevState.ownerParticipantId !== nextState.ownerParticipantId) {
         result.ownerParticipantId = {
@@ -1139,10 +1153,10 @@ export const serverTransform =
         }
 
         const pieces = RecordOperation.serverTransform<
-            PieceTypes.State,
-            PieceTypes.State,
-            PieceTypes.TwoWayOperation,
-            PieceTypes.UpOperation,
+            CharacterPieceTypes.State,
+            CharacterPieceTypes.State,
+            CharacterPieceTypes.TwoWayOperation,
+            CharacterPieceTypes.UpOperation,
             TwoWayError
         >({
             prevState: prevState.pieces,
@@ -1150,7 +1164,7 @@ export const serverTransform =
             first: serverOperation?.pieces,
             second: clientOperation.pieces,
             innerTransform: ({ prevState, nextState, first, second }) =>
-                Piece.serverTransform({
+                CharacterPiece.serverTransform({
                     prevState,
                     currentState: nextState,
                     serverOperation: first,
@@ -1228,18 +1242,18 @@ export const serverTransform =
         }
 
         const portraitPositions = RecordOperation.serverTransform<
-            BoardPositionTypes.State,
-            BoardPositionTypes.State,
-            BoardPositionTypes.TwoWayOperation,
-            BoardPositionTypes.UpOperation,
+            PortraitPieceTypes.State,
+            PortraitPieceTypes.State,
+            PortraitPieceTypes.TwoWayOperation,
+            PortraitPieceTypes.UpOperation,
             TwoWayError
         >({
-            prevState: prevState.portraitPositions,
-            nextState: currentState.portraitPositions,
-            first: serverOperation?.portraitPositions,
-            second: clientOperation.portraitPositions,
+            prevState: prevState.portraitPieces,
+            nextState: currentState.portraitPieces,
+            first: serverOperation?.portraitPieces,
+            second: clientOperation.portraitPieces,
             innerTransform: ({ prevState, nextState, first, second }) =>
-                BoardPosition.serverTransform({
+                PortraitPiece.serverTransform({
                     prevState,
                     currentState: nextState,
                     serverOperation: first,
@@ -1296,7 +1310,7 @@ export const serverTransform =
             strParams: strParams.value,
             pieces: pieces.value,
             privateCommands: privateCommands.value,
-            portraitPositions: portraitPositions.value,
+            portraitPieces: portraitPositions.value,
         };
 
         if (canChangeOwnerParticipantId({ requestedBy, currentOwnerParticipant: currentState })) {
@@ -1415,14 +1429,20 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     }
 
     const pieces = RecordOperation.clientTransform<
-        PieceTypes.State,
-        PieceTypes.UpOperation,
+        CharacterPieceTypes.State,
+        CharacterPieceTypes.UpOperation,
         UpError
     >({
         first: first.pieces,
         second: second.pieces,
-        innerTransform: params => Piece.clientTransform(params),
-        innerDiff: params => Piece.diff(params),
+        innerTransform: params => CharacterPiece.clientTransform(params),
+        innerDiff: params => {
+            const diff = CharacterPiece.diff(params);
+            if (diff == null) {
+                return diff;
+            }
+            return CharacterPiece.toUpOperation(diff);
+        },
     });
     if (pieces.isError) {
         return pieces;
@@ -1449,14 +1469,20 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     }
 
     const portraitPositions = RecordOperation.clientTransform<
-        BoardPositionTypes.State,
-        BoardPositionTypes.UpOperation,
+        PortraitPieceTypes.State,
+        PortraitPieceTypes.UpOperation,
         UpError
     >({
-        first: first.portraitPositions,
-        second: second.portraitPositions,
-        innerTransform: params => BoardPosition.clientTransform(params),
-        innerDiff: params => BoardPosition.diff(params),
+        first: first.portraitPieces,
+        second: second.portraitPieces,
+        innerTransform: params => PortraitPiece.clientTransform(params),
+        innerDiff: params => {
+            const diff = PortraitPiece.diff(params);
+            if (diff == null) {
+                return diff;
+            }
+            return PortraitPiece.toUpOperation(diff);
+        },
     });
     if (portraitPositions.isError) {
         return portraitPositions;
@@ -1524,7 +1550,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         pieces: pieces.value.firstPrime,
         privateCommands: privateCommands.value.firstPrime,
         strParams: strParams.value.firstPrime,
-        portraitPositions: portraitPositions.value.firstPrime,
+        portraitPieces: portraitPositions.value.firstPrime,
 
         ownerParticipantId: ownerParticipantId.firstPrime,
         isPrivate: isPrivate.firstPrime,
@@ -1544,7 +1570,7 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         pieces: pieces.value.secondPrime,
         privateCommands: privateCommands.value.secondPrime,
         strParams: strParams.value.secondPrime,
-        portraitPositions: portraitPositions.value.secondPrime,
+        portraitPieces: portraitPositions.value.secondPrime,
 
         ownerParticipantId: ownerParticipantId.secondPrime,
         isPrivate: isPrivate.secondPrime,

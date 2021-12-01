@@ -4,6 +4,15 @@ import * as ReplaceOperation from '../../util/replaceOperation';
 import * as TextOperation from '../../util/textOperation';
 import { createOperation } from '../../util/createOperation';
 import { Maybe, maybe } from '../../../maybe';
+import * as RecordOperation from '../../util/recordOperation';
+import { record } from '../../util/record';
+import * as DicePiece from './dicePiece/types';
+import * as ImagePiece from './imagePiece/types';
+import * as StringPiece from './stringPiece/types';
+import {
+    recordDownOperationElementFactory,
+    recordUpOperationElementFactory,
+} from '../../util/recordOperationElement';
 
 const numberDownOperation = t.type({ oldValue: t.number });
 const numberUpOperation = t.type({ newValue: t.number });
@@ -22,6 +31,10 @@ export const state = t.type({
     cellWidth: t.number,
     name: t.string,
     ownerParticipantId: maybe(t.string),
+
+    dicePieces: record(t.string, DicePiece.state),
+    imagePieces: record(t.string, ImagePiece.state),
+    stringPieces: record(t.string, StringPiece.state),
 });
 
 export type State = t.TypeOf<typeof state>;
@@ -37,6 +50,19 @@ export const downOperation = createOperation(2, 1, {
     cellWidth: numberDownOperation,
     name: TextOperation.downOperation,
     ownerParticipantId: t.type({ oldValue: maybe(t.string) }),
+
+    dicePieces: record(
+        t.string,
+        recordDownOperationElementFactory(DicePiece.state, DicePiece.downOperation)
+    ),
+    imagePieces: record(
+        t.string,
+        recordDownOperationElementFactory(ImagePiece.state, ImagePiece.downOperation)
+    ),
+    stringPieces: record(
+        t.string,
+        recordDownOperationElementFactory(StringPiece.state, StringPiece.downOperation)
+    ),
 });
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
@@ -52,6 +78,19 @@ export const upOperation = createOperation(2, 1, {
     cellWidth: numberUpOperation,
     name: TextOperation.upOperation,
     ownerParticipantId: t.type({ newValue: maybe(t.string) }),
+
+    dicePieces: record(
+        t.string,
+        recordUpOperationElementFactory(DicePiece.state, DicePiece.upOperation)
+    ),
+    imagePieces: record(
+        t.string,
+        recordUpOperationElementFactory(ImagePiece.state, ImagePiece.upOperation)
+    ),
+    stringPieces: record(
+        t.string,
+        recordUpOperationElementFactory(StringPiece.state, StringPiece.upOperation)
+    ),
 });
 
 export type UpOperation = t.TypeOf<typeof upOperation>;
@@ -72,4 +111,14 @@ export type TwoWayOperation = {
     cellWidth?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     name?: TextOperation.TwoWayOperation;
     ownerParticipantId?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<string>>;
+
+    dicePieces?: RecordOperation.RecordTwoWayOperation<DicePiece.State, DicePiece.TwoWayOperation>;
+    imagePieces?: RecordOperation.RecordTwoWayOperation<
+        ImagePiece.State,
+        ImagePiece.TwoWayOperation
+    >;
+    stringPieces?: RecordOperation.RecordTwoWayOperation<
+        StringPiece.State,
+        StringPiece.TwoWayOperation
+    >;
 };

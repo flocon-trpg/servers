@@ -72,7 +72,7 @@ export class FRoom extends FObject {
                         privateCommands: {},
                         privateVarToml: '',
                         portraitImage: undefined,
-                        portraitPositions: {},
+                        portraitPieces: {},
                         boolParams: {},
                         numParams: {},
                         numMaxParams: {},

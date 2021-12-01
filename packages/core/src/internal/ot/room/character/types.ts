@@ -5,8 +5,8 @@ import {
 } from '../../util/recordOperationElement';
 import { FilePath, filePath } from '../../filePath/types';
 import * as TextOperation from '../../util/textOperation';
-import * as Piece from '../../piece/types';
-import * as BoardPosition from '../../boardPosition/types';
+import * as CharacterPiece from './characterPiece/types';
+import * as PortraitPiece from './portraitPiece/types';
 import * as ReplaceOperation from '../../util/replaceOperation';
 import { RecordTwoWayOperation } from '../../util/recordOperation';
 import * as BoolParam from './boolParam/types';
@@ -50,9 +50,9 @@ export const state = t.type({
     numParams: record(t.string, NumParam.state),
     numMaxParams: record(t.string, NumParam.state),
     strParams: record(t.string, StrParam.state),
-    pieces: record(t.string, Piece.state),
+    pieces: record(t.string, CharacterPiece.state),
     privateCommands: record(t.string, Command.state),
-    portraitPositions: record(t.string, BoardPosition.state),
+    portraitPieces: record(t.string, PortraitPiece.state),
 });
 
 export type State = t.TypeOf<typeof state>;
@@ -83,14 +83,17 @@ export const downOperation = createOperation(2, 1, {
     numParams: record(t.string, NumParam.downOperation),
     numMaxParams: record(t.string, NumParam.downOperation),
     strParams: record(t.string, StrParam.downOperation),
-    pieces: record(t.string, recordDownOperationElementFactory(Piece.state, Piece.downOperation)),
+    pieces: record(
+        t.string,
+        recordDownOperationElementFactory(CharacterPiece.state, CharacterPiece.downOperation)
+    ),
     privateCommands: record(
         t.string,
         recordDownOperationElementFactory(Command.state, Command.downOperation)
     ),
-    portraitPositions: record(
+    portraitPieces: record(
         t.string,
-        recordDownOperationElementFactory(BoardPosition.state, BoardPosition.downOperation)
+        recordDownOperationElementFactory(PortraitPiece.state, PortraitPiece.downOperation)
     ),
 });
 
@@ -123,14 +126,17 @@ export const upOperation = createOperation(2, 1, {
     numParams: record(t.string, NumParam.upOperation),
     numMaxParams: record(t.string, NumParam.upOperation),
     strParams: record(t.string, StrParam.upOperation),
-    pieces: record(t.string, recordUpOperationElementFactory(Piece.state, Piece.upOperation)),
+    pieces: record(
+        t.string,
+        recordUpOperationElementFactory(CharacterPiece.state, CharacterPiece.upOperation)
+    ),
     privateCommands: record(
         t.string,
         recordUpOperationElementFactory(Command.state, Command.upOperation)
     ),
-    portraitPositions: record(
+    portraitPieces: record(
         t.string,
-        recordUpOperationElementFactory(BoardPosition.state, BoardPosition.upOperation)
+        recordUpOperationElementFactory(PortraitPiece.state, PortraitPiece.upOperation)
     ),
 });
 
@@ -166,7 +172,7 @@ export type TwoWayOperation = {
     numParams?: StringKeyRecord<NumParam.TwoWayOperation>;
     numMaxParams?: StringKeyRecord<NumParam.TwoWayOperation>;
     strParams?: StringKeyRecord<StrParam.TwoWayOperation>;
-    pieces?: RecordTwoWayOperation<Piece.State, Piece.TwoWayOperation>;
+    pieces?: RecordTwoWayOperation<CharacterPiece.State, CharacterPiece.TwoWayOperation>;
     privateCommands?: RecordTwoWayOperation<Command.State, Command.TwoWayOperation>;
-    portraitPositions?: RecordTwoWayOperation<BoardPosition.State, BoardPosition.TwoWayOperation>;
+    portraitPieces?: RecordTwoWayOperation<PortraitPiece.State, PortraitPiece.TwoWayOperation>;
 };

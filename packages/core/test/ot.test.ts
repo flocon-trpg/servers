@@ -9,6 +9,7 @@ import {
     update,
     StrIndex10,
     RequestedBy,
+    DicePieceState,
 } from '../src';
 import { Resources } from './resources';
 import * as TextOperation from '../src/internal/ot/util/textOperation';
@@ -296,11 +297,15 @@ describe.each`
 
 describe('tests creating DicePieceValue', () => {
     const participantId = Resources.Participant.Player1.userUid;
+    const boardId = 'BOARD_ID';
     const characterId = 'CHARACTER_ID';
-    const dicePieceValueId = 'DICE_ID';
+    const dicePieceId = 'DICE_ID';
 
     const state: State = {
         ...Resources.minimumState,
+        boards: {
+            [boardId]: Resources.Board.emptyState(participantId),
+        },
         characters: {
             [characterId]: Resources.Character.emptyState(participantId),
         },
@@ -315,29 +320,50 @@ describe('tests creating DicePieceValue', () => {
         },
     };
 
+    const newValue: DicePieceState = {
+        $v: 2,
+        $r: 1,
+        memo: undefined,
+        name: undefined,
+        dice: {
+            '1': {
+                $v: 1,
+                $r: 1,
+                dieType: 'D6',
+                value: 1,
+                isValuePrivate: false,
+            },
+        },
+        x: 0,
+        y: 0,
+        w: 0,
+        h: 0,
+        cellX: 0,
+        cellY: 0,
+        cellW: 0,
+        cellH: 0,
+        isCellMode: false,
+        isPositionLocked: false,
+        opacity: undefined,
+        ownerCharacterId: characterId,
+    };
+
     const clientOperation: UpOperation = {
         $v: 2,
         $r: 1,
-        dicePieceValues: {
-            [dicePieceValueId]: {
-                type: replace,
-                replace: {
-                    newValue: {
-                        $v: 2,
-                        $r: 1,
-                        memo: undefined,
-                        name: undefined,
-                        dice: {
-                            '1': {
-                                $v: 1,
-                                $r: 1,
-                                dieType: 'D6',
-                                value: 1,
-                                isValuePrivate: false,
+        boards: {
+            [boardId]: {
+                type: update,
+                update: {
+                    $v: 2,
+                    $r: 1,
+                    dicePieces: {
+                        [dicePieceId]: {
+                            type: replace,
+                            replace: {
+                                newValue,
                             },
                         },
-                        pieces: {},
-                        ownerCharacterId: characterId,
                     },
                 },
             },
@@ -361,26 +387,19 @@ describe('tests creating DicePieceValue', () => {
     const expected: TwoWayOperation = {
         $v: 2,
         $r: 1,
-        dicePieceValues: {
-            [dicePieceValueId]: {
-                type: replace,
-                replace: {
-                    newValue: {
-                        $v: 2,
-                        $r: 1,
-                        memo: undefined,
-                        name: undefined,
-                        dice: {
-                            '1': {
-                                $v: 1,
-                                $r: 1,
-                                dieType: 'D6',
-                                value: 1,
-                                isValuePrivate: false,
+        boards: {
+            [boardId]: {
+                type: update,
+                update: {
+                    $v: 2,
+                    $r: 1,
+                    dicePieces: {
+                        [dicePieceId]: {
+                            type: replace,
+                            replace: {
+                                newValue,
                             },
                         },
-                        pieces: {},
-                        ownerCharacterId: characterId,
                     },
                 },
             },

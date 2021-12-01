@@ -3,16 +3,17 @@ import {
     recordUpOperationElementFactory,
     replace as replaceKey,
     update as updateKey,
-} from '../../util/recordOperationElement';
+} from '../../../util/recordOperationElement';
 import * as DicePieceValueTypes from './types';
-import * as PieceTypes from '../../piece/types';
+import * as PieceBase from '../../../pieceBase/functions';
+import * as PieceBaseTypes from '../../../pieceBase/types';
 import * as DieValue from './dieValue/functions';
 import * as DieValueTypes from './dieValue/types';
 import { chooseRecord } from '@flocon-trpg/utils';
-import { createOperation } from '../../util/createOperation';
-import { record } from '../../util/record';
-import { createType, deleteType, updateType } from '../../piece/log';
-import { maybe } from '../../../maybe';
+import { createOperation } from '../../../util/createOperation';
+import { record } from '../../../util/record';
+import { createType, deleteType, updateType } from '../../../pieceBase/log';
+import { maybe } from '../../../../maybe';
 
 const dieValueUpOperation = createOperation(1, 1, {
     dieType: t.type({ newValue: DieValueTypes.dieType }),
@@ -29,15 +30,12 @@ const update = t.intersection([
 
         type: t.literal(updateType),
     }),
+    PieceBaseTypes.upOperation,
     t.partial({
         ownerCharacterId: t.type({ newValue: maybe(t.string) }),
         dice: record(
             t.string,
             recordUpOperationElementFactory(DieValueTypes.state, dieValueUpOperation)
-        ),
-        pieces: record(
-            t.string,
-            recordUpOperationElementFactory(PieceTypes.state, PieceTypes.upOperation)
         ),
     }),
 ]);
@@ -81,6 +79,7 @@ export const ofOperation = (
     currentState: DicePieceValueTypes.State
 ): Type => {
     return {
+        ...PieceBase.toUpOperation(operation),
         $v: 2,
         $r: 1,
         type: updateType,
@@ -130,6 +129,5 @@ export const ofOperation = (
                           }
                       }
                   }),
-        pieces: operation.pieces,
     };
 };

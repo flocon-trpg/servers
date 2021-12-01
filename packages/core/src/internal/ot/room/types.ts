@@ -16,10 +16,7 @@ import { record } from '../util/record';
 import { Maybe, maybe } from '../../maybe';
 import * as Board from './board/types';
 import * as Character from './character/types';
-import * as DicePieceValue from './dicePieceValue/types';
-import * as ImagePieceValue from './imagePieceValue/types';
 import * as RollCall from './rollCall/types';
-import * as StringPieceValue from './stringPieceValue/types';
 
 const stateBase = t.type({
     activeBoardId: maybe(t.string),
@@ -37,8 +34,6 @@ const stateBase = t.type({
     characterTag8Name: maybe(t.string),
     characterTag9Name: maybe(t.string),
     characterTag10Name: maybe(t.string),
-    dicePieceValues: record(t.string, DicePieceValue.state), // keyはランダムなID
-    imagePieceValues: record(t.string, ImagePieceValue.state), // keyはランダムなID
     memos: record(t.string, Memo.state), // keyはランダムなID
     numParamNames: record(t.string, ParamNames.state), //keyはStrIndex20
     publicChannel1Name: t.string,
@@ -52,7 +47,6 @@ const stateBase = t.type({
     publicChannel9Name: t.string,
     publicChannel10Name: t.string,
     rollCalls: record(t.string, RollCall.state), // keyは現在は'1'のみを使える
-    stringPieceValues: record(t.string, StringPieceValue.state), //keyはStrIndex20
     strParamNames: record(t.string, ParamNames.state), //keyはStrIndex20
 });
 
@@ -102,14 +96,6 @@ export const downOperation = createOperation(2, 1, {
     characterTag8Name: NullableTextOperation.downOperation,
     characterTag9Name: NullableTextOperation.downOperation,
     characterTag10Name: NullableTextOperation.downOperation,
-    dicePieceValues: record(
-        t.string,
-        recordDownOperationElementFactory(DicePieceValue.state, DicePieceValue.downOperation)
-    ),
-    imagePieceValues: record(
-        t.string,
-        recordDownOperationElementFactory(ImagePieceValue.state, ImagePieceValue.downOperation)
-    ),
     memos: record(t.string, recordDownOperationElementFactory(Memo.state, Memo.downOperation)),
     name: TextOperation.downOperation,
     numParamNames: record(
@@ -133,10 +119,6 @@ export const downOperation = createOperation(2, 1, {
     rollCalls: record(
         t.string,
         recordDownOperationElementFactory(RollCall.state, RollCall.downOperation)
-    ),
-    stringPieceValues: record(
-        t.string,
-        recordDownOperationElementFactory(StringPieceValue.state, StringPieceValue.downOperation)
     ),
     strParamNames: record(
         t.string,
@@ -168,14 +150,6 @@ export const upOperation = createOperation(2, 1, {
     characterTag8Name: NullableTextOperation.upOperation,
     characterTag9Name: NullableTextOperation.upOperation,
     characterTag10Name: NullableTextOperation.upOperation,
-    dicePieceValues: record(
-        t.string,
-        recordUpOperationElementFactory(DicePieceValue.state, DicePieceValue.upOperation)
-    ),
-    imagePieceValues: record(
-        t.string,
-        recordUpOperationElementFactory(ImagePieceValue.state, ImagePieceValue.upOperation)
-    ),
     memos: record(t.string, recordUpOperationElementFactory(Memo.state, Memo.upOperation)),
     name: TextOperation.upOperation,
     numParamNames: record(
@@ -199,10 +173,6 @@ export const upOperation = createOperation(2, 1, {
     rollCalls: record(
         t.string,
         recordUpOperationElementFactory(RollCall.state, RollCall.upOperation)
-    ),
-    stringPieceValues: record(
-        t.string,
-        recordUpOperationElementFactory(StringPieceValue.state, StringPieceValue.upOperation)
     ),
     strParamNames: record(
         t.string,
@@ -234,14 +204,6 @@ export type TwoWayOperation = {
     characterTag8Name?: NullableTextOperation.TwoWayOperation;
     characterTag9Name?: NullableTextOperation.TwoWayOperation;
     characterTag10Name?: NullableTextOperation.TwoWayOperation;
-    dicePieceValues?: RecordOperation.RecordTwoWayOperation<
-        DicePieceValue.State,
-        DicePieceValue.TwoWayOperation
-    >;
-    imagePieceValues?: RecordOperation.RecordTwoWayOperation<
-        ImagePieceValue.State,
-        ImagePieceValue.TwoWayOperation
-    >;
     memos?: RecordOperation.RecordTwoWayOperation<Memo.State, Memo.TwoWayOperation>;
     name?: TextOperation.TwoWayOperation;
     numParamNames?: RecordOperation.RecordTwoWayOperation<
@@ -263,10 +225,6 @@ export type TwoWayOperation = {
     publicChannel9Name?: TextOperation.TwoWayOperation;
     publicChannel10Name?: TextOperation.TwoWayOperation;
     rollCalls?: RecordOperation.RecordTwoWayOperation<RollCall.State, RollCall.TwoWayOperation>;
-    stringPieceValues?: RecordOperation.RecordTwoWayOperation<
-        StringPieceValue.State,
-        StringPieceValue.TwoWayOperation
-    >;
     strParamNames?: RecordOperation.RecordTwoWayOperation<
         ParamNames.State,
         ParamNames.TwoWayOperation

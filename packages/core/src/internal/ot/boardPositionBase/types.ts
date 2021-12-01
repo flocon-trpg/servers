@@ -1,25 +1,29 @@
 import * as t from 'io-ts';
 import { Maybe, maybe } from '../../maybe';
-import { createOperation } from '../util/createOperation';
 import * as ReplaceOperation from '../util/replaceOperation';
+import * as NullableTextOperation from '../util/nullableTextOperation';
 
 const numberDownOperation = t.type({ oldValue: t.number });
 const booleanDownOperation = t.type({ oldValue: t.boolean });
 const numberUpOperation = t.type({ newValue: t.number });
 const booleanUpOperation = t.type({ newValue: t.boolean });
 
-// boardId変更機能は今の所UIに存在しないので定義していない
-
 export const state = t.type({
-    $v: t.literal(2),
-    $r: t.literal(1),
-    boardId: t.string,
     h: t.number,
     isPositionLocked: t.boolean,
-    isPrivate: t.boolean,
 
     /**
-     * @description To 3rd-party developers: Please always set undefined because it is not implemented yet in the official web-server.
+     * @description To 3rd-party developers: Please always set undefined to this if it is CharacterPiece or PortraitPiece.
+     */
+    memo: maybe(t.string),
+
+    /**
+     * @description To 3rd-party developers: Please always set undefined to this if it is CharacterPiece or PortraitPiece.
+     */
+    name: maybe(t.string),
+
+    /**
+     * @description To 3rd-party developers: Please always set undefined to this because it is not implemented yet in the official web-server.
      */
     opacity: maybe(t.number),
 
@@ -30,11 +34,11 @@ export const state = t.type({
 
 export type State = t.TypeOf<typeof state>;
 
-export const downOperation = createOperation(2, 1, {
-    boardId: t.type({ oldValue: t.string }),
+export const downOperation = t.partial({
     h: numberDownOperation,
     isPositionLocked: booleanDownOperation,
-    isPrivate: booleanDownOperation,
+    memo: NullableTextOperation.downOperation,
+    name: NullableTextOperation.downOperation,
     opacity: t.type({ oldValue: maybe(t.number) }),
     w: numberDownOperation,
     x: numberDownOperation,
@@ -43,11 +47,11 @@ export const downOperation = createOperation(2, 1, {
 
 export type DownOperation = t.TypeOf<typeof downOperation>;
 
-export const upOperation = createOperation(2, 1, {
-    boardId: t.type({ newValue: t.string }),
+export const upOperation = t.partial({
     h: numberUpOperation,
     isPositionLocked: booleanUpOperation,
-    isPrivate: booleanUpOperation,
+    memo: NullableTextOperation.upOperation,
+    name: NullableTextOperation.upOperation,
     opacity: t.type({ newValue: maybe(t.number) }),
     w: numberUpOperation,
     x: numberUpOperation,
@@ -57,13 +61,10 @@ export const upOperation = createOperation(2, 1, {
 export type UpOperation = t.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = {
-    $v: 2;
-    $r: 1;
-
-    boardId?: ReplaceOperation.ReplaceValueTwoWayOperation<string>;
     h?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     isPositionLocked?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
-    isPrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
+    memo?: NullableTextOperation.TwoWayOperation;
+    name?: NullableTextOperation.TwoWayOperation;
     opacity?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<number>>;
     w?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;
     x?: ReplaceOperation.ReplaceValueTwoWayOperation<number>;

@@ -1,7 +1,6 @@
 import * as DieValue from './dieValue/functions';
 import * as DieValueTypes from './dieValue/types';
-import * as Piece from '../../piece/functions';
-import * as PieceTypes from '../../piece/types';
+import * as Piece from '../../../pieceBase/functions';
 import {
     Apply,
     ClientTransform,
@@ -13,27 +12,21 @@ import {
     ServerTransform,
     TwoWayError,
     UpError,
-} from '../../util/type';
-import { isIdRecord } from '../../util/record';
+} from '../../../util/type';
+import { isIdRecord } from '../../../util/record';
 import { Result } from '@kizahasi/result';
 import { chooseRecord } from '@flocon-trpg/utils';
-import * as RecordOperation from '../../util/recordOperation';
-import * as ReplaceOperation from '../../util/replaceOperation';
-import {
-    dicePieceValueStrIndexes,
-    DownOperation,
-    State,
-    TwoWayOperation,
-    UpOperation,
-} from './types';
-import * as Room from '../types';
+import * as RecordOperation from '../../../util/recordOperation';
+import * as ReplaceOperation from '../../../util/replaceOperation';
+import { dicePieceStrIndexes, DownOperation, State, TwoWayOperation, UpOperation } from './types';
+import * as Room from '../../types';
 import {
     anyValue,
     RequestedBy,
     isCharacterOwner,
     canChangeOwnerCharacterId,
-} from '../../util/requestedBy';
-import * as NullableTextOperation from '../../util/nullableTextOperation';
+} from '../../../util/requestedBy';
+import * as NullableTextOperation from '../../../util/nullableTextOperation';
 
 export const toClientState =
     (requestedBy: RequestedBy, currentRoomState: Room.State) =>
@@ -46,45 +39,36 @@ export const toClientState =
         return {
             ...source,
             dice: chooseRecord(source.dice, state => DieValue.toClientState(isAuthorized)(state)),
-            pieces: Piece.toClientStateMany(requestedBy, currentRoomState)(source.pieces),
         };
     };
 
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
     return {
         ...source,
-        memo: source.memo == null ? undefined : NullableTextOperation.toDownOperation(source.memo),
-        name: source.name == null ? undefined : NullableTextOperation.toDownOperation(source.name),
+        memo: undefined,
+        name: undefined,
+        ...Piece.toDownOperation(source),
     };
 };
 
 export const toUpOperation = (source: TwoWayOperation): UpOperation => {
     return {
         ...source,
-        memo: source.memo == null ? undefined : NullableTextOperation.toUpOperation(source.memo),
-        name: source.name == null ? undefined : NullableTextOperation.toUpOperation(source.name),
+        memo: undefined,
+        name: undefined,
+        ...Piece.toUpOperation(source),
     };
 };
 
-export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, operation }) => {
-    const result: State = { ...state };
+export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
+    const piece = Piece.apply({ state, operation });
+    if (piece.isError) {
+        return piece;
+    }
+    const result: State = { ...state, ...piece.value };
 
     if (operation.ownerCharacterId != null) {
         result.ownerCharacterId = operation.ownerCharacterId.newValue;
-    }
-    if (operation.memo != null) {
-        const valueResult = NullableTextOperation.apply(state.memo, operation.memo);
-        if (valueResult.isError) {
-            return valueResult;
-        }
-        result.memo = valueResult.value;
-    }
-    if (operation.name != null) {
-        const valueResult = NullableTextOperation.apply(state.name, operation.name);
-        if (valueResult.isError) {
-            return valueResult;
-        }
-        result.name = valueResult.value;
     }
 
     const dice = RecordOperation.apply<DieValueTypes.State, DieValueTypes.UpOperation, ScalarError>(
@@ -101,40 +85,18 @@ export const apply: Apply<State, UpOperation | TwoWayOperation> = ({ state, oper
     }
     result.dice = dice.value;
 
-    const pieces = RecordOperation.apply<PieceTypes.State, PieceTypes.UpOperation, ScalarError>({
-        prevState: state.pieces,
-        operation: operation.pieces,
-        innerApply: ({ prevState, operation: upOperation }) => {
-            return Piece.apply({ state: prevState, operation: upOperation });
-        },
-    });
-    if (pieces.isError) {
-        return pieces;
-    }
-    result.pieces = pieces.value;
-
     return Result.ok(result);
 };
 
 export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
-    const result: State = { ...state };
+    const piece = Piece.applyBack({ state, operation });
+    if (piece.isError) {
+        return piece;
+    }
+    const result: State = { ...state, ...piece.value };
 
     if (operation.ownerCharacterId != null) {
         result.ownerCharacterId = operation.ownerCharacterId.oldValue;
-    }
-    if (operation.memo != null) {
-        const valueResult = NullableTextOperation.applyBack(state.memo, operation.memo);
-        if (valueResult.isError) {
-            return valueResult;
-        }
-        result.memo = valueResult.value;
-    }
-    if (operation.name != null) {
-        const valueResult = NullableTextOperation.applyBack(state.name, operation.name);
-        if (valueResult.isError) {
-            return valueResult;
-        }
-        result.name = valueResult.value;
     }
 
     const dice = RecordOperation.applyBack<
@@ -153,36 +115,10 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     }
     result.dice = dice.value;
 
-    const pieces = RecordOperation.applyBack<
-        PieceTypes.State,
-        PieceTypes.DownOperation,
-        ScalarError
-    >({
-        nextState: state.pieces,
-        operation: operation.pieces,
-        innerApplyBack: ({ state: nextState, operation }) => {
-            return Piece.applyBack({ state: nextState, operation });
-        },
-    });
-    if (pieces.isError) {
-        return pieces;
-    }
-    result.pieces = pieces.value;
-
     return Result.ok(result);
 };
 
 export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
-    const memo = NullableTextOperation.composeDownOperation(first.memo, second.memo);
-    if (memo.isError) {
-        return memo;
-    }
-
-    const name = NullableTextOperation.composeDownOperation(first.name, second.name);
-    if (name.isError) {
-        return name;
-    }
-
     const dice = RecordOperation.composeDownOperation<
         DieValueTypes.State,
         DieValueTypes.DownOperation,
@@ -199,33 +135,15 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
         return dice;
     }
 
-    const pieces = RecordOperation.composeDownOperation<
-        PieceTypes.State,
-        PieceTypes.DownOperation,
-        DownError
-    >({
-        first: first.pieces,
-        second: second.pieces,
-        innerApplyBack: ({ state, operation }) => {
-            return Piece.applyBack({ state, operation });
-        },
-        innerCompose: params => Piece.composeDownOperation(params),
-    });
-    if (pieces.isError) {
-        return pieces;
-    }
-
     const valueProps: DownOperation = {
         $v: 2,
         $r: 1,
+        ...Piece.composeDownOperation({ first, second }),
         ownerCharacterId: ReplaceOperation.composeDownOperation(
             first.ownerCharacterId,
             second.ownerCharacterId
         ),
-        memo: memo.value,
-        name: name.value,
         dice: dice.value,
-        pieces: pieces.value,
     };
     return Result.ok(valueProps);
 };
@@ -253,31 +171,21 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         return dice;
     }
 
-    const pieces = RecordOperation.restore<
-        PieceTypes.State,
-        PieceTypes.DownOperation,
-        PieceTypes.TwoWayOperation,
-        ScalarError
-    >({
-        nextState: nextState.pieces,
-        downOperation: downOperation.pieces,
-        innerDiff: params => Piece.diff(params),
-        innerRestore: params => Piece.restore(params),
-    });
-    if (pieces.isError) {
-        return pieces;
+    const piece = Piece.restore({ nextState, downOperation });
+    if (piece.isError) {
+        return piece;
     }
 
     const prevState: State = {
         ...nextState,
+        ...piece.value.prevState,
         dice: dice.value.prevState,
-        pieces: pieces.value.prevState,
     };
     const twoWayOperation: TwoWayOperation = {
         $v: 2,
         $r: 1,
+        ...piece.value.twoWayOperation,
         dice: dice.value.twoWayOperation,
-        pieces: pieces.value.twoWayOperation,
     };
 
     if (downOperation.ownerCharacterId !== undefined) {
@@ -287,49 +195,15 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
             newValue: nextState.ownerCharacterId,
         };
     }
-    if (downOperation.memo !== undefined) {
-        const restored = NullableTextOperation.restore({
-            nextState: nextState.memo,
-            downOperation: downOperation.memo,
-        });
-        if (restored.isError) {
-            return restored;
-        }
-        prevState.memo = restored.value.prevState;
-        twoWayOperation.memo = restored.value.twoWayOperation;
-    }
-    if (downOperation.name !== undefined) {
-        const restored = NullableTextOperation.restore({
-            nextState: nextState.name,
-            downOperation: downOperation.name,
-        });
-        if (restored.isError) {
-            return restored;
-        }
-        prevState.name = restored.value.prevState;
-        twoWayOperation.name = restored.value.twoWayOperation;
-    }
 
     return Result.ok({ prevState, nextState, twoWayOperation });
 };
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const dice = RecordOperation.diff<DieValueTypes.State, DieValueTypes.TwoWayOperation>({
-        prevState: prevState.dice,
-        nextState: nextState.dice,
-        innerDiff: params => DieValue.diff(params),
-    });
-    const pieces = RecordOperation.diff<PieceTypes.State, PieceTypes.TwoWayOperation>({
-        prevState: prevState.pieces,
-        nextState: nextState.pieces,
-        innerDiff: params => Piece.diff(params),
-    });
-
     const result: TwoWayOperation = {
         $v: 2,
         $r: 1,
-        dice,
-        pieces,
+        ...Piece.diff({ prevState, nextState }),
     };
 
     if (prevState.ownerCharacterId !== nextState.ownerCharacterId) {
@@ -337,18 +211,6 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
             oldValue: prevState.ownerCharacterId,
             newValue: nextState.ownerCharacterId,
         };
-    }
-    if (prevState.memo !== nextState.memo) {
-        result.memo = NullableTextOperation.diff({
-            prev: prevState.memo,
-            next: nextState.memo,
-        });
-    }
-    if (prevState.name !== nextState.name) {
-        result.name = NullableTextOperation.diff({
-            prev: prevState.name,
-            next: nextState.name,
-        });
     }
 
     if (isIdRecord(result)) {
@@ -395,7 +257,7 @@ export const serverTransform =
             toServerState: state => state,
             cancellationPolicy: {
                 cancelCreate: ({ key }) =>
-                    !isAuthorized || dicePieceValueStrIndexes.every(x => x !== key),
+                    !isAuthorized || dicePieceStrIndexes.every(x => x !== key),
                 cancelRemove: () => !isAuthorized,
                 cancelUpdate: () => !isAuthorized,
             },
@@ -404,40 +266,21 @@ export const serverTransform =
             return dice;
         }
 
-        const pieces = RecordOperation.serverTransform<
-            PieceTypes.State,
-            PieceTypes.State,
-            PieceTypes.TwoWayOperation,
-            PieceTypes.UpOperation,
-            TwoWayError
-        >({
-            prevState: prevState.pieces,
-            nextState: currentState.pieces,
-            first: serverOperation?.pieces,
-            second: clientOperation.pieces,
-            innerTransform: ({ prevState, nextState, first, second }) =>
-                Piece.serverTransform({
-                    prevState,
-                    currentState: nextState,
-                    serverOperation: first,
-                    clientOperation: second,
-                }),
-            toServerState: state => state,
-            cancellationPolicy: {
-                cancelCreate: () => !isAuthorized,
-                cancelRemove: params => !isAuthorized && params.state.isPrivate,
-                cancelUpdate: params => !isAuthorized && params.nextState.isPrivate,
-            },
+        const piece = Piece.serverTransform({
+            prevState,
+            currentState,
+            clientOperation,
+            serverOperation,
         });
-        if (pieces.isError) {
-            return pieces;
+        if (piece.isError) {
+            return piece;
         }
 
         const twoWayOperation: TwoWayOperation = {
             $v: 2,
             $r: 1,
+            ...piece.value,
             dice: dice.value,
-            pieces: pieces.value,
         };
 
         if (
@@ -496,59 +339,27 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         return dice;
     }
 
-    const pieces = RecordOperation.clientTransform<
-        PieceTypes.State,
-        PieceTypes.UpOperation,
-        UpError
-    >({
-        first: first.pieces,
-        second: second.pieces,
-        innerTransform: params => Piece.clientTransform(params),
-        innerDiff: params => Piece.diff(params),
-    });
-    if (pieces.isError) {
-        return pieces;
-    }
+    const piece = Piece.clientTransform({ first, second });
 
     const ownerCharacterId = ReplaceOperation.clientTransform({
         first: first.ownerCharacterId,
         second: second.ownerCharacterId,
     });
 
-    const memo = NullableTextOperation.clientTransform({
-        first: first.memo,
-        second: second.memo,
-    });
-    if (memo.isError) {
-        return memo;
-    }
-
-    const name = NullableTextOperation.clientTransform({
-        first: first.name,
-        second: second.name,
-    });
-    if (name.isError) {
-        return name;
-    }
-
     const firstPrime: UpOperation = {
+        ...piece.value?.firstPrime,
         $v: 2,
         $r: 1,
         dice: dice.value.firstPrime,
-        pieces: pieces.value.firstPrime,
         ownerCharacterId: ownerCharacterId.firstPrime,
-        memo: memo.value.firstPrime,
-        name: name.value.firstPrime,
     };
 
     const secondPrime: UpOperation = {
+        ...piece.value?.secondPrime,
         $v: 2,
         $r: 1,
         dice: dice.value.secondPrime,
-        pieces: pieces.value.secondPrime,
         ownerCharacterId: ownerCharacterId.secondPrime,
-        memo: memo.value.secondPrime,
-        name: name.value.secondPrime,
     };
 
     return Result.ok({

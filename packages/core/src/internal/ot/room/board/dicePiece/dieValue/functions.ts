@@ -1,4 +1,4 @@
-import * as ReplaceOperation from '../../../util/replaceOperation';
+import * as ReplaceOperation from '../../../../util/replaceOperation';
 import {
     Apply,
     ClientTransform,
@@ -7,8 +7,8 @@ import {
     DownError,
     Restore,
     ServerTransform,
-} from '../../../util/type';
-import { isIdRecord } from '../../../util/record';
+} from '../../../../util/type';
+import { isIdRecord } from '../../../../util/record';
 import { Result } from '@kizahasi/result';
 import { DownOperation, State, TwoWayOperation, UpOperation } from './types';
 
@@ -149,7 +149,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
 
 export const serverTransform =
     (isAuthorized: boolean): ServerTransform<State, TwoWayOperation, UpOperation> =>
-    ({ prevState, currentState, clientOperation, serverOperation }) => {
+    ({ prevState, clientOperation, serverOperation }) => {
         if (!isAuthorized) {
             // 自分以外はどのプロパティも編集できない。
             return Result.ok(undefined);

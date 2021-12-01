@@ -11,32 +11,49 @@ import {
     ServerTransform,
 } from '../util/type';
 import { DownOperation, State, TwoWayOperation, UpOperation } from './types';
+import * as NullableTextOperation from '../util/nullableTextOperation';
 
 export const toClientState = (source: State): State => {
     return source;
 };
 
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
-    return source;
+    return {
+        ...source,
+        memo: source.memo == null ? undefined : NullableTextOperation.toDownOperation(source.memo),
+        name: source.name == null ? undefined : NullableTextOperation.toDownOperation(source.name),
+    };
 };
 
 export const toUpOperation = (source: TwoWayOperation): UpOperation => {
-    return source;
+    return {
+        ...source,
+        memo: source.memo == null ? undefined : NullableTextOperation.toUpOperation(source.memo),
+        name: source.name == null ? undefined : NullableTextOperation.toUpOperation(source.name),
+    };
 };
 
 export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     const result: State = { ...state };
-    if (operation.boardId != null) {
-        result.boardId = operation.boardId.newValue;
-    }
     if (operation.h != null) {
         result.h = operation.h.newValue;
     }
     if (operation.isPositionLocked != null) {
         result.isPositionLocked = operation.isPositionLocked.newValue;
     }
-    if (operation.isPrivate != null) {
-        result.isPrivate = operation.isPrivate.newValue;
+    if (operation.memo != null) {
+        const valueResult = NullableTextOperation.apply(state.memo, operation.memo);
+        if (valueResult.isError) {
+            return valueResult;
+        }
+        result.memo = valueResult.value;
+    }
+    if (operation.name != null) {
+        const valueResult = NullableTextOperation.apply(state.name, operation.name);
+        if (valueResult.isError) {
+            return valueResult;
+        }
+        result.name = valueResult.value;
     }
     if (operation.opacity != null) {
         result.opacity = operation.opacity.newValue;
@@ -56,17 +73,25 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
 export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
     const result = { ...state };
 
-    if (operation.boardId != null) {
-        result.boardId = operation.boardId.oldValue;
-    }
     if (operation.h !== undefined) {
         result.h = operation.h.oldValue;
     }
     if (operation.isPositionLocked != null) {
         result.isPositionLocked = operation.isPositionLocked.oldValue;
     }
-    if (operation.isPrivate !== undefined) {
-        result.isPrivate = operation.isPrivate.oldValue;
+    if (operation.memo != null) {
+        const valueResult = NullableTextOperation.applyBack(state.memo, operation.memo);
+        if (valueResult.isError) {
+            return valueResult;
+        }
+        result.memo = valueResult.value;
+    }
+    if (operation.name != null) {
+        const valueResult = NullableTextOperation.applyBack(state.name, operation.name);
+        if (valueResult.isError) {
+            return valueResult;
+        }
+        result.name = valueResult.value;
     }
     if (operation.opacity != null) {
         result.opacity = operation.opacity.oldValue;
@@ -85,16 +110,24 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 };
 
 export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
+    const memo = NullableTextOperation.composeDownOperation(first.memo, second.memo);
+    if (memo.isError) {
+        return memo;
+    }
+
+    const name = NullableTextOperation.composeDownOperation(first.name, second.name);
+    if (name.isError) {
+        return name;
+    }
+
     const valueProps: DownOperation = {
-        $v: 2,
-        $r: 1,
-        boardId: ReplaceOperation.composeDownOperation(first.boardId, second.boardId),
         h: ReplaceOperation.composeDownOperation(first.h, second.h),
         isPositionLocked: ReplaceOperation.composeDownOperation(
             first.isPositionLocked,
             second.isPositionLocked
         ),
-        isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
+        memo: memo.value,
+        name: name.value,
         opacity: ReplaceOperation.composeDownOperation(first.opacity, second.opacity),
         w: ReplaceOperation.composeDownOperation(first.w, second.w),
         x: ReplaceOperation.composeDownOperation(first.x, second.x),
@@ -111,12 +144,8 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         return Result.ok({ prevState: nextState, twoWayOperation: undefined });
     }
     const prevState = { ...nextState };
-    const twoWayOperation: TwoWayOperation = { $v: 2, $r: 1 };
+    const twoWayOperation: TwoWayOperation = {};
 
-    if (downOperation.boardId !== undefined) {
-        prevState.boardId = downOperation.boardId.oldValue;
-        twoWayOperation.boardId = { ...downOperation.boardId, newValue: nextState.boardId };
-    }
     if (downOperation.h !== undefined) {
         prevState.h = downOperation.h.oldValue;
         twoWayOperation.h = { ...downOperation.h, newValue: nextState.h };
@@ -128,12 +157,27 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
             newValue: nextState.isPositionLocked,
         };
     }
-    if (downOperation.isPrivate !== undefined) {
-        prevState.isPrivate = downOperation.isPrivate.oldValue;
-        twoWayOperation.isPrivate = {
-            ...downOperation.isPrivate,
-            newValue: nextState.isPrivate,
-        };
+    if (downOperation.memo !== undefined) {
+        const restored = NullableTextOperation.restore({
+            nextState: nextState.memo,
+            downOperation: downOperation.memo,
+        });
+        if (restored.isError) {
+            return restored;
+        }
+        prevState.memo = restored.value.prevState;
+        twoWayOperation.memo = restored.value.twoWayOperation;
+    }
+    if (downOperation.name !== undefined) {
+        const restored = NullableTextOperation.restore({
+            nextState: nextState.name,
+            downOperation: downOperation.name,
+        });
+        if (restored.isError) {
+            return restored;
+        }
+        prevState.name = restored.value.prevState;
+        twoWayOperation.name = restored.value.twoWayOperation;
     }
     if (downOperation.opacity !== undefined) {
         prevState.opacity = downOperation.opacity.oldValue;
@@ -156,10 +200,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 };
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const resultType: TwoWayOperation = { $v: 2, $r: 1 };
-    if (prevState.boardId !== nextState.boardId) {
-        resultType.boardId = { oldValue: prevState.boardId, newValue: nextState.boardId };
-    }
+    const resultType: TwoWayOperation = {};
     if (prevState.h !== nextState.h) {
         resultType.h = { oldValue: prevState.h, newValue: nextState.h };
     }
@@ -169,11 +210,17 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
             newValue: nextState.isPositionLocked,
         };
     }
-    if (prevState.isPrivate !== nextState.isPrivate) {
-        resultType.isPrivate = {
-            oldValue: prevState.isPrivate,
-            newValue: nextState.isPrivate,
-        };
+    if (prevState.memo !== nextState.memo) {
+        resultType.memo = NullableTextOperation.diff({
+            prev: prevState.memo,
+            next: nextState.memo,
+        });
+    }
+    if (prevState.name !== nextState.name) {
+        resultType.name = NullableTextOperation.diff({
+            prev: prevState.name,
+            next: nextState.name,
+        });
     }
     if (prevState.opacity !== nextState.opacity) {
         resultType.opacity = { oldValue: prevState.opacity, newValue: nextState.opacity };
@@ -198,43 +245,58 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
     clientOperation,
     serverOperation,
 }) => {
-    const twoWayOperation: TwoWayOperation = { $v: 2, $r: 1 };
+    const twoWayOperation: TwoWayOperation = {};
 
-    twoWayOperation.boardId = ReplaceOperation.serverTransform({
-        first: serverOperation?.boardId,
-        second: clientOperation.boardId,
-        prevState: prevState.boardId,
-    });
     twoWayOperation.h = ReplaceOperation.serverTransform({
         first: serverOperation?.h,
         second: clientOperation.h,
         prevState: prevState.h,
     });
+
     twoWayOperation.isPositionLocked = ReplaceOperation.serverTransform({
         first: serverOperation?.isPositionLocked,
         second: clientOperation.isPositionLocked,
         prevState: prevState.isPositionLocked,
     });
-    twoWayOperation.isPrivate = ReplaceOperation.serverTransform({
-        first: serverOperation?.isPrivate,
-        second: clientOperation.isPrivate,
-        prevState: prevState.isPrivate,
+
+    const transformedMemo = NullableTextOperation.serverTransform({
+        first: serverOperation?.memo,
+        second: clientOperation.memo,
+        prevState: prevState.memo,
     });
+    if (transformedMemo.isError) {
+        return transformedMemo;
+    }
+    twoWayOperation.memo = transformedMemo.value;
+
+    const transformedName = NullableTextOperation.serverTransform({
+        first: serverOperation?.name,
+        second: clientOperation.name,
+        prevState: prevState.name,
+    });
+    if (transformedName.isError) {
+        return transformedName;
+    }
+    twoWayOperation.name = transformedName.value;
+
     twoWayOperation.opacity = ReplaceOperation.serverTransform({
         first: serverOperation?.opacity,
         second: clientOperation.opacity,
         prevState: prevState.opacity,
     });
+
     twoWayOperation.w = ReplaceOperation.serverTransform({
         first: serverOperation?.w,
         second: clientOperation.w,
         prevState: prevState.w,
     });
+
     twoWayOperation.x = ReplaceOperation.serverTransform({
         first: serverOperation?.x,
         second: clientOperation.x,
         prevState: prevState.x,
     });
+
     twoWayOperation.y = ReplaceOperation.serverTransform({
         first: serverOperation?.y,
         second: clientOperation.y,
@@ -249,46 +311,57 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
 };
 
 export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
-    const boardId = ReplaceOperation.clientTransform({
-        first: first.boardId,
-        second: second.boardId,
-    });
     const h = ReplaceOperation.clientTransform({
         first: first.h,
         second: second.h,
     });
+
     const isPositionLocked = ReplaceOperation.clientTransform({
         first: first.isPositionLocked,
         second: second.isPositionLocked,
     });
-    const isPrivate = ReplaceOperation.clientTransform({
-        first: first.isPrivate,
-        second: second.isPrivate,
+
+    const memo = NullableTextOperation.clientTransform({
+        first: first.memo,
+        second: second.memo,
     });
+    if (memo.isError) {
+        return memo;
+    }
+
+    const name = NullableTextOperation.clientTransform({
+        first: first.name,
+        second: second.name,
+    });
+    if (name.isError) {
+        return name;
+    }
+
     const opacity = ReplaceOperation.clientTransform({
         first: first.opacity,
         second: second.opacity,
     });
+
     const w = ReplaceOperation.clientTransform({
         first: first.w,
         second: second.w,
     });
+
     const x = ReplaceOperation.clientTransform({
         first: first.x,
         second: second.x,
     });
+
     const y = ReplaceOperation.clientTransform({
         first: first.y,
         second: second.y,
     });
 
     const firstPrime: UpOperation = {
-        $v: 2,
-        $r: 1,
-        boardId: boardId.firstPrime,
         h: h.firstPrime,
         isPositionLocked: isPositionLocked.firstPrime,
-        isPrivate: isPrivate.firstPrime,
+        memo: memo.value.firstPrime,
+        name: name.value.firstPrime,
         opacity: opacity.firstPrime,
         w: w.firstPrime,
         x: x.firstPrime,
@@ -296,12 +369,10 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     };
 
     const secondPrime: UpOperation = {
-        $v: 2,
-        $r: 1,
-        boardId: boardId.secondPrime,
         h: h.secondPrime,
         isPositionLocked: isPositionLocked.secondPrime,
-        isPrivate: isPrivate.secondPrime,
+        memo: memo.value.secondPrime,
+        name: name.value.secondPrime,
         opacity: opacity.secondPrime,
         w: w.secondPrime,
         x: x.secondPrime,

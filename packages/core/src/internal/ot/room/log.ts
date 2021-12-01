@@ -2,23 +2,25 @@ import * as RoomTypes from './types';
 import * as RecordOperation from '../util/recordOperation';
 import { replace } from '../util/recordOperationElement';
 import { recordForEach } from '@flocon-trpg/utils';
-import * as DicePieceValue from './dicePieceValue/functions';
-import * as DicePieceValueTypes from './dicePieceValue/types';
-import * as DicePieceValueLog from './dicePieceValue/log';
-import * as StringPieceValue from './stringPieceValue/functions';
-import * as StringPieceValueTypes from './stringPieceValue/types';
-import * as StringPieceValueLog from './stringPieceValue/log';
-import { createType, deleteType } from '../piece/log';
+import * as Board from './board/functions';
+import * as BoardTypes from './board/types';
+import * as DicePiece from './board/dicePiece/functions';
+import * as DicePieceLog from './board/dicePiece/log';
+import * as StringPiece from './board/stringPiece/functions';
+import * as StringPieceLog from './board/stringPiece/log';
+import { createType, deleteType } from '../pieceBase/log';
 import { restrict } from '../util/requestedBy';
 
-type DicePieceValueLogType = {
+type DicePieceLogType = {
+    boardId: string;
     stateId: string;
-    value: DicePieceValueLog.Type;
+    value: DicePieceLog.Type;
 };
 
-type StringPieceValueLogType = {
+type StringPieceLogType = {
+    boardId: string;
     stateId: string;
-    value: StringPieceValueLog.Type;
+    value: StringPieceLog.Type;
 };
 
 export const createLogs = ({
@@ -28,116 +30,175 @@ export const createLogs = ({
     prevState: RoomTypes.State;
     nextState: RoomTypes.State;
 }) => {
-    const dicePieceValuesDiff = RecordOperation.diff<
-        DicePieceValueTypes.State,
-        DicePieceValueTypes.TwoWayOperation
-    >({
-        prevState: prevState.dicePieceValues,
-        nextState: nextState.dicePieceValues,
-        innerDiff: params => DicePieceValue.diff(params),
+    const boardsDiff = RecordOperation.diff<BoardTypes.State, BoardTypes.TwoWayOperation>({
+        prevState: prevState.boards,
+        nextState: nextState.boards,
+        innerDiff: params => Board.diff(params),
     });
+    if (boardsDiff == null) {
+        return undefined;
+    }
 
-    const stringPieceValuesDiff = RecordOperation.diff<
-        StringPieceValueTypes.State,
-        StringPieceValueTypes.TwoWayOperation
-    >({
-        prevState: prevState.stringPieceValues,
-        nextState: nextState.stringPieceValues,
-        innerDiff: params => StringPieceValue.diff(params),
-    });
+    const dicePieceLogs: DicePieceLogType[] = [];
+    const stringPieceLogs: StringPieceLogType[] = [];
 
-    const dicePieceValueLogs: DicePieceValueLogType[] = [];
-    recordForEach(dicePieceValuesDiff ?? {}, (value, stateId) => {
-        if (value.type === replace) {
-            if (value.replace.newValue == null) {
-                if (value.replace.oldValue != null) {
-                    dicePieceValueLogs.push({
+    recordForEach(boardsDiff, (diff, boardId) => {
+        if (diff.type === replace) {
+            recordForEach(diff.replace.oldValue?.dicePieces ?? {}, (value, stateId) => {
+                dicePieceLogs.push({
+                    boardId,
+                    stateId,
+                    value: {
+                        $v: 2,
+                        $r: 1,
+                        type: deleteType,
+                        value: DicePiece.toClientState({ type: restrict }, prevState)(value),
+                    },
+                });
+            });
+            recordForEach(diff.replace.newValue?.dicePieces ?? {}, (value, stateId) => {
+                dicePieceLogs.push({
+                    boardId,
+                    stateId,
+                    value: {
+                        $v: 2,
+                        $r: 1,
+                        type: createType,
+                        value: DicePiece.toClientState({ type: restrict }, prevState)(value),
+                    },
+                });
+            });
+
+            recordForEach(diff.replace.oldValue?.stringPieces ?? {}, (value, stateId) => {
+                stringPieceLogs.push({
+                    boardId,
+                    stateId,
+                    value: {
+                        $v: 2,
+                        $r: 1,
+                        type: deleteType,
+                        value: StringPiece.toClientState({ type: restrict }, prevState)(value),
+                    },
+                });
+            });
+            recordForEach(diff.replace.newValue?.stringPieces ?? {}, (value, stateId) => {
+                stringPieceLogs.push({
+                    boardId,
+                    stateId,
+                    value: {
+                        $v: 2,
+                        $r: 1,
+                        type: createType,
+                        value: StringPiece.toClientState({ type: restrict }, prevState)(value),
+                    },
+                });
+            });
+
+            return;
+        }
+
+        const nextBoard = nextState.boards[boardId];
+        if (nextBoard == null) {
+            throw new Error('this should not happen. Board.diff has some bugs?');
+        }
+
+        recordForEach(diff.update.dicePieces ?? {}, (operation, stateId) => {
+            if (operation.type === replace) {
+                if (operation.replace.oldValue != null) {
+                    dicePieceLogs.push({
+                        boardId,
                         stateId,
                         value: {
                             $v: 2,
                             $r: 1,
                             type: deleteType,
-                            value: DicePieceValue.toClientState(
+                            value: DicePiece.toClientState(
                                 { type: restrict },
                                 prevState
-                            )(value.replace.oldValue),
+                            )(operation.replace.oldValue),
                         },
                     });
                 }
+                if (operation.replace.newValue != null) {
+                    dicePieceLogs.push({
+                        boardId,
+                        stateId,
+                        value: {
+                            $v: 2,
+                            $r: 1,
+                            type: createType,
+                            value: DicePiece.toClientState(
+                                { type: restrict },
+                                prevState
+                            )(operation.replace.newValue),
+                        },
+                    });
+                }
+
                 return;
             }
-            dicePieceValueLogs.push({
-                stateId,
-                value: {
-                    $v: 2,
-                    $r: 1,
-                    type: createType,
-                    value: DicePieceValue.toClientState(
-                        { type: restrict },
-                        nextState
-                    )(value.replace.newValue),
-                },
-            });
-            return;
-        }
 
-        const nextDicePieceValue = nextState.dicePieceValues[stateId];
-        if (nextDicePieceValue == null) {
-            throw new Error('this should not happen. Character.diff may have some bugs?');
-        }
-        dicePieceValueLogs.push({
-            stateId,
-            value: DicePieceValueLog.ofOperation(value.update, nextDicePieceValue),
+            const nextDicePiece = nextBoard.dicePieces[stateId];
+            if (nextDicePiece == null) {
+                throw new Error('this should not happen');
+            }
+            dicePieceLogs.push({
+                boardId,
+                stateId,
+                value: DicePieceLog.ofOperation(operation.update, nextDicePiece),
+            });
         });
-    });
 
-    const stringPieceValueLogs: StringPieceValueLogType[] = [];
-    recordForEach(stringPieceValuesDiff ?? {}, (value, stateId) => {
-        if (value.type === replace) {
-            if (value.replace.newValue == null) {
-                if (value.replace.oldValue != null) {
-                    stringPieceValueLogs.push({
+        recordForEach(diff.update.stringPieces ?? {}, (operation, stateId) => {
+            if (operation.type === replace) {
+                if (operation.replace.oldValue != null) {
+                    stringPieceLogs.push({
+                        boardId,
                         stateId,
                         value: {
                             $v: 2,
                             $r: 1,
                             type: deleteType,
-                            value: StringPieceValue.toClientState(
+                            value: StringPiece.toClientState(
                                 { type: restrict },
                                 prevState
-                            )(value.replace.oldValue),
+                            )(operation.replace.oldValue),
                         },
                     });
                 }
+                if (operation.replace.newValue != null) {
+                    stringPieceLogs.push({
+                        boardId,
+                        stateId,
+                        value: {
+                            $v: 2,
+                            $r: 1,
+                            type: createType,
+                            value: StringPiece.toClientState(
+                                { type: restrict },
+                                prevState
+                            )(operation.replace.newValue),
+                        },
+                    });
+                }
+
                 return;
             }
-            stringPieceValueLogs.push({
-                stateId,
-                value: {
-                    $v: 2,
-                    $r: 1,
-                    type: createType,
-                    value: StringPieceValue.toClientState(
-                        { type: restrict },
-                        nextState
-                    )(value.replace.newValue),
-                },
-            });
-            return;
-        }
 
-        const nextStringPieceValue = nextState.stringPieceValues[stateId];
-        if (nextStringPieceValue == null) {
-            throw new Error('this should not happen. Character.diff may have some bugs?');
-        }
-        stringPieceValueLogs.push({
-            stateId,
-            value: StringPieceValueLog.ofOperation(value.update, nextStringPieceValue),
+            const nextStringPiece = nextBoard.stringPieces[stateId];
+            if (nextStringPiece == null) {
+                throw new Error('this should not happen');
+            }
+            stringPieceLogs.push({
+                boardId,
+                stateId,
+                value: StringPieceLog.ofOperation(operation.update, nextStringPiece),
+            });
         });
     });
 
     return {
-        dicePieceValueLogs,
-        stringPieceValueLogs,
+        dicePieceLogs,
+        stringPieceLogs,
     };
 };

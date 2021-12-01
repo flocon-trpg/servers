@@ -1,10 +1,9 @@
 import * as t from 'io-ts';
-import { recordUpOperationElementFactory } from '../../util/recordOperationElement';
 import * as StringPieceValueTypes from './types';
-import * as PieceTypes from '../../piece/types';
-import { record } from '../../util/record';
-import { createType, deleteType, updateType } from '../../piece/log';
-import { maybe } from '../../../maybe';
+import * as PieceBase from '../../../pieceBase/functions';
+import * as PieceBaseTypes from '../../../pieceBase/types';
+import { createType, deleteType, updateType } from '../../../pieceBase/log';
+import { maybe } from '../../../../maybe';
 
 const update = t.intersection([
     t.type({
@@ -13,14 +12,11 @@ const update = t.intersection([
 
         type: t.literal(updateType),
     }),
+    PieceBaseTypes.upOperation,
     t.partial({
         ownerCharacterId: t.type({ newValue: maybe(t.string) }),
         isValuePrivateChanged: t.type({ newValue: maybe(t.string) }),
         isValueChanged: t.boolean,
-        pieces: record(
-            t.string,
-            recordUpOperationElementFactory(PieceTypes.state, PieceTypes.upOperation)
-        ),
     }),
 ]);
 
@@ -63,6 +59,7 @@ export const ofOperation = (
     currentState: StringPieceValueTypes.State
 ): Type => {
     return {
+        ...PieceBase.toUpOperation(operation),
         $v: 2,
         $r: 1,
         type: updateType,
@@ -75,7 +72,5 @@ export const ofOperation = (
                 : {
                       newValue: operation.isValuePrivate.newValue ? undefined : currentState.value,
                   },
-
-        pieces: operation.pieces,
     };
 };

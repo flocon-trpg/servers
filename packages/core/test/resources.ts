@@ -1,4 +1,4 @@
-import { State, Player, Spectator, CharacterState } from '../src';
+import { State, Player, Spectator, CharacterState, BoardState } from '../src';
 import { forceMaxLength100String } from './forceMaxLength100String';
 
 export namespace Resources {
@@ -30,6 +30,26 @@ export namespace Resources {
         }
     }
 
+    export namespace Board {
+        export const emptyState = (ownerParticipantId: string | undefined): BoardState => ({
+            $v: 2,
+            $r: 1,
+            backgroundImage: undefined,
+            backgroundImageZoom: 1,
+            cellColumnCount: 0,
+            cellHeight: 0,
+            cellOffsetX: 0,
+            cellOffsetY: 0,
+            cellRowCount: 0,
+            cellWidth: 0,
+            dicePieces: {},
+            imagePieces: {},
+            name: '',
+            ownerParticipantId,
+            stringPieces: {},
+        });
+    }
+
     export namespace Character {
         export const emptyState = (ownerParticipantId: string | undefined): CharacterState => ({
             $v: 2,
@@ -57,7 +77,7 @@ export namespace Resources {
             numMaxParams: {},
             strParams: {},
             pieces: {},
-            portraitPositions: {},
+            portraitPieces: {},
             ownerParticipantId,
         });
     }
@@ -71,8 +91,6 @@ export namespace Resources {
         bgms: {},
         boards: {},
         characters: {},
-        dicePieceValues: {},
-        imagePieceValues: {},
         participants: {
             [Participant.Player1.userUid]: {
                 $v: 2,
@@ -99,7 +117,6 @@ export namespace Resources {
                 role: undefined,
             },
         },
-        stringPieceValues: {},
         boolParamNames: {},
         numParamNames: {},
         strParamNames: {},
@@ -166,8 +183,61 @@ export namespace Resources {
                 cellOffsetY: 10,
                 cellRowCount: 10,
                 cellWidth: 10,
+                dicePieces: {
+                    DICE_PIECE_KEY: {
+                        $v: 2,
+                        $r: 1,
+                        cellH: 1,
+                        cellW: 2,
+                        cellX: 3,
+                        cellY: 4,
+                        isCellMode: false,
+                        isPositionLocked: false,
+                        opacity: undefined,
+                        h: 5,
+                        w: 6,
+                        x: 7,
+                        y: 8,
+                        name: undefined,
+                        memo: undefined,
+                        dice: {
+                            '1': {
+                                $v: 1,
+                                $r: 1,
+                                dieType: 'D6',
+                                isValuePrivate: false,
+                                value: 3,
+                            },
+                        },
+                        ownerCharacterId: Participant.Player2.userUid,
+                    },
+                },
+                imagePieces: {},
                 name: 'BOARD_NAME',
                 ownerParticipantId: Participant.Player1.userUid,
+                stringPieces: {
+                    STR_PIECE_KEY: {
+                        $v: 2,
+                        $r: 1,
+                        cellH: 1,
+                        cellW: 2,
+                        cellX: 3,
+                        cellY: 4,
+                        isCellMode: false,
+                        isPositionLocked: false,
+                        opacity: undefined,
+                        h: 5,
+                        w: 6,
+                        x: 7,
+                        y: 8,
+                        isValuePrivate: false,
+                        value: 'STR_PIECE_VALUE',
+                        valueInputType: undefined,
+                        name: undefined,
+                        memo: undefined,
+                        ownerCharacterId: Participant.Player2.userUid,
+                    },
+                },
             },
         },
         characters: {
@@ -252,13 +322,15 @@ export namespace Resources {
                         isPositionLocked: false,
                         isPrivate: false,
                         opacity: undefined,
+                        memo: undefined,
+                        name: undefined,
                         h: 5,
                         w: 6,
                         x: 7,
                         y: 8,
                     },
                 },
-                portraitPositions: {
+                portraitPieces: {
                     PORTRAIT_LOCATION: {
                         $v: 2,
                         $r: 1,
@@ -266,6 +338,8 @@ export namespace Resources {
                         isPositionLocked: false,
                         isPrivate: false,
                         opacity: undefined,
+                        memo: undefined,
+                        name: undefined,
                         h: 5,
                         w: 6,
                         x: 7,
@@ -291,44 +365,6 @@ export namespace Resources {
                 name: 'BOOL_PARAM_NAME',
             },
         },
-        dicePieceValues: {
-            DICE_PIECE_KEY: {
-                $v: 2,
-                $r: 1,
-                name: undefined,
-                memo: undefined,
-                dice: {
-                    '1': {
-                        $v: 1,
-                        $r: 1,
-                        dieType: 'D6',
-                        isValuePrivate: false,
-                        value: 3,
-                    },
-                },
-                ownerCharacterId: Participant.Player2.userUid,
-                pieces: {
-                    DICE_PIECE_KEY: {
-                        $v: 2,
-                        $r: 1,
-                        boardId,
-                        cellH: 1,
-                        cellW: 2,
-                        cellX: 3,
-                        cellY: 4,
-                        isCellMode: false,
-                        isPositionLocked: false,
-                        isPrivate: false,
-                        opacity: undefined,
-                        h: 5,
-                        w: 6,
-                        x: 7,
-                        y: 8,
-                    },
-                },
-            },
-        },
-        imagePieceValues: {},
         numParamNames: {
             '1': {
                 $v: 1,
@@ -379,36 +415,5 @@ export namespace Resources {
         publicChannel8Name: '',
         publicChannel9Name: '',
         publicChannel10Name: '',
-        stringPieceValues: {
-            STR_PIECE_KEY: {
-                $v: 2,
-                $r: 1,
-                isValuePrivate: false,
-                value: 'STR_PIECE_VALUE',
-                valueInputType: undefined,
-                name: undefined,
-                memo: undefined,
-                ownerCharacterId: Participant.Player2.userUid,
-                pieces: {
-                    DICE_PIECE_KEY: {
-                        $v: 2,
-                        $r: 1,
-                        boardId,
-                        cellH: 1,
-                        cellW: 2,
-                        cellX: 3,
-                        cellY: 4,
-                        isCellMode: false,
-                        isPositionLocked: false,
-                        isPrivate: false,
-                        opacity: undefined,
-                        h: 5,
-                        w: 6,
-                        x: 7,
-                        y: 8,
-                    },
-                },
-            },
-        },
     };
 }

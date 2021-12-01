@@ -4,10 +4,6 @@ import * as Board from './board/functions';
 import * as BoardTypes from './board/types';
 import * as Character from './character/functions';
 import * as CharacterTypes from './character/types';
-import * as DicePieceValue from './dicePieceValue/functions';
-import * as DicePieceValueTypes from './dicePieceValue/types';
-import * as ImagePieceValue from './imagePieceValue/functions';
-import * as ImagePieceValueTypes from './imagePieceValue/types';
 import * as Memo from './memo/functions';
 import * as MemoTypes from './memo/types';
 import * as NullableTextOperation from '../util/nullableTextOperation';
@@ -20,8 +16,6 @@ import { mapRecordOperationElement } from '../util/recordOperationElement';
 import * as ReplaceOperation from '../util/replaceOperation';
 import * as RollCall from './rollCall/functions';
 import * as RollCallTypes from './rollCall/types';
-import * as StringPieceValue from './stringPieceValue/functions';
-import * as StringPieceValueTypes from './stringPieceValue/types';
 import * as TextOperation from '../util/textOperation';
 import {
     Apply,
@@ -47,7 +41,6 @@ import {
     isOwner,
     anyValue,
     none,
-    isCharacterOwner,
     isBoardOwner,
     admin,
 } from '../util/requestedBy';
@@ -77,7 +70,7 @@ export const toClientState =
                         requestedBy,
                         currentRoomState: source,
                     }),
-                toClientState: ({ state }) => Board.toClientState(state),
+                toClientState: ({ state }) => Board.toClientState(requestedBy, source)(state),
             }),
             characters: RecordOperation.toClientState<CharacterTypes.State, CharacterTypes.State>({
                 serverState: source.characters,
@@ -95,29 +88,6 @@ export const toClientState =
                         requestedBy,
                         source
                     )(state),
-            }),
-            dicePieceValues: RecordOperation.toClientState<
-                DicePieceValueTypes.State,
-                DicePieceValueTypes.State
-            >({
-                serverState: source.dicePieceValues,
-                isPrivate: () => false,
-                toClientState: ({ state }) =>
-                    DicePieceValue.toClientState(requestedBy, source)(state),
-            }),
-            imagePieceValues: RecordOperation.toClientState<
-                ImagePieceValueTypes.State,
-                ImagePieceValueTypes.State
-            >({
-                serverState: source.imagePieceValues,
-                isPrivate: state =>
-                    state.isPrivate &&
-                    !isOwner({
-                        requestedBy,
-                        ownerParticipantId: state.ownerParticipantId ?? anyValue,
-                    }),
-                toClientState: ({ state }) =>
-                    ImagePieceValue.toClientState(requestedBy, source)(state),
             }),
             memos: RecordOperation.toClientState({
                 serverState: source.memos,
@@ -138,15 +108,6 @@ export const toClientState =
                 serverState: source.rollCalls,
                 isPrivate: () => false,
                 toClientState: ({ state }) => RollCall.toClientState(state),
-            }),
-            stringPieceValues: RecordOperation.toClientState<
-                StringPieceValueTypes.State,
-                StringPieceValueTypes.State
-            >({
-                serverState: source.stringPieceValues,
-                isPrivate: () => false,
-                toClientState: ({ state }) =>
-                    StringPieceValue.toClientState(requestedBy, source)(state),
             }),
             strParamNames: RecordOperation.toClientState({
                 serverState: source.strParamNames,
@@ -239,26 +200,6 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
             source.characterTag10Name == null
                 ? undefined
                 : NullableTextOperation.toDownOperation(source.characterTag10Name),
-        dicePieceValues:
-            source.dicePieceValues == null
-                ? undefined
-                : chooseRecord(source.dicePieceValues, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: DicePieceValue.toDownOperation,
-                      })
-                  ),
-        imagePieceValues:
-            source.imagePieceValues == null
-                ? undefined
-                : chooseRecord(source.imagePieceValues, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: ImagePieceValue.toDownOperation,
-                      })
-                  ),
         memos:
             source.memos == null
                 ? undefined
@@ -338,16 +279,6 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
                           source: operation,
                           mapReplace: x => x,
                           mapOperation: RollCall.toDownOperation,
-                      })
-                  ),
-        stringPieceValues:
-            source.stringPieceValues == null
-                ? undefined
-                : chooseRecord(source.stringPieceValues, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: StringPieceValue.toDownOperation,
                       })
                   ),
         strParamNames:
@@ -446,26 +377,6 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
             source.characterTag10Name == null
                 ? undefined
                 : NullableTextOperation.toUpOperation(source.characterTag10Name),
-        dicePieceValues:
-            source.dicePieceValues == null
-                ? undefined
-                : chooseRecord(source.dicePieceValues, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: DicePieceValue.toUpOperation,
-                      })
-                  ),
-        imagePieceValues:
-            source.imagePieceValues == null
-                ? undefined
-                : chooseRecord(source.imagePieceValues, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: ImagePieceValue.toUpOperation,
-                      })
-                  ),
         memos:
             source.memos == null
                 ? undefined
@@ -547,16 +458,6 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
                           mapOperation: RollCall.toUpOperation,
                       })
                   ),
-        stringPieceValues:
-            source.stringPieceValues == null
-                ? undefined
-                : chooseRecord(source.stringPieceValues, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: StringPieceValue.toUpOperation,
-                      })
-                  ),
         strParamNames:
             source.strParamNames == null
                 ? undefined
@@ -577,11 +478,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
         result.activeBoardId = operation.activeBoardId.newValue;
     }
 
-    const bgms = RecordOperation.apply<
-        BgmTypes.State,
-        BgmTypes.UpOperation | BgmTypes.TwoWayOperation,
-        ScalarError
-    >({
+    const bgms = RecordOperation.apply<BgmTypes.State, BgmTypes.UpOperation, ScalarError>({
         prevState: state.bgms,
         operation: operation.bgms,
         innerApply: ({ prevState, operation }) => {
@@ -595,7 +492,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
 
     const boolParamNames = RecordOperation.apply<
         ParamNamesTypes.State,
-        ParamNamesTypes.UpOperation | ParamNamesTypes.TwoWayOperation,
+        ParamNamesTypes.UpOperation,
         ScalarError
     >({
         prevState: state.boolParamNames,
@@ -623,7 +520,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
 
     const characters = RecordOperation.apply<
         CharacterTypes.State,
-        CharacterTypes.UpOperation | CharacterTypes.TwoWayOperation,
+        CharacterTypes.UpOperation,
         ScalarError
     >({
         prevState: state.characters,
@@ -652,44 +549,6 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
         }
     }
 
-    const dicePieceValues = RecordOperation.apply<
-        DicePieceValueTypes.State,
-        DicePieceValueTypes.UpOperation | DicePieceValueTypes.TwoWayOperation,
-        ScalarError
-    >({
-        prevState: state.dicePieceValues,
-        operation: operation.dicePieceValues,
-        innerApply: ({ prevState, operation: upOperation }) => {
-            return DicePieceValue.apply({
-                state: prevState,
-                operation: upOperation,
-            });
-        },
-    });
-    if (dicePieceValues.isError) {
-        return dicePieceValues;
-    }
-    result.dicePieceValues = dicePieceValues.value;
-
-    const imagePieceValues = RecordOperation.apply<
-        ImagePieceValueTypes.State,
-        ImagePieceValueTypes.UpOperation | ImagePieceValueTypes.TwoWayOperation,
-        ScalarError
-    >({
-        prevState: state.imagePieceValues,
-        operation: operation.imagePieceValues,
-        innerApply: ({ prevState, operation: upOperation }) => {
-            return ImagePieceValue.apply({
-                state: prevState,
-                operation: upOperation,
-            });
-        },
-    });
-    if (imagePieceValues.isError) {
-        return imagePieceValues;
-    }
-    result.imagePieceValues = imagePieceValues.value;
-
     if (operation.name != null) {
         const applied = TextOperation.apply(state.name, operation.name);
         if (applied.isError) {
@@ -700,7 +559,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
 
     const numParamNames = RecordOperation.apply<
         ParamNamesTypes.State,
-        ParamNamesTypes.UpOperation | ParamNamesTypes.TwoWayOperation,
+        ParamNamesTypes.UpOperation,
         ScalarError
     >({
         prevState: state.numParamNames,
@@ -714,11 +573,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     }
     result.numParamNames = numParamNames.value;
 
-    const memo = RecordOperation.apply<
-        MemoTypes.State,
-        MemoTypes.UpOperation | MemoTypes.TwoWayOperation,
-        ScalarError
-    >({
+    const memo = RecordOperation.apply<MemoTypes.State, MemoTypes.UpOperation, ScalarError>({
         prevState: state.memos,
         operation: operation.memos,
         innerApply: ({ prevState, operation }) => {
@@ -760,7 +615,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
 
     const rollCalls = RecordOperation.apply<
         RollCallTypes.State,
-        RollCallTypes.UpOperation | RollCallTypes.TwoWayOperation,
+        RollCallTypes.UpOperation,
         ScalarError
     >({
         prevState: state.rollCalls,
@@ -777,28 +632,9 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     }
     result.rollCalls = rollCalls.value;
 
-    const stringPieceValues = RecordOperation.apply<
-        StringPieceValueTypes.State,
-        StringPieceValueTypes.UpOperation | StringPieceValueTypes.TwoWayOperation,
-        ScalarError
-    >({
-        prevState: state.stringPieceValues,
-        operation: operation.stringPieceValues,
-        innerApply: ({ prevState, operation: upOperation }) => {
-            return StringPieceValue.apply({
-                state: prevState,
-                operation: upOperation,
-            });
-        },
-    });
-    if (stringPieceValues.isError) {
-        return stringPieceValues;
-    }
-    result.stringPieceValues = stringPieceValues.value;
-
     const strParamNames = RecordOperation.apply<
         ParamNamesTypes.State,
-        ParamNamesTypes.UpOperation | ParamNamesTypes.TwoWayOperation,
+        ParamNamesTypes.UpOperation,
         ScalarError
     >({
         prevState: state.strParamNames,
@@ -894,22 +730,6 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
         }
     }
 
-    const dicePieceValues = RecordOperation.applyBack<
-        DicePieceValueTypes.State,
-        DicePieceValueTypes.DownOperation,
-        ScalarError
-    >({
-        nextState: state.dicePieceValues,
-        operation: operation.dicePieceValues,
-        innerApplyBack: ({ state, operation }) => {
-            return DicePieceValue.applyBack({ state, operation });
-        },
-    });
-    if (dicePieceValues.isError) {
-        return dicePieceValues;
-    }
-    result.dicePieceValues = dicePieceValues.value;
-
     if (operation.name != null) {
         const applied = TextOperation.applyBack(state.name, operation.name);
         if (applied.isError) {
@@ -917,25 +737,6 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
         }
         result.name = applied.value;
     }
-
-    const imagePieceValues = RecordOperation.applyBack<
-        ImagePieceValueTypes.State,
-        ImagePieceValueTypes.DownOperation,
-        ScalarError
-    >({
-        nextState: state.imagePieceValues,
-        operation: operation.imagePieceValues,
-        innerApplyBack: ({ state, operation }) => {
-            return ImagePieceValue.applyBack({
-                state,
-                operation,
-            });
-        },
-    });
-    if (imagePieceValues.isError) {
-        return imagePieceValues;
-    }
-    result.imagePieceValues = imagePieceValues.value;
 
     const numParamNames = RecordOperation.applyBack<
         ParamNamesTypes.State,
@@ -995,7 +796,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 
     const rollCalls = RecordOperation.applyBack<
         RollCallTypes.State,
-        RollCallTypes.DownOperation | RollCallTypes.TwoWayOperation,
+        RollCallTypes.DownOperation,
         ScalarError
     >({
         nextState: state.rollCalls,
@@ -1011,22 +812,6 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
         return rollCalls;
     }
     result.rollCalls = rollCalls.value;
-
-    const stringPieceValues = RecordOperation.applyBack<
-        StringPieceValueTypes.State,
-        StringPieceValueTypes.DownOperation,
-        ScalarError
-    >({
-        nextState: state.stringPieceValues,
-        operation: operation.stringPieceValues,
-        innerApplyBack: ({ state, operation }) => {
-            return StringPieceValue.applyBack({ state, operation });
-        },
-    });
-    if (stringPieceValues.isError) {
-        return stringPieceValues;
-    }
-    result.stringPieceValues = stringPieceValues.value;
 
     const strParamNames = RecordOperation.applyBack<
         ParamNamesTypes.State,
@@ -1096,34 +881,6 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
         return characters;
     }
 
-    const dicePieceValues = RecordOperation.composeDownOperation<
-        DicePieceValueTypes.State,
-        DicePieceValueTypes.DownOperation,
-        DownError
-    >({
-        first: first.dicePieceValues,
-        second: second.dicePieceValues,
-        innerApplyBack: params => DicePieceValue.applyBack(params),
-        innerCompose: params => DicePieceValue.composeDownOperation(params),
-    });
-    if (dicePieceValues.isError) {
-        return dicePieceValues;
-    }
-
-    const imagePieceValues = RecordOperation.composeDownOperation<
-        ImagePieceValueTypes.State,
-        ImagePieceValueTypes.DownOperation,
-        DownError
-    >({
-        first: first.imagePieceValues,
-        second: second.imagePieceValues,
-        innerApplyBack: params => ImagePieceValue.applyBack(params),
-        innerCompose: params => ImagePieceValue.composeDownOperation(params),
-    });
-    if (imagePieceValues.isError) {
-        return imagePieceValues;
-    }
-
     const memo = RecordOperation.composeDownOperation({
         first: first.memos,
         second: second.memos,
@@ -1147,20 +904,6 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
     });
     if (numParamNames.isError) {
         return numParamNames;
-    }
-
-    const stringPieceValues = RecordOperation.composeDownOperation<
-        StringPieceValueTypes.State,
-        StringPieceValueTypes.DownOperation,
-        DownError
-    >({
-        first: first.stringPieceValues,
-        second: second.stringPieceValues,
-        innerApplyBack: params => StringPieceValue.applyBack(params),
-        innerCompose: params => StringPieceValue.composeDownOperation(params),
-    });
-    if (stringPieceValues.isError) {
-        return stringPieceValues;
     }
 
     const strParamNames = RecordOperation.composeDownOperation({
@@ -1205,11 +948,8 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
         boolParamNames: boolParamNames.value,
         boards: boards.value,
         characters: characters.value,
-        dicePieceValues: dicePieceValues.value,
-        imagePieceValues: imagePieceValues.value,
         memos: memo.value,
         numParamNames: numParamNames.value,
-        stringPieceValues: stringPieceValues.value,
         strParamNames: strParamNames.value,
         participants: participants.value,
         rollCalls: rollCalls.value,
@@ -1293,36 +1033,6 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         return characters;
     }
 
-    const dicePieceValues = RecordOperation.restore<
-        DicePieceValueTypes.State,
-        DicePieceValueTypes.DownOperation,
-        DicePieceValueTypes.TwoWayOperation,
-        ScalarError
-    >({
-        nextState: nextState.dicePieceValues,
-        downOperation: downOperation.dicePieceValues,
-        innerDiff: params => DicePieceValue.diff(params),
-        innerRestore: params => DicePieceValue.restore(params),
-    });
-    if (dicePieceValues.isError) {
-        return dicePieceValues;
-    }
-
-    const imagePieceValues = RecordOperation.restore<
-        ImagePieceValueTypes.State,
-        ImagePieceValueTypes.DownOperation,
-        ImagePieceValueTypes.TwoWayOperation,
-        ScalarError
-    >({
-        nextState: nextState.imagePieceValues,
-        downOperation: downOperation.imagePieceValues,
-        innerDiff: params => ImagePieceValue.diff(params),
-        innerRestore: params => ImagePieceValue.restore(params),
-    });
-    if (imagePieceValues.isError) {
-        return imagePieceValues;
-    }
-
     const memo = RecordOperation.restore({
         nextState: nextState.memos,
         downOperation: downOperation.memos,
@@ -1341,21 +1051,6 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     });
     if (numParamNames.isError) {
         return numParamNames;
-    }
-
-    const stringPieceValues = RecordOperation.restore<
-        StringPieceValueTypes.State,
-        StringPieceValueTypes.DownOperation,
-        StringPieceValueTypes.TwoWayOperation,
-        ScalarError
-    >({
-        nextState: nextState.stringPieceValues,
-        downOperation: downOperation.stringPieceValues,
-        innerDiff: params => StringPieceValue.diff(params),
-        innerRestore: params => StringPieceValue.restore(params),
-    });
-    if (stringPieceValues.isError) {
-        return stringPieceValues;
     }
 
     const strParamNames = RecordOperation.restore({
@@ -1394,11 +1089,8 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         boards: boards.value.prevState,
         boolParamNames: boolParamNames.value.prevState,
         characters: characters.value.prevState,
-        dicePieceValues: dicePieceValues.value.prevState,
-        imagePieceValues: imagePieceValues.value.prevState,
         memos: memo.value.prevState,
         numParamNames: numParamNames.value.prevState,
-        stringPieceValues: stringPieceValues.value.prevState,
         strParamNames: strParamNames.value.prevState,
         participants: participants.value.prevState,
         rollCalls: rollCalls.value.prevState,
@@ -1410,11 +1102,8 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         boards: boards.value.twoWayOperation,
         boolParamNames: boolParamNames.value.twoWayOperation,
         characters: characters.value.twoWayOperation,
-        dicePieceValues: dicePieceValues.value.twoWayOperation,
-        imagePieceValues: imagePieceValues.value.twoWayOperation,
         memos: memo.value.twoWayOperation,
         numParamNames: numParamNames.value.twoWayOperation,
-        stringPieceValues: stringPieceValues.value.twoWayOperation,
         strParamNames: strParamNames.value.twoWayOperation,
         participants: participants.value.twoWayOperation,
         rollCalls: rollCalls.value.twoWayOperation,
@@ -1496,23 +1185,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         nextState: nextState.characters,
         innerDiff: params => Character.diff(params),
     });
-    const dicePieceValues = RecordOperation.diff<
-        DicePieceValueTypes.State,
-        DicePieceValueTypes.TwoWayOperation
-    >({
-        prevState: prevState.dicePieceValues,
-        nextState: nextState.dicePieceValues,
-        innerDiff: params => DicePieceValue.diff(params),
-    });
-    const imagePieceValues = RecordOperation.diff<
-        ImagePieceValueTypes.State,
-        ImagePieceValueTypes.TwoWayOperation
-    >({
-        prevState: prevState.imagePieceValues,
-        nextState: nextState.imagePieceValues,
-        innerDiff: params => ImagePieceValue.diff(params),
-    });
-    const memo = RecordOperation.diff({
+    const memos = RecordOperation.diff({
         prevState: prevState.memos,
         nextState: nextState.memos,
         innerDiff: params => Memo.diff(params),
@@ -1521,14 +1194,6 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         prevState: prevState.numParamNames,
         nextState: nextState.numParamNames,
         innerDiff: params => ParamNames.diff(params),
-    });
-    const stringPieceValues = RecordOperation.diff<
-        StringPieceValueTypes.State,
-        StringPieceValueTypes.TwoWayOperation
-    >({
-        prevState: prevState.stringPieceValues,
-        nextState: nextState.stringPieceValues,
-        innerDiff: params => StringPieceValue.diff(params),
     });
     const strParamNames = RecordOperation.diff({
         prevState: prevState.strParamNames,
@@ -1552,13 +1217,10 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         boards,
         boolParamNames,
         characters,
-        dicePieceValues,
-        imagePieceValues,
-        memos: memo,
+        memos,
         numParamNames,
         participants,
         rollCalls,
-        stringPieceValues,
         strParamNames,
     };
     if (prevState.activeBoardId !== nextState.activeBoardId) {
@@ -1668,7 +1330,10 @@ export const serverTransform =
             prevState: prevState.boards,
             nextState: currentState.boards,
             innerTransform: ({ first, second, prevState, nextState }) =>
-                Board.serverTransform(requestedBy)({
+                Board.serverTransform(
+                    requestedBy,
+                    currentState
+                )({
                     prevState,
                     currentState: nextState,
                     serverOperation: first,
@@ -1745,94 +1410,6 @@ export const serverTransform =
         });
         if (characters.isError) {
             return characters;
-        }
-
-        const dicePieceValues = RecordOperation.serverTransform<
-            DicePieceValueTypes.State,
-            DicePieceValueTypes.State,
-            DicePieceValueTypes.TwoWayOperation,
-            DicePieceValueTypes.UpOperation,
-            TwoWayError
-        >({
-            first: serverOperation?.dicePieceValues,
-            second: clientOperation.dicePieceValues,
-            prevState: prevState.dicePieceValues,
-            nextState: currentState.dicePieceValues,
-            innerTransform: ({ first, second, prevState, nextState }) =>
-                DicePieceValue.serverTransform(
-                    requestedBy,
-                    currentState
-                )({
-                    prevState,
-                    currentState: nextState,
-                    serverOperation: first,
-                    clientOperation: second,
-                }),
-            toServerState: state => state,
-            cancellationPolicy: {
-                cancelCreate: ({ newState }) =>
-                    !isCharacterOwner({
-                        requestedBy,
-                        characterId: newState.ownerCharacterId ?? none,
-                        currentRoomState: currentState,
-                    }),
-                cancelUpdate: ({ nextState }) =>
-                    !isCharacterOwner({
-                        requestedBy,
-                        characterId: nextState.ownerCharacterId ?? anyValue,
-                        currentRoomState: currentState,
-                    }),
-                cancelRemove: ({ state }) =>
-                    !isCharacterOwner({
-                        requestedBy,
-                        characterId: state.ownerCharacterId ?? anyValue,
-                        currentRoomState: currentState,
-                    }),
-            },
-        });
-        if (dicePieceValues.isError) {
-            return dicePieceValues;
-        }
-
-        const imagePieceValues = RecordOperation.serverTransform<
-            ImagePieceValueTypes.State,
-            ImagePieceValueTypes.State,
-            ImagePieceValueTypes.TwoWayOperation,
-            ImagePieceValueTypes.UpOperation,
-            TwoWayError
-        >({
-            first: serverOperation?.imagePieceValues,
-            second: clientOperation.imagePieceValues,
-            prevState: prevState.imagePieceValues,
-            nextState: currentState.imagePieceValues,
-            innerTransform: ({ first, second, prevState, nextState }) =>
-                ImagePieceValue.serverTransform(requestedBy)({
-                    prevState,
-                    currentState: nextState,
-                    serverOperation: first,
-                    clientOperation: second,
-                }),
-            toServerState: state => state,
-            cancellationPolicy: {
-                cancelCreate: ({ newState }) =>
-                    !isOwner({
-                        requestedBy,
-                        ownerParticipantId: newState.ownerParticipantId ?? none,
-                    }),
-                cancelUpdate: ({ nextState }) =>
-                    !isOwner({
-                        requestedBy,
-                        ownerParticipantId: nextState.ownerParticipantId ?? anyValue,
-                    }) && nextState.isPrivate,
-                cancelRemove: ({ state }) =>
-                    !isOwner({
-                        requestedBy,
-                        ownerParticipantId: state.ownerParticipantId ?? anyValue,
-                    }) && state.isPrivate,
-            },
-        });
-        if (imagePieceValues.isError) {
-            return imagePieceValues;
         }
 
         // TODO: ファイルサイズが巨大になりそうなときに拒否する機能
@@ -1917,53 +1494,6 @@ export const serverTransform =
             return rollCalls;
         }
 
-        const stringPieceValues = RecordOperation.serverTransform<
-            StringPieceValueTypes.State,
-            StringPieceValueTypes.State,
-            StringPieceValueTypes.TwoWayOperation,
-            StringPieceValueTypes.UpOperation,
-            TwoWayError
-        >({
-            first: serverOperation?.stringPieceValues,
-            second: clientOperation.stringPieceValues,
-            prevState: prevState.stringPieceValues,
-            nextState: currentState.stringPieceValues,
-            innerTransform: ({ first, second, prevState, nextState }) =>
-                StringPieceValue.serverTransform(
-                    requestedBy,
-                    currentState
-                )({
-                    prevState,
-                    currentState: nextState,
-                    serverOperation: first,
-                    clientOperation: second,
-                }),
-            toServerState: state => state,
-            cancellationPolicy: {
-                cancelCreate: ({ newState }) =>
-                    !isCharacterOwner({
-                        requestedBy,
-                        characterId: newState.ownerCharacterId ?? none,
-                        currentRoomState: currentState,
-                    }),
-                cancelUpdate: ({ nextState }) =>
-                    !isCharacterOwner({
-                        requestedBy,
-                        characterId: nextState.ownerCharacterId ?? anyValue,
-                        currentRoomState: currentState,
-                    }),
-                cancelRemove: ({ state }) =>
-                    !isCharacterOwner({
-                        requestedBy,
-                        characterId: state.ownerCharacterId ?? anyValue,
-                        currentRoomState: currentState,
-                    }),
-            },
-        });
-        if (stringPieceValues.isError) {
-            return stringPieceValues;
-        }
-
         const strParamNames = RecordOperation.serverTransform<
             ParamNamesTypes.State,
             ParamNamesTypes.State,
@@ -2026,11 +1556,8 @@ export const serverTransform =
             boards: boards.value,
             characters: characters.value,
             boolParamNames: boolParamNames.value,
-            dicePieceValues: dicePieceValues.value,
-            imagePieceValues: imagePieceValues.value,
             memos: memos.value,
             numParamNames: numParamNames.value,
-            stringPieceValues: stringPieceValues.value,
             strParamNames: strParamNames.value,
             participants: participants.value,
             rollCalls: rollCalls.value,
@@ -2179,46 +1706,6 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         return characters;
     }
 
-    const dicePieceValues = RecordOperation.clientTransform<
-        DicePieceValueTypes.State,
-        DicePieceValueTypes.UpOperation,
-        UpError
-    >({
-        first: first.dicePieceValues,
-        second: second.dicePieceValues,
-        innerTransform: params => DicePieceValue.clientTransform(params),
-        innerDiff: params => {
-            const diff = DicePieceValue.diff(params);
-            if (diff == null) {
-                return diff;
-            }
-            return DicePieceValue.toUpOperation(diff);
-        },
-    });
-    if (dicePieceValues.isError) {
-        return dicePieceValues;
-    }
-
-    const imagePieceValues = RecordOperation.clientTransform<
-        ImagePieceValueTypes.State,
-        ImagePieceValueTypes.UpOperation,
-        UpError
-    >({
-        first: first.imagePieceValues,
-        second: second.imagePieceValues,
-        innerTransform: params => ImagePieceValue.clientTransform(params),
-        innerDiff: params => {
-            const diff = ImagePieceValue.diff(params);
-            if (diff == null) {
-                return diff;
-            }
-            return ImagePieceValue.toUpOperation(diff);
-        },
-    });
-    if (imagePieceValues.isError) {
-        return imagePieceValues;
-    }
-
     const memos = RecordOperation.clientTransform<MemoTypes.State, MemoTypes.UpOperation, UpError>({
         first: first.memos,
         second: second.memos,
@@ -2273,26 +1760,6 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     });
     if (rollCalls.isError) {
         return rollCalls;
-    }
-
-    const stringPieceValues = RecordOperation.clientTransform<
-        StringPieceValueTypes.State,
-        StringPieceValueTypes.UpOperation,
-        UpError
-    >({
-        first: first.stringPieceValues,
-        second: second.stringPieceValues,
-        innerTransform: params => StringPieceValue.clientTransform(params),
-        innerDiff: params => {
-            const diff = StringPieceValue.diff(params);
-            if (diff == null) {
-                return diff;
-            }
-            return StringPieceValue.toUpOperation(diff);
-        },
-    });
-    if (stringPieceValues.isError) {
-        return stringPieceValues;
     }
 
     const strParamNames = RecordOperation.clientTransform<
@@ -2351,11 +1818,8 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         boards: boards.value.firstPrime,
         boolParamNames: boolParamNames.value.firstPrime,
         characters: characters.value.firstPrime,
-        dicePieceValues: dicePieceValues.value.firstPrime,
-        imagePieceValues: imagePieceValues.value.firstPrime,
         memos: memos.value.firstPrime,
         numParamNames: numParamNames.value.firstPrime,
-        stringPieceValues: stringPieceValues.value.firstPrime,
         strParamNames: strParamNames.value.firstPrime,
         participants: participants.value.firstPrime,
         rollCalls: rollCalls.value.firstPrime,
@@ -2370,11 +1834,8 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         boards: boards.value.secondPrime,
         boolParamNames: boolParamNames.value.secondPrime,
         characters: characters.value.secondPrime,
-        dicePieceValues: dicePieceValues.value.secondPrime,
-        imagePieceValues: imagePieceValues.value.secondPrime,
         memos: memos.value.secondPrime,
         numParamNames: numParamNames.value.secondPrime,
-        stringPieceValues: stringPieceValues.value.secondPrime,
         strParamNames: strParamNames.value.secondPrime,
         participants: participants.value.secondPrime,
         rollCalls: rollCalls.value.secondPrime,

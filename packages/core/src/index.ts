@@ -115,13 +115,13 @@ export {
     apply as applyBoardPosition,
     diff as boardPositionDiff,
     toUpOperation as toBoardPositionUpOperation,
-} from './internal/ot/boardPosition/functions';
+} from './internal/ot/boardPositionBase/functions';
 
 export {
     State as BoardPositionState,
     UpOperation as BoardPositionUpOperation,
     DownOperation as BoardPositionDownOperation,
-} from './internal/ot/boardPosition/types';
+} from './internal/ot/boardPositionBase/types';
 
 export {
     Master,
@@ -137,13 +137,13 @@ export {
     apply as applyPiece,
     diff as pieceDiff,
     toUpOperation as toPieceUpOperation,
-} from './internal/ot/piece/functions';
+} from './internal/ot/pieceBase/functions';
 
 export {
     State as PieceState,
     UpOperation as PieceUpOperation,
     DownOperation as PieceDownOperation,
-} from './internal/ot/piece/types';
+} from './internal/ot/pieceBase/types';
 
 export {
     apply as applyBoard,
@@ -197,74 +197,71 @@ export {
     apply as applyDicePieceValue,
     diff as dicePieceValueDiff,
     toUpOperation as toDicePieceValueUpOperation,
-} from './internal/ot/room/dicePieceValue/functions';
+} from './internal/ot/room/board/dicePiece/functions';
 
 export {
-    State as DicePieceValueState,
-    UpOperation as DicePieceValueUpOperation,
-    DownOperation as DicePieceValueDownOperation,
-    dicePieceValueStrIndexes,
-} from './internal/ot/room/dicePieceValue/types';
+    State as DicePieceState,
+    UpOperation as DicePieceUpOperation,
+    DownOperation as DicePieceDownOperation,
+    dicePieceStrIndexes,
+} from './internal/ot/room/board/dicePiece/types';
 
 export {
     decode as decodeDicePieceValue,
     parse as parseDicePieceValue,
     exact as exactDicePieceValue,
-} from './internal/ot/room/dicePieceValue/converter';
+} from './internal/ot/room/board/dicePiece/converter';
 
 export {
     apply as applyDieValue,
     diff as dieValueDiff,
     toUpOperation as toDieValueUpOperation,
-} from './internal/ot/room/dicePieceValue/dieValue/functions';
+} from './internal/ot/room/board/dicePiece/dieValue/functions';
 
 export {
     State as DieValueState,
     UpOperation as DieValueUpOperation,
     DownOperation as DieValueDownOperation,
-} from './internal/ot/room/dicePieceValue/dieValue/types';
+} from './internal/ot/room/board/dicePiece/dieValue/types';
 
-export {
-    type as dicePieceValueLog,
-    Type as DicePieceValueLog,
-} from './internal/ot/room/dicePieceValue/log';
+export { type as diceValueLog, Type as DiceValueLog } from './internal/ot/room/board/dicePiece/log';
 
 export {
     apply as applyImagePieceValue,
     diff as imagePieceValueDiff,
     toUpOperation as toImagePieceValueUpOperation,
-} from './internal/ot/room/imagePieceValue/functions';
+} from './internal/ot/room/board/imagePiece/functions';
 
 export {
-    State as ImagePieceValueState,
-    UpOperation as ImagePieceValueUpOperation,
-    DownOperation as ImagePieceValueDownOperation,
-} from './internal/ot/room/imagePieceValue/types';
+    State as ImagePieceState,
+    UpOperation as ImagePieceUpOperation,
+    DownOperation as ImagePieceDownOperation,
+} from './internal/ot/room/board/imagePiece/types';
 
 export {
     apply as applyNumberPieceValue,
     diff as stringPieceValueDiff,
     toUpOperation as toStringPieceValueUpOperation,
-} from './internal/ot/room/stringPieceValue/functions';
+} from './internal/ot/room/board/stringPiece/functions';
 
 export {
-    State as StringPieceValueState,
-    UpOperation as StringPieceValueUpOperation,
-    DownOperation as StringPieceValueDownOperation,
+    State as StringPieceState,
+    UpOperation as StringPieceUpOperation,
+    DownOperation as StringPieceDownOperation,
     String,
     Number,
-} from './internal/ot/room/stringPieceValue/types';
+} from './internal/ot/room/board/stringPiece/types';
 
 export {
     decode as decodeStringPieceValue,
     parse as parseStringPieceValue,
     exact as exactStringPieceValue,
-} from './internal/ot/room/stringPieceValue/converter';
+} from './internal/ot/room/board/stringPiece/converter';
 
 export {
     type as stringPieceValueLog,
     Type as StringPieceValueLog,
-} from './internal/ot/room/stringPieceValue/log';
+} from './internal/ot/room/board/stringPiece/log';
 
 export {
     State as MemoState,
@@ -318,7 +315,7 @@ export {
     isOwner,
 } from './internal/ot/util/requestedBy';
 
-export { updateType, createType, deleteType } from './internal/ot/piece/log';
+export { updateType, createType, deleteType } from './internal/ot/pieceBase/log';
 
 export { createLogs } from './internal/ot/room/log';
 

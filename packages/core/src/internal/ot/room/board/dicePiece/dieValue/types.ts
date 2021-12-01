@@ -1,7 +1,7 @@
 import * as t from 'io-ts';
-import * as ReplaceOperation from '../../../util/replaceOperation';
-import { createOperation } from '../../../util/createOperation';
-import { maybe, Maybe } from '../../../../maybe';
+import * as ReplaceOperation from '../../../../util/replaceOperation';
+import { createOperation } from '../../../../util/createOperation';
+import { maybe, Maybe } from '../../../../../maybe';
 
 // 今の所D6しか対応していない。D4は将来のために予約されている。
 export const D4 = 'D4';
