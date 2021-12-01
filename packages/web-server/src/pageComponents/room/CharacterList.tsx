@@ -1,6 +1,20 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
-import { Table, Button, Input, Tooltip } from 'antd';
+import {
+    Table,
+    Button,
+    Input,
+    Tooltip,
+    Tabs,
+    Dropdown,
+    Menu,
+    Modal,
+    Row,
+    Col,
+    Divider,
+    Checkbox,
+    Alert,
+} from 'antd';
 import { update } from '../../stateManagers/states/types';
 import { NumberParameterInput } from '../../components/NumberParameterInput';
 import { BooleanParameterInput } from '../../components/BooleanParameterInput';
@@ -18,10 +32,16 @@ import {
     useNumParamNames,
     useStrParamNames,
 } from '../../hooks/state/useParamNames';
-import { CharacterState, ParamNameState, StrIndex20, strIndex20Array } from '@flocon-trpg/core';
+import {
+    CharacterState,
+    ParamNameState,
+    strIndex10Array,
+    StrIndex20,
+    strIndex20Array,
+} from '@flocon-trpg/core';
 import _ from 'lodash';
 import classNames from 'classnames';
-import { flex, flexRow, itemsCenter } from '../../utils/className';
+import { cancelRnd, flex, flexRow, itemsCenter } from '../../utils/className';
 import { ColumnType } from 'antd/lib/table';
 import { SortOrder } from 'antd/lib/table/interface';
 import { IconView } from '../../components/IconView';
@@ -34,6 +54,15 @@ import produce from 'immer';
 import { characterParameterNamesEditorVisibilityAtom } from './CharacterParameterNamesEditorModal';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { characterTagNamesEditorVisibilityAtom } from './CharacterTagNamesEditorModal';
+import { CharacterTabConfig } from '../../atoms/roomConfig/types/characterTabConfig';
+import { useAtomSelector } from '../../atoms/useAtomSelector';
+import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
+import { CharacterTabName } from '../../components/CharacterTabName';
+import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
+import { CharacterTabConfigUtils } from '../../atoms/roomConfig/types/characterTabConfig/utils';
+import { DrawerFooter } from '../../layouts/DrawerFooter';
+import { Gutter } from 'antd/lib/grid/row';
+import { useCharacterTagNames } from '../../hooks/state/useCharacterTagNames';
 
 type DataSource = {
     key: string;
@@ -45,8 +74,6 @@ type DataSource = {
     onOperateCharacter: (mapping: (operation: CharacterState) => CharacterState) => void;
 };
 
-const minNumParameter = -1000000;
-const maxNumParameter = 1000000;
 const overriddenParameterNamePadding = 6;
 
 const createBooleanParameterColumn = ({
@@ -238,18 +265,18 @@ const createStringParameterColumn = ({
     };
 };
 
-export const CharacterList: React.FC = () => {
+type CharacterListTabPaneProps = {
+    tabConfig: CharacterTabConfig;
+};
+
+const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
+    tabConfig,
+}: CharacterListTabPaneProps) => {
     const myUserUid = useMyUserUid();
     const setRoomState = useSetRoomStateWithImmer();
-    const setCharacterEditorDrawer = useUpdateAtom(characterEditorModalAtom);
-    const setCharacterParameterNamesEditorVisibility = useUpdateAtom(
-        characterParameterNamesEditorVisibilityAtom
-    );
-    const setCharacterTagNamesEditorVisibility = useUpdateAtom(
-        characterTagNamesEditorVisibilityAtom
-    );
+    const setCharacterEditorModal = useUpdateAtom(characterEditorModalAtom);
 
-    const characters = useCharacters();
+    const characters = useCharacters(tabConfig);
     const boolParamNames = useBoolParamNames();
     const numParamNames = useNumParamNames();
     const strParamNames = useStrParamNames();
@@ -299,7 +326,7 @@ export const CharacterList: React.FC = () => {
                         style={{ alignSelf: 'center' }}
                         size='small'
                         onClick={() =>
-                            setCharacterEditorDrawer({
+                            setCharacterEditorModal({
                                 type: update,
                                 stateId: character.stateId,
                             })
@@ -380,22 +407,292 @@ export const CharacterList: React.FC = () => {
         .value();
 
     return (
-        <div>
-            <Button size='small' onClick={() => setCharacterEditorDrawer({ type: create })}>
-                キャラクターを作成
-            </Button>
-            <Button size='small' onClick={() => setCharacterParameterNamesEditorVisibility(true)}>
-                パラメーターを追加・編集・削除
-            </Button>
-            <Button size='small' onClick={() => setCharacterTagNamesEditorVisibility(true)}>
-                タグを追加・編集・削除
-            </Button>
-            <Table
-                columns={columns}
-                dataSource={charactersDataSource}
-                size='small'
-                pagination={false}
-            />
+        <Table
+            columns={columns}
+            dataSource={charactersDataSource}
+            size='small'
+            pagination={false}
+        />
+    );
+};
+
+const modalGutter: [Gutter, Gutter] = [16, 16];
+const modalInputSpan = 18;
+
+type TabEditorModalProps = {
+    // これがundefinedの場合、Modalのvisibleがfalseとみなされる。
+    config?: CharacterTabConfig;
+
+    onChange: (immerRecipe: (config: CharacterTabConfig) => void) => void;
+    onClose: () => void;
+};
+
+const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProps) => {
+    const { config, onChange, onClose } = props;
+
+    const characterTagNames = useCharacterTagNames();
+
+    const tagCheckBoxes: React.ReactNode[] = [];
+    strIndex10Array.forEach(index => {
+        if (config == null) {
+            return;
+        }
+        const key = `showTag${index}` as const;
+        const tagName = characterTagNames?.[`characterTag${index}Name`];
+        if (tagName == null) {
+            return;
+        }
+        tagCheckBoxes.push(
+            <React.Fragment key={index}>
+                <Checkbox
+                    checked={config[key] ?? false}
+                    onChange={e =>
+                        onChange(config => {
+                            config[key] = e.target.checked;
+                        })
+                    }
+                >
+                    <span>{tagName}</span>
+                </Checkbox>
+                <br />
+            </React.Fragment>
+        );
+    });
+
+    return (
+        <Modal
+            className={cancelRnd}
+            visible={config != null}
+            title='タブの編集'
+            closable
+            onCancel={() => onClose()}
+            width={500}
+            footer={
+                <DrawerFooter
+                    close={{
+                        textType: 'close',
+                        onClick: () => onClose(),
+                    }}
+                />
+            }
+        >
+            <Row gutter={modalGutter} align='middle'>
+                <Col flex='auto' />
+                <Col flex={0}>タブ名</Col>
+                <Col span={modalInputSpan}>
+                    <Input
+                        value={config?.tabName ?? ''}
+                        onChange={e =>
+                            onChange(config => {
+                                config.tabName = e.target.value;
+                            })
+                        }
+                    />
+                    {config?.tabName ?? '' !== '' ? null : (
+                        <>
+                            <br />
+                            <Alert
+                                type='info'
+                                showIcon
+                                message='タブ名が空白であるため、自動的に決定された名前が表示されます。'
+                            />
+                        </>
+                    )}
+                </Col>
+            </Row>
+            <Divider />
+            <Row gutter={modalGutter} align='middle'>
+                <Col flex='auto' />
+                <Col flex={0}></Col>
+                <Col span={modalInputSpan}>
+                    <Checkbox
+                        checked={config?.showNoTag ?? false}
+                        onChange={e =>
+                            onChange(config => {
+                                config.showNoTag = e.target.checked;
+                            })
+                        }
+                    >
+                        <span>タグのないキャラクター</span>
+                    </Checkbox>
+                </Col>
+            </Row>
+            <Divider dashed />
+            <Row gutter={modalGutter} align='middle'>
+                <Col flex='auto' />
+                <Col flex={0}></Col>
+                <Col span={modalInputSpan}>{tagCheckBoxes}</Col>
+            </Row>
+        </Modal>
+    );
+};
+
+export const CharacterList: React.FC = () => {
+    const tabs = useAtomSelector(
+        roomConfigAtom,
+        roomConfig => roomConfig?.panels.characterPanel.tabs
+    );
+    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setCharacterParameterNamesEditorVisibility = useUpdateAtom(
+        characterParameterNamesEditorVisibilityAtom
+    );
+    const setCharacterTagNamesEditorVisibility = useUpdateAtom(
+        characterTagNamesEditorVisibilityAtom
+    );
+    const setCharacterEditorModal = useUpdateAtom(characterEditorModalAtom);
+    const [editingTabConfigKey, setEditingTabConfigKey] = React.useState<string | undefined>();
+
+    const tabPanes = (tabs ?? []).map((tab, tabIndex) => {
+        return (
+            <Tabs.TabPane
+                key={tab.key}
+                tabKey={tab.key}
+                style={{ overflowY: 'scroll' }}
+                closable={false}
+                tab={
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyItems: 'center',
+                        }}
+                    >
+                        <div style={{ flex: '0 0 auto', maxWidth: 100 }}>
+                            <CharacterTabName tabConfig={tab} />
+                        </div>
+                        <div style={{ flex: 1 }} />
+                        <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>
+                            <Dropdown
+                                trigger={['click']}
+                                overlay={
+                                    <Menu>
+                                        <Menu.Item
+                                            icon={<Icon.SettingOutlined />}
+                                            onClick={() => setEditingTabConfigKey(tab.key)}
+                                        >
+                                            編集
+                                        </Menu.Item>
+                                        <Menu.Item
+                                            icon={<Icon.DeleteOutlined />}
+                                            onClick={() => {
+                                                Modal.warn({
+                                                    onOk: () => {
+                                                        setRoomConfig(roomConfig => {
+                                                            if (roomConfig == null) {
+                                                                return;
+                                                            }
+                                                            roomConfig.panels.characterPanel.tabs.splice(
+                                                                tabIndex,
+                                                                1
+                                                            );
+                                                        });
+                                                    },
+                                                    okCancel: true,
+                                                    maskClosable: true,
+                                                    closable: true,
+                                                    content: 'タブを削除します。よろしいですか？',
+                                                });
+                                            }}
+                                        >
+                                            削除
+                                        </Menu.Item>
+                                    </Menu>
+                                }
+                            >
+                                <Button
+                                    style={{
+                                        width: 18,
+                                        minWidth: 18,
+
+                                        // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
+                                        padding: '0 2px',
+                                    }}
+                                    type='text'
+                                    size='small'
+                                    onClick={e => e.stopPropagation()}
+                                >
+                                    <Icon.EllipsisOutlined />
+                                </Button>
+                            </Dropdown>
+                        </div>
+                    </div>
+                }
+            >
+                <CharacterListTabPane tabConfig={tab} />
+            </Tabs.TabPane>
+        );
+    });
+
+    return (
+        <div
+            style={{ display: 'flex', flexDirection: 'column', height: '100%', margin: '2px 4px' }}
+        >
+            <div style={{ paddingBottom: 8 }}>
+                <TabEditorModal
+                    config={tabs?.find(tab => tab.key === editingTabConfigKey)}
+                    onClose={() => setEditingTabConfigKey(undefined)}
+                    onChange={recipe => {
+                        if (editingTabConfigKey == null) {
+                            return;
+                        }
+                        setRoomConfig(roomConfig => {
+                            if (roomConfig == null) {
+                                return;
+                            }
+                            const targetTabConfig = roomConfig.panels.characterPanel.tabs.find(
+                                tab => tab.key === editingTabConfigKey
+                            );
+                            if (targetTabConfig == null) {
+                                return;
+                            }
+                            recipe(targetTabConfig);
+                        });
+                    }}
+                />
+                <Button size='small' onClick={() => setCharacterEditorModal({ type: create })}>
+                    キャラクターを作成
+                </Button>
+                <Button
+                    size='small'
+                    onClick={() => setCharacterParameterNamesEditorVisibility(true)}
+                >
+                    パラメーターを追加・編集・削除
+                </Button>
+                <Button size='small' onClick={() => setCharacterTagNamesEditorVisibility(true)}>
+                    タグを追加・編集・削除
+                </Button>
+            </div>
+            <Tabs
+                type='editable-card'
+                onEdit={(e, type) => {
+                    if (type === 'remove') {
+                        if (typeof e !== 'string') {
+                            return;
+                        }
+                        setRoomConfig(roomConfig => {
+                            if (roomConfig == null) {
+                                return;
+                            }
+                            [...roomConfig.panels.characterPanel.tabs].forEach((tab, i) => {
+                                if (tab.key === e) {
+                                    roomConfig.panels.characterPanel.tabs.splice(i, 1);
+                                }
+                            });
+                        });
+                        return;
+                    }
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        roomConfig.panels.characterPanel.tabs.push(
+                            CharacterTabConfigUtils.createEmpty({})
+                        );
+                    });
+                }}
+            >
+                {tabPanes}
+            </Tabs>
         </div>
     );
 };

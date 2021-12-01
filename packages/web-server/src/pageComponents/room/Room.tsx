@@ -519,7 +519,6 @@ export const Room: React.FC = () => {
                             }
                             childrenContainerStyle={{
                                 padding: childrenContainerPadding,
-                                overflowY: 'scroll',
                             }}
                             position={characterPanel}
                             size={characterPanel}

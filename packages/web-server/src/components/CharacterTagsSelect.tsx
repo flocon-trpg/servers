@@ -51,8 +51,6 @@ export const CharacterTagsSelect: React.FC<Props> = ({ character, onChange }: Pr
                 });
             }}
             onDeselect={(value, option) => {
-                console.info(value);
-                console.info(option);
                 onChange(character => {
                     strIndex10Array.forEach(i => {
                         if (option.key === tagKey(i)) {

@@ -1,22 +1,22 @@
 import { MessageFilterUtils } from '../messageFilter/utils';
-import { TabConfig } from '.';
+import { MessageTabConfig } from '.';
 
-export namespace TabConfigUtils {
-    export const createEmpty = ({ tabName }: { tabName?: string }): TabConfig => {
+export namespace MessageTabConfigUtils {
+    export const createEmpty = ({ tabName }: { tabName?: string }): MessageTabConfig => {
         return {
             ...MessageFilterUtils.createEmpty(),
             tabName,
         };
     };
 
-    export const createAll = ({ tabName }: { tabName?: string }): TabConfig => {
+    export const createAll = ({ tabName }: { tabName?: string }): MessageTabConfig => {
         return {
             ...MessageFilterUtils.createAll(),
             tabName,
         };
     };
 
-    export const toTabName = (source: TabConfig): string => {
+    export const toTabName = (source: MessageTabConfig): string => {
         if (source.tabName != null && source.tabName !== '') {
             return source.tabName;
         }

@@ -1,19 +1,23 @@
 import { chooseRecord } from '@flocon-trpg/utils';
 import * as t from 'io-ts';
 import { simpleId } from '@flocon-trpg/core';
-import { partialTabConfig, TabConfig, deserializeTabConfig } from '../tabConfig';
+import {
+    partialMessageTabConfig,
+    MessageTabConfig,
+    deserializeMessageTabConfig,
+} from '../messageTabConfig';
 import {
     deserializeDraggablePanelConfigBase,
     DraggablePanelConfigBase,
     serializedDraggablePanelConfigBase,
 } from '../draggablePanelConfig';
 import { record } from '../../../../utils/io-ts/record';
-import { TabConfigUtils } from '../tabConfig/utils';
+import { MessageTabConfigUtils } from '../messageTabConfig/utils';
 import { defaultMessagePanelPosition } from '../defaultPanelPositions';
 
 export type MessagePanelConfig = {
     isMinimized: boolean;
-    tabs: Record<string, TabConfig | undefined>;
+    tabs: Record<string, MessageTabConfig | undefined>;
     selectedTextColor?: string;
     isPrivateMessageMode: boolean;
     selectedPublicChannelKey?: string;
@@ -26,7 +30,7 @@ export type MessagePanelConfig = {
 export const serializedMessagePanelConfig = t.intersection([
     t.partial({
         isMinimized: t.boolean,
-        tabs: record(t.string, partialTabConfig),
+        tabs: record(t.string, partialMessageTabConfig),
         selectedTextColor: t.string,
         isPrivateMessageMode: t.boolean,
         selectedPublicChannelKey: t.string,
@@ -46,7 +50,7 @@ export const deserializeMessagePanelConfig = (
     return {
         ...deserializeDraggablePanelConfigBase(source),
         isMinimized: source.isMinimized ?? false,
-        tabs: chooseRecord(source.tabs ?? {}, deserializeTabConfig),
+        tabs: chooseRecord(source.tabs ?? {}, deserializeMessageTabConfig),
         selectedTextColor: source.selectedTextColor,
         isPrivateMessageMode: source.isPrivateMessageMode ?? false,
         selectedPublicChannelKey: source.selectedPublicChannelKey,
@@ -60,7 +64,7 @@ export const deserializeMessagePanelConfig = (
 export const defaultMessagePanelConfig = (): MessagePanelConfig => {
     return {
         ...defaultMessagePanelPosition,
-        tabs: { [simpleId()]: TabConfigUtils.createAll({}) },
+        tabs: { [simpleId()]: MessageTabConfigUtils.createAll({}) },
         isPrivateMessageMode: false,
         customCharacterName: '',
     };

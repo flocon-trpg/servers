@@ -61,14 +61,14 @@ import classNames from 'classnames';
 import { getUserUid, MyAuthContext } from '../../contexts/MyAuthContext';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { useMutation } from '@apollo/client';
-import { TabConfig } from '../../atoms/roomConfig/types/tabConfig';
+import { MessageTabConfig } from '../../atoms/roomConfig/types/messageTabConfig';
 import { atom } from 'jotai';
 import { roomAtom, Notification } from '../../atoms/room/roomAtom';
 import { userConfigAtom } from '../../atoms/userConfig/userConfigAtom';
 import { UserConfigUtils } from '../../atoms/userConfig/utils';
 import { MessageFilter } from '../../atoms/roomConfig/types/messageFilter';
 import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
-import { TabConfigUtils } from '../../atoms/roomConfig/types/tabConfig/utils';
+import { MessageTabConfigUtils } from '../../atoms/roomConfig/types/messageTabConfig/utils';
 import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
 import { useAtomValue } from 'jotai/utils';
 
@@ -89,9 +89,9 @@ const allRoomMessagesResultAtom = atom(get => get(roomAtom).allRoomMessagesResul
 
 type TabEditorDrawerProps = {
     // これがundefinedの場合、Drawerのvisibleがfalseとみなされる。
-    config?: TabConfig;
+    config?: MessageTabConfig;
 
-    onChange: (newValue: TabConfig) => void;
+    onChange: (newValue: MessageTabConfig) => void;
     onClose: () => void;
 };
 
@@ -124,7 +124,7 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
         return first.toStringSet();
     }, [config?.privateChannels]);
 
-    const onChange = (newValue: Partial<TabConfig>): void => {
+    const onChange = (newValue: Partial<MessageTabConfig>): void => {
         if (config == null) {
             return;
         }
@@ -866,7 +866,7 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                                   }}
                               >
                                   <div style={{ flex: '0 0 auto', maxWidth: 100 }}>
-                                      {TabConfigUtils.toTabName(tab)}
+                                      {MessageTabConfigUtils.toTabName(tab)}
                                   </div>
                                   <div style={{ flex: 1 }} />
                                   <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>
@@ -1036,7 +1036,7 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                         if (messagePanel == null) {
                             return;
                         }
-                        messagePanel.tabs[simpleId()] = TabConfigUtils.createEmpty({});
+                        messagePanel.tabs[simpleId()] = MessageTabConfigUtils.createEmpty({});
                     });
                 }}
             >
