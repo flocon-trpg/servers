@@ -194,9 +194,9 @@ export {
 } from './internal/ot/room/character/strParam/types';
 
 export {
-    apply as applyDicePieceValue,
-    diff as dicePieceValueDiff,
-    toUpOperation as toDicePieceValueUpOperation,
+    apply as applyDicePiece,
+    diff as dicePieceDiff,
+    toUpOperation as toDicePieceUpOperation,
 } from './internal/ot/room/board/dicePiece/functions';
 
 export {
@@ -207,9 +207,9 @@ export {
 } from './internal/ot/room/board/dicePiece/types';
 
 export {
-    decode as decodeDicePieceValue,
-    parse as parseDicePieceValue,
-    exact as exactDicePieceValue,
+    decode as decodeDicePiece,
+    parse as parseDicePiece,
+    exact as exactDicePiece,
 } from './internal/ot/room/board/dicePiece/converter';
 
 export {
@@ -224,12 +224,12 @@ export {
     DownOperation as DieValueDownOperation,
 } from './internal/ot/room/board/dicePiece/dieValue/types';
 
-export { type as diceValueLog, Type as DiceValueLog } from './internal/ot/room/board/dicePiece/log';
+export { type as dicePieceLog, Type as DicePieceLog } from './internal/ot/room/board/dicePiece/log';
 
 export {
-    apply as applyImagePieceValue,
-    diff as imagePieceValueDiff,
-    toUpOperation as toImagePieceValueUpOperation,
+    apply as applyImagePiece,
+    diff as imagePieceDiff,
+    toUpOperation as toImagePieceUpOperation,
 } from './internal/ot/room/board/imagePiece/functions';
 
 export {
@@ -239,9 +239,9 @@ export {
 } from './internal/ot/room/board/imagePiece/types';
 
 export {
-    apply as applyNumberPieceValue,
-    diff as stringPieceValueDiff,
-    toUpOperation as toStringPieceValueUpOperation,
+    apply as applyNumberPiece,
+    diff as stringPieceDiff,
+    toUpOperation as toStringPieceUpOperation,
 } from './internal/ot/room/board/stringPiece/functions';
 
 export {
@@ -253,14 +253,14 @@ export {
 } from './internal/ot/room/board/stringPiece/types';
 
 export {
-    decode as decodeStringPieceValue,
-    parse as parseStringPieceValue,
-    exact as exactStringPieceValue,
+    decode as decodeStringPiece,
+    parse as parseStringPiece,
+    exact as exactStringPiece,
 } from './internal/ot/room/board/stringPiece/converter';
 
 export {
-    type as stringPieceValueLog,
-    Type as StringPieceValueLog,
+    type as stringPieceLog,
+    Type as StringPieceLog,
 } from './internal/ot/room/board/stringPiece/log';
 
 export {
