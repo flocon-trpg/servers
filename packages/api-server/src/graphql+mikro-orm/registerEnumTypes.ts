@@ -22,7 +22,7 @@ import { PrereleaseType } from '../enums/PrereleaseType';
 import { GetRoomConnectionFailureType } from '../enums/GetRoomConnectionFailureType';
 import { WritingMessageStatusInputType } from '../enums/WritingMessageStatusInputType';
 import { WritingMessageStatusType } from '../enums/WritingMessageStatusType';
-import { PieceValueLogType } from '../enums/PieceValueLogType';
+import { PieceLogType } from '../enums/PieceLogType';
 import { BaasType } from '../enums/BaasType';
 import { GetFileItemsFailureType } from '../enums/GetFileItemsFailureType';
 import { CreateRoomFailureType } from '../enums/CreateRoomFailureType';
@@ -92,8 +92,8 @@ export const registerEnumTypes = (): void => {
     registerEnumType(ParticipantRole, {
         name: 'ParticipantRole',
     });
-    registerEnumType(PieceValueLogType, {
-        name: 'PieceValueLogType',
+    registerEnumType(PieceLogType, {
+        name: 'PieceLogType',
     });
     registerEnumType(PrereleaseType, {
         name: 'PrereleaseType',

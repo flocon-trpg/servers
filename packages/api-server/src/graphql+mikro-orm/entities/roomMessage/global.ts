@@ -1,39 +1,39 @@
 import {
-    DicePieceValueLog as DicePieceValueLog$MikroORM,
-    StringPieceValueLog as StringPieceValueLog$MikroORM,
+    DicePieceLog as DicePieceLog$MikroORM,
+    StringPieceLog as StringPieceLog$MikroORM,
 } from './mikro-orm';
-import { PieceValueLog, PieceValueLogType } from './graphql';
-import { decodeDicePieceValue, decodeStringPieceValue } from '@flocon-trpg/core';
-import { PieceValueLogType as PieceValueLogTypeEnum } from '../../../enums/PieceValueLogType';
+import { PieceLog, PieceLogType } from './graphql';
+import { decodeDicePiece, decodeStringPiece } from '@flocon-trpg/core';
+import { PieceLogType as PieceLogTypeEnum } from '../../../enums/PieceLogType';
 
-export namespace DicePieceValueLog {
+export namespace DicePieceLog {
     export namespace MikroORM {
         export namespace ToGraphQL {
-            export const state = (entity: DicePieceValueLog$MikroORM): PieceValueLog => {
+            export const state = (entity: DicePieceLog$MikroORM): PieceLog => {
                 return {
-                    __tstype: PieceValueLogType,
+                    __tstype: PieceLogType,
                     messageId: entity.id,
                     stateId: entity.stateId,
                     createdAt: entity.createdAt.getTime(),
-                    logType: PieceValueLogTypeEnum.Dice,
-                    valueJson: JSON.stringify(decodeDicePieceValue(entity.value)),
+                    logType: PieceLogTypeEnum.Dice,
+                    valueJson: JSON.stringify(decodeDicePiece(entity.value)),
                 };
             };
         }
     }
 }
 
-export namespace StringPieceValueLog {
+export namespace StringPieceLog {
     export namespace MikroORM {
         export namespace ToGraphQL {
-            export const state = (entity: StringPieceValueLog$MikroORM): PieceValueLog => {
+            export const state = (entity: StringPieceLog$MikroORM): PieceLog => {
                 return {
-                    __tstype: PieceValueLogType,
+                    __tstype: PieceLogType,
                     messageId: entity.id,
                     stateId: entity.stateId,
                     createdAt: entity.createdAt.getTime(),
-                    logType: PieceValueLogTypeEnum.Number,
-                    valueJson: JSON.stringify(decodeStringPieceValue(entity.value)),
+                    logType: PieceLogTypeEnum.String,
+                    valueJson: JSON.stringify(decodeStringPiece(entity.value)),
                 };
             };
         }

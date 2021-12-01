@@ -1,6 +1,6 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20211128171539 extends Migration {
+export class Migration20211201185826 extends Migration {
     async up(): Promise<void> {
         this.addSql(
             'create table `user` (`user_uid` varchar not null, `baas_type` varchar not null, `is_entry` integer not null, primary key (`user_uid`));'
@@ -73,17 +73,17 @@ export class Migration20211128171539 extends Migration {
         );
 
         this.addSql(
-            'create table `dice_piece_value_log` (`id` varchar not null, `created_at` datetime not null, `state_id` varchar not null, `value` json null, primary key (`id`));'
+            'create table `dice_piece_log` (`id` varchar not null, `created_at` datetime not null, `state_id` varchar not null, `value` json null, primary key (`id`));'
         );
         this.addSql(
-            'create index `dice_piece_value_log_state_id_index` on `dice_piece_value_log` (`state_id`);'
+            'create index `dice_piece_log_state_id_index` on `dice_piece_log` (`state_id`);'
         );
 
         this.addSql(
-            'create table `string_piece_value_log` (`id` varchar not null, `created_at` datetime not null, `state_id` varchar not null, `value` json null, primary key (`id`));'
+            'create table `string_piece_log` (`id` varchar not null, `created_at` datetime not null, `state_id` varchar not null, `value` json null, primary key (`id`));'
         );
         this.addSql(
-            'create index `string_piece_value_log_state_id_index` on `string_piece_value_log` (`state_id`);'
+            'create index `string_piece_log_state_id_index` on `string_piece_log` (`state_id`);'
         );
 
         this.addSql(
@@ -138,14 +138,12 @@ export class Migration20211128171539 extends Migration {
         );
         this.addSql('create index `room_prv_msg_room_id_index` on `room_prv_msg` (`room_id`);');
 
-        this.addSql('alter table `dice_piece_value_log` add column `room_id` varchar null;');
-        this.addSql(
-            'create index `dice_piece_value_log_room_id_index` on `dice_piece_value_log` (`room_id`);'
-        );
+        this.addSql('alter table `dice_piece_log` add column `room_id` varchar null;');
+        this.addSql('create index `dice_piece_log_room_id_index` on `dice_piece_log` (`room_id`);');
 
-        this.addSql('alter table `string_piece_value_log` add column `room_id` varchar null;');
+        this.addSql('alter table `string_piece_log` add column `room_id` varchar null;');
         this.addSql(
-            'create index `string_piece_value_log_room_id_index` on `string_piece_value_log` (`room_id`);'
+            'create index `string_piece_log_room_id_index` on `string_piece_log` (`room_id`);'
         );
 
         this.addSql('alter table `room_pub_ch` add column `room_id` varchar null;');

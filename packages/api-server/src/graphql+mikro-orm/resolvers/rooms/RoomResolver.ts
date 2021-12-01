@@ -53,8 +53,8 @@ import {
     RoomPubCh,
     RoomPubMsg,
     RoomSe,
-    StringPieceValueLog as StringPieceValueLog$MikroORM,
-    DicePieceValueLog as DicePieceValueLog$MikroORM,
+    StringPieceLog as StringPieceLog$MikroORM,
+    DicePieceLog as DicePieceLog$MikroORM,
 } from '../../entities/roomMessage/mikro-orm';
 import {
     ChangeParticipantNameArgs,
@@ -87,7 +87,7 @@ import {
     GetRoomMessagesFailureResultType,
     GetRoomMessagesResult,
     MakeMessageNotSecretResult,
-    PieceValueLog,
+    PieceLog,
     RoomMessageEvent,
     RoomMessages,
     RoomMessagesType,
@@ -118,8 +118,8 @@ import { analyze, Context } from '../../../messageAnalyzer/main';
 import Color from 'color';
 import { GetRoomMessagesFailureType } from '../../../enums/GetRoomMessagesFailureType';
 import {
-    DicePieceValueLog as DicePieceValueLogNameSpace,
-    StringPieceValueLog as StringPieceValueLogNameSpace,
+    DicePieceLog as DicePieceLogNameSpace,
+    StringPieceLog as StringPieceLogNameSpace,
 } from '../../entities/roomMessage/global';
 import { GetRoomLogFailureType } from '../../../enums/GetRoomLogFailureType';
 import { writeSystemMessage } from '../utils/roomMessage';
@@ -853,12 +853,12 @@ export class RoomResolver {
             privateMessages.push(graphQLValue);
         }
 
-        const pieceValueLogs: PieceValueLog[] = [];
-        for (const msg of await room.dicePieceValueLogs.loadItems()) {
-            pieceValueLogs.push(DicePieceValueLogNameSpace.MikroORM.ToGraphQL.state(msg));
+        const pieceLogs: PieceLog[] = [];
+        for (const msg of await room.dicePieceLogs.loadItems()) {
+            pieceLogs.push(DicePieceLogNameSpace.MikroORM.ToGraphQL.state(msg));
         }
-        for (const msg of await room.stringPieceValueLogs.loadItems()) {
-            pieceValueLogs.push(StringPieceValueLogNameSpace.MikroORM.ToGraphQL.state(msg));
+        for (const msg of await room.stringPieceLogs.loadItems()) {
+            pieceLogs.push(StringPieceLogNameSpace.MikroORM.ToGraphQL.state(msg));
         }
 
         const soundEffects: RoomSoundEffect[] = [];
@@ -881,7 +881,7 @@ export class RoomResolver {
             __tstype: RoomMessagesType,
             publicMessages,
             privateMessages,
-            pieceValueLogs,
+            pieceLogs: pieceLogs,
             publicChannels,
             soundEffects,
         };
@@ -1103,11 +1103,8 @@ export class RoomResolver {
                     boolParamNames: {},
                     boards: {},
                     characters: {},
-                    dicePieceValues: {},
-                    imagePieceValues: {},
                     numParamNames: {},
                     rollCalls: {},
-                    stringPieceValues: {},
                     strParamNames: {},
                     memos: {},
                 },
@@ -1575,9 +1572,9 @@ export class RoomResolver {
             });
 
             const logs = createLogs({ prevState: roomState, nextState: nextRoomState });
-            const dicePieceLogEntities: DicePieceValueLog$MikroORM[] = [];
-            logs?.dicePieceValueLogs.forEach(log => {
-                const entity = new DicePieceValueLog$MikroORM({
+            const dicePieceLogEntities: DicePieceLog$MikroORM[] = [];
+            logs?.dicePieceLogs.forEach(log => {
+                const entity = new DicePieceLog$MikroORM({
                     stateId: log.stateId,
                     room,
                     value: log.value,
@@ -1585,9 +1582,9 @@ export class RoomResolver {
                 dicePieceLogEntities.push(entity);
                 em.persist(entity);
             });
-            const stringPieceLogEntities: StringPieceValueLog$MikroORM[] = [];
-            logs?.stringPieceValueLogs.forEach(log => {
-                const entity = new StringPieceValueLog$MikroORM({
+            const stringPieceLogEntities: StringPieceLog$MikroORM[] = [];
+            logs?.stringPieceLogs.forEach(log => {
+                const entity = new StringPieceLog$MikroORM({
                     stateId: log.stateId,
                     room,
                     value: log.value,
@@ -1630,7 +1627,7 @@ export class RoomResolver {
                                 roomId: room.id,
                                 createdBy: undefined,
                                 visibleTo: undefined,
-                                value: DicePieceValueLogNameSpace.MikroORM.ToGraphQL.state(log),
+                                value: DicePieceLogNameSpace.MikroORM.ToGraphQL.state(log),
                             } as const)
                     ),
                     ...stringPieceLogEntities.map(
@@ -1640,7 +1637,7 @@ export class RoomResolver {
                                 roomId: room.id,
                                 createdBy: undefined,
                                 visibleTo: undefined,
-                                value: StringPieceValueLogNameSpace.MikroORM.ToGraphQL.state(log),
+                                value: StringPieceLogNameSpace.MikroORM.ToGraphQL.state(log),
                             } as const)
                     ),
                 ],
@@ -2570,13 +2567,13 @@ export class RoomResolver {
             room.roomPrvMsgs.getItems().forEach(x => em.remove(x));
             room.roomPrvMsgs.removeAll();
 
-            await room.dicePieceValueLogs.init();
-            room.dicePieceValueLogs.getItems().forEach(x => em.remove(x));
-            room.dicePieceValueLogs.removeAll();
+            await room.dicePieceLogs.init();
+            room.dicePieceLogs.getItems().forEach(x => em.remove(x));
+            room.dicePieceLogs.removeAll();
 
-            await room.stringPieceValueLogs.init();
-            room.stringPieceValueLogs.getItems().forEach(x => em.remove(x));
-            room.stringPieceValueLogs.removeAll();
+            await room.stringPieceLogs.init();
+            room.stringPieceLogs.getItems().forEach(x => em.remove(x));
+            room.stringPieceLogs.removeAll();
 
             em.persist(room);
             await em.flush();

@@ -15,8 +15,8 @@ import { easyFlake } from '../../../utils/easyFlake';
 import { EM } from '../../../utils/types';
 import { Participant } from '../participant/mikro-orm';
 import {
-    DicePieceValueLog as DicePieceValueLogEntity,
-    StringPieceValueLog as StringPieceValueLogEntity,
+    DicePieceLog as DicePieceLogEntity,
+    StringPieceLog as StringPieceLogEntity,
     RoomPrvMsg,
     RoomPubCh,
     RoomSe as RoomSe,
@@ -85,11 +85,11 @@ export class Room {
     @OneToMany(() => RoomPrvMsg, x => x.room, { orphanRemoval: true })
     public roomPrvMsgs = new Collection<RoomPrvMsg>(this);
 
-    @OneToMany(() => DicePieceValueLogEntity, x => x.room, { orphanRemoval: true })
-    public dicePieceValueLogs = new Collection<DicePieceValueLogEntity>(this);
+    @OneToMany(() => DicePieceLogEntity, x => x.room, { orphanRemoval: true })
+    public dicePieceLogs = new Collection<DicePieceLogEntity>(this);
 
-    @OneToMany(() => StringPieceValueLogEntity, x => x.room, { orphanRemoval: true })
-    public stringPieceValueLogs = new Collection<StringPieceValueLogEntity>(this);
+    @OneToMany(() => StringPieceLogEntity, x => x.room, { orphanRemoval: true })
+    public stringPieceLogs = new Collection<StringPieceLogEntity>(this);
 
     @OneToMany(() => RoomSe, x => x.room, { orphanRemoval: true })
     public roomSes = new Collection<RoomSe>(this);
@@ -142,13 +142,13 @@ export const deleteRoom = async (em: EM, room: Room): Promise<void> => {
     room.participants.getItems().forEach(x => em.remove(x));
     room.participants.removeAll();
 
-    await room.dicePieceValueLogs.init();
-    room.dicePieceValueLogs.getItems().forEach(x => em.remove(x));
-    room.dicePieceValueLogs.removeAll();
+    await room.dicePieceLogs.init();
+    room.dicePieceLogs.getItems().forEach(x => em.remove(x));
+    room.dicePieceLogs.removeAll();
 
-    await room.stringPieceValueLogs.init();
-    room.stringPieceValueLogs.getItems().forEach(x => em.remove(x));
-    room.stringPieceValueLogs.removeAll();
+    await room.stringPieceLogs.init();
+    room.stringPieceLogs.getItems().forEach(x => em.remove(x));
+    room.stringPieceLogs.removeAll();
 
     em.remove(room);
 };

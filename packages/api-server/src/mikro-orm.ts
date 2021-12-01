@@ -5,8 +5,8 @@ import { FileTag } from './graphql+mikro-orm/entities/fileTag/mikro-orm';
 import { Participant } from './graphql+mikro-orm/entities/participant/mikro-orm';
 import { Room, RoomOp } from './graphql+mikro-orm/entities/room/mikro-orm';
 import {
-    DicePieceValueLog,
-    StringPieceValueLog,
+    DicePieceLog,
+    StringPieceLog,
     RoomPrvMsg,
     RoomPubCh,
     RoomPubMsg,
@@ -19,8 +19,8 @@ const entities = [
     RoomOp,
     RoomPubMsg,
     RoomPrvMsg,
-    DicePieceValueLog,
-    StringPieceValueLog,
+    DicePieceLog,
+    StringPieceLog,
     RoomPubCh,
     RoomSe,
     User,

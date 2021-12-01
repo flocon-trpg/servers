@@ -89,7 +89,7 @@ fragment JoinRoomResult on JoinRoomResult {
   }
 }
 
-fragment PieceValueLog on PieceValueLog {
+fragment PieceLog on PieceLog {
   messageId
   stateId
   createdAt
@@ -199,8 +199,8 @@ fragment RoomMessageEvent on RoomMessageEvent {
   ... on RoomPrivateMessage {
     ...RoomPrivateMessage
   }
-  ... on PieceValueLog {
-    ...PieceValueLog
+  ... on PieceLog {
+    ...PieceLog
   }
   ... on RoomPublicChannelUpdate {
     key
@@ -316,8 +316,8 @@ query GetMessages($roomId: String!) {
       privateMessages {
         ...RoomPrivateMessage
       }
-      pieceValueLogs {
-        ...PieceValueLog
+      pieceLogs {
+        ...PieceLog
       }
       publicChannels {
         ...RoomPublicChannel
@@ -342,8 +342,8 @@ query GetLog($roomId: String!) {
       privateMessages {
         ...RoomPrivateMessage
       }
-      pieceValueLogs {
-        ...PieceValueLog
+      pieceLogs {
+        ...PieceLog
       }
       publicChannels {
         ...RoomPublicChannel

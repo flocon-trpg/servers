@@ -501,18 +501,18 @@ export enum ParticipantRole {
     OfString = 'ofString',
 }
 
-export type PieceValueLog = {
-    __typename?: 'PieceValueLog';
+export type PieceLog = {
+    __typename?: 'PieceLog';
     createdAt: Scalars['Float'];
-    logType: PieceValueLogType;
+    logType: PieceLogType;
     messageId: Scalars['String'];
     stateId: Scalars['String'];
     valueJson: Scalars['String'];
 };
 
-export enum PieceValueLogType {
+export enum PieceLogType {
     Dice = 'Dice',
-    Number = 'Number',
+    String = 'String',
 }
 
 export type Pong = {
@@ -633,7 +633,7 @@ export type RoomGetState = {
 };
 
 export type RoomMessageEvent =
-    | PieceValueLog
+    | PieceLog
     | RoomMessagesReset
     | RoomPrivateMessage
     | RoomPrivateMessageUpdate
@@ -650,7 +650,7 @@ export type RoomMessageSyntaxError = {
 
 export type RoomMessages = {
     __typename?: 'RoomMessages';
-    pieceValueLogs: Array<PieceValueLog>;
+    pieceLogs: Array<PieceLog>;
     privateMessages: Array<RoomPrivateMessage>;
     publicChannels: Array<RoomPublicChannel>;
     publicMessages: Array<RoomPublicMessage>;
@@ -986,12 +986,12 @@ export type JoinRoomResultFragment =
     | JoinRoomResult_JoinRoomFailureResult_Fragment
     | JoinRoomResult_JoinRoomSuccessResult_Fragment;
 
-export type PieceValueLogFragment = {
-    __typename?: 'PieceValueLog';
+export type PieceLogFragment = {
+    __typename?: 'PieceLog';
     messageId: string;
     stateId: string;
     createdAt: number;
-    logType: PieceValueLogType;
+    logType: PieceLogType;
     valueJson: string;
 };
 
@@ -1116,12 +1116,12 @@ export type RoomSoundEffectFragment = {
     file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
 };
 
-type RoomMessageEvent_PieceValueLog_Fragment = {
-    __typename: 'PieceValueLog';
+type RoomMessageEvent_PieceLog_Fragment = {
+    __typename: 'PieceLog';
     messageId: string;
     stateId: string;
     createdAt: number;
-    logType: PieceValueLogType;
+    logType: PieceLogType;
     valueJson: string;
 };
 
@@ -1265,7 +1265,7 @@ type RoomMessageEvent_RoomSoundEffect_Fragment = {
 };
 
 export type RoomMessageEventFragment =
-    | RoomMessageEvent_PieceValueLog_Fragment
+    | RoomMessageEvent_PieceLog_Fragment
     | RoomMessageEvent_RoomMessagesReset_Fragment
     | RoomMessageEvent_RoomPrivateMessage_Fragment
     | RoomMessageEvent_RoomPrivateMessageUpdate_Fragment
@@ -1496,12 +1496,12 @@ export type GetMessagesQuery = {
                       | null
                       | undefined;
               }>;
-              pieceValueLogs: Array<{
-                  __typename?: 'PieceValueLog';
+              pieceLogs: Array<{
+                  __typename?: 'PieceLog';
                   messageId: string;
                   stateId: string;
                   createdAt: number;
-                  logType: PieceValueLogType;
+                  logType: PieceLogType;
                   valueJson: string;
               }>;
               publicChannels: Array<{
@@ -1640,12 +1640,12 @@ export type GetLogQuery = {
                       | null
                       | undefined;
               }>;
-              pieceValueLogs: Array<{
-                  __typename?: 'PieceValueLog';
+              pieceLogs: Array<{
+                  __typename?: 'PieceLog';
                   messageId: string;
                   stateId: string;
                   createdAt: number;
-                  logType: PieceValueLogType;
+                  logType: PieceLogType;
                   valueJson: string;
               }>;
               publicChannels: Array<{
@@ -2174,11 +2174,11 @@ export type RoomEventSubscription = {
                   | undefined;
               roomMessageEvent?:
                   | {
-                        __typename: 'PieceValueLog';
+                        __typename: 'PieceLog';
                         messageId: string;
                         stateId: string;
                         createdAt: number;
-                        logType: PieceValueLogType;
+                        logType: PieceLogType;
                         valueJson: string;
                     }
                   | { __typename: 'RoomMessagesReset' }
@@ -3006,13 +3006,13 @@ export const RoomPrivateMessageFragmentDoc = {
         },
     ],
 } as unknown as DocumentNode<RoomPrivateMessageFragment, unknown>;
-export const PieceValueLogFragmentDoc = {
+export const PieceLogFragmentDoc = {
     kind: 'Document',
     definitions: [
         {
             kind: 'FragmentDefinition',
-            name: { kind: 'Name', value: 'PieceValueLog' },
-            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'PieceValueLog' } },
+            name: { kind: 'Name', value: 'PieceLog' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'PieceLog' } },
             selectionSet: {
                 kind: 'SelectionSet',
                 selections: [
@@ -3025,7 +3025,7 @@ export const PieceValueLogFragmentDoc = {
             },
         },
     ],
-} as unknown as DocumentNode<PieceValueLogFragment, unknown>;
+} as unknown as DocumentNode<PieceLogFragment, unknown>;
 export const RoomMessageEventFragmentDoc = {
     kind: 'Document',
     definitions: [
@@ -3105,14 +3105,14 @@ export const RoomMessageEventFragmentDoc = {
                         kind: 'InlineFragment',
                         typeCondition: {
                             kind: 'NamedType',
-                            name: { kind: 'Name', value: 'PieceValueLog' },
+                            name: { kind: 'Name', value: 'PieceLog' },
                         },
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
                                 {
                                     kind: 'FragmentSpread',
-                                    name: { kind: 'Name', value: 'PieceValueLog' },
+                                    name: { kind: 'Name', value: 'PieceLog' },
                                 },
                             ],
                         },
@@ -3678,7 +3678,7 @@ export const GetMessagesDocument = {
                                             },
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'pieceValueLogs' },
+                                                name: { kind: 'Name', value: 'pieceLogs' },
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
                                                     selections: [
@@ -3686,7 +3686,7 @@ export const GetMessagesDocument = {
                                                             kind: 'FragmentSpread',
                                                             name: {
                                                                 kind: 'Name',
-                                                                value: 'PieceValueLog',
+                                                                value: 'PieceLog',
                                                             },
                                                         },
                                                     ],
@@ -3756,7 +3756,7 @@ export const GetMessagesDocument = {
         ...CharacterValueForMessageFragmentDoc.definitions,
         ...FilePathFragmentDoc.definitions,
         ...RoomPrivateMessageFragmentDoc.definitions,
-        ...PieceValueLogFragmentDoc.definitions,
+        ...PieceLogFragmentDoc.definitions,
         ...RoomPublicChannelFragmentDoc.definitions,
         ...RoomSoundEffectFragmentDoc.definitions,
     ],
@@ -3842,7 +3842,7 @@ export const GetLogDocument = {
                                             },
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'pieceValueLogs' },
+                                                name: { kind: 'Name', value: 'pieceLogs' },
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
                                                     selections: [
@@ -3850,7 +3850,7 @@ export const GetLogDocument = {
                                                             kind: 'FragmentSpread',
                                                             name: {
                                                                 kind: 'Name',
-                                                                value: 'PieceValueLog',
+                                                                value: 'PieceLog',
                                                             },
                                                         },
                                                     ],
@@ -3917,7 +3917,7 @@ export const GetLogDocument = {
         ...CharacterValueForMessageFragmentDoc.definitions,
         ...FilePathFragmentDoc.definitions,
         ...RoomPrivateMessageFragmentDoc.definitions,
-        ...PieceValueLogFragmentDoc.definitions,
+        ...PieceLogFragmentDoc.definitions,
         ...RoomPublicChannelFragmentDoc.definitions,
         ...RoomSoundEffectFragmentDoc.definitions,
     ],
@@ -5968,7 +5968,7 @@ export const RoomEventDocument = {
         ...CharacterValueForMessageFragmentDoc.definitions,
         ...RoomPublicChannelFragmentDoc.definitions,
         ...RoomPrivateMessageFragmentDoc.definitions,
-        ...PieceValueLogFragmentDoc.definitions,
+        ...PieceLogFragmentDoc.definitions,
     ],
 } as unknown as DocumentNode<RoomEventSubscription, RoomEventSubscriptionVariables>;
 export const PongDocument = {

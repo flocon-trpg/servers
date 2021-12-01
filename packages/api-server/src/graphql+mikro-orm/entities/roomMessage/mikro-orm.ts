@@ -1,6 +1,6 @@
 import {
-    DicePieceValueLog as DicePieceValueLogState,
-    StringPieceValueLog as StringPieceValueLogState,
+    DicePieceLog as DicePieceLogState,
+    StringPieceLog as StringPieceLogState,
 } from '@flocon-trpg/core';
 import {
     Collection,
@@ -302,7 +302,7 @@ export class RoomPrvMsg {
 }
 
 @Entity()
-export class DicePieceValueLog {
+export class DicePieceLog {
     public constructor({
         room,
         stateId,
@@ -310,7 +310,7 @@ export class DicePieceValueLog {
     }: {
         room: Room;
         stateId: string;
-        value: DicePieceValueLogState;
+        value: DicePieceLogState;
     }) {
         this.room = Reference.create(room);
         this.stateId = stateId;
@@ -327,14 +327,14 @@ export class DicePieceValueLog {
     public stateId: string;
 
     @Property({ type: JsonType, nullable: true })
-    public value?: DicePieceValueLogState;
+    public value?: DicePieceLogState;
 
     @ManyToOne(() => Room, { wrappedReference: true })
     public room: IdentifiedReference<Room>;
 }
 
 @Entity()
-export class StringPieceValueLog {
+export class StringPieceLog {
     public constructor({
         room,
         stateId,
@@ -342,7 +342,7 @@ export class StringPieceValueLog {
     }: {
         room: Room;
         stateId: string;
-        value: StringPieceValueLogState;
+        value: StringPieceLogState;
     }) {
         this.room = Reference.create(room);
         this.stateId = stateId;
@@ -359,7 +359,7 @@ export class StringPieceValueLog {
     public stateId: string;
 
     @Property({ type: JsonType, nullable: true })
-    public value?: StringPieceValueLogState;
+    public value?: StringPieceLogState;
 
     @ManyToOne(() => Room, { wrappedReference: true })
     public room: IdentifiedReference<Room>;

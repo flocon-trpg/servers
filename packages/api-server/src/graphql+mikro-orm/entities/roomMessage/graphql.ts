@@ -6,7 +6,7 @@ import { EditMessageFailureType } from '../../../enums/EditMessageFailureType';
 import { GetRoomLogFailureType } from '../../../enums/GetRoomLogFailureType';
 import { GetRoomMessagesFailureType } from '../../../enums/GetRoomMessagesFailureType';
 import { MakeMessageNotSecretFailureType } from '../../../enums/MakeMessageNotSecretFailureType';
-import { PieceValueLogType as PieceValueLogTypeEnum } from '../../../enums/PieceValueLogType';
+import { PieceLogType as PieceLogTypeEnum } from '../../../enums/PieceLogType';
 import { WriteRoomPrivateMessageFailureType } from '../../../enums/WriteRoomPrivateMessageFailureType';
 import { WriteRoomPublicMessageFailureType } from '../../../enums/WriteRoomPublicMessageFailureType';
 import { WriteRoomSoundEffectFailureType } from '../../../enums/WriteRoomSoundEffectFailureType';
@@ -207,11 +207,11 @@ export class RoomPrivateMessage {
     public updatedAt?: number;
 }
 
-export const PieceValueLogType = 'PieceValueLog';
+export const PieceLogType = 'PieceLog';
 
 @ObjectType()
-export class PieceValueLog {
-    public __tstype!: typeof PieceValueLogType;
+export class PieceLog {
+    public __tstype!: typeof PieceLogType;
 
     @Field()
     public messageId!: string;
@@ -222,8 +222,8 @@ export class PieceValueLog {
     @Field()
     public createdAt!: number;
 
-    @Field(() => PieceValueLogTypeEnum)
-    public logType!: PieceValueLogTypeEnum;
+    @Field(() => PieceLogTypeEnum)
+    public logType!: PieceLogTypeEnum;
 
     @Field()
     public valueJson!: string;
@@ -257,7 +257,7 @@ export const RoomMessage = createUnionType({
         [
             RoomPublicMessage,
             RoomPrivateMessage,
-            PieceValueLog,
+            PieceLog,
             RoomPublicChannel,
             RoomSoundEffect,
         ] as const,
@@ -267,8 +267,8 @@ export const RoomMessage = createUnionType({
                 return RoomPrivateMessage;
             case RoomPublicChannelType:
                 return RoomPublicMessage;
-            case PieceValueLogType:
-                return PieceValueLog;
+            case PieceLogType:
+                return PieceLog;
             case RoomPublicMessageType:
                 return RoomPublicChannel;
             case RoomSoundEffectType:
@@ -289,8 +289,8 @@ export class RoomMessages {
     @Field(() => [RoomPrivateMessage])
     public privateMessages!: RoomPrivateMessage[];
 
-    @Field(() => [PieceValueLog])
-    public pieceValueLogs!: PieceValueLog[];
+    @Field(() => [PieceLog])
+    public pieceLogs!: PieceLog[];
 
     @Field(() => [RoomPublicChannel])
     public publicChannels!: RoomPublicChannel[];
@@ -556,7 +556,7 @@ export const RoomMessageEvent = createUnionType({
             RoomPublicMessage,
             RoomPrivateMessage,
             RoomPublicChannel,
-            PieceValueLog,
+            PieceLog,
             RoomSoundEffect,
             RoomPublicChannelUpdate,
             RoomPublicMessageUpdate,
@@ -571,8 +571,8 @@ export const RoomMessageEvent = createUnionType({
                 return RoomPrivateMessage;
             case RoomPublicChannelType:
                 return RoomPublicChannel;
-            case PieceValueLogType:
-                return PieceValueLog;
+            case PieceLogType:
+                return PieceLog;
             case RoomSoundEffectType:
                 return RoomSoundEffect;
             case RoomPublicChannelUpdateType:

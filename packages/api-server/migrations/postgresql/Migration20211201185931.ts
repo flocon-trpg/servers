@@ -1,6 +1,6 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20211128171607 extends Migration {
+export class Migration20211201185931 extends Migration {
     async up(): Promise<void> {
         this.addSql(
             'create table "user" ("user_uid" varchar(255) not null, "baas_type" varchar(255) not null, "is_entry" bool not null);'
@@ -75,23 +75,23 @@ export class Migration20211128171607 extends Migration {
         );
 
         this.addSql(
-            'create table "dice_piece_value_log" ("id" varchar(255) not null, "created_at" timestamptz(0) not null, "state_id" varchar(255) not null, "value" jsonb null, "room_id" varchar(255) not null);'
+            'create table "dice_piece_log" ("id" varchar(255) not null, "created_at" timestamptz(0) not null, "state_id" varchar(255) not null, "value" jsonb null, "room_id" varchar(255) not null);'
         );
         this.addSql(
-            'alter table "dice_piece_value_log" add constraint "dice_piece_value_log_pkey" primary key ("id");'
+            'alter table "dice_piece_log" add constraint "dice_piece_log_pkey" primary key ("id");'
         );
         this.addSql(
-            'create index "dice_piece_value_log_state_id_index" on "dice_piece_value_log" ("state_id");'
+            'create index "dice_piece_log_state_id_index" on "dice_piece_log" ("state_id");'
         );
 
         this.addSql(
-            'create table "string_piece_value_log" ("id" varchar(255) not null, "created_at" timestamptz(0) not null, "state_id" varchar(255) not null, "value" jsonb null, "room_id" varchar(255) not null);'
+            'create table "string_piece_log" ("id" varchar(255) not null, "created_at" timestamptz(0) not null, "state_id" varchar(255) not null, "value" jsonb null, "room_id" varchar(255) not null);'
         );
         this.addSql(
-            'alter table "string_piece_value_log" add constraint "string_piece_value_log_pkey" primary key ("id");'
+            'alter table "string_piece_log" add constraint "string_piece_log_pkey" primary key ("id");'
         );
         this.addSql(
-            'create index "string_piece_value_log_state_id_index" on "string_piece_value_log" ("state_id");'
+            'create index "string_piece_log_state_id_index" on "string_piece_log" ("state_id");'
         );
 
         this.addSql(
@@ -172,11 +172,11 @@ export class Migration20211128171607 extends Migration {
         );
 
         this.addSql(
-            'alter table "dice_piece_value_log" add constraint "dice_piece_value_log_room_id_foreign" foreign key ("room_id") references "room" ("id") on update cascade;'
+            'alter table "dice_piece_log" add constraint "dice_piece_log_room_id_foreign" foreign key ("room_id") references "room" ("id") on update cascade;'
         );
 
         this.addSql(
-            'alter table "string_piece_value_log" add constraint "string_piece_value_log_room_id_foreign" foreign key ("room_id") references "room" ("id") on update cascade;'
+            'alter table "string_piece_log" add constraint "string_piece_log_room_id_foreign" foreign key ("room_id") references "room" ("id") on update cascade;'
         );
 
         this.addSql(
