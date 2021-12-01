@@ -1,4 +1,4 @@
-import { Col, Drawer, InputNumber, Row } from 'antd';
+import { Col, InputNumber, Modal, Row } from 'antd';
 import React from 'react';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { InputFile } from '../../components/InputFile';
@@ -12,12 +12,26 @@ import { useBoards } from '../../hooks/state/useBoards';
 import {  BoardState, simpleId, } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { FilePath } from '../../utils/filePath';
-import { useAtom } from 'jotai';
-import { boardEditorDrawerAtom } from '../../atoms/overlay/boardDrawerAtom';
+import { atom, useAtom } from 'jotai';
 import { create, update } from '../../utils/constants';
 import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
 import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
+
+export type BoardEditorModalType =
+    | {
+          type: typeof create;
+
+          // ボードを作成した際に、自動的にそのボードをアクティブにするために使われる。
+          // 現時点ではこれがnullになることはないが、ボードエディターからこのModalを開くときはboardEditorPanelIdが指定できないためそれを想定してnullを型に加えている。
+          boardEditorPanelId: string | null;
+      }
+    | {
+          type: typeof update;
+          stateId: string;
+      };
+
+export const boardEditorModalAtom = atom<BoardEditorModalType | null>(null);
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -47,14 +61,14 @@ const defaultBoard: BoardState = {
 const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
-export const BoardDrawer: React.FC = () => {
+export const BoardEditorModal: React.FC = () => {
     const myUserUid = useMyUserUid();
     const setRoomState = useSetRoomStateWithImmer();
-    const [drawerType, setDrawerType] = useAtom(boardEditorDrawerAtom);
+    const [modalValue, setModalValue] = useAtom(boardEditorModalAtom);
     const setRoomConfigAtom = useImmerUpdateAtom(roomConfigAtom);
     const boards = useBoards();
     let stateEditorParams: StateEditorParams<BoardState | undefined>;
-    switch (drawerType?.type) {
+    switch (modalValue?.type) {
         case create:
         case undefined:
             stateEditorParams = {
@@ -65,10 +79,10 @@ export const BoardDrawer: React.FC = () => {
         case update:
             stateEditorParams = {
                 type: update,
-                state: boards?.get(drawerType.stateId),
+                state: boards?.get(modalValue.stateId),
                 onUpdate: nextState => {
                     setRoomState(roomState => {
-                        roomState.boards[drawerType.stateId] = nextState;
+                        roomState.boards[modalValue.stateId] = nextState;
                     });
                 },
             };
@@ -87,7 +101,7 @@ export const BoardDrawer: React.FC = () => {
     }
 
     let onOkClick: (() => void) | undefined = undefined;
-    if (drawerType?.type === create) {
+    if (modalValue?.type === create) {
         onOkClick = () => {
             const id = simpleId();
             setRoomState(roomState => {
@@ -97,13 +111,13 @@ export const BoardDrawer: React.FC = () => {
                 };
             })
             resetBoardToCreate(defaultBoard);
-            setDrawerType(null);
+            setModalValue(null);
             setRoomConfigAtom(roomConfig => {
-                if (drawerType.boardEditorPanelId == null) {
+                if (modalValue.boardEditorPanelId == null) {
                     return;
                 }
                 const originBoardEditorPanel =
-                    roomConfig?.panels.boardEditorPanels[drawerType.boardEditorPanelId];
+                    roomConfig?.panels.boardEditorPanels[modalValue.boardEditorPanelId];
                 if (originBoardEditorPanel == null) {
                     return;
                 }
@@ -113,27 +127,27 @@ export const BoardDrawer: React.FC = () => {
     }
 
     let onDestroy: (() => void) | undefined = undefined;
-    if (drawerType?.type === update) {
+    if (modalValue?.type === update) {
         onDestroy = () => {
             setRoomState(roomState => {
-                delete roomState.boards[drawerType.stateId]
+                delete roomState.boards[modalValue.stateId]
             })
-            setDrawerType(null);
+            setModalValue(null);
         };
     }
 
     return (
-        <Drawer
+        <Modal
             {...drawerBaseProps}
-            title={drawerType?.type === create ? 'ボードの新規作成' : 'ボードの編集'}
-            visible={drawerType != null}
+            title={modalValue?.type === create ? 'ボードの新規作成' : 'ボードの編集'}
+            visible={modalValue != null}
             closable
-            onClose={() => setDrawerType(null)}
+            onCancel={() => setModalValue(null)}
             footer={
                 <DrawerFooter
                     close={{
-                        textType: drawerType?.type === create ? 'cancel' : 'close',
-                        onClick: () => setDrawerType(null),
+                        textType: modalValue?.type === create ? 'cancel' : 'close',
+                        onClick: () => setModalValue(null),
                     }}
                     ok={onOkClick == null ? undefined : { textType: 'create', onClick: onOkClick }}
                     destroy={
@@ -287,6 +301,6 @@ export const BoardDrawer: React.FC = () => {
                 drawerType={filesManagerDrawerType}
                 onClose={() => setFilesManagerDrawerType(null)}
             />
-        </Drawer>
+        </Modal>
     );
 };

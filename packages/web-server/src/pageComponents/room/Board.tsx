@@ -70,8 +70,8 @@ import {
 import { MouseOverOn } from '../../atoms/overlay/board/types';
 import { useUpdateAtom } from 'jotai/utils';
 import { boardContextMenuAtom } from '../../atoms/overlay/board/boardContextMenuAtom';
-import { boardEditorDrawerAtom } from '../../atoms/overlay/boardDrawerAtom';
 import { create } from '../../utils/constants';
+import { boardEditorModalAtom } from './BoardEditorModal';
 
 const createPiecePostOperation = ({
     e,
@@ -858,7 +858,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
     const setBoardContextMenu = useUpdateAtom(boardContextMenuAtom);
     const setBoardTooltip = useUpdateAtom(boardTooltipAtom);
     const setBoardPopoverEditor = useUpdateAtom(boardPopoverEditorAtom);
-    const setBoardEditorDrawer = useUpdateAtom(boardEditorDrawerAtom);
+    const setBoardEditorModal = useUpdateAtom(boardEditorModalAtom);
     const roomId = useAtomSelector(roomAtom, state => state.roomId);
     const boards = useBoards();
     const characters = useCharacters();
@@ -1089,7 +1089,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                 <Menu.Item
                     icon={<Icons.PlusOutlined />}
                     onClick={() =>
-                        setBoardEditorDrawer({
+                        setBoardEditorModal({
                             type: create,
                             boardEditorPanelId,
                         })
@@ -1136,7 +1136,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                         if (boardIdToShow == null) {
                             return;
                         }
-                        setBoardEditorDrawer({
+                        setBoardEditorModal({
                             type: update,
                             stateId: boardIdToShow,
                         });

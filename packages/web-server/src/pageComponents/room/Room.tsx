@@ -5,7 +5,7 @@ import { CharacterList } from './CharacterList';
 import { RoomMessages } from './RoomMessages';
 import { CharacterParameterNamesEditorModal } from './CharacterParameterNamesEditorModal';
 import { CharacterEditorModal } from './CharacterEditorModal';
-import { BoardDrawer } from './BoardDrawer';
+import { BoardEditorModal } from './BoardEditorModal';
 import { SoundPlayer } from './SoundPlayer';
 import { EditRoomDrawer } from './EditRoomDrawer';
 import { ParticipantList } from './ParticipantList';
@@ -702,7 +702,7 @@ export const Room: React.FC = () => {
                 <PieceTooltip />
                 <PopoverEditor />
 
-                <BoardDrawer />
+                <BoardEditorModal />
                 <CharacterEditorModal />
                 <CharacterTagNamesEditorModal/>
                 <BoardPositionAndPieceEditorModal />
