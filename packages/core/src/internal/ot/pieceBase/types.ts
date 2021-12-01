@@ -7,6 +7,11 @@ const booleanDownOperation = t.type({ oldValue: t.boolean });
 const numberUpOperation = t.type({ newValue: t.number });
 const booleanUpOperation = t.type({ newValue: t.boolean });
 
+/*
+fast-check-io-tsは、intersectionの配列にintersectionが含まれていると無限ループに陥る模様？
+それを回避させるため、stateBaseなどをexportしている。
+*/
+
 export const stateBase = t.type({
     cellH: t.number,
     cellW: t.number,
