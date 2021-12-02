@@ -16,7 +16,7 @@ type Props = {
     onUpdate: (immerRecipe: (pieceState: State) => void) => void;
 };
 
-export const PositionEditor: React.FC<Props> = ({
+export const BoardPositionEditorBase: React.FC<Props> = ({
     state,
     onUpdate,
     gutter,

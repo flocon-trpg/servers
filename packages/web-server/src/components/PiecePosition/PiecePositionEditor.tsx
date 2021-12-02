@@ -2,7 +2,7 @@ import { PieceState } from '@flocon-trpg/core';
 import { Checkbox, Col, InputNumber, Row, Space } from 'antd';
 import { Gutter } from 'antd/lib/grid/row';
 import React from 'react';
-import { PositionEditor } from './PositionEditor';
+import { BoardPositionEditorBase } from './BoardPositionEditorBase';
 
 const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
@@ -12,7 +12,7 @@ type Props = {
     onUpdate: (immerRecipe: (pieceState: PieceState) => void) => void;
 };
 
-export const PieceEditor: React.FC<Props> = ({ state, onUpdate }: Props) => {
+export const PiecePositionEditor: React.FC<Props> = ({ state, onUpdate }: Props) => {
     let positionElement: JSX.Element;
     if (state.isCellMode) {
         positionElement = (
@@ -79,7 +79,7 @@ export const PieceEditor: React.FC<Props> = ({ state, onUpdate }: Props) => {
         );
     } else {
         positionElement = (
-            <PositionEditor
+            <BoardPositionEditorBase
                 gutter={gutter}
                 inputSpan={inputSpan}
                 state={state}

@@ -2,8 +2,8 @@ import { Modal } from 'antd';
 import { atom } from 'jotai';
 import { useAtom } from 'jotai';
 import React from 'react';
-import { BoardPositionEditor } from '../../components/BoardPositionAndPiece/BoardPositionEditor';
-import { PieceEditor } from '../../components/BoardPositionAndPiece/PieceEditor';
+import { BoardPositionEditor } from '../../components/PiecePosition/BoardPositionEditor';
+import { PiecePositionEditor } from '../../components/PiecePosition/PiecePositionEditor';
 import { useCharacter } from '../../hooks/state/useCharacter';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 
@@ -66,7 +66,7 @@ export const BoardPositionAndPieceEditorModal: React.FC = () => {
                 break;
             }
             modalChildren = (
-                <PieceEditor
+                <PiecePositionEditor
                     state={piece}
                     onUpdate={recipe => {
                         setRoomState(roomState => {

@@ -2,7 +2,7 @@ import { BoardPositionState } from '@flocon-trpg/core';
 import { Checkbox, Col, Row } from 'antd';
 import { Gutter } from 'antd/lib/grid/row';
 import React from 'react';
-import { PositionEditor } from './PositionEditor';
+import { BoardPositionEditorBase } from './BoardPositionEditorBase';
 
 const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
@@ -15,7 +15,7 @@ type Props = {
 export const BoardPositionEditor: React.FC<Props> = ({ state, onUpdate }: Props) => {
     return (
         <div>
-            {<PositionEditor state={state} gutter={gutter} inputSpan={inputSpan} onUpdate={onUpdate} />}
+            {<BoardPositionEditorBase state={state} gutter={gutter} inputSpan={inputSpan} onUpdate={onUpdate} />}
             <Row gutter={gutter} align='middle'>
                 <Col flex='auto' />
                 <Col flex={0}></Col>
