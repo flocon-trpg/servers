@@ -134,18 +134,6 @@ export {
 } from './internal/ot/room/participant/types';
 
 export {
-    apply as applyPiece,
-    diff as pieceDiff,
-    toUpOperation as toPieceUpOperation,
-} from './internal/ot/pieceBase/functions';
-
-export {
-    State as PieceState,
-    UpOperation as PieceUpOperation,
-    DownOperation as PieceDownOperation,
-} from './internal/ot/pieceBase/types';
-
-export {
     apply as applyBoard,
     diff as boardDiff,
     toUpOperation as toBoardUpOperation,
@@ -172,19 +160,31 @@ export {
 export {
     State as BoolParamState,
     UpOperation as BoolParamUpOperation,
-    DownOperation as BoolParamCharacterDownOperation,
+    DownOperation as BoolParamDownOperation,
 } from './internal/ot/room/character/boolParam/types';
+
+export {
+    apply as applyCharacterPiece,
+    diff as characterPieceDiff,
+    toUpOperation as toCharacterPieceUpOperation,
+} from './internal/ot/room/character/characterPiece/functions';
+
+export {
+    State as CharacterPieceState,
+    UpOperation as CharacterPieceUpOperation,
+    DownOperation as CharacterPieceDownOperation,
+} from './internal/ot/room/character/characterPiece/types';
 
 export {
     State as NumParamState,
     UpOperation as NumParamUpOperation,
-    DownOperation as NumParamCharacterDownOperation,
+    DownOperation as NumParamDownOperation,
 } from './internal/ot/room/character/numParam/types';
 
 export {
     apply as applyStrParamCharacter,
     diff as strParamcharacterDiff,
-    toUpOperation as toCharacterStrParamUpOperation,
+    toUpOperation as toStrParamUpOperation,
 } from './internal/ot/room/character/strParam/functions';
 
 export {
@@ -192,6 +192,18 @@ export {
     UpOperation as StrParamUpOperation,
     DownOperation as StrParamCharacterDownOperation,
 } from './internal/ot/room/character/strParam/types';
+
+export {
+    apply as applyPortraitPiece,
+    diff as portraitPieceDiff,
+    toUpOperation as toPortraitPieceUpOperation,
+} from './internal/ot/room/character/portraitPiece/functions';
+
+export {
+    State as PortraitPieceState,
+    UpOperation as PortraitPieceUpOperation,
+    DownOperation as PortraitPieceDownOperation,
+} from './internal/ot/room/character/portraitPiece/types';
 
 export {
     apply as applyDicePiece,
