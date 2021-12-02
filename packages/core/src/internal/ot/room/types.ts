@@ -16,7 +16,6 @@ import { record } from '../util/record';
 import { Maybe, maybe } from '../../maybe';
 import * as Board from './board/types';
 import * as Character from './character/types';
-import * as RollCall from './rollCall/types';
 
 const stateBase = t.type({
     activeBoardId: maybe(t.string),
@@ -46,7 +45,6 @@ const stateBase = t.type({
     publicChannel8Name: t.string,
     publicChannel9Name: t.string,
     publicChannel10Name: t.string,
-    rollCalls: record(t.string, RollCall.state), // keyは現在は'1'のみを使える
     strParamNames: record(t.string, ParamNames.state), //keyはStrIndex20
 });
 
@@ -116,10 +114,6 @@ export const downOperation = createOperation(2, 1, {
     publicChannel8Name: TextOperation.downOperation,
     publicChannel9Name: TextOperation.downOperation,
     publicChannel10Name: TextOperation.downOperation,
-    rollCalls: record(
-        t.string,
-        recordDownOperationElementFactory(RollCall.state, RollCall.downOperation)
-    ),
     strParamNames: record(
         t.string,
         recordDownOperationElementFactory(ParamNames.state, ParamNames.downOperation)
@@ -170,10 +164,6 @@ export const upOperation = createOperation(2, 1, {
     publicChannel8Name: TextOperation.upOperation,
     publicChannel9Name: TextOperation.upOperation,
     publicChannel10Name: TextOperation.upOperation,
-    rollCalls: record(
-        t.string,
-        recordUpOperationElementFactory(RollCall.state, RollCall.upOperation)
-    ),
     strParamNames: record(
         t.string,
         recordUpOperationElementFactory(ParamNames.state, ParamNames.upOperation)
@@ -224,7 +214,6 @@ export type TwoWayOperation = {
     publicChannel8Name?: TextOperation.TwoWayOperation;
     publicChannel9Name?: TextOperation.TwoWayOperation;
     publicChannel10Name?: TextOperation.TwoWayOperation;
-    rollCalls?: RecordOperation.RecordTwoWayOperation<RollCall.State, RollCall.TwoWayOperation>;
     strParamNames?: RecordOperation.RecordTwoWayOperation<
         ParamNames.State,
         ParamNames.TwoWayOperation

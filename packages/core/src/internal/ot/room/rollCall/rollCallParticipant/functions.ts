@@ -96,6 +96,7 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
 }) => {
     const twoWayOperation: TwoWayOperation = { $v: 1, $r: 1 };
 
+    // TODO: 自分以外でも編集できてしまうのでできれば修正したほうがいい。また、偽の時刻を申告できてしまう。
     twoWayOperation.answeredAt = ReplaceOperation.serverTransform({
         first: serverOperation?.answeredAt,
         second: clientOperation.answeredAt,

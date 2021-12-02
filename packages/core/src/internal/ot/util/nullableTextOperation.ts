@@ -4,6 +4,8 @@ import * as TextOperationCore from '@kizahasi/ot-string';
 import { replace, update } from './recordOperationElement';
 import * as TextOperation from './textOperation';
 
+// CONSIDER: keyが1つのみのrecordOperationを用いることでこのコードを大幅に簡略化できないか？
+
 const stateShouldNotBeUndefinedMessage = 'state should not be undefined';
 const firstTypeShouldBeSameAsSecondType = 'first type and second type should be same';
 

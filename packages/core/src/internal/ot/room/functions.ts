@@ -14,8 +14,6 @@ import * as ParticipantTypes from './participant/types';
 import * as RecordOperation from '../util/recordOperation';
 import { mapRecordOperationElement } from '../util/recordOperationElement';
 import * as ReplaceOperation from '../util/replaceOperation';
-import * as RollCall from './rollCall/functions';
-import * as RollCallTypes from './rollCall/types';
 import * as TextOperation from '../util/textOperation';
 import {
     Apply,
@@ -42,7 +40,6 @@ import {
     anyValue,
     none,
     isBoardOwner,
-    admin,
 } from '../util/requestedBy';
 
 const oneToTenArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
@@ -103,11 +100,6 @@ export const toClientState =
                 serverState: source.participants,
                 isPrivate: () => false,
                 toClientState: ({ state }) => Participant.toClientState(state),
-            }),
-            rollCalls: RecordOperation.toClientState<RollCallTypes.State, RollCallTypes.State>({
-                serverState: source.rollCalls,
-                isPrivate: () => false,
-                toClientState: ({ state }) => RollCall.toClientState(state),
             }),
             strParamNames: RecordOperation.toClientState({
                 serverState: source.strParamNames,
@@ -271,16 +263,6 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
             source.publicChannel10Name == null
                 ? undefined
                 : TextOperation.toDownOperation(source.publicChannel10Name),
-        rollCalls:
-            source.rollCalls == null
-                ? undefined
-                : chooseRecord(source.rollCalls, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: RollCall.toDownOperation,
-                      })
-                  ),
         strParamNames:
             source.strParamNames == null
                 ? undefined
@@ -448,16 +430,6 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
             source.publicChannel10Name == null
                 ? undefined
                 : TextOperation.toUpOperation(source.publicChannel10Name),
-        rollCalls:
-            source.rollCalls == null
-                ? undefined
-                : chooseRecord(source.rollCalls, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: RollCall.toUpOperation,
-                      })
-                  ),
         strParamNames:
             source.strParamNames == null
                 ? undefined
@@ -612,25 +584,6 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
             result[key] = applied.value;
         }
     }
-
-    const rollCalls = RecordOperation.apply<
-        RollCallTypes.State,
-        RollCallTypes.UpOperation,
-        ScalarError
-    >({
-        prevState: state.rollCalls,
-        operation: operation.rollCalls,
-        innerApply: ({ prevState, operation: upOperation }) => {
-            return RollCall.apply({
-                state: prevState,
-                operation: upOperation,
-            });
-        },
-    });
-    if (rollCalls.isError) {
-        return rollCalls;
-    }
-    result.rollCalls = rollCalls.value;
 
     const strParamNames = RecordOperation.apply<
         ParamNamesTypes.State,
@@ -794,25 +747,6 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
         }
     }
 
-    const rollCalls = RecordOperation.applyBack<
-        RollCallTypes.State,
-        RollCallTypes.DownOperation,
-        ScalarError
-    >({
-        nextState: state.rollCalls,
-        operation: operation.rollCalls,
-        innerApplyBack: ({ state, operation }) => {
-            return RollCall.applyBack({
-                state,
-                operation,
-            });
-        },
-    });
-    if (rollCalls.isError) {
-        return rollCalls;
-    }
-    result.rollCalls = rollCalls.value;
-
     const strParamNames = RecordOperation.applyBack<
         ParamNamesTypes.State,
         ParamNamesTypes.DownOperation,
@@ -926,16 +860,6 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
         return participants;
     }
 
-    const rollCalls = RecordOperation.composeDownOperation({
-        first: first.rollCalls,
-        second: second.rollCalls,
-        innerApplyBack: params => RollCall.applyBack(params),
-        innerCompose: params => RollCall.composeDownOperation(params),
-    });
-    if (rollCalls.isError) {
-        return rollCalls;
-    }
-
     const valueProps: DownOperation = {
         $v: 2,
         $r: 1,
@@ -952,7 +876,6 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
         numParamNames: numParamNames.value,
         strParamNames: strParamNames.value,
         participants: participants.value,
-        rollCalls: rollCalls.value,
     };
 
     for (const i of oneToTenArray) {
@@ -1073,16 +996,6 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         return participants;
     }
 
-    const rollCalls = RecordOperation.restore({
-        nextState: nextState.rollCalls,
-        downOperation: downOperation.rollCalls,
-        innerDiff: params => RollCall.diff(params),
-        innerRestore: params => RollCall.restore(params),
-    });
-    if (rollCalls.isError) {
-        return rollCalls;
-    }
-
     const prevState: State = {
         ...nextState,
         bgms: bgms.value.prevState,
@@ -1093,7 +1006,6 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         numParamNames: numParamNames.value.prevState,
         strParamNames: strParamNames.value.prevState,
         participants: participants.value.prevState,
-        rollCalls: rollCalls.value.prevState,
     };
     const twoWayOperation: TwoWayOperation = {
         $v: 2,
@@ -1106,7 +1018,6 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         numParamNames: numParamNames.value.twoWayOperation,
         strParamNames: strParamNames.value.twoWayOperation,
         participants: participants.value.twoWayOperation,
-        rollCalls: rollCalls.value.twoWayOperation,
     };
 
     if (downOperation.activeBoardId !== undefined) {
@@ -1205,11 +1116,6 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         nextState: nextState.participants,
         innerDiff: params => Participant.diff(params),
     });
-    const rollCalls = RecordOperation.diff({
-        prevState: prevState.rollCalls,
-        nextState: nextState.rollCalls,
-        innerDiff: params => RollCall.diff(params),
-    });
     const result: TwoWayOperation = {
         $v: 2,
         $r: 1,
@@ -1220,7 +1126,6 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         memos,
         numParamNames,
         participants,
-        rollCalls,
         strParamNames,
     };
     if (prevState.activeBoardId !== nextState.activeBoardId) {
@@ -1465,35 +1370,6 @@ export const serverTransform =
             return numParamNames;
         }
 
-        const rollCalls = RecordOperation.serverTransform<
-            RollCallTypes.State,
-            RollCallTypes.State,
-            RollCallTypes.TwoWayOperation,
-            RollCallTypes.UpOperation,
-            TwoWayError
-        >({
-            first: serverOperation?.rollCalls,
-            second: clientOperation.rollCalls,
-            prevState: prevState.rollCalls,
-            nextState: currentState.rollCalls,
-            innerTransform: ({ first, second, prevState, nextState }) =>
-                RollCall.serverTransform({
-                    prevState,
-                    currentState: nextState,
-                    serverOperation: first,
-                    clientOperation: second,
-                }),
-            toServerState: state => state,
-            cancellationPolicy: {
-                cancelCreate: () => requestedBy.type !== admin,
-                cancelUpdate: () => requestedBy.type !== admin,
-                cancelRemove: () => requestedBy.type !== admin,
-            },
-        });
-        if (rollCalls.isError) {
-            return rollCalls;
-        }
-
         const strParamNames = RecordOperation.serverTransform<
             ParamNamesTypes.State,
             ParamNamesTypes.State,
@@ -1560,7 +1436,6 @@ export const serverTransform =
             numParamNames: numParamNames.value,
             strParamNames: strParamNames.value,
             participants: participants.value,
-            rollCalls: rollCalls.value,
         };
 
         // activeBoardIdには、自分が作成したBoardしか設定できない。ただし、nullishにするのは誰でもできる。
@@ -1742,26 +1617,6 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         return numParamNames;
     }
 
-    const rollCalls = RecordOperation.clientTransform<
-        RollCallTypes.State,
-        RollCallTypes.UpOperation,
-        UpError
-    >({
-        first: first.rollCalls,
-        second: second.rollCalls,
-        innerTransform: params => RollCall.clientTransform(params),
-        innerDiff: params => {
-            const diff = RollCall.diff(params);
-            if (diff == null) {
-                return diff;
-            }
-            return RollCall.toUpOperation(diff);
-        },
-    });
-    if (rollCalls.isError) {
-        return rollCalls;
-    }
-
     const strParamNames = RecordOperation.clientTransform<
         ParamNamesTypes.State,
         ParamNamesTypes.UpOperation,
@@ -1822,7 +1677,6 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         numParamNames: numParamNames.value.firstPrime,
         strParamNames: strParamNames.value.firstPrime,
         participants: participants.value.firstPrime,
-        rollCalls: rollCalls.value.firstPrime,
         name: name.value.firstPrime,
     };
 
@@ -1838,7 +1692,6 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         numParamNames: numParamNames.value.secondPrime,
         strParamNames: strParamNames.value.secondPrime,
         participants: participants.value.secondPrime,
-        rollCalls: rollCalls.value.secondPrime,
         name: name.value.secondPrime,
     };
 

@@ -1104,7 +1104,6 @@ export class RoomResolver {
                     boards: {},
                     characters: {},
                     numParamNames: {},
-                    rollCalls: {},
                     strParamNames: {},
                     memos: {},
                 },
