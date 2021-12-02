@@ -1,4 +1,4 @@
-import { CharacterState, characterState, simpleId } from '@flocon-trpg/core';
+import { BoardState, boardState, simpleId } from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
 import { Alert, Modal } from 'antd';
 import { atom, useAtom } from 'jotai';
@@ -12,12 +12,12 @@ import { formatValidationErrors } from '../../utils/io-ts-reporters';
 import classNames from 'classnames';
 import { flex, flexColumn } from '../../utils/className';
 
-export const importCharacterModalVisibilityAtom = atom(false);
+export const importBoardModalVisibilityAtom = atom(false);
 
-export const ImportCharacterModal: React.FC = () => {
-    const [visibility, setVisibility] = useAtom(importCharacterModalVisibilityAtom);
+export const ImportBoardModal: React.FC = () => {
+    const [visibility, setVisibility] = useAtom(importBoardModalVisibilityAtom);
     const [value, setValue] = React.useState('');
-    const [parsed, setParsed] = React.useState<Result<CharacterState>>();
+    const [parsed, setParsed] = React.useState<Result<BoardState>>();
     React.useEffect(() => {
         if (value.trim() === '') {
             setParsed(undefined);
@@ -30,7 +30,7 @@ export const ImportCharacterModal: React.FC = () => {
             setParsed(Result.error(`JSONをパースできませんでした - ${e}`));
             return;
         }
-        const decoded = E.mapLeft(formatValidationErrors)(characterState.decode(json));
+        const decoded = E.mapLeft(formatValidationErrors)(boardState.decode(json));
         if (decoded._tag === 'Left') {
             setParsed(Result.error(decoded.left));
             return;
@@ -43,7 +43,7 @@ export const ImportCharacterModal: React.FC = () => {
     return (
         <Modal
             width={800}
-            title={'キャラクターのインポート'}
+            title={'ボードのインポート'}
             visible={visibility}
             closable
             onCancel={() => setVisibility(false)}
@@ -61,7 +61,7 @@ export const ImportCharacterModal: React.FC = () => {
                             }
                             setRoomState(roomState => {
                                 const id = simpleId();
-                                roomState.characters[id] = {
+                                roomState.boards[id] = {
                                     ...parsed.value,
                                     ownerParticipantId: myUserUid,
                                 };
@@ -75,7 +75,7 @@ export const ImportCharacterModal: React.FC = () => {
             }
         >
             <div className={classNames(flex, flexColumn)}>
-                <div>インポートしたキャラクターの作成者は常に自分になります。ただしコマの作成者の情報は保持されます(これらの仕様は後で変更されるかもしれません)。</div>
+                <div>インポートしたボードの作成者は常に自分になります(この仕様は後で変更されるかもしれません)。</div>
                 <BufferedTextArea
                     value={value}
                     onChange={e => {

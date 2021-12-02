@@ -60,6 +60,7 @@ import { boardContextMenuAtom } from '../../atoms/overlay/board/boardContextMenu
 import { create } from '../../utils/constants';
 import { boardEditorModalAtom } from './BoardEditorModal';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
+import { importBoardModalVisibilityAtom } from './ImportBoardModal';
 
 const setDragEndResultToPieceState = ({
     e,
@@ -764,6 +765,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
     const setBoardTooltip = useUpdateAtom(boardTooltipAtom);
     const setBoardPopoverEditor = useUpdateAtom(boardPopoverEditorAtom);
     const setBoardEditorModal = useUpdateAtom(boardEditorModalAtom);
+    const setImportBoardModal = useUpdateAtom(importBoardModalVisibilityAtom);
     const roomId = useAtomSelector(roomAtom, state => state.roomId);
     const boards = useBoards();
     const characters = useCharacters();
@@ -985,6 +987,12 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                     }
                 >
                     新規作成
+                </Menu.Item>
+                <Menu.Item
+                    icon={<Icons.ImportOutlined />}
+                    onClick={() => setImportBoardModal(true)}
+                >
+                    インポート
                 </Menu.Item>
             </Menu>
         );
