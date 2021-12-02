@@ -116,10 +116,12 @@ export const CharacterEditorModal: React.FC = () => {
     const numParamNames = useNumParamNames();
     const strParamNames = useStrParamNames();
     const participants = useParticipants();
-    let stateEditorParams: StateEditorParams<CharacterState | undefined>;
+    let stateEditorParams: StateEditorParams<CharacterState | undefined> | undefined;
     switch (atomValue?.type) {
-        case create:
         case undefined:
+            stateEditorParams = undefined;
+            break;
+        case create:
             stateEditorParams = {
                 type: create,
                 initState: defaultCharacter,

@@ -24,10 +24,12 @@ export type StateEditorParams<T> =
       };
 
 // stateのcreateとupdateを自動的に切り替える機能をサポートするhook。createはボタンなどを押すまで作成されず、updateは値が変わるたびにstateにその変更が反映される場面を想定。
-export function useStateEditor<T>(state: StateEditorParams<T>) {
-    const [uiState, setUiState] = React.useState<T>(
+export function useStateEditor<T>(state: StateEditorParams<T> | undefined) {
+    const [uiState, setUiState] = React.useState<T | undefined>(
         (() => {
-            switch (state.type) {
+            switch (state?.type) {
+                case undefined:
+                    return undefined;
                 case update:
                     return state.state;
                 case create:
@@ -40,7 +42,7 @@ export function useStateEditor<T>(state: StateEditorParams<T>) {
 
     const resetUiState = React.useCallback(
         (newState?: T) => {
-            if (stateRef.current.type !== create) {
+            if (stateRef.current?.type !== create) {
                 return false;
             }
             setUiState(newState == null ? stateRef.current.initState : newState);
@@ -51,11 +53,13 @@ export function useStateEditor<T>(state: StateEditorParams<T>) {
 
     const updateUiState = React.useCallback(
         (recipe: Recipe<T>) => {
-            if (stateRef.current.type === create) {
+            if (stateRef.current?.type === create) {
                 setUiState(uiState => produce(uiState, recipe));
                 return;
             }
-            stateRef.current.onUpdate(produce(stateRef.current.state, recipe));
+            if (stateRef.current?.type === update) {
+                stateRef.current.onUpdate(produce(stateRef.current.state, recipe));
+            }
         },
         [stateRef]
     );
@@ -63,11 +67,15 @@ export function useStateEditor<T>(state: StateEditorParams<T>) {
     const previousState = usePrevious(state);
 
     React.useEffect(() => {
+        if (state == null) {
+            setUiState(undefined);
+            return;
+        }
         if (state.type === create) {
             if (previousState?.type === create) {
                 if (state.updateInitState != null) {
                     const f = state.updateInitState;
-                    setUiState(prev => f(prev));
+                    setUiState(prev => f(prev ?? state.initState));
                 }
                 return;
             }

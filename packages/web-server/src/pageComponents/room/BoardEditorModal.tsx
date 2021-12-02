@@ -72,10 +72,12 @@ export const BoardEditorModal: React.FC = () => {
     const [modalValue, setModalValue] = useAtom(boardEditorModalAtom);
     const setRoomConfigAtom = useImmerUpdateAtom(roomConfigAtom);
     const boards = useBoards();
-    let stateEditorParams: StateEditorParams<BoardState | undefined>;
+    let stateEditorParams: StateEditorParams<BoardState | undefined> | undefined;
     switch (modalValue?.type) {
-        case create:
         case undefined:
+            stateEditorParams = undefined;
+            break
+        case create:
             stateEditorParams = {
                 type: create,
                 initState: defaultBoard,

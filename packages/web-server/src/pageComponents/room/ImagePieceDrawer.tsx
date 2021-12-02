@@ -68,13 +68,10 @@ export const ImagePieceDrawer: React.FC = () => {
     const myUserUid = useMyUserUid();
     const imagePieces = useImagePieces(drawerType?.boardId);
     const clone = useCloneImagePiece();
-    let stateEditorParams: StateEditorParams<ImagePieceState | undefined>;
+    let stateEditorParams: StateEditorParams<ImagePieceState | undefined> | undefined;
     switch (drawerType?.type) {
         case undefined:
-            stateEditorParams = {
-                type: create,
-                initState: undefined,
-            };
+            stateEditorParams = undefined;
             break;
         case create:
             stateEditorParams = {

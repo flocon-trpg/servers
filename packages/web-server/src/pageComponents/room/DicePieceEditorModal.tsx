@@ -27,6 +27,7 @@ const defaultDicePieceValue = (
     $r: 1,
 
     ownerCharacterId,
+
     dice: {},
     memo: undefined,
     name: undefined,
@@ -47,18 +48,17 @@ export const DicePieceEditorModal: React.FC = () => {
         id: string;
         state: CharacterState;
     }>();
-    let stateEditorParams: StateEditorParams<DicePieceState | undefined>;
+    let stateEditorParams: StateEditorParams<DicePieceState | undefined> | undefined;
     switch (drawerType?.type) {
         case undefined:
-            stateEditorParams = {
-                type: create,
-                initState: undefined,
-            };
+            stateEditorParams = undefined;
             break;
         case create:
             stateEditorParams = {
                 type: create,
-                initState: defaultDicePieceValue(drawerType.piecePosition, myUserUid),
+
+                // createする際にownerCharacterIdをセットする必要がある
+                initState: defaultDicePieceValue(drawerType.piecePosition, undefined),
             };
             break;
         case update:
@@ -92,13 +92,16 @@ export const DicePieceEditorModal: React.FC = () => {
     // drawerType != nullを付けていることで、updateから閉じる際に一瞬onCreateボタンが出るのを防いでいる。ただし、これで適切なのかどうかは吟味していない
     if (drawerType != null && drawerType.type === create) {
         onCreate = () => {
+            if (activeCharacter == null) {
+                return;
+            }
             const id = simpleId();
             setRoomState(roomState => {
                 const dicePieces = roomState.boards[drawerType.boardId]?.dicePieces;
                 if (dicePieces == null) {
                     return;
                 }
-                dicePieces[id] = uiState;
+                dicePieces[id] = { ...uiState, ownerCharacterId: activeCharacter.id };
             });
             setDrawerType(null);
             resetUiState(undefined);
