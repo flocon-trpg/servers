@@ -794,8 +794,8 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
         return panel.boardEditorPanel.activeBoardId;
     })();
 
-    const dicePieceValues = useDicePieces(boardIdToShow);
-    const stringPieceValues = useStringPieces(boardIdToShow);
+    const dicePieces = useDicePieces(boardIdToShow);
+    const stringPieces = useStringPieces(boardIdToShow);
     const imagePieces = useImagePieces(boardIdToShow);
 
     if (
@@ -803,8 +803,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
         myUserUid == null ||
         roomId == null ||
         boards == null ||
-        characters == null ||
-        stringPieceValues == null
+        characters == null
     ) {
         return null;
     }
@@ -921,7 +920,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                 pieceId,
                                 piece,
                             })),
-                        dicePiecesOnCursor: [...(dicePieceValues ?? [])]
+                        dicePiecesOnCursor: [...(dicePieces ?? [])]
                             .filter(([, piece]) => {
                                 return Piece.isCursorOnIcon({
                                     ...board,
@@ -934,7 +933,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                 pieceId,
                                 piece,
                             })),
-                        stringPiecesOnCursor: [...(stringPieceValues ?? [])]
+                        stringPiecesOnCursor: [...(stringPieces ?? [])]
                             .filter(([, piece]) => {
                                 return Piece.isCursorOnIcon({
                                     ...board,
