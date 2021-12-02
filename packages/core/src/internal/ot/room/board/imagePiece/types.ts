@@ -8,7 +8,6 @@ import { Maybe, maybe } from '../../../../maybe';
 
 export const state = t.intersection([
     BoardPosition.state,
-    Piece.stateBase,
     t.type({
         $v: t.literal(2),
         $r: t.literal(1),
@@ -23,7 +22,6 @@ export type State = t.TypeOf<typeof state>;
 
 export const downOperation = t.intersection([
     BoardPosition.downOperation,
-    Piece.downOperationBase,
     createOperation(2, 1, {
         ownerParticipantId: t.type({ oldValue: maybe(t.string) }),
         image: t.type({ oldValue: maybe(filePath) }),
@@ -35,7 +33,6 @@ export type DownOperation = t.TypeOf<typeof downOperation>;
 
 export const upOperation = t.intersection([
     BoardPosition.upOperation,
-    Piece.upOperationBase,
     createOperation(2, 1, {
         ownerParticipantId: t.type({ newValue: maybe(t.string) }),
         image: t.type({ newValue: maybe(filePath) }),
