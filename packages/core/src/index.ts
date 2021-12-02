@@ -152,6 +152,7 @@ export {
 } from './internal/ot/room/board/functions';
 
 export {
+    state as boardState,
     State as BoardState,
     UpOperation as BoardUpOperation,
     DownOperation as BoardDownOperation,
@@ -164,6 +165,7 @@ export {
 } from './internal/ot/room/character/functions';
 
 export {
+    state as characterState,
     State as CharacterState,
     UpOperation as CharacterUpOperation,
     DownOperation as CharacterDownOperation,

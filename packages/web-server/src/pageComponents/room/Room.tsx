@@ -32,6 +32,7 @@ import { roomAtom } from '../../atoms/room/roomAtom';
 import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
 import { BoardPositionAndPieceEditorModal } from './BoardPositionAndPieceEditorModal';
 import { CharacterTagNamesEditorModal } from './CharacterTagNamesEditorModal';
+import { ImportCharacterModal } from './ImportCharacterModal';
 
 const RoomMessagePanels: React.FC = () => {
     const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
@@ -712,6 +713,7 @@ export const Room: React.FC = () => {
                 <StringPieceEditorModal />
                 <CharacterParameterNamesEditorModal />
                 <EditRoomDrawer />
+                <ImportCharacterModal />
 
                 <CommandEditorModal />
             </AntdLayout.Content>

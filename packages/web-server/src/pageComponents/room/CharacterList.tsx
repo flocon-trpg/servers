@@ -63,6 +63,7 @@ import { CharacterTabConfigUtils } from '../../atoms/roomConfig/types/characterT
 import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { Gutter } from 'antd/lib/grid/row';
 import { useCharacterTagNames } from '../../hooks/state/useCharacterTagNames';
+import { importCharacterModalVisibilityAtom } from './ImportCharacterModal';
 
 type DataSource = {
     key: string;
@@ -540,6 +541,7 @@ export const CharacterList: React.FC = () => {
         characterTagNamesEditorVisibilityAtom
     );
     const setCharacterEditorModal = useUpdateAtom(characterEditorModalAtom);
+    const setImportCharacterModal = useUpdateAtom(importCharacterModalVisibilityAtom);
     const [editingTabConfigKey, setEditingTabConfigKey] = React.useState<string | undefined>();
 
     const tabPanes = (tabs ?? []).map((tab, tabIndex) => {
@@ -651,6 +653,9 @@ export const CharacterList: React.FC = () => {
                 />
                 <Button size='small' onClick={() => setCharacterEditorModal({ type: create })}>
                     キャラクターを作成
+                </Button>
+                <Button size='small' onClick={() => setImportCharacterModal(true)}>
+                    キャラクターをインポート
                 </Button>
                 <Button
                     size='small'
