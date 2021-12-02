@@ -19,7 +19,7 @@ export const PieceEditor: React.FC<Props> = ({ state, onUpdate }: Props) => {
             <>
                 <Row gutter={gutter} align='middle'>
                     <Col flex='auto' />
-                    <Col flex={0}>位置</Col>
+                    <Col flex={0}>セルの位置</Col>
                     <Col span={inputSpan}>
                         <Space>
                             <InputNumber
@@ -48,7 +48,7 @@ export const PieceEditor: React.FC<Props> = ({ state, onUpdate }: Props) => {
                 </Row>
                 <Row gutter={gutter} align='middle'>
                     <Col flex='auto' />
-                    <Col flex={0}>大きさ</Col>
+                    <Col flex={0}>セルの大きさ</Col>
                     <Col span={inputSpan}>
                         <Space>
                             <InputNumber

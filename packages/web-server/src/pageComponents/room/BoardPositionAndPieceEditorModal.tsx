@@ -3,6 +3,7 @@ import { atom } from 'jotai';
 import { useAtom } from 'jotai';
 import React from 'react';
 import { BoardPositionEditor } from '../../components/BoardPositionAndPiece/BoardPositionEditor';
+import { PieceEditor } from '../../components/BoardPositionAndPiece/PieceEditor';
 import { useCharacter } from '../../hooks/state/useCharacter';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 
@@ -59,14 +60,14 @@ export const BoardPositionAndPieceEditorModal: React.FC = () => {
             break;
         }
         case characterPiece: {
-            const portrait = character?.pieces?.[atomValue.pieceId];
-            if (portrait == null) {
+            const piece = character?.pieces?.[atomValue.pieceId];
+            if (piece == null) {
                 modalChildren = null;
                 break;
             }
             modalChildren = (
-                <BoardPositionEditor
-                    state={portrait}
+                <PieceEditor
+                    state={piece}
                     onUpdate={recipe => {
                         setRoomState(roomState => {
                             const pos =
