@@ -64,8 +64,12 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 };
 
 export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
+    const pieceBase = PieceBase.composeDownOperation({ first, second });
+    if (pieceBase.isError) {
+        return pieceBase;
+    }
     const valueProps: DownOperation = {
-        ...PieceBase.composeDownOperation({ first, second }),
+        ...pieceBase.value,
         $v: 2,
         $r: 1,
         isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),

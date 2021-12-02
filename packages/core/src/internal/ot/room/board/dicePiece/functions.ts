@@ -200,10 +200,17 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
 };
 
 export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
+    const dice = RecordOperation.diff({
+        prevState: prevState.dice,
+        nextState: nextState.dice,
+        innerDiff: DieValue.diff,
+    });
+
     const result: TwoWayOperation = {
         $v: 2,
         $r: 1,
         ...Piece.diff({ prevState, nextState }),
+        dice,
     };
 
     if (prevState.ownerCharacterId !== nextState.ownerCharacterId) {

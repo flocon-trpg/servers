@@ -113,6 +113,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         $v: 2,
         $r: 1,
     };
+
     if (prevState.isPrivate !== nextState.isPrivate) {
         resultType.isPrivate = {
             oldValue: prevState.isPrivate,

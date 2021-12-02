@@ -69,6 +69,11 @@ export const normalizeRoomState = (source: unknown): any => {
             }
             const result: Record<string, unknown> = {};
             for (const key in record) {
+                // CharacterPieceとPortraitPieceにboardIdを変更できるOperationはないのでスキップ
+                if (key === 'boardId') {
+                    continue;
+                }
+
                 result[key] = normalizeRoomState(record[key]);
             }
             if (isEmpty(result)) {

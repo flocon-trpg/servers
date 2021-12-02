@@ -987,7 +987,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         nextState: nextState.privateCommands,
         innerDiff: params => Command.diff(params),
     });
-    const portraitPositions = RecordOperation.diff<
+    const portraitPieces = RecordOperation.diff<
         PortraitPieceTypes.State,
         PortraitPieceTypes.TwoWayOperation
     >({
@@ -1004,7 +1004,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         strParams,
         pieces,
         privateCommands,
-        portraitPieces: portraitPositions,
+        portraitPieces,
     };
     if (prevState.ownerParticipantId !== nextState.ownerParticipantId) {
         result.ownerParticipantId = {
