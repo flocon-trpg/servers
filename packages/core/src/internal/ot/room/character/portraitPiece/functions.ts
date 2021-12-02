@@ -54,7 +54,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     if (boardPosition.isError) {
         return boardPosition;
     }
-    const result = { ...state, ...boardPosition };
+    const result = { ...state, ...boardPosition.value };
 
     if (operation.isPrivate != null) {
         result.isPrivate = operation.isPrivate.oldValue;
