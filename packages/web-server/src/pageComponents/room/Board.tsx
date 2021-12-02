@@ -490,14 +490,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             if (imagePiece == null) {
                                 return;
                             }
-                            if (e.newPosition != null) {
-                                imagePiece.x = e.newPosition.x;
-                                imagePiece.y = e.newPosition.y;
-                            }
-                            if (e.newSize != null) {
-                                imagePiece.w = e.newSize.w;
-                                imagePiece.h = e.newSize.h;
-                            }
+                            setDragEndResultToPieceState({ e, piece: imagePiece, board });
                         });
                     }}
                 />
@@ -581,7 +574,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         onPopoverEditorRef.current({
                             pageX: e.evt.pageX,
                             pageY: e.evt.pageY,
-                            dblClickOn: { type: 'stringPiece', piece, pieceId, boardId},
+                            dblClickOn: { type: 'stringPiece', piece, pieceId, boardId },
                         });
                     }}
                     onMouseEnter={() =>
@@ -798,13 +791,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
     const stringPieces = useStringPieces(boardIdToShow);
     const imagePieces = useImagePieces(boardIdToShow);
 
-    if (
-        me == null ||
-        myUserUid == null ||
-        roomId == null ||
-        boards == null ||
-        characters == null
-    ) {
+    if (me == null || myUserUid == null || roomId == null || boards == null || characters == null) {
         return null;
     }
 

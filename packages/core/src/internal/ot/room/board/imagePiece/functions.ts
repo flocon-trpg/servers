@@ -10,7 +10,7 @@ import {
 } from '../../../util/type';
 import { isIdRecord } from '../../../util/record';
 import { Result } from '@kizahasi/result';
-import * as BoardPosition from '../../../boardPositionBase/functions';
+import * as Piece from '../../../pieceBase/functions';
 import { DownOperation, State, TwoWayOperation, UpOperation } from './types';
 import {
     anyValue,
@@ -28,7 +28,7 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
         ...source,
         memo: undefined,
         name: undefined,
-        ...BoardPosition.toDownOperation(source),
+        ...Piece.toDownOperation(source),
     };
 };
 
@@ -37,12 +37,12 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
         ...source,
         memo: undefined,
         name: undefined,
-        ...BoardPosition.toUpOperation(source),
+        ...Piece.toUpOperation(source),
     };
 };
 
 export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
-    const piece = BoardPosition.apply({ state, operation });
+    const piece = Piece.apply({ state, operation });
     if (piece.isError) {
         return piece;
     }
@@ -62,7 +62,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
 };
 
 export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
-    const piece = BoardPosition.applyBack({ state, operation });
+    const piece = Piece.applyBack({ state, operation });
     if (piece.isError) {
         return piece;
     }
@@ -82,7 +82,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 };
 
 export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
-    const boardPosition = BoardPosition.composeDownOperation({ first, second });
+    const boardPosition = Piece.composeDownOperation({ first, second });
     if (boardPosition.isError) {
         return boardPosition;
     }
@@ -109,7 +109,7 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         return Result.ok({ prevState: nextState, twoWayOperation: undefined });
     }
 
-    const piece = BoardPosition.restore({ nextState, downOperation });
+    const piece = Piece.restore({ nextState, downOperation });
     if (piece.isError) {
         return piece;
     }
@@ -153,7 +153,7 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
     const result: TwoWayOperation = {
         $v: 2,
         $r: 1,
-        ...BoardPosition.diff({ prevState, nextState }),
+        ...Piece.diff({ prevState, nextState }),
     };
 
     if (prevState.ownerParticipantId !== nextState.ownerParticipantId) {
@@ -187,7 +187,7 @@ export const serverTransform =
             return Result.ok(undefined);
         }
 
-        const piece = BoardPosition.serverTransform({
+        const piece = Piece.serverTransform({
             prevState,
             currentState,
             clientOperation,
@@ -236,7 +236,7 @@ export const serverTransform =
     };
 
 export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
-    const piece = BoardPosition.clientTransform({ first, second });
+    const piece = Piece.clientTransform({ first, second });
 
     const ownerPariticipantId = ReplaceOperation.clientTransform({
         first: first.ownerParticipantId,

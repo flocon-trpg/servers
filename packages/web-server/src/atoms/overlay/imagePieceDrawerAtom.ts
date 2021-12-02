@@ -1,12 +1,12 @@
 import { atom } from 'jotai';
 import { create, update } from '../../utils/constants';
-import { PiecePositionWithoutCell } from '../../utils/types';
+import { PiecePositionWithCell } from '../../utils/types';
 
 export type ImagePieceDrawerType =
     | {
           type: typeof create;
           boardId: string;
-          piecePosition: PiecePositionWithoutCell;
+          piecePosition: PiecePositionWithCell;
       }
     | {
           type: typeof update;

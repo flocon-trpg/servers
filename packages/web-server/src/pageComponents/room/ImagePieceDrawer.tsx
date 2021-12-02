@@ -8,7 +8,7 @@ import { ImagePieceState, simpleId } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useImagePieces } from '../../hooks/state/useImagePieces';
 import { InputFile } from '../../components/InputFile';
-import { FilesManagerDrawerType, PiecePositionWithoutCell } from '../../utils/types';
+import { FilesManagerDrawerType, PiecePositionWithCell } from '../../utils/types';
 import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';
 import { BufferedInput } from '../../components/BufferedInput';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
@@ -26,7 +26,7 @@ const drawerBaseProps: Partial<DrawerProps> = {
 };
 
 const defaultImagePiece = (
-    piecePosition: PiecePositionWithoutCell,
+    piecePosition: PiecePositionWithCell,
     ownerParticipantId: string | undefined
 ): ImagePieceState => ({
     $v: 2,
