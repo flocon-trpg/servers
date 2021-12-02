@@ -90,6 +90,22 @@ export const PieceEditor: React.FC<Props> = ({ state, onUpdate }: Props) => {
 
     return (
         <div>
+            <Row gutter={gutter} align='middle'>
+                <Col flex='auto' />
+                <Col flex={0}></Col>
+                <Col span={inputSpan}>
+                    <Checkbox
+                        checked={state.isCellMode}
+                        onChange={e =>
+                            onUpdate(piece => {
+                                piece.isCellMode = e.target.checked;
+                            })
+                        }
+                    >
+                        セルにスナップする
+                    </Checkbox>
+                </Col>
+            </Row>
             {positionElement}
             <Row gutter={gutter} align='middle'>
                 <Col flex='auto' />
