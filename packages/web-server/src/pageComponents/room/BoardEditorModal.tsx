@@ -1,4 +1,4 @@
-import { Col, InputNumber, Modal, Row } from 'antd';
+import { Col, Divider, InputNumber, Modal, Row } from 'antd';
 import React from 'react';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { InputFile } from '../../components/InputFile';
@@ -17,6 +17,7 @@ import { create, update } from '../../utils/constants';
 import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
 import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
+import { CopyToClipboardButton } from '../../components/CopyToClipboardButton';
 
 export type BoardEditorModalType =
     | {
@@ -300,6 +301,21 @@ export const BoardEditorModal: React.FC = () => {
                         />
                     </Col>
                 </Row>
+                <Divider dashed />
+                <CopyToClipboardButton
+                    clipboardText={async () => {
+                        return JSON.stringify(board);
+                    }}
+                >
+                    クリップボードにエクスポート
+                </CopyToClipboardButton>
+                <p>
+                    {'キャラクターコマ、キャラクター立ち絵コマはエクスポートされません。'}
+                    <br />
+                    {
+                        '自分が閲覧できない値はエクスポートされません。例えば、他のユーザーが作成して非公開にしている値はエクスポートの対象外ですが、自分が作成して非公開にしている値は自分が閲覧可能なためエクスポートの対象内となります。'
+                    }
+                </p>
             </div>
             <FilesManagerDrawer
                 drawerType={filesManagerDrawerType}

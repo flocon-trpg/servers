@@ -39,6 +39,7 @@ import { flex, flex1, flexAuto, flexRow, itemsCenter, justifyEnd } from '../../u
 import { EditorGroupHeader } from '../../components/EditorGroupHeader';
 import { OverriddenParameterNameEditor } from '../../components/OverriddenParameterNameEditor';
 import { CharacterTagsSelect } from '../../components/CharacterTagsSelect';
+import { CopyToClipboardButton } from '../../components/CopyToClipboardButton';
 
 export type CharacterEditorModalType =
     | {
@@ -593,6 +594,32 @@ export const CharacterEditorModal: React.FC = () => {
                                 </Button>
                             </>
                         )}
+
+                        <EditorGroupHeader>エクスポート</EditorGroupHeader>
+
+                        <div>
+                            <CopyToClipboardButton
+                                clipboardText={async () => {
+                                    const characterToExport: typeof character = {
+                                        ...character,
+                                        pieces: {},
+                                        portraitPieces: {},
+                                    };
+                                    return JSON.stringify(characterToExport);
+                                }}
+                            >
+                                クリップボードにエクスポート
+                            </CopyToClipboardButton>
+                            <p>
+                                {
+                                    'キャラクターコマ、キャラクター立ち絵コマはエクスポートされません。'
+                                }
+                                <br />
+                                {
+                                    '自分が閲覧できない値はエクスポートされません。例えば、他のユーザーによって非公開にされている値はエクスポートの対象外ですが、自分が非公開にしている値は自分が閲覧可能なためエクスポートの対象内となります。'
+                                }
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
