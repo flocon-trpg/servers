@@ -1,23 +1,17 @@
-import { PieceState } from '@flocon-trpg/core';
 import { atom } from 'jotai';
 import { create, update } from '../../utils/constants';
+import { PiecePositionWithoutCell } from '../../utils/types';
 
 export type ImagePieceDrawerType =
     | {
-          // pieceとともに作成するケース
           type: typeof create;
-          piece: PieceState;
-      }
-    | {
-          // pieceは作成しないケース
-          type: typeof create;
-          piece: null;
+          boardId: string;
+          piecePosition: PiecePositionWithoutCell;
       }
     | {
           type: typeof update;
-          // boardKey != nullならば、pieceが指定されたupdate。そうでないならばpieceが指定されないupdate。
-          boardId: string | null;
-          stateId: string;
+          boardId: string;
+          pieceId: string;
       };
 
 export const imagePieceDrawerAtom = atom<ImagePieceDrawerType | null>(null);

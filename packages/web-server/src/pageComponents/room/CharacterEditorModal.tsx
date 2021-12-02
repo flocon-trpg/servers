@@ -96,7 +96,7 @@ const defaultCharacter: CharacterState = {
     privateCommands: {},
     privateVarToml: '',
     portraitImage: undefined,
-    portraitPositions: {},
+    portraitPieces: {},
     boolParams: {},
     numParams: {},
     numMaxParams: {},

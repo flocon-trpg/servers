@@ -1,20 +1,14 @@
-import { PieceState } from '@flocon-trpg/core';
 import { create, update } from './constants';
+import { PiecePositionWithCell } from './types';
 
 export type PieceValueEditorType =
     | {
-          // pieceとともに作成するケース
           type: typeof create;
-          piece: PieceState;
-      }
-    | {
-          // pieceは作成しないケース
-          type: typeof create;
-          piece: null;
+          boardId: string;
+          piecePosition: PiecePositionWithCell;
       }
     | {
           type: typeof update;
-          // boardKey != nullならば、pieceが指定されたupdate。そうでないならばpieceが指定されないupdate。
-          boardId: string | null;
-          stateId: string;
+          boardId: string;
+          pieceId: string;
       };

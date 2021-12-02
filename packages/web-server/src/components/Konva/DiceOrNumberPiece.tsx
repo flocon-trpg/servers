@@ -2,9 +2,9 @@ import React from 'react';
 import * as ReactKonva from 'react-konva';
 import { animated, useSpring } from '@react-spring/konva';
 import {
-    DicePieceValueState,
-    dicePieceValueStrIndexes,
-    StringPieceValueState,
+    DicePieceState,
+    dicePieceStrIndexes,
+    StringPieceState,
     DieValueState,
 } from '@flocon-trpg/core';
 import { StringPieceValue } from '../../utils/stringPieceValue';
@@ -20,20 +20,20 @@ export const dicePiece = 'dicePiece';
 export type DiceOrStringPieceState =
     | {
           type: typeof stringPiece;
-          state: StringPieceValueState;
+          state: StringPieceState;
       }
     | {
           type: typeof dicePiece;
-          state: DicePieceValueState;
+          state: DicePieceState;
       };
 
-type StringPieceValueContentProps = {
+type StringPieceContentProps = {
     createdByMe: boolean;
-    state: StringPieceValueState;
+    state: StringPieceState;
 } & Size;
 
-const StringPieceValueContent: React.FC<StringPieceValueContentProps> = (
-    props: StringPieceValueContentProps
+const StringPieceContent: React.FC<StringPieceContentProps> = (
+    props: StringPieceContentProps
 ) => {
     const text = StringPieceValue.toKonvaText(props.state, props.createdByMe);
 
@@ -128,19 +128,19 @@ const StringPieceValueContent: React.FC<StringPieceValueContentProps> = (
     );
 };
 
-type DicePieceValueContentProps = {
+type DicePieceContentProps = {
     createdByMe: boolean;
-    state: DicePieceValueState;
+    state: DicePieceState;
     opacity: number;
 } & Size;
 
-const DicePieceValueContent: React.FC<DicePieceValueContentProps> = ({
+const DicePieceContent: React.FC<DicePieceContentProps> = ({
     createdByMe,
     state,
     w,
     h,
     opacity,
-}: DicePieceValueContentProps) => {
+}: DicePieceContentProps) => {
     const largeDieWidth = (w * 2) / 3;
     const largeDieHeight = (h * 2) / 3;
     const dieWidth = w / 2 - w / 20;
@@ -217,7 +217,7 @@ const DicePieceValueContent: React.FC<DicePieceValueContentProps> = ({
     };
 
     const dice: DieValueState[] = [];
-    dicePieceValueStrIndexes.forEach(i => {
+    dicePieceStrIndexes.forEach(i => {
         const die = state.dice[i];
         if (die != null) {
             dice.push(die);
@@ -314,10 +314,10 @@ type ValueContentProps = {
 const ValueContent: React.FC<ValueContentProps> = (props: ValueContentProps) => {
     switch (props.state.type) {
         case dicePiece: {
-            return <DicePieceValueContent {...props} state={props.state.state} />;
+            return <DicePieceContent {...props} state={props.state.state} />;
         }
         case stringPiece: {
-            return <StringPieceValueContent {...props} state={props.state.state} />;
+            return <StringPieceContent {...props} state={props.state.state} />;
         }
     }
 };

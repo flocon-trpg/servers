@@ -18,7 +18,7 @@ type State =
     | {
           type: typeof characterPortrait;
           characterId: string;
-          boardPositionId: string;
+          pieceId: string;
       };
 
 export const boardPositionAndPieceEditorModalAtom = atom<State | undefined>(undefined);
@@ -34,7 +34,7 @@ export const BoardPositionAndPieceEditorModal: React.FC = () => {
             modalChildren = null;
             break;
         case characterPortrait: {
-            const portrait = character?.portraitPositions?.[atomValue.boardPositionId];
+            const portrait = character?.portraitPieces?.[atomValue.pieceId];
             if (portrait == null) {
                 modalChildren = null;
                 break;
@@ -45,8 +45,8 @@ export const BoardPositionAndPieceEditorModal: React.FC = () => {
                     onUpdate={recipe => {
                         setRoomState(roomState => {
                             const pos =
-                                roomState.characters[atomValue.characterId]?.portraitPositions?.[
-                                    atomValue.boardPositionId
+                                roomState.characters[atomValue.characterId]?.portraitPieces?.[
+                                    atomValue.pieceId
                                 ];
                             if (pos == null) {
                                 return;

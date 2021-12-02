@@ -1,17 +1,14 @@
-import { Button, Col, Drawer, Row, Tooltip, Typography } from 'antd';
+import { Button, Col, Drawer, Row, Tooltip } from 'antd';
 import React from 'react';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { DrawerProps } from 'antd/lib/drawer';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
-import {
-    ImagePieceValueState,
-    simpleId,
-} from '@flocon-trpg/core';
+import { ImagePieceState, simpleId } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
-import { useImagePieceValues } from '../../hooks/state/useImagePieceValues';
+import { useImagePieces } from '../../hooks/state/useImagePieces';
 import { InputFile } from '../../components/InputFile';
-import { FilesManagerDrawerType } from '../../utils/types';
+import { FilesManagerDrawerType, PiecePositionWithoutCell } from '../../utils/types';
 import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';
 import { BufferedInput } from '../../components/BufferedInput';
 import { BufferedTextArea } from '../../components/BufferedTextArea';
@@ -28,19 +25,22 @@ const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
 };
 
-const defaultImagePieceValue: ImagePieceValueState = {
+const defaultImagePiece = (
+    piecePosition: PiecePositionWithoutCell,
+    ownerParticipantId: string | undefined
+): ImagePieceState => ({
     $v: 2,
     $r: 1,
 
-    // createするときはこれに自身のIDを入れなければならない
-    ownerParticipantId: undefined,
-
+    ownerParticipantId,
     image: undefined,
     isPrivate: false,
-    memo: '',
-    name: '',
-    pieces: {},
-};
+    memo: undefined,
+    name: undefined,
+    opacity: undefined,
+    isPositionLocked: false,
+    ...piecePosition,
+});
 
 const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
@@ -57,7 +57,7 @@ const IdView: React.FC = () => {
         <Row gutter={gutter} align='middle'>
             <Col flex='auto' />
             <Col flex={0}>ID</Col>
-            <Col span={inputSpan}>{drawerType.type === update ? drawerType.stateId : '(なし)'}</Col>
+            <Col span={inputSpan}>{drawerType.type === update ? drawerType.pieceId : '(なし)'}</Col>
         </Row>
     );
 };
@@ -66,37 +66,47 @@ export const ImagePieceDrawer: React.FC = () => {
     const [drawerType, setDrawerType] = useAtom(imagePieceDrawerAtom);
     const setRoomState = useSetRoomStateWithImmer();
     const myUserUid = useMyUserUid();
-    const imagePieces = useImagePieceValues();
+    const imagePieces = useImagePieces(drawerType?.boardId);
     const clone = useCloneImagePiece();
-    let stateEditorParams: StateEditorParams<ImagePieceValueState | undefined>;
+    let stateEditorParams: StateEditorParams<ImagePieceState | undefined>;
     switch (drawerType?.type) {
-        case create:
         case undefined:
             stateEditorParams = {
                 type: create,
-                initState: defaultImagePieceValue,
+                initState: undefined,
+            };
+            break;
+        case create:
+            stateEditorParams = {
+                type: create,
+                initState: defaultImagePiece(drawerType.piecePosition, myUserUid),
             };
             break;
         case update:
             stateEditorParams = {
                 type: update,
-                state: imagePieces?.find(value => value.id === drawerType.stateId)?.value,
+                state: imagePieces?.get(drawerType.pieceId),
                 onUpdate: newState => {
                     if (myUserUid == null || drawerType?.type !== update) {
                         return;
                     }
-                    const stateId = drawerType.stateId;
+                    const boardId = drawerType.boardId;
+                    const pieceId = drawerType.pieceId;
                     setRoomState(roomState => {
-                        roomState.imagePieceValues[stateId] = newState;
+                        const imagePieces = roomState.boards[boardId]?.imagePieces;
+                        if (imagePieces == null) {
+                            return;
+                        }
+                        imagePieces[pieceId] = newState;
                     });
                 },
             };
             break;
     }
 
-    const { uiState, updateUiState, resetUiState } = useStateEditor<
-        ImagePieceValueState | undefined
-    >(stateEditorParams);
+    const { uiState, updateUiState, resetUiState } = useStateEditor<ImagePieceState | undefined>(
+        stateEditorParams
+    );
     const [filesManagerDrawerType, setFilesManagerDrawerType] =
         React.useState<FilesManagerDrawerType | null>(null);
 
@@ -108,22 +118,16 @@ export const ImagePieceDrawer: React.FC = () => {
     // drawerType != nullを付けていることで、updateから閉じる際に一瞬onCreateボタンが出るのを防いでいる。ただし、これで適切なのかどうかは吟味していない
     if (drawerType != null && drawerType?.type === create) {
         onCreate = () => {
-            const piece = drawerType.piece;
             const id = simpleId();
             setRoomState(roomState => {
-                roomState.imagePieceValues[id] = {
-                    ...uiState,
-                    ownerParticipantId: myUserUid,
-                    pieces:
-                        piece == null
-                            ? {}
-                            : {
-                                  [drawerType.piece.boardId]: piece,
-                              },
-                };
+                const imagePieces = roomState.boards[drawerType.boardId]?.imagePieces;
+                if (imagePieces == null) {
+                    return;
+                }
+                imagePieces[id] = uiState;
             });
             setDrawerType(null);
-            resetUiState(defaultImagePieceValue);
+            resetUiState(undefined);
         };
     }
 
@@ -160,7 +164,10 @@ export const ImagePieceDrawer: React.FC = () => {
                                     <Button
                                         size='small'
                                         onClick={() => {
-                                            clone({ myUserUid, source: uiState });
+                                            clone({
+                                                boardId: drawerType.boardId,
+                                                pieceId: drawerType.pieceId,
+                                            });
                                         }}
                                     >
                                         このコマを複製

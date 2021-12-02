@@ -9,7 +9,7 @@ import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
 import { BufferedInput } from '../../components/BufferedInput';
 import { useBoards } from '../../hooks/state/useBoards';
-import {  BoardState, simpleId, } from '@flocon-trpg/core';
+import { BoardState, simpleId } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { FilePath } from '../../utils/filePath';
 import { atom, useAtom } from 'jotai';
@@ -56,6 +56,10 @@ const defaultBoard: BoardState = {
     cellOffsetY: 0,
     backgroundImage: undefined,
     backgroundImageZoom: 1,
+
+    dicePieces: {},
+    imagePieces: {},
+    stringPieces: {},
 };
 
 const gutter: [Gutter, Gutter] = [16, 16];
@@ -107,9 +111,9 @@ export const BoardEditorModal: React.FC = () => {
             setRoomState(roomState => {
                 roomState.boards[id] = {
                     ...board,
-                    ownerParticipantId: myUserUid
+                    ownerParticipantId: myUserUid,
                 };
-            })
+            });
             resetBoardToCreate(defaultBoard);
             setModalValue(null);
             setRoomConfigAtom(roomConfig => {
@@ -130,8 +134,8 @@ export const BoardEditorModal: React.FC = () => {
     if (modalValue?.type === update) {
         onDestroy = () => {
             setRoomState(roomState => {
-                delete roomState.boards[modalValue.stateId]
-            })
+                delete roomState.boards[modalValue.stateId];
+            });
             setModalValue(null);
         };
     }

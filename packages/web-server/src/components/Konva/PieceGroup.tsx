@@ -87,7 +87,7 @@ export const PieceGroup: React.FC<PropsWithChildren<PieceGroupProps>> = ({
         e.target.y(y);
         if (onDragEndProp != null) {
             onDragEndProp({
-                newLocation: {
+                newPosition: {
                     x,
                     y,
                 },
@@ -144,7 +144,7 @@ export const PieceGroup: React.FC<PropsWithChildren<PieceGroupProps>> = ({
             }
 
             onDragEndProp({
-                newLocation: {
+                newPosition: {
                     x: node.x(),
                     y: node.y(),
                 },

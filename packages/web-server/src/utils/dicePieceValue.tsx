@@ -1,11 +1,11 @@
 import React from 'react';
-import { DicePieceValueState, DieValueState } from '@flocon-trpg/core';
+import { DicePieceState, DieValueState } from '@flocon-trpg/core';
 
 export namespace DicePieceValue {
     export const privateValueOpacity = 0.5;
 
     type ImageProps = {
-        state: DicePieceValueState;
+        state: DicePieceState;
         size: number;
         padding?: number | string;
     };

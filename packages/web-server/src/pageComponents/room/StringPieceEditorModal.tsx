@@ -4,63 +4,43 @@ import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../hooks/useStateEditor';
 import {
-    StringPieceValueState,
+    StringPieceState,
     CharacterState,
     simpleId,
     String
 } from '@flocon-trpg/core';
-import { useStringPieceValues } from '../../hooks/state/useStringPieceValues';
+import { useStringPieces } from '../../hooks/state/useStringPieces';
 import { MyCharactersSelect } from '../../components/MyCharactersSelect';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
-import { keyNames } from '@flocon-trpg/utils';
-import { useAtomValue } from 'jotai/utils';
 import { create, update } from '../../utils/constants';
 import { atom, useAtom } from 'jotai';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
-import { dicePieceValueEditorModalAtom } from './DicePieceValueEditorModal';
 import { PieceValueEditorType } from '../../utils/pieceValueEditorType';
 import { BufferedInput } from '../../components/BufferedInput';
+import { PiecePositionWithCell } from '../../utils/types';
 
 export const stringPieceEditorModalAtom = atom<PieceValueEditorType | null>(null);
 
-const defaultStringPieceValue: StringPieceValueState = {
+const defaultStringPieceValue = (
+    piecePosition: PiecePositionWithCell,
+    ownerCharacterId: string | undefined
+): StringPieceState => ({
     $v: 2,
     $r: 1,
 
-    // createするときはこれに自身のIDを入れなければならない
-    ownerCharacterId: undefined,
-
+    ownerCharacterId,
     value: '',
     isValuePrivate: false,
     valueInputType: String,
     memo: undefined,
     name: undefined,
-    pieces: {},
-};
+    opacity: undefined,
+    isPositionLocked: false,
+    ...piecePosition,
+});
 
 const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
-
-const IdView: React.FC = () => {
-    const drawerType = useAtomValue(dicePieceValueEditorModalAtom);
-    const myUserUid = useMyUserUid();
-
-    if (drawerType == null || myUserUid == null) {
-        return null;
-    }
-
-    return (
-        <Row gutter={gutter} align='middle'>
-            <Col flex='auto' />
-            <Col flex={0}>ID</Col>
-            <Col span={inputSpan}>
-                {drawerType.type === update
-                    ? keyNames({ createdBy: myUserUid, id: drawerType.stateId })
-                    : '(なし)'}
-            </Col>
-        </Row>
-    );
-};
 
 const parseIntSafe = (value: string) => {
     const result = parseInt(value, 10);
@@ -70,40 +50,46 @@ const parseIntSafe = (value: string) => {
     return result;
 };
 
-export const StringPieceValueDrawer: React.FC = () => {
+export const StringPieceEditorModal: React.FC = () => {
     const [drawerType, setDrawerType] = useAtom(stringPieceEditorModalAtom);
     const setRoomState = useSetRoomStateWithImmer();
     const myUserUid = useMyUserUid();
-    const stringPieceValues = useStringPieceValues();
+    const stringPieces = useStringPieces(drawerType?.boardId);
     const [activeCharacter, setActiveCharacter] = React.useState<{
         id: string;
         state: CharacterState;
     }>();
 
-    let stateEditorParams: StateEditorParams<typeof defaultStringPieceValue | undefined>;
+    let stateEditorParams: StateEditorParams<StringPieceState | undefined>;
     switch (drawerType?.type) {
-        case create:
         case undefined:
             stateEditorParams = {
                 type: create,
-                initState: defaultStringPieceValue,
+                initState: undefined,
+            };
+            break;
+        case create:
+            stateEditorParams = {
+                type: create,
+                initState: defaultStringPieceValue(drawerType.piecePosition, myUserUid),
             };
             break;
         case update:
             stateEditorParams = {
                 type: update,
-                state: stringPieceValues?.find(
-                    value =>
-                        value.value.ownerCharacterId === myUserUid &&
-                        value.id === drawerType.stateId
-                )?.value,
+                state: stringPieces?.get(drawerType.pieceId),
                 onUpdate: newState => {
                     if (myUserUid == null || drawerType?.type !== update) {
                         return;
                     }
-                    const stateId = drawerType.stateId;
+                    const boardId = drawerType.boardId;
+                    const pieceId = drawerType.pieceId;
                     setRoomState(roomState => {
-                        roomState.stringPieceValues[stateId] = newState;
+                        const stringPieces = roomState.boards[boardId]?.stringPieces;
+                        if (stringPieces == null) {
+                            return;
+                        }
+                        stringPieces[pieceId] = newState;
                     });
                 },
             };
@@ -119,27 +105,16 @@ export const StringPieceValueDrawer: React.FC = () => {
     // drawerType != nullを付けていることで、updateから閉じる際に一瞬onCreateボタンが出るのを防いでいる。ただし、これで適切なのかどうかは吟味していない
     if (drawerType != null && drawerType?.type === create) {
         onCreate = () => {
-            if (activeCharacter == null) {
-                return;
-            }
-
-            const piece = drawerType.piece;
             const id = simpleId();
             setRoomState(roomState => {
-                roomState.stringPieceValues[id] = {
-                    ...uiState,
-                    ownerCharacterId: activeCharacter.id,
-                    pieces:
-                        piece == null
-                            ? {}
-                            : {
-                                  [drawerType.piece.boardId]: piece,
-                              },
-                };
+                const stringPieces = roomState.boards[drawerType.boardId]?.stringPieces;
+                if (stringPieces == null) {
+                    return;
+                }
+                stringPieces[id] = uiState;
             });
             setDrawerType(null);
-            setActiveCharacter(undefined);
-            resetUiState(defaultStringPieceValue);
+            resetUiState(undefined);
         };
     }
 
@@ -160,7 +135,15 @@ export const StringPieceValueDrawer: React.FC = () => {
             }
         >
             <div>
-                <IdView />
+        <Row gutter={gutter} align='middle'>
+            <Col flex='auto' />
+            <Col flex={0}>ID</Col>
+            <Col span={inputSpan}>
+                {drawerType?.type === update
+                    ? drawerType.pieceId
+                    : '(なし)'}
+            </Col>
+        </Row>
                 <Row gutter={gutter} align='middle'>
                     <Col flex='auto' />
                     <Col flex={0}>所有者</Col>

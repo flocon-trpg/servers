@@ -1,4 +1,4 @@
-import { BoardState, PieceState } from '@flocon-trpg/core';
+import { BoardState, PieceState, BoardPositionState } from '@flocon-trpg/core';
 
 export namespace Piece {
     export const getPosition = ({
@@ -8,18 +8,21 @@ export namespace Piece {
         cellOffsetX,
         cellOffsetY,
     }: {
-        state: PieceState;
+        state: PieceState | BoardPositionState;
         cellWidth: number;
         cellHeight: number;
         cellOffsetX: number;
         cellOffsetY: number;
     }): { x: number; y: number; w: number; h: number } => {
-        return {
-            x: state.isCellMode ? state.cellX * cellWidth + cellOffsetX : state.x,
-            y: state.isCellMode ? state.cellY * cellHeight + cellOffsetY : state.y,
-            w: state.isCellMode ? state.cellW * cellWidth : state.w,
-            h: state.isCellMode ? state.cellH * cellHeight : state.h,
-        };
+        if ('isCellMode' in state) {
+            return {
+                x: state.isCellMode ? state.cellX * cellWidth + cellOffsetX : state.x,
+                y: state.isCellMode ? state.cellY * cellHeight + cellOffsetY : state.y,
+                w: state.isCellMode ? state.cellW * cellWidth : state.w,
+                h: state.isCellMode ? state.cellH * cellHeight : state.h,
+            };
+        }
+        return state;
     };
 
     export const isCursorOnIcon = ({
@@ -30,7 +33,7 @@ export namespace Piece {
         cellOffsetX,
         cellOffsetY,
     }: {
-        state: PieceState;
+        state: PieceState | BoardPositionState;
         cellWidth: number;
         cellHeight: number;
         cursorPosition: { x: number; y: number };

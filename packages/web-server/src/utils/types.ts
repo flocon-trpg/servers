@@ -1,4 +1,5 @@
 import { FilterValue } from 'antd/lib/table/interface';
+import { number } from 'fp-ts';
 import { FilePath } from './filePath';
 
 export type CharacterTagNames = {
@@ -69,6 +70,16 @@ export type Size = {
 };
 
 export type DragEndResult = {
-    readonly newLocation?: Vector2;
+    readonly newPosition?: Vector2;
     readonly newSize?: Size;
+};
+
+export type PiecePositionWithoutCell = Vector2 & Size;
+
+export type PiecePositionWithCell = PiecePositionWithoutCell & {
+    cellX: number;
+    cellY: number;
+    cellW: number;
+    cellH: number;
+    isCellMode: boolean;
 };

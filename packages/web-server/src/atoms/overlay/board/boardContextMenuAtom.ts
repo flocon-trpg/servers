@@ -1,10 +1,11 @@
 import {
     CharacterState,
-    PieceState,
-    DicePieceValueState,
-    StringPieceValueState,
+    CharacterPieceState,
+    DicePieceState,
+    StringPieceState,
     BoardPositionState,
-    ImagePieceValueState,
+    ImagePieceState,
+    PortraitPieceState,
 } from '@flocon-trpg/core';
 import { atom } from 'jotai';
 import { BoardConfig } from '../../roomConfig/types/boardConfig';
@@ -20,28 +21,28 @@ export type ContextMenuState = {
         characterId: string;
         character: CharacterState;
         pieceId: string;
-        piece: PieceState;
+        piece: CharacterPieceState;
     }>;
     portraitsOnCursor: ReadonlyArray<{
         characterId: string;
         character: CharacterState;
-        portraitPositionId: string;
-        portraitPosition: BoardPositionState;
+        pieceId: string;
+        piece: PortraitPieceState;
     }>;
-    dicePieceValuesOnCursor: ReadonlyArray<{
-        dicePieceValueId: string;
-        dicePieceValue: DicePieceValueState;
-        piece: PieceState;
+    dicePiecesOnCursor: ReadonlyArray<{
+        boardId: string;
+        pieceId: string;
+        piece: DicePieceState;
     }>;
-    stringPieceValuesOnCursor: ReadonlyArray<{
-        stringPieceValueId: string;
-        stringPieceValue: StringPieceValueState;
-        piece: PieceState;
+    stringPiecesOnCursor: ReadonlyArray<{
+        boardId: string;
+        pieceId: string;
+        piece: StringPieceState;
     }>;
-    imagePieceValuesOnCursor: ReadonlyArray<{
-        imagePieceValueId: string;
-        imagePieceValue: ImagePieceValueState;
-        piece: PieceState;
+    imagePiecesOnCursor: ReadonlyArray<{
+        boardId: string;
+        pieceId: string;
+        piece: ImagePieceState;
     }>;
 };
 

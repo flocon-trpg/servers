@@ -29,7 +29,7 @@ import {
     soundEffect,
     useFilteredAndMapRoomMessages,
     Message,
-    pieceValueLog,
+    pieceLog,
 } from '../../hooks/useRoomMessages';
 import { PrivateChannelSet, PrivateChannelSets } from '../../utils/PrivateChannelSet';
 import { ChatInput } from '../../components/ChatInput/Main';
@@ -453,7 +453,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
     const createdAt =
         message.type === privateMessage ||
         message.type === publicMessage ||
-        message.type === pieceValueLog
+        message.type === pieceLog
             ? message.value.createdAt
             : (message.createdAt as number | undefined);
     let datetime: string | null = null;
@@ -625,7 +625,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
             </div>
             {message.type === privateMessage ||
             message.type === publicMessage ||
-            message.type === pieceValueLog ? (
+            message.type === pieceLog ? (
                 <RoomMessageNameSpace.Content
                     style={{
                         fontSize,
@@ -732,7 +732,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
                             message={
                                 message.type === publicMessage ||
                                 message.type === privateMessage ||
-                                message.type === pieceValueLog
+                                message.type === pieceLog
                                     ? message
                                     : message.value
                             }

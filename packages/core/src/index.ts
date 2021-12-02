@@ -124,6 +124,18 @@ export {
 } from './internal/ot/boardPositionBase/types';
 
 export {
+    apply as applyPiece,
+    diff as pieceDiff,
+    toUpOperation as toPieceUpOperation,
+} from './internal/ot/pieceBase/functions';
+
+export {
+    State as PieceState,
+    UpOperation as PieceUpOperation,
+    DownOperation as PieceDownOperation,
+} from './internal/ot/pieceBase/types';
+
+export {
     Master,
     Player,
     Spectator,

@@ -1,5 +1,5 @@
 import { BoardPositionState } from '@flocon-trpg/core';
-import { Checkbox, Col, InputNumber, Row, Space } from 'antd';
+import { Checkbox, Col, Row } from 'antd';
 import { Gutter } from 'antd/lib/grid/row';
 import React from 'react';
 import { PositionEditor } from './PositionEditor';

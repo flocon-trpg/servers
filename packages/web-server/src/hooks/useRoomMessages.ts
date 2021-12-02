@@ -7,7 +7,7 @@ import {
     RoomPublicMessageFragment,
     RoomPublicChannelFragment,
     RoomSoundEffectFragment,
-    PieceValueLogFragment,
+    PieceLogFragment,
     RoomEventSubscription,
     GetRoomMessagesFailureType,
     GetMessagesDocument,
@@ -25,7 +25,7 @@ import { roomAtom, Notification } from '../atoms/room/roomAtom';
 
 export const privateMessage = 'privateMessage';
 export const publicMessage = 'publicMessage';
-export const pieceValueLog = 'pieceValueLog';
+export const pieceLog = 'pieceLog';
 export const publicChannel = 'publicChannel';
 export const soundEffect = 'soundEffect';
 
@@ -39,8 +39,8 @@ export type RoomMessage =
           value: RoomPublicMessageFragment;
       }
     | {
-          type: typeof pieceValueLog;
-          value: PieceValueLogFragment;
+          type: typeof pieceLog;
+          value: PieceLogFragment;
       }
     | {
           type: typeof soundEffect;
@@ -51,7 +51,7 @@ const createRoomMessage = (
     source:
         | RoomPrivateMessageFragment
         | RoomPublicMessageFragment
-        | PieceValueLogFragment
+        | PieceLogFragment
         | RoomSoundEffectFragment
 ): RoomMessage | undefined => {
     switch (source.__typename) {
@@ -65,9 +65,9 @@ const createRoomMessage = (
                 type: publicMessage,
                 value: source,
             };
-        case 'PieceValueLog':
+        case 'PieceLog':
             return {
-                type: pieceValueLog,
+                type: pieceLog,
                 value: source,
             };
         case 'RoomSoundEffect':
@@ -113,7 +113,7 @@ const reduceInit = (actions: RoomMessageEventFragment[]): StateToReduce => {
                 break;
             case 'RoomPrivateMessage':
             case 'RoomPublicMessage':
-            case 'PieceValueLog':
+            case 'PieceLog':
             case 'RoomSoundEffect': {
                 const newValue = createRoomMessage(action);
                 if (newValue == null) {
@@ -217,7 +217,7 @@ const reduceMessages = (
     switch (action.__typename) {
         case 'RoomPrivateMessage':
         case 'RoomPublicMessage':
-        case 'PieceValueLog':
+        case 'PieceLog':
         case 'RoomSoundEffect': {
             const newValue = createRoomMessage(action);
             if (newValue == null) {
@@ -243,7 +243,7 @@ const reduceMessages = (
                 const target = draft[index];
                 if (
                     target == null ||
-                    target.type === pieceValueLog ||
+                    target.type === pieceLog ||
                     target.type === soundEffect ||
                     target.type === notification
                 ) {
@@ -314,7 +314,7 @@ const reduce = (
         case 'RoomPublicMessage':
         case 'RoomPrivateMessageUpdate':
         case 'RoomPublicMessageUpdate':
-        case 'PieceValueLog':
+        case 'PieceLog':
         case 'RoomSoundEffect':
         case 'RoomMessagesReset':
         case undefined: {
@@ -432,8 +432,8 @@ export const useAllRoomMessages = ({
                         messagesData.result.privateMessages.forEach(msg => {
                             actions.push({ ...msg, __typename: 'RoomPrivateMessage' });
                         });
-                        messagesData.result.pieceValueLogs.forEach(msg => {
-                            actions.push({ ...msg, __typename: 'PieceValueLog' });
+                        messagesData.result.pieceLogs.forEach(msg => {
+                            actions.push({ ...msg, __typename: 'PieceLog' });
                         });
                         messagesData.result.soundEffects.forEach(se => {
                             actions.push({ ...se, __typename: 'RoomSoundEffect' });

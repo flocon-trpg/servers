@@ -2,38 +2,43 @@ import React from 'react';
 import { Table, Button, Tooltip } from 'antd';
 import { update } from '../../stateManagers/states/types';
 import * as Icon from '@ant-design/icons';
-import {
-    StringPieceValueElement,
-    useStringPieceValues,
-} from '../../hooks/state/useStringPieceValues';
-import { DicePieceValueElement, useDicePieceValues } from '../../hooks/state/useDicePieceValues';
+import { useStringPieces } from '../../hooks/state/useStringPieces';
+import { useDicePieces } from '../../hooks/state/useDicePieces';
 import { DicePieceValue } from '../../utils/dicePieceValue';
 import { StringPieceValue } from '../../utils/stringPieceValue';
 import { keyNames } from '@flocon-trpg/utils';
 import { useUpdateAtom } from 'jotai/utils';
 import { useCharacters } from '../../hooks/state/useCharacters';
-import { dicePieceValueEditorModalAtom } from './DicePieceValueEditorModal';
-import { stringPieceEditorModalAtom } from './StringPieceValueEditorModal';
+import { dicePieceEditorModalAtom } from './DicePieceEditorModal';
+import { stringPieceEditorModalAtom } from './StringPieceEditorModal';
+import { DicePieceState, StringPieceState } from '@flocon-trpg/core';
 
 type DataSource =
     | {
           type: 'dice';
           key: string;
-          value: DicePieceValueElement;
+          pieceId: string;
+          piece: DicePieceState;
       }
     | {
           type: 'string';
           key: string;
-          value: StringPieceValueElement;
+          pieceId: string;
+          piece: StringPieceState;
       };
-export const PieceValueList: React.FC = () => {
-    const characters = useCharacters();
-    const dicePieceValues = useDicePieceValues();
-    const stringPieceValues = useStringPieceValues();
-    const setDicePieceEditor = useUpdateAtom(dicePieceValueEditorModalAtom);
-    const setStringPieceEditr = useUpdateAtom(stringPieceEditorModalAtom);
 
-    if (dicePieceValues == null || stringPieceValues == null ) {
+type Props = {
+    boardId: string;
+};
+
+export const PieceList: React.FC<Props> = ({ boardId }: Props) => {
+    const characters = useCharacters();
+    const dicePieces = useDicePieces(boardId);
+    const stringPieces = useStringPieces(boardId);
+    const setDicePieceEditor = useUpdateAtom(dicePieceEditorModalAtom);
+    const setStringPieceEditor = useUpdateAtom(stringPieceEditorModalAtom);
+
+    if (dicePieces == null || stringPieces == null) {
         return null;
     }
 
@@ -52,15 +57,15 @@ export const PieceValueList: React.FC = () => {
                                 if (dataSource.type === 'dice') {
                                     setDicePieceEditor({
                                         type: update,
-                                        boardId: null,
-                                        stateId: dataSource.value.id,
+                                        boardId,
+                                        pieceId: dataSource.pieceId,
                                     });
                                 }
                                 if (dataSource.type === 'string') {
-                                    setStringPieceEditr({
+                                    setStringPieceEditor({
                                         type: update,
-                                        boardId: null,
-                                        stateId: dataSource.value.id,
+                                        boardId,
+                                        pieceId: dataSource.pieceId,
                                     });
                                 }
                             }}
@@ -102,7 +107,7 @@ export const PieceValueList: React.FC = () => {
                             textOverflow: 'ellipsis',
                         }}
                     >
-                        {dataSource.value.id}
+                        {dataSource.pieceId}
                     </div>
                 );
             },
@@ -113,9 +118,9 @@ export const PieceValueList: React.FC = () => {
             // eslint-disable-next-line react/display-name
             render: (_: unknown, dataSource: DataSource) => {
                 if (dataSource.type === 'dice') {
-                    return <DicePieceValue.images state={dataSource.value.value} size={22} />;
+                    return <DicePieceValue.images state={dataSource.piece} size={22} />;
                 }
-                return <div>{StringPieceValue.stringify(dataSource.value.value)}</div>;
+                return <div>{StringPieceValue.stringify(dataSource.piece)}</div>;
             },
         },
         {
@@ -123,7 +128,7 @@ export const PieceValueList: React.FC = () => {
             title: '作成者',
             // eslint-disable-next-line react/display-name
             render: (_: unknown, dataSource: DataSource) => {
-                const createdBy = dataSource.value.value.ownerCharacterId;
+                const createdBy = dataSource.piece.ownerCharacterId;
                 return (
                     <span>
                         {(createdBy == null ? undefined : characters.get(createdBy)?.name) ?? '?'}
@@ -134,15 +139,17 @@ export const PieceValueList: React.FC = () => {
     ];
 
     const dataSource: DataSource[] = [
-        ...dicePieceValues.map(value => ({
+        ...[...dicePieces].map(([pieceId, piece]) => ({
             type: 'dice' as const,
-            value,
-            key: keyNames( value.id, 'dice'),
+            key: keyNames(pieceId, 'dice'),
+            piece,
+            pieceId,
         })),
-        ...stringPieceValues.map(value => ({
+        ...[...stringPieces].map(([pieceId, piece]) => ({
             type: 'string' as const,
-            value,
-            key: keyNames(value.id, 'string'),
+            key: keyNames(pieceId, 'string'),
+            piece,
+            pieceId,
         })),
     ];
     return (

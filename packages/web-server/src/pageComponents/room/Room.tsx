@@ -15,9 +15,9 @@ import { usePlaySoundEffect } from '../../hooks/usePlaySoundEffect';
 import { useMessageNotification } from '../../hooks/useMessageNotification';
 import { RoomMenu } from './RoomMenu';
 import { recordToArray } from '@flocon-trpg/utils';
-import { PieceValueList } from './PieceValueList';
-import { StringPieceValueDrawer } from './StringPieceValueEditorModal';
-import { DicePieceValueEditorModal } from './DicePieceValueEditorModal';
+import { PieceList } from './PieceList';
+import { StringPieceEditorModal } from './StringPieceEditorModal';
+import { DicePieceEditorModal } from './DicePieceEditorModal';
 import { Memos } from './Memos';
 import { BoardContextMenu, PieceTooltip, PopoverEditor } from './BoardPopover';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
@@ -156,6 +156,7 @@ export const Room: React.FC = () => {
     useMessageNotification();
 
     const roomId = useAtomSelector(roomAtom, state => state.roomId);
+    const activeBoardId = useAtomSelector(roomAtom, state => state.roomState?.state?.activeBoardId);
 
     if (
         roomIdOfRoomConfig == null ||
@@ -644,7 +645,7 @@ export const Room: React.FC = () => {
                     )}
                     {pieceValuePanel.isMinimized ? null : (
                         <DraggableCard
-                            header='コマ'
+                            header='コマ(仮)'
                             onDragStop={e =>
                                 setRoomConfig(roomConfig => {
                                     if (roomConfig == null) {
@@ -693,7 +694,7 @@ export const Room: React.FC = () => {
                             minWidth={150}
                             zIndex={pieceValuePanel.zIndex}
                         >
-                            <PieceValueList />
+                            {activeBoardId == null ? 'ボードビュアーにボードが表示されていないため、無効化されています' : <PieceList boardId={activeBoardId} />}
                         </DraggableCard>
                     )}
                 </div>
@@ -706,9 +707,9 @@ export const Room: React.FC = () => {
                 <CharacterEditorModal />
                 <CharacterTagNamesEditorModal/>
                 <BoardPositionAndPieceEditorModal />
-                <DicePieceValueEditorModal />
+                <DicePieceEditorModal />
                 <ImagePieceDrawer />
-                <StringPieceValueDrawer />
+                <StringPieceEditorModal />
                 <CharacterParameterNamesEditorModal />
                 <EditRoomDrawer />
 
