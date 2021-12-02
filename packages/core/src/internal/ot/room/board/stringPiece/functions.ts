@@ -117,6 +117,11 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 };
 
 export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
+    const piece = Piece.composeDownOperation({ first, second });
+    if (piece.isError) {
+        return piece;
+    }
+
     const value = TextOperation.composeDownOperation(first.value, second.value);
     if (value.isError) {
         return value;
@@ -125,7 +130,7 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
     const valueProps: DownOperation = {
         $v: 2,
         $r: 1,
-        ...Piece.composeDownOperation({ first, second }),
+        ...piece.value,
         ownerCharacterId: ReplaceOperation.composeDownOperation(
             first.ownerCharacterId,
             second.ownerCharacterId

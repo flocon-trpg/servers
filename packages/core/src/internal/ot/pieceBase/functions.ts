@@ -87,8 +87,12 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 };
 
 export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
+    const boardPosition = BoardPosition.composeDownOperation({ first, second });
+    if (boardPosition.isError) {
+        return boardPosition;
+    }
     const valueProps: DownOperation = {
-        ...BoardPosition.composeDownOperation({ first, second }),
+        ...boardPosition.value,
         cellH: ReplaceOperation.composeDownOperation(first.cellH, second.cellH),
         cellW: ReplaceOperation.composeDownOperation(first.cellW, second.cellW),
         cellX: ReplaceOperation.composeDownOperation(first.cellX, second.cellX),

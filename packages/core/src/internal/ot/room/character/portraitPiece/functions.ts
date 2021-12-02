@@ -54,7 +54,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     if (boardPosition.isError) {
         return boardPosition;
     }
-    const result = { ...state };
+    const result = { ...state, ...boardPosition };
 
     if (operation.isPrivate != null) {
         result.isPrivate = operation.isPrivate.oldValue;
@@ -64,10 +64,15 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
 };
 
 export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
+    const boardPosition = BoardPositionBase.composeDownOperation({ first, second });
+    if (boardPosition.isError) {
+        return boardPosition;
+    }
+
     const valueProps: DownOperation = {
-        ...BoardPositionBase.composeDownOperation({ first, second }),
         $v: 2,
         $r: 1,
+        ...boardPosition.value,
         isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
     };
     return Result.ok(valueProps);
