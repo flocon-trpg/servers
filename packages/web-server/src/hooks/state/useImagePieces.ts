@@ -1,41 +1,16 @@
 import React from 'react';
-import { CompositeKey, compositeKeyEquals, dualKeyRecordToDualKeyMap } from '@flocon-trpg/utils';
-import { PieceState } from '@flocon-trpg/core';
-import { ImagePieceValueElement, useImagePieceValues } from './useImagePieceValues';
-import { useBooleanOrCompositeKeyMemo } from '../useBooleanOrCompositeKeyMemo';
+import { recordToMap } from '@flocon-trpg/utils';
+import { useAtomSelector } from '../../atoms/useAtomSelector';
+import { roomAtom } from '../../atoms/room/roomAtom';
 
-export type ImagePieceElement = {
-    value: ImagePieceValueElement;
-    pieceBoardKey: CompositeKey;
-    piece: PieceState;
-};
-
-export const useImagePieces = (
-    boardKey: CompositeKey | boolean
-): ReadonlyArray<ImagePieceElement> | undefined => {
-    const boardKeyMemo = useBooleanOrCompositeKeyMemo(boardKey);
-    const imagePieceValues = useImagePieceValues();
+export const useImagePieces = (boardId: string | undefined) => {
+    const imagePieces = useAtomSelector(
+        roomAtom,
+        state =>
+            boardId == null ? undefined : state.roomState?.state?.boards?.[boardId]?.imagePieces,
+        [boardId]
+    );
     return React.useMemo(() => {
-        if (imagePieceValues == null) {
-            return undefined;
-        }
-        return imagePieceValues.flatMap(element => {
-            return dualKeyRecordToDualKeyMap<PieceState>(element.value.pieces)
-                .toArray()
-                .filter(([, piece]) => {
-                    if (boardKeyMemo === true || boardKeyMemo === false) {
-                        return boardKeyMemo;
-                    }
-                    return compositeKeyEquals(boardKeyMemo, piece.boardKey);
-                })
-                .map(
-                    ([pieceKey, piece]) =>
-                        ({
-                            value: element,
-                            pieceBoardKey: { createdBy: pieceKey.first, id: pieceKey.second },
-                            piece,
-                        } as const)
-                );
-        });
-    }, [imagePieceValues, boardKeyMemo]);
+        return imagePieces == null ? undefined : recordToMap(imagePieces);
+    }, [imagePieces]);
 };

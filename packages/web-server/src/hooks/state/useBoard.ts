@@ -1,17 +1,7 @@
-import React from 'react';
-import { CompositeKey } from '@flocon-trpg/utils';
 import { BoardState } from '@flocon-trpg/core';
-import _ from 'lodash';
-import { useBoards } from './useBoards';
-import { useCompositeKeyMemo } from '../useCompositeKeyMemo';
+import { useAtomSelector } from '../../atoms/useAtomSelector';
+import { roomAtom } from '../../atoms/room/roomAtom';
 
-export const useBoard = (boardKey: CompositeKey): BoardState | undefined => {
-    const boardKeyMemo = useCompositeKeyMemo(boardKey);
-    const boards = useBoards();
-    return React.useMemo(() => {
-        if (boards == null) {
-            return undefined;
-        }
-        return boards.get(boardKeyMemo);
-    }, [boards, boardKeyMemo]);
+export const useBoard = (boardId: string): BoardState | undefined => {
+    return useAtomSelector(roomAtom, state => state.roomState?.state?.boards?.[boardId], [boardId]);
 };

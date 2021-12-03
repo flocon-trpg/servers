@@ -1,5 +1,5 @@
-import * as Command from './internal/ot/room/participant/character/command/functions';
-import * as CommandTypes from './internal/ot/room/participant/character/command/types';
+import * as Command from './internal/ot/room/character/command/functions';
+import * as CommandTypes from './internal/ot/room/character/command/types';
 import * as RecordOperation from './internal/ot/util/recordOperation';
 
 export const privateCommandsDiff = ({
@@ -112,16 +112,28 @@ export {
 } from './internal/ot/room/converter';
 
 export {
-    apply as applyBoardLocation,
-    diff as boardLocationDiff,
-    toUpOperation as toBoardLocationUpOperation,
-} from './internal/ot/boardLocation/functions';
+    apply as applyBoardPosition,
+    diff as boardPositionDiff,
+    toUpOperation as toBoardPositionUpOperation,
+} from './internal/ot/boardPositionBase/functions';
 
 export {
-    State as BoardLocationState,
-    UpOperation as BoardLocationUpOperation,
-    DownOperation as BoardLocationDownOperation,
-} from './internal/ot/boardLocation/types';
+    State as BoardPositionState,
+    UpOperation as BoardPositionUpOperation,
+    DownOperation as BoardPositionDownOperation,
+} from './internal/ot/boardPositionBase/types';
+
+export {
+    apply as applyPiece,
+    diff as pieceDiff,
+    toUpOperation as toPieceUpOperation,
+} from './internal/ot/pieceBase/functions';
+
+export {
+    State as PieceState,
+    UpOperation as PieceUpOperation,
+    DownOperation as PieceDownOperation,
+} from './internal/ot/pieceBase/types';
 
 export {
     Master,
@@ -129,141 +141,153 @@ export {
     Spectator,
     ParticipantRole,
     State as ParticipantState,
-    DbState as ParticipantDbState,
     UpOperation as ParticipantUpOperation,
     DownOperation as ParticipantDownOperation,
 } from './internal/ot/room/participant/types';
 
 export {
-    apply as applyPiece,
-    diff as pieceDiff,
-    toUpOperation as toPieceUpOperation,
-} from './internal/ot/piece/functions';
-
-export {
-    State as PieceState,
-    UpOperation as PieceUpOperation,
-    DownOperation as PieceDownOperation,
-} from './internal/ot/piece/types';
-
-export {
     apply as applyBoard,
     diff as boardDiff,
     toUpOperation as toBoardUpOperation,
-} from './internal/ot/room/participant/board/functions';
+} from './internal/ot/room/board/functions';
 
 export {
+    state as boardState,
     State as BoardState,
     UpOperation as BoardUpOperation,
     DownOperation as BoardDownOperation,
-} from './internal/ot/room/participant/board/types';
+} from './internal/ot/room/board/types';
 
 export {
     apply as applyCharacter,
     diff as characterDiff,
     toUpOperation as toCharacterUpOperation,
-} from './internal/ot/room/participant/character/functions';
+} from './internal/ot/room/character/functions';
 
 export {
+    state as characterState,
     State as CharacterState,
     UpOperation as CharacterUpOperation,
     DownOperation as CharacterDownOperation,
-} from './internal/ot/room/participant/character/types';
+} from './internal/ot/room/character/types';
 
 export {
     State as BoolParamState,
     UpOperation as BoolParamUpOperation,
-    DownOperation as BoolParamCharacterDownOperation,
-} from './internal/ot/room/participant/character/boolParam/types';
+    DownOperation as BoolParamDownOperation,
+} from './internal/ot/room/character/boolParam/types';
+
+export {
+    apply as applyCharacterPiece,
+    diff as characterPieceDiff,
+    toUpOperation as toCharacterPieceUpOperation,
+} from './internal/ot/room/character/characterPiece/functions';
+
+export {
+    State as CharacterPieceState,
+    UpOperation as CharacterPieceUpOperation,
+    DownOperation as CharacterPieceDownOperation,
+} from './internal/ot/room/character/characterPiece/types';
 
 export {
     State as NumParamState,
     UpOperation as NumParamUpOperation,
-    DownOperation as NumParamCharacterDownOperation,
-} from './internal/ot/room/participant/character/numParam/types';
+    DownOperation as NumParamDownOperation,
+} from './internal/ot/room/character/numParam/types';
 
 export {
     apply as applyStrParamCharacter,
     diff as strParamcharacterDiff,
-    toUpOperation as toCharacterStrParamUpOperation,
-} from './internal/ot/room/participant/character/strParam/functions';
+    toUpOperation as toStrParamUpOperation,
+} from './internal/ot/room/character/strParam/functions';
 
 export {
     State as StrParamState,
     UpOperation as StrParamUpOperation,
     DownOperation as StrParamCharacterDownOperation,
-} from './internal/ot/room/participant/character/strParam/types';
+} from './internal/ot/room/character/strParam/types';
 
 export {
-    apply as applyDicePieceValue,
-    diff as dicePieceValueDiff,
-    toUpOperation as toDicePieceValueUpOperation,
-} from './internal/ot/room/participant/character/dicePieceValue/functions';
+    apply as applyPortraitPiece,
+    diff as portraitPieceDiff,
+    toUpOperation as toPortraitPieceUpOperation,
+} from './internal/ot/room/character/portraitPiece/functions';
 
 export {
-    State as DicePieceValueState,
-    UpOperation as DicePieceValueUpOperation,
-    DownOperation as DicePieceValueDownOperation,
-    dicePieceValueStrIndexes,
-} from './internal/ot/room/participant/character/dicePieceValue/types';
+    State as PortraitPieceState,
+    UpOperation as PortraitPieceUpOperation,
+    DownOperation as PortraitPieceDownOperation,
+} from './internal/ot/room/character/portraitPiece/types';
 
 export {
-    decode as decodeDicePieceValue,
-    parse as parseDicePieceValue,
-    exact as exactDicePieceValue,
-} from './internal/ot/room/participant/character/dicePieceValue/converter';
+    apply as applyDicePiece,
+    diff as dicePieceDiff,
+    toUpOperation as toDicePieceUpOperation,
+} from './internal/ot/room/board/dicePiece/functions';
+
+export {
+    State as DicePieceState,
+    UpOperation as DicePieceUpOperation,
+    DownOperation as DicePieceDownOperation,
+    dicePieceStrIndexes,
+} from './internal/ot/room/board/dicePiece/types';
+
+export {
+    decode as decodeDicePiece,
+    parse as parseDicePiece,
+    exact as exactDicePiece,
+} from './internal/ot/room/board/dicePiece/converter';
 
 export {
     apply as applyDieValue,
     diff as dieValueDiff,
     toUpOperation as toDieValueUpOperation,
-} from './internal/ot/room/participant/character/dicePieceValue/dieValue/functions';
+} from './internal/ot/room/board/dicePiece/dieValue/functions';
 
 export {
     State as DieValueState,
     UpOperation as DieValueUpOperation,
     DownOperation as DieValueDownOperation,
-} from './internal/ot/room/participant/character/dicePieceValue/dieValue/types';
+} from './internal/ot/room/board/dicePiece/dieValue/types';
+
+export { type as dicePieceLog, Type as DicePieceLog } from './internal/ot/room/board/dicePiece/log';
 
 export {
-    type as dicePieceValueLog,
-    Type as DicePieceValueLog,
-} from './internal/ot/room/participant/character/dicePieceValue/log';
+    apply as applyImagePiece,
+    diff as imagePieceDiff,
+    toUpOperation as toImagePieceUpOperation,
+} from './internal/ot/room/board/imagePiece/functions';
 
 export {
-    apply as applyImagePieceValue,
-    diff as imagePieceValueDiff,
-    toUpOperation as toImagePieceValueUpOperation,
-} from './internal/ot/room/participant/imagePieceValue/functions';
+    State as ImagePieceState,
+    UpOperation as ImagePieceUpOperation,
+    DownOperation as ImagePieceDownOperation,
+} from './internal/ot/room/board/imagePiece/types';
 
 export {
-    State as ImagePieceValueState,
-    UpOperation as ImagePieceValueUpOperation,
-    DownOperation as ImagePieceValueDownOperation,
-} from './internal/ot/room/participant/imagePieceValue/types';
+    apply as applyStringPiece,
+    diff as stringPieceDiff,
+    toUpOperation as toStringPieceUpOperation,
+} from './internal/ot/room/board/stringPiece/functions';
 
 export {
-    apply as applyNumberPieceValue,
-    diff as stringPieceValueDiff,
-    toUpOperation as toStringPieceValueUpOperation,
-} from './internal/ot/room/participant/character/stringPieceValue/functions';
+    State as StringPieceState,
+    UpOperation as StringPieceUpOperation,
+    DownOperation as StringPieceDownOperation,
+    String,
+    Number,
+} from './internal/ot/room/board/stringPiece/types';
 
 export {
-    State as StringPieceValueState,
-    UpOperation as StringPieceValueUpOperation,
-    DownOperation as StringPieceValueDownOperation,
-} from './internal/ot/room/participant/character/stringPieceValue/types';
+    decode as decodeStringPiece,
+    parse as parseStringPiece,
+    exact as exactStringPiece,
+} from './internal/ot/room/board/stringPiece/converter';
 
 export {
-    decode as decodeStringPieceValue,
-    parse as parseStringPieceValue,
-    exact as exactStringPieceValue,
-} from './internal/ot/room/participant/character/stringPieceValue/converter';
-
-export {
-    type as stringPieceValueLog,
-    Type as StringPieceValueLog,
-} from './internal/ot/room/participant/character/stringPieceValue/log';
+    type as stringPieceLog,
+    Type as StringPieceLog,
+} from './internal/ot/room/board/stringPiece/log';
 
 export {
     State as MemoState,
@@ -272,6 +296,15 @@ export {
     Plain,
     Markdown,
 } from './internal/ot/room/memo/types';
+
+export {
+    DownOperation as NullableTextDownOperation,
+    UpOperation as NullableTextUpOperation,
+    TwoWayOperation as NullableTextTwoWayOperation,
+    apply as applyNullableText,
+    diff as nullableTextDiff,
+    toUpOperation as toNullableTextUpOperation,
+} from './internal/ot/util/nullableTextOperation';
 
 export { isIdRecord } from './internal/ot/util/record';
 
@@ -298,9 +331,17 @@ export {
     toUpOperation as toTextUpOperation,
 } from './internal/ot/util/textOperation';
 
-export { client, admin, restrict, RequestedBy } from './internal/ot/util/type';
+export {
+    client,
+    admin,
+    restrict,
+    RequestedBy,
+    isCharacterOwner,
+    isBoardOwner,
+    isOwner,
+} from './internal/ot/util/requestedBy';
 
-export { updateType, createType, deleteType } from './internal/ot/piece/log';
+export { updateType, createType, deleteType } from './internal/ot/pieceBase/log';
 
 export { createLogs } from './internal/ot/room/log';
 

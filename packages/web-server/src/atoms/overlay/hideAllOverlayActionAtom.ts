@@ -1,25 +1,25 @@
 import { atom } from 'jotai';
+import { boardEditorModalAtom } from '../../pageComponents/room/BoardEditorModal';
+import { characterEditorModalAtom } from '../../pageComponents/room/CharacterEditorModal';
+import { characterParameterNamesEditorVisibilityAtom } from '../../pageComponents/room/CharacterParameterNamesEditorModal';
+import { dicePieceEditorModalAtom } from '../../pageComponents/room/DicePieceEditorModal';
+import { stringPieceEditorModalAtom } from '../../pageComponents/room/StringPieceEditorModal';
 import { boardContextMenuAtom } from './board/boardContextMenuAtom';
 import { boardPopoverEditorAtom } from './board/boardPopoverEditorAtom';
 import { boardTooltipAtom } from './board/boardTooltipAtom';
-import { boardEditorDrawerAtom } from './boardDrawerAtom';
-import { characterEditorDrawerAtom } from './characterEditorDrawerAtom';
-import { characterParameterNamesDrawerVisibilityAtom } from './characterParameterNamesDrawerVisibilityAtom';
 import { commandEditorModalAtom } from './commandEditorModalAtom';
-import { dicePieceDrawerAtom } from './dicePieceDrawerAtom';
 import { editRoomDrawerVisibilityAtom } from './editRoomDrawerVisibilityAtom';
 import { imagePieceDrawerAtom } from './imagePieceDrawerAtom';
-import { stringPieceDrawerAtom } from './stringPieceDrawerAtom';
 
 export const hideAllOverlayActionAtom = atom<null, void>(null, (get, set) => {
-    set(boardEditorDrawerAtom, null);
-    set(characterEditorDrawerAtom, null);
-    set(characterParameterNamesDrawerVisibilityAtom, false);
+    set(boardEditorModalAtom, null);
+    set(characterEditorModalAtom, null);
+    set(characterParameterNamesEditorVisibilityAtom, false);
     set(commandEditorModalAtom, null);
-    set(dicePieceDrawerAtom, null);
+    set(dicePieceEditorModalAtom, null);
     set(editRoomDrawerVisibilityAtom, false);
     set(imagePieceDrawerAtom, null);
-    set(stringPieceDrawerAtom, null);
+    set(stringPieceEditorModalAtom, null);
 
     set(boardContextMenuAtom, null);
     set(boardPopoverEditorAtom, null);

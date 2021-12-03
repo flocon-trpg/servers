@@ -5,6 +5,7 @@ import {
     deserializeBoardConfig,
     serializedBoardConfig,
 } from '../boardConfig';
+import { defaultActiveBoardPanelPosition } from '../defaultPanelPositions';
 import {
     deserializeDraggablePanelConfigBase,
     DraggablePanelConfigBase,
@@ -39,12 +40,7 @@ export const deserializeActiveBoardPanelConfig = (
 
 export const defaultActiveBoardPanelsConfig = (): ActiveBoardPanelConfig => {
     return {
+        ...defaultActiveBoardPanelPosition,
         board: defaultBoardConfig(),
-        x: 0,
-        y: 0,
-        width: 400,
-        height: 400,
-        zIndex: 0,
-        isMinimized: false,
     };
 };

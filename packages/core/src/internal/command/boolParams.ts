@@ -8,16 +8,17 @@ import {
     ScriptError,
 } from '@flocon-trpg/flocon-script';
 import { recordToArray } from '@flocon-trpg/utils';
-import * as Character from '../ot/room/participant/character/types';
-import * as BoolParam from '../ot/room/participant/character/boolParam/types';
+import * as Character from '../ot/room/character/types';
+import * as BoolParam from '../ot/room/character/boolParam/types';
 import * as Room from '../ot/room/types';
 import { FBoolParam } from './boolParam';
 
 const createDefaultState = (): BoolParam.State => ({
-    $v: 1,
+    $v: 2,
     $r: 1,
     value: false,
     isValuePrivate: false,
+    overriddenParameterName: undefined,
 });
 
 export class FBoolParams extends FObject {

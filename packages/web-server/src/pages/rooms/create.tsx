@@ -12,16 +12,16 @@ const wrapperCol = 24 - labelCol;
 
 const roomName = 'roomName';
 const participantName = 'userName';
-const joinAsPlayerPhrase = 'joinAsPlayerPhrase';
-const joinAsSpectatorPhrase = 'joinAsSpectatorPhrase';
+const playerPassword = 'playerPassword';
+const spectatorPassword = 'spectatorPassword';
 
 const CreateRoomCore: React.FC = () => {
     const router = useRouter();
     const [createRoom, createRoomResult] = useMutation(CreateRoomDocument);
     const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
-    const [isJoinAsPlayerPhraseEnabled, setIsJoinAsPlayerPhraseEnabled] =
+    const [isPlayerPasswordEnabled, setIsPlayerPasswordEnabled] =
         React.useState<boolean>(false);
-    const [isJoinAsSpectatorPhraseEnabled, setIsJoinAsSpectatorPhraseEnabled] =
+    const [isSpectatorPasswordEnabled, setIsSpectatorPasswordEnabled] =
         React.useState<boolean>(false);
     const myAuth = React.useContext(MyAuthContext);
 
@@ -41,16 +41,16 @@ const CreateRoomCore: React.FC = () => {
                 }
                 const roomNameValue: string = e[roomName] ?? '';
                 const participantNameValue: string = e[participantName] ?? '';
-                const joinAsPlayerPhraseValue: string = e[joinAsPlayerPhrase] ?? '';
-                const joinAsSpectatorPhraseValue: string = e[joinAsSpectatorPhrase] ?? '';
+                const playerPasswordValue: string = e[playerPassword] ?? '';
+                const spectatorPasswordValue: string = e[spectatorPassword] ?? '';
                 const input: CreateRoomInput = {
                     roomName: roomNameValue,
                     participantName: participantNameValue,
-                    joinAsPlayerPhrase: isJoinAsPlayerPhraseEnabled
-                        ? joinAsPlayerPhraseValue
+                    playerPassword: isPlayerPasswordEnabled
+                        ? playerPasswordValue
                         : undefined,
-                    joinAsSpectatorPhrase: isJoinAsSpectatorPhraseEnabled
-                        ? joinAsSpectatorPhraseValue
+                    spectatorPassword: isSpectatorPasswordEnabled
+                        ? spectatorPasswordValue
                         : undefined,
                 };
                 setIsSubmitting(true);
@@ -78,21 +78,21 @@ const CreateRoomCore: React.FC = () => {
             </Form.Item>
             <Form.Item label='参加パスワードを有効化'>
                 <Switch
-                    checked={isJoinAsPlayerPhraseEnabled}
-                    onChange={setIsJoinAsPlayerPhraseEnabled}
+                    checked={isPlayerPasswordEnabled}
+                    onChange={setIsPlayerPasswordEnabled}
                 />
             </Form.Item>
-            <Form.Item label='参加パスワード' name={joinAsPlayerPhrase}>
-                <Input disabled={!isJoinAsPlayerPhraseEnabled} />
+            <Form.Item label='参加パスワード' name={playerPassword}>
+                <Input disabled={!isPlayerPasswordEnabled} />
             </Form.Item>
             <Form.Item label='観戦パスワードを有効化'>
                 <Switch
-                    checked={isJoinAsSpectatorPhraseEnabled}
-                    onChange={setIsJoinAsSpectatorPhraseEnabled}
+                    checked={isSpectatorPasswordEnabled}
+                    onChange={setIsSpectatorPasswordEnabled}
                 />
             </Form.Item>
-            <Form.Item label='観戦パスワード' name={joinAsSpectatorPhrase}>
-                <Input disabled={!isJoinAsSpectatorPhraseEnabled} />
+            <Form.Item label='観戦パスワード' name={spectatorPassword}>
+                <Input disabled={!isSpectatorPasswordEnabled} />
             </Form.Item>
 
             <Form.Item wrapperCol={{ offset: labelCol, span: wrapperCol }}>

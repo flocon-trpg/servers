@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { StrParamState } from '../src';
 
 const isEmpty = (source: Record<string, unknown>): boolean => {
     for (const key in source) {
@@ -11,31 +12,24 @@ const isEmpty = (source: Record<string, unknown>): boolean => {
 };
 
 const isDefaultSimpleParam = (source: Record<string, unknown>) => {
-    if (
-        _.isEqual(source, {
-            $v: 1,
-            $r: 1,
-            isValuePrivate: false,
-            value: null,
-        })
-    ) {
-        return true;
-    }
     return _.isEqual(source, {
-        $v: 1,
+        $v: 2,
         $r: 1,
         isValuePrivate: false,
         value: undefined,
+        overriddenParameterName: undefined,
     });
 };
 
 const isDefaultStrParam = (source: Record<string, unknown>) => {
-    return _.isEqual(source, {
-        $v: 1,
+    const defaultStrParam: StrParamState = {
+        $v: 2,
         $r: 1,
         isValuePrivate: false,
-        value: '',
-    });
+        value: undefined,
+        overriddenParameterName: undefined,
+    };
+    return _.isEqual(source, defaultStrParam);
 };
 
 const isDefaultParam = (source: Record<string, unknown>) => {
@@ -75,6 +69,11 @@ export const normalizeRoomState = (source: unknown): any => {
             }
             const result: Record<string, unknown> = {};
             for (const key in record) {
+                // CharacterPieceとPortraitPieceにboardIdを変更できるOperationはないのでスキップ
+                if (key === 'boardId') {
+                    continue;
+                }
+
                 result[key] = normalizeRoomState(record[key]);
             }
             if (isEmpty(result)) {

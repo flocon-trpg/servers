@@ -1,4 +1,5 @@
 import * as t from 'io-ts';
+import { defaultGameEffectPanelPosition } from '../defaultPanelPositions';
 import {
     deserializeDraggablePanelConfigBase,
     DraggablePanelConfigBase,
@@ -29,11 +30,6 @@ export const deserializeGameEffectPanelConfig = (
 
 export const defaultGameEffectPanelConfig = (): GameEffectPanelConfig => {
     return {
-        x: 600,
-        y: 400,
-        width: 300,
-        height: 300,
-        zIndex: 0,
-        isMinimized: false,
+        ...defaultGameEffectPanelPosition,
     };
 };

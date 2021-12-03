@@ -7,7 +7,7 @@ import {
     test,
 } from '@flocon-trpg/flocon-script';
 import { FRoom } from './room';
-import { CompositeKey, keyNames } from '@flocon-trpg/utils';
+import { keyNames } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 
 type CommandError = {
@@ -38,7 +38,8 @@ export const testCommand = (script: string): Result<undefined, CommandError> => 
 type CharacterCommandParams = {
     script: string;
     room: Room.State;
-    characterKey: CompositeKey;
+    characterId: string;
+    myUserUid: string;
 };
 
 type CommandResult = Result<Room.State, CommandError>;
@@ -46,12 +47,13 @@ type CommandResult = Result<Room.State, CommandError>;
 export const execCharacterCommand = ({
     script,
     room,
-    characterKey,
+    characterId,
+    myUserUid,
 }: CharacterCommandParams): CommandResult => {
-    const fRoom = new FRoom(room);
-    const fCharacter = fRoom.findCharacter(characterKey);
+    const fRoom = new FRoom(room, myUserUid);
+    const fCharacter = fRoom.findCharacter(characterId);
     if (fCharacter == null) {
-        throw new Error(`character(${keyNames(characterKey)}) not found`);
+        throw new Error(`character(${keyNames(characterId)}) not found`);
     }
     const globalThis = {
         room: fRoom,

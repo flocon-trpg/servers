@@ -20,10 +20,10 @@ export class CreateRoomInput {
     public participantName!: string;
 
     @Field({ nullable: true })
-    public joinAsPlayerPhrase?: string;
+    public playerPassword?: string;
 
     @Field({ nullable: true })
-    public joinAsSpectatorPhrase?: string;
+    public spectatorPassword?: string;
 }
 
 @ArgsType()
@@ -41,7 +41,7 @@ export class JoinRoomArgs {
     public name!: string;
 
     @Field({ nullable: true })
-    public phrase?: string;
+    public password?: string;
 }
 
 @ArgsType()
@@ -50,7 +50,7 @@ export class PromoteArgs {
     public roomId!: string;
 
     @Field({ nullable: true })
-    public phrase?: string;
+    public password?: string;
 }
 
 @ArgsType()
@@ -101,7 +101,7 @@ export class WritePublicMessageArgs {
     public channelKey!: string;
 
     @Field({ nullable: true })
-    public characterStateId?: string;
+    public characterId?: string;
 
     @Field({ nullable: true })
     @MaxLength(1_000)
@@ -128,7 +128,7 @@ export class WritePrivateMessageArgs {
     public textColor?: string;
 
     @Field({ nullable: true })
-    public characterStateId?: string;
+    public characterId?: string;
 
     @Field({ nullable: true })
     @MaxLength(1_000)

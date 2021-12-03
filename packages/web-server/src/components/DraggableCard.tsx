@@ -125,7 +125,7 @@ export const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) 
                         height: `calc(100% - ${
                             props.headerHeight ?? defaultHeaderHeight
                         }px - ${topElementContainerHeight}px - ${bottomElementContainerHeight}px)`,
-                        //padding: `12px ${horizontalPadding}px`,
+                        // padding: `12px ${horizontalPadding}px`,
                     }}
                 >
                     {props.children}

@@ -1,11 +1,10 @@
 import { $free, $system } from '@flocon-trpg/core';
-import _ from 'lodash';
 import React from 'react';
 import { MessageFilter } from '../atoms/roomConfig/types/messageFilter';
 import { PrivateChannelSets } from '../utils/PrivateChannelSet';
 import {
     Message,
-    pieceValueLog,
+    pieceLog,
     notification,
     privateMessage,
     publicMessage,
@@ -95,7 +94,7 @@ export function useMessageFilter(config: MessageFilter): (message: Message) => b
                         return true;
                     });
                 }
-                case pieceValueLog:
+                case pieceLog:
                     return showSystem;
                 case soundEffect:
                     return false;

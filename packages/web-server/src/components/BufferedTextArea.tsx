@@ -25,8 +25,10 @@ export type BottomElementParams =
 
 export type Props = {
     style?: React.CSSProperties;
+    classNames?: string;
     value: string;
     placeholder?: string;
+    readOnly?: boolean;
     rows?: number;
     cols?: number;
     size?: 'small' | 'middle';
@@ -46,6 +48,7 @@ export const BufferedTextArea: React.FC<Props> = (props: Props) => {
         size,
         disableResize,
         style,
+        classNames: classNamesValue,
         ...inputProps
     } = props;
     const createBottomElement = (params: BottomElementParams): JSX.Element | null => {
@@ -102,7 +105,7 @@ export const BufferedTextArea: React.FC<Props> = (props: Props) => {
     // antdのInput.TextAreaだと、refで文字を直接編集する方法がわからなかったので代わりにtextareaを使っている。
     // Input.TextAreaでは単なるtextareaとしてレンダリングされるため、classNameを設定するだけでantdのInput.TextAreaを再現できると思われる。
     return (
-        <div style={style} className={classNames(flex, flexColumn)}>
+        <div style={style} className={classNames(classNamesValue, flex, flexColumn)}>
             <textarea
                 {...inputProps}
                 className={classNames(flex1, {

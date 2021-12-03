@@ -1,5 +1,6 @@
 import { simpleId } from '@flocon-trpg/core';
 import * as t from 'io-ts';
+import { defaultMemoPanelPosition } from '../defaultPanelPositions';
 import {
     deserializeDraggablePanelConfigBase,
     DraggablePanelConfigBase,
@@ -31,12 +32,7 @@ export const deserializeMemoPanelConfig = (source: SerializedMemoPanelConfig): M
 
 export const defaultMemoPanelConfig = (): MemoPanelConfig => {
     return {
-        x: 0,
-        y: 400,
-        width: 300,
-        height: 300,
-        zIndex: 0,
-        isMinimized: false,
+        ...defaultMemoPanelPosition,
     };
 };
 

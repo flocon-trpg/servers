@@ -128,7 +128,7 @@ export const toClientState = <TSourceState, TClientState>({
     );
 };
 
-// composeDownOperationは、レコード内の同一キーを時系列順でremove→addしたものをcomposeすると、本来はupdateになるべきだが、replaceになってしまうという仕様がある。だが、このrestore関数ではそれはupdateに変換してくれる。その代わり、innerDiffはdownでなくtwoWayである必要がある。
+// composeDownOperationは、レコード内の同一キーを時系列順でremove→addしたものをcomposeすると、本来はupdateになるべきだが、replaceになってしまうという仕様がある。だが、このrestore関数ではそれをupdateに変換してくれる。その代わり、innerDiffはdownでなくtwoWayである必要がある。
 export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError = string>({
     nextState,
     downOperation,

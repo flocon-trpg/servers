@@ -1,30 +1,25 @@
 import { Popover, Tooltip } from 'antd';
 import React from 'react';
 import {
-    PieceValueLogFragment,
-    PieceValueLogType,
+    PieceLogFragment,
+    PieceLogType,
     RoomPrivateMessageFragment,
     RoomPublicMessageFragment,
 } from '@flocon-trpg/typed-document-node';
-import { pieceValueLog, privateMessage, publicMessage } from '../../hooks/useRoomMessages';
+import { pieceLog, privateMessage, publicMessage } from '../../hooks/useRoomMessages';
 import { PrivateChannelSet } from '../../utils/PrivateChannelSet';
 import { PublicChannelNames } from '../../utils/types';
 import { Jdenticon } from '../../components/Jdenticon';
 import { isDeleted, toText } from '../../utils/message';
 import { NewTabLinkify } from '../../components/NewTabLinkify';
 import {
-    isIdRecord,
     ParticipantState,
-    PieceState,
-    PieceUpOperation,
-    RecordUpOperationElement,
     replace,
-    update,
-    parseStringPieceValue,
-    parseDicePieceValue,
+    parseStringPiece,
+    parseDicePiece,
     $free,
 } from '@flocon-trpg/core';
-import { dualKeyRecordToDualKeyMap, keyNames, recordToMap } from '@flocon-trpg/utils';
+import { recordToMap } from '@flocon-trpg/utils';
 import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../../utils/className';
 import { IconView } from '../../components/IconView';
@@ -44,8 +39,8 @@ export namespace RoomMessage {
               value: Omit<RoomPublicMessageFragment, 'createdAt'> & { createdAt?: number };
           }
         | {
-              type: typeof pieceValueLog;
-              value: Omit<PieceValueLogFragment, 'createdAt'> & { createdAt?: number };
+              type: typeof pieceLog;
+              value: Omit<PieceLogFragment, 'createdAt'> & { createdAt?: number };
           };
 
     type ContentProps = {
@@ -54,15 +49,11 @@ export namespace RoomMessage {
     };
 
     export const Content: React.FC<ContentProps> = ({ style, message }: ContentProps) => {
-        if (message.type === pieceValueLog) {
+        if (message.type === pieceLog) {
             switch (message.value.logType) {
-                case PieceValueLogType.Dice: {
-                    const key = keyNames(
-                        message.value.characterCreatedBy,
-                        message.value.characterId,
-                        message.value.stateId
-                    );
-                    const value = parseDicePieceValue(message.value.valueJson);
+                case PieceLogType.Dice: {
+                    const key = message.value.stateId;
+                    const value = parseDicePiece(message.value.valueJson);
                     if (value.type === 'create') {
                         return (
                             <div style={style}>
@@ -94,9 +85,6 @@ export namespace RoomMessage {
                         );
                     }
 
-                    const pieces = dualKeyRecordToDualKeyMap<
-                        RecordUpOperationElement<PieceState, PieceUpOperation>
-                    >(value.pieces ?? {});
                     const dice = recordToMap(value.dice ?? {});
 
                     const changed: (string | null)[] = [];
@@ -124,29 +112,6 @@ export namespace RoomMessage {
                         }
                     });
 
-                    changed.push(
-                        pieces
-                            .toArray()
-                            .some(
-                                ([, piece]) =>
-                                    piece.type === replace && piece.replace.newValue != null
-                            )
-                            ? 'コマ作成'
-                            : null,
-                        pieces
-                            .toArray()
-                            .some(
-                                ([, piece]) =>
-                                    piece.type === replace && piece.replace.newValue == null
-                            )
-                            ? 'コマ削除'
-                            : null,
-                        pieces
-                            .toArray()
-                            .some(([, piece]) => piece.type === update && !isIdRecord(piece.update))
-                            ? 'コマ編集'
-                            : null
-                    );
                     const changedMessage = changed.reduce((seed, elem) => {
                         if (elem == null) {
                             return seed;
@@ -168,13 +133,9 @@ export namespace RoomMessage {
                         </div>
                     );
                 }
-                case PieceValueLogType.Number: {
-                    const key = keyNames(
-                        message.value.characterCreatedBy,
-                        message.value.characterId,
-                        message.value.stateId
-                    );
-                    const value = parseStringPieceValue(message.value.valueJson);
+                case PieceLogType.String: {
+                    const key = message.value.stateId;
+                    const value = parseStringPiece(message.value.valueJson);
 
                     if (value.type === 'create') {
                         return (
@@ -207,34 +168,9 @@ export namespace RoomMessage {
                         );
                     }
 
-                    const pieces = dualKeyRecordToDualKeyMap<
-                        RecordUpOperationElement<PieceState, PieceUpOperation>
-                    >(value.pieces ?? {});
-
                     const changed = [
                         value.isValueChanged ? '値' : null,
                         value.isValuePrivateChanged ? '公開状態' : null,
-                        pieces
-                            .toArray()
-                            .some(
-                                ([, piece]) =>
-                                    piece.type === replace && piece.replace.newValue != null
-                            )
-                            ? 'コマ作成'
-                            : null,
-                        pieces
-                            .toArray()
-                            .some(
-                                ([, piece]) =>
-                                    piece.type === replace && piece.replace.newValue == null
-                            )
-                            ? 'コマ削除'
-                            : null,
-                        pieces
-                            .toArray()
-                            .some(([, piece]) => piece.type === update && !isIdRecord(piece.update))
-                            ? 'コマ編集'
-                            : null,
                     ].reduce((seed, elem) => {
                         if (elem == null) {
                             return seed;
@@ -307,7 +243,7 @@ export namespace RoomMessage {
             case 'warning':
             case 'info':
             case 'error':
-            case pieceValueLog:
+            case pieceLog:
                 return <IconView image='Message' size={size} />;
         }
         if (message.value.createdBy == null) {
@@ -320,7 +256,7 @@ export namespace RoomMessage {
         message: MessageState,
         participants: ReadonlyMap<string, ParticipantState>
     ) => {
-        if (message.type === pieceValueLog || message.value.createdBy == null) {
+        if (message.type === pieceLog || message.value.createdBy == null) {
             return null;
         }
         let participantName: string | null = null;
@@ -365,7 +301,7 @@ export namespace RoomMessage {
         publicChannelNames: PublicChannelNames,
         participants: ReadonlyMap<string, ParticipantState>
     ) => {
-        if (message.type === pieceValueLog || message.value.createdBy == null) {
+        if (message.type === pieceLog || message.value.createdBy == null) {
             return 'システムメッセージ';
         }
         switch (message.type) {

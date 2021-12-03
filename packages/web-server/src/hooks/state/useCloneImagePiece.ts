@@ -1,38 +1,46 @@
-import { ImagePieceValueState, PieceState, simpleId } from '@flocon-trpg/core';
-import { dualKeyRecordForEach } from '@flocon-trpg/utils';
+import { simpleId } from '@flocon-trpg/core';
 import produce from 'immer';
 import React from 'react';
+import { useMyUserUid } from '../useMyUserUid';
 import { useSetRoomState } from '../useSetRoomState';
 
 export const useCloneImagePiece = () => {
     const setRoomState = useSetRoomState();
+    const myUserUid = useMyUserUid();
 
     return React.useCallback(
-        ({ source, myUserUid }: { source: ImagePieceValueState; myUserUid: string }) => {
+        ({ boardId, pieceId }: { boardId: string; pieceId: string }) => {
             setRoomState(room => {
-                const me = room.participants[myUserUid];
-                if (me == null) {
+                if (myUserUid == null) {
                     return room;
                 }
 
-                const newImagePieceValue = produce(source, piece => {
-                    // 少なくとも現状では1つの画像コマにつき1ボードにしか置かれていないため、このようにすべてのボードの位置を変更するだけで構わない。
-                    dualKeyRecordForEach<PieceState>(piece.pieces, value => {
-                        value.x += 20;
-                        value.y += 20;
-                    });
+                const board = room.boards[boardId];
+                if (board == null) {
+                    return room;
+                }
+
+                const imagePiece = board.imagePieces[pieceId];
+                if (imagePiece == null) {
+                    return room;
+                }
+
+                const newImagePieceValue = produce(imagePiece, imagePiece => {
+                    imagePiece.x += 20;
+                    imagePiece.y += 20;
                 });
+                newImagePieceValue.ownerParticipantId = myUserUid;
 
                 return produce(room, room => {
-                    const me = room.participants[myUserUid];
-                    if (me == null) {
+                    const board = room.boards[boardId];
+                    if (board == null) {
                         return;
                     }
                     const newId = simpleId();
-                    me.imagePieceValues[newId] = newImagePieceValue;
+                    board.imagePieces[newId] = newImagePieceValue;
                 });
             });
         },
-        [setRoomState]
+        [myUserUid, setRoomState]
     );
 };

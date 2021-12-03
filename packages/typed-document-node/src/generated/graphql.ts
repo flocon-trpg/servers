@@ -1,5 +1,6 @@
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
+export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
@@ -34,8 +35,8 @@ export type CharacterValueForMessage = {
     image?: Maybe<FilePath>;
     isPrivate: Scalars['Boolean'];
     name: Scalars['String'];
+    portraitImage?: Maybe<FilePath>;
     stateId: Scalars['String'];
-    tachieImage?: Maybe<FilePath>;
 };
 
 export type CommandResult = {
@@ -54,10 +55,10 @@ export enum CreateRoomFailureType {
 }
 
 export type CreateRoomInput = {
-    joinAsPlayerPhrase?: Maybe<Scalars['String']>;
-    joinAsSpectatorPhrase?: Maybe<Scalars['String']>;
     participantName: Scalars['String'];
+    playerPassword?: InputMaybe<Scalars['String']>;
     roomName: Scalars['String'];
+    spectatorPassword?: InputMaybe<Scalars['String']>;
 };
 
 export type CreateRoomResult = CreateRoomFailureResult | CreateRoomSuccessResult;
@@ -126,10 +127,10 @@ export type EntryToServerResult = {
 
 export enum EntryToServerResultType {
     AlreadyEntried = 'AlreadyEntried',
-    NoPhraseRequired = 'NoPhraseRequired',
+    NoPasswordRequired = 'NoPasswordRequired',
     NotSignIn = 'NotSignIn',
     Success = 'Success',
-    WrongPhrase = 'WrongPhrase',
+    WrongPassword = 'WrongPassword',
 }
 
 export type FileItem = {
@@ -281,7 +282,7 @@ export enum JoinRoomFailureType {
     AlreadyParticipant = 'AlreadyParticipant',
     NotFound = 'NotFound',
     TransformError = 'TransformError',
-    WrongPhrase = 'WrongPhrase',
+    WrongPassword = 'WrongPassword',
 }
 
 export type JoinRoomResult = JoinRoomFailureResult | JoinRoomSuccessResult;
@@ -381,19 +382,19 @@ export type MutationEditMessageArgs = {
 };
 
 export type MutationEntryToServerArgs = {
-    phrase?: Maybe<Scalars['String']>;
+    password?: InputMaybe<Scalars['String']>;
 };
 
 export type MutationJoinRoomAsPlayerArgs = {
     id: Scalars['String'];
     name: Scalars['String'];
-    phrase?: Maybe<Scalars['String']>;
+    password?: InputMaybe<Scalars['String']>;
 };
 
 export type MutationJoinRoomAsSpectatorArgs = {
     id: Scalars['String'];
     name: Scalars['String'];
-    phrase?: Maybe<Scalars['String']>;
+    password?: InputMaybe<Scalars['String']>;
 };
 
 export type MutationLeaveRoomArgs = {
@@ -417,7 +418,7 @@ export type MutationPingArgs = {
 };
 
 export type MutationPromoteToPlayerArgs = {
-    phrase?: Maybe<Scalars['String']>;
+    password?: InputMaybe<Scalars['String']>;
     roomId: Scalars['String'];
 };
 
@@ -431,23 +432,23 @@ export type MutationUpdateWritingMessageStatusArgs = {
 };
 
 export type MutationWritePrivateMessageArgs = {
-    characterStateId?: Maybe<Scalars['String']>;
-    customName?: Maybe<Scalars['String']>;
-    gameType?: Maybe<Scalars['String']>;
+    characterId?: InputMaybe<Scalars['String']>;
+    customName?: InputMaybe<Scalars['String']>;
+    gameType?: InputMaybe<Scalars['String']>;
     roomId: Scalars['String'];
     text: Scalars['String'];
-    textColor?: Maybe<Scalars['String']>;
+    textColor?: InputMaybe<Scalars['String']>;
     visibleTo: Array<Scalars['String']>;
 };
 
 export type MutationWritePublicMessageArgs = {
     channelKey: Scalars['String'];
-    characterStateId?: Maybe<Scalars['String']>;
-    customName?: Maybe<Scalars['String']>;
-    gameType?: Maybe<Scalars['String']>;
+    characterId?: InputMaybe<Scalars['String']>;
+    customName?: InputMaybe<Scalars['String']>;
+    gameType?: InputMaybe<Scalars['String']>;
     roomId: Scalars['String'];
     text: Scalars['String'];
-    textColor?: Maybe<Scalars['String']>;
+    textColor?: InputMaybe<Scalars['String']>;
 };
 
 export type MutationWriteRoomSoundEffectArgs = {
@@ -500,20 +501,18 @@ export enum ParticipantRole {
     OfString = 'ofString',
 }
 
-export type PieceValueLog = {
-    __typename?: 'PieceValueLog';
-    characterCreatedBy: Scalars['String'];
-    characterId: Scalars['String'];
+export type PieceLog = {
+    __typename?: 'PieceLog';
     createdAt: Scalars['Float'];
-    logType: PieceValueLogType;
+    logType: PieceLogType;
     messageId: Scalars['String'];
     stateId: Scalars['String'];
     valueJson: Scalars['String'];
 };
 
-export enum PieceValueLogType {
+export enum PieceLogType {
     Dice = 'Dice',
-    Number = 'Number',
+    String = 'String',
 }
 
 export type Pong = {
@@ -538,7 +537,7 @@ export enum PromoteFailureType {
     NoNeedToPromote = 'NoNeedToPromote',
     NotFound = 'NotFound',
     NotParticipant = 'NotParticipant',
-    WrongPhrase = 'WrongPhrase',
+    WrongPassword = 'WrongPassword',
 }
 
 export type PromoteResult = {
@@ -605,8 +604,8 @@ export type RoomAsListItem = {
     createdBy: Scalars['String'];
     id: Scalars['ID'];
     name: Scalars['String'];
-    requiresPhraseToJoinAsPlayer: Scalars['Boolean'];
-    requiresPhraseToJoinAsSpectator: Scalars['Boolean'];
+    requiresPlayerPassword: Scalars['Boolean'];
+    requiresSpectatorPassword: Scalars['Boolean'];
 };
 
 export type RoomConnectionEvent = {
@@ -634,7 +633,7 @@ export type RoomGetState = {
 };
 
 export type RoomMessageEvent =
-    | PieceValueLog
+    | PieceLog
     | RoomMessagesReset
     | RoomPrivateMessage
     | RoomPrivateMessageUpdate
@@ -651,7 +650,7 @@ export type RoomMessageSyntaxError = {
 
 export type RoomMessages = {
     __typename?: 'RoomMessages';
-    pieceValueLogs: Array<PieceValueLog>;
+    pieceLogs: Array<PieceLog>;
     privateMessages: Array<RoomPrivateMessage>;
     publicChannels: Array<RoomPublicChannel>;
     publicMessages: Array<RoomPublicMessage>;
@@ -863,7 +862,7 @@ export type CharacterValueForMessageFragment = {
         | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
         | null
         | undefined;
-    tachieImage?:
+    portraitImage?:
         | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
         | null
         | undefined;
@@ -908,8 +907,8 @@ export type GetNonJoinedRoomResultFragment = {
         id: string;
         name: string;
         createdBy: string;
-        requiresPhraseToJoinAsPlayer: boolean;
-        requiresPhraseToJoinAsSpectator: boolean;
+        requiresPlayerPassword: boolean;
+        requiresSpectatorPassword: boolean;
     };
 };
 
@@ -925,8 +924,8 @@ type GetRoomListResult_GetRoomsListSuccessResult_Fragment = {
         id: string;
         name: string;
         createdBy: string;
-        requiresPhraseToJoinAsPlayer: boolean;
-        requiresPhraseToJoinAsSpectator: boolean;
+        requiresPlayerPassword: boolean;
+        requiresSpectatorPassword: boolean;
     }>;
 };
 
@@ -947,8 +946,8 @@ type GetRoomResult_GetNonJoinedRoomResult_Fragment = {
         id: string;
         name: string;
         createdBy: string;
-        requiresPhraseToJoinAsPlayer: boolean;
-        requiresPhraseToJoinAsSpectator: boolean;
+        requiresPlayerPassword: boolean;
+        requiresSpectatorPassword: boolean;
     };
 };
 
@@ -987,14 +986,12 @@ export type JoinRoomResultFragment =
     | JoinRoomResult_JoinRoomFailureResult_Fragment
     | JoinRoomResult_JoinRoomSuccessResult_Fragment;
 
-export type PieceValueLogFragment = {
-    __typename?: 'PieceValueLog';
+export type PieceLogFragment = {
+    __typename?: 'PieceLog';
     messageId: string;
-    characterCreatedBy: string;
-    characterId: string;
     stateId: string;
     createdAt: number;
-    logType: PieceValueLogType;
+    logType: PieceLogType;
     valueJson: string;
 };
 
@@ -1003,8 +1000,8 @@ export type RoomAsListItemFragment = {
     id: string;
     name: string;
     createdBy: string;
-    requiresPhraseToJoinAsPlayer: boolean;
-    requiresPhraseToJoinAsSpectator: boolean;
+    requiresPlayerPassword: boolean;
+    requiresSpectatorPassword: boolean;
 };
 
 export type RoomGetStateFragment = {
@@ -1061,7 +1058,7 @@ export type RoomPublicMessageFragment = {
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
-              tachieImage?:
+              portraitImage?:
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
@@ -1101,7 +1098,7 @@ export type RoomPrivateMessageFragment = {
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
-              tachieImage?:
+              portraitImage?:
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
@@ -1119,14 +1116,12 @@ export type RoomSoundEffectFragment = {
     file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
 };
 
-type RoomMessageEvent_PieceValueLog_Fragment = {
-    __typename: 'PieceValueLog';
+type RoomMessageEvent_PieceLog_Fragment = {
+    __typename: 'PieceLog';
     messageId: string;
-    characterCreatedBy: string;
-    characterId: string;
     stateId: string;
     createdAt: number;
-    logType: PieceValueLogType;
+    logType: PieceLogType;
     valueJson: string;
 };
 
@@ -1163,7 +1158,7 @@ type RoomMessageEvent_RoomPrivateMessage_Fragment = {
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
-              tachieImage?:
+              portraitImage?:
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
@@ -1233,7 +1228,7 @@ type RoomMessageEvent_RoomPublicMessage_Fragment = {
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
-              tachieImage?:
+              portraitImage?:
                   | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                   | null
                   | undefined;
@@ -1270,7 +1265,7 @@ type RoomMessageEvent_RoomSoundEffect_Fragment = {
 };
 
 export type RoomMessageEventFragment =
-    | RoomMessageEvent_PieceValueLog_Fragment
+    | RoomMessageEvent_PieceLog_Fragment
     | RoomMessageEvent_RoomMessagesReset_Fragment
     | RoomMessageEvent_RoomPrivateMessage_Fragment
     | RoomMessageEvent_RoomPrivateMessageUpdate_Fragment
@@ -1355,8 +1350,8 @@ export type GetRoomQuery = {
                   id: string;
                   name: string;
                   createdBy: string;
-                  requiresPhraseToJoinAsPlayer: boolean;
-                  requiresPhraseToJoinAsSpectator: boolean;
+                  requiresPlayerPassword: boolean;
+                  requiresSpectatorPassword: boolean;
               };
           }
         | { __typename: 'GetRoomFailureResult'; failureType: GetRoomFailureType };
@@ -1375,8 +1370,8 @@ export type GetRoomsListQuery = {
                   id: string;
                   name: string;
                   createdBy: string;
-                  requiresPhraseToJoinAsPlayer: boolean;
-                  requiresPhraseToJoinAsSpectator: boolean;
+                  requiresPlayerPassword: boolean;
+                  requiresSpectatorPassword: boolean;
               }>;
           };
 };
@@ -1434,7 +1429,7 @@ export type GetMessagesQuery = {
                                   }
                                 | null
                                 | undefined;
-                            tachieImage?:
+                            portraitImage?:
                                 | {
                                       __typename?: 'FilePath';
                                       sourceType: FileSourceType;
@@ -1489,7 +1484,7 @@ export type GetMessagesQuery = {
                                   }
                                 | null
                                 | undefined;
-                            tachieImage?:
+                            portraitImage?:
                                 | {
                                       __typename?: 'FilePath';
                                       sourceType: FileSourceType;
@@ -1501,14 +1496,12 @@ export type GetMessagesQuery = {
                       | null
                       | undefined;
               }>;
-              pieceValueLogs: Array<{
-                  __typename?: 'PieceValueLog';
+              pieceLogs: Array<{
+                  __typename?: 'PieceLog';
                   messageId: string;
-                  characterCreatedBy: string;
-                  characterId: string;
                   stateId: string;
                   createdAt: number;
-                  logType: PieceValueLogType;
+                  logType: PieceLogType;
                   valueJson: string;
               }>;
               publicChannels: Array<{
@@ -1580,7 +1573,7 @@ export type GetLogQuery = {
                                   }
                                 | null
                                 | undefined;
-                            tachieImage?:
+                            portraitImage?:
                                 | {
                                       __typename?: 'FilePath';
                                       sourceType: FileSourceType;
@@ -1635,7 +1628,7 @@ export type GetLogQuery = {
                                   }
                                 | null
                                 | undefined;
-                            tachieImage?:
+                            portraitImage?:
                                 | {
                                       __typename?: 'FilePath';
                                       sourceType: FileSourceType;
@@ -1647,14 +1640,12 @@ export type GetLogQuery = {
                       | null
                       | undefined;
               }>;
-              pieceValueLogs: Array<{
-                  __typename?: 'PieceValueLog';
+              pieceLogs: Array<{
+                  __typename?: 'PieceLog';
                   messageId: string;
-                  characterCreatedBy: string;
-                  characterId: string;
                   stateId: string;
                   createdAt: number;
-                  logType: PieceValueLogType;
+                  logType: PieceLogType;
                   valueJson: string;
               }>;
               publicChannels: Array<{
@@ -1730,8 +1721,8 @@ export type GetRoomAsListItemQuery = {
                   id: string;
                   name: string;
                   createdBy: string;
-                  requiresPhraseToJoinAsPlayer: boolean;
-                  requiresPhraseToJoinAsSpectator: boolean;
+                  requiresPlayerPassword: boolean;
+                  requiresSpectatorPassword: boolean;
               };
           };
 };
@@ -1811,7 +1802,7 @@ export type EditFileTagsMutation = { __typename?: 'Mutation'; result: boolean };
 export type JoinRoomAsPlayerMutationVariables = Exact<{
     id: Scalars['String'];
     name: Scalars['String'];
-    phrase?: Maybe<Scalars['String']>;
+    password?: InputMaybe<Scalars['String']>;
 }>;
 
 export type JoinRoomAsPlayerMutation = {
@@ -1838,7 +1829,7 @@ export type JoinRoomAsPlayerMutation = {
 export type JoinRoomAsSpectatorMutationVariables = Exact<{
     id: Scalars['String'];
     name: Scalars['String'];
-    phrase?: Maybe<Scalars['String']>;
+    password?: InputMaybe<Scalars['String']>;
 }>;
 
 export type JoinRoomAsSpectatorMutation = {
@@ -1863,7 +1854,7 @@ export type JoinRoomAsSpectatorMutation = {
 };
 
 export type EntryToServerMutationVariables = Exact<{
-    phrase: Scalars['String'];
+    password: Scalars['String'];
 }>;
 
 export type EntryToServerMutation = {
@@ -1902,8 +1893,8 @@ export type OperateMutation = {
                   id: string;
                   name: string;
                   createdBy: string;
-                  requiresPhraseToJoinAsPlayer: boolean;
-                  requiresPhraseToJoinAsSpectator: boolean;
+                  requiresPlayerPassword: boolean;
+                  requiresSpectatorPassword: boolean;
               };
           }
         | {
@@ -1931,7 +1922,7 @@ export type PingMutation = {
 
 export type PromoteToPlayerMutationVariables = Exact<{
     roomId: Scalars['String'];
-    phrase?: Maybe<Scalars['String']>;
+    password?: InputMaybe<Scalars['String']>;
 }>;
 
 export type PromoteToPlayerMutation = {
@@ -1954,11 +1945,11 @@ export type ResetMessagesMutation = {
 export type WritePublicMessageMutationVariables = Exact<{
     roomId: Scalars['String'];
     text: Scalars['String'];
-    textColor?: Maybe<Scalars['String']>;
+    textColor?: InputMaybe<Scalars['String']>;
     channelKey: Scalars['String'];
-    characterStateId?: Maybe<Scalars['String']>;
-    customName?: Maybe<Scalars['String']>;
-    gameType?: Maybe<Scalars['String']>;
+    characterId?: InputMaybe<Scalars['String']>;
+    customName?: InputMaybe<Scalars['String']>;
+    gameType?: InputMaybe<Scalars['String']>;
 }>;
 
 export type WritePublicMessageMutation = {
@@ -2004,7 +1995,7 @@ export type WritePublicMessageMutation = {
                             | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                             | null
                             | undefined;
-                        tachieImage?:
+                        portraitImage?:
                             | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                             | null
                             | undefined;
@@ -2022,10 +2013,10 @@ export type WritePrivateMessageMutationVariables = Exact<{
     roomId: Scalars['String'];
     visibleTo: Array<Scalars['String']> | Scalars['String'];
     text: Scalars['String'];
-    textColor?: Maybe<Scalars['String']>;
-    characterStateId?: Maybe<Scalars['String']>;
-    customName?: Maybe<Scalars['String']>;
-    gameType?: Maybe<Scalars['String']>;
+    textColor?: InputMaybe<Scalars['String']>;
+    characterId?: InputMaybe<Scalars['String']>;
+    customName?: InputMaybe<Scalars['String']>;
+    gameType?: InputMaybe<Scalars['String']>;
 }>;
 
 export type WritePrivateMessageMutation = {
@@ -2071,7 +2062,7 @@ export type WritePrivateMessageMutation = {
                             | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                             | null
                             | undefined;
-                        tachieImage?:
+                        portraitImage?:
                             | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
                             | null
                             | undefined;
@@ -2183,13 +2174,11 @@ export type RoomEventSubscription = {
                   | undefined;
               roomMessageEvent?:
                   | {
-                        __typename: 'PieceValueLog';
+                        __typename: 'PieceLog';
                         messageId: string;
-                        characterCreatedBy: string;
-                        characterId: string;
                         stateId: string;
                         createdAt: number;
-                        logType: PieceValueLogType;
+                        logType: PieceLogType;
                         valueJson: string;
                     }
                   | { __typename: 'RoomMessagesReset' }
@@ -2236,7 +2225,7 @@ export type RoomEventSubscription = {
                                         }
                                       | null
                                       | undefined;
-                                  tachieImage?:
+                                  portraitImage?:
                                       | {
                                             __typename?: 'FilePath';
                                             sourceType: FileSourceType;
@@ -2326,7 +2315,7 @@ export type RoomEventSubscription = {
                                         }
                                       | null
                                       | undefined;
-                                  tachieImage?:
+                                  portraitImage?:
                                       | {
                                             __typename?: 'FilePath';
                                             sourceType: FileSourceType;
@@ -2525,14 +2514,8 @@ export const RoomAsListItemFragmentDoc = {
                     { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'name' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
-                    {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'requiresPhraseToJoinAsPlayer' },
-                    },
-                    {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'requiresPhraseToJoinAsSpectator' },
-                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'requiresPlayerPassword' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'requiresSpectatorPassword' } },
                 ],
             },
         },
@@ -2859,7 +2842,7 @@ export const CharacterValueForMessageFragmentDoc = {
                     },
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'tachieImage' },
+                        name: { kind: 'Name', value: 'portraitImage' },
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
@@ -3023,19 +3006,17 @@ export const RoomPrivateMessageFragmentDoc = {
         },
     ],
 } as unknown as DocumentNode<RoomPrivateMessageFragment, unknown>;
-export const PieceValueLogFragmentDoc = {
+export const PieceLogFragmentDoc = {
     kind: 'Document',
     definitions: [
         {
             kind: 'FragmentDefinition',
-            name: { kind: 'Name', value: 'PieceValueLog' },
-            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'PieceValueLog' } },
+            name: { kind: 'Name', value: 'PieceLog' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'PieceLog' } },
             selectionSet: {
                 kind: 'SelectionSet',
                 selections: [
                     { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
-                    { kind: 'Field', name: { kind: 'Name', value: 'characterCreatedBy' } },
-                    { kind: 'Field', name: { kind: 'Name', value: 'characterId' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'stateId' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'logType' } },
@@ -3044,7 +3025,7 @@ export const PieceValueLogFragmentDoc = {
             },
         },
     ],
-} as unknown as DocumentNode<PieceValueLogFragment, unknown>;
+} as unknown as DocumentNode<PieceLogFragment, unknown>;
 export const RoomMessageEventFragmentDoc = {
     kind: 'Document',
     definitions: [
@@ -3124,14 +3105,14 @@ export const RoomMessageEventFragmentDoc = {
                         kind: 'InlineFragment',
                         typeCondition: {
                             kind: 'NamedType',
-                            name: { kind: 'Name', value: 'PieceValueLog' },
+                            name: { kind: 'Name', value: 'PieceLog' },
                         },
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
                                 {
                                     kind: 'FragmentSpread',
-                                    name: { kind: 'Name', value: 'PieceValueLog' },
+                                    name: { kind: 'Name', value: 'PieceLog' },
                                 },
                             ],
                         },
@@ -3697,7 +3678,7 @@ export const GetMessagesDocument = {
                                             },
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'pieceValueLogs' },
+                                                name: { kind: 'Name', value: 'pieceLogs' },
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
                                                     selections: [
@@ -3705,7 +3686,7 @@ export const GetMessagesDocument = {
                                                             kind: 'FragmentSpread',
                                                             name: {
                                                                 kind: 'Name',
-                                                                value: 'PieceValueLog',
+                                                                value: 'PieceLog',
                                                             },
                                                         },
                                                     ],
@@ -3775,7 +3756,7 @@ export const GetMessagesDocument = {
         ...CharacterValueForMessageFragmentDoc.definitions,
         ...FilePathFragmentDoc.definitions,
         ...RoomPrivateMessageFragmentDoc.definitions,
-        ...PieceValueLogFragmentDoc.definitions,
+        ...PieceLogFragmentDoc.definitions,
         ...RoomPublicChannelFragmentDoc.definitions,
         ...RoomSoundEffectFragmentDoc.definitions,
     ],
@@ -3861,7 +3842,7 @@ export const GetLogDocument = {
                                             },
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'pieceValueLogs' },
+                                                name: { kind: 'Name', value: 'pieceLogs' },
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
                                                     selections: [
@@ -3869,7 +3850,7 @@ export const GetLogDocument = {
                                                             kind: 'FragmentSpread',
                                                             name: {
                                                                 kind: 'Name',
-                                                                value: 'PieceValueLog',
+                                                                value: 'PieceLog',
                                                             },
                                                         },
                                                     ],
@@ -3936,7 +3917,7 @@ export const GetLogDocument = {
         ...CharacterValueForMessageFragmentDoc.definitions,
         ...FilePathFragmentDoc.definitions,
         ...RoomPrivateMessageFragmentDoc.definitions,
-        ...PieceValueLogFragmentDoc.definitions,
+        ...PieceLogFragmentDoc.definitions,
         ...RoomPublicChannelFragmentDoc.definitions,
         ...RoomSoundEffectFragmentDoc.definitions,
     ],
@@ -4573,7 +4554,7 @@ export const JoinRoomAsPlayerDocument = {
                 },
                 {
                     kind: 'VariableDefinition',
-                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'phrase' } },
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'password' } },
                     type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
                 },
             ],
@@ -4597,10 +4578,10 @@ export const JoinRoomAsPlayerDocument = {
                             },
                             {
                                 kind: 'Argument',
-                                name: { kind: 'Name', value: 'phrase' },
+                                name: { kind: 'Name', value: 'password' },
                                 value: {
                                     kind: 'Variable',
-                                    name: { kind: 'Name', value: 'phrase' },
+                                    name: { kind: 'Name', value: 'password' },
                                 },
                             },
                         ],
@@ -4647,7 +4628,7 @@ export const JoinRoomAsSpectatorDocument = {
                 },
                 {
                     kind: 'VariableDefinition',
-                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'phrase' } },
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'password' } },
                     type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
                 },
             ],
@@ -4671,10 +4652,10 @@ export const JoinRoomAsSpectatorDocument = {
                             },
                             {
                                 kind: 'Argument',
-                                name: { kind: 'Name', value: 'phrase' },
+                                name: { kind: 'Name', value: 'password' },
                                 value: {
                                     kind: 'Variable',
-                                    name: { kind: 'Name', value: 'phrase' },
+                                    name: { kind: 'Name', value: 'password' },
                                 },
                             },
                         ],
@@ -4705,7 +4686,7 @@ export const EntryToServerDocument = {
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
-                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'phrase' } },
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'password' } },
                     type: {
                         kind: 'NonNullType',
                         type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
@@ -4722,10 +4703,10 @@ export const EntryToServerDocument = {
                         arguments: [
                             {
                                 kind: 'Argument',
-                                name: { kind: 'Name', value: 'phrase' },
+                                name: { kind: 'Name', value: 'password' },
                                 value: {
                                     kind: 'Variable',
-                                    name: { kind: 'Name', value: 'phrase' },
+                                    name: { kind: 'Name', value: 'password' },
                                 },
                             },
                         ],
@@ -5028,7 +5009,7 @@ export const PromoteToPlayerDocument = {
                 },
                 {
                     kind: 'VariableDefinition',
-                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'phrase' } },
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'password' } },
                     type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
                 },
             ],
@@ -5050,10 +5031,10 @@ export const PromoteToPlayerDocument = {
                             },
                             {
                                 kind: 'Argument',
-                                name: { kind: 'Name', value: 'phrase' },
+                                name: { kind: 'Name', value: 'password' },
                                 value: {
                                     kind: 'Variable',
-                                    name: { kind: 'Name', value: 'phrase' },
+                                    name: { kind: 'Name', value: 'password' },
                                 },
                             },
                         ],
@@ -5154,10 +5135,7 @@ export const WritePublicMessageDocument = {
                 },
                 {
                     kind: 'VariableDefinition',
-                    variable: {
-                        kind: 'Variable',
-                        name: { kind: 'Name', value: 'characterStateId' },
-                    },
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'characterId' } },
                     type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
                 },
                 {
@@ -5210,10 +5188,10 @@ export const WritePublicMessageDocument = {
                             },
                             {
                                 kind: 'Argument',
-                                name: { kind: 'Name', value: 'characterStateId' },
+                                name: { kind: 'Name', value: 'characterId' },
                                 value: {
                                     kind: 'Variable',
-                                    name: { kind: 'Name', value: 'characterStateId' },
+                                    name: { kind: 'Name', value: 'characterId' },
                                 },
                             },
                             {
@@ -5347,10 +5325,7 @@ export const WritePrivateMessageDocument = {
                 },
                 {
                     kind: 'VariableDefinition',
-                    variable: {
-                        kind: 'Variable',
-                        name: { kind: 'Name', value: 'characterStateId' },
-                    },
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'characterId' } },
                     type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
                 },
                 {
@@ -5403,10 +5378,10 @@ export const WritePrivateMessageDocument = {
                             },
                             {
                                 kind: 'Argument',
-                                name: { kind: 'Name', value: 'characterStateId' },
+                                name: { kind: 'Name', value: 'characterId' },
                                 value: {
                                     kind: 'Variable',
-                                    name: { kind: 'Name', value: 'characterStateId' },
+                                    name: { kind: 'Name', value: 'characterId' },
                                 },
                             },
                             {
@@ -5993,7 +5968,7 @@ export const RoomEventDocument = {
         ...CharacterValueForMessageFragmentDoc.definitions,
         ...RoomPublicChannelFragmentDoc.definitions,
         ...RoomPrivateMessageFragmentDoc.definitions,
-        ...PieceValueLogFragmentDoc.definitions,
+        ...PieceLogFragmentDoc.definitions,
     ],
 } as unknown as DocumentNode<RoomEventSubscription, RoomEventSubscriptionVariables>;
 export const PongDocument = {

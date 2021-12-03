@@ -2,7 +2,6 @@ import { Select } from 'antd';
 import Modal from 'antd/lib/modal/Modal';
 import React from 'react';
 import { useMyBoards } from '../../hooks/state/useMyBoards';
-import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import { cancelRnd } from '../../utils/className';
 
@@ -21,7 +20,6 @@ type SelectedBoardKey =
       };
 
 export const ActiveBoardSelectorModal: React.FC<Props> = ({ visible, onComplete }: Props) => {
-    const myUserUid = useMyUserUid();
     const myBoards = useMyBoards();
     const operate = useSetRoomStateByApply();
     const [selectedBoardKey, setSelectedBoardKey] = React.useState<SelectedBoardKey | undefined>(
@@ -42,10 +40,6 @@ export const ActiveBoardSelectorModal: React.FC<Props> = ({ visible, onComplete 
             });
     }, [myBoards]);
 
-    if (myUserUid == null) {
-        return null;
-    }
-
     const hasSelectedBoardKey: boolean =
         selectedBoardKey?.delete === false
             ? myBoards?.has(selectedBoardKey.boardId) === true
@@ -57,9 +51,9 @@ export const ActiveBoardSelectorModal: React.FC<Props> = ({ visible, onComplete 
         }
         if (selectedBoardKey.delete) {
             operate({
-                $v: 1,
-                $r: 2,
-                activeBoardKey: {
+                $v: 2,
+                $r: 1,
+                activeBoardId: {
                     newValue: undefined,
                 },
             });
@@ -68,13 +62,10 @@ export const ActiveBoardSelectorModal: React.FC<Props> = ({ visible, onComplete 
             return;
         }
         operate({
-            $v: 1,
-            $r: 2,
-            activeBoardKey: {
-                newValue: {
-                    createdBy: myUserUid,
-                    id: selectedBoardKey.boardId,
-                },
+            $v: 2,
+            $r: 1,
+            activeBoardId: {
+                newValue: selectedBoardKey.boardId,
             },
         });
         onComplete();

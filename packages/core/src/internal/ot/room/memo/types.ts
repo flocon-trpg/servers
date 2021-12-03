@@ -6,6 +6,9 @@ import * as TextOperation from '../../util/textOperation';
 export const Plain = 'Plain';
 export const Markdown = 'Markdown';
 
+/**
+ * @description To 3rd-party developers: Please always set 'Plain' to this because 'Markdown' is not implemented yet in the official web-server.
+ */
 const textType = t.union([t.literal(Plain), t.literal(Markdown)]);
 type TextType = t.TypeOf<typeof textType>;
 
@@ -16,6 +19,10 @@ export const state = t.type({
     name: t.string,
     dir: t.array(t.string),
     text: t.string,
+
+    /**
+     * @description To 3rd-party developers: Please always set 'Plain' to this because 'Markdown' is not implemented yet in the official web-server.
+     */
     textType,
 });
 

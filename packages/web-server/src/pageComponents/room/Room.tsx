@@ -3,9 +3,9 @@ import { Layout as AntdLayout, Result, Modal } from 'antd';
 import { DraggableCard, horizontalPadding } from '../../components/DraggableCard';
 import { CharacterList } from './CharacterList';
 import { RoomMessages } from './RoomMessages';
-import { CharacterParameterNamesDrawer } from './CharacterParameterNamesDrawer';
-import { CharacterDrawer } from './CharacterDrawer';
-import { BoardDrawer } from './BoardDrawer';
+import { CharacterParameterNamesEditorModal } from './CharacterParameterNamesEditorModal';
+import { CharacterEditorModal } from './CharacterEditorModal';
+import { BoardEditorModal } from './BoardEditorModal';
 import { SoundPlayer } from './SoundPlayer';
 import { EditRoomDrawer } from './EditRoomDrawer';
 import { ParticipantList } from './ParticipantList';
@@ -15,9 +15,9 @@ import { usePlaySoundEffect } from '../../hooks/usePlaySoundEffect';
 import { useMessageNotification } from '../../hooks/useMessageNotification';
 import { RoomMenu } from './RoomMenu';
 import { recordToArray } from '@flocon-trpg/utils';
-import { PieceValueList } from './PieceValueList';
-import { StringPieceValueDrawer } from './StringPieceValueDrawer';
-import { DicePieceValueDrawer } from './DicePieceValueDrawer';
+import { PieceList } from './PieceList';
+import { StringPieceEditorModal } from './StringPieceEditorModal';
+import { DicePieceEditorModal } from './DicePieceEditorModal';
 import { Memos } from './Memos';
 import { BoardContextMenu, PieceTooltip, PopoverEditor } from './BoardPopover';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
@@ -30,6 +30,10 @@ import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
 import { RoomConfigUtils } from '../../atoms/roomConfig/types/roomConfig/utils';
 import { roomAtom } from '../../atoms/room/roomAtom';
 import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
+import { BoardPositionAndPieceEditorModal } from './BoardPositionAndPieceEditorModal';
+import { CharacterTagNamesEditorModal } from './CharacterTagNamesEditorModal';
+import { ImportCharacterModal } from './ImportCharacterModal';
+import { ImportBoardModal } from './ImportBoardModal';
 
 const RoomMessagePanels: React.FC = () => {
     const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
@@ -46,7 +50,7 @@ const RoomMessagePanels: React.FC = () => {
                 return (
                     <DraggableCard
                         key={pair.key}
-                        header='Message'
+                        header='メッセージ'
                         onDragStop={e =>
                             setRoomConfig(roomConfig => {
                                 if (roomConfig == null) {
@@ -154,6 +158,7 @@ export const Room: React.FC = () => {
     useMessageNotification();
 
     const roomId = useAtomSelector(roomAtom, state => state.roomId);
+    const activeBoardId = useAtomSelector(roomAtom, state => state.roomState?.state?.activeBoardId);
 
     if (
         roomIdOfRoomConfig == null ||
@@ -476,7 +481,7 @@ export const Room: React.FC = () => {
                     <RoomMessagePanels />
                     {characterPanel.isMinimized ? null : (
                         <DraggableCard
-                            header='Characters'
+                            header='キャラクター'
                             onDragStop={e =>
                                 setRoomConfig(roomConfig => {
                                     if (roomConfig == null) {
@@ -517,7 +522,6 @@ export const Room: React.FC = () => {
                             }
                             childrenContainerStyle={{
                                 padding: childrenContainerPadding,
-                                overflowY: 'scroll',
                             }}
                             position={characterPanel}
                             size={characterPanel}
@@ -586,7 +590,7 @@ export const Room: React.FC = () => {
                     {memoPanels}
                     {participantPanel.isMinimized ? null : (
                         <DraggableCard
-                            header='Participants'
+                            header='入室者'
                             onDragStop={e =>
                                 setRoomConfig(roomConfig => {
                                     if (roomConfig == null) {
@@ -643,7 +647,7 @@ export const Room: React.FC = () => {
                     )}
                     {pieceValuePanel.isMinimized ? null : (
                         <DraggableCard
-                            header='コマ'
+                            header='コマ(仮)'
                             onDragStop={e =>
                                 setRoomConfig(roomConfig => {
                                     if (roomConfig == null) {
@@ -692,7 +696,7 @@ export const Room: React.FC = () => {
                             minWidth={150}
                             zIndex={pieceValuePanel.zIndex}
                         >
-                            <PieceValueList />
+                            {activeBoardId == null ? 'ボードビュアーにボードが表示されていないため、無効化されています' : <PieceList boardId={activeBoardId} />}
                         </DraggableCard>
                     )}
                 </div>
@@ -701,13 +705,17 @@ export const Room: React.FC = () => {
                 <PieceTooltip />
                 <PopoverEditor />
 
-                <BoardDrawer />
-                <CharacterDrawer />
-                <DicePieceValueDrawer />
+                <BoardEditorModal />
+                <CharacterEditorModal />
+                <CharacterTagNamesEditorModal/>
+                <BoardPositionAndPieceEditorModal />
+                <DicePieceEditorModal />
                 <ImagePieceDrawer />
-                <StringPieceValueDrawer />
-                <CharacterParameterNamesDrawer />
+                <StringPieceEditorModal />
+                <CharacterParameterNamesEditorModal />
                 <EditRoomDrawer />
+                <ImportBoardModal />
+                <ImportCharacterModal />
 
                 <CommandEditorModal />
             </AntdLayout.Content>

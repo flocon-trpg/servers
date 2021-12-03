@@ -1,5 +1,4 @@
 import React from 'react';
-import { generateChatPalette } from '@flocon-trpg/core';
 import { Select } from 'antd';
 import { useBufferValue } from '../../hooks/useBufferValue';
 import { useMyCharacters } from '../../hooks/state/useMyCharacters';
@@ -13,8 +12,6 @@ import {
 import { Subject } from 'rxjs';
 import classNames from 'classnames';
 import { flex, flex1, flexColumn, flexNone, flexRow, itemsCenter } from '../../utils/className';
-import { ChatPaletteTomlInput } from '../../components/ChatPaletteTomlInput';
-import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { UISelector } from '../../components/UISelector';
 import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
@@ -26,13 +23,15 @@ import { useUpdateAtom } from 'jotai/utils';
 import { roomPublicMessageInputAtom } from '../../atoms/inputs/roomPublicMessageInputAtom';
 import { roomPrivateMessageInputAtom } from '../../atoms/inputs/roomPrivateMessageInputAtom';
 import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
+import { BufferedTextArea } from '../../components/BufferedTextArea';
+import { CharacterVarInput } from '../../components/CharacterVarInput';
 
 const titleStyle: React.CSSProperties = {
     flexBasis: '80px',
 };
 
 type ChatPaletteListProps = {
-    chatPaletteToml: string | null;
+    chatPaletteText: string | null;
     onClick: (text: string) => void;
     onDoubleClick: (text: string) => void;
     isEditMode: boolean;
@@ -40,21 +39,23 @@ type ChatPaletteListProps = {
 };
 
 const ChatPaletteList: React.FC<ChatPaletteListProps> = ({
-    chatPaletteToml,
+    chatPaletteText,
     onClick,
     onDoubleClick,
     isEditMode,
     onChange,
 }: ChatPaletteListProps) => {
-    const { currentValue: bufferedChatPaletteToml } = useBufferValue({
-        value: chatPaletteToml,
+    const { currentValue: bufferedChatPaletteText } = useBufferValue({
+        value: chatPaletteText,
         bufferDuration: 1000,
     });
 
     const chatPaletteResult = React.useMemo(
         () =>
-            bufferedChatPaletteToml == null ? null : generateChatPalette(bufferedChatPaletteToml),
-        [bufferedChatPaletteToml]
+            bufferedChatPaletteText == null
+                ? null
+                : bufferedChatPaletteText.replace(/(\r\n|\r)/g, '\n').split('\n'),
+        [bufferedChatPaletteText]
     );
 
     const baseStyle: React.CSSProperties = {
@@ -68,25 +69,19 @@ const ChatPaletteList: React.FC<ChatPaletteListProps> = ({
 
     if (isEditMode) {
         return (
-            <ChatPaletteTomlInput
+            <BufferedTextArea
                 style={{ minHeight: 'calc(100% - 32px)' }}
                 disableResize
                 size='small'
                 bufferDuration='default'
-                value={chatPaletteToml ?? ''}
+                value={chatPaletteText ?? ''}
                 onChange={e => onChange(e.currentValue)}
+                spellCheck={false}
             />
         );
     }
 
-    if (chatPaletteResult.isError) {
-        if (bufferedChatPaletteToml?.trim() === '') {
-            return <div style={baseStyle}>チャットパレットが空です。</div>;
-        }
-        return <div style={baseStyle}>文法エラー: {chatPaletteResult.error}</div>;
-    }
-
-    const options = chatPaletteResult.value.map((value, i) => (
+    const options = chatPaletteResult.map((value, i) => (
         <option
             style={{ backgroundColor: i % 2 === 0 ? undefined : '#FFFFFF10' }}
             key={i}
@@ -114,6 +109,11 @@ const ChatPaletteList: React.FC<ChatPaletteListProps> = ({
     );
 };
 
+const nonEditKey = 'nonEdit';
+const editKey = 'edit';
+const editVarKey = 'editVar';
+type UISelectorKey = typeof nonEditKey | typeof editKey | typeof editVarKey;
+
 type ChatPaletteProps = {
     roomId: string;
     panelId: string;
@@ -130,12 +130,11 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
     );
     const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
     const subject = React.useMemo(() => new Subject<string>(), []);
-    const myUserUid = useMyUserUid();
     const myCharacters = useMyCharacters();
     const [selectedChannelType, setSelectedChannelType] =
         React.useState<SelectedChannelType>(publicChannel);
-    const [isEditMode, setIsEditMode] = React.useState(false);
-    const operateAsStateWithImmer = useSetRoomStateWithImmer();
+    const [uiSelectorKey, setUiSelectorKey] = React.useState<UISelectorKey>(nonEditKey);
+    const setRoomState = useSetRoomStateWithImmer();
 
     const myCharactersOptions = React.useMemo(() => {
         if (myCharacters == null) {
@@ -156,14 +155,12 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
         return null;
     }
 
-    const selectedCharacterStateId = config.selectedCharacterStateId;
+    const selectedCharacterId = config.selectedCharacterId;
     const selectedCharacter =
-        selectedCharacterStateId == null ? undefined : myCharacters?.get(selectedCharacterStateId);
+        selectedCharacterId == null ? undefined : myCharacters?.get(selectedCharacterId);
 
     const onConfigUpdate = (
-        recipe: (
-            draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>
-        ) => void
+        recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void
     ) => {
         setRoomConfig(roomConfig => {
             if (roomConfig == null) {
@@ -184,13 +181,13 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
                 <Select
                     style={{ flex: 1, maxWidth: miniInputMaxWidth }}
                     placeholder='キャラクター'
-                    value={config.selectedCharacterStateId}
+                    value={config.selectedCharacterId}
                     onSelect={(value, option) => {
                         onConfigUpdate(draft => {
                             if (typeof option.key !== 'string') {
                                 return;
                             }
-                            draft.selectedCharacterStateId = option.key;
+                            draft.selectedCharacterId = option.key;
                         });
                     }}
                 >
@@ -211,39 +208,70 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
             <UISelector
                 style={{ padding: '2px 0' }}
                 className={classNames(flex1, flex, flexColumn)}
-                keys={[false, true]}
-                activeKey={isEditMode}
-                getName={key => (key ? '編集' : '通常')}
-                onChange={setIsEditMode}
-                render={isEditMode => (
-                    <ChatPaletteList
-                        chatPaletteToml={selectedCharacter?.chatPalette ?? null}
-                        onClick={text => {
-                            if (selectedChannelType === publicChannel) {
-                                setPublicMessageInput(text);
-                                return;
-                            }
-                            setPrivateMessageInput(text)
-                        }}
-                        onDoubleClick={text => subject.next(text)}
-                        isEditMode={isEditMode}
-                        onChange={toml => {
-                            operateAsStateWithImmer(prevRoom => {
-                                if (myUserUid == null || selectedCharacterStateId == null) {
+                keys={[nonEditKey, editKey, editVarKey] as const}
+                activeKey={uiSelectorKey}
+                getName={key => {
+                    switch (key) {
+                        case nonEditKey:
+                            return '通常';
+                        case editKey:
+                            return '編集';
+                        case editVarKey:
+                            return '編集（キャラクター変数）';
+                    }
+                }}
+                onChange={setUiSelectorKey}
+                render={uiSelectorKey => {
+                    if (uiSelectorKey === editVarKey) {
+                        return (
+                            <CharacterVarInput
+                            style={{padding: '0 0 2px 0'}}
+                                classNames={classNames(flex1)}
+                                disableResize
+                                character={selectedCharacter}
+                                onChange={newValue =>
+                                    setRoomState(roomState => {
+                                        if (selectedCharacterId == null) {
+                                            return;
+                                        }
+                                        const character = roomState.characters[selectedCharacterId];
+                                        if (character == null) {
+                                            return;
+                                        }
+                                        character.privateVarToml = newValue;
+                                    })
+                                }
+                            />
+                        );
+                    }
+
+                    return (
+                        <ChatPaletteList
+                            chatPaletteText={selectedCharacter?.chatPalette ?? null}
+                            onClick={text => {
+                                if (selectedChannelType === publicChannel) {
+                                    setPublicMessageInput(text);
                                     return;
                                 }
-                                const character =
-                                    prevRoom.participants[myUserUid]?.characters?.[
-                                        selectedCharacterStateId
-                                    ];
-                                if (character == null) {
-                                    return;
-                                }
-                                character.chatPalette = toml;
-                            });
-                        }}
-                    />
-                )}
+                                setPrivateMessageInput(text);
+                            }}
+                            onDoubleClick={text => subject.next(text)}
+                            isEditMode={uiSelectorKey === editKey}
+                            onChange={toml => {
+                                setRoomState(roomState => {
+                                    if (selectedCharacterId == null) {
+                                        return;
+                                    }
+                                    const character = roomState.characters[selectedCharacterId];
+                                    if (character == null) {
+                                        return;
+                                    }
+                                    character.chatPalette = toml;
+                                });
+                            }}
+                        />
+                    );
+                }}
             />
             <SubmitMessage
                 roomId={roomId}

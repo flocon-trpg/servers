@@ -88,21 +88,18 @@ export namespace GlobalRoom {
             export const state = async (roomEntity: Room, em: EM): Promise<State> => {
                 const result = decodeDbState(roomEntity.value);
                 const participants: Record<string, ParticipantState> = {};
-                await recordForEachAsync(
-                    result.participants,
-                    async (participant, participantKey) => {
-                        const participantEntity = await em.findOne(Participant, {
-                            room: { id: roomEntity.id },
-                            user: { userUid: participantKey },
-                        });
-                        const name = participantEntity?.name;
-                        participants[participantKey] = {
-                            ...participant,
-                            name: name == null ? undefined : convertToMaxLength100String(name),
-                            role: participantEntity?.role,
-                        };
-                    }
-                );
+                const participantEntities = await em.find(Participant, {
+                    room: { id: roomEntity.id },
+                });
+                for (const participantEntity of participantEntities) {
+                    const name = participantEntity?.name;
+                    participants[participantEntity.user.userUid] = {
+                        $v: 2,
+                        $r: 1,
+                        name: name == null ? undefined : convertToMaxLength100String(name),
+                        role: participantEntity?.role,
+                    };
+                }
                 return {
                     ...result,
                     createdBy: roomEntity.createdBy,
@@ -232,7 +229,7 @@ export namespace GlobalRoom {
                 });
                 const upOperation =
                     diffOperation == null ? undefined : toUpOperation(diffOperation);
-                return stringifyUpOperation(upOperation ?? { $v: 1, $r: 2 });
+                return stringifyUpOperation(upOperation ?? { $v: 2, $r: 1 });
             };
         }
 

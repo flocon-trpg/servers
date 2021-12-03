@@ -1,6 +1,6 @@
 import {
-    DicePieceValueLog as DicePieceValueLogState,
-    StringPieceValueLog as StringPieceValueLogState,
+    DicePieceLog as DicePieceLogState,
+    StringPieceLog as StringPieceLogState,
 } from '@flocon-trpg/core';
 import {
     Collection,
@@ -177,11 +177,11 @@ export class RoomPubMsg {
     // 「書き込んだとき」のCharaのimagePath
     // CONSIDER: デフォルトではPostgreSQLの場合varchar(255)になるため、lengthを設定している。値は適当（MySQLの最大値）。
     @Property({ nullable: true, length: 65535, default: null })
-    public charaTachieImagePath?: string;
+    public charaPortraitImagePath?: string;
 
     // 「書き込んだとき」のCharaのimageSourceType
     @Property({ type: 'string', nullable: true, default: null })
-    public charaTachieImageSourceType?: FileSourceType;
+    public charaPortraitImageSourceType?: FileSourceType;
 
     @Property({ nullable: true })
     public customName?: string;
@@ -281,11 +281,11 @@ export class RoomPrvMsg {
     // 「書き込んだとき」のCharaのimagePath
     // CONSIDER: デフォルトではPostgreSQLの場合varchar(255)になるため、lengthを設定している。値は適当（MySQLの最大値）。
     @Property({ nullable: true, length: 65535, default: null })
-    public charaTachieImagePath?: string;
+    public charaPortraitImagePath?: string;
 
     // 「書き込んだとき」のCharaのimageSourceType
     @Property({ type: 'string', nullable: true, default: null })
-    public charaTachieImageSourceType?: FileSourceType;
+    public charaPortraitImageSourceType?: FileSourceType;
 
     @Property({ nullable: true })
     public customName?: string;
@@ -302,22 +302,16 @@ export class RoomPrvMsg {
 }
 
 @Entity()
-export class DicePieceValueLog {
+export class DicePieceLog {
     public constructor({
-        characterCreatedBy,
-        characterId,
         room,
         stateId,
         value,
     }: {
-        characterCreatedBy: string;
-        characterId: string;
         room: Room;
         stateId: string;
-        value: DicePieceValueLogState;
+        value: DicePieceLogState;
     }) {
-        this.characterCreatedBy = characterCreatedBy;
-        this.characterId = characterId;
         this.room = Reference.create(room);
         this.stateId = stateId;
         this.value = value;
@@ -326,12 +320,6 @@ export class DicePieceValueLog {
     @PrimaryKey()
     public id: string = easyFlake();
 
-    @Property({ index: true })
-    public characterCreatedBy: string;
-
-    @Property({ index: true })
-    public characterId: string;
-
     @Property({ type: Date, onCreate: () => new Date() })
     public createdAt: Date = new Date();
 
@@ -339,29 +327,23 @@ export class DicePieceValueLog {
     public stateId: string;
 
     @Property({ type: JsonType, nullable: true })
-    public value?: DicePieceValueLogState;
+    public value?: DicePieceLogState;
 
     @ManyToOne(() => Room, { wrappedReference: true })
     public room: IdentifiedReference<Room>;
 }
 
 @Entity()
-export class StringPieceValueLog {
+export class StringPieceLog {
     public constructor({
-        characterCreatedBy,
-        characterId,
         room,
         stateId,
         value,
     }: {
-        characterCreatedBy: string;
-        characterId: string;
         room: Room;
         stateId: string;
-        value: StringPieceValueLogState;
+        value: StringPieceLogState;
     }) {
-        this.characterCreatedBy = characterCreatedBy;
-        this.characterId = characterId;
         this.room = Reference.create(room);
         this.stateId = stateId;
         this.value = value;
@@ -370,12 +352,6 @@ export class StringPieceValueLog {
     @PrimaryKey()
     public id: string = easyFlake();
 
-    @Property({ index: true })
-    public characterCreatedBy: string;
-
-    @Property({ index: true })
-    public characterId: string;
-
     @Property({ type: Date, onCreate: () => new Date() })
     public createdAt: Date = new Date();
 
@@ -383,7 +359,7 @@ export class StringPieceValueLog {
     public stateId: string;
 
     @Property({ type: JsonType, nullable: true })
-    public value?: StringPieceValueLogState;
+    public value?: StringPieceLogState;
 
     @ManyToOne(() => Room, { wrappedReference: true })
     public room: IdentifiedReference<Room>;

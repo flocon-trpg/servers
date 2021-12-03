@@ -1,23 +1,26 @@
-import { chooseRecord } from '@flocon-trpg/utils';
 import * as t from 'io-ts';
 import { simpleId } from '@flocon-trpg/core';
-import { partialTabConfig, TabConfig, deserializeTabConfig } from '../tabConfig';
+import {
+    partialMessageTabConfig,
+    MessageTabConfig,
+    deserializeMessageTabConfig,
+} from '../messageTabConfig';
 import {
     deserializeDraggablePanelConfigBase,
     DraggablePanelConfigBase,
     serializedDraggablePanelConfigBase,
 } from '../draggablePanelConfig';
-import { record } from '../../../../utils/io-ts/record';
-import { TabConfigUtils } from '../tabConfig/utils';
+import { MessageTabConfigUtils } from '../messageTabConfig/utils';
+import { defaultMessagePanelPosition } from '../defaultPanelPositions';
 
 export type MessagePanelConfig = {
     isMinimized: boolean;
-    tabs: Record<string, TabConfig | undefined>;
+    tabs: MessageTabConfig[];
     selectedTextColor?: string;
     isPrivateMessageMode: boolean;
     selectedPublicChannelKey?: string;
     selectedCharacterType?: string;
-    selectedCharacterStateId?: string;
+    selectedCharacterId?: string;
     customCharacterName: string;
     selectedGameSystem?: string;
 } & DraggablePanelConfigBase;
@@ -25,12 +28,12 @@ export type MessagePanelConfig = {
 export const serializedMessagePanelConfig = t.intersection([
     t.partial({
         isMinimized: t.boolean,
-        tabs: record(t.string, partialTabConfig),
+        tabs: t.array(partialMessageTabConfig),
         selectedTextColor: t.string,
         isPrivateMessageMode: t.boolean,
         selectedPublicChannelKey: t.string,
         selectedCharacterType: t.string,
-        selectedCharacterStateId: t.string,
+        selectedCharacterId: t.string,
         customCharacterName: t.string,
         selectedGameSystem: t.string,
     }),
@@ -45,12 +48,12 @@ export const deserializeMessagePanelConfig = (
     return {
         ...deserializeDraggablePanelConfigBase(source),
         isMinimized: source.isMinimized ?? false,
-        tabs: chooseRecord(source.tabs ?? {}, deserializeTabConfig),
+        tabs: (source.tabs ?? []).map(deserializeMessageTabConfig),
         selectedTextColor: source.selectedTextColor,
         isPrivateMessageMode: source.isPrivateMessageMode ?? false,
         selectedPublicChannelKey: source.selectedPublicChannelKey,
         selectedCharacterType: source.selectedCharacterType,
-        selectedCharacterStateId: source.selectedCharacterStateId,
+        selectedCharacterId: source.selectedCharacterId,
         customCharacterName: source.customCharacterName ?? '',
         selectedGameSystem: source.selectedGameSystem,
     };
@@ -58,13 +61,8 @@ export const deserializeMessagePanelConfig = (
 
 export const defaultMessagePanelConfig = (): MessagePanelConfig => {
     return {
-        x: 0,
-        y: 400,
-        width: 300,
-        height: 300,
-        zIndex: 0,
-        isMinimized: false,
-        tabs: { [simpleId()]: TabConfigUtils.createAll({}) },
+        ...defaultMessagePanelPosition,
+        tabs: [MessageTabConfigUtils.createAll({})],
         isPrivateMessageMode: false,
         customCharacterName: '',
     };

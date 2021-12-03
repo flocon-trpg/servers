@@ -332,8 +332,7 @@ export class MainResolver {
 
     @Mutation(() => EntryToServerResult)
     public async entryToServer(
-        // TODO: 現状ではphraseよりはpasswordという名前のほうが適切なのでリネームするほうが良い
-        @Arg('phrase', () => String, { nullable: true }) phrase: string | null | undefined,
+        @Arg('password', () => String, { nullable: true }) password: string | null | undefined,
         @Ctx() context: ResolverContext
     ): Promise<EntryToServerResult> {
         const queue = async () => {
@@ -363,15 +362,18 @@ export class MainResolver {
                 await em.flush();
                 return {
                     type:
-                        phrase == null
+                        password == null
                             ? EntryToServerResultType.Success
-                            : EntryToServerResultType.NoPhraseRequired,
+                            : EntryToServerResultType.NoPasswordRequired,
                 };
             }
 
-            if (phrase == null || !(await comparePassword(phrase, serverConfig.entryPassword))) {
+            if (
+                password == null ||
+                !(await comparePassword(password, serverConfig.entryPassword))
+            ) {
                 return {
-                    type: EntryToServerResultType.WrongPhrase,
+                    type: EntryToServerResultType.WrongPassword,
                 };
             }
 

@@ -22,13 +22,12 @@
         "@types/safe-compare": "^1.1.0",
         "@types/sharp": "^0.29.2",
         "@types/uuid": "^8.3.1",
-        "@types/ws": "^7.4.7",
+        "@types/ws": "^8.0.0",
         "@types/yargs": "^17.0.3",
         "apollo-server-express": "^3.3.0",
         "bcdice": "^3.3.0",
         "bcrypt": "^5.0.1",
         "check-disk-space": "^3.0.1",
-        "class-transformer": "^0.4.0",
         "class-validator": "^0.13.1",
         "color": "^4.0.1",
         "dotenv": "^10.0.0",
@@ -71,11 +70,11 @@
         "form-data": "4.0.0",
         "isomorphic-fetch": "3.0.0",
         "isomorphic-ws": "4.0.1",
-        "jest": "27.3.1",
+        "jest": "27.4.3",
         "rimraf": "3.0.2",
         "ts-jest": "27.0.7",
         "url-join": "4.0.1",
-        "ws": "8.2.3"
+        "ws": "8.3.0"
     },
     "engines": {
         "node": ">=14"

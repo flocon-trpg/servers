@@ -1,15 +1,7 @@
 import React from 'react';
 import * as Icons from '@ant-design/icons';
 import { useMemos } from '../../hooks/state/useMemos';
-import {
-    MemoState,
-    replace,
-    simpleId,
-    textDiff,
-    toTextUpOperation,
-    update,
-} from '@flocon-trpg/core';
-import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
+import { MemoState, simpleId } from '@flocon-trpg/core';
 import { Button, Popover, Tree, Modal, Menu, Dropdown, Input } from 'antd';
 import { DataNode } from 'rc-tree/lib/interface';
 import { BufferedInput } from '../../components/BufferedInput';
@@ -198,13 +190,12 @@ const dirToString = (dir: string[]) => {
 
 type DirSelectProps = {
     memoId: string;
-    memo: MemoState;
 };
 
 const defaultNewDirName = 'a new group';
-const DirSelect = ({ memoId, memo }: DirSelectProps) => {
+const DirSelect = ({ memoId }: DirSelectProps) => {
     const memos = useMemos();
-    const operate = useSetRoomStateByApply();
+    const setRoomState = useSetRoomStateWithImmer();
     const [isModalVisible, setIsModalVisible] = React.useState(false);
     const [newDirName, setNewDirName] = React.useState(defaultNewDirName);
 
@@ -214,19 +205,12 @@ const DirSelect = ({ memoId, memo }: DirSelectProps) => {
             <Menu.Item
                 key={`DIRSELECT-${memoId}`}
                 onClick={() => {
-                    operate({
-                        $v: 1,
-                        $r: 2,
-                        memos: {
-                            [memoId]: {
-                                type: update,
-                                update: {
-                                    $v: 1,
-                                    $r: 1,
-                                    dir: { newValue: [...dir] },
-                                },
-                            },
-                        },
+                    setRoomState(roomState => {
+                        const memo = roomState.memos[memoId];
+                        if (memo == null) {
+                            return;
+                        }
+                        memo.dir = [...dir];
                     });
                 }}
             >
@@ -252,19 +236,12 @@ const DirSelect = ({ memoId, memo }: DirSelectProps) => {
                     setIsModalVisible(false);
                 }}
                 onOk={() => {
-                    operate({
-                        $v: 1,
-                        $r: 2,
-                        memos: {
-                            [memoId]: {
-                                type: update,
-                                update: {
-                                    $v: 1,
-                                    $r: 1,
-                                    dir: { newValue: [...memo.dir, newDirName] },
-                                },
-                            },
-                        },
+                    setRoomState(roomState => {
+                        const memo = roomState.memos[memoId];
+                        if (memo == null) {
+                            return;
+                        }
+                        memo.dir = [...memo.dir, newDirName];
                     });
                     setNewDirName(defaultNewDirName);
                     setIsModalVisible(false);
@@ -292,8 +269,7 @@ type MemoProps = {
 };
 
 const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
-    const operate = useSetRoomStateByApply();
-    const operateAsStateWithImmer = useSetRoomStateWithImmer();
+    const setRoomState = useSetRoomStateWithImmer();
 
     if (memoId == null) {
         return <div style={{ padding }}>表示するメモが指定されていません。</div>;
@@ -320,7 +296,7 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
                     bufferDuration='default'
                     value={memo.name}
                     onChange={e =>
-                        operateAsStateWithImmer(prevState => {
+                        setRoomState(prevState => {
                             const memo = prevState.memos[memoId];
                             if (memo != null) {
                                 memo.name = e.currentValue;
@@ -329,24 +305,14 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
                     }
                 />
                 <div style={{ minWidth: 16 }} />
-                <DirSelect memoId={memoId} memo={memo} />
+                <DirSelect memoId={memoId} />
                 <Button
-                    disabled={memo == null}
                     onClick={() => {
                         Modal.confirm({
                             title: '現在開いているメモを削除してよろしいですか？',
                             onOk: () => {
-                                operate({
-                                    $v: 1,
-                                    $r: 2,
-                                    memos: {
-                                        [memoId]: {
-                                            type: replace,
-                                            replace: {
-                                                newValue: undefined,
-                                            },
-                                        },
-                                    },
+                                setRoomState(roomState => {
+                                    delete roomState.memos[memoId];
                                 });
                             },
                         });
@@ -362,21 +328,12 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
                 placeholder='本文'
                 disableResize
                 onChange={e => {
-                    const diff2 = textDiff({ prev: e.previousValue, next: e.currentValue });
-                    operate({
-                        $v: 1,
-                        $r: 2,
-                        memos: {
-                            [memoId]: {
-                                type: update,
-                                update: {
-                                    $v: 1,
-                                    $r: 1,
-                                    text:
-                                        diff2 === undefined ? undefined : toTextUpOperation(diff2),
-                                },
-                            },
-                        },
+                    setRoomState(roomState => {
+                        const memo = roomState.memos[memoId];
+                        if (memo == null) {
+                            return;
+                        }
+                        memo.text = e.currentValue;
                     });
                 }}
             />
@@ -390,7 +347,7 @@ type Props = {
 };
 
 export const Memos: React.FC<Props> = ({ selectedMemoId, onSelectedMemoIdChange }: Props) => {
-    const operate = useSetRoomStateByApply();
+    const setRoomState = useSetRoomStateWithImmer();
     const memos = useMemos();
     const memo = selectedMemoId == null ? undefined : memos?.get(selectedMemoId);
     const [popoverVisible, setPopoverVisible] = React.useState(false);
@@ -428,26 +385,17 @@ export const Memos: React.FC<Props> = ({ selectedMemoId, onSelectedMemoIdChange 
                 <Button
                     onClick={() => {
                         const id = simpleId();
-                        operate({
-                            $v: 1,
-                            $r: 2,
-                            memos: {
-                                [id]: {
-                                    type: replace,
-                                    replace: {
-                                        newValue: {
-                                            $v: 1,
-                                            $r: 1,
-                                            text: '',
-                                            textType: 'Plain',
-                                            name: `新規メモ@${moment(new Date()).format(
-                                                'YYYY/MM/DD HH:mm:ss'
-                                            )}`,
-                                            dir: memo == null ? [] : memo.dir,
-                                        },
-                                    },
-                                },
-                            },
+                        setRoomState(roomState => {
+                            roomState.memos[id] = {
+                                $v: 1,
+                                $r: 1,
+                                text: '',
+                                textType: 'Plain',
+                                name: `新規メモ@${moment(new Date()).format(
+                                    'YYYY/MM/DD HH:mm:ss'
+                                )}`,
+                                dir: memo == null ? [] : memo.dir,
+                            };
                         });
                         onSelectedMemoIdChange(id);
                     }}

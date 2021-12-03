@@ -68,6 +68,38 @@ html {
     align-items: center;
 }
 
+.self-center {
+    align-self: center;
+}
+
+.items-end {
+    align-items: end;
+}
+
+.self-end {
+    align-self: end;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.justify-end {
+    justify-content: end;
+}
+
 .justify-items-center {
     justify-items: center;
+}
+
+.justify-self-center {
+    justify-self: center;
+}
+
+.justify-items-end {
+    justify-items: end;
+}
+
+.justify-self-end {
+    justify-self: end;
 }

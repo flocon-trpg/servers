@@ -7,7 +7,7 @@ fragment CharacterValueForMessage on CharacterValueForMessage {
   image {
     ...FilePath
   }
-  tachieImage {
+  portraitImage {
     ...FilePath
   }
 }
@@ -89,10 +89,8 @@ fragment JoinRoomResult on JoinRoomResult {
   }
 }
 
-fragment PieceValueLog on PieceValueLog {
+fragment PieceLog on PieceLog {
   messageId
-  characterCreatedBy
-  characterId
   stateId
   createdAt
   logType
@@ -103,8 +101,8 @@ fragment RoomAsListItem on RoomAsListItem {
   id
   name
   createdBy
-  requiresPhraseToJoinAsPlayer
-  requiresPhraseToJoinAsSpectator
+  requiresPlayerPassword
+  requiresSpectatorPassword
 }
 
 fragment RoomGetState on RoomGetState {
@@ -201,8 +199,8 @@ fragment RoomMessageEvent on RoomMessageEvent {
   ... on RoomPrivateMessage {
     ...RoomPrivateMessage
   }
-  ... on PieceValueLog {
-    ...PieceValueLog
+  ... on PieceLog {
+    ...PieceLog
   }
   ... on RoomPublicChannelUpdate {
     key
@@ -318,8 +316,8 @@ query GetMessages($roomId: String!) {
       privateMessages {
         ...RoomPrivateMessage
       }
-      pieceValueLogs {
-        ...PieceValueLog
+      pieceLogs {
+        ...PieceLog
       }
       publicChannels {
         ...RoomPublicChannel
@@ -344,8 +342,8 @@ query GetLog($roomId: String!) {
       privateMessages {
         ...RoomPrivateMessage
       }
-      pieceValueLogs {
-        ...PieceValueLog
+      pieceLogs {
+        ...PieceLog
       }
       publicChannels {
         ...RoomPublicChannel
@@ -442,20 +440,20 @@ mutation EditFileTags($input: EditFileTagsInput!) {
   result: editFileTags(input: $input)
 }
 
-mutation JoinRoomAsPlayer($id: String!, $name: String!, $phrase: String) {
-  result: joinRoomAsPlayer(id: $id, name: $name, phrase: $phrase) {
+mutation JoinRoomAsPlayer($id: String!, $name: String!, $password: String) {
+  result: joinRoomAsPlayer(id: $id, name: $name, password: $password) {
     ...JoinRoomResult
   }
 }
 
-mutation JoinRoomAsSpectator($id: String!, $name: String!, $phrase: String) {
-  result: joinRoomAsSpectator(id: $id, name: $name, phrase: $phrase) {
+mutation JoinRoomAsSpectator($id: String!, $name: String!, $password: String) {
+  result: joinRoomAsSpectator(id: $id, name: $name, password: $password) {
     ...JoinRoomResult
   }
 }
 
-mutation EntryToServer($phrase: String!) {
-  result: entryToServer(phrase: $phrase) {
+mutation EntryToServer($password: String!) {
+  result: entryToServer(password: $password) {
     type
   }
 }
@@ -495,8 +493,8 @@ mutation Ping($value: Float!) {
   }
 }
 
-mutation PromoteToPlayer($roomId: String!, $phrase: String) {
-  result: promoteToPlayer(roomId: $roomId, phrase: $phrase) {
+mutation PromoteToPlayer($roomId: String!, $password: String) {
+  result: promoteToPlayer(roomId: $roomId, password: $password) {
     failureType
   }
 }
@@ -507,8 +505,8 @@ mutation ResetMessages($roomId: String!) {
   }
 }
 
-mutation WritePublicMessage($roomId: String!, $text: String!, $textColor: String, $channelKey: String!, $characterStateId: String, $customName: String, $gameType: String) {
-  result: writePublicMessage(roomId: $roomId, text: $text, textColor: $textColor, channelKey: $channelKey, characterStateId: $characterStateId, customName: $customName, gameType: $gameType) {
+mutation WritePublicMessage($roomId: String!, $text: String!, $textColor: String, $channelKey: String!, $characterId: String, $customName: String, $gameType: String) {
+  result: writePublicMessage(roomId: $roomId, text: $text, textColor: $textColor, channelKey: $channelKey, characterId: $characterId, customName: $customName, gameType: $gameType) {
     __typename
     ... on RoomPublicMessage {
       ...RoomPublicMessage
@@ -522,8 +520,8 @@ mutation WritePublicMessage($roomId: String!, $text: String!, $textColor: String
   }
 }
 
-mutation WritePrivateMessage($roomId: String!, $visibleTo: [String!]!, $text: String!, $textColor: String, $characterStateId: String, $customName: String, $gameType: String) {
-  result: writePrivateMessage(roomId: $roomId, visibleTo: $visibleTo, text: $text, textColor: $textColor, characterStateId: $characterStateId, customName: $customName, gameType: $gameType) {
+mutation WritePrivateMessage($roomId: String!, $visibleTo: [String!]!, $text: String!, $textColor: String, $characterId: String, $customName: String, $gameType: String) {
+  result: writePrivateMessage(roomId: $roomId, visibleTo: $visibleTo, text: $text, textColor: $textColor, characterId: $characterId, customName: $customName, gameType: $gameType) {
     __typename
     ... on RoomPrivateMessage {
       ...RoomPrivateMessage

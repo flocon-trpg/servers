@@ -1,26 +1,16 @@
 import { CharacterUpOperation, update, UpOperation } from '@flocon-trpg/core';
-import { CompositeKey } from '@flocon-trpg/utils';
 
 export const characterUpdateOperation = (
-    characterKey: CompositeKey,
+    characterId: string,
     operation: CharacterUpOperation
 ): UpOperation => {
     return {
-        $v: 1,
-        $r: 2,
-        participants: {
-            [characterKey.createdBy]: {
+        $v: 2,
+        $r: 1,
+        characters: {
+            [characterId]: {
                 type: update,
-                update: {
-                    $v: 1,
-                    $r: 2,
-                    characters: {
-                        [characterKey.id]: {
-                            type: update,
-                            update: operation,
-                        },
-                    },
-                },
+                update: operation,
             },
         },
     };

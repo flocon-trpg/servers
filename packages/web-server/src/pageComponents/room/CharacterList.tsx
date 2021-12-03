@@ -1,6 +1,20 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
-import { Table, Button, Input, Tooltip } from 'antd';
+import {
+    Table,
+    Button,
+    Input,
+    Tooltip,
+    Tabs,
+    Dropdown,
+    Menu,
+    Modal,
+    Row,
+    Col,
+    Divider,
+    Checkbox,
+    Alert,
+} from 'antd';
 import { update } from '../../stateManagers/states/types';
 import { NumberParameterInput } from '../../components/NumberParameterInput';
 import { BooleanParameterInput } from '../../components/BooleanParameterInput';
@@ -12,9 +26,7 @@ import {
     characterIsNotPrivate,
     characterIsNotPrivateAndNotCreatedByMe,
 } from '../../resource/text/main';
-import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
 import { useCharacters } from '../../hooks/state/useCharacters';
-import { useParticipants } from '../../hooks/state/useParticipants';
 import {
     useBoolParamNames,
     useNumParamNames,
@@ -23,39 +35,47 @@ import {
 import {
     CharacterState,
     ParamNameState,
-    ParticipantState,
+    strIndex10Array,
     StrIndex20,
     strIndex20Array,
-    UpOperation,
 } from '@flocon-trpg/core';
-import { CompositeKey, keyNames } from '@flocon-trpg/utils';
 import _ from 'lodash';
 import classNames from 'classnames';
-import { flex, flexRow, itemsCenter } from '../../utils/className';
+import { cancelRnd, flex, flexRow, itemsCenter } from '../../utils/className';
 import { ColumnType } from 'antd/lib/table';
 import { SortOrder } from 'antd/lib/table/interface';
 import { IconView } from '../../components/IconView';
-import { characterUpdateOperation } from '../../utils/characterUpdateOperation';
-import { getUserUid, MyAuthContext } from '../../contexts/MyAuthContext';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { create } from '../../utils/constants';
 import { useUpdateAtom } from 'jotai/utils';
-import { characterEditorDrawerAtom } from '../../atoms/overlay/characterEditorDrawerAtom';
-import { characterParameterNamesDrawerVisibilityAtom } from '../../atoms/overlay/characterParameterNamesDrawerVisibilityAtom';
+import { characterEditorModalAtom } from './CharacterEditorModal';
+import { OverriddenParameterNameEditor } from '../../components/OverriddenParameterNameEditor';
+import produce from 'immer';
+import { characterParameterNamesEditorVisibilityAtom } from './CharacterParameterNamesEditorModal';
+import { useMyUserUid } from '../../hooks/useMyUserUid';
+import { characterTagNamesEditorVisibilityAtom } from './CharacterTagNamesEditorModal';
+import { CharacterTabConfig } from '../../atoms/roomConfig/types/characterTabConfig';
+import { useAtomSelector } from '../../atoms/useAtomSelector';
+import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
+import { CharacterTabName } from '../../components/CharacterTabName';
+import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
+import { CharacterTabConfigUtils } from '../../atoms/roomConfig/types/characterTabConfig/utils';
+import { DrawerFooter } from '../../layouts/DrawerFooter';
+import { Gutter } from 'antd/lib/grid/row';
+import { useCharacterTagNames } from '../../hooks/state/useCharacterTagNames';
+import { importCharacterModalVisibilityAtom } from './ImportCharacterModal';
 
 type DataSource = {
     key: string;
     character: {
-        stateKey: CompositeKey;
+        stateId: string;
         state: CharacterState;
         createdByMe: boolean | null;
     };
-    participants: ReadonlyMap<string, ParticipantState>;
-    operate: (operation: UpOperation) => void;
+    onOperateCharacter: (mapping: (operation: CharacterState) => CharacterState) => void;
 };
 
-const minNumParameter = -1000000;
-const maxNumParameter = 1000000;
+const overriddenParameterNamePadding = 6;
 
 const createBooleanParameterColumn = ({
     key,
@@ -85,9 +105,27 @@ const createBooleanParameterColumn = ({
             booleanToNumber(x.character.state.boolParams[key]?.value, sortOrder) -
             booleanToNumber(y.character.state.boolParams[key]?.value, sortOrder),
         // eslint-disable-next-line react/display-name
-        render: (_: unknown, { character, operate }: DataSource) => {
+        render: (_: unknown, { character, onOperateCharacter }: DataSource) => {
             return (
-                <>
+                <div className={classNames(flex, flexRow)}>
+                    <OverriddenParameterNameEditor
+                        type='table'
+                        overriddenParameterName={
+                            character.state.boolParams[key]?.overriddenParameterName
+                        }
+                        onOverriddenParameterNameChange={newName =>
+                            onOperateCharacter(character =>
+                                produce(character, character => {
+                                    const boolParam = character.boolParams[key];
+                                    if (boolParam == null) {
+                                        return;
+                                    }
+                                    boolParam.overriddenParameterName = newName;
+                                })
+                            )
+                        }
+                    />
+                    <div style={{ paddingLeft: overriddenParameterNamePadding }} />
                     <BooleanParameterInput
                         isCharacterPrivate={character.state.isPrivate}
                         isCreate={false}
@@ -95,13 +133,11 @@ const createBooleanParameterColumn = ({
                         parameterKey={key}
                         parameter={character.state.boolParams[key]}
                         createdByMe={character.createdByMe ?? false}
-                        onOperate={characterOperation => {
-                            operate(
-                                characterUpdateOperation(character.stateKey, characterOperation)
-                            );
+                        onOperate={mapping => {
+                            onOperateCharacter(mapping);
                         }}
                     />
-                </>
+                </div>
             );
         },
     };
@@ -131,9 +167,27 @@ const createNumParameterColumn = ({
         },
         sortDirections: ['descend', 'ascend'],
         // eslint-disable-next-line react/display-name
-        render: (_: unknown, { character, operate }: DataSource) => {
+        render: (_: unknown, { character, onOperateCharacter }: DataSource) => {
             return (
-                <>
+                <div className={classNames(flex, flexRow)}>
+                    <OverriddenParameterNameEditor
+                        type='table'
+                        overriddenParameterName={
+                            character.state.numParams[key]?.overriddenParameterName
+                        }
+                        onOverriddenParameterNameChange={newName =>
+                            onOperateCharacter(character =>
+                                produce(character, character => {
+                                    const numParam = character.numParams[key];
+                                    if (numParam == null) {
+                                        return;
+                                    }
+                                    numParam.overriddenParameterName = newName;
+                                })
+                            )
+                        }
+                    />
+                    <div style={{ paddingLeft: overriddenParameterNamePadding }} />
                     <NumberParameterInput
                         isCharacterPrivate={character.state.isPrivate}
                         isCreate={false}
@@ -142,13 +196,11 @@ const createNumParameterColumn = ({
                         numberParameter={character.state.numParams[key]}
                         numberMaxParameter={character.state.numMaxParams[key]}
                         createdByMe={character.createdByMe ?? false}
-                        onOperate={characterOperation => {
-                            operate(
-                                characterUpdateOperation(character.stateKey, characterOperation)
-                            );
+                        onOperate={mapping => {
+                            onOperateCharacter(mapping);
                         }}
                     />
-                </>
+                </div>
             );
         },
     };
@@ -176,9 +228,27 @@ const createStringParameterColumn = ({
             return xValue.localeCompare(yValue);
         },
         // eslint-disable-next-line react/display-name
-        render: (_: unknown, { character, operate }: DataSource) => {
+        render: (_: unknown, { character, onOperateCharacter }: DataSource) => {
             return (
-                <>
+                <div className={classNames(flex, flexRow)}>
+                    <OverriddenParameterNameEditor
+                        type='table'
+                        overriddenParameterName={
+                            character.state.strParams[key]?.overriddenParameterName
+                        }
+                        onOverriddenParameterNameChange={newName =>
+                            onOperateCharacter(character =>
+                                produce(character, character => {
+                                    const strParam = character.strParams[key];
+                                    if (strParam == null) {
+                                        return;
+                                    }
+                                    strParam.overriddenParameterName = newName;
+                                })
+                            )
+                        }
+                    />
+                    <div style={{ paddingLeft: overriddenParameterNamePadding }} />
                     <StringParameterInput
                         compact
                         isCharacterPrivate={character.state.isPrivate}
@@ -186,34 +256,34 @@ const createStringParameterColumn = ({
                         parameterKey={key}
                         parameter={character.state.strParams[key]}
                         createdByMe={character.createdByMe ?? false}
-                        onOperate={characterOperation => {
-                            operate(
-                                characterUpdateOperation(character.stateKey, characterOperation)
-                            );
+                        onOperate={mapping => {
+                            onOperateCharacter(mapping);
                         }}
                     />
-                </>
+                </div>
             );
         },
     };
 };
 
-export const CharacterList: React.FC = () => {
-    const myAuth = React.useContext(MyAuthContext);
-    const operate = useSetRoomStateByApply();
-    const operateAsStateWithImmer = useSetRoomStateWithImmer();
-    const setCharacterEditorDrawer = useUpdateAtom(characterEditorDrawerAtom);
-    const setCharacterParameterNamesDrawerVisibility = useUpdateAtom(characterParameterNamesDrawerVisibilityAtom);
+type CharacterListTabPaneProps = {
+    tabConfig: CharacterTabConfig;
+};
 
-    const characters = useCharacters();
-    const participants = useParticipants();
+const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
+    tabConfig,
+}: CharacterListTabPaneProps) => {
+    const myUserUid = useMyUserUid();
+    const setRoomState = useSetRoomStateWithImmer();
+    const setCharacterEditorModal = useUpdateAtom(characterEditorModalAtom);
+
+    const characters = useCharacters(tabConfig);
     const boolParamNames = useBoolParamNames();
     const numParamNames = useNumParamNames();
     const strParamNames = useStrParamNames();
 
     if (
         characters == null ||
-        participants == null ||
         boolParamNames == null ||
         numParamNames == null ||
         strParamNames == null
@@ -221,17 +291,27 @@ export const CharacterList: React.FC = () => {
         return null;
     }
 
-    const charactersDataSource: DataSource[] = characters.toArray().map(([key, character]) => {
-        const createdByMe = getUserUid(myAuth) === key.createdBy;
+    const operateCharacter =
+        (characterId: string) => (mapping: (character: CharacterState) => CharacterState) => {
+            setRoomState(roomState => {
+                const character = roomState.characters[characterId];
+                if (character == null) {
+                    return;
+                }
+                roomState.characters[characterId] = mapping(character);
+            });
+        };
+
+    const charactersDataSource: DataSource[] = [...characters].map(([characterId, character]) => {
+        const createdByMe = myUserUid != null && myUserUid === character.ownerParticipantId;
         return {
-            key: keyNames(key), // antdのtableのkeyとして必要
+            key: characterId, // antdのtableのkeyとして必要
             character: {
-                stateKey: key,
+                stateId: characterId,
                 state: character,
                 createdByMe,
             },
-            participants,
-            operate,
+            onOperateCharacter: operateCharacter(characterId),
         };
     });
 
@@ -247,9 +327,9 @@ export const CharacterList: React.FC = () => {
                         style={{ alignSelf: 'center' }}
                         size='small'
                         onClick={() =>
-                            setCharacterEditorDrawer({
-                                        type: update,
-                                        stateKey: character.stateKey,
+                            setCharacterEditorModal({
+                                type: update,
+                                stateId: character.stateId,
                             })
                         }
                     >
@@ -263,7 +343,7 @@ export const CharacterList: React.FC = () => {
             key: '全体公開',
             width: 36,
             // eslint-disable-next-line react/display-name
-            render: (_: unknown, { character, operate }: DataSource) => (
+            render: (_: unknown, { character }: DataSource) => (
                 <ToggleButton
                     size='small'
                     checked={!character.state.isPrivate}
@@ -279,13 +359,13 @@ export const CharacterList: React.FC = () => {
                             : characterIsNotPrivate({ isCreate: false })
                     }
                     onChange={newValue => {
-                        operate(
-                            characterUpdateOperation(character.stateKey, {
-                                $v: 1,
-                                $r: 2,
-                                isPrivate: { newValue: !newValue },
-                            })
-                        );
+                        setRoomState(roomState => {
+                            const targetCharacter = roomState.characters[character.stateId];
+                            if (targetCharacter == null) {
+                                return;
+                            }
+                            targetCharacter.isPrivate = !newValue;
+                        });
                     }}
                 />
             ),
@@ -308,11 +388,8 @@ export const CharacterList: React.FC = () => {
                         value={character.state.name}
                         size='small'
                         onChange={newValue => {
-                            operateAsStateWithImmer(state => {
-                                const targetCharacter =
-                                    state.participants[character.stateKey.createdBy]?.characters[
-                                        character.stateKey.id
-                                    ];
+                            setRoomState(state => {
+                                const targetCharacter = state.characters[character.stateId];
                                 if (targetCharacter == null) {
                                     return;
                                 }
@@ -331,29 +408,297 @@ export const CharacterList: React.FC = () => {
         .value();
 
     return (
-        <div>
-            <Button
-                size='small'
-                onClick={() =>
-                    setCharacterEditorDrawer({type: create})
+        <Table
+            columns={columns}
+            dataSource={charactersDataSource}
+            size='small'
+            pagination={false}
+        />
+    );
+};
+
+const modalGutter: [Gutter, Gutter] = [16, 16];
+const modalInputSpan = 18;
+
+type TabEditorModalProps = {
+    // これがundefinedの場合、Modalのvisibleがfalseとみなされる。
+    config?: CharacterTabConfig;
+
+    onChange: (immerRecipe: (config: CharacterTabConfig) => void) => void;
+    onClose: () => void;
+};
+
+const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProps) => {
+    const { config, onChange, onClose } = props;
+
+    const characterTagNames = useCharacterTagNames();
+
+    const tagCheckBoxes: React.ReactNode[] = [];
+    strIndex10Array.forEach(index => {
+        if (config == null) {
+            return;
+        }
+        const key = `showTag${index}` as const;
+        const tagName = characterTagNames?.[`characterTag${index}Name`];
+        if (tagName == null) {
+            return;
+        }
+        tagCheckBoxes.push(
+            <React.Fragment key={index}>
+                <Checkbox
+                    checked={config[key] ?? false}
+                    onChange={e =>
+                        onChange(config => {
+                            config[key] = e.target.checked;
+                        })
+                    }
+                >
+                    <span>{tagName}</span>
+                </Checkbox>
+                <br />
+            </React.Fragment>
+        );
+    });
+
+    return (
+        <Modal
+            className={cancelRnd}
+            visible={config != null}
+            title='タブの編集'
+            closable
+            onCancel={() => onClose()}
+            width={500}
+            footer={
+                <DrawerFooter
+                    close={{
+                        textType: 'close',
+                        onClick: () => onClose(),
+                    }}
+                />
+            }
+        >
+            <Row gutter={modalGutter} align='middle'>
+                <Col flex='auto' />
+                <Col flex={0}>タブ名</Col>
+                <Col span={modalInputSpan}>
+                    <Input
+                        value={config?.tabName ?? ''}
+                        onChange={e =>
+                            onChange(config => {
+                                config.tabName = e.target.value;
+                            })
+                        }
+                    />
+                    {config?.tabName ?? '' !== '' ? null : (
+                        <>
+                            <br />
+                            <Alert
+                                type='info'
+                                showIcon
+                                message='タブ名が空白であるため、自動的に決定された名前が表示されます。'
+                            />
+                        </>
+                    )}
+                </Col>
+            </Row>
+            <Divider />
+            <Row gutter={modalGutter} align='middle'>
+                <Col flex='auto' />
+                <Col flex={0}></Col>
+                <Col span={modalInputSpan}>
+                    <Checkbox
+                        checked={config?.showNoTag ?? false}
+                        onChange={e =>
+                            onChange(config => {
+                                config.showNoTag = e.target.checked;
+                            })
+                        }
+                    >
+                        <span>タグのないキャラクター</span>
+                    </Checkbox>
+                </Col>
+            </Row>
+            <Divider dashed />
+            <Row gutter={modalGutter} align='middle'>
+                <Col flex='auto' />
+                <Col flex={0}></Col>
+                <Col span={modalInputSpan}>{tagCheckBoxes}</Col>
+            </Row>
+        </Modal>
+    );
+};
+
+export const CharacterList: React.FC = () => {
+    const tabs = useAtomSelector(
+        roomConfigAtom,
+        roomConfig => roomConfig?.panels.characterPanel.tabs
+    );
+    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setCharacterParameterNamesEditorVisibility = useUpdateAtom(
+        characterParameterNamesEditorVisibilityAtom
+    );
+    const setCharacterTagNamesEditorVisibility = useUpdateAtom(
+        characterTagNamesEditorVisibilityAtom
+    );
+    const setCharacterEditorModal = useUpdateAtom(characterEditorModalAtom);
+    const setImportCharacterModal = useUpdateAtom(importCharacterModalVisibilityAtom);
+    const [editingTabConfigKey, setEditingTabConfigKey] = React.useState<string | undefined>();
+
+    const tabPanes = (tabs ?? []).map((tab, tabIndex) => {
+        return (
+            <Tabs.TabPane
+                key={tab.key}
+                tabKey={tab.key}
+                style={{ overflowY: 'scroll' }}
+                closable={false}
+                tab={
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyItems: 'center',
+                        }}
+                    >
+                        <div style={{ flex: '0 0 auto', maxWidth: 100 }}>
+                            <CharacterTabName tabConfig={tab} />
+                        </div>
+                        <div style={{ flex: 1 }} />
+                        <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>
+                            <Dropdown
+                                trigger={['click']}
+                                overlay={
+                                    <Menu>
+                                        <Menu.Item
+                                            icon={<Icon.SettingOutlined />}
+                                            onClick={() => setEditingTabConfigKey(tab.key)}
+                                        >
+                                            編集
+                                        </Menu.Item>
+                                        <Menu.Item
+                                            icon={<Icon.DeleteOutlined />}
+                                            onClick={() => {
+                                                Modal.warn({
+                                                    onOk: () => {
+                                                        setRoomConfig(roomConfig => {
+                                                            if (roomConfig == null) {
+                                                                return;
+                                                            }
+                                                            roomConfig.panels.characterPanel.tabs.splice(
+                                                                tabIndex,
+                                                                1
+                                                            );
+                                                        });
+                                                    },
+                                                    okCancel: true,
+                                                    maskClosable: true,
+                                                    closable: true,
+                                                    content: 'タブを削除します。よろしいですか？',
+                                                });
+                                            }}
+                                        >
+                                            削除
+                                        </Menu.Item>
+                                    </Menu>
+                                }
+                            >
+                                <Button
+                                    style={{
+                                        width: 18,
+                                        minWidth: 18,
+
+                                        // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
+                                        padding: '0 2px',
+                                    }}
+                                    type='text'
+                                    size='small'
+                                    onClick={e => e.stopPropagation()}
+                                >
+                                    <Icon.EllipsisOutlined />
+                                </Button>
+                            </Dropdown>
+                        </div>
+                    </div>
                 }
             >
-                キャラクターを作成
-            </Button>
-            <Button
-                size='small'
-                onClick={() =>
-                    setCharacterParameterNamesDrawerVisibility(true)
-                }
+                <CharacterListTabPane tabConfig={tab} />
+            </Tabs.TabPane>
+        );
+    });
+
+    return (
+        <div
+            style={{ display: 'flex', flexDirection: 'column', height: '100%', margin: '2px 4px' }}
+        >
+            <div style={{ paddingBottom: 8 }}>
+                <TabEditorModal
+                    config={tabs?.find(tab => tab.key === editingTabConfigKey)}
+                    onClose={() => setEditingTabConfigKey(undefined)}
+                    onChange={recipe => {
+                        if (editingTabConfigKey == null) {
+                            return;
+                        }
+                        setRoomConfig(roomConfig => {
+                            if (roomConfig == null) {
+                                return;
+                            }
+                            const targetTabConfig = roomConfig.panels.characterPanel.tabs.find(
+                                tab => tab.key === editingTabConfigKey
+                            );
+                            if (targetTabConfig == null) {
+                                return;
+                            }
+                            recipe(targetTabConfig);
+                        });
+                    }}
+                />
+                <Button size='small' onClick={() => setCharacterEditorModal({ type: create })}>
+                    キャラクターを作成
+                </Button>
+                <Button size='small' onClick={() => setImportCharacterModal(true)}>
+                    キャラクターをインポート
+                </Button>
+                <Button
+                    size='small'
+                    onClick={() => setCharacterParameterNamesEditorVisibility(true)}
+                >
+                    パラメーターを追加・編集・削除
+                </Button>
+                <Button size='small' onClick={() => setCharacterTagNamesEditorVisibility(true)}>
+                    タグを追加・編集・削除
+                </Button>
+            </div>
+            <Tabs
+                type='editable-card'
+                onEdit={(e, type) => {
+                    if (type === 'remove') {
+                        if (typeof e !== 'string') {
+                            return;
+                        }
+                        setRoomConfig(roomConfig => {
+                            if (roomConfig == null) {
+                                return;
+                            }
+                            const indexToSplice = roomConfig.panels.characterPanel.tabs.findIndex(
+                                tab => tab.key === e
+                            );
+                            if (indexToSplice >= 0) {
+                                roomConfig.panels.characterPanel.tabs.splice(indexToSplice, 1);
+                            }
+                        });
+                        return;
+                    }
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        roomConfig.panels.characterPanel.tabs.push(
+                            CharacterTabConfigUtils.createEmpty({})
+                        );
+                    });
+                }}
             >
-                パラメーターを追加・編集・削除
-            </Button>
-            <Table
-                columns={columns}
-                dataSource={charactersDataSource}
-                size='small'
-                pagination={false}
-            />
+                {tabPanes}
+            </Tabs>
         </div>
     );
 };

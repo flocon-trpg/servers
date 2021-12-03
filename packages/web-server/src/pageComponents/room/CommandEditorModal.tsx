@@ -112,8 +112,8 @@ export const CommandEditorModal: React.FC = () => {
     const modalWidth = 10000;
 
     const operate = useSetRoomStateByApply();
-    const [commandEditorModalType, setCommandEditorModalType] = useAtom(commandEditorModalAtom) 
-        const character = useCharacter(commandEditorModalType?.characterKey);
+    const [commandEditorModalType, setCommandEditorModalType] = useAtom(commandEditorModalAtom);
+    const character = useCharacter(commandEditorModalType?.characterId);
     const characterRef = useReadonlyRef(character);
     const [privateCommands, setPrivateCommands] = React.useState<Map<string, CommandState>>(
         new Map()
@@ -209,7 +209,7 @@ export const CommandEditorModal: React.FC = () => {
             content:
                 '閉じてもよろしいですか？もしコマンドに変更があった場合、その変更は破棄されます。',
             onOk: () => {
-                setCommandEditorModalType(null)
+                setCommandEditorModalType(null);
             },
         });
     };
@@ -224,16 +224,16 @@ export const CommandEditorModal: React.FC = () => {
                     return;
                 }
                 operate(
-                    characterUpdateOperation(commandEditorModalType.characterKey, {
-                        $v: 1,
-                        $r: 2,
+                    characterUpdateOperation(commandEditorModalType.characterId, {
+                        $v: 2,
+                        $r: 1,
                         privateCommands: privateCommandsDiff({
                             prevState: character.privateCommands,
                             nextState: mapToRecord(privateCommands),
                         }),
                     })
                 );
-                setCommandEditorModalType(null)
+                setCommandEditorModalType(null);
             }}
             onCancel={() => close()}
         >

@@ -3,6 +3,7 @@ import { chooseRecord } from '@flocon-trpg/utils';
 import * as t from 'io-ts';
 import { record } from '../../../../utils/io-ts/record';
 import { BoardConfig, deserializeBoardConfig, serializedBoardConfig } from '../boardConfig';
+import { defaultBoardEditorPanelPosition } from '../defaultPanelPositions';
 import {
     deserializeDraggablePanelConfigBase,
     DraggablePanelConfigBase,
@@ -10,14 +11,14 @@ import {
 } from '../draggablePanelConfig';
 
 export type BoardEditorPanelConfig = {
-    activeBoardKey: string | null;
+    activeBoardId: string | undefined;
     boards: Record<string, BoardConfig | undefined>;
     isMinimized: boolean;
 } & DraggablePanelConfigBase;
 
 export const serializedBoardEditorPanelConfig = t.intersection([
     t.partial({
-        activeBoardKey: maybe(t.string),
+        activeBoardId: maybe(t.string),
         boards: record(t.string, serializedBoardConfig),
         isMinimized: t.boolean,
     }),
@@ -31,7 +32,7 @@ export const deserializeBoardEditorPanelConfig = (
 ): BoardEditorPanelConfig => {
     return {
         ...deserializeDraggablePanelConfigBase(source),
-        activeBoardKey: source.activeBoardKey ?? null,
+        activeBoardId: source.activeBoardId ?? undefined,
         boards: chooseRecord(source.boards ?? {}, deserializeBoardConfig),
         isMinimized: source.isMinimized ?? false,
     };
@@ -39,14 +40,9 @@ export const deserializeBoardEditorPanelConfig = (
 
 export const defaultBoardEditorPanelsConfig = (): Record<string, BoardEditorPanelConfig> => {
     const config: BoardEditorPanelConfig = {
-        x: 50,
-        y: 50,
-        width: 400,
-        height: 400,
-        zIndex: 0,
-        activeBoardKey: null,
+        ...defaultBoardEditorPanelPosition,
+        activeBoardId: undefined,
         boards: {},
-        isMinimized: false,
     };
     const result: Record<string, BoardEditorPanelConfig> = {};
     const id = simpleId();

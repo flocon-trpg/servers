@@ -11,6 +11,7 @@ export const useAtomSelector = <T1, T2>(
     const mappingRef = useLatest(mapping);
     const mappedAtom = React.useMemo(() => {
         return atom(get => mappingRef.current(get(anAtom)));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [anAtom, mappingRef, ...(additionalDeps ?? [])]);
     const result = useAtomValue(mappedAtom);
     return result;

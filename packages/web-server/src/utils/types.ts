@@ -1,6 +1,19 @@
 import { FilterValue } from 'antd/lib/table/interface';
 import { FilePath } from './filePath';
 
+export type CharacterTagNames = {
+    characterTag1Name: string | undefined;
+    characterTag2Name: string | undefined;
+    characterTag3Name: string | undefined;
+    characterTag4Name: string | undefined;
+    characterTag5Name: string | undefined;
+    characterTag6Name: string | undefined;
+    characterTag7Name: string | undefined;
+    characterTag8Name: string | undefined;
+    characterTag9Name: string | undefined;
+    characterTag10Name: string | undefined;
+};
+
 export const none = 'none';
 export const some = 'some';
 
@@ -56,6 +69,16 @@ export type Size = {
 };
 
 export type DragEndResult = {
-    readonly newLocation?: Vector2;
+    readonly newPosition?: Vector2;
     readonly newSize?: Size;
+};
+
+export type PiecePositionWithoutCell = Vector2 & Size;
+
+export type PiecePositionWithCell = PiecePositionWithoutCell & {
+    cellX: number;
+    cellY: number;
+    cellW: number;
+    cellH: number;
+    isCellMode: boolean;
 };

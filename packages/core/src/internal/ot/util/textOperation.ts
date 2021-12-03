@@ -165,7 +165,8 @@ export const restore = ({
     });
 };
 
-export const serverTransform = ({
+// 元々はこの関数自身がserverTransformとしてexportされていたが、firstPrimeは必要ないためexportを外した。ただし将来使うことがあるかもしれないため一応残している。
+const serverTransformCore = ({
     first,
     second,
     prevState,
@@ -221,6 +222,22 @@ export const serverTransform = ({
         firstPrime: TextOperationCore.TextTwoWayOperation.toUnit(result.value.firstPrime),
         secondPrime: TextOperationCore.TextTwoWayOperation.toUnit(result.value.secondPrime),
     });
+};
+
+export const serverTransform = ({
+    first,
+    second,
+    prevState,
+}: {
+    first?: TwoWayOperation;
+    second?: UpOperation;
+    prevState: string;
+}) => {
+    const result = serverTransformCore({ first, second, prevState });
+    if (result.isError) {
+        return result;
+    }
+    return Result.ok(result.value.secondPrime);
 };
 
 export const clientTransform = ({

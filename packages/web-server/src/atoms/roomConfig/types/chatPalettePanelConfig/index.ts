@@ -1,5 +1,6 @@
 import { simpleId } from '@flocon-trpg/core';
 import * as t from 'io-ts';
+import { defaultChatPalettePanelPosition } from '../defaultPanelPositions';
 import {
     deserializeDraggablePanelConfigBase,
     DraggablePanelConfigBase,
@@ -10,7 +11,7 @@ export type ChatPalettePanelConfig = {
     selectedTextColor?: string;
     isPrivateMessageMode: boolean;
     selectedPublicChannelKey?: string;
-    selectedCharacterStateId?: string;
+    selectedCharacterId?: string;
     customCharacterName: string;
     selectedGameSystem?: string;
     isMinimized: boolean;
@@ -21,7 +22,7 @@ export const serializedChatPalettePanelConfig = t.intersection([
         selectedTextColor: t.string,
         isPrivateMessageMode: t.boolean,
         selectedPublicChannelKey: t.string,
-        selectedCharacterStateId: t.string,
+        selectedCharacterId: t.string,
         customCharacterName: t.string,
         selectedGameSystem: t.string,
         isMinimized: t.boolean,
@@ -39,7 +40,7 @@ export const deserializeChatPalettePanelConfig = (
         selectedTextColor: source.selectedTextColor,
         isPrivateMessageMode: source.isPrivateMessageMode ?? false,
         selectedPublicChannelKey: source.selectedPublicChannelKey,
-        selectedCharacterStateId: source.selectedCharacterStateId,
+        selectedCharacterId: source.selectedCharacterId,
         customCharacterName: source.customCharacterName ?? '',
         selectedGameSystem: source.selectedGameSystem,
         isMinimized: source.isMinimized ?? false,
@@ -48,14 +49,9 @@ export const deserializeChatPalettePanelConfig = (
 
 export const defaultChatPalettePanelsConfig = (): Record<string, ChatPalettePanelConfig> => {
     const config: ChatPalettePanelConfig = {
-        x: 50,
-        y: 50,
-        width: 400,
-        height: 400,
-        zIndex: 0,
+        ...defaultChatPalettePanelPosition,
         customCharacterName: '',
         isPrivateMessageMode: false,
-        isMinimized: false,
     };
     const result: Record<string, ChatPalettePanelConfig> = {};
     const id = simpleId();

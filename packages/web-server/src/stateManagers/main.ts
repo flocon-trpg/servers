@@ -20,13 +20,13 @@ const createParameters = (state: State, revision: number): Parameters => {
                 throw result.error;
             }
             return {
-                firstPrime: result.value.firstPrime ?? { $v: 1, $r: 2 },
-                secondPrime: result.value.secondPrime ?? { $v: 1, $r: 2 },
+                firstPrime: result.value.firstPrime ?? { $v: 2, $r: 1 },
+                secondPrime: result.value.secondPrime ?? { $v: 2, $r: 1 },
             };
         },
         diff: params => {
             const result = diff(params);
-            return toUpOperation(result ?? { $v: 1, $r: 2 });
+            return toUpOperation(result ?? { $v: 2, $r: 1 });
         },
         enableHistory: false,
     };

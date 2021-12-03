@@ -1,47 +1,48 @@
 import {
     CharacterState,
-    PieceState,
-    BoardLocationState,
-    DicePieceValueState,
-    StringPieceValueState,
+    CharacterPieceState,
+    DicePieceState,
+    StringPieceState,
+    ImagePieceState,
+    PortraitPieceState,
 } from '@flocon-trpg/core';
-import { CompositeKey } from '@flocon-trpg/utils';
 import { atom } from 'jotai';
-import { ImagePieceValueElement } from '../../../hooks/state/useImagePieceValues';
 import { BoardConfig } from '../../roomConfig/types/boardConfig';
 
 export type ContextMenuState = {
-    boardKey: CompositeKey;
+    boardId: string;
     boardConfig: BoardConfig;
     offsetX: number;
     offsetY: number;
     pageX: number;
     pageY: number;
     characterPiecesOnCursor: ReadonlyArray<{
-        characterKey: CompositeKey;
+        characterId: string;
         character: CharacterState;
-        pieceKey: CompositeKey;
-        piece: PieceState;
+        pieceId: string;
+        piece: CharacterPieceState;
     }>;
-    tachiesOnCursor: ReadonlyArray<{
-        characterKey: CompositeKey;
+    portraitsOnCursor: ReadonlyArray<{
+        characterId: string;
         character: CharacterState;
-        tachieLocationKey: CompositeKey;
-        tachieLocation: BoardLocationState;
+        pieceId: string;
+        piece: PortraitPieceState;
     }>;
-    dicePieceValuesOnCursor: ReadonlyArray<{
-        characterKey: CompositeKey;
-        dicePieceValueKey: string;
-        dicePieceValue: DicePieceValueState;
-        piece: PieceState;
+    dicePiecesOnCursor: ReadonlyArray<{
+        boardId: string;
+        pieceId: string;
+        piece: DicePieceState;
     }>;
-    stringPieceValuesOnCursor: ReadonlyArray<{
-        characterKey: CompositeKey;
-        stringPieceValueKey: string;
-        stringPieceValue: StringPieceValueState;
-        piece: PieceState;
+    stringPiecesOnCursor: ReadonlyArray<{
+        boardId: string;
+        pieceId: string;
+        piece: StringPieceState;
     }>;
-    imagePieceValuesOnCursor: ReadonlyArray<ImagePieceValueElement>;
+    imagePiecesOnCursor: ReadonlyArray<{
+        boardId: string;
+        pieceId: string;
+        piece: ImagePieceState;
+    }>;
 };
 
 export const boardContextMenuAtom = atom<ContextMenuState | null>(null);

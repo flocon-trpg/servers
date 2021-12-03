@@ -102,6 +102,7 @@ const exactChatPalette = t.strict({
 });
 
 // text.valueに例えば {foo} のような文字列が含まれている場合、varで定義されていればそれに置き換える。定義が見つからなければそのまま残す。
+/** @deprecated We no longer use TOML in chat palettes. */
 export const generateChatPalette = (toml: string): Result<string[]> => {
     // CONSIDER: TOMLのDateTimeに未対応
     const object = parseTomlCore(toml);
@@ -147,6 +148,7 @@ export const generateChatPalette = (toml: string): Result<string[]> => {
     return Result.ok(lines);
 };
 
+/** @deprecated We no longer use TOML in chat palettes. */
 export const isValidChatPalette = (toml: string): Result<undefined> => {
     // CONSIDER: TOMLのDateTimeに未対応
     const object = parseTomlCore(toml);

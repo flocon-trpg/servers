@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Checkbox, Divider, Drawer, Tooltip, Typography } from 'antd';
+import { Button, Checkbox, Divider, Drawer, Tooltip } from 'antd';
 import {
     FilePathInput,
     FileSourceType,
@@ -8,21 +8,21 @@ import {
 import * as Icon from '@ant-design/icons';
 import { FilesManagerDrawer } from '../../components/FilesManagerDrawer';
 import { FilesManagerDrawerType, some } from '../../utils/types';
-import { replace, update } from '../../stateManagers/states/types';
 import { VolumeBar } from '../../components/VolumeBar';
 import { DrawerFooter } from '../../layouts/DrawerFooter';
 import { MyStyle } from '../../utils/myStyle';
-import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
-import { BgmState, FilePath, StrIndex5, UpOperation } from '@flocon-trpg/core';
+import { BgmState, FilePath, StrIndex5 } from '@flocon-trpg/core';
 import _ from 'lodash';
 import { cancelRnd, flex, flexColumn, flexRow, itemsCenter } from '../../utils/className';
 import classNames from 'classnames';
 import { sound } from '../../utils/fileType';
 import { FilePath as FilePathModule } from '../../utils/filePath';
 import { useMutation } from '@apollo/client';
-import { atom, } from 'jotai';
+import { atom } from 'jotai';
 import { roomAtom } from '../../atoms/room/roomAtom';
 import { useAtomValue } from 'jotai/utils';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
+import { EditorGroupHeader } from '../../components/EditorGroupHeader';
 
 const defaultVolume = 0.5;
 
@@ -105,18 +105,16 @@ const FilePathView: React.FC<FilePathViewProps> = ({
 
 type BgmPlayerDrawerProps = {
     channelKey: StrIndex5;
-    bgmState: BgmState | undefined;
     visible: boolean;
     onClose: () => void;
 };
 
 const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({
     channelKey,
-    bgmState,
     visible,
     onClose,
 }: BgmPlayerDrawerProps) => {
-    const operate = useSetRoomStateByApply();
+    const setRoomState = useSetRoomStateWithImmer();
 
     const [filesManagerDrawerType, setFilesManagerDrawerType] =
         React.useState<FilesManagerDrawerType | null>(null);
@@ -160,60 +158,30 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({
                     ok={{
                         textType: 'ok',
                         onClick: () => {
-                            if (bgmState == null) {
-                                const operation: UpOperation = {
-                                    $v: 1,
-                                    $r: 2,
-                                    bgms: {
-                                        [channelKey]: {
-                                            type: replace,
-                                            replace: {
-                                                newValue: {
-                                                    $v: 1,
-                                                    $r: 1,
-                                                    files: filesInput.map(x => ({
-                                                        ...x,
-                                                        $v: 1,
-                                                        $r: 1,
-                                                    })),
-                                                    volume: volumeInput,
-                                                    isPaused: !isNotPausedInput,
-                                                },
-                                            },
-                                        },
-                                    },
-                                };
-                                operate(operation);
-                                onClose();
-                                return;
-                            }
-                            const operation: UpOperation = {
-                                $v: 1,
-                                $r: 2,
-                                bgms: {
-                                    [channelKey]: {
-                                        type: update,
-                                        update: {
+                            setRoomState(roomState => {
+                                const bgm = roomState.bgms[channelKey];
+                                if (bgm == null) {
+                                    roomState.bgms[channelKey] = {
+                                        $v: 1,
+                                        $r: 1,
+                                        files: filesInput.map(x => ({
+                                            ...x,
                                             $v: 1,
                                             $r: 1,
-                                            files: {
-                                                newValue: filesInput.map(x => ({
-                                                    ...x,
-                                                    $v: 1,
-                                                    $r: 1,
-                                                })),
-                                            },
-                                            volume: {
-                                                newValue: volumeInput,
-                                            },
-                                            isPaused: {
-                                                newValue: !isNotPausedInput,
-                                            },
-                                        },
-                                    },
-                                },
-                            };
-                            operate(operation);
+                                        })),
+                                        volume: volumeInput,
+                                        isPaused: !isNotPausedInput,
+                                    };
+                                    return;
+                                }
+                                bgm.files = filesInput.map(x => ({
+                                    ...x,
+                                    $v: 1,
+                                    $r: 1,
+                                }));
+                                bgm.volume = volumeInput;
+                                bgm.isPaused = !isNotPausedInput;
+                            });
                             onClose();
                         },
                     }}
@@ -238,7 +206,7 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({
                     すぐ再生を開始する
                 </Checkbox>
                 <Divider />
-                <Typography.Title level={4}>BGMプレイリスト</Typography.Title>
+                <EditorGroupHeader>BGMプレイリスト</EditorGroupHeader>
                 {tags.length === 0 ? 'BGMに指定するファイルが1つも選択されていません。' : tags}
                 <Button
                     icon={<Icon.PlusOutlined />}
@@ -329,7 +297,7 @@ const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({
                     onVolumeBarValueChange={i => setVolumeInput(i)}
                 />
                 <Divider />
-                <Typography.Title level={4}>ファイル</Typography.Title>
+                <EditorGroupHeader>ファイル</EditorGroupHeader>
                 {fileInput && (
                     <FilePathView
                         closable
@@ -370,7 +338,7 @@ type BgmPlayerProps = {
 const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayerProps) => {
     const defaultVolume = 0.5;
 
-    const operate = useSetRoomStateByApply();
+    const setRoomState = useSetRoomStateWithImmer();
     const [isDrawerVisible, setIsDrawerVisible] = React.useState(false);
     const [volumeInput, setVolumeInput] = React.useState<number>();
 
@@ -388,7 +356,6 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                 channelKey={channelKey}
                 visible={isDrawerVisible}
                 onClose={() => setIsDrawerVisible(false)}
-                bgmState={bgmState}
             />
             <div className={classNames(flex, flexRow, itemsCenter)}>
                 <div style={MyStyle.Text.larger}>
@@ -414,24 +381,16 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                         <Button
                             size='small'
                             onClick={() => {
-                                if (volumeInput == null || bgmState == null) {
+                                if (volumeInput == null) {
                                     return;
                                 }
-                                const operation: UpOperation = {
-                                    $v: 1,
-                                    $r: 2,
-                                    bgms: {
-                                        [channelKey]: {
-                                            type: update,
-                                            update: {
-                                                $v: 1,
-                                                $r: 1,
-                                                volume: { newValue: volumeInput },
-                                            },
-                                        },
-                                    },
-                                };
-                                operate(operation);
+                                setRoomState(roomState => {
+                                    const bgm = roomState.bgms[channelKey];
+                                    if (bgm == null) {
+                                        return;
+                                    }
+                                    bgm.volume = volumeInput;
+                                });
                             }}
                         >
                             適用
@@ -461,26 +420,13 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                     size='small'
                     disabled={(bgmState?.files ?? []).length === 0}
                     onClick={() => {
-                        if (bgmState == null) {
-                            return;
-                        }
-                        const operation: UpOperation = {
-                            $v: 1,
-                            $r: 2,
-                            bgms: {
-                                [channelKey]: {
-                                    type: update,
-                                    update: {
-                                        $v: 1,
-                                        $r: 1,
-                                        isPaused: {
-                                            newValue: !bgmState.isPaused,
-                                        },
-                                    },
-                                },
-                            },
-                        };
-                        operate(operation);
+                        setRoomState(roomState => {
+                            const bgm = roomState.bgms[channelKey];
+                            if (bgm == null) {
+                                return;
+                            }
+                            bgm.isPaused = !bgm.isPaused;
+                        });
                     }}
                 >
                     {bgmState?.isPaused === true ? '再生' : '停止'}
@@ -489,17 +435,9 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                     size='small'
                     disabled={(bgmState?.files ?? []).length === 0}
                     onClick={() => {
-                        const operation: UpOperation = {
-                            $v: 1,
-                            $r: 2,
-                            bgms: {
-                                [channelKey]: {
-                                    type: replace,
-                                    replace: { newValue: undefined },
-                                },
-                            },
-                        };
-                        operate(operation);
+                        setRoomState(roomState => {
+                            delete roomState.bgms[channelKey];
+                        });
                     }}
                 >
                     クリア

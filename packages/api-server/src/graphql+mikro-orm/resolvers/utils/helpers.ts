@@ -153,3 +153,16 @@ export const comparePassword = async (
     }
     return await bcrypt.compare(plainPassword, config.value);
 };
+
+export const bcryptCompareNullable = async (
+    plainPassword: string | undefined,
+    hash: string | undefined
+) => {
+    if (hash == null) {
+        return true;
+    }
+    if (plainPassword == null) {
+        return false;
+    }
+    return await bcrypt.compare(plainPassword, hash);
+};

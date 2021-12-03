@@ -14,7 +14,11 @@ import {
 } from 'type-graphql';
 import { ResolverContext } from '../../utils/Contexts';
 import { GetRoomFailureType } from '../../../enums/GetRoomFailureType';
-import { ensureAuthorizedUser, findRoomAndMyParticipant } from '../utils/helpers';
+import {
+    bcryptCompareNullable,
+    ensureAuthorizedUser,
+    findRoomAndMyParticipant,
+} from '../utils/helpers';
 import { JoinRoomFailureType } from '../../../enums/JoinRoomFailureType';
 import * as Room$MikroORM from '../../entities/room/mikro-orm';
 import * as Participant$MikroORM from '../../entities/participant/mikro-orm';
@@ -49,8 +53,8 @@ import {
     RoomPubCh,
     RoomPubMsg,
     RoomSe,
-    StringPieceValueLog as StringPieceValueLog$MikroORM,
-    DicePieceValueLog as DicePieceValueLog$MikroORM,
+    StringPieceLog as StringPieceLog$MikroORM,
+    DicePieceLog as DicePieceLog$MikroORM,
 } from '../../entities/roomMessage/mikro-orm';
 import {
     ChangeParticipantNameArgs,
@@ -83,7 +87,7 @@ import {
     GetRoomMessagesFailureResultType,
     GetRoomMessagesResult,
     MakeMessageNotSecretResult,
-    PieceValueLog,
+    PieceLog,
     RoomMessageEvent,
     RoomMessages,
     RoomMessagesType,
@@ -114,8 +118,8 @@ import { analyze, Context } from '../../../messageAnalyzer/main';
 import Color from 'color';
 import { GetRoomMessagesFailureType } from '../../../enums/GetRoomMessagesFailureType';
 import {
-    DicePieceValueLog as DicePieceValueLogNameSpace,
-    StringPieceValueLog as StringPieceValueLogNameSpace,
+    DicePieceLog as DicePieceLogNameSpace,
+    StringPieceLog as StringPieceLogNameSpace,
 } from '../../entities/roomMessage/global';
 import { GetRoomLogFailureType } from '../../../enums/GetRoomLogFailureType';
 import { writeSystemMessage } from '../utils/roomMessage';
@@ -153,6 +157,7 @@ import {
     $free,
     $system,
     MaxLength100String,
+    isCharacterOwner,
 } from '@flocon-trpg/core';
 import {
     ApplyError,
@@ -167,6 +172,9 @@ import { RateLimitMiddleware } from '../../middlewares/RateLimitMiddleware';
 import { convertToMaxLength100String } from '../../../utils/convertToMaxLength100String';
 import { GetRoomAsListItemResult } from '../../results/GetRoomAsListItemResult';
 import { ResetRoomMessagesFailureType } from '../../../enums/ResetRoomMessagesFailureType';
+import { hash } from 'bcrypt';
+
+const bcryptSaltRounds = 10;
 
 const find = <T>(source: Record<string, T | undefined>, key: string): T | undefined => source[key];
 
@@ -281,13 +289,10 @@ const operateParticipantAndFlush = async ({
                 type: replace,
                 replace: {
                     newValue: {
-                        $v: 1,
-                        $r: 2,
+                        $v: 2,
+                        $r: 1,
                         name: create.name,
                         role: create.role,
-                        boards: {},
-                        characters: {},
-                        imagePieceValues: {},
                     },
                 },
             };
@@ -297,8 +302,8 @@ const operateParticipantAndFlush = async ({
             participantOperation = {
                 type: 'update',
                 update: {
-                    $v: 1,
-                    $r: 2,
+                    $v: 2,
+                    $r: 1,
                     role: update.role,
                     name: update.name,
                 },
@@ -314,8 +319,8 @@ const operateParticipantAndFlush = async ({
     }
 
     const roomUpOperation: UpOperation = {
-        $v: 1,
-        $r: 2,
+        $v: 2,
+        $r: 1,
         participants: {
             [myUserUid]: participantOperation,
         },
@@ -386,11 +391,12 @@ const joinRoomCore = async ({
         room: Room$MikroORM.Room;
         args: JoinRoomArgs;
         me: ParticipantState | undefined;
-    }) =>
+    }) => Promise<
         | ParticipantRole
-        | JoinRoomFailureType.WrongPhrase
+        | JoinRoomFailureType.WrongPassword
         | JoinRoomFailureType.AlreadyParticipant
-        | 'id';
+        | 'id'
+    >;
 }): Promise<{ result: typeof JoinRoomResult; payload: RoomEventPayload | undefined }> => {
     const queue = async (): Promise<{
         result: typeof JoinRoomResult;
@@ -413,7 +419,7 @@ const joinRoomCore = async ({
         }
         const { room, me } = findResult;
         const participantUserUids = findResult.participantIds();
-        const strategyResult = strategy({ me, room, args });
+        const strategyResult = await strategy({ me, room, args });
         switch (strategyResult) {
             case 'id': {
                 return {
@@ -423,10 +429,10 @@ const joinRoomCore = async ({
                     payload: undefined,
                 };
             }
-            case JoinRoomFailureType.WrongPhrase: {
+            case JoinRoomFailureType.WrongPassword: {
                 return {
                     result: {
-                        failureType: JoinRoomFailureType.WrongPhrase,
+                        failureType: JoinRoomFailureType.WrongPassword,
                     },
                     payload: undefined,
                 };
@@ -474,11 +480,12 @@ const promoteMeCore = async ({
     strategy: (params: {
         room: Room$MikroORM.Room;
         me: ParticipantState;
-    }) =>
+    }) => Promise<
         | ParticipantRole
-        | PromoteFailureType.WrongPhrase
+        | PromoteFailureType.WrongPassword
         | PromoteFailureType.NoNeedToPromote
-        | PromoteFailureType.NotParticipant;
+        | PromoteFailureType.NotParticipant
+    >;
 }): Promise<{ result: PromoteResult; payload: RoomEventPayload | undefined }> => {
     const queue = async (): Promise<{
         result: PromoteResult;
@@ -509,7 +516,7 @@ const promoteMeCore = async ({
                 payload: undefined,
             };
         }
-        const strategyResult = strategy({ me, room });
+        const strategyResult = await strategy({ me, room });
         switch (strategyResult) {
             case PromoteFailureType.NoNeedToPromote: {
                 return {
@@ -519,10 +526,10 @@ const promoteMeCore = async ({
                     payload: undefined,
                 };
             }
-            case PromoteFailureType.WrongPhrase: {
+            case PromoteFailureType.WrongPassword: {
                 return {
                     result: {
-                        failureType: PromoteFailureType.WrongPhrase,
+                        failureType: PromoteFailureType.WrongPassword,
                     },
                     payload: undefined,
                 };
@@ -651,12 +658,12 @@ const toCharacterValueForMessage = (
                       path: message.charaImagePath,
                       sourceType: message.charaImageSourceType,
                   },
-        tachieImage:
-            message.charaTachieImagePath == null || message.charaTachieImageSourceType == null
+        portraitImage:
+            message.charaPortraitImagePath == null || message.charaPortraitImageSourceType == null
                 ? undefined
                 : {
-                      path: message.charaTachieImagePath,
-                      sourceType: message.charaTachieImageSourceType,
+                      path: message.charaPortraitImagePath,
+                      sourceType: message.charaPortraitImageSourceType,
                   },
     };
 };
@@ -846,12 +853,12 @@ export class RoomResolver {
             privateMessages.push(graphQLValue);
         }
 
-        const pieceValueLogs: PieceValueLog[] = [];
-        for (const msg of await room.dicePieceValueLogs.loadItems()) {
-            pieceValueLogs.push(DicePieceValueLogNameSpace.MikroORM.ToGraphQL.state(msg));
+        const pieceLogs: PieceLog[] = [];
+        for (const msg of await room.dicePieceLogs.loadItems()) {
+            pieceLogs.push(DicePieceLogNameSpace.MikroORM.ToGraphQL.state(msg));
         }
-        for (const msg of await room.numberPieceValueLogs.loadItems()) {
-            pieceValueLogs.push(StringPieceValueLogNameSpace.MikroORM.ToGraphQL.state(msg));
+        for (const msg of await room.stringPieceLogs.loadItems()) {
+            pieceLogs.push(StringPieceLogNameSpace.MikroORM.ToGraphQL.state(msg));
         }
 
         const soundEffects: RoomSoundEffect[] = [];
@@ -874,7 +881,7 @@ export class RoomResolver {
             __tstype: RoomMessagesType,
             publicMessages,
             privateMessages,
-            pieceValueLogs,
+            pieceLogs: pieceLogs,
             publicChannels,
             soundEffects,
         };
@@ -1069,18 +1076,19 @@ export class RoomResolver {
                 name: input.roomName,
                 createdBy: authorizedUser.userUid,
                 value: {
-                    $v: 1,
-                    $r: 2,
-                    participants: {
-                        [authorizedUser.userUid]: {
-                            $v: 1,
-                            $r: 2,
-                            boards: {},
-                            characters: {},
-                            imagePieceValues: {},
-                        },
-                    },
-                    activeBoardKey: null,
+                    $v: 2,
+                    $r: 1,
+                    activeBoardId: undefined,
+                    characterTag1Name: 'NPC',
+                    characterTag2Name: undefined,
+                    characterTag3Name: undefined,
+                    characterTag4Name: undefined,
+                    characterTag5Name: undefined,
+                    characterTag6Name: undefined,
+                    characterTag7Name: undefined,
+                    characterTag8Name: undefined,
+                    characterTag9Name: undefined,
+                    characterTag10Name: undefined,
                     publicChannel1Name: 'メイン',
                     publicChannel2Name: 'メイン2',
                     publicChannel3Name: 'メイン3',
@@ -1093,6 +1101,8 @@ export class RoomResolver {
                     publicChannel10Name: 'メイン10',
                     bgms: {},
                     boolParamNames: {},
+                    boards: {},
+                    characters: {},
                     numParamNames: {},
                     strParamNames: {},
                     memos: {},
@@ -1107,8 +1117,15 @@ export class RoomResolver {
             authorizedUser.participants.add(newParticipant);
 
             // このRoomのroomOperatedを購読しているユーザーはいないので、roomOperatedは実行する必要がない。
-            newRoom.joinAsPlayerPhrase = input.joinAsPlayerPhrase;
-            newRoom.joinAsSpectatorPhrase = input.joinAsSpectatorPhrase;
+            if (input.playerPassword != null) {
+                newRoom.playerPasswordHash = await hash(input.playerPassword, bcryptSaltRounds);
+            }
+            if (input.spectatorPassword != null) {
+                newRoom.spectatorPasswordHash = await hash(
+                    input.spectatorPassword,
+                    bcryptSaltRounds
+                );
+            }
             const revision = newRoom.revision;
             em.persist(newRoom);
 
@@ -1199,7 +1216,7 @@ export class RoomResolver {
         const { result, payload } = await joinRoomCore({
             args,
             context,
-            strategy: ({ me, room }) => {
+            strategy: async ({ me, room }) => {
                 if (me != null) {
                     switch (me.role) {
                         case undefined:
@@ -1208,8 +1225,8 @@ export class RoomResolver {
                             return JoinRoomFailureType.AlreadyParticipant;
                     }
                 }
-                if (room.joinAsPlayerPhrase != null && room.joinAsPlayerPhrase !== args.phrase) {
-                    return JoinRoomFailureType.WrongPhrase;
+                if (!(await bcryptCompareNullable(args.password, room.playerPasswordHash))) {
+                    return JoinRoomFailureType.WrongPassword;
                 }
                 return Player;
             },
@@ -1231,7 +1248,7 @@ export class RoomResolver {
         const { result, payload } = await joinRoomCore({
             args,
             context,
-            strategy: ({ me, room }) => {
+            strategy: async ({ me, room }) => {
                 if (me != null) {
                     switch (me.role) {
                         case undefined:
@@ -1240,11 +1257,8 @@ export class RoomResolver {
                             return JoinRoomFailureType.AlreadyParticipant;
                     }
                 }
-                if (
-                    room.joinAsSpectatorPhrase != null &&
-                    room.joinAsSpectatorPhrase !== args.phrase
-                ) {
-                    return JoinRoomFailureType.WrongPhrase;
+                if (!(await bcryptCompareNullable(args.password, room.spectatorPasswordHash))) {
+                    return JoinRoomFailureType.WrongPassword;
                 }
                 return Spectator;
             },
@@ -1266,17 +1280,16 @@ export class RoomResolver {
         const { result, payload } = await promoteMeCore({
             ...args,
             context,
-            strategy: ({ me, room }) => {
+            strategy: async ({ me, room }) => {
                 switch (me.role) {
                     case Master:
                     case Player:
                         return PromoteFailureType.NoNeedToPromote;
                     case Spectator: {
                         if (
-                            room.joinAsPlayerPhrase != null &&
-                            room.joinAsPlayerPhrase !== args.phrase
+                            !(await bcryptCompareNullable(args.password, room.playerPasswordHash))
                         ) {
-                            return PromoteFailureType.WrongPhrase;
+                            return PromoteFailureType.WrongPassword;
                         }
                         return Player;
                     }
@@ -1558,11 +1571,9 @@ export class RoomResolver {
             });
 
             const logs = createLogs({ prevState: roomState, nextState: nextRoomState });
-            const dicePieceLogEntities: DicePieceValueLog$MikroORM[] = [];
-            logs?.dicePieceValueLogs.forEach(log => {
-                const entity = new DicePieceValueLog$MikroORM({
-                    characterCreatedBy: log.characterKey.createdBy,
-                    characterId: log.characterKey.id,
+            const dicePieceLogEntities: DicePieceLog$MikroORM[] = [];
+            logs?.dicePieceLogs.forEach(log => {
+                const entity = new DicePieceLog$MikroORM({
                     stateId: log.stateId,
                     room,
                     value: log.value,
@@ -1570,11 +1581,9 @@ export class RoomResolver {
                 dicePieceLogEntities.push(entity);
                 em.persist(entity);
             });
-            const stringPieceLogEntities: StringPieceValueLog$MikroORM[] = [];
-            logs?.stringPieceValueLogs.forEach(log => {
-                const entity = new StringPieceValueLog$MikroORM({
-                    characterCreatedBy: log.characterKey.createdBy,
-                    characterId: log.characterKey.id,
+            const stringPieceLogEntities: StringPieceLog$MikroORM[] = [];
+            logs?.stringPieceLogs.forEach(log => {
+                const entity = new StringPieceLog$MikroORM({
                     stateId: log.stateId,
                     room,
                     value: log.value,
@@ -1617,7 +1626,7 @@ export class RoomResolver {
                                 roomId: room.id,
                                 createdBy: undefined,
                                 visibleTo: undefined,
-                                value: DicePieceValueLogNameSpace.MikroORM.ToGraphQL.state(log),
+                                value: DicePieceLogNameSpace.MikroORM.ToGraphQL.state(log),
                             } as const)
                     ),
                     ...stringPieceLogEntities.map(
@@ -1627,7 +1636,7 @@ export class RoomResolver {
                                 roomId: room.id,
                                 createdBy: undefined,
                                 visibleTo: undefined,
-                                value: StringPieceValueLogNameSpace.MikroORM.ToGraphQL.state(log),
+                                value: StringPieceLogNameSpace.MikroORM.ToGraphQL.state(log),
                             } as const)
                     ),
                 ],
@@ -1716,11 +1725,15 @@ export class RoomResolver {
             }
 
             let chara: CharacterState | undefined = undefined;
-            if (args.characterStateId != null) {
-                chara =
-                    roomState.participants[authorizedUser.userUid]?.characters?.[
-                        args.characterStateId
-                    ];
+            if (args.characterId != null) {
+                if (
+                    isCharacterOwner({
+                        requestedBy: { type: client, userUid: authorizedUser.userUid },
+                        characterId: args.characterId,
+                        currentRoomState: roomState,
+                    })
+                )
+                    chara = roomState.characters[args.characterId];
             }
             const entityResult = await analyzeTextAndSetToEntity({
                 type: 'RoomPubMsg',
@@ -1749,16 +1762,16 @@ export class RoomResolver {
             entity.customName = args.customName;
 
             if (chara != null) {
-                entity.charaStateId = args.characterStateId;
+                entity.charaStateId = args.characterId;
                 entity.charaName = chara.name;
                 entity.charaIsPrivate = chara.isPrivate;
                 entity.charaImagePath = chara.image?.path;
                 entity.charaImageSourceType = FileSourceTypeModule.ofNullishString(
                     chara.image?.sourceType
                 );
-                entity.charaTachieImagePath = chara.tachieImage?.path;
-                entity.charaTachieImageSourceType = FileSourceTypeModule.ofNullishString(
-                    chara.tachieImage?.sourceType
+                entity.charaPortraitImagePath = chara.portraitImage?.path;
+                entity.charaPortraitImageSourceType = FileSourceTypeModule.ofNullishString(
+                    chara.portraitImage?.sourceType
                 );
             }
 
@@ -1840,11 +1853,15 @@ export class RoomResolver {
             await authorizedUser.visibleRoomPrvMsgs.init({ where: { room: { id: room.id } } });
 
             let chara: CharacterState | undefined = undefined;
-            if (args.characterStateId != null) {
-                chara =
-                    roomState.participants[authorizedUser.userUid]?.characters?.[
-                        args.characterStateId
-                    ];
+            if (args.characterId != null) {
+                if (
+                    isCharacterOwner({
+                        requestedBy: { type: client, userUid: authorizedUser.userUid },
+                        characterId: args.characterId,
+                        currentRoomState: roomState,
+                    })
+                )
+                    chara = roomState.characters[args.characterId];
             }
             const entityResult = await analyzeTextAndSetToEntity({
                 type: 'RoomPrvMsg',
@@ -1881,16 +1898,16 @@ export class RoomResolver {
             entity.customName = args.customName;
 
             if (chara != null) {
-                entity.charaStateId = args.characterStateId;
+                entity.charaStateId = args.characterId;
                 entity.charaName = chara.name;
                 entity.charaIsPrivate = chara.isPrivate;
                 entity.charaImagePath = chara.image?.path;
                 entity.charaImageSourceType = FileSourceTypeModule.ofNullishString(
-                    chara.tachieImage?.sourceType
+                    chara.portraitImage?.sourceType
                 );
-                entity.charaTachieImagePath = chara.tachieImage?.path;
-                entity.charaTachieImageSourceType = FileSourceTypeModule.ofNullishString(
-                    chara.tachieImage?.sourceType
+                entity.charaPortraitImagePath = chara.portraitImage?.path;
+                entity.charaPortraitImageSourceType = FileSourceTypeModule.ofNullishString(
+                    chara.portraitImage?.sourceType
                 );
             }
 
@@ -2549,13 +2566,13 @@ export class RoomResolver {
             room.roomPrvMsgs.getItems().forEach(x => em.remove(x));
             room.roomPrvMsgs.removeAll();
 
-            await room.dicePieceValueLogs.init();
-            room.dicePieceValueLogs.getItems().forEach(x => em.remove(x));
-            room.dicePieceValueLogs.removeAll();
+            await room.dicePieceLogs.init();
+            room.dicePieceLogs.getItems().forEach(x => em.remove(x));
+            room.dicePieceLogs.removeAll();
 
-            await room.numberPieceValueLogs.init();
-            room.numberPieceValueLogs.getItems().forEach(x => em.remove(x));
-            room.numberPieceValueLogs.removeAll();
+            await room.stringPieceLogs.init();
+            room.stringPieceLogs.getItems().forEach(x => em.remove(x));
+            room.stringPieceLogs.removeAll();
 
             em.persist(room);
             await em.flush();

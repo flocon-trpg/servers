@@ -1,41 +1,16 @@
 import React from 'react';
-import { CompositeKey, compositeKeyEquals, dualKeyRecordToDualKeyMap } from '@flocon-trpg/utils';
-import { PieceState } from '@flocon-trpg/core';
-import { StringPieceValueElement, useStringPieceValues } from './useStringPieceValues';
-import { useBooleanOrCompositeKeyMemo } from '../useBooleanOrCompositeKeyMemo';
+import { recordToMap } from '@flocon-trpg/utils';
+import { useAtomSelector } from '../../atoms/useAtomSelector';
+import { roomAtom } from '../../atoms/room/roomAtom';
 
-export type StringPieceElement = {
-    value: StringPieceValueElement;
-    pieceBoardKey: CompositeKey;
-    piece: PieceState;
-};
-
-export const useStringPieces = (
-    boardKey: CompositeKey | boolean
-): ReadonlyArray<StringPieceElement> | undefined => {
-    const boardKeyMemo = useBooleanOrCompositeKeyMemo(boardKey);
-    const numberPieceValues = useStringPieceValues();
+export const useStringPieces = (boardId: string | undefined) => {
+    const stringPieces = useAtomSelector(
+        roomAtom,
+        state =>
+            boardId == null ? undefined : state.roomState?.state?.boards?.[boardId]?.stringPieces,
+        [boardId]
+    );
     return React.useMemo(() => {
-        if (numberPieceValues == null) {
-            return undefined;
-        }
-        return numberPieceValues.flatMap(element => {
-            return dualKeyRecordToDualKeyMap<PieceState>(element.value.pieces)
-                .toArray()
-                .filter(([, piece]) => {
-                    if (boardKeyMemo === true || boardKeyMemo === false) {
-                        return boardKeyMemo;
-                    }
-                    return compositeKeyEquals(boardKeyMemo, piece.boardKey);
-                })
-                .map(
-                    ([pieceKey, piece]) =>
-                        ({
-                            value: element,
-                            pieceBoardKey: { createdBy: pieceKey.first, id: pieceKey.second },
-                            piece,
-                        } as const)
-                );
-        });
-    }, [numberPieceValues, boardKeyMemo]);
+        return stringPieces == null ? undefined : recordToMap(stringPieces);
+    }, [stringPieces]);
 };

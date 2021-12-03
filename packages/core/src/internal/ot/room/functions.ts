@@ -1,7 +1,12 @@
 import * as Bgm from './bgm/functions';
 import * as BgmTypes from './bgm/types';
+import * as Board from './board/functions';
+import * as BoardTypes from './board/types';
+import * as Character from './character/functions';
+import * as CharacterTypes from './character/types';
 import * as Memo from './memo/functions';
 import * as MemoTypes from './memo/types';
+import * as NullableTextOperation from '../util/nullableTextOperation';
 import * as ParamNames from './paramName/functions';
 import * as ParamNamesTypes from './paramName/types';
 import * as Participant from './participant/functions';
@@ -12,12 +17,10 @@ import * as ReplaceOperation from '../util/replaceOperation';
 import * as TextOperation from '../util/textOperation';
 import {
     Apply,
-    client,
     ClientTransform,
     Compose,
     Diff,
     DownError,
-    RequestedBy,
     Restore,
     ScalarError,
     ServerTransform,
@@ -29,6 +32,17 @@ import { Result } from '@kizahasi/result';
 import { chooseRecord } from '@flocon-trpg/utils';
 import { isStrIndex20, isStrIndex5 } from '../../indexes';
 import { DownOperation, State, TwoWayOperation, UpOperation } from './types';
+import {
+    client,
+    RequestedBy,
+    isBoardVisible,
+    isOwner,
+    anyValue,
+    none,
+    isBoardOwner,
+} from '../util/requestedBy';
+
+const oneToTenArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 
 export const toClientState =
     (requestedBy: RequestedBy) =>
@@ -45,6 +59,33 @@ export const toClientState =
                 isPrivate: () => false,
                 toClientState: ({ state }) => ParamNames.toClientState(state),
             }),
+            boards: RecordOperation.toClientState({
+                serverState: source.boards,
+                isPrivate: (_, boardId) =>
+                    !isBoardVisible({
+                        boardId,
+                        requestedBy,
+                        currentRoomState: source,
+                    }),
+                toClientState: ({ state }) => Board.toClientState(requestedBy, source)(state),
+            }),
+            characters: RecordOperation.toClientState<CharacterTypes.State, CharacterTypes.State>({
+                serverState: source.characters,
+                isPrivate: state =>
+                    !isOwner({
+                        requestedBy,
+                        ownerParticipantId: state.ownerParticipantId ?? anyValue,
+                    }) && state.isPrivate,
+                toClientState: ({ state }) =>
+                    Character.toClientState(
+                        isOwner({
+                            requestedBy,
+                            ownerParticipantId: state.ownerParticipantId ?? anyValue,
+                        }),
+                        requestedBy,
+                        source
+                    )(state),
+            }),
             memos: RecordOperation.toClientState({
                 serverState: source.memos,
                 isPrivate: () => false,
@@ -58,12 +99,7 @@ export const toClientState =
             participants: RecordOperation.toClientState({
                 serverState: source.participants,
                 isPrivate: () => false,
-                toClientState: ({ state, key }) =>
-                    Participant.toClientState(
-                        requestedBy,
-                        key,
-                        source.activeBoardKey ?? null
-                    )(state),
+                toClientState: ({ state }) => Participant.toClientState(state),
             }),
             strParamNames: RecordOperation.toClientState({
                 serverState: source.strParamNames,
@@ -96,6 +132,66 @@ export const toDownOperation = (source: TwoWayOperation): DownOperation => {
                           mapOperation: ParamNames.toDownOperation,
                       })
                   ),
+        boards:
+            source.boards == null
+                ? undefined
+                : chooseRecord(source.boards, operation =>
+                      mapRecordOperationElement({
+                          source: operation,
+                          mapReplace: x => x,
+                          mapOperation: Board.toDownOperation,
+                      })
+                  ),
+        characters:
+            source.characters == null
+                ? undefined
+                : chooseRecord(source.characters, operation =>
+                      mapRecordOperationElement({
+                          source: operation,
+                          mapReplace: x => x,
+                          mapOperation: Character.toDownOperation,
+                      })
+                  ),
+        characterTag1Name:
+            source.characterTag1Name == null
+                ? undefined
+                : NullableTextOperation.toDownOperation(source.characterTag1Name),
+        characterTag2Name:
+            source.characterTag2Name == null
+                ? undefined
+                : NullableTextOperation.toDownOperation(source.characterTag2Name),
+        characterTag3Name:
+            source.characterTag3Name == null
+                ? undefined
+                : NullableTextOperation.toDownOperation(source.characterTag3Name),
+        characterTag4Name:
+            source.characterTag4Name == null
+                ? undefined
+                : NullableTextOperation.toDownOperation(source.characterTag4Name),
+        characterTag5Name:
+            source.characterTag5Name == null
+                ? undefined
+                : NullableTextOperation.toDownOperation(source.characterTag5Name),
+        characterTag6Name:
+            source.characterTag6Name == null
+                ? undefined
+                : NullableTextOperation.toDownOperation(source.characterTag6Name),
+        characterTag7Name:
+            source.characterTag7Name == null
+                ? undefined
+                : NullableTextOperation.toDownOperation(source.characterTag7Name),
+        characterTag8Name:
+            source.characterTag8Name == null
+                ? undefined
+                : NullableTextOperation.toDownOperation(source.characterTag8Name),
+        characterTag9Name:
+            source.characterTag9Name == null
+                ? undefined
+                : NullableTextOperation.toDownOperation(source.characterTag9Name),
+        characterTag10Name:
+            source.characterTag10Name == null
+                ? undefined
+                : NullableTextOperation.toDownOperation(source.characterTag10Name),
         memos:
             source.memos == null
                 ? undefined
@@ -203,6 +299,66 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
                           mapOperation: ParamNames.toUpOperation,
                       })
                   ),
+        boards:
+            source.boards == null
+                ? undefined
+                : chooseRecord(source.boards, operation =>
+                      mapRecordOperationElement({
+                          source: operation,
+                          mapReplace: x => x,
+                          mapOperation: Board.toUpOperation,
+                      })
+                  ),
+        characters:
+            source.characters == null
+                ? undefined
+                : chooseRecord(source.characters, operation =>
+                      mapRecordOperationElement({
+                          source: operation,
+                          mapReplace: x => x,
+                          mapOperation: Character.toUpOperation,
+                      })
+                  ),
+        characterTag1Name:
+            source.characterTag1Name == null
+                ? undefined
+                : NullableTextOperation.toUpOperation(source.characterTag1Name),
+        characterTag2Name:
+            source.characterTag2Name == null
+                ? undefined
+                : NullableTextOperation.toUpOperation(source.characterTag2Name),
+        characterTag3Name:
+            source.characterTag3Name == null
+                ? undefined
+                : NullableTextOperation.toUpOperation(source.characterTag3Name),
+        characterTag4Name:
+            source.characterTag4Name == null
+                ? undefined
+                : NullableTextOperation.toUpOperation(source.characterTag4Name),
+        characterTag5Name:
+            source.characterTag5Name == null
+                ? undefined
+                : NullableTextOperation.toUpOperation(source.characterTag5Name),
+        characterTag6Name:
+            source.characterTag6Name == null
+                ? undefined
+                : NullableTextOperation.toUpOperation(source.characterTag6Name),
+        characterTag7Name:
+            source.characterTag7Name == null
+                ? undefined
+                : NullableTextOperation.toUpOperation(source.characterTag7Name),
+        characterTag8Name:
+            source.characterTag8Name == null
+                ? undefined
+                : NullableTextOperation.toUpOperation(source.characterTag8Name),
+        characterTag9Name:
+            source.characterTag9Name == null
+                ? undefined
+                : NullableTextOperation.toUpOperation(source.characterTag9Name),
+        characterTag10Name:
+            source.characterTag10Name == null
+                ? undefined
+                : NullableTextOperation.toUpOperation(source.characterTag10Name),
         memos:
             source.memos == null
                 ? undefined
@@ -290,15 +446,11 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
 export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     const result: State = { ...state };
 
-    if (operation.activeBoardKey != null) {
-        result.activeBoardKey = operation.activeBoardKey.newValue;
+    if (operation.activeBoardId != null) {
+        result.activeBoardId = operation.activeBoardId.newValue;
     }
 
-    const bgms = RecordOperation.apply<
-        BgmTypes.State,
-        BgmTypes.UpOperation | BgmTypes.TwoWayOperation,
-        ScalarError
-    >({
+    const bgms = RecordOperation.apply<BgmTypes.State, BgmTypes.UpOperation, ScalarError>({
         prevState: state.bgms,
         operation: operation.bgms,
         innerApply: ({ prevState, operation }) => {
@@ -312,7 +464,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
 
     const boolParamNames = RecordOperation.apply<
         ParamNamesTypes.State,
-        ParamNamesTypes.UpOperation | ParamNamesTypes.TwoWayOperation,
+        ParamNamesTypes.UpOperation,
         ScalarError
     >({
         prevState: state.boolParamNames,
@@ -326,6 +478,49 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     }
     result.boolParamNames = boolParamNames.value;
 
+    const boards = RecordOperation.apply<BoardTypes.State, BoardTypes.UpOperation, ScalarError>({
+        prevState: state.boards,
+        operation: operation.boards,
+        innerApply: ({ prevState, operation: upOperation }) => {
+            return Board.apply({ state: prevState, operation: upOperation });
+        },
+    });
+    if (boards.isError) {
+        return boards;
+    }
+    result.boards = boards.value;
+
+    const characters = RecordOperation.apply<
+        CharacterTypes.State,
+        CharacterTypes.UpOperation,
+        ScalarError
+    >({
+        prevState: state.characters,
+        operation: operation.characters,
+        innerApply: ({ prevState, operation: upOperation }) => {
+            return Character.apply({
+                state: prevState,
+                operation: upOperation,
+            });
+        },
+    });
+    if (characters.isError) {
+        return characters;
+    }
+    result.characters = characters.value;
+
+    for (const i of oneToTenArray) {
+        const key = `characterTag${i}Name` as const;
+        const operationElement = operation[key];
+        if (operationElement != null) {
+            const applied = NullableTextOperation.apply(state[key], operationElement);
+            if (applied.isError) {
+                return applied;
+            }
+            result[key] = applied.value;
+        }
+    }
+
     if (operation.name != null) {
         const applied = TextOperation.apply(state.name, operation.name);
         if (applied.isError) {
@@ -336,7 +531,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
 
     const numParamNames = RecordOperation.apply<
         ParamNamesTypes.State,
-        ParamNamesTypes.UpOperation | ParamNamesTypes.TwoWayOperation,
+        ParamNamesTypes.UpOperation,
         ScalarError
     >({
         prevState: state.numParamNames,
@@ -350,11 +545,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     }
     result.numParamNames = numParamNames.value;
 
-    const memo = RecordOperation.apply<
-        MemoTypes.State,
-        MemoTypes.UpOperation | MemoTypes.TwoWayOperation,
-        ScalarError
-    >({
+    const memo = RecordOperation.apply<MemoTypes.State, MemoTypes.UpOperation, ScalarError>({
         prevState: state.memos,
         operation: operation.memos,
         innerApply: ({ prevState, operation }) => {
@@ -382,7 +573,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
     }
     result.participants = participants.value;
 
-    for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const) {
+    for (const i of oneToTenArray) {
         const key = `publicChannel${i}Name` as const;
         const operationElement = operation[key];
         if (operationElement != null) {
@@ -396,7 +587,7 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
 
     const strParamNames = RecordOperation.apply<
         ParamNamesTypes.State,
-        ParamNamesTypes.UpOperation | ParamNamesTypes.TwoWayOperation,
+        ParamNamesTypes.UpOperation,
         ScalarError
     >({
         prevState: state.strParamNames,
@@ -416,8 +607,8 @@ export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
 export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
     const result: State = { ...state };
 
-    if (operation.activeBoardKey != null) {
-        result.activeBoardKey = operation.activeBoardKey.oldValue;
+    if (operation.activeBoardId != null) {
+        result.activeBoardId = operation.activeBoardId.oldValue;
     }
 
     const bgms = RecordOperation.applyBack<BgmTypes.State, BgmTypes.DownOperation, ScalarError>({
@@ -447,6 +638,50 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
         return boolParamNames;
     }
     result.boolParamNames = boolParamNames.value;
+
+    const boards = RecordOperation.applyBack<
+        BoardTypes.State,
+        BoardTypes.DownOperation,
+        ScalarError
+    >({
+        nextState: state.boards,
+        operation: operation.boards,
+        innerApplyBack: ({ state, operation }) => {
+            return Board.applyBack({ state, operation });
+        },
+    });
+    if (boards.isError) {
+        return boards;
+    }
+    result.boards = boards.value;
+
+    const characters = RecordOperation.applyBack<
+        CharacterTypes.State,
+        CharacterTypes.DownOperation,
+        ScalarError
+    >({
+        nextState: state.characters,
+        operation: operation.characters,
+        innerApplyBack: ({ state, operation }) => {
+            return Character.applyBack({ state, operation });
+        },
+    });
+    if (characters.isError) {
+        return characters;
+    }
+    result.characters = characters.value;
+
+    for (const i of oneToTenArray) {
+        const key = `characterTag${i}Name` as const;
+        const operationElement = operation[key];
+        if (operationElement != null) {
+            const applied = NullableTextOperation.applyBack(state[key], operationElement);
+            if (applied.isError) {
+                return applied;
+            }
+            result[key] = applied.value;
+        }
+    }
 
     if (operation.name != null) {
         const applied = TextOperation.applyBack(state.name, operation.name);
@@ -500,7 +735,7 @@ export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => 
     }
     result.participants = participants.value;
 
-    for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const) {
+    for (const i of oneToTenArray) {
         const key = `publicChannel${i}Name` as const;
         const operationElement = operation[key];
         if (operationElement != null) {
@@ -552,6 +787,34 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
         return boolParamNames;
     }
 
+    const boards = RecordOperation.composeDownOperation<
+        BoardTypes.State,
+        BoardTypes.DownOperation,
+        DownError
+    >({
+        first: first.boards,
+        second: second.boards,
+        innerApplyBack: params => Board.applyBack(params),
+        innerCompose: params => Board.composeDownOperation(params),
+    });
+    if (boards.isError) {
+        return boards;
+    }
+
+    const characters = RecordOperation.composeDownOperation<
+        CharacterTypes.State,
+        CharacterTypes.DownOperation,
+        DownError
+    >({
+        first: first.characters,
+        second: second.characters,
+        innerApplyBack: params => Character.applyBack(params),
+        innerCompose: params => Character.composeDownOperation(params),
+    });
+    if (characters.isError) {
+        return characters;
+    }
+
     const memo = RecordOperation.composeDownOperation({
         first: first.memos,
         second: second.memos,
@@ -598,22 +861,33 @@ export const composeDownOperation: Compose<DownOperation, DownError> = ({ first,
     }
 
     const valueProps: DownOperation = {
-        $v: 1,
-        $r: 2,
-        activeBoardKey: ReplaceOperation.composeDownOperation(
-            first.activeBoardKey,
-            second.activeBoardKey
+        $v: 2,
+        $r: 1,
+        activeBoardId: ReplaceOperation.composeDownOperation(
+            first.activeBoardId,
+            second.activeBoardId
         ),
         name: name.value,
         bgms: bgms.value,
         boolParamNames: boolParamNames.value,
+        boards: boards.value,
+        characters: characters.value,
         memos: memo.value,
         numParamNames: numParamNames.value,
         strParamNames: strParamNames.value,
         participants: participants.value,
     };
 
-    for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const) {
+    for (const i of oneToTenArray) {
+        const key = `characterTag${i}Name` as const;
+        const composed = NullableTextOperation.composeDownOperation(first[key], second[key]);
+        if (composed.isError) {
+            return composed;
+        }
+        valueProps[key] = composed.value;
+    }
+
+    for (const i of oneToTenArray) {
         const key = `publicChannel${i}Name` as const;
         const composed = TextOperation.composeDownOperation(first[key], second[key]);
         if (composed.isError) {
@@ -650,6 +924,36 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     });
     if (boolParamNames.isError) {
         return boolParamNames;
+    }
+
+    const boards = RecordOperation.restore<
+        BoardTypes.State,
+        BoardTypes.DownOperation,
+        BoardTypes.TwoWayOperation,
+        ScalarError
+    >({
+        nextState: nextState.boards,
+        downOperation: downOperation.boards,
+        innerDiff: params => Board.diff(params),
+        innerRestore: params => Board.restore(params),
+    });
+    if (boards.isError) {
+        return boards;
+    }
+
+    const characters = RecordOperation.restore<
+        CharacterTypes.State,
+        CharacterTypes.DownOperation,
+        CharacterTypes.TwoWayOperation,
+        ScalarError
+    >({
+        nextState: nextState.characters,
+        downOperation: downOperation.characters,
+        innerDiff: params => Character.diff(params),
+        innerRestore: params => Character.restore(params),
+    });
+    if (characters.isError) {
+        return characters;
     }
 
     const memo = RecordOperation.restore({
@@ -695,28 +999,32 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
     const prevState: State = {
         ...nextState,
         bgms: bgms.value.prevState,
+        boards: boards.value.prevState,
         boolParamNames: boolParamNames.value.prevState,
+        characters: characters.value.prevState,
         memos: memo.value.prevState,
         numParamNames: numParamNames.value.prevState,
         strParamNames: strParamNames.value.prevState,
         participants: participants.value.prevState,
     };
     const twoWayOperation: TwoWayOperation = {
-        $v: 1,
-        $r: 2,
+        $v: 2,
+        $r: 1,
         bgms: bgms.value.twoWayOperation,
+        boards: boards.value.twoWayOperation,
         boolParamNames: boolParamNames.value.twoWayOperation,
+        characters: characters.value.twoWayOperation,
         memos: memo.value.twoWayOperation,
         numParamNames: numParamNames.value.twoWayOperation,
         strParamNames: strParamNames.value.twoWayOperation,
         participants: participants.value.twoWayOperation,
     };
 
-    if (downOperation.activeBoardKey !== undefined) {
-        prevState.activeBoardKey = downOperation.activeBoardKey.oldValue;
-        twoWayOperation.activeBoardKey = {
-            ...downOperation.activeBoardKey,
-            newValue: nextState.activeBoardKey,
+    if (downOperation.activeBoardId !== undefined) {
+        prevState.activeBoardId = downOperation.activeBoardId.oldValue;
+        twoWayOperation.activeBoardId = {
+            ...downOperation.activeBoardId,
+            newValue: nextState.activeBoardId,
         };
     }
 
@@ -732,7 +1040,23 @@ export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
         twoWayOperation.name = restored.value.twoWayOperation;
     }
 
-    for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const) {
+    for (const i of oneToTenArray) {
+        const key = `characterTag${i}Name` as const;
+        const downOperationValue = downOperation[key];
+        if (downOperationValue !== undefined) {
+            const restored = NullableTextOperation.restore({
+                nextState: nextState[key],
+                downOperation: downOperationValue,
+            });
+            if (restored.isError) {
+                return restored;
+            }
+            prevState[key] = restored.value.prevState;
+            twoWayOperation[key] = restored.value.twoWayOperation;
+        }
+    }
+
+    for (const i of oneToTenArray) {
         const key = `publicChannel${i}Name` as const;
         const downOperationValue = downOperation[key];
         if (downOperationValue !== undefined) {
@@ -757,12 +1081,22 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         nextState: nextState.bgms,
         innerDiff: params => Bgm.diff(params),
     });
+    const boards = RecordOperation.diff<BoardTypes.State, BoardTypes.TwoWayOperation>({
+        prevState: prevState.boards,
+        nextState: nextState.boards,
+        innerDiff: params => Board.diff(params),
+    });
     const boolParamNames = RecordOperation.diff({
         prevState: prevState.boolParamNames,
         nextState: nextState.boolParamNames,
         innerDiff: params => ParamNames.diff(params),
     });
-    const memo = RecordOperation.diff({
+    const characters = RecordOperation.diff<CharacterTypes.State, CharacterTypes.TwoWayOperation>({
+        prevState: prevState.characters,
+        nextState: nextState.characters,
+        innerDiff: params => Character.diff(params),
+    });
+    const memos = RecordOperation.diff({
         prevState: prevState.memos,
         nextState: nextState.memos,
         innerDiff: params => Memo.diff(params),
@@ -783,28 +1117,36 @@ export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => 
         innerDiff: params => Participant.diff(params),
     });
     const result: TwoWayOperation = {
-        $v: 1,
-        $r: 2,
+        $v: 2,
+        $r: 1,
         bgms,
+        boards,
         boolParamNames,
-        memos: memo,
+        characters,
+        memos,
         numParamNames,
-        strParamNames,
         participants,
+        strParamNames,
     };
-    if (
-        prevState.activeBoardKey?.createdBy !== nextState.activeBoardKey?.createdBy ||
-        prevState.activeBoardKey?.id !== nextState.activeBoardKey?.id
-    ) {
-        result.activeBoardKey = {
-            oldValue: prevState.activeBoardKey,
-            newValue: nextState.activeBoardKey,
+    if (prevState.activeBoardId !== nextState.activeBoardId) {
+        result.activeBoardId = {
+            oldValue: prevState.activeBoardId,
+            newValue: nextState.activeBoardId,
         };
     }
     if (prevState.name !== nextState.name) {
         result.name = TextOperation.diff({ prev: prevState.name, next: nextState.name });
     }
-    for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const) {
+    for (const i of oneToTenArray) {
+        const key = `characterTag${i}Name` as const;
+        if (prevState[key] !== nextState[key]) {
+            result[key] = NullableTextOperation.diff({
+                prev: prevState[key],
+                next: nextState[key],
+            });
+        }
+    }
+    for (const i of oneToTenArray) {
         const key = `publicChannel${i}Name` as const;
         if (prevState[key] !== nextState[key]) {
             result[key] = TextOperation.diff({ prev: prevState[key], next: nextState[key] });
@@ -826,8 +1168,6 @@ export const serverTransform =
                 return Result.ok(undefined);
             }
         }
-
-        const currentActiveBoardKey = currentState.activeBoardKey;
 
         const bgms = RecordOperation.serverTransform<
             BgmTypes.State,
@@ -881,6 +1221,100 @@ export const serverTransform =
         });
         if (boolParamNames.isError) {
             return boolParamNames;
+        }
+
+        const boards = RecordOperation.serverTransform<
+            BoardTypes.State,
+            BoardTypes.State,
+            BoardTypes.TwoWayOperation,
+            BoardTypes.UpOperation,
+            TwoWayError
+        >({
+            first: serverOperation?.boards,
+            second: clientOperation.boards,
+            prevState: prevState.boards,
+            nextState: currentState.boards,
+            innerTransform: ({ first, second, prevState, nextState }) =>
+                Board.serverTransform(
+                    requestedBy,
+                    currentState
+                )({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: {
+                cancelCreate: ({ newState }) =>
+                    !isOwner({
+                        requestedBy,
+                        ownerParticipantId: newState.ownerParticipantId ?? none,
+                    }),
+                cancelUpdate: ({ key }) => {
+                    return !isBoardVisible({
+                        boardId: key,
+                        currentRoomState: currentState,
+                        requestedBy,
+                    });
+                },
+                cancelRemove: ({ state }) =>
+                    !isOwner({
+                        requestedBy,
+                        ownerParticipantId: state.ownerParticipantId ?? anyValue,
+                    }),
+            },
+        });
+        if (boards.isError) {
+            return boards;
+        }
+
+        const characters = RecordOperation.serverTransform<
+            CharacterTypes.State,
+            CharacterTypes.State,
+            CharacterTypes.TwoWayOperation,
+            CharacterTypes.UpOperation,
+            TwoWayError
+        >({
+            first: serverOperation?.characters,
+            second: clientOperation.characters,
+            prevState: prevState.characters,
+            nextState: currentState.characters,
+            innerTransform: ({ first, second, prevState, nextState }) =>
+                Character.serverTransform(
+                    isOwner({
+                        requestedBy,
+                        ownerParticipantId: nextState.ownerParticipantId ?? anyValue,
+                    }),
+                    requestedBy,
+                    currentState
+                )({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: {
+                cancelCreate: ({ newState }) =>
+                    !isOwner({
+                        requestedBy,
+                        ownerParticipantId: newState.ownerParticipantId ?? none,
+                    }),
+                cancelUpdate: ({ nextState }) =>
+                    !isOwner({
+                        requestedBy,
+                        ownerParticipantId: nextState.ownerParticipantId ?? anyValue,
+                    }) && nextState.isPrivate,
+                cancelRemove: ({ state }) =>
+                    !isOwner({
+                        requestedBy,
+                        ownerParticipantId: state.ownerParticipantId ?? anyValue,
+                    }) && state.isPrivate,
+            },
+        });
+        if (characters.isError) {
+            return characters;
         }
 
         // TODO: ファイルサイズが巨大になりそうなときに拒否する機能
@@ -978,7 +1412,6 @@ export const serverTransform =
                 Participant.serverTransform({
                     requestedBy,
                     participantKey: key,
-                    activeBoardKey: currentActiveBoardKey ?? null,
                 })({
                     prevState,
                     currentState: nextState,
@@ -993,9 +1426,11 @@ export const serverTransform =
         }
 
         const twoWayOperation: TwoWayOperation = {
-            $v: 1,
-            $r: 2,
+            $v: 2,
+            $r: 1,
             bgms: bgms.value,
+            boards: boards.value,
+            characters: characters.value,
             boolParamNames: boolParamNames.value,
             memos: memos.value,
             numParamNames: numParamNames.value,
@@ -1003,19 +1438,20 @@ export const serverTransform =
             participants: participants.value,
         };
 
-        // activeBoardKeyには、自分が作成したBoardしか設定できない。ただし、nullishにするのは誰でもできる。
-        if (clientOperation.activeBoardKey != null) {
+        // activeBoardIdには、自分が作成したBoardしか設定できない。ただし、nullishにするのは誰でもできる。
+        if (clientOperation.activeBoardId != null) {
             if (
-                clientOperation.activeBoardKey.newValue == null ||
-                RequestedBy.isAuthorized({
+                clientOperation.activeBoardId.newValue == null ||
+                isBoardOwner({
                     requestedBy,
-                    userUid: clientOperation.activeBoardKey.newValue.createdBy,
-                })
+                    boardId: clientOperation.activeBoardId.newValue,
+                    currentRoomState: currentState,
+                }) === true
             ) {
-                twoWayOperation.activeBoardKey = ReplaceOperation.serverTransform({
-                    first: serverOperation?.activeBoardKey,
-                    second: clientOperation.activeBoardKey,
-                    prevState: prevState.activeBoardKey,
+                twoWayOperation.activeBoardId = ReplaceOperation.serverTransform({
+                    first: serverOperation?.activeBoardId,
+                    second: clientOperation.activeBoardId,
+                    prevState: prevState.activeBoardId,
                 });
             }
         }
@@ -1028,9 +1464,22 @@ export const serverTransform =
         if (name.isError) {
             return name;
         }
-        twoWayOperation.name = name.value.secondPrime;
+        twoWayOperation.name = name.value;
 
-        for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const) {
+        for (const i of oneToTenArray) {
+            const key = `characterTag${i}Name` as const;
+            const transformed = NullableTextOperation.serverTransform({
+                first: serverOperation?.[key],
+                second: clientOperation[key],
+                prevState: prevState[key],
+            });
+            if (transformed.isError) {
+                return transformed;
+            }
+            twoWayOperation[key] = transformed.value;
+        }
+
+        for (const i of oneToTenArray) {
             const key = `publicChannel${i}Name` as const;
             const transformed = TextOperation.serverTransform({
                 first: serverOperation?.[key],
@@ -1040,7 +1489,7 @@ export const serverTransform =
             if (transformed.isError) {
                 return transformed;
             }
-            twoWayOperation[key] = transformed.value.secondPrime;
+            twoWayOperation[key] = transformed.value;
         }
 
         if (isIdRecord(twoWayOperation)) {
@@ -1051,9 +1500,9 @@ export const serverTransform =
     };
 
 export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
-    const activeBoardKey = ReplaceOperation.clientTransform({
-        first: first.activeBoardKey,
-        second: second.activeBoardKey,
+    const activeBoardId = ReplaceOperation.clientTransform({
+        first: first.activeBoardId,
+        second: second.activeBoardId,
     });
 
     const bgms = RecordOperation.clientTransform<BgmTypes.State, BgmTypes.UpOperation, UpError>({
@@ -1090,6 +1539,46 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     });
     if (boolParamNames.isError) {
         return boolParamNames;
+    }
+
+    const boards = RecordOperation.clientTransform<
+        BoardTypes.State,
+        BoardTypes.UpOperation,
+        UpError
+    >({
+        first: first.boards,
+        second: second.boards,
+        innerTransform: params => Board.clientTransform(params),
+        innerDiff: params => {
+            const diff = Board.diff(params);
+            if (diff == null) {
+                return diff;
+            }
+            return Board.toUpOperation(diff);
+        },
+    });
+    if (boards.isError) {
+        return boards;
+    }
+
+    const characters = RecordOperation.clientTransform<
+        CharacterTypes.State,
+        CharacterTypes.UpOperation,
+        UpError
+    >({
+        first: first.characters,
+        second: second.characters,
+        innerTransform: params => Character.clientTransform(params),
+        innerDiff: params => {
+            const diff = Character.diff(params);
+            if (diff == null) {
+                return diff;
+            }
+            return Character.toUpOperation(diff);
+        },
+    });
+    if (characters.isError) {
+        return characters;
     }
 
     const memos = RecordOperation.clientTransform<MemoTypes.State, MemoTypes.UpOperation, UpError>({
@@ -1177,11 +1666,13 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     }
 
     const firstPrime: UpOperation = {
-        $v: 1,
-        $r: 2,
-        activeBoardKey: activeBoardKey.firstPrime,
+        $v: 2,
+        $r: 1,
+        activeBoardId: activeBoardId.firstPrime,
         bgms: bgms.value.firstPrime,
+        boards: boards.value.firstPrime,
         boolParamNames: boolParamNames.value.firstPrime,
+        characters: characters.value.firstPrime,
         memos: memos.value.firstPrime,
         numParamNames: numParamNames.value.firstPrime,
         strParamNames: strParamNames.value.firstPrime,
@@ -1190,11 +1681,13 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
     };
 
     const secondPrime: UpOperation = {
-        $v: 1,
-        $r: 2,
-        activeBoardKey: activeBoardKey.secondPrime,
+        $v: 2,
+        $r: 1,
+        activeBoardId: activeBoardId.secondPrime,
         bgms: bgms.value.secondPrime,
+        boards: boards.value.secondPrime,
         boolParamNames: boolParamNames.value.secondPrime,
+        characters: characters.value.secondPrime,
         memos: memos.value.secondPrime,
         numParamNames: numParamNames.value.secondPrime,
         strParamNames: strParamNames.value.secondPrime,
@@ -1202,7 +1695,20 @@ export const clientTransform: ClientTransform<UpOperation> = ({ first, second })
         name: name.value.secondPrime,
     };
 
-    for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const) {
+    for (const i of oneToTenArray) {
+        const key = `characterTag${i}Name` as const;
+        const operation = NullableTextOperation.clientTransform({
+            first: first[key],
+            second: second[key],
+        });
+        if (operation.isError) {
+            return operation;
+        }
+        firstPrime[key] = operation.value.firstPrime;
+        secondPrime[key] = operation.value.secondPrime;
+    }
+
+    for (const i of oneToTenArray) {
         const key = `publicChannel${i}Name` as const;
         const operation = TextOperation.clientTransform({
             first: first[key],

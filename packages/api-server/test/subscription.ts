@@ -73,20 +73,20 @@ export class TestRoomEventSubscription {
         return roomPrivateMessages[0];
     }
 
-    public toBeExactlyOnePieceValueLogEvent() {
+    public toBeExactlyOnePieceLogEvent() {
         expect(this.values).toHaveLength(1);
-        const pieceValueLogs = _(this.values)
+        const pieceLogs = _(this.values)
             .map(x => {
                 const roomMessageEvent = x.roomEvent?.roomMessageEvent;
-                if (roomMessageEvent?.__typename !== 'PieceValueLog') {
+                if (roomMessageEvent?.__typename !== 'PieceLog') {
                     return undefined;
                 }
                 return roomMessageEvent;
             })
             .compact()
             .value();
-        expect(pieceValueLogs).toHaveLength(1);
-        return pieceValueLogs[0];
+        expect(pieceLogs).toHaveLength(1);
+        return pieceLogs[0];
     }
 }
 

@@ -29,7 +29,7 @@ import {
     soundEffect,
     useFilteredAndMapRoomMessages,
     Message,
-    pieceValueLog,
+    pieceLog,
 } from '../../hooks/useRoomMessages';
 import { PrivateChannelSet, PrivateChannelSets } from '../../utils/PrivateChannelSet';
 import { ChatInput } from '../../components/ChatInput/Main';
@@ -50,8 +50,7 @@ import { useWritingMessageStatus } from '../../hooks/useWritingMessageStatus';
 import { isDeleted, toText } from '../../utils/message';
 import { usePublicChannelNames } from '../../hooks/state/usePublicChannelNames';
 import { useParticipants } from '../../hooks/state/useParticipants';
-import { simpleId } from '@flocon-trpg/core';
-import { recordToArray, recordToMap } from '@flocon-trpg/utils';
+import { recordToMap } from '@flocon-trpg/utils';
 import { Color } from '../../utils/color';
 import * as Icons from '@ant-design/icons';
 import { InputModal } from '../../components/InputModal';
@@ -61,16 +60,18 @@ import classNames from 'classnames';
 import { getUserUid, MyAuthContext } from '../../contexts/MyAuthContext';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { useMutation } from '@apollo/client';
-import { TabConfig } from '../../atoms/roomConfig/types/tabConfig';
+import { MessageTabConfig } from '../../atoms/roomConfig/types/messageTabConfig';
 import { atom } from 'jotai';
 import { roomAtom, Notification } from '../../atoms/room/roomAtom';
 import { userConfigAtom } from '../../atoms/userConfig/userConfigAtom';
 import { UserConfigUtils } from '../../atoms/userConfig/utils';
 import { MessageFilter } from '../../atoms/roomConfig/types/messageFilter';
 import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
-import { TabConfigUtils } from '../../atoms/roomConfig/types/tabConfig/utils';
+import { MessageTabConfigUtils } from '../../atoms/roomConfig/types/messageTabConfig/utils';
 import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
 import { useAtomValue } from 'jotai/utils';
+import { MessageTabName } from '../../components/MessageTabName';
+import _ from 'lodash';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -89,9 +90,9 @@ const allRoomMessagesResultAtom = atom(get => get(roomAtom).allRoomMessagesResul
 
 type TabEditorDrawerProps = {
     // これがundefinedの場合、Drawerのvisibleがfalseとみなされる。
-    config?: TabConfig;
+    config?: MessageTabConfig;
 
-    onChange: (newValue: TabConfig) => void;
+    onChange: (newValue: MessageTabConfig) => void;
     onClose: () => void;
 };
 
@@ -124,7 +125,7 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
         return first.toStringSet();
     }, [config?.privateChannels]);
 
-    const onChange = (newValue: Partial<TabConfig>): void => {
+    const onChange = (newValue: Partial<MessageTabConfig>): void => {
         if (config == null) {
             return;
         }
@@ -393,7 +394,7 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (
                                         return;
                                     }
                                     operateAsStateWithImmer(state => {
-                                            state[key] = e.currentValue;
+                                        state[key] = e.currentValue;
                                     });
                                 }}
                             />
@@ -452,7 +453,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
     const createdAt =
         message.type === privateMessage ||
         message.type === publicMessage ||
-        message.type === pieceValueLog
+        message.type === pieceLog
             ? message.value.createdAt
             : (message.createdAt as number | undefined);
     let datetime: string | null = null;
@@ -624,7 +625,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
             </div>
             {message.type === privateMessage ||
             message.type === publicMessage ||
-            message.type === pieceValueLog ? (
+            message.type === pieceLog ? (
                 <RoomMessageNameSpace.Content
                     style={{
                         fontSize,
@@ -731,7 +732,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
                             message={
                                 message.type === publicMessage ||
                                 message.type === privateMessage ||
-                                message.type === pieceValueLog
+                                message.type === pieceLog
                                     ? message
                                     : message.value
                             }
@@ -778,10 +779,8 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
             <div style={{ padding: '0 4px' }}>
                 <JumpToBottomVirtuoso
                     items={messages}
-                    create={(index, data) => data}
-                    height={
-                        writingStatus == null ? contentHeight : contentHeight - writingStatusHeight
-                    }
+                    create={(_, data) => data}
+                    height={contentHeight - writingStatusHeight}
                 />
             </div>
             {writingStatus}
@@ -811,7 +810,7 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
         if (editingTabConfigKey == null) {
             return undefined;
         }
-        return tabs?.[editingTabConfigKey];
+        return tabs?.find(tab => tab.key === editingTabConfigKey);
     }, [tabs, editingTabConfigKey]);
 
     const [isChannelNamesEditorVisible, setIsChannelNamesEditorVisible] = React.useState(false);
@@ -850,11 +849,11 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
     const tabPanels =
         contentHeight <= 0
             ? null
-            : recordToArray(tabs).map(({ key: tabKey, value: tab }) => {
+            : tabs.map((tab, tabIndex) => {
                   return (
                       <Tabs.TabPane
-                          key={tabKey}
-                          tabKey={tabKey}
+                          key={tab.key}
+                          tabKey={tab.key}
                           closable={false}
                           style={{ backgroundColor: Color.chatBackgroundColor }}
                           tab={
@@ -866,7 +865,7 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                                   }}
                               >
                                   <div style={{ flex: '0 0 auto', maxWidth: 100 }}>
-                                      {TabConfigUtils.toTabName(tab)}
+                                      <MessageTabName tabConfig={tab} />
                                   </div>
                                   <div style={{ flex: 1 }} />
                                   <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>
@@ -876,7 +875,9 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                                               <Menu>
                                                   <Menu.Item
                                                       icon={<Icon.SettingOutlined />}
-                                                      onClick={() => setEditingTabConfigKey(tabKey)}
+                                                      onClick={() =>
+                                                          setEditingTabConfigKey(tab.key)
+                                                      }
                                                   >
                                                       編集
                                                   </Menu.Item>
@@ -897,8 +898,10 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                                                                       if (messagePanel == null) {
                                                                           return;
                                                                       }
-                                                                      messagePanel.tabs[tabKey] =
-                                                                          undefined;
+                                                                      messagePanel.tabs.splice(
+                                                                          tabIndex,
+                                                                          1
+                                                                      );
                                                                   });
                                                               },
                                                               okCancel: true,
@@ -960,7 +963,11 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                         if (messagePanel == null) {
                             return;
                         }
-                        messagePanel.tabs[editingTabConfigKey] = newValue;
+                        [...messagePanel.tabs].forEach((tab, i) => {
+                            if (tab.key === editingTabConfigKey) {
+                                messagePanel.tabs[i] = newValue;
+                            }
+                        });
                     });
                 }}
             />
@@ -1024,7 +1031,12 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                             if (messagePanel == null) {
                                 return;
                             }
-                            messagePanel.tabs[e] = undefined;
+                            const indexToSplice = messagePanel.tabs.findIndex(
+                                tab => tab.key === editingTabConfigKey
+                            );
+                            if (indexToSplice >= 0) {
+                                messagePanel.tabs.splice(indexToSplice, 1);
+                            }
                         });
                         return;
                     }
@@ -1036,7 +1048,7 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                         if (messagePanel == null) {
                             return;
                         }
-                        messagePanel.tabs[simpleId()] = TabConfigUtils.createEmpty({});
+                        messagePanel.tabs.push(MessageTabConfigUtils.createEmpty({}));
                     });
                 }}
             >

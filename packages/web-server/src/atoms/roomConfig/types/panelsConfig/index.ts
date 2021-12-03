@@ -18,7 +18,7 @@ import {
     defaultCharactersPanelConfig,
     deserializeCharactersPanelConfig,
     serializedCharactersPanelConfig,
-} from '../charactersPanel';
+} from '../charactersPanelConfig';
 import {
     ChatPalettePanelConfig,
     defaultChatPalettePanelsConfig,
@@ -44,11 +44,11 @@ import {
     deserializeMessagePanelConfig,
 } from '../messagePanelConfig';
 import {
-    defaultParticipantPanelConfig,
+    defaultParticipantsPanelConfig,
     deserializeParticipantsPanelConfig,
-    ParticipantPanelConfig,
-    serializedParticipantPanelConfig,
-} from '../participants';
+    ParticipantsPanelConfig,
+    serializedParticipantsPanelConfig,
+} from '../participantsPanelConfig';
 import {
     defaultPieceValuePanelConfig,
     deserializePieceValuePanelConfig,
@@ -65,7 +65,7 @@ export type PanelsConfig = {
     memoPanels: Record<string, MemoPanelConfig | undefined>;
     messagePanels: Record<string, MessagePanelConfig | undefined>;
     pieceValuePanel: PieceValuePanelConfig;
-    participantPanel: ParticipantPanelConfig;
+    participantPanel: ParticipantsPanelConfig;
 };
 
 export const serializedPanelsConfig = t.partial({
@@ -77,7 +77,7 @@ export const serializedPanelsConfig = t.partial({
     messagePanels: record(t.string, serializedMessagePanelConfig),
     memoPanels: record(t.string, serializedMemoPanelConfig),
     pieceValuePanel: serializedPieceValuePanelConfig,
-    participantPanel: serializedParticipantPanelConfig,
+    participantPanel: serializedParticipantsPanelConfig,
 });
 
 export type SerializedPanelsConfig = t.TypeOf<typeof serializedPanelsConfig>;
@@ -112,6 +112,6 @@ export const defaultPanelsConfig = (): PanelsConfig => {
         memoPanels: defaultMemoPanelsConfig(),
         messagePanels: defaultMessagePanelsConfig(),
         pieceValuePanel: defaultPieceValuePanelConfig(),
-        participantPanel: defaultParticipantPanelConfig(),
+        participantPanel: defaultParticipantsPanelConfig(),
     };
 };

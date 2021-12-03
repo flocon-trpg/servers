@@ -41,23 +41,23 @@ const EntryFormComponent: React.FC<EntryFormComponentProps> = (props: EntryFormC
     const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
     const [isFinishedSuccessfully, setIsFinishedSuccessfully] = React.useState<boolean>(false);
 
-    const phraseName = 'phrase';
+    const passwordName = 'password';
 
     return (
         <Form
-            name='entryPhrase'
+            name='entryPassword'
             onFinish={e => {
                 if (isSubmitting || isFinishedSuccessfully) {
                     return;
                 }
-                const phrase: string = e[phraseName];
+                const password: string = e[passwordName];
                 setIsSubmitting(true);
-                entryToServer({ variables: { phrase } }).then(r => {
+                entryToServer({ variables: { password } }).then(r => {
                     const resultType = r.data?.result.type;
                     if (resultType == null) {
                         return;
                     }
-                    if (resultType === EntryToServerResultType.WrongPhrase) {
+                    if (resultType === EntryToServerResultType.WrongPassword) {
                         setIsSubmitting(false);
                         return;
                     }
@@ -71,7 +71,7 @@ const EntryFormComponent: React.FC<EntryFormComponentProps> = (props: EntryFormC
                 });
             }}
         >
-            <Form.Item label='Phrase' name={phraseName}>
+            <Form.Item label='password' name={passwordName}>
                 <Input />
             </Form.Item>
 
@@ -84,8 +84,8 @@ const EntryFormComponent: React.FC<EntryFormComponentProps> = (props: EntryFormC
                     Submit
                 </Button>
                 {isSubmitting ? <Spin /> : null}
-                {entryToServerResult?.data?.result.type === EntryToServerResultType.WrongPhrase ? (
-                    <Alert message='wrong phrase' type='error' showIcon />
+                {entryToServerResult?.data?.result.type === EntryToServerResultType.WrongPassword? (
+                    <Alert message='wrong password' type='error' showIcon />
                 ) : null}
                 {entryToServerResult?.error == null ? null : (
                     <Alert message={entryToServerResult.error.message} type='error' showIcon />

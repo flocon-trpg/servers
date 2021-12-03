@@ -10,6 +10,7 @@ import { KonvaNodeEvents } from 'react-konva';
 export type PieceGroupProps = {
     isSelected: boolean;
     draggable: boolean;
+    resizable: boolean;
     listening: boolean;
     onDragEnd?: (resize: DragEndResult) => void;
     onClick?: () => void;
@@ -22,6 +23,7 @@ export type PieceGroupProps = {
 export const PieceGroup: React.FC<PropsWithChildren<PieceGroupProps>> = ({
     isSelected,
     draggable,
+    resizable,
     listening,
     onDragEnd: onDragEndProp,
     onClick,
@@ -85,7 +87,7 @@ export const PieceGroup: React.FC<PropsWithChildren<PieceGroupProps>> = ({
         e.target.y(y);
         if (onDragEndProp != null) {
             onDragEndProp({
-                newLocation: {
+                newPosition: {
                     x,
                     y,
                 },
@@ -142,7 +144,7 @@ export const PieceGroup: React.FC<PropsWithChildren<PieceGroupProps>> = ({
             }
 
             onDragEndProp({
-                newLocation: {
+                newPosition: {
                     x: node.x(),
                     y: node.y(),
                 },
@@ -164,6 +166,7 @@ export const PieceGroup: React.FC<PropsWithChildren<PieceGroupProps>> = ({
                 <ReactKonva.Transformer
                     ref={transformerRef}
                     rotateEnabled={false}
+                    resizeEnabled={resizable}
                     boundBoxFunc={(oldBox, newBox) => {
                         // limit resize
                         if (newBox.width < imageMinimalSize || newBox.height < imageMinimalSize) {
