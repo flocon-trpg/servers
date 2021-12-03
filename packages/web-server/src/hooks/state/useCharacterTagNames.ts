@@ -3,7 +3,7 @@ import { roomAtom } from '../../atoms/room/roomAtom';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
 import { CharacterTagNames } from '../../utils/types';
 
-export function useCharacterTagNames(): CharacterTagNames | null {
+export function useCharacterTagNames(): Partial<CharacterTagNames> {
     const characterTag1Name = useAtomSelector(
         roomAtom,
         state => state?.roomState?.state?.characterTag1Name
@@ -45,7 +45,7 @@ export function useCharacterTagNames(): CharacterTagNames | null {
         state => state?.roomState?.state?.characterTag10Name
     );
 
-    const [resultState, setResultState] = React.useState<CharacterTagNames | null>(null);
+    const [resultState, setResultState] = React.useState<Partial<CharacterTagNames>>({});
 
     React.useEffect(() => {
         setResultState({

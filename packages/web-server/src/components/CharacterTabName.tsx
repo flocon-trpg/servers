@@ -1,7 +1,6 @@
 import { strIndex10Array } from '@flocon-trpg/core';
 import React from 'react';
 import { CharacterTabConfig } from '../atoms/roomConfig/types/characterTabConfig';
-import { CharacterTagFilterUtils } from '../atoms/roomConfig/types/characterTagFilter/utils';
 import { useCharacterTagNames } from '../hooks/state/useCharacterTagNames';
 
 const generateTabName = (
@@ -12,26 +11,40 @@ const generateTabName = (
         return tabConfig.tabName;
     }
 
-    if (CharacterTagFilterUtils.isAll(tabConfig)) {
-        return '全てのキャラクター';
-    }
-    if (CharacterTagFilterUtils.isEmpty(tabConfig)) {
-        return '空のタブ';
+    let isAll = true;
+    let isEmpty = true;
+    const names: string[] = [];
+    if (tabConfig.showNoTag) {
+        names.push('タグなし');
+        isEmpty = false;
+    } else {
+        isAll = false;
     }
 
-    const elements: string[] = [];
-    if (tabConfig.showNoTag) {
-        elements.push('タグなし');
-    }
     strIndex10Array.forEach(index => {
+        const characterTagName = characterTagNames[`characterTag${index}Name`];
+        if (characterTagName == null) {
+            return;
+        }
+
         if (tabConfig[`showTag${index}`]) {
-            elements.push(characterTagNames?.[`characterTag${index}Name`] ?? `(タグ${index})`);
+            names.push(characterTagName);
+            isEmpty = false;
+        } else {
+            isAll = false;
         }
     });
-    if (elements.length >= 4) {
-        return `複数のタグ`;
+
+    if (isEmpty) {
+        return '空のタブ';
     }
-    return elements.reduce((seed, elem, i) => {
+    if (isAll) {
+        return '全てのキャラクター';
+    }
+    if (names.length >= 4) {
+        return `タブ`;
+    }
+    return names.reduce((seed, elem, i) => {
         if (i === 0) {
             return elem;
         }

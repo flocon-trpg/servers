@@ -1,38 +1,6 @@
 import { CharacterTagFilter } from '.';
 
 export namespace CharacterTagFilterUtils {
-    export const isEmpty = (source: CharacterTagFilter): boolean => {
-        return (
-            !source.showNoTag &&
-            !source.showTag1 &&
-            !source.showTag10 &&
-            !source.showTag2 &&
-            !source.showTag3 &&
-            !source.showTag4 &&
-            !source.showTag5 &&
-            !source.showTag6 &&
-            !source.showTag7 &&
-            !source.showTag8 &&
-            !source.showTag9
-        );
-    };
-
-    export const isAll = (source: CharacterTagFilter): boolean => {
-        return (
-            source.showNoTag &&
-            source.showTag1 &&
-            source.showTag10 &&
-            source.showTag2 &&
-            source.showTag3 &&
-            source.showTag4 &&
-            source.showTag5 &&
-            source.showTag6 &&
-            source.showTag7 &&
-            source.showTag8 &&
-            source.showTag9
-        );
-    };
-
     export const createEmpty = (): CharacterTagFilter => {
         return {
             showNoTag: false,
