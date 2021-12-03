@@ -302,7 +302,7 @@ export const createServer = async ({
                 res.sendStatus(404);
                 return;
             }
-            filepath = path.join(path.resolve(directory), 'thumbs', sanitize(filename));
+            filepath = path.join(path.resolve(directory), 'thumbs', filename);
         }
 
         // SVGを直接開くことによるXSSを防いでいる https://qiita.com/itizawa/items/e98ecd67910492d5c2af ただし、現状では必要ないかもしれない
