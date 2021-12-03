@@ -3280,16 +3280,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/core@npm:~9.3.0":
-  version: 9.3.0
-  resolution: "@react-spring/core@npm:9.3.0"
+"@react-spring/core@npm:9.3.1":
+  version: 9.3.1
+  resolution: "@react-spring/core@npm:9.3.1"
   dependencies:
     "@react-spring/animated": ~9.3.0
     "@react-spring/shared": ~9.3.0
     "@react-spring/types": ~9.3.0
   peerDependencies:
     react: ^16.8.0  || ^17.0.0
-  checksum: ead78eee48dbed5a8400796e6cc3a51298c660343edccee8bbb734fb0b5a5e50cd96ccb0cd25af4f8566946aa402b815892dea96f2e60f49342a4bbe4fa7e07b
+  checksum: 311452e51ea92815fe415d2f82fe068b7a365e33ca6f5b586b1dfb8d8f27557644a27f59b6e4ed3c10838b5c903a84704b197005edd68fe54cef5343a1d5bf5a
   languageName: node
   linkType: hard
 
@@ -15918,9 +15918,6 @@ __metadata:
     eslint-plugin-react-hooks: next
     husky: ^7.0.4
     prettier: 2.5.0
-  dependenciesMeta:
-    "@react-spring/core":
-      built: false
   languageName: unknown
   linkType: soft
 

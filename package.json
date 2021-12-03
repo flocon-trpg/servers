@@ -27,9 +27,7 @@
         "eslint-plugin-react-hooks": "next",
         "prettier": "2.5.0"
     },
-    "dependenciesMeta": {
-        "@react-spring/core": {
-            "built": false
-        }
+    "resolutions": {
+        "@react-spring/core": "9.3.1"
     }
 }
