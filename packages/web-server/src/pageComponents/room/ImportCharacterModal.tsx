@@ -64,6 +64,8 @@ export const ImportCharacterModal: React.FC = () => {
                                 roomState.characters[id] = {
                                     ...parsed.value,
                                     ownerParticipantId: myUserUid,
+                                    pieces: {},
+                                    portraitPieces: {},
                                 };
                             });
                             setValue('');
@@ -75,7 +77,7 @@ export const ImportCharacterModal: React.FC = () => {
             }
         >
             <div className={classNames(flex, flexColumn)}>
-                <div>インポートしたキャラクターの作成者は常に自分になります。ただしコマの作成者の情報は保持されます(これらの仕様は後で変更されるかもしれません)。</div>
+                <div>インポートしたキャラクターの作成者は常に自分になります(この仕様は後で変更されるかもしれません)。</div>
                 <BufferedTextArea
                     value={value}
                     onChange={e => {

@@ -75,7 +75,7 @@ export const ImportBoardModal: React.FC = () => {
             }
         >
             <div className={classNames(flex, flexColumn)}>
-                <div>インポートしたボードの作成者は常に自分になります(この仕様は後で変更されるかもしれません)。</div>
+                <div>インポートしたボードの作成者は常に自分になります。ただしボード内に存在するコマの作成者の情報は保持されます(これらの仕様は後で変更されるかもしれません)。</div>
                 <BufferedTextArea
                     value={value}
                     onChange={e => {
