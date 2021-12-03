@@ -6,6 +6,7 @@ import {
 } from '../characterTagFilter';
 
 export type CharacterTabConfig = {
+    // 同一Panel内にある他のCharacterTabConfigのkeyと重複しないようにしなければならない
     key: string;
 
     // nullishならば自動で名付けられる

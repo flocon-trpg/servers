@@ -678,11 +678,12 @@ export const CharacterList: React.FC = () => {
                             if (roomConfig == null) {
                                 return;
                             }
-                            [...roomConfig.panels.characterPanel.tabs].forEach((tab, i) => {
-                                if (tab.key === e) {
-                                    roomConfig.panels.characterPanel.tabs.splice(i, 1);
-                                }
-                            });
+                            const indexToSplice = roomConfig.panels.characterPanel.tabs.findIndex(
+                                tab => tab.key === e
+                            );
+                            if (indexToSplice >= 0) {
+                                roomConfig.panels.characterPanel.tabs.splice(indexToSplice, 1);
+                            }
                         });
                         return;
                     }

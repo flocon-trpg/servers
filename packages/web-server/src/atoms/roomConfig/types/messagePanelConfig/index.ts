@@ -1,4 +1,3 @@
-import { chooseRecord } from '@flocon-trpg/utils';
 import * as t from 'io-ts';
 import { simpleId } from '@flocon-trpg/core';
 import {
@@ -11,13 +10,12 @@ import {
     DraggablePanelConfigBase,
     serializedDraggablePanelConfigBase,
 } from '../draggablePanelConfig';
-import { record } from '../../../../utils/io-ts/record';
 import { MessageTabConfigUtils } from '../messageTabConfig/utils';
 import { defaultMessagePanelPosition } from '../defaultPanelPositions';
 
 export type MessagePanelConfig = {
     isMinimized: boolean;
-    tabs: Record<string, MessageTabConfig | undefined>;
+    tabs: MessageTabConfig[];
     selectedTextColor?: string;
     isPrivateMessageMode: boolean;
     selectedPublicChannelKey?: string;
@@ -30,7 +28,7 @@ export type MessagePanelConfig = {
 export const serializedMessagePanelConfig = t.intersection([
     t.partial({
         isMinimized: t.boolean,
-        tabs: record(t.string, partialMessageTabConfig),
+        tabs: t.array(partialMessageTabConfig),
         selectedTextColor: t.string,
         isPrivateMessageMode: t.boolean,
         selectedPublicChannelKey: t.string,
@@ -50,7 +48,7 @@ export const deserializeMessagePanelConfig = (
     return {
         ...deserializeDraggablePanelConfigBase(source),
         isMinimized: source.isMinimized ?? false,
-        tabs: chooseRecord(source.tabs ?? {}, deserializeMessageTabConfig),
+        tabs: (source.tabs ?? []).map(deserializeMessageTabConfig),
         selectedTextColor: source.selectedTextColor,
         isPrivateMessageMode: source.isPrivateMessageMode ?? false,
         selectedPublicChannelKey: source.selectedPublicChannelKey,
@@ -64,7 +62,7 @@ export const deserializeMessagePanelConfig = (
 export const defaultMessagePanelConfig = (): MessagePanelConfig => {
     return {
         ...defaultMessagePanelPosition,
-        tabs: { [simpleId()]: MessageTabConfigUtils.createAll({}) },
+        tabs: [MessageTabConfigUtils.createAll({})],
         isPrivateMessageMode: false,
         customCharacterName: '',
     };
