@@ -22,7 +22,7 @@ export class FRoom extends FObject {
     // FRoom内のRoom.Stateは全てmutableとして扱う。FCharacter内のCharacter.Stateなども同様。
     private readonly _room: Room.State;
 
-    public constructor(source: Room.State, private readonly ownerParticipantId: string) {
+    public constructor(source: Room.State, private readonly myUserUid: string) {
         super();
         this._room = cloneDeep(source);
     }
@@ -51,7 +51,7 @@ export class FRoom extends FObject {
                     createNewState: () => ({
                         $v: 2,
                         $r: 1,
-                        ownerParticipantId: this.ownerParticipantId,
+                        ownerParticipantId: this.myUserUid,
                         image: undefined,
                         isPrivate: false,
                         memo: '',

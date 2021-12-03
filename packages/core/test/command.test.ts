@@ -32,7 +32,7 @@ describe('characterCommand', () => {
             script: `room.name = '${nextRoomName}'`,
             room,
             characterId,
-            ownerParticipantId: participantId,
+            myUserUid: participantId,
         });
         if (actual.isError) {
             throw actual.error;
@@ -71,7 +71,7 @@ describe('characterCommand', () => {
             script: `character.name = '${nextCharacterName}'`,
             room,
             characterId,
-            ownerParticipantId: participantId,
+            myUserUid: participantId,
         });
         if (actual.isError) {
             throw actual.error;
@@ -128,7 +128,7 @@ myCharacter.name = '${nextCharacterName}';
             `,
             room,
             characterId,
-            ownerParticipantId: participantId,
+            myUserUid: participantId,
         });
         if (actual.isError) {
             throw actual.error;
@@ -185,7 +185,7 @@ newCharacter.value.name = newCharacterById.name + '!!';
             `,
             room,
             characterId,
-            ownerParticipantId: participantId,
+            myUserUid: participantId,
         });
         if (actual.isError) {
             throw actual.error;
@@ -232,7 +232,7 @@ this.room.characters.delete('${characterId}');
             `,
             room,
             characterId,
-            ownerParticipantId: participantId,
+            myUserUid: participantId,
         });
         if (actual.isError) {
             throw actual.error;

@@ -39,7 +39,7 @@ type CharacterCommandParams = {
     script: string;
     room: Room.State;
     characterId: string;
-    ownerParticipantId: string;
+    myUserUid: string;
 };
 
 type CommandResult = Result<Room.State, CommandError>;
@@ -48,9 +48,9 @@ export const execCharacterCommand = ({
     script,
     room,
     characterId,
-    ownerParticipantId,
+    myUserUid,
 }: CharacterCommandParams): CommandResult => {
-    const fRoom = new FRoom(room, ownerParticipantId);
+    const fRoom = new FRoom(room, myUserUid);
     const fCharacter = fRoom.findCharacter(characterId);
     if (fCharacter == null) {
         throw new Error(`character(${keyNames(characterId)}) not found`);
