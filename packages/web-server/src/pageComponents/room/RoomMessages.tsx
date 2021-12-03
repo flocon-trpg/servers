@@ -779,10 +779,8 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
             <div style={{ padding: '0 4px' }}>
                 <JumpToBottomVirtuoso
                     items={messages}
-                    create={(index, data) => data}
-                    height={
-                        writingStatus == null ? contentHeight : contentHeight - writingStatusHeight
-                    }
+                    create={(_, data) => data}
+                    height={contentHeight - writingStatusHeight}
                 />
             </div>
             {writingStatus}

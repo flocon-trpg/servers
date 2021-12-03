@@ -307,7 +307,6 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
                 <div style={{ minWidth: 16 }} />
                 <DirSelect memoId={memoId} />
                 <Button
-                    disabled={memo == null}
                     onClick={() => {
                         Modal.confirm({
                             title: '現在開いているメモを削除してよろしいですか？',

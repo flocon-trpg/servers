@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Checkbox, Divider, Drawer, Tooltip, Typography } from 'antd';
+import { Button, Checkbox, Divider, Drawer, Tooltip } from 'antd';
 import {
     FilePathInput,
     FileSourceType,

@@ -9,7 +9,6 @@ import { BaasType } from '../../../enums/BaasType';
 import { EntryPasswordConfig, plain, ServerConfig } from '../../../configType';
 import safeCompare from 'safe-compare';
 import bcrypt from 'bcrypt';
-import { string } from 'fp-ts';
 
 const find = <T>(source: Record<string, T | undefined>, key: string): T | undefined => source[key];
 

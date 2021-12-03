@@ -1,5 +1,4 @@
 import { FilterValue } from 'antd/lib/table/interface';
-import { number } from 'fp-ts';
 import { FilePath } from './filePath';
 
 export type CharacterTagNames = {

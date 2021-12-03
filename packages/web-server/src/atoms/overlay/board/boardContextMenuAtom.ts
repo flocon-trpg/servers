@@ -3,7 +3,6 @@ import {
     CharacterPieceState,
     DicePieceState,
     StringPieceState,
-    BoardPositionState,
     ImagePieceState,
     PortraitPieceState,
 } from '@flocon-trpg/core';
