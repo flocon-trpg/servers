@@ -1772,7 +1772,7 @@ __metadata:
   resolution: "@flocon-trpg/cache@workspace:packages/cache"
   dependencies:
     "@flocon-trpg/utils": "workspace:^"
-    "@types/ioredis": 4.28.1
+    "@types/ioredis": 4.28.2
     "@types/jest": 27.0.3
     ioredis: ^4.28.0
     jest: 27.4.3
@@ -3710,12 +3710,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ioredis@npm:4.28.1":
-  version: 4.28.1
-  resolution: "@types/ioredis@npm:4.28.1"
+"@types/ioredis@npm:4.28.2":
+  version: 4.28.2
+  resolution: "@types/ioredis@npm:4.28.2"
   dependencies:
     "@types/node": "*"
-  checksum: 2d5adc6ce3078a0dc59911b6e50214fbcedf7bf139b6fde8e466132d8f15c90b3f55ecbd1d16e93541dc0abaa666ce924608d6e34ed4d0ee9903aab51d1c9900
+  checksum: d519b48a6c3f2246f2953a10cc3642559da842c4065f7411feefdfb6fe6093f4a49030fb4663481a71fbb4864d0c93ad88c91be67d506070f92f035d98cd2dfc
   languageName: node
   linkType: hard
 
