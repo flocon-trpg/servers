@@ -501,7 +501,7 @@ namespace ContextMenuModule {
                                         script: value.value,
                                         room,
                                         characterId: characterPair.id,
-                                        ownerParticipantId: myUserUid,
+                                        myUserUid,
                                     });
                                     if (commandResult.isError) {
                                         // TODO: 通知する

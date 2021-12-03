@@ -50,7 +50,7 @@ export const execCharacterCommand = ({
         script: transpiled.value,
         room,
         characterId,
-        ownerParticipantId: myUserUid,
+        myUserUid,
     });
     if (result.isError) {
         return Result.error(result.error.message);
