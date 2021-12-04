@@ -49,10 +49,10 @@ const autoMigration = async (lang: Lang) => {
     let message: string;
     switch (lang) {
         case en:
-            message = 'Enter Access-Control-Allow-Origin header value';
+            message = 'Choose database auto-migration config';
             break;
         case ja:
-            message = 'Access-Control-Allow-Origin ヘッダーの値を入力してください';
+            message = 'データベースの自動マイグレーションの設定を選択してください';
             break;
     }
 
