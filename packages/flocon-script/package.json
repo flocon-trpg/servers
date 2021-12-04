@@ -11,7 +11,9 @@
         "node": ">=12"
     },
     "scripts": {
-        "build": "rimraf ./dist && yarn build:tsc",
+        "build": "yarn run build:self",
+        "build-ci": "yarn run build:self",
+        "build:self": "rimraf ./dist && yarn build:tsc",
         "build:tsc": "tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-types.json",
         "test": "jest"
     },

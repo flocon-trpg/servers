@@ -94,10 +94,10 @@
     "scripts": {
         "dev": "run-s build:less dev:next",
         "dev:next": "next",
-        "build": "run-s build:less build:next",
+        "build": "yarn workspaces foreach -pvtR --from '@flocon-trpg/web-server' run build && yarn run build:self",
+        "build:self": "run-s build:less build:next",
         "build:less": "lessc ./src/css/antd.less ./src/css/antd.css --js",
         "build:next": "next build",
-        "build-rec": "yarn workspaces foreach -pvtR --from '@flocon-trpg/web-server' run build",
         "export": "next export",
         "start": "next start",
         "serve": "serve ./out",
