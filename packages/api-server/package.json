@@ -81,8 +81,9 @@
     },
     "scripts": {
         "dev": "node dist/index.js",
-        "build": "yarn workspaces foreach -pvtR --from '@flocon-trpg/api-server' run build && yarn run build:self",
+        "build": "run-s build:deps build:self",
         "build-ci": "yarn run build:self",
+        "build:deps": "yarn workspaces foreach -pvtR --from '@flocon-trpg/api-server' --exclude '@flocon-trpg/api-server' run build",
         "build:self": "rimraf ./dist && yarn build:tsc",
         "build:tsc": "tsc -p tsconfig.build.json",
         "gen": "run-s gen:schema gen:codegen",
