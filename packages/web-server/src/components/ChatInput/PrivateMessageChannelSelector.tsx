@@ -29,7 +29,7 @@ const PrivateMessageDrawer: React.FC<PrivateMessageDrawerProps> = ({
     onClose,
 }: PrivateMessageDrawerProps) => {
     const myUserUid = useMyUserUid();
-    const participants = useAtomSelector(roomAtom,state => state.roomState?.state?.participants);
+    const participants = useAtomSelector(roomAtom, state => state.roomState?.state?.participants);
 
     if (myUserUid == null || participants == null) {
         return null;

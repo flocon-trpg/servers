@@ -696,7 +696,11 @@ export const Room: React.FC = () => {
                             minWidth={150}
                             zIndex={pieceValuePanel.zIndex}
                         >
-                            {activeBoardId == null ? 'ボードビュアーにボードが表示されていないため、無効化されています' : <PieceList boardId={activeBoardId} />}
+                            {activeBoardId == null ? (
+                                'ボードビュアーにボードが表示されていないため、無効化されています'
+                            ) : (
+                                <PieceList boardId={activeBoardId} />
+                            )}
                         </DraggableCard>
                     )}
                 </div>
@@ -707,7 +711,7 @@ export const Room: React.FC = () => {
 
                 <BoardEditorModal />
                 <CharacterEditorModal />
-                <CharacterTagNamesEditorModal/>
+                <CharacterTagNamesEditorModal />
                 <BoardPositionAndPieceEditorModal />
                 <DicePieceEditorModal />
                 <ImagePieceDrawer />

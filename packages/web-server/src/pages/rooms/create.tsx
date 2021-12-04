@@ -19,8 +19,7 @@ const CreateRoomCore: React.FC = () => {
     const router = useRouter();
     const [createRoom, createRoomResult] = useMutation(CreateRoomDocument);
     const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
-    const [isPlayerPasswordEnabled, setIsPlayerPasswordEnabled] =
-        React.useState<boolean>(false);
+    const [isPlayerPasswordEnabled, setIsPlayerPasswordEnabled] = React.useState<boolean>(false);
     const [isSpectatorPasswordEnabled, setIsSpectatorPasswordEnabled] =
         React.useState<boolean>(false);
     const myAuth = React.useContext(MyAuthContext);
@@ -46,9 +45,7 @@ const CreateRoomCore: React.FC = () => {
                 const input: CreateRoomInput = {
                     roomName: roomNameValue,
                     participantName: participantNameValue,
-                    playerPassword: isPlayerPasswordEnabled
-                        ? playerPasswordValue
-                        : undefined,
+                    playerPassword: isPlayerPasswordEnabled ? playerPasswordValue : undefined,
                     spectatorPassword: isSpectatorPasswordEnabled
                         ? spectatorPasswordValue
                         : undefined,
@@ -77,10 +74,7 @@ const CreateRoomCore: React.FC = () => {
                 <Input />
             </Form.Item>
             <Form.Item label='参加パスワードを有効化'>
-                <Switch
-                    checked={isPlayerPasswordEnabled}
-                    onChange={setIsPlayerPasswordEnabled}
-                />
+                <Switch checked={isPlayerPasswordEnabled} onChange={setIsPlayerPasswordEnabled} />
             </Form.Item>
             <Form.Item label='参加パスワード' name={playerPassword}>
                 <Input disabled={!isPlayerPasswordEnabled} />

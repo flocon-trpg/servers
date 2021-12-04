@@ -12,7 +12,10 @@ import { FilterValue } from 'antd/lib/table/interface';
 import moment from 'moment';
 import { useMyUserUid } from '../../hooks/useMyUserUid';
 import { $public, StorageType, unlisted } from '../../utils/firebaseStorage';
-import { DeleteFirebaseStorageFileModal, useDeleteFirebaseStorageFileModalActions } from '../DeleteFirebaseStorageFileModal';
+import {
+    DeleteFirebaseStorageFileModal,
+    useDeleteFirebaseStorageFileModalActions,
+} from '../DeleteFirebaseStorageFileModal';
 import { accept } from './helper';
 import { FileType, guessFileType, image, others, sound } from '../../utils/fileType';
 import { FileState, Reference } from '../../atoms/firebaseStorage/fileState';
@@ -221,7 +224,9 @@ const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({
                 </Menu.Item>
                 <Menu.Item
                     icon={<Icons.DeleteOutlined />}
-                    onClick={() => DeleteFirebaseStorageFileModal(storageType, reference, modalActions)}
+                    onClick={() =>
+                        DeleteFirebaseStorageFileModal(storageType, reference, modalActions)
+                    }
                 >
                     削除
                 </Menu.Item>
@@ -326,9 +331,7 @@ const FirebaseFilesList: React.FC<FirebaseFilesListProps> = ({
     );
 };
 
-const referencesToDataSource = (
-    files: ReadonlyArray<Reference>
-): Promise<DataSource[]> => {
+const referencesToDataSource = (files: ReadonlyArray<Reference>): Promise<DataSource[]> => {
     const promises = files.map(async file => {
         const metadata = await file.getMetadata();
         const name = fileName(file.fullPath);
@@ -354,8 +357,8 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
     defaultFilteredValue,
 }: FirebaseFilesManagerProps) => {
     const myUserUid = useMyUserUid();
-    const [reloadUnlistedFilesKey, setReloadUnlistedFilesKey] = useAtom(reloadUnlistedFilesKeyAtom)
-    const [reloadPublicFilesKey, setReloadPublicFilesKey] = useAtom(reloadPublicFilesKeyAtom)
+    const [reloadUnlistedFilesKey, setReloadUnlistedFilesKey] = useAtom(reloadUnlistedFilesKeyAtom);
+    const [reloadPublicFilesKey, setReloadPublicFilesKey] = useAtom(reloadPublicFilesKeyAtom);
     const setUnlistedFiles = useUpdateAtom(unlistedFilesAtom);
     const setPublicFiles = useUpdateAtom(publicFilesAtom);
     const config = useWebConfig();
@@ -395,7 +398,7 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
             if (unsubscribed) {
                 return;
             }
-            setUnlistedFiles(newState)
+            setUnlistedFiles(newState);
         };
         main();
         return () => {
@@ -429,7 +432,7 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
                         <Uploader
                             storageType={unlisted}
                             onUploaded={() => {
-                                setReloadUnlistedFilesKey(i => i + 1)
+                                setReloadUnlistedFilesKey(i => i + 1);
                             }}
                         />
                         <FirebaseFilesList

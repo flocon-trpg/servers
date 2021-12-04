@@ -25,13 +25,13 @@ export const AllContextProvider: React.FC<PropsWithChildren<Props>> = ({
     return (
         <ClientIdContext.Provider value={clientId}>
             <ApolloProvider client={apolloClient}>
-                    <MyAuthContext.Provider value={user}>
-                        <FirebaseStorageUrlCacheContext.Provider value={firebaseStorageUrlCache}>
-                            <FirebaseAuthenticationIdTokenContext.Provider value={getIdToken}>
-                                {children}
-                            </FirebaseAuthenticationIdTokenContext.Provider>
-                        </FirebaseStorageUrlCacheContext.Provider>
-                    </MyAuthContext.Provider>
+                <MyAuthContext.Provider value={user}>
+                    <FirebaseStorageUrlCacheContext.Provider value={firebaseStorageUrlCache}>
+                        <FirebaseAuthenticationIdTokenContext.Provider value={getIdToken}>
+                            {children}
+                        </FirebaseAuthenticationIdTokenContext.Provider>
+                    </FirebaseStorageUrlCacheContext.Provider>
+                </MyAuthContext.Provider>
             </ApolloProvider>
         </ClientIdContext.Provider>
     );

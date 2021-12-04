@@ -32,7 +32,7 @@ export const VolumeBar: React.FC<Props> = ({
             <Slider
                 disabled={readonly}
                 style={{ flex: 1, minWidth: 50 }}
-                min={minValue == null ? 0 : (inputNumberType === '0-1' ? (minValue * 100) : minValue)}
+                min={minValue == null ? 0 : inputNumberType === '0-1' ? minValue * 100 : minValue}
                 max={inputNumberType === '0-1' ? 100 : 1}
                 step={1}
                 onChange={(newValue: unknown) => {

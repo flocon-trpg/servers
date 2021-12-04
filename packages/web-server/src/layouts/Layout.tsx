@@ -84,7 +84,8 @@ const EntryFormComponent: React.FC<EntryFormComponentProps> = (props: EntryFormC
                     Submit
                 </Button>
                 {isSubmitting ? <Spin /> : null}
-                {entryToServerResult?.data?.result.type === EntryToServerResultType.WrongPassword? (
+                {entryToServerResult?.data?.result.type ===
+                EntryToServerResultType.WrongPassword ? (
                     <Alert message='wrong password' type='error' showIcon />
                 ) : null}
                 {entryToServerResult?.error == null ? null : (

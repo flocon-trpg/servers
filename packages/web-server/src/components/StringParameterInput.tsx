@@ -72,7 +72,8 @@ export const StringParameterInput: React.FC<Props> = ({
                         [parameterKey]: {
                             $v: 2,
                             $r: 1,
-                            value: diff2 === undefined ? undefined : toNullableTextUpOperation(diff2),
+                            value:
+                                diff2 === undefined ? undefined : toNullableTextUpOperation(diff2),
                         },
                     },
                 };

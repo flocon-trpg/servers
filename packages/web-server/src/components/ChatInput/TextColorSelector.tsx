@@ -38,9 +38,11 @@ export const TextColorSelector: React.FC<Props> = ({
                         color={
                             config.selectedTextColor == null ? '#000000' : config.selectedTextColor
                         }
-                        onChange={e => onConfigUpdate(draft => {
-                            draft.selectedTextColor = rgb(e.rgb)
-                        })}
+                        onChange={e =>
+                            onConfigUpdate(draft => {
+                                draft.selectedTextColor = rgb(e.rgb);
+                            })
+                        }
                         presetColors={[
                             '#F26262',
                             '#F2A962',
@@ -73,9 +75,11 @@ export const TextColorSelector: React.FC<Props> = ({
             </Popover>
             <Button
                 size='small'
-                onClick={() => onConfigUpdate(draft => {
-                    draft.selectedTextColor = undefined;
-                })}
+                onClick={() =>
+                    onConfigUpdate(draft => {
+                        draft.selectedTextColor = undefined;
+                    })
+                }
             >
                 リセット
             </Button>

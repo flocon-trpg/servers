@@ -16,7 +16,10 @@ import { useAtomSelector } from '../atoms/useAtomSelector';
 import { roomConfigAtom } from '../atoms/roomConfig/roomConfigAtom';
 import { roomAtom } from '../atoms/room/roomAtom';
 import { MessageFilterUtils } from '../atoms/roomConfig/types/messageFilter/utils';
-import { defaultMasterVolume, defaultSeVolume } from '../atoms/roomConfig/types/roomConfig/resources';
+import {
+    defaultMasterVolume,
+    defaultSeVolume,
+} from '../atoms/roomConfig/types/roomConfig/resources';
 
 const argsBase: Omit<ArgsProps, 'message'> = {
     placement: 'bottomRight',
@@ -25,11 +28,11 @@ const argsBase: Omit<ArgsProps, 'message'> = {
 export function useMessageNotification(): void {
     const publicChannelNames = usePublicChannelNames();
     const publicChannelNameRef = useReadonlyRef(publicChannelNames);
-    const allRoomMessagesResult = useAtomSelector(roomAtom,state => state.allRoomMessagesResult);
+    const allRoomMessagesResult = useAtomSelector(roomAtom, state => state.allRoomMessagesResult);
     const participantsMap = useParticipants();
     const participantsMapRef = useReadonlyRef(participantsMap);
-    const masterVolume = useAtomSelector(roomConfigAtom,state => state?.masterVolume);
-    const seVolume = useAtomSelector(roomConfigAtom,state => state?.seVolume);
+    const masterVolume = useAtomSelector(roomConfigAtom, state => state?.masterVolume);
+    const seVolume = useAtomSelector(roomConfigAtom, state => state?.seVolume);
     const volumeRef = React.useRef(
         (masterVolume ?? defaultMasterVolume) * (seVolume ?? defaultSeVolume)
     );
@@ -43,7 +46,8 @@ export function useMessageNotification(): void {
         myUserUidRef.current = myUserUid;
     }, [myUserUid]);
 
-    const messageNotificationFilter = useAtomSelector(roomConfigAtom,
+    const messageNotificationFilter = useAtomSelector(
+        roomConfigAtom,
         state => state?.messageNotificationFilter
     );
     const messageNotificationFilterRef = React.useRef(

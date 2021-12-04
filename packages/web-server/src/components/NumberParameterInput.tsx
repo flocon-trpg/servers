@@ -10,7 +10,13 @@ import {
     parameterIsPrivateAndNotCreatedByMe,
     parameterIsNotPrivateAndNotCreatedByMe,
 } from '../resource/text/main';
-import { applyCharacter, CharacterState, CharacterUpOperation, NumParamState, StrIndex20 } from '@flocon-trpg/core';
+import {
+    applyCharacter,
+    CharacterState,
+    CharacterUpOperation,
+    NumParamState,
+    StrIndex20,
+} from '@flocon-trpg/core';
 
 const inputWidth = 50;
 
@@ -37,13 +43,15 @@ export const NumberParameterInput: React.FC<Props> = ({
     onOperate,
     compact,
 }: Props) => {
-    const apply = (operation: CharacterUpOperation) => (state: CharacterState): CharacterState => {
-        const result = applyCharacter({state, operation});
-        if (result.isError) {
-            throw result.error;
-        }
-        return result.value;
-    }
+    const apply =
+        (operation: CharacterUpOperation) =>
+        (state: CharacterState): CharacterState => {
+            const result = applyCharacter({ state, operation });
+            if (result.isError) {
+                throw result.error;
+            }
+            return result.value;
+        };
 
     const addOrDeleteNumberParameterButton = ({
         disabled,
@@ -96,7 +104,7 @@ export const NumberParameterInput: React.FC<Props> = ({
                                 },
                             },
                         };
-                            onOperate(apply(operation));
+                        onOperate(apply(operation));
                     }}
                 >
                     <DeleteOutlined />
@@ -156,7 +164,7 @@ export const NumberParameterInput: React.FC<Props> = ({
                                 },
                             },
                         };
-                            onOperate(apply(operation));
+                        onOperate(apply(operation));
                     }}
                 >
                     <DeleteOutlined />
@@ -210,7 +218,7 @@ export const NumberParameterInput: React.FC<Props> = ({
                             },
                         },
                     };
-                            onOperate(apply(operation));
+                    onOperate(apply(operation));
                 }}
             />
         );
@@ -248,7 +256,7 @@ export const NumberParameterInput: React.FC<Props> = ({
                                 },
                             },
                         };
-                            onOperate(apply(operation));
+                        onOperate(apply(operation));
                     }}
                 />
                 {addOrDeleteNumberParameterButton({ disabled: false })}
@@ -301,7 +309,7 @@ export const NumberParameterInput: React.FC<Props> = ({
                             },
                         },
                     };
-                            onOperate(apply(operation));
+                    onOperate(apply(operation));
                 }}
             />
         );
@@ -339,7 +347,7 @@ export const NumberParameterInput: React.FC<Props> = ({
                                 },
                             },
                         };
-                            onOperate(apply(operation));
+                        onOperate(apply(operation));
                     }}
                 />
                 {addOrDeleteNumberMaxParameterButton({ disabled: false })}

@@ -77,7 +77,9 @@ export const ImportCharacterModal: React.FC = () => {
             }
         >
             <div className={classNames(flex, flexColumn)}>
-                <div>インポートしたキャラクターの作成者は常に自分になります(この仕様は後で変更されるかもしれません)。</div>
+                <div>
+                    インポートしたキャラクターの作成者は常に自分になります(この仕様は後で変更されるかもしれません)。
+                </div>
                 <BufferedTextArea
                     value={value}
                     onChange={e => {
@@ -90,7 +92,11 @@ export const ImportCharacterModal: React.FC = () => {
                     rows={15}
                     bottomElement={() => null}
                 />
-                <div>{parsed?.error != null && <Alert type='error'showIcon message={parsed.error} />}</div>
+                <div>
+                    {parsed?.error != null && (
+                        <Alert type='error' showIcon message={parsed.error} />
+                    )}
+                </div>
             </div>
         </Modal>
     );
