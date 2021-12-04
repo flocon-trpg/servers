@@ -1824,6 +1824,23 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@flocon-trpg/servers@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "@flocon-trpg/servers@workspace:."
+  dependencies:
+    "@commitlint/cli": 15.0.0
+    "@commitlint/config-conventional": 15.0.0
+    "@typescript-eslint/eslint-plugin": 5.5.0
+    "@typescript-eslint/parser": 5.5.0
+    eslint: 8.3.0
+    eslint-config-prettier: 8.3.0
+    eslint-plugin-react: 7.27.1
+    eslint-plugin-react-hooks: next
+    husky: ^7.0.4
+    prettier: 2.5.0
+  languageName: unknown
+  linkType: soft
+
 "@flocon-trpg/set-env-interactive-core@workspace:^, @flocon-trpg/set-env-interactive-core@workspace:packages/set-env-interactive-core":
   version: 0.0.0-use.local
   resolution: "@flocon-trpg/set-env-interactive-core@workspace:packages/set-env-interactive-core"
@@ -15903,23 +15920,6 @@ __metadata:
   checksum: 006accc40578ee2beae382757c4ce2908a826b27e2b079efdcd2959ee544ddf210b7b5d7d5e80467807604244e7388427330f5c6d4cd61e6edaddc5773ccc393
   languageName: node
   linkType: hard
-
-"root-workspace-0b6124@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "root-workspace-0b6124@workspace:."
-  dependencies:
-    "@commitlint/cli": 15.0.0
-    "@commitlint/config-conventional": 15.0.0
-    "@typescript-eslint/eslint-plugin": 5.5.0
-    "@typescript-eslint/parser": 5.5.0
-    eslint: 8.3.0
-    eslint-config-prettier: 8.3.0
-    eslint-plugin-react: 7.27.1
-    eslint-plugin-react-hooks: next
-    husky: ^7.0.4
-    prettier: 2.5.0
-  languageName: unknown
-  linkType: soft
 
 "rtl-css-js@npm:^1.14.0":
   version: 1.14.2

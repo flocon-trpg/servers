@@ -1,4 +1,5 @@
 {
+    "name": "@flocon-trpg/servers",
     "private": true,
     "workspaces": [
         "packages/*"
@@ -6,6 +7,7 @@
     "scripts": {
         "postinstall": "husky install",
         "build": "yarn workspaces foreach -ptv run build",
+        "build-ci": "yarn workspaces foreach -ptv --exclude '{@flocon-trpg/servers,@flocon-trpg/web-server}' run build",
         "test": "yarn workspaces foreach -pv run test",
         "lint": "eslint \"packages/**/*.{ts,tsx}\"",
         "prettier": "yarn prettier:base --write",
