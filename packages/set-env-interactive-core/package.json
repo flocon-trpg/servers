@@ -11,8 +11,8 @@
         "node": ">=14"
     },
     "scripts": {
-        "build": "rimraf ./dist && yarn dist",
-        "dist": "tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-types.json"
+        "build": "rimraf ./dist && yarn build:tsc",
+        "build:tsc": "tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-types.json"
     },
     "name": "@flocon-trpg/set-env-interactive-core",
     "author": "kizahasi",
