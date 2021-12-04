@@ -3,7 +3,7 @@
         "config:base",
         ":timezone(Asia/Tokyo)",
         ":pinOnlyDevDependencies",
-        "schedule:daily",
+        "schedule:weekly",
         "helpers:disableTypesNodeMajor"
     ]
 }
