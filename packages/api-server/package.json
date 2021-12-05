@@ -97,6 +97,7 @@
         "migration-down": "ts-node run-migrationDown.ts",
         "test": "jest",
         "type-check": "tsc -p tsconfig.type-check.json",
+        "tc": "yarn run type-check",
         "watch": "run-p watch:*",
         "watch:codegen": "graphql-codegen --config codegen.yml --watch"
     },
