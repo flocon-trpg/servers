@@ -1,5 +1,7 @@
 import * as t from 'io-ts';
 
+// これらを変更したら、あわせて.env.localのテンプレートも変更する必要がある
+
 export const postgresql = 'postgresql';
 export const sqlite = 'sqlite';
 export const plain = 'plain';
