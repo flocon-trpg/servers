@@ -25,7 +25,7 @@
         "eslint-config-prettier": "8.3.0",
         "eslint-plugin-react": "7.27.1",
         "eslint-plugin-react-hooks": "next",
-        "prettier": "2.5.0"
+        "prettier": "2.5.1"
     },
     "resolutions": {
         "@react-spring/core": "9.3.1"
