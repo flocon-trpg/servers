@@ -4,6 +4,7 @@ import {
     DatabaseConfig,
     entryPassword,
     EntryPasswordConfig,
+    none,
     postgresql,
     postgresqlDatabase,
     PostgresqlDatabaseConfig,
@@ -69,11 +70,11 @@ const loadServerConfig = ({
 }: {
     databaseArg: typeof postgresql | typeof sqlite | null;
 }): ServerConfig => {
-    let entryPasswordConfig: EntryPasswordConfig | null;
+    let entryPasswordConfig: EntryPasswordConfig | undefined;
     {
         const entryPasswordObject = process.env[FLOCON_API_ENTRY_PASSWORD];
         if (entryPasswordObject == null) {
-            entryPasswordConfig = null;
+            throw new Error(`${FLOCON_API_ENTRY_PASSWORD} is required but not found.`);
         } else {
             const json = JSON.parse(entryPasswordObject);
 
@@ -81,7 +82,11 @@ const loadServerConfig = ({
             if (j._tag === 'Left') {
                 throw new Error(j.left);
             }
-            entryPasswordConfig = j.right;
+            if (j.right.type === none) {
+                entryPasswordConfig = undefined;
+            } else {
+                entryPasswordConfig = j.right;
+            }
         }
     }
 
@@ -163,7 +168,7 @@ const loadServerConfig = ({
     return {
         admins: [],
         database: databaseConfig,
-        entryPassword: entryPasswordConfig ?? undefined,
+        entryPassword: entryPasswordConfig,
         uploader: {
             enabled: isTruthyString(process.env[FLOCON_API_ENABLE_EMBEDDED_UPLOADER]),
             directory: process.env[FLOCON_API_EMBEDDED_UPLOADER_PATH],

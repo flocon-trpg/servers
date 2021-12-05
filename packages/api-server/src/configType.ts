@@ -32,12 +32,18 @@ export type DatabaseConfig =
           dbName: string;
       };
 
-export const entryPassword = t.type({
-    type: t.union([t.literal(plain), t.literal(bcrypt)]),
-    value: t.string,
-});
+export const entryPassword = t.union([
+    t.type({ type: t.literal(none) }),
+    t.type({
+        type: t.union([t.literal(plain), t.literal(bcrypt)]),
+        value: t.string,
+    }),
+]);
 
-export type EntryPasswordConfig = t.TypeOf<typeof entryPassword>;
+export type EntryPasswordConfig = {
+    type: typeof plain | typeof bcrypt;
+    value: string;
+};
 
 export type UploaderConfig = {
     enabled: boolean;
