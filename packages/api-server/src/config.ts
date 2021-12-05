@@ -28,12 +28,13 @@ import {
     FLOCON_API_EMBEDDED_UPLOADER_MAX_FILE_SIZE,
     FLOCON_API_EMBEDDED_UPLOADER_PATH,
     FLOCON_API_EMBEDDED_UPLOADER_SIZE_QUOTA,
+    FLOCON_API_ENABLE_EMBEDDED_UPLOADER,
     FLOCON_API_ENTRY_PASSWORD,
     FLOCON_API_POSTGRESQL,
     FLOCON_API_SQLITE,
     loadDotenv,
 } from './env';
-import { filterInt } from '@flocon-trpg/utils';
+import { filterInt, isTruthyString } from '@flocon-trpg/utils';
 
 loadDotenv();
 
@@ -164,6 +165,7 @@ const loadServerConfig = ({
         database: databaseConfig,
         entryPassword: entryPasswordConfig ?? undefined,
         uploader: {
+            enabled: isTruthyString(process.env[FLOCON_API_ENABLE_EMBEDDED_UPLOADER]),
             directory: process.env[FLOCON_API_EMBEDDED_UPLOADER_PATH],
             countQuota:
                 filterNullableInt(process.env[FLOCON_API_EMBEDDED_UPLOADER_COUNT_QUOTA]) ??

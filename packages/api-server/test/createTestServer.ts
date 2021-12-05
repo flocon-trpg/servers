@@ -72,6 +72,7 @@ export const createTestServer = async (
         entryPassword: entryPasswordConfig,
         autoMigration: false,
         uploader: {
+            enabled: true,
             maxFileSize: 1000 * 1000,
             sizeQuota: 100 * 1000 * 1000,
             countQuota: 10,

@@ -27,6 +27,7 @@ import { Context } from 'graphql-ws';
 import { thumbsDir } from './utils/thumbsDir';
 import { RateLimiterAbstract, RateLimiterMemory } from 'rate-limiter-flexible';
 import { consume } from './rateLimit/consume';
+import { FLOCON_API_EMBEDDED_UPLOADER_PATH } from './env';
 
 export const createServer = async ({
     serverConfig,
@@ -109,8 +110,24 @@ export const createServer = async ({
         });
     }
 
-    const directory = serverConfig.uploader.directory;
-    if (directory != null) {
+    const applyUploader = async () => {
+        const enabled = serverConfig.uploader.enabled;
+        const directory = serverConfig.uploader.directory;
+        if (!enabled) {
+            AppConsole.log({
+                en: `The uploader of API server is disabled.`,
+                ja: `APIサーバーのアップローダーは無効化されています。`,
+            });
+            return;
+        }
+        if (directory == null) {
+            AppConsole.warn({
+                en: `The uploader of API server is disabled because "${FLOCON_API_EMBEDDED_UPLOADER_PATH}" is empty.`,
+                ja: `"${FLOCON_API_EMBEDDED_UPLOADER_PATH}"の値が空なので、APIサーバーのアップローダーは無効化されています。`,
+            });
+            return;
+        }
+
         AppConsole.log({
             en: `The uploader of API server is enabled.`,
             ja: `APIサーバーのアップローダーは有効化されています。`,
@@ -241,76 +258,72 @@ export const createServer = async ({
                 res.sendStatus(200);
             }
         );
-    } else {
-        AppConsole.log({
-            en: `The uploader of API server is disabled.`,
-            ja: `APIサーバーのアップローダーは無効化されています。`,
-        });
-    }
 
-    app.get('/uploader/:type/:file_name', async (req, res) => {
-        let typeParam: 'files' | 'thumbs';
-        switch (req.params.type) {
-            case 'files':
-                typeParam = 'files';
-                break;
-            case 'thumbs':
-                typeParam = 'thumbs';
-                break;
-            default:
-                res.sendStatus(404);
-                return;
-        }
+        app.get('/uploader/:type/:file_name', async (req, res) => {
+            let typeParam: 'files' | 'thumbs';
+            switch (req.params.type) {
+                case 'files':
+                    typeParam = 'files';
+                    break;
+                case 'thumbs':
+                    typeParam = 'thumbs';
+                    break;
+                default:
+                    res.sendStatus(404);
+                    return;
+            }
 
-        if (directory == null) {
-            res.status(403).send('Flocon uploader is disabled by server config');
-            return;
-        }
-
-        const decodedIdToken = await getDecodedIdTokenFromExpressRequest(req);
-        if (decodedIdToken == null || decodedIdToken.isError) {
-            res.status(403).send('Invalid Authorization header');
-            return;
-        }
-
-        const rateLimitError = await consume(rateLimiter, decodedIdToken.value.uid, 5);
-        if (rateLimitError != null) {
-            res.status(429).send(rateLimitError.errorMessage);
-            return;
-        }
-
-        const forkedEm = em.fork();
-        const user = await forkedEm.findOne(User, { userUid: decodedIdToken.value.uid });
-        if (user?.isEntry !== true) {
-            res.status(403).send('Requires entry');
-            return;
-        }
-
-        const filename = sanitize(req.params.file_name);
-
-        let filepath: string;
-        if (typeParam === 'files') {
-            const fileCount = await forkedEm.count(File, { filename });
-            if (fileCount === 0) {
-                res.sendStatus(404);
+            if (directory == null) {
+                res.status(403).send('Flocon uploader is disabled by server config');
                 return;
             }
-            filepath = path.join(path.resolve(directory), filename);
-        } else {
-            const fileCount = await forkedEm.count(File, { thumbFilename: filename });
-            if (fileCount === 0) {
-                res.sendStatus(404);
+
+            const decodedIdToken = await getDecodedIdTokenFromExpressRequest(req);
+            if (decodedIdToken == null || decodedIdToken.isError) {
+                res.status(403).send('Invalid Authorization header');
                 return;
             }
-            filepath = path.join(path.resolve(directory), 'thumbs', filename);
-        }
 
-        // SVGを直接開くことによるXSSを防いでいる https://qiita.com/itizawa/items/e98ecd67910492d5c2af ただし、現状では必要ないかもしれない
-        res.header('Content-Security-Policy', "script-src 'unsafe-hashes'");
-        res.sendFile(filepath, () => {
-            res.end();
+            const rateLimitError = await consume(rateLimiter, decodedIdToken.value.uid, 5);
+            if (rateLimitError != null) {
+                res.status(429).send(rateLimitError.errorMessage);
+                return;
+            }
+
+            const forkedEm = em.fork();
+            const user = await forkedEm.findOne(User, { userUid: decodedIdToken.value.uid });
+            if (user?.isEntry !== true) {
+                res.status(403).send('Requires entry');
+                return;
+            }
+
+            const filename = sanitize(req.params.file_name);
+
+            let filepath: string;
+            if (typeParam === 'files') {
+                const fileCount = await forkedEm.count(File, { filename });
+                if (fileCount === 0) {
+                    res.sendStatus(404);
+                    return;
+                }
+                filepath = path.join(path.resolve(directory), filename);
+            } else {
+                const fileCount = await forkedEm.count(File, { thumbFilename: filename });
+                if (fileCount === 0) {
+                    res.sendStatus(404);
+                    return;
+                }
+                filepath = path.join(path.resolve(directory), 'thumbs', filename);
+            }
+
+            // SVGを直接開くことによるXSSを防いでいる https://qiita.com/itizawa/items/e98ecd67910492d5c2af ただし、現状では必要ないかもしれない
+            res.header('Content-Security-Policy', "script-src 'unsafe-hashes'");
+            res.sendFile(filepath, () => {
+                res.end();
+            });
         });
-    });
+    };
+    await applyUploader();
 
     // https://github.com/enisdenjo/graphql-ws のコードを使用
     const server = app.listen(port, () => {

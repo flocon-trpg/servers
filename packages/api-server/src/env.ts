@@ -9,7 +9,6 @@ export const loadDotenv = (): void => {
 
     dotenvFiles.forEach(dotenvFile => {
         if (existsSync(dotenvFile)) {
-            // bcryptのハッシュなどには$が含まれているため変数展開されそうだが、大丈夫な模様
             dotenvExpand(
                 config({
                     path: dotenvFile,
@@ -26,6 +25,7 @@ export const FLOCON_API_ENTRY_PASSWORD = 'FLOCON_API_ENTRY_PASSWORD';
 export const FLOCON_API_ACCESS_CONTROL_ALLOW_ORIGIN = 'FLOCON_API_ACCESS_CONTROL_ALLOW_ORIGIN';
 export const FLOCON_API_SQLITE = 'FLOCON_API_SQLITE';
 export const FLOCON_API_POSTGRESQL = 'FLOCON_API_POSTGRESQL';
+export const FLOCON_API_ENABLE_EMBEDDED_UPLOADER = 'FLOCON_API_EMBEDDED_UPLOADER_PATH';
 export const FLOCON_API_EMBEDDED_UPLOADER_MAX_FILE_SIZE =
     'FLOCON_API_EMBEDDED_UPLOADER_MAX_FILE_SIZE';
 export const FLOCON_API_EMBEDDED_UPLOADER_SIZE_QUOTA = 'FLOCON_API_EMBEDDED_UPLOADER_SIZE_QUOTA';
