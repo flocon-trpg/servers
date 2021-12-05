@@ -1,5 +1,6 @@
 import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
 import {
+    loadServerConfigAsCheck,
     loadServerConfigAsMain,
     loadServerConfigAsMigrationCreate,
     loadServerConfigAsMigrationDown,
@@ -107,6 +108,7 @@ export const migrate = async (
             case down:
                 return loadServerConfigAsMigrationDown();
             case check:
+                return loadServerConfigAsCheck();
             case autoMigrationAlways:
                 return loadServerConfigAsMain();
             default:

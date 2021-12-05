@@ -122,10 +122,6 @@ jobs:
                       {
                           "dbName": "./test1.sqlite3"
                       }
-                  FLOCON_API_ENTRY_PASSWORD: >
-                      {
-                          "type": "none"
-                      }
 
             - name: Migration-up SQLite(2)
               run: yarn migration-up --db sqlite
@@ -133,10 +129,6 @@ jobs:
                   FLOCON_API_SQLITE: >
                       {
                           "dbName": "./test2.sqlite3"
-                      }
-                  FLOCON_API_ENTRY_PASSWORD: >
-                      {
-                          "type": "none"
                       }
 
             - name: Migration-up PostgreSQL
@@ -146,10 +138,6 @@ jobs:
                       {
                           "dbName": "test",
                           "clientUrl": "postgresql://postgres:postgres@postgres:5432"
-                      }
-                  FLOCON_API_ENTRY_PASSWORD: >
-                      {
-                          "type": "none"
                       }
 
             # skips `yarn build` because it already has js files

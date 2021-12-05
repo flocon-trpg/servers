@@ -67,11 +67,13 @@ const loadFirebaseConfigCore = (): FirebaseConfig => {
 
 const loadServerConfig = ({
     databaseArg,
+    ignoreEntryPassword,
 }: {
     databaseArg: typeof postgresql | typeof sqlite | null;
+    ignoreEntryPassword: boolean;
 }): ServerConfig => {
     let entryPasswordConfig: EntryPasswordConfig | undefined;
-    {
+    if (!ignoreEntryPassword) {
         const entryPasswordObject = process.env[FLOCON_API_ENTRY_PASSWORD];
         if (entryPasswordObject == null) {
             throw new Error(`${FLOCON_API_ENTRY_PASSWORD} is required but not found.`);
@@ -203,9 +205,21 @@ export const loadServerConfigAsMain = async (): Promise<ServerConfig> => {
     if (serverConfigAsMainCache == null) {
         serverConfigAsMainCache = loadServerConfig({
             databaseArg: (await loadAsMain()).db ?? null,
+            ignoreEntryPassword: false,
         });
     }
     return serverConfigAsMainCache;
+};
+
+let serverConfigAsCheckCache: ServerConfig | null = null;
+export const loadServerConfigAsCheck = async (): Promise<ServerConfig> => {
+    if (serverConfigAsCheckCache == null) {
+        serverConfigAsCheckCache = loadServerConfig({
+            databaseArg: (await loadAsMain()).db ?? null,
+            ignoreEntryPassword: true,
+        });
+    }
+    return serverConfigAsCheckCache;
 };
 
 let serverConfigAsMigrationCreateCache: ServerConfig | null = null;
@@ -213,6 +227,7 @@ export const loadServerConfigAsMigrationCreate = async (): Promise<ServerConfig>
     if (serverConfigAsMigrationCreateCache == null) {
         serverConfigAsMigrationCreateCache = loadServerConfig({
             databaseArg: (await loadMigrationCreate()).db ?? null,
+            ignoreEntryPassword: true,
         });
     }
     return serverConfigAsMigrationCreateCache;
@@ -223,6 +238,7 @@ export const loadServerConfigAsMigrationUp = async (): Promise<ServerConfig> => 
     if (serverConfigAsMigrationUpCache == null) {
         serverConfigAsMigrationUpCache = loadServerConfig({
             databaseArg: (await loadMigrationUp()).db ?? null,
+            ignoreEntryPassword: true,
         });
     }
     return serverConfigAsMigrationUpCache;
@@ -235,7 +251,11 @@ export const loadServerConfigAsMigrationDown = async (): Promise<
     if (serverConfigAsMigrationDownCache == null) {
         const loaded = await loadMigrationDown();
         serverConfigAsMigrationDownCache = {
-            ...loadServerConfig({ databaseArg: loaded.db ?? null }),
+            ...loadServerConfig({
+                databaseArg: loaded.db ?? null,
+
+                ignoreEntryPassword: true,
+            }),
             count: loaded.count,
         };
     }
