@@ -7,4 +7,5 @@ migrate('up').catch(err => {
         en: '❌ migration failed. ',
         ja: '❌ マイグレーションに失敗しました。',
     });
+    process.exit(1);
 });

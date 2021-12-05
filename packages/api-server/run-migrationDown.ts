@@ -6,4 +6,5 @@ migrate('down').catch(err => {
     AppConsole.error({
         en: '❌ migration-down failed. ',
     });
+    process.exit(1);
 });

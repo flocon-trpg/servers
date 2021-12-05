@@ -7,4 +7,5 @@ migrate('check').catch(err => {
         en: '❌ migration-check failed. ',
         ja: '❌ マイグレーションのチェックに失敗しました。',
     });
+    process.exit(1);
 });

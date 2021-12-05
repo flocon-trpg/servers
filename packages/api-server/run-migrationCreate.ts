@@ -11,6 +11,7 @@ const main = async () => {
             en: '❌ migration failed. ',
             ja: '❌ マイグレーションに失敗しました。',
         });
+        process.exit(1);
     });
 };
 
