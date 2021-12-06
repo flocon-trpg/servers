@@ -25,7 +25,7 @@ import * as E from 'fp-ts/Either';
 import { formatValidationErrors } from './utils/io-ts-reporters';
 import {
     ACCESS_CONTROL_ALLOW_ORIGIN,
-    FLOCON_API_AUTO_MIGRATION,
+    AUTO_MIGRATION,
     FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL,
     EMBUPLOADER_COUNT_QUOTA,
     EMBUPLOADER_MAX_FILE_SIZE,
@@ -224,7 +224,7 @@ const loadServerConfig = ({
             sizeQuota: filterNullableInt(process.env[EMBUPLOADER_SIZE_QUOTA]) ?? undefined,
             maxFileSize: filterNullableInt(process.env[EMBUPLOADER_MAX_FILE_SIZE]) ?? undefined,
         },
-        autoMigration: process.env[FLOCON_API_AUTO_MIGRATION] === always,
+        autoMigration: process.env[AUTO_MIGRATION] === always,
         accessControlAllowOrigin: process.env[ACCESS_CONTROL_ALLOW_ORIGIN],
         disableRateLimitExperimental:
             process.env[FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL] === 'true',
