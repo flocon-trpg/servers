@@ -1,15 +1,15 @@
 import { prompt } from 'inquirer';
 import {
-    FLOCON_API_ACCESS_CONTROL_ALLOW_ORIGIN,
+    ACCESS_CONTROL_ALLOW_ORIGIN,
     FLOCON_API_AUTO_MIGRATION,
-    FLOCON_API_EMBEDDED_UPLOADER_COUNT_QUOTA,
-    FLOCON_API_EMBEDDED_UPLOADER_MAX_FILE_SIZE,
-    FLOCON_API_EMBEDDED_UPLOADER_PATH,
-    FLOCON_API_EMBEDDED_UPLOADER_SIZE_QUOTA,
-    FLOCON_API_ENTRY_PASSWORD,
-    FLOCON_API_POSTGRESQL,
-    FLOCON_API_SQLITE,
-    NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG,
+    EMBUPLOADER_COUNT_QUOTA,
+    EMBUPLOADER_MAX_FILE_SIZE,
+    EMBUPLOADER_PATH,
+    EMBUPLOADER_SIZE_QUOTA,
+    ENTRY_PASSWORD,
+    POSTGRESQL,
+    SQLITE,
+    NEXT_PUBLIC_FIREBASE_CONFIG,
 } from './src/env';
 import { always, bcrypt, disabled, plain, postgresql, sqlite } from './src/configType';
 import { hash } from 'bcrypt';
@@ -285,7 +285,7 @@ const main = async (): Promise<void> => {
     };
     root.children.push({
         type: leaf,
-        envKey: NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG,
+        envKey: NEXT_PUBLIC_FIREBASE_CONFIG,
         question: firebaseConfigPrompt,
     });
     root.children.push({
@@ -295,17 +295,17 @@ const main = async (): Promise<void> => {
     });
     root.children.push({
         type: leaf,
-        envKey: FLOCON_API_ENTRY_PASSWORD,
+        envKey: ENTRY_PASSWORD,
         question: entryPassword,
     });
     root.children.push({
         type: leaf,
-        envKey: FLOCON_API_POSTGRESQL,
+        envKey: POSTGRESQL,
         question: database(postgresql),
     });
     root.children.push({
         type: leaf,
-        envKey: FLOCON_API_SQLITE,
+        envKey: SQLITE,
         question: database(sqlite),
     });
     const embeddedUploaderNode: Node = {
@@ -325,27 +325,27 @@ const main = async (): Promise<void> => {
     root.children.push(embeddedUploaderNode);
     embeddedUploaderNode.children.push({
         type: leaf,
-        envKey: FLOCON_API_ACCESS_CONTROL_ALLOW_ORIGIN,
+        envKey: ACCESS_CONTROL_ALLOW_ORIGIN,
         question: accessControlAllowOrigin,
     });
     embeddedUploaderNode.children.push({
         type: leaf,
-        envKey: FLOCON_API_EMBEDDED_UPLOADER_PATH,
+        envKey: EMBUPLOADER_PATH,
         question: embeddedUploaderPath,
     });
     embeddedUploaderNode.children.push({
         type: leaf,
-        envKey: FLOCON_API_EMBEDDED_UPLOADER_MAX_FILE_SIZE,
+        envKey: EMBUPLOADER_MAX_FILE_SIZE,
         question: lang => inputNumber(lang, 'byte'),
     });
     embeddedUploaderNode.children.push({
         type: leaf,
-        envKey: FLOCON_API_EMBEDDED_UPLOADER_COUNT_QUOTA,
+        envKey: EMBUPLOADER_COUNT_QUOTA,
         question: lang => inputNumber(lang),
     });
     embeddedUploaderNode.children.push({
         type: leaf,
-        envKey: FLOCON_API_EMBEDDED_UPLOADER_SIZE_QUOTA,
+        envKey: EMBUPLOADER_SIZE_QUOTA,
         question: lang => inputNumber(lang, 'byte'),
     });
 

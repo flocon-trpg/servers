@@ -27,7 +27,7 @@ import { Context } from 'graphql-ws';
 import { thumbsDir } from './utils/thumbsDir';
 import { RateLimiterAbstract, RateLimiterMemory } from 'rate-limiter-flexible';
 import { consume } from './rateLimit/consume';
-import { FLOCON_API_EMBEDDED_UPLOADER_PATH } from './env';
+import { EMBUPLOADER_PATH } from './env';
 
 export const createServer = async ({
     serverConfig,
@@ -122,8 +122,8 @@ export const createServer = async ({
         }
         if (directory == null) {
             AppConsole.warn({
-                en: `The uploader of API server is disabled because "${FLOCON_API_EMBEDDED_UPLOADER_PATH}" is empty.`,
-                ja: `"${FLOCON_API_EMBEDDED_UPLOADER_PATH}"の値が空なので、APIサーバーのアップローダーは無効化されています。`,
+                en: `The uploader of API server is disabled because "${EMBUPLOADER_PATH}" is empty.`,
+                ja: `"${EMBUPLOADER_PATH}"の値が空なので、APIサーバーのアップローダーは無効化されています。`,
             });
             return;
         }

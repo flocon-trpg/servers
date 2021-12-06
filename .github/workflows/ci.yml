@@ -36,7 +36,7 @@ jobs:
               run: yarn run build:self && yarn run export
               working-directory: ./packages/web-server
               env:
-                  NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG: ${{ secrets.NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG }}
+                  NEXT_PUBLIC_FIREBASE_CONFIG: ${{ secrets.NEXT_PUBLIC_FIREBASE_CONFIG }}
                   NEXT_PUBLIC_FLOCON_WEB_CONFIG: ${{ secrets.NEXT_PUBLIC_FLOCON_WEB_CONFIG }}
 
     test-cache-redis:
@@ -118,7 +118,7 @@ jobs:
             - name: Migration-up SQLite(1)
               run: yarn migration-up --db sqlite
               env:
-                  FLOCON_API_SQLITE: >
+                  SQLITE: >
                       {
                           "dbName": "./test1.sqlite3"
                       }
@@ -126,7 +126,7 @@ jobs:
             - name: Migration-up SQLite(2)
               run: yarn migration-up --db sqlite
               env:
-                  FLOCON_API_SQLITE: >
+                  SQLITE: >
                       {
                           "dbName": "./test2.sqlite3"
                       }
@@ -134,7 +134,7 @@ jobs:
             - name: Migration-up PostgreSQL
               run: yarn migration-up --db postgresql
               env:
-                  FLOCON_API_POSTGRESQL: >
+                  POSTGRESQL: >
                       {
                           "clientUrl": "postgresql://postgres:postgres@postgres:5432/test"
                       }

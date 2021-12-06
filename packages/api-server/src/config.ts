@@ -22,17 +22,17 @@ import {
 import * as E from 'fp-ts/Either';
 import { formatValidationErrors } from './utils/io-ts-reporters';
 import {
-    FLOCON_API_ACCESS_CONTROL_ALLOW_ORIGIN,
+    ACCESS_CONTROL_ALLOW_ORIGIN,
     FLOCON_API_AUTO_MIGRATION,
     FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL,
-    FLOCON_API_EMBEDDED_UPLOADER_COUNT_QUOTA,
-    FLOCON_API_EMBEDDED_UPLOADER_MAX_FILE_SIZE,
-    FLOCON_API_EMBEDDED_UPLOADER_PATH,
-    FLOCON_API_EMBEDDED_UPLOADER_SIZE_QUOTA,
-    FLOCON_API_ENABLE_EMBEDDED_UPLOADER,
-    FLOCON_API_ENTRY_PASSWORD,
-    FLOCON_API_POSTGRESQL,
-    FLOCON_API_SQLITE,
+    EMBUPLOADER_COUNT_QUOTA,
+    EMBUPLOADER_MAX_FILE_SIZE,
+    EMBUPLOADER_PATH,
+    EMBUPLOADER_SIZE_QUOTA,
+    EMBUPLOADER_ENABLED,
+    ENTRY_PASSWORD,
+    POSTGRESQL,
+    SQLITE,
     loadDotenv,
 } from './env';
 import { filterInt, isTruthyString } from '@flocon-trpg/utils';
@@ -49,11 +49,11 @@ const filterNullableInt = (source: string | null | undefined) => {
 const loadFirebaseConfigCore = (): FirebaseConfig => {
     let env = process.env['FLOCON_FIREBASE_CONFIG'];
     if (env == null) {
-        env = process.env['NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG'];
+        env = process.env['NEXT_PUBLIC_FIREBASE_CONFIG'];
     }
     if (env == null) {
         throw new Error(
-            'Firebase config is not found. Set FLOCON_FIREBASE_CONFIG or NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG environment variable.'
+            'Firebase config is not found. Set FLOCON_FIREBASE_CONFIG or NEXT_PUBLIC_FIREBASE_CONFIG environment variable.'
         );
     }
     const json = JSON.parse(env);
@@ -74,9 +74,9 @@ const loadServerConfig = ({
 }): ServerConfig => {
     let entryPasswordConfig: EntryPasswordConfig | undefined;
     if (!ignoreEntryPassword) {
-        const entryPasswordObject = process.env[FLOCON_API_ENTRY_PASSWORD];
+        const entryPasswordObject = process.env[ENTRY_PASSWORD];
         if (entryPasswordObject == null) {
-            throw new Error(`${FLOCON_API_ENTRY_PASSWORD} is required but not found.`);
+            throw new Error(`${ENTRY_PASSWORD} is required but not found.`);
         } else {
             const json = JSON.parse(entryPasswordObject);
 
@@ -94,8 +94,8 @@ const loadServerConfig = ({
 
     let databaseConfig: DatabaseConfig;
     {
-        const psqlObject = process.env[FLOCON_API_POSTGRESQL];
-        const sqliteObject = process.env[FLOCON_API_SQLITE];
+        const psqlObject = process.env[POSTGRESQL];
+        const sqliteObject = process.env[SQLITE];
 
         let psqlConfig: PostgresqlDatabaseConfig | null;
         if (psqlObject == null) {
@@ -127,7 +127,7 @@ const loadServerConfig = ({
                     if (sqliteConfig != null) {
                         if (psqlConfig != null) {
                             throw new Error(
-                                `Because both ${FLOCON_API_POSTGRESQL} and ${FLOCON_API_SQLITE} are set, you must use --db parameter to specify a database to use.`
+                                `Because both ${POSTGRESQL} and ${SQLITE} are set, you must use --db parameter to specify a database to use.`
                             );
                         }
                         return {
@@ -137,9 +137,7 @@ const loadServerConfig = ({
                         } as const;
                     }
                     if (psqlConfig == null) {
-                        throw new Error(
-                            `${FLOCON_API_POSTGRESQL} or ${FLOCON_API_SQLITE} is required.`
-                        );
+                        throw new Error(`${POSTGRESQL} or ${SQLITE} is required.`);
                     }
                     return {
                         ...psqlConfig,
@@ -151,7 +149,7 @@ const loadServerConfig = ({
                 break;
             case sqlite: {
                 if (sqliteConfig == null) {
-                    throw new Error(`${FLOCON_API_SQLITE} is required.`);
+                    throw new Error(`${SQLITE} is required.`);
                 }
                 databaseConfig = {
                     ...sqliteConfig,
@@ -162,7 +160,7 @@ const loadServerConfig = ({
             }
             case postgresql: {
                 if (psqlConfig == null) {
-                    throw new Error(`${FLOCON_API_POSTGRESQL} is required.`);
+                    throw new Error(`${POSTGRESQL} is required.`);
                 }
                 databaseConfig = {
                     ...psqlConfig,
@@ -180,20 +178,14 @@ const loadServerConfig = ({
         database: databaseConfig,
         entryPassword: entryPasswordConfig,
         uploader: {
-            enabled: isTruthyString(process.env[FLOCON_API_ENABLE_EMBEDDED_UPLOADER]),
-            directory: process.env[FLOCON_API_EMBEDDED_UPLOADER_PATH],
-            countQuota:
-                filterNullableInt(process.env[FLOCON_API_EMBEDDED_UPLOADER_COUNT_QUOTA]) ??
-                undefined,
-            sizeQuota:
-                filterNullableInt(process.env[FLOCON_API_EMBEDDED_UPLOADER_SIZE_QUOTA]) ??
-                undefined,
-            maxFileSize:
-                filterNullableInt(process.env[FLOCON_API_EMBEDDED_UPLOADER_MAX_FILE_SIZE]) ??
-                undefined,
+            enabled: isTruthyString(process.env[EMBUPLOADER_ENABLED]),
+            directory: process.env[EMBUPLOADER_PATH],
+            countQuota: filterNullableInt(process.env[EMBUPLOADER_COUNT_QUOTA]) ?? undefined,
+            sizeQuota: filterNullableInt(process.env[EMBUPLOADER_SIZE_QUOTA]) ?? undefined,
+            maxFileSize: filterNullableInt(process.env[EMBUPLOADER_MAX_FILE_SIZE]) ?? undefined,
         },
         autoMigration: process.env[FLOCON_API_AUTO_MIGRATION] === always,
-        accessControlAllowOrigin: process.env[FLOCON_API_ACCESS_CONTROL_ALLOW_ORIGIN],
+        accessControlAllowOrigin: process.env[ACCESS_CONTROL_ALLOW_ORIGIN],
         disableRateLimitExperimental:
             process.env[FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL] === 'true',
     };

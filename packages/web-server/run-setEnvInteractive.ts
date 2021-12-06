@@ -1,10 +1,10 @@
 import { prompt } from 'inquirer';
 import {
-    NEXT_PUBLIC_FLOCON_API_HTTP,
-    NEXT_PUBLIC_FLOCON_API_WS,
-    NEXT_PUBLIC_FLOCON_AUTH_PROVIDERS,
-    NEXT_PUBLIC_FLOCON_FIREBASE_UPLOADER_ENABLED,
-    NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG,
+    NEXT_PUBLIC_API_HTTP,
+    NEXT_PUBLIC_API_WS,
+    NEXT_PUBLIC_AUTH_PROVIDERS,
+    NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED,
+    NEXT_PUBLIC_FIREBASE_CONFIG,
     email,
     google,
     twitter,
@@ -97,27 +97,27 @@ const main = async (): Promise<void> => {
     };
     root.children.push({
         type: leaf,
-        envKey: NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG,
+        envKey: NEXT_PUBLIC_FIREBASE_CONFIG,
         question: firebaseConfigPrompt,
     });
     root.children.push({
         type: leaf,
-        envKey: NEXT_PUBLIC_FLOCON_API_HTTP,
+        envKey: NEXT_PUBLIC_API_HTTP,
         question: urlInput('http'),
     });
     root.children.push({
         type: leaf,
-        envKey: NEXT_PUBLIC_FLOCON_API_WS,
+        envKey: NEXT_PUBLIC_API_WS,
         question: urlInput('ws'),
     });
     root.children.push({
         type: leaf,
-        envKey: NEXT_PUBLIC_FLOCON_AUTH_PROVIDERS,
+        envKey: NEXT_PUBLIC_AUTH_PROVIDERS,
         question: list,
     });
     root.children.push({
         type: leaf,
-        envKey: NEXT_PUBLIC_FLOCON_FIREBASE_UPLOADER_ENABLED,
+        envKey: NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED,
         question: b,
     });
 
