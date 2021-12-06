@@ -136,8 +136,7 @@ jobs:
               env:
                   FLOCON_API_POSTGRESQL: >
                       {
-                          "dbName": "test",
-                          "clientUrl": "postgresql://postgres:postgres@postgres:5432"
+                          "clientUrl": "postgresql://postgres:postgres@postgres:5432/test"
                       }
 
             # skips `yarn build` because it already has js files
