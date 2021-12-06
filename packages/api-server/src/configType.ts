@@ -51,8 +51,8 @@ export type DatabaseConfig =
       };
 
 export const firebaseAdminSecret = t.type({
-    clientEmail: t.string,
-    privateKey: t.string,
+    client_email: t.string,
+    private_key: t.string,
 });
 
 export type FirebaseAdminSecretConfig = t.TypeOf<typeof firebaseAdminSecret>;

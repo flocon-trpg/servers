@@ -42,8 +42,8 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
                 ? undefined
                 : admin.credential.cert({
                       projectId: firebaseConfig.projectId,
-                      clientEmail: serverConfig.firebaseAdminSecret.clientEmail,
-                      privateKey: serverConfig.firebaseAdminSecret.privateKey,
+                      clientEmail: serverConfig.firebaseAdminSecret.client_email,
+                      privateKey: serverConfig.firebaseAdminSecret.private_key,
                   }),
     });
 
