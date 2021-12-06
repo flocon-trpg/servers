@@ -31,13 +31,22 @@ const logEntryPasswordConfig = (serverConfig: ServerConfig) => {
 };
 
 export const main = async (params: { debug: boolean }): Promise<void> => {
-    admin.initializeApp({
-        projectId: loadFirebaseConfig().projectId,
-    });
-
-    const connectionManager = new InMemoryConnectionManager();
+    const firebaseConfig = loadFirebaseConfig();
 
     const serverConfig = await loadServerConfigAsMain();
+
+    admin.initializeApp({
+        projectId: firebaseConfig.projectId,
+        credential:
+            serverConfig.firebaseAdminSecret == null
+                ? undefined
+                : admin.credential.cert({
+                      projectId: firebaseConfig.projectId,
+                      clientEmail: serverConfig.firebaseAdminSecret.clientEmail,
+                      privateKey: serverConfig.firebaseAdminSecret.privateKey,
+                  }),
+    });
+
     const schema = await buildSchema(serverConfig)({ emitSchemaFile: false, pubSub });
     const dbType = serverConfig.database.__type;
     const orm = await prepareORM(serverConfig.database, params.debug);
@@ -88,6 +97,8 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
         }
         return authTokenValue == null ? undefined : await getDecodedIdToken(authTokenValue);
     };
+
+    const connectionManager = new InMemoryConnectionManager();
 
     // TODO: queueLimitの値をきちんと決める
     const promiseQueue = new PromiseQueue({ queueLimit: 50 });

@@ -50,6 +50,13 @@ export type DatabaseConfig =
           driverOptions: Record<string, unknown> | undefined;
       };
 
+export const firebaseAdminSecret = t.type({
+    clientEmail: t.string,
+    privateKey: t.string,
+});
+
+export type FirebaseAdminSecretConfig = t.TypeOf<typeof firebaseAdminSecret>;
+
 export const entryPassword = t.union([
     t.type({ type: t.literal(none) }),
     t.type({
@@ -83,6 +90,7 @@ export type ServerConfig = {
     admins: string[];
     database: DatabaseConfig;
     entryPassword?: EntryPasswordConfig;
+    firebaseAdminSecret?: FirebaseAdminSecretConfig;
     uploader: UploaderConfig;
     autoMigration: boolean;
     accessControlAllowOrigin?: string;

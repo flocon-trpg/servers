@@ -4,6 +4,8 @@ import {
     DatabaseConfig,
     entryPassword,
     EntryPasswordConfig,
+    firebaseAdminSecret,
+    FirebaseAdminSecretConfig,
     none,
     postgresql,
     postgresqlDatabase,
@@ -34,6 +36,7 @@ import {
     POSTGRESQL,
     SQLITE,
     loadDotenv,
+    FIREBASE_ADMIN_SECRET,
 } from './env';
 import { filterInt, isTruthyString } from '@flocon-trpg/utils';
 
@@ -67,11 +70,32 @@ const loadFirebaseConfigCore = (): FirebaseConfig => {
 
 const loadServerConfig = ({
     databaseArg,
+    ignoreFirebaseAdminSecret,
     ignoreEntryPassword,
 }: {
     databaseArg: typeof postgresql | typeof sqlite | null;
+    ignoreFirebaseAdminSecret: boolean;
     ignoreEntryPassword: boolean;
 }): ServerConfig => {
+    let firebaseAdminSecretConfig: FirebaseAdminSecretConfig | undefined;
+    if (ignoreFirebaseAdminSecret) {
+        firebaseAdminSecretConfig = undefined;
+    } else {
+        const firebaseAdminSecretObject = process.env[FIREBASE_ADMIN_SECRET];
+        if (firebaseAdminSecretObject == null) {
+            console.log(`${FIREBASE_ADMIN_SECRET} is not found.`);
+        } else {
+            const json = JSON.parse(firebaseAdminSecretObject);
+            const j = firebaseAdminSecret.decode(json);
+            if (j._tag === 'Left') {
+                throw new Error(
+                    `An error occured while decoding ${FIREBASE_ADMIN_SECRET} JSON (for security reasons, detailed error messages are not shown).`
+                );
+            }
+            firebaseAdminSecretConfig = j.right;
+        }
+    }
+
     let entryPasswordConfig: EntryPasswordConfig | undefined;
     if (!ignoreEntryPassword) {
         const entryPasswordObject = process.env[ENTRY_PASSWORD];
@@ -177,6 +201,7 @@ const loadServerConfig = ({
         admins: [],
         database: databaseConfig,
         entryPassword: entryPasswordConfig,
+        firebaseAdminSecret: firebaseAdminSecretConfig,
         uploader: {
             enabled: isTruthyString(process.env[EMBUPLOADER_ENABLED]),
             directory: process.env[EMBUPLOADER_PATH],
@@ -206,6 +231,7 @@ export const loadServerConfigAsMain = async (): Promise<ServerConfig> => {
         serverConfigAsMainCache = loadServerConfig({
             databaseArg: (await loadAsMain()).db ?? null,
             ignoreEntryPassword: false,
+            ignoreFirebaseAdminSecret: false,
         });
     }
     return serverConfigAsMainCache;
@@ -217,6 +243,7 @@ export const loadServerConfigAsCheck = async (): Promise<ServerConfig> => {
         serverConfigAsCheckCache = loadServerConfig({
             databaseArg: (await loadAsMain()).db ?? null,
             ignoreEntryPassword: true,
+            ignoreFirebaseAdminSecret: true,
         });
     }
     return serverConfigAsCheckCache;
@@ -228,6 +255,7 @@ export const loadServerConfigAsMigrationCreate = async (): Promise<ServerConfig>
         serverConfigAsMigrationCreateCache = loadServerConfig({
             databaseArg: (await loadMigrationCreate()).db ?? null,
             ignoreEntryPassword: true,
+            ignoreFirebaseAdminSecret: true,
         });
     }
     return serverConfigAsMigrationCreateCache;
@@ -239,6 +267,7 @@ export const loadServerConfigAsMigrationUp = async (): Promise<ServerConfig> => 
         serverConfigAsMigrationUpCache = loadServerConfig({
             databaseArg: (await loadMigrationUp()).db ?? null,
             ignoreEntryPassword: true,
+            ignoreFirebaseAdminSecret: true,
         });
     }
     return serverConfigAsMigrationUpCache;
@@ -253,8 +282,8 @@ export const loadServerConfigAsMigrationDown = async (): Promise<
         serverConfigAsMigrationDownCache = {
             ...loadServerConfig({
                 databaseArg: loaded.db ?? null,
-
                 ignoreEntryPassword: true,
+                ignoreFirebaseAdminSecret: true,
             }),
             count: loaded.count,
         };
