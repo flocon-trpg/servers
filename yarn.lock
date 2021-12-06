@@ -1847,7 +1847,7 @@ __metadata:
   dependencies:
     "@flocon-trpg/utils": "workspace:^"
     "@types/inquirer": 8.1.3
-    "@types/node": 14.17.34
+    "@types/node": 14.18.0
     chalk: ^4.0.0
     dotenv: ^10.0.0
     envfile: ^6.17.0
@@ -3886,10 +3886,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:14.17.34, @types/node@npm:^14.0.0":
-  version: 14.17.34
-  resolution: "@types/node@npm:14.17.34"
-  checksum: 803a7532b6998aca6aa1b3e6239f280e82612d4f641d38fbf08962c905ea9d1b278b2f09d396beac5120a4e68f33d7467298b197f2f00150ec1dcd546de02a89
+"@types/node@npm:14.18.0":
+  version: 14.18.0
+  resolution: "@types/node@npm:14.18.0"
+  checksum: b120c26fe5f30bc358e861db8d7e401e419d14bd9dd25c022f3c2ea8b0b429d4c9efd77ad5d6d2a8bde61702a6786fb74d409f1b2cbb61c79133e2a65aab4fb1
   languageName: node
   linkType: hard
 
@@ -3897,6 +3897,13 @@ __metadata:
   version: 10.17.60
   resolution: "@types/node@npm:10.17.60"
   checksum: 2cdb3a77d071ba8513e5e8306fa64bf50e3c3302390feeaeff1fd325dd25c8441369715dfc8e3701011a72fed5958c7dfa94eb9239a81b3c286caa4d97db6eef
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^14.0.0":
+  version: 14.17.34
+  resolution: "@types/node@npm:14.17.34"
+  checksum: 803a7532b6998aca6aa1b3e6239f280e82612d4f641d38fbf08962c905ea9d1b278b2f09d396beac5120a4e68f33d7467298b197f2f00150ec1dcd546de02a89
   languageName: node
   linkType: hard
 
