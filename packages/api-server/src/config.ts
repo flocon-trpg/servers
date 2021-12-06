@@ -94,8 +94,8 @@ const loadServerConfig = ({
         firebaseAdminSecretConfig = undefined;
     } else {
         const firebaseAdminSecretObject = process.env[FIREBASE_ADMIN_SECRET];
-        if (firebaseAdminSecretObject == null) {
-            console.log(`${FIREBASE_ADMIN_SECRET} is not found.`);
+        if (firebaseAdminSecretObject == null || firebaseAdminSecretObject.trim() === '') {
+            console.log(`${FIREBASE_ADMIN_SECRET} is not found and will be ignored.`);
         } else {
             const json = parseJSON({
                 json: firebaseAdminSecretObject,
