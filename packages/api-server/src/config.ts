@@ -37,6 +37,8 @@ import {
     SQLITE,
     loadDotenv,
     FIREBASE_ADMIN_SECRET,
+    NEXT_PUBLIC_FIREBASE_CONFIG,
+    FIREBASE_CONFIG,
 } from './env';
 import { filterInt, isTruthyString } from '@flocon-trpg/utils';
 
@@ -58,15 +60,15 @@ const filterNullableInt = (source: string | null | undefined) => {
 };
 
 const loadFirebaseConfigCore = (): FirebaseConfig => {
-    let env = process.env['FLOCON_FIREBASE_CONFIG'];
+    let env = process.env[FIREBASE_CONFIG];
     let name = FIREBASE_CONFIG;
     if (env == null) {
-        env = process.env['NEXT_PUBLIC_FIREBASE_CONFIG'];
+        env = process.env[NEXT_PUBLIC_FIREBASE_CONFIG];
         name = NEXT_PUBLIC_FIREBASE_CONFIG;
     }
     if (env == null) {
         throw new Error(
-            'Firebase config is not found. Set FLOCON_FIREBASE_CONFIG or NEXT_PUBLIC_FIREBASE_CONFIG environment variable.'
+            `Firebase config is not found. Set ${NEXT_PUBLIC_FIREBASE_CONFIG} or ${FIREBASE_CONFIG} environment variable.`
         );
     }
     const json = parseJSON({ json: env, name });
