@@ -13,6 +13,7 @@ import { BaasType } from './enums/BaasType';
 import { AppConsole } from './utils/appConsole';
 import { ServerConfig } from './configType';
 import { createServer } from './createServer';
+import { VERSION } from './VERSION';
 
 const logEntryPasswordConfig = (serverConfig: ServerConfig) => {
     if (serverConfig.entryPassword == null) {
@@ -31,6 +32,10 @@ const logEntryPasswordConfig = (serverConfig: ServerConfig) => {
 };
 
 export const main = async (params: { debug: boolean }): Promise<void> => {
+    AppConsole.log({
+        en: `Flocon API Server v${VERSION.toString()}`,
+    });
+
     const firebaseConfig = loadFirebaseConfig();
 
     const serverConfig = await loadServerConfigAsMain();
