@@ -16,6 +16,7 @@ const PostgreSQLConfig = {
     dbName: 'test',
     clientUrl: postgresClientUrl,
     debug: true,
+    driverOptions: undefined,
 };
 
 export type DbConfig =
@@ -47,11 +48,13 @@ const createDatabaseConfig = (dbConfig: DbConfig): DatabaseConfig => {
                 __type: postgresql,
                 clientUrl: postgresClientUrl,
                 dbName: 'test',
+                driverOptions: undefined,
             };
         case 'SQLite':
             return {
                 __type: sqlite,
                 dbName: dbConfig.dbName,
+                driverOptions: undefined,
             };
     }
 };

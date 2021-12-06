@@ -132,6 +132,7 @@ const loadServerConfig = ({
                         }
                         return {
                             ...sqliteConfig,
+                            driverOptions: sqliteConfig.driverOptions,
                             __type: sqlite,
                         } as const;
                     }
@@ -140,6 +141,7 @@ const loadServerConfig = ({
                     }
                     return {
                         ...psqlConfig,
+                        driverOptions: psqlConfig.driverOptions,
                         __type: postgresql,
                     } as const;
                 })();
@@ -150,6 +152,7 @@ const loadServerConfig = ({
                 }
                 databaseConfig = {
                     ...sqliteConfig,
+                    driverOptions: sqliteConfig.driverOptions,
                     __type: sqlite,
                 };
                 break;
@@ -160,6 +163,7 @@ const loadServerConfig = ({
                 }
                 databaseConfig = {
                     ...psqlConfig,
+                    driverOptions: psqlConfig.driverOptions,
                     __type: postgresql,
                 };
                 break;

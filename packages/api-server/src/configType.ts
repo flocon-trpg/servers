@@ -10,16 +10,26 @@ export const always = 'always';
 export const disabled = 'disabled';
 export const none = 'none';
 
-export const postgresqlDatabase = t.type({
-    dbName: t.string,
-    clientUrl: t.string,
+const driverOptionsConfig = t.partial({
+    driverOptions: t.record(t.string, t.unknown),
 });
+
+export const postgresqlDatabase = t.intersection([
+    driverOptionsConfig,
+    t.type({
+        dbName: t.string,
+        clientUrl: t.string,
+    }),
+]);
 
 export type PostgresqlDatabaseConfig = t.TypeOf<typeof postgresqlDatabase>;
 
-export const sqliteDatabase = t.type({
-    dbName: t.string,
-});
+export const sqliteDatabase = t.intersection([
+    driverOptionsConfig,
+    t.type({
+        dbName: t.string,
+    }),
+]);
 
 export type SqliteDatabaseConfig = t.TypeOf<typeof sqliteDatabase>;
 
@@ -28,10 +38,12 @@ export type DatabaseConfig =
           __type: typeof postgresql;
           dbName: string;
           clientUrl: string;
+          driverOptions: Record<string, unknown> | undefined;
       }
     | {
           __type: typeof sqlite;
           dbName: string;
+          driverOptions: Record<string, unknown> | undefined;
       };
 
 export const entryPassword = t.union([

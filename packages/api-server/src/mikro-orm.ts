@@ -1,4 +1,10 @@
-import { Connection, IDatabaseDriver, LoggerNamespace, MikroORM } from '@mikro-orm/core';
+import {
+    Connection,
+    Dictionary,
+    IDatabaseDriver,
+    LoggerNamespace,
+    MikroORM,
+} from '@mikro-orm/core';
 import { DatabaseConfig, postgresql, sqlite } from './configType';
 import { File } from './graphql+mikro-orm/entities/file/mikro-orm';
 import { FileTag } from './graphql+mikro-orm/entities/fileTag/mikro-orm';
@@ -55,10 +61,12 @@ export const createPostgreSQL = async ({
     dbName,
     clientUrl,
     debug,
+    driverOptions,
 }: {
     dbName: string;
     clientUrl: string;
     debug?: Debug;
+    driverOptions: Dictionary<unknown> | undefined;
 }): Promise<MikroORM<IDatabaseDriver<Connection>>> => {
     return await MikroORM.init({
         entities,
@@ -70,6 +78,7 @@ export const createPostgreSQL = async ({
         debug,
         forceUndefined: true,
         clientUrl,
+        driverOptions,
     });
 };
 
