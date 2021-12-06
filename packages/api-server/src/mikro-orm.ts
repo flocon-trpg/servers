@@ -63,7 +63,7 @@ export const createPostgreSQL = async ({
     debug,
     driverOptions,
 }: {
-    dbName: string;
+    dbName: string | undefined;
     clientUrl: string;
     debug?: Debug;
     driverOptions: Dictionary<unknown> | undefined;

@@ -14,10 +14,14 @@ const driverOptionsConfig = t.partial({
     driverOptions: t.record(t.string, t.unknown),
 });
 
+const partialDbName = t.partial({
+    dbName: t.string,
+});
+
 export const postgresqlDatabase = t.intersection([
     driverOptionsConfig,
+    partialDbName,
     t.type({
-        dbName: t.string,
         clientUrl: t.string,
     }),
 ]);
@@ -36,7 +40,7 @@ export type SqliteDatabaseConfig = t.TypeOf<typeof sqliteDatabase>;
 export type DatabaseConfig =
     | {
           __type: typeof postgresql;
-          dbName: string;
+          dbName: string | undefined;
           clientUrl: string;
           driverOptions: Record<string, unknown> | undefined;
       }

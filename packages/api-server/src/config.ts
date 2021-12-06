@@ -142,6 +142,7 @@ const loadServerConfig = ({
                     return {
                         ...psqlConfig,
                         driverOptions: psqlConfig.driverOptions,
+                        dbName: psqlConfig.dbName,
                         __type: postgresql,
                     } as const;
                 })();
@@ -164,6 +165,7 @@ const loadServerConfig = ({
                 databaseConfig = {
                     ...psqlConfig,
                     driverOptions: psqlConfig.driverOptions,
+                    dbName: psqlConfig.dbName,
                     __type: postgresql,
                 };
                 break;
