@@ -42,6 +42,14 @@ import { filterInt, isTruthyString } from '@flocon-trpg/utils';
 
 loadDotenv();
 
+const parseJSON = ({ json, name }: { json: string; name: string }): unknown => {
+    try {
+        return JSON.parse(json);
+    } catch {
+        throw new Error(`Could not parse ${name} JSON`);
+    }
+};
+
 const filterNullableInt = (source: string | null | undefined) => {
     if (source == null) {
         return source;
@@ -51,15 +59,17 @@ const filterNullableInt = (source: string | null | undefined) => {
 
 const loadFirebaseConfigCore = (): FirebaseConfig => {
     let env = process.env['FLOCON_FIREBASE_CONFIG'];
+    let name = FIREBASE_CONFIG;
     if (env == null) {
         env = process.env['NEXT_PUBLIC_FIREBASE_CONFIG'];
+        name = NEXT_PUBLIC_FIREBASE_CONFIG;
     }
     if (env == null) {
         throw new Error(
             'Firebase config is not found. Set FLOCON_FIREBASE_CONFIG or NEXT_PUBLIC_FIREBASE_CONFIG environment variable.'
         );
     }
-    const json = JSON.parse(env);
+    const json = parseJSON({ json: env, name });
 
     const decoded = E.mapLeft(formatValidationErrors)(firebaseConfigIo.decode(json));
     if (decoded._tag === 'Left') {
@@ -85,7 +95,10 @@ const loadServerConfig = ({
         if (firebaseAdminSecretObject == null) {
             console.log(`${FIREBASE_ADMIN_SECRET} is not found.`);
         } else {
-            const json = JSON.parse(firebaseAdminSecretObject);
+            const json = parseJSON({
+                json: firebaseAdminSecretObject,
+                name: FIREBASE_ADMIN_SECRET,
+            });
             const j = firebaseAdminSecret.decode(json);
             if (j._tag === 'Left') {
                 throw new Error(
@@ -102,7 +115,7 @@ const loadServerConfig = ({
         if (entryPasswordObject == null) {
             throw new Error(`${ENTRY_PASSWORD} is required but not found.`);
         } else {
-            const json = JSON.parse(entryPasswordObject);
+            const json = parseJSON({ json: entryPasswordObject, name: ENTRY_PASSWORD });
 
             const j = E.mapLeft(formatValidationErrors)(entryPassword.decode(json));
             if (j._tag === 'Left') {
@@ -125,7 +138,7 @@ const loadServerConfig = ({
         if (psqlObject == null) {
             psqlConfig = null;
         } else {
-            const json = JSON.parse(psqlObject);
+            const json = parseJSON({ json: psqlObject, name: POSTGRESQL });
             const j = E.mapLeft(formatValidationErrors)(postgresqlDatabase.decode(json));
             if (j._tag === 'Left') {
                 throw new Error(j.left);
@@ -137,7 +150,7 @@ const loadServerConfig = ({
         if (sqliteObject == null) {
             sqliteConfig = null;
         } else {
-            const json = JSON.parse(sqliteObject);
+            const json = parseJSON({ json: sqliteObject, name: SQLITE });
             const j = E.mapLeft(formatValidationErrors)(sqliteDatabase.decode(json));
             if (j._tag === 'Left') {
                 throw new Error(j.left);

@@ -20,6 +20,7 @@ export const loadDotenv = (): void => {
 
 // これらを変更したら、あわせて.env.localのテンプレートも変更する必要がある
 
+export const FIREBASE_CONFIG = 'FIREBASE_CONFIG';
 export const NEXT_PUBLIC_FIREBASE_CONFIG = 'NEXT_PUBLIC_FIREBASE_CONFIG';
 export const FIREBASE_ADMIN_SECRET = 'FIREBASE_ADMIN_SECRET';
 export const FLOCON_API_ADMINS = 'FLOCON_API_ADMINS';
