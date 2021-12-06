@@ -153,17 +153,10 @@ const Index: React.FC = () => {
                     {versionInfo}
                 </QueryResultViewer>
                 <div style={{ height: spacing }} />
-                <Typography.Title level={3}>ドキュメント、コラムなど</Typography.Title>
+                <Typography.Title level={3}>ドキュメント</Typography.Title>
                 <ul>
                     <li>
-                        <Link href='/docs/auth'>Floconにおけるユーザー認証の仕組み</Link> (
-                        2021/06/09)
-                    </li>
-                    <li>
-                        <Link href='/docs/storage'>ファイルアップローダーの仕様</Link> ( 2021/06/09)
-                    </li>
-                    <li>
-                        <Link href='/docs/board'>新しくなったボードの使い方</Link> (2021/05/29)
+                        <Link href='/docs/board'>ボードの使い方</Link> (2021/05/29)
                     </li>
                 </ul>
             </div>
