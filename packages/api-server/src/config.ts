@@ -127,7 +127,7 @@ const loadServerConfig = ({
                     if (sqliteConfig != null) {
                         if (psqlConfig != null) {
                             throw new Error(
-                                'When server config has SQLite and PostgreSQL config, you must use --db parameter.'
+                                `Because both ${FLOCON_API_POSTGRESQL} and ${FLOCON_API_SQLITE} are set, you must use --db parameter to specify a database to use.`
                             );
                         }
                         return {
@@ -137,7 +137,9 @@ const loadServerConfig = ({
                         } as const;
                     }
                     if (psqlConfig == null) {
-                        throw new Error('database/postgresql or database/sqlite is required.');
+                        throw new Error(
+                            `${FLOCON_API_POSTGRESQL} or ${FLOCON_API_SQLITE} is required.`
+                        );
                     }
                     return {
                         ...psqlConfig,
@@ -149,7 +151,7 @@ const loadServerConfig = ({
                 break;
             case sqlite: {
                 if (sqliteConfig == null) {
-                    throw new Error('database/sqlite is required.');
+                    throw new Error(`${FLOCON_API_SQLITE} is required.`);
                 }
                 databaseConfig = {
                     ...sqliteConfig,
@@ -160,7 +162,7 @@ const loadServerConfig = ({
             }
             case postgresql: {
                 if (psqlConfig == null) {
-                    throw new Error('database/postgresql is required.');
+                    throw new Error(`${FLOCON_API_POSTGRESQL} is required.`);
                 }
                 databaseConfig = {
                     ...psqlConfig,
