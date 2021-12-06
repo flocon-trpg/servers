@@ -224,7 +224,7 @@ const loadServerConfig = ({
             sizeQuota: filterNullableInt(process.env[EMBUPLOADER_SIZE_QUOTA]) ?? undefined,
             maxFileSize: filterNullableInt(process.env[EMBUPLOADER_MAX_FILE_SIZE]) ?? undefined,
         },
-        autoMigration: process.env[AUTO_MIGRATION] === always,
+        autoMigration: isTruthyString(process.env[AUTO_MIGRATION]),
         accessControlAllowOrigin: process.env[ACCESS_CONTROL_ALLOW_ORIGIN],
         disableRateLimitExperimental:
             process.env[FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL] === 'true',
