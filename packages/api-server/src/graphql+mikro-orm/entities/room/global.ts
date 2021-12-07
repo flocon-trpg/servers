@@ -30,7 +30,6 @@ import { User } from '../user/mikro-orm';
 import { nullableStringToParticipantRoleType } from '../../../enums/ParticipantRoleType';
 import { convertToMaxLength100String } from '../../../utils/convertToMaxLength100String';
 import { isNonEmptyArray, ReadonlyNonEmptyArray } from '../../../utils/readonlyNonEmptyArray';
-import { date } from 'fp-ts';
 
 type IsSequentialResult<T> =
     | {
