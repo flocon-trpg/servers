@@ -40,17 +40,21 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
 
     const serverConfig = await loadServerConfigAsMain();
 
-    admin.initializeApp({
-        projectId: firebaseConfig.projectId,
-        credential:
-            serverConfig.firebaseAdminSecret == null
-                ? undefined
-                : admin.credential.cert({
-                      projectId: firebaseConfig.projectId,
-                      clientEmail: serverConfig.firebaseAdminSecret.client_email,
-                      privateKey: serverConfig.firebaseAdminSecret.private_key,
-                  }),
-    });
+    // credentialにundefinedを渡すと`Invalid Firebase app options passed as the first argument to initializeApp() for the app named "[DEFAULT]". The "credential" property must be an object which implements the Credential interface.`というエラーが出るので回避している
+    if (serverConfig.firebaseAdminSecret == null) {
+        admin.initializeApp({
+            projectId: firebaseConfig.projectId,
+        });
+    } else {
+        admin.initializeApp({
+            projectId: firebaseConfig.projectId,
+            credential: admin.credential.cert({
+                projectId: firebaseConfig.projectId,
+                clientEmail: serverConfig.firebaseAdminSecret.client_email,
+                privateKey: serverConfig.firebaseAdminSecret.private_key,
+            }),
+        });
+    }
 
     const schema = await buildSchema(serverConfig)({ emitSchemaFile: false, pubSub });
     const dbType = serverConfig.database.__type;
