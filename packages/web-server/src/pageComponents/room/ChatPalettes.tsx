@@ -225,7 +225,7 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
                     if (uiSelectorKey === editVarKey) {
                         return (
                             <CharacterVarInput
-                            style={{padding: '0 0 2px 0'}}
+                                style={{ padding: '0 0 2px 0' }}
                                 classNames={classNames(flex1)}
                                 disableResize
                                 character={selectedCharacter}

@@ -1,4 +1,4 @@
-import {  Col, InputNumber, Row, Space } from 'antd';
+import { Col, InputNumber, Row, Space } from 'antd';
 import { Gutter } from 'antd/lib/grid/row';
 import React from 'react';
 

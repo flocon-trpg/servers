@@ -17,7 +17,9 @@ const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
 export const EditRoomDrawer: React.FC = () => {
-    const [editRoomDrawerVisibility, setEditRoomDrawerVisibility] = useAtom(editRoomDrawerVisibilityAtom);
+    const [editRoomDrawerVisibility, setEditRoomDrawerVisibility] = useAtom(
+        editRoomDrawerVisibilityAtom
+    );
     const operateAsStateWithImmer = useSetRoomStateWithImmer();
     const name = useAtomSelector(roomAtom, state => state.roomState?.state?.name);
 

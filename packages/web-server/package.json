@@ -1,12 +1,11 @@
 {
     "name": "@flocon-trpg/web-server",
-    "version": "0.6.0-beta.1",
+    "version": "0.6.1-beta.1",
     "description": "Flocon Web server",
     "dependencies": {
         "@apollo/client": "^3.4.15",
         "@emotion/react": "^11.4.1",
         "@flocon-trpg/core": "workspace:^",
-        "@flocon-trpg/set-env-interactive-core": "workspace:^",
         "@flocon-trpg/typed-document-node": "workspace:^",
         "@flocon-trpg/utils": "workspace:^",
         "@kizahasi/result": "^1.0.0",
@@ -71,7 +70,7 @@
         "@types/jest": "27.0.3",
         "jest": "27.4.3",
         "monaco-editor": "0.26.1",
-        "ts-jest": "27.0.7"
+        "ts-jest": "27.1.0"
     },
     "engines": {
         "node": ">=14"
@@ -94,14 +93,14 @@
     "scripts": {
         "dev": "run-s build:less dev:next",
         "dev:next": "next",
-        "build": "run-s build:less build:next",
+        "build": "run-s build:deps build:self",
+        "build:deps": "yarn workspaces foreach -pvtR --from '@flocon-trpg/web-server' --exclude '@flocon-trpg/web-server' run build",
+        "build:self": "run-s build:less build:next",
         "build:less": "lessc ./src/css/antd.less ./src/css/antd.css --js",
         "build:next": "next build",
-        "export": "run-s build export:next",
-        "export:next": "next export",
+        "export": "next export",
         "start": "next start",
         "serve": "serve ./out",
-        "set-env-interactive": "ts-node -P ./tsconfig.ts-node.json run-setEnvInteractive.ts",
         "test": "jest",
         "type-check": "tsc",
         "tc": "yarn run type-check"

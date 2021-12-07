@@ -15,7 +15,14 @@ type Props = {
 export const BoardPositionEditor: React.FC<Props> = ({ state, onUpdate }: Props) => {
     return (
         <div>
-            {<BoardPositionEditorBase state={state} gutter={gutter} inputSpan={inputSpan} onUpdate={onUpdate} />}
+            {
+                <BoardPositionEditorBase
+                    state={state}
+                    gutter={gutter}
+                    inputSpan={inputSpan}
+                    onUpdate={onUpdate}
+                />
+            }
             <Row gutter={gutter} align='middle'>
                 <Col flex='auto' />
                 <Col flex={0}></Col>

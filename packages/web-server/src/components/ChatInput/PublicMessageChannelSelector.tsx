@@ -11,9 +11,7 @@ import { Draft } from 'immer';
 type Props = {
     config: ChatPalettePanelConfig | MessagePanelConfig;
     onConfigUpdate: (
-        recipe: (
-            draft: Draft<ChatPalettePanelConfig> |Draft<MessagePanelConfig>
-        ) => void
+        recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void
     ) => void;
     titleStyle?: React.CSSProperties;
     inputMaxWidth?: number;

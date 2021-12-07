@@ -13,6 +13,7 @@ import { BaasType } from './enums/BaasType';
 import { AppConsole } from './utils/appConsole';
 import { ServerConfig } from './configType';
 import { createServer } from './createServer';
+import { VERSION } from './VERSION';
 
 const logEntryPasswordConfig = (serverConfig: ServerConfig) => {
     if (serverConfig.entryPassword == null) {
@@ -31,16 +32,33 @@ const logEntryPasswordConfig = (serverConfig: ServerConfig) => {
 };
 
 export const main = async (params: { debug: boolean }): Promise<void> => {
-    admin.initializeApp({
-        projectId: loadFirebaseConfig().projectId,
+    AppConsole.log({
+        en: `Flocon API Server v${VERSION.toString()}`,
     });
 
-    const connectionManager = new InMemoryConnectionManager();
+    const firebaseConfig = loadFirebaseConfig();
 
     const serverConfig = await loadServerConfigAsMain();
+
+    // credentialにundefinedを渡すと`Invalid Firebase app options passed as the first argument to initializeApp() for the app named "[DEFAULT]". The "credential" property must be an object which implements the Credential interface.`というエラーが出るので回避している
+    if (serverConfig.firebaseAdminSecret == null) {
+        admin.initializeApp({
+            projectId: firebaseConfig.projectId,
+        });
+    } else {
+        admin.initializeApp({
+            projectId: firebaseConfig.projectId,
+            credential: admin.credential.cert({
+                projectId: firebaseConfig.projectId,
+                clientEmail: serverConfig.firebaseAdminSecret.client_email,
+                privateKey: serverConfig.firebaseAdminSecret.private_key,
+            }),
+        });
+    }
+
     const schema = await buildSchema(serverConfig)({ emitSchemaFile: false, pubSub });
     const dbType = serverConfig.database.__type;
-    const orm = await prepareORM(serverConfig.database, params.debug);
+    const orm = await prepareORM(serverConfig.database, 'dist', params.debug);
     if (serverConfig.autoMigration) {
         await doAutoMigrationBeforeStart(orm, dbType);
     }
@@ -88,6 +106,8 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
         }
         return authTokenValue == null ? undefined : await getDecodedIdToken(authTokenValue);
     };
+
+    const connectionManager = new InMemoryConnectionManager();
 
     // TODO: queueLimitの値をきちんと決める
     const promiseQueue = new PromiseQueue({ queueLimit: 50 });

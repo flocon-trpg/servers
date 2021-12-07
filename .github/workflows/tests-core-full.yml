@@ -28,8 +28,8 @@ jobs:
 
             - run: yarn
 
-            - name: Prepare other packages
-              run: yarn dist
+            - name: Prepare packages
+              run: yarn build-ci
               working-directory: '.'
 
             - name: Test

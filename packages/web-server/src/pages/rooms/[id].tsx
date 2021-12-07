@@ -94,8 +94,10 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
         if (disableJoinActions) {
             return;
         }
-        const password = roomState.requiresPlayerPassword? playerPassword : undefined;
-        await joinRoomAsPlayer({ variables: { id: roomState.id, password, name } }).then(OnGetResult);
+        const password = roomState.requiresPlayerPassword ? playerPassword : undefined;
+        await joinRoomAsPlayer({ variables: { id: roomState.id, password, name } }).then(
+            OnGetResult
+        );
     };
     const onJoinAsSpectatorButtonClick = async () => {
         if (disableJoinActions) {
@@ -212,7 +214,9 @@ const useRoomConfig = (roomId: string): boolean => {
                 return;
             }
             // immerを使わなくても問題ないが、コード変更があったときにエンバグする可能性を減らすことを狙ってimmerを使っている
-            setRoomConfig(produce(roomConfig, roomConfig => RoomConfigUtils.fixRoomConfig(roomConfig)));
+            setRoomConfig(
+                produce(roomConfig, roomConfig => RoomConfigUtils.fixRoomConfig(roomConfig))
+            );
             setResult(true);
         };
         main();
@@ -260,16 +264,19 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
     });
 
     React.useEffect(() => {
-        setRoomAtomValue({...roomAtom.init, roomId})
+        setRoomAtomValue({ ...roomAtom.init, roomId });
     }, [roomId, setRoomAtomValue]);
     React.useEffect(() => {
-        setRoomAtomValue(roomAtomValue => ({...roomAtomValue, roomState}))
+        setRoomAtomValue(roomAtomValue => ({ ...roomAtomValue, roomState }));
     }, [roomState, setRoomAtomValue]);
     React.useEffect(() => {
-        setRoomAtomValue(roomAtomValue => ({...roomAtomValue, roomEventSubscription}))
+        setRoomAtomValue(roomAtomValue => ({ ...roomAtomValue, roomEventSubscription }));
     }, [roomEventSubscription, setRoomAtomValue]);
     React.useEffect(() => {
-        setRoomAtomValue(roomAtomValue => ({...roomAtomValue, allRoomMessagesResult: allRoomMessages}))
+        setRoomAtomValue(roomAtomValue => ({
+            ...roomAtomValue,
+            allRoomMessagesResult: allRoomMessages,
+        }));
     }, [allRoomMessages, setRoomAtomValue]);
 
     const newNotification = useAtomSelector(roomAtom, room => room.notifications.newValue);

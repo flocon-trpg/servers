@@ -1,6 +1,10 @@
 import * as React from 'react';
 import { Button, Drawer, Input, Result, Tabs, Tooltip } from 'antd';
-import { FilePathFragment, FileSourceType, GetServerInfoDocument } from '@flocon-trpg/typed-document-node';
+import {
+    FilePathFragment,
+    FileSourceType,
+    GetServerInfoDocument,
+} from '@flocon-trpg/typed-document-node';
 import { DrawerFooter } from '../layouts/DrawerFooter';
 import { FilesManagerDrawerType, some } from '../utils/types';
 import { cancelRnd } from '../utils/className';

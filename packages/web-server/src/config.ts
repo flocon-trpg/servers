@@ -2,7 +2,7 @@ import { firebaseConfig } from '@flocon-trpg/core';
 import { isTruthyString, parseEnvListValue } from '@flocon-trpg/utils';
 import * as E from 'fp-ts/Either';
 import { WebConfig } from './configType';
-import { NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG } from './env';
+import { NEXT_PUBLIC_FIREBASE_CONFIG } from './env';
 import { formatValidationErrors } from './utils/io-ts-reporters';
 
 // jsonファイルを直接importしても動くが、jsonファイルにミスがあるときに出るエラーメッセージをわかりやすくするため、io-ts&io-ts-reportersを用いて変換している。
@@ -29,11 +29,11 @@ const loadConfig = (): WebConfig => {
     const okValue = process.env['NEXT_PUBLIC_FOO'];
     */
 
-    const firebaseFile = process.env.NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG;
+    const firebaseFile = process.env.NEXT_PUBLIC_FIREBASE_CONFIG;
 
     if (firebaseFile == null) {
         throw new Error(
-            `Firebase config is not found. Set ${NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG} environment variable.`
+            `Firebase config is not found. Set ${NEXT_PUBLIC_FIREBASE_CONFIG} environment variable.`
         );
     }
 
@@ -47,11 +47,11 @@ const loadConfig = (): WebConfig => {
 
     return {
         firebaseConfig: firebaseConfigObject.right,
-        http: process.env.NEXT_PUBLIC_FLOCON_API_HTTP,
-        ws: process.env.NEXT_PUBLIC_FLOCON_API_WS,
-        authProviders: parseEnvListValue(process.env.NEXT_PUBLIC_FLOCON_AUTH_PROVIDERS),
+        http: process.env.NEXT_PUBLIC_API_HTTP,
+        ws: process.env.NEXT_PUBLIC_API_WS,
+        authProviders: parseEnvListValue(process.env.NEXT_PUBLIC_AUTH_PROVIDERS),
         isUnlistedFirebaseStorageEnabled: isTruthyString(
-            process.env.NEXT_PUBLIC_FLOCON_FIREBASE_UPLOADER_ENABLED
+            process.env.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED
         ),
         isPublicFirebaseStorageEnabled: false,
     };

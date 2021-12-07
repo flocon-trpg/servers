@@ -66,10 +66,10 @@ export const GameSelector: React.FC<Props> = ({
             return;
         }
         addRoomNotification({
-                type: apolloError,
-                error: availableGameSystems.error,
-                createdAt: new Date().getTime(),
-        })
+            type: apolloError,
+            error: availableGameSystems.error,
+            createdAt: new Date().getTime(),
+        });
     }, [addRoomNotification, availableGameSystems.error]);
 
     return (
@@ -83,10 +83,10 @@ export const GameSelector: React.FC<Props> = ({
                 onSelect={(value, option) => {
                     onConfigUpdate(state => {
                         if (typeof option.key !== 'string') {
-                        return;
-                    }
-                        state.selectedGameSystem = option.key
-                    })
+                            return;
+                        }
+                        state.selectedGameSystem = option.key;
+                    });
                 }}
                 filterOption={(input, option) => {
                     const value: unknown = option?.value;

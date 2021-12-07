@@ -24,7 +24,7 @@ jobs:
             - run: yarn install
 
             - name: Prepare packages
-              run: yarn dist
+              run: yarn build-ci
 
             - name: Test
               run: yarn test --ci --coverage --maxWorkers=2
@@ -33,10 +33,10 @@ jobs:
                   TEST_SKIP_RESOLVERS: true
 
             - name: Next export
-              run: yarn run export
+              run: yarn run build:self && yarn run export
               working-directory: ./packages/web-server
               env:
-                  NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG: ${{ secrets.NEXT_PUBLIC_FLOCON_FIREBASE_CONFIG }}
+                  NEXT_PUBLIC_FIREBASE_CONFIG: ${{ secrets.NEXT_PUBLIC_FIREBASE_CONFIG }}
                   NEXT_PUBLIC_FLOCON_WEB_CONFIG: ${{ secrets.NEXT_PUBLIC_FLOCON_WEB_CONFIG }}
 
     test-cache-redis:
@@ -67,8 +67,8 @@ jobs:
 
             - run: yarn
 
-            - name: Prepare other packages
-              run: yarn dist
+            - name: Prepare packages
+              run: yarn build-ci
               working-directory: '.'
 
             - name: Test
@@ -108,8 +108,8 @@ jobs:
             - name: Install
               run: yarn
 
-            - name: Prepare other packages
-              run: yarn dist
+            - name: Prepare packages
+              run: yarn build-ci
               working-directory: '.'
 
             - name: Type-check
@@ -118,7 +118,7 @@ jobs:
             - name: Migration-up SQLite(1)
               run: yarn migration-up --db sqlite
               env:
-                  FLOCON_API_SQLITE: >
+                  SQLITE: >
                       {
                           "dbName": "./test1.sqlite3"
                       }
@@ -126,7 +126,7 @@ jobs:
             - name: Migration-up SQLite(2)
               run: yarn migration-up --db sqlite
               env:
-                  FLOCON_API_SQLITE: >
+                  SQLITE: >
                       {
                           "dbName": "./test2.sqlite3"
                       }
@@ -134,10 +134,9 @@ jobs:
             - name: Migration-up PostgreSQL
               run: yarn migration-up --db postgresql
               env:
-                  FLOCON_API_POSTGRESQL: >
+                  POSTGRESQL: >
                       {
-                          "dbName": "test",
-                          "clientUrl": "postgresql://postgres:postgres@postgres:5432"
+                          "clientUrl": "postgresql://postgres:postgres@postgres:5432/test"
                       }
 
             # skips `yarn build` because it already has js files

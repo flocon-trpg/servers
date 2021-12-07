@@ -11,8 +11,10 @@
         "node": ">=12"
     },
     "scripts": {
-        "build": "rimraf ./dist && yarn dist",
-        "dist": "tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-types.json",
+        "build": "yarn run build:self",
+        "build-ci": "yarn run build:self",
+        "build:self": "rimraf ./dist && yarn build:tsc",
+        "build:tsc": "tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-types.json",
         "test": "jest"
     },
     "name": "@flocon-trpg/utils",
@@ -24,7 +26,7 @@
         "@types/jest": "27.0.3",
         "jest": "27.4.3",
         "rimraf": "3.0.2",
-        "ts-jest": "27.0.7",
+        "ts-jest": "27.1.0",
         "typescript": "4.4.4"
     }
 }

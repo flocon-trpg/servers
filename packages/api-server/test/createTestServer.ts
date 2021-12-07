@@ -16,7 +16,9 @@ const PostgreSQLConfig = {
     dbName: 'test',
     clientUrl: postgresClientUrl,
     debug: true,
-};
+    driverOptions: undefined,
+    dir: 'src',
+} as const;
 
 export type DbConfig =
     | {
@@ -28,7 +30,7 @@ export type DbConfig =
       };
 
 const createSQLiteConfig = (dbName: string) => {
-    return { dbName, debug: true };
+    return { dbName, dir: 'src', debug: true } as const;
 };
 
 export const createOrm = async (dbCofig: DbConfig) => {
@@ -47,11 +49,13 @@ const createDatabaseConfig = (dbConfig: DbConfig): DatabaseConfig => {
                 __type: postgresql,
                 clientUrl: postgresClientUrl,
                 dbName: 'test',
+                driverOptions: undefined,
             };
         case 'SQLite':
             return {
                 __type: sqlite,
                 dbName: dbConfig.dbName,
+                driverOptions: undefined,
             };
     }
 };
@@ -72,6 +76,7 @@ export const createTestServer = async (
         entryPassword: entryPasswordConfig,
         autoMigration: false,
         uploader: {
+            enabled: true,
             maxFileSize: 1000 * 1000,
             sizeQuota: 100 * 1000 * 1000,
             countQuota: 10,

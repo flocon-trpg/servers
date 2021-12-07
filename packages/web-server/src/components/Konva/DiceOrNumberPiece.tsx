@@ -32,9 +32,7 @@ type StringPieceContentProps = {
     state: StringPieceState;
 } & Size;
 
-const StringPieceContent: React.FC<StringPieceContentProps> = (
-    props: StringPieceContentProps
-) => {
+const StringPieceContent: React.FC<StringPieceContentProps> = (props: StringPieceContentProps) => {
     const text = StringPieceValue.toKonvaText(props.state, props.createdByMe);
 
     const prevText = usePrevious(text);

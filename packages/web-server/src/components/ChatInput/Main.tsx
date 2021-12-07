@@ -5,7 +5,7 @@ import { TextColorSelector } from './TextColorSelector';
 import { publicChannel, SelectedChannelType, SubmitMessage } from './SubmitMessage';
 import { getSelectedCharacterType } from './getSelectedCharacterType';
 import { MessagePanelConfig } from '../../atoms/roomConfig/types/messagePanelConfig';
-import { atom, } from 'jotai';
+import { atom } from 'jotai';
 import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
 import { Draft } from 'immer';
 import { useAtomValue } from 'jotai/utils';

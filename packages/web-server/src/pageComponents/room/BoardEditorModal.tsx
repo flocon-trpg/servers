@@ -76,7 +76,7 @@ export const BoardEditorModal: React.FC = () => {
     switch (modalValue?.type) {
         case undefined:
             stateEditorParams = undefined;
-            break
+            break;
         case create:
             stateEditorParams = {
                 type: create,

@@ -41,7 +41,10 @@ import { editRoomDrawerVisibilityAtom } from '../../atoms/overlay/editRoomDrawer
 import { OpacityBar } from '../../components/VolumeBar';
 import { atom, useAtom } from 'jotai';
 import produce from 'immer';
-import { defaultPanelOpacity, minPanelOpacity } from '../../atoms/roomConfig/types/roomConfig/resources';
+import {
+    defaultPanelOpacity,
+    minPanelOpacity,
+} from '../../atoms/roomConfig/types/roomConfig/resources';
 
 const panelOpacityAtom = atom(
     get => get(roomConfigAtom)?.panelOpacity,
@@ -938,7 +941,10 @@ export const RoomMenu: React.FC = () => {
                         </div>
                     </Menu.Item>
                     <Menu.Divider />
-                    <div className={classNames(flex, flexRow, itemsCenter)} style={{padding: '0 4px'}}>
+                    <div
+                        className={classNames(flex, flexRow, itemsCenter)}
+                        style={{ padding: '0 4px' }}
+                    >
                         <div>透過度</div>
                         <OpacityBar
                             value={panelOpacity ?? defaultPanelOpacity}

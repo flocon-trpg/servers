@@ -1,4 +1,10 @@
-import { Connection, IDatabaseDriver, LoggerNamespace, MikroORM } from '@mikro-orm/core';
+import {
+    Connection,
+    Dictionary,
+    IDatabaseDriver,
+    LoggerNamespace,
+    MikroORM,
+} from '@mikro-orm/core';
 import { DatabaseConfig, postgresql, sqlite } from './configType';
 import { File } from './graphql+mikro-orm/entities/file/mikro-orm';
 import { FileTag } from './graphql+mikro-orm/entities/fileTag/mikro-orm';
@@ -31,19 +37,28 @@ const entities = [
 
 type Debug = boolean | LoggerNamespace[];
 
+const src = 'src';
+const dist = 'dist';
+type Dir = typeof src | typeof dist;
+
+const migrationPattern = /^[\w-]+\d+\.[jt]s$/;
+
 export const createSQLite = async ({
     dbName,
     debug,
+    dir,
 }: {
     dbName: string;
     debug?: Debug;
+    dir: Dir;
 }): Promise<MikroORM<IDatabaseDriver<Connection>>> => {
-    // TODO: dbNameを変える、パスもここからのディレクトリではなく実行されるtypescriptファイルの位置が基準となりわかりにくいので変える。
+    // TODO: dbNameを変える。
     return await MikroORM.init({
         entities,
         dbName,
         migrations: {
-            path: './migrations/sqlite',
+            path: `./${dir}/__migrations__/sqlite`,
+            pattern: migrationPattern,
         },
         type: 'sqlite',
         forceUndefined: true,
@@ -55,35 +70,46 @@ export const createPostgreSQL = async ({
     dbName,
     clientUrl,
     debug,
+    dir,
+    driverOptions,
 }: {
-    dbName: string;
+    dbName: string | undefined;
     clientUrl: string;
     debug?: Debug;
+    dir: Dir;
+    driverOptions: Dictionary<unknown> | undefined;
 }): Promise<MikroORM<IDatabaseDriver<Connection>>> => {
     return await MikroORM.init({
         entities,
         dbName,
         migrations: {
-            path: './migrations/postgresql',
+            path: `./${dir}/__migrations__/postgresql`,
+            pattern: migrationPattern,
+
+            // https://github.com/mikro-orm/mikro-orm/issues/190#issuecomment-655763246
+            disableForeignKeys: false,
         },
         type: 'postgresql',
         debug,
         forceUndefined: true,
         clientUrl,
+        driverOptions,
     });
 };
 
-export const prepareORM = async (config: DatabaseConfig, debug: boolean) => {
+export const prepareORM = async (config: DatabaseConfig, dir: Dir, debug: boolean) => {
     try {
         switch (config.__type) {
             case postgresql:
                 return await createPostgreSQL({
                     ...config,
+                    dir,
                     debug,
                 });
             case sqlite:
                 return await createSQLite({
                     ...config,
+                    dir,
                     debug,
                 });
         }

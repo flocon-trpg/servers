@@ -260,6 +260,7 @@ const operateParticipantAndFlush = async ({
     myUserUid,
     em,
     room,
+    roomHistCount,
     participantUserUids,
     create,
     update,
@@ -267,6 +268,7 @@ const operateParticipantAndFlush = async ({
     myUserUid: string;
     em: EM;
     room: Room$MikroORM.Room;
+    roomHistCount: number | undefined;
     participantUserUids: ReadonlySet<string>;
     create?: {
         role: ParticipantRole | undefined;
@@ -353,6 +355,15 @@ const operateParticipantAndFlush = async ({
         operation: transformedValue,
     });
     await em.flush();
+
+    await GlobalRoom.Global.autoRemoveOldRoomOp({
+        em: em.fork(),
+        roomId: room.id,
+        roomRevision: room.revision,
+        roomHistCount,
+    });
+    await em.flush();
+
     const generateOperation = (deliverTo: string): RoomOperation => {
         return {
             __tstype: 'RoomOperation',
@@ -449,6 +460,7 @@ const joinRoomCore = async ({
                 return await operateParticipantAndFlush({
                     em,
                     room,
+                    roomHistCount: context.serverConfig.roomHistCount,
                     participantUserUids,
                     myUserUid: authorizedUser.userUid,
                     create: {
@@ -551,6 +563,7 @@ const promoteMeCore = async ({
                         await operateParticipantAndFlush({
                             em,
                             room,
+                            roomHistCount: context.serverConfig.roomHistCount,
                             participantUserUids,
                             myUserUid: authorizedUser.userUid,
                             update: {
@@ -1351,6 +1364,7 @@ export class RoomResolver {
                     name: { newValue: convertToMaxLength100String(args.newName) },
                 },
                 room,
+                roomHistCount: context.serverConfig.roomHistCount,
                 participantUserUids,
             });
 
@@ -1462,6 +1476,7 @@ export class RoomResolver {
                     role: { newValue: undefined },
                 },
                 room,
+                roomHistCount: context.serverConfig.roomHistCount,
                 participantUserUids,
             });
             return Result.ok({
@@ -1592,6 +1607,14 @@ export class RoomResolver {
                 em.persist(entity);
             });
 
+            await em.flush();
+
+            await GlobalRoom.Global.autoRemoveOldRoomOp({
+                em: em.fork(),
+                roomId: room.id,
+                roomRevision: room.revision,
+                roomHistCount: context.serverConfig.roomHistCount,
+            });
             await em.flush();
 
             const generateOperation = (deliverTo: string): RoomOperation => {

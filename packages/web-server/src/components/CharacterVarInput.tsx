@@ -11,7 +11,14 @@ type Props = {
     rows?: number;
 };
 
-export const CharacterVarInput: React.FC<Props> = ({ style, classNames, disableResize, character, onChange, rows }: Props) => {
+export const CharacterVarInput: React.FC<Props> = ({
+    style,
+    classNames,
+    disableResize,
+    character,
+    onChange,
+    rows,
+}: Props) => {
     return (
         <TomlInput
             style={style}
