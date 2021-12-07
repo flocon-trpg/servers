@@ -85,6 +85,9 @@ export const createPostgreSQL = async ({
         migrations: {
             path: `./${dir}/__migrations__/postgresql`,
             pattern: migrationPattern,
+
+            // https://github.com/mikro-orm/mikro-orm/issues/190#issuecomment-655763246
+            disableForeignKeys: false,
         },
         type: 'postgresql',
         debug,
