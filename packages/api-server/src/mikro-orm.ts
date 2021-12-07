@@ -41,6 +41,8 @@ const src = 'src';
 const dist = 'dist';
 type Dir = typeof src | typeof dist;
 
+const migrationPattern = /^[\w-]+\d+\.[jt]s$/;
+
 export const createSQLite = async ({
     dbName,
     debug,
@@ -56,6 +58,7 @@ export const createSQLite = async ({
         dbName,
         migrations: {
             path: `./${dir}/__migrations__/sqlite`,
+            pattern: migrationPattern,
         },
         type: 'sqlite',
         forceUndefined: true,
@@ -81,6 +84,7 @@ export const createPostgreSQL = async ({
         dbName,
         migrations: {
             path: `./${dir}/__migrations__/postgresql`,
+            pattern: migrationPattern,
         },
         type: 'postgresql',
         debug,
