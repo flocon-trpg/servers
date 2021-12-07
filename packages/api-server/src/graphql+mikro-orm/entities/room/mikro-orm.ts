@@ -106,6 +106,15 @@ export class RoomOp {
     @PrimaryKey()
     public id: string = v4();
 
+    @Property({
+        type: Date,
+        nullable: true,
+        onCreate: () => new Date(),
+        index: true,
+        default: null,
+    })
+    public createdAt?: Date;
+
     @Property({ index: true })
     public prevRevision: number;
 
