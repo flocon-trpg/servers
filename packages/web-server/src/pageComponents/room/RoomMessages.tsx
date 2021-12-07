@@ -71,7 +71,6 @@ import { MessageTabConfigUtils } from '../../atoms/roomConfig/types/messageTabCo
 import { useImmerUpdateAtom } from '../../atoms/useImmerUpdateAtom';
 import { useAtomValue } from 'jotai/utils';
 import { MessageTabName } from '../../components/MessageTabName';
-import _ from 'lodash';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
