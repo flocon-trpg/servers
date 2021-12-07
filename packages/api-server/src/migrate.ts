@@ -64,10 +64,10 @@ const migrateUpCore = async ({
 }) => {
     AppConsole.log({
         en: `Migration-up is started${
-            type === autoMigrationAlways ? '(reason: auto-migration=always)' : ''
+            type === autoMigrationAlways ? '(reason: AUTO_MIGRATION is enabled)' : ''
         }. DB is ${prettify(dbType)}`,
         ja: `マイグレーションのupを開始します${
-            type === autoMigrationAlways ? '(reason: auto-migration=always)' : ''
+            type === autoMigrationAlways ? '(reason: AUTO_MIGRATION is enabled)' : ''
         }。DBは${prettify(dbType)}です。`,
     });
     const migrator = orm.getMigrator();
