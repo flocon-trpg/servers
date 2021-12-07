@@ -1,6 +1,6 @@
 /*
 This file includes a modified copy of https://github.com/konvajs/use-image , whose author is lavrton.
-License of https://github.com/konvajs/use-image is as follows:
+The license of https://github.com/konvajs/use-image is as follows:
 
 
 MIT License
