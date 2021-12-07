@@ -30,6 +30,7 @@ import { User } from '../user/mikro-orm';
 import { nullableStringToParticipantRoleType } from '../../../enums/ParticipantRoleType';
 import { convertToMaxLength100String } from '../../../utils/convertToMaxLength100String';
 import { isNonEmptyArray, ReadonlyNonEmptyArray } from '../../../utils/readonlyNonEmptyArray';
+import { date } from 'fp-ts';
 
 type IsSequentialResult<T> =
     | {
@@ -139,7 +140,7 @@ export namespace GlobalRoom {
                         return Result.ok(undefined);
                     }
                     return Result.error(
-                        'Database error: There are missing operations. Client state is too old?'
+                        'Some operations are not found. Maybe your request is too old, or ROOMHIST_COUNT is too small?'
                     );
                 }
                 if (revisionRange.expectedTo != null) {
@@ -147,24 +148,24 @@ export namespace GlobalRoom {
                         revisionRange.expectedTo - revisionRange.from;
                     if (expectedOperationEntitiesLength < operationEntities.length) {
                         return Result.error(
-                            'Database error: There are duplicate operations. Multiple apps tried to update same database simultaneously?'
+                            'There are duplicate operations. Multiple apps tried to update same database simultaneously?'
                         );
                     }
                     if (expectedOperationEntitiesLength > operationEntities.length) {
                         return Result.error(
-                            'Database error: There are missing operations. Client state is too old?'
+                            'Some operations are not found. Maybe your request is too old, or ROOMHIST_COUNT is too small?'
                         );
                     }
                 }
                 const isSequentialResult = isSequential(operationEntities, o => o.prevRevision);
                 if (isSequentialResult.type === 'NotSequential') {
                     return Result.error(
-                        'Database error: There are missing operations. Multiple apps tried to update same database simultaneously?'
+                        'There are missing operations. Multiple apps tried to update same database simultaneously?'
                     );
                 }
                 if (isSequentialResult.type === 'DuplicateElement') {
                     return Result.error(
-                        'Database error: There are duplicate operations. Multiple apps tried to update same database simultaneously?'
+                        'There are duplicate operations. Multiple apps tried to update same database simultaneously?'
                     );
                 }
 
@@ -339,6 +340,29 @@ export namespace GlobalRoom {
 
             em.persist(op);
             return nextState.value;
+        };
+
+        export const autoRemoveOldRoomOp = async ({
+            em,
+            roomId,
+            roomRevision,
+            roomHistCount,
+        }: {
+            em: EM;
+            roomId: string;
+            roomRevision: number;
+            roomHistCount: number | undefined;
+        }) => {
+            if (roomHistCount == null || roomHistCount < 0) {
+                return;
+            }
+            const toRemove = await em.find(RoomOp, {
+                room: { id: roomId },
+                prevRevision: { $lt: roomRevision - roomHistCount },
+            });
+            for (const tr of toRemove) {
+                em.remove(tr);
+            }
         };
     }
 

@@ -94,6 +94,7 @@ export type ServerConfig = {
     uploader: UploaderConfig;
     autoMigration: boolean;
     accessControlAllowOrigin?: string;
+    roomHistCount?: number;
 
     // rate limitのフォーマットが決まっていない（pointとdurationの指定のカスタマイズ、メソッドごとの消費pointのカスタマイズなど）が、とりあえずテストではrate limitは無効化したいため、experimentalとしている
     disableRateLimitExperimental: boolean;

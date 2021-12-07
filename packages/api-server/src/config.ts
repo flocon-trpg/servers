@@ -1,6 +1,5 @@
 import { FirebaseConfig, firebaseConfig as firebaseConfigIo } from '@flocon-trpg/core';
 import {
-    always,
     DatabaseConfig,
     entryPassword,
     EntryPasswordConfig,
@@ -39,6 +38,7 @@ import {
     FIREBASE_ADMIN_SECRET,
     NEXT_PUBLIC_FIREBASE_CONFIG,
     FIREBASE_CONFIG,
+    ROOMHIST_COUNT,
 } from './env';
 import { filterInt, isTruthyString } from '@flocon-trpg/utils';
 
@@ -224,6 +224,7 @@ const loadServerConfig = ({
             sizeQuota: filterNullableInt(process.env[EMBUPLOADER_SIZE_QUOTA]) ?? undefined,
             maxFileSize: filterNullableInt(process.env[EMBUPLOADER_MAX_FILE_SIZE]) ?? undefined,
         },
+        roomHistCount: filterNullableInt(process.env[ROOMHIST_COUNT]) ?? undefined,
         autoMigration: isTruthyString(process.env[AUTO_MIGRATION]),
         accessControlAllowOrigin: process.env[ACCESS_CONTROL_ALLOW_ORIGIN],
         disableRateLimitExperimental:
