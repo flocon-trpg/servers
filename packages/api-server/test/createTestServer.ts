@@ -17,7 +17,8 @@ const PostgreSQLConfig = {
     clientUrl: postgresClientUrl,
     debug: true,
     driverOptions: undefined,
-};
+    dir: 'src',
+} as const;
 
 export type DbConfig =
     | {
@@ -29,7 +30,7 @@ export type DbConfig =
       };
 
 const createSQLiteConfig = (dbName: string) => {
-    return { dbName, debug: true };
+    return { dbName, dir: 'src', debug: true } as const;
 };
 
 export const createOrm = async (dbCofig: DbConfig) => {

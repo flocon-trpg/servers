@@ -49,7 +49,7 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
 
     const schema = await buildSchema(serverConfig)({ emitSchemaFile: false, pubSub });
     const dbType = serverConfig.database.__type;
-    const orm = await prepareORM(serverConfig.database, params.debug);
+    const orm = await prepareORM(serverConfig.database, 'dist', params.debug);
     if (serverConfig.autoMigration) {
         await doAutoMigrationBeforeStart(orm, dbType);
     }

@@ -37,19 +37,25 @@ const entities = [
 
 type Debug = boolean | LoggerNamespace[];
 
+const src = 'src';
+const dist = 'dist';
+type Dir = typeof src | typeof dist;
+
 export const createSQLite = async ({
     dbName,
     debug,
+    dir,
 }: {
     dbName: string;
     debug?: Debug;
+    dir: Dir;
 }): Promise<MikroORM<IDatabaseDriver<Connection>>> => {
-    // TODO: dbNameを変える、パスもここからのディレクトリではなく実行されるtypescriptファイルの位置が基準となりわかりにくいので変える。
+    // TODO: dbNameを変える。
     return await MikroORM.init({
         entities,
         dbName,
         migrations: {
-            path: './migrations/sqlite',
+            path: `./${dir}/__migrations__/sqlite`,
         },
         type: 'sqlite',
         forceUndefined: true,
@@ -61,18 +67,20 @@ export const createPostgreSQL = async ({
     dbName,
     clientUrl,
     debug,
+    dir,
     driverOptions,
 }: {
     dbName: string | undefined;
     clientUrl: string;
     debug?: Debug;
+    dir: Dir;
     driverOptions: Dictionary<unknown> | undefined;
 }): Promise<MikroORM<IDatabaseDriver<Connection>>> => {
     return await MikroORM.init({
         entities,
         dbName,
         migrations: {
-            path: './migrations/postgresql',
+            path: `./${dir}/__migrations__/postgresql`,
         },
         type: 'postgresql',
         debug,
@@ -82,17 +90,19 @@ export const createPostgreSQL = async ({
     });
 };
 
-export const prepareORM = async (config: DatabaseConfig, debug: boolean) => {
+export const prepareORM = async (config: DatabaseConfig, dir: Dir, debug: boolean) => {
     try {
         switch (config.__type) {
             case postgresql:
                 return await createPostgreSQL({
                     ...config,
+                    dir,
                     debug,
                 });
             case sqlite:
                 return await createSQLite({
                     ...config,
+                    dir,
                     debug,
                 });
         }

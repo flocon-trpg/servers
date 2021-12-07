@@ -92,7 +92,7 @@ const migrateUpCore = async ({
     });
 };
 
-export const migrate = async (
+export const migrateByTsNode = async (
     type:
         | typeof check
         | typeof create
@@ -121,12 +121,17 @@ export const migrate = async (
     // TODO: 他のDBにも対応させる
     switch (serverConfig.database.__type) {
         case sqlite:
-            orm = await createSQLite({ ...serverConfig.database, debug: type !== check });
+            orm = await createSQLite({
+                ...serverConfig.database,
+                dir: 'src',
+                debug: type !== check,
+            });
             dbType = sqlite;
             break;
         case postgresql:
             orm = await createPostgreSQL({
                 ...serverConfig.database,
+                dir: 'src',
                 debug: type !== check,
             });
             dbType = postgresql;
