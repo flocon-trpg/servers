@@ -22,7 +22,7 @@ import { createApolloClient } from '../utils/createApolloClient';
 import { getUserConfig, setUserConfig } from '../utils/localStorage/userConfig';
 import { getAuth } from '../utils/firebaseHelpers';
 import { useMyUserUid } from '../hooks/useMyUserUid';
-import { AllContextProvider } from '../components/AllContextProvider';
+import { AllContextProvider } from '../components/behaviors/AllContextProvider';
 import { simpleId } from '@flocon-trpg/core';
 import { Ref } from '../utils/ref';
 import { userConfigAtom } from '../atoms/userConfig/userConfigAtom';

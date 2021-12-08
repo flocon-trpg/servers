@@ -1,10 +1,10 @@
 import { Alert, Button, Collapse, Typography } from 'antd';
 import Link from 'next/link';
 import React from 'react';
-import { FilesManagerDrawer } from '../components/FilesManagerDrawer';
-import { QueryResultViewer } from '../components/QueryResultViewer';
+import { FilesManagerDrawer } from '../components/contextual/room/file/FilesManagerDrawer';
+import { QueryResultViewer } from '../components/ui/QueryResultViewer';
 import { GetServerInfoDocument, PrereleaseType } from '@flocon-trpg/typed-document-node';
-import { Layout } from '../layouts/Layout';
+import { Layout } from '../components/ui/Layout';
 import { FilesManagerDrawerType, none } from '../utils/types';
 import { SupportedApiServers, VERSION } from '../VERSION';
 import * as Icon from '@ant-design/icons';

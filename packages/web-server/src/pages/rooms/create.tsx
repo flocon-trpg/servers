@@ -1,9 +1,9 @@
 import { Alert, Button, Card, Form, Input, Spin, Switch } from 'antd';
 import { useRouter } from 'next/router';
 import React from 'react';
-import { Layout, loginAndEntry } from '../../layouts/Layout';
+import { Layout, loginAndEntry } from '../../components/ui/Layout';
 import { CreateRoomDocument, CreateRoomInput } from '@flocon-trpg/typed-document-node';
-import { Center } from '../../components/Center';
+import { Center } from '../../components/ui/Center';
 import { MyAuthContext } from '../../contexts/MyAuthContext';
 import { useMutation } from '@apollo/client';
 

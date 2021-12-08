@@ -1,7 +1,7 @@
 import React from 'react';
 import { interval } from 'rxjs';
-import { OnChangeParams } from '../../components/BufferedInput';
-import { BufferedTextArea } from '../../components/BufferedTextArea';
+import { OnChangeParams } from '../../components/ui/BufferedInput';
+import { BufferedTextArea } from '../../components/ui/BufferedTextArea';
 
 const Main: React.FC = () => {
     const [changelog, setChangelog] = React.useState<OnChangeParams[]>([]);

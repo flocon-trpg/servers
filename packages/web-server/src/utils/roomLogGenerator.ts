@@ -7,7 +7,10 @@ import { PrivateChannelSet } from './PrivateChannelSet';
 import { escape } from 'html-escaper';
 import moment from 'moment';
 import { PublicChannelNames } from './types';
-import { messageContentMaxHeight, RoomMessage } from '../pageComponents/room/RoomMessage';
+import {
+    messageContentMaxHeight,
+    RoomMessage,
+} from '../components/contextual/room/message/RoomMessage';
 import { isDeleted, toText } from './message';
 import { Default, FirebaseStorage, ParticipantState, Uploader, simpleId } from '@flocon-trpg/core';
 import { Color } from './color';
@@ -18,7 +21,7 @@ import { analyzeUrl } from './analyzeUrl';
 import { ExpiryMap } from './expiryMap';
 import { logCss } from './richLogResource/logCss';
 import { logHtml } from './richLogResource/logHtml';
-import { RoomMessageFilter } from '../components/ChannelsFilter';
+import { RoomMessageFilter } from '../components/contextual/room/message/ChannelsFilter';
 import { WebConfig } from '../configType';
 
 const privateMessage = 'privateMessage';

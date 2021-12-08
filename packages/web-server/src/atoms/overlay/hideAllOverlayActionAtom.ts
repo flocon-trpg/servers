@@ -1,9 +1,9 @@
 import { atom } from 'jotai';
-import { boardEditorModalAtom } from '../../pageComponents/room/BoardEditorModal';
-import { characterEditorModalAtom } from '../../pageComponents/room/CharacterEditorModal';
-import { characterParameterNamesEditorVisibilityAtom } from '../../pageComponents/room/CharacterParameterNamesEditorModal';
-import { dicePieceEditorModalAtom } from '../../pageComponents/room/DicePieceEditorModal';
-import { stringPieceEditorModalAtom } from '../../pageComponents/room/StringPieceEditorModal';
+import { boardEditorModalAtom } from '../../components/contextual/room/board/BoardEditorModal';
+import { characterEditorModalAtom } from '../../components/contextual/room/character/CharacterEditorModal';
+import { characterParameterNamesEditorVisibilityAtom } from '../../components/contextual/room/character/CharacterParameterNamesEditorModal';
+import { dicePieceEditorModalAtom } from '../../components/contextual/room/board/DicePieceEditorModal';
+import { stringPieceEditorModalAtom } from '../../components/contextual/room/board/StringPieceEditorModal';
 import { boardContextMenuAtom } from './board/boardContextMenuAtom';
 import { boardPopoverEditorAtom } from './board/boardPopoverEditorAtom';
 import { boardTooltipAtom } from './board/boardTooltipAtom';

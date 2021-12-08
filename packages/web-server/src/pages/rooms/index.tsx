@@ -1,10 +1,10 @@
 import React from 'react';
 import { GetRoomsListDocument, RoomAsListItemFragment } from '@flocon-trpg/typed-document-node';
-import { Layout, loginAndEntry } from '../../layouts/Layout';
+import { Layout, loginAndEntry } from '../../components/ui/Layout';
 import Link from 'next/link';
 import { Button, Table } from 'antd';
 import { useRouter } from 'next/router';
-import { QueryResultViewer } from '../../components/QueryResultViewer';
+import { QueryResultViewer } from '../../components/ui/QueryResultViewer';
 import classNames from 'classnames';
 import { flex, flexNone } from '../../utils/className';
 import { useQuery } from '@apollo/client';

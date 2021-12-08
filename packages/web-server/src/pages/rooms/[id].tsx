@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import React from 'react';
-import { Room as RoomComponent } from '../../pageComponents/room/Room';
+import { Room as RoomComponent } from '../../components/contextual/room/Room';
 import {
     GetRoomFailureType,
     JoinRoomAsPlayerDocument,
@@ -12,7 +12,7 @@ import {
     WritingMessageStatusInputType,
 } from '@flocon-trpg/typed-document-node';
 import { Alert, Button, Card, Input, Result, Spin, notification as antdNotification } from 'antd';
-import { Layout, loginAndEntry, success } from '../../layouts/Layout';
+import { Layout, loginAndEntry, success } from '../../components/ui/Layout';
 import { FetchResult, useMutation } from '@apollo/client';
 import {
     deleted,
@@ -24,8 +24,8 @@ import {
     nonJoined,
     useRoomState,
 } from '../../hooks/useRoomState';
-import { Center } from '../../components/Center';
-import { LoadingResult } from '../../components/Result/LoadingResult';
+import { Center } from '../../components/ui/Center';
+import { LoadingResult } from '../../components/ui/result/LoadingResult';
 import { usePublishRoomEventSubscription } from '../../hooks/usePublishRoomEventSubscription';
 import { useAllRoomMessages } from '../../hooks/useRoomMessages';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
