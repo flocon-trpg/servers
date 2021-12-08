@@ -1,7 +1,7 @@
 import axios from 'axios';
 import urljoin from 'url-join';
-import { getHttpUri } from '../config';
-import { WebConfig } from '../configType';
+import { getHttpUri } from '../../config';
+import { WebConfig } from '../../configType';
 
 export const files = 'files';
 export const thumbs = 'thumbs';

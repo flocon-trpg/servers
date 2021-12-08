@@ -2,7 +2,7 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { DieValueState } from '@flocon-trpg/core';
-import { D6Value, noDie, noValue } from '../../../../../utils/dice';
+import { D6Value, noDie, noValue } from '../../../../../utils/board/dice';
 import * as Icons from '@ant-design/icons';
 import { Button } from 'antd';
 import { update, replace } from '../../../../../stateManagers/states/types';

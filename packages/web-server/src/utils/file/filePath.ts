@@ -1,9 +1,9 @@
 import { FilePathFragment, FileSourceType } from '@flocon-trpg/typed-document-node';
 import * as Core from '@flocon-trpg/core';
-import { getStorageForce } from './firebaseHelpers';
+import { getStorageForce } from '../firebaseHelpers';
 import { ExpiryMap } from './expiryMap';
 import { files, getFloconUploaderFile } from './getFloconUploaderFile';
-import { WebConfig } from '../configType';
+import { WebConfig } from '../../configType';
 
 export type FilePath = {
     path: string;

@@ -31,7 +31,7 @@ import {
     Message,
     pieceLog,
 } from '../../../../hooks/useRoomMessages';
-import { PrivateChannelSet, PrivateChannelSets } from '../../../../utils/PrivateChannelSet';
+import { PrivateChannelSet, PrivateChannelSets } from '../../../../utils/message/PrivateChannelSet';
 import { ChatInput } from './ChatInput';
 import {
     DeleteMessageDocument,
@@ -47,7 +47,7 @@ import { QueryResultViewer } from '../../../ui/QueryResultViewer';
 import { useMessageFilter } from '../../../../hooks/useMessageFilter';
 import { RoomMessage as RoomMessageNameSpace } from './RoomMessage';
 import { useWritingMessageStatus } from '../../../../hooks/useWritingMessageStatus';
-import { isDeleted, toText } from '../../../../utils/message';
+import { isDeleted, toText } from '../../../../utils/message/message';
 import { usePublicChannelNames } from '../../../../hooks/state/usePublicChannelNames';
 import { useParticipants } from '../../../../hooks/state/useParticipants';
 import { recordToMap } from '@flocon-trpg/utils';

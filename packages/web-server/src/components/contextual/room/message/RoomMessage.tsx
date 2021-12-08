@@ -7,10 +7,10 @@ import {
     RoomPublicMessageFragment,
 } from '@flocon-trpg/typed-document-node';
 import { pieceLog, privateMessage, publicMessage } from '../../../../hooks/useRoomMessages';
-import { PrivateChannelSet } from '../../../../utils/PrivateChannelSet';
+import { PrivateChannelSet } from '../../../../utils/message/PrivateChannelSet';
 import { PublicChannelNames } from '../../../../utils/types';
 import { Jdenticon } from '../../../ui/Jdenticon';
-import { isDeleted, toText } from '../../../../utils/message';
+import { isDeleted, toText } from '../../../../utils/message/message';
 import { NewTabLinkify } from '../../../ui/NewTabLinkify';
 import {
     ParticipantState,

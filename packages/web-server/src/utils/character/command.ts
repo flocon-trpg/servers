@@ -30,30 +30,3 @@ export const testCommand = (script: string): Result<undefined> => {
     }
     return Result.ok(undefined);
 };
-
-export const execCharacterCommand = ({
-    script,
-    room,
-    characterId,
-    myUserUid,
-}: {
-    script: string;
-    room: State;
-    characterId: string;
-    myUserUid: string;
-}) => {
-    const transpiled = transpile(script);
-    if (transpiled.isError) {
-        return transpiled;
-    }
-    const result = execCharacterCommandCore({
-        script: transpiled.value,
-        room,
-        characterId,
-        myUserUid,
-    });
-    if (result.isError) {
-        return Result.error(result.error.message);
-    }
-    return Result.ok(undefined);
-};

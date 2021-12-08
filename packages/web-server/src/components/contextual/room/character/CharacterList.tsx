@@ -25,7 +25,7 @@ import {
     characterIsPrivate,
     characterIsNotPrivate,
     characterIsNotPrivateAndNotCreatedByMe,
-} from '../../../../resource/text/main';
+} from '../../../../resources/text/main';
 import { useCharacters } from '../../../../hooks/state/useCharacters';
 import {
     useBoolParamNames,

@@ -7,9 +7,9 @@ import {
     StringPieceState,
     DieValueState,
 } from '@flocon-trpg/core';
-import { StringPieceValue } from '../../../../utils/stringPieceValue';
+import { StringPieceValue } from '../../../../utils/board/stringPieceValue';
 import { KonvaD6 } from './die/KonvaDice';
-import { DicePieceValue } from '../../../../utils/dicePieceValue';
+import { DicePieceValue } from '../../../../utils/board/dicePieceValue';
 import { usePrevious } from 'react-use';
 import { Size } from '../../../../utils/types';
 import { PieceGroup, PieceGroupProps } from './PieceGroup';

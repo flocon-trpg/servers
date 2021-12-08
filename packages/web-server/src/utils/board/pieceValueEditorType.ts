@@ -1,5 +1,5 @@
-import { create, update } from './constants';
-import { PiecePositionWithCell } from './types';
+import { create, update } from '../constants';
+import { PiecePositionWithCell } from '../types';
 
 export type PieceValueEditorType =
     | {

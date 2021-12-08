@@ -13,7 +13,7 @@ import {
     characterIsPrivate,
     characterIsNotPrivate,
     characterIsNotPrivateAndNotCreatedByMe,
-} from '../../../../resource/text/main';
+} from '../../../../resources/text/main';
 import { StateEditorParams, useStateEditor } from '../../../../hooks/useStateEditor';
 import { BufferedInput } from '../../../ui/BufferedInput';
 import { useCharacters } from '../../../../hooks/state/useCharacters';
@@ -26,7 +26,7 @@ import {
 import { CharacterState, strIndex20Array, simpleId } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
 import { BufferedTextArea } from '../../../ui/BufferedTextArea';
-import { FilePath } from '../../../../utils/filePath';
+import { FilePath } from '../../../../utils/file/filePath';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
 import { atom, useAtom } from 'jotai';
 import { create, update } from '../../../../utils/constants';

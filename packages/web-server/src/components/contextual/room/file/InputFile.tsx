@@ -5,7 +5,7 @@ import { some } from '../../../../utils/types';
 import { FirebaseStorageLink } from './FirebaseStorageLink';
 import * as Core from '@flocon-trpg/core';
 import { FilterValue } from 'antd/lib/table/interface';
-import { FilePath } from '../../../../utils/filePath';
+import { FilePath } from '../../../../utils/file/filePath';
 import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../../../../utils/className';
 import { ImageView } from './ImageView';

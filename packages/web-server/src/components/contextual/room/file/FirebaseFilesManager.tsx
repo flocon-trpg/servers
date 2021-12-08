@@ -11,7 +11,7 @@ import { InformationIcon } from '../../../ui/InformationIcon';
 import { FilterValue } from 'antd/lib/table/interface';
 import moment from 'moment';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
-import { $public, StorageType, unlisted } from '../../../../utils/firebaseStorage';
+import { $public, StorageType, unlisted } from '../../../../utils/file/firebaseStorage';
 import {
     DeleteFirebaseStorageFileModal,
     useDeleteFirebaseStorageFileModalActions,

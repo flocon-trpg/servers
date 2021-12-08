@@ -7,7 +7,7 @@ import {
     parameterIsNotPrivate,
     parameterIsPrivateAndNotCreatedByMe,
     parameterIsNotPrivateAndNotCreatedByMe,
-} from '../../../../resource/text/main';
+} from '../../../../resources/text/main';
 import { BufferedInput } from '../../../ui/BufferedInput';
 import {
     CharacterState,

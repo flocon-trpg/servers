@@ -16,7 +16,7 @@ import _ from 'lodash';
 import { cancelRnd, flex, flexColumn, flexRow, itemsCenter } from '../../../utils/className';
 import classNames from 'classnames';
 import { sound } from '../../../utils/fileType';
-import { FilePath as FilePathModule } from '../../../utils/filePath';
+import { FilePath as FilePathModule } from '../../../utils/file/filePath';
 import { useMutation } from '@apollo/client';
 import { atom } from 'jotai';
 import { roomAtom } from '../../../atoms/room/roomAtom';

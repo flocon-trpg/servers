@@ -11,7 +11,7 @@ import { BufferedInput } from '../../../ui/BufferedInput';
 import { useBoards } from '../../../../hooks/state/useBoards';
 import { BoardState, simpleId } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
-import { FilePath } from '../../../../utils/filePath';
+import { FilePath } from '../../../../utils/file/filePath';
 import { atom, useAtom } from 'jotai';
 import { create, update } from '../../../../utils/constants';
 import { roomConfigAtom } from '../../../../atoms/roomConfig/roomConfigAtom';

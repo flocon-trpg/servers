@@ -1,7 +1,7 @@
 import { $free, $system } from '@flocon-trpg/core';
 import React from 'react';
 import { MessageFilter } from '../atoms/roomConfig/types/messageFilter';
-import { PrivateChannelSets } from '../utils/PrivateChannelSet';
+import { PrivateChannelSets } from '../utils/message/PrivateChannelSet';
 import {
     Message,
     pieceLog,

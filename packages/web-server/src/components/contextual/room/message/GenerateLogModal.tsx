@@ -12,7 +12,10 @@ import { useParticipants } from '../../../../hooks/state/useParticipants';
 import { usePublicChannelNames } from '../../../../hooks/state/usePublicChannelNames';
 import { useReadonlyRef } from '../../../../hooks/useReadonlyRef';
 import { ChannelsFilter, ChannelsFilterOptions } from './ChannelsFilter';
-import { generateAsRichLog, generateAsStaticHtml } from '../../../../utils/roomLogGenerator';
+import {
+    generateAsRichLog,
+    generateAsStaticHtml,
+} from '../../../../utils/message/roomLogGenerator';
 import moment from 'moment';
 import { Button, Modal, Progress, Radio } from 'antd';
 import classNames from 'classnames';

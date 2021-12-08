@@ -4,9 +4,9 @@ import * as ReactKonva from 'react-konva';
 import { animated, useSpring, useTransition } from '@react-spring/konva';
 import { RoomPublicMessageFragment } from '@flocon-trpg/typed-document-node';
 import { interval } from 'rxjs';
-import { isDeleted, toText as toTextCore } from '../../../../utils/message';
+import { isDeleted, toText as toTextCore } from '../../../../utils/message/message';
 import { FilePath as CoreFilePath } from '@flocon-trpg/core';
-import { FilePath } from '../../../../utils/filePath';
+import { FilePath } from '../../../../utils/file/filePath';
 import { PieceGroup, PieceGroupProps } from './PieceGroup';
 
 type BalloonCoreProps = {

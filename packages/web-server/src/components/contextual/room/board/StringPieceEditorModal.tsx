@@ -10,7 +10,7 @@ import { useMyUserUid } from '../../../../hooks/useMyUserUid';
 import { create, update } from '../../../../utils/constants';
 import { atom, useAtom } from 'jotai';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
-import { PieceValueEditorType } from '../../../../utils/pieceValueEditorType';
+import { PieceValueEditorType } from '../../../../utils/board/pieceValueEditorType';
 import { BufferedInput } from '../../../ui/BufferedInput';
 import { PiecePositionWithCell } from '../../../../utils/types';
 

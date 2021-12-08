@@ -12,7 +12,7 @@ import { FilesManagerDrawerType, PiecePositionWithCell } from '../../../../utils
 import { FilesManagerDrawer } from '../file/FilesManagerDrawer';
 import { BufferedInput } from '../../../ui/BufferedInput';
 import { BufferedTextArea } from '../../../ui/BufferedTextArea';
-import { FilePath } from '../../../../utils/filePath';
+import { FilePath } from '../../../../utils/file/filePath';
 import { useAtomValue } from 'jotai/utils';
 import { imagePieceDrawerAtom } from '../../../../atoms/overlay/imagePieceDrawerAtom';
 import { create, update } from '../../../../utils/constants';

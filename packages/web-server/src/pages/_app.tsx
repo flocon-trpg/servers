@@ -16,7 +16,7 @@ import { getHttpUri, getWsUri } from '../config';
 import { enableMapSet } from 'immer';
 import Head from 'next/head';
 import { loader } from '@monaco-editor/react';
-import { ExpiryMap } from '../utils/expiryMap';
+import { ExpiryMap } from '../utils/file/expiryMap';
 import urljoin from 'url-join';
 import { createApolloClient } from '../utils/createApolloClient';
 import { getUserConfig, setUserConfig } from '../utils/localStorage/userConfig';

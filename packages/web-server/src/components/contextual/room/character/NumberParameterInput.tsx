@@ -9,7 +9,7 @@ import {
     parameterIsNotPrivate,
     parameterIsPrivateAndNotCreatedByMe,
     parameterIsNotPrivateAndNotCreatedByMe,
-} from '../../../../resource/text/main';
+} from '../../../../resources/text/main';
 import {
     applyCharacter,
     CharacterState,

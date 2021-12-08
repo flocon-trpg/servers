@@ -11,9 +11,9 @@ import { Message, publicMessage, useFilteredRoomMessages } from '../../../../hoo
 import { useMe } from '../../../../hooks/useMe';
 import { useCharacters } from '../../../../hooks/state/useCharacters';
 import { useParticipants } from '../../../../hooks/state/useParticipants';
-import { Piece } from '../../../../utils/piece';
+import { Piece } from '../../../../utils/board/piece';
 import { useBoards } from '../../../../hooks/state/useBoards';
-import { BoardPosition } from '../../../../utils/boardPosition';
+import { BoardPosition } from '../../../../utils/board/boardPosition';
 import { ActiveBoardSelectorModal } from './ActiveBoardSelecterModal';
 import useConstant from 'use-constant';
 import { debounceTime } from 'rxjs/operators';

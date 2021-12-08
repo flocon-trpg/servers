@@ -22,7 +22,7 @@ import { DeleteFloconStorageFileModal } from './DeleteFloconStorageFileModal';
 import { FirebaseAuthenticationIdTokenContext } from '../../../../contexts/FirebaseAuthenticationIdTokenContext';
 import { useAsync } from 'react-use';
 import { LazyAndPreloadImage } from '../../../ui/LazyAndPreloadImage';
-import { getFloconUploaderFile, thumbs } from '../../../../utils/getFloconUploaderFile';
+import { getFloconUploaderFile, thumbs } from '../../../../utils/file/getFloconUploaderFile';
 import { useMutation, useQuery } from '@apollo/client';
 import { useWebConfig } from '../../../../hooks/useWebConfig';
 

@@ -4,7 +4,7 @@ import React from 'react';
 import { Reference } from '../../../../atoms/firebaseStorage/fileState';
 import { reloadPublicFilesKeyAtom } from '../../../../atoms/firebaseStorage/reloadPublicFilesKeyAtom';
 import { reloadUnlistedFilesKeyAtom } from '../../../../atoms/firebaseStorage/reloadUnlistedFilesKeyAtom';
-import { $public, StorageType, unlisted } from '../../../../utils/firebaseStorage';
+import { $public, StorageType, unlisted } from '../../../../utils/file/firebaseStorage';
 
 export const useDeleteFirebaseStorageFileModalActions = () => {
     const setReloadUnlistedFilesKey = useUpdateAtom(reloadUnlistedFilesKeyAtom);

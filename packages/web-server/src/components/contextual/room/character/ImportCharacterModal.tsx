@@ -8,7 +8,7 @@ import { DrawerFooter } from '../../../ui/DrawerFooter';
 import * as E from 'fp-ts/Either';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
-import { formatValidationErrors } from '../../../../utils/io-ts-reporters';
+import { formatValidationErrors } from '../../../../utils/io-ts/io-ts-reporters';
 import classNames from 'classnames';
 import { flex, flexColumn } from '../../../../utils/className';
 

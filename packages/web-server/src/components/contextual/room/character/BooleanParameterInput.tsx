@@ -9,7 +9,7 @@ import {
     parameterIsNotPrivateAndNotCreatedByMe,
     parameterIsPrivate,
     parameterIsPrivateAndNotCreatedByMe,
-} from '../../../../resource/text/main';
+} from '../../../../resources/text/main';
 import {
     BoolParamState,
     CharacterState,
