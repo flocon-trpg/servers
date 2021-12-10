@@ -316,8 +316,9 @@ export const createServer = async ({
                 filepath = path.join(path.resolve(directory), 'thumbs', filename);
             }
 
-            // SVGを直接開くことによるXSSを防いでいる https://qiita.com/itizawa/items/e98ecd67910492d5c2af ただし、現状では必要ないかもしれない
-            res.header('Content-Security-Policy', "script-src 'unsafe-hashes'");
+            // 現在は内蔵アップローダーのファイルを直接開く手段はクライアントには実装されていないが、念のためCSPを設定している
+            res.header('Content-Security-Policy', "default-src 'self'; img-src *; media-src *");
+
             res.sendFile(filepath, () => {
                 res.end();
             });
