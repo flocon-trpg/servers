@@ -254,12 +254,22 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                                 )}
                                 {typeof myAuth === 'string' ? (
                                     <Button key='2' onClick={() => router.push('/signin')}>
-                                        Log in
+                                        ログイン/ユーザー登録
                                     </Button>
                                 ) : (
-                                    <Button key='2' onClick={() => signOut()}>
-                                        Logout
-                                    </Button>
+                                    <>
+                                        <Button
+                                            key='1'
+                                            href='/profile'
+                                            target='_blank'
+                                            rel='noopener noreferrer'
+                                        >
+                                            ユーザー名を変更する
+                                        </Button>
+                                        <Button key='2' onClick={() => signOut()}>
+                                            ログアウト
+                                        </Button>
+                                    </>
                                 )}
                             </Space>
                         </Col>
