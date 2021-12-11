@@ -821,10 +821,27 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
     const boardComponent = (() => {
         if (boardIdToShow == null) {
             return (
-                <div style={{ padding: 20 }}>
-                    {`${
+                <div style={{ width: 500, position: 'absolute', left: 20, top: 20 }}>
+                    <p>{`${
                         panel.type === 'activeBoard' ? 'ボードビュアー' : 'ボードエディター'
-                    }に表示するボードが指定されていません。`}
+                    }に表示するボードが指定されていません。`}</p>
+                    {panel.type === 'activeBoard' ? (
+                        <>
+                            <p>
+                                ヒント1:
+                                ボードビュアーウィンドウに表示されているボードは全員が閲覧、編集可能です。
+                            </p>
+                            <p>
+                                ヒント2:
+                                セッションに利用するボードを用意する場合は、まずボードエディターウィンドウでボードを作成して、次にボードビュアーウィンドウから作成したボードを選択します。
+                            </p>
+                        </>
+                    ) : (
+                        <p>
+                            ヒント:
+                            ボードエディターウィンドウに表示されているボードは自分のみが閲覧、編集可能です。作成したボードを全員に公開して共有する場合は、ボードビュアーウィンドウから選択します。
+                        </p>
+                    )}
                 </div>
             );
         }
