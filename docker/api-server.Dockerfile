@@ -1,5 +1,5 @@
 # example of docker build:
-# docker build -f api-server.Dockerfile -t flocon-api --build-arg branch="v0.6.1-beta.1" . 
+# docker build -f api-server.Dockerfile -t flocon-api --build-arg branch="api/v0.6.1-beta.1" . 
 
 
 FROM node:16-bullseye as build
