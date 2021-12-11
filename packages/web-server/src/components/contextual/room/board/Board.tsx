@@ -64,6 +64,7 @@ import { create } from '../../../../utils/constants';
 import { boardEditorModalAtom } from './BoardEditorModal';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
 import { importBoardModalVisibilityAtom } from './ImportBoardModal';
+import { BoardType } from '../../../../utils/board/boardType';
 
 const setDragEndResultToPieceState = ({
     e,
@@ -154,7 +155,7 @@ type BoardCoreProps = {
     board: BoardState;
     boardConfig: BoardConfig;
     boardId: string;
-    boardEditorPanelId: string | null; // nullならばactiveBoardPanelとして扱われる
+    boardType: BoardType;
     onClick?: (e: KonvaEventObject<MouseEvent>) => void;
     onContextMenu?: (e: KonvaEventObject<PointerEvent>, stateOffset: Vector2) => void; // stateOffsetは、configなどのxy座標を基準にした位置。
     onTooltip?: (params: BoardTooltipState | null) => void;
@@ -167,7 +168,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     board,
     boardConfig,
     boardId,
-    boardEditorPanelId,
+    boardType,
     onClick,
     onContextMenu,
     onTooltip,
@@ -662,7 +663,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     RoomConfigUtils.zoomBoard(roomConfig, {
                         roomId,
                         boardId,
-                        boardEditorPanelId: boardEditorPanelId,
+                        boardType,
                         zoomDelta: e.evt.deltaY > 0 ? -0.25 : 0.25,
                         prevCanvasWidth: canvasWidth,
                         prevCanvasHeight: canvasHeight,
@@ -699,24 +700,15 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             if (roomConfig == null) {
                                 return;
                             }
-                            if (boardEditorPanelId == null) {
-                                const boardPanel = roomConfig.panels.activeBoardPanel;
-                                if (boardPanel == null) {
-                                    return;
+                            RoomConfigUtils.editBoard(
+                                roomConfig,
+                                boardId,
+                                boardType,
+                                boardConfig => {
+                                    boardConfig.offsetX -= e.evt.movementX / nonZeroScale;
+                                    boardConfig.offsetY -= e.evt.movementY / nonZeroScale;
                                 }
-                                boardPanel.board.offsetX -= e.evt.movementX / nonZeroScale;
-                                boardPanel.board.offsetY -= e.evt.movementY / nonZeroScale;
-                                return;
-                            }
-                            const board =
-                                roomConfig.panels.boardEditorPanels[boardEditorPanelId]?.boards?.[
-                                    boardId
-                                ];
-                            if (board == null) {
-                                return;
-                            }
-                            board.offsetX -= e.evt.movementX / nonZeroScale;
-                            board.offsetY -= e.evt.movementY / nonZeroScale;
+                            );
                         });
                     }}
                 >
@@ -738,11 +730,12 @@ type Props = {
 } & (
     | {
           type: 'activeBoard';
-          activeBoardPanel: ActiveBoardPanelConfig;
+          config: ActiveBoardPanelConfig;
+          isBackground: boolean;
       }
     | {
           type: 'boardEditor';
-          boardEditorPanel: BoardEditorPanelConfig;
+          config: BoardEditorPanelConfig;
           boardEditorPanelId: string;
       }
 );
@@ -775,10 +768,6 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
     const myUserUid = useMyUserUid();
     const me = useMe();
     const activeBoardId = useAtomSelector(roomAtom, state => state.roomState?.state?.activeBoardId);
-    const activeBoardPanelConfig = useAtomSelector(
-        roomConfigAtom,
-        state => state?.panels.activeBoardPanel
-    );
     const [activeBoardSelectorModalVisibility, setActiveBoardSelectorModalVisibility] =
         React.useState(false);
 
@@ -786,10 +775,10 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
         if (panel.type === 'activeBoard') {
             return activeBoardId;
         }
-        if (panel.boardEditorPanel.activeBoardId == null) {
+        if (panel.config.activeBoardId == null) {
             return undefined;
         }
-        return panel.boardEditorPanel.activeBoardId;
+        return panel.config.activeBoardId;
     })();
 
     const dicePieces = useDicePieces(boardIdToShow);
@@ -806,17 +795,21 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                 return null;
             }
             if (panel.type === 'activeBoard') {
-                if (activeBoardPanelConfig == null) {
-                    return null;
-                }
-                return activeBoardPanelConfig.board;
+                return panel.config.board;
             }
-            return panel.boardEditorPanel.boards[keyNames(boardIdToShow)];
+            return panel.config.boards[keyNames(boardIdToShow)];
         })() ?? defaultBoardConfig();
 
     const boardEditorPanelId = panel.type === 'boardEditor' ? panel.boardEditorPanelId : null;
 
     const board = boardIdToShow == null ? null : boards.get(boardIdToShow);
+
+    let boardType: BoardType;
+    if (panel.type === 'activeBoard') {
+        boardType = { type: 'activeBoardViewer', isBackground: panel.isBackground };
+    } else {
+        boardType = { type: 'boardEditor', boardEditorPanelId: panel.boardEditorPanelId };
+    }
 
     const boardComponent = (() => {
         if (boardIdToShow == null) {
@@ -829,17 +822,21 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                         <>
                             <p>
                                 ヒント1:
-                                ボードビュアーウィンドウに表示されているボードは全員が閲覧、編集可能です。
+                                ボードビュアーに表示されているボードは全員が閲覧、編集可能です。
                             </p>
                             <p>
                                 ヒント2:
-                                セッションに利用するボードを用意する場合は、まずボードエディターウィンドウでボードを作成して、次にボードビュアーウィンドウから作成したボードを選択します。
+                                ボードビュアーは、ボードビュアーウィンドウと背景のどちらからでも利用できます。
+                            </p>
+                            <p>
+                                ヒント3:
+                                セッションに用いるボードを用意する場合は、まずボードエディターウィンドウでボードを作成して、次にボードビュアーで作成したボードを選択します。
                             </p>
                         </>
                     ) : (
                         <p>
                             ヒント:
-                            ボードエディターウィンドウに表示されているボードは自分のみが閲覧、編集可能です。作成したボードを全員に公開して共有する場合は、ボードビュアーウィンドウから選択します。
+                            ボードエディターウィンドウに表示されているボードは自分のみが閲覧、編集可能です。作成したボードを全員に公開して共有する場合は、ボードビュアーから選択します。
                         </p>
                     )}
                 </div>
@@ -859,8 +856,8 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                 canvasHeight={canvasHeight}
                 board={board}
                 boardId={boardIdToShow}
+                boardType={boardType}
                 boardConfig={boardConfig}
-                boardEditorPanelId={boardEditorPanelId}
                 onClick={() => setBoardContextMenu(null)}
                 onTooltip={newValue => setBoardTooltip(newValue)}
                 onPopupEditor={newValue => setBoardPopoverEditor(newValue)}
@@ -1077,7 +1074,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                     RoomConfigUtils.editBoard(
                                         roomConfig,
                                         boardIdToShow,
-                                        boardEditorPanelId,
+                                        boardType,
                                         boardConfig => {
                                             boardConfig.showGrid = !boardConfig.showGrid;
                                         }
@@ -1107,7 +1104,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                                     RoomConfigUtils.editBoard(
                                                         roomConfig,
                                                         boardIdToShow,
-                                                        boardEditorPanelId,
+                                                        boardType,
                                                         boardConfig => {
                                                             boardConfig.gridLineTension = e;
                                                         }
@@ -1138,7 +1135,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                                             RoomConfigUtils.editBoard(
                                                                 roomConfig,
                                                                 boardIdToShow,
-                                                                boardEditorPanelId,
+                                                                boardType,
                                                                 boardConfig => {
                                                                     boardConfig.gridLineColor =
                                                                         rgba(e.rgb);
@@ -1173,7 +1170,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                 RoomConfigUtils.zoomBoard(roomConfig, {
                                     roomId,
                                     boardId: boardIdToShow,
-                                    boardEditorPanelId,
+                                    boardType,
                                     zoomDelta: 0.25,
                                     prevCanvasWidth: canvasWidth,
                                     prevCanvasHeight: canvasHeight,
@@ -1195,7 +1192,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                 RoomConfigUtils.zoomBoard(roomConfig, {
                                     roomId,
                                     boardId: boardIdToShow,
-                                    boardEditorPanelId,
+                                    boardType,
                                     zoomDelta: -0.25,
                                     prevCanvasWidth: canvasWidth,
                                     prevCanvasHeight: canvasHeight,
@@ -1218,7 +1215,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                 RoomConfigUtils.editBoard(
                                     roomConfig,
                                     boardIdToShow,
-                                    boardEditorPanelId,
+                                    boardType,
                                     () => {
                                         return defaultBoardConfig();
                                     }

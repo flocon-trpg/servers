@@ -11,10 +11,11 @@ import {
 } from '@flocon-trpg/typed-document-node';
 import { Alert, Button, Card, Input, Result, Spin, notification as antdNotification } from 'antd';
 import produce from 'immer';
-import { useAtomValue, useUpdateAtom } from 'jotai/utils';
+import { atom } from 'jotai';
+import { selectAtom, useAtomValue, useUpdateAtom } from 'jotai/utils';
 import { useRouter } from 'next/router';
 import React from 'react';
-import { usePrevious } from 'react-use';
+import { useDebounce, usePrevious } from 'react-use';
 import { bufferTime, Subject } from 'rxjs';
 import { roomPrivateMessageInputAtom } from '../../../atoms/inputs/roomPrivateMessageInputAtom';
 import { roomPublicMessageInputAtom } from '../../../atoms/inputs/roomPublicMessageInputAtom';
@@ -43,6 +44,58 @@ import { Room } from '../../contextual/room/Room';
 import { Center } from '../../ui/Center';
 import { Layout, loginAndEntry, success } from '../../ui/Layout';
 import { LoadingResult } from '../../ui/result/LoadingResult';
+
+const debouncedWindowInnerWidthAtomCore = atom(0);
+const debouncedWindowInnerHeightAtomCore = atom(0);
+
+export const debouncedWindowInnerWidthAtom = selectAtom(debouncedWindowInnerWidthAtomCore, x => x);
+export const debouncedWindowInnerHeightAtom = selectAtom(
+    debouncedWindowInnerHeightAtomCore,
+    x => x
+);
+
+const useOnResize = () => {
+    const [windowInnerWidthState, setWindowInnerWidthState] = React.useState(
+        debouncedWindowInnerWidthAtomCore.init
+    );
+    const [windowInnerHeightState, setWindowInnerHeightState] = React.useState(
+        debouncedWindowInnerHeightAtomCore.init
+    );
+
+    const setWindowInnerWidthAtom = useUpdateAtom(debouncedWindowInnerWidthAtomCore);
+    const setWindowInnerHeightAtom = useUpdateAtom(debouncedWindowInnerHeightAtomCore);
+
+    React.useEffect(() => {
+        const updateInnerWindowSize = () => {
+            setWindowInnerWidthState(window.innerWidth);
+            setWindowInnerHeightState(window.innerHeight);
+        };
+
+        // 'load'などでは初期サイズを取得できなかったので、setTimeoutで取得している
+        setTimeout(() => updateInnerWindowSize(), 1000);
+
+        window.addEventListener('resize', updateInnerWindowSize);
+        return () => {
+            window.removeEventListener('resize', updateInnerWindowSize);
+        };
+    }, [setWindowInnerHeightAtom, setWindowInnerWidthAtom]);
+
+    const debounceTime = 500;
+    useDebounce(
+        () => {
+            setWindowInnerWidthAtom(windowInnerWidthState);
+        },
+        debounceTime,
+        [windowInnerWidthState]
+    );
+    useDebounce(
+        () => {
+            setWindowInnerHeightAtom(windowInnerHeightState);
+        },
+        debounceTime,
+        [windowInnerHeightState]
+    );
+};
 
 type JoinRoomFormProps = {
     roomState: RoomAsListItemFragment;
@@ -241,6 +294,7 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
     const setRoomPrivateMessageInput = useUpdateAtom(roomPrivateMessageInputAtom);
     const hideAllOverlay = useUpdateAtom(hideAllOverlayActionAtom);
 
+    useOnResize();
     useRoomConfig(roomId);
 
     const [updateWritingMessageStatus] = useMutation(UpdateWritingMessageStatusDocument);

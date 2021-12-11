@@ -34,6 +34,8 @@ import { BoardPositionAndPieceEditorModal } from './piece/BoardPositionAndPieceE
 import { CharacterTagNamesEditorModal } from './character/CharacterTagNamesEditorModal';
 import { ImportCharacterModal } from './character/ImportCharacterModal';
 import { ImportBoardModal } from './board/ImportBoardModal';
+import { useAtomValue } from 'jotai/utils';
+import { debouncedWindowInnerHeightAtom, debouncedWindowInnerWidthAtom } from '../../pages/room/id';
 
 const RoomMessagePanels: React.FC = () => {
     const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
@@ -129,7 +131,13 @@ const bottomContainerPadding = `0px ${horizontalPadding}px`;
 
 export const Room: React.FC = () => {
     const myUserUid = useMyUserUid();
+    const innerWidth = useAtomValue(debouncedWindowInnerWidthAtom);
+    const innerHeight = useAtomValue(debouncedWindowInnerHeightAtom);
     const roomIdOfRoomConfig = useAtomSelector(roomConfigAtom, state => state?.roomId);
+    const activeBoardBackgroundConfig = useAtomSelector(
+        roomConfigAtom,
+        state => state?.panels.activeBoardBackground
+    );
     const activeBoardPanelConfig = useAtomSelector(
         roomConfigAtom,
         state => state?.panels.activeBoardPanel
@@ -163,6 +171,7 @@ export const Room: React.FC = () => {
     if (
         roomIdOfRoomConfig == null ||
         roomIdOfRoomConfig !== roomId ||
+        activeBoardBackgroundConfig == null ||
         activeBoardPanelConfig == null ||
         boardEditorPanelsConfig == null ||
         characterPanel == null ||
@@ -257,7 +266,7 @@ export const Room: React.FC = () => {
                     canvasHeight={pair.value.height}
                     type='boardEditor'
                     boardEditorPanelId={pair.key}
-                    boardEditorPanel={pair.value}
+                    config={pair.value}
                 />
             </DraggableCard>
         );
@@ -418,6 +427,13 @@ export const Room: React.FC = () => {
             <AntdLayout.Content>
                 <RoomMenu />
                 <div style={{ position: 'relative' }}>
+                    <Board
+                        canvasWidth={innerWidth}
+                        canvasHeight={innerHeight - 40 /* TODO: 40という値は適当 */}
+                        type='activeBoard'
+                        isBackground={true}
+                        config={activeBoardBackgroundConfig}
+                    />
                     {activeBoardPanelConfig.isMinimized ? null : (
                         <DraggableCard
                             header='ボードビュアー'
@@ -473,7 +489,8 @@ export const Room: React.FC = () => {
                                 canvasWidth={activeBoardPanelConfig.width}
                                 canvasHeight={activeBoardPanelConfig.height}
                                 type='activeBoard'
-                                activeBoardPanel={activeBoardPanelConfig}
+                                isBackground={false}
+                                config={activeBoardPanelConfig}
                             />
                         </DraggableCard>
                     )}
