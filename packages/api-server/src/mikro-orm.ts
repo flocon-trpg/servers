@@ -37,27 +37,21 @@ const entities = [
 
 type Debug = boolean | LoggerNamespace[];
 
-const src = 'src';
-const dist = 'dist';
-type Dir = typeof src | typeof dist;
-
 const migrationPattern = /^[\w-]+\d+\.[jt]s$/;
 
 export const createSQLite = async ({
     dbName,
     debug,
-    dir,
 }: {
     dbName: string;
     debug?: Debug;
-    dir: Dir;
 }): Promise<MikroORM<IDatabaseDriver<Connection>>> => {
     // TODO: dbNameを変える。
     return await MikroORM.init({
         entities,
         dbName,
         migrations: {
-            path: `./${dir}/__migrations__/sqlite`,
+            path: `./dist/__migrations__/sqlite`,
             pattern: migrationPattern,
         },
         type: 'sqlite',
@@ -70,20 +64,18 @@ export const createPostgreSQL = async ({
     dbName,
     clientUrl,
     debug,
-    dir,
     driverOptions,
 }: {
     dbName: string | undefined;
     clientUrl: string;
     debug?: Debug;
-    dir: Dir;
     driverOptions: Dictionary<unknown> | undefined;
 }): Promise<MikroORM<IDatabaseDriver<Connection>>> => {
     return await MikroORM.init({
         entities,
         dbName,
         migrations: {
-            path: `./${dir}/__migrations__/postgresql`,
+            path: `./dist/__migrations__/postgresql`,
             pattern: migrationPattern,
 
             // https://github.com/mikro-orm/mikro-orm/issues/190#issuecomment-655763246
@@ -97,19 +89,17 @@ export const createPostgreSQL = async ({
     });
 };
 
-export const prepareORM = async (config: DatabaseConfig, dir: Dir, debug: boolean) => {
+export const prepareORM = async (config: DatabaseConfig, debug: boolean) => {
     try {
         switch (config.__type) {
             case postgresql:
                 return await createPostgreSQL({
                     ...config,
-                    dir,
                     debug,
                 });
             case sqlite:
                 return await createSQLite({
                     ...config,
-                    dir,
                     debug,
                 });
         }

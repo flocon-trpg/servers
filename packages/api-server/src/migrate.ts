@@ -92,7 +92,7 @@ const migrateUpCore = async ({
     });
 };
 
-export const migrateByTsNode = async (
+export const migrateByNpmScript = async (
     type:
         | typeof check
         | typeof create
@@ -123,7 +123,6 @@ export const migrateByTsNode = async (
         case sqlite:
             orm = await createSQLite({
                 ...serverConfig.database,
-                dir: 'src',
                 debug: type !== check,
             });
             dbType = sqlite;
@@ -131,7 +130,6 @@ export const migrateByTsNode = async (
         case postgresql:
             orm = await createPostgreSQL({
                 ...serverConfig.database,
-                dir: 'src',
                 debug: type !== check,
             });
             dbType = postgresql;
