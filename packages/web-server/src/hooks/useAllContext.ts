@@ -1,6 +1,6 @@
 import { useApolloClient } from '@apollo/client';
 import React from 'react';
-import { Props } from '../components/AllContextProvider';
+import { Props } from '../components/behaviors/AllContextProvider';
 import { ClientIdContext } from '../contexts/ClientIdContext';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';

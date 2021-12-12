@@ -38,7 +38,7 @@ export const deserializeActiveBoardPanelConfig = (
     };
 };
 
-export const defaultActiveBoardPanelsConfig = (): ActiveBoardPanelConfig => {
+export const defaultActiveBoardPanelConfig = (): ActiveBoardPanelConfig => {
     return {
         ...defaultActiveBoardPanelPosition,
         board: defaultBoardConfig(),

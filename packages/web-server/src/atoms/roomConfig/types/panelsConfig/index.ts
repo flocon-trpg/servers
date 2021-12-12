@@ -3,7 +3,7 @@ import * as t from 'io-ts';
 import { record } from '../../../../utils/io-ts/record';
 import {
     ActiveBoardPanelConfig,
-    defaultActiveBoardPanelsConfig,
+    defaultActiveBoardPanelConfig,
     deserializeActiveBoardPanelConfig,
     serializedActiveBoardPanelConfig,
 } from '../activeBoardPanelConfig';
@@ -57,6 +57,9 @@ import {
 } from '../pieceValuePanelConfig';
 
 export type PanelsConfig = {
+    // DraggablePanelConfigBaseのプロパティは使われていない
+    activeBoardBackground: ActiveBoardPanelConfig;
+
     activeBoardPanel: ActiveBoardPanelConfig;
     boardEditorPanels: Record<string, BoardEditorPanelConfig | undefined>;
     characterPanel: CharactersPanelConfig;
@@ -69,6 +72,7 @@ export type PanelsConfig = {
 };
 
 export const serializedPanelsConfig = t.partial({
+    activeBoardBackground: serializedActiveBoardPanelConfig,
     activeBoardPanel: serializedActiveBoardPanelConfig,
     boardEditorPanels: record(t.string, serializedBoardEditorPanelConfig),
     characterPanel: serializedCharactersPanelConfig,
@@ -84,6 +88,9 @@ export type SerializedPanelsConfig = t.TypeOf<typeof serializedPanelsConfig>;
 
 export const deserializePanelsConfig = (source: SerializedPanelsConfig): PanelsConfig => {
     return {
+        activeBoardBackground: deserializeActiveBoardPanelConfig(
+            source.activeBoardBackground ?? {}
+        ),
         activeBoardPanel: deserializeActiveBoardPanelConfig(source.activeBoardPanel ?? {}),
         boardEditorPanels: chooseRecord(
             source.boardEditorPanels ?? {},
@@ -104,7 +111,8 @@ export const deserializePanelsConfig = (source: SerializedPanelsConfig): PanelsC
 
 export const defaultPanelsConfig = (): PanelsConfig => {
     return {
-        activeBoardPanel: defaultActiveBoardPanelsConfig(),
+        activeBoardBackground: defaultActiveBoardPanelConfig(),
+        activeBoardPanel: defaultActiveBoardPanelConfig(),
         boardEditorPanels: defaultBoardEditorPanelsConfig(),
         characterPanel: defaultCharactersPanelConfig(),
         chatPalettePanels: defaultChatPalettePanelsConfig(),

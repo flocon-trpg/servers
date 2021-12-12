@@ -13,7 +13,7 @@ import {
     GetMessagesDocument,
 } from '@flocon-trpg/typed-document-node';
 import { appConsole } from '../utils/appConsole';
-import { PrivateChannelSet, PrivateChannelSets } from '../utils/PrivateChannelSet';
+import { PrivateChannelSet, PrivateChannelSets } from '../utils/message/PrivateChannelSet';
 import { useMyUserUid } from './useMyUserUid';
 import { usePrevious } from 'react-use';
 import { useAtomSelector } from '../atoms/useAtomSelector';

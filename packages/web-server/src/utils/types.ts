@@ -1,5 +1,5 @@
 import { FilterValue } from 'antd/lib/table/interface';
-import { FilePath } from './filePath';
+import { FilePath } from './file/filePath';
 
 export type CharacterTagNames = {
     characterTag1Name: string | undefined;

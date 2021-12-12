@@ -2,6 +2,7 @@ import { RoomConfig } from '.';
 import { ResizeDirection } from 're-resizable';
 import { recordToArray } from '@flocon-trpg/utils';
 import { BoardConfig, defaultBoardConfig } from '../boardConfig';
+import { BoardType } from '../../../../utils/board/boardType';
 
 export namespace RoomConfigUtils {
     export const activeBoardPanel = 'activeBoardPanel';
@@ -49,7 +50,7 @@ export namespace RoomConfigUtils {
 
     export type ZoomBoardAction = {
         roomId: string;
-        boardEditorPanelId: string | null; // nullならばActiveBoardPanelが対象になる。
+        boardType: BoardType;
         boardId: string;
         zoomDelta: number;
         prevCanvasWidth: number;
@@ -213,7 +214,7 @@ export namespace RoomConfigUtils {
     };
 
     export const zoomBoard = (state: RoomConfig, action: ZoomBoardAction): void => {
-        RoomConfigUtils.editBoard(state, action.boardId, action.boardEditorPanelId, board => {
+        RoomConfigUtils.editBoard(state, action.boardId, action.boardType, board => {
             const prevZoom = board.zoom;
             const nextZoom = prevZoom + action.zoomDelta;
             const prevScale = Math.pow(2, prevZoom);
@@ -228,23 +229,31 @@ export namespace RoomConfigUtils {
     export const editBoard = (
         state: RoomConfig,
         boardId: string,
-        boardEditorPanelId: string | null /* nullならばactiveBoardPanelが対象となる */,
+        boardType: BoardType,
         action: (source: BoardConfig) => void
     ): void => {
-        if (boardEditorPanelId == null) {
+        if (boardType.type === 'activeBoardViewer') {
+            if (boardType.isBackground) {
+                const result = action(state.panels.activeBoardBackground.board);
+                if (result == null) {
+                    return;
+                }
+                state.panels.activeBoardBackground.board = result;
+                return;
+            }
             const result = action(state.panels.activeBoardPanel.board);
             if (result == null) {
                 return;
             }
             state.panels.activeBoardPanel.board = result;
-        } else {
-            const targetPanel = state.panels.boardEditorPanels[boardEditorPanelId];
-            if (targetPanel == null) {
-                return;
-            }
-            const board = targetPanel.boards[boardId] ?? defaultBoardConfig();
-            action(board);
-            targetPanel.boards[boardId] = board;
+            return;
         }
+        const targetPanel = state.panels.boardEditorPanels[boardType.boardEditorPanelId];
+        if (targetPanel == null) {
+            return;
+        }
+        const board = targetPanel.boards[boardId] ?? defaultBoardConfig();
+        action(board);
+        targetPanel.boards[boardId] = board;
     };
 }

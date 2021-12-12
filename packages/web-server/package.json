@@ -1,6 +1,6 @@
 {
     "name": "@flocon-trpg/web-server",
-    "version": "0.6.1-beta.1",
+    "version": "0.6.2-beta.1",
     "description": "Flocon Web server",
     "dependencies": {
         "@apollo/client": "^3.4.15",

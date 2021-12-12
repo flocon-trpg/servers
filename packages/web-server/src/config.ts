@@ -3,7 +3,7 @@ import { isTruthyString, parseEnvListValue } from '@flocon-trpg/utils';
 import * as E from 'fp-ts/Either';
 import { WebConfig } from './configType';
 import { NEXT_PUBLIC_FIREBASE_CONFIG } from './env';
-import { formatValidationErrors } from './utils/io-ts-reporters';
+import { formatValidationErrors } from './utils/io-ts/io-ts-reporters';
 
 // jsonファイルを直接importしても動くが、jsonファイルにミスがあるときに出るエラーメッセージをわかりやすくするため、io-ts&io-ts-reportersを用いて変換している。
 
