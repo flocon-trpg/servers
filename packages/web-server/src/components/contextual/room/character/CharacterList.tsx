@@ -60,7 +60,7 @@ import { roomConfigAtom } from '../../../../atoms/roomConfig/roomConfigAtom';
 import { CharacterTabName } from './CharacterTabName';
 import { useImmerUpdateAtom } from '../../../../atoms/useImmerUpdateAtom';
 import { CharacterTabConfigUtils } from '../../../../atoms/roomConfig/types/characterTabConfig/utils';
-import { DrawerFooter } from '../../../ui/DrawerFooter';
+import { DialogFooter } from '../../../ui/DialogFooter';
 import { Gutter } from 'antd/lib/grid/row';
 import { useCharacterTagNames } from '../../../../hooks/state/useCharacterTagNames';
 import { importCharacterModalVisibilityAtom } from './ImportCharacterModal';
@@ -469,7 +469,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
             onCancel={() => onClose()}
             width={500}
             footer={
-                <DrawerFooter
+                <DialogFooter
                     close={{
                         textType: 'close',
                         onClick: () => onClose(),

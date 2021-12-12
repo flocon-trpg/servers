@@ -1,6 +1,6 @@
 import { Col, Drawer, Input, Row } from 'antd';
 import React from 'react';
-import { DrawerFooter } from '../../ui/DrawerFooter';
+import { DialogFooter } from '../../ui/DialogFooter';
 import { DrawerProps } from 'antd/lib/drawer';
 import { Gutter } from 'antd/lib/grid/row';
 import { useSetRoomStateWithImmer } from '../../../hooks/useSetRoomStateWithImmer';
@@ -31,7 +31,7 @@ export const EditRoomDrawer: React.FC = () => {
             closable
             onClose={() => setEditRoomDrawerVisibility(false)}
             footer={
-                <DrawerFooter
+                <DialogFooter
                     close={{
                         textType: 'close',
                         onClick: () => setEditRoomDrawerVisibility(false),

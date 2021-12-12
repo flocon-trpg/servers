@@ -9,7 +9,7 @@ import * as Icon from '@ant-design/icons';
 import { FilesManagerDrawer } from './file/FilesManagerDrawer';
 import { FilesManagerDrawerType, some } from '../../../utils/types';
 import { VolumeBar } from '../../ui/VolumeBar';
-import { DrawerFooter } from '../../ui/DrawerFooter';
+import { DialogFooter } from '../../ui/DialogFooter';
 import { MyStyle } from '../../../utils/myStyle';
 import { BgmState, FilePath, StrIndex5 } from '@flocon-trpg/core';
 import _ from 'lodash';
@@ -153,7 +153,7 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({
             onClose={() => onClose()}
             visible={visible}
             footer={
-                <DrawerFooter
+                <DialogFooter
                     close={{ textType: 'cancel', onClick: () => onClose() }}
                     ok={{
                         textType: 'ok',
@@ -266,7 +266,7 @@ const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({
             visible={visible}
             onClose={() => onClose()}
             footer={
-                <DrawerFooter
+                <DialogFooter
                     close={{ textType: 'cancel', onClick: () => onClose() }}
                     ok={{
                         textType: 'ok',

@@ -24,7 +24,7 @@ type Props = {
     };
 };
 
-export const DrawerFooter: React.FC<Props> = ({ close, ok, destroy }: Props) => {
+export const DialogFooter: React.FC<Props> = ({ close, ok, destroy }: Props) => {
     if (close == null && ok == null && destroy == null) {
         return null;
     }

@@ -4,7 +4,7 @@ import { Alert, Modal } from 'antd';
 import { atom, useAtom } from 'jotai';
 import React from 'react';
 import { BufferedTextArea } from '../../../ui/BufferedTextArea';
-import { DrawerFooter } from '../../../ui/DrawerFooter';
+import { DialogFooter } from '../../../ui/DialogFooter';
 import * as E from 'fp-ts/Either';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
@@ -48,7 +48,7 @@ export const ImportCharacterModal: React.FC = () => {
             closable
             onCancel={() => setVisibility(false)}
             footer={
-                <DrawerFooter
+                <DialogFooter
                     close={{
                         textType: 'cancel',
                         onClick: () => setVisibility(false),

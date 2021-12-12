@@ -1,6 +1,6 @@
 import { Button, Modal, Tooltip } from 'antd';
 import React from 'react';
-import { DrawerFooter } from '../../../ui/DrawerFooter';
+import { DialogFooter } from '../../../ui/DialogFooter';
 import { InputFile } from '../file/InputFile';
 import { FilesManagerDrawerType } from '../../../../utils/types';
 import { FilesManagerDrawer } from '../file/FilesManagerDrawer';
@@ -206,7 +206,7 @@ export const CharacterEditorModal: React.FC = () => {
             closable
             onCancel={() => setAtomValue(null)}
             footer={
-                <DrawerFooter
+                <DialogFooter
                     close={{
                         textType: atomValue?.type === create ? 'cancel' : 'close',
                         onClick: () => setAtomValue(null),

@@ -1,6 +1,6 @@
 import { Button, Col, Drawer, Row, Tooltip } from 'antd';
 import React from 'react';
-import { DrawerFooter } from '../../../ui/DrawerFooter';
+import { DialogFooter } from '../../../ui/DialogFooter';
 import { DrawerProps } from 'antd/lib/drawer';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../../../hooks/useStateEditor';
@@ -136,7 +136,7 @@ export const ImagePieceDrawer: React.FC = () => {
             closable
             onClose={() => setDrawerType(null)}
             footer={
-                <DrawerFooter
+                <DialogFooter
                     close={{
                         textType: drawerType?.type === update ? 'close' : 'cancel',
                         onClick: () => setDrawerType(null),

@@ -41,7 +41,7 @@ import {
 } from '@flocon-trpg/typed-document-node';
 import * as Icon from '@ant-design/icons';
 import { Gutter } from 'antd/lib/grid/row';
-import { DrawerFooter } from '../../../ui/DrawerFooter';
+import { DialogFooter } from '../../../ui/DialogFooter';
 import { BufferedInput } from '../../../ui/BufferedInput';
 import { QueryResultViewer } from '../../../ui/QueryResultViewer';
 import { useMessageFilter } from '../../../../hooks/useMessageFilter';
@@ -151,7 +151,7 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
             onClose={() => onClose()}
             width={500}
             footer={
-                <DrawerFooter
+                <DialogFooter
                     close={{
                         textType: 'close',
                         onClick: () => onClose(),
@@ -377,7 +377,7 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (
             onClose={() => onClose()}
             width={500}
             footer={
-                <DrawerFooter
+                <DialogFooter
                     close={{
                         textType: 'close',
                         onClick: () => onClose(),

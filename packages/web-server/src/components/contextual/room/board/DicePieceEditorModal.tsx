@@ -1,6 +1,6 @@
 import { Col, Modal, Row } from 'antd';
 import React from 'react';
-import { DrawerFooter } from '../../../ui/DrawerFooter';
+import { DialogFooter } from '../../../ui/DialogFooter';
 import { replace } from '../../../../stateManagers/states/types';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../../../hooks/useStateEditor';
@@ -115,7 +115,7 @@ export const DicePieceEditorModal: React.FC = () => {
             closable
             onCancel={() => setDrawerType(null)}
             footer={
-                <DrawerFooter
+                <DialogFooter
                     close={{
                         textType: drawerType?.type === update ? 'close' : 'cancel',
                         onClick: () => setDrawerType(null),

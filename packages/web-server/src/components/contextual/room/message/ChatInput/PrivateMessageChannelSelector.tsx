@@ -4,7 +4,7 @@ import { recordToArray } from '@flocon-trpg/utils';
 import _ from 'lodash';
 import { useParticipants } from '../../../../../hooks/state/useParticipants';
 import { useMyUserUid } from '../../../../../hooks/useMyUserUid';
-import { DrawerFooter } from '../../../../ui/DrawerFooter';
+import { DialogFooter } from '../../../../ui/DialogFooter';
 import { Gutter } from 'antd/lib/grid/row';
 import { cancelRnd, flex, flexNone, flexRow, itemsCenter } from '../../../../../utils/className';
 import classNames from 'classnames';
@@ -44,7 +44,7 @@ const PrivateMessageDrawer: React.FC<PrivateMessageDrawerProps> = ({
             closable
             onClose={() => onClose()}
             footer={
-                <DrawerFooter
+                <DialogFooter
                     close={{
                         textType: 'close',
                         onClick: () => onClose(),

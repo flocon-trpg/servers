@@ -1,6 +1,6 @@
 import { Col, Divider, InputNumber, Modal, Row } from 'antd';
 import React from 'react';
-import { DrawerFooter } from '../../../ui/DrawerFooter';
+import { DialogFooter } from '../../../ui/DialogFooter';
 import { InputFile } from '../file/InputFile';
 import { DrawerProps } from 'antd/lib/drawer';
 import { FilesManagerDrawer } from '../file/FilesManagerDrawer';
@@ -151,7 +151,7 @@ export const BoardEditorModal: React.FC = () => {
             closable
             onCancel={() => setModalValue(null)}
             footer={
-                <DrawerFooter
+                <DialogFooter
                     close={{
                         textType: modalValue?.type === create ? 'cancel' : 'close',
                         onClick: () => setModalValue(null),

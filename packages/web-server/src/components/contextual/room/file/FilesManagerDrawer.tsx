@@ -5,7 +5,7 @@ import {
     FileSourceType,
     GetServerInfoDocument,
 } from '@flocon-trpg/typed-document-node';
-import { DrawerFooter } from '../../../ui/DrawerFooter';
+import { DialogFooter } from '../../../ui/DialogFooter';
 import { FilesManagerDrawerType, some } from '../../../../utils/types';
 import { cancelRnd } from '../../../../utils/className';
 import { FirebaseFilesManager } from './FirebaseFilesManager';
@@ -100,7 +100,7 @@ export const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Pro
             onClose={() => onClose()}
             width={800}
             footer={
-                <DrawerFooter
+                <DialogFooter
                     close={{
                         textType: 'close',
                         onClick: () => onClose(),

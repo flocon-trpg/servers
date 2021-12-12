@@ -1,6 +1,6 @@
 import { Button, Collapse, Form, Modal, Select, Space } from 'antd';
 import React from 'react';
-import { DrawerFooter } from '../../../ui/DrawerFooter';
+import { DialogFooter } from '../../../ui/DialogFooter';
 import { replace } from '../../../../stateManagers/states/types';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { BufferedInput } from '../../../ui/BufferedInput';
@@ -250,7 +250,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
             closable
             onCancel={() => setEditorVisibility(false)}
             footer={
-                <DrawerFooter
+                <DialogFooter
                     close={{
                         textType: 'close',
                         onClick: () => setEditorVisibility(false),

@@ -1,6 +1,6 @@
 import { Button, Modal } from 'antd';
 import React from 'react';
-import { DrawerFooter } from '../../../ui/DrawerFooter';
+import { DialogFooter } from '../../../ui/DialogFooter';
 import { BufferedInput } from '../../../ui/BufferedInput';
 import { strIndex10Array } from '@flocon-trpg/core';
 import classNames from 'classnames';
@@ -59,7 +59,7 @@ export const CharacterTagNamesEditorModal: React.FC = () => {
             closable
             onCancel={() => setEditorVisibility(false)}
             footer={
-                <DrawerFooter
+                <DialogFooter
                     close={{
                         textType: 'close',
                         onClick: () => setEditorVisibility(false),
