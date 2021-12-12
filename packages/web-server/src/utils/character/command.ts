@@ -1,8 +1,4 @@
-import {
-    execCharacterCommand as execCharacterCommandCore,
-    State,
-    testCommand as testCommandCore,
-} from '@flocon-trpg/core';
+import { testCommand as testCommandCore } from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
 import { transform } from 'sucrase';
 
