@@ -31,6 +31,15 @@ export const DialogFooter: React.FC<Props> = ({ close, ok, destroy }: Props) => 
 
     let closeButton: JSX.Element | null = null;
     if (close != null) {
+        let closeText: string;
+        switch (close.textType) {
+            case 'close':
+                closeText = '閉じる';
+                break;
+            case 'cancel':
+                closeText = 'キャンセル';
+                break;
+        }
         closeButton = (
             <Button
                 onClick={() => {
@@ -40,7 +49,7 @@ export const DialogFooter: React.FC<Props> = ({ close, ok, destroy }: Props) => 
                 }}
                 style={{ marginLeft: 8 }}
             >
-                {close.textType}
+                {closeText}
             </Button>
         );
     }
@@ -81,6 +90,21 @@ export const DialogFooter: React.FC<Props> = ({ close, ok, destroy }: Props) => 
 
     let okButton: JSX.Element | null = null;
     if (ok != null) {
+        let okText: string;
+        switch (ok.textType) {
+            case 'create':
+                okText = '作成';
+                break;
+            case 'loading':
+                okText = '読み込み中';
+                break;
+            case 'ok':
+                okText = 'OK';
+                break;
+            case 'post':
+                okText = '投稿する';
+                break;
+        }
         okButton = (
             <Button
                 onClick={() => {
@@ -90,7 +114,7 @@ export const DialogFooter: React.FC<Props> = ({ close, ok, destroy }: Props) => 
                 type='primary'
                 style={{ marginLeft: 8 }}
             >
-                {ok.textType}
+                {okText}
             </Button>
         );
     }
