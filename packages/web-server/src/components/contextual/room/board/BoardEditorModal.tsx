@@ -247,7 +247,7 @@ export const BoardEditorModal: React.FC = () => {
                 </Row>
                 <Row gutter={gutter} align='middle'>
                     <Col flex='auto' />
-                    <Col flex={0}>グリッドの大きさ</Col>
+                    <Col flex={0}>セルの大きさ</Col>
                     <Col span={inputSpan}>
                         {/* cellWidth === cellHeight という前提だが、もし異なる場合は代表してcellWidthの値を用いることにしている */}
                         <InputNumber
@@ -269,7 +269,7 @@ export const BoardEditorModal: React.FC = () => {
                 </Row>
                 <Row gutter={gutter} align='middle'>
                     <Col flex='auto' />
-                    <Col flex={0}>グリッドの基準点</Col>
+                    <Col flex={0}>セルの基準点</Col>
                     <Col span={inputSpan}>
                         <span>x=</span>
                         <InputNumber

@@ -251,8 +251,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
         return lastMessage.value;
     })();
 
-    const grid = (() => {
-        // 本来はグリッドを縦横無限に表示するのが理想だが、実装簡略化のためとりあえず200本ずつだけ表示している。
+    const cellLines = (() => {
+        // 本来はセルの線を縦横無限に表示するのが理想だが、実装簡略化のためとりあえず200本ずつだけ表示している。
 
         if (!boardConfig.showGrid) {
             return null;
@@ -715,7 +715,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     {/* このRectがないと画像がないところで位置をドラッグで変えることができない。ただもっといい方法があるかも */}
                     <ReactKonva.Rect x={-100000} y={-100000} width={200000} height={200000} />
                     {backgroundImageKonva}
-                    {grid}
+                    {cellLines}
                 </ReactKonva.Layer>
             </AllContextProvider>
             {/* pieces: ドラッグでpieceのみを動かせる */}
@@ -1082,13 +1082,13 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                 });
                             }}
                         >
-                            グリッドの表示/非表示
+                            セルの線の表示/非表示
                         </Button>
                         <Popover
                             trigger='click'
                             content={
                                 <div className={classNames(cancelRnd, flex, flexColumn)}>
-                                    <div style={{ paddingBottom: 8 }}>グリッドの設定</div>
+                                    <div style={{ paddingBottom: 8 }}>セルの線の設定</div>
                                     <div className={classNames(flex, flexRow, itemsCenter)}>
                                         <div style={titleStyle}>太さ</div>
                                         <InputNumber

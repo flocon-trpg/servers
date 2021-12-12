@@ -19,7 +19,7 @@ export const PiecePositionEditor: React.FC<Props> = ({ state, onUpdate }: Props)
             <>
                 <Row gutter={gutter} align='middle'>
                     <Col flex='auto' />
-                    <Col flex={0}>セルの位置</Col>
+                    <Col flex={0}>セルの座標</Col>
                     <Col span={inputSpan}>
                         <Space>
                             <InputNumber
