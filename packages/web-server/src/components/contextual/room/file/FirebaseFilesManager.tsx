@@ -189,7 +189,7 @@ const openButtonColumn = (onClick: (ref: Reference) => void): Column => ({
     render: (_, record: DataSource) => {
         return (
             <Button key={record.reference.fullPath} onClick={() => onClick(record.reference)}>
-                選択
+                開く
             </Button>
         );
     },

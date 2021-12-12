@@ -235,7 +235,7 @@ const openButtonColumn = (onClick: (filename: string) => void): Column => ({
     render: (_, record: DataSource) => {
         return (
             <Button key={record.filename} onClick={() => onClick(record.filename)}>
-                選択
+                開く
             </Button>
         );
     },
