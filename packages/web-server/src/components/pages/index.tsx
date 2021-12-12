@@ -1,5 +1,4 @@
 import { Alert, Button, Collapse, Typography } from 'antd';
-import Link from 'next/link';
 import React from 'react';
 import { FilesManagerDrawer } from '../contextual/room/file/FilesManagerDrawer';
 import { QueryResultViewer } from '../ui/QueryResultViewer';
@@ -152,13 +151,6 @@ export const Index: React.FC = () => {
                 <QueryResultViewer error={error} loading={false} compact>
                     {versionInfo}
                 </QueryResultViewer>
-                <div style={{ height: spacing }} />
-                <Typography.Title level={3}>ドキュメント</Typography.Title>
-                <ul>
-                    <li>
-                        <Link href='/docs/board'>ボードの使い方</Link> (2021/05/29)
-                    </li>
-                </ul>
             </div>
         </Layout>
     );
