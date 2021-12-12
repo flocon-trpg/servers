@@ -6,12 +6,12 @@ const yRatio = 30;
 type PanelPosition = DraggablePanelConfigBase & { isMinimized: boolean };
 
 export const defaultActiveBoardPanelPosition: PanelPosition = {
-    x: xRatio * 7,
-    y: yRatio * 7,
+    x: xRatio * 8,
+    y: yRatio * 8,
     width: 800,
     height: 600,
-    zIndex: 7,
-    isMinimized: false,
+    zIndex: 8,
+    isMinimized: true,
 };
 
 export const defaultBoardEditorPanelPosition: PanelPosition = {
@@ -60,11 +60,11 @@ export const defaultMemoPanelPosition: PanelPosition = {
 };
 
 export const defaultMessagePanelPosition: PanelPosition = {
-    x: xRatio * 8,
-    y: yRatio * 8,
+    x: xRatio * 7,
+    y: yRatio * 7,
     width: 600,
     height: 600,
-    zIndex: 8,
+    zIndex: 7,
     isMinimized: false,
 };
 
