@@ -5,5 +5,8 @@
         ":pinOnlyDevDependencies",
         "schedule:weekly",
         "helpers:disableTypesNodeMajor"
-    ]
+    ],
+    "lockFileMaintenance": {
+        "enabled": true
+    }
 }
