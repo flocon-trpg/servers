@@ -2,8 +2,21 @@
     "extends": [
         "config:base",
         ":timezone(Asia/Tokyo)",
-        ":pinOnlyDevDependencies",
         "schedule:weekly",
         "helpers:disableTypesNodeMajor"
+    ],
+    "packageRules": [
+        {
+            "matchPackagePatterns": ["*"],
+            "rangeStrategy": "update-lockfile"
+        },
+        {
+            "matchDepTypes": ["devDependencies"],
+            "rangeStrategy": "pin"
+        },
+        {
+            "matchDepTypes": ["peerDependencies"],
+            "rangeStrategy": "widen"
+        }
     ]
 }
