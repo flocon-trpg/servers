@@ -358,8 +358,7 @@ const operateParticipantAndFlush = async ({
 
     await GlobalRoom.Global.autoRemoveOldRoomOp({
         em: em.fork(),
-        roomId: room.id,
-        roomRevision: room.revision,
+        room,
         roomHistCount,
     });
     await em.flush();
@@ -1611,8 +1610,7 @@ export class RoomResolver {
 
             await GlobalRoom.Global.autoRemoveOldRoomOp({
                 em: em.fork(),
-                roomId: room.id,
-                roomRevision: room.revision,
+                room,
                 roomHistCount: context.serverConfig.roomHistCount,
             });
             await em.flush();

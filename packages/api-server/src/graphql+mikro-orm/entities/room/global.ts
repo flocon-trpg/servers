@@ -343,24 +343,27 @@ export namespace GlobalRoom {
 
         export const autoRemoveOldRoomOp = async ({
             em,
-            roomId,
-            roomRevision,
+            room,
             roomHistCount,
         }: {
             em: EM;
-            roomId: string;
-            roomRevision: number;
+            room: Room;
             roomHistCount: number | undefined;
         }) => {
             if (roomHistCount == null || roomHistCount < 0) {
                 return;
             }
             const toRemove = await em.find(RoomOp, {
-                room: { id: roomId },
-                prevRevision: { $lt: roomRevision - roomHistCount },
+                room: { id: room.id },
+                prevRevision: { $lt: room.revision - roomHistCount },
             });
+            if (toRemove.length === 0) {
+                return;
+            }
+            await room.roomOperations.init();
             for (const tr of toRemove) {
                 em.remove(tr);
+                room.roomOperations.remove(tr);
             }
         };
     }
