@@ -121,7 +121,7 @@ export const Index: React.FC = () => {
                     />
                 </div>
                 <div style={{ height: spacing }} />
-                <Typography.Title level={3}>バグと対処法</Typography.Title>
+                <Typography.Title level={3}>動作環境</Typography.Title>
                 <ul>
                     <li>
                         ブラウザはChrome系(Edgeを含む)かFirefoxを推奨します。Internet
