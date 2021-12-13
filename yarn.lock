@@ -1722,7 +1722,7 @@ __metadata:
     "@types/uuid": ^8.3.1
     "@types/ws": ^8.0.0
     "@types/yargs": ^17.0.3
-    "@urql/core": 2.3.5
+    "@urql/core": 2.3.6
     apollo-server-express: ^3.3.0
     axios: 0.24.0
     bcdice: ^3.3.0
@@ -1773,7 +1773,7 @@ __metadata:
   resolution: "@flocon-trpg/cache@workspace:packages/cache"
   dependencies:
     "@flocon-trpg/utils": "workspace:^"
-    "@types/ioredis": 4.28.2
+    "@types/ioredis": 4.28.3
     "@types/jest": 27.0.3
     ioredis: ^4.28.0
     jest: 27.4.3
@@ -3711,12 +3711,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ioredis@npm:4.28.2":
-  version: 4.28.2
-  resolution: "@types/ioredis@npm:4.28.2"
+"@types/ioredis@npm:4.28.3":
+  version: 4.28.3
+  resolution: "@types/ioredis@npm:4.28.3"
   dependencies:
     "@types/node": "*"
-  checksum: d519b48a6c3f2246f2953a10cc3642559da842c4065f7411feefdfb6fe6093f4a49030fb4663481a71fbb4864d0c93ad88c91be67d506070f92f035d98cd2dfc
+  checksum: aa3080dafdbc6829d82ffa63407ca89a6139c930467bfb16f85e5824747e15b03827dcb9c3bfdbb65ee7f2839864d1e150978c0be003bfe8cbde41dbf759e9e4
   languageName: node
   linkType: hard
 
@@ -4258,15 +4258,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@urql/core@npm:2.3.5":
-  version: 2.3.5
-  resolution: "@urql/core@npm:2.3.5"
+"@urql/core@npm:2.3.6":
+  version: 2.3.6
+  resolution: "@urql/core@npm:2.3.6"
   dependencies:
     "@graphql-typed-document-node/core": ^3.1.0
     wonka: ^4.0.14
   peerDependencies:
-    graphql: ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0
-  checksum: 597119560b2261043d5b210fdb5d80ece39d7e52db4c52e6ccadfa57e4e05fa9a2873f11b3f5e067051545e28012d2e0e41c8edaec3e26b797cf3212202e6800
+    graphql: ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
+  checksum: 39b10abc9b600cf698bc702b9b678cf8cf4851faa8041be6fe26e439a18a447f8f39049cd2a9b188076cbd272ead62286ea05294c5de14719e7799caa8c44942
   languageName: node
   linkType: hard
 

@@ -93,7 +93,6 @@ const optionBase: BuildSchemaOptions = {
 
 const emitSchemaFileOptions: EmitSchemaFileOptions = {
     path: path.resolve(process.cwd(), './tmp/schema.gql'),
-    commentDescriptions: true,
 };
 
 export const buildSchema =

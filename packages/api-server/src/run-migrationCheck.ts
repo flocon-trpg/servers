@@ -1,7 +1,7 @@
-import { migrateByTsNode } from './src/migrate';
-import { AppConsole } from './src/utils/appConsole';
+import { migrateByNpmScript } from './migrate';
+import { AppConsole } from './utils/appConsole';
 
-migrateByTsNode('check').catch(err => {
+migrateByNpmScript('check').catch(err => {
     console.error(err);
     AppConsole.error({
         en: '❌ migration-check failed. ',

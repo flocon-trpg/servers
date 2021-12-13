@@ -41,6 +41,7 @@ export type CharacterValueForMessage = {
 
 export type CommandResult = {
     __typename?: 'CommandResult';
+    /** 成功判定のないコマンドの場合はnullish。成功判定のあるコマンドの場合はその結果。 */
     isSuccess?: Maybe<Scalars['Boolean']>;
     text: Scalars['String'];
 };
@@ -136,9 +137,13 @@ export enum EntryToServerResultType {
 export type FileItem = {
     __typename?: 'FileItem';
     createdAt?: Maybe<Scalars['Float']>;
+    /** ファイルをアップロードしたユーザー。Firebase AuthenticationのUserUidで表現される。 */
     createdBy: Scalars['String'];
+    /** サーバーで管理されているファイル名。axiosなどでファイルを取得する際はこれを用いる。ソートするとアップロードした時系列順になる。 */
     filename: Scalars['ID'];
+    /** ユーザーが名付けたファイル名。 */
     screenname: Scalars['String'];
+    /** サムネイル画像のファイル名。axiosなどを用いてファイルを取得する。 */
     thumbFilename?: Maybe<Scalars['String']>;
 };
 
@@ -171,6 +176,7 @@ export type GetAvailableGameSystemsResult = {
 };
 
 export type GetFilesInput = {
+    /** FileTagのidを指定することで、指定したタグが付いているファイルのみを抽出して表示する。例えばidがx,yの3つのタグが付いているファイルは、[]や[x]や[x,y]と指定した場合にマッチするが、[x,y,z]と指定された場合は除外される。 */
     fileTagIds: Array<Scalars['String']>;
 };
 
@@ -181,6 +187,7 @@ export type GetFilesResult = {
 
 export type GetJoinedRoomResult = {
     __typename?: 'GetJoinedRoomResult';
+    /** 自分の現在のParticipantRole。 */
     role: ParticipantRole;
     room: RoomGetState;
 };
@@ -332,6 +339,7 @@ export type Mutation = {
     leaveRoom: LeaveRoomResult;
     makeMessageNotSecret: MakeMessageNotSecretResult;
     operate: OperateRoomResult;
+    /** for test */
     ping: Pong;
     promoteToPlayer: PromoteResult;
     resetMessages: ResetRoomMessagesResult;
@@ -601,6 +609,7 @@ export type ResetRoomMessagesResult = {
 
 export type RoomAsListItem = {
     __typename?: 'RoomAsListItem';
+    /** この部屋の作成者。Firebase AuthenticationのUserUidで表現される。 */
     createdBy: Scalars['String'];
     id: Scalars['ID'];
     name: Scalars['String'];
@@ -627,8 +636,11 @@ export type RoomEvent = {
 
 export type RoomGetState = {
     __typename?: 'RoomGetState';
+    /** この部屋の作成者。Firebase AuthenticationのUserUidで表現される。 */
     createdBy: Scalars['String'];
+    /** Current revision of Room. Whenever Room is updated, this value is incremented by 1. This value is required when you apply RoomOperation. / Roomの現在のリビジョン。Roomが更新されるたび、この値は1増加する。RoomOperationを適用する際に必要となる。 */
     revision: Scalars['Float'];
+    /** room.state をJSON化したもの */
     stateJson: Scalars['String'];
 };
 
@@ -664,19 +676,24 @@ export type RoomMessagesReset = {
 
 export type RoomOperation = {
     __typename?: 'RoomOperation';
+    /** operateRoomを呼んだ人物。promoteなどの結果の場合はnullishになる。 */
     operatedBy?: Maybe<OperatedBy>;
     revisionTo: Scalars['Float'];
+    /** room.upOperationをJSONにしたもの。idならばnullish。 */
     valueJson: Scalars['String'];
 };
 
 export type RoomOperationInput = {
+    /** クライアントを識別するID。適当なIDをクライアント側で生成して渡す。Operationごとに変える必要はない */
     clientId: Scalars['String'];
+    /** room.upOperationをJSONにしたもの */
     valueJson: Scalars['String'];
 };
 
 export type RoomPrivateMessage = {
     __typename?: 'RoomPrivateMessage';
     altTextToSecret?: Maybe<Scalars['String']>;
+    /** 発言がCharacterと紐付いているときはnon-nullish。PLとしての発言、もしくはcreatedByがnullishのときはnullish。後からCharacterの値が更新されても、この値が更新されることはない。 */
     character?: Maybe<CharacterValueForMessage>;
     commandResult?: Maybe<CommandResult>;
     createdAt: Scalars['Float'];
@@ -706,6 +723,7 @@ export type RoomPrivateMessageUpdate = {
 
 export type RoomPublicChannel = {
     __typename?: 'RoomPublicChannel';
+    /** 現在の仕様では、$system, $free, '1', … , '10' の12個のみをサポートしている。このうち、$systemはシステムメッセージ専用チャンネルであるため誰も書き込むことができない。'1', …, '10'はSpectatorが書き込むことはできないが、$freeはSpectatorも書き込むことができる。 */
     key: Scalars['String'];
     name?: Maybe<Scalars['String']>;
 };
@@ -720,9 +738,11 @@ export type RoomPublicMessage = {
     __typename?: 'RoomPublicMessage';
     altTextToSecret?: Maybe<Scalars['String']>;
     channelKey: Scalars['String'];
+    /** 発言がCharacterと紐付いているときはnon-nullish。PLとしての発言、もしくはcreatedByがnullishのときはnullish。 */
     character?: Maybe<CharacterValueForMessage>;
     commandResult?: Maybe<CommandResult>;
     createdAt: Scalars['Float'];
+    /** channelKeyが$system以外のときは、システムメッセージならばnullishで、そうでないならばnullishではない。$systemのとき、原則として全てシステムメッセージであるため常にnullishになる。 */
     createdBy?: Maybe<Scalars['String']>;
     customName?: Maybe<Scalars['String']>;
     initText?: Maybe<Scalars['String']>;
@@ -771,6 +791,7 @@ export type ServerInfo = {
 
 export type Subscription = {
     __typename?: 'Subscription';
+    /** for test */
     pong: Pong;
     roomEvent?: Maybe<RoomEvent>;
 };
