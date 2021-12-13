@@ -113,7 +113,7 @@ export const Index: React.FC = () => {
                         style={{ margin: '0 0 8px 0' }}
                         onClick={() => setDrawerType({ openFileType: none })}
                     >
-                        ファイルマネージャー
+                        アップローダー
                     </Button>
                     <FilesManagerDrawer
                         drawerType={drawerType}
