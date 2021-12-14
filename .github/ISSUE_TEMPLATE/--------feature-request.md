@@ -4,10 +4,9 @@ about: Suggest an idea for this project
 title: ''
 labels: ''
 assignees: ''
-
 ---
 
-## 機能要望は何らかの問題と関連していますか？記述してください/Is your feature request related to a problem? Please describe.**
+## 機能要望は何らかの問題と関連していますか？記述してください/Is your feature request related to a problem? Please describe.\*\*
 
 問題の内容をなるべく明瞭かつ簡潔に記述します（例: …をするときにフラストレーションがたまる）/A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 
