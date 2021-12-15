@@ -2,6 +2,7 @@
     "name": "@flocon-trpg/servers",
     "private": true,
     "workspaces": [
+        "apps/*",
         "packages/*"
     ],
     "scripts": {
@@ -9,7 +10,7 @@
         "build": "yarn workspaces foreach -ptv run build:self",
         "build-ci": "yarn workspaces foreach -ptv run build-ci",
         "test": "yarn workspaces foreach -pv run test",
-        "lint": "eslint \"packages/**/*.{ts,tsx}\"",
+        "lint": "eslint \"{apps,packages}/**/*.{ts,tsx}\"",
         "prettier": "yarn prettier:base --write",
         "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md}\""
     },
