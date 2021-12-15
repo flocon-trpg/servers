@@ -1689,9 +1689,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@flocon-trpg/api-server@workspace:packages/api-server":
+"@flocon-trpg/api-server@workspace:apps/api-server":
   version: 0.0.0-use.local
-  resolution: "@flocon-trpg/api-server@workspace:packages/api-server"
+  resolution: "@flocon-trpg/api-server@workspace:apps/api-server"
   dependencies:
     "@flocon-trpg/cache": "workspace:^"
     "@flocon-trpg/core": "workspace:^"
@@ -1865,9 +1865,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@flocon-trpg/web-server@workspace:packages/web-server":
+"@flocon-trpg/web-server@workspace:apps/web-server":
   version: 0.0.0-use.local
-  resolution: "@flocon-trpg/web-server@workspace:packages/web-server"
+  resolution: "@flocon-trpg/web-server@workspace:apps/web-server"
   dependencies:
     "@apollo/client": ^3.4.15
     "@emotion/react": ^11.4.1
