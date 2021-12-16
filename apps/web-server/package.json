@@ -5,9 +5,9 @@
     "dependencies": {
         "@apollo/client": "^3.4.15",
         "@emotion/react": "^11.4.1",
-        "@flocon-trpg/core": "workspace:^",
-        "@flocon-trpg/typed-document-node": "workspace:^",
-        "@flocon-trpg/utils": "workspace:^",
+        "@flocon-trpg/core": "workspace:*",
+        "@flocon-trpg/typed-document-node": "workspace:*",
+        "@flocon-trpg/utils": "workspace:*",
         "@kizahasi/result": "^1.0.0",
         "@monaco-editor/react": "^4.2.2",
         "@next/bundle-analyzer": "^11.0.0",

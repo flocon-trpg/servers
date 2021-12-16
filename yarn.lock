@@ -1693,10 +1693,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@flocon-trpg/api-server@workspace:apps/api-server"
   dependencies:
-    "@flocon-trpg/cache": "workspace:^"
-    "@flocon-trpg/core": "workspace:^"
+    "@flocon-trpg/cache": "workspace:*"
+    "@flocon-trpg/core": "workspace:*"
     "@flocon-trpg/typed-document-node": "workspace:*"
-    "@flocon-trpg/utils": "workspace:^"
+    "@flocon-trpg/utils": "workspace:*"
     "@graphql-codegen/cli": 2.3.0
     "@graphql-codegen/typed-document-node": 2.2.1
     "@graphql-codegen/typescript": 2.4.1
@@ -1767,11 +1767,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@flocon-trpg/cache@workspace:^, @flocon-trpg/cache@workspace:packages/cache":
+"@flocon-trpg/cache@workspace:*, @flocon-trpg/cache@workspace:packages/cache":
   version: 0.0.0-use.local
   resolution: "@flocon-trpg/cache@workspace:packages/cache"
   dependencies:
-    "@flocon-trpg/utils": "workspace:^"
+    "@flocon-trpg/utils": "workspace:*"
     "@types/ioredis": 4.28.3
     "@types/jest": 27.0.3
     ioredis: ^4.28.0
@@ -1783,12 +1783,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@flocon-trpg/core@workspace:^, @flocon-trpg/core@workspace:packages/core":
+"@flocon-trpg/core@workspace:*, @flocon-trpg/core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@flocon-trpg/core@workspace:packages/core"
   dependencies:
-    "@flocon-trpg/flocon-script": "workspace:^"
-    "@flocon-trpg/utils": "workspace:^"
+    "@flocon-trpg/flocon-script": "workspace:*"
+    "@flocon-trpg/utils": "workspace:*"
     "@kizahasi/option": ^1.0.0
     "@kizahasi/ot-string": ^0.3.0
     "@kizahasi/result": ^1.0.1
@@ -1808,11 +1808,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@flocon-trpg/flocon-script@workspace:^, @flocon-trpg/flocon-script@workspace:packages/flocon-script":
+"@flocon-trpg/flocon-script@workspace:*, @flocon-trpg/flocon-script@workspace:packages/flocon-script":
   version: 0.0.0-use.local
   resolution: "@flocon-trpg/flocon-script@workspace:packages/flocon-script"
   dependencies:
-    "@flocon-trpg/utils": "workspace:^"
+    "@flocon-trpg/utils": "workspace:*"
     "@kizahasi/option": ^1.0.0
     "@types/estree": 0.0.50
     "@types/jest": 27.0.3
@@ -1841,7 +1841,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@flocon-trpg/typed-document-node@workspace:*, @flocon-trpg/typed-document-node@workspace:^, @flocon-trpg/typed-document-node@workspace:packages/typed-document-node":
+"@flocon-trpg/typed-document-node@workspace:*, @flocon-trpg/typed-document-node@workspace:packages/typed-document-node":
   version: 0.0.0-use.local
   resolution: "@flocon-trpg/typed-document-node@workspace:packages/typed-document-node"
   dependencies:
@@ -1852,7 +1852,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@flocon-trpg/utils@workspace:^, @flocon-trpg/utils@workspace:packages/utils":
+"@flocon-trpg/utils@workspace:*, @flocon-trpg/utils@workspace:packages/utils":
   version: 0.0.0-use.local
   resolution: "@flocon-trpg/utils@workspace:packages/utils"
   dependencies:
@@ -1871,9 +1871,9 @@ __metadata:
   dependencies:
     "@apollo/client": ^3.4.15
     "@emotion/react": ^11.4.1
-    "@flocon-trpg/core": "workspace:^"
-    "@flocon-trpg/typed-document-node": "workspace:^"
-    "@flocon-trpg/utils": "workspace:^"
+    "@flocon-trpg/core": "workspace:*"
+    "@flocon-trpg/typed-document-node": "workspace:*"
+    "@flocon-trpg/utils": "workspace:*"
     "@kizahasi/result": ^1.0.0
     "@monaco-editor/react": ^4.2.2
     "@next/bundle-analyzer": ^11.0.0

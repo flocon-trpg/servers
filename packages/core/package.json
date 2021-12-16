@@ -32,8 +32,8 @@
         "typescript": "4.4.4"
     },
     "dependencies": {
-        "@flocon-trpg/flocon-script": "workspace:^",
-        "@flocon-trpg/utils": "workspace:^",
+        "@flocon-trpg/flocon-script": "workspace:*",
+        "@flocon-trpg/utils": "workspace:*",
         "@kizahasi/option": "^1.0.0",
         "@kizahasi/ot-string": "^0.3.0",
         "@kizahasi/result": "^1.0.1",
