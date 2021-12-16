@@ -10,6 +10,9 @@
         "build": "yarn workspaces foreach -ptv run build:self",
         "build-ci": "yarn workspaces foreach -ptv run build-ci",
         "test": "yarn workspaces foreach -pv run test",
+        "publish": "yarn run publish:prepare && yarn run publish:core",
+        "publish:prepare": "yarn workspaces foreach -ptv --exclude '@flocon-trpg/*-server' run build:self",
+        "publish:core": "yarn workspaces foreach -tv --exclude '@flocon-trpg/*-server' npm publish --tolerate-republish --access=public",
         "lint": "eslint \"{apps,packages}/**/*.{ts,tsx}\"",
         "prettier": "yarn prettier:base --write",
         "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md}\""
