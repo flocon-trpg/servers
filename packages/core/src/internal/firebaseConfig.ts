@@ -1,9 +1,10 @@
 import * as t from 'io-ts';
 
 export const firebaseConfig = t.type({
+    // databaseURLというキーはおそらくFirestoreを有効化しないと含まれないため、除外している。
+
     apiKey: t.string,
     authDomain: t.string,
-    databaseURL: t.string,
     projectId: t.string,
     storageBucket: t.string,
     messagingSenderId: t.string,
