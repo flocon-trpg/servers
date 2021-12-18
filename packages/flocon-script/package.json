@@ -19,6 +19,11 @@
     },
     "name": "@flocon-trpg/flocon-script",
     "author": "kizahasi",
+    "description": "One of core libraries for Flocon",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/flocon-trpg/servers"
+    },
     "devDependencies": {
         "@types/estree": "0.0.50",
         "@types/jest": "27.0.3",

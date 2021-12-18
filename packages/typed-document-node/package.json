@@ -15,6 +15,11 @@
     },
     "name": "@flocon-trpg/typed-document-node",
     "author": "kizahasi",
+    "description": "TypedDocumentNode of Flocon Web server",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/flocon-trpg/servers"
+    },
     "devDependencies": {
         "rimraf": "3.0.2",
         "typescript": "4.4.4"

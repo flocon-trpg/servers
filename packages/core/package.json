@@ -19,7 +19,11 @@
     },
     "name": "@flocon-trpg/core",
     "author": "kizahasi",
-    "description": "Core library for Flocon project(not released yet).",
+    "description": "One of core libraries for Flocon",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/flocon-trpg/servers"
+    },
     "devDependencies": {
         "@types/estree": "0.0.50",
         "@types/jest": "27.0.3",
