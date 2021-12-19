@@ -31,9 +31,9 @@ export const KonvaD6: React.FC<KonvaD6Props> = ({
 }: KonvaD6Props) => {
     let src: string;
     if (value === question) {
-        src = '/dice/q-6.png';
+        src = '/assets/dice/q-6.png';
     } else {
-        src = isD6Value(value) ? `/dice/${value}-6.png` : '/dice/0-6.png';
+        src = isD6Value(value) ? `/assets/dice/${value}-6.png` : '/assets/dice/0-6.png';
     }
     const image = useImage(src);
 

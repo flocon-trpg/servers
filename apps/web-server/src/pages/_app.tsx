@@ -267,7 +267,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     return (
         <>
             <Head>
-                <link rel='shortcut icon' href='/logo.png' />
+                <link rel='shortcut icon' href='/assets/logo.png' />
             </Head>
             <AllContextProvider
                 clientId={clientId}

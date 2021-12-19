@@ -532,7 +532,7 @@ export const RoomMenu: React.FC = () => {
         <>
             <Menu triggerSubMenuAction='click' selectable={false} mode='horizontal'>
                 <Menu.Item onClick={() => router.push('/')}>
-                    <img src='/logo.png' width={24} height={24} />
+                    <img src='/assets/logo.png' width={24} height={24} />
                 </Menu.Item>
                 <Menu.SubMenu title='部屋'>
                     <Menu.Item onClick={() => setEditRoomDrawerVisibility(true)}>編集</Menu.Item>
