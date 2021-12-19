@@ -21,7 +21,7 @@
     "author": "kizahasi",
     "description": "Core library for Flocon project(not released yet).",
     "devDependencies": {
-        "@types/ioredis": "4.28.3",
+        "@types/ioredis": "4.28.5",
         "@types/jest": "27.0.3",
         "jest": "27.4.3",
         "rimraf": "3.0.2",
