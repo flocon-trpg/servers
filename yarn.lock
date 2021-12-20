@@ -9872,8 +9872,8 @@ __metadata:
   linkType: hard
 
 "ioredis@npm:^4.28.0":
-  version: 4.28.0
-  resolution: "ioredis@npm:4.28.0"
+  version: 4.28.2
+  resolution: "ioredis@npm:4.28.2"
   dependencies:
     cluster-key-slot: ^1.1.0
     debug: ^4.3.1
@@ -9886,7 +9886,7 @@ __metadata:
     redis-errors: ^1.2.0
     redis-parser: ^3.0.0
     standard-as-callback: ^2.1.0
-  checksum: d6951d3df93b94a8716090f233ccc9124fe82a244965ac695835a7d4d1795ca28025ef91abfbc014cce63b96112badfc216b8d91827722ddc406f10bd221b6ab
+  checksum: 4d9e5a4707cc918d2c2e161ea430aa06e68d5a513a680e8a315cf2cdea0b65b410a2e7279a04bab6db66aa781af4244acce3df67f560fed198f1f2f1d2c1d609
   languageName: node
   linkType: hard
 
