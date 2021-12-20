@@ -1,0 +1,27 @@
+name: release
+
+on:
+    push:
+        tags:
+            - 'v2*.*.*'
+            - 'v3*.*.*'
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
+            - name: Install
+              run: yarn
+            - name: Build web-server
+              run: yarn run export
+              working-directory: ./apps/web-server
+            - name: mv out directory
+              run: mv ./apps/web-server/out ./out
+            - name: Create web-server-static.zip
+              run: zip -r ${GITHUB_WORKSPACE}/web-server-static.zip ./out
+            - name: Release
+              uses: softprops/action-gh-release@v1
+              with:
+                  files: web-server-static.zip
