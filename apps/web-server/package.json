@@ -71,7 +71,7 @@
         "@types/jest": "27.0.3",
         "jest": "27.4.5",
         "monaco-editor": "0.26.1",
-        "ts-jest": "27.1.0"
+        "ts-jest": "27.1.2"
     },
     "engines": {
         "node": ">=14"
