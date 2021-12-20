@@ -19,11 +19,15 @@ export const FirebaseStorageLink: React.FC<Props> = ({ reference }: Props) => {
     const config = useWebConfig();
 
     React.useEffect(() => {
+        if (config?.value == null) {
+            return;
+        }
+
         let unsubscribed = false;
 
         const ref = (() => {
             if (typeof reference === 'string') {
-                return getStorageForce(config).ref(reference);
+                return getStorageForce(config.value).ref(reference);
             }
             return reference;
         })();

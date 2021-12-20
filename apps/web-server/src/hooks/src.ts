@@ -11,6 +11,7 @@ export const done = 'done';
 export const success = 'success';
 export const loading = 'loading';
 export const nullishArg = 'nullishArg';
+export const invalidWebConfig = 'invalidWebConfig';
 export const error = 'error';
 
 type SrcArrayResult =
@@ -21,10 +22,10 @@ type SrcArrayResult =
       }
     | {
           type: typeof error;
-          error: any;
+          error: unknown;
       }
     | {
-          type: typeof loading | typeof nullishArg;
+          type: typeof loading | typeof nullishArg | typeof invalidWebConfig;
       };
 
 // PathArrayがnullish ⇔ 戻り値がnullishArg
@@ -44,8 +45,12 @@ export function useSrcArrayFromGraphQL(
     }));
 
     useDeepCompareEffect(() => {
-        if (getIdToken == null) {
+        if (getIdToken == null || config == null) {
             setResult({ type: loading });
+            return;
+        }
+        if (config.isError) {
+            setResult({ type: invalidWebConfig });
             return;
         }
         if (cleanPathArray == null) {
@@ -61,7 +66,12 @@ export function useSrcArrayFromGraphQL(
                 }
 
                 // firebaseStorageUrlCacheContextはDeepCompareしてほしくないしされる必要もないインスタンスであるため、depsに加えてはいけない。
-                return FilePathModule.getSrc(path, config, idToken, firebaseStorageUrlCacheContext);
+                return FilePathModule.getSrc(
+                    path,
+                    config.value,
+                    idToken,
+                    firebaseStorageUrlCacheContext
+                );
             })
         )
             .then(all => {
@@ -92,7 +102,7 @@ type SrcResult =
           value: string;
       }
     | {
-          type: typeof loading | typeof error | typeof nullishArg;
+          type: typeof loading | typeof error | typeof nullishArg | typeof invalidWebConfig;
       };
 
 export function useSrcFromGraphQL(path: FilePathFragment | FilePath | null | undefined): SrcResult {

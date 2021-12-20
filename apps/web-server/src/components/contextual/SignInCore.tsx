@@ -34,16 +34,20 @@ const toSignInOptions = (providers: string[]) => {
 
 const SignInCore: React.FC = () => {
     const config = useWebConfig();
-    const auth = getAuth(config);
+    const auth = config?.value == null ? null : getAuth(config.value);
     const [altMessage, setAltMessage] = React.useState<string | null>('loading...');
     const authContainerRef = React.useRef<HTMLDivElement | null>(null);
 
     React.useEffect(() => {
-        if (auth == null || authContainerRef.current == null) {
+        if (
+            config?.value?.authProviders == null ||
+            auth == null ||
+            authContainerRef.current == null
+        ) {
             return;
         }
 
-        const signInOptions = toSignInOptions(config.authProviders);
+        const signInOptions = toSignInOptions(config.value.authProviders);
         if (signInOptions.length === 0) {
             setAltMessage(
                 'エラー: config 内の firebase.auth.provider でログインプロバイダが1つも指定されていないため、ログインできません。この問題を解決するには、サーバー管理者に問い合わせてください。'
@@ -78,7 +82,7 @@ const SignInCore: React.FC = () => {
         };
         const authUI = firebaseui.auth.AuthUI.getInstance() ?? new firebaseui.auth.AuthUI(auth);
         authUI.start(authContainerRef.current, firebaseAuthConfig);
-    }, [auth, authContainerRef, config.authProviders]);
+    }, [auth, authContainerRef, config?.value?.authProviders]);
 
     return (
         <div>

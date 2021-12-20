@@ -79,7 +79,8 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                 publicChannelNamesRef.current == null ||
                 participantsRef.current == null ||
                 firebaseStorageUrlCacheContextRef.current == null ||
-                getIdTokenRef.current == null
+                getIdTokenRef.current == null ||
+                configRef.current?.value == null
             ) {
                 return;
             }
@@ -139,7 +140,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                     participants: participantsRef.current,
                     filter: ChannelsFilterOptions.toFilter(channelsFilterOptionsRef.current),
                 },
-                config: configRef.current,
+                config: configRef.current.value,
                 idToken,
                 firebaseStorageUrlCache: firebaseStorageUrlCacheContextRef.current,
                 onProgressChange: p => setProgress(p.percent),

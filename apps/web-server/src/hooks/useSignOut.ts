@@ -13,7 +13,7 @@ export function useSignOut() {
     const setRoom = useUpdateAtom(roomAtom);
     const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
     const config = useWebConfig();
-    const auth = getAuth(config);
+    const auth = config?.value == null ? null : getAuth(config.value);
     const firebaseStorageUrlCacheContextRef = useReadonlyRef(firebaseStorageUrlCacheContext);
     const setPublicFiles = useUpdateAtom(publicFilesAtom);
     const setUnlistedFiles = useUpdateAtom(unlistedFilesAtom);
