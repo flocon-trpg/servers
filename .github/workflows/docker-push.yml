@@ -17,7 +17,7 @@ jobs:
                   username: ${{ secrets.DOCKERHUB_USERNAME }}
                   password: ${{ secrets.DOCKERHUB_TOKEN }}
             - name: docker build
-              run: docker build -f api-server.Dockerfile -t kizahasi/flocon-api:${GITHUB_REF##*/} --build-arg branch="${GITHUB_REF##*/}" .
+              run: docker build -f api-server.Dockerfile -t kizahasi/flocon-api:${GITHUB_REF##*/} --build-arg branch="api/${GITHUB_REF##*/}" .
               working-directory: ./docker
             - name: docker push
               run: docker push kizahasi/flocon-api:${GITHUB_REF##*/}
