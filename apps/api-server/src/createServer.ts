@@ -28,6 +28,31 @@ import { thumbsDir } from './utils/thumbsDir';
 import { RateLimiterAbstract, RateLimiterMemory } from 'rate-limiter-flexible';
 import { consume } from './rateLimit/consume';
 import { EMBUPLOADER_PATH } from './env';
+import { Html } from './html/Html';
+
+const setupIndexAsSuccess = (app: ReturnType<typeof express>) => {
+    app.get('/', (req, res) => {
+        res.send(Html.success);
+    });
+};
+
+const setupIndexAsError = (app: ReturnType<typeof express>) => {
+    app.get('/', (req, res) => {
+        res.send(Html.error);
+    });
+};
+
+export const createServerAsError = async ({ port }: { port: string | number }) => {
+    const app = express();
+    setupIndexAsError(app);
+
+    const server = app.listen(port, () => {
+        console.log(
+            `⚠️ Server ready at http://localhost:${port}, but API server is not running. Please see error messages.`
+        );
+    });
+    return server;
+};
 
 export const createServer = async ({
     serverConfig,
@@ -111,15 +136,15 @@ export const createServer = async ({
     }
 
     const applyUploader = async () => {
-        const enabled = serverConfig.uploader.enabled;
-        const directory = serverConfig.uploader.directory;
-        if (!enabled) {
+        const uploaderConfig = serverConfig.uploader;
+        if (uploaderConfig == null || !uploaderConfig.enabled) {
             AppConsole.log({
                 en: `The uploader of API server is disabled.`,
                 ja: `APIサーバーのアップローダーは無効化されています。`,
             });
             return;
         }
+        const directory = uploaderConfig.directory;
         if (directory == null) {
             AppConsole.warn({
                 en: `The uploader of API server is disabled because "${EMBUPLOADER_PATH}" is empty.`,
@@ -178,12 +203,12 @@ export const createServer = async ({
                 const upload = multer({
                     storage,
                     limits: {
-                        fileSize: serverConfig.uploader.maxFileSize,
+                        fileSize: uploaderConfig.maxFileSize,
                     },
                     fileFilter: (req, file, cb) => {
                         if (
-                            serverConfig.uploader.countQuota != null &&
-                            serverConfig.uploader.countQuota <= filesCount
+                            uploaderConfig.countQuota != null &&
+                            uploaderConfig.countQuota <= filesCount
                         ) {
                             cb(null, false);
                             res.status(400).send('File count quota exceeded');
@@ -191,8 +216,8 @@ export const createServer = async ({
                         }
                         const totalSize = files.reduce((seed, elem) => seed + elem.size, 0);
                         if (
-                            serverConfig.uploader.sizeQuota != null &&
-                            serverConfig.uploader.sizeQuota <= totalSize
+                            uploaderConfig.sizeQuota != null &&
+                            uploaderConfig.sizeQuota <= totalSize
                         ) {
                             cb(null, false);
                             res.status(400).send('File size quota exceeded');
@@ -326,6 +351,8 @@ export const createServer = async ({
     };
     await applyUploader();
 
+    setupIndexAsSuccess(app);
+
     // https://github.com/enisdenjo/graphql-ws のコードを使用
     const server = app.listen(port, () => {
         const subscriptionsPath = '/graphql';
@@ -387,6 +414,7 @@ export const createServer = async ({
             wsServer
         );
 
+        // TODO: /graphqlが含まれているとAPI_HTTPなどの設定にも/graphqlの部分も入力してしまいそうなので、対処したほうがいいと思われる。また、createServerAsErrorとの統一性も取れていない
         console.log(`🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`);
         console.log(`🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`);
     });

@@ -5,7 +5,6 @@ import {
     LoggerNamespace,
     MikroORM,
 } from '@mikro-orm/core';
-import { DatabaseConfig, postgresql, sqlite } from './configType';
 import { File } from './graphql+mikro-orm/entities/file/mikro-orm';
 import { FileTag } from './graphql+mikro-orm/entities/fileTag/mikro-orm';
 import { Participant } from './graphql+mikro-orm/entities/participant/mikro-orm';
@@ -87,24 +86,4 @@ export const createPostgreSQL = async ({
         clientUrl,
         driverOptions,
     });
-};
-
-export const prepareORM = async (config: DatabaseConfig, debug: boolean) => {
-    try {
-        switch (config.__type) {
-            case postgresql:
-                return await createPostgreSQL({
-                    ...config,
-                    debug,
-                });
-            case sqlite:
-                return await createSQLite({
-                    ...config,
-                    debug,
-                });
-        }
-    } catch (error) {
-        console.error('Could not connect to the database!');
-        throw error;
-    }
 };

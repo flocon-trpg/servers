@@ -17,9 +17,9 @@ export namespace DicePieceValue {
             }
             let src: string;
             if (state.value == null) {
-                src = '/dice/0-6.png';
+                src = '/assets/dice/0-6.png';
             } else {
-                src = `/dice/${state.value}-6.png`;
+                src = `/assets/dice/${state.value}-6.png`;
             }
             return (
                 <img

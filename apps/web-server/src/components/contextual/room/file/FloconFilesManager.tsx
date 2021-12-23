@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Button, Dropdown, Menu, notification, Table, Tooltip, Upload } from 'antd';
 import { accept } from './helper';
-import { getHttpUri } from '../../../../config';
 import urljoin from 'url-join';
 import axios from 'axios';
 import { ColumnGroupType, ColumnType, FilterValue } from 'antd/lib/table/interface';
@@ -25,6 +24,7 @@ import { LazyAndPreloadImage } from '../../../ui/LazyAndPreloadImage';
 import { getFloconUploaderFile, thumbs } from '../../../../utils/file/getFloconUploaderFile';
 import { useMutation, useQuery } from '@apollo/client';
 import { useWebConfig } from '../../../../hooks/useWebConfig';
+import { getHttpUri } from '../../../../atoms/webConfig/webConfigAtom';
 
 type DataSource = FileItemFragment;
 
@@ -39,7 +39,7 @@ const Uploader: React.FC<UploaderProps> = ({ unlistedMode, onUploaded }: Uploade
     const config = useWebConfig();
     const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);
 
-    if (getIdToken == null) {
+    if (config?.value == null || getIdToken == null) {
         return null;
     }
 
@@ -68,7 +68,7 @@ const Uploader: React.FC<UploaderProps> = ({ unlistedMode, onUploaded }: Uploade
                     const result = await axios
                         .post(
                             urljoin(
-                                getHttpUri(config),
+                                getHttpUri(config.value),
                                 'uploader',
                                 'upload',
                                 unlistedMode ? 'unlisted' : 'public'
@@ -113,7 +113,7 @@ const Thumb: React.FC<ThumbProps> = ({ thumbFilePath, size }: ThumbProps) => {
     const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);
     const loadingIcon = <Icons.LoadingOutlined style={{ fontSize: size }} />;
     const src = useAsync(async () => {
-        if (thumbFilePath == null || getIdToken == null) {
+        if (config?.value == null || thumbFilePath == null || getIdToken == null) {
             return null;
         }
         const idToken = await getIdToken();
@@ -122,7 +122,7 @@ const Thumb: React.FC<ThumbProps> = ({ thumbFilePath, size }: ThumbProps) => {
         }
         const axiosResponse = await getFloconUploaderFile({
             filename: thumbFilePath,
-            config,
+            config: config.value,
             idToken,
             mode: thumbs,
         });

@@ -2,7 +2,7 @@ import { createPostgreSQL, createSQLite } from '../src/mikro-orm';
 import { PromiseQueue } from '../src/utils/promiseQueue';
 import { InMemoryConnectionManager } from '../src/connection/main';
 import { BaasType } from '../src/enums/BaasType';
-import { DatabaseConfig, postgresql, ServerConfig, sqlite } from '../src/configType';
+import { postgresql, ServerConfig, sqlite } from '../src/configType';
 import { buildSchema } from '../src/buildSchema';
 import { PubSub } from 'graphql-subscriptions';
 import { createServer } from '../src/createServer';
@@ -41,21 +41,21 @@ export const createOrm = async (dbCofig: DbConfig) => {
     }
 };
 
-const createDatabaseConfig = (dbConfig: DbConfig): DatabaseConfig => {
+const setDatabaseConfig = (target: ServerConfig, dbConfig: DbConfig): void => {
     switch (dbConfig.type) {
         case 'PostgreSQL':
-            return {
-                __type: postgresql,
+            target.postgresql = {
                 clientUrl: postgresClientUrl,
                 dbName: 'test',
                 driverOptions: undefined,
             };
+            return;
         case 'SQLite':
-            return {
-                __type: sqlite,
+            target.sqlite = {
                 dbName: dbConfig.dbName,
                 driverOptions: undefined,
             };
+            return;
     }
 };
 
@@ -67,11 +67,16 @@ export const createTestServer = async (
     const connectionManager = new InMemoryConnectionManager();
 
     const $orm = await createOrm(dbConfig);
-    const databaseConfig = createDatabaseConfig(dbConfig);
     const serverConfig: ServerConfig = {
         accessControlAllowOrigin: '*',
         admins: [],
-        database: databaseConfig,
+        firebaseAdminSecret: undefined,
+        firebaseProjectId: 'FAKE_FIREBASE_PROJECTID',
+        heroku: false,
+        herokuDatabaseUrl: undefined,
+        postgresql: undefined,
+        sqlite: undefined,
+        roomHistCount: undefined,
         entryPassword: entryPasswordConfig,
         autoMigration: false,
         uploader: {
@@ -83,6 +88,7 @@ export const createTestServer = async (
         },
         disableRateLimitExperimental: true,
     };
+    setDatabaseConfig(serverConfig, dbConfig);
 
     const schema = await buildSchema(serverConfig)({
         emitSchemaFile: false,

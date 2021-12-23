@@ -236,7 +236,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                             <Link href='/'>
                                 <img
                                     style={{ cursor: 'pointer' }}
-                                    src='/logo.png'
+                                    src='/assets/logo.png'
                                     width={32}
                                     height={32}
                                 />

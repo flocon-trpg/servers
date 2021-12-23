@@ -12,7 +12,6 @@ import 'firebase/storage';
 import useConstant from 'use-constant';
 import { authNotFound, FirebaseUserState, loading, notSignIn } from '../contexts/MyAuthContext';
 import { appConsole } from '../utils/appConsole';
-import { getHttpUri, getWsUri } from '../config';
 import { enableMapSet } from 'immer';
 import Head from 'next/head';
 import { loader } from '@monaco-editor/react';
@@ -33,7 +32,12 @@ import { setRoomConfig } from '../utils/localStorage/roomConfig';
 import { UserConfig } from '../atoms/userConfig/types';
 import { RoomConfig } from '../atoms/roomConfig/types/roomConfig';
 import { useAtomValue, useUpdateAtom } from 'jotai/utils';
-import { webConfigAtom } from '../atoms/webConfig/webConfigAtom';
+import {
+    getHttpUri,
+    getWsUri,
+    publicEnvTxtAtom,
+    webConfigAtom,
+} from '../atoms/webConfig/webConfigAtom';
 import { useWebConfig } from '../hooks/useWebConfig';
 
 enableMapSet();
@@ -118,7 +122,7 @@ const useAutoSaveRoomConfig = () => {
 // _app.tsxで1回のみ呼ばれることを想定。firebase authのデータを取得したい場合はContextで行う。
 const useFirebaseUser = (): FirebaseUserState => {
     const config = useAtomValue(webConfigAtom);
-    const auth = getAuth(config);
+    const auth = config?.value == null ? null : getAuth(config.value);
     const [user, setUser] = React.useState<FirebaseUserState>(loading);
     React.useEffect(() => {
         if (auth == null) {
@@ -137,16 +141,39 @@ const useFirebaseUser = (): FirebaseUserState => {
 };
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
+    const setPublicEnvTxt = useUpdateAtom(publicEnvTxtAtom);
+    React.useEffect(() => {
+        const main = async () => {
+            // chromeなどではfetchできないと `http://localhost:3000/env.txt 404 (Not Found)` などといったエラーメッセージが表示されるが、実際は問題ない
+            const envTxtObj = await fetch('/env.txt');
+            if (!envTxtObj.ok) {
+                setPublicEnvTxt({ fetched: true, value: null });
+                return;
+            }
+            const envTxt = await envTxtObj.text();
+            setPublicEnvTxt({ fetched: true, value: envTxt });
+        };
+        main();
+    }, [setPublicEnvTxt]);
+
     const config = useWebConfig();
     const setRoomNotification = useUpdateAtom(roomNotificationsAtom);
 
     const [httpUri, setHttpUri] = React.useState<string>();
     const [wsUri, setWsUri] = React.useState<string>();
     React.useEffect(() => {
-        setHttpUri(urljoin(getHttpUri(config), 'graphql'));
+        if (config?.value == null) {
+            setHttpUri(undefined);
+            return;
+        }
+        setHttpUri(urljoin(getHttpUri(config.value), 'graphql'));
     }, [config]);
     React.useEffect(() => {
-        setWsUri(urljoin(getWsUri(config), 'graphql'));
+        if (config?.value == null) {
+            setWsUri(undefined);
+            return;
+        }
+        setWsUri(urljoin(getWsUri(config.value), 'graphql'));
     }, [config]);
     React.useEffect(() => {
         if (httpUri == null) {
@@ -217,6 +244,14 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         loader.config({ 'vs/nls': { availableLanguages: { '*': 'ja' } } });
     }, []);
 
+    if (config == null) {
+        return <div style={{ padding: 5 }}>{'env.txt を確認しています…'}</div>;
+    }
+
+    if (config.isError) {
+        return <div style={{ padding: 5 }}>{`設定ファイルに問題があります: ${config.error}`}</div>;
+    }
+
     if (authNotFoundState) {
         return (
             <div style={{ padding: 5 }}>
@@ -232,7 +267,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     return (
         <>
             <Head>
-                <link rel='shortcut icon' href='/logo.png' />
+                <link rel='shortcut icon' href='/assets/logo.png' />
             </Head>
             <AllContextProvider
                 clientId={clientId}

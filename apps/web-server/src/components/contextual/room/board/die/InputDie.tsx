@@ -99,37 +99,37 @@ const InputD6Die: React.FC<InputD6Props> = ({
         <div className={classNames(flex, flexRow, itemsCenter)}>
             <img
                 css={value == noValue ? selectedImgButton : imgButton}
-                src='/dice/0-6.png'
+                src='/assets/dice/0-6.png'
                 onClick={() => onValueChange(noValue)}
             />
             <img
                 css={value === 1 ? selectedImgButton : imgButton}
-                src='/dice/1-6.png'
+                src='/assets/dice/1-6.png'
                 onClick={() => onValueChange(1)}
             />
             <img
                 css={value === 2 ? selectedImgButton : imgButton}
-                src='/dice/2-6.png'
+                src='/assets/dice/2-6.png'
                 onClick={() => onValueChange(2)}
             />
             <img
                 css={value === 3 ? selectedImgButton : imgButton}
-                src='/dice/3-6.png'
+                src='/assets/dice/3-6.png'
                 onClick={() => onValueChange(3)}
             />
             <img
                 css={value === 4 ? selectedImgButton : imgButton}
-                src='/dice/4-6.png'
+                src='/assets/dice/4-6.png'
                 onClick={() => onValueChange(4)}
             />
             <img
                 css={value === 5 ? selectedImgButton : imgButton}
-                src='/dice/5-6.png'
+                src='/assets/dice/5-6.png'
                 onClick={() => onValueChange(5)}
             />
             <img
                 css={value === 6 ? selectedImgButton : imgButton}
-                src='/dice/6-6.png'
+                src='/assets/dice/6-6.png'
                 onClick={() => onValueChange(6)}
             />
             <div style={{ width: size === 'small' ? 8 : 10 }} />

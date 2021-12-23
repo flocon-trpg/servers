@@ -468,13 +468,15 @@ export const generateAsRichLog = async ({
     }
     onProgressChange({ percent: 1 });
     const nonameImage = await axios
-        .get('/log/noname.png', { responseType: 'blob' })
+        .get('/assets/log/noname.png', { responseType: 'blob' })
         .catch(() => null);
     if (nonameImage != null) {
         imgFolder.file('noname.png', nonameImage.data);
     }
     onProgressChange({ percent: 3 });
-    const diceImage = await axios.get('/log/dice.png', { responseType: 'blob' }).catch(() => null);
+    const diceImage = await axios
+        .get('/assets/log/dice.png', { responseType: 'blob' })
+        .catch(() => null);
     if (diceImage != null) {
         imgFolder.file('dice.png', diceImage.data);
     }

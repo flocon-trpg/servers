@@ -1,8 +1,6 @@
 import admin from 'firebase-admin';
 import { buildSchema } from './buildSchema';
 import { PromiseQueue } from './utils/promiseQueue';
-import { prepareORM } from './mikro-orm';
-import { loadFirebaseConfig, loadServerConfigAsMain } from './config';
 import { Extra } from 'graphql-ws/lib/use/ws';
 import { doAutoMigrationBeforeStart, checkMigrationsBeforeStart } from './migrate';
 import { InMemoryConnectionManager, pubSub } from './connection/main';
@@ -12,8 +10,10 @@ import { Context } from 'graphql-ws/lib/server';
 import { BaasType } from './enums/BaasType';
 import { AppConsole } from './utils/appConsole';
 import { ServerConfig } from './configType';
-import { createServer } from './createServer';
+import { createServer, createServerAsError } from './createServer';
 import { VERSION } from './VERSION';
+import { ServerConfigBuilder } from './config';
+import { loadAsMain } from './utils/commandLineArgs';
 
 const logEntryPasswordConfig = (serverConfig: ServerConfig) => {
     if (serverConfig.entryPassword == null) {
@@ -36,20 +36,46 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
         en: `Flocon API Server v${VERSION.toString()}`,
     });
 
-    const firebaseConfig = loadFirebaseConfig();
+    const port = process.env.PORT ?? 4000;
 
-    const serverConfig = await loadServerConfigAsMain();
+    const commandLineArgs = await loadAsMain();
+
+    const serverConfigBuilder = new ServerConfigBuilder(process.env);
+    const serverConfigResult = serverConfigBuilder.serverConfig;
+
+    if (serverConfigResult.isError) {
+        console.error(serverConfigResult.error);
+        await createServerAsError({
+            port,
+        });
+        return;
+    }
+
+    const serverConfig = serverConfigResult.value;
+    const orm = await ServerConfig.createORM(
+        serverConfig,
+        commandLineArgs.db ?? null,
+        commandLineArgs.debug
+    );
+
+    if (orm.isError) {
+        console.error(orm.error);
+        await createServerAsError({
+            port,
+        });
+        return;
+    }
 
     // credentialにundefinedを渡すと`Invalid Firebase app options passed as the first argument to initializeApp() for the app named "[DEFAULT]". The "credential" property must be an object which implements the Credential interface.`というエラーが出るので回避している
     if (serverConfig.firebaseAdminSecret == null) {
         admin.initializeApp({
-            projectId: firebaseConfig.projectId,
+            projectId: serverConfig.firebaseProjectId,
         });
     } else {
         admin.initializeApp({
-            projectId: firebaseConfig.projectId,
+            projectId: serverConfig.firebaseProjectId,
             credential: admin.credential.cert({
-                projectId: firebaseConfig.projectId,
+                projectId: serverConfig.firebaseProjectId,
                 clientEmail: serverConfig.firebaseAdminSecret.client_email,
                 privateKey: serverConfig.firebaseAdminSecret.private_key,
             }),
@@ -57,12 +83,10 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
     }
 
     const schema = await buildSchema(serverConfig)({ emitSchemaFile: false, pubSub });
-    const dbType = serverConfig.database.__type;
-    const orm = await prepareORM(serverConfig.database, params.debug);
     if (serverConfig.autoMigration) {
-        await doAutoMigrationBeforeStart(orm, dbType);
+        await doAutoMigrationBeforeStart(orm.value);
     }
-    await checkMigrationsBeforeStart(orm, dbType);
+    await checkMigrationsBeforeStart(orm.value);
     logEntryPasswordConfig(serverConfig);
 
     const getDecodedIdToken = async (
@@ -116,7 +140,7 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
         promiseQueue,
         serverConfig,
         connectionManager,
-        em: orm.em,
+        em: orm.value.em,
         schema,
         debug: params.debug,
         port: process.env.PORT ?? 4000,

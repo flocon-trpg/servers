@@ -1,6 +1,11 @@
 name: CI
 
-on: [push, pull_request]
+on:
+    push:
+        branches:
+            - '**'
+        tags-ignore:
+            - '**'
 
 jobs:
     main:
@@ -138,8 +143,6 @@ jobs:
                       {
                           "clientUrl": "postgresql://postgres:postgres@postgres:5432/test"
                       }
-
-            # skips `yarn build` because it already has js files
 
             - name: Test
               run: yarn test --ci --coverage --maxWorkers=2

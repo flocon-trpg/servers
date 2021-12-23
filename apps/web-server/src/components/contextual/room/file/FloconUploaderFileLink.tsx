@@ -14,6 +14,10 @@ export const FloconUploaderFileLink: React.FC<Props> = ({ state }: Props) => {
     const config = useWebConfig();
     const [isDownloading, setIsDownloading] = React.useState(false);
 
+    if (config?.value == null) {
+        return null;
+    }
+
     if (isDownloading) {
         return <span>{state.screenname}</span>;
     }
@@ -32,7 +36,7 @@ export const FloconUploaderFileLink: React.FC<Props> = ({ state }: Props) => {
                     }
                     const axiosResponse = await getFloconUploaderFile({
                         filename: state.filename,
-                        config,
+                        config: config.value,
                         idToken,
                         mode: files,
                     });

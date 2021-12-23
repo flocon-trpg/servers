@@ -5,7 +5,7 @@ export namespace AppConsole {
         ja?: string;
     };
 
-    const messageToString = (source: Message): string => {
+    export const messageToString = (source: Message): string => {
         const icon = source.icon == null ? '' : `${source.icon} `;
         if (source.ja == null) {
             return `${icon}${source.en}`;
@@ -15,6 +15,10 @@ export namespace AppConsole {
 
     export const log = (message: Message): void => {
         console.log(messageToString(message));
+    };
+
+    export const logJa = (message: string): void => {
+        console.log(message);
     };
 
     export const warn = (message: Message): void => {

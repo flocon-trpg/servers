@@ -67,17 +67,17 @@ const Uploader: React.FC<UploaderProps> = ({ onUploaded, storageType }: Uploader
         <Upload.Dragger
             accept={accept}
             customRequest={options => {
-                if (myUserUid == null) {
+                if (myUserUid == null || config?.value == null) {
                     return;
                 }
                 if (typeof options.file === 'string' || !('name' in options.file)) {
                     return;
                 }
                 const storageRef = (() => {
-                    if (config.isUnlistedFirebaseStorageEnabled !== true) {
+                    if (config.value.isUnlistedFirebaseStorageEnabled !== true) {
                         return null;
                     }
-                    return getStorageForce(config).ref(
+                    return getStorageForce(config.value).ref(
                         Path.unlisted.file(myUserUid, options.file.name)
                     );
                 })();
@@ -366,10 +366,10 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
     React.useEffect(() => {
         let unsubscribed = false;
         const main = async () => {
-            if (config.isPublicFirebaseStorageEnabled !== true) {
+            if (config?.value == null || config.value.isPublicFirebaseStorageEnabled !== true) {
                 return;
             }
-            const $public = await getStorageForce(config).ref(Path.public.list).listAll();
+            const $public = await getStorageForce(config.value).ref(Path.public.list).listAll();
             const newState = await referencesToDataSource($public.items);
             if (unsubscribed) {
                 return;
@@ -388,10 +388,10 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
         }
         let unsubscribed = false;
         const main = async () => {
-            if (config.isUnlistedFirebaseStorageEnabled !== true) {
+            if (config?.value == null || config.value.isUnlistedFirebaseStorageEnabled !== true) {
                 return;
             }
-            const unlisted = await getStorageForce(config)
+            const unlisted = await getStorageForce(config.value)
                 .ref(Path.unlisted.list(myUserUid))
                 .listAll();
             const newState = await referencesToDataSource(unlisted.items);
@@ -406,9 +406,13 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
         };
     }, [myUserUid, setUnlistedFiles, reloadUnlistedFilesKey, config]);
 
+    if (config?.value == null) {
+        return null;
+    }
+
     if (
-        config.isPublicFirebaseStorageEnabled !== true &&
-        config.isUnlistedFirebaseStorageEnabled !== true
+        config.value.isPublicFirebaseStorageEnabled !== true &&
+        config.value.isUnlistedFirebaseStorageEnabled !== true
     ) {
         return <div>Firebase StorageのUIは管理者によって全て無効化されています。</div>;
     }
@@ -425,7 +429,7 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
     }
 
     const unlistedTabPane: JSX.Element = (() => {
-        if (config.isUnlistedFirebaseStorageEnabled) {
+        if (config.value.isUnlistedFirebaseStorageEnabled) {
             return (
                 <Tabs.TabPane tab='unlisted' key='storage1'>
                     <div>
@@ -448,7 +452,7 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
     })();
 
     const publicTabPane: JSX.Element = (() => {
-        if (config.isPublicFirebaseStorageEnabled) {
+        if (config.value.isPublicFirebaseStorageEnabled) {
             return (
                 <Tabs.TabPane tab='public' key='storage2'>
                     <div>

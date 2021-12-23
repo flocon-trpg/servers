@@ -16,6 +16,7 @@ export {
 } from './internal/dualKeyMap';
 export { filterInt } from './internal/filterInt';
 export { isTruthyString } from './internal/isTruthyString';
+export { isTruthyStringOrNullish } from './internal/isTruthyStringOrNullish';
 export { keyNames } from './internal/keyNames';
 export { groupJoinMap } from './internal/groupJoinMap';
 export { groupJoinSet } from './internal/groupJoinSet';

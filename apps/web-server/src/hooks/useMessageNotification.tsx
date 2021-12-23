@@ -103,10 +103,10 @@ export function useMessageNotification(): void {
         const volume = Math.min(volumeRef.current, 1);
         if (message.value.commandResult == null) {
             if (message.value.createdBy !== myUserUidRef.current) {
-                new Howl({ src: '/chat.mp3', volume }).play();
+                new Howl({ src: '/assets/chat.mp3', volume }).play();
             }
         } else {
-            new Howl({ src: '/diceroll.mp3', volume }).play();
+            new Howl({ src: '/assets/diceroll.mp3', volume }).play();
         }
 
         if (message.value.createdBy === myUserUidRef.current) {
