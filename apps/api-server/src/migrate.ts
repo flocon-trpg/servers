@@ -2,10 +2,8 @@ import { Result } from '@kizahasi/result';
 import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
 import { ServerConfigBuilder } from './config';
 import { ServerConfigForMigration } from './configType';
-import { createPostgreSQL, createSQLite } from './mikro-orm';
 import { AppConsole } from './utils/appConsole';
 import {
-    loadAsMain,
     loadMigrationCreate,
     loadMigrationDown,
     loadMigrationUpOrCheck,
@@ -18,20 +16,6 @@ const createInitial = 'create-initial';
 const up = 'up';
 const down = 'down';
 const autoMigrationAlways = 'autoMigrationAlways';
-
-const sqlite = 'sqlite';
-const postgresql = 'postgresql';
-
-type DBType = typeof sqlite | typeof postgresql;
-
-const prettify = (dbType: DBType) => {
-    switch (dbType) {
-        case sqlite:
-            return 'SQLite';
-        case postgresql:
-            return 'PostgreSQL';
-    }
-};
 
 const migrationCheckErrorMessage: AppConsole.Message = {
     icon: '❗',
