@@ -1,11 +1,11 @@
-import { SemVer, beta } from '@flocon-trpg/utils';
+import { SemVer, alpha } from '@flocon-trpg/utils';
 
 export const VERSION = new SemVer({
     major: 0,
-    minor: 6,
-    patch: 1,
+    minor: 7,
+    patch: 0,
     prerelease: {
-        type: beta,
-        version: 5,
+        type: alpha,
+        version: 1,
     },
 });
