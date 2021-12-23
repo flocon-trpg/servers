@@ -1,6 +1,11 @@
 name: prettier
 
-on: [push, pull_request]
+on:
+    push:
+        branches:
+            - '**'
+        tags-ignore:
+            - '**'
 
 jobs:
     # fails in windows because it uses crlf
