@@ -1,13 +1,15 @@
+import { Result } from '@kizahasi/result';
 import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
-import {
-    loadServerConfigAsCheck,
-    loadServerConfigAsMain,
-    loadServerConfigAsMigrationCreate,
-    loadServerConfigAsMigrationDown,
-    loadServerConfigAsMigrationUp,
-} from './config';
+import { ServerConfigBuilder } from './config';
+import { ServerConfigForMigration } from './configType';
 import { createPostgreSQL, createSQLite } from './mikro-orm';
 import { AppConsole } from './utils/appConsole';
+import {
+    loadAsMain,
+    loadMigrationCreate,
+    loadMigrationDown,
+    loadMigrationUpOrCheck,
+} from './utils/commandLineArgs';
 import { ORM } from './utils/types';
 
 const check = 'check';
@@ -31,21 +33,17 @@ const prettify = (dbType: DBType) => {
     }
 };
 
-const migrationCheckErrorMessage = (dbType: DBType): AppConsole.Message => ({
+const migrationCheckErrorMessage: AppConsole.Message = {
     icon: '❗',
-    en: `Pending migrations were found. You need to execute "migration-up" command to run the server. It is recommended to backup the DB before executing the command if the DB has some data you don't want to lose. DB is ${prettify(
-        dbType
-    )}`,
-    ja: `適用すべきマイグレーションが見つかりました。サーバーを稼働させるには"migration-up"コマンドを実行する必要があります。もし失いたくないデータがDBにある場合、そのコマンドを実行する前にDBをバックアップしておくことを推奨します。DBは${prettify(
-        dbType
-    )}です。`,
-});
+    en: `Pending migrations were found. You need to execute "migration-up" command to run the server. It is recommended to backup the DB before executing the command if the DB has some data you don't want to lose.`,
+    ja: `適用すべきマイグレーションが見つかりました。サーバーを稼働させるには"migration-up"コマンドを実行する必要があります。もし失いたくないデータがDBにある場合、そのコマンドを実行する前にDBをバックアップしておくことを推奨します。`,
+};
 
-const migrationCheckOkMessage = (dbType: DBType): AppConsole.Message => ({
+const migrationCheckOkMessage: AppConsole.Message = {
     icon: '✔️',
-    en: `No pending migrations were found. DB is ${prettify(dbType)}`,
-    ja: `適用すべきマイグレーションはありません。DBは${prettify(dbType)}です。`,
-});
+    en: `No pending migrations were found.`,
+    ja: `適用すべきマイグレーションはありません。`,
+};
 
 const hasMigrations = async (orm: MikroORM<IDatabaseDriver<Connection>>) => {
     const migrator = orm.getMigrator();
@@ -55,20 +53,18 @@ const hasMigrations = async (orm: MikroORM<IDatabaseDriver<Connection>>) => {
 
 const migrateUpCore = async ({
     type,
-    dbType,
     orm,
 }: {
     type: typeof up | typeof autoMigrationAlways;
-    dbType: DBType;
     orm: ORM;
 }) => {
     AppConsole.log({
         en: `Migration-up is started${
             type === autoMigrationAlways ? '(reason: AUTO_MIGRATION is enabled)' : ''
-        }. DB is ${prettify(dbType)}`,
+        }.`,
         ja: `マイグレーションのupを開始します${
             type === autoMigrationAlways ? '(reason: AUTO_MIGRATION is enabled)' : ''
-        }。DBは${prettify(dbType)}です。`,
+        }。`,
     });
     const migrator = orm.getMigrator();
     const migrations = await migrator.getPendingMigrations();
@@ -87,8 +83,8 @@ const migrateUpCore = async ({
     }
     AppConsole.log({
         icon: '😊',
-        en: `Migration-up has been successfully finished. DB is ${prettify(dbType)}.`,
-        ja: `マイグレーションのupが正常に完了しました。DBは${prettify(dbType)}です。`,
+        en: `Migration-up has been successfully finished.`,
+        ja: `マイグレーションのupが正常に完了しました。`,
     });
 };
 
@@ -101,146 +97,150 @@ export const migrateByNpmScript = async (
         | typeof down
         | typeof autoMigrationAlways
 ) => {
-    const serverConfig = await (() => {
-        switch (type) {
-            case up:
-                return loadServerConfigAsMigrationUp();
-            case down:
-                return loadServerConfigAsMigrationDown();
-            case check:
-                return loadServerConfigAsCheck();
-            case autoMigrationAlways:
-                return loadServerConfigAsMain();
-            default:
-                return loadServerConfigAsMigrationCreate();
-        }
-    })();
-
-    let orm: MikroORM<IDatabaseDriver<Connection>>;
-    let dbType: DBType;
-    // TODO: 他のDBにも対応させる
-    switch (serverConfig.database.__type) {
-        case sqlite:
-            orm = await createSQLite({
-                ...serverConfig.database,
-                debug: type !== check,
-            });
-            dbType = sqlite;
-            break;
-        case postgresql:
-            orm = await createPostgreSQL({
-                ...serverConfig.database,
-                debug: type !== check,
-            });
-            dbType = postgresql;
-            break;
+    const serverConfigBuilder = new ServerConfigBuilder(process.env);
+    const serverConfig = serverConfigBuilder.serverConfigForMigration;
+    if (serverConfig.isError) {
+        throw new Error(serverConfig.error);
     }
 
+    let orm: Result<ORM> | undefined = undefined;
     try {
         switch (type) {
             case create: {
                 AppConsole.log({
-                    en: `Migration-create is started. DB is ${prettify(dbType)}.`,
-                    ja: `マイグレーションの作成を開始します。DBは${prettify(dbType)}です。`,
+                    en: `Migration-create is started.`,
+                    ja: `マイグレーションの作成を開始します。`,
                 });
-                const migrator = orm.getMigrator();
+                const commandLineArgs = await loadMigrationCreate();
+                orm = await ServerConfigForMigration.createORM(
+                    serverConfig.value,
+                    commandLineArgs.db ?? null,
+                    true
+                );
+                if (orm.isError) {
+                    throw new Error(orm.error);
+                }
+                const migrator = orm.value.getMigrator();
                 await migrator.createMigration();
                 AppConsole.log({
                     icon: '😊',
-                    en: `Migration-create has been successfully finished. DB is ${prettify(
-                        dbType
-                    )}.`,
-                    ja: `マイグレーションの作成が正常に完了しました。DBは${prettify(dbType)}です。`,
+                    en: `Migration-create has been successfully finished.`,
+                    ja: `マイグレーションの作成が正常に完了しました。`,
                 });
                 return;
             }
             case createInitial: {
                 AppConsole.log({
-                    en: `Migration-create-init is started. DB is ${prettify(dbType)}.`,
-                    ja: `マイグレーションの新規作成を開始します。DBは${prettify(dbType)}です。`,
+                    en: `Migration-create-init is started. `,
+                    ja: `マイグレーションの新規作成を開始します。`,
                 });
-                const migrator = orm.getMigrator();
+                const commandLineArgs = await loadMigrationCreate();
+                orm = await ServerConfigForMigration.createORM(
+                    serverConfig.value,
+                    commandLineArgs.db ?? null,
+                    true
+                );
+                if (orm.isError) {
+                    throw new Error(orm.error);
+                }
+                const migrator = orm.value.getMigrator();
                 await migrator.createInitialMigration();
                 AppConsole.log({
                     icon: '😊',
-                    en: `Migration-create-init has been successfully finished. DB is ${prettify(
-                        dbType
-                    )}.`,
-                    ja: `マイグレーションの新規作成が正常に完了しました。DBは${prettify(
-                        dbType
-                    )}です。`,
+                    en: `Migration-create-init has been successfully finished.`,
+                    ja: `マイグレーションの新規作成が正常に完了しました。`,
                 });
                 return;
             }
             case up:
-            case autoMigrationAlways:
+            case autoMigrationAlways: {
+                const commandLineArgs = await loadMigrationUpOrCheck();
+                orm = await ServerConfigForMigration.createORM(
+                    serverConfig.value,
+                    commandLineArgs.db ?? null,
+                    true
+                );
+                if (orm.isError) {
+                    throw new Error(orm.error);
+                }
                 await migrateUpCore({
-                    orm,
+                    orm: orm.value,
                     type,
-                    dbType,
                 });
                 return;
+            }
             case down: {
                 AppConsole.log({
-                    en: `Migration-down is started. DB is ${prettify(dbType)}.`,
-                    ja: `マイグレーションのdownを開始します。DBは${prettify(dbType)}です。`,
+                    en: `Migration-down is started. `,
+                    ja: `マイグレーションのdownを開始します。`,
                 });
 
-                const config = await loadServerConfigAsMigrationDown();
-                if (!Number.isInteger(config.count)) {
+                const commandLineArgs = await loadMigrationDown();
+                orm = await ServerConfigForMigration.createORM(
+                    serverConfig.value,
+                    commandLineArgs.db ?? null,
+                    true
+                );
+                if (orm.isError) {
+                    throw new Error(orm.error);
+                }
+
+                if (!Number.isInteger(commandLineArgs.count)) {
                     AppConsole.log({ icon: '❌', en: '"--count" must be integer' });
                     return;
                 }
-                if (config.count < 0) {
+                if (commandLineArgs.count < 0) {
                     AppConsole.log({ icon: '❌', en: '"--count" must not be negative' });
                     return;
                 }
 
-                const migrator = orm.getMigrator();
-                for (const _ of new Array(config.count).fill('')) {
+                const migrator = orm.value.getMigrator();
+                for (const _ of new Array(commandLineArgs.count).fill('')) {
                     await migrator.down();
                     AppConsole.log({ en: 'A migration-down is finished.' });
                 }
                 AppConsole.log({
                     icon: '😊',
-                    en: `Migration-down has been successfully finished. DB is ${prettify(dbType)}.`,
-                    ja: `マイグレーションのdownが正常に完了しました。DBは${prettify(dbType)}です。`,
+                    en: `Migration-down has been successfully finished.`,
+                    ja: `マイグレーションのdownが正常に完了しました。`,
                 });
                 return;
             }
             case check: {
-                if (await hasMigrations(orm)) {
-                    AppConsole.log(migrationCheckErrorMessage(dbType));
+                const commandLineArgs = await loadMigrationUpOrCheck();
+                orm = await ServerConfigForMigration.createORM(
+                    serverConfig.value,
+                    commandLineArgs.db ?? null,
+                    true
+                );
+                if (orm.isError) {
+                    throw new Error(orm.error);
+                }
+                if (await hasMigrations(orm.value)) {
+                    AppConsole.log(migrationCheckErrorMessage);
                 } else {
-                    AppConsole.log(migrationCheckOkMessage(dbType));
+                    AppConsole.log(migrationCheckOkMessage);
                 }
                 return;
             }
         }
     } finally {
         // これがないとターミナルなどで実行したときに自動で終わらない。
-        orm.close();
+        orm?.value?.close();
     }
 };
 
-export const checkMigrationsBeforeStart = async (
-    orm: MikroORM<IDatabaseDriver<Connection>>,
-    dbType: DBType
-) => {
+export const checkMigrationsBeforeStart = async (orm: MikroORM<IDatabaseDriver<Connection>>) => {
     if (await hasMigrations(orm)) {
         await orm.close();
-        throw migrationCheckErrorMessage(dbType);
+        throw new Error(AppConsole.messageToString(migrationCheckErrorMessage));
     }
-    AppConsole.log(migrationCheckOkMessage(dbType));
+    AppConsole.log(migrationCheckOkMessage);
 };
 
-export const doAutoMigrationBeforeStart = async (
-    orm: MikroORM<IDatabaseDriver<Connection>>,
-    dbType: DBType
-) => {
+export const doAutoMigrationBeforeStart = async (orm: MikroORM<IDatabaseDriver<Connection>>) => {
     await migrateUpCore({
         orm,
-        dbType,
         type: autoMigrationAlways,
     });
 };

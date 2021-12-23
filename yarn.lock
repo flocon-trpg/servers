@@ -1701,6 +1701,7 @@ __metadata:
     "@graphql-codegen/typed-document-node": 2.2.1
     "@graphql-codegen/typescript": 2.4.1
     "@graphql-codegen/typescript-operations": 2.2.1
+    "@kizahasi/option": ^1.0.0
     "@kizahasi/ot-string": ^0.3.0
     "@kizahasi/result": ^1.0.0
     "@mikro-orm/core": ^4.5.7

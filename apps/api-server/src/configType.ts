@@ -1,4 +1,9 @@
+import { Result } from '@kizahasi/result';
 import * as t from 'io-ts';
+import { DATABASE_URL, HEROKU, POSTGRESQL, SQLITE } from './env';
+import { createPostgreSQL, createSQLite } from './mikro-orm';
+import { AppConsole } from './utils/appConsole';
+import { ORM } from './utils/types';
 
 // これらを変更したら、あわせて.env.localのテンプレートも変更する必要がある
 
@@ -37,23 +42,15 @@ export const sqliteDatabase = t.intersection([
 
 export type SqliteDatabaseConfig = t.TypeOf<typeof sqliteDatabase>;
 
-export type DatabaseConfig =
-    | {
-          __type: typeof postgresql;
-          dbName: string | undefined;
-          clientUrl: string;
-          driverOptions: Record<string, unknown> | undefined;
-      }
-    | {
-          __type: typeof sqlite;
-          dbName: string;
-          driverOptions: Record<string, unknown> | undefined;
-      };
-
-export const firebaseAdminSecret = t.type({
-    client_email: t.string,
-    private_key: t.string,
-});
+export const firebaseAdminSecret = t.intersection([
+    t.type({
+        client_email: t.string,
+        private_key: t.string,
+    }),
+    t.partial({
+        project_id: t.string,
+    }),
+]);
 
 export type FirebaseAdminSecretConfig = t.TypeOf<typeof firebaseAdminSecret>;
 
@@ -86,16 +83,141 @@ export type UploaderConfig = {
     directory?: string;
 };
 
+export type ServerConfigForMigration = {
+    heroku: boolean;
+
+    // HerokuでHeroku Postgresを使うと自動的にセットされる DATABASE_URL を表す。
+    herokuDatabaseUrl: string | undefined;
+
+    postgresql: PostgresqlDatabaseConfig | undefined;
+    sqlite: SqliteDatabaseConfig | undefined;
+};
+
+export namespace ServerConfigForMigration {
+    const createSQLiteORM = async (sqliteConfig: SqliteDatabaseConfig): Promise<Result<ORM>> => {
+        const result = await createSQLite({ dbName: sqliteConfig.dbName });
+        return Result.ok(result);
+    };
+
+    const createPostgresORM = async (
+        postgresConfig: PostgresqlDatabaseConfig | undefined,
+        serverConfig: ServerConfigForMigration,
+        databaseArg: typeof postgresql | null,
+        debug: boolean
+    ): Promise<Result<ORM>> => {
+        if (serverConfig.heroku) {
+            if (serverConfig.herokuDatabaseUrl != null) {
+                const result = await createPostgreSQL({
+                    clientUrl: serverConfig.herokuDatabaseUrl,
+                    dbName: undefined,
+                    driverOptions: {
+                        connection: { ssl: { rejectUnauthorized: false } },
+                    },
+                    debug,
+                });
+                return Result.ok(result);
+            }
+            AppConsole.logJa(
+                `${HEROKU}の値がtrueですが、${DATABASE_URL}の値が見つかりませんでした。${DATABASE_URL}によるデータベースの参照はスキップします…`
+            );
+        }
+        if (postgresConfig == null) {
+            if (databaseArg === postgresql) {
+                return Result.error(
+                    `使用するデータベースとしてPostgreSQLが指定されましたが、設定が見つかりませんでした。${POSTGRESQL}の値を設定する必要があります。Herokuの場合はHeroku Postgresをインストールしていてなおかつ${DATABASE_URL}の値が設定されていることを確認してください。`
+                );
+            }
+            return Result.error(
+                `使用するデータベースとしてPostgreSQLが指定されましたが、${POSTGRESQL}の値が設定されていません。`
+            );
+        }
+        const result = await createPostgreSQL({
+            dbName: postgresConfig.dbName,
+            clientUrl: postgresConfig.clientUrl,
+            driverOptions: postgresConfig.driverOptions,
+            debug,
+        });
+        return Result.ok(result);
+    };
+
+    const createORMCore = async (
+        serverConfig: ServerConfigForMigration,
+        databaseArg: typeof postgresql | typeof sqlite | null,
+        debug: boolean
+    ): Promise<Result<ORM>> => {
+        switch (databaseArg) {
+            case null:
+                if (serverConfig.sqlite != null) {
+                    if (serverConfig.postgresql != null) {
+                        return Result.error(
+                            `Because both ${POSTGRESQL} and ${SQLITE} are set, you must use --db parameter to specify a database to use.`
+                        );
+                    }
+                    return await createSQLiteORM(serverConfig.sqlite);
+                }
+                return await createPostgresORM(
+                    serverConfig.postgresql,
+                    serverConfig,
+                    databaseArg,
+                    debug
+                );
+            case sqlite: {
+                if (serverConfig.sqlite == null) {
+                    return Result.error(
+                        `使用するデータベースとしてSQLiteが指定されましたが、${SQLITE}の値が設定されていません。`
+                    );
+                }
+                return await createSQLiteORM(serverConfig.sqlite);
+            }
+            case postgresql: {
+                return await createPostgresORM(
+                    serverConfig.postgresql,
+                    serverConfig,
+                    databaseArg,
+                    debug
+                );
+            }
+        }
+    };
+
+    export async function createORM(
+        serverConfig: ServerConfigForMigration,
+        databaseArg: typeof postgresql | typeof sqlite | null,
+        debug: boolean
+    ) {
+        try {
+            return await createORMCore(serverConfig, databaseArg, debug);
+        } catch (e) {
+            AppConsole.error({
+                en: 'Could not connect to the database!',
+                ja: 'データベースに接続できませんでした',
+            });
+            // TODO: 適度にcatchする
+            throw e;
+        }
+    }
+}
+
 export type ServerConfig = {
     admins: string[];
-    database: DatabaseConfig;
-    entryPassword?: EntryPasswordConfig;
-    firebaseAdminSecret?: FirebaseAdminSecretConfig;
-    uploader: UploaderConfig;
+    entryPassword: EntryPasswordConfig | undefined;
+    firebaseAdminSecret: Omit<FirebaseAdminSecretConfig, 'project_id'> | undefined;
+    firebaseProjectId: string;
+    uploader: UploaderConfig | undefined;
     autoMigration: boolean;
-    accessControlAllowOrigin?: string;
-    roomHistCount?: number;
+    accessControlAllowOrigin: string | undefined;
+    roomHistCount: number | undefined;
 
     // rate limitのフォーマットが決まっていない（pointとdurationの指定のカスタマイズ、メソッドごとの消費pointのカスタマイズなど）が、とりあえずテストではrate limitは無効化したいため、experimentalとしている
     disableRateLimitExperimental: boolean;
-};
+} & ServerConfigForMigration;
+
+export namespace ServerConfig {
+    export async function createORM(
+        serverConfig: ServerConfigForMigration,
+        databaseArg: typeof postgresql | typeof sqlite | null,
+        debug: boolean
+    ) {
+        return await ServerConfigForMigration.createORM(serverConfig, databaseArg, debug);
+    }
+}

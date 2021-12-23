@@ -45,10 +45,10 @@ export const loadAsMain = async (): Promise<Main> => {
     return mainCache;
 };
 
-type MigrationUp = {
+type MigrationUpOrCheck = {
     db?: DbType;
 };
-const getMigrationUp = async (): Promise<MigrationUp> => {
+const getMigrationUp = async (): Promise<MigrationUpOrCheck> => {
     const options = await yargs(process.argv.slice(2)).options({
         db: {
             type: 'string',
@@ -61,8 +61,8 @@ const getMigrationUp = async (): Promise<MigrationUp> => {
         db: options.db == null ? undefined : toDbType(options.db),
     };
 };
-let migrationUpCache: MigrationUp | null = null;
-export const loadMigrationUp = async (): Promise<MigrationUp> => {
+let migrationUpCache: MigrationUpOrCheck | null = null;
+export const loadMigrationUpOrCheck = async (): Promise<MigrationUpOrCheck> => {
     if (migrationUpCache == null) {
         migrationUpCache = await getMigrationUp();
     }

@@ -47,15 +47,7 @@ const authChecker =
             return true;
         }
 
-        const adminConfig = serverConfig.admins;
-        let adminUserUids: string[];
-        if (typeof adminConfig === 'string') {
-            adminUserUids = [adminConfig];
-        } else if (adminConfig == null) {
-            adminUserUids = [];
-        } else {
-            adminUserUids = adminConfig;
-        }
+        const adminUserUids = serverConfig.admins;
 
         if (role === ADMIN) {
             if (!adminUserUids.includes(decodedIdToken.uid)) {
