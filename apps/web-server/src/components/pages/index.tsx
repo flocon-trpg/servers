@@ -151,6 +151,16 @@ export const Index: React.FC = () => {
                 <QueryResultViewer error={error} loading={false} compact>
                     {versionInfo}
                 </QueryResultViewer>
+                <div style={{ height: spacing }} />
+                <Typography.Title level={3}>利用規約・プライバシーポリシー</Typography.Title>
+                <ul>
+                    <li>
+                        <a href='/tos'>利用規約</a>
+                    </li>
+                    <li>
+                        <a href='/privacy_policy'>プライバシーポリシー</a>
+                    </li>
+                </ul>
             </div>
         </Layout>
     );
