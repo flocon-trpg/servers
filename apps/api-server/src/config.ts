@@ -123,6 +123,7 @@ export class ServerConfigBuilder {
         return this[FIREBASE_ADMIN_SECRET];
     }
 
+    // GCEなどといった、Google Admin SDKのデータが自動的に取得できる環境ではFIREBASE_ADMIN_SECRETではなくこれを用いるほうが簡便であるため定義している
     public readonly [FIREBASE_PROJECTID]: string | undefined;
     public get firebaseProjectId() {
         return this[FIREBASE_PROJECTID];
