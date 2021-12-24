@@ -4,7 +4,8 @@
 
 FROM node:16-bullseye as build
 
-# we can set a tag to this instead of a branch 
+# branchという名前ですが、ブランチではなくタグも指定できます。
+# これを変更することで、デプロイするAPIサーバーのバージョンを変更できます。
 ARG branch="release"
 
 WORKDIR /app

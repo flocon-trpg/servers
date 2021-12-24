@@ -7,6 +7,7 @@ import { parseEnvListValue, isTruthyStringOrNullish } from '@flocon-trpg/utils';
 import * as E from 'fp-ts/Either';
 import { formatValidationErrors } from '../../utils/io-ts/io-ts-reporters';
 import { NEXT_PUBLIC_AUTH_PROVIDERS, NEXT_PUBLIC_FIREBASE_CONFIG } from '../../env';
+import { FetchTextState } from '../../utils/types';
 
 type Env = {
     firebaseConfig?: FirebaseConfig;
@@ -91,18 +92,7 @@ const getProcessEnvConfig = () => {
 
 const processEnvAtom = atom(getProcessEnvConfig());
 
-type PublicEnvTxtValue =
-    | {
-          fetched: false;
-      }
-    | {
-          fetched: true;
-
-          // fetchメソッドなどを実行した結果、ファイルが見つかった場合はそのファイルの内容。見つからなかった場合はnull。
-          value: string | null;
-      };
-
-export const publicEnvTxtAtom = atom<PublicEnvTxtValue>({ fetched: false });
+export const publicEnvTxtAtom = atom<FetchTextState>({ fetched: false });
 
 export const envsAtom = atom<Result<Envs> | null>(get => {
     const processEnv = get(processEnvAtom);

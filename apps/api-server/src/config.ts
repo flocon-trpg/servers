@@ -156,6 +156,7 @@ export class ServerConfigBuilder {
     public constructor(env: typeof process.env) {
         const simpleProps = [
             ACCESS_CONTROL_ALLOW_ORIGIN,
+            DATABASE_URL,
             EMBUPLOADER_PATH,
             FIREBASE_PROJECTID,
         ] as const;
