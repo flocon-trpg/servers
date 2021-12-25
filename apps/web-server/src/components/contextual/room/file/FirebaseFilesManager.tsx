@@ -350,11 +350,13 @@ const referencesToDataSource = (files: ReadonlyArray<Reference>): Promise<DataSo
 type FirebaseFilesManagerProps = {
     onFlieOpen?: (path: FilePathFragment) => void;
     defaultFilteredValue?: FilterValue;
+    isEmbeddedUploaderDisabled: boolean;
 };
 
 export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
     onFlieOpen,
     defaultFilteredValue,
+    isEmbeddedUploaderDisabled,
 }: FirebaseFilesManagerProps) => {
     const myUserUid = useMyUserUid();
     const [reloadUnlistedFilesKey, setReloadUnlistedFilesKey] = useAtom(reloadUnlistedFilesKeyAtom);
@@ -414,7 +416,14 @@ export const FirebaseFilesManager: React.FC<FirebaseFilesManagerProps> = ({
         config.value.isPublicFirebaseStorageEnabled !== true &&
         config.value.isUnlistedFirebaseStorageEnabled !== true
     ) {
-        return <div>Firebase StorageのUIは管理者によって全て無効化されています。</div>;
+        return (
+            <div>
+                Firebase Storage版アップローダーは管理者によって無効化されています
+                {!isEmbeddedUploaderDisabled &&
+                    '（内蔵アップローダーは有効化されています。内蔵アップローダーを利用する場合は、上のタブから選択してください。）'}
+                。
+            </div>
+        );
     }
 
     let onFirebaseFileOpen: ((ref: Reference) => void) | undefined = undefined;

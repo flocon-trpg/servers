@@ -2,7 +2,7 @@ import { Alert, Button, Card, Form, Input, Spin, Switch } from 'antd';
 import React from 'react';
 import { MyAuthContext } from '../../contexts/MyAuthContext';
 import { Center } from '../ui/Center';
-import { Layout, loginAndEntry } from '../ui/Layout';
+import { Layout, login } from '../ui/Layout';
 
 const labelCol = 10;
 const wrapperCol = 24 - labelCol;
@@ -71,7 +71,7 @@ export const Profile: React.FC = () => {
     );
 
     return (
-        <Layout requires={loginAndEntry}>
+        <Layout requires={login}>
             <Center>
                 <Card title='ユーザー情報の変更'>{form}</Card>
             </Center>

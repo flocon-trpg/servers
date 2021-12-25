@@ -122,6 +122,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
     const router = useRouter();
     const myAuth = React.useContext(MyAuthContext);
     const myUserUid = typeof myAuth === 'string' ? null : myAuth.uid;
+    const isAnonymous = typeof myAuth === 'string' ? false : myAuth.isAnonymous;
     const apolloClient = useApolloClient();
     const signOut = useSignOut();
     const [isEntry, setIsEntry] = React.useState<
@@ -266,7 +267,12 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                                         >
                                             ユーザー名を変更する
                                         </Button>
-                                        <Button key='2' onClick={() => signOut()}>
+                                        {isAnonymous && (
+                                            <Button key='2' onClick={() => router.push('/signin')}>
+                                                非匿名アカウントにアップグレードする
+                                            </Button>
+                                        )}
+                                        <Button key='3' onClick={() => signOut()}>
                                             ログアウト
                                         </Button>
                                     </>
