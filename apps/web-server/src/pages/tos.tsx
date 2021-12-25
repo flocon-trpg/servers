@@ -27,7 +27,7 @@ const Tos: React.FC = () => {
         return (
             <div
                 style={{ padding }}
-            >{`${filename}が見つからなかったため、利用規約の文章を作成することができませんでした。`}</div>
+            >{`${filename}が見つからなかったため、利用規約の文章を生成することができませんでした。`}</div>
         );
     }
     return (
@@ -39,7 +39,13 @@ const Tos: React.FC = () => {
                 </a>
                 ファイルから生成されています。
             </div>
-            <ReactMarkdown>{text.value}</ReactMarkdown>
+            {text.value.trim() === '' ? (
+                <div
+                    style={{ padding }}
+                >{`${filename}の中身が空であるため、利用規約の文章を生成することができませんでした。`}</div>
+            ) : (
+                <ReactMarkdown>{text.value}</ReactMarkdown>
+            )}
         </div>
     );
 };
