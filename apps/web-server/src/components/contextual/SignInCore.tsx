@@ -108,7 +108,7 @@ const SignInCore: React.FC = () => {
                         return;
                     }
                     setFirebaseAuthErrorMessage(
-                        '匿名アカウントは、既存のアカウントにアップグレードすることはできません。'
+                        '匿名アカウントは、既に作成済みのアカウントにアップグレードすることはできません。'
                     );
                 },
                 uiShown: function () {
