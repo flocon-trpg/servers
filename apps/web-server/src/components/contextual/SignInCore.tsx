@@ -27,7 +27,10 @@ import { flex, flexColumn, itemsCenter } from '../../utils/className';
 const toSignInOptions = (providers: string[]) => {
     const signInOptions: firebaseui.auth.Config['signInOptions'] = [];
     if (providers.includes(email)) {
-        signInOptions.push(firebase.auth.EmailAuthProvider.PROVIDER_ID);
+        signInOptions.push({
+            provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+            requireDisplayName: false,
+        });
     }
     if (providers.includes(facebook)) {
         signInOptions.push(firebase.auth.FacebookAuthProvider.PROVIDER_ID);
