@@ -22,7 +22,7 @@ export const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Pro
     const myAuth = React.useContext(MyAuthContext);
     const [input, setInput] = React.useState<string>('');
     const { data: serverInfo } = useQuery(GetServerInfoDocument);
-    const isUploaderDisabled = serverInfo?.result.uploaderEnabled !== true;
+    const isEmbeddedUploaderDisabled = serverInfo?.result.uploaderEnabled !== true;
 
     const child = (() => {
         if (typeof myAuth === 'string') {
@@ -46,11 +46,12 @@ export const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Pro
                     <FirebaseFilesManager
                         onFlieOpen={onFileOpen}
                         defaultFilteredValue={drawerType?.defaultFilteredValue}
+                        isEmbeddedUploaderDisabled={isEmbeddedUploaderDisabled}
                     />
                 </Tabs.TabPane>
                 <Tabs.TabPane
                     tab={
-                        isUploaderDisabled ? (
+                        isEmbeddedUploaderDisabled ? (
                             <Tooltip title='APIサーバーが稼働していないか、APIサーバーの設定で有効化されていないため、使用できません'>
                                 内蔵アップローダー
                             </Tooltip>
@@ -59,7 +60,7 @@ export const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Pro
                         )
                     }
                     key='2'
-                    disabled={isUploaderDisabled}
+                    disabled={isEmbeddedUploaderDisabled}
                 >
                     <FloconFilesManager
                         onFlieOpen={onFileOpen}
