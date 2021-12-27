@@ -19,7 +19,6 @@ import { ExpiryMap } from '../utils/file/expiryMap';
 import urljoin from 'url-join';
 import { createApolloClient } from '../utils/createApolloClient';
 import { getUserConfig, setUserConfig } from '../utils/localStorage/userConfig';
-import { getAuth } from '../utils/firebaseHelpers';
 import { useMyUserUid } from '../hooks/useMyUserUid';
 import { AllContextProvider } from '../components/behaviors/AllContextProvider';
 import { simpleId } from '@flocon-trpg/core';
@@ -32,15 +31,23 @@ import { setRoomConfig } from '../utils/localStorage/roomConfig';
 import { UserConfig } from '../atoms/userConfig/types';
 import { RoomConfig } from '../atoms/roomConfig/types/roomConfig';
 import { useAtomValue, useUpdateAtom } from 'jotai/utils';
-import {
-    getHttpUri,
-    getWsUri,
-    publicEnvTxtAtom,
-    webConfigAtom,
-} from '../atoms/webConfig/webConfigAtom';
+import { getHttpUri, getWsUri, publicEnvTxtAtom } from '../atoms/webConfig/webConfigAtom';
 import { useWebConfig } from '../hooks/useWebConfig';
+import { atom, useAtom } from 'jotai';
+import { FirebaseApp, initializeApp } from 'firebase/app';
+import { Auth, getAuth } from 'firebase/auth';
+import { FirebaseStorage, getStorage } from 'firebase/storage';
 
 enableMapSet();
+
+const firebaseAppCoreAtom = atom<FirebaseApp | undefined>(undefined);
+export const firebaseAppAtom = atom(get => get(firebaseAppCoreAtom));
+
+const firebaseAuthCoreAtom = atom<Auth | undefined>(undefined);
+export const firebaseAuthAtom = atom(get => get(firebaseAuthCoreAtom));
+
+const firebaseStorageCoreAtom = atom<FirebaseStorage | undefined>(undefined);
+export const firebaseStorageAtom = atom(get => get(firebaseStorageCoreAtom));
 
 // localForageを用いてRoomConfigを読み込み、ReduxのStateと紐付ける。
 // Userが変わるたびに、useUserConfigが更新される必要がある。_app.tsxなどどこか一箇所でuseUserConfigを呼び出すだけでよい。
@@ -121,8 +128,7 @@ const useAutoSaveRoomConfig = () => {
 
 // _app.tsxで1回のみ呼ばれることを想定。firebase authのデータを取得したい場合はContextで行う。
 const useFirebaseUser = (): FirebaseUserState => {
-    const config = useAtomValue(webConfigAtom);
-    const auth = config?.value == null ? null : getAuth(config.value);
+    const auth = useAtomValue(firebaseAuthAtom);
     const [user, setUser] = React.useState<FirebaseUserState>(loading);
     React.useEffect(() => {
         if (auth == null) {
@@ -157,6 +163,28 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     }, [setPublicEnvTxt]);
 
     const config = useWebConfig();
+
+    const [firebaseApp, setFirebaseApp] = useAtom(firebaseAppCoreAtom);
+    React.useEffect(() => {
+        if (config?.value == null) {
+            setFirebaseApp(undefined);
+            return;
+        }
+        setFirebaseApp(prevValue => {
+            if (prevValue == null) {
+                console.warn('Firebase app is initialized multiple times');
+            }
+            return initializeApp(config.value.firebaseConfig);
+        });
+    }, [config, setFirebaseApp]);
+
+    const setFirebaseAuth = useUpdateAtom(firebaseAuthCoreAtom);
+    const setFirebaseStorage = useUpdateAtom(firebaseStorageCoreAtom);
+    React.useEffect(() => {
+        setFirebaseAuth(firebaseApp == null ? undefined : getAuth(firebaseApp));
+        setFirebaseStorage(firebaseApp == null ? undefined : getStorage(firebaseApp));
+    }, [firebaseApp, setFirebaseAuth, setFirebaseStorage]);
+
     const setRoomNotification = useUpdateAtom(roomNotificationsAtom);
 
     const [httpUri, setHttpUri] = React.useState<string>();

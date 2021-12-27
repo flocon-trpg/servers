@@ -12,7 +12,6 @@ import {
     TwitterAuthProvider,
 } from 'firebase/auth';
 import * as firebaseui from 'firebaseui';
-import { getAuth } from '../../utils/firebaseHelpers';
 import {
     anonymous,
     email,
@@ -31,6 +30,8 @@ import * as Icons from '@ant-design/icons';
 import classNames from 'classnames';
 import { flex, flexColumn, itemsCenter } from '../../utils/className';
 import { signInAnonymously } from '@firebase/auth';
+import { useAtomValue } from 'jotai/utils';
+import { firebaseAuthAtom } from '../../pages/_app';
 
 const toSignInOptions = (providers: string[]) => {
     const signInOptions: firebaseui.auth.Config['signInOptions'] = [];
@@ -76,7 +77,7 @@ const createFirebaseErrorMessage = (firebaseAuthErrorCode: string | undefined) =
 const SignInCore: React.FC = () => {
     const config = useWebConfig();
     const router = useRouter();
-    const auth = config?.value == null ? null : getAuth(config.value);
+    const auth = useAtomValue(firebaseAuthAtom);
     const [altMessage, setAltMessage] = React.useState<string | null>('loading...');
     const authContainerRef = React.useRef<HTMLDivElement | null>(null);
     const [firebaseAuthErrorMessage, setFirebaseAuthErrorMessage] = React.useState<string>();

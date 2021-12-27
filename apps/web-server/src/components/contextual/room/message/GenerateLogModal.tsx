@@ -22,6 +22,8 @@ import classNames from 'classnames';
 import { flex, flexColumn } from '../../../../utils/className';
 import { useApolloClient } from '@apollo/client';
 import { useWebConfig } from '../../../../hooks/useWebConfig';
+import { useAtomValue } from 'jotai/utils';
+import { firebaseStorageAtom } from '../../../../pages/_app';
 
 const simple = 'simple';
 const rich = 'rich';
@@ -40,6 +42,8 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
     const apolloClientRef = useReadonlyRef(apolloClient);
     const config = useWebConfig();
     const configRef = useReadonlyRef(config);
+    const firebaseStorage = useAtomValue(firebaseStorageAtom);
+    const firebaseStorageRef = useReadonlyRef(firebaseStorage);
     const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
     const firebaseStorageUrlCacheContextRef = useReadonlyRef(firebaseStorageUrlCacheContext);
     const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);
@@ -80,7 +84,8 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                 participantsRef.current == null ||
                 firebaseStorageUrlCacheContextRef.current == null ||
                 getIdTokenRef.current == null ||
-                configRef.current?.value == null
+                configRef.current?.value == null ||
+                firebaseStorageRef.current == null
             ) {
                 return;
             }
@@ -141,6 +146,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                     filter: ChannelsFilterOptions.toFilter(channelsFilterOptionsRef.current),
                 },
                 config: configRef.current.value,
+                storage: firebaseStorageRef.current,
                 idToken,
                 firebaseStorageUrlCache: firebaseStorageUrlCacheContextRef.current,
                 onProgressChange: p => setProgress(p.percent),
@@ -170,6 +176,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
         logModeRef,
         channelsFilterOptionsRef,
         configRef,
+        firebaseStorageRef,
     ]);
 
     return (

@@ -1,10 +1,9 @@
 import { FilePathFragment, FileSourceType } from '@flocon-trpg/typed-document-node';
 import * as Core from '@flocon-trpg/core';
-import { getStorageForce } from '../firebaseHelpers';
 import { ExpiryMap } from './expiryMap';
 import { files, getFloconUploaderFile } from './getFloconUploaderFile';
 import { WebConfig } from '../../configType';
-import { getDownloadURL, ref } from 'firebase/storage';
+import { FirebaseStorage, getDownloadURL, ref } from 'firebase/storage';
 
 export type FilePath = {
     path: string;
@@ -91,6 +90,7 @@ export namespace FilePath {
     export const getSrc = async (
         path: FilePath | Omit<Core.FilePath, '$v' | '$r'>,
         config: WebConfig,
+        storage: FirebaseStorage,
         idToken: string,
         cache: ExpiryMap<string, string> | null
     ): Promise<SrcResult> => {
@@ -126,7 +126,6 @@ export namespace FilePath {
                         blob: undefined,
                     };
                 }
-                const storage = getStorageForce(config);
                 const storageRef = ref(storage, path.path);
                 const url = await getDownloadURL(storageRef).catch(() => null);
                 if (typeof url !== 'string') {

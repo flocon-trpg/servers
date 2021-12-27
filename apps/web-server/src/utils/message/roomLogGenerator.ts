@@ -23,6 +23,7 @@ import { logCss } from './richLogCss';
 import { logHtml } from './richLogHtml';
 import { RoomMessageFilter } from '../../components/contextual/room/message/ChannelsFilter';
 import { WebConfig } from '../../configType';
+import { FirebaseStorage as FirebaseStorageType } from '@firebase/storage';
 
 const privateMessage = 'privateMessage';
 const publicMessage = 'publicMessage';
@@ -318,6 +319,7 @@ class ImageDownloader {
 
     public constructor(
         private readonly config: WebConfig,
+        private readonly storage: FirebaseStorageType,
         private readonly firebaseStorageUrlCache: ExpiryMap<string, string>
     ) {}
 
@@ -353,6 +355,7 @@ class ImageDownloader {
         const srcResult = await FilePath.getSrc(
             filePath,
             this.config,
+            this.storage,
             idToken,
             this.firebaseStorageUrlCache
         );
@@ -443,17 +446,19 @@ type RichLogProgress = {
 export const generateAsRichLog = async ({
     params,
     config,
+    storage,
     idToken,
     firebaseStorageUrlCache,
     onProgressChange,
 }: {
     params: GenerateLogParams;
     config: WebConfig;
+    storage: FirebaseStorageType;
     idToken: string;
     firebaseStorageUrlCache: ExpiryMap<string, string>;
     onProgressChange: (p: RichLogProgress) => void;
 }): Promise<Blob> => {
-    const imageDownloader = new ImageDownloader(config, firebaseStorageUrlCache);
+    const imageDownloader = new ImageDownloader(config, storage, firebaseStorageUrlCache);
     const zip = new JSZip();
 
     const cssFolder = zip.folder('css');

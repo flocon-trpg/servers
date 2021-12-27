@@ -1,10 +1,10 @@
 import { StorageReference, ref, getDownloadURL } from 'firebase/storage';
+import { useAtomValue } from 'jotai/utils';
 import React from 'react';
 import { FirebaseStorageUrlCacheContext } from '../../../../contexts/FirebaseStorageUrlCacheContext';
 import { useReadonlyRef } from '../../../../hooks/useReadonlyRef';
-import { useWebConfig } from '../../../../hooks/useWebConfig';
+import { firebaseStorageAtom } from '../../../../pages/_app';
 import { fileName } from '../../../../utils/filename';
-import { getStorageForce } from '../../../../utils/firebaseHelpers';
 
 type Props = {
     reference: StorageReference | string;
@@ -17,10 +17,10 @@ export const FirebaseStorageLink: React.FC<Props> = ({ reference }: Props) => {
     const [fullPath, setFullPath] = React.useState<string>(
         typeof reference === 'string' ? '' : reference.fullPath
     );
-    const config = useWebConfig();
+    const storage = useAtomValue(firebaseStorageAtom);
 
     React.useEffect(() => {
-        if (config?.value == null) {
+        if (storage == null) {
             return;
         }
 
@@ -28,7 +28,7 @@ export const FirebaseStorageLink: React.FC<Props> = ({ reference }: Props) => {
 
         const storageRef = (() => {
             if (typeof reference === 'string') {
-                return ref(getStorageForce(config.value), reference);
+                return ref(storage, reference);
             }
             return reference;
         })();
@@ -51,7 +51,7 @@ export const FirebaseStorageLink: React.FC<Props> = ({ reference }: Props) => {
         return () => {
             unsubscribed = true;
         };
-    }, [reference, config, cacheRef]);
+    }, [reference, cacheRef, storage]);
 
     if (url == null) {
         return <span>{fileName(fullPath)}</span>;
