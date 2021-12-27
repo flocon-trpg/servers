@@ -3,7 +3,14 @@
 // dynamicはReactのComponentをimportする際にしか使えないようなので、ここでComponentを定義して、それをdynamic loadingするようにしている。
 
 import React from 'react';
-import firebase from 'firebase/app';
+import {
+    EmailAuthProvider,
+    FacebookAuthProvider,
+    GithubAuthProvider,
+    GoogleAuthProvider,
+    PhoneAuthProvider,
+    TwitterAuthProvider,
+} from 'firebase/auth';
 import * as firebaseui from 'firebaseui';
 import { getAuth } from '../../utils/firebaseHelpers';
 import {
@@ -23,29 +30,30 @@ import { useRouter } from 'next/router';
 import * as Icons from '@ant-design/icons';
 import classNames from 'classnames';
 import { flex, flexColumn, itemsCenter } from '../../utils/className';
+import { signInAnonymously } from '@firebase/auth';
 
 const toSignInOptions = (providers: string[]) => {
     const signInOptions: firebaseui.auth.Config['signInOptions'] = [];
     if (providers.includes(email)) {
         signInOptions.push({
-            provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+            provider: EmailAuthProvider.PROVIDER_ID,
             requireDisplayName: false,
         });
     }
     if (providers.includes(facebook)) {
-        signInOptions.push(firebase.auth.FacebookAuthProvider.PROVIDER_ID);
+        signInOptions.push(FacebookAuthProvider.PROVIDER_ID);
     }
     if (providers.includes(github)) {
-        signInOptions.push(firebase.auth.GithubAuthProvider.PROVIDER_ID);
+        signInOptions.push(GithubAuthProvider.PROVIDER_ID);
     }
     if (providers.includes(google)) {
-        signInOptions.push(firebase.auth.GoogleAuthProvider.PROVIDER_ID);
+        signInOptions.push(GoogleAuthProvider.PROVIDER_ID);
     }
     if (providers.includes(phone)) {
-        signInOptions.push(firebase.auth.PhoneAuthProvider.PROVIDER_ID);
+        signInOptions.push(PhoneAuthProvider.PROVIDER_ID);
     }
     if (providers.includes(twitter)) {
-        signInOptions.push(firebase.auth.TwitterAuthProvider.PROVIDER_ID);
+        signInOptions.push(TwitterAuthProvider.PROVIDER_ID);
     }
     return signInOptions;
 };
@@ -154,7 +162,7 @@ const SignInCore: React.FC = () => {
                                     return;
                                 }
                                 setSigningUpAsAnonymous(true);
-                                auth.signInAnonymously()
+                                signInAnonymously(auth)
                                     .then(() => {
                                         router.push('/');
                                     })

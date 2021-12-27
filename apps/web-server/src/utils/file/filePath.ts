@@ -4,6 +4,7 @@ import { getStorageForce } from '../firebaseHelpers';
 import { ExpiryMap } from './expiryMap';
 import { files, getFloconUploaderFile } from './getFloconUploaderFile';
 import { WebConfig } from '../../configType';
+import { getDownloadURL, ref } from 'firebase/storage';
 
 export type FilePath = {
     path: string;
@@ -125,10 +126,9 @@ export namespace FilePath {
                         blob: undefined,
                     };
                 }
-                const url = await getStorageForce(config)
-                    .ref(path.path)
-                    .getDownloadURL()
-                    .catch(() => null);
+                const storage = getStorageForce(config);
+                const storageRef = ref(storage, path.path);
+                const url = await getDownloadURL(storageRef).catch(() => null);
                 if (typeof url !== 'string') {
                     return {
                         type: Core.FirebaseStorage,

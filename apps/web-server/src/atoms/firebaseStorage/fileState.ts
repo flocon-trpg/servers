@@ -1,6 +1,7 @@
 import { FileType } from '../../utils/fileType';
+import { StorageReference } from 'firebase/storage';
 
-export type Reference = firebase.default.storage.Reference;
+export type Reference = StorageReference;
 
 export type FileState = {
     reference: Reference;

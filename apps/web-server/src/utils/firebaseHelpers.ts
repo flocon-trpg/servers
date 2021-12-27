@@ -1,28 +1,30 @@
-import 'firebase/auth';
-import firebase from 'firebase/app';
+import { getAuth as getAuthCore, Auth } from 'firebase/auth';
+import { getStorage as getStorageCore, FirebaseStorage } from 'firebase/storage';
+import { getApps, initializeApp, FirebaseApp } from 'firebase/app';
 import { WebConfig } from '../configType';
 
-let _app: firebase.app.App | null = null;
-let _auth: firebase.auth.Auth | null = null;
-let _storage: firebase.storage.Storage | null = null;
+let _app: FirebaseApp | null = null;
+let _auth: Auth | null = null;
+let _storage: FirebaseStorage | null = null;
 
-const getApp = (config: WebConfig): firebase.app.App | null => {
+const getApp = (config: WebConfig): FirebaseApp | null => {
     const isBrowser = typeof window !== 'undefined';
     if (!isBrowser) {
         // もしこれがないと、next exportなどを実行したときに_appに変なインスタンスが入るので、_app.storage()などを実行すると「storage is not a function」と言われコケてしまう。next devなどでは大丈夫。
         return null;
     }
     if (_app != null) return _app;
-    if (firebase.apps.length > 0) {
-        _app = firebase.app();
+    const [app] = getApps();
+    if (app != null) {
+        _app = app;
         return _app;
     } else {
-        _app = firebase.initializeApp(config.firebaseConfig);
+        _app = initializeApp(config.firebaseConfig);
         return _app;
     }
 };
 
-export const getAuth = (config: WebConfig): firebase.auth.Auth | null => {
+export const getAuth = (config: WebConfig): Auth | null => {
     if (_auth != null) {
         return _auth;
     }
@@ -30,11 +32,11 @@ export const getAuth = (config: WebConfig): firebase.auth.Auth | null => {
     if (app == null) {
         return null;
     }
-    _auth = app.auth();
+    _auth = getAuthCore(app);
     return _auth;
 };
 
-export const getAuthForce = (config: WebConfig): firebase.auth.Auth => {
+export const getAuthForce = (config: WebConfig): Auth => {
     const auth = getAuth(config);
     if (auth == null) {
         throw new Error('auth == null');
@@ -42,7 +44,7 @@ export const getAuthForce = (config: WebConfig): firebase.auth.Auth => {
     return auth;
 };
 
-export const getStorage = (config: WebConfig): firebase.storage.Storage | null => {
+export const getStorage = (config: WebConfig): FirebaseStorage | null => {
     if (_storage != null) {
         return _storage;
     }
@@ -50,11 +52,11 @@ export const getStorage = (config: WebConfig): firebase.storage.Storage | null =
     if (app == null) {
         return null;
     }
-    _storage = app.storage();
+    _storage = getStorageCore(app);
     return _storage;
 };
 
-export const getStorageForce = (config: WebConfig): firebase.storage.Storage => {
+export const getStorageForce = (config: WebConfig): FirebaseStorage => {
     const storage = getStorage(config);
     if (storage == null) {
         throw new Error('storage == null');

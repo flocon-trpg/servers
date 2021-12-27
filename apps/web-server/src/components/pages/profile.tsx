@@ -1,3 +1,4 @@
+import { updateProfile } from '@firebase/auth';
 import { Alert, Button, Card, Form, Input, Spin, Switch } from 'antd';
 import React from 'react';
 import { MyAuthContext } from '../../contexts/MyAuthContext';
@@ -31,8 +32,7 @@ export const Profile: React.FC = () => {
             style={{ width: 600 }}
             onFinish={() => {
                 setIsSubmitting(true);
-                myAuth
-                    .updateProfile({ displayName })
+                updateProfile(myAuth, { displayName })
                     .catch((err: unknown) => {
                         if (err instanceof Error) {
                             setSubmitErrorMessage(err.message);
