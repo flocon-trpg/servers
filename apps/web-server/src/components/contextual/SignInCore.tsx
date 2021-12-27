@@ -86,7 +86,7 @@ const SignInCore: React.FC = () => {
         const signInOptions = toSignInOptions(config.value.authProviders);
         if (signInOptions.length === 0 && !isAnonymousLoginEnabled(config.value.authProviders)) {
             setAltMessage(
-                'エラー: config 内の firebase.auth.provider でログインプロバイダが1つも指定されていないため、ログインできません。この問題を解決するには、サーバー管理者に問い合わせてください。'
+                `エラー: config 内の ${NEXT_PUBLIC_AUTH_PROVIDERS} でログインプロバイダが1つも指定されていないため、ログインできません。この問題を解決するには、サーバー管理者に問い合わせてください。`
             );
             return;
         }
