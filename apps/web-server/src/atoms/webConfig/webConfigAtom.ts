@@ -53,9 +53,12 @@ const parseConfig = (env: Data | undefined): Result<Env> => {
     const result: Env = {
         http: env == null ? process.env.NEXT_PUBLIC_API_HTTP : env.NEXT_PUBLIC_API_HTTP,
         ws: env == null ? process.env.NEXT_PUBLIC_API_WS : env.NEXT_PUBLIC_API_WS,
-        authProviders: parseEnvListValue(
-            env == null ? process.env.NEXT_PUBLIC_AUTH_PROVIDERS : env.NEXT_PUBLIC_AUTH_PROVIDERS
-        ),
+        authProviders:
+            parseEnvListValue(
+                env == null
+                    ? process.env.NEXT_PUBLIC_AUTH_PROVIDERS
+                    : env.NEXT_PUBLIC_AUTH_PROVIDERS
+            ) ?? undefined,
         isUnlistedFirebaseStorageEnabled:
             isTruthyStringOrNullish(
                 env == null

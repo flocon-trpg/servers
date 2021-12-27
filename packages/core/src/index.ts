@@ -59,6 +59,8 @@ export {
 
 export { testCommand, execCharacterCommand } from './internal/command/main';
 
+export { fakeFirebaseConfig1, fakeFirebaseConfig2 } from './internal/fake/fakeFirebaseConfig';
+
 export { Default, Uploader, FirebaseStorage, FilePath } from './internal/ot/filePath/types';
 
 export { Expression, plain, expr1, analyze } from './internal/expression';
