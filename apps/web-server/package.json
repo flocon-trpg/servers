@@ -25,7 +25,6 @@
         "clipboard-copy": "^4.0.1",
         "envfile": "^6.17.0",
         "firebase": "^9.6.0",
-        "firebaseui": "^6.0.0",
         "fp-ts": "^2.11.4",
         "graphql": "^15.6.0",
         "graphql-ws": "^5.5.0",
