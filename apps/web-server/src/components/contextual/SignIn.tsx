@@ -1,7 +1,3 @@
-// firebaseuiは内部でwindowを使っているようで、next.jsだとpages内のどこかでimportするだけで"ReferenceError: window is not defined"というエラーがビルド時に出る。
-// そこで、dynamic loadingを使うことで回避している。https://dev.to/vvo/how-to-solve-window-is-not-defined-errors-in-react-and-next-js-5f97
-// dynamicはReactのComponentをimportする際にしか使えないようなので、ここでComponentを定義して、それをdynamic loadingするようにしている。
-
 import React from 'react';
 import {
     EmailAuthProvider,
