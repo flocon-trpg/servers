@@ -26,7 +26,7 @@ import { useMyUserUid } from '../../../../hooks/useMyUserUid';
 import { FilePath, FileSourceType } from '@flocon-trpg/typed-document-node';
 import { ImagePiece } from './ImagePiece';
 import { DragEndResult, Vector2 } from '../../../../utils/types';
-import { DiceOrNumberPiece } from './DiceOrNumberPiece';
+import { DiceOrStringPiece } from './DiceOrStringPiece';
 import { useTransition, animated } from '@react-spring/konva';
 import { useCharacterPieces } from '../../../../hooks/state/useCharacterPieces';
 import { usePortraitPieces } from '../../../../hooks/state/usePortraitPieces';
@@ -504,7 +504,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
 
         const dicePieceElements = [...(dicePieces ?? [])].map(([pieceId, piece]) => {
             return (
-                <DiceOrNumberPiece
+                <DiceOrStringPiece
                     {...Piece.getPosition({ ...board, state: piece })}
                     key={pieceId}
                     opacity={1}
@@ -550,9 +550,9 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             );
         });
 
-        const numberPieceElements = [...(numberPieces ?? [])].map(([pieceId, piece]) => {
+        const stringPieceElements = [...(numberPieces ?? [])].map(([pieceId, piece]) => {
             return (
-                <DiceOrNumberPiece
+                <DiceOrStringPiece
                     {...Piece.getPosition({ ...board, state: piece })}
                     key={pieceId}
                     opacity={1}
@@ -606,7 +606,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     {characterPieceElements}
                     {imagePieceElements}
                     {dicePieceElements}
-                    {numberPieceElements}
+                    {stringPieceElements}
                 </ReactKonva.Layer>
             </AllContextProvider>
         );

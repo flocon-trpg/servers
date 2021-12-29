@@ -327,7 +327,7 @@ type Props = {
 } & PieceGroupProps;
 
 // ImagePieceはCharacterなどと表示方法が近いので、ここでは実装していない
-export const DiceOrNumberPiece: React.FC<Props> = (props: Props) => {
+export const DiceOrStringPiece: React.FC<Props> = (props: Props) => {
     return (
         <PieceGroup {...props}>
             <ValueContent {...props} />
