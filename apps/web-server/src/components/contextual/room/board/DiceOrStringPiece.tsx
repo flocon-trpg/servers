@@ -13,6 +13,7 @@ import { DicePieceValue } from '../../../../utils/board/dicePieceValue';
 import { usePrevious } from 'react-use';
 import { Size } from '../../../../utils/types';
 import { PieceGroup, PieceGroupProps } from './PieceGroup';
+import { Text } from 'react-konva';
 
 export const stringPiece = 'stringPiece';
 export const dicePiece = 'dicePiece';
@@ -116,7 +117,7 @@ const StringPieceContent: React.FC<StringPieceContentProps> = (props: StringPiec
                 height={props.h}
                 fontSize={props.w / 2.5}
                 fontFamily='Noto Sans JP Regular'
-                fill='black'
+                fill={props.state.isValuePrivate ? 'gray' : 'black'}
                 align='center'
                 verticalAlign='middle'
             />
