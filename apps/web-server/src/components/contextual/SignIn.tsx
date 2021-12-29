@@ -293,7 +293,10 @@ export const SignIn: React.FC = () => {
     if (emailMode) {
         authUI = (
             <>
-                <a style={{ marginBottom: 12, marginLeft: 12, alignSelf: 'start' }} onClick={() => setEmailMode(false)}>
+                <a
+                    style={{ marginBottom: 12, marginLeft: 12, alignSelf: 'start' }}
+                    onClick={() => setEmailMode(false)}
+                >
                     {'< 戻る'}
                 </a>
                 <Email />
@@ -303,7 +306,10 @@ export const SignIn: React.FC = () => {
         const margin = 4;
         authUI = (
             <>
-                <a style={{ marginBottom: 12, alignSelf: 'start' }} onClick={() => router.push('/')}>
+                <a
+                    style={{ marginBottom: 12, alignSelf: 'start' }}
+                    onClick={() => router.push('/')}
+                >
                     {'< トップページに戻る'}
                 </a>
                 <Button style={{ margin }} onClick={() => setEmailMode(true)}>
@@ -340,6 +346,12 @@ export const SignIn: React.FC = () => {
                                     router.push('/');
                                 })
                                 .catch((error: Error) => {
+                                    if (error.code === 'auth/admin-restricted-operation') {
+                                        setError(
+                                            '匿名認証は有効化されていないため、利用できません。'
+                                        );
+                                        return;
+                                    }
                                     setError(error);
                                 });
                         }}
@@ -351,6 +363,18 @@ export const SignIn: React.FC = () => {
         );
     }
 
+    const authErrorToString = (error: Error | string) => {
+        if (typeof error === 'string') {
+            return error;
+        }
+        switch (error.code) {
+            case 'auth/operation-not-allowed':
+                return '選択したログインプロバイダは有効化されていないため、利用できません。';
+            default:
+                return error.message;
+        }
+    };
+
     return (
         <Center>
             <div style={{ padding: 24 }} className={classNames(flex, flexColumn)}>
@@ -360,11 +384,7 @@ export const SignIn: React.FC = () => {
                             style={{ width: formWidth, marginBottom: 16 }}
                             type='error'
                             showIcon
-                            message={
-                                typeof authError === 'string'
-                                    ? authError
-                                    : `${authError.code}: ${authError.message}`
-                            }
+                            message={authErrorToString(authError)}
                         />
                     </Center>
                 )}
