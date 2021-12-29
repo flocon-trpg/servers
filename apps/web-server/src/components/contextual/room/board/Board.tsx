@@ -65,6 +65,7 @@ import { boardEditorModalAtom } from './BoardEditorModal';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
 import { importBoardModalVisibilityAtom } from './ImportBoardModal';
 import { BoardType } from '../../../../utils/board/boardType';
+import { useIsMyCharacter } from '../../../../hooks/state/useIsMyCharacter';
 
 const setDragEndResultToPieceState = ({
     e,
@@ -220,6 +221,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const setRoomState = useSetRoomStateWithImmer();
     const publicMessages = useFilteredRoomMessages({ filter: publicMessageFilter });
     const myUserUid = useMyUserUid();
+    const isMyCharacter = useIsMyCharacter();
 
     /*
         TransitionにHTMLImageElementを含めないと、フェードアウトが発生しない模様（おそらくフェードアウト時には画像が捨てられているため）。そのため含めている。
@@ -509,7 +511,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     key={pieceId}
                     opacity={1}
                     state={{ type: dicePiece, state: piece }}
-                    createdByMe={piece.ownerCharacterId === myUserUid}
+                    createdByMe={isMyCharacter(piece.ownerCharacterId)}
                     draggable={!piece.isPositionLocked}
                     resizable={!piece.isPositionLocked}
                     listening
@@ -557,7 +559,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     key={pieceId}
                     opacity={1}
                     state={{ type: 'stringPiece', state: piece }}
-                    createdByMe={piece.ownerCharacterId === myUserUid}
+                    createdByMe={isMyCharacter(piece.ownerCharacterId)}
                     draggable={!piece.isPositionLocked}
                     resizable={!piece.isPositionLocked}
                     listening
