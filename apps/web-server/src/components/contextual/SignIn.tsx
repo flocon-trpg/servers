@@ -291,11 +291,21 @@ export const SignIn: React.FC = () => {
 
     let authUI: JSX.Element;
     if (emailMode) {
-        authUI = <Email />;
+        authUI = (
+            <>
+                <a style={{ marginBottom: 12, marginLeft: 12, alignSelf: 'start' }} onClick={() => setEmailMode(false)}>
+                    {'< 戻る'}
+                </a>
+                <Email />
+            </>
+        );
     } else {
         const margin = 4;
         authUI = (
             <>
+                <a style={{ marginBottom: 12, alignSelf: 'start' }} onClick={() => router.push('/')}>
+                    {'< トップページに戻る'}
+                </a>
                 <Button style={{ margin }} onClick={() => setEmailMode(true)}>
                     メールアドレス・パスワードでログイン
                 </Button>
