@@ -293,30 +293,35 @@ export const SignIn: React.FC = () => {
     if (emailMode) {
         authUI = <Email />;
     } else {
+        const margin = 4;
         authUI = (
             <>
-                <Button onClick={() => setEmailMode(true)}>メールアドレス・パスワード</Button>
-                <Button onClick={() => loginWithAuthProvider(googleProvider)}>
-                    Googleアカウント
+                <Button style={{ margin }} onClick={() => setEmailMode(true)}>
+                    メールアドレス・パスワードでログイン
                 </Button>
-                <Button onClick={() => loginWithAuthProvider(twitterProvider)}>
-                    Twitterアカウント
+                <Button style={{ margin }} onClick={() => loginWithAuthProvider(googleProvider)}>
+                    Googleアカウントでログイン
                 </Button>
-                <Button onClick={() => loginWithAuthProvider(facebookProvider)}>
-                    Facebookアカウント
+                <Button style={{ margin }} onClick={() => loginWithAuthProvider(twitterProvider)}>
+                    Twitterアカウントでログイン
                 </Button>
-                <Button onClick={() => loginWithAuthProvider(githubProvider)}>
-                    GitHubアカウント
+                <Button style={{ margin }} onClick={() => loginWithAuthProvider(facebookProvider)}>
+                    Facebookアカウントでログイン
+                </Button>
+                <Button style={{ margin }} onClick={() => loginWithAuthProvider(githubProvider)}>
+                    GitHubアカウントでログイン
                 </Button>
                 <Button
+                    style={{ margin }}
                     onClick={() =>
                         phoneProvider == null ? undefined : loginWithAuthProvider(phoneProvider)
                     }
                 >
-                    電話認証
+                    電話認証でログイン
                 </Button>
                 <Tooltip title='アカウントを作成せずに匿名でログインします。匿名ユーザーのデータは消失しやすいため、あくまでお試しとして使うことを推奨します。非匿名アカウントに後からアップグレードすることもできます。'>
                     <Button
+                        style={{ margin }}
                         onClick={() => {
                             signInAnonymously(auth)
                                 .then(result => {
@@ -329,7 +334,7 @@ export const SignIn: React.FC = () => {
                                 });
                         }}
                     >
-                        匿名認証
+                        匿名認証でログイン
                     </Button>
                 </Tooltip>
             </>
