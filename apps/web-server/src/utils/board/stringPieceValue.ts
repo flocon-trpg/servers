@@ -1,15 +1,15 @@
 import { StringPieceState } from '@flocon-trpg/core';
 
 export namespace StringPieceValue {
-    export const toKonvaText = (state: StringPieceState, createdByMe: boolean): string => {
+    export const toKonvaText = <T>(
+        state: StringPieceState,
+        createdByMe: boolean,
+        defaultValue: T
+    ): string | T => {
         if (state.isValuePrivate && !createdByMe) {
-            return '?';
+            return defaultValue;
         }
-        const number = state.value?.toString() ?? 'null';
-        if (state.isValuePrivate) {
-            return `(${number})`;
-        }
-        return number;
+        return state.value;
     };
 
     export const stringify = (source: StringPieceState): string => {

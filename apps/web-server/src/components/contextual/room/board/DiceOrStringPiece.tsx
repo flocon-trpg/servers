@@ -33,7 +33,7 @@ type StringPieceContentProps = {
 } & Size;
 
 const StringPieceContent: React.FC<StringPieceContentProps> = (props: StringPieceContentProps) => {
-    const text = StringPieceValue.toKonvaText(props.state, props.createdByMe);
+    const text = StringPieceValue.toKonvaText(props.state, props.createdByMe, undefined);
 
     const prevText = usePrevious(text);
 
@@ -49,17 +49,15 @@ const StringPieceContent: React.FC<StringPieceContentProps> = (props: StringPiec
             from: {
                 scaleX: 1,
                 x: 0,
-                fill: prevText === '?' || text === '?' ? baseColor : transitionColor,
+                fill: prevText == null || text == null ? baseColor : transitionColor,
             },
             to: async (next, cancel) => {
-                if (prevText === '?' || text === '?') {
+                if (prevText == null || text == null) {
                     await next({
                         scaleX: 0,
                         x: props.w / 2,
                         fill: baseColor,
                     });
-                } else {
-                    await next({});
                 }
                 await next({
                     scaleX: 1,
@@ -76,23 +74,22 @@ const StringPieceContent: React.FC<StringPieceContentProps> = (props: StringPiec
                 duration,
             },
             from: {
-                text: prevText === '?' || text === '?' ? prevText : text,
                 scaleX: 1,
                 x: 0,
+                opacity: 0,
             },
             to: async (next, cancel) => {
-                if (prevText === '?' || text === '?') {
+                if (prevText == null || text == null) {
                     await next({
                         scaleX: 0,
                         x: props.w / 2,
+                        opacity: 0.5,
                     });
-                } else {
-                    await next({});
                 }
                 await next({
-                    text,
                     scaleX: 1,
                     x: 0,
+                    opacity: 1,
                 });
             },
         }),
@@ -113,6 +110,7 @@ const StringPieceContent: React.FC<StringPieceContentProps> = (props: StringPiec
             {/* fontSizeの決め方は適当 */}
             <animated.Text
                 {...textSpringProps}
+                text={text ?? '?'}
                 y={0}
                 width={props.w}
                 height={props.h}
