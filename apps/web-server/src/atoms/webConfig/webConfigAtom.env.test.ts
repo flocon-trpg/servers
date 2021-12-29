@@ -45,7 +45,7 @@ describe('webConfigAtom (process.env exists)', () => {
 
         expect(webConfigAtomResult.current[0]?.value?.http).toEqual(envFile[NEXT_PUBLIC_API_HTTP]);
         expect(webConfigAtomResult.current[0]?.value?.ws).toEqual(envFile[NEXT_PUBLIC_API_WS]);
-        expect(webConfigAtomResult.current[0]?.value?.authProviders.sort()).toEqual(
+        expect(webConfigAtomResult.current[0]?.value?.authProviders?.sort()).toEqual(
             [email, google].sort()
         );
         expect(webConfigAtomResult.current[0]?.value?.firebaseConfig).toEqual(
@@ -64,7 +64,7 @@ describe('webConfigAtom (process.env exists)', () => {
 
         expect(webConfigAtomResult.current[0]?.value?.http).toEqual(envFile[NEXT_PUBLIC_API_HTTP]);
         expect(webConfigAtomResult.current[0]?.value?.ws).toEqual(envFile[NEXT_PUBLIC_API_WS]);
-        expect(webConfigAtomResult.current[0]?.value?.authProviders.sort()).toEqual(
+        expect(webConfigAtomResult.current[0]?.value?.authProviders?.sort()).toEqual(
             [email, google].sort()
         );
         expect(webConfigAtomResult.current[0]?.value?.firebaseConfig).toEqual(

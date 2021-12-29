@@ -16,16 +16,7 @@ import {
     linkWithPopup,
     fetchSignInMethodsForEmail,
 } from 'firebase/auth';
-import {
-    anonymous,
-    email,
-    facebook,
-    github,
-    google,
-    NEXT_PUBLIC_AUTH_PROVIDERS,
-    phone,
-    twitter,
-} from '../../env';
+import { anonymous, email, facebook, github, google, phone, twitter } from '../../env';
 import { useWebConfig } from '../../hooks/useWebConfig';
 import { Alert, Button, Form, Input, Tooltip } from 'antd';
 import { Center } from '../ui/Center';
@@ -260,7 +251,7 @@ export const SignIn: React.FC = () => {
     const setError = useUpdateAtom(errorAtom);
     const auth = useAtomValue(firebaseAuthAtom);
     const [emailMode, setEmailMode] = useAtom(emailModeAtom);
-    let authError: Error | string | undefined = useAtomValue(errorAtom);
+    const authError = useAtomValue(errorAtom);
 
     const googleProvider = React.useMemo(() => new GoogleAuthProvider(), []);
     const facebookProvider = React.useMemo(() => new FacebookAuthProvider(), []);
@@ -273,16 +264,18 @@ export const SignIn: React.FC = () => {
 
     const loginWithAuthProvider = useLoginWithAuthProvider();
 
+    const areProvidersEmptyValue = React.useMemo(() => {
+        const authProviders = config?.value?.authProviders ?? [];
+        return areProvidersEmpty(authProviders);
+    }, [config?.value?.authProviders]);
+    const authProviders = config?.value?.authProviders ?? [];
+
     if (config?.isError === true) {
         return <div>{config.error}</div>;
     }
 
     if (config?.value === undefined || auth == null) {
         return <div>Firebase のサービスを準備しています…</div>;
-    }
-
-    if (areProvidersEmpty(config.value.authProviders)) {
-        authError = `エラー: config 内の ${NEXT_PUBLIC_AUTH_PROVIDERS} でログインプロバイダが1つも指定されていないため、ログインできません。この問題を解決するには、サーバー管理者に問い合わせてください。`;
     }
 
     let authUI: JSX.Element;
@@ -308,53 +301,79 @@ export const SignIn: React.FC = () => {
                 >
                     {'< トップページに戻る'}
                 </a>
-                <Button style={{ margin }} onClick={() => setEmailMode(true)}>
-                    メールアドレス・パスワードでログイン
-                </Button>
-                <Button style={{ margin }} onClick={() => loginWithAuthProvider(googleProvider)}>
-                    Googleアカウントでログイン
-                </Button>
-                <Button style={{ margin }} onClick={() => loginWithAuthProvider(twitterProvider)}>
-                    Twitterアカウントでログイン
-                </Button>
-                <Button style={{ margin }} onClick={() => loginWithAuthProvider(facebookProvider)}>
-                    Facebookアカウントでログイン
-                </Button>
-                <Button style={{ margin }} onClick={() => loginWithAuthProvider(githubProvider)}>
-                    GitHubアカウントでログイン
-                </Button>
-                <Button
-                    style={{ margin }}
-                    onClick={() =>
-                        phoneProvider == null ? undefined : loginWithAuthProvider(phoneProvider)
-                    }
-                >
-                    電話認証でログイン
-                </Button>
-                <Tooltip title='アカウントを作成せずに匿名でログインします。匿名ユーザーのデータは消失しやすいため、あくまでお試しとして使うことを推奨します。非匿名アカウントに後からアップグレードすることもできます。'>
+                {(areProvidersEmptyValue || authProviders.includes(email)) && (
+                    <Button style={{ margin }} onClick={() => setEmailMode(true)}>
+                        メールアドレス・パスワードでログイン
+                    </Button>
+                )}
+                {(areProvidersEmptyValue || authProviders.includes(google)) && (
                     <Button
                         style={{ margin }}
-                        onClick={() => {
-                            signInAnonymously(auth)
-                                .then(result => {
-                                    updateProfile(result.user, { displayName, photoURL: null });
-                                    setError(undefined);
-                                    router.push('/');
-                                })
-                                .catch((error: Error) => {
-                                    if (error.code === 'auth/admin-restricted-operation') {
-                                        setError(
-                                            '匿名認証は有効化されていないため、利用できません。'
-                                        );
-                                        return;
-                                    }
-                                    setError(error);
-                                });
-                        }}
+                        onClick={() => loginWithAuthProvider(googleProvider)}
                     >
-                        匿名認証でログイン
+                        Googleアカウントでログイン
                     </Button>
-                </Tooltip>
+                )}
+                {(areProvidersEmptyValue || authProviders.includes(twitter)) && (
+                    <Button
+                        style={{ margin }}
+                        onClick={() => loginWithAuthProvider(twitterProvider)}
+                    >
+                        Twitterアカウントでログイン
+                    </Button>
+                )}
+                {(areProvidersEmptyValue || authProviders.includes(facebook)) && (
+                    <Button
+                        style={{ margin }}
+                        onClick={() => loginWithAuthProvider(facebookProvider)}
+                    >
+                        Facebookアカウントでログイン
+                    </Button>
+                )}
+                {(areProvidersEmptyValue || authProviders.includes(github)) && (
+                    <Button
+                        style={{ margin }}
+                        onClick={() => loginWithAuthProvider(githubProvider)}
+                    >
+                        GitHubアカウントでログイン
+                    </Button>
+                )}
+                {(areProvidersEmptyValue || authProviders.includes(phone)) && (
+                    <Button
+                        style={{ margin }}
+                        onClick={() =>
+                            phoneProvider == null ? undefined : loginWithAuthProvider(phoneProvider)
+                        }
+                    >
+                        電話認証でログイン
+                    </Button>
+                )}
+                {(areProvidersEmptyValue || authProviders.includes(anonymous)) && (
+                    <Tooltip title='アカウントを作成せずに匿名でログインします。匿名ユーザーのデータは消失しやすいため、あくまでお試しとして使うことを推奨します。非匿名アカウントに後からアップグレードすることもできます。'>
+                        <Button
+                            style={{ margin }}
+                            onClick={() => {
+                                signInAnonymously(auth)
+                                    .then(result => {
+                                        updateProfile(result.user, { displayName, photoURL: null });
+                                        setError(undefined);
+                                        router.push('/');
+                                    })
+                                    .catch((error: Error) => {
+                                        if (error.code === 'auth/admin-restricted-operation') {
+                                            setError(
+                                                '匿名認証は有効化されていないため、利用できません。'
+                                            );
+                                            return;
+                                        }
+                                        setError(error);
+                                    });
+                            }}
+                        >
+                            匿名認証でログイン
+                        </Button>
+                    </Tooltip>
+                )}
             </>
         );
     }

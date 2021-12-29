@@ -156,9 +156,6 @@ export const webConfigAtom = atom<Result<WebConfig> | null>(get => {
     if (mergedEnv.firebaseConfig == null) {
         return Result.error(`${NEXT_PUBLIC_FIREBASE_CONFIG} の値が見つかりませんでした。`);
     }
-    if (mergedEnv.authProviders == null) {
-        return Result.error(`${NEXT_PUBLIC_AUTH_PROVIDERS} の値が見つかりませんでした。`);
-    }
     const result: WebConfig = {
         authProviders: mergedEnv.authProviders,
         firebaseConfig: mergedEnv.firebaseConfig,
