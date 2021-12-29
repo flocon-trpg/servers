@@ -26,7 +26,7 @@ import { useMyUserUid } from '../../../../hooks/useMyUserUid';
 import { FilePath, FileSourceType } from '@flocon-trpg/typed-document-node';
 import { ImagePiece } from './ImagePiece';
 import { DragEndResult, Vector2 } from '../../../../utils/types';
-import { DiceOrNumberPiece } from './DiceOrNumberPiece';
+import { DiceOrStringPiece } from './DiceOrStringPiece';
 import { useTransition, animated } from '@react-spring/konva';
 import { useCharacterPieces } from '../../../../hooks/state/useCharacterPieces';
 import { usePortraitPieces } from '../../../../hooks/state/usePortraitPieces';
@@ -65,6 +65,7 @@ import { boardEditorModalAtom } from './BoardEditorModal';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
 import { importBoardModalVisibilityAtom } from './ImportBoardModal';
 import { BoardType } from '../../../../utils/board/boardType';
+import { useIsMyCharacter } from '../../../../hooks/state/useIsMyCharacter';
 
 const setDragEndResultToPieceState = ({
     e,
@@ -220,6 +221,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const setRoomState = useSetRoomStateWithImmer();
     const publicMessages = useFilteredRoomMessages({ filter: publicMessageFilter });
     const myUserUid = useMyUserUid();
+    const isMyCharacter = useIsMyCharacter();
 
     /*
         TransitionにHTMLImageElementを含めないと、フェードアウトが発生しない模様（おそらくフェードアウト時には画像が捨てられているため）。そのため含めている。
@@ -504,12 +506,12 @@ const BoardCore: React.FC<BoardCoreProps> = ({
 
         const dicePieceElements = [...(dicePieces ?? [])].map(([pieceId, piece]) => {
             return (
-                <DiceOrNumberPiece
+                <DiceOrStringPiece
                     {...Piece.getPosition({ ...board, state: piece })}
                     key={pieceId}
                     opacity={1}
                     state={{ type: dicePiece, state: piece }}
-                    createdByMe={piece.ownerCharacterId === myUserUid}
+                    createdByMe={isMyCharacter(piece.ownerCharacterId)}
                     draggable={!piece.isPositionLocked}
                     resizable={!piece.isPositionLocked}
                     listening
@@ -550,14 +552,14 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             );
         });
 
-        const numberPieceElements = [...(numberPieces ?? [])].map(([pieceId, piece]) => {
+        const stringPieceElements = [...(numberPieces ?? [])].map(([pieceId, piece]) => {
             return (
-                <DiceOrNumberPiece
+                <DiceOrStringPiece
                     {...Piece.getPosition({ ...board, state: piece })}
                     key={pieceId}
                     opacity={1}
                     state={{ type: 'stringPiece', state: piece }}
-                    createdByMe={piece.ownerCharacterId === myUserUid}
+                    createdByMe={isMyCharacter(piece.ownerCharacterId)}
                     draggable={!piece.isPositionLocked}
                     resizable={!piece.isPositionLocked}
                     listening
@@ -606,7 +608,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     {characterPieceElements}
                     {imagePieceElements}
                     {dicePieceElements}
-                    {numberPieceElements}
+                    {stringPieceElements}
                 </ReactKonva.Layer>
             </AllContextProvider>
         );

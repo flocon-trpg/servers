@@ -6,7 +6,7 @@ import { firebaseConfig, FirebaseConfig } from '@flocon-trpg/core';
 import { parseEnvListValue, isTruthyStringOrNullish } from '@flocon-trpg/utils';
 import * as E from 'fp-ts/Either';
 import { formatValidationErrors } from '../../utils/io-ts/io-ts-reporters';
-import { NEXT_PUBLIC_AUTH_PROVIDERS, NEXT_PUBLIC_FIREBASE_CONFIG } from '../../env';
+import { NEXT_PUBLIC_FIREBASE_CONFIG } from '../../env';
 import { FetchTextState } from '../../utils/types';
 
 type Env = {
@@ -155,9 +155,6 @@ export const webConfigAtom = atom<Result<WebConfig> | null>(get => {
     const mergedEnv: Env = mergeEnv(envs.value);
     if (mergedEnv.firebaseConfig == null) {
         return Result.error(`${NEXT_PUBLIC_FIREBASE_CONFIG} の値が見つかりませんでした。`);
-    }
-    if (mergedEnv.authProviders == null) {
-        return Result.error(`${NEXT_PUBLIC_AUTH_PROVIDERS} の値が見つかりませんでした。`);
     }
     const result: WebConfig = {
         authProviders: mergedEnv.authProviders,

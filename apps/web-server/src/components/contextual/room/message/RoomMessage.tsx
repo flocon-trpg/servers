@@ -147,7 +147,7 @@ export namespace RoomMessage {
                                         </div>
                                     }
                                 >
-                                    {`数値コマ(${key})が新規作成されました`}
+                                    {`文字列コマ(${key})が新規作成されました`}
                                 </Tooltip>
                             </div>
                         );
@@ -162,7 +162,7 @@ export namespace RoomMessage {
                                         </div>
                                     }
                                 >
-                                    {`数値コマ(${key})が削除されました`}
+                                    {`文字列コマ(${key})が削除されました`}
                                 </Tooltip>
                             </div>
                         );
@@ -187,7 +187,7 @@ export namespace RoomMessage {
                                     </div>
                                 }
                             >
-                                {`数値コマ(${key})において次の変更がありました: ${changed}`}
+                                {`文字列コマ(${key})において次の変更がありました: ${changed}`}
                             </Tooltip>
                         </div>
                     );

@@ -36,7 +36,7 @@ export const PublicMessageChannelSelector: React.FC<Props> = ({
             <Select
                 style={{ flex: 1, maxWidth: inputMaxWidth }}
                 value={selectedPublicChannelKey}
-                onSelect={newValue =>
+                onChange={newValue =>
                     onConfigUpdate(draft => {
                         draft.selectedPublicChannelKey = newValue;
                     })

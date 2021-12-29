@@ -269,7 +269,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                                         </Button>
                                         {isAnonymous && (
                                             <Button key='2' onClick={() => router.push('/signin')}>
-                                                非匿名アカウントにアップグレードする
+                                                非匿名アカウントに変換する
                                             </Button>
                                         )}
                                         <Button key='3' onClick={() => signOut()}>

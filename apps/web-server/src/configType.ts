@@ -4,7 +4,7 @@ export type WebConfig = {
     firebaseConfig: FirebaseConfig;
     http?: string;
     ws?: string;
-    authProviders: string[];
+    authProviders?: string[];
     isUnlistedFirebaseStorageEnabled: boolean;
 
     // 現状、常にfalseがセットされる

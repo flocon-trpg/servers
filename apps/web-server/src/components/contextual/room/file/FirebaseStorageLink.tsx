@@ -1,12 +1,13 @@
+import { StorageReference, ref, getDownloadURL } from 'firebase/storage';
+import { useAtomValue } from 'jotai/utils';
 import React from 'react';
 import { FirebaseStorageUrlCacheContext } from '../../../../contexts/FirebaseStorageUrlCacheContext';
 import { useReadonlyRef } from '../../../../hooks/useReadonlyRef';
-import { useWebConfig } from '../../../../hooks/useWebConfig';
+import { firebaseStorageAtom } from '../../../../pages/_app';
 import { fileName } from '../../../../utils/filename';
-import { getStorageForce } from '../../../../utils/firebaseHelpers';
 
 type Props = {
-    reference: firebase.default.storage.Reference | string;
+    reference: StorageReference | string;
 };
 
 export const FirebaseStorageLink: React.FC<Props> = ({ reference }: Props) => {
@@ -16,33 +17,33 @@ export const FirebaseStorageLink: React.FC<Props> = ({ reference }: Props) => {
     const [fullPath, setFullPath] = React.useState<string>(
         typeof reference === 'string' ? '' : reference.fullPath
     );
-    const config = useWebConfig();
+    const storage = useAtomValue(firebaseStorageAtom);
 
     React.useEffect(() => {
-        if (config?.value == null) {
+        if (storage == null) {
             return;
         }
 
         let unsubscribed = false;
 
-        const ref = (() => {
+        const storageRef = (() => {
             if (typeof reference === 'string') {
-                return getStorageForce(config.value).ref(reference);
+                return ref(storage, reference);
             }
             return reference;
         })();
-        setFullPath(ref.fullPath);
-        const cachedUrl = cacheRef.current?.get(ref.fullPath);
+        setFullPath(storageRef.fullPath);
+        const cachedUrl = cacheRef.current?.get(storageRef.fullPath);
         if (cachedUrl != null) {
             setUrl(cachedUrl);
             return;
         }
-        ref.getDownloadURL().then(url => {
+        getDownloadURL(storageRef).then(url => {
             if (unsubscribed) {
                 return;
             }
             if (typeof url === 'string') {
-                cacheRef.current?.set(ref.fullPath, url, 1000 * 60 * 10);
+                cacheRef.current?.set(storageRef.fullPath, url, 1000 * 60 * 10);
                 setUrl(url);
             }
         });
@@ -50,7 +51,7 @@ export const FirebaseStorageLink: React.FC<Props> = ({ reference }: Props) => {
         return () => {
             unsubscribed = true;
         };
-    }, [reference, config, cacheRef]);
+    }, [reference, cacheRef, storage]);
 
     if (url == null) {
         return <span>{fileName(fullPath)}</span>;

@@ -28,9 +28,9 @@ import { useMyUserUid } from '../../../../hooks/useMyUserUid';
 import { BufferedTextArea } from '../../../ui/BufferedTextArea';
 import { FilePath } from '../../../../utils/file/filePath';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
-import { atom, useAtom } from 'jotai';
+import { atom } from 'jotai';
 import { create, update } from '../../../../utils/constants';
-import { useUpdateAtom } from 'jotai/utils';
+import { useAtomValue, useUpdateAtom } from 'jotai/utils';
 import { commandEditorModalAtom } from '../../../../atoms/overlay/commandEditorModalAtom';
 import { useIsMyCharacter } from '../../../../hooks/state/useIsMyCharacter';
 import { CharacterVarInput } from './CharacterVarInput';
@@ -48,16 +48,56 @@ import { OverriddenParameterNameEditor } from './OverriddenParameterNameEditor';
 import { CharacterTagsSelect } from './CharacterTagsSelect';
 import { CopyToClipboardButton } from '../../../ui/CopyToClipboardButton';
 
-export type CharacterEditorModalType =
+type CharacterEditorModalState =
     | {
           type: typeof create;
       }
     | {
           type: typeof update;
           stateId: string;
+
+          // BufferedInputの変更内容が保存されていない状態でModalを閉じてもその変更が反映されるように、updateモードのModalが閉じられたときはPieceValueEditorStateをnullにするのではなくclosedをfalseに切り替えるようにしている。
+          closed: boolean;
       };
 
-export const characterEditorModalAtom = atom<CharacterEditorModalType | null>(null);
+export type CharacterEditorModalAction =
+    | {
+          type: typeof create;
+      }
+    | {
+          type: typeof update;
+          stateId: string;
+      }
+    | null;
+
+const characterEditorModalPrimitiveAtom = atom<CharacterEditorModalState | null>(null);
+export const characterEditorModalAtom = atom<
+    CharacterEditorModalState | null,
+    CharacterEditorModalAction
+>(
+    get => get(characterEditorModalPrimitiveAtom),
+    (get, set, newValue) => {
+        switch (newValue?.type) {
+            case create:
+                set(characterEditorModalPrimitiveAtom, newValue);
+                break;
+            case update:
+                set(characterEditorModalPrimitiveAtom, {
+                    ...newValue,
+                    closed: false,
+                });
+                break;
+            case undefined: {
+                const prevValue = get(characterEditorModalPrimitiveAtom);
+                if (prevValue?.type === update) {
+                    set(characterEditorModalPrimitiveAtom, { ...prevValue, closed: true });
+                    return;
+                }
+                set(characterEditorModalPrimitiveAtom, newValue);
+            }
+        }
+    }
+);
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 type RowProps = {
@@ -114,7 +154,8 @@ const defaultCharacter: CharacterState = {
 
 export const CharacterEditorModal: React.FC = () => {
     const myUserUid = useMyUserUid();
-    const [atomValue, setAtomValue] = useAtom(characterEditorModalAtom);
+    const atomValue = useAtomValue(characterEditorModalPrimitiveAtom);
+    const setAtomValue = useUpdateAtom(characterEditorModalAtom);
     const setCommandEditorModal = useUpdateAtom(commandEditorModalAtom);
     const setRoomState = useSetRoomStateWithImmer();
     const isMyCharacter = useIsMyCharacter();
@@ -198,11 +239,24 @@ export const CharacterEditorModal: React.FC = () => {
         };
     }
 
+    let visible: boolean;
+    switch (atomValue?.type) {
+        case undefined:
+            visible = false;
+            break;
+        case update:
+            visible = !atomValue.closed;
+            break;
+        case create:
+            visible = true;
+            break;
+    }
+
     return (
         <Modal
             width={1000}
             title={atomValue?.type === create ? 'キャラクターの新規作成' : 'キャラクターの編集'}
-            visible={atomValue != null}
+            visible={visible}
             closable
             onCancel={() => setAtomValue(null)}
             footer={
@@ -558,14 +612,14 @@ export const CharacterEditorModal: React.FC = () => {
                             value={character.memo}
                             rows={10}
                             disableResize
-                            onChange={e =>
+                            onChange={e => {
                                 updateCharacter(character => {
                                     if (character == null) {
                                         return;
                                     }
                                     character.memo = e.currentValue;
-                                })
-                            }
+                                });
+                            }}
                         />
 
                         {createdByMe && (

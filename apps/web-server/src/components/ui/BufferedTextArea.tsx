@@ -1,7 +1,6 @@
 import classNames from 'classnames';
 import React from 'react';
 import { useBuffer } from '../../hooks/useBuffer';
-import * as Icons from '@ant-design/icons';
 import { useReadonlyRef } from '../../hooks/useReadonlyRef';
 import { flex, flex1, flexColumn } from '../../utils/className';
 
@@ -53,10 +52,7 @@ export const BufferedTextArea: React.FC<Props> = (props: Props) => {
     } = props;
     const createBottomElement = (params: BottomElementParams): JSX.Element | null => {
         if (createBottomElementCore == null) {
-            if (params.isSkipping) {
-                return <Icons.EditOutlined />;
-            }
-            return <Icons.CheckOutlined />;
+            return null;
         }
         return createBottomElementCore(params);
     };

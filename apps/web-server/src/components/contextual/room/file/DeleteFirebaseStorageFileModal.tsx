@@ -5,6 +5,7 @@ import { Reference } from '../../../../atoms/firebaseStorage/fileState';
 import { reloadPublicFilesKeyAtom } from '../../../../atoms/firebaseStorage/reloadPublicFilesKeyAtom';
 import { reloadUnlistedFilesKeyAtom } from '../../../../atoms/firebaseStorage/reloadUnlistedFilesKeyAtom';
 import { $public, StorageType, unlisted } from '../../../../utils/file/firebaseStorage';
+import { deleteObject } from 'firebase/storage';
 
 export const useDeleteFirebaseStorageFileModalActions = () => {
     const setReloadUnlistedFilesKey = useUpdateAtom(reloadUnlistedFilesKeyAtom);
@@ -30,7 +31,7 @@ export const DeleteFirebaseStorageFileModal = (
             : `${referenceArray.length}個のファイル`;
     const deleteFiles = async () => {
         for (const r of referenceArray) {
-            await r.delete();
+            await deleteObject(r);
         }
         switch (storageType) {
             case $public:

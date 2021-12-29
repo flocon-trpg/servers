@@ -241,7 +241,7 @@ export const CommandEditorModal: React.FC = () => {
                 <div className={classNames(flex, flexRow)}>
                     <Select
                         value={selectedKey}
-                        onSelect={x => setSelectedKeyState(x)}
+                        onChange={x => setSelectedKeyState(x)}
                         style={{ minWidth: 100 }}
                     >
                         {options()}

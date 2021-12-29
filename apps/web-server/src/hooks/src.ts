@@ -6,6 +6,8 @@ import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCa
 import { FilePathFragment } from '@flocon-trpg/typed-document-node';
 import { FilePath as FilePathModule } from '../utils/file/filePath';
 import { useWebConfig } from './useWebConfig';
+import { useAtomValue } from 'jotai/utils';
+import { firebaseStorageAtom } from '../pages/_app';
 
 export const done = 'done';
 export const success = 'success';
@@ -34,6 +36,7 @@ export function useSrcArrayFromGraphQL(
     pathArray: ReadonlyArray<FilePathFragment | FilePath> | null | undefined
 ): SrcArrayResult {
     const config = useWebConfig();
+    const storage = useAtomValue(firebaseStorageAtom);
     const [result, setResult] = React.useState<SrcArrayResult>({ type: loading });
     const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
     const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);
@@ -45,7 +48,7 @@ export function useSrcArrayFromGraphQL(
     }));
 
     useDeepCompareEffect(() => {
-        if (getIdToken == null || config == null) {
+        if (getIdToken == null || config == null || storage == null) {
             setResult({ type: loading });
             return;
         }
@@ -69,6 +72,7 @@ export function useSrcArrayFromGraphQL(
                 return FilePathModule.getSrc(
                     path,
                     config.value,
+                    storage,
                     idToken,
                     firebaseStorageUrlCacheContext
                 );
@@ -91,7 +95,7 @@ export function useSrcArrayFromGraphQL(
         return () => {
             isDisposed = true;
         };
-    }, [cleanPathArray, getIdToken]);
+    }, [cleanPathArray, config, storage, getIdToken]);
 
     return result;
 }

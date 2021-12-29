@@ -33,7 +33,7 @@ type StringPieceContentProps = {
 } & Size;
 
 const StringPieceContent: React.FC<StringPieceContentProps> = (props: StringPieceContentProps) => {
-    const text = StringPieceValue.toKonvaText(props.state, props.createdByMe);
+    const text = StringPieceValue.toKonvaText(props.state, props.createdByMe, undefined);
 
     const prevText = usePrevious(text);
 
@@ -49,17 +49,15 @@ const StringPieceContent: React.FC<StringPieceContentProps> = (props: StringPiec
             from: {
                 scaleX: 1,
                 x: 0,
-                fill: prevText === '?' || text === '?' ? baseColor : transitionColor,
+                fill: prevText == null || text == null ? baseColor : transitionColor,
             },
             to: async (next, cancel) => {
-                if (prevText === '?' || text === '?') {
+                if (prevText == null || text == null) {
                     await next({
                         scaleX: 0,
                         x: props.w / 2,
                         fill: baseColor,
                     });
-                } else {
-                    await next({});
                 }
                 await next({
                     scaleX: 1,
@@ -76,23 +74,22 @@ const StringPieceContent: React.FC<StringPieceContentProps> = (props: StringPiec
                 duration,
             },
             from: {
-                text: prevText === '?' || text === '?' ? prevText : text,
                 scaleX: 1,
                 x: 0,
+                opacity: 0,
             },
             to: async (next, cancel) => {
-                if (prevText === '?' || text === '?') {
+                if (prevText == null || text == null) {
                     await next({
                         scaleX: 0,
                         x: props.w / 2,
+                        opacity: 0.5,
                     });
-                } else {
-                    await next({});
                 }
                 await next({
-                    text,
                     scaleX: 1,
                     x: 0,
+                    opacity: 1,
                 });
             },
         }),
@@ -110,15 +107,16 @@ const StringPieceContent: React.FC<StringPieceContentProps> = (props: StringPiec
                 stroke='#606060B0'
                 cornerRadius={5}
             />
-            {/* fontSizeの決め方は適当 */}
+            {/* TODO: fontSizeの決め方が適当。fontSizeはユーザーが自由に変更できるようにするべき */}
             <animated.Text
                 {...textSpringProps}
+                text={text ?? '?'}
                 y={0}
                 width={props.w}
                 height={props.h}
                 fontSize={props.w / 2.5}
                 fontFamily='Noto Sans JP Regular'
-                fill='black'
+                fill={props.state.isValuePrivate ? 'gray' : 'black'}
                 align='center'
                 verticalAlign='middle'
             />
@@ -327,7 +325,7 @@ type Props = {
 } & PieceGroupProps;
 
 // ImagePieceはCharacterなどと表示方法が近いので、ここでは実装していない
-export const DiceOrNumberPiece: React.FC<Props> = (props: Props) => {
+export const DiceOrStringPiece: React.FC<Props> = (props: Props) => {
     return (
         <PieceGroup {...props}>
             <ValueContent {...props} />

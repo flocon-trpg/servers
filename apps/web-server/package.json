@@ -1,6 +1,6 @@
 {
     "name": "@flocon-trpg/web-server",
-    "version": "0.7.1",
+    "version": "0.7.2",
     "description": "Flocon Web server",
     "dependencies": {
         "@apollo/client": "^3.4.15",
@@ -19,13 +19,12 @@
         "@types/react-color": "^3.0.5",
         "@types/react-linkify": "^1.0.1",
         "@types/url-join": "^4.0.1",
-        "antd": "^4.16.13",
+        "antd": "^4.18.0",
         "axios": "^0.24.0",
         "classnames": "^2.3.1",
         "clipboard-copy": "^4.0.1",
         "envfile": "^6.17.0",
-        "firebase": "^8.9.1",
-        "firebaseui": "^4.8.1",
+        "firebase": "^9.6.0",
         "fp-ts": "^2.11.4",
         "graphql": "^15.6.0",
         "graphql-ws": "^5.5.0",

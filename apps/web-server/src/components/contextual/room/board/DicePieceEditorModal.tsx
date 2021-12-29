@@ -11,13 +11,11 @@ import { InputDie } from './die/InputDie';
 import { noValue } from '../../../../utils/board/dice';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
 import { create, update } from '../../../../utils/constants';
-import { atom, useAtom } from 'jotai';
+import { useAtom } from 'jotai';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
-import { PieceValueEditorType } from '../../../../utils/board/pieceValueEditorType';
 import { BufferedInput } from '../../../ui/BufferedInput';
 import { PiecePositionWithCell } from '../../../../utils/types';
-
-export const dicePieceEditorModalAtom = atom<PieceValueEditorType | null>(null);
+import { dicePieceValueEditorAtom } from '../../../../atoms/pieceValueEditor/pieceValueEditorAtom';
 
 const defaultDicePieceValue = (
     piecePosition: PiecePositionWithCell,
@@ -40,16 +38,16 @@ const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
 export const DicePieceEditorModal: React.FC = () => {
-    const [drawerType, setDrawerType] = useAtom(dicePieceEditorModalAtom);
+    const [modalType, setModalType] = useAtom(dicePieceValueEditorAtom);
     const setRoomState = useSetRoomStateWithImmer();
     const myUserUid = useMyUserUid();
-    const dicePieces = useDicePieces(drawerType?.boardId);
+    const dicePieces = useDicePieces(modalType?.boardId);
     const [activeCharacter, setActiveCharacter] = React.useState<{
         id: string;
         state: CharacterState;
     }>();
     let stateEditorParams: StateEditorParams<DicePieceState | undefined> | undefined;
-    switch (drawerType?.type) {
+    switch (modalType?.type) {
         case undefined:
             stateEditorParams = undefined;
             break;
@@ -58,19 +56,19 @@ export const DicePieceEditorModal: React.FC = () => {
                 type: create,
 
                 // createする際にownerCharacterIdをセットする必要がある
-                initState: defaultDicePieceValue(drawerType.piecePosition, undefined),
+                initState: defaultDicePieceValue(modalType.piecePosition, undefined),
             };
             break;
         case update:
             stateEditorParams = {
                 type: update,
-                state: dicePieces?.get(drawerType.pieceId),
+                state: dicePieces?.get(modalType.pieceId),
                 onUpdate: newState => {
-                    if (myUserUid == null || drawerType?.type !== update) {
+                    if (myUserUid == null || modalType?.type !== update) {
                         return;
                     }
-                    const boardId = drawerType.boardId;
-                    const pieceId = drawerType.pieceId;
+                    const boardId = modalType.boardId;
+                    const pieceId = modalType.pieceId;
                     setRoomState(roomState => {
                         const dicePieces = roomState.boards[boardId]?.dicePieces;
                         if (dicePieces == null) {
@@ -90,35 +88,48 @@ export const DicePieceEditorModal: React.FC = () => {
 
     let onCreate: (() => void) | undefined = undefined;
     // drawerType != nullを付けていることで、updateから閉じる際に一瞬onCreateボタンが出るのを防いでいる。ただし、これで適切なのかどうかは吟味していない
-    if (drawerType != null && drawerType.type === create) {
+    if (modalType != null && modalType.type === create) {
         onCreate = () => {
             if (activeCharacter == null) {
                 return;
             }
             const id = simpleId();
             setRoomState(roomState => {
-                const dicePieces = roomState.boards[drawerType.boardId]?.dicePieces;
+                const dicePieces = roomState.boards[modalType.boardId]?.dicePieces;
                 if (dicePieces == null) {
                     return;
                 }
                 dicePieces[id] = { ...uiState, ownerCharacterId: activeCharacter.id };
             });
-            setDrawerType(null);
+            setModalType(null);
             resetUiState(undefined);
         };
     }
 
+    let visible: boolean;
+    switch (modalType?.type) {
+        case undefined:
+            visible = false;
+            break;
+        case update:
+            visible = !modalType.closed;
+            break;
+        case create:
+            visible = true;
+            break;
+    }
+
     return (
         <Modal
-            title={drawerType?.type === update ? 'ダイスコマの編集' : 'ダイスコマの新規作成'}
-            visible={drawerType != null}
+            title={modalType?.type === update ? 'ダイスコマの編集' : 'ダイスコマの新規作成'}
+            visible={visible}
             closable
-            onCancel={() => setDrawerType(null)}
+            onCancel={() => setModalType(null)}
             footer={
                 <DialogFooter
                     close={{
-                        textType: drawerType?.type === update ? 'close' : 'cancel',
-                        onClick: () => setDrawerType(null),
+                        textType: modalType?.type === update ? 'close' : 'cancel',
+                        onClick: () => setModalType(null),
                     }}
                     ok={onCreate == null ? undefined : { textType: 'create', onClick: onCreate }}
                 />
@@ -129,7 +140,7 @@ export const DicePieceEditorModal: React.FC = () => {
                     <Col flex='auto' />
                     <Col flex={0}>ID</Col>
                     <Col span={inputSpan}>
-                        {drawerType?.type === update ? drawerType.pieceId : '(なし)'}
+                        {modalType?.type === update ? modalType.pieceId : '(なし)'}
                     </Col>
                 </Row>
                 <Row gutter={gutter} align='middle'>
@@ -138,11 +149,11 @@ export const DicePieceEditorModal: React.FC = () => {
                     <Col span={inputSpan}>
                         <MyCharactersSelect
                             selectedCharacterId={
-                                drawerType?.type === update
+                                modalType?.type === update
                                     ? uiState.ownerCharacterId
                                     : activeCharacter?.id
                             }
-                            readOnly={drawerType?.type === update}
+                            readOnly={modalType?.type === update}
                             onSelect={setActiveCharacter}
                         />
                     </Col>
