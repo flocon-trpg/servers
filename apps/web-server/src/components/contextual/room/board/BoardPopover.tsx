@@ -12,7 +12,7 @@ import {
     BoardPositionState,
 } from '@flocon-trpg/core';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
-import { Menu, Tooltip } from 'antd';
+import { Checkbox, Menu, Tooltip } from 'antd';
 import _ from 'lodash';
 import React from 'react';
 import { InputDie } from './die/InputDie';
@@ -51,7 +51,7 @@ import { create } from '../../../../utils/constants';
 import { useCloneImagePiece } from '../../../../hooks/state/useCloneImagePiece';
 import { ImageView } from '../file/ImageView';
 import classNames from 'classnames';
-import { flex, flexRow, itemsCenter } from '../../../../utils/className';
+import { flex, flexColumn, flexRow, itemsCenter } from '../../../../utils/className';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
 import { useIsMyCharacter } from '../../../../hooks/state/useIsMyCharacter';
 import {
@@ -60,8 +60,11 @@ import {
     characterPortrait,
 } from '../piece/BoardPositionAndPieceEditorModal';
 import { characterEditorModalAtom } from '../character/CharacterEditorModal';
-import { dicePieceEditorModalAtom } from './DicePieceEditorModal';
-import { stringPieceEditorModalAtom } from './StringPieceEditorModal';
+import { BufferedInput } from '../../../ui/BufferedInput';
+import {
+    dicePieceValueEditorAtom,
+    stringPieceValueEditorAtom,
+} from '../../../../atoms/pieceValueEditor/pieceValueEditorAtom';
 
 /* absolute positionで表示するときにBoardの子として表示させると、Boardウィンドウから要素がはみ出ることができないため、ウィンドウ右端に近いところで要素を表示させるときに不便なことがある。そのため、ページ全体の子として持たせるようにしている。 */
 
@@ -144,12 +147,12 @@ export const PieceTooltip: React.FC = () => {
 };
 
 namespace PopupEditorBase {
-    type DicePieceProps = {
+    type PieceProps = {
         boardId: string;
         pieceId: string;
     };
 
-    export const DicePiece: React.FC<DicePieceProps> = ({ boardId, pieceId }: DicePieceProps) => {
+    export const DicePiece: React.FC<PieceProps> = ({ boardId, pieceId }: PieceProps) => {
         const setRoomState = useSetRoomStateWithImmer();
 
         const dicePieceValue = useAtomSelector(
@@ -163,7 +166,7 @@ namespace PopupEditorBase {
         const titleWidth = 60;
 
         return (
-            <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+            <div className={classNames(flex, flexColumn)} style={{ width: '100%' }}>
                 {dicePieceStrIndexes.map(key => {
                     const die = dicePieceValue.dice[key];
                     return (
@@ -229,6 +232,52 @@ namespace PopupEditorBase {
             </div>
         );
     };
+
+    export const StringPiece: React.FC<PieceProps> = ({ boardId, pieceId }: PieceProps) => {
+        const setRoomState = useSetRoomStateWithImmer();
+        const stringPieceValue = useAtomSelector(
+            roomAtom,
+            roomState => roomState.roomState?.state?.boards?.[boardId]?.stringPieces?.[pieceId]
+        );
+
+        if (stringPieceValue == null) {
+            return null;
+        }
+
+        return (
+            <div className={classNames(flex, flexColumn)} style={{ width: '100%' }}>
+                <BufferedInput
+                    bufferDuration='default'
+                    value={stringPieceValue.value}
+                    onChange={e =>
+                        setRoomState(roomState => {
+                            const stringPieceValue =
+                                roomState.boards[boardId]?.stringPieces?.[pieceId];
+                            if (stringPieceValue == null) {
+                                return;
+                            }
+                            stringPieceValue.value = e.currentValue;
+                        })
+                    }
+                />
+                <Checkbox
+                    checked={stringPieceValue.isValuePrivate}
+                    onChange={e =>
+                        setRoomState(roomState => {
+                            const stringPieceValue =
+                                roomState.boards[boardId]?.stringPieces?.[pieceId];
+                            if (stringPieceValue == null) {
+                                return;
+                            }
+                            stringPieceValue.isValuePrivate = e.target.checked;
+                        })
+                    }
+                >
+                    値を非公開にする
+                </Checkbox>
+            </div>
+        );
+    };
 }
 
 export const PopoverEditor: React.FC = () => {
@@ -246,6 +295,14 @@ export const PopoverEditor: React.FC = () => {
         case dicePiece:
             children = (
                 <PopupEditorBase.DicePiece
+                    boardId={popoverEditor.dblClickOn.boardId}
+                    pieceId={popoverEditor.dblClickOn.pieceId}
+                />
+            );
+            break;
+        case stringPiece:
+            children = (
+                <PopupEditorBase.StringPiece
                     boardId={popoverEditor.dblClickOn.boardId}
                     pieceId={popoverEditor.dblClickOn.pieceId}
                 />
@@ -293,8 +350,8 @@ const toBoardPosition = ({
 // 1つ1つ個別に渡すコードを書くのが面倒なのでこのように1つにまとめて全て渡している
 const useHooks = () => {
     const setCharacterEditor = useUpdateAtom(characterEditorModalAtom);
-    const setDicePieceEditor = useUpdateAtom(dicePieceEditorModalAtom);
-    const setStringPieceEditor = useUpdateAtom(stringPieceEditorModalAtom);
+    const setDicePieceEditor = useUpdateAtom(dicePieceValueEditorAtom);
+    const setStringPieceEditor = useUpdateAtom(stringPieceValueEditorAtom);
     const setImagePieceDrawer = useUpdateAtom(imagePieceDrawerAtom);
     const setBoardPositionAndPieceEditorModal = useUpdateAtom(boardPositionAndPieceEditorModalAtom);
     const cloneImagePiece = useCloneImagePiece();
@@ -632,7 +689,7 @@ namespace ContextMenuModule {
             return null;
         }
         return (
-            <Menu.ItemGroup title='数値コマ'>
+            <Menu.ItemGroup title='文字列コマ'>
                 {stringPiecesOnCursor.map(({ pieceId, piece, boardId }) => (
                     // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が下にもあるため、キーを互いに異なるものにするように文字列を付加している。
                     <Menu.SubMenu
@@ -918,7 +975,7 @@ namespace ContextMenuModule {
                         セルにスナップしない
                     </Menu.Item>
                 </Menu.SubMenu>
-                <Menu.SubMenu title='数値コマ'>
+                <Menu.SubMenu title='文字列コマ'>
                     <Menu.Item
                         onClick={() => {
                             hooks.setStringPieceEditor({

@@ -53,10 +53,7 @@ export const BufferedTextArea: React.FC<Props> = (props: Props) => {
     } = props;
     const createBottomElement = (params: BottomElementParams): JSX.Element | null => {
         if (createBottomElementCore == null) {
-            if (params.isSkipping) {
-                return <Icons.EditOutlined />;
-            }
-            return <Icons.CheckOutlined />;
+            return null;
         }
         return createBottomElementCore(params);
     };

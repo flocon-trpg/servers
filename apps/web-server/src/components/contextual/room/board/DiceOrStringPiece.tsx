@@ -107,7 +107,7 @@ const StringPieceContent: React.FC<StringPieceContentProps> = (props: StringPiec
                 stroke='#606060B0'
                 cornerRadius={5}
             />
-            {/* fontSizeの決め方は適当 */}
+            {/* TODO: fontSizeの決め方が適当。fontSizeはユーザーが自由に変更できるようにするべき */}
             <animated.Text
                 {...textSpringProps}
                 text={text ?? '?'}

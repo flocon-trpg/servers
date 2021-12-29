@@ -24,14 +24,19 @@ export function useBuffer<TValue, TComponent>({
 
     const ref = React.useRef<TComponent | null>(null);
     const subject = useConstant(() => new Subject<TValue>());
-    const subjectNext: (value: TValue) => void = useConstant(() => {
-        return x => subject.next(x);
+    const latestOnChangeInputValueRef = React.useRef(value);
+    const onChangeInput: (value: TValue) => void = useConstant(() => {
+        return x => {
+            latestOnChangeInputValueRef.current = x;
+            subject.next(x);
+        };
     });
     const [, setSubscription] = React.useState<Subscription>();
     const [changeParams, setChangeParams] = React.useState<{
         previousValue?: TValue;
         currentValue: TValue;
     }>({ currentValue: value });
+    const changeParamsRef = useReadonlyRef(changeParams);
     const [subscriptionUpdateKey, setSubscriptionUpdateKey] = React.useState(0);
 
     React.useEffect(() => {
@@ -72,8 +77,22 @@ export function useBuffer<TValue, TComponent>({
         }
     }, [changeParams, onChangeRef]);
 
+    // unmount時にonChangeを実行させている
+    React.useEffect(() => {
+        const $changeParamsRef = changeParamsRef;
+        const $latestOnChangeInputValueRef = latestOnChangeInputValueRef;
+        const $onChangeRef = onChangeRef;
+        return () => {
+            const previousValue = $changeParamsRef.current.currentValue;
+            const currentValue = $latestOnChangeInputValueRef.current;
+            if (previousValue !== currentValue) {
+                $onChangeRef.current({ previousValue, currentValue });
+            }
+        };
+    }, [changeParamsRef, onChangeRef]);
+
     return {
-        onChangeInput: subjectNext,
+        onChangeInput,
         ref,
     };
 }

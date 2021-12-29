@@ -9,9 +9,11 @@ import { StringPieceValue } from '../../../../utils/board/stringPieceValue';
 import { keyNames } from '@flocon-trpg/utils';
 import { useUpdateAtom } from 'jotai/utils';
 import { useCharacters } from '../../../../hooks/state/useCharacters';
-import { dicePieceEditorModalAtom } from '../board/DicePieceEditorModal';
-import { stringPieceEditorModalAtom } from '../board/StringPieceEditorModal';
 import { DicePieceState, StringPieceState } from '@flocon-trpg/core';
+import {
+    dicePieceValueEditorAtom,
+    stringPieceValueEditorAtom,
+} from '../../../../atoms/pieceValueEditor/pieceValueEditorAtom';
 
 type DataSource =
     | {
@@ -35,8 +37,8 @@ export const PieceList: React.FC<Props> = ({ boardId }: Props) => {
     const characters = useCharacters();
     const dicePieces = useDicePieces(boardId);
     const stringPieces = useStringPieces(boardId);
-    const setDicePieceEditor = useUpdateAtom(dicePieceEditorModalAtom);
-    const setStringPieceEditor = useUpdateAtom(stringPieceEditorModalAtom);
+    const setDicePieceValueEditor = useUpdateAtom(dicePieceValueEditorAtom);
+    const setStringPieceValueEditor = useUpdateAtom(stringPieceValueEditorAtom);
 
     if (dicePieces == null || stringPieces == null) {
         return null;
@@ -55,14 +57,14 @@ export const PieceList: React.FC<Props> = ({ boardId }: Props) => {
                             size='small'
                             onClick={() => {
                                 if (dataSource.type === 'dice') {
-                                    setDicePieceEditor({
+                                    setDicePieceValueEditor({
                                         type: update,
                                         boardId,
                                         pieceId: dataSource.pieceId,
                                     });
                                 }
                                 if (dataSource.type === 'string') {
-                                    setStringPieceEditor({
+                                    setStringPieceValueEditor({
                                         type: update,
                                         boardId,
                                         pieceId: dataSource.pieceId,
@@ -89,7 +91,7 @@ export const PieceList: React.FC<Props> = ({ boardId }: Props) => {
                             textOverflow: 'ellipsis',
                         }}
                     >
-                        {dataSource.type === 'dice' ? 'ダイスコマ' : '数値コマ'}
+                        {dataSource.type === 'dice' ? 'ダイスコマ' : '文字列コマ'}
                     </div>
                 );
             },

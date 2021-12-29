@@ -46,7 +46,7 @@ export const CharacterSelector: React.FC<Props> = ({
             <Select
                 style={{ flex: 1, maxWidth: inputMaxWidth }}
                 value={selectedCharacterType}
-                onSelect={newValue =>
+                onChange={newValue =>
                     onConfigUpdate(draft => {
                         draft.selectedCharacterType = newValue;
                     })

@@ -270,7 +270,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                                 style={{ minWidth: 150 }}
                                 size='small'
                                 value={addNumParamSelector}
-                                onSelect={newValue => {
+                                onChange={newValue => {
                                     setAddNumParamSelector(newValue);
                                 }}
                                 onDeselect={() => {
@@ -322,7 +322,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                                 style={{ minWidth: 150 }}
                                 size='small'
                                 value={addBoolParamSelector}
-                                onSelect={newValue => {
+                                onChange={newValue => {
                                     setAddBoolParamSelector(newValue);
                                 }}
                                 onDeselect={() => {
@@ -374,7 +374,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                                 style={{ minWidth: 150 }}
                                 size='small'
                                 value={addStrParamSelector}
-                                onSelect={newValue => {
+                                onChange={newValue => {
                                     setAddStrParamSelector(newValue);
                                 }}
                                 onDeselect={() => {
