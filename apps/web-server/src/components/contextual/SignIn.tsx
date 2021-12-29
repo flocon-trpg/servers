@@ -86,6 +86,13 @@ const Email: React.FC = () => {
     const [email, setEmail] = React.useState('');
     const [password, setPassword] = React.useState('');
     const auth = useAtomValue(firebaseAuthAtom);
+    const onSuccess = React.useCallback(() => {
+        setError(undefined);
+        setEmail('');
+        setPassword('');
+        setEmailMode(false);
+        router.push('/');
+    }, [router, setEmailMode, setError]);
 
     if (auth == null) {
         return null;
@@ -122,12 +129,16 @@ const Email: React.FC = () => {
                                     return;
                                 }
                                 const credential = EmailAuthProvider.credential(email, password);
+                                setIsSubmitting(true);
                                 await linkWithCredential(auth.currentUser, credential)
                                     .then(() => {
-                                        setError(undefined);
-                                        router.push('/');
+                                        onSuccess();
                                     })
-                                    .catch((err: Error) => setError(err));
+                                    .catch((err: Error) => setError(err))
+                                    .finally(() => {
+                                        setPassword('');
+                                        setIsSubmitting(false);
+                                    });
                             }}
                         >
                             非匿名アカウントに変換
@@ -146,11 +157,13 @@ const Email: React.FC = () => {
                                                 displayName,
                                                 photoURL: null,
                                             });
-                                            setError(undefined);
-                                            router.push('/');
+                                            onSuccess();
                                         })
                                         .catch((err: Error) => setError(err))
-                                        .finally(() => setIsSubmitting(false));
+                                        .finally(() => {
+                                            setPassword('');
+                                            setIsSubmitting(false);
+                                        });
                                 }}
                             >
                                 アカウント作成
@@ -160,54 +173,58 @@ const Email: React.FC = () => {
                                 onClick={async () => {
                                     setIsSubmitting(true);
 
-                                    const signInMethods = await fetchSignInMethodsForEmail(
-                                        auth,
-                                        email
-                                    ).catch((err: Error) => {
-                                        console.error('fetchSignInMethodsForEmail', err);
-                                        return null;
-                                    });
+                                    const main = async () => {
+                                        const signInMethods = await fetchSignInMethodsForEmail(
+                                            auth,
+                                            email
+                                        ).catch((err: Error) => {
+                                            console.error('fetchSignInMethodsForEmail', err);
+                                            return null;
+                                        });
 
-                                    await signInWithEmailAndPassword(auth, email, password)
-                                        .then(() => {
-                                            setError(undefined);
-                                            router.push('/');
-                                        })
-                                        .catch(async (err: Error) => {
-                                            setIsSubmitting(false);
-                                            setError(err);
+                                        await signInWithEmailAndPassword(auth, email, password)
+                                            .then(() => {
+                                                onSuccess();
+                                            })
+                                            .catch(async (err: Error) => {
+                                                setError(err);
 
-                                            if (signInMethods == null) {
-                                                return;
-                                            }
-
-                                            // とあるメールアドレスxがあるとする。以下の手順を踏んだ際、xを用いてsignInWithEmailAndPasswordを実行してもauth/wrong-passwordが常に返されてログインできなくなる。https://github.com/firebase/firebaseui-web/issues/122
-                                            // 1. メールアドレス・パスワード方式でxのアカウントを作成
-                                            // 2. xをverifyしない（Floconでは現時点ではverifyする手段はないため、2の条件は常に満たされる）
-                                            // 3. xを用いてGoogleアカウントでログイン
-                                            // もし2でverifyしていればxはメールアドレス・パスワードとGoogleアカウントの2つがリンクされたアカウントとなるが、verifyしない場合は3の時点でGoogleアカウントのみがリンクされた状態になる。
-                                            // firebaseuiはこの場合に自動的にGoogleアカウントでログインするのでユーザーフレンドリーである。そのためFloconでもなるべく再現するようにしている。
-                                            if (
-                                                signInMethods.every(
-                                                    method =>
-                                                        method !==
-                                                        EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD
-                                                )
-                                            ) {
-                                                if (
-                                                    signInMethods.includes(
-                                                        GoogleAuthProvider.GOOGLE_SIGN_IN_METHOD
-                                                    )
-                                                ) {
-                                                    setError(
-                                                        '指定されたメールアドレスは「メールアドレス・パスワード」でログインすることはできません。代わりに「Googleアカウント」でログインしてください。'
-                                                    );
-                                                    setEmailMode(false);
+                                                if (signInMethods == null) {
                                                     return;
                                                 }
-                                            }
-                                        })
-                                        .finally(() => setIsSubmitting(false));
+
+                                                // とあるメールアドレスxがあるとする。以下の手順を踏んだ際、xを用いてsignInWithEmailAndPasswordを実行してもauth/wrong-passwordが常に返されてログインできなくなる。https://github.com/firebase/firebaseui-web/issues/122
+                                                // 1. メールアドレス・パスワード方式でxのアカウントを作成
+                                                // 2. xをverifyしない（Floconでは現時点ではverifyする手段はないため、2の条件は常に満たされる）
+                                                // 3. xを用いてGoogleアカウントでログイン
+                                                // もし2でverifyしていればxはメールアドレス・パスワードとGoogleアカウントの2つがリンクされたアカウントとなるが、verifyしない場合は3の時点でGoogleアカウントのみがリンクされた状態になる。
+                                                // firebaseuiはこの場合に自動的にGoogleアカウントでログインするのでユーザーフレンドリーである。そのためFloconでもなるべく再現するようにしている。
+                                                if (
+                                                    signInMethods.every(
+                                                        method =>
+                                                            method !==
+                                                            EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD
+                                                    )
+                                                ) {
+                                                    if (
+                                                        signInMethods.includes(
+                                                            GoogleAuthProvider.GOOGLE_SIGN_IN_METHOD
+                                                        )
+                                                    ) {
+                                                        setError(
+                                                            '指定されたメールアドレスは「メールアドレス・パスワード」でログインすることはできません。代わりに「Googleアカウント」でログインしてください。'
+                                                        );
+                                                        setEmailMode(false);
+                                                        return;
+                                                    }
+                                                }
+                                            });
+                                    };
+
+                                    await main().finally(() => {
+                                        setPassword('');
+                                        setIsSubmitting(false);
+                                    });
                                 }}
                             >
                                 ログイン
