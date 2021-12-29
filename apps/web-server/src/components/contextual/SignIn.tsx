@@ -115,7 +115,7 @@ const Email: React.FC = () => {
 
             <Form.Item wrapperCol={{ offset: labelCol, span: wrapperCol }}>
                 <div className={classNames(flex, flexRow)}>
-                    {auth.currentUser?.isAnonymous === true && (
+                    {auth.currentUser?.isAnonymous === true ? (
                         <Button
                             onClick={async () => {
                                 if (auth.currentUser == null) {
@@ -129,86 +129,91 @@ const Email: React.FC = () => {
                                     })
                                     .catch((err: Error) => setError(err));
                             }}
-                        />
-                    )}
-                    <Button
-                        disabled={isSubmitting}
-                        onClick={async () => {
-                            setIsSubmitting(true);
-                            await createUserWithEmailAndPassword(auth, email, password)
-                                .then(async cred => {
-                                    const user = cred.user;
-                                    //await sendEmailVerification(user);
-                                    await updateProfile(user, {
-                                        displayName,
-                                        photoURL: null,
+                        >
+                            非匿名アカウントに変換
+                        </Button>
+                    ) : (
+                        <>
+                            <Button
+                                disabled={isSubmitting}
+                                onClick={async () => {
+                                    setIsSubmitting(true);
+                                    await createUserWithEmailAndPassword(auth, email, password)
+                                        .then(async cred => {
+                                            const user = cred.user;
+                                            //await sendEmailVerification(user);
+                                            await updateProfile(user, {
+                                                displayName,
+                                                photoURL: null,
+                                            });
+                                            setError(undefined);
+                                            router.push('/');
+                                        })
+                                        .catch((err: Error) => setError(err))
+                                        .finally(() => setIsSubmitting(false));
+                                }}
+                            >
+                                アカウント作成
+                            </Button>
+                            <Button
+                                disabled={isSubmitting}
+                                onClick={async () => {
+                                    setIsSubmitting(true);
+
+                                    const signInMethods = await fetchSignInMethodsForEmail(
+                                        auth,
+                                        email
+                                    ).catch((err: Error) => {
+                                        console.error('fetchSignInMethodsForEmail', err);
+                                        return null;
                                     });
-                                    setError(undefined);
-                                    router.push('/');
-                                })
-                                .catch((err: Error) => setError(err))
-                                .finally(() => setIsSubmitting(false));
-                        }}
-                    >
-                        アカウント作成
-                    </Button>
-                    <Button
-                        disabled={isSubmitting}
-                        onClick={async () => {
-                            setIsSubmitting(true);
 
-                            const signInMethods = await fetchSignInMethodsForEmail(
-                                auth,
-                                email
-                            ).catch((err: Error) => {
-                                console.error('fetchSignInMethodsForEmail', err);
-                                return null;
-                            });
+                                    await signInWithEmailAndPassword(auth, email, password)
+                                        .then(() => {
+                                            setError(undefined);
+                                            router.push('/');
+                                        })
+                                        .catch(async (err: Error) => {
+                                            setIsSubmitting(false);
+                                            setError(err);
 
-                            await signInWithEmailAndPassword(auth, email, password)
-                                .then(() => {
-                                    setError(undefined);
-                                    router.push('/');
-                                })
-                                .catch(async (err: Error) => {
-                                    setIsSubmitting(false);
-                                    setError(err);
+                                            if (signInMethods == null) {
+                                                return;
+                                            }
 
-                                    if (signInMethods == null) {
-                                        return;
-                                    }
-
-                                    // とあるメールアドレスxがあるとする。以下の手順を踏んだ際、xを用いてsignInWithEmailAndPasswordを実行してもauth/wrong-passwordが常に返されてログインできなくなる。https://github.com/firebase/firebaseui-web/issues/122
-                                    // 1. メールアドレス・パスワード方式でxのアカウントを作成
-                                    // 2. xをverifyしない（Floconでは現時点ではverifyする手段はないため、2の条件は常に満たされる）
-                                    // 3. xを用いてGoogleアカウントでログイン
-                                    // もし2でverifyしていればxはメールアドレス・パスワードとGoogleアカウントの2つがリンクされたアカウントとなるが、verifyしない場合は3の時点でGoogleアカウントのみがリンクされた状態になる。
-                                    // firebaseuiはこの場合に自動的にGoogleアカウントでログインするのでユーザーフレンドリーである。そのためFloconでもなるべく再現するようにしている。
-                                    if (
-                                        signInMethods.every(
-                                            method =>
-                                                method !==
-                                                EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD
-                                        )
-                                    ) {
-                                        if (
-                                            signInMethods.includes(
-                                                GoogleAuthProvider.GOOGLE_SIGN_IN_METHOD
-                                            )
-                                        ) {
-                                            setError(
-                                                '指定されたメールアドレスは「メールアドレス・パスワード」でログインすることはできません。代わりに「Googleアカウント」でログインしてください。'
-                                            );
-                                            setEmailMode(false);
-                                            return;
-                                        }
-                                    }
-                                })
-                                .finally(() => setIsSubmitting(false));
-                        }}
-                    >
-                        ログイン
-                    </Button>
+                                            // とあるメールアドレスxがあるとする。以下の手順を踏んだ際、xを用いてsignInWithEmailAndPasswordを実行してもauth/wrong-passwordが常に返されてログインできなくなる。https://github.com/firebase/firebaseui-web/issues/122
+                                            // 1. メールアドレス・パスワード方式でxのアカウントを作成
+                                            // 2. xをverifyしない（Floconでは現時点ではverifyする手段はないため、2の条件は常に満たされる）
+                                            // 3. xを用いてGoogleアカウントでログイン
+                                            // もし2でverifyしていればxはメールアドレス・パスワードとGoogleアカウントの2つがリンクされたアカウントとなるが、verifyしない場合は3の時点でGoogleアカウントのみがリンクされた状態になる。
+                                            // firebaseuiはこの場合に自動的にGoogleアカウントでログインするのでユーザーフレンドリーである。そのためFloconでもなるべく再現するようにしている。
+                                            if (
+                                                signInMethods.every(
+                                                    method =>
+                                                        method !==
+                                                        EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD
+                                                )
+                                            ) {
+                                                if (
+                                                    signInMethods.includes(
+                                                        GoogleAuthProvider.GOOGLE_SIGN_IN_METHOD
+                                                    )
+                                                ) {
+                                                    setError(
+                                                        '指定されたメールアドレスは「メールアドレス・パスワード」でログインすることはできません。代わりに「Googleアカウント」でログインしてください。'
+                                                    );
+                                                    setEmailMode(false);
+                                                    return;
+                                                }
+                                            }
+                                        })
+                                        .finally(() => setIsSubmitting(false));
+                                }}
+                            >
+                                ログイン
+                            </Button>
+                        </>
+                    )}
                 </div>
             </Form.Item>
         </Form>
@@ -278,6 +283,9 @@ export const SignIn: React.FC = () => {
         return <div>Firebase のサービスを準備しています…</div>;
     }
 
+    const suffix =
+        auth.currentUser?.isAnonymous === true ? 'で非匿名アカウントに変換' : 'でログイン';
+
     let authUI: JSX.Element;
     if (emailMode) {
         authUI = (
@@ -303,7 +311,7 @@ export const SignIn: React.FC = () => {
                 </a>
                 {(areProvidersEmptyValue || authProviders.includes(email)) && (
                     <Button style={{ margin }} onClick={() => setEmailMode(true)}>
-                        メールアドレス・パスワードでログイン
+                        {`メールアドレス・パスワード${suffix}`}
                     </Button>
                 )}
                 {(areProvidersEmptyValue || authProviders.includes(google)) && (
@@ -311,7 +319,7 @@ export const SignIn: React.FC = () => {
                         style={{ margin }}
                         onClick={() => loginWithAuthProvider(googleProvider)}
                     >
-                        Googleアカウントでログイン
+                        {`Googleアカウント${suffix}`}
                     </Button>
                 )}
                 {(areProvidersEmptyValue || authProviders.includes(twitter)) && (
@@ -319,7 +327,7 @@ export const SignIn: React.FC = () => {
                         style={{ margin }}
                         onClick={() => loginWithAuthProvider(twitterProvider)}
                     >
-                        Twitterアカウントでログイン
+                        {`Twitterアカウント${suffix}`}
                     </Button>
                 )}
                 {(areProvidersEmptyValue || authProviders.includes(facebook)) && (
@@ -327,7 +335,7 @@ export const SignIn: React.FC = () => {
                         style={{ margin }}
                         onClick={() => loginWithAuthProvider(facebookProvider)}
                     >
-                        Facebookアカウントでログイン
+                        {`Facebookアカウント${suffix}`}
                     </Button>
                 )}
                 {(areProvidersEmptyValue || authProviders.includes(github)) && (
@@ -335,7 +343,7 @@ export const SignIn: React.FC = () => {
                         style={{ margin }}
                         onClick={() => loginWithAuthProvider(githubProvider)}
                     >
-                        GitHubアカウントでログイン
+                        {`GitHubアカウント${suffix}`}
                     </Button>
                 )}
                 {(areProvidersEmptyValue || authProviders.includes(phone)) && (
@@ -345,7 +353,7 @@ export const SignIn: React.FC = () => {
                             phoneProvider == null ? undefined : loginWithAuthProvider(phoneProvider)
                         }
                     >
-                        電話認証でログイン
+                        {`電話認証${suffix}`}
                     </Button>
                 )}
                 {(areProvidersEmptyValue || authProviders.includes(anonymous)) && (
