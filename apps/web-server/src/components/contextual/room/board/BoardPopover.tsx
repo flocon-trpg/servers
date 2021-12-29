@@ -933,7 +933,7 @@ namespace ContextMenuModule {
                     </Menu.Item>
                     <Menu.Item
                         onClick={() => {
-                            hooks.setDicePieceEditor({
+                            hooks.setStringPieceEditor({
                                 type: create,
                                 boardId,
                                 piecePosition: piecePositionWhichIsNotCellMode,
