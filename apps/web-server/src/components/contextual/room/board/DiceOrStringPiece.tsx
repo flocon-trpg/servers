@@ -13,7 +13,6 @@ import { DicePieceValue } from '../../../../utils/board/dicePieceValue';
 import { usePrevious } from 'react-use';
 import { Size } from '../../../../utils/types';
 import { PieceGroup, PieceGroupProps } from './PieceGroup';
-import { Text } from 'react-konva';
 
 export const stringPiece = 'stringPiece';
 export const dicePiece = 'dicePiece';
