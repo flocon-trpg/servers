@@ -64,7 +64,7 @@ const useLoginWithAuthProvider = () => {
                 .then(async result => {
                     await updateProfile(result.user, { displayName, photoURL: null });
                     setError(undefined);
-                    router.push('/');
+                    await router.push('/');
                 })
                 .catch((error: Error) => {
                     setError(error);
@@ -86,12 +86,12 @@ const Email: React.FC = () => {
     const [email, setEmail] = React.useState('');
     const [password, setPassword] = React.useState('');
     const auth = useAtomValue(firebaseAuthAtom);
-    const onSuccess = React.useCallback(() => {
+    const onSuccess = React.useCallback(async () => {
         setError(undefined);
         setEmail('');
         setPassword('');
         setEmailMode(false);
-        router.push('/');
+        await router.push('/');
     }, [router, setEmailMode, setError]);
 
     if (auth == null) {
@@ -131,8 +131,8 @@ const Email: React.FC = () => {
                                 const credential = EmailAuthProvider.credential(email, password);
                                 setIsSubmitting(true);
                                 await linkWithCredential(auth.currentUser, credential)
-                                    .then(() => {
-                                        onSuccess();
+                                    .then(async () => {
+                                        await onSuccess();
                                     })
                                     .catch((err: Error) => setError(err))
                                     .finally(() => {
@@ -157,7 +157,7 @@ const Email: React.FC = () => {
                                                 displayName,
                                                 photoURL: null,
                                             });
-                                            onSuccess();
+                                            await onSuccess();
                                         })
                                         .catch((err: Error) => setError(err))
                                         .finally(() => {
@@ -183,8 +183,8 @@ const Email: React.FC = () => {
                                         });
 
                                         await signInWithEmailAndPassword(auth, email, password)
-                                            .then(() => {
-                                                onSuccess();
+                                            .then(async () => {
+                                                await onSuccess();
                                             })
                                             .catch(async (err: Error) => {
                                                 setError(err);
@@ -380,9 +380,12 @@ export const SignIn: React.FC = () => {
                             onClick={() => {
                                 signInAnonymously(auth)
                                     .then(async result => {
-                                        await updateProfile(result.user, { displayName, photoURL: null });
+                                        await updateProfile(result.user, {
+                                            displayName,
+                                            photoURL: null,
+                                        });
                                         setError(undefined);
-                                        router.push('/');
+                                        await router.push('/');
                                     })
                                     .catch((error: Error) => {
                                         if (error.code === 'auth/admin-restricted-operation') {
