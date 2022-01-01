@@ -8,6 +8,7 @@ import { isDeleted, toText as toTextCore } from '../../../../utils/message/messa
 import { FilePath as CoreFilePath } from '@flocon-trpg/core';
 import { FilePath } from '../../../../utils/file/filePath';
 import { PieceGroup, PieceGroupProps } from './PieceGroup';
+import { NameLabel } from './NameLabel';
 
 type BalloonCoreProps = {
     text0?: string;
@@ -233,6 +234,8 @@ type Props = {
     // 💬を使いたくない場合は常にundefinedにすればよい。
     message?: RoomPublicMessageFragment;
 
+    label?: string;
+
     // undefinedならば(x => true)とみなされる。
     // messageが常にundefinedならばこれもundefinedにしてよい。
     // re-renderのたびに実行されるため、軽量なおかつ副作用のない関数を用いることを強く推奨。
@@ -272,6 +275,7 @@ export const ImagePiece: React.FC<Props> = (props: Props) => {
                     width={props.w}
                     height={props.h}
                 />
+                <NameLabel x={0} y={0} w={props.w} h={props.h} text={props.label} />
             </PieceGroup>
             <Balloon
                 x={props.x}

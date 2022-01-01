@@ -320,6 +320,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     <ImagePiece
                         {...Piece.getPosition({ ...board, state: piece })}
                         opacity={1}
+                        label={character.name}
                         key={keyNames(characterId, pieceId)}
                         filePath={character.image}
                         draggable={!piece.isPositionLocked}

@@ -385,7 +385,7 @@ const ResetMessagesModal: React.FC<ResetMessagesModalProps> = ({
             {roomCreatedByMe ? (
                 <div>
                     <p>
-                        この部屋のログを全て削除します。この部屋の参加者でない限り、部屋を削除することはできません。
+                        この部屋のログを全て削除します。この部屋の参加者でない限り、ログを削除することはできません。
                     </p>
                     <p style={{ fontWeight: 'bold' }}>ログを削除すると元に戻すことはできません。</p>
                     <p>本当によろしいですか？</p>
