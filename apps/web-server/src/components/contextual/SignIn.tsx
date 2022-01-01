@@ -61,8 +61,10 @@ const useLoginWithAuthProvider = () => {
                 return;
             }
             await signInWithPopup(auth, provider)
-                .then(async result => {
-                    await updateProfile(result.user, { displayName, photoURL: null });
+                .then(async () => {
+                    // ソーシャルアカウントによるログインの場合は、アカウントの利用が初めてか否かを判断できないようなので、「初めての場合のみdisplayNameをリセットする」といったことはできない。そのためリセットは行わないようにしている。
+                    // なお、result.operationType、result.user.metadataを用いて判定する方法はうまくいかなかった。
+
                     setError(undefined);
                     await router.push('/');
                 })
