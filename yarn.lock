@@ -3433,8 +3433,8 @@ __metadata:
   linkType: hard
 
 "@react-spring/konva@npm:^9.2.4":
-  version: 9.3.0
-  resolution: "@react-spring/konva@npm:9.3.0"
+  version: 9.3.2
+  resolution: "@react-spring/konva@npm:9.3.2"
   dependencies:
     "@react-spring/animated": ~9.3.0
     "@react-spring/core": ~9.3.0
@@ -3444,7 +3444,7 @@ __metadata:
     konva: ">=2.6"
     react: ^16.8.0  || ^17.0.0
     react-konva: ^16.8.0  || ^17.0.0
-  checksum: 2347ecb6946e14cce4768d7ba3d0ce49ce4bcec9f4e0b962a12a85d93ca584920b440716bce97cc065c9a933e98b520fd5b831fd97d15bf4d1f96c1016d0451a
+  checksum: 31a8cd919bee43aa9ca74008528e22a5c8c6fe241a4f0ffd0e45ba1a93715737b78d3d281f57f45a866f498b2d128f35df2f8ae896aa5d567a46bf28e2f1c8e3
   languageName: node
   linkType: hard
 
