@@ -61,8 +61,8 @@ const useLoginWithAuthProvider = () => {
                 return;
             }
             await signInWithPopup(auth, provider)
-                .then(result => {
-                    updateProfile(result.user, { displayName, photoURL: null });
+                .then(async result => {
+                    await updateProfile(result.user, { displayName, photoURL: null });
                     setError(undefined);
                     router.push('/');
                 })
@@ -379,8 +379,8 @@ export const SignIn: React.FC = () => {
                             style={{ margin }}
                             onClick={() => {
                                 signInAnonymously(auth)
-                                    .then(result => {
-                                        updateProfile(result.user, { displayName, photoURL: null });
+                                    .then(async result => {
+                                        await updateProfile(result.user, { displayName, photoURL: null });
                                         setError(undefined);
                                         router.push('/');
                                     })
