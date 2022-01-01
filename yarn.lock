@@ -4764,8 +4764,8 @@ __metadata:
   linkType: hard
 
 "antd@npm:^4.18.0":
-  version: 4.18.0
-  resolution: "antd@npm:4.18.0"
+  version: 4.18.2
+  resolution: "antd@npm:4.18.2"
   dependencies:
     "@ant-design/colors": ^6.0.0
     "@ant-design/icons": ^4.7.0
@@ -4813,7 +4813,7 @@ __metadata:
   peerDependencies:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
-  checksum: e16a875efc8568aed6fd513e34a9a1b6146e140091eddf6d6a8b64310bb029f7b46746a97def180ece0a01287b81efcb7158183ab150a49641c9074a6d639ab1
+  checksum: b33adc21055d87f34e5dd71aec31140024997c59180179678daf3fcc818342b1a23b49ca7660c99e5b3f8c840b58eafc3a18ac81301b0e6d62a305a81d8fdef8
   languageName: node
   linkType: hard
 
