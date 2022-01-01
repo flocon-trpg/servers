@@ -3419,16 +3419,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/core@npm:9.3.1":
-  version: 9.3.1
-  resolution: "@react-spring/core@npm:9.3.1"
+"@react-spring/core@npm:9.3.2":
+  version: 9.3.2
+  resolution: "@react-spring/core@npm:9.3.2"
   dependencies:
     "@react-spring/animated": ~9.3.0
     "@react-spring/shared": ~9.3.0
     "@react-spring/types": ~9.3.0
   peerDependencies:
     react: ^16.8.0  || ^17.0.0
-  checksum: 311452e51ea92815fe415d2f82fe068b7a365e33ca6f5b586b1dfb8d8f27557644a27f59b6e4ed3c10838b5c903a84704b197005edd68fe54cef5343a1d5bf5a
+  checksum: 1504143b9446d32c3877c8224c3fee3b6d18c0218b04b6766de7164ed645932808066ef12af63b06123a3da168f6bbc0fdf325c337b17d7f13d8a09f4a37f608
   languageName: node
   linkType: hard
 
