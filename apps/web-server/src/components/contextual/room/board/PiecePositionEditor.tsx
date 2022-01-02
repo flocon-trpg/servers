@@ -2,6 +2,7 @@ import { PieceState } from '@flocon-trpg/core';
 import { Checkbox, Col, InputNumber, Row, Space } from 'antd';
 import { Gutter } from 'antd/lib/grid/row';
 import React from 'react';
+import { BufferedInput } from '../../../ui/BufferedInput';
 import { BoardPositionEditorBase } from './BoardPositionEditorBase';
 
 const gutter: [Gutter, Gutter] = [16, 16];
@@ -10,9 +11,34 @@ const inputSpan = 16;
 type Props = {
     state: PieceState;
     onUpdate: (immerRecipe: (pieceState: PieceState) => void) => void;
+    showNameInput?: boolean;
 };
 
-export const PiecePositionEditor: React.FC<Props> = ({ state, onUpdate }: Props) => {
+export const PiecePositionEditor: React.FC<Props> = ({ state, onUpdate, showNameInput }: Props) => {
+    let nameElement: JSX.Element | null = null;
+    if (showNameInput === true) {
+        const inputElement = (
+            <BufferedInput
+                style={{ width: 150 }}
+                bufferDuration='default'
+                value={state.name ?? ''}
+                onChange={e =>
+                    onUpdate(piece => {
+                        // nameがない状態をあらわす値として '' と undefined の2種類が混在するのは後々仕様変更があった際に困るかもしれないため、undefinedで統一させるようにしている
+                        piece.name = e.currentValue === '' ? undefined : e.currentValue;
+                    })
+                }
+            />
+        );
+        nameElement = (
+            <Row gutter={gutter} align='middle'>
+                <Col flex='auto' />
+                <Col flex={0}>コマの名前</Col>
+                <Col span={inputSpan}>{inputElement}</Col>
+            </Row>
+        );
+    }
+
     let positionElement: JSX.Element;
     if (state.isCellMode) {
         positionElement = (
@@ -123,6 +149,7 @@ export const PiecePositionEditor: React.FC<Props> = ({ state, onUpdate }: Props)
                     </Checkbox>
                 </Col>
             </Row>
+            {nameElement}
         </div>
     );
 };
