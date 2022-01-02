@@ -67,6 +67,7 @@ export const BoardPositionAndPieceEditorModal: React.FC = () => {
             }
             modalChildren = (
                 <PiecePositionEditor
+                    showNameInput
                     state={piece}
                     onUpdate={recipe => {
                         setRoomState(roomState => {
