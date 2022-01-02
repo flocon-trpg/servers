@@ -22,7 +22,7 @@ export const NameLabel: React.FC<Props> = (props: Props) => {
 
     const textPropsBase: Konva.TextConfig = {
         text: props.text,
-        fontSize: innerH,
+        fontSize: innerH * 0.9,
         fontFamily: 'Noto Sans JP Regular',
         align: 'center',
         verticalAlign: 'middle',
@@ -32,14 +32,7 @@ export const NameLabel: React.FC<Props> = (props: Props) => {
         <ReactKonva.Label x={innerX} y={innerY} width={innerW} height={innerH}>
             <ReactKonva.Tag fill='#606060D0' />
 
-            <ReactKonva.Text
-                {...textPropsBase}
-                width={innerW}
-                padding={innerW * 0.025}
-                fill='white'
-                wrap='none'
-                ellipsis
-            />
+            <ReactKonva.Text {...textPropsBase} width={innerW} fill='white' wrap='none' ellipsis />
         </ReactKonva.Label>
     );
 };
