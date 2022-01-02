@@ -3023,8 +3023,8 @@ __metadata:
   linkType: hard
 
 "@mikro-orm/core@npm:^4.5.7":
-  version: 4.5.9
-  resolution: "@mikro-orm/core@npm:4.5.9"
+  version: 4.5.10
+  resolution: "@mikro-orm/core@npm:4.5.10"
   dependencies:
     ansi-colors: 4.1.1
     clone: 2.1.2
@@ -3057,7 +3057,7 @@ __metadata:
       optional: true
     "@mikro-orm/sqlite":
       optional: true
-  checksum: 8323bbe0009766aa72d0d1237bc27f2fc9b5f894e23d0e1896d486a2ad00a89fcba925b48ac207fb3e47f1922698ba6561c6a50c437ecb3d3386a13b391a5b96
+  checksum: 4ec93e1403c3a08a5abda52560cc25cab77d990c0c542f0046c34f3e67860baf325b6675cc68a28fc229196a53b8072e1673112db9715c19b885bceb6cfa5282
   languageName: node
   linkType: hard
 
