@@ -101,7 +101,12 @@ export const toClientState =
                 CharacterPieceTypes.State
             >({
                 serverState: source.pieces,
-                isPrivate: () => !isAuthorized,
+                isPrivate: state =>
+                    !isBoardVisible({
+                        requestedBy,
+                        boardId: state.boardId,
+                        currentRoomState,
+                    }),
                 toClientState: ({ state }) => CharacterPiece.toClientState(state),
             }),
             privateCommands: RecordOperation.toClientState<CommandTypes.State, CommandTypes.State>({
