@@ -1,4 +1,4 @@
-import { Button, Col, Modal, Row, Tooltip } from 'antd';
+import { Button, Col, Modal, Row, Space, Tooltip } from 'antd';
 import React from 'react';
 import { DialogFooter } from '../../../ui/DialogFooter';
 import { DrawerProps } from 'antd/lib/drawer';
@@ -160,11 +160,10 @@ export const ImagePieceModal: React.FC = () => {
         >
             <div>
                 <IdView />
+                <div style={{ height: 8 }} />
 
                 {modalType?.type !== update ? null : (
                     <>
-                        <EditorGroupHeader>複製</EditorGroupHeader>
-
                         <Row gutter={gutter} align='middle'>
                             <Col flex='auto' />
                             <Col flex={0}></Col>
@@ -185,6 +184,7 @@ export const ImagePieceModal: React.FC = () => {
                                 </Tooltip>
                             </Col>
                         </Row>
+                        <div style={{ height: 8 }} />
                     </>
                 )}
 
