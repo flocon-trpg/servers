@@ -1,4 +1,5 @@
 import {
+    BoardPositionState,
     CharacterState,
     DicePieceState,
     ImagePieceState,
@@ -34,6 +35,7 @@ export type ClickOn =
     | {
           type: typeof character | typeof portrait;
           characterId: string;
+          pieceId: string;
           character: CharacterState;
       };
 

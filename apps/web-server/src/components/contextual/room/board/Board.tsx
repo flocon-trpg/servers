@@ -19,7 +19,6 @@ import useConstant from 'use-constant';
 import { debounceTime } from 'rxjs/operators';
 import { Vector2d } from 'konva/types/types';
 import { Subject } from 'rxjs';
-import { useReadonlyRef } from '../../../../hooks/useReadonlyRef';
 import { PieceState, BoardState, $free } from '@flocon-trpg/core';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
@@ -49,14 +48,8 @@ import { RoomConfigUtils } from '../../../../atoms/roomConfig/types/roomConfig/u
 import { ActiveBoardPanelConfig } from '../../../../atoms/roomConfig/types/activeBoardPanelConfig';
 import { BoardEditorPanelConfig } from '../../../../atoms/roomConfig/types/boardEditorPanelConfig';
 import { useImmerUpdateAtom } from '../../../../atoms/useImmerUpdateAtom';
-import {
-    boardTooltipAtom,
-    BoardTooltipState,
-} from '../../../../atoms/overlay/board/boardTooltipAtom';
-import {
-    boardPopoverEditorAtom,
-    BoardPopoverEditorState,
-} from '../../../../atoms/overlay/board/boardPopoverEditorAtom';
+import { boardTooltipAtom } from '../../../../atoms/overlay/board/boardTooltipAtom';
+import { boardPopoverEditorAtom } from '../../../../atoms/overlay/board/boardPopoverEditorAtom';
 import { MouseOverOn } from '../../../../atoms/overlay/board/types';
 import { useUpdateAtom } from 'jotai/utils';
 import { boardContextMenuAtom } from '../../../../atoms/overlay/board/boardContextMenuAtom';
@@ -66,6 +59,7 @@ import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithI
 import { importBoardModalVisibilityAtom } from './ImportBoardModal';
 import { BoardType } from '../../../../utils/board/boardType';
 import { useIsMyCharacter } from '../../../../hooks/state/useIsMyCharacter';
+import { imagePieceModalAtom } from './ImagePieceModal';
 
 const setDragEndResultToPieceState = ({
     e,
@@ -103,7 +97,7 @@ const background = 'background';
 const character = 'character';
 const portrait = 'portrait';
 const dicePiece = 'dicePiece';
-const numberPiece = 'numberPiece';
+const stringPiece = 'stringPiece';
 const imagePiece = 'imagePiece';
 
 type SelectedPieceId =
@@ -118,7 +112,7 @@ type SelectedPieceId =
           pieceId: string;
       }
     | {
-          type: typeof dicePiece | typeof numberPiece;
+          type: typeof dicePiece | typeof stringPiece;
           pieceId: string;
       }
     | {
@@ -159,8 +153,6 @@ type BoardCoreProps = {
     boardType: BoardType;
     onClick?: (e: KonvaEventObject<MouseEvent>) => void;
     onContextMenu?: (e: KonvaEventObject<PointerEvent>, stateOffset: Vector2) => void; // stateOffsetは、configなどのxy座標を基準にした位置。
-    onTooltip?: (params: BoardTooltipState | null) => void;
-    onPopupEditor?: (params: BoardPopoverEditorState | null) => void;
     canvasWidth: number;
     canvasHeight: number;
 };
@@ -172,8 +164,6 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     boardType,
     onClick,
     onContextMenu,
-    onTooltip,
-    onPopupEditor,
     canvasWidth,
     canvasHeight,
 }: BoardCoreProps) => {
@@ -187,31 +177,26 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const characterPieces = useCharacterPieces(boardId);
     const portraitPositions = usePortraitPieces(boardId);
 
-    const onTooltipRef = useReadonlyRef(onTooltip);
-    const onPopoverEditorRef = useReadonlyRef(onPopupEditor);
+    const setBoardPopoverEditor = useUpdateAtom(boardPopoverEditorAtom);
     const unsetPopoverEditor = () => {
-        if (onPopoverEditorRef.current == null) {
-            return;
-        }
-        onPopoverEditorRef.current(null);
+        setBoardPopoverEditor(null);
     };
+
+    const setBoardTooltip = useUpdateAtom(boardTooltipAtom);
 
     const mouseOverOnRef = React.useRef<MouseOverOn>({ type: background });
     const { stoppedCursor, onMove } = useGetStoppedCursor();
     React.useEffect(() => {
-        if (onTooltipRef.current == null) {
-            return;
-        }
         if (stoppedCursor == null) {
-            onTooltipRef.current(null);
+            setBoardTooltip(null);
             return;
         }
-        onTooltipRef.current({
+        setBoardTooltip({
             pageX: stoppedCursor.x,
             pageY: stoppedCursor.y,
             mouseOverOn: mouseOverOnRef.current,
         });
-    }, [stoppedCursor, onTooltipRef]);
+    }, [setBoardTooltip, stoppedCursor]);
     const [selectedPieceId, setSelectedPieceId] = React.useState<SelectedPieceId>();
     const [isBackgroundDragging, setIsBackgroundDragging] = React.useState(false); // これがないと、pieceをドラッグでリサイズする際に背景が少し動いてしまう。
     const backgroundImage = useImageFromGraphQL(board.backgroundImage);
@@ -222,6 +207,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const publicMessages = useFilteredRoomMessages({ filter: publicMessageFilter });
     const myUserUid = useMyUserUid();
     const isMyCharacter = useIsMyCharacter();
+    const setImagePieceModal = useUpdateAtom(imagePieceModalAtom);
 
     /*
         TransitionにHTMLImageElementを含めないと、フェードアウトが発生しない模様（おそらくフェードアウト時には画像が捨てられているため）。そのため含めている。
@@ -336,17 +322,14 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             setSelectedPieceId({
                                 type: 'character',
                                 characterId,
-                                pieceId: pieceId,
+                                pieceId,
                             });
                         }}
                         onDblClick={e => {
-                            if (onPopoverEditorRef.current == null) {
-                                return;
-                            }
-                            onPopoverEditorRef.current({
+                            setBoardPopoverEditor({
                                 pageX: e.evt.pageX,
                                 pageY: e.evt.pageY,
-                                dblClickOn: { type: 'character', character, characterId },
+                                dblClickOn: { type: 'character', character, characterId, pieceId },
                             });
                         }}
                         onMouseEnter={() =>
@@ -354,6 +337,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                                 type: 'character',
                                 character,
                                 characterId,
+                                pieceId,
                             })
                         }
                         onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
@@ -412,17 +396,19 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             });
                         }}
                         onDblClick={e => {
-                            if (onPopoverEditorRef.current == null) {
-                                return;
-                            }
-                            onPopoverEditorRef.current({
+                            setBoardPopoverEditor({
                                 pageX: e.evt.pageX,
                                 pageY: e.evt.pageY,
-                                dblClickOn: { type: 'portrait', character, characterId },
+                                dblClickOn: { type: 'portrait', character, characterId, pieceId },
                             });
                         }}
                         onMouseEnter={() =>
-                            (mouseOverOnRef.current = { type: 'portrait', character, characterId })
+                            (mouseOverOnRef.current = {
+                                type: 'portrait',
+                                character,
+                                characterId,
+                                pieceId,
+                            })
                         }
                         onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
                         onDragEnd={e => {
@@ -474,13 +460,15 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         });
                     }}
                     onDblClick={e => {
-                        if (onPopoverEditorRef.current == null) {
-                            return;
-                        }
-                        onPopoverEditorRef.current({
+                        setBoardPopoverEditor({
                             pageX: e.evt.pageX,
                             pageY: e.evt.pageY,
                             dblClickOn: { type: 'imagePiece', piece, boardId, pieceId },
+                        });
+                        setImagePieceModal({
+                            type: update,
+                            boardId,
+                            pieceId,
                         });
                     }}
                     onMouseEnter={() =>
@@ -527,10 +515,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         });
                     }}
                     onDblClick={e => {
-                        if (onPopoverEditorRef.current == null) {
-                            return;
-                        }
-                        onPopoverEditorRef.current({
+                        setBoardPopoverEditor({
                             pageX: e.evt.pageX,
                             pageY: e.evt.pageY,
                             dblClickOn: { type: 'dicePiece', piece, pieceId, boardId },
@@ -565,21 +550,18 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     resizable={!piece.isPositionLocked}
                     listening
                     isSelected={
-                        selectedPieceId?.type === 'numberPiece' &&
+                        selectedPieceId?.type === 'stringPiece' &&
                         selectedPieceId.pieceId === pieceId
                     }
                     onClick={() => {
                         unsetPopoverEditor();
                         setSelectedPieceId({
-                            type: 'numberPiece',
+                            type: 'stringPiece',
                             pieceId,
                         });
                     }}
                     onDblClick={e => {
-                        if (onPopoverEditorRef.current == null) {
-                            return;
-                        }
-                        onPopoverEditorRef.current({
+                        setBoardPopoverEditor({
                             pageX: e.evt.pageX,
                             pageY: e.evt.pageY,
                             dblClickOn: { type: 'stringPiece', piece, pieceId, boardId },
@@ -761,8 +743,6 @@ const zoomButtonStyle: React.CSSProperties = {
 export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: Props) => {
     const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
     const setBoardContextMenu = useUpdateAtom(boardContextMenuAtom);
-    const setBoardTooltip = useUpdateAtom(boardTooltipAtom);
-    const setBoardPopoverEditor = useUpdateAtom(boardPopoverEditorAtom);
     const setBoardEditorModal = useUpdateAtom(boardEditorModalAtom);
     const setImportBoardModal = useUpdateAtom(importBoardModalVisibilityAtom);
     const roomId = useAtomSelector(roomAtom, state => state.roomId);
@@ -861,8 +841,6 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                 boardType={boardType}
                 boardConfig={boardConfig}
                 onClick={() => setBoardContextMenu(null)}
-                onTooltip={newValue => setBoardTooltip(newValue)}
-                onPopupEditor={newValue => setBoardPopoverEditor(newValue)}
                 onContextMenu={(e, stateOffset) => {
                     e.evt.preventDefault();
                     setBoardContextMenu({

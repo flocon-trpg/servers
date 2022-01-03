@@ -1,4 +1,4 @@
-import { Button, Col, Drawer, Row, Tooltip } from 'antd';
+import { Button, Col, Modal, Row, Tooltip } from 'antd';
 import React from 'react';
 import { DialogFooter } from '../../../ui/DialogFooter';
 import { DrawerProps } from 'antd/lib/drawer';
@@ -14,12 +14,25 @@ import { BufferedInput } from '../../../ui/BufferedInput';
 import { BufferedTextArea } from '../../../ui/BufferedTextArea';
 import { FilePath } from '../../../../utils/file/filePath';
 import { useAtomValue } from 'jotai/utils';
-import { imagePieceDrawerAtom } from '../../../../atoms/overlay/imagePieceDrawerAtom';
 import { create, update } from '../../../../utils/constants';
-import { useAtom } from 'jotai';
+import { atom, useAtom } from 'jotai';
 import { useCloneImagePiece } from '../../../../hooks/state/useCloneImagePiece';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
 import { EditorGroupHeader } from '../../../ui/EditorGroupHeader';
+
+type ImagePieceModalType =
+    | {
+          type: typeof create;
+          boardId: string;
+          piecePosition: PiecePositionWithCell;
+      }
+    | {
+          type: typeof update;
+          boardId: string;
+          pieceId: string;
+      };
+
+export const imagePieceModalAtom = atom<ImagePieceModalType | null>(null);
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -46,7 +59,7 @@ const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
 const IdView: React.FC = () => {
-    const drawerType = useAtomValue(imagePieceDrawerAtom);
+    const drawerType = useAtomValue(imagePieceModalAtom);
     const myUserUid = useMyUserUid();
 
     if (drawerType == null || myUserUid == null) {
@@ -62,33 +75,33 @@ const IdView: React.FC = () => {
     );
 };
 
-export const ImagePieceDrawer: React.FC = () => {
-    const [drawerType, setDrawerType] = useAtom(imagePieceDrawerAtom);
+export const ImagePieceModal: React.FC = () => {
+    const [modalType, setModalType] = useAtom(imagePieceModalAtom);
     const setRoomState = useSetRoomStateWithImmer();
     const myUserUid = useMyUserUid();
-    const imagePieces = useImagePieces(drawerType?.boardId);
+    const imagePieces = useImagePieces(modalType?.boardId);
     const clone = useCloneImagePiece();
     let stateEditorParams: StateEditorParams<ImagePieceState | undefined> | undefined;
-    switch (drawerType?.type) {
+    switch (modalType?.type) {
         case undefined:
             stateEditorParams = undefined;
             break;
         case create:
             stateEditorParams = {
                 type: create,
-                initState: defaultImagePiece(drawerType.piecePosition, myUserUid),
+                initState: defaultImagePiece(modalType.piecePosition, myUserUid),
             };
             break;
         case update:
             stateEditorParams = {
                 type: update,
-                state: imagePieces?.get(drawerType.pieceId),
+                state: imagePieces?.get(modalType.pieceId),
                 onUpdate: newState => {
-                    if (myUserUid == null || drawerType?.type !== update) {
+                    if (myUserUid == null || modalType?.type !== update) {
                         return;
                     }
-                    const boardId = drawerType.boardId;
-                    const pieceId = drawerType.pieceId;
+                    const boardId = modalType.boardId;
+                    const pieceId = modalType.pieceId;
                     setRoomState(roomState => {
                         const imagePieces = roomState.boards[boardId]?.imagePieces;
                         if (imagePieces == null) {
@@ -113,33 +126,33 @@ export const ImagePieceDrawer: React.FC = () => {
 
     let onCreate: (() => void) | undefined = undefined;
     // drawerType != nullを付けていることで、updateから閉じる際に一瞬onCreateボタンが出るのを防いでいる。ただし、これで適切なのかどうかは吟味していない
-    if (drawerType != null && drawerType?.type === create) {
+    if (modalType != null && modalType?.type === create) {
         onCreate = () => {
             const id = simpleId();
             setRoomState(roomState => {
-                const imagePieces = roomState.boards[drawerType.boardId]?.imagePieces;
+                const imagePieces = roomState.boards[modalType.boardId]?.imagePieces;
                 if (imagePieces == null) {
                     return;
                 }
                 imagePieces[id] = uiState;
             });
-            setDrawerType(null);
+            setModalType(null);
             resetUiState(undefined);
         };
     }
 
     return (
-        <Drawer
+        <Modal
             {...drawerBaseProps}
-            title={drawerType?.type == update ? '画像コマの編集' : '画像コマの新規作成'}
-            visible={drawerType != null}
+            title={modalType?.type == update ? '画像コマの編集' : '画像コマの新規作成'}
+            visible={modalType != null}
             closable
-            onClose={() => setDrawerType(null)}
+            onCancel={() => setModalType(null)}
             footer={
                 <DialogFooter
                     close={{
-                        textType: drawerType?.type === update ? 'close' : 'cancel',
-                        onClick: () => setDrawerType(null),
+                        textType: modalType?.type === update ? 'close' : 'cancel',
+                        onClick: () => setModalType(null),
                     }}
                     ok={onCreate == null ? undefined : { textType: 'create', onClick: onCreate }}
                 />
@@ -148,7 +161,7 @@ export const ImagePieceDrawer: React.FC = () => {
             <div>
                 <IdView />
 
-                {drawerType?.type !== update ? null : (
+                {modalType?.type !== update ? null : (
                     <>
                         <EditorGroupHeader>複製</EditorGroupHeader>
 
@@ -162,8 +175,8 @@ export const ImagePieceDrawer: React.FC = () => {
                                         size='small'
                                         onClick={() => {
                                             clone({
-                                                boardId: drawerType.boardId,
-                                                pieceId: drawerType.pieceId,
+                                                boardId: modalType.boardId,
+                                                pieceId: modalType.pieceId,
                                             });
                                         }}
                                     >
@@ -248,6 +261,6 @@ export const ImagePieceDrawer: React.FC = () => {
                 drawerType={filesManagerDrawerType}
                 onClose={() => setFilesManagerDrawerType(null)}
             />
-        </Drawer>
+        </Modal>
     );
 };

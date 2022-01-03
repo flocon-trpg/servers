@@ -3,6 +3,7 @@ import { Checkbox, Col, InputNumber, Row, Space } from 'antd';
 import { Gutter } from 'antd/lib/grid/row';
 import React from 'react';
 import { BufferedInput } from '../../../ui/BufferedInput';
+import { EditorGroupHeader } from '../../../ui/EditorGroupHeader';
 import { BoardPositionEditorBase } from './BoardPositionEditorBase';
 
 const gutter: [Gutter, Gutter] = [16, 16];
@@ -116,6 +117,8 @@ export const PiecePositionEditor: React.FC<Props> = ({ state, onUpdate, showName
 
     return (
         <div>
+            {nameElement}
+            <EditorGroupHeader>位置とサイズ</EditorGroupHeader>
             <Row gutter={gutter} align='middle'>
                 <Col flex='auto' />
                 <Col flex={0}></Col>
@@ -149,7 +152,6 @@ export const PiecePositionEditor: React.FC<Props> = ({ state, onUpdate, showName
                     </Checkbox>
                 </Col>
             </Row>
-            {nameElement}
         </div>
     );
 };
