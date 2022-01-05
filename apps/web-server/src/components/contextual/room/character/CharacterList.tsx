@@ -526,6 +526,8 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
             dataSource={charactersDataSource}
             size='small'
             pagination={false}
+            // 列をドラッグして動かすときにTooltipをドラッグするとキャラクターウィンドウが開いてしまう。簡単な方法でTooltipを調整する手段はなさそうなので、非表示にすることで解決している
+            showSorterTooltip={false}
         />
     );
 };
