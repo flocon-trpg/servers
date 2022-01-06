@@ -60,6 +60,8 @@ import { importCharacterModalVisibilityAtom } from './ImportCharacterModal';
 import { useDrag, useDrop } from 'react-dnd';
 import { KeySorter } from '../../../../utils/keySorter';
 import { RowKeys } from '../../../../atoms/roomConfig/types/charactersPanelConfig';
+import { DraggableTabs } from '../../../ui/DraggableTabs';
+import { moveElement } from '../../../../utils/moveElement';
 
 type DataSource = {
     key: string;
@@ -262,6 +264,8 @@ const createStringParameterColumn = ({
     };
 };
 
+const dndItemKey = 'rowKey';
+
 type TableHeaderCellProps = {
     title: string;
     rowKey: string;
@@ -282,7 +286,7 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
             type,
             end: (_, monitor) => {
                 const dropResult = monitor.getDropResult();
-                const draggedItemRowKey = (dropResult as any)?.rowKey as string | undefined;
+                const draggedItemRowKey = (dropResult as any)?.[dndItemKey] as string | undefined;
                 if (draggedItemRowKey == null) {
                     return;
                 }
@@ -299,15 +303,12 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
                     }
                 });
             },
-            collect: monitor => {
-                return { canDrag: monitor.canDrag(), highlighted: monitor.isDragging() };
-            },
         },
         [setRoomConfig, rowKey]
     );
     const [, drop] = useDrop({
         accept: type,
-        drop: () => ({ rowKey }),
+        drop: () => ({ [dndItemKey]: rowKey }),
     });
     return (
         <div ref={drop}>
@@ -782,8 +783,18 @@ export const CharacterList: React.FC = () => {
                     タグを追加・編集・削除
                 </Button>
             </div>
-            <Tabs
+            <DraggableTabs
+                // キャラクターウィンドウは最大で1個までしか存在しないため、静的な値で構わない
+                dndType='CharacterListTabs'
                 type='editable-card'
+                onDnd={action => {
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        moveElement(roomConfig.panels.characterPanel.tabs, tab => tab.key, action);
+                    });
+                }}
                 onEdit={(e, type) => {
                     if (type === 'remove') {
                         if (typeof e !== 'string') {
@@ -813,7 +824,7 @@ export const CharacterList: React.FC = () => {
                 }}
             >
                 {tabPanes}
-            </Tabs>
+            </DraggableTabs>
         </div>
     );
 };

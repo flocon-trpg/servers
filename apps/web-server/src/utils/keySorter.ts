@@ -1,3 +1,5 @@
+import { moveElement } from './moveElement';
+
 type Move<TKey extends string> = {
     from: TKey;
     to: TKey;
@@ -30,30 +32,6 @@ export class KeySorter<TKey extends string = string> {
 
     public move(configSource: ReadonlyArray<TKey>, move: Move<TKey>) {
         const result = this.generate(configSource);
-
-        const fromIndex = result.findIndex(elem => elem === move.from);
-        if (fromIndex < 0) {
-            return null;
-        }
-        const toIndex = result.findIndex(elem => elem === move.to);
-        if (toIndex < 0) {
-            return null;
-        }
-
-        if (fromIndex === toIndex) {
-            return result;
-        }
-
-        const elementToMove = result[fromIndex];
-        if (elementToMove == null) {
-            throw new Error('This should not happen');
-        }
-        result.splice(fromIndex, 1);
-        if (toIndex < fromIndex) {
-            result.splice(toIndex, 0, elementToMove);
-            return result;
-        }
-        result.splice(toIndex + 1, 0, elementToMove);
-        return result;
+        return moveElement(result, x => x, move);
     }
 }
