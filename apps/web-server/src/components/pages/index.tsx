@@ -74,7 +74,7 @@ export const Index: React.FC = () => {
                 <Alert
                     type='error'
                     showIcon
-                    message='クライアントとAPIサーバーの間に互換性がありません。APIサーバーとWebサーバーのいずれかもしくは両方をアップデートすることを推奨します。'
+                    message='APIサーバーとWebサーバーの間に互換性がありません。APIサーバーとWebサーバーのいずれかもしくは両方をアップデートすることを推奨します。'
                 />
             );
         }
@@ -134,7 +134,7 @@ export const Index: React.FC = () => {
                 </ul>
                 <div style={{ height: spacing }} />
                 <Typography.Title level={3}>バージョン情報</Typography.Title>
-                <div>{`クライアント: ${VERSION}`}</div>
+                <div>{`Webサーバー: ${VERSION}`}</div>
                 <div>
                     APIサーバー:{' '}
                     {loading ? (

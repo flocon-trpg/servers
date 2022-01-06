@@ -21,7 +21,7 @@ import { DicePieceEditorModal } from './board/DicePieceEditorModal';
 import { Memos } from './Memos';
 import { BoardContextMenu, PieceTooltip, PopoverEditor } from './board/BoardPopover';
 import { useMyUserUid } from '../../../hooks/useMyUserUid';
-import { ImagePieceDrawer } from './board/ImagePieceDrawer';
+import { ImagePieceModal } from './board/ImagePieceModal';
 import { CommandEditorModal } from './character/CommandEditorModal';
 import { ChatPalette } from './character/ChatPalettes';
 import { Board } from './board/Board';
@@ -30,12 +30,12 @@ import { roomConfigAtom } from '../../../atoms/roomConfig/roomConfigAtom';
 import { RoomConfigUtils } from '../../../atoms/roomConfig/types/roomConfig/utils';
 import { roomAtom } from '../../../atoms/room/roomAtom';
 import { useImmerUpdateAtom } from '../../../atoms/useImmerUpdateAtom';
-import { BoardPositionAndPieceEditorModal } from './piece/BoardPositionAndPieceEditorModal';
 import { CharacterTagNamesEditorModal } from './character/CharacterTagNamesEditorModal';
 import { ImportCharacterModal } from './character/ImportCharacterModal';
 import { ImportBoardModal } from './board/ImportBoardModal';
 import { useAtomValue } from 'jotai/utils';
 import { debouncedWindowInnerHeightAtom, debouncedWindowInnerWidthAtom } from '../../pages/room/id';
+import { BoardPositionAndPieceEditorModal } from './piece/BoardPositionAndPieceEditorModal';
 
 const RoomMessagePanels: React.FC = () => {
     const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
@@ -727,11 +727,11 @@ export const Room: React.FC = () => {
                 <PopoverEditor />
 
                 <BoardEditorModal />
+                <BoardPositionAndPieceEditorModal />
                 <CharacterEditorModal />
                 <CharacterTagNamesEditorModal />
-                <BoardPositionAndPieceEditorModal />
                 <DicePieceEditorModal />
-                <ImagePieceDrawer />
+                <ImagePieceModal />
                 <StringPieceEditorModal />
                 <CharacterParameterNamesEditorModal />
                 <EditRoomDrawer />

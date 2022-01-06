@@ -1,5 +1,7 @@
 import { ApolloClient, ApolloProvider } from '@apollo/client';
 import React, { PropsWithChildren } from 'react';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import { ClientIdContext } from '../../contexts/ClientIdContext';
 import { FirebaseAuthenticationIdTokenContext } from '../../contexts/FirebaseAuthenticationIdTokenContext';
 import { FirebaseStorageUrlCacheContext } from '../../contexts/FirebaseStorageUrlCacheContext';
@@ -28,7 +30,7 @@ export const AllContextProvider: React.FC<PropsWithChildren<Props>> = ({
                 <MyAuthContext.Provider value={user}>
                     <FirebaseStorageUrlCacheContext.Provider value={firebaseStorageUrlCache}>
                         <FirebaseAuthenticationIdTokenContext.Provider value={getIdToken}>
-                            {children}
+                            <DndProvider backend={HTML5Backend}>{children}</DndProvider>
                         </FirebaseAuthenticationIdTokenContext.Provider>
                     </FirebaseStorageUrlCacheContext.Provider>
                 </MyAuthContext.Provider>

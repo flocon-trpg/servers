@@ -46,7 +46,6 @@ import {
     boardContextMenuAtom,
     ContextMenuState,
 } from '../../../../atoms/overlay/board/boardContextMenuAtom';
-import { imagePieceDrawerAtom } from '../../../../atoms/overlay/imagePieceDrawerAtom';
 import { create } from '../../../../utils/constants';
 import { useCloneImagePiece } from '../../../../hooks/state/useCloneImagePiece';
 import { ImageView } from '../file/ImageView';
@@ -54,17 +53,20 @@ import classNames from 'classnames';
 import { flex, flexColumn, flexRow, itemsCenter } from '../../../../utils/className';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
 import { useIsMyCharacter } from '../../../../hooks/state/useIsMyCharacter';
-import {
-    boardPositionAndPieceEditorModalAtom,
-    characterPiece,
-    characterPortrait,
-} from '../piece/BoardPositionAndPieceEditorModal';
 import { characterEditorModalAtom } from '../character/CharacterEditorModal';
 import { BufferedInput } from '../../../ui/BufferedInput';
 import {
     dicePieceValueEditorAtom,
     stringPieceValueEditorAtom,
 } from '../../../../atoms/pieceValueEditor/pieceValueEditorAtom';
+import { PiecePositionEditor } from './PiecePositionEditor';
+import { BoardPositionEditor } from './BoardPositionEditor';
+import { imagePieceModalAtom } from './ImagePieceModal';
+import {
+    boardPositionAndPieceEditorModalAtom,
+    characterPiece,
+    characterPortrait,
+} from '../piece/BoardPositionAndPieceEditorModal';
 
 /* absolute positionで表示するときにBoardの子として表示させると、Boardウィンドウから要素がはみ出ることができないため、ウィンドウ右端に近いところで要素を表示させるときに不便なことがある。そのため、ページ全体の子として持たせるようにしている。 */
 
@@ -147,9 +149,46 @@ export const PieceTooltip: React.FC = () => {
 };
 
 namespace PopupEditorBase {
+    type CharacterPieceProps = {
+        characterId: string;
+        pieceId: string;
+    };
+
     type PieceProps = {
         boardId: string;
         pieceId: string;
+    };
+
+    export const Character: React.FC<CharacterPieceProps> = ({
+        pieceId,
+        characterId,
+    }: CharacterPieceProps) => {
+        const setRoomState = useSetRoomStateWithImmer();
+
+        const characterPieceValue = useAtomSelector(
+            roomAtom,
+            roomState => roomState.roomState?.state?.characters?.[characterId]?.pieces?.[pieceId]
+        );
+        if (characterPieceValue == null) {
+            return null;
+        }
+
+        return (
+            <PiecePositionEditor
+                showNameInput
+                state={characterPieceValue}
+                onUpdate={recipe => {
+                    setRoomState(roomState => {
+                        const characterPieceValue =
+                            roomState?.characters?.[characterId]?.pieces?.[pieceId];
+                        if (characterPieceValue == null) {
+                            return;
+                        }
+                        recipe(characterPieceValue);
+                    });
+                }}
+            />
+        );
     };
 
     export const DicePiece: React.FC<PieceProps> = ({ boardId, pieceId }: PieceProps) => {
@@ -233,6 +272,38 @@ namespace PopupEditorBase {
         );
     };
 
+    export const PortraitPiece: React.FC<CharacterPieceProps> = ({
+        pieceId,
+        characterId,
+    }: CharacterPieceProps) => {
+        const setRoomState = useSetRoomStateWithImmer();
+
+        const portraitPieceValue = useAtomSelector(
+            roomAtom,
+            roomState =>
+                roomState.roomState?.state?.characters?.[characterId]?.portraitPieces?.[pieceId]
+        );
+        if (portraitPieceValue == null) {
+            return null;
+        }
+
+        return (
+            <BoardPositionEditor
+                state={portraitPieceValue}
+                onUpdate={recipe => {
+                    setRoomState(roomState => {
+                        const portraitPieceValue =
+                            roomState?.characters?.[characterId]?.portraitPieces?.[pieceId];
+                        if (portraitPieceValue == null) {
+                            return;
+                        }
+                        recipe(portraitPieceValue);
+                    });
+                }}
+            />
+        );
+    };
+
     export const StringPiece: React.FC<PieceProps> = ({ boardId, pieceId }: PieceProps) => {
         const setRoomState = useSetRoomStateWithImmer();
         const stringPieceValue = useAtomSelector(
@@ -291,7 +362,16 @@ export const PopoverEditor: React.FC = () => {
     const top = popoverEditor.pageY - 3;
 
     let children: JSX.Element | null;
+    let width: number | undefined = undefined;
     switch (popoverEditor.dblClickOn.type) {
+        case character:
+            children = (
+                <PopupEditorBase.Character
+                    characterId={popoverEditor.dblClickOn.characterId}
+                    pieceId={popoverEditor.dblClickOn.pieceId}
+                />
+            );
+            break;
         case dicePiece:
             children = (
                 <PopupEditorBase.DicePiece
@@ -299,6 +379,15 @@ export const PopoverEditor: React.FC = () => {
                     pieceId={popoverEditor.dblClickOn.pieceId}
                 />
             );
+            break;
+        case portrait:
+            children = (
+                <PopupEditorBase.PortraitPiece
+                    characterId={popoverEditor.dblClickOn.characterId}
+                    pieceId={popoverEditor.dblClickOn.pieceId}
+                />
+            );
+            width = 400;
             break;
         case stringPiece:
             children = (
@@ -323,6 +412,7 @@ export const PopoverEditor: React.FC = () => {
                 position: 'absolute',
                 left,
                 top,
+                width,
                 padding,
                 backgroundColor,
                 zIndex,
@@ -352,7 +442,7 @@ const useHooks = () => {
     const setCharacterEditor = useUpdateAtom(characterEditorModalAtom);
     const setDicePieceEditor = useUpdateAtom(dicePieceValueEditorAtom);
     const setStringPieceEditor = useUpdateAtom(stringPieceValueEditorAtom);
-    const setImagePieceDrawer = useUpdateAtom(imagePieceDrawerAtom);
+    const setImagePieceModal = useUpdateAtom(imagePieceModalAtom);
     const setBoardPositionAndPieceEditorModal = useUpdateAtom(boardPositionAndPieceEditorModalAtom);
     const cloneImagePiece = useCloneImagePiece();
     return React.useMemo(
@@ -360,7 +450,7 @@ const useHooks = () => {
             setCharacterEditor,
             setDicePieceEditor,
             setStringPieceEditor,
-            setImagePieceDrawer,
+            setImagePieceModal,
             setBoardPositionAndPieceEditorModal,
             cloneImagePiece,
         }),
@@ -368,7 +458,7 @@ const useHooks = () => {
             setCharacterEditor,
             setDicePieceEditor,
             setStringPieceEditor,
-            setImagePieceDrawer,
+            setImagePieceModal,
             setBoardPositionAndPieceEditorModal,
             cloneImagePiece,
         ]
@@ -394,7 +484,7 @@ namespace ContextMenuModule {
         }
         return (
             <Menu.ItemGroup title='コマ'>
-                {characterPiecesOnCursor.map(({ characterId: characterId, character, pieceId }) => (
+                {characterPiecesOnCursor.map(({ characterId, character, pieceId }) => (
                     // characterIdとpieceIdを組み合わせてkeyにしている場所が他にもあるため、キーを互いに異なるものにするように文字列を付加している。
                     <Menu.SubMenu
                         key={keyNames(characterId, pieceId, 'selected-piece')}
@@ -441,19 +531,19 @@ namespace ContextMenuModule {
         );
     };
 
-    type SelectedTachiesPiecesMenuProps = {
+    type SelectedPortraitPiecesMenuProps = {
         portraitsOnCursor: ContextMenuState['portraitsOnCursor'];
         onContextMenuClear: () => void;
         hooks: ReturnType<typeof useHooks>;
         setRoomState: ReturnType<typeof useSetRoomStateWithImmer>;
     };
 
-    const selectedTachiePiecesMenu = ({
+    const selectedPortraitPiecesMenu = ({
         portraitsOnCursor,
         onContextMenuClear,
         hooks,
         setRoomState,
-    }: SelectedTachiesPiecesMenuProps): JSX.Element | null => {
+    }: SelectedPortraitPiecesMenuProps): JSX.Element | null => {
         if (portraitsOnCursor.length === 0) {
             return null;
         }
@@ -765,7 +855,7 @@ namespace ContextMenuModule {
                     >
                         <Menu.Item
                             onClick={() => {
-                                hooks.setImagePieceDrawer({
+                                hooks.setImagePieceModal({
                                     type: update,
                                     boardId: boardIdToShow,
                                     pieceId,
@@ -1004,7 +1094,7 @@ namespace ContextMenuModule {
                 <Menu.SubMenu title='画像コマ'>
                     <Menu.Item
                         onClick={() => {
-                            hooks.setImagePieceDrawer({
+                            hooks.setImagePieceModal({
                                 type: create,
                                 boardId,
                                 piecePosition: piecePositionWhichIsCellMode,
@@ -1016,7 +1106,7 @@ namespace ContextMenuModule {
                     </Menu.Item>
                     <Menu.Item
                         onClick={() => {
-                            hooks.setImagePieceDrawer({
+                            hooks.setImagePieceModal({
                                 type: create,
                                 boardId,
                                 piecePosition: piecePositionWhichIsNotCellMode,
@@ -1082,7 +1172,7 @@ namespace ContextMenuModule {
                         hooks,
                         setRoomState,
                     })}
-                    {selectedTachiePiecesMenu({
+                    {selectedPortraitPiecesMenu({
                         ...contextMenuState,
                         onContextMenuClear,
                         hooks,

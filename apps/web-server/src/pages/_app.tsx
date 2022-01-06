@@ -170,7 +170,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
             return;
         }
         setFirebaseApp(prevValue => {
-            if (prevValue == null) {
+            if (prevValue != null) {
                 console.warn('Firebase app is initialized multiple times');
             }
             return initializeApp(config.value.firebaseConfig);

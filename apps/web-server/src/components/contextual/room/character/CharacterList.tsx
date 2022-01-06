@@ -32,14 +32,7 @@ import {
     useNumParamNames,
     useStrParamNames,
 } from '../../../../hooks/state/useParamNames';
-import {
-    CharacterState,
-    ParamNameState,
-    strIndex10Array,
-    StrIndex20,
-    strIndex20Array,
-} from '@flocon-trpg/core';
-import _ from 'lodash';
+import { CharacterState, ParamNameState, strIndex10Array, StrIndex20 } from '@flocon-trpg/core';
 import classNames from 'classnames';
 import { cancelRnd, flex, flexRow, itemsCenter } from '../../../../utils/className';
 import { ColumnType } from 'antd/lib/table';
@@ -64,6 +57,11 @@ import { DialogFooter } from '../../../ui/DialogFooter';
 import { Gutter } from 'antd/lib/grid/row';
 import { useCharacterTagNames } from '../../../../hooks/state/useCharacterTagNames';
 import { importCharacterModalVisibilityAtom } from './ImportCharacterModal';
+import { useDrag, useDrop } from 'react-dnd';
+import { KeySorter } from '../../../../utils/keySorter';
+import { RowKeys } from '../../../../atoms/roomConfig/types/charactersPanelConfig';
+import { DraggableTabs } from '../../../ui/DraggableTabs';
+import { moveElement } from '../../../../utils/moveElement';
 
 type DataSource = {
     key: string;
@@ -99,7 +97,7 @@ const createBooleanParameterColumn = ({
         return value ? 1 : -1;
     };
     return {
-        title: name.name,
+        title: <TableHeaderCell title={name.name} rowKey={RowKeys.BoolParam(key)} />,
         key: reactKey,
         sorter: (x, y, sortOrder) =>
             booleanToNumber(x.character.state.boolParams[key]?.value, sortOrder) -
@@ -143,7 +141,7 @@ const createBooleanParameterColumn = ({
     };
 };
 
-const createNumParameterColumn = ({
+const createNumberParameterColumn = ({
     key,
     numParamNames,
 }: {
@@ -156,7 +154,7 @@ const createNumParameterColumn = ({
         return null;
     }
     return {
-        title: name.name,
+        title: <TableHeaderCell title={name.name} rowKey={RowKeys.NumParam(key)} />,
         key: reactKey,
         sorter: (x, y, sortOrder) => {
             const defaultValue = sortOrder === 'ascend' ? Number.MAX_VALUE : Number.MIN_VALUE;
@@ -219,7 +217,7 @@ const createStringParameterColumn = ({
         return null;
     }
     return {
-        title: name.name,
+        title: <TableHeaderCell title={name.name} rowKey={RowKeys.StrParam(key)} />,
         key: reactKey,
         sorter: (x, y) => {
             // 現在の仕様では、StringParameterは他のパラメーターと異なりundefinedでも''と同じとみなされるため、それに合わせている。
@@ -266,6 +264,82 @@ const createStringParameterColumn = ({
     };
 };
 
+const dndItemKey = 'rowKey';
+
+type TableHeaderCellProps = {
+    title: string;
+    rowKey: string;
+};
+
+const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
+    title,
+    rowKey,
+}: TableHeaderCellProps) => {
+    // キャラクターウィンドウは現時点では最大1個までしか存在しないため、静的な文字列で構わない
+    const type = 'TableHeaderCell';
+
+    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const keySorter = React.useMemo(() => new KeySorter(RowKeys.all), []);
+
+    const [, drag] = useDrag(
+        {
+            type,
+            end: (_, monitor) => {
+                const dropResult = monitor.getDropResult();
+                const draggedItemRowKey = (dropResult as any)?.[dndItemKey] as string | undefined;
+                if (draggedItemRowKey == null) {
+                    return;
+                }
+                setRoomConfig(roomConfig => {
+                    if (roomConfig == null) {
+                        return;
+                    }
+                    const newRowKeysOrder = keySorter.move(
+                        roomConfig.panels.characterPanel.rowKeysOrder,
+                        { from: rowKey, to: draggedItemRowKey }
+                    );
+                    if (newRowKeysOrder != null) {
+                        roomConfig.panels.characterPanel.rowKeysOrder = newRowKeysOrder;
+                    }
+                });
+            },
+        },
+        [setRoomConfig, rowKey]
+    );
+    const [, drop] = useDrop({
+        accept: type,
+        drop: () => ({ [dndItemKey]: rowKey }),
+    });
+    return (
+        <div ref={drop}>
+            {title}
+            <Tooltip
+                overlayClassName={cancelRnd}
+                overlay={
+                    <div
+                        onClick={e => {
+                            // これがないと、overlayをクリックしたときでもTableがソートされてしまう
+                            e.stopPropagation();
+                        }}
+                    >
+                        左右にドラッグすることで列を移動できます。
+                    </div>
+                }
+            >
+                <Button
+                    ref={drag}
+                    style={{ cursor: 'move' }}
+                    type='text'
+                    size='small'
+                    onClick={e => e.stopPropagation()}
+                >
+                    <Icon.MenuOutlined />
+                </Button>
+            </Tooltip>
+        </div>
+    );
+};
+
 type CharacterListTabPaneProps = {
     tabConfig: CharacterTabConfig;
 };
@@ -282,12 +356,144 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
     const numParamNames = useNumParamNames();
     const strParamNames = useStrParamNames();
 
-    if (
-        characters == null ||
-        boolParamNames == null ||
-        numParamNames == null ||
-        strParamNames == null
-    ) {
+    const rowKeysOrderSource = useAtomSelector(
+        roomConfigAtom,
+        roomConfig => roomConfig?.panels.characterPanel.rowKeysOrder
+    );
+    const rowKeysOrder = React.useMemo(
+        () => new KeySorter(RowKeys.all).generate(rowKeysOrderSource ?? []),
+        [rowKeysOrderSource]
+    );
+    const columns: ColumnType<DataSource>[] | null = React.useMemo(() => {
+        if (boolParamNames == null || numParamNames == null || strParamNames == null) {
+            return null;
+        }
+
+        return rowKeysOrder
+            .map<ColumnType<DataSource> | null>(rowKey => {
+                switch (rowKey) {
+                    case RowKeys.EditButton:
+                        return {
+                            title: <TableHeaderCell title='' rowKey={rowKey} />,
+                            key: 'menu',
+                            width: 36,
+                            // eslint-disable-next-line react/display-name
+                            render: (_: unknown, { character }: DataSource) => (
+                                <Tooltip title='編集'>
+                                    <Button
+                                        style={{ alignSelf: 'center' }}
+                                        size='small'
+                                        onClick={() =>
+                                            setCharacterEditorModal({
+                                                type: update,
+                                                stateId: character.stateId,
+                                            })
+                                        }
+                                    >
+                                        <Icon.SettingOutlined />
+                                    </Button>
+                                </Tooltip>
+                            ),
+                        };
+                    case RowKeys.Name:
+                        return {
+                            title: <TableHeaderCell title='名前' rowKey={rowKey} />,
+                            key: 'name',
+                            sorter: (x, y) =>
+                                x.character.state.name.localeCompare(y.character.state.name),
+                            // eslint-disable-next-line react/display-name
+                            render: (_: unknown, { character }: DataSource) => (
+                                <div className={classNames(flex, flexRow, itemsCenter)}>
+                                    {character.state.image == null ? (
+                                        <Icon.UserOutlined />
+                                    ) : (
+                                        <IconView size={20} image={character.state.image} />
+                                    )}
+                                    <div style={{ width: 4 }} />
+                                    <Input
+                                        style={{ minWidth: 100 }}
+                                        value={character.state.name}
+                                        size='small'
+                                        onChange={newValue => {
+                                            setRoomState(state => {
+                                                const targetCharacter =
+                                                    state.characters[character.stateId];
+                                                if (targetCharacter == null) {
+                                                    return;
+                                                }
+                                                targetCharacter.name = newValue.target.value;
+                                            });
+                                        }}
+                                    />
+                                </div>
+                            ),
+                        };
+                    case RowKeys.TogglePrivate:
+                        return {
+                            title: <TableHeaderCell title='' rowKey={rowKey} />,
+                            key: '全体公開',
+                            width: 36,
+                            // eslint-disable-next-line react/display-name
+                            render: (_: unknown, { character }: DataSource) => (
+                                <ToggleButton
+                                    size='small'
+                                    checked={!character.state.isPrivate}
+                                    disabled={
+                                        character.createdByMe
+                                            ? false
+                                            : characterIsNotPrivateAndNotCreatedByMe
+                                    }
+                                    showAsTextWhenDisabled
+                                    checkedChildren={<Icon.EyeOutlined />}
+                                    unCheckedChildren={<Icon.EyeInvisibleOutlined />}
+                                    tooltip={
+                                        character.state.isPrivate
+                                            ? characterIsPrivate({ isCreate: false })
+                                            : characterIsNotPrivate({ isCreate: false })
+                                    }
+                                    onChange={newValue => {
+                                        setRoomState(roomState => {
+                                            const targetCharacter =
+                                                roomState.characters[character.stateId];
+                                            if (targetCharacter == null) {
+                                                return;
+                                            }
+                                            targetCharacter.isPrivate = !newValue;
+                                        });
+                                    }}
+                                />
+                            ),
+                        };
+                }
+                const boolParamKey = RowKeys.isBoolParam(rowKey);
+                if (boolParamKey != null) {
+                    return createBooleanParameterColumn({ key: boolParamKey, boolParamNames });
+                }
+                const numParamKey = RowKeys.isNumParam(rowKey);
+                if (numParamKey != null) {
+                    return createNumberParameterColumn({ key: numParamKey, numParamNames });
+                }
+                const strParamKey = RowKeys.isStrParam(rowKey);
+                if (strParamKey != null) {
+                    return createStringParameterColumn({ key: strParamKey, strParamNames });
+                }
+
+                console.warn(
+                    `"${rowKey}" は使用可能なキーではありません。KeySorterの設定に誤りがある可能性があります。`
+                );
+                return null;
+            })
+            .flatMap(x => (x == null ? [] : [x]));
+    }, [
+        boolParamNames,
+        numParamNames,
+        rowKeysOrder,
+        setCharacterEditorModal,
+        setRoomState,
+        strParamNames,
+    ]);
+
+    if (columns == null || characters == null) {
         return null;
     }
 
@@ -315,104 +521,14 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
         };
     });
 
-    const columns = _([
-        {
-            title: '',
-            key: 'menu',
-            width: 36,
-            // eslint-disable-next-line react/display-name
-            render: (_: unknown, { character }: DataSource) => (
-                <Tooltip title='編集'>
-                    <Button
-                        style={{ alignSelf: 'center' }}
-                        size='small'
-                        onClick={() =>
-                            setCharacterEditorModal({
-                                type: update,
-                                stateId: character.stateId,
-                            })
-                        }
-                    >
-                        <Icon.SettingOutlined />
-                    </Button>
-                </Tooltip>
-            ),
-        },
-        {
-            title: '',
-            key: '全体公開',
-            width: 36,
-            // eslint-disable-next-line react/display-name
-            render: (_: unknown, { character }: DataSource) => (
-                <ToggleButton
-                    size='small'
-                    checked={!character.state.isPrivate}
-                    disabled={
-                        character.createdByMe ? false : characterIsNotPrivateAndNotCreatedByMe
-                    }
-                    showAsTextWhenDisabled
-                    checkedChildren={<Icon.EyeOutlined />}
-                    unCheckedChildren={<Icon.EyeInvisibleOutlined />}
-                    tooltip={
-                        character.state.isPrivate
-                            ? characterIsPrivate({ isCreate: false })
-                            : characterIsNotPrivate({ isCreate: false })
-                    }
-                    onChange={newValue => {
-                        setRoomState(roomState => {
-                            const targetCharacter = roomState.characters[character.stateId];
-                            if (targetCharacter == null) {
-                                return;
-                            }
-                            targetCharacter.isPrivate = !newValue;
-                        });
-                    }}
-                />
-            ),
-        },
-        {
-            title: '名前',
-            key: 'name',
-            sorter: (x, y) => x.character.state.name.localeCompare(y.character.state.name),
-            // eslint-disable-next-line react/display-name
-            render: (_: unknown, { character }: DataSource) => (
-                <div className={classNames(flex, flexRow, itemsCenter)}>
-                    {character.state.image == null ? (
-                        <Icon.UserOutlined />
-                    ) : (
-                        <IconView size={20} image={character.state.image} />
-                    )}
-                    <div style={{ width: 4 }} />
-                    <Input
-                        style={{ minWidth: 100 }}
-                        value={character.state.name}
-                        size='small'
-                        onChange={newValue => {
-                            setRoomState(state => {
-                                const targetCharacter = state.characters[character.stateId];
-                                if (targetCharacter == null) {
-                                    return;
-                                }
-                                targetCharacter.name = newValue.target.value;
-                            });
-                        }}
-                    />
-                </div>
-            ),
-        },
-        ...strIndex20Array.map(key => createNumParameterColumn({ key, numParamNames })),
-        ...strIndex20Array.map(key => createBooleanParameterColumn({ key, boolParamNames })),
-        ...strIndex20Array.map(key => createStringParameterColumn({ key, strParamNames })),
-    ])
-        .compact()
-        .value();
-
     return (
         <Table
             columns={columns}
             dataSource={charactersDataSource}
             size='small'
             pagination={false}
+            // 列をドラッグして動かすときにTooltipをドラッグするとキャラクターウィンドウが開いてしまう。簡単な方法でTooltipを調整する手段はなさそうなので、非表示にすることで解決している
+            showSorterTooltip={false}
         />
     );
 };
@@ -667,8 +783,18 @@ export const CharacterList: React.FC = () => {
                     タグを追加・編集・削除
                 </Button>
             </div>
-            <Tabs
+            <DraggableTabs
+                // キャラクターウィンドウは最大で1個までしか存在しないため、静的な値で構わない
+                dndType='CharacterListTabs'
                 type='editable-card'
+                onDnd={action => {
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        moveElement(roomConfig.panels.characterPanel.tabs, tab => tab.key, action);
+                    });
+                }}
                 onEdit={(e, type) => {
                     if (type === 'remove') {
                         if (typeof e !== 'string') {
@@ -698,7 +824,7 @@ export const CharacterList: React.FC = () => {
                 }}
             >
                 {tabPanes}
-            </Tabs>
+            </DraggableTabs>
         </div>
     );
 };

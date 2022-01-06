@@ -78,6 +78,8 @@ import { MessageTabConfigUtils } from '../../../../atoms/roomConfig/types/messag
 import { useImmerUpdateAtom } from '../../../../atoms/useImmerUpdateAtom';
 import { useAtomValue } from 'jotai/utils';
 import { MessageTabName } from './MessageTabName';
+import { DraggableTabs } from '../../../ui/DraggableTabs';
+import { moveElement } from '../../../../utils/moveElement';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -1021,9 +1023,19 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                     <Icons.PlusOutlined />
                 </Button>
             </div>
-            <Tabs
+            <DraggableTabs
                 style={{ flexBasis: `${tabsHeight}px`, margin: `0 ${marginX}px 4px ${marginX}px` }}
+                dndType={`MessagePanelTab@${panelId}`}
                 type='editable-card'
+                onDnd={action => {
+                    setRoomConfig(roomConfig => {
+                        const messagePanel = roomConfig?.panels.messagePanels[panelId];
+                        if (messagePanel == null) {
+                            return;
+                        }
+                        moveElement(messagePanel.tabs, tab => tab.key, action);
+                    });
+                }}
                 onEdit={(e, type) => {
                     if (type === 'remove') {
                         if (typeof e !== 'string') {
@@ -1059,7 +1071,7 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                 }}
             >
                 {tabPanels}
-            </Tabs>
+            </DraggableTabs>
             <div style={{ flex: 1 }} />
             <ChatInput
                 {...props}
