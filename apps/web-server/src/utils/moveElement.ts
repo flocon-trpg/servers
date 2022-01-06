@@ -21,10 +21,6 @@ export const moveElement = <T>(
         throw new Error('This should not happen');
     }
     source.splice(fromIndex, 1);
-    if (toIndex < fromIndex) {
-        source.splice(toIndex, 0, elementToMove);
-        return source;
-    }
-    source.splice(toIndex + 1, 0, elementToMove);
+    source.splice(toIndex, 0, elementToMove);
     return source;
 };
