@@ -1,5 +1,4 @@
 import {
-    BoardPositionState,
     CharacterState,
     DicePieceState,
     ImagePieceState,

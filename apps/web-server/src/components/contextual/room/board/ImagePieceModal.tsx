@@ -1,4 +1,4 @@
-import { Button, Col, Modal, Row, Space, Tooltip } from 'antd';
+import { Button, Col, Modal, Row, Tooltip } from 'antd';
 import React from 'react';
 import { DialogFooter } from '../../../ui/DialogFooter';
 import { DrawerProps } from 'antd/lib/drawer';
