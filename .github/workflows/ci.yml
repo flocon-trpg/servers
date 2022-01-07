@@ -41,11 +41,8 @@ jobs:
                   TEST_SKIP_RESOLVERS: true
 
             - name: Next export
-              run: yarn run build:self && yarn run export
+              run: yarn run export
               working-directory: ./apps/web-server
-              env:
-                  NEXT_PUBLIC_FIREBASE_CONFIG: ${{ secrets.NEXT_PUBLIC_FIREBASE_CONFIG }}
-                  NEXT_PUBLIC_FLOCON_WEB_CONFIG: ${{ secrets.NEXT_PUBLIC_FLOCON_WEB_CONFIG }}
 
     test-cache-redis:
         name: Tests cache with Redis on Node ${{ matrix.node }} and ${{ matrix.os }}
