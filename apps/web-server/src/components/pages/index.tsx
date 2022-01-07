@@ -82,7 +82,7 @@ export const Index: React.FC = () => {
             <div className={classNames(flex, flexColumn)}>
                 {alert}
                 <Collapse ghost>
-                    <Collapse.Panel header='詳細' key='version-info-detais-panel'>
+                    <Collapse.Panel header='APIサーバーの詳細' key='version-info-detais-panel'>
                         <div className={classNames(flex, flexColumn)}>
                             <div>{`supported API server versions: ${supportedApiServersAsString}`}</div>
                             <div>
@@ -127,30 +127,36 @@ export const Index: React.FC = () => {
                         ブラウザはChrome系(Edgeを含む)かFirefoxを推奨します。Internet
                         Explorerではおそらく動作しません。Safariでは、概ね正常に動きますが、メッセージのスクロールでカクつくかもしれません（要調査）。
                     </li>
+                    <li>現時点ではスマートフォンには対応しておりません。</li>
                     <li>
                         AdblockやAdblock
-                        Plusを使用していると正常にサイトが動かないという不具合が報告されています。これらの拡張機能を無効にしてからの利用を推奨します。
+                        Plusを使用していると正常にサイトが動かない不具合が報告されています。もし動作に支障がある場合は、これらの拡張機能を無効にしてからの利用を推奨します。なお、uBlock
+                        Originでは不具合は確認されておりません。
                     </li>
                 </ul>
                 <div style={{ height: spacing }} />
                 <Typography.Title level={3}>バージョン情報</Typography.Title>
-                <div>{`Webサーバー: ${VERSION}`}</div>
-                <div>
-                    APIサーバー:{' '}
-                    {loading ? (
-                        <span>
-                            <Icon.LoadingOutlined />
-                            取得中…
-                        </span>
-                    ) : apiServerSemVer == null ? (
-                        '(エラーが発生しました)'
-                    ) : (
-                        apiServerSemVer.toString()
-                    )}
-                </div>
-                <QueryResultViewer error={error} loading={false} compact>
-                    {versionInfo}
-                </QueryResultViewer>
+                <ul>
+                    <li>{`Webサーバー: ${VERSION}`}</li>
+                    <li>
+                        APIサーバー:{' '}
+                        {loading ? (
+                            <span>
+                                <Icon.LoadingOutlined />
+                                取得中…
+                            </span>
+                        ) : apiServerSemVer == null ? (
+                            '(エラーが発生しました)'
+                        ) : (
+                            apiServerSemVer.toString()
+                        )}
+                        <div style={{ maxWidth: 800 }}>
+                            <QueryResultViewer error={error} loading={false} compact>
+                                {versionInfo}
+                            </QueryResultViewer>
+                        </div>
+                    </li>
+                </ul>
                 <div style={{ height: spacing }} />
                 <Typography.Title level={3}>利用規約・プライバシーポリシー</Typography.Title>
                 <ul>
@@ -159,6 +165,24 @@ export const Index: React.FC = () => {
                     </li>
                     <li>
                         <a href='/privacy_policy'>プライバシーポリシー</a>
+                    </li>
+                </ul>
+                <div style={{ height: spacing }} />
+                <Typography.Title level={3}>外部リンク</Typography.Title>
+                <ul>
+                    <li>
+                        <a href='https://flocon.app' target='_blank' rel='noopener noreferrer'>
+                            公式サイト
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href='https://github.com/flocon-trpg/servers/releases'
+                            target='_blank'
+                            rel='noopener noreferrer'
+                        >
+                            更新履歴
+                        </a>
                     </li>
                 </ul>
             </div>
