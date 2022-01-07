@@ -134,12 +134,16 @@ const useFirebaseUser = (): FirebaseUserState => {
             setUser(authNotFound);
             return;
         }
+
+        // authは最初はnullで、その後非同期でenv.txtが読み込まれてからnon-nullになるため、サイトを開いたときは正常の場合でも上のコードによりまずauthNotFoundがセットされる。
+        // そのためこのようにloadingをセットしないと、onIdTokenChangedでuserを受信するまでauthNotFoundエラーがブラウザ画面に表示されてしまう。
+        setUser(loading);
+
         const unsubscribe = auth.onIdTokenChanged(user => {
             setUser(user == null ? notSignIn : user);
         });
         return () => {
             unsubscribe();
-            setUser(loading);
         };
     }, [auth]);
     return user;
