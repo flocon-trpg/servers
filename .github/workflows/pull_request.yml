@@ -1,11 +1,13 @@
 name: Tests of pull requests
 
 on:
-    - pull_request
+    pull_request:
+        branches-ignore:
+            - 'renovate/**'
 
 jobs:
-    pr-test:
-        name: Full test
+    main:
+        name: 'Full test and Codecov'
 
         runs-on: ubuntu-latest
         container: 'node:14'
