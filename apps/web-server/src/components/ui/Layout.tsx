@@ -190,7 +190,13 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
         }
         switch (isEntry) {
             case 'loading':
-                return <LoadingResult title='エントリーの有無を確認しています…' />;
+                return (
+                    <LoadingResult
+                        title='エントリーの有無を確認しています…'
+                        // APIサーバーをHeroku Freeプランで運用している場合はスリープが解除されるまで待たされることがあるため、それに対応した文章としている。特に公式サーバーの利用者を念頭に置いている。
+                        subTitle='完了までに十数秒程度かかることがあります。しばらくお待ちください…'
+                    />
+                );
             case false:
                 return (
                     <Center>
