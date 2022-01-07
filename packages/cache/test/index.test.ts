@@ -30,7 +30,10 @@ const createEach = (redis: Redis.Redis): Cache[] => {
 };
 
 describe('cache', () => {
-    const redis = new Redis();
+    const redis = new Redis({
+        port: 6379,
+        host: 'redis',
+    });
 
     afterAll(() => {
         redis.disconnect();
