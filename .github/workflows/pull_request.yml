@@ -1,0 +1,80 @@
+name: Tests of pull requests
+
+on:
+    pull_request:
+        branches-ignore:
+            - 'renovate/**'
+
+jobs:
+    main:
+        name: 'Full test and Codecov'
+
+        runs-on: ubuntu-latest
+        container: 'node:14'
+
+        services:
+            postgres:
+                image: postgres
+                env:
+                    POSTGRES_USER: postgres
+                    POSTGRES_PASSWORD: postgres
+                    POSTGRES_DB: test
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports:
+                    - 5432:5432
+            redis:
+                image: redis
+                options: >-
+                    --health-cmd "redis-cli ping"
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v2
+
+            - name: Install
+              run: yarn
+
+            - name: Prepare packages
+              run: yarn run build-ci
+
+            - name: Migration-up SQLite(1)
+              run: yarn migration-up --db sqlite
+              working-directory: ./apps/api-server
+              env:
+                  SQLITE: >
+                      {
+                          "dbName": "./test1.sqlite3"
+                      }
+
+            - name: Migration-up SQLite(2)
+              run: yarn migration-up --db sqlite
+              working-directory: ./apps/api-server
+              env:
+                  SQLITE: >
+                      {
+                          "dbName": "./test2.sqlite3"
+                      }
+
+            - name: Migration-up PostgreSQL
+              run: yarn migration-up --db postgresql
+              working-directory: ./apps/api-server
+              env:
+                  POSTGRESQL: >
+                      {
+                          "clientUrl": "postgresql://postgres:postgres@postgres:5432/test"
+                      }
+
+            - name: Test
+              run: TEST_NUM_RUNS=3000 yarn test --ci --coverage --maxWorkers=2
+
+            - name: Upload Codecov Coverage
+              uses: codecov/codecov-action@v2
+              with:
+                  token: ${{ secrets.CODECOV_TOKEN }}
