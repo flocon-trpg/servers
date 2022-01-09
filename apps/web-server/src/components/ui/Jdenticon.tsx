@@ -5,14 +5,19 @@ import classNames from 'classnames';
 import { flex, flexColumn } from '../../utils/className';
 
 const userUid = 'userUid';
+const none = 'none';
 
 type Props = {
     hashOrValue: string;
     size: number;
-    tooltipMode?: {
-        type: typeof userUid;
-        userName?: string;
-    };
+    tooltipMode?:
+        | {
+              type: typeof userUid;
+              userName?: string;
+          }
+        | {
+              type: typeof none;
+          };
 };
 
 export const Jdenticon: React.FC<Props> = ({ hashOrValue, size, tooltipMode }: Props) => {
@@ -20,6 +25,12 @@ export const Jdenticon: React.FC<Props> = ({ hashOrValue, size, tooltipMode }: P
     React.useEffect(() => {
         setSrc(`data:image/svg+xml;utf8,${encodeURIComponent(jdenticon.toSvg(hashOrValue, size))}`);
     }, [hashOrValue, size]);
+
+    const content = <img src={src} width={size} height={size} />;
+
+    if (tooltipMode?.type === 'none') {
+        return content;
+    }
 
     let tooltipTitle: string;
     let tooltipTitle2: string | null = null;
@@ -49,7 +60,7 @@ export const Jdenticon: React.FC<Props> = ({ hashOrValue, size, tooltipMode }: P
                 </div>
             }
         >
-            <img src={src} width={size} height={size} />
+            {content}
         </Popover>
     );
 };
