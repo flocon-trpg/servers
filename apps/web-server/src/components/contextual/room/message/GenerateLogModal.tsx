@@ -267,7 +267,11 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                 )}
                 {progress === 100 && (
                     <div>
-                        zipファイル生成が完了しました。間もなくzipファイルのダウンロードが開始されます。
+                        {`${
+                            logMode === rich ? 'zip' : 'HTML'
+                        }ファイルの生成が完了しました。間もなく${
+                            logMode === rich ? 'zip' : 'HTML'
+                        }ファイルのダウンロードが開始されます。`}
                     </div>
                 )}
                 {errorMessage != null && <div>{errorMessage}</div>}
