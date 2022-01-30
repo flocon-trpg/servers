@@ -797,21 +797,18 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
 };
 
 type Props = {
+    width: number;
     height: number;
     panelId: string;
 };
 
-export const RoomMessages: React.FC<Props> = (props: Props) => {
-    const { height, panelId } = props;
+export const RoomMessages: React.FC<Props> = ({ width, height, panelId }: Props) => {
     const tabsAtom = React.useMemo(() => {
         return atom(get => get(roomConfigAtom)?.panels.messagePanels?.[panelId]?.tabs);
     }, [panelId]);
     const tabs = useAtomValue(tabsAtom);
     const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
     const setUserConfig = useImmerUpdateAtom(userConfigAtom);
-
-    const contentHeight = Math.max(0, height - 340);
-    const tabsHeight = Math.max(0, height - 300);
 
     const [editingTabConfigKey, setEditingTabConfigKey] = React.useState<string>();
     const editingTabConfig = React.useMemo(() => {
@@ -830,6 +827,10 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
     if (roomId == null || allRoomMessagesResult == null || tabs == null) {
         return null;
     }
+
+    const wrapChatInput = width >= 800;
+    const contentHeight = Math.max(0, height - 340);
+    const tabsHeight = Math.max(0, height - 300);
 
     switch (allRoomMessagesResult.type) {
         case loading:
@@ -944,7 +945,7 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                               </div>
                           }
                       >
-                          <MessageTabPane {...props} config={tab} contentHeight={contentHeight} />
+                          <MessageTabPane config={tab} contentHeight={contentHeight} />
                       </Tabs.TabPane>
                   );
               });
@@ -956,7 +957,6 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
             style={{ display: 'flex', flexDirection: 'column', height: '100%', margin: '2px 4px' }}
         >
             <TabEditorDrawer
-                {...props}
                 config={editingTabConfig}
                 onClose={() => setEditingTabConfigKey(undefined)}
                 onChange={newValue => {
@@ -980,7 +980,6 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                 }}
             />
             <ChannelNamesEditor
-                {...props}
                 visible={isChannelNamesEditorVisible}
                 onClose={() => setIsChannelNamesEditorVisible(false)}
             />
@@ -1074,9 +1073,10 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
             </DraggableTabs>
             <div style={{ flex: 1 }} />
             <ChatInput
-                {...props}
                 style={{ flex: 'auto', margin: '0 4px' }}
                 roomId={roomId}
+                panelId={panelId}
+                wrap={wrapChatInput}
                 onConfigUpdate={recipe =>
                     setRoomConfig(roomConfig => {
                         if (roomConfig == null) {

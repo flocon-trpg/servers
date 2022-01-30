@@ -118,7 +118,11 @@ const RoomMessagePanels: React.FC = () => {
                         minWidth={150}
                         zIndex={pair.value.zIndex}
                     >
-                        <RoomMessages panelId={pair.key} height={pair.value.height} />
+                        <RoomMessages
+                            panelId={pair.key}
+                            width={pair.value.width}
+                            height={pair.value.height}
+                        />
                     </DraggableCard>
                 );
             })}

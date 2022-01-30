@@ -10,20 +10,27 @@ import { roomConfigAtom } from '../../../../../atoms/roomConfig/roomConfigAtom';
 import { Draft } from 'immer';
 import { useAtomValue } from 'jotai/utils';
 
-const titleStyle: React.CSSProperties = {
+const titleStyleBase: React.CSSProperties = {
     flexBasis: '80px',
 };
+
+const miniInputMaxWidth = 200;
 
 type Props = {
     roomId: string;
     panelId: string;
     style?: Omit<React.CSSProperties, 'alignItems' | 'display' | 'flexDirection'>;
     onConfigUpdate: (recipe: (draft: Draft<MessagePanelConfig>) => void) => void;
+    wrap: boolean;
 };
 
-export const ChatInput: React.FC<Props> = ({ roomId, panelId, style, onConfigUpdate }: Props) => {
-    const miniInputMaxWidth = 200;
-
+export const ChatInput: React.FC<Props> = ({
+    roomId,
+    panelId,
+    style,
+    onConfigUpdate,
+    wrap,
+}: Props) => {
     const configAtom = React.useMemo(
         () => atom(get => get(roomConfigAtom)?.panels.messagePanels?.[panelId]),
         [panelId]
@@ -36,25 +43,52 @@ export const ChatInput: React.FC<Props> = ({ roomId, panelId, style, onConfigUpd
         return null;
     }
 
+    const titleStyle: React.CSSProperties | undefined = wrap ? undefined : titleStyleBase;
+    const characterSelector = (
+        <CharacterSelector
+            config={config}
+            onConfigUpdate={onConfigUpdate}
+            titleStyle={titleStyle}
+            inputMaxWidth={miniInputMaxWidth}
+        />
+    );
+    const gameSelector = (
+        <GameSelector
+            config={config}
+            onConfigUpdate={onConfigUpdate}
+            titleStyle={titleStyle}
+            inputMaxWidth={miniInputMaxWidth}
+        />
+    );
+    const textColorSelector = (
+        <TextColorSelector
+            config={config}
+            onConfigUpdate={onConfigUpdate}
+            titleStyle={titleStyle}
+        />
+    );
+    let topElement: JSX.Element;
+    if (wrap) {
+        topElement = (
+            <div style={{ ...style, display: 'flex', flexDirection: 'row' }}>
+                {characterSelector}
+                {gameSelector}
+                {textColorSelector}
+            </div>
+        );
+    } else {
+        topElement = (
+            <>
+                {characterSelector}
+                {gameSelector}
+                {textColorSelector}
+            </>
+        );
+    }
+
     return (
         <div style={{ ...style, display: 'flex', flexDirection: 'column' }}>
-            <CharacterSelector
-                config={config}
-                onConfigUpdate={onConfigUpdate}
-                titleStyle={titleStyle}
-                inputMaxWidth={miniInputMaxWidth}
-            />
-            <GameSelector
-                config={config}
-                onConfigUpdate={onConfigUpdate}
-                titleStyle={titleStyle}
-                inputMaxWidth={miniInputMaxWidth}
-            />
-            <TextColorSelector
-                config={config}
-                onConfigUpdate={onConfigUpdate}
-                titleStyle={titleStyle}
-            />
+            {topElement}
             <div style={{ flexBasis: 6 }} />
             <SubmitMessage
                 roomId={roomId}
