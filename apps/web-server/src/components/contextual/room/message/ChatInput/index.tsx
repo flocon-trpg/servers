@@ -10,18 +10,25 @@ import { roomConfigAtom } from '../../../../../atoms/roomConfig/roomConfigAtom';
 import { Draft } from 'immer';
 import { useAtomValue } from 'jotai/utils';
 
-const titleStyleBase: React.CSSProperties = {
+const titleStyleForRow: React.CSSProperties = {
+    paddingRight: 4,
+};
+
+const titleStyleForColumn: React.CSSProperties = {
     flexBasis: '80px',
 };
 
 const miniInputMaxWidth = 200;
 
+export const row = 'row';
+export const column = 'column';
+
 type Props = {
     roomId: string;
     panelId: string;
-    style?: Omit<React.CSSProperties, 'alignItems' | 'display' | 'flexDirection'>;
+    style?: Omit<React.CSSProperties, 'alignItems' | 'display' | 'flexDirection' | 'gap'>;
     onConfigUpdate: (recipe: (draft: Draft<MessagePanelConfig>) => void) => void;
-    wrap: boolean;
+    topElementsDirection: typeof row | typeof column;
 };
 
 export const ChatInput: React.FC<Props> = ({
@@ -29,7 +36,7 @@ export const ChatInput: React.FC<Props> = ({
     panelId,
     style,
     onConfigUpdate,
-    wrap,
+    topElementsDirection,
 }: Props) => {
     const configAtom = React.useMemo(
         () => atom(get => get(roomConfigAtom)?.panels.messagePanels?.[panelId]),
@@ -43,7 +50,8 @@ export const ChatInput: React.FC<Props> = ({
         return null;
     }
 
-    const titleStyle: React.CSSProperties | undefined = wrap ? undefined : titleStyleBase;
+    const titleStyle: React.CSSProperties | undefined =
+        topElementsDirection === row ? titleStyleForRow : titleStyleForColumn;
     const characterSelector = (
         <CharacterSelector
             config={config}
@@ -68,9 +76,9 @@ export const ChatInput: React.FC<Props> = ({
         />
     );
     let topElement: JSX.Element;
-    if (wrap) {
+    if (topElementsDirection === row) {
         topElement = (
-            <div style={{ ...style, display: 'flex', flexDirection: 'row' }}>
+            <div style={{ ...style, display: 'flex', flexDirection: 'row', gap: '0 20px' }}>
                 {characterSelector}
                 {gameSelector}
                 {textColorSelector}
