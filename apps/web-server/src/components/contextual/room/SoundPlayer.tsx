@@ -248,11 +248,6 @@ const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({
     const [fileInput, setFileInput] = React.useState<FilePathInput>();
     const [volumeInput, setVolumeInput] = React.useState<number>(defaultVolume);
 
-    React.useEffect(() => {
-        setFileInput(undefined);
-        setVolumeInput(defaultVolume);
-    }, [visible]);
-
     if (roomId == null) {
         return null;
     }
@@ -267,7 +262,13 @@ const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({
             onClose={() => onClose()}
             footer={
                 <DialogFooter
-                    close={{ textType: 'cancel', onClick: () => onClose() }}
+                    close={{
+                        textType: 'cancel',
+                        onClick: () => {
+                            setFileInput(undefined);
+                            onClose();
+                        },
+                    }}
                     ok={{
                         textType: 'ok',
                         disabled: fileInput == null,
@@ -275,10 +276,12 @@ const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({
                             if (fileInput == null) {
                                 return;
                             }
+
                             // Promiseの結果を待たずに処理を続行している
                             writeRoomSoundEffect({
                                 variables: { roomId, file: fileInput, volume: volumeInput },
                             });
+                            setFileInput(undefined);
                             onClose();
                         },
                     }}
