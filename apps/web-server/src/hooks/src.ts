@@ -109,15 +109,23 @@ type SrcResult =
           type: typeof loading | typeof error | typeof nullishArg | typeof invalidWebConfig;
       };
 
-export function useSrcFromGraphQL(path: FilePathFragment | FilePath | null | undefined): SrcResult {
-    const pathArray = React.useMemo(() => (path == null ? null : [path]), [path]);
-    const resultArray = useSrcArrayFromGraphQL(pathArray);
-    if (resultArray.type !== done) {
-        return resultArray;
+const toSrcResult = (srcArray: ReturnType<typeof useSrcArrayFromGraphQL>): SrcResult => {
+    if (srcArray.type !== done) {
+        return srcArray;
     }
-    const result = resultArray.value[0];
+    const result = srcArray.value[0];
     if (result == null) {
         return { type: error };
     }
     return { type: success, value: result };
+};
+
+export function useSrcFromGraphQL(path: FilePathFragment | FilePath | null | undefined): SrcResult {
+    const pathArray = React.useMemo(() => (path == null ? null : [path]), [path]);
+    const resultArray = useSrcArrayFromGraphQL(pathArray);
+    const [result, setResult] = React.useState<SrcResult>(toSrcResult(resultArray));
+    React.useEffect(() => {
+        setResult(toSrcResult(resultArray));
+    }, [resultArray]);
+    return result;
 }
