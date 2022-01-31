@@ -7,20 +7,21 @@ import { flex, flexNone, flexRow, itemsCenter } from '../../../../../utils/class
 import { ChatPalettePanelConfig } from '../../../../../atoms/roomConfig/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '../../../../../atoms/roomConfig/types/messagePanelConfig';
 import { Draft } from 'immer';
+import { InputDescription } from '../../../../ui/InputDescription';
 
 type Props = {
     config: ChatPalettePanelConfig | MessagePanelConfig;
     onConfigUpdate: (
         recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void
     ) => void;
-    titleStyle?: React.CSSProperties;
+    descriptionStyle?: React.CSSProperties;
     inputMaxWidth?: number;
 };
 
 export const PublicMessageChannelSelector: React.FC<Props> = ({
     config,
     onConfigUpdate,
-    titleStyle,
+    descriptionStyle,
     inputMaxWidth,
 }: Props) => {
     const publicChannelNames = usePublicChannelNames();
@@ -32,7 +33,7 @@ export const PublicMessageChannelSelector: React.FC<Props> = ({
 
     return (
         <div className={classNames(flexNone, flex, flexRow, itemsCenter)}>
-            <div style={titleStyle}>送信先</div>
+            <InputDescription style={descriptionStyle}>送信先</InputDescription>
             <Select
                 style={{ flex: 1, maxWidth: inputMaxWidth }}
                 value={selectedPublicChannelKey}

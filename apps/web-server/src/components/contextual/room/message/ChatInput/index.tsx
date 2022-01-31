@@ -10,11 +10,7 @@ import { roomConfigAtom } from '../../../../../atoms/roomConfig/roomConfigAtom';
 import { Draft } from 'immer';
 import { useAtomValue } from 'jotai/utils';
 
-const titleStyleForRow: React.CSSProperties = {
-    paddingRight: 4,
-};
-
-const titleStyleForColumn: React.CSSProperties = {
+const flexBasis80: React.CSSProperties = {
     flexBasis: '80px',
 };
 
@@ -50,13 +46,13 @@ export const ChatInput: React.FC<Props> = ({
         return null;
     }
 
-    const titleStyle: React.CSSProperties | undefined =
-        topElementsDirection === row ? titleStyleForRow : titleStyleForColumn;
+    const desciptionStyle: React.CSSProperties | undefined =
+        topElementsDirection === row ? undefined : flexBasis80;
     const characterSelector = (
         <CharacterSelector
             config={config}
             onConfigUpdate={onConfigUpdate}
-            titleStyle={titleStyle}
+            descriptionStyle={desciptionStyle}
             inputMaxWidth={miniInputMaxWidth}
         />
     );
@@ -64,7 +60,7 @@ export const ChatInput: React.FC<Props> = ({
         <GameSelector
             config={config}
             onConfigUpdate={onConfigUpdate}
-            titleStyle={titleStyle}
+            descriptionStyle={desciptionStyle}
             inputMaxWidth={miniInputMaxWidth}
         />
     );
@@ -72,7 +68,7 @@ export const ChatInput: React.FC<Props> = ({
         <TextColorSelector
             config={config}
             onConfigUpdate={onConfigUpdate}
-            titleStyle={titleStyle}
+            descriptionStyle={desciptionStyle}
         />
     );
     let topElement: JSX.Element;

@@ -995,7 +995,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
         );
 
     const noActiveBoardText = '';
-    const titleStyle: React.CSSProperties = { maxWidth: 40, minWidth: 40 };
+    const descriptionStyle: React.CSSProperties = { maxWidth: 40, minWidth: 40 };
 
     return (
         <div style={{ position: 'relative' }}>
@@ -1070,7 +1070,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                 <div className={classNames(cancelRnd, flex, flexColumn)}>
                                     <div style={{ paddingBottom: 8 }}>セルの線の設定</div>
                                     <div className={classNames(flex, flexRow, itemsCenter)}>
-                                        <div style={titleStyle}>太さ</div>
+                                        <div style={descriptionStyle}>太さ</div>
                                         <InputNumber
                                             value={boardConfig.gridLineTension}
                                             onChange={e => {
@@ -1094,7 +1094,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                         />
                                     </div>
                                     <div className={classNames(flex, flexRow, itemsCenter)}>
-                                        <div style={titleStyle}>色</div>
+                                        <div style={descriptionStyle}>色</div>
                                         {/* ↓ trigger='click' にすると、SketchPickerを開いている状態でPopover全体を閉じたときに次にSketchPickerが開かず（開き直したら直る）操作性が悪いため、'click'は用いていない */}
                                         <Popover
                                             content={

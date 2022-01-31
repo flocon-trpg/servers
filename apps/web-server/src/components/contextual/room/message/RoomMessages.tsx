@@ -82,6 +82,7 @@ import { MessageTabName } from './MessageTabName';
 import { DraggableTabs } from '../../../ui/DraggableTabs';
 import { moveElement } from '../../../../utils/moveElement';
 import { column, row } from '../../../../atoms/userConfig/types';
+import { InputDescription } from '../../../ui/InputDescription';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -1002,7 +1003,7 @@ export const RoomMessages: React.FC<Props> = ({ height, panelId }: Props) => {
                     チャンネルの名前を編集
                 </Button>
                 <div style={{ width: 16 }} />
-                <div>フォントサイズ</div>
+                <InputDescription>フォントサイズ</InputDescription>
                 <Button
                     size='small'
                     onClick={() => {
@@ -1032,7 +1033,7 @@ export const RoomMessages: React.FC<Props> = ({ height, panelId }: Props) => {
                     <Icons.PlusOutlined />
                 </Button>
                 <div style={{ width: 16 }} />
-                <div>プルダウンメニューの表示方法</div>
+                <InputDescription>プルダウンメニューの表示方法</InputDescription>
                 <Select
                     style={{ minWidth: 100 }}
                     value={chatInputDirectionCore}

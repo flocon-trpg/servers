@@ -7,19 +7,20 @@ import classNames from 'classnames';
 import { flex, flexRow, flexNone, itemsCenter } from '../../../../../utils/className';
 import { MessagePanelConfig } from '../../../../../atoms/roomConfig/types/messagePanelConfig';
 import { Draft } from 'immer';
+import { InputDescription } from '../../../../ui/InputDescription';
 
 type Props = {
     config: MessagePanelConfig;
     onConfigUpdate: (recipe: (draft: Draft<MessagePanelConfig>) => void) => void;
-    titleStyle?: React.CSSProperties;
     inputMaxWidth?: number;
+    descriptionStyle?: React.CSSProperties;
 };
 
 export const CharacterSelector: React.FC<Props> = ({
-    titleStyle,
     inputMaxWidth,
     config,
     onConfigUpdate,
+    descriptionStyle,
 }: Props) => {
     const myCharacters = useMyCharacters();
 
@@ -42,7 +43,7 @@ export const CharacterSelector: React.FC<Props> = ({
 
     return (
         <div className={classNames(flexNone, flex, flexRow, itemsCenter)}>
-            <div style={titleStyle}>キャラクター</div>
+            <InputDescription style={descriptionStyle}>キャラクター</InputDescription>
             <Select
                 style={{ flex: 1, maxWidth: inputMaxWidth }}
                 value={selectedCharacterType}

@@ -4,6 +4,7 @@ import * as Icons from '@ant-design/icons';
 import { BufferedInput } from '../../../ui/BufferedInput';
 import classNames from 'classnames';
 import { flex, flexRow } from '../../../../utils/className';
+import { InputDescription } from '../../../ui/InputDescription';
 
 type PropsBase = {
     style?: React.CSSProperties;
@@ -68,15 +69,16 @@ export const OverriddenParameterNameEditor: React.FC<Props> = ({
     return (
         <div className={classNames(className, flex, flexRow)} style={style}>
             {restProps.type === 'editor' && (
-                <div
-                    style={{
-                        textDecoration:
-                            overriddenParameterName == null ? undefined : 'line-through',
-                        paddingRight: 4,
-                    }}
-                >
-                    {restProps.baseName}
-                </div>
+                <InputDescription>
+                    <div
+                        style={{
+                            textDecoration:
+                                overriddenParameterName == null ? undefined : 'line-through',
+                        }}
+                    >
+                        {restProps.baseName}
+                    </div>
+                </InputDescription>
             )}
             {overriddenParameterNameArea}
         </div>

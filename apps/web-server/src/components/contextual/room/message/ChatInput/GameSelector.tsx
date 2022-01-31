@@ -15,6 +15,7 @@ import { MessagePanelConfig } from '../../../../../atoms/roomConfig/types/messag
 import { roomNotificationsAtom } from '../../../../../atoms/room/roomAtom';
 import { Draft } from 'immer';
 import { useUpdateAtom } from 'jotai/utils';
+import { InputDescription } from '../../../../ui/InputDescription';
 
 type HelpMessageProps = {
     gameSystemId: string;
@@ -48,15 +49,15 @@ type Props = {
     onConfigUpdate: (
         recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void
     ) => void;
-    titleStyle?: React.CSSProperties;
     inputMaxWidth?: number;
+    descriptionStyle?: React.CSSProperties;
 };
 
 export const GameSelector: React.FC<Props> = ({
-    titleStyle,
     inputMaxWidth,
     config,
     onConfigUpdate,
+    descriptionStyle,
 }: Props) => {
     const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
 
@@ -74,7 +75,7 @@ export const GameSelector: React.FC<Props> = ({
 
     return (
         <div className={classNames(flexNone, flex, flexRow, itemsCenter)}>
-            <div style={titleStyle}>ダイス</div>
+            <InputDescription style={descriptionStyle}>ダイス</InputDescription>
             <Select
                 style={{ flex: 1, maxWidth: inputMaxWidth }}
                 placeholder='ゲームの種類'
