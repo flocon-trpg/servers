@@ -8,6 +8,7 @@ import { newEvent } from './useRoomMessages';
 import { useAtomSelector } from '../atoms/useAtomSelector';
 import { roomConfigAtom } from '../atoms/roomConfig/roomConfigAtom';
 import { roomAtom } from '../atoms/room/roomAtom';
+import { useLatest } from 'react-use';
 
 // 長過ぎる曲をSEにしようとした場合、何もしないと部屋に再入室しない限りその曲を止めることができない。それを防ぐため、最大15秒までしか流れないようにしている。15秒という長さは適当。
 const musicLengthLimit = 15 * 1000;
@@ -23,6 +24,8 @@ type SoundEffect = {
 };
 
 function usePlaySoundEffectCore(value?: SoundEffect): void {
+    const valueRef = useLatest(value);
+
     const masterVolume = useAtomSelector(roomConfigAtom, state => state?.masterVolume) ?? 0;
     const seVolume = useAtomSelector(roomConfigAtom, state => state?.seVolume) ?? 0;
     const volumeConfig = masterVolume * seVolume;
@@ -32,11 +35,13 @@ function usePlaySoundEffectCore(value?: SoundEffect): void {
         volumeConfigRef.current = volumeConfig;
     }, [volumeConfig]);
 
-    const url = useSrcFromGraphQL(value?.filePath);
+    const url = useSrcFromGraphQL(value?.filePath, [value?.messageId]);
     const howlsRef = React.useRef<Map<string, { howl: Howl; volume: number }>>(new Map());
 
     React.useEffect(() => {
-        if (url.type !== success || value?.messageId == null) {
+        const value = valueRef.current;
+
+        if (url.type !== success || value == null) {
             return;
         }
 
@@ -55,7 +60,7 @@ function usePlaySoundEffectCore(value?: SoundEffect): void {
             howl.stop();
             howlsRef.current.delete(value.messageId);
         }, musicLengthLimit + fadeout);
-    }, [url, value?.messageId, value?.volume]);
+    }, [url, valueRef]);
 
     React.useEffect(() => {
         howlsRef.current.forEach(({ howl, volume }) => {
