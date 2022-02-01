@@ -19,6 +19,7 @@ export type RoomConfig = {
     masterVolume: number;
     channelVolumes: Record<string, number | undefined>;
     seVolume: number;
+    showBackgroundBoardViewer: boolean;
 };
 
 export const serializedRoomConfig = t.partial({
@@ -32,6 +33,7 @@ export const serializedRoomConfig = t.partial({
     masterVolume: t.number,
     channelVolumes: record(t.string, t.number),
     seVolume: t.number,
+    showBackgroundBoardViewer: t.boolean,
 });
 
 export type SerializedRoomConfig = t.TypeOf<typeof serializedRoomConfig>;
@@ -46,6 +48,7 @@ export const deserializeRoomConfig = (source: SerializedRoomConfig, roomId: stri
         masterVolume: source.masterVolume ?? defaultMasterVolume,
         channelVolumes: source.channelVolumes ?? {},
         seVolume: source.seVolume ?? defaultSeVolume,
+        showBackgroundBoardViewer: source.showBackgroundBoardViewer ?? true,
     };
 };
 
@@ -58,5 +61,6 @@ export const defaultRoomConfig = (roomId: string): RoomConfig => {
         masterVolume: defaultMasterVolume,
         channelVolumes: {},
         seVolume: defaultSeVolume,
+        showBackgroundBoardViewer: true,
     };
 };

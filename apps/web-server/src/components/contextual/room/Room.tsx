@@ -134,6 +134,10 @@ export const Room: React.FC = () => {
     const innerWidth = useAtomValue(debouncedWindowInnerWidthAtom);
     const innerHeight = useAtomValue(debouncedWindowInnerHeightAtom);
     const roomIdOfRoomConfig = useAtomSelector(roomConfigAtom, state => state?.roomId);
+    const showBackgroundBoardViewer = useAtomSelector(
+        roomConfigAtom,
+        state => state?.showBackgroundBoardViewer
+    );
     const activeBoardBackgroundConfig = useAtomSelector(
         roomConfigAtom,
         state => state?.panels.activeBoardBackground
@@ -427,13 +431,15 @@ export const Room: React.FC = () => {
             <AntdLayout.Content>
                 <RoomMenu />
                 <div style={{ position: 'relative' }}>
-                    <Board
-                        canvasWidth={innerWidth}
-                        canvasHeight={innerHeight - 40 /* TODO: 40という値は適当 */}
-                        type='activeBoard'
-                        isBackground={true}
-                        config={activeBoardBackgroundConfig}
-                    />
+                    {showBackgroundBoardViewer == true && (
+                        <Board
+                            canvasWidth={innerWidth}
+                            canvasHeight={innerHeight - 40 /* TODO: 40という値は適当 */}
+                            type='activeBoard'
+                            isBackground={true}
+                            config={activeBoardBackgroundConfig}
+                        />
+                    )}
                     {activeBoardPanelConfig.isMinimized ? null : (
                         <DraggableCard
                             header='ボードビュアー'

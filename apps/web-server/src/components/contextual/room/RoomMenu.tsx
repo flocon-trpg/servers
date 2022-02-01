@@ -60,6 +60,20 @@ const panelOpacityAtom = atom(
     }
 );
 
+const showBackgroundBoardViewerAtom = atom(
+    get => get(roomConfigAtom)?.showBackgroundBoardViewer,
+    (get, set, newValue: boolean) => {
+        set(roomConfigAtom, roomConfig => {
+            if (roomConfig == null) {
+                return roomConfig;
+            }
+            return produce(roomConfig, roomConfig => {
+                roomConfig.showBackgroundBoardViewer = newValue;
+            });
+        });
+    }
+);
+
 type BecomePlayerModalProps = {
     roomId: string;
     visible: boolean;
@@ -498,6 +512,9 @@ export const RoomMenu: React.FC = () => {
     const pieceValuePanel = useAtomSelector(roomConfigAtom, state => state?.panels.pieceValuePanel);
 
     const [panelOpacity, setPanelOpacity] = useAtom(panelOpacityAtom);
+    const [showBackgroundBoardViewer, setShowBackgroundBoardViewerAtom] = useAtom(
+        showBackgroundBoardViewerAtom
+    );
 
     const [leaveRoomMutation] = useMutation(LeaveRoomDocument);
     const [isBecomePlayerModalVisible, setIsBecomePlayerModalVisible] = React.useState(false);
@@ -956,6 +973,22 @@ export const RoomMenu: React.FC = () => {
                             />
                         </div>
                     </Menu.SubMenu>
+                    <Menu.Item
+                        onClick={() => {
+                            setShowBackgroundBoardViewerAtom(!showBackgroundBoardViewer);
+                        }}
+                    >
+                        <div>
+                            <span>
+                                {showBackgroundBoardViewer ? (
+                                    <Icon.CheckSquareOutlined />
+                                ) : (
+                                    <Icon.BorderOutlined />
+                                )}
+                            </span>
+                            <span>最背面にボードビュアーを表示する</span>
+                        </div>
+                    </Menu.Item>
                 </Menu.SubMenu>
                 <Menu.Item>
                     <Popover trigger='click' content={<RoomVolumeBar roomId={roomId} />}>
