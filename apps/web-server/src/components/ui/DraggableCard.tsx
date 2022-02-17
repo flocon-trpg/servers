@@ -10,6 +10,7 @@ import {
     defaultPanelOpacity,
     minPanelOpacity,
 } from '../../atoms/roomConfig/types/roomConfig/resources';
+import { Styles } from '../../styles';
 
 // 上からheader、topElement、children、bottomElementの順で描画される。children以外はheightが固定されている。
 // それぞれの要素は、styleにheightやpaddingなどが自動的に設定されたdivに包まれる。このdivのstyleは、自動的に設定されていない値であれば、*ContainerStyleというプロパティに渡すことで好きな値をセットすることができる。
@@ -22,7 +23,6 @@ export const horizontalPadding = 24;
 const headerBackgroundColor = 'rgba(32, 49, 117, 1)'; // antdのgeekblue-4と等しい
 const borderColor = 'rgba(32, 49, 117, 0.4)';
 const headerColor = undefined;
-export const backgroundColor = '#141414';
 const defaultHeaderHeight = 28;
 const borderWidth = 2;
 
@@ -86,7 +86,7 @@ export const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) 
                     borderWidth: `0 ${borderWidth}px ${borderWidth}px ${borderWidth}px`,
                     borderStyle: 'solid',
                     borderColor,
-                    backgroundColor,
+                    backgroundColor: Styles.backgroundColor,
                     height: '100%', // heightとwidthを設定することで、childrenの（親要素の）大きさがDraggableCardの大きさに連動するようになる
                     width: '100%',
                     opacity: panelOpacity,
@@ -113,7 +113,7 @@ export const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) 
                     className={cancelRnd}
                     style={{
                         ...props.topElementContainerStyle,
-                        backgroundColor,
+                        backgroundColor: Styles.backgroundColor,
                         height: `${topElementContainerHeight}px`,
                         //padding: `6px ${horizontalPadding}px`
                     }}
@@ -124,7 +124,7 @@ export const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) 
                     className={cancelRnd}
                     style={{
                         ...props.childrenContainerStyle,
-                        backgroundColor,
+                        backgroundColor: Styles.backgroundColor,
                         height: `calc(100% - ${
                             props.headerHeight ?? defaultHeaderHeight
                         }px - ${topElementContainerHeight}px - ${bottomElementContainerHeight}px)`,
@@ -137,7 +137,7 @@ export const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) 
                     className={cancelRnd}
                     style={{
                         ...props.bottomElementContainerStyle,
-                        backgroundColor,
+                        backgroundColor: Styles.backgroundColor,
                         height: `${bottomElementContainerHeight}px`,
                         //padding: `6px ${horizontalPadding}px`
                     }}

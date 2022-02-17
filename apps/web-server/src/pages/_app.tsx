@@ -1,5 +1,5 @@
-import '../css/antd.css';
-import '../css/main.scss';
+import '../styles/css/antd.css';
+import '../styles/css/main.scss';
 
 import 'firebase/auth';
 import 'firebase/storage';

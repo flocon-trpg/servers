@@ -10,7 +10,7 @@ import { FilesManagerDrawer } from './file/FilesManagerDrawer';
 import { FilesManagerDrawerType, some } from '../../../utils/types';
 import { VolumeBar } from '../../ui/VolumeBar';
 import { DialogFooter } from '../../ui/DialogFooter';
-import { MyStyle } from '../../../utils/myStyle';
+import { Styles } from '../../../styles';
 import { BgmState, FilePath, StrIndex5 } from '@flocon-trpg/core';
 import _ from 'lodash';
 import { cancelRnd, flex, flexColumn, flexRow, itemsCenter } from '../../../utils/className';
@@ -361,7 +361,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                 onClose={() => setIsDrawerVisible(false)}
             />
             <div className={classNames(flex, flexRow, itemsCenter)}>
-                <div style={MyStyle.Text.larger}>
+                <div style={Styles.Text.larger}>
                     {bgmState != null && (bgmState.files ?? []).length !== 0 ? (
                         /* 本当はPauseアイコンではなく停止アイコンを使いたいが、antdでは見つからなかったので暫定的にPauseアイコンを用いている */
                         bgmState.isPaused ? (
@@ -465,7 +465,7 @@ export const SoundPlayer: React.FC = () => {
                 onClose={() => setIsSeDrawerVisible(false)}
             />
 
-            <div style={MyStyle.Text.larger}>SE</div>
+            <div style={Styles.Text.larger}>SE</div>
             <Button
                 size='small'
                 style={{ marginTop: 2 }}

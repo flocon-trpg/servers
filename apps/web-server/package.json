@@ -99,7 +99,7 @@
         "build": "run-s build:deps build:self",
         "build:deps": "yarn workspaces foreach -pvtR --from '@flocon-trpg/web-server' --exclude '@flocon-trpg/web-server' run build",
         "build:self": "run-s build:less build:next",
-        "build:less": "lessc ./src/css/antd.less ./src/css/antd.css --js",
+        "build:less": "lessc ./src/styles/css/antd.less ./src/styles/css/antd.css --js",
         "build:next": "next build",
         "export": "run-s build export:core",
         "export:core": "next export",
