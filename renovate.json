@@ -18,5 +18,6 @@
             "matchDepTypes": ["peerDependencies"],
             "rangeStrategy": "widen"
         }
-    ]
+    ],
+    "prConcurrentLimit": 30
 }
