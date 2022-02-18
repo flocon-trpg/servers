@@ -2,12 +2,14 @@ name: Tests of pull requests
 
 on:
     pull_request:
-        branches-ignore:
-            - 'renovate/**'
+        branches:
+            - '**'
 
 jobs:
     main:
         name: 'Full test and Codecov'
+
+        if: startsWith(github.head_ref, 'renovate/') == false
 
         runs-on: ubuntu-latest
         container: 'node:14'
