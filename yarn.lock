@@ -3022,9 +3022,9 @@ __metadata:
   linkType: hard
 
 "@ltd/j-toml@npm:^1.23.0":
-  version: 1.23.0
-  resolution: "@ltd/j-toml@npm:1.23.0"
-  checksum: 293bdfd3dac675d4a2435e868c53a820335c7a46b7f97cbf6182fc1b03847f509b7385bce70b22218005b9c207a035b27402e7d52a11e3199a6c1a38bc420aaf
+  version: 1.29.0
+  resolution: "@ltd/j-toml@npm:1.29.0"
+  checksum: 56ec78d86d9c4adbdfc645e569018bfa9c0e9cf7b073ea357fd1c935a82f8575f9ade5f722fd654363a731a2305335f7a43e98815dff09dcf85090da54c14696
   languageName: node
   linkType: hard
 
