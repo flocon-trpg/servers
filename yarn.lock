@@ -1940,7 +1940,7 @@ __metadata:
     "@kizahasi/ot-string": ^0.3.0
     "@kizahasi/result": ^1.0.1
     "@ltd/j-toml": ^1.23.0
-    "@types/estree": 0.0.50
+    "@types/estree": 0.0.51
     "@types/jest": 27.0.3
     "@types/lodash.clonedeep": 4.5.6
     fast-check: 2.20.0
@@ -1961,7 +1961,7 @@ __metadata:
   dependencies:
     "@flocon-trpg/utils": "workspace:^"
     "@kizahasi/option": ^1.0.0
-    "@types/estree": 0.0.50
+    "@types/estree": 0.0.51
     "@types/jest": 27.0.3
     acorn: ^8.5.0
     jest: 27.4.5
@@ -3790,10 +3790,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/estree@npm:0.0.50":
-  version: 0.0.50
-  resolution: "@types/estree@npm:0.0.50"
-  checksum: 9a2b6a4a8c117f34d08fbda5e8f69b1dfb109f7d149b60b00fd7a9fb6ac545c078bc590aa4ec2f0a256d680cf72c88b3b28b60c326ee38a7bc8ee1ee95624922
+"@types/estree@npm:0.0.51":
+  version: 0.0.51
+  resolution: "@types/estree@npm:0.0.51"
+  checksum: e56a3bcf759fd9185e992e7fdb3c6a5f81e8ff120e871641607581fb3728d16c811702a7d40fa5f869b7f7b4437ab6a87eb8d98ffafeee51e85bbe955932a189
   languageName: node
   linkType: hard
 
