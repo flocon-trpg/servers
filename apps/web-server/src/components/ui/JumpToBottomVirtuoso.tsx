@@ -1,11 +1,11 @@
 import { Button } from 'antd';
 import React from 'react';
-import { ItemContent, Virtuoso, VirtuosoHandle } from 'react-virtuoso';
+import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { Styles } from '../../styles';
 
 type Props<T> = {
     items: ReadonlyArray<T>;
-    create: ItemContent<T> | undefined;
+    create: ((index: number, data: T) => React.ReactNode) | undefined;
     height: React.CSSProperties['height'];
 };
 
