@@ -1,11 +1,11 @@
 import { useQuery } from '@apollo/client';
 import { GetRoomsListDocument, RoomAsListItemFragment } from '@flocon-trpg/typed-document-node';
-import { Button, Table } from 'antd';
+import { Button, Table, Tooltip } from 'antd';
 import classNames from 'classnames';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React from 'react';
-import { flex, flexNone } from '../../../utils/className';
+import { flex, flexNone, flexRow } from '../../../utils/className';
 import { Layout, loginAndEntry } from '../../ui/Layout';
 import { QueryResultViewer } from '../../ui/QueryResultViewer';
 
@@ -20,6 +20,23 @@ const columns = [
         title: 'Name',
         dataIndex: 'name',
         sorter: (x: Data, y: Data) => x.name.localeCompare(y.name),
+        // eslint-disable-next-line react/display-name
+        render: (_: any, record: Data) => (
+            <div className={classNames(flex, flexRow)}>
+                <Tooltip title={record.name}>
+                    <div
+                        style={{
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                            textOverflow: 'ellipsis',
+                            maxWidth: 400,
+                        }}
+                    >
+                        {record.name}
+                    </div>
+                </Tooltip>
+            </div>
+        ),
     },
     {
         title: 'Action',

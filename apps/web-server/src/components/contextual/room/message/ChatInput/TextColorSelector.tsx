@@ -9,23 +9,24 @@ import { rgb } from '../../../../../utils/rgb';
 import { Draft } from 'immer';
 import { ChatPalettePanelConfig } from '../../../../../atoms/roomConfig/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '../../../../../atoms/roomConfig/types/messagePanelConfig';
+import { InputDescription } from '../../../../ui/InputDescription';
 
 type Props = {
     config: ChatPalettePanelConfig | MessagePanelConfig;
     onConfigUpdate: (
         recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void
     ) => void;
-    titleStyle?: React.CSSProperties;
+    descriptionStyle?: React.CSSProperties;
 };
 
 export const TextColorSelector: React.FC<Props> = ({
     config,
     onConfigUpdate,
-    titleStyle,
+    descriptionStyle: descriptionStyle,
 }: Props) => {
     return (
         <div className={classNames(flexNone, flex, flexRow, itemsCenter)}>
-            <div style={titleStyle}>文字色</div>
+            <InputDescription style={descriptionStyle}>文字色</InputDescription>
             <Popover
                 trigger='click'
                 content={

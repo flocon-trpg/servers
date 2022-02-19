@@ -1,4 +1,5 @@
 import { Color } from '../color';
+import { Styles } from '../../styles';
 
 export const logCss = `
 html {
@@ -7,16 +8,16 @@ html {
 }
 
 * {
-    scrollbar-color: #686868 #141414;
+    scrollbar-color: #686868 ${Styles.backgroundColor};
     scrollbar-width: thin;
 }
 ::-webkit-scrollbar {
-    background-color: #141414;
+    background-color: ${Styles.backgroundColor};
     width: 8px;
     height: 8px;
 }
 ::-webkit-scrollbar-corner {
-    background-color: #141414;
+    background-color: ${Styles.backgroundColor};
 }
 ::-webkit-scrollbar-thumb {
     background-color: #686868;

@@ -18,7 +18,7 @@ export const error = 'error';
 
 type SrcArrayResult =
     | {
-          // useFirebaseStorageUrlArrayは一部が成功して残りが失敗というケースがあるため、successではなくdoneという名前にしている。
+          // 一部が成功して残りが失敗というケースがあるため、successではなくdoneという名前にしている。
           type: typeof done;
           value: (string | null)[];
       }
@@ -33,7 +33,8 @@ type SrcArrayResult =
 // PathArrayがnullish ⇔ 戻り値がnullishArg
 // pathArray.length = 戻り値.length
 export function useSrcArrayFromGraphQL(
-    pathArray: ReadonlyArray<FilePathFragment | FilePath> | null | undefined
+    pathArray: ReadonlyArray<FilePathFragment | FilePath> | null | undefined,
+    additionalDeps?: React.DependencyList
 ): SrcArrayResult {
     const config = useWebConfig();
     const storage = useAtomValue(firebaseStorageAtom);
@@ -95,7 +96,7 @@ export function useSrcArrayFromGraphQL(
         return () => {
             isDisposed = true;
         };
-    }, [cleanPathArray, config, storage, getIdToken]);
+    }, [cleanPathArray, config, storage, getIdToken, ...(additionalDeps ?? [])]);
 
     return result;
 }
@@ -109,15 +110,26 @@ type SrcResult =
           type: typeof loading | typeof error | typeof nullishArg | typeof invalidWebConfig;
       };
 
-export function useSrcFromGraphQL(path: FilePathFragment | FilePath | null | undefined): SrcResult {
-    const pathArray = React.useMemo(() => (path == null ? null : [path]), [path]);
-    const resultArray = useSrcArrayFromGraphQL(pathArray);
-    if (resultArray.type !== done) {
-        return resultArray;
+const toSrcResult = (srcArray: ReturnType<typeof useSrcArrayFromGraphQL>): SrcResult => {
+    if (srcArray.type !== done) {
+        return srcArray;
     }
-    const result = resultArray.value[0];
+    const result = srcArray.value[0];
     if (result == null) {
         return { type: error };
     }
     return { type: success, value: result };
+};
+
+export function useSrcFromGraphQL(
+    path: FilePathFragment | FilePath | null | undefined,
+    additionalDeps?: React.DependencyList
+): SrcResult {
+    const pathArray = React.useMemo(() => (path == null ? null : [path]), [path]);
+    const resultArray = useSrcArrayFromGraphQL(pathArray, additionalDeps);
+    const [result, setResult] = React.useState<SrcResult>(toSrcResult(resultArray));
+    React.useEffect(() => {
+        setResult(toSrcResult(resultArray));
+    }, [resultArray]);
+    return result;
 }

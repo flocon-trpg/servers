@@ -17,7 +17,7 @@ import {
     generateAsStaticHtml,
 } from '../../../../utils/message/roomLogGenerator';
 import moment from 'moment';
-import { Button, Modal, Progress, Radio } from 'antd';
+import { Button, Checkbox, Modal, Progress, Radio } from 'antd';
 import classNames from 'classnames';
 import { flex, flexColumn } from '../../../../utils/className';
 import { useApolloClient } from '@apollo/client';
@@ -62,6 +62,11 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
         ChannelsFilterOptions.defaultValue
     );
     const channelsFilterOptionsRef = useReadonlyRef(channelsFilterOptions);
+
+    const [showCreatedAt, setShowCreatedAt] = React.useState(true);
+    const showCreatedAtRef = useReadonlyRef(showCreatedAt);
+    const [showUsernameAlways, setShowUsernameAlways] = React.useState(true);
+    const showUsernameAlwaysRef = useReadonlyRef(showUsernameAlways);
 
     const [progress, setProgress] = React.useState<number>();
     const [errorMessage, setErrorMessage] = React.useState<string>();
@@ -131,6 +136,8 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                         messages: logData.data.result,
                         participants: participantsRef.current,
                         filter: ChannelsFilterOptions.toFilter(channelsFilterOptionsRef.current),
+                        showCreatedAt: showCreatedAtRef.current,
+                        showUsernameAlways: showUsernameAlwaysRef.current,
                     }),
                     `log_simple_${moment(new Date()).format('YYYY-MM-DD-HH-mm-ss')}.html`
                 );
@@ -177,6 +184,8 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
         channelsFilterOptionsRef,
         configRef,
         firebaseStorageRef,
+        showCreatedAtRef,
+        showUsernameAlwaysRef,
     ]);
 
     return (
@@ -214,6 +223,28 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                     onChange={setChannelsFilterOptions}
                     disabled={isDownloading}
                 />
+                {logMode === simple && (
+                    <>
+                        <div style={{ marginTop: 4 }}>ログに含める情報</div>
+                        <div>
+                            <Checkbox
+                                checked={showUsernameAlways}
+                                disabled={isDownloading}
+                                onChange={e => setShowUsernameAlways(e.target.checked)}
+                            >
+                                常にユーザー名を含める
+                            </Checkbox>
+                            <br />
+                            <Checkbox
+                                checked={showCreatedAt}
+                                disabled={isDownloading}
+                                onChange={e => setShowCreatedAt(e.target.checked)}
+                            >
+                                書き込み日時
+                            </Checkbox>
+                        </div>
+                    </>
+                )}
                 <Button
                     style={{ alignSelf: 'start', marginTop: 8 }}
                     type='primary'
@@ -236,7 +267,11 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                 )}
                 {progress === 100 && (
                     <div>
-                        zipファイル生成が完了しました。間もなくzipファイルのダウンロードが開始されます。
+                        {`${
+                            logMode === rich ? 'zip' : 'HTML'
+                        }ファイルの生成が完了しました。間もなく${
+                            logMode === rich ? 'zip' : 'HTML'
+                        }ファイルのダウンロードが開始されます。`}
                     </div>
                 )}
                 {errorMessage != null && <div>{errorMessage}</div>}

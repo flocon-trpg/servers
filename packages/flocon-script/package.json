@@ -20,7 +20,7 @@
     "name": "@flocon-trpg/flocon-script",
     "author": "kizahasi",
     "devDependencies": {
-        "@types/estree": "0.0.50",
+        "@types/estree": "0.0.51",
         "@types/jest": "27.0.3",
         "jest": "27.4.5",
         "rimraf": "3.0.2",

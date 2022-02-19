@@ -33,7 +33,7 @@ import { useImmerUpdateAtom } from '../../../../atoms/useImmerUpdateAtom';
 import { BufferedTextArea } from '../../../ui/BufferedTextArea';
 import { CharacterVarInput } from './CharacterVarInput';
 
-const titleStyle: React.CSSProperties = {
+const descriptionStyle: React.CSSProperties = {
     flexBasis: '80px',
 };
 
@@ -184,7 +184,7 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             <div className={classNames(flexNone, flex, flexRow, itemsCenter)}>
-                <div style={titleStyle}>キャラクター</div>
+                <div style={descriptionStyle}>キャラクター</div>
                 <Select
                     style={{ flex: 1, maxWidth: miniInputMaxWidth }}
                     placeholder='キャラクター'
@@ -204,13 +204,13 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
             <GameSelector
                 config={config}
                 onConfigUpdate={onConfigUpdate}
-                titleStyle={titleStyle}
+                descriptionStyle={descriptionStyle}
                 inputMaxWidth={miniInputMaxWidth}
             />
             <TextColorSelector
                 config={config}
                 onConfigUpdate={onConfigUpdate}
-                titleStyle={titleStyle}
+                descriptionStyle={descriptionStyle}
             />
             <UISelector
                 style={{ padding: '2px 0' }}

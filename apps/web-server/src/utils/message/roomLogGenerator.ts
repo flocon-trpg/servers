@@ -24,6 +24,7 @@ import { logHtml } from './richLogHtml';
 import { RoomMessageFilter } from '../../components/contextual/room/message/ChannelsFilter';
 import { WebConfig } from '../../configType';
 import { FirebaseStorage as FirebaseStorageType } from '@firebase/storage';
+import { div, generateHtml, HtmlObject, span } from './generateHtml';
 
 const privateMessage = 'privateMessage';
 const publicMessage = 'publicMessage';
@@ -124,7 +125,7 @@ const createRoomMessageArray = (
             const privateChannelSet = new PrivateChannelSet(new Set(msg.visibleTo));
             const channelName = privateChannelSet
                 .toChannelNameBase(participants)
-                .reduce((seed, elem, i) => (i === 0 ? elem : `${seed}, ${elem}`), '');
+                .reduce((seed, elem, i) => (i === 0 ? `秘話: ${elem}` : `${seed}, ${elem}`), '');
             if (isDeleted(msg)) {
                 if (msg.createdBy == null) {
                     return;
@@ -237,34 +238,70 @@ type GenerateLogParams = {
     filter: RoomMessageFilter;
 } & PublicChannelNames;
 
-export const generateAsStaticHtml = (params: GenerateLogParams) => {
+export const generateAsStaticHtml = (
+    params: GenerateLogParams & {
+        showCreatedAt: boolean;
+        showUsernameAlways: boolean;
+    }
+) => {
     const elements = createRoomMessageArray(params)
         .sort((x, y) => x.createdAt - y.createdAt)
         .map(msg => {
-            const left =
-                msg.value.createdBy == null
-                    ? '<span>システムメッセージ</span>'
-                    : `<span>${escape(msg.value.createdBy.rolePlayPart ?? '')}</span>
-${msg.value.createdBy.rolePlayPart == null ? '' : '<span> - </span>'}
-<span>${escape(msg.value.createdBy.participantNamePart)}</span>
-<span> (${escape(msg.value.channelName)})</span>
-<span> </span>`;
+            const left: HtmlObject[] = [];
 
-            return `<div class="message" style="${
-                msg.value.textColor == null ? '' : `color: ${escape(msg.value.textColor)}`
-            }">
-${left}
-<span> @ ${moment(new Date(msg.createdAt)).format('MM/DD HH:mm:ss')} </span>
-${
-    msg.value.text == null
-        ? '<span class="text gray">(削除済み)</span>'
-        : `<span class="text">${escape(msg.value.text ?? '')} ${escape(
-              msg.value.commandResult ?? ''
-          )}</span>`
-}
-</div>`;
+            if (msg.value.createdBy == null) {
+                left.push({
+                    type: span,
+                    children: 'システムメッセージ',
+                });
+            } else {
+                let name: HtmlObject;
+                if (msg.value.createdBy.rolePlayPart == null) {
+                    name = { type: span, children: msg.value.createdBy.participantNamePart };
+                } else {
+                    name = {
+                        type: span,
+                        children: params.showUsernameAlways
+                            ? `${msg.value.createdBy.rolePlayPart} - ${msg.value.createdBy.participantNamePart}`
+                            : msg.value.createdBy.participantNamePart,
+                    };
+                }
+                left.push(name);
+                const channel: HtmlObject = {
+                    type: span,
+                    children: ` (${msg.value.channelName})`,
+                };
+                left.push(channel);
+            }
+
+            const result: HtmlObject = {
+                type: div,
+                className: 'message',
+                style:
+                    msg.value.textColor == null
+                        ? undefined
+                        : `color: ${escape(msg.value.textColor)}`,
+                children: [
+                    ...left,
+                    {
+                        type: span,
+                        children: params.showCreatedAt
+                            ? ` @ ${moment(new Date(msg.createdAt)).format('MM/DD HH:mm:ss')} `
+                            : ' ',
+                    },
+                    {
+                        type: span,
+                        className: msg.value.text == null ? 'text gray' : 'text',
+                        children:
+                            msg.value.text == null
+                                ? '(削除済み)'
+                                : `${msg.value.text ?? ''} ${msg.value.commandResult ?? ''}`,
+                    },
+                ],
+            };
+            return generateHtml(result);
         })
-        .reduce((seed, elem) => seed + '\r\n' + elem, '');
+        .reduce((seed, elem) => (seed === '' ? elem : `${seed}\r\n${elem}`), '');
 
     return `<!DOCTYPE html>
 <html lang="ja">

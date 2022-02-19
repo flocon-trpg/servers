@@ -1,10 +1,16 @@
 import * as t from 'io-ts';
 
+export const column = 'column';
+export const row = 'row';
+
 export type UserConfig = {
     userUid: string;
 
     // +ボタンを押すと1増え、-ボタンを押すと1減る。+ボタンや-ボタンがどれだけ押されたかを見て、適切なフォントの大きさをコンポーネント側が決めて表示する。
     roomMessagesFontSizeDelta: number;
+
+    // nullishの場合はautoとなる
+    chatInputDirection?: typeof column | typeof row;
 };
 
 export const serializedUserConfig = t.partial({

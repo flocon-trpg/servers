@@ -1,6 +1,6 @@
 {
     "name": "@flocon-trpg/web-server",
-    "version": "0.7.7",
+    "version": "0.7.8",
     "description": "Flocon Web server",
     "dependencies": {
         "@apollo/client": "^3.4.15",
@@ -24,7 +24,7 @@
         "classnames": "^2.3.1",
         "clipboard-copy": "^4.0.1",
         "envfile": "^6.17.0",
-        "firebase": "^9.6.0",
+        "firebase": "^9.6.6",
         "fp-ts": "^2.11.4",
         "graphql": "^15.6.0",
         "graphql-ws": "^5.5.0",
@@ -55,7 +55,7 @@
         "react-draggable": "^4.4.4",
         "react-konva": "17.0.1-3",
         "react-linkify": "^1.0.0-alpha",
-        "react-markdown": "^7.1.1",
+        "react-markdown": "^8.0.0",
         "react-use": "^17.3.1",
         "react-virtuoso": "^2.2.1",
         "rxjs": "^7.3.0",
@@ -68,7 +68,7 @@
         "use-constant": "^1.1.0"
     },
     "devDependencies": {
-        "@testing-library/react": "12.1.2",
+        "@testing-library/react": "12.1.3",
         "@testing-library/react-hooks": "7.0.2",
         "@types/jest": "27.0.3",
         "jest": "27.4.5",
@@ -99,7 +99,7 @@
         "build": "run-s build:deps build:self",
         "build:deps": "yarn workspaces foreach -pvtR --from '@flocon-trpg/web-server' --exclude '@flocon-trpg/web-server' run build",
         "build:self": "run-s build:less build:next",
-        "build:less": "lessc ./src/css/antd.less ./src/css/antd.css --js",
+        "build:less": "lessc ./src/styles/css/antd.less ./src/styles/css/antd.css --js",
         "build:next": "next build",
         "export": "run-s build export:core",
         "export:core": "next export",

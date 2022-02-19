@@ -18,6 +18,7 @@ import {
     Input,
     Modal,
     Result,
+    Select,
 } from 'antd';
 import moment from 'moment';
 import {
@@ -80,6 +81,8 @@ import { useAtomValue } from 'jotai/utils';
 import { MessageTabName } from './MessageTabName';
 import { DraggableTabs } from '../../../ui/DraggableTabs';
 import { moveElement } from '../../../../utils/moveElement';
+import { column, row } from '../../../../atoms/userConfig/types';
+import { InputDescription } from '../../../ui/InputDescription';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -91,9 +94,12 @@ const some = 'some';
 const custom = 'custom';
 type HiwaSelectValueType = typeof none | typeof some | typeof custom;
 
+const auto = 'auto';
+
 const participantsAtom = atom(get => get(roomAtom).roomState?.state?.participants);
 const roomIdAtom = atom(get => get(roomAtom).roomId);
 const roomMessageFontSizeDeltaAtom = atom(get => get(userConfigAtom)?.roomMessagesFontSizeDelta);
+const chatInputDirectionAtom = atom(get => get(userConfigAtom)?.chatInputDirection);
 const allRoomMessagesResultAtom = atom(get => get(roomAtom).allRoomMessagesResult);
 
 type TabEditorDrawerProps = {
@@ -801,17 +807,13 @@ type Props = {
     panelId: string;
 };
 
-export const RoomMessages: React.FC<Props> = (props: Props) => {
-    const { height, panelId } = props;
+export const RoomMessages: React.FC<Props> = ({ height, panelId }: Props) => {
     const tabsAtom = React.useMemo(() => {
         return atom(get => get(roomConfigAtom)?.panels.messagePanels?.[panelId]?.tabs);
     }, [panelId]);
     const tabs = useAtomValue(tabsAtom);
     const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
     const setUserConfig = useImmerUpdateAtom(userConfigAtom);
-
-    const contentHeight = Math.max(0, height - 340);
-    const tabsHeight = Math.max(0, height - 300);
 
     const [editingTabConfigKey, setEditingTabConfigKey] = React.useState<string>();
     const editingTabConfig = React.useMemo(() => {
@@ -826,10 +828,20 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
     const roomId = useAtomValue(roomIdAtom);
     const allRoomMessagesResult = useAtomValue(allRoomMessagesResultAtom);
     const roomMessagesFontSizeDelta = useAtomValue(roomMessageFontSizeDeltaAtom);
+    const chatInputDirectionCore = useAtomValue(chatInputDirectionAtom) ?? auto;
 
     if (roomId == null || allRoomMessagesResult == null || tabs == null) {
         return null;
     }
+
+    const chatInputDirection =
+        chatInputDirectionCore === auto ? (height <= 500 ? row : column) : chatInputDirectionCore;
+    const spaceDiff = 60;
+    const contentHeight = Math.max(
+        0,
+        height - 280 - (chatInputDirection === column ? spaceDiff : 0)
+    );
+    const tabsHeight = Math.max(0, height - 240 - (chatInputDirection === column ? spaceDiff : 0));
 
     switch (allRoomMessagesResult.type) {
         case loading:
@@ -944,7 +956,7 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                               </div>
                           }
                       >
-                          <MessageTabPane {...props} config={tab} contentHeight={contentHeight} />
+                          <MessageTabPane config={tab} contentHeight={contentHeight} />
                       </Tabs.TabPane>
                   );
               });
@@ -956,7 +968,6 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
             style={{ display: 'flex', flexDirection: 'column', height: '100%', margin: '2px 4px' }}
         >
             <TabEditorDrawer
-                {...props}
                 config={editingTabConfig}
                 onClose={() => setEditingTabConfigKey(undefined)}
                 onChange={newValue => {
@@ -980,7 +991,6 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                 }}
             />
             <ChannelNamesEditor
-                {...props}
                 visible={isChannelNamesEditorVisible}
                 onClose={() => setIsChannelNamesEditorVisible(false)}
             />
@@ -993,7 +1003,7 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                     チャンネルの名前を編集
                 </Button>
                 <div style={{ width: 16 }} />
-                <div>フォントサイズ</div>
+                <InputDescription>フォントサイズ</InputDescription>
                 <Button
                     size='small'
                     onClick={() => {
@@ -1022,6 +1032,32 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
                 >
                     <Icons.PlusOutlined />
                 </Button>
+                <div style={{ width: 16 }} />
+                <InputDescription>プルダウンメニューの表示方法</InputDescription>
+                <Select
+                    style={{ minWidth: 100 }}
+                    value={chatInputDirectionCore}
+                    onChange={e => {
+                        setUserConfig(userConfig => {
+                            if (userConfig == null) {
+                                return;
+                            }
+                            switch (e) {
+                                case column:
+                                case row:
+                                    userConfig.chatInputDirection = e;
+                                    break;
+                                default:
+                                    userConfig.chatInputDirection = undefined;
+                                    break;
+                            }
+                        });
+                    }}
+                >
+                    <Select.Option value={auto}>自動</Select.Option>
+                    <Select.Option value={column}>縦に並べる</Select.Option>
+                    <Select.Option value={row}>横に並べる</Select.Option>
+                </Select>
             </div>
             <DraggableTabs
                 style={{ flexBasis: `${tabsHeight}px`, margin: `0 ${marginX}px 4px ${marginX}px` }}
@@ -1074,9 +1110,10 @@ export const RoomMessages: React.FC<Props> = (props: Props) => {
             </DraggableTabs>
             <div style={{ flex: 1 }} />
             <ChatInput
-                {...props}
                 style={{ flex: 'auto', margin: '0 4px' }}
                 roomId={roomId}
+                panelId={panelId}
+                topElementsDirection={chatInputDirection}
                 onConfigUpdate={recipe =>
                     setRoomConfig(roomConfig => {
                         if (roomConfig == null) {

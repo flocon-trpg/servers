@@ -377,6 +377,8 @@ type Props = {
     onConfigUpdate: (
         recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void
     ) => void;
+    descriptionStyle?: React.CSSProperties;
+
     // ChatPalettePanelConfigにselectedCharacterTypeは存在しないので、独立させている
     selectedCharacterType: SelectedCharacterType | null;
 
@@ -385,7 +387,16 @@ type Props = {
     autoSubmitter?: Observable<string>;
 };
 
-export const SubmitMessage: React.FC<Props> = (props: Props) => {
+export const SubmitMessage: React.FC<Props> = ({
+    roomId,
+    selectedChannelType,
+    onSelectedChannelTypeChange,
+    config,
+    onConfigUpdate,
+    descriptionStyle,
+    selectedCharacterType,
+    autoSubmitter,
+}: Props) => {
     const [participantIdsOfSendTo, setParticipantIdsOfSendTo] = React.useState<ReadonlySet<string>>(
         new Set()
     );
@@ -393,18 +404,33 @@ export const SubmitMessage: React.FC<Props> = (props: Props) => {
     const privateMessageElement = (
         <>
             <PrivateMessageChannelSelector
-                {...props}
                 participantIdsOfSendTo={participantIdsOfSendTo}
                 onParticipantIdsOfSendToChange={setParticipantIdsOfSendTo}
+                descriptionStyle={descriptionStyle}
             />
-            <PrivateMessageElement {...props} participantIdsOfSendTo={participantIdsOfSendTo} />
+            <PrivateMessageElement
+                roomId={roomId}
+                config={config}
+                selectedCharacterType={selectedCharacterType}
+                participantIdsOfSendTo={participantIdsOfSendTo}
+                autoSubmitter={autoSubmitter}
+            />
         </>
     );
 
     const publicMessageElement = (
         <>
-            <PublicMessageChannelSelector {...props} />
-            <PublicMessageElement {...props} />
+            <PublicMessageChannelSelector
+                config={config}
+                onConfigUpdate={onConfigUpdate}
+                descriptionStyle={descriptionStyle}
+            />
+            <PublicMessageElement
+                roomId={roomId}
+                config={config}
+                selectedCharacterType={selectedCharacterType}
+                autoSubmitter={autoSubmitter}
+            />
         </>
     );
 
@@ -414,8 +440,8 @@ export const SubmitMessage: React.FC<Props> = (props: Props) => {
             getName={key => (key === privateChannel ? '秘話' : '通常')}
             className={classNames(flexNone, flex, flexColumn)}
             render={key => (key === privateChannel ? privateMessageElement : publicMessageElement)}
-            activeKey={props.selectedChannelType}
-            onChange={x => props.onSelectedChannelTypeChange(x)}
+            activeKey={selectedChannelType}
+            onChange={x => onSelectedChannelTypeChange(x)}
         />
     );
 };

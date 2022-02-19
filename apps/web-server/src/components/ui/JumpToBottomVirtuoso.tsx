@@ -1,11 +1,11 @@
 import { Button } from 'antd';
 import React from 'react';
-import { ItemContent, Virtuoso, VirtuosoHandle } from 'react-virtuoso';
-import { backgroundColor } from './DraggableCard';
+import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
+import { Styles } from '../../styles';
 
 type Props<T> = {
     items: ReadonlyArray<T>;
-    create: ItemContent<T> | undefined;
+    create: ((index: number, data: T) => React.ReactNode) | undefined;
     height: React.CSSProperties['height'];
 };
 
@@ -58,7 +58,7 @@ export function JumpToBottomVirtuoso<T>({ items, create, height }: Props<T>) {
                     style={{
                         position: 'absolute',
                         bottom: 5,
-                        backgroundColor,
+                        backgroundColor: Styles.backgroundColor,
                         left: '50%',
                         transform: 'translateX(-50%)',
                     }}

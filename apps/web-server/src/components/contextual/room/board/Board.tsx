@@ -36,7 +36,14 @@ import { useAllContext } from '../../../../hooks/useAllContext';
 import { AllContextProvider } from '../../../behaviors/AllContextProvider';
 import { range } from '../../../../utils/range';
 import classNames from 'classnames';
-import { cancelRnd, flex, flexColumn, flexRow, itemsCenter } from '../../../../utils/className';
+import {
+    cancelRnd,
+    flex,
+    flexColumn,
+    flexRow,
+    itemsCenter,
+    itemsEnd,
+} from '../../../../utils/className';
 import { SketchPicker } from 'react-color';
 import { css } from '@emotion/react';
 import { rgba } from '../../../../utils/rgba';
@@ -60,6 +67,7 @@ import { importBoardModalVisibilityAtom } from './ImportBoardModal';
 import { BoardType } from '../../../../utils/board/boardType';
 import { useIsMyCharacter } from '../../../../hooks/state/useIsMyCharacter';
 import { imagePieceModalAtom } from './ImagePieceModal';
+import { Styles } from '../../../../styles';
 
 const setDragEndResultToPieceState = ({
     e,
@@ -740,6 +748,10 @@ const zoomButtonStyle: React.CSSProperties = {
     right: 20,
 };
 
+const NonTransparentStyle: React.CSSProperties = {
+    background: Styles.backgroundColor,
+};
+
 export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: Props) => {
     const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
     const setBoardContextMenu = useUpdateAtom(boardContextMenuAtom);
@@ -995,7 +1007,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
         );
 
     const noActiveBoardText = '';
-    const titleStyle: React.CSSProperties = { maxWidth: 40, minWidth: 40 };
+    const descriptionStyle: React.CSSProperties = { maxWidth: 40, minWidth: 40 };
 
     return (
         <div style={{ position: 'relative' }}>
@@ -1003,7 +1015,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
             <div style={boardsDropDownStyle}>
                 {boardsMenu != null ? (
                     <Dropdown overlay={boardsMenu} trigger={['click']}>
-                        <Button>
+                        <Button style={NonTransparentStyle}>
                             {boardIdToShow == null
                                 ? noActiveBoardText
                                 : boards.get(boardIdToShow)?.name ?? noActiveBoardText}{' '}
@@ -1016,6 +1028,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                             {board?.name}
                         </div>
                         <Button
+                            style={NonTransparentStyle}
                             onClick={() => {
                                 setActiveBoardSelectorModalVisibility(true);
                             }}
@@ -1025,6 +1038,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                     </>
                 )}
                 <Button
+                    style={NonTransparentStyle}
                     disabled={boardIdToShow == null}
                     onClick={() => {
                         if (boardIdToShow == null) {
@@ -1040,9 +1054,10 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                 </Button>
             </div>
             <div style={zoomButtonStyle}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                <div className={classNames(flex, flexColumn, itemsEnd)}>
                     <div className={classNames(flex, flexRow)}>
                         <Button
+                            style={NonTransparentStyle}
                             onClick={() => {
                                 if (boardIdToShow == null) {
                                     return;
@@ -1070,7 +1085,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                 <div className={classNames(cancelRnd, flex, flexColumn)}>
                                     <div style={{ paddingBottom: 8 }}>セルの線の設定</div>
                                     <div className={classNames(flex, flexRow, itemsCenter)}>
-                                        <div style={titleStyle}>太さ</div>
+                                        <div style={descriptionStyle}>太さ</div>
                                         <InputNumber
                                             value={boardConfig.gridLineTension}
                                             onChange={e => {
@@ -1094,7 +1109,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                         />
                                     </div>
                                     <div className={classNames(flex, flexRow, itemsCenter)}>
-                                        <div style={titleStyle}>色</div>
+                                        <div style={descriptionStyle}>色</div>
                                         {/* ↓ trigger='click' にすると、SketchPickerを開いている状態でPopover全体を閉じたときに次にSketchPickerが開かず（開き直したら直る）操作性が悪いため、'click'は用いていない */}
                                         <Popover
                                             content={
@@ -1126,19 +1141,22 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                                 />
                                             }
                                         >
-                                            <Button>{boardConfig.gridLineColor}</Button>
+                                            <Button style={NonTransparentStyle}>
+                                                {boardConfig.gridLineColor}
+                                            </Button>
                                         </Popover>
                                     </div>
                                 </div>
                             }
                         >
-                            <Button>
+                            <Button style={NonTransparentStyle}>
                                 <Icons.EllipsisOutlined />
                             </Button>
                         </Popover>
                     </div>
                     <div style={{ height: 18 }} />
                     <Button
+                        style={NonTransparentStyle}
                         onClick={() => {
                             if (boardIdToShow == null) {
                                 return;
@@ -1161,6 +1179,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                         <Icon.ZoomInOutlined />
                     </Button>
                     <Button
+                        style={NonTransparentStyle}
                         onClick={() => {
                             if (boardIdToShow == null) {
                                 return;
@@ -1184,6 +1203,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                     </Button>
                     <div style={{ height: 6 }} />
                     <Button
+                        style={NonTransparentStyle}
                         onClick={() => {
                             if (boardIdToShow == null) {
                                 return;

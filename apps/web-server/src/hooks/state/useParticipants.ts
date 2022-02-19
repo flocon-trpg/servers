@@ -1,13 +1,48 @@
 import React from 'react';
-import { recordToMap } from '@flocon-trpg/utils';
-import { ParticipantState } from '@flocon-trpg/core';
+import { recordForEach, recordToMap } from '@flocon-trpg/utils';
+import { Master, ParticipantState, Player, Spectator } from '@flocon-trpg/core';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
 import { roomAtom } from '../../atoms/room/roomAtom';
 
-export const useParticipants = (): ReadonlyMap<string, ParticipantState> | undefined => {
+type Filter = {
+    [Master]: boolean;
+    [Player]: boolean;
+    [Spectator]: boolean;
+};
+
+export const useParticipants = (
+    filter?: Filter
+): ReadonlyMap<string, ParticipantState> | undefined => {
+    const includeMaster = filter?.[Master] ?? true;
+    const includePlayer = filter?.[Player] ?? true;
+    const includeSpectator = filter?.[Spectator] ?? true;
+
     const participants = useAtomSelector(roomAtom, state => state.roomState?.state?.participants);
-    return React.useMemo(
-        () => (participants == null ? undefined : recordToMap(participants)),
-        [participants]
-    );
+    return React.useMemo(() => {
+        if (participants == null) {
+            return undefined;
+        }
+
+        const result = new Map<string, ParticipantState>();
+        recordForEach(participants, (value, key) => {
+            switch (value.role) {
+                case Master:
+                    if (includeMaster) {
+                        result.set(key, value);
+                    }
+                    return;
+                case Player:
+                    if (includePlayer) {
+                        result.set(key, value);
+                    }
+                    return;
+                case Spectator:
+                    if (includeSpectator) {
+                        result.set(key, value);
+                    }
+                    return;
+            }
+        });
+        return result;
+    }, [participants, includeMaster, includePlayer, includeSpectator]);
 };
