@@ -397,7 +397,7 @@ export const generateAsStaticHtml = (
     </head>
     <body>
         <div style="display: flex; flex-direction: column">
-        ${elements}
+${elements}
         </div>
     </body>
 </html>`;
