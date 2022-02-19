@@ -3930,9 +3930,9 @@ __metadata:
   linkType: hard
 
 "@types/howler@npm:^2.2.4":
-  version: 2.2.4
-  resolution: "@types/howler@npm:2.2.4"
-  checksum: e8b013e434334f59ab37a6a8ece4b46a4d05a94b789b1b0e104078aecd4060ebc5ab3e163676088258de4fd870d6aa561e7faca7178a3a93415dc80c04422d04
+  version: 2.2.5
+  resolution: "@types/howler@npm:2.2.5"
+  checksum: 7f5b3bfcb16517efb6c85f76d46f2bb03bc5a6b38a1d6ef214e54648f5bbf73a4271ac41a5101b429f6377f507e624c2fb68a8b3279ab65b631937dffbc32891
   languageName: node
   linkType: hard
 
