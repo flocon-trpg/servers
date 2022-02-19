@@ -752,10 +752,6 @@ const NonTransparentStyle: React.CSSProperties = {
     background: Styles.backgroundColor,
 };
 
-const NonTransparent: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
-    return <div style={NonTransparentStyle}>{children}</div>;
-};
-
 export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: Props) => {
     const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
     const setBoardContextMenu = useUpdateAtom(boardContextMenuAtom);
@@ -1018,77 +1014,71 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
             {boardComponent}
             <div style={boardsDropDownStyle}>
                 {boardsMenu != null ? (
-                    <NonTransparent>
-                        <Dropdown overlay={boardsMenu} trigger={['click']}>
-                            <Button>
-                                {boardIdToShow == null
-                                    ? noActiveBoardText
-                                    : boards.get(boardIdToShow)?.name ?? noActiveBoardText}{' '}
-                                <Icons.DownOutlined />
-                            </Button>
-                        </Dropdown>
-                    </NonTransparent>
+                    <Dropdown overlay={boardsMenu} trigger={['click']}>
+                        <Button style={NonTransparentStyle}>
+                            {boardIdToShow == null
+                                ? noActiveBoardText
+                                : boards.get(boardIdToShow)?.name ?? noActiveBoardText}{' '}
+                            <Icons.DownOutlined />
+                        </Button>
+                    </Dropdown>
                 ) : (
                     <>
                         <div style={{ marginRight: 4, padding: 4, background: '#E0E0E010' }}>
                             {board?.name}
                         </div>
-                        <NonTransparent>
-                            <Button
-                                onClick={() => {
-                                    setActiveBoardSelectorModalVisibility(true);
-                                }}
-                            >
-                                表示ボードの変更
-                            </Button>
-                        </NonTransparent>
+                        <Button
+                            style={NonTransparentStyle}
+                            onClick={() => {
+                                setActiveBoardSelectorModalVisibility(true);
+                            }}
+                        >
+                            表示ボードの変更
+                        </Button>
                     </>
                 )}
-
-                <NonTransparent>
-                    <Button
-                        disabled={boardIdToShow == null}
-                        onClick={() => {
-                            if (boardIdToShow == null) {
-                                return;
-                            }
-                            setBoardEditorModal({
-                                type: update,
-                                stateId: boardIdToShow,
-                            });
-                        }}
-                    >
-                        編集
-                    </Button>
-                </NonTransparent>
+                <Button
+                    style={NonTransparentStyle}
+                    disabled={boardIdToShow == null}
+                    onClick={() => {
+                        if (boardIdToShow == null) {
+                            return;
+                        }
+                        setBoardEditorModal({
+                            type: update,
+                            stateId: boardIdToShow,
+                        });
+                    }}
+                >
+                    編集
+                </Button>
             </div>
             <div style={zoomButtonStyle}>
                 <div className={classNames(flex, flexColumn, itemsEnd)}>
                     <div className={classNames(flex, flexRow)}>
-                        <NonTransparent>
-                            <Button
-                                onClick={() => {
-                                    if (boardIdToShow == null) {
+                        <Button
+                            style={NonTransparentStyle}
+                            onClick={() => {
+                                if (boardIdToShow == null) {
+                                    return;
+                                }
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
                                         return;
                                     }
-                                    setRoomConfig(roomConfig => {
-                                        if (roomConfig == null) {
-                                            return;
+                                    RoomConfigUtils.editBoard(
+                                        roomConfig,
+                                        boardIdToShow,
+                                        boardType,
+                                        boardConfig => {
+                                            boardConfig.showGrid = !boardConfig.showGrid;
                                         }
-                                        RoomConfigUtils.editBoard(
-                                            roomConfig,
-                                            boardIdToShow,
-                                            boardType,
-                                            boardConfig => {
-                                                boardConfig.showGrid = !boardConfig.showGrid;
-                                            }
-                                        );
-                                    });
-                                }}
-                            >
-                                セルの線の表示/非表示
-                            </Button>
-                        </NonTransparent>
+                                    );
+                                });
+                            }}
+                        >
+                            セルの線の表示/非表示
+                        </Button>
                         <Popover
                             trigger='click'
                             content={
@@ -1151,95 +1141,90 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                                 />
                                             }
                                         >
-                                            <NonTransparent>
-                                                <Button>{boardConfig.gridLineColor}</Button>
-                                            </NonTransparent>
+                                            <Button style={NonTransparentStyle}>
+                                                {boardConfig.gridLineColor}
+                                            </Button>
                                         </Popover>
                                     </div>
                                 </div>
                             }
                         >
-                            <NonTransparent>
-                                <Button>
-                                    <Icons.EllipsisOutlined />
-                                </Button>
-                            </NonTransparent>
+                            <Button style={NonTransparentStyle}>
+                                <Icons.EllipsisOutlined />
+                            </Button>
                         </Popover>
                     </div>
                     <div style={{ height: 18 }} />
-                    <NonTransparent>
-                        <Button
-                            onClick={() => {
-                                if (boardIdToShow == null) {
+                    <Button
+                        style={NonTransparentStyle}
+                        onClick={() => {
+                            if (boardIdToShow == null) {
+                                return;
+                            }
+                            setRoomConfig(roomConfig => {
+                                if (roomConfig == null) {
                                     return;
                                 }
-                                setRoomConfig(roomConfig => {
-                                    if (roomConfig == null) {
-                                        return;
-                                    }
-                                    RoomConfigUtils.zoomBoard(roomConfig, {
-                                        roomId,
-                                        boardId: boardIdToShow,
-                                        boardType,
-                                        zoomDelta: 0.25,
-                                        prevCanvasWidth: canvasWidth,
-                                        prevCanvasHeight: canvasHeight,
-                                    });
+                                RoomConfigUtils.zoomBoard(roomConfig, {
+                                    roomId,
+                                    boardId: boardIdToShow,
+                                    boardType,
+                                    zoomDelta: 0.25,
+                                    prevCanvasWidth: canvasWidth,
+                                    prevCanvasHeight: canvasHeight,
                                 });
-                            }}
-                        >
-                            <Icon.ZoomInOutlined />
-                        </Button>
-                    </NonTransparent>
-                    <NonTransparent>
-                        <Button
-                            onClick={() => {
-                                if (boardIdToShow == null) {
+                            });
+                        }}
+                    >
+                        <Icon.ZoomInOutlined />
+                    </Button>
+                    <Button
+                        style={NonTransparentStyle}
+                        onClick={() => {
+                            if (boardIdToShow == null) {
+                                return;
+                            }
+                            setRoomConfig(roomConfig => {
+                                if (roomConfig == null) {
                                     return;
                                 }
-                                setRoomConfig(roomConfig => {
-                                    if (roomConfig == null) {
-                                        return;
-                                    }
-                                    RoomConfigUtils.zoomBoard(roomConfig, {
-                                        roomId,
-                                        boardId: boardIdToShow,
-                                        boardType,
-                                        zoomDelta: -0.25,
-                                        prevCanvasWidth: canvasWidth,
-                                        prevCanvasHeight: canvasHeight,
-                                    });
+                                RoomConfigUtils.zoomBoard(roomConfig, {
+                                    roomId,
+                                    boardId: boardIdToShow,
+                                    boardType,
+                                    zoomDelta: -0.25,
+                                    prevCanvasWidth: canvasWidth,
+                                    prevCanvasHeight: canvasHeight,
                                 });
-                            }}
-                        >
-                            <Icon.ZoomOutOutlined />
-                        </Button>
-                    </NonTransparent>
+                            });
+                        }}
+                    >
+                        <Icon.ZoomOutOutlined />
+                    </Button>
                     <div style={{ height: 6 }} />
-                    <NonTransparent>
-                        <Button
-                            onClick={() => {
-                                if (boardIdToShow == null) {
+                    <Button
+                        style={NonTransparentStyle}
+                        onClick={() => {
+                            if (boardIdToShow == null) {
+                                return;
+                            }
+                            setRoomConfig(roomConfig => {
+                                if (roomConfig == null) {
                                     return;
                                 }
-                                setRoomConfig(roomConfig => {
-                                    if (roomConfig == null) {
-                                        return;
+                                RoomConfigUtils.editBoard(
+                                    roomConfig,
+                                    boardIdToShow,
+                                    boardType,
+                                    () => {
+                                        return defaultBoardConfig();
                                     }
-                                    RoomConfigUtils.editBoard(
-                                        roomConfig,
-                                        boardIdToShow,
-                                        boardType,
-                                        () => {
-                                            return defaultBoardConfig();
-                                        }
-                                    );
-                                });
-                            }}
-                        >
-                            ボードの位置とズームをリセット
-                        </Button>
-                    </NonTransparent>
+                                );
+                            });
+                        }}
+                    >
+                        ボードの位置とズームをリセット
+                    </Button>
                 </div>
             </div>
             <ActiveBoardSelectorModal
