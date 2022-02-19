@@ -249,31 +249,102 @@ export const generateAsStaticHtml = (
         .map(msg => {
             const left: HtmlObject[] = [];
 
-            if (msg.value.createdBy == null) {
-                left.push({
-                    type: span,
-                    children: 'システムメッセージ',
-                });
-            } else {
-                let name: HtmlObject;
-                if (msg.value.createdBy.rolePlayPart == null) {
-                    name = { type: span, children: msg.value.createdBy.participantNamePart };
+            const space: HtmlObject = {
+                type: span,
+                children: ' ',
+                className: 'space',
+            };
+
+            let authorChildren: HtmlObject[];
+            {
+                const user = 'user';
+                const character = 'character';
+
+                if (msg.value.createdBy == null) {
+                    authorChildren = [
+                        {
+                            type: span,
+                            children: 'システムメッセージ',
+                            className: 'system-message',
+                        },
+                    ];
+                } else if (msg.value.createdBy.rolePlayPart == null) {
+                    authorChildren = [
+                        {
+                            type: span,
+                            children: msg.value.createdBy.participantNamePart,
+                            className: user,
+                        },
+                    ];
                 } else {
-                    name = {
-                        type: span,
-                        children: params.showUsernameAlways
-                            ? `${msg.value.createdBy.rolePlayPart} - ${msg.value.createdBy.participantNamePart}`
-                            : msg.value.createdBy.participantNamePart,
-                    };
+                    if (params.showUsernameAlways) {
+                        authorChildren = [
+                            {
+                                type: span,
+                                children: msg.value.createdBy.rolePlayPart,
+                                className: character,
+                            },
+                            space,
+                            { type: span, children: '-', className: 'hyphen' },
+                            space,
+                            {
+                                type: span,
+                                children: msg.value.createdBy.participantNamePart,
+                                className: user,
+                            },
+                        ];
+                    } else {
+                        authorChildren = [
+                            {
+                                type: span,
+                                children: msg.value.createdBy.rolePlayPart,
+                                className: character,
+                            },
+                        ];
+                    }
                 }
-                left.push(name);
+            }
+            const author: HtmlObject = {
+                type: span,
+                children: authorChildren,
+                className: 'author',
+            };
+            left.push(author);
+
+            if (msg.value.createdBy != null) {
+                left.push(space);
                 const channel: HtmlObject = {
                     type: span,
-                    children: ` (${msg.value.channelName})`,
+                    children: `(${msg.value.channelName})`,
+                    className: 'channel',
                 };
                 left.push(channel);
             }
 
+            const createdAt: HtmlObject[] = params.showCreatedAt
+                ? [
+                      {
+                          type: span,
+                          className: 'created-at',
+                          children: [
+                              {
+                                  type: span,
+                                  children: '@',
+                                  className: 'atmark',
+                              },
+                              space,
+                              {
+                                  type: span,
+                                  children: `${moment(new Date(msg.createdAt)).format(
+                                      'MM/DD HH:mm:ss'
+                                  )}`,
+                                  className: 'date',
+                              },
+                          ],
+                      },
+                      space,
+                  ]
+                : [];
             const result: HtmlObject = {
                 type: div,
                 className: 'message',
@@ -283,12 +354,8 @@ export const generateAsStaticHtml = (
                         : `color: ${escape(msg.value.textColor)}`,
                 children: [
                     ...left,
-                    {
-                        type: span,
-                        children: params.showCreatedAt
-                            ? ` @ ${moment(new Date(msg.createdAt)).format('MM/DD HH:mm:ss')} `
-                            : ' ',
-                    },
+                    space,
+                    ...createdAt,
                     {
                         type: span,
                         className: msg.value.text == null ? 'text gray' : 'text',
@@ -330,7 +397,7 @@ export const generateAsStaticHtml = (
     </head>
     <body>
         <div style="display: flex; flex-direction: column">
-        ${elements}
+${elements}
         </div>
     </body>
 </html>`;
