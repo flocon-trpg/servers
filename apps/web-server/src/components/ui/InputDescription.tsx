@@ -2,6 +2,7 @@ import React from 'react';
 
 const defaultStyle: React.CSSProperties = {
     paddingRight: 4,
+    whiteSpace: 'nowrap',
 };
 
 type Props = {
