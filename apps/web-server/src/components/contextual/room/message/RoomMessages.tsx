@@ -454,14 +454,14 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
         [participants]
     );
 
-    const roomMessage =
+    const userMessage =
         message.type === privateMessage || message.type === publicMessage ? message.value : null;
 
     let createdByMe: boolean | null;
-    if (typeof myAuth === 'string' || roomMessage == null) {
+    if (typeof myAuth === 'string' || userMessage == null) {
         createdByMe = null;
     } else {
-        createdByMe = myAuth.uid === roomMessage.createdBy;
+        createdByMe = myAuth.uid === userMessage.createdBy;
     }
 
     const createdAt =
@@ -475,12 +475,19 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
         datetime = moment(new Date(createdAt)).format('YYYY/MM/DD HH:mm:ss');
     }
 
+    const userName =
+        message.type === privateMessage ||
+        message.type === publicMessage ||
+        message.type === pieceLog
+            ? RoomMessageNameSpace.userName(message, participantsMap ?? new Map())
+            : null;
+
     let updatedInfo: JSX.Element | null = null;
-    if (roomMessage?.updatedAt != null) {
-        if (isDeleted(roomMessage)) {
+    if (userMessage?.updatedAt != null) {
+        if (isDeleted(userMessage)) {
             updatedInfo = (
                 <Tooltip
-                    title={`${moment(new Date(roomMessage.updatedAt)).format(
+                    title={`${moment(new Date(userMessage.updatedAt)).format(
                         'YYYY/MM/DD HH:mm:ss'
                     )}に削除されました`}
                 >
@@ -490,7 +497,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
         } else {
             updatedInfo = (
                 <Tooltip
-                    title={`${moment(new Date(roomMessage.updatedAt)).format(
+                    title={`${moment(new Date(userMessage.updatedAt)).format(
                         'YYYY/MM/DD HH:mm:ss'
                     )}に編集されました`}
                 >
@@ -529,16 +536,16 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
         }
     }
     const notSecretMenuItem =
-        roomMessage?.isSecret === true &&
-        roomMessage.createdBy != null &&
-        roomMessage.createdBy === getUserUid(myAuth) ? (
+        userMessage?.isSecret === true &&
+        userMessage.createdBy != null &&
+        userMessage.createdBy === getUserUid(myAuth) ? (
             <Menu.Item
                 onClick={() => {
                     if (roomId == null) {
                         return;
                     }
                     makeMessageNotSecret({
-                        variables: { messageId: roomMessage.messageId, roomId },
+                        variables: { messageId: userMessage.messageId, roomId },
                     });
                 }}
             >
@@ -546,7 +553,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
             </Menu.Item>
         ) : null;
     const editMenuItem =
-        roomMessage != null && createdByMe === true && roomMessage.commandResult == null ? (
+        userMessage != null && createdByMe === true && userMessage.commandResult == null ? (
             <Menu.Item
                 onClick={() => {
                     setIsEditModalVisible(true);
@@ -556,14 +563,14 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
             </Menu.Item>
         ) : null;
     const deleteMenuItem =
-        roomMessage != null && createdByMe === true ? (
+        userMessage != null && createdByMe === true ? (
             <Menu.Item
                 onClick={() => {
                     if (roomId == null) {
                         return;
                     }
                     deleteMessageMutation({
-                        variables: { messageId: roomMessage.messageId, roomId },
+                        variables: { messageId: userMessage.messageId, roomId },
                     });
                 }}
             >
@@ -610,14 +617,11 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                     display: 'flex',
                     flexDirection: 'row',
                     alignItems: 'center',
+                    gap: '0 6px',
                 }}
             >
-                <div className={classNames(flexNone)}>
-                    {message.type === privateMessage ||
-                        (message.type === publicMessage &&
-                            RoomMessageNameSpace.userName(message, participantsMap ?? new Map()))}
-                </div>
-                <div style={{ flex: '0 0 auto', color: 'gray', paddingLeft: 6 }}>
+                {userName && <div className={classNames(flexNone)}>{userName}</div>}
+                <div style={{ flex: '0 0 auto', color: 'gray' }}>
                     {message.type !== privateMessage && message.type !== publicMessage
                         ? '(ログ)'
                         : publicChannelNames == null
@@ -628,12 +632,8 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                               participantsMap ?? new Map()
                           )}
                 </div>
-                <div style={{ flex: '0 0 auto', color: 'gray', paddingLeft: 6 }}>{datetime}</div>
-                {privateMessageMembersInfo != null && (
-                    <div style={{ flex: '0 0 auto', width: 6 }} />
-                )}
+                <div style={{ flex: '0 0 auto', color: 'gray' }}>{datetime}</div>
                 {privateMessageMembersInfo}
-                {updatedInfo == null ? null : <div style={{ flex: '0 0 auto', width: 6 }} />}
                 {updatedInfo}
                 <div style={{ flex: 1 }} />
             </div>
@@ -684,11 +684,11 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                 visible={isEditModalVisible}
                 isTextArea={true}
                 onOk={(value, setValue) => {
-                    if (roomMessage == null || roomId == null) {
+                    if (userMessage == null || roomId == null) {
                         return;
                     }
                     editMessageMutation({
-                        variables: { messageId: roomMessage.messageId, roomId, text: value },
+                        variables: { messageId: userMessage.messageId, roomId, text: value },
                     }).then(() => {
                         setIsEditModalVisible(false);
                         setValue('');
@@ -699,7 +699,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                     setValue('');
                 }}
                 onOpen={setValue => {
-                    setValue(roomMessage == null ? '' : toText(roomMessage) ?? '');
+                    setValue(userMessage == null ? '' : toText(userMessage) ?? '');
                 }}
             />
         </div>
