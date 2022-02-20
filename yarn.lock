@@ -3131,8 +3131,8 @@ __metadata:
   linkType: hard
 
 "@mikro-orm/core@npm:^4.5.7":
-  version: 4.5.9
-  resolution: "@mikro-orm/core@npm:4.5.9"
+  version: 4.5.10
+  resolution: "@mikro-orm/core@npm:4.5.10"
   dependencies:
     ansi-colors: 4.1.1
     clone: 2.1.2
@@ -3165,13 +3165,13 @@ __metadata:
       optional: true
     "@mikro-orm/sqlite":
       optional: true
-  checksum: 8323bbe0009766aa72d0d1237bc27f2fc9b5f894e23d0e1896d486a2ad00a89fcba925b48ac207fb3e47f1922698ba6561c6a50c437ecb3d3386a13b391a5b96
+  checksum: 4ec93e1403c3a08a5abda52560cc25cab77d990c0c542f0046c34f3e67860baf325b6675cc68a28fc229196a53b8072e1673112db9715c19b885bceb6cfa5282
   languageName: node
   linkType: hard
 
-"@mikro-orm/knex@npm:^4.5.9":
-  version: 4.5.9
-  resolution: "@mikro-orm/knex@npm:4.5.9"
+"@mikro-orm/knex@npm:^4.5.10":
+  version: 4.5.10
+  resolution: "@mikro-orm/knex@npm:4.5.10"
   dependencies:
     fs-extra: 9.1.0
     knex: 0.21.19
@@ -3200,48 +3200,48 @@ __metadata:
       optional: true
     sqlite3:
       optional: true
-  checksum: 934ff5734c1916b8d80a6571f36d6a73fe2de995c6f1e893a7f3953033bac9f432c764fad2d567716037704c76418e1170c16145f93a44c2a3a692ab5cb34b7c
+  checksum: ef8218481545b7287e8a00662373142d44ec1b58ba7110688585210da8c689d7feec7062286b473c4099000a05ff3cba4b010a7067531d3663286aaf777bedbc
   languageName: node
   linkType: hard
 
 "@mikro-orm/migrations@npm:^4.5.7":
-  version: 4.5.9
-  resolution: "@mikro-orm/migrations@npm:4.5.9"
+  version: 4.5.10
+  resolution: "@mikro-orm/migrations@npm:4.5.10"
   dependencies:
-    "@mikro-orm/knex": ^4.5.9
+    "@mikro-orm/knex": ^4.5.10
     "@types/umzug": 2.3.0
     fs-extra: 9.1.0
     knex: 0.21.19
     umzug: 2.3.0
   peerDependencies:
     "@mikro-orm/core": ^4.0.0
-  checksum: 2cc9134a6026f76a23365eacfef810df81bbc0fce9aa861dd80cac1c4034312a0cbfd6a683b22cbec4c3ed3c975284956a61373676be0621cb0f9936b4f48686
+  checksum: bd60b53c0e17a977a42368d00e6a2fb0a21245d58721127269b727f6db49518a42371d54406484dc7c31090e1053120a318e92bdc32f63d3f7b0eac6e4900700
   languageName: node
   linkType: hard
 
 "@mikro-orm/postgresql@npm:^4.5.7":
-  version: 4.5.9
-  resolution: "@mikro-orm/postgresql@npm:4.5.9"
+  version: 4.5.10
+  resolution: "@mikro-orm/postgresql@npm:4.5.10"
   dependencies:
-    "@mikro-orm/knex": ^4.5.9
+    "@mikro-orm/knex": ^4.5.10
     pg: 8.6.0
   peerDependencies:
     "@mikro-orm/core": ^4.0.0
-  checksum: be7753d9115cdb7bb90901ab64d5741c8dc4f399f56a76652bcb176bbe2e2295f709a0561d5681beff3f9dc3f9a6cf8667254ebba24a89b12fa1c5393549a078
+  checksum: ba8395aca673839aafff938c6eeff8d1abbd42c2a4304311efb39c6606449180db334259255a5d0e3f77e10b85d0278c400bdd3a90df82de71fcdbd777c85dcb
   languageName: node
   linkType: hard
 
 "@mikro-orm/sqlite@npm:^4.5.7":
-  version: 4.5.9
-  resolution: "@mikro-orm/sqlite@npm:4.5.9"
+  version: 4.5.10
+  resolution: "@mikro-orm/sqlite@npm:4.5.10"
   dependencies:
-    "@mikro-orm/knex": ^4.5.9
+    "@mikro-orm/knex": ^4.5.10
     fs-extra: 9.1.0
     sqlite3: 5.0.2
     sqlstring-sqlite: 0.1.1
   peerDependencies:
     "@mikro-orm/core": ^4.0.0
-  checksum: 87f2646b9d17abc6db8eddaf0c5d6f6b98fb7afebf16985eeba4ad5bcab24e5784595b7a0fca9fb26844d515814818a865c491624e8356ed47f72c9b6c24d005
+  checksum: fc80199220557b6490d8105e07cde469e3b432040174d238f4942030de624f53e71805e1ec891cb3e61498ad532455ef735a59e99bfc02b58cd74ac0bed4fa8e
   languageName: node
   linkType: hard
 
