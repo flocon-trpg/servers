@@ -3618,6 +3618,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@scarf/scarf@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "@scarf/scarf@npm:1.1.1"
+  checksum: f3205e7a76fed1ec3328643a5f276f4aab5c67d0e17ca0a414755aacae529f4a3492b44607f9ad066470ecb3ee003e72b3d9581f58dc6c507c18180611ff113e
+  languageName: node
+  linkType: hard
+
 "@sindresorhus/is@npm:^0.14.0":
   version: 0.14.0
   resolution: "@sindresorhus/is@npm:0.14.0"
@@ -10289,12 +10296,14 @@ __metadata:
   linkType: hard
 
 "io-ts-reporters@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "io-ts-reporters@npm:2.0.0"
+  version: 2.0.1
+  resolution: "io-ts-reporters@npm:2.0.1"
+  dependencies:
+    "@scarf/scarf": ^1.1.1
   peerDependencies:
     fp-ts: ^2.10.5
     io-ts: ^2.2.16
-  checksum: fd15abdc1b88dfbd54ff3c10a8a55ccf862b5f8b7ee1642760920f0fb0808ac977ece72ed221ab9b011987cf2f880aafa83c1ced526aea4ef560c6403ac8e7e2
+  checksum: d3ffd603249417475771c3c29be8b3455d82010bf2f53b7e0fc8974c4864d0ff5366bcc58a0e0e6a3016f0ffa98c1acc8f42ef19d25d3ca89652574200d57193
   languageName: node
   linkType: hard
 
