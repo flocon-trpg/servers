@@ -879,14 +879,8 @@ export type CharacterValueForMessageFragment = {
     stateId: string;
     isPrivate: boolean;
     name: string;
-    image?:
-        | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
-        | null
-        | undefined;
-    portraitImage?:
-        | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
-        | null
-        | undefined;
+    image?: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string } | null;
+    portraitImage?: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string } | null;
 };
 
 type CreateRoomResult_CreateRoomFailureResult_Fragment = {
@@ -907,10 +901,10 @@ export type CreateRoomResultFragment =
 export type FileItemFragment = {
     __typename?: 'FileItem';
     filename: string;
-    thumbFilename?: string | null | undefined;
+    thumbFilename?: string | null;
     screenname: string;
     createdBy: string;
-    createdAt?: number | null | undefined;
+    createdAt?: number | null;
 };
 
 export type FilePathFragment = {
@@ -989,18 +983,12 @@ type JoinRoomResult_JoinRoomFailureResult_Fragment = {
 
 type JoinRoomResult_JoinRoomSuccessResult_Fragment = {
     __typename: 'JoinRoomSuccessResult';
-    operation?:
-        | {
-              __typename?: 'RoomOperation';
-              revisionTo: number;
-              valueJson: string;
-              operatedBy?:
-                  | { __typename?: 'OperatedBy'; userUid: string; clientId: string }
-                  | null
-                  | undefined;
-          }
-        | null
-        | undefined;
+    operation?: {
+        __typename?: 'RoomOperation';
+        revisionTo: number;
+        valueJson: string;
+        operatedBy?: { __typename?: 'OperatedBy'; userUid: string; clientId: string } | null;
+    } | null;
 };
 
 export type JoinRoomResultFragment =
@@ -1036,102 +1024,93 @@ export type RoomOperationFragment = {
     __typename?: 'RoomOperation';
     revisionTo: number;
     valueJson: string;
-    operatedBy?:
-        | { __typename?: 'OperatedBy'; userUid: string; clientId: string }
-        | null
-        | undefined;
+    operatedBy?: { __typename?: 'OperatedBy'; userUid: string; clientId: string } | null;
 };
 
 export type RoomPublicChannelFragment = {
     __typename?: 'RoomPublicChannel';
     key: string;
-    name?: string | null | undefined;
+    name?: string | null;
 };
 
 export type RoomPublicMessageFragment = {
     __typename?: 'RoomPublicMessage';
     messageId: string;
     channelKey: string;
-    initText?: string | null | undefined;
-    initTextSource?: string | null | undefined;
-    textColor?: string | null | undefined;
-    altTextToSecret?: string | null | undefined;
+    initText?: string | null;
+    initTextSource?: string | null;
+    textColor?: string | null;
+    altTextToSecret?: string | null;
     isSecret: boolean;
-    createdBy?: string | null | undefined;
-    customName?: string | null | undefined;
+    createdBy?: string | null;
+    customName?: string | null;
     createdAt: number;
-    updatedAt?: number | null | undefined;
-    updatedText?:
-        | { __typename?: 'UpdatedText'; currentText?: string | null | undefined; updatedAt: number }
-        | null
-        | undefined;
-    commandResult?:
-        | { __typename?: 'CommandResult'; text: string; isSuccess?: boolean | null | undefined }
-        | null
-        | undefined;
-    character?:
-        | {
-              __typename?: 'CharacterValueForMessage';
-              stateId: string;
-              isPrivate: boolean;
-              name: string;
-              image?:
-                  | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
-                  | null
-                  | undefined;
-              portraitImage?:
-                  | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
-                  | null
-                  | undefined;
-          }
-        | null
-        | undefined;
+    updatedAt?: number | null;
+    updatedText?: {
+        __typename?: 'UpdatedText';
+        currentText?: string | null;
+        updatedAt: number;
+    } | null;
+    commandResult?: {
+        __typename?: 'CommandResult';
+        text: string;
+        isSuccess?: boolean | null;
+    } | null;
+    character?: {
+        __typename?: 'CharacterValueForMessage';
+        stateId: string;
+        isPrivate: boolean;
+        name: string;
+        image?: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string } | null;
+        portraitImage?: {
+            __typename?: 'FilePath';
+            sourceType: FileSourceType;
+            path: string;
+        } | null;
+    } | null;
 };
 
 export type RoomPrivateMessageFragment = {
     __typename?: 'RoomPrivateMessage';
     messageId: string;
     visibleTo: Array<string>;
-    initText?: string | null | undefined;
-    initTextSource?: string | null | undefined;
-    textColor?: string | null | undefined;
-    altTextToSecret?: string | null | undefined;
+    initText?: string | null;
+    initTextSource?: string | null;
+    textColor?: string | null;
+    altTextToSecret?: string | null;
     isSecret: boolean;
-    createdBy?: string | null | undefined;
-    customName?: string | null | undefined;
+    createdBy?: string | null;
+    customName?: string | null;
     createdAt: number;
-    updatedAt?: number | null | undefined;
-    updatedText?:
-        | { __typename?: 'UpdatedText'; currentText?: string | null | undefined; updatedAt: number }
-        | null
-        | undefined;
-    commandResult?:
-        | { __typename?: 'CommandResult'; text: string; isSuccess?: boolean | null | undefined }
-        | null
-        | undefined;
-    character?:
-        | {
-              __typename?: 'CharacterValueForMessage';
-              stateId: string;
-              isPrivate: boolean;
-              name: string;
-              image?:
-                  | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
-                  | null
-                  | undefined;
-              portraitImage?:
-                  | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
-                  | null
-                  | undefined;
-          }
-        | null
-        | undefined;
+    updatedAt?: number | null;
+    updatedText?: {
+        __typename?: 'UpdatedText';
+        currentText?: string | null;
+        updatedAt: number;
+    } | null;
+    commandResult?: {
+        __typename?: 'CommandResult';
+        text: string;
+        isSuccess?: boolean | null;
+    } | null;
+    character?: {
+        __typename?: 'CharacterValueForMessage';
+        stateId: string;
+        isPrivate: boolean;
+        name: string;
+        image?: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string } | null;
+        portraitImage?: {
+            __typename?: 'FilePath';
+            sourceType: FileSourceType;
+            path: string;
+        } | null;
+    } | null;
 };
 
 export type RoomSoundEffectFragment = {
     __typename?: 'RoomSoundEffect';
     messageId: string;
-    createdBy?: string | null | undefined;
+    createdBy?: string | null;
     createdAt: number;
     volume: number;
     file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
@@ -1152,134 +1131,132 @@ type RoomMessageEvent_RoomPrivateMessage_Fragment = {
     __typename: 'RoomPrivateMessage';
     messageId: string;
     visibleTo: Array<string>;
-    initText?: string | null | undefined;
-    initTextSource?: string | null | undefined;
-    textColor?: string | null | undefined;
-    altTextToSecret?: string | null | undefined;
+    initText?: string | null;
+    initTextSource?: string | null;
+    textColor?: string | null;
+    altTextToSecret?: string | null;
     isSecret: boolean;
-    createdBy?: string | null | undefined;
-    customName?: string | null | undefined;
+    createdBy?: string | null;
+    customName?: string | null;
     createdAt: number;
-    updatedAt?: number | null | undefined;
-    updatedText?:
-        | { __typename?: 'UpdatedText'; currentText?: string | null | undefined; updatedAt: number }
-        | null
-        | undefined;
-    commandResult?:
-        | { __typename?: 'CommandResult'; text: string; isSuccess?: boolean | null | undefined }
-        | null
-        | undefined;
-    character?:
-        | {
-              __typename?: 'CharacterValueForMessage';
-              stateId: string;
-              isPrivate: boolean;
-              name: string;
-              image?:
-                  | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
-                  | null
-                  | undefined;
-              portraitImage?:
-                  | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
-                  | null
-                  | undefined;
-          }
-        | null
-        | undefined;
+    updatedAt?: number | null;
+    updatedText?: {
+        __typename?: 'UpdatedText';
+        currentText?: string | null;
+        updatedAt: number;
+    } | null;
+    commandResult?: {
+        __typename?: 'CommandResult';
+        text: string;
+        isSuccess?: boolean | null;
+    } | null;
+    character?: {
+        __typename?: 'CharacterValueForMessage';
+        stateId: string;
+        isPrivate: boolean;
+        name: string;
+        image?: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string } | null;
+        portraitImage?: {
+            __typename?: 'FilePath';
+            sourceType: FileSourceType;
+            path: string;
+        } | null;
+    } | null;
 };
 
 type RoomMessageEvent_RoomPrivateMessageUpdate_Fragment = {
     __typename: 'RoomPrivateMessageUpdate';
     messageId: string;
-    initText?: string | null | undefined;
-    initTextSource?: string | null | undefined;
-    altTextToSecret?: string | null | undefined;
+    initText?: string | null;
+    initTextSource?: string | null;
+    altTextToSecret?: string | null;
     isSecret: boolean;
-    updatedAt?: number | null | undefined;
-    updatedText?:
-        | { __typename?: 'UpdatedText'; currentText?: string | null | undefined; updatedAt: number }
-        | null
-        | undefined;
-    commandResult?:
-        | { __typename?: 'CommandResult'; text: string; isSuccess?: boolean | null | undefined }
-        | null
-        | undefined;
+    updatedAt?: number | null;
+    updatedText?: {
+        __typename?: 'UpdatedText';
+        currentText?: string | null;
+        updatedAt: number;
+    } | null;
+    commandResult?: {
+        __typename?: 'CommandResult';
+        text: string;
+        isSuccess?: boolean | null;
+    } | null;
 };
 
 type RoomMessageEvent_RoomPublicChannel_Fragment = {
     __typename: 'RoomPublicChannel';
     key: string;
-    name?: string | null | undefined;
+    name?: string | null;
 };
 
 type RoomMessageEvent_RoomPublicChannelUpdate_Fragment = {
     __typename: 'RoomPublicChannelUpdate';
     key: string;
-    name?: string | null | undefined;
+    name?: string | null;
 };
 
 type RoomMessageEvent_RoomPublicMessage_Fragment = {
     __typename: 'RoomPublicMessage';
     messageId: string;
     channelKey: string;
-    initText?: string | null | undefined;
-    initTextSource?: string | null | undefined;
-    textColor?: string | null | undefined;
-    altTextToSecret?: string | null | undefined;
+    initText?: string | null;
+    initTextSource?: string | null;
+    textColor?: string | null;
+    altTextToSecret?: string | null;
     isSecret: boolean;
-    createdBy?: string | null | undefined;
-    customName?: string | null | undefined;
+    createdBy?: string | null;
+    customName?: string | null;
     createdAt: number;
-    updatedAt?: number | null | undefined;
-    updatedText?:
-        | { __typename?: 'UpdatedText'; currentText?: string | null | undefined; updatedAt: number }
-        | null
-        | undefined;
-    commandResult?:
-        | { __typename?: 'CommandResult'; text: string; isSuccess?: boolean | null | undefined }
-        | null
-        | undefined;
-    character?:
-        | {
-              __typename?: 'CharacterValueForMessage';
-              stateId: string;
-              isPrivate: boolean;
-              name: string;
-              image?:
-                  | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
-                  | null
-                  | undefined;
-              portraitImage?:
-                  | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
-                  | null
-                  | undefined;
-          }
-        | null
-        | undefined;
+    updatedAt?: number | null;
+    updatedText?: {
+        __typename?: 'UpdatedText';
+        currentText?: string | null;
+        updatedAt: number;
+    } | null;
+    commandResult?: {
+        __typename?: 'CommandResult';
+        text: string;
+        isSuccess?: boolean | null;
+    } | null;
+    character?: {
+        __typename?: 'CharacterValueForMessage';
+        stateId: string;
+        isPrivate: boolean;
+        name: string;
+        image?: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string } | null;
+        portraitImage?: {
+            __typename?: 'FilePath';
+            sourceType: FileSourceType;
+            path: string;
+        } | null;
+    } | null;
 };
 
 type RoomMessageEvent_RoomPublicMessageUpdate_Fragment = {
     __typename: 'RoomPublicMessageUpdate';
     messageId: string;
-    initText?: string | null | undefined;
-    initTextSource?: string | null | undefined;
-    altTextToSecret?: string | null | undefined;
+    initText?: string | null;
+    initTextSource?: string | null;
+    altTextToSecret?: string | null;
     isSecret: boolean;
-    updatedAt?: number | null | undefined;
-    updatedText?:
-        | { __typename?: 'UpdatedText'; currentText?: string | null | undefined; updatedAt: number }
-        | null
-        | undefined;
-    commandResult?:
-        | { __typename?: 'CommandResult'; text: string; isSuccess?: boolean | null | undefined }
-        | null
-        | undefined;
+    updatedAt?: number | null;
+    updatedText?: {
+        __typename?: 'UpdatedText';
+        currentText?: string | null;
+        updatedAt: number;
+    } | null;
+    commandResult?: {
+        __typename?: 'CommandResult';
+        text: string;
+        isSuccess?: boolean | null;
+    } | null;
 };
 
 type RoomMessageEvent_RoomSoundEffect_Fragment = {
     __typename: 'RoomSoundEffect';
     messageId: string;
-    createdBy?: string | null | undefined;
+    createdBy?: string | null;
     createdAt: number;
     volume: number;
     file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
@@ -1301,10 +1278,7 @@ export type SemVerFragment = {
     major: number;
     minor: number;
     patch: number;
-    prerelease?:
-        | { __typename?: 'Prerelease'; type: PrereleaseType; version: number }
-        | null
-        | undefined;
+    prerelease?: { __typename?: 'Prerelease'; type: PrereleaseType; version: number } | null;
 };
 
 export type GetAvailableGameSystemsQueryVariables = Exact<{ [key: string]: never }>;
@@ -1326,7 +1300,7 @@ export type GetDiceHelpMessagesQueryVariables = Exact<{
     id: Scalars['String'];
 }>;
 
-export type GetDiceHelpMessagesQuery = { __typename?: 'Query'; result?: string | null | undefined };
+export type GetDiceHelpMessagesQuery = { __typename?: 'Query'; result?: string | null };
 
 export type GetFilesQueryVariables = Exact<{
     input: GetFilesInput;
@@ -1339,10 +1313,10 @@ export type GetFilesQuery = {
         files: Array<{
             __typename?: 'FileItem';
             filename: string;
-            thumbFilename?: string | null | undefined;
+            thumbFilename?: string | null;
             screenname: string;
             createdBy: string;
-            createdAt?: number | null | undefined;
+            createdAt?: number | null;
         }>;
     };
 };
@@ -1411,111 +1385,81 @@ export type GetMessagesQuery = {
                   __typename?: 'RoomPublicMessage';
                   messageId: string;
                   channelKey: string;
-                  initText?: string | null | undefined;
-                  initTextSource?: string | null | undefined;
-                  textColor?: string | null | undefined;
-                  altTextToSecret?: string | null | undefined;
+                  initText?: string | null;
+                  initTextSource?: string | null;
+                  textColor?: string | null;
+                  altTextToSecret?: string | null;
                   isSecret: boolean;
-                  createdBy?: string | null | undefined;
-                  customName?: string | null | undefined;
+                  createdBy?: string | null;
+                  customName?: string | null;
                   createdAt: number;
-                  updatedAt?: number | null | undefined;
-                  updatedText?:
-                      | {
-                            __typename?: 'UpdatedText';
-                            currentText?: string | null | undefined;
-                            updatedAt: number;
-                        }
-                      | null
-                      | undefined;
-                  commandResult?:
-                      | {
-                            __typename?: 'CommandResult';
-                            text: string;
-                            isSuccess?: boolean | null | undefined;
-                        }
-                      | null
-                      | undefined;
-                  character?:
-                      | {
-                            __typename?: 'CharacterValueForMessage';
-                            stateId: string;
-                            isPrivate: boolean;
-                            name: string;
-                            image?:
-                                | {
-                                      __typename?: 'FilePath';
-                                      sourceType: FileSourceType;
-                                      path: string;
-                                  }
-                                | null
-                                | undefined;
-                            portraitImage?:
-                                | {
-                                      __typename?: 'FilePath';
-                                      sourceType: FileSourceType;
-                                      path: string;
-                                  }
-                                | null
-                                | undefined;
-                        }
-                      | null
-                      | undefined;
+                  updatedAt?: number | null;
+                  updatedText?: {
+                      __typename?: 'UpdatedText';
+                      currentText?: string | null;
+                      updatedAt: number;
+                  } | null;
+                  commandResult?: {
+                      __typename?: 'CommandResult';
+                      text: string;
+                      isSuccess?: boolean | null;
+                  } | null;
+                  character?: {
+                      __typename?: 'CharacterValueForMessage';
+                      stateId: string;
+                      isPrivate: boolean;
+                      name: string;
+                      image?: {
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      } | null;
+                      portraitImage?: {
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      } | null;
+                  } | null;
               }>;
               privateMessages: Array<{
                   __typename?: 'RoomPrivateMessage';
                   messageId: string;
                   visibleTo: Array<string>;
-                  initText?: string | null | undefined;
-                  initTextSource?: string | null | undefined;
-                  textColor?: string | null | undefined;
-                  altTextToSecret?: string | null | undefined;
+                  initText?: string | null;
+                  initTextSource?: string | null;
+                  textColor?: string | null;
+                  altTextToSecret?: string | null;
                   isSecret: boolean;
-                  createdBy?: string | null | undefined;
-                  customName?: string | null | undefined;
+                  createdBy?: string | null;
+                  customName?: string | null;
                   createdAt: number;
-                  updatedAt?: number | null | undefined;
-                  updatedText?:
-                      | {
-                            __typename?: 'UpdatedText';
-                            currentText?: string | null | undefined;
-                            updatedAt: number;
-                        }
-                      | null
-                      | undefined;
-                  commandResult?:
-                      | {
-                            __typename?: 'CommandResult';
-                            text: string;
-                            isSuccess?: boolean | null | undefined;
-                        }
-                      | null
-                      | undefined;
-                  character?:
-                      | {
-                            __typename?: 'CharacterValueForMessage';
-                            stateId: string;
-                            isPrivate: boolean;
-                            name: string;
-                            image?:
-                                | {
-                                      __typename?: 'FilePath';
-                                      sourceType: FileSourceType;
-                                      path: string;
-                                  }
-                                | null
-                                | undefined;
-                            portraitImage?:
-                                | {
-                                      __typename?: 'FilePath';
-                                      sourceType: FileSourceType;
-                                      path: string;
-                                  }
-                                | null
-                                | undefined;
-                        }
-                      | null
-                      | undefined;
+                  updatedAt?: number | null;
+                  updatedText?: {
+                      __typename?: 'UpdatedText';
+                      currentText?: string | null;
+                      updatedAt: number;
+                  } | null;
+                  commandResult?: {
+                      __typename?: 'CommandResult';
+                      text: string;
+                      isSuccess?: boolean | null;
+                  } | null;
+                  character?: {
+                      __typename?: 'CharacterValueForMessage';
+                      stateId: string;
+                      isPrivate: boolean;
+                      name: string;
+                      image?: {
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      } | null;
+                      portraitImage?: {
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      } | null;
+                  } | null;
               }>;
               pieceLogs: Array<{
                   __typename?: 'PieceLog';
@@ -1528,12 +1472,12 @@ export type GetMessagesQuery = {
               publicChannels: Array<{
                   __typename?: 'RoomPublicChannel';
                   key: string;
-                  name?: string | null | undefined;
+                  name?: string | null;
               }>;
               soundEffects: Array<{
                   __typename?: 'RoomSoundEffect';
                   messageId: string;
-                  createdBy?: string | null | undefined;
+                  createdBy?: string | null;
                   createdAt: number;
                   volume: number;
                   file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
@@ -1555,111 +1499,81 @@ export type GetLogQuery = {
                   __typename?: 'RoomPublicMessage';
                   messageId: string;
                   channelKey: string;
-                  initText?: string | null | undefined;
-                  initTextSource?: string | null | undefined;
-                  textColor?: string | null | undefined;
-                  altTextToSecret?: string | null | undefined;
+                  initText?: string | null;
+                  initTextSource?: string | null;
+                  textColor?: string | null;
+                  altTextToSecret?: string | null;
                   isSecret: boolean;
-                  createdBy?: string | null | undefined;
-                  customName?: string | null | undefined;
+                  createdBy?: string | null;
+                  customName?: string | null;
                   createdAt: number;
-                  updatedAt?: number | null | undefined;
-                  updatedText?:
-                      | {
-                            __typename?: 'UpdatedText';
-                            currentText?: string | null | undefined;
-                            updatedAt: number;
-                        }
-                      | null
-                      | undefined;
-                  commandResult?:
-                      | {
-                            __typename?: 'CommandResult';
-                            text: string;
-                            isSuccess?: boolean | null | undefined;
-                        }
-                      | null
-                      | undefined;
-                  character?:
-                      | {
-                            __typename?: 'CharacterValueForMessage';
-                            stateId: string;
-                            isPrivate: boolean;
-                            name: string;
-                            image?:
-                                | {
-                                      __typename?: 'FilePath';
-                                      sourceType: FileSourceType;
-                                      path: string;
-                                  }
-                                | null
-                                | undefined;
-                            portraitImage?:
-                                | {
-                                      __typename?: 'FilePath';
-                                      sourceType: FileSourceType;
-                                      path: string;
-                                  }
-                                | null
-                                | undefined;
-                        }
-                      | null
-                      | undefined;
+                  updatedAt?: number | null;
+                  updatedText?: {
+                      __typename?: 'UpdatedText';
+                      currentText?: string | null;
+                      updatedAt: number;
+                  } | null;
+                  commandResult?: {
+                      __typename?: 'CommandResult';
+                      text: string;
+                      isSuccess?: boolean | null;
+                  } | null;
+                  character?: {
+                      __typename?: 'CharacterValueForMessage';
+                      stateId: string;
+                      isPrivate: boolean;
+                      name: string;
+                      image?: {
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      } | null;
+                      portraitImage?: {
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      } | null;
+                  } | null;
               }>;
               privateMessages: Array<{
                   __typename?: 'RoomPrivateMessage';
                   messageId: string;
                   visibleTo: Array<string>;
-                  initText?: string | null | undefined;
-                  initTextSource?: string | null | undefined;
-                  textColor?: string | null | undefined;
-                  altTextToSecret?: string | null | undefined;
+                  initText?: string | null;
+                  initTextSource?: string | null;
+                  textColor?: string | null;
+                  altTextToSecret?: string | null;
                   isSecret: boolean;
-                  createdBy?: string | null | undefined;
-                  customName?: string | null | undefined;
+                  createdBy?: string | null;
+                  customName?: string | null;
                   createdAt: number;
-                  updatedAt?: number | null | undefined;
-                  updatedText?:
-                      | {
-                            __typename?: 'UpdatedText';
-                            currentText?: string | null | undefined;
-                            updatedAt: number;
-                        }
-                      | null
-                      | undefined;
-                  commandResult?:
-                      | {
-                            __typename?: 'CommandResult';
-                            text: string;
-                            isSuccess?: boolean | null | undefined;
-                        }
-                      | null
-                      | undefined;
-                  character?:
-                      | {
-                            __typename?: 'CharacterValueForMessage';
-                            stateId: string;
-                            isPrivate: boolean;
-                            name: string;
-                            image?:
-                                | {
-                                      __typename?: 'FilePath';
-                                      sourceType: FileSourceType;
-                                      path: string;
-                                  }
-                                | null
-                                | undefined;
-                            portraitImage?:
-                                | {
-                                      __typename?: 'FilePath';
-                                      sourceType: FileSourceType;
-                                      path: string;
-                                  }
-                                | null
-                                | undefined;
-                        }
-                      | null
-                      | undefined;
+                  updatedAt?: number | null;
+                  updatedText?: {
+                      __typename?: 'UpdatedText';
+                      currentText?: string | null;
+                      updatedAt: number;
+                  } | null;
+                  commandResult?: {
+                      __typename?: 'CommandResult';
+                      text: string;
+                      isSuccess?: boolean | null;
+                  } | null;
+                  character?: {
+                      __typename?: 'CharacterValueForMessage';
+                      stateId: string;
+                      isPrivate: boolean;
+                      name: string;
+                      image?: {
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      } | null;
+                      portraitImage?: {
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      } | null;
+                  } | null;
               }>;
               pieceLogs: Array<{
                   __typename?: 'PieceLog';
@@ -1672,12 +1586,12 @@ export type GetLogQuery = {
               publicChannels: Array<{
                   __typename?: 'RoomPublicChannel';
                   key: string;
-                  name?: string | null | undefined;
+                  name?: string | null;
               }>;
               soundEffects: Array<{
                   __typename?: 'RoomSoundEffect';
                   messageId: string;
-                  createdBy?: string | null | undefined;
+                  createdBy?: string | null;
                   createdAt: number;
                   volume: number;
                   file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
@@ -1715,10 +1629,11 @@ export type GetServerInfoQuery = {
             major: number;
             minor: number;
             patch: number;
-            prerelease?:
-                | { __typename?: 'Prerelease'; type: PrereleaseType; version: number }
-                | null
-                | undefined;
+            prerelease?: {
+                __typename?: 'Prerelease';
+                type: PrereleaseType;
+                version: number;
+            } | null;
         };
     };
 };
@@ -1754,7 +1669,7 @@ export type CreateFileTagMutationVariables = Exact<{
 
 export type CreateFileTagMutation = {
     __typename?: 'Mutation';
-    result?: { __typename?: 'FileTag'; id: string; name: string } | null | undefined;
+    result?: { __typename?: 'FileTag'; id: string; name: string } | null;
 };
 
 export type ChangeParticipantNameMutationVariables = Exact<{
@@ -1766,7 +1681,7 @@ export type ChangeParticipantNameMutation = {
     __typename?: 'Mutation';
     result: {
         __typename?: 'ChangeParticipantNameResult';
-        failureType?: ChangeParticipantNameFailureType | null | undefined;
+        failureType?: ChangeParticipantNameFailureType | null;
     };
 };
 
@@ -1808,10 +1723,7 @@ export type DeleteRoomMutationVariables = Exact<{
 
 export type DeleteRoomMutation = {
     __typename?: 'Mutation';
-    result: {
-        __typename?: 'DeleteRoomResult';
-        failureType?: DeleteRoomFailureType | null | undefined;
-    };
+    result: { __typename?: 'DeleteRoomResult'; failureType?: DeleteRoomFailureType | null };
 };
 
 export type EditFileTagsMutationVariables = Exact<{
@@ -1832,18 +1744,16 @@ export type JoinRoomAsPlayerMutation = {
         | { __typename: 'JoinRoomFailureResult'; failureType: JoinRoomFailureType }
         | {
               __typename: 'JoinRoomSuccessResult';
-              operation?:
-                  | {
-                        __typename?: 'RoomOperation';
-                        revisionTo: number;
-                        valueJson: string;
-                        operatedBy?:
-                            | { __typename?: 'OperatedBy'; userUid: string; clientId: string }
-                            | null
-                            | undefined;
-                    }
-                  | null
-                  | undefined;
+              operation?: {
+                  __typename?: 'RoomOperation';
+                  revisionTo: number;
+                  valueJson: string;
+                  operatedBy?: {
+                      __typename?: 'OperatedBy';
+                      userUid: string;
+                      clientId: string;
+                  } | null;
+              } | null;
           };
 };
 
@@ -1859,18 +1769,16 @@ export type JoinRoomAsSpectatorMutation = {
         | { __typename: 'JoinRoomFailureResult'; failureType: JoinRoomFailureType }
         | {
               __typename: 'JoinRoomSuccessResult';
-              operation?:
-                  | {
-                        __typename?: 'RoomOperation';
-                        revisionTo: number;
-                        valueJson: string;
-                        operatedBy?:
-                            | { __typename?: 'OperatedBy'; userUid: string; clientId: string }
-                            | null
-                            | undefined;
-                    }
-                  | null
-                  | undefined;
+              operation?: {
+                  __typename?: 'RoomOperation';
+                  revisionTo: number;
+                  valueJson: string;
+                  operatedBy?: {
+                      __typename?: 'OperatedBy';
+                      userUid: string;
+                      clientId: string;
+                  } | null;
+              } | null;
           };
 };
 
@@ -1889,10 +1797,7 @@ export type LeaveRoomMutationVariables = Exact<{
 
 export type LeaveRoomMutation = {
     __typename?: 'Mutation';
-    result: {
-        __typename?: 'LeaveRoomResult';
-        failureType?: LeaveRoomFailureType | null | undefined;
-    };
+    result: { __typename?: 'LeaveRoomResult'; failureType?: LeaveRoomFailureType | null };
 };
 
 export type OperateMutationVariables = Exact<{
@@ -1924,10 +1829,11 @@ export type OperateMutation = {
                   __typename?: 'RoomOperation';
                   revisionTo: number;
                   valueJson: string;
-                  operatedBy?:
-                      | { __typename?: 'OperatedBy'; userUid: string; clientId: string }
-                      | null
-                      | undefined;
+                  operatedBy?: {
+                      __typename?: 'OperatedBy';
+                      userUid: string;
+                      clientId: string;
+                  } | null;
               };
           };
 };
@@ -1938,7 +1844,7 @@ export type PingMutationVariables = Exact<{
 
 export type PingMutation = {
     __typename?: 'Mutation';
-    result: { __typename?: 'Pong'; createdBy?: string | null | undefined; value: number };
+    result: { __typename?: 'Pong'; createdBy?: string | null; value: number };
 };
 
 export type PromoteToPlayerMutationVariables = Exact<{
@@ -1948,7 +1854,7 @@ export type PromoteToPlayerMutationVariables = Exact<{
 
 export type PromoteToPlayerMutation = {
     __typename?: 'Mutation';
-    result: { __typename?: 'PromoteResult'; failureType?: PromoteFailureType | null | undefined };
+    result: { __typename?: 'PromoteResult'; failureType?: PromoteFailureType | null };
 };
 
 export type ResetMessagesMutationVariables = Exact<{
@@ -1959,7 +1865,7 @@ export type ResetMessagesMutation = {
     __typename?: 'Mutation';
     result: {
         __typename?: 'ResetRoomMessagesResult';
-        failureType?: ResetRoomMessagesFailureType | null | undefined;
+        failureType?: ResetRoomMessagesFailureType | null;
     };
 };
 
@@ -1981,48 +1887,41 @@ export type WritePublicMessageMutation = {
               __typename: 'RoomPublicMessage';
               messageId: string;
               channelKey: string;
-              initText?: string | null | undefined;
-              initTextSource?: string | null | undefined;
-              textColor?: string | null | undefined;
-              altTextToSecret?: string | null | undefined;
+              initText?: string | null;
+              initTextSource?: string | null;
+              textColor?: string | null;
+              altTextToSecret?: string | null;
               isSecret: boolean;
-              createdBy?: string | null | undefined;
-              customName?: string | null | undefined;
+              createdBy?: string | null;
+              customName?: string | null;
               createdAt: number;
-              updatedAt?: number | null | undefined;
-              updatedText?:
-                  | {
-                        __typename?: 'UpdatedText';
-                        currentText?: string | null | undefined;
-                        updatedAt: number;
-                    }
-                  | null
-                  | undefined;
-              commandResult?:
-                  | {
-                        __typename?: 'CommandResult';
-                        text: string;
-                        isSuccess?: boolean | null | undefined;
-                    }
-                  | null
-                  | undefined;
-              character?:
-                  | {
-                        __typename?: 'CharacterValueForMessage';
-                        stateId: string;
-                        isPrivate: boolean;
-                        name: string;
-                        image?:
-                            | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
-                            | null
-                            | undefined;
-                        portraitImage?:
-                            | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
-                            | null
-                            | undefined;
-                    }
-                  | null
-                  | undefined;
+              updatedAt?: number | null;
+              updatedText?: {
+                  __typename?: 'UpdatedText';
+                  currentText?: string | null;
+                  updatedAt: number;
+              } | null;
+              commandResult?: {
+                  __typename?: 'CommandResult';
+                  text: string;
+                  isSuccess?: boolean | null;
+              } | null;
+              character?: {
+                  __typename?: 'CharacterValueForMessage';
+                  stateId: string;
+                  isPrivate: boolean;
+                  name: string;
+                  image?: {
+                      __typename?: 'FilePath';
+                      sourceType: FileSourceType;
+                      path: string;
+                  } | null;
+                  portraitImage?: {
+                      __typename?: 'FilePath';
+                      sourceType: FileSourceType;
+                      path: string;
+                  } | null;
+              } | null;
           }
         | {
               __typename: 'WriteRoomPublicMessageFailureResult';
@@ -2048,48 +1947,41 @@ export type WritePrivateMessageMutation = {
               __typename: 'RoomPrivateMessage';
               messageId: string;
               visibleTo: Array<string>;
-              initText?: string | null | undefined;
-              initTextSource?: string | null | undefined;
-              textColor?: string | null | undefined;
-              altTextToSecret?: string | null | undefined;
+              initText?: string | null;
+              initTextSource?: string | null;
+              textColor?: string | null;
+              altTextToSecret?: string | null;
               isSecret: boolean;
-              createdBy?: string | null | undefined;
-              customName?: string | null | undefined;
+              createdBy?: string | null;
+              customName?: string | null;
               createdAt: number;
-              updatedAt?: number | null | undefined;
-              updatedText?:
-                  | {
-                        __typename?: 'UpdatedText';
-                        currentText?: string | null | undefined;
-                        updatedAt: number;
-                    }
-                  | null
-                  | undefined;
-              commandResult?:
-                  | {
-                        __typename?: 'CommandResult';
-                        text: string;
-                        isSuccess?: boolean | null | undefined;
-                    }
-                  | null
-                  | undefined;
-              character?:
-                  | {
-                        __typename?: 'CharacterValueForMessage';
-                        stateId: string;
-                        isPrivate: boolean;
-                        name: string;
-                        image?:
-                            | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
-                            | null
-                            | undefined;
-                        portraitImage?:
-                            | { __typename?: 'FilePath'; sourceType: FileSourceType; path: string }
-                            | null
-                            | undefined;
-                    }
-                  | null
-                  | undefined;
+              updatedAt?: number | null;
+              updatedText?: {
+                  __typename?: 'UpdatedText';
+                  currentText?: string | null;
+                  updatedAt: number;
+              } | null;
+              commandResult?: {
+                  __typename?: 'CommandResult';
+                  text: string;
+                  isSuccess?: boolean | null;
+              } | null;
+              character?: {
+                  __typename?: 'CharacterValueForMessage';
+                  stateId: string;
+                  isPrivate: boolean;
+                  name: string;
+                  image?: {
+                      __typename?: 'FilePath';
+                      sourceType: FileSourceType;
+                      path: string;
+                  } | null;
+                  portraitImage?: {
+                      __typename?: 'FilePath';
+                      sourceType: FileSourceType;
+                      path: string;
+                  } | null;
+              } | null;
           }
         | {
               __typename: 'WriteRoomPrivateMessageFailureResult';
@@ -2109,7 +2001,7 @@ export type WriteRoomSoundEffectMutation = {
         | {
               __typename: 'RoomSoundEffect';
               messageId: string;
-              createdBy?: string | null | undefined;
+              createdBy?: string | null;
               createdAt: number;
               volume: number;
               file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
@@ -2128,10 +2020,7 @@ export type EditMessageMutationVariables = Exact<{
 
 export type EditMessageMutation = {
     __typename?: 'Mutation';
-    result: {
-        __typename?: 'EditMessageResult';
-        failureType?: EditMessageFailureType | null | undefined;
-    };
+    result: { __typename?: 'EditMessageResult'; failureType?: EditMessageFailureType | null };
 };
 
 export type DeleteMessageMutationVariables = Exact<{
@@ -2141,10 +2030,7 @@ export type DeleteMessageMutationVariables = Exact<{
 
 export type DeleteMessageMutation = {
     __typename?: 'Mutation';
-    result: {
-        __typename?: 'DeleteMessageResult';
-        failureType?: DeleteMessageFailureType | null | undefined;
-    };
+    result: { __typename?: 'DeleteMessageResult'; failureType?: DeleteMessageFailureType | null };
 };
 
 export type MakeMessageNotSecretMutationVariables = Exact<{
@@ -2156,7 +2042,7 @@ export type MakeMessageNotSecretMutation = {
     __typename?: 'Mutation';
     result: {
         __typename?: 'MakeMessageNotSecretResult';
-        failureType?: MakeMessageNotSecretFailureType | null | undefined;
+        failureType?: MakeMessageNotSecretFailureType | null;
     };
 };
 
@@ -2173,243 +2059,174 @@ export type RoomEventSubscriptionVariables = Exact<{
 
 export type RoomEventSubscription = {
     __typename?: 'Subscription';
-    roomEvent?:
-        | {
-              __typename?: 'RoomEvent';
-              isRoomMessagesResetEvent: boolean;
-              roomOperation?:
-                  | {
-                        __typename?: 'RoomOperation';
-                        revisionTo: number;
-                        valueJson: string;
-                        operatedBy?:
-                            | { __typename?: 'OperatedBy'; userUid: string; clientId: string }
-                            | null
-                            | undefined;
-                    }
-                  | null
-                  | undefined;
-              deleteRoomOperation?:
-                  | { __typename?: 'DeleteRoomOperation'; deletedBy: string }
-                  | null
-                  | undefined;
-              roomMessageEvent?:
-                  | {
-                        __typename: 'PieceLog';
-                        messageId: string;
-                        stateId: string;
-                        createdAt: number;
-                        logType: PieceLogType;
-                        valueJson: string;
-                    }
-                  | { __typename: 'RoomMessagesReset' }
-                  | {
-                        __typename: 'RoomPrivateMessage';
-                        messageId: string;
-                        visibleTo: Array<string>;
-                        initText?: string | null | undefined;
-                        initTextSource?: string | null | undefined;
-                        textColor?: string | null | undefined;
-                        altTextToSecret?: string | null | undefined;
-                        isSecret: boolean;
-                        createdBy?: string | null | undefined;
-                        customName?: string | null | undefined;
-                        createdAt: number;
-                        updatedAt?: number | null | undefined;
-                        updatedText?:
-                            | {
-                                  __typename?: 'UpdatedText';
-                                  currentText?: string | null | undefined;
-                                  updatedAt: number;
-                              }
-                            | null
-                            | undefined;
-                        commandResult?:
-                            | {
-                                  __typename?: 'CommandResult';
-                                  text: string;
-                                  isSuccess?: boolean | null | undefined;
-                              }
-                            | null
-                            | undefined;
-                        character?:
-                            | {
-                                  __typename?: 'CharacterValueForMessage';
-                                  stateId: string;
-                                  isPrivate: boolean;
-                                  name: string;
-                                  image?:
-                                      | {
-                                            __typename?: 'FilePath';
-                                            sourceType: FileSourceType;
-                                            path: string;
-                                        }
-                                      | null
-                                      | undefined;
-                                  portraitImage?:
-                                      | {
-                                            __typename?: 'FilePath';
-                                            sourceType: FileSourceType;
-                                            path: string;
-                                        }
-                                      | null
-                                      | undefined;
-                              }
-                            | null
-                            | undefined;
-                    }
-                  | {
-                        __typename: 'RoomPrivateMessageUpdate';
-                        messageId: string;
-                        initText?: string | null | undefined;
-                        initTextSource?: string | null | undefined;
-                        altTextToSecret?: string | null | undefined;
-                        isSecret: boolean;
-                        updatedAt?: number | null | undefined;
-                        updatedText?:
-                            | {
-                                  __typename?: 'UpdatedText';
-                                  currentText?: string | null | undefined;
-                                  updatedAt: number;
-                              }
-                            | null
-                            | undefined;
-                        commandResult?:
-                            | {
-                                  __typename?: 'CommandResult';
-                                  text: string;
-                                  isSuccess?: boolean | null | undefined;
-                              }
-                            | null
-                            | undefined;
-                    }
-                  | {
-                        __typename: 'RoomPublicChannel';
-                        key: string;
-                        name?: string | null | undefined;
-                    }
-                  | {
-                        __typename: 'RoomPublicChannelUpdate';
-                        key: string;
-                        name?: string | null | undefined;
-                    }
-                  | {
-                        __typename: 'RoomPublicMessage';
-                        messageId: string;
-                        channelKey: string;
-                        initText?: string | null | undefined;
-                        initTextSource?: string | null | undefined;
-                        textColor?: string | null | undefined;
-                        altTextToSecret?: string | null | undefined;
-                        isSecret: boolean;
-                        createdBy?: string | null | undefined;
-                        customName?: string | null | undefined;
-                        createdAt: number;
-                        updatedAt?: number | null | undefined;
-                        updatedText?:
-                            | {
-                                  __typename?: 'UpdatedText';
-                                  currentText?: string | null | undefined;
-                                  updatedAt: number;
-                              }
-                            | null
-                            | undefined;
-                        commandResult?:
-                            | {
-                                  __typename?: 'CommandResult';
-                                  text: string;
-                                  isSuccess?: boolean | null | undefined;
-                              }
-                            | null
-                            | undefined;
-                        character?:
-                            | {
-                                  __typename?: 'CharacterValueForMessage';
-                                  stateId: string;
-                                  isPrivate: boolean;
-                                  name: string;
-                                  image?:
-                                      | {
-                                            __typename?: 'FilePath';
-                                            sourceType: FileSourceType;
-                                            path: string;
-                                        }
-                                      | null
-                                      | undefined;
-                                  portraitImage?:
-                                      | {
-                                            __typename?: 'FilePath';
-                                            sourceType: FileSourceType;
-                                            path: string;
-                                        }
-                                      | null
-                                      | undefined;
-                              }
-                            | null
-                            | undefined;
-                    }
-                  | {
-                        __typename: 'RoomPublicMessageUpdate';
-                        messageId: string;
-                        initText?: string | null | undefined;
-                        initTextSource?: string | null | undefined;
-                        altTextToSecret?: string | null | undefined;
-                        isSecret: boolean;
-                        updatedAt?: number | null | undefined;
-                        updatedText?:
-                            | {
-                                  __typename?: 'UpdatedText';
-                                  currentText?: string | null | undefined;
-                                  updatedAt: number;
-                              }
-                            | null
-                            | undefined;
-                        commandResult?:
-                            | {
-                                  __typename?: 'CommandResult';
-                                  text: string;
-                                  isSuccess?: boolean | null | undefined;
-                              }
-                            | null
-                            | undefined;
-                    }
-                  | {
-                        __typename: 'RoomSoundEffect';
-                        messageId: string;
-                        createdBy?: string | null | undefined;
-                        createdAt: number;
-                        volume: number;
-                        file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
-                    }
-                  | null
-                  | undefined;
-              roomConnectionEvent?:
-                  | {
-                        __typename?: 'RoomConnectionEvent';
-                        userUid: string;
-                        isConnected: boolean;
-                        updatedAt: number;
-                    }
-                  | null
-                  | undefined;
-              writingMessageStatus?:
-                  | {
-                        __typename?: 'WritingMessageStatus';
-                        userUid: string;
-                        status: WritingMessageStatusType;
-                    }
-                  | null
-                  | undefined;
-          }
-        | null
-        | undefined;
+    roomEvent?: {
+        __typename?: 'RoomEvent';
+        isRoomMessagesResetEvent: boolean;
+        roomOperation?: {
+            __typename?: 'RoomOperation';
+            revisionTo: number;
+            valueJson: string;
+            operatedBy?: { __typename?: 'OperatedBy'; userUid: string; clientId: string } | null;
+        } | null;
+        deleteRoomOperation?: { __typename?: 'DeleteRoomOperation'; deletedBy: string } | null;
+        roomMessageEvent?:
+            | {
+                  __typename: 'PieceLog';
+                  messageId: string;
+                  stateId: string;
+                  createdAt: number;
+                  logType: PieceLogType;
+                  valueJson: string;
+              }
+            | { __typename: 'RoomMessagesReset' }
+            | {
+                  __typename: 'RoomPrivateMessage';
+                  messageId: string;
+                  visibleTo: Array<string>;
+                  initText?: string | null;
+                  initTextSource?: string | null;
+                  textColor?: string | null;
+                  altTextToSecret?: string | null;
+                  isSecret: boolean;
+                  createdBy?: string | null;
+                  customName?: string | null;
+                  createdAt: number;
+                  updatedAt?: number | null;
+                  updatedText?: {
+                      __typename?: 'UpdatedText';
+                      currentText?: string | null;
+                      updatedAt: number;
+                  } | null;
+                  commandResult?: {
+                      __typename?: 'CommandResult';
+                      text: string;
+                      isSuccess?: boolean | null;
+                  } | null;
+                  character?: {
+                      __typename?: 'CharacterValueForMessage';
+                      stateId: string;
+                      isPrivate: boolean;
+                      name: string;
+                      image?: {
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      } | null;
+                      portraitImage?: {
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      } | null;
+                  } | null;
+              }
+            | {
+                  __typename: 'RoomPrivateMessageUpdate';
+                  messageId: string;
+                  initText?: string | null;
+                  initTextSource?: string | null;
+                  altTextToSecret?: string | null;
+                  isSecret: boolean;
+                  updatedAt?: number | null;
+                  updatedText?: {
+                      __typename?: 'UpdatedText';
+                      currentText?: string | null;
+                      updatedAt: number;
+                  } | null;
+                  commandResult?: {
+                      __typename?: 'CommandResult';
+                      text: string;
+                      isSuccess?: boolean | null;
+                  } | null;
+              }
+            | { __typename: 'RoomPublicChannel'; key: string; name?: string | null }
+            | { __typename: 'RoomPublicChannelUpdate'; key: string; name?: string | null }
+            | {
+                  __typename: 'RoomPublicMessage';
+                  messageId: string;
+                  channelKey: string;
+                  initText?: string | null;
+                  initTextSource?: string | null;
+                  textColor?: string | null;
+                  altTextToSecret?: string | null;
+                  isSecret: boolean;
+                  createdBy?: string | null;
+                  customName?: string | null;
+                  createdAt: number;
+                  updatedAt?: number | null;
+                  updatedText?: {
+                      __typename?: 'UpdatedText';
+                      currentText?: string | null;
+                      updatedAt: number;
+                  } | null;
+                  commandResult?: {
+                      __typename?: 'CommandResult';
+                      text: string;
+                      isSuccess?: boolean | null;
+                  } | null;
+                  character?: {
+                      __typename?: 'CharacterValueForMessage';
+                      stateId: string;
+                      isPrivate: boolean;
+                      name: string;
+                      image?: {
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      } | null;
+                      portraitImage?: {
+                          __typename?: 'FilePath';
+                          sourceType: FileSourceType;
+                          path: string;
+                      } | null;
+                  } | null;
+              }
+            | {
+                  __typename: 'RoomPublicMessageUpdate';
+                  messageId: string;
+                  initText?: string | null;
+                  initTextSource?: string | null;
+                  altTextToSecret?: string | null;
+                  isSecret: boolean;
+                  updatedAt?: number | null;
+                  updatedText?: {
+                      __typename?: 'UpdatedText';
+                      currentText?: string | null;
+                      updatedAt: number;
+                  } | null;
+                  commandResult?: {
+                      __typename?: 'CommandResult';
+                      text: string;
+                      isSuccess?: boolean | null;
+                  } | null;
+              }
+            | {
+                  __typename: 'RoomSoundEffect';
+                  messageId: string;
+                  createdBy?: string | null;
+                  createdAt: number;
+                  volume: number;
+                  file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
+              }
+            | null;
+        roomConnectionEvent?: {
+            __typename?: 'RoomConnectionEvent';
+            userUid: string;
+            isConnected: boolean;
+            updatedAt: number;
+        } | null;
+        writingMessageStatus?: {
+            __typename?: 'WritingMessageStatus';
+            userUid: string;
+            status: WritingMessageStatusType;
+        } | null;
+    } | null;
 };
 
 export type PongSubscriptionVariables = Exact<{ [key: string]: never }>;
 
 export type PongSubscription = {
     __typename?: 'Subscription';
-    pong: { __typename?: 'Pong'; createdBy?: string | null | undefined; value: number };
+    pong: { __typename?: 'Pong'; createdBy?: string | null; value: number };
 };
 
 export const RoomGetStateFragmentDoc = {
