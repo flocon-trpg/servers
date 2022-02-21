@@ -38,7 +38,7 @@
         "@kizahasi/ot-string": "^0.3.0",
         "@kizahasi/result": "^1.0.1",
         "@ltd/j-toml": "^1.23.0",
-        "fp-ts": "^2.11.5",
+        "fp-ts": "^2.11.8",
         "io-ts": "^2.2.16",
         "lodash.clonedeep": "^4.5.0"
     }

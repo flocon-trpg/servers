@@ -2175,7 +2175,7 @@ __metadata:
     express: ^4.17.1
     firebase-admin: ^10.0.0
     form-data: 4.0.0
-    fp-ts: ^2.11.5
+    fp-ts: ^2.11.8
     fs-extra: ^10.0.0
     graphql: ^15.6.0
     graphql-ws: ^5.5.0
@@ -2238,7 +2238,7 @@ __metadata:
     "@types/lodash.clonedeep": 4.5.6
     fast-check: 2.22.0
     fast-check-io-ts: 0.5.0
-    fp-ts: ^2.11.5
+    fp-ts: ^2.11.8
     io-ts: ^2.2.16
     jest: 27.5.1
     lodash.clonedeep: ^4.5.0
@@ -2334,7 +2334,7 @@ __metadata:
     clipboard-copy: ^4.0.1
     envfile: ^6.17.0
     firebase: ^9.6.6
-    fp-ts: ^2.11.4
+    fp-ts: ^2.11.8
     graphql: ^15.6.0
     graphql-ws: ^5.5.0
     howler: ^2.2.3
@@ -9291,10 +9291,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fp-ts@npm:^2.11.4, fp-ts@npm:^2.11.5":
-  version: 2.11.5
-  resolution: "fp-ts@npm:2.11.5"
-  checksum: 68a4884527abca782a2f664b13152cd797b92b6042538905af95fa0e9da2e884bc5b05bdfcfbb02fdabfe8536ae6a62a24159696545d8a263413e4c007326c4a
+"fp-ts@npm:^2.11.8":
+  version: 2.11.8
+  resolution: "fp-ts@npm:2.11.8"
+  checksum: 481b824797ba59f3f5549810e8f6688b27554790d11a470ccdf4fc086a1cb4993ffb9060131b054abccca703f2776993e12f649865143e178e9b7c9e5b295ea7
   languageName: node
   linkType: hard
 
