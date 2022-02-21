@@ -5887,12 +5887,12 @@ __metadata:
   linkType: hard
 
 "bcdice@npm:^3.3.0":
-  version: 3.4.0
-  resolution: "bcdice@npm:3.4.0"
+  version: 3.5.0
+  resolution: "bcdice@npm:3.5.0"
   dependencies:
     lodash: ^4.17.20
     source-map-support: ^0.5.19
-  checksum: 8886df0e81b1bff04df8ca32c3164d60400c815ed921b31c92d6dea29b80cfcb112d686bec90854d123dc01751b2e5a3743f8fb7c6973ba727bae93b25135946
+  checksum: d7f44307fe9678310d78067c9faf346a7577d6c7f47ec514c27a4f7d022afb3c32c01446601264ad26852b36df1ebfe334a22c11b234c6f312664bca4cdee9c3
   languageName: node
   linkType: hard
 
