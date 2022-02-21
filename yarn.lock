@@ -9898,12 +9898,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphql-ws@npm:^5.4.1, graphql-ws@npm:^5.5.0":
+"graphql-ws@npm:^5.4.1":
   version: 5.5.5
   resolution: "graphql-ws@npm:5.5.5"
   peerDependencies:
     graphql: ">=0.11 <=16"
   checksum: bdb77b3e44be53d2d8d0c395066e62e74efe1123d9b5be7cc69b60d28229974e32abc79c5997095d038d169d4135cb2bcb98f0e666aa8cfeb3bb9857b960d803
+  languageName: node
+  linkType: hard
+
+"graphql-ws@npm:^5.5.0":
+  version: 5.6.0
+  resolution: "graphql-ws@npm:5.6.0"
+  peerDependencies:
+    graphql: ">=0.11 <=16"
+  checksum: 97acb90531bdfb2ce09b5851c36dec3555569ebda0f45c4e0391372bb484198a7b6434fe73bd629e55423abae41ccd77f35fbf2fa449f66408b99808d76a3cca
   languageName: node
   linkType: hard
 
