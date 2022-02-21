@@ -2202,7 +2202,7 @@ __metadata:
     typescript: 4.4.4
     url-join: 4.0.1
     uuid: ^8.3.2
-    ws: 8.3.0
+    ws: 8.5.0
     yargs: ^17.2.1
   languageName: unknown
   linkType: soft
@@ -20220,9 +20220,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:8.3.0":
-  version: 8.3.0
-  resolution: "ws@npm:8.3.0"
+"ws@npm:8.5.0":
+  version: 8.5.0
+  resolution: "ws@npm:8.5.0"
   peerDependencies:
     bufferutil: ^4.0.1
     utf-8-validate: ^5.0.2
@@ -20231,7 +20231,7 @@ __metadata:
       optional: true
     utf-8-validate:
       optional: true
-  checksum: 71f6919e3cb2c60ae53e00b13d7782bb77005750641855153a1716c23b7011259fe3a29a432522a3044dc7c579a7e2f5a495bb79ba9f823ce6c2e763300ef99b
+  checksum: 76f2f90e40344bf18fd544194e7067812fb1372b2a37865678d8f12afe4b478ff2ebc0c7c0aff82cd5e6b66fc43d889eec0f1865c2365d8f7a66d92da7744a77
   languageName: node
   linkType: hard
 
