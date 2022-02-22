@@ -189,12 +189,12 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
                     style={{ flex: 1, maxWidth: miniInputMaxWidth }}
                     placeholder='キャラクター'
                     value={config.selectedCharacterId}
-                    onSelect={(value, option) => {
+                    onChange={value => {
+                        if (value == null) {
+                            return;
+                        }
                         onConfigUpdate(draft => {
-                            if (typeof option.key !== 'string') {
-                                return;
-                            }
-                            draft.selectedCharacterId = option.key;
+                            draft.selectedCharacterId = value;
                         });
                     }}
                 >

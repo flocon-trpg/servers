@@ -81,12 +81,12 @@ export const GameSelector: React.FC<Props> = ({
                 placeholder='ゲームの種類'
                 showSearch
                 value={config.selectedGameSystem}
-                onSelect={(value, option) => {
+                onChange={value => {
+                    if (value == null) {
+                        return;
+                    }
                     onConfigUpdate(state => {
-                        if (typeof option.key !== 'string') {
-                            return;
-                        }
-                        state.selectedGameSystem = option.key;
+                        state.selectedGameSystem = value;
                     });
                 }}
                 filterOption={(input, option) => {

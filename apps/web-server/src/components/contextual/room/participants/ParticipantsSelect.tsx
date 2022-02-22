@@ -8,15 +8,13 @@ import { Jdenticon } from '../../../ui/Jdenticon';
 
 type Props = {
     selectedParticipantIds: ReadonlySet<string>;
-    onSelect: (participantId: string) => void;
-    onDeselect: (participantId: string) => void;
+    onChange: (participantIds: string[]) => void;
     placeholder?: string;
 };
 
 export const ParticipantsSelect: React.FC<Props> = ({
     selectedParticipantIds,
-    onSelect,
-    onDeselect,
+    onChange,
     placeholder,
 }: Props) => {
     const myUserUid = useMyUserUid();
@@ -57,18 +55,7 @@ export const ParticipantsSelect: React.FC<Props> = ({
             mode='multiple'
             style={{ width: '100%' }}
             value={[...selectedParticipantIds].filter(participantId => participantId !== myUserUid)}
-            onSelect={value => {
-                if (typeof value !== 'string') {
-                    return;
-                }
-                onSelect(value);
-            }}
-            onDeselect={(value, option) => {
-                if (typeof option.key !== 'string') {
-                    return;
-                }
-                onDeselect(option.key);
-            }}
+            onChange={value => onChange(value)}
         >
             {children}
         </Select>

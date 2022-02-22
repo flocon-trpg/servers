@@ -30,15 +30,8 @@ export const PrivateMessageChannelSelector: React.FC<Props> = ({
             <ParticipantsSelect
                 placeholder='秘話の宛先（1人も指定されていない場合は独り言になります）'
                 selectedParticipantIds={participantIdsOfSendTo}
-                onSelect={newId => {
-                    const newSet = new Set(participantIdsOfSendTo);
-                    newSet.add(newId);
-                    newSet.add(myUserUid);
-                    onParticipantIdsOfSendToChange(newSet);
-                }}
-                onDeselect={idToDelete => {
-                    const newSet = new Set(participantIdsOfSendTo);
-                    newSet.delete(idToDelete);
+                onChange={newIds => {
+                    const newSet = new Set(newIds);
                     newSet.add(myUserUid);
                     onParticipantIdsOfSendToChange(newSet);
                 }}

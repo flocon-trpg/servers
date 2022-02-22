@@ -38,21 +38,10 @@ export const CharacterTagsSelect: React.FC<Props> = ({ character, onChange }: Pr
             mode='multiple'
             style={{ width: '100%' }}
             value={values}
-            onSelect={value => {
+            onChange={value => {
                 onChange(character => {
                     strIndex10Array.forEach(i => {
-                        if (value === tagKey(i)) {
-                            character[`hasTag${i}`] = true;
-                        }
-                    });
-                });
-            }}
-            onDeselect={(value, option) => {
-                onChange(character => {
-                    strIndex10Array.forEach(i => {
-                        if (option.key === tagKey(i)) {
-                            character[`hasTag${i}`] = false;
-                        }
+                        character[`hasTag${i}`] = value.includes(tagKey(i));
                     });
                 });
             }}
