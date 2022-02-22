@@ -35,7 +35,7 @@ import { PrereleaseType } from '../../enums/PrereleaseType';
 import { alpha, beta, DualKeyMap, rc } from '@flocon-trpg/utils';
 import { BaasType } from '../../enums/BaasType';
 import { GetFilesResult } from '../results/GetFilesResult';
-import { ENTRY } from '../../roles';
+import { ADMIN, ENTRY } from '../../roles';
 import { EditFileTagsInput, FileTag as FileTagGraphQL, GetFilesInput } from './object+args+input';
 import { File } from '../entities/file/mikro-orm';
 import { QueryOrder, Reference } from '@mikro-orm/core';
@@ -53,6 +53,12 @@ export type PongPayload = {
 
 @Resolver()
 export class MainResolver {
+    @Query(() => [String], { description: 'since v0.8.0' })
+    @Authorized(ADMIN)
+    public async getAdmins(@Ctx() context: ResolverContext): Promise<ReadonlyArray<string>> {
+        return context.serverConfig.admins;
+    }
+
     @Query(() => GetAvailableGameSystemsResult)
     public async getAvailableGameSystems(): Promise<GetAvailableGameSystemsResult> {
         return {

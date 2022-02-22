@@ -83,6 +83,15 @@ export type DeleteMessageResult = {
     failureType?: Maybe<DeleteMessageFailureType>;
 };
 
+export enum DeleteRoomAsAdminFailureType {
+    NotFound = 'NotFound',
+}
+
+export type DeleteRoomAsAdminResult = {
+    __typename?: 'DeleteRoomAsAdminResult';
+    failureType?: Maybe<DeleteRoomAsAdminFailureType>;
+};
+
 export enum DeleteRoomFailureType {
     NotCreatedByYou = 'NotCreatedByYou',
     NotFound = 'NotFound',
@@ -91,6 +100,8 @@ export enum DeleteRoomFailureType {
 export type DeleteRoomOperation = {
     __typename?: 'DeleteRoomOperation';
     deletedBy: Scalars['String'];
+    /** since v0.8.0 */
+    deletedByAdmin: Scalars['Boolean'];
 };
 
 export type DeleteRoomResult = {
@@ -331,6 +342,8 @@ export type Mutation = {
     deleteFiles: Array<Scalars['String']>;
     deleteMessage: DeleteMessageResult;
     deleteRoom: DeleteRoomResult;
+    /** since v0.8.0 */
+    deleteRoomAsAdmin: DeleteRoomAsAdminResult;
     editFileTags: Scalars['Boolean'];
     editMessage: EditMessageResult;
     entryToServer: EntryToServerResult;
@@ -376,6 +389,10 @@ export type MutationDeleteMessageArgs = {
 };
 
 export type MutationDeleteRoomArgs = {
+    id: Scalars['String'];
+};
+
+export type MutationDeleteRoomAsAdminArgs = {
     id: Scalars['String'];
 };
 
@@ -555,6 +572,8 @@ export type PromoteResult = {
 
 export type Query = {
     __typename?: 'Query';
+    /** since v0.8.0 */
+    getAdmins: Array<Scalars['String']>;
     getAvailableGameSystems: GetAvailableGameSystemsResult;
     getDiceHelpMessage?: Maybe<Scalars['String']>;
     getFiles: GetFilesResult;
