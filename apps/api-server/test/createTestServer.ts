@@ -2,7 +2,7 @@ import { createPostgreSQL, createSQLite } from '../src/mikro-orm';
 import { PromiseQueue } from '../src/utils/promiseQueue';
 import { InMemoryConnectionManager } from '../src/connection/main';
 import { BaasType } from '../src/enums/BaasType';
-import { postgresql, ServerConfig, sqlite } from '../src/configType';
+import { ServerConfig, WritableServerConfig } from '../src/configType';
 import { buildSchema } from '../src/buildSchema';
 import { PubSub } from 'graphql-subscriptions';
 import { createServer } from '../src/createServer';
@@ -41,7 +41,7 @@ export const createOrm = async (dbCofig: DbConfig) => {
     }
 };
 
-const setDatabaseConfig = (target: ServerConfig, dbConfig: DbConfig): void => {
+const setDatabaseConfig = (target: WritableServerConfig, dbConfig: DbConfig): void => {
     switch (dbConfig.type) {
         case 'PostgreSQL':
             target.postgresql = {
@@ -67,7 +67,7 @@ export const createTestServer = async (
     const connectionManager = new InMemoryConnectionManager();
 
     const $orm = await createOrm(dbConfig);
-    const serverConfig: ServerConfig = {
+    const serverConfig: WritableServerConfig = {
         accessControlAllowOrigin: '*',
         admins: [],
         firebaseAdminSecret: undefined,

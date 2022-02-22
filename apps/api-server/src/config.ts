@@ -357,7 +357,7 @@ export class ServerConfigBuilder {
             sizeQuota: ensureOk(this.uploaderSizeQuota),
             maxFileSize: ensureOk(this.uploaderMaxSize),
         };
-        const result: ServerConfig = {
+        const nonFrozenResult: ServerConfig = {
             accessControlAllowOrigin: this.accessControlAllowOrigin,
             admins: [],
             autoMigration: this.autoMigration ?? false,
@@ -372,6 +372,7 @@ export class ServerConfigBuilder {
             uploader: uploaderConfig,
             disableRateLimitExperimental: this.disableRateLimit ?? false,
         };
+        const result = Object.freeze(nonFrozenResult);
         return Result.ok(result);
     }
 

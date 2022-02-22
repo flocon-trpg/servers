@@ -1,5 +1,6 @@
 import { Result } from '@kizahasi/result';
 import * as t from 'io-ts';
+import { ReadonlyDeep } from 'type-fest';
 import { DATABASE_URL, HEROKU, POSTGRESQL, SQLITE } from './env';
 import { createPostgreSQL, createSQLite } from './mikro-orm';
 import { AppConsole } from './utils/appConsole';
@@ -83,7 +84,7 @@ export type UploaderConfig = {
     directory?: string;
 };
 
-export type ServerConfigForMigration = {
+export type WritableServerConfigForMigration = {
     heroku: boolean;
 
     // HerokuでHeroku Postgresを使うと自動的にセットされる DATABASE_URL を表す。
@@ -92,6 +93,8 @@ export type ServerConfigForMigration = {
     postgresql: PostgresqlDatabaseConfig | undefined;
     sqlite: SqliteDatabaseConfig | undefined;
 };
+
+export type ServerConfigForMigration = ReadonlyDeep<WritableServerConfigForMigration>;
 
 export namespace ServerConfigForMigration {
     const createSQLiteORM = async (sqliteConfig: SqliteDatabaseConfig): Promise<Result<ORM>> => {
@@ -198,7 +201,7 @@ export namespace ServerConfigForMigration {
     }
 }
 
-export type ServerConfig = {
+export type WritableServerConfig = {
     admins: string[];
     entryPassword: EntryPasswordConfig | undefined;
     firebaseAdminSecret: Omit<FirebaseAdminSecretConfig, 'project_id'> | undefined;
@@ -210,7 +213,9 @@ export type ServerConfig = {
 
     // rate limitのフォーマットが決まっていない（pointとdurationの指定のカスタマイズ、メソッドごとの消費pointのカスタマイズなど）が、とりあえずテストではrate limitは無効化したいため、experimentalとしている
     disableRateLimitExperimental: boolean;
-} & ServerConfigForMigration;
+} & WritableServerConfigForMigration;
+
+export type ServerConfig = ReadonlyDeep<WritableServerConfig>;
 
 export namespace ServerConfig {
     export async function createORM(
