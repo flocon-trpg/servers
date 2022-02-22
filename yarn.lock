@@ -2151,7 +2151,7 @@ __metadata:
     "@types/color": ^3.0.2
     "@types/express": ^4.17.13
     "@types/fs-extra": ^9.0.13
-    "@types/inquirer": 8.1.3
+    "@types/inquirer": 8.2.0
     "@types/jest": 27.4.0
     "@types/lodash": ^4.14.175
     "@types/multer": ^1.4.7
@@ -4240,13 +4240,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/inquirer@npm:8.1.3":
-  version: 8.1.3
-  resolution: "@types/inquirer@npm:8.1.3"
+"@types/inquirer@npm:8.2.0":
+  version: 8.2.0
+  resolution: "@types/inquirer@npm:8.2.0"
   dependencies:
     "@types/through": "*"
     rxjs: ^7.2.0
-  checksum: b2f9914d1380e60a9a6d890abdd24078db63069a4bd974e77a00c5660bf5cab33a60fba6f02b56f1b2e6418e287e4697361b12cb85704b13e76f1a23c934d203
+  checksum: bb4b550ca01e892bab9483dfc8f8122dc4eb3291e8b9e1d038fbb6d883335f6ff61692331ae90af452e878c0335b119269ad9909c1ba4b6ec10da6fcf1568011
   languageName: node
   linkType: hard
 
