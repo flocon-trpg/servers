@@ -65,4 +65,7 @@ export class DeleteRoomOperation {
 
     @Field()
     public deletedBy!: string;
+
+    @Field({ description: 'since v0.8.0' })
+    public deletedByAdmin!: boolean;
 }

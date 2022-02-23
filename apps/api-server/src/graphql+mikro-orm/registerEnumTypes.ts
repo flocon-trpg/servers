@@ -28,6 +28,7 @@ import { GetFileItemsFailureType } from '../enums/GetFileItemsFailureType';
 import { CreateRoomFailureType } from '../enums/CreateRoomFailureType';
 import { GetRoomsListFailureType } from '../enums/GetRoomsListFailureType';
 import { ResetRoomMessagesFailureType } from '../enums/ResetRoomMessagesFailureType';
+import { DeleteRoomAsAdminFailureType } from '../enums/DeleteRoomAsAdminFailureType';
 
 let hasRegistered = false;
 export const registerEnumTypes = (): void => {
@@ -49,6 +50,9 @@ export const registerEnumTypes = (): void => {
     });
     registerEnumType(DeleteRoomFailureType, {
         name: 'DeleteRoomFailureType',
+    });
+    registerEnumType(DeleteRoomAsAdminFailureType, {
+        name: 'DeleteRoomAsAdminFailureType',
     });
     registerEnumType(EditMessageFailureType, {
         name: 'EditMessageFailureType',

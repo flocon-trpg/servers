@@ -33,6 +33,12 @@ export class DeleteRoomArgs {
 }
 
 @ArgsType()
+export class DeleteRoomAsAdminInput {
+    @Field()
+    public id!: string;
+}
+
+@ArgsType()
 export class JoinRoomArgs {
     @Field()
     public id!: string;

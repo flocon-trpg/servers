@@ -302,7 +302,7 @@ export class MainResolver {
         });
     }
 
-    // CONSIDER: 内部情報に簡単にアクセスできるのはセキュリティリスクになりうる。
+    // CONSIDER: 内部情報に簡単にアクセスできるのはセキュリティリスクになりうる。@Authorized(ENTRY) を付けたほうがいいか？
     @Query(() => ServerInfo)
     public async getServerInfo(@Ctx() context: ResolverContext): Promise<ServerInfo> {
         const prerelease = (() => {
