@@ -493,33 +493,35 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
         strParamNames,
     ]);
 
-    if (columns == null || characters == null) {
+    const charactersDataSource: DataSource[] = React.useMemo(() => {
+        const operateCharacter =
+            (characterId: string) => (mapping: (character: CharacterState) => CharacterState) => {
+                setRoomState(roomState => {
+                    const character = roomState.characters[characterId];
+                    if (character == null) {
+                        return;
+                    }
+                    roomState.characters[characterId] = mapping(character);
+                });
+            };
+
+        return [...characters].map(([characterId, character]) => {
+            const createdByMe = myUserUid != null && myUserUid === character.ownerParticipantId;
+            return {
+                key: characterId, // antdのtableのkeyとして必要
+                character: {
+                    stateId: characterId,
+                    state: character,
+                    createdByMe,
+                },
+                onOperateCharacter: operateCharacter(characterId),
+            };
+        });
+    }, [characters, myUserUid, setRoomState]);
+
+    if (columns == null) {
         return null;
     }
-
-    const operateCharacter =
-        (characterId: string) => (mapping: (character: CharacterState) => CharacterState) => {
-            setRoomState(roomState => {
-                const character = roomState.characters[characterId];
-                if (character == null) {
-                    return;
-                }
-                roomState.characters[characterId] = mapping(character);
-            });
-        };
-
-    const charactersDataSource: DataSource[] = [...characters].map(([characterId, character]) => {
-        const createdByMe = myUserUid != null && myUserUid === character.ownerParticipantId;
-        return {
-            key: characterId, // antdのtableのkeyとして必要
-            character: {
-                stateId: characterId,
-                state: character,
-                createdByMe,
-            },
-            onOperateCharacter: operateCharacter(characterId),
-        };
-    });
 
     return (
         <Table
