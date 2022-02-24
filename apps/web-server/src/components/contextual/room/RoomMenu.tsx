@@ -923,7 +923,7 @@ const PanelsMenu: React.FC = () => {
     );
 };
 
-export const RoomMenu: React.FC = () => {
+export const RoomMenu: React.FC = React.memo(function RoomMenu() {
     const me = useMe();
     const myUserUid = useMyUserUid();
     const myAuth = React.useContext(MyAuthContext);
@@ -947,143 +947,166 @@ export const RoomMenu: React.FC = () => {
         React.useState<FilesManagerDrawerType | null>(null);
     const setEditRoomDrawerVisibility = useUpdateAtom(editRoomDrawerVisibilityAtom);
 
-    if (me == null || myUserUid == null || typeof myAuth === 'string' || roomId == null) {
-        return null;
-    }
+    return React.useMemo(() => {
+        if (me == null || myUserUid == null || typeof myAuth === 'string' || roomId == null) {
+            return null;
+        }
 
-    return (
-        <>
-            <Menu triggerSubMenuAction='click' selectable={false} mode='horizontal'>
-                <Menu.Item onClick={() => router.push('/')}>
-                    <img src='/assets/logo.png' width={24} height={24} />
-                </Menu.Item>
-                <Menu.SubMenu title='部屋'>
-                    <Menu.Item onClick={() => setEditRoomDrawerVisibility(true)}>編集</Menu.Item>
-                    <Menu.Item onClick={() => setIsDeleteRoomModalVisible(true)}>
-                        <span style={{ color: 'red' }}>削除</span>
+        return (
+            <>
+                <Menu triggerSubMenuAction='click' selectable={false} mode='horizontal'>
+                    <Menu.Item onClick={() => router.push('/')}>
+                        <img src='/assets/logo.png' width={24} height={24} />
                     </Menu.Item>
-                    <Menu.Item onClick={() => setIsResetMessagesModalVisible(true)}>
-                        <span style={{ color: 'red' }}>ログの初期化</span>
+                    <Menu.SubMenu title='部屋'>
+                        <Menu.Item onClick={() => setEditRoomDrawerVisibility(true)}>
+                            編集
+                        </Menu.Item>
+                        <Menu.Item onClick={() => setIsDeleteRoomModalVisible(true)}>
+                            <span style={{ color: 'red' }}>削除</span>
+                        </Menu.Item>
+                        <Menu.Item onClick={() => setIsResetMessagesModalVisible(true)}>
+                            <span style={{ color: 'red' }}>ログの初期化</span>
+                        </Menu.Item>
+                        <Menu.Divider />
+                        <Menu.Item onClick={() => setIsGenerateSimpleLogModalVisible(true)}>
+                            ログをダウンロード
+                        </Menu.Item>
+                    </Menu.SubMenu>
+                    <Menu.SubMenu title='表示'>
+                        <PanelsMenu />
+                        <Menu.Item
+                            onClick={() => {
+                                setShowBackgroundBoardViewerAtom(!showBackgroundBoardViewer);
+                            }}
+                        >
+                            <div>
+                                <span>
+                                    {showBackgroundBoardViewer ? (
+                                        <Icon.CheckSquareOutlined />
+                                    ) : (
+                                        <Icon.BorderOutlined />
+                                    )}
+                                </span>
+                                <span>最背面にボードビュアーを表示する</span>
+                            </div>
+                        </Menu.Item>
+                    </Menu.SubMenu>
+                    <Menu.Item>
+                        <Popover trigger='click' content={<RoomVolumeBar roomId={roomId} />}>
+                            ボリューム
+                        </Popover>
                     </Menu.Item>
-                    <Menu.Divider />
-                    <Menu.Item onClick={() => setIsGenerateSimpleLogModalVisible(true)}>
-                        ログをダウンロード
+                    <Menu.Item onClick={() => setFilesManagerDrawerType({ openFileType: none })}>
+                        アップローダー
                     </Menu.Item>
-                </Menu.SubMenu>
-                <Menu.SubMenu title='表示'>
-                    <PanelsMenu />
-                    <Menu.Item
-                        onClick={() => {
-                            setShowBackgroundBoardViewerAtom(!showBackgroundBoardViewer);
-                        }}
-                    >
-                        <div>
-                            <span>
-                                {showBackgroundBoardViewer ? (
-                                    <Icon.CheckSquareOutlined />
-                                ) : (
-                                    <Icon.BorderOutlined />
-                                )}
-                            </span>
-                            <span>最背面にボードビュアーを表示する</span>
-                        </div>
-                    </Menu.Item>
-                </Menu.SubMenu>
-                <Menu.Item>
-                    <Popover trigger='click' content={<RoomVolumeBar roomId={roomId} />}>
-                        ボリューム
-                    </Popover>
-                </Menu.Item>
-                <Menu.Item onClick={() => setFilesManagerDrawerType({ openFileType: none })}>
-                    アップローダー
-                </Menu.Item>
-                <Menu.SubMenu
-                    title={
-                        <div className={classNames(flex, flexRow, itemsCenter)}>
-                            <Jdenticon
-                                hashOrValue={myUserUid}
-                                size={20}
-                                tooltipMode={{ type: 'userUid' }}
-                            />
-                            <span style={{ marginLeft: 4 }}>{me.name}</span>
-                        </div>
-                    }
-                >
-                    <Menu.Item onClick={() => setIsChangeMyParticipantNameModalVisible(true)}>
-                        名前を変更
-                    </Menu.Item>
-                    <Menu.Item
-                        disabled={
-                            me.role === ParticipantRole.Player || me.role === ParticipantRole.Master
+                    <Menu.SubMenu
+                        title={
+                            <div className={classNames(flex, flexRow, itemsCenter)}>
+                                <Jdenticon
+                                    hashOrValue={myUserUid}
+                                    size={20}
+                                    tooltipMode={{ type: 'userUid' }}
+                                />
+                                <span style={{ marginLeft: 4 }}>{me.name}</span>
+                            </div>
                         }
-                        onClick={() => setIsBecomePlayerModalVisible(true)}
                     >
-                        {me.role === ParticipantRole.Player ||
-                        me.role === ParticipantRole.Master ? (
-                            <Tooltip title='すでに昇格済みです。'>参加者に昇格</Tooltip>
-                        ) : (
-                            '参加者に昇格'
-                        )}
-                    </Menu.Item>
-                    <Menu.Item
-                        onClick={() => {
-                            leaveRoomMutation({ variables: { id: roomId } }).then(result => {
-                                if (result.data == null) {
-                                    return;
-                                }
-                                router.push(path.rooms.index);
-                            });
-                        }}
+                        <Menu.Item onClick={() => setIsChangeMyParticipantNameModalVisible(true)}>
+                            名前を変更
+                        </Menu.Item>
+                        <Menu.Item
+                            disabled={
+                                me.role === ParticipantRole.Player ||
+                                me.role === ParticipantRole.Master
+                            }
+                            onClick={() => setIsBecomePlayerModalVisible(true)}
+                        >
+                            {me.role === ParticipantRole.Player ||
+                            me.role === ParticipantRole.Master ? (
+                                <Tooltip title='すでに昇格済みです。'>参加者に昇格</Tooltip>
+                            ) : (
+                                '参加者に昇格'
+                            )}
+                        </Menu.Item>
+                        <Menu.Item
+                            onClick={() => {
+                                leaveRoomMutation({ variables: { id: roomId } }).then(result => {
+                                    if (result.data == null) {
+                                        return;
+                                    }
+                                    router.push(path.rooms.index);
+                                });
+                            }}
+                        >
+                            退室する
+                        </Menu.Item>
+                    </Menu.SubMenu>
+                    <Menu.SubMenu
+                        icon={<Icon.UserOutlined />}
+                        title={
+                            <span>
+                                {myAuth.displayName} - {myAuth.uid}
+                            </span>
+                        }
                     >
-                        退室する
-                    </Menu.Item>
-                </Menu.SubMenu>
-                <Menu.SubMenu
-                    icon={<Icon.UserOutlined />}
-                    title={
-                        <span>
-                            {myAuth.displayName} - {myAuth.uid}
-                        </span>
-                    }
-                >
-                    <Menu.Item onClick={() => signOut()}>ログアウト</Menu.Item>
-                </Menu.SubMenu>
-            </Menu>
-            <FilesManagerDrawer
-                drawerType={filesManagerDrawerType}
-                onClose={() => setFilesManagerDrawerType(null)}
-            />
-            <BecomePlayerModal
-                visible={isBecomePlayerModalVisible}
-                onOk={() => setIsBecomePlayerModalVisible(false)}
-                onCancel={() => setIsBecomePlayerModalVisible(false)}
-                roomId={roomId}
-            />
-            <ChangeMyParticipantNameModal
-                visible={isChangeMyParticipantNameModalVisible}
-                onOk={() => setIsChangeMyParticipantNameModalVisible(false)}
-                onCancel={() => setIsChangeMyParticipantNameModalVisible(false)}
-                roomId={roomId}
-            />
-            <DeleteRoomModal
-                visible={isDeleteRoomModalVisible}
-                onOk={() => setIsDeleteRoomModalVisible(false)}
-                onCancel={() => setIsDeleteRoomModalVisible(false)}
-                roomId={roomId}
-                roomCreatedByMe={myUserUid === createdBy}
-            />
-            <ResetMessagesModal
-                visible={isResetMessagesModalVisible}
-                onOk={() => setIsResetMessagesModalVisible(false)}
-                onCancel={() => setIsResetMessagesModalVisible(false)}
-                roomId={roomId}
-                roomCreatedByMe={myUserUid === createdBy}
-            />
-            <GenerateLogModal
-                visible={isGenerateLogModalVisible}
-                onClose={() => setIsGenerateSimpleLogModalVisible(false)}
-                roomId={roomId}
-            />
-        </>
-    );
-};
+                        <Menu.Item onClick={() => signOut()}>ログアウト</Menu.Item>
+                    </Menu.SubMenu>
+                </Menu>
+                <FilesManagerDrawer
+                    drawerType={filesManagerDrawerType}
+                    onClose={() => setFilesManagerDrawerType(null)}
+                />
+                <BecomePlayerModal
+                    visible={isBecomePlayerModalVisible}
+                    onOk={() => setIsBecomePlayerModalVisible(false)}
+                    onCancel={() => setIsBecomePlayerModalVisible(false)}
+                    roomId={roomId}
+                />
+                <ChangeMyParticipantNameModal
+                    visible={isChangeMyParticipantNameModalVisible}
+                    onOk={() => setIsChangeMyParticipantNameModalVisible(false)}
+                    onCancel={() => setIsChangeMyParticipantNameModalVisible(false)}
+                    roomId={roomId}
+                />
+                <DeleteRoomModal
+                    visible={isDeleteRoomModalVisible}
+                    onOk={() => setIsDeleteRoomModalVisible(false)}
+                    onCancel={() => setIsDeleteRoomModalVisible(false)}
+                    roomId={roomId}
+                    roomCreatedByMe={myUserUid === createdBy}
+                />
+                <ResetMessagesModal
+                    visible={isResetMessagesModalVisible}
+                    onOk={() => setIsResetMessagesModalVisible(false)}
+                    onCancel={() => setIsResetMessagesModalVisible(false)}
+                    roomId={roomId}
+                    roomCreatedByMe={myUserUid === createdBy}
+                />
+                <GenerateLogModal
+                    visible={isGenerateLogModalVisible}
+                    onClose={() => setIsGenerateSimpleLogModalVisible(false)}
+                    roomId={roomId}
+                />
+            </>
+        );
+    }, [
+        createdBy,
+        filesManagerDrawerType,
+        isBecomePlayerModalVisible,
+        isChangeMyParticipantNameModalVisible,
+        isDeleteRoomModalVisible,
+        isGenerateLogModalVisible,
+        isResetMessagesModalVisible,
+        leaveRoomMutation,
+        me,
+        myAuth,
+        myUserUid,
+        roomId,
+        router,
+        setEditRoomDrawerVisibility,
+        setShowBackgroundBoardViewerAtom,
+        showBackgroundBoardViewer,
+        signOut,
+    ]);
+});
