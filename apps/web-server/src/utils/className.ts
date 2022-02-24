@@ -15,3 +15,4 @@ export const justifyItemsCenter = 'justify-items-center';
 export const justifySelfCenter = 'justify-self-center';
 export const justifyItemsEnd = 'justify-items-end';
 export const justifySelfEnd = 'justify-self-end';
+export const relative = 'relative';
