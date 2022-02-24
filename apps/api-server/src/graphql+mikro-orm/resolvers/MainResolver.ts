@@ -53,10 +53,10 @@ export type PongPayload = {
 
 @Resolver()
 export class MainResolver {
-    @Query(() => [String], { description: 'since v0.8.0' })
+    @Query(() => String, { description: 'since v0.8.0' })
     @Authorized(ADMIN)
-    public async getAdmins(@Ctx() context: ResolverContext): Promise<ReadonlyArray<string>> {
-        return context.serverConfig.admins;
+    public async amIAdmin(@Ctx() context: ResolverContext): Promise<string> {
+        return ensureAuthorizedUser(context).userUid;
     }
 
     @Query(() => GetAvailableGameSystemsResult)

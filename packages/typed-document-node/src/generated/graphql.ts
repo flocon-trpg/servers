@@ -573,7 +573,7 @@ export type PromoteResult = {
 export type Query = {
     __typename?: 'Query';
     /** since v0.8.0 */
-    getAdmins: Array<Scalars['String']>;
+    amIAdmin: Scalars['String'];
     getAvailableGameSystems: GetAvailableGameSystemsResult;
     getDiceHelpMessage?: Maybe<Scalars['String']>;
     getFiles: GetFilesResult;
