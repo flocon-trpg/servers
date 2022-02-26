@@ -83,6 +83,8 @@ import { DraggableTabs } from '../../../ui/DraggableTabs';
 import { moveElement } from '../../../../utils/moveElement';
 import { column, row } from '../../../../atoms/userConfig/types';
 import { InputDescription } from '../../../ui/InputDescription';
+import { WritableDraft } from 'immer/dist/internal';
+import { MessagePanelConfig } from '../../../../atoms/roomConfig/types/messagePanelConfig';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -830,6 +832,23 @@ export const RoomMessages: React.FC<Props> = ({ height, panelId }: Props) => {
     const roomMessagesFontSizeDelta = useAtomValue(roomMessageFontSizeDeltaAtom);
     const chatInputDirectionCore = useAtomValue(chatInputDirectionAtom) ?? auto;
 
+    // GameSelectorの無駄なrerenderを抑止するため、useCallbackを使っている。
+    const onChatInputConfigUpdate = React.useCallback(
+        (recipe: (draft: WritableDraft<MessagePanelConfig>) => void) => {
+            setRoomConfig(roomConfig => {
+                if (roomConfig == null) {
+                    return;
+                }
+                const messagePanel = roomConfig.panels.messagePanels[panelId];
+                if (messagePanel == null) {
+                    return;
+                }
+                recipe(messagePanel);
+            });
+        },
+        [panelId, setRoomConfig]
+    );
+
     if (roomId == null || allRoomMessagesResult == null || tabs == null) {
         return null;
     }
@@ -1114,18 +1133,7 @@ export const RoomMessages: React.FC<Props> = ({ height, panelId }: Props) => {
                 roomId={roomId}
                 panelId={panelId}
                 topElementsDirection={chatInputDirection}
-                onConfigUpdate={recipe =>
-                    setRoomConfig(roomConfig => {
-                        if (roomConfig == null) {
-                            return;
-                        }
-                        const messagePanel = roomConfig.panels.messagePanels[panelId];
-                        if (messagePanel == null) {
-                            return;
-                        }
-                        recipe(messagePanel);
-                    })
-                }
+                onConfigUpdate={onChatInputConfigUpdate}
             />
         </div>
     );
