@@ -465,7 +465,7 @@ const GameEffectPanel: React.FC = React.memo(function GameEffectPanel() {
         []
     );
 
-    if (config == null) {
+    if (config == null || config.isMinimized) {
         return null;
     }
 
