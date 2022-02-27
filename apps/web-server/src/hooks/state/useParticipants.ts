@@ -1,5 +1,5 @@
 import React from 'react';
-import { recordForEach, recordToMap } from '@flocon-trpg/utils';
+import { recordForEach } from '@flocon-trpg/utils';
 import { Master, ParticipantState, Player, Spectator } from '@flocon-trpg/core';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
 import { roomAtom } from '../../atoms/room/roomAtom';

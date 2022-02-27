@@ -493,33 +493,35 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
         strParamNames,
     ]);
 
-    if (columns == null || characters == null) {
+    const charactersDataSource: DataSource[] = React.useMemo(() => {
+        const operateCharacter =
+            (characterId: string) => (mapping: (character: CharacterState) => CharacterState) => {
+                setRoomState(roomState => {
+                    const character = roomState.characters[characterId];
+                    if (character == null) {
+                        return;
+                    }
+                    roomState.characters[characterId] = mapping(character);
+                });
+            };
+
+        return [...characters].map(([characterId, character]) => {
+            const createdByMe = myUserUid != null && myUserUid === character.ownerParticipantId;
+            return {
+                key: characterId, // antdのtableのkeyとして必要
+                character: {
+                    stateId: characterId,
+                    state: character,
+                    createdByMe,
+                },
+                onOperateCharacter: operateCharacter(characterId),
+            };
+        });
+    }, [characters, myUserUid, setRoomState]);
+
+    if (columns == null) {
         return null;
     }
-
-    const operateCharacter =
-        (characterId: string) => (mapping: (character: CharacterState) => CharacterState) => {
-            setRoomState(roomState => {
-                const character = roomState.characters[characterId];
-                if (character == null) {
-                    return;
-                }
-                roomState.characters[characterId] = mapping(character);
-            });
-        };
-
-    const charactersDataSource: DataSource[] = [...characters].map(([characterId, character]) => {
-        const createdByMe = myUserUid != null && myUserUid === character.ownerParticipantId;
-        return {
-            key: characterId, // antdのtableのkeyとして必要
-            character: {
-                stateId: characterId,
-                state: character,
-                createdByMe,
-            },
-            onOperateCharacter: operateCharacter(characterId),
-        };
-    });
 
     return (
         <Table
@@ -660,171 +662,192 @@ export const CharacterList: React.FC = () => {
     const setImportCharacterModal = useUpdateAtom(importCharacterModalVisibilityAtom);
     const [editingTabConfigKey, setEditingTabConfigKey] = React.useState<string | undefined>();
 
-    const tabPanes = (tabs ?? []).map((tab, tabIndex) => {
-        return (
-            <Tabs.TabPane
-                key={tab.key}
-                tabKey={tab.key}
-                style={{ overflowY: 'scroll' }}
-                closable={false}
-                tab={
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            justifyItems: 'center',
-                        }}
-                    >
-                        <div style={{ flex: '0 0 auto', maxWidth: 100 }}>
-                            <CharacterTabName tabConfig={tab} />
-                        </div>
-                        <div style={{ flex: 1 }} />
-                        <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>
-                            <Dropdown
-                                trigger={['click']}
-                                overlay={
-                                    <Menu>
-                                        <Menu.Item
-                                            icon={<Icon.SettingOutlined />}
-                                            onClick={() => setEditingTabConfigKey(tab.key)}
-                                        >
-                                            編集
-                                        </Menu.Item>
-                                        <Menu.Item
-                                            icon={<Icon.DeleteOutlined />}
-                                            onClick={() => {
-                                                Modal.warn({
-                                                    onOk: () => {
-                                                        setRoomConfig(roomConfig => {
-                                                            if (roomConfig == null) {
-                                                                return;
-                                                            }
-                                                            roomConfig.panels.characterPanel.tabs.splice(
-                                                                tabIndex,
-                                                                1
-                                                            );
-                                                        });
-                                                    },
-                                                    okCancel: true,
-                                                    maskClosable: true,
-                                                    closable: true,
-                                                    content: 'タブを削除します。よろしいですか？',
-                                                });
-                                            }}
-                                        >
-                                            削除
-                                        </Menu.Item>
-                                    </Menu>
-                                }
-                            >
-                                <Button
-                                    style={{
-                                        width: 18,
-                                        minWidth: 18,
-
-                                        // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
-                                        padding: '0 2px',
-                                    }}
-                                    type='text'
-                                    size='small'
-                                    onClick={e => e.stopPropagation()}
+    return React.useMemo(() => {
+        const tabPanes = (tabs ?? []).map((tab, tabIndex) => {
+            return (
+                <Tabs.TabPane
+                    key={tab.key}
+                    tabKey={tab.key}
+                    style={{ overflowY: 'scroll' }}
+                    closable={false}
+                    tab={
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                justifyItems: 'center',
+                            }}
+                        >
+                            <div style={{ flex: '0 0 auto', maxWidth: 100 }}>
+                                <CharacterTabName tabConfig={tab} />
+                            </div>
+                            <div style={{ flex: 1 }} />
+                            <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>
+                                <Dropdown
+                                    trigger={['click']}
+                                    overlay={
+                                        <Menu>
+                                            <Menu.Item
+                                                icon={<Icon.SettingOutlined />}
+                                                onClick={() => setEditingTabConfigKey(tab.key)}
+                                            >
+                                                編集
+                                            </Menu.Item>
+                                            <Menu.Item
+                                                icon={<Icon.DeleteOutlined />}
+                                                onClick={() => {
+                                                    Modal.warn({
+                                                        onOk: () => {
+                                                            setRoomConfig(roomConfig => {
+                                                                if (roomConfig == null) {
+                                                                    return;
+                                                                }
+                                                                roomConfig.panels.characterPanel.tabs.splice(
+                                                                    tabIndex,
+                                                                    1
+                                                                );
+                                                            });
+                                                        },
+                                                        okCancel: true,
+                                                        maskClosable: true,
+                                                        closable: true,
+                                                        content:
+                                                            'タブを削除します。よろしいですか？',
+                                                    });
+                                                }}
+                                            >
+                                                削除
+                                            </Menu.Item>
+                                        </Menu>
+                                    }
                                 >
-                                    <Icon.EllipsisOutlined />
-                                </Button>
-                            </Dropdown>
-                        </div>
-                    </div>
-                }
-            >
-                <CharacterListTabPane tabConfig={tab} />
-            </Tabs.TabPane>
-        );
-    });
+                                    <Button
+                                        style={{
+                                            width: 18,
+                                            minWidth: 18,
 
-    return (
-        <div
-            style={{ display: 'flex', flexDirection: 'column', height: '100%', margin: '2px 4px' }}
-        >
-            <div style={{ paddingBottom: 8 }}>
-                <TabEditorModal
-                    config={tabs?.find(tab => tab.key === editingTabConfigKey)}
-                    onClose={() => setEditingTabConfigKey(undefined)}
-                    onChange={recipe => {
-                        if (editingTabConfigKey == null) {
-                            return;
-                        }
+                                            // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
+                                            padding: '0 2px',
+                                        }}
+                                        type='text'
+                                        size='small'
+                                        onClick={e => e.stopPropagation()}
+                                    >
+                                        <Icon.EllipsisOutlined />
+                                    </Button>
+                                </Dropdown>
+                            </div>
+                        </div>
+                    }
+                >
+                    <CharacterListTabPane tabConfig={tab} />
+                </Tabs.TabPane>
+            );
+        });
+
+        return (
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: '100%',
+                    margin: '2px 4px',
+                }}
+            >
+                <div style={{ paddingBottom: 8 }}>
+                    <TabEditorModal
+                        config={tabs?.find(tab => tab.key === editingTabConfigKey)}
+                        onClose={() => setEditingTabConfigKey(undefined)}
+                        onChange={recipe => {
+                            if (editingTabConfigKey == null) {
+                                return;
+                            }
+                            setRoomConfig(roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                const targetTabConfig = roomConfig.panels.characterPanel.tabs.find(
+                                    tab => tab.key === editingTabConfigKey
+                                );
+                                if (targetTabConfig == null) {
+                                    return;
+                                }
+                                recipe(targetTabConfig);
+                            });
+                        }}
+                    />
+                    <Button size='small' onClick={() => setCharacterEditorModal({ type: create })}>
+                        キャラクターを作成
+                    </Button>
+                    <Button size='small' onClick={() => setImportCharacterModal(true)}>
+                        キャラクターをインポート
+                    </Button>
+                    <Button
+                        size='small'
+                        onClick={() => setCharacterParameterNamesEditorVisibility(true)}
+                    >
+                        パラメーターを追加・編集・削除
+                    </Button>
+                    <Button size='small' onClick={() => setCharacterTagNamesEditorVisibility(true)}>
+                        タグを追加・編集・削除
+                    </Button>
+                </div>
+                <DraggableTabs
+                    // キャラクターウィンドウは最大で1個までしか存在しないため、静的な値で構わない
+                    dndType='CharacterListTabs'
+                    type='editable-card'
+                    onDnd={action => {
                         setRoomConfig(roomConfig => {
                             if (roomConfig == null) {
                                 return;
                             }
-                            const targetTabConfig = roomConfig.panels.characterPanel.tabs.find(
-                                tab => tab.key === editingTabConfigKey
+                            moveElement(
+                                roomConfig.panels.characterPanel.tabs,
+                                tab => tab.key,
+                                action
                             );
-                            if (targetTabConfig == null) {
-                                return;
-                            }
-                            recipe(targetTabConfig);
                         });
                     }}
-                />
-                <Button size='small' onClick={() => setCharacterEditorModal({ type: create })}>
-                    キャラクターを作成
-                </Button>
-                <Button size='small' onClick={() => setImportCharacterModal(true)}>
-                    キャラクターをインポート
-                </Button>
-                <Button
-                    size='small'
-                    onClick={() => setCharacterParameterNamesEditorVisibility(true)}
-                >
-                    パラメーターを追加・編集・削除
-                </Button>
-                <Button size='small' onClick={() => setCharacterTagNamesEditorVisibility(true)}>
-                    タグを追加・編集・削除
-                </Button>
-            </div>
-            <DraggableTabs
-                // キャラクターウィンドウは最大で1個までしか存在しないため、静的な値で構わない
-                dndType='CharacterListTabs'
-                type='editable-card'
-                onDnd={action => {
-                    setRoomConfig(roomConfig => {
-                        if (roomConfig == null) {
-                            return;
-                        }
-                        moveElement(roomConfig.panels.characterPanel.tabs, tab => tab.key, action);
-                    });
-                }}
-                onEdit={(e, type) => {
-                    if (type === 'remove') {
-                        if (typeof e !== 'string') {
+                    onEdit={(e, type) => {
+                        if (type === 'remove') {
+                            if (typeof e !== 'string') {
+                                return;
+                            }
+                            setRoomConfig(roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                const indexToSplice =
+                                    roomConfig.panels.characterPanel.tabs.findIndex(
+                                        tab => tab.key === e
+                                    );
+                                if (indexToSplice >= 0) {
+                                    roomConfig.panels.characterPanel.tabs.splice(indexToSplice, 1);
+                                }
+                            });
                             return;
                         }
                         setRoomConfig(roomConfig => {
                             if (roomConfig == null) {
                                 return;
                             }
-                            const indexToSplice = roomConfig.panels.characterPanel.tabs.findIndex(
-                                tab => tab.key === e
+                            roomConfig.panels.characterPanel.tabs.push(
+                                CharacterTabConfigUtils.createEmpty({})
                             );
-                            if (indexToSplice >= 0) {
-                                roomConfig.panels.characterPanel.tabs.splice(indexToSplice, 1);
-                            }
                         });
-                        return;
-                    }
-                    setRoomConfig(roomConfig => {
-                        if (roomConfig == null) {
-                            return;
-                        }
-                        roomConfig.panels.characterPanel.tabs.push(
-                            CharacterTabConfigUtils.createEmpty({})
-                        );
-                    });
-                }}
-            >
-                {tabPanes}
-            </DraggableTabs>
-        </div>
-    );
+                    }}
+                >
+                    {tabPanes}
+                </DraggableTabs>
+            </div>
+        );
+    }, [
+        editingTabConfigKey,
+        setCharacterEditorModal,
+        setCharacterParameterNamesEditorVisibility,
+        setCharacterTagNamesEditorVisibility,
+        setImportCharacterModal,
+        setRoomConfig,
+        tabs,
+    ]);
 };

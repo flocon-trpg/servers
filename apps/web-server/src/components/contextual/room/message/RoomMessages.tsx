@@ -83,6 +83,8 @@ import { DraggableTabs } from '../../../ui/DraggableTabs';
 import { moveElement } from '../../../../utils/moveElement';
 import { column, row } from '../../../../atoms/userConfig/types';
 import { InputDescription } from '../../../ui/InputDescription';
+import { WritableDraft } from 'immer/dist/internal';
+import { MessagePanelConfig } from '../../../../atoms/roomConfig/types/messagePanelConfig';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -830,9 +832,22 @@ export const RoomMessages: React.FC<Props> = ({ height, panelId }: Props) => {
     const roomMessagesFontSizeDelta = useAtomValue(roomMessageFontSizeDeltaAtom);
     const chatInputDirectionCore = useAtomValue(chatInputDirectionAtom) ?? auto;
 
-    if (roomId == null || allRoomMessagesResult == null || tabs == null) {
-        return null;
-    }
+    // GameSelectorの無駄なrerenderを抑止するため、useCallbackを使っている。
+    const onChatInputConfigUpdate = React.useCallback(
+        (recipe: (draft: WritableDraft<MessagePanelConfig>) => void) => {
+            setRoomConfig(roomConfig => {
+                if (roomConfig == null) {
+                    return;
+                }
+                const messagePanel = roomConfig.panels.messagePanels[panelId];
+                if (messagePanel == null) {
+                    return;
+                }
+                recipe(messagePanel);
+            });
+        },
+        [panelId, setRoomConfig]
+    );
 
     const chatInputDirection =
         chatInputDirectionCore === auto ? (height <= 500 ? row : column) : chatInputDirectionCore;
@@ -842,6 +857,167 @@ export const RoomMessages: React.FC<Props> = ({ height, panelId }: Props) => {
         height - 280 - (chatInputDirection === column ? spaceDiff : 0)
     );
     const tabsHeight = Math.max(0, height - 240 - (chatInputDirection === column ? spaceDiff : 0));
+
+    const marginX = 5;
+
+    const draggableTabs = React.useMemo(() => {
+        if (tabs == null) {
+            return undefined;
+        }
+
+        const tabPanels =
+            contentHeight <= 0
+                ? null
+                : tabs.map((tab, tabIndex) => {
+                      return (
+                          <Tabs.TabPane
+                              key={tab.key}
+                              tabKey={tab.key}
+                              closable={false}
+                              style={{ backgroundColor: Color.chatBackgroundColor }}
+                              tab={
+                                  <div
+                                      style={{
+                                          display: 'flex',
+                                          flexDirection: 'row',
+                                          justifyItems: 'center',
+                                      }}
+                                  >
+                                      <div style={{ flex: '0 0 auto', maxWidth: 100 }}>
+                                          <MessageTabName tabConfig={tab} />
+                                      </div>
+                                      <div style={{ flex: 1 }} />
+                                      <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>
+                                          <Dropdown
+                                              trigger={['click']}
+                                              overlay={
+                                                  <Menu>
+                                                      <Menu.Item
+                                                          icon={<Icon.SettingOutlined />}
+                                                          onClick={() =>
+                                                              setEditingTabConfigKey(tab.key)
+                                                          }
+                                                      >
+                                                          編集
+                                                      </Menu.Item>
+                                                      <Menu.Item
+                                                          icon={<Icon.DeleteOutlined />}
+                                                          onClick={() => {
+                                                              Modal.warn({
+                                                                  onOk: () => {
+                                                                      setRoomConfig(roomConfig => {
+                                                                          if (roomConfig == null) {
+                                                                              return;
+                                                                          }
+                                                                          const messagePanel =
+                                                                              roomConfig.panels
+                                                                                  .messagePanels[
+                                                                                  panelId
+                                                                              ];
+                                                                          if (
+                                                                              messagePanel == null
+                                                                          ) {
+                                                                              return;
+                                                                          }
+                                                                          messagePanel.tabs.splice(
+                                                                              tabIndex,
+                                                                              1
+                                                                          );
+                                                                      });
+                                                                  },
+                                                                  okCancel: true,
+                                                                  maskClosable: true,
+                                                                  closable: true,
+                                                                  content:
+                                                                      'タブを削除します。よろしいですか？',
+                                                              });
+                                                          }}
+                                                      >
+                                                          削除
+                                                      </Menu.Item>
+                                                  </Menu>
+                                              }
+                                          >
+                                              <Button
+                                                  style={{
+                                                      width: 18,
+                                                      minWidth: 18,
+
+                                                      // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
+                                                      padding: '0 2px',
+                                                  }}
+                                                  type='text'
+                                                  size='small'
+                                                  onClick={e => e.stopPropagation()}
+                                              >
+                                                  <Icon.EllipsisOutlined />
+                                              </Button>
+                                          </Dropdown>
+                                      </div>
+                                  </div>
+                              }
+                          >
+                              <MessageTabPane config={tab} contentHeight={contentHeight} />
+                          </Tabs.TabPane>
+                      );
+                  });
+
+        return (
+            <DraggableTabs
+                style={{ flexBasis: `${tabsHeight}px`, margin: `0 ${marginX}px 4px ${marginX}px` }}
+                dndType={`MessagePanelTab@${panelId}`}
+                type='editable-card'
+                onDnd={action => {
+                    setRoomConfig(roomConfig => {
+                        const messagePanel = roomConfig?.panels.messagePanels[panelId];
+                        if (messagePanel == null) {
+                            return;
+                        }
+                        moveElement(messagePanel.tabs, tab => tab.key, action);
+                    });
+                }}
+                onEdit={(e, type) => {
+                    if (type === 'remove') {
+                        if (typeof e !== 'string') {
+                            return;
+                        }
+                        setRoomConfig(roomConfig => {
+                            if (roomConfig == null) {
+                                return;
+                            }
+                            const messagePanel = roomConfig.panels.messagePanels[panelId];
+                            if (messagePanel == null) {
+                                return;
+                            }
+                            const indexToSplice = messagePanel.tabs.findIndex(
+                                tab => tab.key === editingTabConfigKey
+                            );
+                            if (indexToSplice >= 0) {
+                                messagePanel.tabs.splice(indexToSplice, 1);
+                            }
+                        });
+                        return;
+                    }
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        const messagePanel = roomConfig.panels.messagePanels[panelId];
+                        if (messagePanel == null) {
+                            return;
+                        }
+                        messagePanel.tabs.push(MessageTabConfigUtils.createEmpty({}));
+                    });
+                }}
+            >
+                {tabPanels}
+            </DraggableTabs>
+        );
+    }, [contentHeight, editingTabConfigKey, panelId, setRoomConfig, tabs, tabsHeight]);
+
+    if (roomId == null || allRoomMessagesResult == null || draggableTabs == null) {
+        return null;
+    }
 
     switch (allRoomMessagesResult.type) {
         case loading:
@@ -865,103 +1041,6 @@ export const RoomMessages: React.FC<Props> = ({ height, panelId }: Props) => {
         default:
             break;
     }
-
-    const tabPanels =
-        contentHeight <= 0
-            ? null
-            : tabs.map((tab, tabIndex) => {
-                  return (
-                      <Tabs.TabPane
-                          key={tab.key}
-                          tabKey={tab.key}
-                          closable={false}
-                          style={{ backgroundColor: Color.chatBackgroundColor }}
-                          tab={
-                              <div
-                                  style={{
-                                      display: 'flex',
-                                      flexDirection: 'row',
-                                      justifyItems: 'center',
-                                  }}
-                              >
-                                  <div style={{ flex: '0 0 auto', maxWidth: 100 }}>
-                                      <MessageTabName tabConfig={tab} />
-                                  </div>
-                                  <div style={{ flex: 1 }} />
-                                  <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>
-                                      <Dropdown
-                                          trigger={['click']}
-                                          overlay={
-                                              <Menu>
-                                                  <Menu.Item
-                                                      icon={<Icon.SettingOutlined />}
-                                                      onClick={() =>
-                                                          setEditingTabConfigKey(tab.key)
-                                                      }
-                                                  >
-                                                      編集
-                                                  </Menu.Item>
-                                                  <Menu.Item
-                                                      icon={<Icon.DeleteOutlined />}
-                                                      onClick={() => {
-                                                          Modal.warn({
-                                                              onOk: () => {
-                                                                  setRoomConfig(roomConfig => {
-                                                                      if (roomConfig == null) {
-                                                                          return;
-                                                                      }
-                                                                      const messagePanel =
-                                                                          roomConfig.panels
-                                                                              .messagePanels[
-                                                                              panelId
-                                                                          ];
-                                                                      if (messagePanel == null) {
-                                                                          return;
-                                                                      }
-                                                                      messagePanel.tabs.splice(
-                                                                          tabIndex,
-                                                                          1
-                                                                      );
-                                                                  });
-                                                              },
-                                                              okCancel: true,
-                                                              maskClosable: true,
-                                                              closable: true,
-                                                              content:
-                                                                  'タブを削除します。よろしいですか？',
-                                                          });
-                                                      }}
-                                                  >
-                                                      削除
-                                                  </Menu.Item>
-                                              </Menu>
-                                          }
-                                      >
-                                          <Button
-                                              style={{
-                                                  width: 18,
-                                                  minWidth: 18,
-
-                                                  // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
-                                                  padding: '0 2px',
-                                              }}
-                                              type='text'
-                                              size='small'
-                                              onClick={e => e.stopPropagation()}
-                                          >
-                                              <Icon.EllipsisOutlined />
-                                          </Button>
-                                      </Dropdown>
-                                  </div>
-                              </div>
-                          }
-                      >
-                          <MessageTabPane config={tab} contentHeight={contentHeight} />
-                      </Tabs.TabPane>
-                  );
-              });
-
-    const marginX = 5;
 
     return (
         <div
@@ -1059,73 +1138,14 @@ export const RoomMessages: React.FC<Props> = ({ height, panelId }: Props) => {
                     <Select.Option value={row}>横に並べる</Select.Option>
                 </Select>
             </div>
-            <DraggableTabs
-                style={{ flexBasis: `${tabsHeight}px`, margin: `0 ${marginX}px 4px ${marginX}px` }}
-                dndType={`MessagePanelTab@${panelId}`}
-                type='editable-card'
-                onDnd={action => {
-                    setRoomConfig(roomConfig => {
-                        const messagePanel = roomConfig?.panels.messagePanels[panelId];
-                        if (messagePanel == null) {
-                            return;
-                        }
-                        moveElement(messagePanel.tabs, tab => tab.key, action);
-                    });
-                }}
-                onEdit={(e, type) => {
-                    if (type === 'remove') {
-                        if (typeof e !== 'string') {
-                            return;
-                        }
-                        setRoomConfig(roomConfig => {
-                            if (roomConfig == null) {
-                                return;
-                            }
-                            const messagePanel = roomConfig.panels.messagePanels[panelId];
-                            if (messagePanel == null) {
-                                return;
-                            }
-                            const indexToSplice = messagePanel.tabs.findIndex(
-                                tab => tab.key === editingTabConfigKey
-                            );
-                            if (indexToSplice >= 0) {
-                                messagePanel.tabs.splice(indexToSplice, 1);
-                            }
-                        });
-                        return;
-                    }
-                    setRoomConfig(roomConfig => {
-                        if (roomConfig == null) {
-                            return;
-                        }
-                        const messagePanel = roomConfig.panels.messagePanels[panelId];
-                        if (messagePanel == null) {
-                            return;
-                        }
-                        messagePanel.tabs.push(MessageTabConfigUtils.createEmpty({}));
-                    });
-                }}
-            >
-                {tabPanels}
-            </DraggableTabs>
             <div style={{ flex: 1 }} />
+            {draggableTabs}
             <ChatInput
                 style={{ flex: 'auto', margin: '0 4px' }}
                 roomId={roomId}
                 panelId={panelId}
                 topElementsDirection={chatInputDirection}
-                onConfigUpdate={recipe =>
-                    setRoomConfig(roomConfig => {
-                        if (roomConfig == null) {
-                            return;
-                        }
-                        const messagePanel = roomConfig.panels.messagePanels[panelId];
-                        if (messagePanel == null) {
-                            return;
-                        }
-                        recipe(messagePanel);
-                    })
-                }
+                onConfigUpdate={onChatInputConfigUpdate}
             />
         </div>
     );

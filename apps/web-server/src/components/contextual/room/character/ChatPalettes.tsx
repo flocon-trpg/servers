@@ -158,6 +158,22 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
             });
     }, [myCharacters]);
 
+    const onConfigUpdate = React.useCallback(
+        (recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void) => {
+            setRoomConfig(roomConfig => {
+                if (roomConfig == null) {
+                    return;
+                }
+                const chatPalettePanel = roomConfig.panels.chatPalettePanels[panelId];
+                if (chatPalettePanel == null) {
+                    return;
+                }
+                recipe(chatPalettePanel);
+            });
+        },
+        [panelId, setRoomConfig]
+    );
+
     if (config == null) {
         return null;
     }
@@ -165,21 +181,6 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
     const selectedCharacterId = config.selectedCharacterId;
     const selectedCharacter =
         selectedCharacterId == null ? undefined : myCharacters?.get(selectedCharacterId);
-
-    const onConfigUpdate = (
-        recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void
-    ) => {
-        setRoomConfig(roomConfig => {
-            if (roomConfig == null) {
-                return;
-            }
-            const chatPalettePanel = roomConfig.panels.chatPalettePanels[panelId];
-            if (chatPalettePanel == null) {
-                return;
-            }
-            recipe(chatPalettePanel);
-        });
-    };
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
