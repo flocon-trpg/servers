@@ -1,5 +1,5 @@
+import { CompositeKey } from '@flocon-trpg/core/src/internal/ot/compositeKey/types';
 import { DualKey } from './dualKeyMap';
-import { CompositeKey } from './stateMap';
 
 type Key = string | CompositeKey | DualKey<string, string>;
 

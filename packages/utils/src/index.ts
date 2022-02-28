@@ -5,6 +5,12 @@ export {
     groupJoinCustomDualKeyMap,
 } from './internal/customDualKeyMap';
 export {
+    CompositeKey,
+    stringToCompositeKey,
+    compositeKeyToJsonString,
+    compositeKeyEquals,
+} from './internal/compositeKey';
+export {
     DualKey,
     DualKeyMap,
     ReadonlyDualKeyMap,
@@ -22,15 +28,7 @@ export { groupJoinMap } from './internal/groupJoinMap';
 export { groupJoinSet } from './internal/groupJoinSet';
 export { parseEnvListValue } from './internal/parseEnvListValue';
 export { SemVer, alpha, beta, rc, Operator, SemverOption } from './internal/semver';
-export {
-    CompositeKey,
-    stringToCompositeKey,
-    toJsonString as stateMapToJsonString,
-    equals as compositeKeyEquals,
-    StateMap,
-    ReadonlyStateMap,
-    createStateMap,
-} from './internal/stateMap';
+export { StateMap, ReadonlyStateMap, createStateMap } from './internal/stateMap';
 export { toBeNever } from './internal/toBeNever';
 export { left, right, both } from './internal/types';
 export {

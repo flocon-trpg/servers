@@ -1,26 +1,6 @@
+import { CompositeKey } from './compositeKey';
 import { CustomDualKeyMap, KeyFactory, ReadonlyCustomDualKeyMap } from './customDualKeyMap';
 import { DualKeyMap, DualKeyMapSource } from './dualKeyMap';
-
-export type CompositeKey = {
-    id: string;
-    createdBy: string;
-};
-
-export const stringToCompositeKey = (source: string): CompositeKey | null => {
-    const array = source.split('@');
-    if (array.length !== 2) {
-        return null;
-    }
-    return { id: array[0]!, createdBy: array[1]! };
-};
-
-export const toJsonString = (source: CompositeKey): string => {
-    return `{ id: ${source.id}, createdBy: ${source.createdBy} }`;
-};
-
-export const equals = (x: CompositeKey, y: CompositeKey): boolean => {
-    return x.createdBy === y.createdBy && x.id === y.id;
-};
 
 const keyFactory: KeyFactory<CompositeKey, string, string> = {
     createDualKey: x => ({ first: x.createdBy, second: x.id }),
