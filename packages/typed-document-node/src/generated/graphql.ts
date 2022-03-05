@@ -1300,6 +1300,10 @@ export type SemVerFragment = {
     prerelease?: { __typename?: 'Prerelease'; type: PrereleaseType; version: number } | null;
 };
 
+export type AmIAdminQueryVariables = Exact<{ [key: string]: never }>;
+
+export type AmIAdminQuery = { __typename?: 'Query'; result: string };
+
 export type GetAvailableGameSystemsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type GetAvailableGameSystemsQuery = {
@@ -1743,6 +1747,18 @@ export type DeleteRoomMutationVariables = Exact<{
 export type DeleteRoomMutation = {
     __typename?: 'Mutation';
     result: { __typename?: 'DeleteRoomResult'; failureType?: DeleteRoomFailureType | null };
+};
+
+export type DeleteRoomAsAdminMutationVariables = Exact<{
+    id: Scalars['String'];
+}>;
+
+export type DeleteRoomAsAdminMutation = {
+    __typename?: 'Mutation';
+    result: {
+        __typename?: 'DeleteRoomAsAdminResult';
+        failureType?: DeleteRoomAsAdminFailureType | null;
+    };
 };
 
 export type EditFileTagsMutationVariables = Exact<{
@@ -3126,6 +3142,26 @@ export const SemVerFragmentDoc = {
         },
     ],
 } as unknown as DocumentNode<SemVerFragment, unknown>;
+export const AmIAdminDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'AmIAdmin' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'amIAdmin' },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<AmIAdminQuery, AmIAdminQueryVariables>;
 export const GetAvailableGameSystemsDocument = {
     kind: 'Document',
     definitions: [
@@ -4345,6 +4381,49 @@ export const DeleteRoomDocument = {
         },
     ],
 } as unknown as DocumentNode<DeleteRoomMutation, DeleteRoomMutationVariables>;
+export const DeleteRoomAsAdminDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'DeleteRoomAsAdmin' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'deleteRoomAsAdmin' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'failureType' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<DeleteRoomAsAdminMutation, DeleteRoomAsAdminMutationVariables>;
 export const EditFileTagsDocument = {
     kind: 'Document',
     definitions: [
