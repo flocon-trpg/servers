@@ -5,17 +5,17 @@ import { useCharacters } from './useCharacters';
 
 export const useMyCharacters = (): ReadonlyMap<string, CharacterState> | undefined => {
     const myUserUid = useMyUserUid();
-    const caracters = useCharacters();
+    const characters = useCharacters();
     return React.useMemo(() => {
-        if (caracters == null) {
+        if (characters == null) {
             return undefined;
         }
         const result = new Map<string, CharacterState>();
-        caracters.forEach((value, key) => {
+        characters.forEach((value, key) => {
             if (value.ownerParticipantId === myUserUid) {
                 result.set(key, value);
             }
         });
         return result;
-    }, [caracters, myUserUid]);
+    }, [characters, myUserUid]);
 };
