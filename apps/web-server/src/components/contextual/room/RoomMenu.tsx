@@ -504,46 +504,11 @@ const PanelsMenu: React.FC = () => {
     const pieceValuePanel = useAtomSelector(roomConfigAtom, state => state?.panels.pieceValuePanel);
     const [panelOpacity, setPanelOpacity] = useAtom(panelOpacityAtom);
 
-    if (
-        activeBoardPanel == null ||
-        boardPanels == null ||
-        characterPanel == null ||
-        chatPalettePanels == null ||
-        gameEffectPanel == null ||
-        participantPanel == null ||
-        memoPanels == null ||
-        messagePanels == null ||
-        pieceValuePanel == null
-    ) {
-        return null;
-    }
-
-    return (
-        <Menu.SubMenu title='ウィンドウ'>
-            <Menu.Item
-                onClick={() => {
-                    setRoomConfig(roomConfig => {
-                        if (roomConfig == null) {
-                            return;
-                        }
-                        roomConfig.panels.characterPanel.isMinimized = false;
-                        RoomConfigUtils.bringPanelToFront(roomConfig, {
-                            type: 'characterPanel',
-                        });
-                    });
-                }}
-            >
-                <div>
-                    <span>
-                        {characterPanel.isMinimized ? (
-                            <Icon.BorderOutlined />
-                        ) : (
-                            <Icon.CheckSquareOutlined />
-                        )}
-                    </span>
-                    <span>キャラクター一覧</span>
-                </div>
-            </Menu.Item>
+    const activeBoardPanelMenu = React.useMemo(() => {
+        if (activeBoardPanel == null) {
+            return null;
+        }
+        return (
             <Menu.Item
                 onClick={() => {
                     setRoomConfig(roomConfig => {
@@ -568,6 +533,13 @@ const PanelsMenu: React.FC = () => {
                     <span>ボードビュアー</span>
                 </div>
             </Menu.Item>
+        );
+    }, [activeBoardPanel, setRoomConfig]);
+    const boardPanelsMenu = React.useMemo(() => {
+        if (boardPanels == null) {
+            return null;
+        }
+        return (
             <Menu.SubMenu title='ボードエディター'>
                 {recordToArray(boardPanels).map((pair, i) => {
                     return (
@@ -640,68 +612,44 @@ const PanelsMenu: React.FC = () => {
                     </div>
                 </Menu.Item>
             </Menu.SubMenu>
-            <Menu.SubMenu title='メッセージ'>
-                {recordToArray(messagePanels).map((pair, i) => {
-                    return (
-                        <Menu.Item
-                            key={pair.key}
-                            onClick={() => {
-                                setRoomConfig(roomConfig => {
-                                    if (roomConfig == null) {
-                                        return;
-                                    }
-                                    const messagePanel = roomConfig?.panels.messagePanels[pair.key];
-                                    if (messagePanel == null) {
-                                        return;
-                                    }
-
-                                    // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
-                                    messagePanel.isMinimized = false;
-
-                                    RoomConfigUtils.bringPanelToFront(roomConfig, {
-                                        type: 'messagePanel',
-                                        panelId: pair.key,
-                                    });
-                                });
-                            }}
-                        >
-                            <div>
-                                <span>
-                                    {pair.value.isMinimized ? (
-                                        <Icon.BorderOutlined />
-                                    ) : (
-                                        <Icon.CheckSquareOutlined />
-                                    )}
-                                </span>
-                                <span>{`パネル${i + 1}`}</span>
-                            </div>
-                        </Menu.Item>
-                    );
-                })}
-                <Menu.Divider />
-                <Menu.Item
-                    onClick={() => {
-                        setRoomConfig(roomConfig => {
-                            if (roomConfig == null) {
-                                return;
-                            }
-                            const panelId = simpleId();
-                            roomConfig.panels.messagePanels[panelId] = defaultMessagePanelConfig();
-                            RoomConfigUtils.bringPanelToFront(roomConfig, {
-                                type: 'messagePanel',
-                                panelId,
-                            });
+        );
+    }, [boardPanels, setRoomConfig]);
+    const characterPanelMenu = React.useMemo(() => {
+        if (characterPanel == null) {
+            return null;
+        }
+        return (
+            <Menu.Item
+                onClick={() => {
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        roomConfig.panels.characterPanel.isMinimized = false;
+                        RoomConfigUtils.bringPanelToFront(roomConfig, {
+                            type: 'characterPanel',
                         });
-                    }}
-                >
-                    <div>
-                        <span>
-                            <Icon.PlusOutlined />
-                        </span>
-                        <span>新規作成</span>
-                    </div>
-                </Menu.Item>
-            </Menu.SubMenu>
+                    });
+                }}
+            >
+                <div>
+                    <span>
+                        {characterPanel.isMinimized ? (
+                            <Icon.BorderOutlined />
+                        ) : (
+                            <Icon.CheckSquareOutlined />
+                        )}
+                    </span>
+                    <span>キャラクター一覧</span>
+                </div>
+            </Menu.Item>
+        );
+    }, [characterPanel, setRoomConfig]);
+    const chatPalettePanelsMenu = React.useMemo(() => {
+        if (chatPalettePanels == null) {
+            return null;
+        }
+        return (
             <Menu.SubMenu title='チャットパレット'>
                 {recordToArray(chatPalettePanels).map((pair, i) => {
                     return (
@@ -774,6 +722,44 @@ const PanelsMenu: React.FC = () => {
                     </div>
                 </Menu.Item>
             </Menu.SubMenu>
+        );
+    }, [chatPalettePanels, setRoomConfig]);
+    const gameEffectPanelMenu = React.useMemo(() => {
+        if (gameEffectPanel == null) {
+            return null;
+        }
+        return (
+            <Menu.Item
+                onClick={() => {
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        roomConfig.panels.gameEffectPanel.isMinimized = false;
+                        RoomConfigUtils.bringPanelToFront(roomConfig, {
+                            type: 'gameEffectPanel',
+                        });
+                    });
+                }}
+            >
+                <div>
+                    <span>
+                        {gameEffectPanel.isMinimized ? (
+                            <Icon.BorderOutlined />
+                        ) : (
+                            <Icon.CheckSquareOutlined />
+                        )}
+                    </span>
+                    <span>SE, BGM</span>
+                </div>
+            </Menu.Item>
+        );
+    }, [gameEffectPanel, setRoomConfig]);
+    const memoPanelsMenu = React.useMemo(() => {
+        if (memoPanels == null) {
+            return null;
+        }
+        return (
             <Menu.SubMenu title='共有メモ（部屋）'>
                 {recordToArray(memoPanels).map((pair, i) => {
                     return (
@@ -836,54 +822,82 @@ const PanelsMenu: React.FC = () => {
                     </div>
                 </Menu.Item>
             </Menu.SubMenu>
-            <Menu.Item
-                onClick={() => {
-                    setRoomConfig(roomConfig => {
-                        if (roomConfig == null) {
-                            return;
-                        }
-                        roomConfig.panels.pieceValuePanel.isMinimized = false;
-                        RoomConfigUtils.bringPanelToFront(roomConfig, {
-                            type: 'pieceValuePanel',
+        );
+    }, [memoPanels, setRoomConfig]);
+    const messagePanelsMenu = React.useMemo(() => {
+        if (messagePanels == null) {
+            return null;
+        }
+        return (
+            <Menu.SubMenu title='メッセージ'>
+                {recordToArray(messagePanels).map((pair, i) => {
+                    return (
+                        <Menu.Item
+                            key={pair.key}
+                            onClick={() => {
+                                setRoomConfig(roomConfig => {
+                                    if (roomConfig == null) {
+                                        return;
+                                    }
+                                    const messagePanel = roomConfig?.panels.messagePanels[pair.key];
+                                    if (messagePanel == null) {
+                                        return;
+                                    }
+
+                                    // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
+                                    messagePanel.isMinimized = false;
+
+                                    RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                        type: 'messagePanel',
+                                        panelId: pair.key,
+                                    });
+                                });
+                            }}
+                        >
+                            <div>
+                                <span>
+                                    {pair.value.isMinimized ? (
+                                        <Icon.BorderOutlined />
+                                    ) : (
+                                        <Icon.CheckSquareOutlined />
+                                    )}
+                                </span>
+                                <span>{`パネル${i + 1}`}</span>
+                            </div>
+                        </Menu.Item>
+                    );
+                })}
+                <Menu.Divider />
+                <Menu.Item
+                    onClick={() => {
+                        setRoomConfig(roomConfig => {
+                            if (roomConfig == null) {
+                                return;
+                            }
+                            const panelId = simpleId();
+                            roomConfig.panels.messagePanels[panelId] = defaultMessagePanelConfig();
+                            RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                type: 'messagePanel',
+                                panelId,
+                            });
                         });
-                    });
-                }}
-            >
-                <div>
-                    <span>
-                        {pieceValuePanel.isMinimized ? (
-                            <Icon.BorderOutlined />
-                        ) : (
-                            <Icon.CheckSquareOutlined />
-                        )}
-                    </span>
-                    <span>コマ</span>
-                </div>
-            </Menu.Item>
-            <Menu.Item
-                onClick={() => {
-                    setRoomConfig(roomConfig => {
-                        if (roomConfig == null) {
-                            return;
-                        }
-                        roomConfig.panels.gameEffectPanel.isMinimized = false;
-                        RoomConfigUtils.bringPanelToFront(roomConfig, {
-                            type: 'gameEffectPanel',
-                        });
-                    });
-                }}
-            >
-                <div>
-                    <span>
-                        {gameEffectPanel.isMinimized ? (
-                            <Icon.BorderOutlined />
-                        ) : (
-                            <Icon.CheckSquareOutlined />
-                        )}
-                    </span>
-                    <span>SE, BGM</span>
-                </div>
-            </Menu.Item>
+                    }}
+                >
+                    <div>
+                        <span>
+                            <Icon.PlusOutlined />
+                        </span>
+                        <span>新規作成</span>
+                    </div>
+                </Menu.Item>
+            </Menu.SubMenu>
+        );
+    }, [messagePanels, setRoomConfig]);
+    const participantPanelMenu = React.useMemo(() => {
+        if (participantPanel == null) {
+            return null;
+        }
+        return (
             <Menu.Item
                 onClick={() => {
                     setRoomConfig(roomConfig => {
@@ -908,8 +922,59 @@ const PanelsMenu: React.FC = () => {
                     <span>入室者</span>
                 </div>
             </Menu.Item>
+        );
+    }, [participantPanel, setRoomConfig]);
+    const pieceValuePanelMenu = React.useMemo(() => {
+        if (pieceValuePanel == null) {
+            return null;
+        }
+        return (
+            <Menu.Item
+                onClick={() => {
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        roomConfig.panels.pieceValuePanel.isMinimized = false;
+                        RoomConfigUtils.bringPanelToFront(roomConfig, {
+                            type: 'pieceValuePanel',
+                        });
+                    });
+                }}
+            >
+                <div>
+                    <span>
+                        {pieceValuePanel.isMinimized ? (
+                            <Icon.BorderOutlined />
+                        ) : (
+                            <Icon.CheckSquareOutlined />
+                        )}
+                    </span>
+                    <span>コマ</span>
+                </div>
+            </Menu.Item>
+        );
+    }, [pieceValuePanel, setRoomConfig]);
+    const opacityStyle: React.CSSProperties = React.useMemo(
+        () => ({
+            padding: '0 4px',
+        }),
+        []
+    );
+
+    return (
+        <Menu.SubMenu title='ウィンドウ'>
+            {characterPanelMenu}
+            {activeBoardPanelMenu}
+            {boardPanelsMenu}
+            {chatPalettePanelsMenu}
+            {messagePanelsMenu}
+            {memoPanelsMenu}
+            {pieceValuePanelMenu}
+            {gameEffectPanelMenu}
+            {participantPanelMenu}
             <Menu.Divider />
-            <div className={classNames(flex, flexRow, itemsCenter)} style={{ padding: '0 4px' }}>
+            <div className={classNames(flex, flexRow, itemsCenter)} style={opacityStyle}>
                 <div>透過度</div>
                 <OpacityBar
                     value={panelOpacity ?? defaultPanelOpacity}
