@@ -55,25 +55,18 @@ type Props = Omit<PropsSource, 'renderTabBar'>;
 export const DraggableTabs: React.FC<Props> = (props: Props) => {
     const { dndType, onDnd, ...tabsProps } = props;
 
-    return (
-        <Tabs
-            {...tabsProps}
-            renderTabBar={(props, DefaultTabBar) => {
-                return (
-                    <DefaultTabBar {...props}>
-                        {(node: any) => (
-                            <WrapTabNode
-                                key={node.key}
-                                index={node.key}
-                                dndType={dndType}
-                                onDnd={onDnd}
-                            >
-                                {node}
-                            </WrapTabNode>
-                        )}
-                    </DefaultTabBar>
-                );
-            }}
-        />
+    const tabBarChildren = React.useCallback(
+        (node: any) => (
+            <WrapTabNode key={node.key} index={node.key} dndType={dndType} onDnd={onDnd}>
+                {node}
+            </WrapTabNode>
+        ),
+        [dndType, onDnd]
     );
+    const renderTabBar: TabsProps['renderTabBar'] = React.useCallback(
+        (props, DefaultTabBar) => <DefaultTabBar {...props}>{tabBarChildren}</DefaultTabBar>,
+        [tabBarChildren]
+    );
+
+    return <Tabs {...tabsProps} renderTabBar={renderTabBar} />;
 };

@@ -60,17 +60,20 @@ const RoomsListComponent: React.FC<RoomsListComponentProps> = ({
 }: RoomsListComponentProps) => {
     const router = useRouter();
 
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', padding: 10 }}>
-            <div className={classNames(flex, flexNone)}>
-                <div className={classNames(flexNone)}>
-                    <Button onClick={() => router.push('rooms/create')}>部屋を作成</Button>
+    return React.useMemo(
+        () => (
+            <div style={{ display: 'flex', flexDirection: 'column', padding: 10 }}>
+                <div className={classNames(flex, flexNone)}>
+                    <div className={classNames(flexNone)}>
+                        <Button onClick={() => router.push('rooms/create')}>部屋を作成</Button>
+                    </div>
+                    <div style={{ flex: 'auto' }} />
                 </div>
-                <div style={{ flex: 'auto' }} />
+                <div style={{ flex: '10px' }} />
+                <Table rowKey='id' style={{ flex: 'auto' }} columns={columns} dataSource={rooms} />
             </div>
-            <div style={{ flex: '10px' }} />
-            <Table rowKey='id' style={{ flex: 'auto' }} columns={columns} dataSource={rooms} />
-        </div>
+        ),
+        [rooms, router]
     );
 };
 
@@ -79,27 +82,29 @@ const pollingInterval = 30000;
 const RoomCore: React.FC = () => {
     const rooms = useQuery(GetRoomsListDocument, { fetchPolicy: 'network-only' });
 
-    switch (rooms.data?.result.__typename) {
-        case 'GetRoomsListSuccessResult':
-            rooms.startPolling(pollingInterval);
-            break;
-        case 'GetRoomsListFailureResult':
-            rooms.stopPolling();
-            break;
-    }
+    React.useEffect(() => {
+        switch (rooms.data?.result.__typename) {
+            case 'GetRoomsListSuccessResult':
+                rooms.startPolling(pollingInterval);
+                break;
+            case 'GetRoomsListFailureResult':
+                rooms.stopPolling();
+                break;
+        }
+    }, [rooms]);
 
-    const roomsData = (() => {
+    const roomsData = React.useMemo(() => {
         switch (rooms.data?.result.__typename) {
             case 'GetRoomsListSuccessResult':
                 return rooms.data.result.rooms;
             case 'GetRoomsListFailureResult':
-                return undefined;
+                return [];
         }
-    })();
+    }, [rooms.data]);
 
     return (
         <QueryResultViewer loading={rooms.loading} error={rooms.error} compact={false}>
-            {roomsData == null ? null : <RoomsListComponent rooms={roomsData ?? []} />}
+            {roomsData == null ? null : <RoomsListComponent rooms={roomsData} />}
         </QueryResultViewer>
     );
 };
