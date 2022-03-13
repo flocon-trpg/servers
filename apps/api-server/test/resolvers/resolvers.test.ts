@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import * as $MikroORM from '../src/graphql+mikro-orm/entities/room/mikro-orm';
-import { EM } from '../src/utils/types';
-import { User as User$MikroORM } from '../src/graphql+mikro-orm/entities/user/mikro-orm';
-import { File as File$MikroORM } from '../src/graphql+mikro-orm/entities/file/mikro-orm';
+import * as $MikroORM from '../../src/graphql+mikro-orm/entities/room/mikro-orm';
+import { EM } from '../../src/utils/types';
+import { User as User$MikroORM } from '../../src/graphql+mikro-orm/entities/user/mikro-orm';
+import { File as File$MikroORM } from '../../src/graphql+mikro-orm/entities/file/mikro-orm';
 import { Client as UrqlClientType } from '@urql/core';
-import { createOrm, createTestServer, DbConfig } from './createTestServer';
-import { Resources } from './resources';
+import { createOrm, createTestServer, DbConfig } from './utils/createTestServer';
+import { Resources } from './utils/resources';
 import {
     EntryToServerMutation,
     EntryToServerMutationVariables,
@@ -57,8 +57,8 @@ import {
     DeleteFilesMutationVariables,
     DeleteFilesDocument,
 } from '@flocon-trpg/typed-document-node';
-import { EntryToServerResultType } from '../src/enums/EntryToServerResultType';
-import { ServerConfig } from '../src/configType';
+import { EntryToServerResultType } from '../../src/enums/EntryToServerResultType';
+import { ServerConfig } from '../../src/configType';
 import { UpOperation, parseState } from '@flocon-trpg/core';
 import axios from 'axios';
 import FormData from 'form-data';
@@ -66,8 +66,8 @@ import urljoin from 'url-join';
 import { readFileSync } from 'fs';
 import { TextTwoWayOperation, TextUpOperation } from '@kizahasi/ot-string';
 import { OperationResult } from '@urql/core';
-import { maskTypeNames } from './maskTypenames';
-import { TestClients } from './testClients';
+import { maskTypeNames } from './utils/maskTypenames';
+import { TestClients } from './utils/testClients';
 import { isTruthyString } from '@flocon-trpg/utils';
 
 /*
@@ -525,7 +525,7 @@ describe.each([
                 const formData = new FormData();
                 formData.append(
                     'file',
-                    readFileSync('./test/pexels-public-domain-pictures-68147.jpg'),
+                    readFileSync('./test/resolvers/pexels-public-domain-pictures-68147.jpg'),
                     {
                         filename: 'test-image.jpg',
                     }
