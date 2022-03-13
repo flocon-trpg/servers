@@ -259,7 +259,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                                 {typeof myAuth === 'string' ? null : (
                                     <div style={{ color: 'white' }}>
                                         {myAuth.displayName} - {myAuth.uid}
-                                        {amIAdminQueryResult.data == null ? null : ' (admin)'}
+                                        {amIAdminQueryResult.data == null ? null : ' (管理者)'}
                                     </div>
                                 )}
                                 {typeof myAuth === 'string' ? (
