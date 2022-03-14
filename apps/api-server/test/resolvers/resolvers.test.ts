@@ -509,6 +509,8 @@ describe.each([
                 Resources.UserUid.player2,
                 Resources.UserUid.spectator,
                 Resources.UserUid.notJoin,
+                Resources.UserUid.admin,
+                Resources.UserUid.notAdmin,
             ] as const,
         });
 
@@ -518,6 +520,8 @@ describe.each([
             [Resources.UserUid.player2]: roomPlayer2Client,
             [Resources.UserUid.spectator]: roomSpectatorClient,
             [Resources.UserUid.notJoin]: notJoinUserClient,
+            [Resources.UserUid.admin]: adminUserClient,
+            [Resources.UserUid.notAdmin]: notAdminUserClient,
         } = clients.clients;
 
         // mutation entryToServer if entryPassword != null
@@ -530,6 +534,8 @@ describe.each([
             await GraphQL.entryToServerMutation(roomPlayer2Client);
             await GraphQL.entryToServerMutation(roomSpectatorClient);
             await GraphQL.entryToServerMutation(notJoinUserClient);
+            await GraphQL.entryToServerMutation(adminUserClient);
+            await GraphQL.entryToServerMutation(notAdminUserClient);
         }
 
         // これがないとport 4000が開放されないので2個目以降のテストが失敗してしまう。以降のテストも同様。
@@ -688,6 +694,28 @@ describe.each([
             server.close();
         }
     );
+
+    it.each([
+        [Resources.UserUid.admin, true],
+        [Resources.UserUid.notAdmin, false],
+    ] as const)('tests AmIAdmin', async (userUid, isAdmin) => {
+        const clients = new TestClients({
+            httpGraphQLUri,
+            wsGraphQLUri,
+            userUids: [userUid] as const,
+        });
+        const client = clients.clients[userUid];
+        const server = await createTestServer({
+            dbConfig: dbType,
+            entryPasswordConfig,
+            admins: [Resources.UserUid.admin],
+        });
+
+        const result = await GraphQL.amIAdminQuery(client, {});
+        expect(result.data?.result).toBe(isAdmin ? userUid : undefined);
+
+        server.close();
+    });
 
     it(
         'tests room',
