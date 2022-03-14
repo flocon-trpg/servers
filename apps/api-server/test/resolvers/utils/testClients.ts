@@ -44,115 +44,53 @@ const createUrqlClient = (
         ],
     });
 
-type ConstructorParams = {
+type ConstructorParams<TUserUids extends ReadonlyArray<string>> = {
     httpGraphQLUri: string;
     wsGraphQLUri: string;
+    userUids: TUserUids;
 };
 
-export class TestClients {
-    public readonly clients;
+type Client = ReturnType<typeof createUrqlClient>;
+type Clients<TUserUids extends ReadonlyArray<string>> = { [_ in TUserUids[number]]: Client };
+type Subscriptions<TUserUids extends ReadonlyArray<string>> = {
+    [_ in TUserUids[number]]: TestRoomEventSubscription;
+};
 
-    public constructor(private readonly params: ConstructorParams) {
-        const { httpGraphQLUri, wsGraphQLUri } = params;
-        const roomMasterClient = createUrqlClient(
-            httpGraphQLUri,
-            wsGraphQLUri,
-            Resources.User.master
-        );
-        const roomPlayer1Client = createUrqlClient(
-            httpGraphQLUri,
-            wsGraphQLUri,
-            Resources.User.player1
-        );
-        const roomPlayer2Client = createUrqlClient(
-            httpGraphQLUri,
-            wsGraphQLUri,
-            Resources.User.player2
-        );
-        const roomSpectatorClient = createUrqlClient(
-            httpGraphQLUri,
-            wsGraphQLUri,
-            Resources.User.spectator
-        );
-        const notJoinUserClient = createUrqlClient(
-            httpGraphQLUri,
-            wsGraphQLUri,
-            Resources.User.notJoin
-        );
+export class TestClients<TUserUids extends ReadonlyArray<string>> {
+    public readonly clients: Clients<TUserUids>;
 
-        // すべてのClientは（この時点では）同一。各プロパティ名は、テストで使いやすいように名前を付けているだけ
-        this.clients = {
-            roomMasterClient,
-            roomPlayer1Client,
-            roomPlayer2Client,
-            roomSpectatorClient,
-            notJoinUserClient,
-        };
+    public constructor(params: ConstructorParams<TUserUids>) {
+        const { httpGraphQLUri, wsGraphQLUri, userUids } = params;
+
+        const record: Record<string, Client> = {};
+        for (const userUid of userUids) {
+            record[userUid] = createUrqlClient(httpGraphQLUri, wsGraphQLUri, userUid);
+        }
+
+        this.clients = record as Clients<TUserUids>;
     }
 
     public beginSubscriptions(roomId: string) {
-        const {
-            roomMasterClient,
-            roomPlayer1Client,
-            roomPlayer2Client,
-            roomSpectatorClient,
-            notJoinUserClient,
-        } = this.clients;
+        const subscriptionsRecord: Record<string, TestRoomEventSubscription> = {};
+        const subscriptionsArray: TestRoomEventSubscription[] = [];
+        for (const userUid in this.clients) {
+            const client = (this.clients as Record<string, Client>)[userUid];
+            if (client == null) {
+                throw new Error();
+            }
+            const subscription = new TestRoomEventSubscription(
+                client.subscription<RoomEventSubscription, RoomEventSubscriptionVariables>(
+                    RoomEventDocument,
+                    {
+                        id: roomId,
+                    }
+                )
+            );
+            subscriptionsRecord[userUid] = subscription;
+            subscriptionsArray.push(subscription);
+        }
 
-        const roomMasterClientSubscription = new TestRoomEventSubscription(
-            roomMasterClient.subscription<RoomEventSubscription, RoomEventSubscriptionVariables>(
-                RoomEventDocument,
-                {
-                    id: roomId,
-                }
-            )
-        );
-        const roomPlayer1ClientSubscription = new TestRoomEventSubscription(
-            roomPlayer1Client.subscription<RoomEventSubscription, RoomEventSubscriptionVariables>(
-                RoomEventDocument,
-                {
-                    id: roomId,
-                }
-            )
-        );
-        const roomPlayer2ClientSubscription = new TestRoomEventSubscription(
-            roomPlayer2Client.subscription<RoomEventSubscription, RoomEventSubscriptionVariables>(
-                RoomEventDocument,
-                {
-                    id: roomId,
-                }
-            )
-        );
-        const roomSpectatorClientSubscription = new TestRoomEventSubscription(
-            roomSpectatorClient.subscription<RoomEventSubscription, RoomEventSubscriptionVariables>(
-                RoomEventDocument,
-                {
-                    id: roomId,
-                }
-            )
-        );
-        const notJoinUserClientSubscription = new TestRoomEventSubscription(
-            notJoinUserClient.subscription<RoomEventSubscription, RoomEventSubscriptionVariables>(
-                RoomEventDocument,
-                {
-                    id: roomId,
-                }
-            )
-        );
-        const allSubscriptions = new CompositeTestRoomEventSubscription([
-            roomMasterClientSubscription,
-            roomPlayer1ClientSubscription,
-            roomPlayer2ClientSubscription,
-            roomSpectatorClientSubscription,
-            notJoinUserClientSubscription,
-        ]);
-        return {
-            roomMasterClientSubscription,
-            roomPlayer1ClientSubscription,
-            roomPlayer2ClientSubscription,
-            roomSpectatorClientSubscription,
-            notJoinUserClientSubscription,
-            allSubscriptions,
-        };
+        const allSubscriptions = new CompositeTestRoomEventSubscription(subscriptionsArray);
+        return { all: allSubscriptions, value: subscriptionsRecord as Subscriptions<TUserUids> };
     }
 }

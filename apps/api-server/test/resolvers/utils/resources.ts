@@ -9,19 +9,23 @@ export namespace Resources {
         export const spectatorPassword = 'SPECTATOR_PASSWORD';
     }
 
-    export namespace User {
+    export namespace UserUid {
         export const master = 'ROOM_MASTER_USER';
         export const player1 = 'ROOM_PLAYER1_USER';
         export const player2 = 'ROOM_PLAYER2_USER';
         export const spectator = 'ROOM_SPECTATOR_USER';
         export const notJoin = 'NOT_JOIN_USER';
+        export const admin = 'ADMIN_USER';
+        export const notAdmin = 'NOT_ADMIN_USER';
     }
 
-    export namespace ParticipantName {
-        export const master = 'ROOM_MASTER_NAME';
-        export const player1 = 'ROOM_PLAYER1_NAME';
-        export const player2 = 'ROOM_PLAYER2_NAME';
-        export const spectator = 'ROOM_SPECTATOR_NAME';
+    export namespace Participant {
+        export namespace Name {
+            export const master = 'ROOM_MASTER_NAME';
+            export const player1 = 'ROOM_PLAYER1_NAME';
+            export const player2 = 'ROOM_PLAYER2_NAME';
+            export const spectator = 'ROOM_SPECTATOR_NAME';
+        }
     }
 
     export namespace ClientId {

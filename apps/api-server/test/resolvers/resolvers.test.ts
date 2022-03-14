@@ -56,6 +56,9 @@ import {
     DeleteFilesMutation,
     DeleteFilesMutationVariables,
     DeleteFilesDocument,
+    AmIAdminDocument,
+    AmIAdminQueryVariables,
+    AmIAdminQuery,
 } from '@flocon-trpg/typed-document-node';
 import { EntryToServerResultType } from '../../src/enums/EntryToServerResultType';
 import { ServerConfig } from '../../src/configType';
@@ -351,6 +354,17 @@ namespace GraphQL {
             .toPromise();
     };
 
+    export const amIAdminQuery = async (
+        client: UrqlClientType,
+        variables: AmIAdminQueryVariables
+    ) => {
+        return await client
+            .query<AmIAdminQuery, AmIAdminQueryVariables>(AmIAdminDocument, variables, {
+                requestPolicy: 'network-only',
+            })
+            .toPromise();
+    };
+
     export const getRoomQuery = async (
         client: UrqlClientType,
         variables: GetRoomQueryVariables
@@ -485,15 +499,25 @@ describe.each([
     const entryPassword = entryPasswordConfig == null ? undefined : Resources.entryPassword;
 
     it('tests entry (and setup users)', async () => {
-        const server = await createTestServer(dbType, entryPasswordConfig);
-        const clients = new TestClients({ httpGraphQLUri, wsGraphQLUri });
+        const server = await createTestServer({ dbConfig: dbType, entryPasswordConfig });
+        const clients = new TestClients({
+            httpGraphQLUri,
+            wsGraphQLUri,
+            userUids: [
+                Resources.UserUid.master,
+                Resources.UserUid.player1,
+                Resources.UserUid.player2,
+                Resources.UserUid.spectator,
+                Resources.UserUid.notJoin,
+            ] as const,
+        });
 
         const {
-            roomMasterClient,
-            roomPlayer1Client,
-            roomPlayer2Client,
-            roomSpectatorClient,
-            notJoinUserClient,
+            [Resources.UserUid.master]: roomMasterClient,
+            [Resources.UserUid.player1]: roomPlayer1Client,
+            [Resources.UserUid.player2]: roomPlayer2Client,
+            [Resources.UserUid.spectator]: roomSpectatorClient,
+            [Resources.UserUid.notJoin]: notJoinUserClient,
         } = clients.clients;
 
         // mutation entryToServer if entryPassword != null
@@ -515,11 +539,17 @@ describe.each([
     it.each(['public', 'unlisted'] as const)(
         'tests upload and delete file in uploader',
         async publicOrUnlisted => {
-            const server = await createTestServer(dbType, entryPasswordConfig);
-            const clients = new TestClients({ httpGraphQLUri, wsGraphQLUri });
+            const server = await createTestServer({ dbConfig: dbType, entryPasswordConfig });
+            const clients = new TestClients({
+                httpGraphQLUri,
+                wsGraphQLUri,
+                userUids: [Resources.UserUid.player1, Resources.UserUid.player2] as const,
+            });
 
-            const { roomPlayer1Client: clientToUploadFiles, roomPlayer2Client: anotherClient } =
-                clients.clients;
+            const {
+                [Resources.UserUid.player1]: clientToUploadFiles,
+                [Resources.UserUid.player2]: anotherClient,
+            } = clients.clients;
 
             {
                 const formData = new FormData();
@@ -533,7 +563,7 @@ describe.each([
                 const axiosConfig = {
                     headers: {
                         ...formData.getHeaders(),
-                        [Resources.testAuthorizationHeader]: Resources.User.player1,
+                        [Resources.testAuthorizationHeader]: Resources.UserUid.player1,
                     },
                 };
                 const postResult = await axios
@@ -572,10 +602,10 @@ describe.each([
             }
 
             const cases = [
-                ['files', Resources.User.player1],
-                ['files', Resources.User.player2],
-                ['thumbs', Resources.User.player1],
-                ['thumbs', Resources.User.player2],
+                ['files', Resources.UserUid.player1],
+                ['files', Resources.UserUid.player2],
+                ['thumbs', Resources.UserUid.player1],
+                ['thumbs', Resources.UserUid.player2],
             ] as const;
             for (const [fileType, id] of cases) {
                 const axiosResult = await axios
@@ -662,10 +692,25 @@ describe.each([
     it(
         'tests room',
         async () => {
-            const server = await createTestServer(dbType, entryPasswordConfig);
-            const clients = new TestClients({ httpGraphQLUri, wsGraphQLUri });
-            const { roomMasterClient, roomPlayer1Client, roomPlayer2Client, roomSpectatorClient } =
-                clients.clients;
+            const server = await createTestServer({ dbConfig: dbType, entryPasswordConfig });
+            const clients = new TestClients({
+                httpGraphQLUri,
+                wsGraphQLUri,
+                userUids: [
+                    Resources.UserUid.master,
+                    Resources.UserUid.player1,
+                    Resources.UserUid.player2,
+                    Resources.UserUid.spectator,
+                    Resources.UserUid.notJoin,
+                ] as const,
+            });
+
+            const {
+                [Resources.UserUid.master]: roomMasterClient,
+                [Resources.UserUid.player1]: roomPlayer1Client,
+                [Resources.UserUid.player2]: roomPlayer2Client,
+                [Resources.UserUid.spectator]: roomSpectatorClient,
+            } = clients.clients;
 
             let roomId: string;
             // mutation createRoom
@@ -674,7 +719,7 @@ describe.each([
                     .mutation<CreateRoomMutation, CreateRoomMutationVariables>(CreateRoomDocument, {
                         input: {
                             roomName: Resources.Room.name,
-                            participantName: Resources.ParticipantName.master,
+                            participantName: Resources.Participant.Name.master,
                             playerPassword: Resources.Room.playerPassword,
                             spectatorPassword: Resources.Room.spectatorPassword,
                         },
@@ -684,14 +729,16 @@ describe.each([
                 roomId = actualData.id;
             }
 
-            // because we have roomId, we can start subscriptions
+            // because we got roomId, we can start subscriptions
             const {
-                roomMasterClientSubscription,
-                roomPlayer1ClientSubscription,
-                roomPlayer2ClientSubscription,
-                roomSpectatorClientSubscription,
-                notJoinUserClientSubscription,
-                allSubscriptions,
+                value: {
+                    [Resources.UserUid.master]: roomMasterClientSubscription,
+                    [Resources.UserUid.player1]: roomPlayer1ClientSubscription,
+                    [Resources.UserUid.player2]: roomPlayer2ClientSubscription,
+                    [Resources.UserUid.spectator]: roomSpectatorClientSubscription,
+                    [Resources.UserUid.notJoin]: notJoinUserClientSubscription,
+                },
+                all: allSubscriptions,
             } = clients.beginSubscriptions(roomId);
 
             // query getRoomsList
@@ -725,7 +772,7 @@ describe.each([
                 Assert.JoinRoomMutation.toBeSuccess(
                     await GraphQL.joinRoomAsPlayerMutation(roomPlayer1Client, {
                         id: roomId,
-                        name: Resources.User.player1,
+                        name: Resources.UserUid.player1,
                         password: Resources.Room.playerPassword,
                     })
                 );
@@ -742,7 +789,7 @@ describe.each([
                 Assert.JoinRoomMutation.toBeFailure(
                     await GraphQL.joinRoomAsPlayerMutation(roomPlayer2Client, {
                         id: roomId,
-                        name: Resources.User.player2,
+                        name: Resources.UserUid.player2,
                         password: undefined,
                     })
                 );
@@ -754,7 +801,7 @@ describe.each([
                 Assert.JoinRoomMutation.toBeFailure(
                     await GraphQL.joinRoomAsPlayerMutation(roomPlayer2Client, {
                         id: roomId,
-                        name: Resources.User.player2,
+                        name: Resources.UserUid.player2,
                         password: Resources.Room.spectatorPassword,
                     })
                 );
@@ -766,7 +813,7 @@ describe.each([
                 Assert.JoinRoomMutation.toBeSuccess(
                     await GraphQL.joinRoomAsPlayerMutation(roomPlayer2Client, {
                         id: roomId,
-                        name: Resources.User.player2,
+                        name: Resources.UserUid.player2,
                         password: Resources.Room.playerPassword,
                     })
                 );
@@ -790,7 +837,7 @@ describe.each([
                 Assert.JoinRoomMutation.toBeFailure(
                     await GraphQL.joinRoomAsSpectatorMutation(roomSpectatorClient, {
                         id: roomId,
-                        name: Resources.User.spectator,
+                        name: Resources.UserUid.spectator,
                         password: undefined,
                     })
                 );
@@ -798,7 +845,7 @@ describe.each([
                 Assert.JoinRoomMutation.toBeFailure(
                     await GraphQL.joinRoomAsSpectatorMutation(roomSpectatorClient, {
                         id: roomId,
-                        name: Resources.User.spectator,
+                        name: Resources.UserUid.spectator,
                         password: Resources.Room.playerPassword,
                     })
                 );
@@ -806,7 +853,7 @@ describe.each([
                 Assert.JoinRoomMutation.toBeSuccess(
                     await GraphQL.joinRoomAsSpectatorMutation(roomSpectatorClient, {
                         id: roomId,
-                        name: Resources.User.spectator,
+                        name: Resources.UserUid.spectator,
                         password: Resources.Room.spectatorPassword,
                     })
                 );
@@ -889,7 +936,7 @@ describe.each([
             // 秘話の投稿テスト
             {
                 const text = 'TEXT';
-                const visibleTo = [Resources.User.player1, Resources.User.player2];
+                const visibleTo = [Resources.UserUid.player1, Resources.UserUid.player2];
 
                 const privateMessage = Assert.WritePrivateMessageMutation.toBeSuccess(
                     await GraphQL.writePrivateMessageMutation(roomPlayer1Client, {

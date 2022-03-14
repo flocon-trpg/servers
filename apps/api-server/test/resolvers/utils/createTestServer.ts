@@ -59,17 +59,22 @@ const setDatabaseConfig = (target: WritableServerConfig, dbConfig: DbConfig): vo
     }
 };
 
-export const createTestServer = async (
-    dbConfig: DbConfig,
-    entryPasswordConfig: ServerConfig['entryPassword']
-) => {
+export const createTestServer = async ({
+    dbConfig,
+    entryPasswordConfig,
+    admins,
+}: {
+    dbConfig: DbConfig;
+    entryPasswordConfig: ServerConfig['entryPassword'];
+    admins?: ServerConfig['admins'];
+}) => {
     const promiseQueue = new PromiseQueue({ queueLimit: 2 });
     const connectionManager = new InMemoryConnectionManager();
 
     const $orm = await createOrm(dbConfig);
     const serverConfig: WritableServerConfig = {
         accessControlAllowOrigin: '*',
-        admins: [],
+        admins: admins == null ? [] : [...admins /* ReadonlyArrayをArrayに変換しているだけ */],
         firebaseAdminSecret: undefined,
         firebaseProjectId: 'FAKE_FIREBASE_PROJECTID',
         heroku: false,
