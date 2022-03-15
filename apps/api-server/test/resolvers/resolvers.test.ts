@@ -3,62 +3,23 @@ import * as $MikroORM from '../../src/graphql+mikro-orm/entities/room/mikro-orm'
 import { EM } from '../../src/utils/types';
 import { User as User$MikroORM } from '../../src/graphql+mikro-orm/entities/user/mikro-orm';
 import { File as File$MikroORM } from '../../src/graphql+mikro-orm/entities/file/mikro-orm';
-import { Client as UrqlClientType } from '@urql/core';
 import { createOrm, createTestServer, DbConfig } from './utils/createTestServer';
 import { Resources } from './utils/resources';
 import {
-    EntryToServerMutation,
-    EntryToServerMutationVariables,
-    EntryToServerDocument,
-    CreateRoomMutationVariables,
-    CreateRoomDocument,
     GetRoomsListQuery,
-    GetRoomsListQueryVariables,
-    GetRoomsListDocument,
     CreateRoomMutation,
     JoinRoomAsPlayerMutation,
-    JoinRoomAsPlayerMutationVariables,
-    JoinRoomAsPlayerDocument,
     JoinRoomAsSpectatorMutation,
-    JoinRoomAsSpectatorMutationVariables,
-    JoinRoomAsSpectatorDocument,
     OperateMutation,
-    OperateMutationVariables,
     GetRoomQuery,
-    GetRoomQueryVariables,
-    GetRoomDocument,
-    WritePrivateMessageMutationVariables,
-    WritePrivateMessageDocument,
     WritePrivateMessageMutation,
-    OperateDocument,
-    LeaveRoomMutationVariables,
-    LeaveRoomDocument,
     LeaveRoomMutation,
     GetMessagesQuery,
-    GetMessagesQueryVariables,
-    GetMessagesDocument,
     DeleteRoomMutation,
-    DeleteRoomMutationVariables,
-    DeleteRoomDocument,
     DeleteRoomFailureType,
     GetFilesQuery,
-    GetFilesQueryVariables,
-    GetFilesDocument,
     EditFileTagsMutation,
-    EditFileTagsMutationVariables,
-    EditFileTagsDocument,
-    CreateFileTagMutationVariables,
     CreateFileTagMutation,
-    CreateFileTagDocument,
-    DeleteFileTagMutationVariables,
-    DeleteFileTagDocument,
-    DeleteFileTagMutation,
-    DeleteFilesMutation,
-    DeleteFilesMutationVariables,
-    DeleteFilesDocument,
-    AmIAdminDocument,
-    AmIAdminQueryVariables,
-    AmIAdminQuery,
 } from '@flocon-trpg/typed-document-node';
 import { EntryToServerResultType } from '../../src/enums/EntryToServerResultType';
 import { ServerConfig } from '../../src/configType';
@@ -71,7 +32,7 @@ import { TextTwoWayOperation, TextUpOperation } from '@kizahasi/ot-string';
 import { OperationResult } from '@urql/core';
 import { maskTypeNames } from './utils/maskTypenames';
 import { TestClients } from './utils/testClients';
-import { isTruthyString } from '@flocon-trpg/utils';
+import { isTruthyString, recordToArray } from '@flocon-trpg/utils';
 
 /*
 To run tests in this file, you need to prepare SQLite and PostgreSQL. If you want to skip them, set TEST_SKIP_RESOLVERS env to "true".
@@ -112,6 +73,13 @@ const clearAllFiles = async (em: EM): Promise<void> => {
         user.files.removeAll();
         await user.fileTags.init();
         user.fileTags.removeAll();
+    }
+    await em.flush();
+};
+
+const clearAllUsers = async (em: EM): Promise<void> => {
+    for (const user of await em.find(User$MikroORM, {})) {
+        em.remove(user);
     }
     await em.flush();
 };
@@ -257,210 +225,6 @@ namespace Assert {
     }
 }
 
-namespace GraphQL {
-    export const createFileTagMutation = async (
-        client: UrqlClientType,
-        variables: CreateFileTagMutationVariables
-    ) => {
-        return await client
-            .mutation<CreateFileTagMutation, CreateFileTagMutationVariables>(
-                CreateFileTagDocument,
-                variables,
-                {
-                    requestPolicy: 'network-only',
-                }
-            )
-            .toPromise();
-    };
-
-    export const deleteFilesMutation = async (
-        client: UrqlClientType,
-        variables: DeleteFilesMutationVariables
-    ) => {
-        return await client
-            .mutation<DeleteFilesMutation, DeleteFilesMutationVariables>(
-                DeleteFilesDocument,
-                variables,
-                {
-                    requestPolicy: 'network-only',
-                }
-            )
-            .toPromise();
-    };
-
-    export const deleteFileTagsMutation = async (
-        client: UrqlClientType,
-        variables: DeleteFileTagMutationVariables
-    ) => {
-        return await client
-            .mutation<DeleteFileTagMutation, DeleteFileTagMutationVariables>(
-                DeleteFileTagDocument,
-                variables,
-                {
-                    requestPolicy: 'network-only',
-                }
-            )
-            .toPromise();
-    };
-
-    export const deleteRoomMutation = async (
-        client: UrqlClientType,
-        variables: DeleteRoomMutationVariables
-    ) => {
-        return await client
-            .mutation<DeleteRoomMutation, DeleteRoomMutationVariables>(
-                DeleteRoomDocument,
-                variables,
-                {
-                    requestPolicy: 'network-only',
-                }
-            )
-            .toPromise();
-    };
-
-    export const editFileTagsMutation = async (
-        client: UrqlClientType,
-        variables: EditFileTagsMutationVariables
-    ) => {
-        return await client
-            .mutation<EditFileTagsMutation, EditFileTagsMutationVariables>(
-                EditFileTagsDocument,
-                variables,
-                {
-                    requestPolicy: 'network-only',
-                }
-            )
-            .toPromise();
-    };
-
-    export const entryToServerMutation = async (client: UrqlClientType) => {
-        return await client
-            .mutation<EntryToServerMutation, EntryToServerMutationVariables>(
-                EntryToServerDocument,
-                { password: Resources.entryPassword },
-                { requestPolicy: 'network-only' }
-            )
-            .toPromise();
-    };
-
-    export const getFilesQuery = async (
-        client: UrqlClientType,
-        variables: GetFilesQueryVariables
-    ) => {
-        return await client
-            .query<GetFilesQuery, GetFilesQueryVariables>(GetFilesDocument, variables, {
-                requestPolicy: 'network-only',
-            })
-            .toPromise();
-    };
-
-    export const amIAdminQuery = async (
-        client: UrqlClientType,
-        variables: AmIAdminQueryVariables
-    ) => {
-        return await client
-            .query<AmIAdminQuery, AmIAdminQueryVariables>(AmIAdminDocument, variables, {
-                requestPolicy: 'network-only',
-            })
-            .toPromise();
-    };
-
-    export const getRoomQuery = async (
-        client: UrqlClientType,
-        variables: GetRoomQueryVariables
-    ) => {
-        return await client
-            .query<GetRoomQuery, GetRoomQueryVariables>(GetRoomDocument, variables, {
-                requestPolicy: 'network-only',
-            })
-            .toPromise();
-    };
-
-    export const getRoomsListQuery = async (client: UrqlClientType) => {
-        return await client
-            .query<GetRoomsListQuery, GetRoomsListQueryVariables>(GetRoomsListDocument, undefined, {
-                requestPolicy: 'network-only',
-            })
-            .toPromise();
-    };
-
-    export const getMessagesQuery = async (
-        client: UrqlClientType,
-        variables: GetMessagesQueryVariables
-    ) => {
-        return await client
-            .query<GetMessagesQuery, GetMessagesQueryVariables>(GetMessagesDocument, variables, {
-                requestPolicy: 'network-only',
-            })
-            .toPromise();
-    };
-
-    export const joinRoomAsPlayerMutation = async (
-        client: UrqlClientType,
-        variables: JoinRoomAsPlayerMutationVariables
-    ) => {
-        return await client
-            .mutation<JoinRoomAsPlayerMutation, JoinRoomAsPlayerMutationVariables>(
-                JoinRoomAsPlayerDocument,
-                variables,
-                { requestPolicy: 'network-only' }
-            )
-            .toPromise();
-    };
-
-    export const joinRoomAsSpectatorMutation = async (
-        client: UrqlClientType,
-        variables: JoinRoomAsSpectatorMutationVariables
-    ) => {
-        return await client
-            .mutation<JoinRoomAsSpectatorMutation, JoinRoomAsSpectatorMutationVariables>(
-                JoinRoomAsSpectatorDocument,
-                variables,
-                {
-                    requestPolicy: 'network-only',
-                }
-            )
-            .toPromise();
-    };
-
-    export const leaveRoomMutation = async (
-        client: UrqlClientType,
-        variables: LeaveRoomMutationVariables
-    ) => {
-        return await client
-            .mutation<LeaveRoomMutation, LeaveRoomMutationVariables>(LeaveRoomDocument, variables, {
-                requestPolicy: 'network-only',
-            })
-            .toPromise();
-    };
-
-    export const operateMutation = async (
-        client: UrqlClientType,
-        variables: OperateMutationVariables
-    ) => {
-        return await client
-            .mutation<OperateMutation, OperateMutationVariables>(OperateDocument, variables, {
-                requestPolicy: 'network-only',
-            })
-            .toPromise();
-    };
-
-    export const writePrivateMessageMutation = async (
-        client: UrqlClientType,
-        variables: WritePrivateMessageMutationVariables
-    ) => {
-        return await client
-            .mutation<WritePrivateMessageMutation, WritePrivateMessageMutationVariables>(
-                WritePrivateMessageDocument,
-                variables,
-                {
-                    requestPolicy: 'network-only',
-                }
-            )
-            .toPromise();
-    };
-}
-
 const httpUri = 'http://localhost:4000';
 const httpGraphQLUri = 'http://localhost:4000/graphql';
 const wsGraphQLUri = 'ws://localhost:4000/graphql';
@@ -489,209 +253,219 @@ describe.each([
         return;
     }
     afterEach(async () => {
-        // Userは各テストで使い回すため削除していない
-
         const orm = await createOrm(dbType);
         await clearAllRooms(orm.em.fork());
         await clearAllFiles(orm.em.fork());
+        await clearAllUsers(orm.em.fork());
     });
 
     const entryPassword = entryPasswordConfig == null ? undefined : Resources.entryPassword;
 
-    it('tests entry (and setup users)', async () => {
-        const server = await createTestServer({ dbConfig: dbType, entryPasswordConfig });
+    type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
+
+    const useTestServer = async (
+        {
+            admins,
+        }: {
+            admins?: ServerConfig['admins'];
+        },
+        main: (server: Awaited<ReturnType<typeof createTestServer>>) => PromiseLike<void>
+    ) => {
+        const server = await createTestServer({
+            dbConfig: dbType,
+            entryPasswordConfig,
+            admins,
+        });
+        try {
+            await main(server);
+        } finally {
+            server.close();
+        }
+    };
+
+    const setupUsers = async ({
+        userUids,
+        test,
+    }: {
+        userUids: ReadonlyArray<string>;
+        test?: boolean;
+    }) => {
+        if (entryPassword == null) {
+            return;
+        }
         const clients = new TestClients({
             httpGraphQLUri,
             wsGraphQLUri,
-            userUids: [
-                Resources.UserUid.master,
-                Resources.UserUid.player1,
-                Resources.UserUid.player2,
-                Resources.UserUid.spectator,
-                Resources.UserUid.notJoin,
-                Resources.UserUid.admin,
-                Resources.UserUid.notAdmin,
-            ] as const,
+            userUids,
         });
 
-        const {
-            [Resources.UserUid.master]: roomMasterClient,
-            [Resources.UserUid.player1]: roomPlayer1Client,
-            [Resources.UserUid.player2]: roomPlayer2Client,
-            [Resources.UserUid.spectator]: roomSpectatorClient,
-            [Resources.UserUid.notJoin]: notJoinUserClient,
-            [Resources.UserUid.admin]: adminUserClient,
-            [Resources.UserUid.notAdmin]: notAdminUserClient,
-        } = clients.clients;
-
-        // mutation entryToServer if entryPassword != null
-        if (entryPassword != null) {
-            const result = await GraphQL.entryToServerMutation(roomMasterClient);
-            expect(result.data?.result.type).toBe(EntryToServerResultType.Success);
-
-            // roomMaster以外のテストは成功するとみなし省略している
-            await GraphQL.entryToServerMutation(roomPlayer1Client);
-            await GraphQL.entryToServerMutation(roomPlayer2Client);
-            await GraphQL.entryToServerMutation(roomSpectatorClient);
-            await GraphQL.entryToServerMutation(notJoinUserClient);
-            await GraphQL.entryToServerMutation(adminUserClient);
-            await GraphQL.entryToServerMutation(notAdminUserClient);
+        for (const { value: client } of recordToArray(clients.clients)) {
+            const result = await client.entryToServerMutation();
+            if (test) {
+                expect(result.data?.result.type).toBe(EntryToServerResultType.Success);
+            }
         }
+    };
 
-        // これがないとport 4000が開放されないので2個目以降のテストが失敗してしまう。以降のテストも同様。
-        server.close();
+    it('tests entry', async () => {
+        await useTestServer({}, async () => {
+            const userUids = ['TestsEntry'];
+            await setupUsers({ userUids, test: true });
+        });
     });
 
     it.each(['public', 'unlisted'] as const)(
         'tests upload and delete file in uploader',
         async publicOrUnlisted => {
-            const server = await createTestServer({ dbConfig: dbType, entryPasswordConfig });
-            const clients = new TestClients({
-                httpGraphQLUri,
-                wsGraphQLUri,
-                userUids: [Resources.UserUid.player1, Resources.UserUid.player2] as const,
-            });
+            await useTestServer({}, async () => {
+                const userUid1 = 'User1';
+                const userUid2 = 'User2';
+                const userUids = [userUid1, userUid2] as const;
+                await setupUsers({ userUids, test: true });
 
-            const {
-                [Resources.UserUid.player1]: clientToUploadFiles,
-                [Resources.UserUid.player2]: anotherClient,
-            } = clients.clients;
+                const clients = new TestClients({
+                    httpGraphQLUri,
+                    wsGraphQLUri,
+                    userUids,
+                });
 
-            {
-                const formData = new FormData();
-                formData.append(
-                    'file',
-                    readFileSync('./test/resolvers/pexels-public-domain-pictures-68147.jpg'),
-                    {
-                        filename: 'test-image.jpg',
-                    }
-                );
-                const axiosConfig = {
-                    headers: {
-                        ...formData.getHeaders(),
-                        [Resources.testAuthorizationHeader]: Resources.UserUid.player1,
-                    },
-                };
-                const postResult = await axios
-                    .post(
-                        urljoin(httpUri, 'uploader', 'upload', publicOrUnlisted),
-                        formData,
-                        axiosConfig
-                    )
-                    .then(() => true)
-                    .catch(err => err);
-                expect(postResult).toBe(true);
-            }
+                const { [userUid1]: clientToUploadFiles, [userUid2]: anotherClient } =
+                    clients.clients;
 
-            let filename: string;
-            let thumbFilename: string | null | undefined;
-            {
-                const filesResult = Assert.GetFilesQuery.toBeSuccess(
-                    await GraphQL.getFilesQuery(clientToUploadFiles, {
-                        input: { fileTagIds: [] },
-                    })
-                );
-                console.log('GetFilesQuery result: %o', filesResult);
-                expect(filesResult).toHaveLength(1);
-                filename = filesResult[0]!.filename;
-                thumbFilename = filesResult[0]!.thumbFilename;
-                if (thumbFilename == null) {
-                    throw new Error('thumbFilename should not be nullish');
-                }
-            }
-
-            {
-                const filesResult = Assert.GetFilesQuery.toBeSuccess(
-                    await GraphQL.getFilesQuery(anotherClient, { input: { fileTagIds: [] } })
-                );
-                expect(filesResult).toHaveLength(publicOrUnlisted === 'public' ? 1 : 0);
-            }
-
-            const cases = [
-                ['files', Resources.UserUid.player1],
-                ['files', Resources.UserUid.player2],
-                ['thumbs', Resources.UserUid.player1],
-                ['thumbs', Resources.UserUid.player2],
-            ] as const;
-            for (const [fileType, id] of cases) {
-                const axiosResult = await axios
-                    .get(
-                        urljoin(
-                            httpUri,
-                            'uploader',
-                            fileType,
-                            fileType === 'files' ? filename : thumbFilename
-                        ),
-                        {
-                            headers: {
-                                [Resources.testAuthorizationHeader]: id,
-                            },
-                        }
-                    )
-                    .then(() => true)
-                    .catch(err => err);
-                expect(axiosResult).toBe(true);
-            }
-
-            let fileTagId: string;
-            {
-                const fileTagName = 'FILE_TAG_NAME';
-                const fileTagResult = Assert.CreateFileTagMutation.toBeSuccess(
-                    await GraphQL.createFileTagMutation(clientToUploadFiles, {
-                        tagName: fileTagName,
-                    })
-                );
-                expect(fileTagResult.name).toBe(fileTagName);
-                fileTagId = fileTagResult.id;
-            }
-
-            {
-                Assert.EditFileTagsMutation.toBeSuccess(
-                    await GraphQL.editFileTagsMutation(clientToUploadFiles, {
-                        input: { actions: [{ filename, add: [fileTagId], remove: [] }] },
-                    })
-                );
-            }
-
-            {
-                const filesResult = Assert.GetFilesQuery.toBeSuccess(
-                    await GraphQL.getFilesQuery(clientToUploadFiles, {
-                        input: { fileTagIds: [fileTagId] },
-                    })
-                );
-                expect(filesResult).toHaveLength(1);
-            }
-
-            for (const client of [clientToUploadFiles, anotherClient]) {
                 {
-                    const nonExistFileTagId = fileTagId + fileTagId;
+                    const formData = new FormData();
+                    formData.append(
+                        'file',
+                        readFileSync('./test/resolvers/pexels-public-domain-pictures-68147.jpg'),
+                        {
+                            filename: 'test-image.jpg',
+                        }
+                    );
+                    const axiosConfig = {
+                        headers: {
+                            ...formData.getHeaders(),
+                            [Resources.testAuthorizationHeader]: userUid1,
+                        },
+                    };
+                    const postResult = await axios
+                        .post(
+                            urljoin(httpUri, 'uploader', 'upload', publicOrUnlisted),
+                            formData,
+                            axiosConfig
+                        )
+                        .then(() => true)
+                        .catch(err => err);
+                    expect(postResult).toBe(true);
+                }
+
+                let filename: string;
+                let thumbFilename: string | null | undefined;
+                {
                     const filesResult = Assert.GetFilesQuery.toBeSuccess(
-                        await GraphQL.getFilesQuery(client, {
-                            input: { fileTagIds: [nonExistFileTagId] },
+                        await clientToUploadFiles.getFilesQuery({ input: { fileTagIds: [] } })
+                    );
+                    console.log('GetFilesQuery result: %o', filesResult);
+                    expect(filesResult).toHaveLength(1);
+                    filename = filesResult[0]!.filename;
+                    thumbFilename = filesResult[0]!.thumbFilename;
+                    if (thumbFilename == null) {
+                        throw new Error('thumbFilename should not be nullish');
+                    }
+                }
+
+                {
+                    const filesResult = Assert.GetFilesQuery.toBeSuccess(
+                        await anotherClient.getFilesQuery({ input: { fileTagIds: [] } })
+                    );
+                    expect(filesResult).toHaveLength(publicOrUnlisted === 'public' ? 1 : 0);
+                }
+
+                const cases = [
+                    ['files', userUid1],
+                    ['files', userUid2],
+                    ['thumbs', userUid1],
+                    ['thumbs', userUid2],
+                ] as const;
+                for (const [fileType, id] of cases) {
+                    const axiosResult = await axios
+                        .get(
+                            urljoin(
+                                httpUri,
+                                'uploader',
+                                fileType,
+                                fileType === 'files' ? filename : thumbFilename
+                            ),
+                            {
+                                headers: {
+                                    [Resources.testAuthorizationHeader]: id,
+                                },
+                            }
+                        )
+                        .then(() => true)
+                        .catch(err => err);
+                    expect(axiosResult).toBe(true);
+                }
+
+                let fileTagId: string;
+                {
+                    const fileTagName = 'FILE_TAG_NAME';
+                    const fileTagResult = Assert.CreateFileTagMutation.toBeSuccess(
+                        await clientToUploadFiles.createFileTagMutation({
+                            tagName: fileTagName,
+                        })
+                    );
+                    expect(fileTagResult.name).toBe(fileTagName);
+                    fileTagId = fileTagResult.id;
+                }
+
+                {
+                    Assert.EditFileTagsMutation.toBeSuccess(
+                        await clientToUploadFiles.editFileTagsMutation({
+                            input: {
+                                actions: [{ filename, add: [fileTagId], remove: [] }],
+                            },
+                        })
+                    );
+                }
+
+                {
+                    const filesResult = Assert.GetFilesQuery.toBeSuccess(
+                        await clientToUploadFiles.getFilesQuery({
+                            input: { fileTagIds: [fileTagId] },
+                        })
+                    );
+                    expect(filesResult).toHaveLength(1);
+                }
+
+                for (const client of [clientToUploadFiles, anotherClient]) {
+                    {
+                        const nonExistFileTagId = fileTagId + fileTagId;
+                        const filesResult = Assert.GetFilesQuery.toBeSuccess(
+                            await client.getFilesQuery({
+                                input: { fileTagIds: [nonExistFileTagId] },
+                            })
+                        );
+                        expect(filesResult).toHaveLength(0);
+                    }
+                }
+
+                {
+                    // TODO: publicでアップロードしたファイルは、アップロード者以外による削除を可能にするかどうかがまだ決定していない
+                    const actual = await clientToUploadFiles.deleteFilesMutation({
+                        filenames: [filename],
+                    });
+                    expect(actual.data?.result).toEqual([filename]);
+                }
+
+                for (const client of [clientToUploadFiles, anotherClient]) {
+                    const filesResult = Assert.GetFilesQuery.toBeSuccess(
+                        await client.getFilesQuery({
+                            input: { fileTagIds: [] },
                         })
                     );
                     expect(filesResult).toHaveLength(0);
                 }
-            }
-
-            {
-                // TODO: publicでアップロードしたファイルは、アップロード者以外による削除を可能にするかどうかがまだ決定していない
-                const actual = await GraphQL.deleteFilesMutation(clientToUploadFiles, {
-                    filenames: [filename],
-                });
-                expect(actual.data?.result).toEqual([filename]);
-            }
-
-            for (const client of [clientToUploadFiles, anotherClient]) {
-                const filesResult = Assert.GetFilesQuery.toBeSuccess(
-                    await GraphQL.getFilesQuery(client, {
-                        input: { fileTagIds: [] },
-                    })
-                );
-                expect(filesResult).toHaveLength(0);
-            }
-
-            server.close();
+            });
         }
     );
 
@@ -699,374 +473,376 @@ describe.each([
         [Resources.UserUid.admin, true],
         [Resources.UserUid.notAdmin, false],
     ] as const)('tests AmIAdmin', async (userUid, isAdmin) => {
-        const clients = new TestClients({
-            httpGraphQLUri,
-            wsGraphQLUri,
-            userUids: [userUid] as const,
-        });
-        const client = clients.clients[userUid];
-        const server = await createTestServer({
-            dbConfig: dbType,
-            entryPasswordConfig,
-            admins: [Resources.UserUid.admin],
-        });
+        await useTestServer(
+            {
+                admins: [Resources.UserUid.admin],
+            },
+            async () => {
+                const clients = new TestClients({
+                    httpGraphQLUri,
+                    wsGraphQLUri,
+                    userUids: [userUid] as const,
+                });
+                const client = clients.clients[userUid];
 
-        const result = await GraphQL.amIAdminQuery(client, {});
-        expect(result.data?.result).toBe(isAdmin ? userUid : undefined);
-
-        server.close();
+                const result = await client.amIAdminQuery({});
+                expect(result.data?.result).toBe(isAdmin ? userUid : undefined);
+            }
+        );
     });
 
     it(
         'tests room',
         async () => {
-            const server = await createTestServer({ dbConfig: dbType, entryPasswordConfig });
-            const clients = new TestClients({
-                httpGraphQLUri,
-                wsGraphQLUri,
-                userUids: [
+            await useTestServer({}, async () => {
+                const userUids = [
                     Resources.UserUid.master,
                     Resources.UserUid.player1,
                     Resources.UserUid.player2,
                     Resources.UserUid.spectator,
                     Resources.UserUid.notJoin,
-                ] as const,
-            });
+                ] as const;
+                await setupUsers({ userUids, test: true });
 
-            const {
-                [Resources.UserUid.master]: roomMasterClient,
-                [Resources.UserUid.player1]: roomPlayer1Client,
-                [Resources.UserUid.player2]: roomPlayer2Client,
-                [Resources.UserUid.spectator]: roomSpectatorClient,
-            } = clients.clients;
+                const clients = new TestClients({
+                    httpGraphQLUri,
+                    wsGraphQLUri,
+                    userUids,
+                });
 
-            let roomId: string;
-            // mutation createRoom
-            {
-                const actual = await roomMasterClient
-                    .mutation<CreateRoomMutation, CreateRoomMutationVariables>(CreateRoomDocument, {
+                const {
+                    [Resources.UserUid.master]: roomMasterClient,
+                    [Resources.UserUid.player1]: roomPlayer1Client,
+                    [Resources.UserUid.player2]: roomPlayer2Client,
+                    [Resources.UserUid.spectator]: roomSpectatorClient,
+                } = clients.clients;
+
+                let roomId: string;
+                // mutation createRoom
+                {
+                    const actual = await roomMasterClient.createRoomMutation({
                         input: {
                             roomName: Resources.Room.name,
                             participantName: Resources.Participant.Name.master,
                             playerPassword: Resources.Room.playerPassword,
                             spectatorPassword: Resources.Room.spectatorPassword,
                         },
-                    })
-                    .toPromise();
-                const actualData = Assert.CreateRoomMutation.toBeSuccess(actual);
-                roomId = actualData.id;
-            }
+                    });
+                    const actualData = Assert.CreateRoomMutation.toBeSuccess(actual);
+                    roomId = actualData.id;
+                }
 
-            // because we got roomId, we can start subscriptions
-            const {
-                value: {
-                    [Resources.UserUid.master]: roomMasterClientSubscription,
-                    [Resources.UserUid.player1]: roomPlayer1ClientSubscription,
-                    [Resources.UserUid.player2]: roomPlayer2ClientSubscription,
-                    [Resources.UserUid.spectator]: roomSpectatorClientSubscription,
-                    [Resources.UserUid.notJoin]: notJoinUserClientSubscription,
-                },
-                all: allSubscriptions,
-            } = clients.beginSubscriptions(roomId);
+                // because we got roomId, we can start subscriptions
+                const {
+                    value: {
+                        [Resources.UserUid.master]: roomMasterClientSubscription,
+                        [Resources.UserUid.player1]: roomPlayer1ClientSubscription,
+                        [Resources.UserUid.player2]: roomPlayer2ClientSubscription,
+                        [Resources.UserUid.spectator]: roomSpectatorClientSubscription,
+                        [Resources.UserUid.notJoin]: notJoinUserClientSubscription,
+                    },
+                    all: allSubscriptions,
+                } = clients.beginSubscriptions(roomId);
 
-            // query getRoomsList
-            {
-                // # testing
-                // - master can get the room
-                const roomMasterResult = Assert.GetRoomsListQuery.toBeSuccess(
-                    await GraphQL.getRoomsListQuery(roomMasterClient)
-                );
-                console.log('getRoomsList query result: %o', roomMasterResult);
-                expect(roomMasterResult.rooms).toHaveLength(1);
-                expect(roomMasterResult.rooms[0]!.id).toBe(roomId);
+                // query getRoomsList
+                {
+                    // # testing
+                    // - master can get the room
+                    const roomMasterResult = Assert.GetRoomsListQuery.toBeSuccess(
+                        await roomMasterClient.getRoomsListQuery()
+                    );
+                    console.log('getRoomsList query result: %o', roomMasterResult);
+                    expect(roomMasterResult.rooms).toHaveLength(1);
+                    expect(roomMasterResult.rooms[0]!.id).toBe(roomId);
 
-                // # testing
-                // - another user can get the room
-                const anotherUserResult = Assert.GetRoomsListQuery.toBeSuccess(
-                    await GraphQL.getRoomsListQuery(roomPlayer1Client)
-                );
-                expect(anotherUserResult.rooms).toHaveLength(1);
-                expect(anotherUserResult.rooms[0]!.id).toBe(roomId);
+                    // # testing
+                    // - another user can get the room
+                    const anotherUserResult = Assert.GetRoomsListQuery.toBeSuccess(
+                        await roomPlayer1Client.getRoomsListQuery()
+                    );
+                    expect(anotherUserResult.rooms).toHaveLength(1);
+                    expect(anotherUserResult.rooms[0]!.id).toBe(roomId);
 
-                allSubscriptions.clear();
-            }
+                    allSubscriptions.clear();
+                }
 
-            // mutation joinRoomAsPlayer
-            // これによりplayer1とplayer2がjoin
-            {
-                // # testing
-                // - joining as a player with a corrent password should be success
-                // - master should get a operation event (a participant was added)
-                Assert.JoinRoomMutation.toBeSuccess(
-                    await GraphQL.joinRoomAsPlayerMutation(roomPlayer1Client, {
-                        id: roomId,
-                        name: Resources.UserUid.player1,
-                        password: Resources.Room.playerPassword,
-                    })
-                );
-                roomMasterClientSubscription.toBeExactlyOneRoomOperationEvent();
-                roomPlayer1ClientSubscription.toBeEmpty();
-                allSubscriptions
-                    .except(roomMasterClientSubscription, roomPlayer1ClientSubscription)
-                    .toBeEmpty();
-                allSubscriptions.clear();
-
-                // # testing
-                // - joining as a player with no password should be failed
-                // - no event should be observed
-                Assert.JoinRoomMutation.toBeFailure(
-                    await GraphQL.joinRoomAsPlayerMutation(roomPlayer2Client, {
-                        id: roomId,
-                        name: Resources.UserUid.player2,
-                        password: undefined,
-                    })
-                );
-                allSubscriptions.toBeEmpty();
-
-                // # testing
-                // - joining as a player with a incorrent password should be failed
-                // - no event should be observed
-                Assert.JoinRoomMutation.toBeFailure(
-                    await GraphQL.joinRoomAsPlayerMutation(roomPlayer2Client, {
-                        id: roomId,
-                        name: Resources.UserUid.player2,
-                        password: Resources.Room.spectatorPassword,
-                    })
-                );
-                allSubscriptions.toBeEmpty();
-
-                // # testing
-                // - joining as a player with a corrent password should be success
-                // - master and player1 should get a operation event
-                Assert.JoinRoomMutation.toBeSuccess(
-                    await GraphQL.joinRoomAsPlayerMutation(roomPlayer2Client, {
-                        id: roomId,
-                        name: Resources.UserUid.player2,
-                        password: Resources.Room.playerPassword,
-                    })
-                );
-
-                roomMasterClientSubscription.toBeExactlyOneRoomOperationEvent();
-                roomPlayer1ClientSubscription.toBeExactlyOneRoomOperationEvent();
-                roomPlayer2ClientSubscription.toBeEmpty();
-                allSubscriptions
-                    .except(
-                        roomMasterClientSubscription,
-                        roomPlayer1ClientSubscription,
-                        roomPlayer2ClientSubscription
-                    )
-                    .toBeEmpty();
-                allSubscriptions.clear();
-            }
-
-            // mutation joinRoomAsSpectator
-            // これによりspectatorがjoin
-            {
-                Assert.JoinRoomMutation.toBeFailure(
-                    await GraphQL.joinRoomAsSpectatorMutation(roomSpectatorClient, {
-                        id: roomId,
-                        name: Resources.UserUid.spectator,
-                        password: undefined,
-                    })
-                );
-
-                Assert.JoinRoomMutation.toBeFailure(
-                    await GraphQL.joinRoomAsSpectatorMutation(roomSpectatorClient, {
-                        id: roomId,
-                        name: Resources.UserUid.spectator,
-                        password: Resources.Room.playerPassword,
-                    })
-                );
-
-                Assert.JoinRoomMutation.toBeSuccess(
-                    await GraphQL.joinRoomAsSpectatorMutation(roomSpectatorClient, {
-                        id: roomId,
-                        name: Resources.UserUid.spectator,
-                        password: Resources.Room.spectatorPassword,
-                    })
-                );
-
-                allSubscriptions.clear();
-            }
-
-            // operateのテストに必要なため、現在のroomのrevisionを取得
-            let initRoomRevision: number;
-            {
-                initRoomRevision = Assert.GetRoomQuery.toBeSuccess(
-                    await GraphQL.getRoomQuery(roomPlayer1Client, {
-                        id: roomId,
-                    })
-                ).room.revision;
-
-                allSubscriptions.clear();
-            }
-
-            const requestId = 'P1_REQID'; // @MaxLength(10)であるため10文字以下にしている
-
-            // operateのテスト（異常系 - 無効なJSON）
-            {
-                await Assert.OperateMutation.toBeFailure(
-                    GraphQL.operateMutation(roomPlayer1Client, {
-                        id: roomId,
-                        requestId,
-                        revisionFrom: initRoomRevision + 1,
-                        operation: {
-                            clientId: Resources.ClientId.player1,
-                            valueJson: JSON.stringify({}),
-                        },
-                    }),
-                    'GraphQL'
-                );
-            }
-
-            // TODO: Room.valueのJSONの容量が上限を超えるようなOperationを送信したときのテスト。例えば単にnameの文字数を一度に大量に増やそうとするとApollo ServerによりPayload Too Largeエラーが返されるため、テストには一工夫必要か。
-
-            // operateのテスト（正常系）
-            const newRoomName = 'NEW_ROOM_NAME';
-            {
-                const operation: UpOperation = {
-                    $v: 2,
-                    $r: 1,
-                    name: textDiff({ prev: Resources.Room.name, next: newRoomName }),
-                };
-                const operationResult = await Assert.OperateMutation.toBeSuccess(
-                    GraphQL.operateMutation(roomPlayer1Client, {
-                        id: roomId,
-                        requestId,
-                        revisionFrom: initRoomRevision,
-                        operation: {
-                            clientId: Resources.ClientId.player1,
-                            valueJson: JSON.stringify(operation),
-                        },
-                    })
-                );
-                console.log('operate mutation result: %o', operationResult);
-                expect(operationResult.operation.revisionTo).toBe(initRoomRevision + 1);
-                const masterSubscriptionResult =
+                // mutation joinRoomAsPlayer
+                // これによりplayer1とplayer2がjoin
+                {
+                    // # testing
+                    // - joining as a player with a corrent password should be success
+                    // - master should get a operation event (a participant was added)
+                    Assert.JoinRoomMutation.toBeSuccess(
+                        await roomPlayer1Client.joinRoomAsPlayerMutation({
+                            id: roomId,
+                            name: Resources.UserUid.player1,
+                            password: Resources.Room.playerPassword,
+                        })
+                    );
                     roomMasterClientSubscription.toBeExactlyOneRoomOperationEvent();
-                expect(maskTypeNames(masterSubscriptionResult)).toEqual(
-                    maskTypeNames(operationResult.operation)
-                );
-                const player2SubscriptionResult =
-                    roomPlayer2ClientSubscription.toBeExactlyOneRoomOperationEvent();
-                expect(maskTypeNames(player2SubscriptionResult)).toEqual(
-                    maskTypeNames(operationResult.operation)
-                );
-                const spectatorSubscriptionResult =
-                    roomSpectatorClientSubscription.toBeExactlyOneRoomOperationEvent();
-                expect(maskTypeNames(spectatorSubscriptionResult)).toEqual(
-                    maskTypeNames(operationResult.operation)
-                );
-                notJoinUserClientSubscription.toBeEmpty();
-                allSubscriptions.clear();
-            }
+                    roomPlayer1ClientSubscription.toBeEmpty();
+                    allSubscriptions
+                        .except(roomMasterClientSubscription, roomPlayer1ClientSubscription)
+                        .toBeEmpty();
+                    allSubscriptions.clear();
 
-            // 秘話の投稿テスト
-            {
-                const text = 'TEXT';
-                const visibleTo = [Resources.UserUid.player1, Resources.UserUid.player2];
+                    // # testing
+                    // - joining as a player with no password should be failed
+                    // - no event should be observed
+                    Assert.JoinRoomMutation.toBeFailure(
+                        await roomPlayer2Client.joinRoomAsPlayerMutation({
+                            id: roomId,
+                            name: Resources.UserUid.player2,
+                            password: undefined,
+                        })
+                    );
+                    allSubscriptions.toBeEmpty();
 
-                const privateMessage = Assert.WritePrivateMessageMutation.toBeSuccess(
-                    await GraphQL.writePrivateMessageMutation(roomPlayer1Client, {
-                        roomId,
-                        text,
-                        visibleTo,
-                    })
-                );
-                roomMasterClientSubscription.toBeEmpty();
-                const player2SubscriptionResult =
-                    roomPlayer2ClientSubscription.toBeExactlyOneRoomPrivateMessageEvent();
-                expect(player2SubscriptionResult).toEqual(privateMessage);
-                roomSpectatorClientSubscription.toBeEmpty();
-                notJoinUserClientSubscription.toBeEmpty();
-                allSubscriptions.clear();
-            }
+                    // # testing
+                    // - joining as a player with a incorrent password should be failed
+                    // - no event should be observed
+                    Assert.JoinRoomMutation.toBeFailure(
+                        await roomPlayer2Client.joinRoomAsPlayerMutation({
+                            id: roomId,
+                            name: Resources.UserUid.player2,
+                            password: Resources.Room.spectatorPassword,
+                        })
+                    );
+                    allSubscriptions.toBeEmpty();
 
-            // DBに保存できているかどうかを確認するため、再度getRoomを実行
-            {
-                const room = Assert.GetRoomQuery.toBeSuccess(
-                    await GraphQL.getRoomQuery(roomPlayer1Client, {
-                        id: roomId,
-                    })
-                );
-                console.log('getRoom query result: %o', room);
+                    // # testing
+                    // - joining as a player with a corrent password should be success
+                    // - master and player1 should get a operation event
+                    Assert.JoinRoomMutation.toBeSuccess(
+                        await roomPlayer2Client.joinRoomAsPlayerMutation({
+                            id: roomId,
+                            name: Resources.UserUid.player2,
+                            password: Resources.Room.playerPassword,
+                        })
+                    );
 
-                expect(parseState(room.room.stateJson).name).toBe(newRoomName);
-            }
+                    roomMasterClientSubscription.toBeExactlyOneRoomOperationEvent();
+                    roomPlayer1ClientSubscription.toBeExactlyOneRoomOperationEvent();
+                    roomPlayer2ClientSubscription.toBeEmpty();
+                    allSubscriptions
+                        .except(
+                            roomMasterClientSubscription,
+                            roomPlayer1ClientSubscription,
+                            roomPlayer2ClientSubscription
+                        )
+                        .toBeEmpty();
+                    allSubscriptions.clear();
+                }
 
-            // 秘話などをDBに保存できているかどうかを確認するため、getMessagesを実行
-            {
-                const player1Messages = Assert.GetMessagesQuery.toBeSuccess(
-                    await GraphQL.getMessagesQuery(roomPlayer1Client, {
-                        roomId,
-                    })
-                );
-                console.log('getMessages query result: %o', player1Messages);
-                const player2Messages = Assert.GetMessagesQuery.toBeSuccess(
-                    await GraphQL.getMessagesQuery(roomPlayer2Client, {
-                        roomId,
-                    })
-                );
+                // mutation joinRoomAsSpectator
+                // これによりspectatorがjoin
+                {
+                    Assert.JoinRoomMutation.toBeFailure(
+                        await roomSpectatorClient.joinRoomAsSpectatorMutation({
+                            id: roomId,
+                            name: Resources.UserUid.spectator,
+                            password: undefined,
+                        })
+                    );
 
-                expect(player1Messages.privateMessages).toHaveLength(1);
-                expect(player1Messages.privateMessages).toEqual(player2Messages.privateMessages);
-            }
+                    Assert.JoinRoomMutation.toBeFailure(
+                        await roomSpectatorClient.joinRoomAsSpectatorMutation({
+                            id: roomId,
+                            name: Resources.UserUid.spectator,
+                            password: Resources.Room.playerPassword,
+                        })
+                    );
 
-            // mutation leaveRoom
-            // これによりplayer2がleave
-            {
-                Assert.LeaveRoomMutation.toBeSuccess(
-                    await GraphQL.leaveRoomMutation(roomPlayer1Client, {
-                        id: roomId,
-                    })
-                );
+                    Assert.JoinRoomMutation.toBeSuccess(
+                        await roomSpectatorClient.joinRoomAsSpectatorMutation({
+                            id: roomId,
+                            name: Resources.UserUid.spectator,
+                            password: Resources.Room.spectatorPassword,
+                        })
+                    );
 
-                // TODO: subscriptionのテストコードを書く
-                allSubscriptions.clear();
-            }
+                    allSubscriptions.clear();
+                }
 
-            {
-                Assert.DeleteRoomMutation.toBeNotCreatedByYou(
-                    await GraphQL.deleteRoomMutation(roomPlayer1Client, {
-                        id: roomId,
-                    })
-                );
+                // operateのテストに必要なため、現在のroomのrevisionを取得
+                let initRoomRevision: number;
+                {
+                    initRoomRevision = Assert.GetRoomQuery.toBeSuccess(
+                        await roomPlayer1Client.getRoomQuery({
+                            id: roomId,
+                        })
+                    ).room.revision;
 
-                allSubscriptions.toBeEmpty();
-                allSubscriptions.clear();
-            }
+                    allSubscriptions.clear();
+                }
 
-            {
-                Assert.DeleteRoomMutation.toBeSuccess(
-                    await GraphQL.deleteRoomMutation(roomMasterClient, {
-                        id: roomId,
-                    })
-                );
+                const requestId = 'P1_REQID'; // @MaxLength(10)であるため10文字以下にしている
 
-                // TODO: subscriptionのテストコードを書く
-                allSubscriptions.clear();
-            }
+                // operateのテスト（異常系 - 無効なJSON）
+                {
+                    await Assert.OperateMutation.toBeFailure(
+                        roomPlayer1Client.operateMutation({
+                            id: roomId,
+                            requestId,
+                            revisionFrom: initRoomRevision + 1,
+                            operation: {
+                                clientId: Resources.ClientId.player1,
+                                valueJson: JSON.stringify({}),
+                            },
+                        }),
+                        'GraphQL'
+                    );
+                }
 
-            // query getRoomsList
-            {
-                // # testing
-                // - master cannot get any room
-                const roomMasterResult = Assert.GetRoomsListQuery.toBeSuccess(
-                    await GraphQL.getRoomsListQuery(roomMasterClient)
-                );
-                expect(roomMasterResult.rooms).toEqual([]);
+                // TODO: Room.valueのJSONの容量が上限を超えるようなOperationを送信したときのテスト。例えば単にnameの文字数を一度に大量に増やそうとするとApollo ServerによりPayload Too Largeエラーが返されるため、テストには一工夫必要か。
 
-                // # testing
-                // - another user cannot get any room
-                const anotherUserResult = Assert.GetRoomsListQuery.toBeSuccess(
-                    await GraphQL.getRoomsListQuery(roomPlayer1Client)
-                );
-                expect(anotherUserResult.rooms).toEqual([]);
+                // operateのテスト（正常系）
+                const newRoomName = 'NEW_ROOM_NAME';
+                {
+                    const operation: UpOperation = {
+                        $v: 2,
+                        $r: 1,
+                        name: textDiff({ prev: Resources.Room.name, next: newRoomName }),
+                    };
+                    const operationResult = await Assert.OperateMutation.toBeSuccess(
+                        roomPlayer1Client.operateMutation({
+                            id: roomId,
+                            requestId,
+                            revisionFrom: initRoomRevision,
+                            operation: {
+                                clientId: Resources.ClientId.player1,
+                                valueJson: JSON.stringify(operation),
+                            },
+                        })
+                    );
+                    console.log('operate mutation result: %o', operationResult);
+                    expect(operationResult.operation.revisionTo).toBe(initRoomRevision + 1);
+                    const masterSubscriptionResult =
+                        roomMasterClientSubscription.toBeExactlyOneRoomOperationEvent();
+                    expect(maskTypeNames(masterSubscriptionResult)).toEqual(
+                        maskTypeNames(operationResult.operation)
+                    );
+                    const player2SubscriptionResult =
+                        roomPlayer2ClientSubscription.toBeExactlyOneRoomOperationEvent();
+                    expect(maskTypeNames(player2SubscriptionResult)).toEqual(
+                        maskTypeNames(operationResult.operation)
+                    );
+                    const spectatorSubscriptionResult =
+                        roomSpectatorClientSubscription.toBeExactlyOneRoomOperationEvent();
+                    expect(maskTypeNames(spectatorSubscriptionResult)).toEqual(
+                        maskTypeNames(operationResult.operation)
+                    );
+                    notJoinUserClientSubscription.toBeEmpty();
+                    allSubscriptions.clear();
+                }
 
-                allSubscriptions.clear();
-            }
+                // 秘話の投稿テスト
+                {
+                    const text = 'TEXT';
+                    const visibleTo = [Resources.UserUid.player1, Resources.UserUid.player2];
 
-            server.close();
+                    const privateMessage = Assert.WritePrivateMessageMutation.toBeSuccess(
+                        await roomPlayer1Client.writePrivateMessageMutation({
+                            roomId,
+                            text,
+                            visibleTo,
+                        })
+                    );
+                    roomMasterClientSubscription.toBeEmpty();
+                    const player2SubscriptionResult =
+                        roomPlayer2ClientSubscription.toBeExactlyOneRoomPrivateMessageEvent();
+                    expect(player2SubscriptionResult).toEqual(privateMessage);
+                    roomSpectatorClientSubscription.toBeEmpty();
+                    notJoinUserClientSubscription.toBeEmpty();
+                    allSubscriptions.clear();
+                }
+
+                // DBに保存できているかどうかを確認するため、再度getRoomを実行
+                {
+                    const room = Assert.GetRoomQuery.toBeSuccess(
+                        await roomPlayer1Client.getRoomQuery({
+                            id: roomId,
+                        })
+                    );
+                    console.log('getRoom query result: %o', room);
+
+                    expect(parseState(room.room.stateJson).name).toBe(newRoomName);
+                }
+
+                // 秘話などをDBに保存できているかどうかを確認するため、getMessagesを実行
+                {
+                    const player1Messages = Assert.GetMessagesQuery.toBeSuccess(
+                        await roomPlayer1Client.getMessagesQuery({
+                            roomId,
+                        })
+                    );
+                    console.log('getMessages query result: %o', player1Messages);
+                    const player2Messages = Assert.GetMessagesQuery.toBeSuccess(
+                        await roomPlayer2Client.getMessagesQuery({
+                            roomId,
+                        })
+                    );
+
+                    expect(player1Messages.privateMessages).toHaveLength(1);
+                    expect(player1Messages.privateMessages).toEqual(
+                        player2Messages.privateMessages
+                    );
+                }
+
+                // mutation leaveRoom
+                // これによりplayer2がleave
+                {
+                    Assert.LeaveRoomMutation.toBeSuccess(
+                        await roomPlayer1Client.leaveRoomMutation({
+                            id: roomId,
+                        })
+                    );
+
+                    // TODO: subscriptionのテストコードを書く
+                    allSubscriptions.clear();
+                }
+
+                {
+                    Assert.DeleteRoomMutation.toBeNotCreatedByYou(
+                        await roomPlayer1Client.deleteRoomMutation({
+                            id: roomId,
+                        })
+                    );
+
+                    allSubscriptions.toBeEmpty();
+                    allSubscriptions.clear();
+                }
+
+                {
+                    Assert.DeleteRoomMutation.toBeSuccess(
+                        await roomMasterClient.deleteRoomMutation({
+                            id: roomId,
+                        })
+                    );
+
+                    // TODO: subscriptionのテストコードを書く
+                    allSubscriptions.clear();
+                }
+
+                // query getRoomsList
+                {
+                    // # testing
+                    // - master cannot get any room
+                    const roomMasterResult = Assert.GetRoomsListQuery.toBeSuccess(
+                        await roomMasterClient.getRoomsListQuery()
+                    );
+                    expect(roomMasterResult.rooms).toEqual([]);
+
+                    // # testing
+                    // - another user cannot get any room
+                    const anotherUserResult = Assert.GetRoomsListQuery.toBeSuccess(
+                        await roomPlayer1Client.getRoomsListQuery()
+                    );
+                    expect(anotherUserResult.rooms).toEqual([]);
+
+                    allSubscriptions.clear();
+                }
+            });
         },
         timeout
     );
