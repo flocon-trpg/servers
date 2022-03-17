@@ -166,7 +166,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                 }}
                 onCancel={() => onCancel()}
             >
-                <Input
+                <Input.Password
                     placeholder='パスワード'
                     value={inputValue}
                     onChange={e => setInputValue(e.target.value)}

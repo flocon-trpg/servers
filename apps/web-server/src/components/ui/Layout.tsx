@@ -72,7 +72,7 @@ const EntryFormComponent: React.FC<EntryFormComponentProps> = (props: EntryFormC
             }}
         >
             <Form.Item label='password' name={passwordName}>
-                <Input />
+                <Input.Password />
             </Form.Item>
 
             <Form.Item>

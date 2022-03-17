@@ -185,7 +185,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                     参加者として入室
                 </div>
                 {roomState.requiresPlayerPassword ? (
-                    <Input
+                    <Input.Password
                         style={{ gridColumn: 2, gridRow: 3 }}
                         onChange={e => setPlayerPassword(e.target.value)}
                         value={playerPassword}
@@ -207,7 +207,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                     観戦者として入室
                 </div>
                 {roomState.requiresSpectatorPassword ? (
-                    <Input
+                    <Input.Password
                         style={{ gridColumn: 2, gridRow: 4 }}
                         onChange={e => setSpectatorPassword(e.target.value)}
                         value={spectatorPassword}

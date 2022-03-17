@@ -77,7 +77,7 @@ export const RoomCreate: React.FC = () => {
                 <Switch checked={isPlayerPasswordEnabled} onChange={setIsPlayerPasswordEnabled} />
             </Form.Item>
             <Form.Item label='参加パスワード' name={playerPassword}>
-                <Input disabled={!isPlayerPasswordEnabled} />
+                <Input.Password disabled={!isPlayerPasswordEnabled} />
             </Form.Item>
             <Form.Item label='観戦パスワードを有効化'>
                 <Switch
@@ -86,7 +86,7 @@ export const RoomCreate: React.FC = () => {
                 />
             </Form.Item>
             <Form.Item label='観戦パスワード' name={spectatorPassword}>
-                <Input disabled={!isSpectatorPasswordEnabled} />
+                <Input.Password disabled={!isSpectatorPasswordEnabled} />
             </Form.Item>
 
             <Form.Item wrapperCol={{ offset: labelCol, span: wrapperCol }}>
