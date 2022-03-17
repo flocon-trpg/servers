@@ -281,6 +281,7 @@ describe.each([
             await clearAllRooms(orm.em.fork());
             await clearAllFiles(orm.em.fork());
             await clearAllUsers(orm.em.fork());
+            await orm.close();
         });
 
         const entryPassword = entryPasswordConfig == null ? undefined : Resources.entryPassword;
