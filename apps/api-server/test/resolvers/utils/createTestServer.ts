@@ -112,6 +112,7 @@ export const createTestServer = async ({
         em: $orm.em,
         schema,
         debug: true,
+        quiet: true,
         getDecodedIdTokenFromWsContext: async context => {
             const uid = context.connectionParams?.[Resources.testAuthorizationHeader] as
                 | string
