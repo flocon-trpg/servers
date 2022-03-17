@@ -243,7 +243,7 @@ const fileOptionsColumn = (storageType: StorageType): Column => ({
             <Dropdown.Button
                 icon={<Icons.MoreOutlined />}
                 overlay={<FileOptionsMenu reference={record.reference} storageType={storageType} />}
-                type={'text' as any}
+                type='text'
                 trigger={['click']}
             />
         );

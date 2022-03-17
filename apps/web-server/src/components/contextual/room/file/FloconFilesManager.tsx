@@ -299,7 +299,7 @@ const fileOptionsColumn: Column = {
             <Dropdown.Button
                 icon={<Icons.MoreOutlined />}
                 overlay={<FileOptionsMenu fileItem={record} />}
-                type={'text' as any}
+                type='text'
                 trigger={['click']}
             />
         );
