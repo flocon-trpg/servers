@@ -37,7 +37,7 @@ export class TestClients<TUserUids extends ReadonlyArray<string>> {
         for (const userUid in this.clients) {
             const client = (this.clients as Record<string, TestClient>)[userUid];
             if (client == null) {
-                throw new Error();
+                throw new Error('this should not happen');
             }
 
             const subscription = client.roomEventSubscription({ roomId });

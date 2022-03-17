@@ -29,6 +29,17 @@ export class TestRoomEventSubscription {
         expect(this.values.every(x => x.roomEvent == null)).toBe(true);
     }
 
+    public toBeExactlyOneDeleteRoomEvent({ deletedBy }: { deletedBy: string }) {
+        expect(this.values).toHaveLength(1);
+        const deleteRoomOperationEvents = _(this.values)
+            .map(x => x.roomEvent?.deleteRoomOperation)
+            .compact()
+            .value();
+        expect(deleteRoomOperationEvents).toHaveLength(1);
+        const actualEvent = deleteRoomOperationEvents[0]!;
+        expect(actualEvent.deletedBy).toBe(deletedBy);
+    }
+
     public toBeExactlyOneRoomConnectionEvent({
         event,
         userUid,
