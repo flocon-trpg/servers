@@ -171,11 +171,11 @@ export class TestClient {
             .toPromise();
     }
 
-    public entryToServerMutation() {
+    public entryToServerMutation({ password }: { password: string }) {
         return this.#core
             .mutation<EntryToServerMutation, EntryToServerMutationVariables>(
                 EntryToServerDocument,
-                { password: Resources.entryPassword },
+                { password },
                 { requestPolicy: 'network-only' }
             )
             .toPromise();

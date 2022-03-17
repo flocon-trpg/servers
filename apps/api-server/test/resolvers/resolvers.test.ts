@@ -149,6 +149,14 @@ namespace Assert {
             }
             return source.data.result;
         };
+
+        export const toBeFailure = (source: OperationResult<GetMessagesQuery>) => {
+            if (source.data?.result.__typename !== 'GetRoomMessagesFailureResult') {
+                expect(source.data?.result.__typename).toBe('GetRoomMessagesFailureResult');
+                throw new Error('Guard');
+            }
+            return source.data.result;
+        };
     }
 
     export namespace GetRoomsListQuery {
@@ -329,7 +337,7 @@ describe.each([
             for (const { value: client } of recordToArray(
                 clients.clients as Record<string, TestClient>
             )) {
-                const result = await client.entryToServerMutation();
+                const result = await client.entryToServerMutation({ password: entryPassword });
                 if (test) {
                     expect(result.data?.result.type).toBe(EntryToServerResultType.Success);
                 }
@@ -369,6 +377,7 @@ describe.each([
             });
             const actualData = Assert.CreateRoomMutation.toBeSuccess(actual);
             const roomId = actualData.id;
+            let roomRevision = actualData.room.revision;
 
             if (autoJoin != null) {
                 for (const userUid in autoJoin) {
@@ -400,12 +409,13 @@ describe.each([
                         default:
                             throw new Error('this should not happen');
                     }
+                    roomRevision++;
                 }
             }
 
             return {
                 roomId,
-                roomRevision: actualData.room.revision,
+                roomRevision,
                 clients: clients.clients,
                 subscriptions: clients.beginSubscriptions(roomId),
             };
@@ -584,11 +594,7 @@ describe.each([
                     admins: [Resources.UserUid.admin],
                 },
                 async () => {
-                    const clients = new TestClients({
-                        httpGraphQLUri,
-                        wsGraphQLUri,
-                        userUids: [userUid] as const,
-                    });
+                    const clients = await setupUsers({ userUids: [userUid] as const });
                     const client = clients.clients[userUid];
 
                     const result = await client.amIAdminQuery({});
@@ -729,7 +735,7 @@ describe.each([
                     });
                 });
 
-                it('tests successful joinRoomAsSpectator -> second joinRoomAsSpectator -> successful joinRoomAsPlayer as promotion', async () => {
+                it('tests joinRoomAsSpectator -> joinRoomAsSpectator -> joinRoomAsPlayer', async () => {
                     await useTestServer({}, async () => {
                         const userUids = [
                             Resources.UserUid.master,
@@ -766,20 +772,14 @@ describe.each([
                         subscriptions.all.toBeEmpty();
                         subscriptions.all.clear();
 
-                        Assert.JoinRoomMutation.toBeSuccess(
+                        Assert.JoinRoomMutation.toBeFailure(
                             await clients[Resources.UserUid.player1].joinRoomAsPlayerMutation({
                                 id: roomId,
                                 name: Resources.Participant.Name.player1,
                                 password: playerPassword,
                             })
                         );
-                        subscriptions.value[
-                            Resources.UserUid.master
-                        ].toBeExactlyOneRoomOperationEvent();
-                        subscriptions.value[
-                            Resources.UserUid.player1
-                        ].toBeExactlyOneRoomOperationEvent();
-                        subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
+                        subscriptions.all.toBeEmpty();
                         subscriptions.all.clear();
                     });
                 });
@@ -1018,12 +1018,6 @@ describe.each([
                             })
                         );
                         expect(spectatorMessages.privateMessages).toHaveLength(0);
-                        const nonJoinMessages = Assert.GetMessagesQuery.toBeSuccess(
-                            await clients[Resources.UserUid.notJoin].getMessagesQuery({
-                                roomId,
-                            })
-                        );
-                        expect(nonJoinMessages.privateMessages).toHaveLength(0);
                     });
                 });
             });
@@ -1058,22 +1052,13 @@ describe.each([
 
                         subscriptions.value[
                             Resources.UserUid.master
-                        ].toBeExactlyOneRoomConnectionEvent({
-                            event: 'disconnect',
-                            userUid: Resources.UserUid.player1,
-                        });
+                        ].toBeExactlyOneRoomOperationEvent();
                         subscriptions.value[
                             Resources.UserUid.player2
-                        ].toBeExactlyOneRoomConnectionEvent({
-                            event: 'disconnect',
-                            userUid: Resources.UserUid.player1,
-                        });
+                        ].toBeExactlyOneRoomOperationEvent();
                         subscriptions.value[
                             Resources.UserUid.spectator
-                        ].toBeExactlyOneRoomConnectionEvent({
-                            event: 'disconnect',
-                            userUid: Resources.UserUid.player1,
-                        });
+                        ].toBeExactlyOneRoomOperationEvent();
                         subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
 
                         const room = Assert.GetRoomQuery.toBeSuccess(
@@ -1083,17 +1068,20 @@ describe.each([
                         );
                         expect(
                             parseState(room.room.stateJson).participants[Resources.UserUid.master]
+                                ?.role
                         ).not.toBeUndefined();
                         expect(
                             parseState(room.room.stateJson).participants[Resources.UserUid.player1]
+                                ?.role
                         ).toBeUndefined();
                         expect(
                             parseState(room.room.stateJson).participants[Resources.UserUid.player2]
+                                ?.role
                         ).not.toBeUndefined();
                         expect(
                             parseState(room.room.stateJson).participants[
                                 Resources.UserUid.spectator
-                            ]
+                            ]?.role
                         ).not.toBeUndefined();
                     });
                 });
@@ -1199,7 +1187,7 @@ describe.each([
                                 id: roomId,
                             })
                         );
-                        Assert.GetRoomQuery.toBeNotFound(
+                        Assert.GetRoomQuery.toBeNonJoined(
                             await clients[Resources.UserUid.notJoin].getRoomQuery({
                                 id: roomId,
                             })
