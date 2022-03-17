@@ -192,6 +192,7 @@ namespace Assert {
             source: OperationResult<JoinRoomAsPlayerMutation | JoinRoomAsSpectatorMutation>
         ) => {
             if (source.data?.result.__typename !== 'JoinRoomSuccessResult') {
+                console.error('failed at JoinRoomMutation.toBeSuccess', source.data);
                 expect(source.data?.result.__typename).toBe('JoinRoomSuccessResult');
                 throw new Error('Guard');
             }
