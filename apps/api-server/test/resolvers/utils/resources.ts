@@ -10,13 +10,13 @@ export namespace Resources {
     }
 
     export namespace UserUid {
-        export const master = 'ROOM_MASTER_USER';
-        export const player1 = 'ROOM_PLAYER1_USER';
-        export const player2 = 'ROOM_PLAYER2_USER';
-        export const spectator = 'ROOM_SPECTATOR_USER';
-        export const notJoin = 'NOT_JOIN_USER';
-        export const admin = 'ADMIN_USER';
-        export const notAdmin = 'NOT_ADMIN_USER';
+        export const master = 'MasterUser';
+        export const player1 = 'Player1User';
+        export const player2 = 'Player2User';
+        export const spectator = 'SpectatorUser';
+        export const notJoin = 'NotJoinUser';
+        export const admin = 'AdminUser';
+        export const notAdmin = 'NotAdminUser';
     }
 
     export namespace Participant {
