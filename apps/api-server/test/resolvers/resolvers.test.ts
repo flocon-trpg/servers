@@ -68,20 +68,21 @@ const clearAllRooms = async (em: EM): Promise<void> => {
 const clearAllFiles = async (em: EM): Promise<void> => {
     for (const file of await em.find(File$MikroORM, {})) {
         await file.fileTags.init();
+        file.fileTags.getItems().forEach(x => em.remove(x));
         file.fileTags.removeAll();
         em.remove(file);
-    }
-    for (const user of await em.find(User$MikroORM, {})) {
-        await user.files.init();
-        user.files.removeAll();
-        await user.fileTags.init();
-        user.fileTags.removeAll();
     }
     await em.flush();
 };
 
 const clearAllUsers = async (em: EM): Promise<void> => {
     for (const user of await em.find(User$MikroORM, {})) {
+        await user.fileTags.init();
+        user.fileTags.getItems().forEach(x => em.remove(x));
+        user.fileTags.removeAll();
+        await user.files.init();
+        user.files.getItems().forEach(x => em.remove(x));
+        user.files.removeAll();
         em.remove(user);
     }
     await em.flush();
