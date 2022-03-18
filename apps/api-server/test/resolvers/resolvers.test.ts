@@ -22,6 +22,8 @@ import {
     CreateFileTagMutation,
     ParticipantRole,
     GetRoomFailureType,
+    DeleteRoomAsAdminMutation,
+    DeleteRoomAsAdminFailureType,
 } from '@flocon-trpg/typed-document-node';
 import { EntryToServerResultType } from '../../src/enums/EntryToServerResultType';
 import { ServerConfig } from '../../src/configType';
@@ -123,6 +125,16 @@ namespace Assert {
 
         export const toBeNotCreatedByYou = (source: OperationResult<DeleteRoomMutation>) => {
             expect(source.data?.result.failureType).toBe(DeleteRoomFailureType.NotCreatedByYou);
+        };
+    }
+
+    export namespace DeleteRoomAsAdminMutation {
+        export const toBeSuccess = (source: OperationResult<DeleteRoomAsAdminMutation>) => {
+            expect(source.data?.result.failureType ?? undefined).toBeUndefined();
+        };
+
+        export const toBeError = (source: OperationResult<DeleteRoomAsAdminMutation>) => {
+            expect(source?.error).not.toBeUndefined();
         };
     }
 
@@ -1189,6 +1201,128 @@ describe.each([
                         );
                         Assert.GetRoomQuery.toBeNonJoined(
                             await clients[Resources.UserUid.notJoin].getRoomQuery({
+                                id: roomId,
+                            })
+                        );
+                    });
+                });
+            });
+
+            describe('deleteRoomAsAdmin mutation', () => {
+                it('should succeed', async () => {
+                    await useTestServer({ admins: [Resources.UserUid.admin] }, async () => {
+                        const userUids = [
+                            Resources.UserUid.admin,
+                            Resources.UserUid.notAdmin,
+                            Resources.UserUid.master,
+                            Resources.UserUid.player1,
+                            Resources.UserUid.spectator,
+                        ] as const;
+                        const { clients, roomId, subscriptions } = await setupUsersAndRoom({
+                            userUids,
+                            roomMasterUserUid: Resources.UserUid.master,
+                            playerPassword,
+                            spectatorPassword,
+                            autoJoin: {
+                                [Resources.UserUid.player1]: 'player',
+                                [Resources.UserUid.spectator]: 'spectator',
+                            },
+                        });
+
+                        Assert.DeleteRoomAsAdminMutation.toBeSuccess(
+                            await clients[Resources.UserUid.admin].deleteRoomAsAdminMutation({
+                                id: roomId,
+                            })
+                        );
+
+                        subscriptions.value[Resources.UserUid.master].toBeExactlyOneDeleteRoomEvent(
+                            {
+                                deletedBy: Resources.UserUid.admin,
+                            }
+                        );
+                        subscriptions.value[
+                            Resources.UserUid.player1
+                        ].toBeExactlyOneDeleteRoomEvent({
+                            deletedBy: Resources.UserUid.admin,
+                        });
+                        subscriptions.value[
+                            Resources.UserUid.spectator
+                        ].toBeExactlyOneDeleteRoomEvent({
+                            deletedBy: Resources.UserUid.admin,
+                        });
+
+                        Assert.GetRoomQuery.toBeNotFound(
+                            await clients[Resources.UserUid.master].getRoomQuery({
+                                id: roomId,
+                            })
+                        );
+                        Assert.GetRoomQuery.toBeNotFound(
+                            await clients[Resources.UserUid.player1].getRoomQuery({
+                                id: roomId,
+                            })
+                        );
+                        Assert.GetRoomQuery.toBeNotFound(
+                            await clients[Resources.UserUid.spectator].getRoomQuery({
+                                id: roomId,
+                            })
+                        );
+                        Assert.GetRoomQuery.toBeNotFound(
+                            await clients[Resources.UserUid.admin].getRoomQuery({
+                                id: roomId,
+                            })
+                        );
+                        Assert.GetRoomQuery.toBeNotFound(
+                            await clients[Resources.UserUid.notAdmin].getRoomQuery({
+                                id: roomId,
+                            })
+                        );
+                    });
+                });
+
+                it.each([
+                    Resources.UserUid.master,
+                    Resources.UserUid.player1,
+                    Resources.UserUid.spectator,
+                    Resources.UserUid.notAdmin,
+                ] as const)('tests unauthorized mutations', async mutatedBy => {
+                    await useTestServer({}, async () => {
+                        const userUids = [
+                            Resources.UserUid.notAdmin,
+                            Resources.UserUid.master,
+                            Resources.UserUid.player1,
+                            Resources.UserUid.spectator,
+                        ] as const;
+                        const { clients, roomId, subscriptions } = await setupUsersAndRoom({
+                            userUids,
+                            roomMasterUserUid: Resources.UserUid.master,
+                            playerPassword,
+                            spectatorPassword,
+                            autoJoin: {
+                                [Resources.UserUid.player1]: 'player',
+                                [Resources.UserUid.spectator]: 'spectator',
+                            },
+                        });
+
+                        Assert.DeleteRoomAsAdminMutation.toBeError(
+                            await clients[mutatedBy].deleteRoomAsAdminMutation({
+                                id: roomId,
+                            })
+                        );
+
+                        subscriptions.all.toBeEmpty();
+
+                        Assert.GetRoomQuery.toBeSuccess(
+                            await clients[Resources.UserUid.master].getRoomQuery({
+                                id: roomId,
+                            })
+                        );
+                        Assert.GetRoomQuery.toBeSuccess(
+                            await clients[Resources.UserUid.player1].getRoomQuery({
+                                id: roomId,
+                            })
+                        );
+                        Assert.GetRoomQuery.toBeSuccess(
+                            await clients[Resources.UserUid.spectator].getRoomQuery({
                                 id: roomId,
                             })
                         );

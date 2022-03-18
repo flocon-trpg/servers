@@ -18,6 +18,9 @@ import {
     DeleteFileTagDocument,
     DeleteFileTagMutation,
     DeleteFileTagMutationVariables,
+    DeleteRoomAsAdminDocument,
+    DeleteRoomAsAdminMutation,
+    DeleteRoomAsAdminMutationVariables,
     DeleteRoomDocument,
     DeleteRoomMutation,
     DeleteRoomMutationVariables,
@@ -151,6 +154,18 @@ export class TestClient {
         return this.#core
             .mutation<DeleteRoomMutation, DeleteRoomMutationVariables>(
                 DeleteRoomDocument,
+                variables,
+                {
+                    requestPolicy: 'network-only',
+                }
+            )
+            .toPromise();
+    }
+
+    public deleteRoomAsAdminMutation(variables: DeleteRoomMutationVariables) {
+        return this.#core
+            .mutation<DeleteRoomAsAdminMutation, DeleteRoomAsAdminMutationVariables>(
+                DeleteRoomAsAdminDocument,
                 variables,
                 {
                     requestPolicy: 'network-only',
