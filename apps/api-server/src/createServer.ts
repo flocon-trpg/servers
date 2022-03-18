@@ -64,6 +64,7 @@ export const createServer = async ({
     getDecodedIdTokenFromExpressRequest,
     getDecodedIdTokenFromWsContext,
     port,
+    quiet,
 }: {
     serverConfig: ServerConfig;
     promiseQueue: PromiseQueue;
@@ -78,6 +79,7 @@ export const createServer = async ({
         context: Context<Extra>
     ) => Promise<Result<Readonly<DecodedIdToken>, unknown> | undefined>;
     port: string | number;
+    quiet?: boolean;
 }) => {
     let rateLimiter: RateLimiterAbstract | null = null;
     if (!serverConfig.disableRateLimitExperimental) {
@@ -115,15 +117,17 @@ export const createServer = async ({
     apolloServer.applyMiddleware({ app });
 
     if (serverConfig.accessControlAllowOrigin == null) {
-        AppConsole.log({
-            en: '"accessControlAllowOrigin" config was not found. "Access-Control-Allow-Origin" header will be empty.',
-            ja: '"accessControlAllowOrigin" のコンフィグが見つかりませんでした。"Access-Control-Allow-Origin" ヘッダーは空になります。',
-        });
+        !quiet &&
+            AppConsole.log({
+                en: '"accessControlAllowOrigin" config was not found. "Access-Control-Allow-Origin" header will be empty.',
+                ja: '"accessControlAllowOrigin" のコンフィグが見つかりませんでした。"Access-Control-Allow-Origin" ヘッダーは空になります。',
+            });
     } else {
-        AppConsole.log({
-            en: `"accessControlAllowOrigin" config was found. "Access-Control-Allow-Origin" header will be "${serverConfig.accessControlAllowOrigin}".`,
-            ja: `"accessControlAllowOrigin" のコンフィグが見つかりました。"Access-Control-Allow-Origin" ヘッダーは "${serverConfig.accessControlAllowOrigin}" になります。`,
-        });
+        !quiet &&
+            AppConsole.log({
+                en: `"accessControlAllowOrigin" config was found. "Access-Control-Allow-Origin" header will be "${serverConfig.accessControlAllowOrigin}".`,
+                ja: `"accessControlAllowOrigin" のコンフィグが見つかりました。"Access-Control-Allow-Origin" ヘッダーは "${serverConfig.accessControlAllowOrigin}" になります。`,
+            });
         const accessControlAllowOrigin = serverConfig.accessControlAllowOrigin;
         app.use((req, res, next) => {
             res.header('Access-Control-Allow-Origin', accessControlAllowOrigin);
@@ -138,25 +142,28 @@ export const createServer = async ({
     const applyUploader = async () => {
         const uploaderConfig = serverConfig.uploader;
         if (uploaderConfig == null || !uploaderConfig.enabled) {
-            AppConsole.log({
-                en: `The uploader of API server is disabled.`,
-                ja: `APIサーバーのアップローダーは無効化されています。`,
-            });
+            !quiet &&
+                AppConsole.log({
+                    en: `The uploader of API server is disabled.`,
+                    ja: `APIサーバーのアップローダーは無効化されています。`,
+                });
             return;
         }
         const directory = uploaderConfig.directory;
         if (directory == null) {
-            AppConsole.warn({
-                en: `The uploader of API server is disabled because "${EMBUPLOADER_PATH}" is empty.`,
-                ja: `"${EMBUPLOADER_PATH}"の値が空なので、APIサーバーのアップローダーは無効化されています。`,
-            });
+            !quiet &&
+                AppConsole.warn({
+                    en: `The uploader of API server is disabled because "${EMBUPLOADER_PATH}" is empty.`,
+                    ja: `"${EMBUPLOADER_PATH}"の値が空なので、APIサーバーのアップローダーは無効化されています。`,
+                });
             return;
         }
 
-        AppConsole.log({
-            en: `The uploader of API server is enabled.`,
-            ja: `APIサーバーのアップローダーは有効化されています。`,
-        });
+        !quiet &&
+            AppConsole.log({
+                en: `The uploader of API server is enabled.`,
+                ja: `APIサーバーのアップローダーは有効化されています。`,
+            });
 
         await ensureDir(path.resolve(directory));
         const storage = multer.diskStorage({
@@ -415,8 +422,10 @@ export const createServer = async ({
         );
 
         // TODO: /graphqlが含まれているとAPI_HTTPなどの設定にも/graphqlの部分も入力してしまいそうなので、対処したほうがいいと思われる。また、createServerAsErrorとの統一性も取れていない
-        console.log(`🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`);
-        console.log(`🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`);
+        !quiet &&
+            console.log(`🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`);
+        !quiet &&
+            console.log(`🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`);
     });
     return server;
 };

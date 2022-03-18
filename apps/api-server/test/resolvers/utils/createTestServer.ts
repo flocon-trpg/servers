@@ -1,11 +1,11 @@
-import { createPostgreSQL, createSQLite } from '../src/mikro-orm';
-import { PromiseQueue } from '../src/utils/promiseQueue';
-import { InMemoryConnectionManager } from '../src/connection/main';
-import { BaasType } from '../src/enums/BaasType';
-import { postgresql, ServerConfig, sqlite } from '../src/configType';
-import { buildSchema } from '../src/buildSchema';
+import { createPostgreSQL, createSQLite } from '../../../src/mikro-orm';
+import { PromiseQueue } from '../../../src/utils/promiseQueue';
+import { InMemoryConnectionManager } from '../../../src/connection/main';
+import { BaasType } from '../../../src/enums/BaasType';
+import { ServerConfig, WritableServerConfig } from '../../../src/configType';
+import { buildSchema } from '../../../src/buildSchema';
 import { PubSub } from 'graphql-subscriptions';
-import { createServer } from '../src/createServer';
+import { createServer } from '../../../src/createServer';
 import { Result } from '@kizahasi/result';
 import { Resources } from './resources';
 
@@ -15,7 +15,8 @@ const postgresClientUrl = 'postgresql://postgres:postgres@postgres:5432';
 const PostgreSQLConfig = {
     dbName: 'test',
     clientUrl: postgresClientUrl,
-    debug: true,
+    // debug: trueだとGitHub Actionsのログのサイズが巨大（10MB以上）になるのでfalseにしている
+    debug: false,
     driverOptions: undefined,
 } as const;
 
@@ -29,7 +30,11 @@ export type DbConfig =
       };
 
 const createSQLiteConfig = (dbName: string) => {
-    return { dbName, debug: true } as const;
+    return {
+        dbName,
+        // debug: trueだとGitHub Actionsのログのサイズが巨大（10MB以上）になるのでfalseにしている
+        debug: false,
+    } as const;
 };
 
 export const createOrm = async (dbCofig: DbConfig) => {
@@ -41,7 +46,7 @@ export const createOrm = async (dbCofig: DbConfig) => {
     }
 };
 
-const setDatabaseConfig = (target: ServerConfig, dbConfig: DbConfig): void => {
+const setDatabaseConfig = (target: WritableServerConfig, dbConfig: DbConfig): void => {
     switch (dbConfig.type) {
         case 'PostgreSQL':
             target.postgresql = {
@@ -59,17 +64,22 @@ const setDatabaseConfig = (target: ServerConfig, dbConfig: DbConfig): void => {
     }
 };
 
-export const createTestServer = async (
-    dbConfig: DbConfig,
-    entryPasswordConfig: ServerConfig['entryPassword']
-) => {
+export const createTestServer = async ({
+    dbConfig,
+    entryPasswordConfig,
+    admins,
+}: {
+    dbConfig: DbConfig;
+    entryPasswordConfig: ServerConfig['entryPassword'];
+    admins?: ServerConfig['admins'];
+}) => {
     const promiseQueue = new PromiseQueue({ queueLimit: 2 });
     const connectionManager = new InMemoryConnectionManager();
 
     const $orm = await createOrm(dbConfig);
-    const serverConfig: ServerConfig = {
+    const serverConfig: WritableServerConfig = {
         accessControlAllowOrigin: '*',
-        admins: [],
+        admins: admins == null ? [] : [...admins /* ReadonlyArrayをArrayに変換しているだけ */],
         firebaseAdminSecret: undefined,
         firebaseProjectId: 'FAKE_FIREBASE_PROJECTID',
         heroku: false,
@@ -102,6 +112,7 @@ export const createTestServer = async (
         em: $orm.em,
         schema,
         debug: true,
+        quiet: true,
         getDecodedIdTokenFromWsContext: async context => {
             const uid = context.connectionParams?.[Resources.testAuthorizationHeader] as
                 | string

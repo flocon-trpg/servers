@@ -1,4 +1,4 @@
-# ApolloClientでは__typenameを書かなくても全て自動的に補完してくれるようだが、urqlでは補完されないことがある( https://github.com/FormidableLabs/urql/issues/1366 )。このため、__typenameで値の種類を判断する必要がある部分は全て__typenameを書くようにしている。
+# ApolloClientでは__typenameを書かなくても全て自動的に補完してくれるようだが、urqlでは補完されないことがある(https://github.com/FormidableLabs/urql/issues/1366)。このため、__typenameで値の種類を判断する必要がある部分は全て__typenameを書くようにしている。
 
 fragment CharacterValueForMessage on CharacterValueForMessage {
   stateId
@@ -250,6 +250,10 @@ fragment SemVer on SemVer {
   }
 }
 
+query AmIAdmin {
+  result: amIAdmin
+}
+
 query GetAvailableGameSystems {
   result: getAvailableGameSystems {
     value {
@@ -432,6 +436,12 @@ mutation DeleteFileTag($tagId: String!) {
 
 mutation DeleteRoom($id: String!) {
   result: deleteRoom(id: $id) {
+    failureType
+  }
+}
+
+mutation DeleteRoomAsAdmin($id: String!) {
+  result: deleteRoomAsAdmin(id: $id) {
     failureType
   }
 }

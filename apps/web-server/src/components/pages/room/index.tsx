@@ -1,15 +1,69 @@
-import { useQuery } from '@apollo/client';
-import { GetRoomsListDocument, RoomAsListItemFragment } from '@flocon-trpg/typed-document-node';
-import { Button, Table, Tooltip } from 'antd';
+import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
+import {
+    AmIAdminDocument,
+    DeleteRoomDocument,
+    GetRoomsListDocument,
+    RoomAsListItemFragment,
+} from '@flocon-trpg/typed-document-node';
+import { Button, Dropdown, Menu, Modal, Table, Tooltip } from 'antd';
 import classNames from 'classnames';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { flex, flexNone, flexRow } from '../../../utils/className';
 import { Layout, loginAndEntry } from '../../ui/Layout';
 import { QueryResultViewer } from '../../ui/QueryResultViewer';
+import * as Icons from '@ant-design/icons';
+import { Styles } from '../../../styles';
 
 type Data = RoomAsListItemFragment;
+
+const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
+    const router = useRouter();
+    const [deleteRoom] = useMutation(DeleteRoomDocument);
+    const amIAdminQueryResult = useQuery(AmIAdminDocument);
+    const [getRooms] = useLazyQuery(GetRoomsListDocument, { fetchPolicy: 'network-only' });
+
+    const overlay = React.useMemo(() => {
+        if (amIAdminQueryResult.data == null) {
+            return undefined;
+        }
+        return (
+            <Menu>
+                <Menu.ItemGroup title='管理者用コマンド'>
+                    <Menu.Item
+                        icon={<Icons.DeleteOutlined />}
+                        onClick={() => {
+                            Modal.warn({
+                                onOk: async () => {
+                                    await deleteRoom({ variables: { id: roomId } });
+                                    await getRooms();
+                                },
+                                okCancel: true,
+                                maskClosable: true,
+                                closable: true,
+                                content: '部屋を削除します。よろしいですか？',
+                            });
+                        }}
+                    >
+                        <div style={Styles.Text.danger}>削除</div>
+                    </Menu.Item>
+                </Menu.ItemGroup>
+            </Menu>
+        );
+    }, [amIAdminQueryResult.data, deleteRoom, getRooms, roomId]);
+    const join = React.useCallback(() => router.push(`/rooms/${roomId}`), [roomId, router]);
+
+    const joinText = '入室';
+
+    if (overlay == null) {
+        return <Button onClick={join}>{joinText}</Button>;
+    }
+    return (
+        <Dropdown.Button onClick={join} overlay={overlay} trigger={['click']}>
+            {joinText}
+        </Dropdown.Button>
+    );
+};
 
 const columns = [
     {
@@ -43,11 +97,7 @@ const columns = [
         dataIndex: '',
         key: 'Action',
         // eslint-disable-next-line react/display-name
-        render: (_: any, record: Data) => (
-            <Link href={`/rooms/${record.id}`}>
-                <a>入室</a>
-            </Link>
-        ),
+        render: (_: any, record: Data) => <RoomButton roomId={record.id} />,
     },
 ];
 

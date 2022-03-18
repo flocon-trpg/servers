@@ -32,6 +32,7 @@ import {
     FIREBASE_PROJECTID,
     HEROKU,
     DATABASE_URL,
+    FLOCON_ADMIN,
 } from './env';
 import { filterInt, isTruthyString } from '@flocon-trpg/utils';
 import { Result, Error } from '@kizahasi/result';
@@ -52,15 +53,6 @@ const tryParseJSON = (json: string): Result<unknown> => {
 // パースなどに失敗したかどうかは確認できるようにしたいがエラーメッセージを表示するとミスで重要な情報が漏れる可能性があるため、エラーメッセージだけ除去している
 type EmptyErrorResult<T> = Result<T, undefined>;
 
-const omitErrorMessage = <T, U>(
-    source: Result<T, U> | undefined
-): EmptyErrorResult<T> | undefined => {
-    if (source?.isError) {
-        return Result.error(undefined);
-    }
-    return source;
-};
-
 // 環境変数の値に記述ミスがあった場合は続行ではなく停止すべきであるため、ガードとしてこの関数を定義している。
 // コードに問題がなければ、この関数でthrowされることはない。
 const ensureOk = <T, U>(source: Result<T, U> | undefined): T | undefined => {
@@ -71,6 +63,11 @@ const ensureOk = <T, U>(source: Result<T, U> | undefined): T | undefined => {
 };
 
 export class ServerConfigBuilder {
+    public readonly [FLOCON_ADMIN]: Result<ReadonlyArray<string>> | undefined;
+    public get admins() {
+        return this[FLOCON_ADMIN];
+    }
+
     public readonly [ACCESS_CONTROL_ALLOW_ORIGIN]: string | undefined;
     public get accessControlAllowOrigin() {
         return this[ACCESS_CONTROL_ALLOW_ORIGIN];
@@ -200,28 +197,42 @@ export class ServerConfigBuilder {
             this[prop] = isTruthyString(value);
         }
 
-        this[FIREBASE_ADMIN_SECRET] = omitErrorMessage(
-            ServerConfigBuilder.firebaseAdminSecretProp(env)
-        );
-        this[ENTRY_PASSWORD] = omitErrorMessage(ServerConfigBuilder.entryPasswordProp(env));
-        this[POSTGRESQL] = omitErrorMessage(ServerConfigBuilder.postgresqlProp(env));
-        this[SQLITE] = omitErrorMessage(ServerConfigBuilder.sqliteProp(env));
+        this[FLOCON_ADMIN] = ServerConfigBuilder.admin(env);
+        this[FIREBASE_ADMIN_SECRET] = ServerConfigBuilder.firebaseAdminSecretProp(env);
+        this[ENTRY_PASSWORD] = ServerConfigBuilder.entryPasswordProp(env);
+        this[POSTGRESQL] = ServerConfigBuilder.postgresqlProp(env);
+        this[SQLITE] = ServerConfigBuilder.sqliteProp(env);
+    }
+
+    private static admin(env: typeof process.env): Result<ReadonlyArray<string>> {
+        const adminValue = env[FLOCON_ADMIN];
+        if (adminValue == null) {
+            return Result.ok([]);
+        }
+
+        if (/[^a-zA-Z0-9 ,]/.test(adminValue)) {
+            return Result.error(
+                `${FLOCON_ADMIN} contains invalid characters. Valid characters are [^a-zA-Z0-9 ,]. Make sure firebase UIDs are set. To set multiple UIDs, separate them by commas.`
+            );
+        }
+
+        return Result.ok(adminValue.split(',').map(s => s.trim()));
     }
 
     private static entryPasswordProp(
         env: typeof process.env
-    ): Result<EntryPasswordConfig> | undefined {
+    ): Result<EntryPasswordConfig, undefined> | undefined {
         const entryPasswordObject = env[ENTRY_PASSWORD];
         if (entryPasswordObject == null) {
             return undefined;
         }
         const json = tryParseJSON(entryPasswordObject);
         if (json.isError) {
-            return json;
+            return Result.error(undefined);
         }
         const j = E.mapLeft(formatValidationErrors)(entryPassword.decode(json.value));
         if (j._tag === 'Left') {
-            return Result.error(j.left);
+            return Result.error(undefined);
         }
         if (j.right.type !== none) {
             return Result.ok(j.right);
@@ -231,57 +242,60 @@ export class ServerConfigBuilder {
 
     private static firebaseAdminSecretProp(
         env: typeof process.env
-    ): Result<FirebaseAdminSecretConfig> | undefined {
+    ): Result<FirebaseAdminSecretConfig, undefined> | undefined {
         const firebaseAdminSecretObject = env[FIREBASE_ADMIN_SECRET];
         if (firebaseAdminSecretObject == null) {
             return undefined;
         }
         const json = tryParseJSON(firebaseAdminSecretObject);
         if (json.isError) {
-            return json;
+            return Result.error(undefined);
         }
         const j = E.mapLeft(formatValidationErrors)(firebaseAdminSecret.decode(json.value));
         if (j._tag === 'Left') {
-            return Result.error(j.left);
+            return Result.error(undefined);
         }
         return Result.ok(j.right);
     }
 
-    private static sqliteProp(env: typeof process.env): Result<SqliteDatabaseConfig> | undefined {
+    private static sqliteProp(
+        env: typeof process.env
+    ): Result<SqliteDatabaseConfig, undefined> | undefined {
         const sqliteObject = env[SQLITE];
         if (sqliteObject == null) {
             return undefined;
         }
         const json = tryParseJSON(sqliteObject);
         if (json.isError) {
-            return json;
+            return Result.error(undefined);
         }
         const j = E.mapLeft(formatValidationErrors)(sqliteDatabase.decode(json.value));
         if (j._tag === 'Left') {
-            return Result.error(j.left);
+            return Result.error(undefined);
         }
         return Result.ok(j.right);
     }
 
     private static postgresqlProp(
         env: typeof process.env
-    ): Result<PostgresqlDatabaseConfig> | undefined {
+    ): Result<PostgresqlDatabaseConfig, undefined> | undefined {
         const postgresqlObject = env[POSTGRESQL];
         if (postgresqlObject == null) {
             return undefined;
         }
         const json = tryParseJSON(postgresqlObject);
         if (json.isError) {
-            return json;
+            return Result.error(undefined);
         }
         const j = E.mapLeft(formatValidationErrors)(postgresqlDatabase.decode(json.value));
         if (j._tag === 'Left') {
-            return Result.error(j.left);
+            return Result.error(undefined);
         }
         return Result.ok(j.right);
     }
 
     private parseError(envKey: string): Error<string> {
+        // TODO: 英語でも出力する（ADMINのエラーメッセージは英語なため整合性が取れていない）
         return Result.error(`${envKey} の値の記入方法が誤っています。`);
     }
 
@@ -311,6 +325,9 @@ export class ServerConfigBuilder {
     }
 
     private createServerConfig(): Result<ServerConfig> {
+        if (this.admins?.isError === true) {
+            return this.admins;
+        }
         if (this.entryPassword?.isError === true) {
             return this.parseError(ENTRY_PASSWORD);
         }
@@ -357,9 +374,9 @@ export class ServerConfigBuilder {
             sizeQuota: ensureOk(this.uploaderSizeQuota),
             maxFileSize: ensureOk(this.uploaderMaxSize),
         };
-        const result: ServerConfig = {
+        const nonFrozenResult: ServerConfig = {
             accessControlAllowOrigin: this.accessControlAllowOrigin,
-            admins: [],
+            admins: ensureOk(this.admins) ?? [],
             autoMigration: this.autoMigration ?? false,
             herokuDatabaseUrl: this.databaseUrl,
             entryPassword: ensureOk(this.entryPassword),
@@ -372,6 +389,7 @@ export class ServerConfigBuilder {
             uploader: uploaderConfig,
             disableRateLimitExperimental: this.disableRateLimit ?? false,
         };
+        const result = Object.freeze(nonFrozenResult);
         return Result.ok(result);
     }
 

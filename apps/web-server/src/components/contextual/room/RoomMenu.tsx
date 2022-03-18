@@ -45,6 +45,7 @@ import {
     defaultPanelOpacity,
     minPanelOpacity,
 } from '../../../atoms/roomConfig/types/roomConfig/resources';
+import { Styles } from '../../../styles';
 
 const panelOpacityAtom = atom(
     get => get(roomConfigAtom)?.panelOpacity,
@@ -1028,10 +1029,10 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
                             編集
                         </Menu.Item>
                         <Menu.Item onClick={() => setIsDeleteRoomModalVisible(true)}>
-                            <span style={{ color: 'red' }}>削除</span>
+                            <span style={Styles.Text.danger}>削除</span>
                         </Menu.Item>
                         <Menu.Item onClick={() => setIsResetMessagesModalVisible(true)}>
-                            <span style={{ color: 'red' }}>ログの初期化</span>
+                            <span style={Styles.Text.danger}>ログの初期化</span>
                         </Menu.Item>
                         <Menu.Divider />
                         <Menu.Item onClick={() => setIsGenerateSimpleLogModalVisible(true)}>

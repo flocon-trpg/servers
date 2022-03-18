@@ -60,6 +60,7 @@ import {
     ChangeParticipantNameArgs,
     CreateRoomInput,
     DeleteRoomArgs,
+    DeleteRoomAsAdminInput,
     EditMessageArgs,
     GetLogArgs,
     GetMessagesArgs,
@@ -166,13 +167,15 @@ import {
     PositiveInt,
 } from '@kizahasi/ot-string';
 import { ParticipantRole as ParticipantRoleEnum } from '../../../enums/ParticipantRole';
-import { ENTRY } from '../../../roles';
+import { ADMIN, ENTRY } from '../../../roles';
 import { ParticipantRoleType } from '../../../enums/ParticipantRoleType';
 import { RateLimitMiddleware } from '../../middlewares/RateLimitMiddleware';
 import { convertToMaxLength100String } from '../../../utils/convertToMaxLength100String';
 import { GetRoomAsListItemResult } from '../../results/GetRoomAsListItemResult';
 import { ResetRoomMessagesFailureType } from '../../../enums/ResetRoomMessagesFailureType';
 import { hash } from 'bcrypt';
+import { DeleteRoomAsAdminResult } from '../../results/DeleteRoomAsAdminResult';
+import { DeleteRoomAsAdminFailureType } from '../../../enums/DeleteRoomAsAdminFailureType';
 
 const bcryptSaltRounds = 10;
 
@@ -205,6 +208,7 @@ type DeleteRoomPayload = {
     type: 'deleteRoomPayload';
     roomId: string;
     deletedBy: string;
+    deletedByAdmin: boolean;
 };
 
 export type RoomConnectionUpdatePayload = {
@@ -1203,6 +1207,53 @@ export class RoomResolver {
                     type: 'deleteRoomPayload',
                     roomId,
                     deletedBy: authorizedUserUid,
+                    deletedByAdmin: false,
+                },
+            };
+        };
+
+        const result = await context.promiseQueue.next(queue);
+        if (result.type === queueLimitReached) {
+            throw serverTooBusyMessage;
+        }
+        if (result.value.payload != null) {
+            await publishRoomEvent(pubSub, result.value.payload);
+        }
+        return result.value.result;
+    }
+
+    @Mutation(() => DeleteRoomAsAdminResult, { description: 'since v0.8.0' })
+    @Authorized(ADMIN)
+    @UseMiddleware(RateLimitMiddleware(2))
+    public async deleteRoomAsAdmin(
+        @Args() args: DeleteRoomAsAdminInput,
+        @Ctx() context: ResolverContext,
+        @PubSub() pubSub: PubSubEngine
+    ): Promise<DeleteRoomAsAdminResult> {
+        const queue = async (): Promise<{
+            result: DeleteRoomAsAdminResult;
+            payload: RoomEventPayload | undefined;
+        }> => {
+            const em = context.em;
+            const authorizedUserUid = ensureAuthorizedUser(context).userUid;
+
+            const room = await em.findOne(Room$MikroORM.Room, { id: args.id });
+            if (room == null) {
+                return {
+                    result: { failureType: DeleteRoomAsAdminFailureType.NotFound },
+                    payload: undefined,
+                };
+            }
+            const roomId = room.id;
+            await Room$MikroORM.deleteRoom(em, room);
+            await em.flush();
+            return {
+                result: { failureType: undefined },
+                payload: {
+                    type: 'deleteRoomPayload',
+                    roomId,
+                    deletedBy: authorizedUserUid,
+                    deletedByAdmin: true,
                 },
             };
         };
@@ -2622,7 +2673,7 @@ export class RoomResolver {
     }
 
     // graphql-wsでRoomOperatedのConnectionを検知しているので、もしこれのメソッドやArgsがリネームもしくは削除されるときはそちらも変える。
-    // CONSIDER: return undefined; とすると、{ roomEvent: null } というオブジェクトが全員に通知される。そのため、それを見るとイベントの内容を予想できてしまう可能性がある。例えば1セッションしか行われていない場合、秘話が送られた可能性が高い、など。この問題はおそらくfilterプロパティで解決できるかもしれない。
+    // CONSIDER: return undefined; とすると、{ roomEvent: null } というオブジェクトが全員に通知される。そのため、それを見るとイベントの内容を予想できてしまう可能性がある。例えばサイト全体で1セッションしか進行していない場合、何らかの秘話が送られた可能性が高い、など。この問題はおそらくfilterプロパティで解決できるかもしれない。
     @Subscription(() => RoomEvent, {
         topics: ROOM_EVENT,
         nullable: true,
@@ -2733,6 +2784,7 @@ export class RoomResolver {
                 deleteRoomOperation: {
                     __tstype: deleteRoomOperation,
                     deletedBy: payload.deletedBy,
+                    deletedByAdmin: payload.deletedByAdmin,
                 },
                 isRoomMessagesResetEvent: false,
             };

@@ -14,6 +14,7 @@ import {
     Result,
 } from 'antd';
 import {
+    AmIAdminDocument,
     EntryToServerDocument,
     EntryToServerResultType,
     IsEntryDocument,
@@ -26,7 +27,7 @@ import { NotSignInResult } from './result/NotSignInResult';
 import { LoadingResult } from './result/LoadingResult';
 import * as Icon from '@ant-design/icons';
 import { useSignOut } from '../../hooks/useSignOut';
-import { useApolloClient, useMutation } from '@apollo/client';
+import { useApolloClient, useMutation, useQuery } from '@apollo/client';
 import { authNotFound, loading, MyAuthContext, notSignIn } from '../../contexts/MyAuthContext';
 import { FirebaseAuthenticationIdTokenContext } from '../../contexts/FirebaseAuthenticationIdTokenContext';
 const { Header, Content } = AntdLayout;
@@ -120,6 +121,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
     hideHeader: hideHeaderProp,
 }: PropsWithChildren<Props>) => {
     const router = useRouter();
+    const amIAdminQueryResult = useQuery(AmIAdminDocument);
     const myAuth = React.useContext(MyAuthContext);
     const myUserUid = typeof myAuth === 'string' ? null : myAuth.uid;
     const isAnonymous = typeof myAuth === 'string' ? false : myAuth.isAnonymous;
@@ -257,6 +259,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                                 {typeof myAuth === 'string' ? null : (
                                     <div style={{ color: 'white' }}>
                                         {myAuth.displayName} - {myAuth.uid}
+                                        {amIAdminQueryResult.data == null ? null : ' (管理者)'}
                                     </div>
                                 )}
                                 {typeof myAuth === 'string' ? (
