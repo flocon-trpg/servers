@@ -65,7 +65,7 @@ export class TestRoomEventSubscription {
             .compact()
             .value();
         expect(roomOperationEvents).toHaveLength(1);
-        return roomOperationEvents[0];
+        return roomOperationEvents[0]!;
     }
 
     public toBeExactlyOneRoomPrivateMessageEvent() {
@@ -81,7 +81,23 @@ export class TestRoomEventSubscription {
             .compact()
             .value();
         expect(roomPrivateMessages).toHaveLength(1);
-        return roomPrivateMessages[0];
+        return roomPrivateMessages[0]!;
+    }
+
+    public toBeExactlyOneRoomPublicMessageEvent() {
+        expect(this.values).toHaveLength(1);
+        const roomPublicMessages = _(this.values)
+            .map(x => {
+                const roomMessageEvent = x.roomEvent?.roomMessageEvent;
+                if (roomMessageEvent?.__typename !== 'RoomPublicMessage') {
+                    return undefined;
+                }
+                return roomMessageEvent;
+            })
+            .compact()
+            .value();
+        expect(roomPublicMessages).toHaveLength(1);
+        return roomPublicMessages[0]!;
     }
 
     public toBeExactlyOnePieceLogEvent() {
@@ -97,7 +113,7 @@ export class TestRoomEventSubscription {
             .compact()
             .value();
         expect(pieceLogs).toHaveLength(1);
-        return pieceLogs[0];
+        return pieceLogs[0]!;
     }
 }
 
