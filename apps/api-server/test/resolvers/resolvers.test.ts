@@ -112,6 +112,7 @@ namespace Assert {
     export namespace CreateRoomMutation {
         export const toBeSuccess = (source: OperationResult<CreateRoomMutation>) => {
             if (source.data?.result.__typename !== 'CreateRoomSuccessResult') {
+                console.error('failed at CreateRoomMutation.toBeSuccess', source);
                 expect(source.data?.result.__typename).toBe('CreateRoomSuccessResult');
                 throw new Error('Guard');
             }
@@ -157,6 +158,7 @@ namespace Assert {
     export namespace GetMessagesQuery {
         export const toBeSuccess = (source: OperationResult<GetMessagesQuery>) => {
             if (source.data?.result.__typename !== 'RoomMessages') {
+                console.error('failed at GetMessagesQuery.toBeSuccess', source);
                 expect(source.data?.result.__typename).toBe('RoomMessages');
                 throw new Error('Guard');
             }
@@ -175,6 +177,7 @@ namespace Assert {
     export namespace GetRoomsListQuery {
         export const toBeSuccess = (source: OperationResult<GetRoomsListQuery>) => {
             if (source.data?.result.__typename !== 'GetRoomsListSuccessResult') {
+                console.error('failed at GetRoomsListQuery.toBeSuccess', source);
                 expect(source.data?.result.__typename).toBe('GetRoomsListSuccessResult');
                 throw new Error('Guard');
             }
@@ -185,6 +188,7 @@ namespace Assert {
     export namespace GetRoomQuery {
         export const toBeSuccess = (source: OperationResult<GetRoomQuery>) => {
             if (source.data?.result.__typename !== 'GetJoinedRoomResult') {
+                console.error('failed at GetRoomQuery.toBeSuccess', source);
                 expect(source.data?.result.__typename).toBe('GetJoinedRoomResult');
                 throw new Error('Guard');
             }
@@ -213,7 +217,7 @@ namespace Assert {
             source: OperationResult<JoinRoomAsPlayerMutation | JoinRoomAsSpectatorMutation>
         ) => {
             if (source.data?.result.__typename !== 'JoinRoomSuccessResult') {
-                console.error('failed at JoinRoomMutation.toBeSuccess', source.data);
+                console.error('failed at JoinRoomMutation.toBeSuccess', source);
                 expect(source.data?.result.__typename).toBe('JoinRoomSuccessResult');
                 throw new Error('Guard');
             }
@@ -241,6 +245,7 @@ namespace Assert {
         export const toBeSuccess = async (source: Promise<OperationResult<OperateMutation>>) => {
             const sourceResult = await source;
             if (sourceResult.data?.result.__typename !== 'OperateRoomSuccessResult') {
+                console.error('failed at OperateMutation.toBeSuccess', sourceResult);
                 expect(sourceResult.data?.result.__typename).toBe('OperateRoomSuccessResult');
                 throw new Error('Guard');
             }
