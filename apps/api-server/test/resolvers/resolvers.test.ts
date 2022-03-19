@@ -349,7 +349,7 @@ describe.each([
             try {
                 await main(server);
             } finally {
-                server.close();
+                await server.close();
             }
         };
 

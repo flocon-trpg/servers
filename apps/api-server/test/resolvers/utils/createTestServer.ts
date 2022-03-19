@@ -144,13 +144,10 @@ export const createTestServer = async ({
         port: 4000,
     });
 
-    // テスト終了時のための後処理
-    result.on('close', () => {
-        const main = async () => {
+    return {
+        close: async () => {
+            result.close();
             await $orm.close();
-        };
-        main();
-    });
-
-    return result;
+        },
+    };
 };
