@@ -421,7 +421,7 @@ export const mapRecordOperation = <TReplace1, TReplace2, TUpdate1, TUpdate2>({
         | undefined
     >;
     mapReplace: (state: TReplace1) => TReplace2;
-    mapUpdate: (state: TUpdate1) => TUpdate2;
+    mapUpdate: (operation: TUpdate1) => TUpdate2;
 }): Record<
     string,
     { type: typeof replace; replace: TReplace2 } | { type: typeof update; update: TUpdate2 }
