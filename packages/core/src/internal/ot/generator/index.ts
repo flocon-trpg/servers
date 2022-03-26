@@ -18,6 +18,7 @@ import {
     recordToArray,
     recordToMap,
     right,
+    toBeNever,
 } from '@flocon-trpg/utils';
 import { isIdRecord } from '../util/record';
 
@@ -104,6 +105,29 @@ export type State<T extends AnyTemplate> = T extends OtValueTemplate
     ? { readonly [P in keyof U3]: State<U3[P]> }
     : unknown;
 
+export const state = <T extends AnyTemplate>(source: T): t.Type<State<T>> => {
+    switch (source.type) {
+        case atomic: {
+            switch (source.mode) {
+                case replace:
+                    return source.value;
+                case ot:
+                    return t.string as any;
+                default:
+                    return toBeNever(source);
+            }
+        }
+        case record: {
+            return t.record(t.string, state(source.value)) as any;
+        }
+        case object: {
+            return t.exact(t.type(mapRecord(source.value, x => state(x)))) as any;
+        }
+        default:
+            return toBeNever(source);
+    }
+};
+
 export type UpOperation<T extends AnyTemplate> = T extends OtValueTemplate
     ? TextOperation.UpOperation
     : T extends ReplaceValueTemplate<infer U1>
@@ -115,6 +139,29 @@ export type UpOperation<T extends AnyTemplate> = T extends OtValueTemplate
     : T extends ObjectValueTemplate<infer U3>
     ? { readonly [P in keyof U3]?: UpOperation<U3[P]> }
     : unknown;
+
+export const upOperation = <T extends AnyTemplate>(source: T): t.Type<UpOperation<T>> => {
+    switch (source.type) {
+        case atomic: {
+            switch (source.mode) {
+                case replace:
+                    return t.type({ newValue: source.value }) as any;
+                case ot:
+                    return TextOperation.upOperation as any;
+                default:
+                    return toBeNever(source);
+            }
+        }
+        case record: {
+            return t.record(t.string, upOperation(source.value)) as any;
+        }
+        case object: {
+            return t.exact(t.partial(mapRecord(source.value, x => upOperation(x)))) as any;
+        }
+        default:
+            return toBeNever(source);
+    }
+};
 
 export type DownOperation<T extends AnyTemplate> = T extends OtValueTemplate
     ? TextOperation.DownOperation
@@ -129,6 +176,29 @@ export type DownOperation<T extends AnyTemplate> = T extends OtValueTemplate
     : T extends ObjectValueTemplate<infer U3>
     ? { readonly [P in keyof U3]?: DownOperation<U3[P]> }
     : unknown;
+
+export const downOperation = <T extends AnyTemplate>(source: T): t.Type<DownOperation<T>> => {
+    switch (source.type) {
+        case atomic: {
+            switch (source.mode) {
+                case replace:
+                    return t.type({ oldValue: source.value }) as any;
+                case ot:
+                    return TextOperation.downOperation as any;
+                default:
+                    return toBeNever(source);
+            }
+        }
+        case record: {
+            return t.record(t.string, downOperation(source.value)) as any;
+        }
+        case object: {
+            return t.exact(t.partial(mapRecord(source.value, x => downOperation(x)))) as any;
+        }
+        default:
+            return toBeNever(source);
+    }
+};
 
 export type TwoWayOperation<T extends AnyTemplate> = T extends OtValueTemplate
     ? TextOperation.TwoWayOperation
