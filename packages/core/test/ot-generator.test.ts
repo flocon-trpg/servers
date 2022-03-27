@@ -63,6 +63,23 @@ namespace ObjectValue {
     export type UpOperation = UpOperationType<typeof template>;
     export type DownOperation = DownOperationType<typeof template>;
     export type TwoWayOperation = TwoWayOperationType<typeof template>;
+
+    export namespace NoVersion {
+        export const template = obj(
+            {
+                value1: ReplaceValue.template,
+                value2: ReplaceValue.template,
+                value3: ReplaceValue.template,
+                value4: ReplaceValue.template,
+            },
+            undefined,
+            undefined
+        );
+        export type State = StateType<typeof template>;
+        export type UpOperation = UpOperationType<typeof template>;
+        export type DownOperation = DownOperationType<typeof template>;
+        export type TwoWayOperation = TwoWayOperationType<typeof template>;
+    }
 }
 
 namespace RecordValue {
@@ -150,6 +167,22 @@ describe('state', () => {
         }
         expect(actual.right).toEqual(expected.value);
     });
+
+    it.each`
+        source              | expected
+        ${{}}               | ${Option.some({})}
+        ${{ $v: 1, $r: 2 }} | ${Option.none()}
+    `(
+        'tests ObjectTemplate(NoVersion) {source: $source, expected: $expected}',
+        ({ source, expected }) => {
+            const actual = state(ObjectValue.NoVersion.template).decode(source);
+            if (actual._tag === 'Left') {
+                expect(expected.isNone).toBe(true);
+                return;
+            }
+            expect(actual.right).toEqual(expected.value);
+        }
+    );
 
     it.each`
         source                                                                        | expected
@@ -255,6 +288,22 @@ describe('upOperation', () => {
     });
 
     it.each`
+        source              | expected
+        ${{}}               | ${Option.some({})}
+        ${{ $v: 1, $r: 2 }} | ${Option.none()}
+    `(
+        'tests ObjectTemplate(NoVersion) {source: $source, expected: $expected}',
+        ({ source, expected }) => {
+            const actual = upOperation(ObjectValue.NoVersion.template).decode(source);
+            if (actual._tag === 'Left') {
+                expect(expected.isNone).toBe(true);
+                return;
+            }
+            expect(actual.right).toEqual(expected.value);
+        }
+    );
+
+    it.each`
         source                                                                                                    | expected
         ${1}                                                                                                      | ${Option.none()}
         ${undefined}                                                                                              | ${Option.none()}
@@ -356,6 +405,22 @@ describe('downOperation', () => {
         }
         expect(actual.right).toEqual(expected.value);
     });
+
+    it.each`
+        source              | expected
+        ${{}}               | ${Option.some({})}
+        ${{ $v: 1, $r: 2 }} | ${Option.none()}
+    `(
+        'tests ObjectTemplate(NoVersion) {source: $source, expected: $expected}',
+        ({ source, expected }) => {
+            const actual = downOperation(ObjectValue.NoVersion.template).decode(source);
+            if (actual._tag === 'Left') {
+                expect(expected.isNone).toBe(true);
+                return;
+            }
+            expect(actual.right).toEqual(expected.value);
+        }
+    );
 
     it.each`
         source                                                                                                    | expected

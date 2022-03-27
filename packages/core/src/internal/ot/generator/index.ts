@@ -77,8 +77,8 @@ export const createRecordValueTemplate = <T extends AnyTemplate>(value: T) => {
 
 export type ObjectValueTemplate<
     T extends ReadonlyRecord<string, AnyTemplate>,
-    V extends number,
-    R extends number
+    V extends number | undefined,
+    R extends number | undefined
 > = {
     type: typeof object;
     $v: V;
@@ -90,8 +90,8 @@ export type ObjectValueTemplate<
 
 export const createObjectValueTemplate = <
     T extends ReadonlyRecord<string, AnyTemplate>,
-    V extends number,
-    R extends number
+    V extends number | undefined,
+    R extends number | undefined
 >(
     value: T,
     $v: V,
@@ -114,8 +114,8 @@ type AnyTemplate =
       }
     | {
           type: typeof object;
-          $v: number;
-          $r: number;
+          $v: number | undefined;
+          $r: number | undefined;
           value: { readonly [P in string]: AnyTemplate };
       };
 
@@ -155,8 +155,8 @@ export const state = <T extends AnyTemplate>(source: T): t.Type<State<T>> => {
             return t.exact(
                 t.intersection([
                     t.type({
-                        $v: t.literal(source.$v),
-                        $r: t.literal(source.$r),
+                        $v: source.$v == null ? t.undefined : t.literal(source.$v),
+                        $r: source.$r == null ? t.undefined : t.literal(source.$r),
                     }),
                     t.partial(mapRecord(source.value, value => state(value))),
                 ])
@@ -207,8 +207,8 @@ export const upOperation = <T extends AnyTemplate>(source: T): t.Type<UpOperatio
             return t.exact(
                 t.intersection([
                     t.type({
-                        $v: t.literal(source.$v),
-                        $r: t.literal(source.$r),
+                        $v: source.$v == null ? t.undefined : t.literal(source.$v),
+                        $r: source.$r == null ? t.undefined : t.literal(source.$r),
                     }),
                     t.partial(mapRecord(source.value, value => upOperation(value))),
                 ])
@@ -261,8 +261,8 @@ export const downOperation = <T extends AnyTemplate>(source: T): t.Type<DownOper
             return t.exact(
                 t.intersection([
                     t.type({
-                        $v: t.literal(source.$v),
-                        $r: t.literal(source.$r),
+                        $v: source.$v == null ? t.undefined : t.literal(source.$v),
+                        $r: source.$r == null ? t.undefined : t.literal(source.$r),
                     }),
                     t.partial(mapRecord(source.value, value => downOperation(value))),
                 ])
