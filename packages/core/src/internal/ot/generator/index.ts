@@ -24,11 +24,15 @@ import { isIdRecord } from '../util/record';
 
 type ReadonlyRecord<TKey extends keyof any, TValue> = { readonly [P in TKey]: TValue };
 
+export const $v = '$v';
+export const $r = '$r';
 export const atomic = 'atomic';
 export const replace = 'replace';
 export const ot = 'ot';
 export const record = 'record';
 export const object = 'object';
+
+const isKeyToIgnore = (key: string) => key === $v || key === $r;
 
 export type ReplaceValueTemplate<T extends Any> = {
     type: typeof atomic;
@@ -67,18 +71,32 @@ export const createRecordValueTemplate = <T extends AnyTemplate>(value: T) => {
     } as const;
 };
 
-export type ObjectValueTemplate<T extends ReadonlyRecord<string, AnyTemplate>> = {
+export type ObjectValueTemplate<
+    T extends ReadonlyRecord<string, AnyTemplate>,
+    V extends number,
+    R extends number
+> = {
     type: typeof object;
+    $v: V;
+    $r: R;
     value: {
         readonly [P in keyof T]: T[P];
     };
 };
 
-export const createObjectValueTemplate = <T extends ReadonlyRecord<string, AnyTemplate>>(
-    value: T
+export const createObjectValueTemplate = <
+    T extends ReadonlyRecord<string, AnyTemplate>,
+    V extends number,
+    R extends number
+>(
+    value: T,
+    $v: V,
+    $r: R
 ) => {
     return {
         type: object,
+        $v,
+        $r,
         value,
     } as const;
 };
@@ -92,6 +110,8 @@ type AnyTemplate =
       }
     | {
           type: typeof object;
+          $v: number;
+          $r: number;
           value: { readonly [P in string]: AnyTemplate };
       };
 
@@ -101,8 +121,13 @@ export type State<T extends AnyTemplate> = T extends OtValueTemplate
     ? t.TypeOf<U1>
     : T extends RecordValueTemplate<infer U2>
     ? { readonly [P in string]?: State<U2> | undefined }
-    : T extends ObjectValueTemplate<infer U3>
-    ? { readonly [P in keyof U3]: State<U3[P]> }
+    : T extends ObjectValueTemplate<infer U3, infer UV, infer UR>
+    ? {
+          $v: UV;
+          $r: UR;
+      } & {
+          readonly [P in keyof U3]: State<U3[P]>;
+      }
     : unknown;
 
 export const state = <T extends AnyTemplate>(source: T): t.Type<State<T>> => {
@@ -121,7 +146,15 @@ export const state = <T extends AnyTemplate>(source: T): t.Type<State<T>> => {
             return t.record(t.string, state(source.value)) as any;
         }
         case object: {
-            return t.exact(t.type(mapRecord(source.value, x => state(x)))) as any;
+            return t.exact(
+                t.intersection([
+                    t.type({
+                        $v: t.literal(source.$v),
+                        $r: t.literal(source.$r),
+                    }),
+                    t.partial(mapRecord(source.value, value => state(value))),
+                ])
+            ) as any;
         }
         default:
             return toBeNever(source);
@@ -136,8 +169,11 @@ export type UpOperation<T extends AnyTemplate> = T extends OtValueTemplate
     ? {
           readonly [P in string]?: RecordUpOperationElement<State<U2>, UpOperation<U2>> | undefined;
       }
-    : T extends ObjectValueTemplate<infer U3>
-    ? { readonly [P in keyof U3]?: UpOperation<U3[P]> }
+    : T extends ObjectValueTemplate<infer U3, infer UV, infer UR>
+    ? {
+          $v: UV;
+          $r: UR;
+      } & { readonly [P in keyof U3]?: UpOperation<U3[P]> }
     : unknown;
 
 export const upOperation = <T extends AnyTemplate>(source: T): t.Type<UpOperation<T>> => {
@@ -156,7 +192,15 @@ export const upOperation = <T extends AnyTemplate>(source: T): t.Type<UpOperatio
             return t.record(t.string, upOperation(source.value)) as any;
         }
         case object: {
-            return t.exact(t.partial(mapRecord(source.value, x => upOperation(x)))) as any;
+            return t.exact(
+                t.intersection([
+                    t.type({
+                        $v: t.literal(source.$v),
+                        $r: t.literal(source.$r),
+                    }),
+                    t.partial(mapRecord(source.value, value => upOperation(value))),
+                ])
+            ) as any;
         }
         default:
             return toBeNever(source);
@@ -173,8 +217,11 @@ export type DownOperation<T extends AnyTemplate> = T extends OtValueTemplate
               | RecordDownOperationElement<State<U2>, DownOperation<U2>>
               | undefined;
       }
-    : T extends ObjectValueTemplate<infer U3>
-    ? { readonly [P in keyof U3]?: DownOperation<U3[P]> }
+    : T extends ObjectValueTemplate<infer U3, infer UV, infer UR>
+    ? {
+          $v: UV;
+          $r: UR;
+      } & { readonly [P in keyof U3]?: DownOperation<U3[P]> }
     : unknown;
 
 export const downOperation = <T extends AnyTemplate>(source: T): t.Type<DownOperation<T>> => {
@@ -193,7 +240,15 @@ export const downOperation = <T extends AnyTemplate>(source: T): t.Type<DownOper
             return t.record(t.string, downOperation(source.value)) as any;
         }
         case object: {
-            return t.exact(t.partial(mapRecord(source.value, x => downOperation(x)))) as any;
+            return t.exact(
+                t.intersection([
+                    t.type({
+                        $v: t.literal(source.$v),
+                        $r: t.literal(source.$r),
+                    }),
+                    t.partial(mapRecord(source.value, value => downOperation(value))),
+                ])
+            ) as any;
         }
         default:
             return toBeNever(source);
@@ -213,8 +268,11 @@ export type TwoWayOperation<T extends AnyTemplate> = T extends OtValueTemplate
               | RecordTwoWayOperationElement<State<U2>, TwoWayOperation<U2>>
               | undefined;
       }
-    : T extends ObjectValueTemplate<infer U4>
-    ? { readonly [P in keyof U4]?: TwoWayOperation<U4[P]> }
+    : T extends ObjectValueTemplate<infer U4, infer UV, infer UR>
+    ? {
+          $v: UV;
+          $r: UR;
+      } & { readonly [P in keyof U4]?: TwoWayOperation<U4[P]> }
     : unknown;
 
 export const toUpOperation =
@@ -246,7 +304,10 @@ export const toUpOperation =
             case object: {
                 return mapRecord(
                     twoWayOperation as Record<string, TwoWayOperation<AnyTemplate>>,
-                    (operationElement, key) => toUpOperation(template.value[key]!)(operationElement)
+                    (operationElement, key) =>
+                        isKeyToIgnore(key)
+                            ? operationElement
+                            : toUpOperation(template.value[key]!)(operationElement)
                 ) as any;
             }
         }
@@ -282,7 +343,9 @@ export const toDownOperation =
                 return mapRecord(
                     twoWayOperation as Record<string, TwoWayOperation<AnyTemplate>>,
                     (operationElement, key) =>
-                        toDownOperation(template.value[key]!)(operationElement)
+                        isKeyToIgnore(key)
+                            ? operationElement
+                            : toDownOperation(template.value[key]!)(operationElement)
                 ) as any;
             }
         }
@@ -321,6 +384,9 @@ export const apply =
                 for (const { key, value } of recordToArray(
                     operation as Record<string, UpOperation<AnyTemplate>>
                 )) {
+                    if (isKeyToIgnore(key)) {
+                        continue;
+                    }
                     const applied = apply(template.value[key]!)({
                         state: state[key],
                         operation: value,
@@ -368,6 +434,9 @@ export const applyBack =
                 for (const { key, value } of recordToArray(
                     operation as Record<string, DownOperation<AnyTemplate>>
                 )) {
+                    if (isKeyToIgnore(key)) {
+                        continue;
+                    }
                     const applied = applyBack(template.value[key]!)({
                         state: state[key],
                         operation: value,
@@ -418,8 +487,14 @@ export const composeDownOperation =
             case object: {
                 const firstMap = recordToMap(first);
                 const secondMap = recordToMap(second);
-                const result: Record<string, DownOperation<AnyTemplate> | undefined> = {};
+                const result: Record<string, DownOperation<AnyTemplate> | number | undefined> = {
+                    [$v]: template.$v,
+                    [$r]: template.$r,
+                };
                 for (const [key, value] of groupJoinMap(firstMap, secondMap)) {
+                    if (isKeyToIgnore(key)) {
+                        continue;
+                    }
                     switch (value.type) {
                         case left:
                             result[key] = value.left;
@@ -483,10 +558,16 @@ export const restore =
             }
             case object: {
                 const prevState = { ...nextState };
-                const twoWayOperation: Record<string, TwoWayOperation<T> | undefined> = {};
+                const twoWayOperation: Record<string, TwoWayOperation<T> | number | undefined> = {
+                    [$v]: template.$v,
+                    [$r]: template.$r,
+                };
                 for (const { key, value } of recordToArray(
                     downOperation as Record<string, DownOperation<AnyTemplate>>
                 )) {
+                    if (isKeyToIgnore(key)) {
+                        continue;
+                    }
                     const restored = restore(template.value[key]!)({
                         nextState: nextState[key],
                         downOperation: value,
@@ -535,8 +616,14 @@ export const diff =
             case object: {
                 const prevStateMap = recordToMap(prevState);
                 const nextStateMap = recordToMap(nextState);
-                const result: Record<string, TwoWayOperation<AnyTemplate> | undefined> = {};
+                const result: Record<string, TwoWayOperation<AnyTemplate> | number | undefined> = {
+                    [$v]: template.$v,
+                    [$r]: template.$r,
+                };
                 for (const [key, value] of groupJoinMap(prevStateMap, nextStateMap)) {
+                    if (isKeyToIgnore(key)) {
+                        continue;
+                    }
                     result[key] = diff(template.value[key]!)({
                         prevState: value.left,
                         nextState: value.right,
@@ -595,9 +682,18 @@ export const clientTransform =
             case object: {
                 const firstMap = recordToMap(first);
                 const secondMap = recordToMap(second);
-                const firstPrime: Record<string, UpOperation<AnyTemplate> | undefined> = {};
-                const secondPrime: Record<string, UpOperation<AnyTemplate> | undefined> = {};
+                const firstPrime: Record<string, UpOperation<AnyTemplate> | number | undefined> = {
+                    [$v]: template.$v,
+                    [$r]: template.$r,
+                };
+                const secondPrime: Record<string, UpOperation<AnyTemplate> | number | undefined> = {
+                    [$v]: template.$v,
+                    [$r]: template.$r,
+                };
                 for (const [key, value] of groupJoinMap(firstMap, secondMap)) {
+                    if (isKeyToIgnore(key)) {
+                        continue;
+                    }
                     switch (value.type) {
                         case left:
                             firstPrime[key] = value.left;

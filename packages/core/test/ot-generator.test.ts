@@ -40,12 +40,16 @@ namespace OtString {
 }
 
 namespace ObjectValue {
-    export const template = obj({
-        value1: ReplaceValue.template,
-        value2: ReplaceValue.template,
-        value3: ReplaceValue.template,
-        value4: ReplaceValue.template,
-    });
+    export const template = obj(
+        {
+            value1: ReplaceValue.template,
+            value2: ReplaceValue.template,
+            value3: ReplaceValue.template,
+            value4: ReplaceValue.template,
+        },
+        1,
+        2
+    );
     export type State = StateType<typeof template>;
     export type UpOperation = UpOperationType<typeof template>;
     export type DownOperation = DownOperationType<typeof template>;
@@ -54,9 +58,13 @@ namespace ObjectValue {
 
 namespace RecordValue {
     export const template = rec(
-        obj({
-            value: ReplaceValue.template,
-        })
+        obj(
+            {
+                value: ReplaceValue.template,
+            },
+            1,
+            2
+        )
     );
     export type State = StateType<typeof template>;
     export type DownOperation = DownOperationType<typeof template>;
@@ -97,13 +105,15 @@ describe('state', () => {
     });
 
     it.each`
-        source                                     | expected
-        ${1}                                       | ${Option.none()}
-        ${undefined}                               | ${Option.none()}
-        ${{}}                                      | ${Option.some({})}
-        ${{ value1: 1, value2: 2 }}                | ${Option.some({ value1: 1, value2: 2 })}
-        ${{ value1: 1, value2: 2, invalidKey: 3 }} | ${Option.some({ value1: 1, value2: 2 })}
-        ${{ value1: 1, value2: '2' }}              | ${Option.none()}
+        source                                                   | expected
+        ${1}                                                     | ${Option.none()}
+        ${undefined}                                             | ${Option.none()}
+        ${{}}                                                    | ${Option.none()}
+        ${{ $v: 10, $r: 20 }}                                    | ${Option.none()}
+        ${{ $v: 1, $r: 2 }}                                      | ${Option.some({ $v: 1, $r: 2 })}
+        ${{ $v: 1, $r: 2, value1: 1, value2: 2 }}                | ${Option.some({ $v: 1, $r: 2, value1: 1, value2: 2 })}
+        ${{ $v: 1, $r: 2, value1: 1, value2: 2, invalidKey: 3 }} | ${Option.some({ $v: 1, $r: 2, value1: 1, value2: 2 })}
+        ${{ value1: 1, value2: '2' }}                            | ${Option.none()}
     `('tests ObjectTemplate {source: $source, expected: $expected}', ({ source, expected }) => {
         const actual = state(ObjectValue.template).decode(source);
         if (actual._tag === 'Left') {
@@ -114,13 +124,13 @@ describe('state', () => {
     });
 
     it.each`
-        source                                            | expected
-        ${1}                                              | ${Option.none()}
-        ${undefined}                                      | ${Option.none()}
-        ${{}}                                             | ${Option.some({})}
-        ${{ value1: { value: 1 }, value2: { value: 2 } }} | ${Option.some({ value1: { value: 1 }, value2: { value: 2 } })}
-        ${{ value1: 1, value2: 2 }}                       | ${Option.none()}
-        ${{ value1: 1, value2: { value: 2 } }}            | ${Option.none()}
+        source                                                                        | expected
+        ${1}                                                                          | ${Option.none()}
+        ${undefined}                                                                  | ${Option.none()}
+        ${{}}                                                                         | ${Option.some({})}
+        ${{ value1: { $v: 1, $r: 2, value: 1 }, value2: { $v: 1, $r: 2, value: 2 } }} | ${Option.some({ value1: { $v: 1, $r: 2, value: 1 }, value2: { $v: 1, $r: 2, value: 2 } })}
+        ${{ value1: 1, value2: 2 }}                                                   | ${Option.none()}
+        ${{ value1: 1, value2: { $v: 1, $r: 2, value: 2 } }}                          | ${Option.none()}
     `('tests RecordTemplate {source: $source, expected: $expected}', ({ source, expected }) => {
         const actual = state(RecordValue.template).decode(source);
         if (actual._tag === 'Left') {
@@ -176,13 +186,14 @@ describe('upOperation', () => {
         ${'str'}                                                                              | ${Option.none()}
         ${{ value1: 1 }}                                                                      | ${Option.none()}
         ${TextOperation.toUpOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!)} | ${Option.none()}
-        ${{}}                                                                                 | ${Option.some({})}
-        ${{ x: 1 }}                                                                           | ${Option.some({})}
-        ${{ newValue: 1 }}                                                                    | ${Option.some({})}
-        ${{ value1: undefined, value2: undefined }}                                           | ${Option.some({})}
-        ${{ value1: { newValue: 1 } }}                                                        | ${Option.some({ value1: { newValue: 1 } })}
-        ${{ value1: { newValue: 'str' } }}                                                    | ${Option.none()}
-        ${{ value1: { newValue: 1 }, value2: { newValue: 1 } }}                               | ${Option.some({ value1: { newValue: 1 }, value2: { newValue: 1 } })}
+        ${{}}                                                                                 | ${Option.none()}
+        ${{ $v: 10, $r: 20 }}                                                                 | ${Option.none()}
+        ${{ $v: 1, $r: 2 }}                                                                   | ${Option.some({ $v: 1, $r: 2 })}
+        ${{ $v: 1, $r: 2, x: 1 }}                                                             | ${Option.some({ $v: 1, $r: 2 })}
+        ${{ $v: 1, $r: 2, value1: undefined, value2: undefined }}                             | ${Option.some({ $v: 1, $r: 2 })}
+        ${{ $v: 1, $r: 2, value1: { newValue: 1 } }}                                          | ${Option.some({ $v: 1, $r: 2, value1: { newValue: 1 } })}
+        ${{ $v: 1, $r: 2, value1: { newValue: 'str' } }}                                      | ${Option.none()}
+        ${{ $v: 1, $r: 2, value1: { newValue: 1 }, value2: { newValue: 1 } }}                 | ${Option.some({ $v: 1, $r: 2, value1: { newValue: 1 }, value2: { newValue: 1 } })}
     `('tests ObjectTemplate {source: $source, expected: $expected}', ({ source, expected }) => {
         const actual = upOperation(ObjectValue.template).decode(source);
         if (actual._tag === 'Left') {
@@ -193,13 +204,13 @@ describe('upOperation', () => {
     });
 
     it.each`
-        source                                                                        | expected
-        ${1}                                                                          | ${Option.none()}
-        ${undefined}                                                                  | ${Option.none()}
-        ${{}}                                                                         | ${Option.some({})}
-        ${{ value1: { value: { newValue: 1 } }, value2: { value: { newValue: 2 } } }} | ${Option.some({ value1: { value: { newValue: 1 } }, value2: { value: { newValue: 2 } } })}
-        ${{ value1: 1, value2: 2 }}                                                   | ${Option.none()}
-        ${{ value1: 1, value2: { value: { newValue: 2 } } }}                          | ${Option.none()}
+        source                                                                                                    | expected
+        ${1}                                                                                                      | ${Option.none()}
+        ${undefined}                                                                                              | ${Option.none()}
+        ${{}}                                                                                                     | ${Option.some({})}
+        ${{ value1: { $v: 1, $r: 2, value: { newValue: 1 } }, value2: { $v: 1, $r: 2, value: { newValue: 2 } } }} | ${Option.some({ value1: { $v: 1, $r: 2, value: { newValue: 1 } }, value2: { $v: 1, $r: 2, value: { newValue: 2 } } })}
+        ${{ value1: 1, value2: 2 }}                                                                               | ${Option.none()}
+        ${{ value1: 1, value2: { $v: 1, $r: 2, value: { newValue: 2 } } }}                                        | ${Option.none()}
     `('tests RecordTemplate {source: $source, expected: $expected}', ({ source, expected }) => {
         const actual = upOperation(RecordValue.template).decode(source);
         if (actual._tag === 'Left') {
@@ -255,13 +266,14 @@ describe('downOperation', () => {
         ${'str'}                                                                                | ${Option.none()}
         ${{ value1: 1 }}                                                                        | ${Option.none()}
         ${TextOperation.toDownOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!)} | ${Option.none()}
-        ${{}}                                                                                   | ${Option.some({})}
-        ${{ x: 1 }}                                                                             | ${Option.some({})}
-        ${{ oldValue: 1 }}                                                                      | ${Option.some({})}
-        ${{ value1: undefined, value2: undefined }}                                             | ${Option.some({})}
-        ${{ value1: { oldValue: 1 } }}                                                          | ${Option.some({ value1: { oldValue: 1 } })}
-        ${{ value1: { oldValue: 'str' } }}                                                      | ${Option.none()}
-        ${{ value1: { oldValue: 1 }, value2: { oldValue: 1 } }}                                 | ${Option.some({ value1: { oldValue: 1 }, value2: { oldValue: 1 } })}
+        ${{}}                                                                                   | ${Option.none()}
+        ${{ $v: 10, $r: 20 }}                                                                   | ${Option.none()}
+        ${{ $v: 1, $r: 2 }}                                                                     | ${Option.some({ $v: 1, $r: 2 })}
+        ${{ $v: 1, $r: 2, x: 1 }}                                                               | ${Option.some({ $v: 1, $r: 2 })}
+        ${{ $v: 1, $r: 2, value1: undefined, value2: undefined }}                               | ${Option.some({ $v: 1, $r: 2 })}
+        ${{ $v: 1, $r: 2, value1: { oldValue: 1 } }}                                            | ${Option.some({ $v: 1, $r: 2, value1: { oldValue: 1 } })}
+        ${{ $v: 1, $r: 2, value1: { oldValue: 'str' } }}                                        | ${Option.none()}
+        ${{ $v: 1, $r: 2, value1: { oldValue: 1 }, value2: { oldValue: 1 } }}                   | ${Option.some({ $v: 1, $r: 2, value1: { oldValue: 1 }, value2: { oldValue: 1 } })}
     `('tests ObjectTemplate {source: $source, expected: $expected}', ({ source, expected }) => {
         const actual = downOperation(ObjectValue.template).decode(source);
         if (actual._tag === 'Left') {
@@ -272,13 +284,13 @@ describe('downOperation', () => {
     });
 
     it.each`
-        source                                                                        | expected
-        ${1}                                                                          | ${Option.none()}
-        ${undefined}                                                                  | ${Option.none()}
-        ${{}}                                                                         | ${Option.some({})}
-        ${{ value1: { value: { newValue: 1 } }, value2: { value: { newValue: 2 } } }} | ${Option.some({ value1: { value: { newValue: 1 } }, value2: { value: { newValue: 2 } } })}
-        ${{ value1: 1, value2: 2 }}                                                   | ${Option.none()}
-        ${{ value1: 1, value2: { value: { newValue: 2 } } }}                          | ${Option.none()}
+        source                                                                                                    | expected
+        ${1}                                                                                                      | ${Option.none()}
+        ${undefined}                                                                                              | ${Option.none()}
+        ${{}}                                                                                                     | ${Option.some({})}
+        ${{ value1: { $v: 1, $r: 2, value: { oldValue: 1 } }, value2: { $v: 1, $r: 2, value: { oldValue: 2 } } }} | ${Option.some({ value1: { $v: 1, $r: 2, value: { oldValue: 1 } }, value2: { $v: 1, $r: 2, value: { oldValue: 2 } } })}
+        ${{ value1: 1, value2: 2 }}                                                                               | ${Option.none()}
+        ${{ value1: 1, value2: { $v: 1, $r: 2, value: { oldValue: 2 } } }}                                        | ${Option.none()}
     `('tests RecordTemplate {source: $source, expected: $expected}', ({ source, expected }) => {
         const actual = downOperation(RecordValue.template).decode(source);
         if (actual._tag === 'Left') {
@@ -316,6 +328,8 @@ describe('toUpOperation', () => {
 
     it('tests ObjectTemplate', () => {
         const source: ObjectValue.TwoWayOperation = {
+            $v: 1,
+            $r: 2,
             value1: {
                 oldValue: 11,
                 newValue: 12,
@@ -327,6 +341,8 @@ describe('toUpOperation', () => {
         };
 
         expect(toUpOperation(ObjectValue.template)(source)).toEqual({
+            $v: 1,
+            $r: 2,
             value1: {
                 newValue: 12,
             },
@@ -341,6 +357,8 @@ describe('toUpOperation', () => {
             key1: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         oldValue: 11,
                         newValue: 12,
@@ -350,7 +368,11 @@ describe('toUpOperation', () => {
             key2: {
                 type: replace,
                 replace: {
-                    oldValue: { value: 21 },
+                    oldValue: {
+                        $v: 1,
+                        $r: 2,
+                        value: 21,
+                    },
                     newValue: undefined,
                 },
             },
@@ -358,7 +380,11 @@ describe('toUpOperation', () => {
                 type: replace,
                 replace: {
                     oldValue: undefined,
-                    newValue: { value: 32 },
+                    newValue: {
+                        $v: 1,
+                        $r: 2,
+                        value: 32,
+                    },
                 },
             },
             key4: undefined,
@@ -368,6 +394,8 @@ describe('toUpOperation', () => {
             key1: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         newValue: 12,
                     },
@@ -382,7 +410,11 @@ describe('toUpOperation', () => {
             key3: {
                 type: replace,
                 replace: {
-                    newValue: { value: 32 },
+                    newValue: {
+                        $v: 1,
+                        $r: 2,
+                        value: 32,
+                    },
                 },
             },
             key4: undefined,
@@ -417,6 +449,8 @@ describe('toDownOperation', () => {
 
     it('tests ObjectTemplate', () => {
         const source: ObjectValue.TwoWayOperation = {
+            $v: 1,
+            $r: 2,
             value1: {
                 oldValue: 11,
                 newValue: 12,
@@ -428,6 +462,8 @@ describe('toDownOperation', () => {
         };
 
         expect(toDownOperation(ObjectValue.template)(source)).toEqual({
+            $v: 1,
+            $r: 2,
             value1: {
                 oldValue: 11,
             },
@@ -442,6 +478,8 @@ describe('toDownOperation', () => {
             key1: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         oldValue: 11,
                         newValue: 12,
@@ -451,7 +489,11 @@ describe('toDownOperation', () => {
             key2: {
                 type: replace,
                 replace: {
-                    oldValue: { value: 21 },
+                    oldValue: {
+                        $v: 1,
+                        $r: 2,
+                        value: 21,
+                    },
                     newValue: undefined,
                 },
             },
@@ -459,7 +501,11 @@ describe('toDownOperation', () => {
                 type: replace,
                 replace: {
                     oldValue: undefined,
-                    newValue: { value: 32 },
+                    newValue: {
+                        $v: 1,
+                        $r: 2,
+                        value: 32,
+                    },
                 },
             },
             key4: undefined,
@@ -469,6 +515,8 @@ describe('toDownOperation', () => {
             key1: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         oldValue: 11,
                     },
@@ -477,7 +525,11 @@ describe('toDownOperation', () => {
             key2: {
                 type: replace,
                 replace: {
-                    oldValue: { value: 21 },
+                    oldValue: {
+                        $v: 1,
+                        $r: 2,
+                        value: 21,
+                    },
                 },
             },
             key3: {
@@ -521,12 +573,16 @@ describe('apply', () => {
 
     it('tests ObjectTemplate', () => {
         const state: ObjectValue.State = {
+            $v: 1,
+            $r: 2,
             value1: 11,
             value2: undefined,
             value3: 31,
             value4: 41,
         };
         const operation: ObjectValue.UpOperation = {
+            $v: 1,
+            $r: 2,
             value1: {
                 newValue: 12,
             },
@@ -540,6 +596,8 @@ describe('apply', () => {
 
         expect(apply(ObjectValue.template)({ state, operation })).toEqual(
             Result.ok({
+                $v: 1,
+                $r: 2,
                 value1: 12,
                 value2: 22,
                 value4: 41,
@@ -549,14 +607,24 @@ describe('apply', () => {
 
     it('tests RecordTemplate', () => {
         const state: RecordValue.State = {
-            key1: { value: 11 },
-            key2: { value: 21 },
+            key1: {
+                $v: 1,
+                $r: 2,
+                value: 11,
+            },
+            key2: {
+                $v: 1,
+                $r: 2,
+                value: 21,
+            },
             undefinedKey: undefined,
         };
         const operation: RecordValue.UpOperation = {
             key1: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         newValue: 12,
                     },
@@ -571,7 +639,11 @@ describe('apply', () => {
             key3: {
                 type: replace,
                 replace: {
-                    newValue: { value: 32 },
+                    newValue: {
+                        $v: 1,
+                        $r: 2,
+                        value: 32,
+                    },
                 },
             },
             key4: undefined,
@@ -579,8 +651,16 @@ describe('apply', () => {
 
         expect(apply(RecordValue.template)({ state, operation })).toEqual(
             Result.ok({
-                key1: { value: 12 },
-                key3: { value: 32 },
+                key1: {
+                    $v: 1,
+                    $r: 2,
+                    value: 12,
+                },
+                key3: {
+                    $v: 1,
+                    $r: 2,
+                    value: 32,
+                },
             })
         );
     });
@@ -616,12 +696,16 @@ describe('applyBack', () => {
 
     it('tests ObjectTemplate', () => {
         const state: ObjectValue.State = {
+            $v: 1,
+            $r: 2,
             value1: 12,
             value2: 22,
             value3: undefined,
             value4: 42,
         };
         const operation: ObjectValue.DownOperation = {
+            $v: 1,
+            $r: 2,
             value1: {
                 oldValue: 11,
             },
@@ -635,6 +719,8 @@ describe('applyBack', () => {
 
         expect(applyBack(ObjectValue.template)({ state, operation })).toEqual(
             Result.ok({
+                $v: 1,
+                $r: 2,
                 value1: 11,
                 value3: 31,
                 value4: 42,
@@ -644,14 +730,24 @@ describe('applyBack', () => {
 
     it('tests RecordTemplate', () => {
         const state: RecordValue.State = {
-            key1: { value: 12 },
-            key3: { value: 32 },
+            key1: {
+                $v: 1,
+                $r: 2,
+                value: 12,
+            },
+            key3: {
+                $v: 1,
+                $r: 2,
+                value: 32,
+            },
             undefinedKey: undefined,
         };
         const operation: RecordValue.DownOperation = {
             key1: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         oldValue: 11,
                     },
@@ -660,7 +756,11 @@ describe('applyBack', () => {
             key2: {
                 type: replace,
                 replace: {
-                    oldValue: { value: 21 },
+                    oldValue: {
+                        $v: 1,
+                        $r: 2,
+                        value: 21,
+                    },
                 },
             },
             key3: {
@@ -674,8 +774,16 @@ describe('applyBack', () => {
 
         expect(applyBack(RecordValue.template)({ state, operation })).toEqual(
             Result.ok({
-                key1: { value: 11 },
-                key2: { value: 21 },
+                key1: {
+                    $v: 1,
+                    $r: 2,
+                    value: 11,
+                },
+                key2: {
+                    $v: 1,
+                    $r: 2,
+                    value: 21,
+                },
             })
         );
     });
@@ -732,6 +840,8 @@ describe('composeDownOperation', () => {
 
     it('tests ObjectTemplate', () => {
         const first: ObjectValue.DownOperation = {
+            $v: 1,
+            $r: 2,
             value1: {
                 oldValue: 11,
             },
@@ -744,6 +854,8 @@ describe('composeDownOperation', () => {
             value4: undefined,
         };
         const second: ObjectValue.DownOperation = {
+            $v: 1,
+            $r: 2,
             value1: {
                 oldValue: 12,
             },
@@ -767,6 +879,8 @@ describe('composeDownOperation', () => {
             updateId: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         oldValue: 1,
                     },
@@ -777,6 +891,8 @@ describe('composeDownOperation', () => {
                 type: replace,
                 replace: {
                     oldValue: {
+                        $v: 1,
+                        $r: 2,
                         value: 1,
                     },
                 },
@@ -784,6 +900,8 @@ describe('composeDownOperation', () => {
             updateUpdate: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         oldValue: 1,
                     },
@@ -792,6 +910,8 @@ describe('composeDownOperation', () => {
             updateReplace: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         oldValue: 1,
                     },
@@ -801,6 +921,8 @@ describe('composeDownOperation', () => {
                 type: replace,
                 replace: {
                     oldValue: {
+                        $v: 1,
+                        $r: 2,
                         value: 1,
                     },
                 },
@@ -810,6 +932,8 @@ describe('composeDownOperation', () => {
             idUpdate: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         oldValue: 2,
                     },
@@ -820,6 +944,8 @@ describe('composeDownOperation', () => {
                 type: replace,
                 replace: {
                     oldValue: {
+                        $v: 1,
+                        $r: 2,
                         value: 2,
                     },
                 },
@@ -828,6 +954,8 @@ describe('composeDownOperation', () => {
             updateUpdate: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         oldValue: 2,
                     },
@@ -836,12 +964,18 @@ describe('composeDownOperation', () => {
             updateReplace: {
                 type: replace,
                 replace: {
-                    oldValue: { value: 2 },
+                    oldValue: {
+                        $v: 1,
+                        $r: 2,
+                        value: 2,
+                    },
                 },
             },
             replaceUpdate: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         oldValue: 2,
                     },
@@ -852,6 +986,8 @@ describe('composeDownOperation', () => {
             idUpdate: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         oldValue: 2,
                     },
@@ -860,6 +996,8 @@ describe('composeDownOperation', () => {
             updateId: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         oldValue: 1,
                     },
@@ -869,6 +1007,8 @@ describe('composeDownOperation', () => {
                 type: replace,
                 replace: {
                     oldValue: {
+                        $v: 1,
+                        $r: 2,
                         value: 2,
                     },
                 },
@@ -877,6 +1017,8 @@ describe('composeDownOperation', () => {
                 type: replace,
                 replace: {
                     oldValue: {
+                        $v: 1,
+                        $r: 2,
                         value: 1,
                     },
                 },
@@ -884,6 +1026,8 @@ describe('composeDownOperation', () => {
             updateUpdate: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         oldValue: 1,
                     },
@@ -893,6 +1037,8 @@ describe('composeDownOperation', () => {
                 type: replace,
                 replace: {
                     oldValue: {
+                        $v: 1,
+                        $r: 2,
                         value: 1,
                     },
                 },
@@ -901,6 +1047,8 @@ describe('composeDownOperation', () => {
                 type: replace,
                 replace: {
                     oldValue: {
+                        $v: 1,
+                        $r: 2,
                         value: 1,
                     },
                 },
@@ -956,12 +1104,16 @@ describe('restore', () => {
 
     it('tests ObjectTemplate', () => {
         const nextState: ObjectValue.State = {
+            $v: 1,
+            $r: 2,
             value1: 12,
             value2: 22,
             value3: undefined,
             value4: 42,
         };
         const downOperation: ObjectValue.DownOperation = {
+            $v: 1,
+            $r: 2,
             value1: {
                 oldValue: 11,
             },
@@ -976,12 +1128,16 @@ describe('restore', () => {
         expect(restore(ObjectValue.template)({ nextState, downOperation })).toEqual(
             Result.ok({
                 prevState: {
+                    $v: 1,
+                    $r: 2,
                     value1: 11,
                     value2: undefined,
                     value3: 31,
                     value4: 42,
                 },
                 twoWayOperation: {
+                    $v: 1,
+                    $r: 2,
                     value1: {
                         oldValue: 11,
                         newValue: 12,
@@ -1001,14 +1157,24 @@ describe('restore', () => {
 
     it('tests RecordTemplate', () => {
         const nextState: RecordValue.State = {
-            key1: { value: 12 },
-            key3: { value: 32 },
+            key1: {
+                $v: 1,
+                $r: 2,
+                value: 12,
+            },
+            key3: {
+                $v: 1,
+                $r: 2,
+                value: 32,
+            },
             undefinedKey: undefined,
         };
         const downOperation: RecordValue.DownOperation = {
             key1: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         oldValue: 11,
                     },
@@ -1017,7 +1183,11 @@ describe('restore', () => {
             key2: {
                 type: replace,
                 replace: {
-                    oldValue: { value: 21 },
+                    oldValue: {
+                        $v: 1,
+                        $r: 2,
+                        value: 21,
+                    },
                 },
             },
             key3: {
@@ -1032,13 +1202,23 @@ describe('restore', () => {
         expect(restore(RecordValue.template)({ nextState, downOperation })).toEqual(
             Result.ok({
                 prevState: {
-                    key1: { value: 11 },
-                    key2: { value: 21 },
+                    key1: {
+                        $v: 1,
+                        $r: 2,
+                        value: 11,
+                    },
+                    key2: {
+                        $v: 1,
+                        $r: 2,
+                        value: 21,
+                    },
                 },
                 twoWayOperation: {
                     key1: {
                         type: update,
                         update: {
+                            $v: 1,
+                            $r: 2,
                             value: {
                                 oldValue: 11,
                                 newValue: 12,
@@ -1048,7 +1228,11 @@ describe('restore', () => {
                     key2: {
                         type: replace,
                         replace: {
-                            oldValue: { value: 21 },
+                            oldValue: {
+                                $v: 1,
+                                $r: 2,
+                                value: 21,
+                            },
                             newValue: undefined,
                         },
                     },
@@ -1056,7 +1240,11 @@ describe('restore', () => {
                         type: replace,
                         replace: {
                             oldValue: undefined,
-                            newValue: { value: 32 },
+                            newValue: {
+                                $v: 1,
+                                $r: 2,
+                                value: 32,
+                            },
                         },
                     },
                 },
@@ -1094,12 +1282,16 @@ describe('diff', () => {
 
     it('tests ObjectTemplate', () => {
         const prevState: ObjectValue.State = {
+            $v: 1,
+            $r: 2,
             value1: 11,
             value2: undefined,
             value3: 31,
             value4: 42,
         };
         const nextState: ObjectValue.State = {
+            $v: 1,
+            $r: 2,
             value1: 12,
             value2: 22,
             value3: undefined,
@@ -1107,6 +1299,8 @@ describe('diff', () => {
         };
 
         expect(diff(ObjectValue.template)({ prevState, nextState })).toEqual({
+            $v: 1,
+            $r: 2,
             value1: {
                 oldValue: 11,
                 newValue: 12,
@@ -1124,13 +1318,29 @@ describe('diff', () => {
 
     it('tests RecordTemplate', () => {
         const prevState: RecordValue.State = {
-            key1: { value: 11 },
-            key2: { value: 21 },
+            key1: {
+                $v: 1,
+                $r: 2,
+                value: 11,
+            },
+            key2: {
+                $v: 1,
+                $r: 2,
+                value: 21,
+            },
             undefinedKey: undefined,
         };
         const nextState: RecordValue.State = {
-            key1: { value: 12 },
-            key3: { value: 32 },
+            key1: {
+                $v: 1,
+                $r: 2,
+                value: 12,
+            },
+            key3: {
+                $v: 1,
+                $r: 2,
+                value: 32,
+            },
             undefinedKey: undefined,
         };
 
@@ -1138,6 +1348,8 @@ describe('diff', () => {
             key1: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         oldValue: 11,
                         newValue: 12,
@@ -1147,7 +1359,11 @@ describe('diff', () => {
             key2: {
                 type: replace,
                 replace: {
-                    oldValue: { value: 21 },
+                    oldValue: {
+                        $v: 1,
+                        $r: 2,
+                        value: 21,
+                    },
                     newValue: undefined,
                 },
             },
@@ -1155,7 +1371,11 @@ describe('diff', () => {
                 type: replace,
                 replace: {
                     oldValue: undefined,
-                    newValue: { value: 32 },
+                    newValue: {
+                        $v: 1,
+                        $r: 2,
+                        value: 32,
+                    },
                 },
             },
         });
@@ -1208,6 +1428,8 @@ describe('clientTransform', () => {
 
     it('tests ObjectTemplate', () => {
         const first: ObjectValue.UpOperation = {
+            $v: 1,
+            $r: 2,
             value1: {
                 newValue: 11,
             },
@@ -1220,6 +1442,8 @@ describe('clientTransform', () => {
             value4: undefined,
         };
         const second: ObjectValue.UpOperation = {
+            $v: 1,
+            $r: 2,
             value1: {
                 newValue: 12,
             },
@@ -1235,6 +1459,8 @@ describe('clientTransform', () => {
         expect(clientTransform(ObjectValue.template)({ first, second })).toEqual(
             Result.ok({
                 firstPrime: {
+                    $v: 1,
+                    $r: 2,
                     value1: {
                         newValue: 11,
                     },
@@ -1255,6 +1481,8 @@ describe('clientTransform', () => {
             updateId: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         newValue: 1,
                     },
@@ -1265,6 +1493,8 @@ describe('clientTransform', () => {
                 type: replace,
                 replace: {
                     newValue: {
+                        $v: 1,
+                        $r: 2,
                         value: 1,
                     },
                 },
@@ -1272,6 +1502,8 @@ describe('clientTransform', () => {
             updateUpdate: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         newValue: 1,
                     },
@@ -1280,6 +1512,8 @@ describe('clientTransform', () => {
             updateReplace: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         newValue: 1,
                     },
@@ -1296,6 +1530,8 @@ describe('clientTransform', () => {
             idUpdate: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         newValue: 2,
                     },
@@ -1306,6 +1542,8 @@ describe('clientTransform', () => {
                 type: replace,
                 replace: {
                     newValue: {
+                        $v: 1,
+                        $r: 2,
                         value: 2,
                     },
                 },
@@ -1314,6 +1552,8 @@ describe('clientTransform', () => {
             updateUpdate: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         newValue: 2,
                     },
@@ -1328,6 +1568,8 @@ describe('clientTransform', () => {
             replaceUpdate: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         newValue: 2,
                     },
@@ -1339,6 +1581,8 @@ describe('clientTransform', () => {
             updateId: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         newValue: 1,
                     },
@@ -1349,6 +1593,8 @@ describe('clientTransform', () => {
                 type: replace,
                 replace: {
                     newValue: {
+                        $v: 1,
+                        $r: 2,
                         value: 1,
                     },
                 },
@@ -1356,6 +1602,8 @@ describe('clientTransform', () => {
             updateUpdate: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         newValue: 1,
                     },
@@ -1373,6 +1621,8 @@ describe('clientTransform', () => {
             idUpdate: {
                 type: update,
                 update: {
+                    $v: 1,
+                    $r: 2,
                     value: {
                         newValue: 2,
                     },
@@ -1383,6 +1633,8 @@ describe('clientTransform', () => {
                 type: replace,
                 replace: {
                     newValue: {
+                        $v: 1,
+                        $r: 2,
                         value: 2,
                     },
                 },
