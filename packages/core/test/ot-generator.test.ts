@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
     createReplaceValueTemplate as rep,
     createObjectValueTemplate as obj,
-    otValueTemplate as otString,
+    createOtValueTemplate as otString,
     createRecordValueTemplate as rec,
     state,
     State as StateType,
@@ -22,6 +23,7 @@ import {
 import * as t from 'io-ts';
 import { replace, update } from '../src/internal/ot/util/recordOperationElement';
 import * as TextOperation from '../src/internal/ot/util/textOperation';
+import * as NullableTextOperation from '../src/internal/ot/util/nullableTextOperation';
 import { Result } from '@kizahasi/result';
 import { Option } from '@kizahasi/option';
 
@@ -33,7 +35,14 @@ namespace ReplaceValue {
 }
 
 namespace OtString {
-    export const template = otString;
+    export const template = otString(false);
+    export type UpOperation = UpOperationType<typeof template>;
+    export type DownOperation = DownOperationType<typeof template>;
+    export type TwoWayOperation = TwoWayOperationType<typeof template>;
+}
+
+namespace NullableOtString {
+    export const template = otString(true);
     export type UpOperation = UpOperationType<typeof template>;
     export type DownOperation = DownOperationType<typeof template>;
     export type TwoWayOperation = TwoWayOperationType<typeof template>;
@@ -93,6 +102,7 @@ describe('state', () => {
     it.each`
         source       | expected
         ${1}         | ${Option.none()}
+        ${null}      | ${Option.none()}
         ${undefined} | ${Option.none()}
         ${'str'}     | ${Option.some('str')}
     `('tests OtStringTemplate {source: $source, expected: $expected}', ({ source, expected }) => {
@@ -103,6 +113,24 @@ describe('state', () => {
         }
         expect(actual.right).toEqual(expected.value);
     });
+
+    it.each`
+        source       | expected
+        ${1}         | ${Option.none()}
+        ${null}      | ${Option.none()}
+        ${undefined} | ${Option.some(undefined)}
+        ${'str'}     | ${Option.some('str')}
+    `(
+        'tests NullableOtStringTemplate {source: $source, expected: $expected}',
+        ({ source, expected }) => {
+            const actual = state(NullableOtString.template).decode(source);
+            if (actual._tag === 'Left') {
+                expect(expected.isNone).toBe(true);
+                return;
+            }
+            expect(actual.right).toEqual(expected.value);
+        }
+    );
 
     it.each`
         source                                                   | expected
@@ -179,6 +207,29 @@ describe('upOperation', () => {
         }
         expect(actual.right).toEqual(expected.value);
     });
+
+    it.each`
+        source                                                                                                  | expected
+        ${{}}                                                                                                   | ${Option.none()}
+        ${undefined}                                                                                            | ${Option.none()}
+        ${'str'}                                                                                                | ${Option.none()}
+        ${{ newValue: 1 }}                                                                                      | ${Option.none()}
+        ${NullableTextOperation.toUpOperation(NullableTextOperation.diff({ prev: 'text1', next: 'text2' })!)}   | ${Option.some(NullableTextOperation.toUpOperation(NullableTextOperation.diff({ prev: 'text1', next: 'text2' })!))}
+        ${NullableTextOperation.toUpOperation(NullableTextOperation.diff({ prev: undefined, next: 'text2' })!)} | ${Option.some(NullableTextOperation.toUpOperation(NullableTextOperation.diff({ prev: undefined, next: 'text2' })!))}
+        ${NullableTextOperation.toUpOperation(NullableTextOperation.diff({ prev: 'text1', next: undefined })!)} | ${Option.some(NullableTextOperation.toUpOperation(NullableTextOperation.diff({ prev: 'text1', next: undefined })!))}
+        ${NullableTextOperation.toDownOperation(NullableTextOperation.diff({ prev: 'text1', next: 'text2' })!)} | ${Option.none()}
+        ${NullableTextOperation.diff({ prev: 'text1', next: 'text2' })}                                         | ${Option.none()}
+    `(
+        'tests NullableOtStringTemplate {source: $source, expected: $expected}',
+        ({ source, expected }) => {
+            const actual = upOperation(NullableOtString.template).decode(source);
+            if (actual._tag === 'Left') {
+                expect(expected.isNone).toBe(true);
+                return;
+            }
+            expect(actual.right).toEqual(expected.value);
+        }
+    );
 
     it.each`
         source                                                                                | expected
@@ -261,6 +312,29 @@ describe('downOperation', () => {
     });
 
     it.each`
+        source                                                                                                    | expected
+        ${{}}                                                                                                     | ${Option.none()}
+        ${undefined}                                                                                              | ${Option.none()}
+        ${'str'}                                                                                                  | ${Option.none()}
+        ${{ oldValue: 1 }}                                                                                        | ${Option.none()}
+        ${NullableTextOperation.toDownOperation(NullableTextOperation.diff({ prev: 'text1', next: 'text2' })!)}   | ${Option.some(NullableTextOperation.toDownOperation(NullableTextOperation.diff({ prev: 'text1', next: 'text2' })!))}
+        ${NullableTextOperation.toDownOperation(NullableTextOperation.diff({ prev: undefined, next: 'text2' })!)} | ${Option.some(NullableTextOperation.toDownOperation(NullableTextOperation.diff({ prev: undefined, next: 'text2' })!))}
+        ${NullableTextOperation.toDownOperation(NullableTextOperation.diff({ prev: 'text1', next: undefined })!)} | ${Option.some(NullableTextOperation.toDownOperation(NullableTextOperation.diff({ prev: 'text1', next: undefined })!))}
+        ${NullableTextOperation.toUpOperation(NullableTextOperation.diff({ prev: 'text1', next: 'text2' })!)}     | ${Option.none()}
+        ${NullableTextOperation.diff({ prev: 'text1', next: 'text2' })}                                           | ${Option.none()}
+    `(
+        'tests NullableOtStringTemplate {source: $source, expected: $expected}',
+        ({ source, expected }) => {
+            const actual = downOperation(NullableOtString.template).decode(source);
+            if (actual._tag === 'Left') {
+                expect(expected.isNone).toBe(true);
+                return;
+            }
+            expect(actual.right).toEqual(expected.value);
+        }
+    );
+
+    it.each`
         source                                                                                  | expected
         ${undefined}                                                                            | ${Option.none()}
         ${'str'}                                                                                | ${Option.none()}
@@ -323,6 +397,20 @@ describe('toUpOperation', () => {
         })!;
         expect(toUpOperation(OtString.template)(source)).toEqual(
             TextOperation.toUpOperation(source)
+        );
+    });
+
+    it.each([
+        ['text1', 'text2'],
+        [undefined, 'text2'],
+        ['text1', undefined],
+    ])('tests NullableOtStringTemplate', (prev, next) => {
+        const source: NullableOtString.TwoWayOperation = NullableTextOperation.diff({
+            prev,
+            next,
+        })!;
+        expect(toUpOperation(NullableOtString.template)(source)).toEqual(
+            NullableTextOperation.toUpOperation(source)
         );
     });
 
@@ -444,6 +532,20 @@ describe('toDownOperation', () => {
         })!;
         expect(toDownOperation(OtString.template)(source)).toEqual(
             TextOperation.toDownOperation(source)
+        );
+    });
+
+    it.each([
+        ['text1', 'text2'],
+        [undefined, 'text2'],
+        ['text1', undefined],
+    ])('tests NullableOtStringTemplate', (prev, next) => {
+        const source: NullableOtString.TwoWayOperation = NullableTextOperation.diff({
+            prev,
+            next,
+        })!;
+        expect(toDownOperation(NullableOtString.template)(source)).toEqual(
+            NullableTextOperation.toDownOperation(source)
         );
     });
 
@@ -571,6 +673,23 @@ describe('apply', () => {
         ).toEqual(Result.ok(next));
     });
 
+    it.each([
+        ['text1', 'text2'],
+        [undefined, 'text2'],
+        ['text1', undefined],
+    ])('tests NullableOtStringTemplate', (prev, next) => {
+        const operation: NullableOtString.TwoWayOperation = NullableTextOperation.diff({
+            prev,
+            next,
+        })!;
+        expect(
+            apply(NullableOtString.template)({
+                state: prev,
+                operation: NullableTextOperation.toUpOperation(operation),
+            })
+        ).toEqual(Result.ok(next));
+    });
+
     it('tests ObjectTemplate', () => {
         const state: ObjectValue.State = {
             $v: 1,
@@ -690,6 +809,23 @@ describe('applyBack', () => {
             applyBack(OtString.template)({
                 state: next,
                 operation: TextOperation.toDownOperation(operation),
+            })
+        ).toEqual(Result.ok(prev));
+    });
+
+    it.each([
+        ['text1', 'text2'],
+        [undefined, 'text2'],
+        ['text1', undefined],
+    ])('tests NullableOtStringTemplate', (prev, next) => {
+        const operation: NullableOtString.TwoWayOperation = NullableTextOperation.diff({
+            prev,
+            next,
+        })!;
+        expect(
+            applyBack(NullableOtString.template)({
+                state: next,
+                operation: NullableTextOperation.toDownOperation(operation),
             })
         ).toEqual(Result.ok(prev));
     });
@@ -832,6 +968,37 @@ describe('composeDownOperation', () => {
         );
         expect(
             composeDownOperation(OtString.template)({
+                first,
+                second,
+            })
+        ).toEqual(Result.ok(expected));
+    });
+
+    it.each([
+        ['text1', 'text2', 'text3'],
+        [undefined, 'text2', 'text3'],
+        ['text1', undefined, 'text3'],
+        ['text1', 'text2', undefined],
+        [undefined, 'text2', undefined],
+    ])('tests NullableOtStringTemplate', (state1, state2, state3) => {
+        const first: NullableOtString.DownOperation = NullableTextOperation.toDownOperation(
+            NullableTextOperation.diff({
+                prev: state1,
+                next: state2,
+            })!
+        );
+        const second: NullableOtString.DownOperation = NullableTextOperation.toDownOperation(
+            NullableTextOperation.diff({
+                prev: state2,
+                next: state3,
+            })!
+        );
+        const expected: NullableOtString.DownOperation = NullableTextOperation.composeDownOperation(
+            first,
+            second
+        ).value!;
+        expect(
+            composeDownOperation(NullableOtString.template)({
                 first,
                 second,
             })
@@ -1102,6 +1269,28 @@ describe('restore', () => {
         );
     });
 
+    it.each([
+        ['text1', 'text2'],
+        [undefined, 'text2'],
+        ['text1', undefined],
+    ])('tests NullableOtStringTemplate', (prev, next) => {
+        const operation: NullableOtString.TwoWayOperation = NullableTextOperation.diff({
+            prev,
+            next,
+        })!;
+        expect(
+            restore(NullableOtString.template)({
+                nextState: next,
+                downOperation: NullableTextOperation.toDownOperation(operation),
+            })
+        ).toEqual(
+            Result.ok({
+                prevState: prev,
+                twoWayOperation: operation,
+            })
+        );
+    });
+
     it('tests ObjectTemplate', () => {
         const nextState: ObjectValue.State = {
             $v: 1,
@@ -1280,6 +1469,23 @@ describe('diff', () => {
         ).toEqual(operation);
     });
 
+    it.each([
+        ['text1', 'text2'],
+        [undefined, 'text2'],
+        ['text1', undefined],
+    ])('tests NullableOtStringTemplate', (prev, next) => {
+        const operation: NullableOtString.TwoWayOperation = NullableTextOperation.diff({
+            prev,
+            next,
+        })!;
+        expect(
+            diff(NullableOtString.template)({
+                prevState: prev,
+                nextState: next,
+            })
+        ).toEqual(operation);
+    });
+
     it('tests ObjectTemplate', () => {
         const prevState: ObjectValue.State = {
             $v: 1,
@@ -1420,6 +1626,34 @@ describe('clientTransform', () => {
         const expected = TextOperation.clientTransform({ first, second });
         expect(
             clientTransform(OtString.template)({
+                first,
+                second,
+            })
+        ).toEqual(expected);
+    });
+
+    it.each([
+        ['text1', 'text2', 'text3'],
+        [undefined, 'text2', 'text3'],
+        ['text1', undefined, 'text3'],
+        ['text1', 'text2', undefined],
+        // [undefined, 'text2', undefined] のケースはsecondがidになりclientTransformが使えないためテスト対象外
+    ])('tests NullableOtStringTemplate', (state1, state2, state3) => {
+        const first: NullableOtString.UpOperation = NullableTextOperation.toUpOperation(
+            NullableTextOperation.diff({
+                prev: state1,
+                next: state2,
+            })!
+        );
+        const second: NullableOtString.UpOperation = NullableTextOperation.toUpOperation(
+            NullableTextOperation.diff({
+                prev: state1,
+                next: state3,
+            })!
+        );
+        const expected = NullableTextOperation.clientTransform({ first, second });
+        expect(
+            clientTransform(NullableOtString.template)({
                 first,
                 second,
             })

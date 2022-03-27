@@ -5,6 +5,7 @@ import { Any } from 'io-ts';
 import { Apply, ClientTransform, Compose, Diff, DownError, Restore } from '../util/type';
 import * as t from 'io-ts';
 import * as TextOperation from '../util/textOperation';
+import * as NullableTextOperation from '../util/nullableTextOperation';
 import * as RecordOperation from '../util/recordOperation';
 import {
     RecordDownOperationElement,
@@ -51,13 +52,16 @@ export const createReplaceValueTemplate = <T extends Any>(value: T) => {
 export type OtValueTemplate = {
     type: typeof atomic;
     mode: typeof ot;
+    nullable: boolean;
     value?: undefined;
 };
 
-export const otValueTemplate = {
-    type: atomic,
-    mode: ot,
-} as const;
+export const createOtValueTemplate = <T extends boolean>(nullable: T) =>
+    ({
+        type: atomic,
+        mode: ot,
+        nullable,
+    } as const);
 
 export type RecordValueTemplate<T extends AnyTemplate> = {
     type: typeof record;
@@ -116,7 +120,9 @@ type AnyTemplate =
       };
 
 export type State<T extends AnyTemplate> = T extends OtValueTemplate
-    ? string
+    ? T['nullable'] extends false
+        ? string
+        : string | undefined
     : T extends ReplaceValueTemplate<infer U1>
     ? t.TypeOf<U1>
     : T extends RecordValueTemplate<infer U2>
@@ -137,7 +143,7 @@ export const state = <T extends AnyTemplate>(source: T): t.Type<State<T>> => {
                 case replace:
                     return source.value;
                 case ot:
-                    return t.string as any;
+                    return source.nullable ? t.union([t.string, t.undefined]) : (t.string as any);
                 default:
                     return toBeNever(source);
             }
@@ -162,7 +168,11 @@ export const state = <T extends AnyTemplate>(source: T): t.Type<State<T>> => {
 };
 
 export type UpOperation<T extends AnyTemplate> = T extends OtValueTemplate
-    ? TextOperation.UpOperation
+    ? T['nullable'] extends true
+        ? NullableTextOperation.UpOperation
+        : T['nullable'] extends false
+        ? TextOperation.UpOperation
+        : NullableTextOperation.UpOperation | TextOperation.UpOperation
     : T extends ReplaceValueTemplate<infer U1>
     ? { newValue: t.TypeOf<U1> }
     : T extends RecordValueTemplate<infer U2>
@@ -183,7 +193,9 @@ export const upOperation = <T extends AnyTemplate>(source: T): t.Type<UpOperatio
                 case replace:
                     return t.type({ newValue: source.value }) as any;
                 case ot:
-                    return TextOperation.upOperation as any;
+                    return source.nullable
+                        ? NullableTextOperation.upOperation
+                        : (TextOperation.upOperation as any);
                 default:
                     return toBeNever(source);
             }
@@ -208,7 +220,11 @@ export const upOperation = <T extends AnyTemplate>(source: T): t.Type<UpOperatio
 };
 
 export type DownOperation<T extends AnyTemplate> = T extends OtValueTemplate
-    ? TextOperation.DownOperation
+    ? T['nullable'] extends true
+        ? NullableTextOperation.DownOperation
+        : T['nullable'] extends false
+        ? TextOperation.DownOperation
+        : NullableTextOperation.DownOperation | TextOperation.DownOperation
     : T extends ReplaceValueTemplate<infer U1>
     ? { oldValue: t.TypeOf<U1> }
     : T extends RecordValueTemplate<infer U2>
@@ -231,7 +247,9 @@ export const downOperation = <T extends AnyTemplate>(source: T): t.Type<DownOper
                 case replace:
                     return t.type({ oldValue: source.value }) as any;
                 case ot:
-                    return TextOperation.downOperation as any;
+                    return source.nullable
+                        ? NullableTextOperation.downOperation
+                        : (TextOperation.downOperation as any);
                 default:
                     return toBeNever(source);
             }
@@ -256,7 +274,11 @@ export const downOperation = <T extends AnyTemplate>(source: T): t.Type<DownOper
 };
 
 export type TwoWayOperation<T extends AnyTemplate> = T extends OtValueTemplate
-    ? TextOperation.TwoWayOperation
+    ? T['nullable'] extends true
+        ? NullableTextOperation.TwoWayOperation
+        : T['nullable'] extends false
+        ? TextOperation.TwoWayOperation
+        : NullableTextOperation.TwoWayOperation | TextOperation.TwoWayOperation
     : T extends ReplaceValueTemplate<infer U1>
     ? {
           oldValue: t.TypeOf<U1>;
@@ -287,7 +309,9 @@ export const toUpOperation =
                             newValue: twoWayOperationAsAny.newValue,
                         } as any;
                     case ot:
-                        return TextOperation.toUpOperation(twoWayOperationAsAny) as any;
+                        return template.nullable
+                            ? NullableTextOperation.toUpOperation(twoWayOperationAsAny)
+                            : (TextOperation.toUpOperation(twoWayOperationAsAny) as any);
                 }
                 break;
             }
@@ -325,7 +349,9 @@ export const toDownOperation =
                             oldValue: twoWayOperationAsAny.oldValue,
                         } as any;
                     case ot:
-                        return TextOperation.toDownOperation(twoWayOperationAsAny) as any;
+                        return template.nullable
+                            ? NullableTextOperation.toDownOperation(twoWayOperationAsAny)
+                            : (TextOperation.toDownOperation(twoWayOperationAsAny) as any);
                 }
                 break;
             }
@@ -361,7 +387,9 @@ export const apply =
                     case replace:
                         return Result.ok(operationAsAny.newValue);
                     case ot:
-                        return TextOperation.apply(state, operationAsAny);
+                        return template.nullable
+                            ? NullableTextOperation.apply(state, operationAsAny)
+                            : TextOperation.apply(state, operationAsAny);
                 }
                 break;
             }
@@ -411,7 +439,9 @@ export const applyBack =
                     case replace:
                         return Result.ok(operationAsAny.oldValue);
                     case ot:
-                        return TextOperation.applyBack(state, operationAsAny);
+                        return template.nullable
+                            ? NullableTextOperation.applyBack(state, operationAsAny)
+                            : TextOperation.applyBack(state, operationAsAny);
                 }
                 break;
             }
@@ -464,7 +494,9 @@ export const composeDownOperation =
                             oldValue: firstAsAny.oldValue,
                         } as any);
                     case ot:
-                        return TextOperation.composeDownOperation(firstAsAny, secondAsAny);
+                        return template.nullable
+                            ? NullableTextOperation.composeDownOperation(firstAsAny, secondAsAny)
+                            : TextOperation.composeDownOperation(firstAsAny, secondAsAny);
                 }
                 break;
             }
@@ -536,10 +568,15 @@ export const restore =
                             } as any,
                         });
                     case ot:
-                        return TextOperation.restore({
-                            nextState: nextStateAsAny,
-                            downOperation: downOperationAsAny,
-                        });
+                        return template.nullable
+                            ? NullableTextOperation.restore({
+                                  nextState: nextStateAsAny,
+                                  downOperation: downOperationAsAny,
+                              })
+                            : TextOperation.restore({
+                                  nextState: nextStateAsAny,
+                                  downOperation: downOperationAsAny,
+                              });
                 }
                 break;
             }
@@ -601,7 +638,12 @@ export const diff =
                                   newValue: nextState,
                               } as any);
                     case ot:
-                        return TextOperation.diff({ prev: prevStateAsAny, next: nextStateAsAny });
+                        return template.nullable
+                            ? NullableTextOperation.diff({
+                                  prev: prevStateAsAny,
+                                  next: nextStateAsAny,
+                              })
+                            : TextOperation.diff({ prev: prevStateAsAny, next: nextStateAsAny });
                 }
                 break;
             }
@@ -648,10 +690,15 @@ export const clientTransform =
                             secondPrime: undefined,
                         }) as any;
                     case ot:
-                        return TextOperation.clientTransform({
-                            first: first as any,
-                            second: second as any,
-                        });
+                        return template.nullable
+                            ? NullableTextOperation.clientTransform({
+                                  first: first as any,
+                                  second: second as any,
+                              })
+                            : TextOperation.clientTransform({
+                                  first: first as any,
+                                  second: second as any,
+                              });
                 }
                 break;
             }
