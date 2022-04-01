@@ -1,16 +1,19 @@
 import {
-    CharacterState,
+    characterTemplate,
     getVariableFromVarTomlObject,
     State,
     analyze as analyzeToExpression,
     plain,
     parseToml,
+    roomTemplate,
 } from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
 import { recordToArray } from '@flocon-trpg/utils';
 import { DynamicLoader } from 'bcdice';
 import BcdiceResult from 'bcdice/ts/result';
 
+type RoomState = State<typeof roomTemplate>;
+type CharacterState = State<typeof characterTemplate>;
 const loader = new DynamicLoader();
 
 export const listAvailableGameSystems = () => {
@@ -51,7 +54,7 @@ const getParameter = async ({
 }: {
     parameterPath: string[];
     context: Context | null;
-    room: State;
+    room: RoomState;
 }): Promise<
     Result<{ value: string | boolean | number | undefined; stringValue: string }> | undefined
 > => {
@@ -149,7 +152,7 @@ export const analyze = async (params: {
     text: string;
     gameType: string;
     context: Context | null;
-    room: State;
+    room: RoomState;
 }): Promise<Result<AnalyzeResult>> => {
     const expressions = analyzeToExpression(params.text);
     if (expressions.isError) {

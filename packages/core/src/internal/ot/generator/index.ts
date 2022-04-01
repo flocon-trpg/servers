@@ -7,10 +7,14 @@ import * as t from 'io-ts';
 import * as TextOperation from '../util/textOperation';
 import * as NullableTextOperation from '../util/nullableTextOperation';
 import * as RecordOperation from '../util/recordOperation';
+import * as ParamRecordOperation from '../util/paramRecordOperation';
+import { record as trecord } from '../util/record';
 import {
     RecordDownOperationElement,
+    recordDownOperationElementFactory,
     RecordTwoWayOperationElement,
     RecordUpOperationElement,
+    recordUpOperationElementFactory,
 } from '../util/recordOperationElement';
 import {
     groupJoinMap,
@@ -31,9 +35,16 @@ export const atomic = 'atomic';
 export const replace = 'replace';
 export const ot = 'ot';
 export const record = 'record';
+export const paramRecord = 'paramRecord';
 export const object = 'object';
 
 const isKeyToIgnore = (key: string) => key === $v || key === $r;
+
+type If<T extends boolean, TTrue, TFalse> = T extends true
+    ? TTrue
+    : T extends false
+    ? TFalse
+    : TTrue | TFalse;
 
 export type ReplaceValueTemplate<T extends Any> = {
     type: typeof atomic;
@@ -63,15 +74,32 @@ export const createOtValueTemplate = <T extends boolean>(nullable: T) =>
         nullable,
     } as const);
 
-export type RecordValueTemplate<T extends AnyTemplate> = {
+export type RecordValueTemplate<TValue extends AnyTemplate> = {
     type: typeof record;
-    value: T;
+    value: TValue;
 };
 
-export const createRecordValueTemplate = <T extends AnyTemplate>(value: T) => {
+export const createRecordValueTemplate = <TValue extends AnyTemplate>(value: TValue) => {
     return {
         type: record,
         value,
+    } as const;
+};
+
+export type ParamRecordValueTemplate<TValue extends AnyTemplate> = {
+    type: typeof paramRecord;
+    value: TValue;
+    defaultState: State<TValue>;
+};
+
+export const createParamRecordValueTemplate = <TValue extends AnyTemplate>(
+    value: TValue,
+    defaultState: State<TValue>
+) => {
+    return {
+        type: paramRecord,
+        value,
+        defaultState,
     } as const;
 };
 
@@ -113,30 +141,44 @@ type AnyTemplate =
           value: AnyTemplate;
       }
     | {
+          type: typeof paramRecord;
+          value: AnyTemplate;
+          defaultState: any;
+      }
+    | {
           type: typeof object;
           $v: number | undefined;
           $r: number | undefined;
           value: { readonly [P in string]: AnyTemplate };
       };
 
+type ParamRecordValueTemplateBase<TValue extends AnyTemplate> = {
+    type: typeof paramRecord;
+    value: TValue;
+};
+
+export type IoTsOptions = {
+    exact: boolean;
+};
+
 export type State<T extends AnyTemplate> = T extends OtValueTemplate
-    ? T['nullable'] extends false
-        ? string
-        : string | undefined
+    ? If<T['nullable'], string | undefined, string>
     : T extends ReplaceValueTemplate<infer U1>
     ? t.TypeOf<U1>
     : T extends RecordValueTemplate<infer U2>
-    ? { readonly [P in string]?: State<U2> | undefined }
-    : T extends ObjectValueTemplate<infer U3, infer UV, infer UR>
+    ? { [P in string]?: State<U2> | undefined }
+    : T extends ParamRecordValueTemplateBase<infer U3>
+    ? { [P in string]?: State<U3> | undefined }
+    : T extends ObjectValueTemplate<infer U4, infer UV, infer UR>
     ? {
           $v: UV;
           $r: UR;
       } & {
-          readonly [P in keyof U3]: State<U3[P]>;
+          [P in keyof U4]: State<U4[P]>;
       }
     : unknown;
 
-export const state = <T extends AnyTemplate>(source: T): t.Type<State<T>> => {
+export const state = <T extends AnyTemplate>(source: T, options: IoTsOptions): t.Type<State<T>> => {
     switch (source.type) {
         case atomic: {
             switch (source.mode) {
@@ -148,19 +190,22 @@ export const state = <T extends AnyTemplate>(source: T): t.Type<State<T>> => {
                     return toBeNever(source);
             }
         }
-        case record: {
-            return t.record(t.string, state(source.value)) as any;
+        case record:
+        case paramRecord: {
+            return trecord(t.string, state(source.value, options)) as any;
         }
         case object: {
-            return t.exact(
-                t.intersection([
-                    t.type({
-                        $v: source.$v == null ? t.undefined : t.literal(source.$v),
-                        $r: source.$r == null ? t.undefined : t.literal(source.$r),
-                    }),
-                    t.partial(mapRecord(source.value, value => state(value))),
-                ])
-            ) as any;
+            const base = t.intersection([
+                t.type({
+                    $v: source.$v == null ? t.undefined : t.literal(source.$v),
+                    $r: source.$r == null ? t.undefined : t.literal(source.$r),
+                }),
+                t.type(mapRecord(source.value, value => state(value, options))),
+            ]) as any;
+            if (options.exact) {
+                return t.exact(base);
+            }
+            return base;
         }
         default:
             return toBeNever(source);
@@ -168,25 +213,28 @@ export const state = <T extends AnyTemplate>(source: T): t.Type<State<T>> => {
 };
 
 export type UpOperation<T extends AnyTemplate> = T extends OtValueTemplate
-    ? T['nullable'] extends true
-        ? NullableTextOperation.UpOperation
-        : T['nullable'] extends false
-        ? TextOperation.UpOperation
-        : NullableTextOperation.UpOperation | TextOperation.UpOperation
+    ? If<T['nullable'], NullableTextOperation.UpOperation, TextOperation.UpOperation>
     : T extends ReplaceValueTemplate<infer U1>
     ? { newValue: t.TypeOf<U1> }
     : T extends RecordValueTemplate<infer U2>
     ? {
-          readonly [P in string]?: RecordUpOperationElement<State<U2>, UpOperation<U2>> | undefined;
+          [P in string]?: RecordUpOperationElement<State<U2>, UpOperation<U2>> | undefined;
+      }
+    : T extends ParamRecordValueTemplate<infer U2>
+    ? {
+          [P in string]?: UpOperation<U2> | undefined;
       }
     : T extends ObjectValueTemplate<infer U3, infer UV, infer UR>
     ? {
           $v: UV;
           $r: UR;
-      } & { readonly [P in keyof U3]?: UpOperation<U3[P]> }
+      } & { [P in keyof U3]?: UpOperation<U3[P]> }
     : unknown;
 
-export const upOperation = <T extends AnyTemplate>(source: T): t.Type<UpOperation<T>> => {
+export const upOperation = <T extends AnyTemplate>(
+    source: T,
+    options: IoTsOptions
+): t.Type<UpOperation<T>> => {
     switch (source.type) {
         case atomic: {
             switch (source.mode) {
@@ -201,18 +249,28 @@ export const upOperation = <T extends AnyTemplate>(source: T): t.Type<UpOperatio
             }
         }
         case record: {
-            return t.record(t.string, upOperation(source.value)) as any;
-        }
-        case object: {
-            return t.exact(
-                t.intersection([
-                    t.type({
-                        $v: source.$v == null ? t.undefined : t.literal(source.$v),
-                        $r: source.$r == null ? t.undefined : t.literal(source.$r),
-                    }),
-                    t.partial(mapRecord(source.value, value => upOperation(value))),
-                ])
+            return trecord(
+                t.string,
+                recordUpOperationElementFactory(
+                    state(source.value, options),
+                    upOperation(source.value, options)
+                )
             ) as any;
+        }
+        case paramRecord:
+            return trecord(t.string, upOperation(source.value, options)) as any;
+        case object: {
+            const base = t.intersection([
+                t.type({
+                    $v: source.$v == null ? t.undefined : t.literal(source.$v),
+                    $r: source.$r == null ? t.undefined : t.literal(source.$r),
+                }),
+                t.partial(mapRecord(source.value, value => upOperation(value, options))),
+            ]) as any;
+            if (options.exact) {
+                return t.exact(base);
+            }
+            return base;
         }
         default:
             return toBeNever(source);
@@ -220,27 +278,28 @@ export const upOperation = <T extends AnyTemplate>(source: T): t.Type<UpOperatio
 };
 
 export type DownOperation<T extends AnyTemplate> = T extends OtValueTemplate
-    ? T['nullable'] extends true
-        ? NullableTextOperation.DownOperation
-        : T['nullable'] extends false
-        ? TextOperation.DownOperation
-        : NullableTextOperation.DownOperation | TextOperation.DownOperation
+    ? If<T['nullable'], NullableTextOperation.DownOperation, TextOperation.DownOperation>
     : T extends ReplaceValueTemplate<infer U1>
     ? { oldValue: t.TypeOf<U1> }
     : T extends RecordValueTemplate<infer U2>
     ? {
-          readonly [P in string]?:
-              | RecordDownOperationElement<State<U2>, DownOperation<U2>>
-              | undefined;
+          [P in string]?: RecordDownOperationElement<State<U2>, DownOperation<U2>> | undefined;
+      }
+    : T extends ParamRecordValueTemplate<infer U2>
+    ? {
+          [P in string]?: DownOperation<U2> | undefined;
       }
     : T extends ObjectValueTemplate<infer U3, infer UV, infer UR>
     ? {
           $v: UV;
           $r: UR;
-      } & { readonly [P in keyof U3]?: DownOperation<U3[P]> }
+      } & { [P in keyof U3]?: DownOperation<U3[P]> }
     : unknown;
 
-export const downOperation = <T extends AnyTemplate>(source: T): t.Type<DownOperation<T>> => {
+export const downOperation = <T extends AnyTemplate>(
+    source: T,
+    options: IoTsOptions
+): t.Type<DownOperation<T>> => {
     switch (source.type) {
         case atomic: {
             switch (source.mode) {
@@ -255,18 +314,29 @@ export const downOperation = <T extends AnyTemplate>(source: T): t.Type<DownOper
             }
         }
         case record: {
-            return t.record(t.string, downOperation(source.value)) as any;
+            return trecord(
+                t.string,
+                recordDownOperationElementFactory(
+                    state(source.value, options),
+                    downOperation(source.value, options)
+                )
+            ) as any;
+        }
+        case paramRecord: {
+            return trecord(t.string, downOperation(source.value, options)) as any;
         }
         case object: {
-            return t.exact(
-                t.intersection([
-                    t.type({
-                        $v: source.$v == null ? t.undefined : t.literal(source.$v),
-                        $r: source.$r == null ? t.undefined : t.literal(source.$r),
-                    }),
-                    t.partial(mapRecord(source.value, value => downOperation(value))),
-                ])
-            ) as any;
+            const base = t.intersection([
+                t.type({
+                    $v: source.$v == null ? t.undefined : t.literal(source.$v),
+                    $r: source.$r == null ? t.undefined : t.literal(source.$r),
+                }),
+                t.partial(mapRecord(source.value, value => downOperation(value, options))),
+            ]) as any;
+            if (options.exact) {
+                return t.exact(base);
+            }
+            return base;
         }
         default:
             return toBeNever(source);
@@ -274,11 +344,7 @@ export const downOperation = <T extends AnyTemplate>(source: T): t.Type<DownOper
 };
 
 export type TwoWayOperation<T extends AnyTemplate> = T extends OtValueTemplate
-    ? T['nullable'] extends true
-        ? NullableTextOperation.TwoWayOperation
-        : T['nullable'] extends false
-        ? TextOperation.TwoWayOperation
-        : NullableTextOperation.TwoWayOperation | TextOperation.TwoWayOperation
+    ? If<T['nullable'], NullableTextOperation.TwoWayOperation, TextOperation.TwoWayOperation>
     : T extends ReplaceValueTemplate<infer U1>
     ? {
           oldValue: t.TypeOf<U1>;
@@ -286,15 +352,17 @@ export type TwoWayOperation<T extends AnyTemplate> = T extends OtValueTemplate
       }
     : T extends RecordValueTemplate<infer U2>
     ? {
-          readonly [P in string]?:
-              | RecordTwoWayOperationElement<State<U2>, TwoWayOperation<U2>>
-              | undefined;
+          [P in string]?: RecordTwoWayOperationElement<State<U2>, TwoWayOperation<U2>> | undefined;
+      }
+    : T extends ParamRecordValueTemplate<infer U2>
+    ? {
+          [P in string]?: TwoWayOperation<U2> | undefined;
       }
     : T extends ObjectValueTemplate<infer U4, infer UV, infer UR>
     ? {
           $v: UV;
           $r: UR;
-      } & { readonly [P in keyof U4]?: TwoWayOperation<U4[P]> }
+      } & { [P in keyof U4]?: TwoWayOperation<U4[P]> }
     : unknown;
 
 export const toUpOperation =
@@ -319,11 +387,17 @@ export const toUpOperation =
                 return RecordOperation.mapRecordUpOperation({
                     source: twoWayOperation as RecordOperation.RecordTwoWayOperation<
                         State<AnyTemplate>,
-                        UpOperation<AnyTemplate>
+                        TwoWayOperation<AnyTemplate>
                     >,
                     mapState: x => x,
                     mapOperation: operation => toUpOperation(template.value)(operation as any),
                 }) as any;
+            }
+            case paramRecord: {
+                return mapRecord(
+                    twoWayOperation as Record<string, TwoWayOperation<AnyTemplate> | undefined>,
+                    x => toUpOperation(template.value)(x)
+                ) as any;
             }
             case object: {
                 return mapRecord(
@@ -334,6 +408,8 @@ export const toUpOperation =
                             : toUpOperation(template.value[key]!)(operationElement)
                 ) as any;
             }
+            default:
+                return toBeNever(template);
         }
     };
 
@@ -359,11 +435,17 @@ export const toDownOperation =
                 return RecordOperation.mapRecordDownOperation({
                     source: twoWayOperation as RecordOperation.RecordTwoWayOperation<
                         State<AnyTemplate>,
-                        DownOperation<AnyTemplate>
+                        TwoWayOperation<AnyTemplate>
                     >,
                     mapState: x => x,
                     mapOperation: operation => toDownOperation(template.value)(operation as any),
                 }) as any;
+            }
+            case paramRecord: {
+                return mapRecord(
+                    twoWayOperation as Record<string, TwoWayOperation<AnyTemplate> | undefined>,
+                    x => toDownOperation(template.value)(x)
+                ) as any;
             }
             case object: {
                 return mapRecord(
@@ -374,6 +456,8 @@ export const toDownOperation =
                             : toDownOperation(template.value[key]!)(operationElement)
                 ) as any;
             }
+            default:
+                return toBeNever(template);
         }
     };
 
@@ -407,6 +491,18 @@ export const apply =
                         }),
                 });
             }
+            case paramRecord: {
+                return ParamRecordOperation.apply({
+                    prevState: state,
+                    operation: operation as Record<string, UpOperation<AnyTemplate>>,
+                    innerApply: ({ prevState, operation }) =>
+                        apply(template.value)({
+                            state: prevState,
+                            operation: operation,
+                        }),
+                    defaultState: template.defaultState,
+                });
+            }
             case object: {
                 const result = { ...state };
                 for (const { key, value } of recordToArray(
@@ -426,6 +522,8 @@ export const apply =
                 }
                 return Result.ok(result);
             }
+            default:
+                return toBeNever(template);
         }
     };
 
@@ -459,6 +557,18 @@ export const applyBack =
                         }),
                 });
             }
+            case paramRecord: {
+                return ParamRecordOperation.applyBack({
+                    nextState: state,
+                    operation: operation as Record<string, DownOperation<AnyTemplate>>,
+                    innerApplyBack: ({ nextState, operation }) =>
+                        applyBack(template.value)({
+                            state: nextState,
+                            operation: operation,
+                        }),
+                    defaultState: template.defaultState,
+                });
+            }
             case object: {
                 const result = { ...state };
                 for (const { key, value } of recordToArray(
@@ -478,6 +588,8 @@ export const applyBack =
                 }
                 return Result.ok(result);
             }
+            default:
+                return toBeNever(template);
         }
     };
 
@@ -516,6 +628,14 @@ export const composeDownOperation =
                         composeDownOperation(template.value)({ first, second }),
                 });
             }
+            case paramRecord: {
+                return ParamRecordOperation.compose({
+                    first,
+                    second,
+                    innerCompose: ({ first, second }) =>
+                        composeDownOperation(template.value)({ first, second }),
+                });
+            }
             case object: {
                 const firstMap = recordToMap(first);
                 const secondMap = recordToMap(second);
@@ -548,6 +668,8 @@ export const composeDownOperation =
                 }
                 return Result.ok(result);
             }
+            default:
+                return toBeNever(template);
         }
     };
 
@@ -593,6 +715,17 @@ export const restore =
                         restore(template.value)({ downOperation: downOperation as any, nextState }),
                 });
             }
+            case paramRecord: {
+                return ParamRecordOperation.restore({
+                    nextState,
+                    downOperation: downOperation as Record<
+                        string,
+                        DownOperation<AnyTemplate> | undefined
+                    >,
+                    innerRestore: ({ downOperation, nextState }) =>
+                        restore(template.value)({ downOperation: downOperation as any, nextState }),
+                });
+            }
             case object: {
                 const prevState = { ...nextState };
                 const twoWayOperation: Record<string, TwoWayOperation<T> | number | undefined> = {
@@ -619,6 +752,8 @@ export const restore =
                 }
                 return Result.ok({ prevState, twoWayOperation });
             }
+            default:
+                return toBeNever(template);
         }
     };
 
@@ -655,6 +790,17 @@ export const diff =
                         diff(template.value)({ prevState, nextState }),
                 });
             }
+            case paramRecord: {
+                return ParamRecordOperation.diff({
+                    prevState: prevState as Record<string, State<AnyTemplate>>,
+                    nextState: nextState as Record<string, State<AnyTemplate>>,
+                    innerDiff: ({ prevState, nextState }) =>
+                        diff(template.value)({
+                            prevState: prevState ?? template.defaultState,
+                            nextState: nextState ?? template.defaultState,
+                        }),
+                });
+            }
             case object: {
                 const prevStateMap = recordToMap(prevState);
                 const nextStateMap = recordToMap(nextState);
@@ -671,8 +817,13 @@ export const diff =
                         nextState: value.right,
                     });
                 }
+                if (isIdRecord(result)) {
+                    return undefined;
+                }
                 return result;
             }
+            default:
+                return toBeNever(template);
         }
     };
 
@@ -726,6 +877,17 @@ export const clientTransform =
                     },
                 });
             }
+            case paramRecord: {
+                return ParamRecordOperation.clientTransform({
+                    first: first as Record<string, UpOperation<AnyTemplate> | undefined>,
+                    second: second as Record<string, UpOperation<AnyTemplate> | undefined>,
+                    innerTransform: ({ first, second }) =>
+                        clientTransform(template.value)({
+                            first,
+                            second,
+                        }),
+                });
+            }
             case object: {
                 const firstMap = recordToMap(first);
                 const secondMap = recordToMap(second);
@@ -766,5 +928,7 @@ export const clientTransform =
                     secondPrime: isIdRecord(secondPrime) ? undefined : secondPrime,
                 });
             }
+            default:
+                return toBeNever(template);
         }
     };

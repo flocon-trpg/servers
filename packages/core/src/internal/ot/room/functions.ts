@@ -12,26 +12,12 @@ import * as ParamNamesTypes from './paramName/types';
 import * as Participant from './participant/functions';
 import * as ParticipantTypes from './participant/types';
 import * as RecordOperation from '../util/recordOperation';
-import { mapRecordOperationElement } from '../util/recordOperationElement';
 import * as ReplaceOperation from '../util/replaceOperation';
 import * as TextOperation from '../util/textOperation';
-import {
-    Apply,
-    ClientTransform,
-    Compose,
-    Diff,
-    DownError,
-    Restore,
-    ScalarError,
-    ServerTransform,
-    TwoWayError,
-    UpError,
-} from '../util/type';
+import { ServerTransform, TwoWayError } from '../util/type';
 import { isIdRecord } from '../util/record';
 import { Result } from '@kizahasi/result';
-import { chooseRecord } from '@flocon-trpg/utils';
 import { isStrIndex20, isStrIndex5 } from '../../indexes';
-import { DownOperation, State, TwoWayOperation, UpOperation } from './types';
 import {
     client,
     RequestedBy,
@@ -41,12 +27,14 @@ import {
     none,
     isBoardOwner,
 } from '../util/requestedBy';
+import { template } from './types';
+import { State, TwoWayOperation, UpOperation } from '../generator';
 
 const oneToTenArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 
 export const toClientState =
     (requestedBy: RequestedBy) =>
-    (source: State): State => {
+    (source: State<typeof template>): State<typeof template> => {
         return {
             ...source,
             bgms: RecordOperation.toClientState({
@@ -69,7 +57,10 @@ export const toClientState =
                     }),
                 toClientState: ({ state }) => Board.toClientState(requestedBy, source)(state),
             }),
-            characters: RecordOperation.toClientState<CharacterTypes.State, CharacterTypes.State>({
+            characters: RecordOperation.toClientState<
+                State<typeof CharacterTypes.template>,
+                State<typeof CharacterTypes.template>
+            >({
                 serverState: source.characters,
                 isPrivate: state =>
                     !isOwner({
@@ -109,1057 +100,14 @@ export const toClientState =
         };
     };
 
-export const toDownOperation = (source: TwoWayOperation): DownOperation => {
-    return {
-        ...source,
-        bgms:
-            source.bgms == null
-                ? undefined
-                : chooseRecord(source.bgms, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: Bgm.toDownOperation,
-                      })
-                  ),
-        boolParamNames:
-            source.boolParamNames == null
-                ? undefined
-                : chooseRecord(source.boolParamNames, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: ParamNames.toDownOperation,
-                      })
-                  ),
-        boards:
-            source.boards == null
-                ? undefined
-                : chooseRecord(source.boards, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: Board.toDownOperation,
-                      })
-                  ),
-        characters:
-            source.characters == null
-                ? undefined
-                : chooseRecord(source.characters, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: Character.toDownOperation,
-                      })
-                  ),
-        characterTag1Name:
-            source.characterTag1Name == null
-                ? undefined
-                : NullableTextOperation.toDownOperation(source.characterTag1Name),
-        characterTag2Name:
-            source.characterTag2Name == null
-                ? undefined
-                : NullableTextOperation.toDownOperation(source.characterTag2Name),
-        characterTag3Name:
-            source.characterTag3Name == null
-                ? undefined
-                : NullableTextOperation.toDownOperation(source.characterTag3Name),
-        characterTag4Name:
-            source.characterTag4Name == null
-                ? undefined
-                : NullableTextOperation.toDownOperation(source.characterTag4Name),
-        characterTag5Name:
-            source.characterTag5Name == null
-                ? undefined
-                : NullableTextOperation.toDownOperation(source.characterTag5Name),
-        characterTag6Name:
-            source.characterTag6Name == null
-                ? undefined
-                : NullableTextOperation.toDownOperation(source.characterTag6Name),
-        characterTag7Name:
-            source.characterTag7Name == null
-                ? undefined
-                : NullableTextOperation.toDownOperation(source.characterTag7Name),
-        characterTag8Name:
-            source.characterTag8Name == null
-                ? undefined
-                : NullableTextOperation.toDownOperation(source.characterTag8Name),
-        characterTag9Name:
-            source.characterTag9Name == null
-                ? undefined
-                : NullableTextOperation.toDownOperation(source.characterTag9Name),
-        characterTag10Name:
-            source.characterTag10Name == null
-                ? undefined
-                : NullableTextOperation.toDownOperation(source.characterTag10Name),
-        memos:
-            source.memos == null
-                ? undefined
-                : chooseRecord(source.memos, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: Memo.toDownOperation,
-                      })
-                  ),
-        name: source.name == null ? undefined : TextOperation.toDownOperation(source.name),
-        numParamNames:
-            source.numParamNames == null
-                ? undefined
-                : chooseRecord(source.numParamNames, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: ParamNames.toDownOperation,
-                      })
-                  ),
-        participants:
-            source.participants == null
-                ? undefined
-                : chooseRecord(source.participants, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: Participant.toDownOperation,
-                      })
-                  ),
-        publicChannel1Name:
-            source.publicChannel1Name == null
-                ? undefined
-                : TextOperation.toDownOperation(source.publicChannel1Name),
-        publicChannel2Name:
-            source.publicChannel2Name == null
-                ? undefined
-                : TextOperation.toDownOperation(source.publicChannel2Name),
-        publicChannel3Name:
-            source.publicChannel3Name == null
-                ? undefined
-                : TextOperation.toDownOperation(source.publicChannel3Name),
-        publicChannel4Name:
-            source.publicChannel4Name == null
-                ? undefined
-                : TextOperation.toDownOperation(source.publicChannel4Name),
-        publicChannel5Name:
-            source.publicChannel5Name == null
-                ? undefined
-                : TextOperation.toDownOperation(source.publicChannel5Name),
-        publicChannel6Name:
-            source.publicChannel6Name == null
-                ? undefined
-                : TextOperation.toDownOperation(source.publicChannel6Name),
-        publicChannel7Name:
-            source.publicChannel7Name == null
-                ? undefined
-                : TextOperation.toDownOperation(source.publicChannel7Name),
-        publicChannel8Name:
-            source.publicChannel8Name == null
-                ? undefined
-                : TextOperation.toDownOperation(source.publicChannel8Name),
-        publicChannel9Name:
-            source.publicChannel9Name == null
-                ? undefined
-                : TextOperation.toDownOperation(source.publicChannel9Name),
-        publicChannel10Name:
-            source.publicChannel10Name == null
-                ? undefined
-                : TextOperation.toDownOperation(source.publicChannel10Name),
-        strParamNames:
-            source.strParamNames == null
-                ? undefined
-                : chooseRecord(source.strParamNames, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: ParamNames.toDownOperation,
-                      })
-                  ),
-    };
-};
-
-export const toUpOperation = (source: TwoWayOperation): UpOperation => {
-    return {
-        ...source,
-        bgms:
-            source.bgms == null
-                ? undefined
-                : chooseRecord(source.bgms, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: Bgm.toUpOperation,
-                      })
-                  ),
-        boolParamNames:
-            source.boolParamNames == null
-                ? undefined
-                : chooseRecord(source.boolParamNames, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: ParamNames.toUpOperation,
-                      })
-                  ),
-        boards:
-            source.boards == null
-                ? undefined
-                : chooseRecord(source.boards, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: Board.toUpOperation,
-                      })
-                  ),
-        characters:
-            source.characters == null
-                ? undefined
-                : chooseRecord(source.characters, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: Character.toUpOperation,
-                      })
-                  ),
-        characterTag1Name:
-            source.characterTag1Name == null
-                ? undefined
-                : NullableTextOperation.toUpOperation(source.characterTag1Name),
-        characterTag2Name:
-            source.characterTag2Name == null
-                ? undefined
-                : NullableTextOperation.toUpOperation(source.characterTag2Name),
-        characterTag3Name:
-            source.characterTag3Name == null
-                ? undefined
-                : NullableTextOperation.toUpOperation(source.characterTag3Name),
-        characterTag4Name:
-            source.characterTag4Name == null
-                ? undefined
-                : NullableTextOperation.toUpOperation(source.characterTag4Name),
-        characterTag5Name:
-            source.characterTag5Name == null
-                ? undefined
-                : NullableTextOperation.toUpOperation(source.characterTag5Name),
-        characterTag6Name:
-            source.characterTag6Name == null
-                ? undefined
-                : NullableTextOperation.toUpOperation(source.characterTag6Name),
-        characterTag7Name:
-            source.characterTag7Name == null
-                ? undefined
-                : NullableTextOperation.toUpOperation(source.characterTag7Name),
-        characterTag8Name:
-            source.characterTag8Name == null
-                ? undefined
-                : NullableTextOperation.toUpOperation(source.characterTag8Name),
-        characterTag9Name:
-            source.characterTag9Name == null
-                ? undefined
-                : NullableTextOperation.toUpOperation(source.characterTag9Name),
-        characterTag10Name:
-            source.characterTag10Name == null
-                ? undefined
-                : NullableTextOperation.toUpOperation(source.characterTag10Name),
-        memos:
-            source.memos == null
-                ? undefined
-                : chooseRecord(source.memos, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: Memo.toUpOperation,
-                      })
-                  ),
-        name: source.name == null ? undefined : TextOperation.toUpOperation(source.name),
-        numParamNames:
-            source.numParamNames == null
-                ? undefined
-                : chooseRecord(source.numParamNames, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: ParamNames.toUpOperation,
-                      })
-                  ),
-        participants:
-            source.participants == null
-                ? undefined
-                : chooseRecord(source.participants, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: Participant.toUpOperation,
-                      })
-                  ),
-        publicChannel1Name:
-            source.publicChannel1Name == null
-                ? undefined
-                : TextOperation.toUpOperation(source.publicChannel1Name),
-        publicChannel2Name:
-            source.publicChannel2Name == null
-                ? undefined
-                : TextOperation.toUpOperation(source.publicChannel2Name),
-        publicChannel3Name:
-            source.publicChannel3Name == null
-                ? undefined
-                : TextOperation.toUpOperation(source.publicChannel3Name),
-        publicChannel4Name:
-            source.publicChannel4Name == null
-                ? undefined
-                : TextOperation.toUpOperation(source.publicChannel4Name),
-        publicChannel5Name:
-            source.publicChannel5Name == null
-                ? undefined
-                : TextOperation.toUpOperation(source.publicChannel5Name),
-        publicChannel6Name:
-            source.publicChannel6Name == null
-                ? undefined
-                : TextOperation.toUpOperation(source.publicChannel6Name),
-        publicChannel7Name:
-            source.publicChannel7Name == null
-                ? undefined
-                : TextOperation.toUpOperation(source.publicChannel7Name),
-        publicChannel8Name:
-            source.publicChannel8Name == null
-                ? undefined
-                : TextOperation.toUpOperation(source.publicChannel8Name),
-        publicChannel9Name:
-            source.publicChannel9Name == null
-                ? undefined
-                : TextOperation.toUpOperation(source.publicChannel9Name),
-        publicChannel10Name:
-            source.publicChannel10Name == null
-                ? undefined
-                : TextOperation.toUpOperation(source.publicChannel10Name),
-        strParamNames:
-            source.strParamNames == null
-                ? undefined
-                : chooseRecord(source.strParamNames, operation =>
-                      mapRecordOperationElement({
-                          source: operation,
-                          mapReplace: x => x,
-                          mapOperation: ParamNames.toUpOperation,
-                      })
-                  ),
-    };
-};
-
-export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
-    const result: State = { ...state };
-
-    if (operation.activeBoardId != null) {
-        result.activeBoardId = operation.activeBoardId.newValue;
-    }
-
-    const bgms = RecordOperation.apply<BgmTypes.State, BgmTypes.UpOperation, ScalarError>({
-        prevState: state.bgms,
-        operation: operation.bgms,
-        innerApply: ({ prevState, operation }) => {
-            return Bgm.apply({ state: prevState, operation });
-        },
-    });
-    if (bgms.isError) {
-        return bgms;
-    }
-    result.bgms = bgms.value;
-
-    const boolParamNames = RecordOperation.apply<
-        ParamNamesTypes.State,
-        ParamNamesTypes.UpOperation,
-        ScalarError
-    >({
-        prevState: state.boolParamNames,
-        operation: operation.boolParamNames,
-        innerApply: ({ prevState, operation }) => {
-            return ParamNames.apply({ state: prevState, operation });
-        },
-    });
-    if (boolParamNames.isError) {
-        return boolParamNames;
-    }
-    result.boolParamNames = boolParamNames.value;
-
-    const boards = RecordOperation.apply<BoardTypes.State, BoardTypes.UpOperation, ScalarError>({
-        prevState: state.boards,
-        operation: operation.boards,
-        innerApply: ({ prevState, operation: upOperation }) => {
-            return Board.apply({ state: prevState, operation: upOperation });
-        },
-    });
-    if (boards.isError) {
-        return boards;
-    }
-    result.boards = boards.value;
-
-    const characters = RecordOperation.apply<
-        CharacterTypes.State,
-        CharacterTypes.UpOperation,
-        ScalarError
-    >({
-        prevState: state.characters,
-        operation: operation.characters,
-        innerApply: ({ prevState, operation: upOperation }) => {
-            return Character.apply({
-                state: prevState,
-                operation: upOperation,
-            });
-        },
-    });
-    if (characters.isError) {
-        return characters;
-    }
-    result.characters = characters.value;
-
-    for (const i of oneToTenArray) {
-        const key = `characterTag${i}Name` as const;
-        const operationElement = operation[key];
-        if (operationElement != null) {
-            const applied = NullableTextOperation.apply(state[key], operationElement);
-            if (applied.isError) {
-                return applied;
-            }
-            result[key] = applied.value;
-        }
-    }
-
-    if (operation.name != null) {
-        const applied = TextOperation.apply(state.name, operation.name);
-        if (applied.isError) {
-            return applied;
-        }
-        result.name = applied.value;
-    }
-
-    const numParamNames = RecordOperation.apply<
-        ParamNamesTypes.State,
-        ParamNamesTypes.UpOperation,
-        ScalarError
-    >({
-        prevState: state.numParamNames,
-        operation: operation.numParamNames,
-        innerApply: ({ prevState, operation }) => {
-            return ParamNames.apply({ state: prevState, operation });
-        },
-    });
-    if (numParamNames.isError) {
-        return numParamNames;
-    }
-    result.numParamNames = numParamNames.value;
-
-    const memo = RecordOperation.apply<MemoTypes.State, MemoTypes.UpOperation, ScalarError>({
-        prevState: state.memos,
-        operation: operation.memos,
-        innerApply: ({ prevState, operation }) => {
-            return Memo.apply({ state: prevState, operation });
-        },
-    });
-    if (memo.isError) {
-        return memo;
-    }
-    result.memos = memo.value;
-
-    const participants = RecordOperation.apply<
-        ParticipantTypes.State,
-        ParticipantTypes.UpOperation,
-        ScalarError
-    >({
-        prevState: state.participants,
-        operation: operation.participants,
-        innerApply: ({ prevState, operation }) => {
-            return Participant.apply({ state: prevState, operation });
-        },
-    });
-    if (participants.isError) {
-        return participants;
-    }
-    result.participants = participants.value;
-
-    for (const i of oneToTenArray) {
-        const key = `publicChannel${i}Name` as const;
-        const operationElement = operation[key];
-        if (operationElement != null) {
-            const applied = TextOperation.apply(state[key], operationElement);
-            if (applied.isError) {
-                return applied;
-            }
-            result[key] = applied.value;
-        }
-    }
-
-    const strParamNames = RecordOperation.apply<
-        ParamNamesTypes.State,
-        ParamNamesTypes.UpOperation,
-        ScalarError
-    >({
-        prevState: state.strParamNames,
-        operation: operation.strParamNames,
-        innerApply: ({ prevState, operation }) => {
-            return ParamNames.apply({ state: prevState, operation });
-        },
-    });
-    if (strParamNames.isError) {
-        return strParamNames;
-    }
-    result.strParamNames = strParamNames.value;
-
-    return Result.ok(result);
-};
-
-export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
-    const result: State = { ...state };
-
-    if (operation.activeBoardId != null) {
-        result.activeBoardId = operation.activeBoardId.oldValue;
-    }
-
-    const bgms = RecordOperation.applyBack<BgmTypes.State, BgmTypes.DownOperation, ScalarError>({
-        nextState: state.bgms,
-        operation: operation.bgms,
-        innerApplyBack: ({ state, operation }) => {
-            return Bgm.applyBack({ state, operation });
-        },
-    });
-    if (bgms.isError) {
-        return bgms;
-    }
-    result.bgms = bgms.value;
-
-    const boolParamNames = RecordOperation.applyBack<
-        ParamNamesTypes.State,
-        ParamNamesTypes.DownOperation,
-        ScalarError
-    >({
-        nextState: state.boolParamNames,
-        operation: operation.boolParamNames,
-        innerApplyBack: ({ state, operation }) => {
-            return ParamNames.applyBack({ state, operation });
-        },
-    });
-    if (boolParamNames.isError) {
-        return boolParamNames;
-    }
-    result.boolParamNames = boolParamNames.value;
-
-    const boards = RecordOperation.applyBack<
-        BoardTypes.State,
-        BoardTypes.DownOperation,
-        ScalarError
-    >({
-        nextState: state.boards,
-        operation: operation.boards,
-        innerApplyBack: ({ state, operation }) => {
-            return Board.applyBack({ state, operation });
-        },
-    });
-    if (boards.isError) {
-        return boards;
-    }
-    result.boards = boards.value;
-
-    const characters = RecordOperation.applyBack<
-        CharacterTypes.State,
-        CharacterTypes.DownOperation,
-        ScalarError
-    >({
-        nextState: state.characters,
-        operation: operation.characters,
-        innerApplyBack: ({ state, operation }) => {
-            return Character.applyBack({ state, operation });
-        },
-    });
-    if (characters.isError) {
-        return characters;
-    }
-    result.characters = characters.value;
-
-    for (const i of oneToTenArray) {
-        const key = `characterTag${i}Name` as const;
-        const operationElement = operation[key];
-        if (operationElement != null) {
-            const applied = NullableTextOperation.applyBack(state[key], operationElement);
-            if (applied.isError) {
-                return applied;
-            }
-            result[key] = applied.value;
-        }
-    }
-
-    if (operation.name != null) {
-        const applied = TextOperation.applyBack(state.name, operation.name);
-        if (applied.isError) {
-            return applied;
-        }
-        result.name = applied.value;
-    }
-
-    const numParamNames = RecordOperation.applyBack<
-        ParamNamesTypes.State,
-        ParamNamesTypes.DownOperation,
-        ScalarError
-    >({
-        nextState: state.numParamNames,
-        operation: operation.numParamNames,
-        innerApplyBack: ({ state, operation }) => {
-            return ParamNames.applyBack({ state, operation });
-        },
-    });
-    if (numParamNames.isError) {
-        return numParamNames;
-    }
-    result.numParamNames = numParamNames.value;
-
-    const memo = RecordOperation.applyBack<MemoTypes.State, MemoTypes.DownOperation, ScalarError>({
-        nextState: state.memos,
-        operation: operation.memos,
-        innerApplyBack: ({ state, operation }) => {
-            return Memo.applyBack({ state, operation });
-        },
-    });
-    if (memo.isError) {
-        return memo;
-    }
-    result.memos = memo.value;
-
-    const participants = RecordOperation.applyBack<
-        ParticipantTypes.State,
-        ParticipantTypes.DownOperation,
-        ScalarError
-    >({
-        nextState: state.participants,
-        operation: operation.participants,
-        innerApplyBack: ({ state, operation }) => {
-            return Participant.applyBack({ state, operation });
-        },
-    });
-    if (participants.isError) {
-        return participants;
-    }
-    result.participants = participants.value;
-
-    for (const i of oneToTenArray) {
-        const key = `publicChannel${i}Name` as const;
-        const operationElement = operation[key];
-        if (operationElement != null) {
-            const applied = TextOperation.applyBack(state[key], operationElement);
-            if (applied.isError) {
-                return applied;
-            }
-            result[key] = applied.value;
-        }
-    }
-
-    const strParamNames = RecordOperation.applyBack<
-        ParamNamesTypes.State,
-        ParamNamesTypes.DownOperation,
-        ScalarError
-    >({
-        nextState: state.strParamNames,
-        operation: operation.strParamNames,
-        innerApplyBack: ({ state, operation }) => {
-            return ParamNames.applyBack({ state, operation });
-        },
-    });
-    if (strParamNames.isError) {
-        return strParamNames;
-    }
-    result.strParamNames = strParamNames.value;
-
-    return Result.ok(result);
-};
-
-export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
-    const bgms = RecordOperation.composeDownOperation({
-        first: first.bgms,
-        second: second.bgms,
-        innerApplyBack: params => Bgm.applyBack(params),
-        innerCompose: params => Bgm.composeDownOperation(params),
-    });
-    if (bgms.isError) {
-        return bgms;
-    }
-
-    const boolParamNames = RecordOperation.composeDownOperation({
-        first: first.boolParamNames,
-        second: second.boolParamNames,
-        innerApplyBack: params => ParamNames.applyBack(params),
-        innerCompose: params => ParamNames.composeDownOperation(params),
-    });
-    if (boolParamNames.isError) {
-        return boolParamNames;
-    }
-
-    const boards = RecordOperation.composeDownOperation<
-        BoardTypes.State,
-        BoardTypes.DownOperation,
-        DownError
-    >({
-        first: first.boards,
-        second: second.boards,
-        innerApplyBack: params => Board.applyBack(params),
-        innerCompose: params => Board.composeDownOperation(params),
-    });
-    if (boards.isError) {
-        return boards;
-    }
-
-    const characters = RecordOperation.composeDownOperation<
-        CharacterTypes.State,
-        CharacterTypes.DownOperation,
-        DownError
-    >({
-        first: first.characters,
-        second: second.characters,
-        innerApplyBack: params => Character.applyBack(params),
-        innerCompose: params => Character.composeDownOperation(params),
-    });
-    if (characters.isError) {
-        return characters;
-    }
-
-    const memo = RecordOperation.composeDownOperation({
-        first: first.memos,
-        second: second.memos,
-        innerApplyBack: params => Memo.applyBack(params),
-        innerCompose: params => Memo.composeDownOperation(params),
-    });
-    if (memo.isError) {
-        return memo;
-    }
-
-    const name = TextOperation.composeDownOperation(first.name, second.name);
-    if (name.isError) {
-        return name;
-    }
-
-    const numParamNames = RecordOperation.composeDownOperation({
-        first: first.numParamNames,
-        second: second.numParamNames,
-        innerApplyBack: params => ParamNames.applyBack(params),
-        innerCompose: params => ParamNames.composeDownOperation(params),
-    });
-    if (numParamNames.isError) {
-        return numParamNames;
-    }
-
-    const strParamNames = RecordOperation.composeDownOperation({
-        first: first.strParamNames,
-        second: second.strParamNames,
-        innerApplyBack: params => ParamNames.applyBack(params),
-        innerCompose: params => ParamNames.composeDownOperation(params),
-    });
-    if (strParamNames.isError) {
-        return strParamNames;
-    }
-
-    const participants = RecordOperation.composeDownOperation({
-        first: first.participants,
-        second: second.participants,
-        innerApplyBack: params => Participant.applyBack(params),
-        innerCompose: params => Participant.composeDownOperation(params),
-    });
-    if (participants.isError) {
-        return participants;
-    }
-
-    const valueProps: DownOperation = {
-        $v: 2,
-        $r: 1,
-        activeBoardId: ReplaceOperation.composeDownOperation(
-            first.activeBoardId,
-            second.activeBoardId
-        ),
-        name: name.value,
-        bgms: bgms.value,
-        boolParamNames: boolParamNames.value,
-        boards: boards.value,
-        characters: characters.value,
-        memos: memo.value,
-        numParamNames: numParamNames.value,
-        strParamNames: strParamNames.value,
-        participants: participants.value,
-    };
-
-    for (const i of oneToTenArray) {
-        const key = `characterTag${i}Name` as const;
-        const composed = NullableTextOperation.composeDownOperation(first[key], second[key]);
-        if (composed.isError) {
-            return composed;
-        }
-        valueProps[key] = composed.value;
-    }
-
-    for (const i of oneToTenArray) {
-        const key = `publicChannel${i}Name` as const;
-        const composed = TextOperation.composeDownOperation(first[key], second[key]);
-        if (composed.isError) {
-            return composed;
-        }
-        valueProps[key] = composed.value;
-    }
-    return Result.ok(valueProps);
-};
-
-export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
-    nextState,
-    downOperation,
-}) => {
-    if (downOperation === undefined) {
-        return Result.ok({ prevState: nextState, twoWayOperation: undefined });
-    }
-
-    const bgms = RecordOperation.restore({
-        nextState: nextState.bgms,
-        downOperation: downOperation.bgms,
-        innerDiff: params => Bgm.diff(params),
-        innerRestore: params => Bgm.restore(params),
-    });
-    if (bgms.isError) {
-        return bgms;
-    }
-
-    const boolParamNames = RecordOperation.restore({
-        nextState: nextState.boolParamNames,
-        downOperation: downOperation.boolParamNames,
-        innerDiff: params => ParamNames.diff(params),
-        innerRestore: params => ParamNames.restore(params),
-    });
-    if (boolParamNames.isError) {
-        return boolParamNames;
-    }
-
-    const boards = RecordOperation.restore<
-        BoardTypes.State,
-        BoardTypes.DownOperation,
-        BoardTypes.TwoWayOperation,
-        ScalarError
-    >({
-        nextState: nextState.boards,
-        downOperation: downOperation.boards,
-        innerDiff: params => Board.diff(params),
-        innerRestore: params => Board.restore(params),
-    });
-    if (boards.isError) {
-        return boards;
-    }
-
-    const characters = RecordOperation.restore<
-        CharacterTypes.State,
-        CharacterTypes.DownOperation,
-        CharacterTypes.TwoWayOperation,
-        ScalarError
-    >({
-        nextState: nextState.characters,
-        downOperation: downOperation.characters,
-        innerDiff: params => Character.diff(params),
-        innerRestore: params => Character.restore(params),
-    });
-    if (characters.isError) {
-        return characters;
-    }
-
-    const memo = RecordOperation.restore({
-        nextState: nextState.memos,
-        downOperation: downOperation.memos,
-        innerDiff: params => Memo.diff(params),
-        innerRestore: params => Memo.restore(params),
-    });
-    if (memo.isError) {
-        return memo;
-    }
-
-    const numParamNames = RecordOperation.restore({
-        nextState: nextState.numParamNames,
-        downOperation: downOperation.numParamNames,
-        innerDiff: params => ParamNames.diff(params),
-        innerRestore: params => ParamNames.restore(params),
-    });
-    if (numParamNames.isError) {
-        return numParamNames;
-    }
-
-    const strParamNames = RecordOperation.restore({
-        nextState: nextState.strParamNames,
-        downOperation: downOperation.strParamNames,
-        innerDiff: params => ParamNames.diff(params),
-        innerRestore: params => ParamNames.restore(params),
-    });
-    if (strParamNames.isError) {
-        return strParamNames;
-    }
-
-    const participants = RecordOperation.restore({
-        nextState: nextState.participants,
-        downOperation: downOperation.participants,
-        innerDiff: params => Participant.diff(params),
-        innerRestore: params => Participant.restore(params),
-    });
-    if (participants.isError) {
-        return participants;
-    }
-
-    const prevState: State = {
-        ...nextState,
-        bgms: bgms.value.prevState,
-        boards: boards.value.prevState,
-        boolParamNames: boolParamNames.value.prevState,
-        characters: characters.value.prevState,
-        memos: memo.value.prevState,
-        numParamNames: numParamNames.value.prevState,
-        strParamNames: strParamNames.value.prevState,
-        participants: participants.value.prevState,
-    };
-    const twoWayOperation: TwoWayOperation = {
-        $v: 2,
-        $r: 1,
-        bgms: bgms.value.twoWayOperation,
-        boards: boards.value.twoWayOperation,
-        boolParamNames: boolParamNames.value.twoWayOperation,
-        characters: characters.value.twoWayOperation,
-        memos: memo.value.twoWayOperation,
-        numParamNames: numParamNames.value.twoWayOperation,
-        strParamNames: strParamNames.value.twoWayOperation,
-        participants: participants.value.twoWayOperation,
-    };
-
-    if (downOperation.activeBoardId !== undefined) {
-        prevState.activeBoardId = downOperation.activeBoardId.oldValue;
-        twoWayOperation.activeBoardId = {
-            ...downOperation.activeBoardId,
-            newValue: nextState.activeBoardId,
-        };
-    }
-
-    if (downOperation.name !== undefined) {
-        const restored = TextOperation.restore({
-            nextState: nextState.name,
-            downOperation: downOperation.name,
-        });
-        if (restored.isError) {
-            return restored;
-        }
-        prevState.name = restored.value.prevState;
-        twoWayOperation.name = restored.value.twoWayOperation;
-    }
-
-    for (const i of oneToTenArray) {
-        const key = `characterTag${i}Name` as const;
-        const downOperationValue = downOperation[key];
-        if (downOperationValue !== undefined) {
-            const restored = NullableTextOperation.restore({
-                nextState: nextState[key],
-                downOperation: downOperationValue,
-            });
-            if (restored.isError) {
-                return restored;
-            }
-            prevState[key] = restored.value.prevState;
-            twoWayOperation[key] = restored.value.twoWayOperation;
-        }
-    }
-
-    for (const i of oneToTenArray) {
-        const key = `publicChannel${i}Name` as const;
-        const downOperationValue = downOperation[key];
-        if (downOperationValue !== undefined) {
-            const restored = TextOperation.restore({
-                nextState: nextState[key],
-                downOperation: downOperationValue,
-            });
-            if (restored.isError) {
-                return restored;
-            }
-            prevState[key] = restored.value.prevState;
-            twoWayOperation[key] = restored.value.twoWayOperation;
-        }
-    }
-
-    return Result.ok({ prevState, twoWayOperation });
-};
-
-export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const bgms = RecordOperation.diff({
-        prevState: prevState.bgms,
-        nextState: nextState.bgms,
-        innerDiff: params => Bgm.diff(params),
-    });
-    const boards = RecordOperation.diff<BoardTypes.State, BoardTypes.TwoWayOperation>({
-        prevState: prevState.boards,
-        nextState: nextState.boards,
-        innerDiff: params => Board.diff(params),
-    });
-    const boolParamNames = RecordOperation.diff({
-        prevState: prevState.boolParamNames,
-        nextState: nextState.boolParamNames,
-        innerDiff: params => ParamNames.diff(params),
-    });
-    const characters = RecordOperation.diff<CharacterTypes.State, CharacterTypes.TwoWayOperation>({
-        prevState: prevState.characters,
-        nextState: nextState.characters,
-        innerDiff: params => Character.diff(params),
-    });
-    const memos = RecordOperation.diff({
-        prevState: prevState.memos,
-        nextState: nextState.memos,
-        innerDiff: params => Memo.diff(params),
-    });
-    const numParamNames = RecordOperation.diff({
-        prevState: prevState.numParamNames,
-        nextState: nextState.numParamNames,
-        innerDiff: params => ParamNames.diff(params),
-    });
-    const strParamNames = RecordOperation.diff({
-        prevState: prevState.strParamNames,
-        nextState: nextState.strParamNames,
-        innerDiff: params => ParamNames.diff(params),
-    });
-    const participants = RecordOperation.diff({
-        prevState: prevState.participants,
-        nextState: nextState.participants,
-        innerDiff: params => Participant.diff(params),
-    });
-    const result: TwoWayOperation = {
-        $v: 2,
-        $r: 1,
-        bgms,
-        boards,
-        boolParamNames,
-        characters,
-        memos,
-        numParamNames,
-        participants,
-        strParamNames,
-    };
-    if (prevState.activeBoardId !== nextState.activeBoardId) {
-        result.activeBoardId = {
-            oldValue: prevState.activeBoardId,
-            newValue: nextState.activeBoardId,
-        };
-    }
-    if (prevState.name !== nextState.name) {
-        result.name = TextOperation.diff({ prev: prevState.name, next: nextState.name });
-    }
-    for (const i of oneToTenArray) {
-        const key = `characterTag${i}Name` as const;
-        if (prevState[key] !== nextState[key]) {
-            result[key] = NullableTextOperation.diff({
-                prev: prevState[key],
-                next: nextState[key],
-            });
-        }
-    }
-    for (const i of oneToTenArray) {
-        const key = `publicChannel${i}Name` as const;
-        if (prevState[key] !== nextState[key]) {
-            result[key] = TextOperation.diff({ prev: prevState[key], next: nextState[key] });
-        }
-    }
-    if (isIdRecord(result)) {
-        return undefined;
-    }
-    return result;
-};
-
 export const serverTransform =
-    (requestedBy: RequestedBy): ServerTransform<State, TwoWayOperation, UpOperation> =>
+    (
+        requestedBy: RequestedBy
+    ): ServerTransform<
+        State<typeof template>,
+        TwoWayOperation<typeof template>,
+        UpOperation<typeof template>
+    > =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
         if (requestedBy.type === client) {
             const me = currentState.participants[requestedBy.userUid];
@@ -1170,10 +118,10 @@ export const serverTransform =
         }
 
         const bgms = RecordOperation.serverTransform<
-            BgmTypes.State,
-            BgmTypes.State,
-            BgmTypes.TwoWayOperation,
-            BgmTypes.UpOperation,
+            State<typeof BgmTypes.template>,
+            State<typeof BgmTypes.template>,
+            TwoWayOperation<typeof BgmTypes.template>,
+            UpOperation<typeof BgmTypes.template>,
             TwoWayError
         >({
             prevState: prevState.bgms,
@@ -1197,10 +145,10 @@ export const serverTransform =
         }
 
         const boolParamNames = RecordOperation.serverTransform<
-            ParamNamesTypes.State,
-            ParamNamesTypes.State,
-            ParamNamesTypes.TwoWayOperation,
-            ParamNamesTypes.UpOperation,
+            State<typeof ParamNamesTypes.template>,
+            State<typeof ParamNamesTypes.template>,
+            TwoWayOperation<typeof ParamNamesTypes.template>,
+            UpOperation<typeof ParamNamesTypes.template>,
             TwoWayError
         >({
             prevState: prevState.boolParamNames,
@@ -1224,10 +172,10 @@ export const serverTransform =
         }
 
         const boards = RecordOperation.serverTransform<
-            BoardTypes.State,
-            BoardTypes.State,
-            BoardTypes.TwoWayOperation,
-            BoardTypes.UpOperation,
+            State<typeof BoardTypes.template>,
+            State<typeof BoardTypes.template>,
+            TwoWayOperation<typeof BoardTypes.template>,
+            UpOperation<typeof BoardTypes.template>,
             TwoWayError
         >({
             first: serverOperation?.boards,
@@ -1270,10 +218,10 @@ export const serverTransform =
         }
 
         const characters = RecordOperation.serverTransform<
-            CharacterTypes.State,
-            CharacterTypes.State,
-            CharacterTypes.TwoWayOperation,
-            CharacterTypes.UpOperation,
+            State<typeof CharacterTypes.template>,
+            State<typeof CharacterTypes.template>,
+            TwoWayOperation<typeof CharacterTypes.template>,
+            UpOperation<typeof CharacterTypes.template>,
             TwoWayError
         >({
             first: serverOperation?.characters,
@@ -1319,10 +267,10 @@ export const serverTransform =
 
         // TODO: ファイルサイズが巨大になりそうなときに拒否する機能
         const memos = RecordOperation.serverTransform<
-            MemoTypes.State,
-            MemoTypes.State,
-            MemoTypes.TwoWayOperation,
-            MemoTypes.UpOperation,
+            State<typeof MemoTypes.template>,
+            State<typeof MemoTypes.template>,
+            TwoWayOperation<typeof MemoTypes.template>,
+            UpOperation<typeof MemoTypes.template>,
             TwoWayError
         >({
             prevState: prevState.memos,
@@ -1344,10 +292,10 @@ export const serverTransform =
         }
 
         const numParamNames = RecordOperation.serverTransform<
-            ParamNamesTypes.State,
-            ParamNamesTypes.State,
-            ParamNamesTypes.TwoWayOperation,
-            ParamNamesTypes.UpOperation,
+            State<typeof ParamNamesTypes.template>,
+            State<typeof ParamNamesTypes.template>,
+            TwoWayOperation<typeof ParamNamesTypes.template>,
+            UpOperation<typeof ParamNamesTypes.template>,
             TwoWayError
         >({
             prevState: prevState.numParamNames,
@@ -1371,10 +319,10 @@ export const serverTransform =
         }
 
         const strParamNames = RecordOperation.serverTransform<
-            ParamNamesTypes.State,
-            ParamNamesTypes.State,
-            ParamNamesTypes.TwoWayOperation,
-            ParamNamesTypes.UpOperation,
+            State<typeof ParamNamesTypes.template>,
+            State<typeof ParamNamesTypes.template>,
+            TwoWayOperation<typeof ParamNamesTypes.template>,
+            UpOperation<typeof ParamNamesTypes.template>,
             TwoWayError
         >({
             prevState: prevState.strParamNames,
@@ -1398,10 +346,10 @@ export const serverTransform =
         }
 
         const participants = RecordOperation.serverTransform<
-            ParticipantTypes.State,
-            ParticipantTypes.State,
-            ParticipantTypes.TwoWayOperation,
-            ParticipantTypes.UpOperation,
+            State<typeof ParticipantTypes.template>,
+            State<typeof ParticipantTypes.template>,
+            TwoWayOperation<typeof ParticipantTypes.template>,
+            UpOperation<typeof ParticipantTypes.template>,
             TwoWayError
         >({
             prevState: prevState.participants,
@@ -1425,7 +373,7 @@ export const serverTransform =
             return participants;
         }
 
-        const twoWayOperation: TwoWayOperation = {
+        const twoWayOperation: TwoWayOperation<typeof template> = {
             $v: 2,
             $r: 1,
             bgms: bgms.value,
@@ -1498,231 +446,3 @@ export const serverTransform =
 
         return Result.ok(twoWayOperation);
     };
-
-export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
-    const activeBoardId = ReplaceOperation.clientTransform({
-        first: first.activeBoardId,
-        second: second.activeBoardId,
-    });
-
-    const bgms = RecordOperation.clientTransform<BgmTypes.State, BgmTypes.UpOperation, UpError>({
-        first: first.bgms,
-        second: second.bgms,
-        innerTransform: params => Bgm.clientTransform(params),
-        innerDiff: params => {
-            const diff = Bgm.diff(params);
-            if (diff == null) {
-                return diff;
-            }
-            return Bgm.toUpOperation(diff);
-        },
-    });
-    if (bgms.isError) {
-        return bgms;
-    }
-
-    const boolParamNames = RecordOperation.clientTransform<
-        ParamNamesTypes.State,
-        ParamNamesTypes.UpOperation,
-        UpError
-    >({
-        first: first.boolParamNames,
-        second: second.boolParamNames,
-        innerTransform: params => ParamNames.clientTransform(params),
-        innerDiff: params => {
-            const diff = ParamNames.diff(params);
-            if (diff == null) {
-                return diff;
-            }
-            return ParamNames.toUpOperation(diff);
-        },
-    });
-    if (boolParamNames.isError) {
-        return boolParamNames;
-    }
-
-    const boards = RecordOperation.clientTransform<
-        BoardTypes.State,
-        BoardTypes.UpOperation,
-        UpError
-    >({
-        first: first.boards,
-        second: second.boards,
-        innerTransform: params => Board.clientTransform(params),
-        innerDiff: params => {
-            const diff = Board.diff(params);
-            if (diff == null) {
-                return diff;
-            }
-            return Board.toUpOperation(diff);
-        },
-    });
-    if (boards.isError) {
-        return boards;
-    }
-
-    const characters = RecordOperation.clientTransform<
-        CharacterTypes.State,
-        CharacterTypes.UpOperation,
-        UpError
-    >({
-        first: first.characters,
-        second: second.characters,
-        innerTransform: params => Character.clientTransform(params),
-        innerDiff: params => {
-            const diff = Character.diff(params);
-            if (diff == null) {
-                return diff;
-            }
-            return Character.toUpOperation(diff);
-        },
-    });
-    if (characters.isError) {
-        return characters;
-    }
-
-    const memos = RecordOperation.clientTransform<MemoTypes.State, MemoTypes.UpOperation, UpError>({
-        first: first.memos,
-        second: second.memos,
-        innerTransform: params => Memo.clientTransform(params),
-        innerDiff: params => {
-            const diff = Memo.diff(params);
-            if (diff == null) {
-                return diff;
-            }
-            return Memo.toUpOperation(diff);
-        },
-    });
-    if (memos.isError) {
-        return memos;
-    }
-
-    const numParamNames = RecordOperation.clientTransform<
-        ParamNamesTypes.State,
-        ParamNamesTypes.UpOperation,
-        UpError
-    >({
-        first: first.numParamNames,
-        second: second.numParamNames,
-        innerTransform: params => ParamNames.clientTransform(params),
-        innerDiff: params => {
-            const diff = ParamNames.diff(params);
-            if (diff == null) {
-                return diff;
-            }
-            return ParamNames.toUpOperation(diff);
-        },
-    });
-    if (numParamNames.isError) {
-        return numParamNames;
-    }
-
-    const strParamNames = RecordOperation.clientTransform<
-        ParamNamesTypes.State,
-        ParamNamesTypes.UpOperation,
-        UpError
-    >({
-        first: first.strParamNames,
-        second: second.strParamNames,
-        innerTransform: params => ParamNames.clientTransform(params),
-        innerDiff: params => {
-            const diff = ParamNames.diff(params);
-            if (diff == null) {
-                return diff;
-            }
-            return ParamNames.toUpOperation(diff);
-        },
-    });
-    if (strParamNames.isError) {
-        return strParamNames;
-    }
-
-    const participants = RecordOperation.clientTransform<
-        ParticipantTypes.State,
-        ParticipantTypes.UpOperation,
-        UpError
-    >({
-        first: first.participants,
-        second: second.participants,
-        innerTransform: params => Participant.clientTransform(params),
-        innerDiff: params => {
-            const diff = Participant.diff(params);
-            if (diff == null) {
-                return diff;
-            }
-            return Participant.toUpOperation(diff);
-        },
-    });
-    if (participants.isError) {
-        return participants;
-    }
-
-    const name = TextOperation.clientTransform({
-        first: first.name,
-        second: second.name,
-    });
-    if (name.isError) {
-        return name;
-    }
-
-    const firstPrime: UpOperation = {
-        $v: 2,
-        $r: 1,
-        activeBoardId: activeBoardId.firstPrime,
-        bgms: bgms.value.firstPrime,
-        boards: boards.value.firstPrime,
-        boolParamNames: boolParamNames.value.firstPrime,
-        characters: characters.value.firstPrime,
-        memos: memos.value.firstPrime,
-        numParamNames: numParamNames.value.firstPrime,
-        strParamNames: strParamNames.value.firstPrime,
-        participants: participants.value.firstPrime,
-        name: name.value.firstPrime,
-    };
-
-    const secondPrime: UpOperation = {
-        $v: 2,
-        $r: 1,
-        activeBoardId: activeBoardId.secondPrime,
-        bgms: bgms.value.secondPrime,
-        boards: boards.value.secondPrime,
-        boolParamNames: boolParamNames.value.secondPrime,
-        characters: characters.value.secondPrime,
-        memos: memos.value.secondPrime,
-        numParamNames: numParamNames.value.secondPrime,
-        strParamNames: strParamNames.value.secondPrime,
-        participants: participants.value.secondPrime,
-        name: name.value.secondPrime,
-    };
-
-    for (const i of oneToTenArray) {
-        const key = `characterTag${i}Name` as const;
-        const operation = NullableTextOperation.clientTransform({
-            first: first[key],
-            second: second[key],
-        });
-        if (operation.isError) {
-            return operation;
-        }
-        firstPrime[key] = operation.value.firstPrime;
-        secondPrime[key] = operation.value.secondPrime;
-    }
-
-    for (const i of oneToTenArray) {
-        const key = `publicChannel${i}Name` as const;
-        const operation = TextOperation.clientTransform({
-            first: first[key],
-            second: second[key],
-        });
-        if (operation.isError) {
-            return operation;
-        }
-        firstPrime[key] = operation.value.firstPrime;
-        secondPrime[key] = operation.value.secondPrime;
-    }
-
-    return Result.ok({
-        firstPrime: isIdRecord(firstPrime) ? undefined : firstPrime,
-        secondPrime: isIdRecord(secondPrime) ? undefined : secondPrime,
-    });
-};

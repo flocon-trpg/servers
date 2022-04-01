@@ -1,152 +1,35 @@
 import { Result } from '@kizahasi/result';
 import { isIdRecord } from '../../../util/record';
 import * as ReplaceOperation from '../../../util/replaceOperation';
-import {
-    Apply,
-    ClientTransform,
-    Compose,
-    Diff,
-    DownError,
-    Restore,
-    ServerTransform,
-} from '../../../util/type';
-import { DownOperation, State, TwoWayOperation, UpOperation } from './types';
+import { ServerTransform } from '../../../util/type';
 import * as PieceBase from '../../../pieceBase/functions';
+import { template } from './types';
+import { State, TwoWayOperation, UpOperation } from '../../../generator';
 
-export const toClientState = (source: State): State => {
+export const toClientState = (source: State<typeof template>): State<typeof template> => {
     return source;
 };
 
-export const toDownOperation = (source: TwoWayOperation): DownOperation => {
-    return {
-        ...source,
-        memo: undefined,
-        name: undefined,
-        ...PieceBase.toDownOperation(source),
-    };
-};
-
-export const toUpOperation = (source: TwoWayOperation): UpOperation => {
-    return {
-        ...source,
-        memo: undefined,
-        name: undefined,
-        ...PieceBase.toUpOperation(source),
-    };
-};
-
-export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
-    const boardPosition = PieceBase.apply({ state, operation });
-    if (boardPosition.isError) {
-        return boardPosition;
-    }
-    const result: State = { ...state, ...boardPosition.value };
-
-    if (operation.isPrivate != null) {
-        result.isPrivate = operation.isPrivate.newValue;
-    }
-
-    return Result.ok(result);
-};
-
-export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
-    const boardPosition = PieceBase.applyBack({ state, operation });
-    if (boardPosition.isError) {
-        return boardPosition;
-    }
-    const result = { ...state, ...boardPosition.value };
-
-    if (operation.isPrivate != null) {
-        result.isPrivate = operation.isPrivate.oldValue;
-    }
-
-    return Result.ok(result);
-};
-
-export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
-    const pieceBase = PieceBase.composeDownOperation({ first, second });
-    if (pieceBase.isError) {
-        return pieceBase;
-    }
-    const valueProps: DownOperation = {
-        ...pieceBase.value,
-        $v: 2,
-        $r: 1,
-        isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
-    };
-    return Result.ok(valueProps);
-};
-
-export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
-    nextState,
-    downOperation,
-}) => {
-    if (downOperation === undefined) {
-        return Result.ok({ prevState: nextState, twoWayOperation: undefined });
-    }
-
-    const boardPosition = PieceBase.restore({ nextState, downOperation });
-    if (boardPosition.isError) {
-        return boardPosition;
-    }
-
-    const prevState: State = {
-        ...nextState,
-        ...boardPosition.value.prevState,
-    };
-    const twoWayOperation: TwoWayOperation = {
-        ...boardPosition.value.twoWayOperation,
-        $v: 2,
-        $r: 1,
-    };
-
-    if (downOperation.isPrivate !== undefined) {
-        prevState.isPrivate = downOperation.isPrivate.oldValue;
-        twoWayOperation.isPrivate = {
-            ...downOperation.isPrivate,
-            newValue: nextState.isPrivate,
-        };
-    }
-
-    return Result.ok({ prevState, twoWayOperation });
-};
-
-export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const resultType: TwoWayOperation = {
-        ...PieceBase.diff({ prevState, nextState }),
-        $v: 2,
-        $r: 1,
-    };
-    if (prevState.isPrivate !== nextState.isPrivate) {
-        resultType.isPrivate = {
-            oldValue: prevState.isPrivate,
-            newValue: nextState.isPrivate,
-        };
-    }
-
-    if (isIdRecord(resultType)) {
-        return undefined;
-    }
-    return resultType;
-};
-
-export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperation> = ({
-    prevState,
-    currentState,
-    clientOperation,
-    serverOperation,
-}) => {
+export const serverTransform: ServerTransform<
+    State<typeof template>,
+    TwoWayOperation<typeof template>,
+    UpOperation<typeof template>
+> = ({ prevState, currentState, clientOperation, serverOperation }) => {
     const boardPosition = PieceBase.serverTransform({
-        prevState,
-        currentState,
-        clientOperation,
-        serverOperation,
+        prevState: { ...prevState, $v: undefined, $r: undefined },
+        currentState: { ...currentState, $v: undefined, $r: undefined },
+        clientOperation: { ...clientOperation, $v: undefined, $r: undefined },
+        serverOperation: { ...serverOperation, $v: undefined, $r: undefined },
     });
     if (boardPosition.isError) {
         return boardPosition;
     }
 
-    const twoWayOperation: TwoWayOperation = { ...boardPosition.value, $v: 2, $r: 1 };
+    const twoWayOperation: TwoWayOperation<typeof template> = {
+        ...boardPosition.value,
+        $v: 2,
+        $r: 1,
+    };
 
     twoWayOperation.isPrivate = ReplaceOperation.serverTransform({
         first: serverOperation?.isPrivate,
@@ -159,31 +42,4 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
     }
 
     return Result.ok(twoWayOperation);
-};
-
-export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
-    const boardPosition = PieceBase.clientTransform({ first, second });
-    const isPrivate = ReplaceOperation.clientTransform({
-        first: first.isPrivate,
-        second: second.isPrivate,
-    });
-
-    const firstPrime: UpOperation = {
-        ...boardPosition.value?.firstPrime,
-        $v: 2,
-        $r: 1,
-        isPrivate: isPrivate.firstPrime,
-    };
-
-    const secondPrime: UpOperation = {
-        ...boardPosition.value?.secondPrime,
-        $v: 2,
-        $r: 1,
-        isPrivate: isPrivate.secondPrime,
-    };
-
-    return Result.ok({
-        firstPrime: isIdRecord(firstPrime) ? undefined : firstPrime,
-        secondPrime: isIdRecord(secondPrime) ? undefined : secondPrime,
-    });
 };

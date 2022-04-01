@@ -9,6 +9,9 @@ import {
 import { FRoom } from './room';
 import { keyNames } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
+import { State } from '../ot/generator';
+
+type RoomState = State<typeof Room.template>;
 
 type CommandError = {
     message: string;
@@ -37,12 +40,12 @@ export const testCommand = (script: string): Result<undefined, CommandError> => 
 
 type CharacterCommandParams = {
     script: string;
-    room: Room.State;
+    room: RoomState;
     characterId: string;
     myUserUid: string;
 };
 
-type CommandResult = Result<Room.State, CommandError>;
+type CommandResult = Result<RoomState, CommandError>;
 
 export const execCharacterCommand = ({
     script,
@@ -77,6 +80,6 @@ export const execCharacterCommand = ({
         }
         throw e;
     }
-    const result: Room.State = fRoom.room;
+    const result: RoomState = fRoom.room;
     return Result.ok(result);
 };

@@ -4,7 +4,13 @@ import { DialogFooter } from '../../../ui/DialogFooter';
 import { replace } from '../../../../stateManagers/states/types';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../../../hooks/useStateEditor';
-import { DicePieceState, CharacterState, dicePieceStrIndexes, simpleId } from '@flocon-trpg/core';
+import {
+    characterTemplate,
+    dicePieceStrIndexes,
+    dicePieceTemplate,
+    simpleId,
+    State,
+} from '@flocon-trpg/core';
 import { useDicePieces } from '../../../../hooks/state/useDicePieces';
 import { MyCharactersSelect } from '../character/MyCharactersSelect';
 import { InputDie } from './die/InputDie';
@@ -16,6 +22,9 @@ import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithI
 import { BufferedInput } from '../../../ui/BufferedInput';
 import { PiecePositionWithCell } from '../../../../utils/types';
 import { dicePieceValueEditorAtom } from '../../../../atoms/pieceValueEditor/pieceValueEditorAtom';
+
+type CharacterState = State<typeof characterTemplate>;
+type DicePieceState = State<typeof dicePieceTemplate>;
 
 const defaultDicePieceValue = (
     piecePosition: PiecePositionWithCell,

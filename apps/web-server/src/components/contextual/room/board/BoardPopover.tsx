@@ -1,15 +1,16 @@
 import {
     execCharacterCommand,
-    BoardState,
-    CharacterState,
     dicePieceStrIndexes,
-    PieceState,
     State,
     diff,
     toUpOperation,
-    FilePath,
     simpleId,
-    BoardPositionState,
+    boardPositionTemplate,
+    characterTemplate,
+    filePathTemplate,
+    roomTemplate,
+    boardTemplate,
+    pieceTemplate,
 } from '@flocon-trpg/core';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { Checkbox, Menu, Tooltip } from 'antd';
@@ -67,6 +68,13 @@ import {
     characterPiece,
     characterPortrait,
 } from '../piece/BoardPositionAndPieceEditorModal';
+
+type BoardState = State<typeof boardTemplate>;
+type BoardPositionState = State<typeof boardPositionTemplate>;
+type CharacterState = State<typeof characterTemplate>;
+type RoomState = State<typeof roomTemplate>;
+type PieceState = State<typeof pieceTemplate>;
+type FilePath = State<typeof filePathTemplate>;
 
 /* absolute positionで表示するときにBoardの子として表示させると、Boardウィンドウから要素がはみ出ることができないため、ウィンドウ右端に近いところで要素を表示させるときに不便なことがある。そのため、ページ全体の子として持たせるようにしている。 */
 
@@ -613,7 +621,7 @@ namespace ContextMenuModule {
         portraitsOnCursor: ContextMenuState['portraitsOnCursor'];
         onContextMenuClear: () => void;
         operate: ReturnType<typeof useSetRoomStateByApply>;
-        room: State;
+        room: RoomState;
         myUserUid: string;
         onSe: (filePath: FilePath, volume: number) => void;
     }): JSX.Element | null => {
@@ -654,12 +662,12 @@ namespace ContextMenuModule {
                                         // TODO: 通知する
                                         return;
                                     }
-                                    const operation = diff({
+                                    const operation = diff(roomTemplate)({
                                         prevState: room,
                                         nextState: commandResult.value,
                                     });
                                     if (operation != null) {
-                                        operate(toUpOperation(operation));
+                                        operate(toUpOperation(roomTemplate)(operation));
                                     }
                                     onContextMenuClear();
                                 }}
@@ -919,6 +927,8 @@ namespace ContextMenuModule {
         const cellPosition = Piece.getCellPosition({ x, y, board });
         // TODO: x,y,w,h の値が適当
         const piecePositionWhichIsCellMode: PieceState = {
+            $v: undefined,
+            $r: undefined,
             x: 0,
             y: 0,
             w: 50,
@@ -935,6 +945,8 @@ namespace ContextMenuModule {
         };
 
         const piecePositionWhichIsNotCellMode: PieceState = {
+            $v: undefined,
+            $r: undefined,
             x,
             y,
             w: 50,
@@ -951,6 +963,8 @@ namespace ContextMenuModule {
         };
 
         const portraitPositionWhichIsNotCellMode: BoardPositionState = {
+            $v: undefined,
+            $r: undefined,
             x,
             y,
             w: 100,

@@ -1,4 +1,4 @@
-import { FilePath } from '@flocon-trpg/core';
+import { State, filePathTemplate } from '@flocon-trpg/core';
 import React from 'react';
 import { useDeepCompareEffect } from 'react-use';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
@@ -8,6 +8,8 @@ import { FilePath as FilePathModule } from '../utils/file/filePath';
 import { useWebConfig } from './useWebConfig';
 import { useAtomValue } from 'jotai/utils';
 import { firebaseStorageAtom } from '../pages/_app';
+
+type FilePath = State<typeof filePathTemplate>;
 
 export const done = 'done';
 export const success = 'success';

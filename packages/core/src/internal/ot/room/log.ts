@@ -2,7 +2,6 @@ import * as RoomTypes from './types';
 import * as RecordOperation from '../util/recordOperation';
 import { replace } from '../util/recordOperationElement';
 import { recordForEach } from '@flocon-trpg/utils';
-import * as Board from './board/functions';
 import * as BoardTypes from './board/types';
 import * as DicePiece from './board/dicePiece/functions';
 import * as DicePieceLog from './board/dicePiece/log';
@@ -10,6 +9,7 @@ import * as StringPiece from './board/stringPiece/functions';
 import * as StringPieceLog from './board/stringPiece/log';
 import { createType, deleteType } from '../pieceBase/log';
 import { restrict } from '../util/requestedBy';
+import { State, TwoWayOperation, diff } from '../generator';
 
 type DicePieceLogType = {
     boardId: string;
@@ -27,13 +27,16 @@ export const createLogs = ({
     prevState,
     nextState,
 }: {
-    prevState: RoomTypes.State;
-    nextState: RoomTypes.State;
+    prevState: State<typeof RoomTypes.template>;
+    nextState: State<typeof RoomTypes.template>;
 }) => {
-    const boardsDiff = RecordOperation.diff<BoardTypes.State, BoardTypes.TwoWayOperation>({
+    const boardsDiff = RecordOperation.diff<
+        State<typeof BoardTypes.template>,
+        TwoWayOperation<typeof BoardTypes.template>
+    >({
         prevState: prevState.boards,
         nextState: nextState.boards,
-        innerDiff: params => Board.diff(params),
+        innerDiff: params => diff(BoardTypes.template)(params),
     });
     if (boardsDiff == null) {
         return undefined;

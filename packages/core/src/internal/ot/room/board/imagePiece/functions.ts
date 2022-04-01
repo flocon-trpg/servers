@@ -1,182 +1,29 @@
 import * as ReplaceOperation from '../../../util/replaceOperation';
-import {
-    Apply,
-    ClientTransform,
-    Compose,
-    Diff,
-    DownError,
-    Restore,
-    ServerTransform,
-} from '../../../util/type';
+import { ServerTransform } from '../../../util/type';
 import { isIdRecord } from '../../../util/record';
 import { Result } from '@kizahasi/result';
 import * as Piece from '../../../pieceBase/functions';
-import { DownOperation, State, TwoWayOperation, UpOperation } from './types';
 import {
     anyValue,
     canChangeOwnerParticipantId,
     isOwner,
     RequestedBy,
 } from '../../../util/requestedBy';
+import { template } from './types';
+import { State, UpOperation, TwoWayOperation } from '../../../generator';
 
-export const toClientState = (source: State): State => {
+export const toClientState = (source: State<typeof template>): State<typeof template> => {
     return source;
 };
 
-export const toDownOperation = (source: TwoWayOperation): DownOperation => {
-    return {
-        ...source,
-        memo: undefined,
-        name: undefined,
-        ...Piece.toDownOperation(source),
-    };
-};
-
-export const toUpOperation = (source: TwoWayOperation): UpOperation => {
-    return {
-        ...source,
-        memo: undefined,
-        name: undefined,
-        ...Piece.toUpOperation(source),
-    };
-};
-
-export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
-    const piece = Piece.apply({ state, operation });
-    if (piece.isError) {
-        return piece;
-    }
-    const result: State = { ...state, ...piece.value };
-
-    if (operation.ownerParticipantId != null) {
-        result.ownerParticipantId = operation.ownerParticipantId.newValue;
-    }
-    if (operation.image != null) {
-        result.image = operation.image.newValue;
-    }
-    if (operation.isPrivate != null) {
-        result.isPrivate = operation.isPrivate.newValue;
-    }
-
-    return Result.ok(result);
-};
-
-export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
-    const piece = Piece.applyBack({ state, operation });
-    if (piece.isError) {
-        return piece;
-    }
-    const result: State = { ...state, ...piece.value };
-
-    if (operation.ownerParticipantId != null) {
-        result.ownerParticipantId = operation.ownerParticipantId.oldValue;
-    }
-    if (operation.image != null) {
-        result.image = operation.image.oldValue;
-    }
-    if (operation.isPrivate != null) {
-        result.isPrivate = operation.isPrivate.oldValue;
-    }
-
-    return Result.ok(result);
-};
-
-export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
-    const boardPosition = Piece.composeDownOperation({ first, second });
-    if (boardPosition.isError) {
-        return boardPosition;
-    }
-
-    const valueProps: DownOperation = {
-        $v: 2,
-        $r: 1,
-        ...boardPosition.value,
-        ownerParticipantId: ReplaceOperation.composeDownOperation(
-            first.ownerParticipantId,
-            second.ownerParticipantId
-        ),
-        image: ReplaceOperation.composeDownOperation(first.image, second.image),
-        isPrivate: ReplaceOperation.composeDownOperation(first.isPrivate, second.isPrivate),
-    };
-    return Result.ok(valueProps);
-};
-
-export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
-    nextState,
-    downOperation,
-}) => {
-    if (downOperation === undefined) {
-        return Result.ok({ prevState: nextState, twoWayOperation: undefined });
-    }
-
-    const piece = Piece.restore({ nextState, downOperation });
-    if (piece.isError) {
-        return piece;
-    }
-
-    const prevState: State = {
-        ...nextState,
-        ...piece.value.prevState,
-    };
-    const twoWayOperation: TwoWayOperation = {
-        $v: 2,
-        $r: 1,
-        ...piece.value.twoWayOperation,
-    };
-
-    if (downOperation.ownerParticipantId !== undefined) {
-        prevState.ownerParticipantId = downOperation.ownerParticipantId.oldValue ?? undefined;
-        twoWayOperation.ownerParticipantId = {
-            oldValue: downOperation.ownerParticipantId.oldValue ?? undefined,
-            newValue: nextState.ownerParticipantId,
-        };
-    }
-    if (downOperation.image !== undefined) {
-        prevState.image = downOperation.image.oldValue ?? undefined;
-        twoWayOperation.image = {
-            oldValue: downOperation.image.oldValue ?? undefined,
-            newValue: nextState.image,
-        };
-    }
-    if (downOperation.isPrivate !== undefined) {
-        prevState.isPrivate = downOperation.isPrivate.oldValue ?? undefined;
-        twoWayOperation.isPrivate = {
-            oldValue: downOperation.isPrivate.oldValue ?? undefined,
-            newValue: nextState.isPrivate,
-        };
-    }
-
-    return Result.ok({ prevState, twoWayOperation });
-};
-
-export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const result: TwoWayOperation = {
-        $v: 2,
-        $r: 1,
-        ...Piece.diff({ prevState, nextState }),
-    };
-
-    if (prevState.ownerParticipantId !== nextState.ownerParticipantId) {
-        result.ownerParticipantId = {
-            oldValue: prevState.ownerParticipantId,
-            newValue: nextState.ownerParticipantId,
-        };
-    }
-    if (prevState.image !== nextState.image) {
-        result.image = { oldValue: prevState.image, newValue: nextState.image };
-    }
-    if (prevState.isPrivate !== nextState.isPrivate) {
-        result.isPrivate = { oldValue: prevState.isPrivate, newValue: nextState.isPrivate };
-    }
-
-    if (isIdRecord(result)) {
-        return undefined;
-    }
-    return result;
-};
-
 export const serverTransform =
-    (requestedBy: RequestedBy): ServerTransform<State, TwoWayOperation, UpOperation> =>
+    (
+        requestedBy: RequestedBy
+    ): ServerTransform<
+        State<typeof template>,
+        TwoWayOperation<typeof template>,
+        UpOperation<typeof template>
+    > =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
         const isAuthorized = isOwner({
             requestedBy,
@@ -188,16 +35,16 @@ export const serverTransform =
         }
 
         const piece = Piece.serverTransform({
-            prevState,
-            currentState,
-            clientOperation,
-            serverOperation,
+            prevState: { ...prevState, $v: undefined, $r: undefined },
+            currentState: { ...currentState, $v: undefined, $r: undefined },
+            clientOperation: { ...clientOperation, $v: undefined, $r: undefined },
+            serverOperation: { ...serverOperation, $v: undefined, $r: undefined },
         });
         if (piece.isError) {
             return piece;
         }
 
-        const twoWayOperation: TwoWayOperation = {
+        const twoWayOperation: TwoWayOperation<typeof template> = {
             $v: 2,
             $r: 1,
             ...piece.value,
@@ -234,44 +81,3 @@ export const serverTransform =
 
         return Result.ok(twoWayOperation);
     };
-
-export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
-    const piece = Piece.clientTransform({ first, second });
-
-    const ownerPariticipantId = ReplaceOperation.clientTransform({
-        first: first.ownerParticipantId,
-        second: second.ownerParticipantId,
-    });
-
-    const image = ReplaceOperation.clientTransform({
-        first: first.image,
-        second: second.image,
-    });
-
-    const isPrivate = ReplaceOperation.clientTransform({
-        first: first.isPrivate,
-        second: second.isPrivate,
-    });
-
-    const firstPrime: UpOperation = {
-        ...piece.value?.firstPrime,
-        $v: 2,
-        $r: 1,
-        ownerParticipantId: ownerPariticipantId.firstPrime,
-        image: image.firstPrime,
-        isPrivate: isPrivate.firstPrime,
-    };
-    const secondPrime: UpOperation = {
-        ...piece.value?.secondPrime,
-        $v: 2,
-        $r: 1,
-        ownerParticipantId: ownerPariticipantId.secondPrime,
-        image: image.secondPrime,
-        isPrivate: isPrivate.secondPrime,
-    };
-
-    return Result.ok({
-        firstPrime: isIdRecord(firstPrime) ? undefined : firstPrime,
-        secondPrime: isIdRecord(secondPrime) ? undefined : secondPrime,
-    });
-};

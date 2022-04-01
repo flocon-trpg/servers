@@ -12,7 +12,14 @@ import {
     RoomMessage,
 } from '../../components/contextual/room/message/RoomMessage';
 import { isDeleted, toText } from './message';
-import { Default, FirebaseStorage, ParticipantState, Uploader, simpleId } from '@flocon-trpg/core';
+import {
+    Default,
+    FirebaseStorage,
+    State,
+    Uploader,
+    simpleId,
+    participantTemplate,
+} from '@flocon-trpg/core';
 import { Color } from '../color';
 import { FilePath } from '../file/filePath';
 import axios from 'axios';
@@ -25,6 +32,8 @@ import { RoomMessageFilter } from '../../components/contextual/room/message/Chan
 import { WebConfig } from '../../configType';
 import { FirebaseStorage as FirebaseStorageType } from '@firebase/storage';
 import { div, generateHtml, HtmlObject, span } from './generateHtml';
+
+type ParticipantState = State<typeof participantTemplate>;
 
 const privateMessage = 'privateMessage';
 const publicMessage = 'publicMessage';

@@ -1,7 +1,9 @@
-import { CharacterState } from '@flocon-trpg/core';
+import { characterTemplate, State } from '@flocon-trpg/core';
 import { Select } from 'antd';
 import React from 'react';
 import { useMyCharacters } from '../../../../hooks/state/useMyCharacters';
+
+type CharacterState = State<typeof characterTemplate>;
 
 type Value = { id: string; state: CharacterState };
 

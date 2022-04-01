@@ -1,3 +1,4 @@
+import { State } from '../generator';
 import * as Room from '../room/types';
 
 // 全てのStateに完全にアクセスできる。
@@ -50,7 +51,7 @@ export const isBoardOwner = ({
 }: {
     boardId: string;
     requestedBy: RequestedBy;
-    currentRoomState: Room.State;
+    currentRoomState: State<typeof Room.template>;
 }): boolean => {
     if (requestedBy.type === admin) {
         return true;
@@ -78,7 +79,7 @@ export const isBoardVisible = ({
 }: {
     boardId: string;
     requestedBy: RequestedBy;
-    currentRoomState: Room.State;
+    currentRoomState: State<typeof Room.template>;
 }): boolean => {
     if (isBoardOwner({ boardId: boardId, requestedBy, currentRoomState }) !== false) {
         return true;
@@ -93,7 +94,7 @@ export const isCharacterOwner = ({
 }: {
     requestedBy: RequestedBy;
     characterId: string | typeof anyValue | typeof none;
-    currentRoomState: Room.State;
+    currentRoomState: State<typeof Room.template>;
 }): boolean => {
     if (requestedBy.type === admin) {
         return true;
@@ -161,7 +162,7 @@ export const canChangeOwnerCharacterId = ({
 }: {
     requestedBy: RequestedBy;
     currentOwnerCharacter: CurrentOwnerCharacter;
-    currentRoomState: Room.State;
+    currentRoomState: State<typeof Room.template>;
 }): boolean => {
     if (requestedBy.type === admin) {
         return true;

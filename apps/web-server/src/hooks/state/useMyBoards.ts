@@ -1,7 +1,9 @@
-import { BoardState } from '@flocon-trpg/core';
+import { boardTemplate, State } from '@flocon-trpg/core';
 import React from 'react';
 import { useMyUserUid } from '../useMyUserUid';
 import { useBoards } from './useBoards';
+
+type BoardState = State<typeof boardTemplate>;
 
 export const useMyBoards = (): ReadonlyMap<string, BoardState> | undefined => {
     const myUserUid = useMyUserUid();

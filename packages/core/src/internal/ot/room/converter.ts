@@ -1,65 +1,70 @@
-import * as t from 'io-ts';
+import { DownOperation, State, UpOperation, state, upOperation, downOperation } from '../generator';
 import * as Room from './types';
 
-export const decodeState = (source: unknown): Room.State => {
-    const result = t.exact(Room.state).decode(source);
+type RoomState = State<typeof Room.template>;
+type RoomDbState = State<typeof Room.dbTemplate>;
+type RoomUpOperation = UpOperation<typeof Room.dbTemplate>;
+type RoomDownOperation = DownOperation<typeof Room.dbTemplate>;
+
+export const decodeState = (source: unknown): RoomState => {
+    const result = state(Room.template, { exact: true }).decode(source);
     if (result._tag === 'Right') {
         return result.right;
     }
     throw new Error('decodeState failure');
 };
 
-export const parseState = (source: string): Room.State => {
+export const parseState = (source: string): RoomState => {
     return decodeState(JSON.parse(source));
 };
 
-export const stringifyState = (source: Room.State): string => {
-    const result = t.exact(Room.state).encode(source);
+export const stringifyState = (source: RoomState): string => {
+    const result = state(Room.template, { exact: true }).encode(source);
     return JSON.stringify(result);
 };
 
-export const decodeDbState = (source: unknown): Room.DbState => {
-    const result = t.exact(Room.dbState).decode(source);
+export const decodeDbState = (source: unknown): RoomDbState => {
+    const result = state(Room.dbTemplate, { exact: true }).decode(source);
     if (result._tag === 'Right') {
         return result.right;
     }
     throw new Error('decodeDbState failure');
 };
 
-export const exactDbState = (source: Room.DbState): Room.DbState => {
-    return t.exact(Room.dbState).encode(source);
+export const exactDbState = (source: RoomDbState): RoomDbState => {
+    return state(Room.dbTemplate, { exact: true }).encode(source);
 };
 
-const decodeUpOperation = (source: unknown): Room.UpOperation => {
-    const result = t.exact(Room.upOperation).decode(source);
+const decodeUpOperation = (source: unknown): RoomUpOperation => {
+    const result = upOperation(Room.template, { exact: true }).decode(source);
     if (result._tag === 'Right') {
         return result.right;
     }
     throw new Error('decodeUpOperation failure');
 };
 
-export const parseUpOperation = (source: string): Room.UpOperation => {
+export const parseUpOperation = (source: string): RoomUpOperation => {
     return decodeUpOperation(JSON.parse(source));
 };
 
-export const stringifyUpOperation = (source: Room.UpOperation): string => {
-    const result = t.exact(Room.upOperation).decode(source);
+export const stringifyUpOperation = (source: RoomUpOperation): string => {
+    const result = upOperation(Room.template, { exact: true }).decode(source);
     if (result._tag === 'Left') {
         throw new Error('decode failed');
     }
     return JSON.stringify(result.right);
 };
 
-export const decodeDownOperation = (source: unknown): Room.DownOperation => {
-    const result = t.exact(Room.downOperation).decode(source);
+export const decodeDownOperation = (source: unknown): RoomDownOperation => {
+    const result = downOperation(Room.template, { exact: false }).decode(source);
     if (result._tag === 'Right') {
         return result.right;
     }
     throw new Error('decodeDownOperation failure');
 };
 
-export const exactDownOperation = (source: Room.DownOperation): Room.DownOperation => {
-    const result = t.exact(Room.downOperation).decode(source);
+export const exactDownOperation = (source: RoomDownOperation): RoomDownOperation => {
+    const result = downOperation(Room.template, { exact: true }).decode(source);
     if (result._tag === 'Left') {
         throw new Error('decode failed');
     }

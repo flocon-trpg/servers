@@ -8,12 +8,13 @@ import {
     beginCast,
 } from '@flocon-trpg/flocon-script';
 import { maxLength100String } from '../maxLengthString';
+import { State } from '../ot/generator';
 import * as Participant from '../ot/room/participant/types';
 
 const name = 'name';
 
 export class FParticipant extends FObject {
-    public constructor(public readonly participant: Participant.State) {
+    public constructor(public readonly participant: State<typeof Participant.template>) {
         super();
     }
 

@@ -9,8 +9,12 @@ import {
     AstInfo,
 } from '@flocon-trpg/flocon-script';
 import * as FilePath from '../ot/filePath/types';
+import { State } from '../ot/generator';
 
-export const toFFilePath = (source: FilePath.FilePath, astInfo: AstInfo | undefined): FObject => {
+export const toFFilePath = (
+    source: State<typeof FilePath.filePathTemplate>,
+    astInfo: AstInfo | undefined
+): FObject => {
     const result = new FRecord();
     result.set({ property: new FString('path'), newValue: new FString(source.path), astInfo });
     result.set({
@@ -24,7 +28,7 @@ export const toFFilePath = (source: FilePath.FilePath, astInfo: AstInfo | undefi
 export const toFilePathOrUndefined = (
     source: FValue,
     astInfo: AstInfo | undefined
-): FilePath.FilePath | undefined => {
+): State<typeof FilePath.filePathTemplate> | undefined => {
     if (source === undefined) {
         return undefined;
     }
@@ -54,7 +58,10 @@ export const toFilePathOrUndefined = (
     };
 };
 
-export const toFilePath = (source: FValue, astInfo: AstInfo | undefined): FilePath.FilePath => {
+export const toFilePath = (
+    source: FValue,
+    astInfo: AstInfo | undefined
+): State<typeof FilePath.filePathTemplate> => {
     const result = toFilePathOrUndefined(source, astInfo);
     if (result === undefined) {
         throw new ScriptError();

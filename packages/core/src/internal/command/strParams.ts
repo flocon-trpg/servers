@@ -12,8 +12,9 @@ import * as Character from '../ot/room/character/types';
 import * as StrParam from '../ot/room/character/strParam/types';
 import * as Room from '../ot/room/types';
 import { FStrParam } from './strParam';
+import { State } from '../ot/generator';
 
-const createDefaultState = (): StrParam.State => ({
+const createDefaultState = (): State<typeof StrParam.template> => ({
     $v: 2,
     $r: 1,
     value: '',
@@ -23,8 +24,8 @@ const createDefaultState = (): StrParam.State => ({
 
 export class FStrParams extends FObject {
     public constructor(
-        private readonly strParams: Character.State['strParams'],
-        private readonly room: Room.State
+        private readonly strParams: State<typeof Character.template>['strParams'],
+        private readonly room: State<typeof Room.template>
     ) {
         super();
     }

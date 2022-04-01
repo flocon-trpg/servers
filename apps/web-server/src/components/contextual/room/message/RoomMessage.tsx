@@ -13,17 +13,20 @@ import { Jdenticon } from '../../../ui/Jdenticon';
 import { isDeleted, toText } from '../../../../utils/message/message';
 import { NewTabLinkify } from '../../../ui/NewTabLinkify';
 import {
-    ParticipantState,
     replace,
     parseStringPiece,
     parseDicePiece,
     $free,
+    participantTemplate,
+    State,
 } from '@flocon-trpg/core';
 import { recordToMap } from '@flocon-trpg/utils';
 import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../../../../utils/className';
 import { IconView } from '../file/IconView';
 import { Notification } from '../../../../atoms/room/roomAtom';
+
+type ParticipantState = State<typeof participantTemplate>;
 
 // 改行荒らし対策として、maxHeightを設けている。200pxという値は適当
 export const messageContentMaxHeight = 200;

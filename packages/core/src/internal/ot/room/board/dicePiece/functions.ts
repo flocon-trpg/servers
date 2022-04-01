@@ -1,24 +1,13 @@
 import * as DieValue from './dieValue/functions';
 import * as DieValueTypes from './dieValue/types';
 import * as Piece from '../../../pieceBase/functions';
-import {
-    Apply,
-    ClientTransform,
-    Compose,
-    Diff,
-    DownError,
-    Restore,
-    ScalarError,
-    ServerTransform,
-    TwoWayError,
-    UpError,
-} from '../../../util/type';
+import { ServerTransform, TwoWayError } from '../../../util/type';
 import { isIdRecord } from '../../../util/record';
 import { Result } from '@kizahasi/result';
 import { chooseRecord } from '@flocon-trpg/utils';
 import * as RecordOperation from '../../../util/recordOperation';
 import * as ReplaceOperation from '../../../util/replaceOperation';
-import { dicePieceStrIndexes, DownOperation, State, TwoWayOperation, UpOperation } from './types';
+import { dicePieceStrIndexes, template } from './types';
 import * as Room from '../../types';
 import {
     anyValue,
@@ -27,10 +16,11 @@ import {
     canChangeOwnerCharacterId,
 } from '../../../util/requestedBy';
 import * as NullableTextOperation from '../../../util/nullableTextOperation';
+import { State, TwoWayOperation, UpOperation } from '../../../generator';
 
 export const toClientState =
-    (requestedBy: RequestedBy, currentRoomState: Room.State) =>
-    (source: State): State => {
+    (requestedBy: RequestedBy, currentRoomState: State<typeof Room.template>) =>
+    (source: State<typeof template>): State<typeof template> => {
         const isAuthorized = isCharacterOwner({
             requestedBy,
             characterId: source.ownerCharacterId ?? anyValue,
@@ -42,201 +32,15 @@ export const toClientState =
         };
     };
 
-export const toDownOperation = (source: TwoWayOperation): DownOperation => {
-    return {
-        ...source,
-        memo: undefined,
-        name: undefined,
-        ...Piece.toDownOperation(source),
-    };
-};
-
-export const toUpOperation = (source: TwoWayOperation): UpOperation => {
-    return {
-        ...source,
-        memo: undefined,
-        name: undefined,
-        ...Piece.toUpOperation(source),
-    };
-};
-
-export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
-    const piece = Piece.apply({ state, operation });
-    if (piece.isError) {
-        return piece;
-    }
-    const result: State = { ...state, ...piece.value };
-
-    if (operation.ownerCharacterId != null) {
-        result.ownerCharacterId = operation.ownerCharacterId.newValue;
-    }
-
-    const dice = RecordOperation.apply<DieValueTypes.State, DieValueTypes.UpOperation, ScalarError>(
-        {
-            prevState: state.dice,
-            operation: operation.dice,
-            innerApply: ({ prevState, operation: upOperation }) => {
-                return DieValue.apply({ state: prevState, operation: upOperation });
-            },
-        }
-    );
-    if (dice.isError) {
-        return dice;
-    }
-    result.dice = dice.value;
-
-    return Result.ok(result);
-};
-
-export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
-    const piece = Piece.applyBack({ state, operation });
-    if (piece.isError) {
-        return piece;
-    }
-    const result: State = { ...state, ...piece.value };
-
-    if (operation.ownerCharacterId != null) {
-        result.ownerCharacterId = operation.ownerCharacterId.oldValue;
-    }
-
-    const dice = RecordOperation.applyBack<
-        DieValueTypes.State,
-        DieValueTypes.DownOperation,
-        ScalarError
-    >({
-        nextState: state.dice,
-        operation: operation.dice,
-        innerApplyBack: ({ state: nextState, operation }) => {
-            return DieValue.applyBack({ state: nextState, operation });
-        },
-    });
-    if (dice.isError) {
-        return dice;
-    }
-    result.dice = dice.value;
-
-    return Result.ok(result);
-};
-
-export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
-    const piece = Piece.composeDownOperation({ first, second });
-    if (piece.isError) {
-        return piece;
-    }
-
-    const dice = RecordOperation.composeDownOperation<
-        DieValueTypes.State,
-        DieValueTypes.DownOperation,
-        DownError
-    >({
-        first: first.dice,
-        second: second.dice,
-        innerApplyBack: ({ state, operation }) => {
-            return DieValue.applyBack({ state, operation });
-        },
-        innerCompose: params => DieValue.composeDownOperation(params),
-    });
-    if (dice.isError) {
-        return dice;
-    }
-
-    const valueProps: DownOperation = {
-        $v: 2,
-        $r: 1,
-        ...piece.value,
-        ownerCharacterId: ReplaceOperation.composeDownOperation(
-            first.ownerCharacterId,
-            second.ownerCharacterId
-        ),
-        dice: dice.value,
-    };
-    return Result.ok(valueProps);
-};
-
-export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
-    nextState,
-    downOperation,
-}) => {
-    if (downOperation === undefined) {
-        return Result.ok({ prevState: nextState, twoWayOperation: undefined });
-    }
-
-    const dice = RecordOperation.restore<
-        DieValueTypes.State,
-        DieValueTypes.DownOperation,
-        DieValueTypes.TwoWayOperation,
-        ScalarError
-    >({
-        nextState: nextState.dice,
-        downOperation: downOperation.dice,
-        innerDiff: params => DieValue.diff(params),
-        innerRestore: params => DieValue.restore(params),
-    });
-    if (dice.isError) {
-        return dice;
-    }
-
-    const piece = Piece.restore({ nextState, downOperation });
-    if (piece.isError) {
-        return piece;
-    }
-
-    const prevState: State = {
-        ...nextState,
-        ...piece.value.prevState,
-        dice: dice.value.prevState,
-    };
-    const twoWayOperation: TwoWayOperation = {
-        $v: 2,
-        $r: 1,
-        ...piece.value.twoWayOperation,
-        dice: dice.value.twoWayOperation,
-    };
-
-    if (downOperation.ownerCharacterId !== undefined) {
-        prevState.ownerCharacterId = downOperation.ownerCharacterId.oldValue ?? undefined;
-        twoWayOperation.ownerCharacterId = {
-            oldValue: downOperation.ownerCharacterId.oldValue ?? undefined,
-            newValue: nextState.ownerCharacterId,
-        };
-    }
-
-    return Result.ok({ prevState, nextState, twoWayOperation });
-};
-
-export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const dice = RecordOperation.diff({
-        prevState: prevState.dice,
-        nextState: nextState.dice,
-        innerDiff: DieValue.diff,
-    });
-
-    const result: TwoWayOperation = {
-        $v: 2,
-        $r: 1,
-        ...Piece.diff({ prevState, nextState }),
-        dice,
-    };
-
-    if (prevState.ownerCharacterId !== nextState.ownerCharacterId) {
-        result.ownerCharacterId = {
-            oldValue: prevState.ownerCharacterId,
-            newValue: nextState.ownerCharacterId,
-        };
-    }
-
-    if (isIdRecord(result)) {
-        return undefined;
-    }
-
-    return result;
-};
-
 export const serverTransform =
     (
         requestedBy: RequestedBy,
-        currentRoomState: Room.State
-    ): ServerTransform<State, TwoWayOperation, UpOperation> =>
+        currentRoomState: State<typeof Room.template>
+    ): ServerTransform<
+        State<typeof template>,
+        TwoWayOperation<typeof template>,
+        UpOperation<typeof template>
+    > =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
         const isAuthorized = isCharacterOwner({
             requestedBy,
@@ -249,10 +53,10 @@ export const serverTransform =
         }
 
         const dice = RecordOperation.serverTransform<
-            DieValueTypes.State,
-            DieValueTypes.State,
-            DieValueTypes.TwoWayOperation,
-            DieValueTypes.UpOperation,
+            State<typeof DieValueTypes.template>,
+            State<typeof DieValueTypes.template>,
+            TwoWayOperation<typeof DieValueTypes.template>,
+            UpOperation<typeof DieValueTypes.template>,
             TwoWayError
         >({
             prevState: prevState.dice,
@@ -279,16 +83,16 @@ export const serverTransform =
         }
 
         const piece = Piece.serverTransform({
-            prevState,
-            currentState,
-            clientOperation,
-            serverOperation,
+            prevState: { ...prevState, $v: undefined, $r: undefined },
+            currentState: { ...currentState, $v: undefined, $r: undefined },
+            clientOperation: { ...clientOperation, $v: undefined, $r: undefined },
+            serverOperation: { ...serverOperation, $v: undefined, $r: undefined },
         });
         if (piece.isError) {
             return piece;
         }
 
-        const twoWayOperation: TwoWayOperation = {
+        const twoWayOperation: TwoWayOperation<typeof template> = {
             $v: 2,
             $r: 1,
             ...piece.value,
@@ -335,47 +139,3 @@ export const serverTransform =
 
         return Result.ok(twoWayOperation);
     };
-
-export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
-    const dice = RecordOperation.clientTransform<
-        DieValueTypes.State,
-        DieValueTypes.UpOperation,
-        UpError
-    >({
-        first: first.dice,
-        second: second.dice,
-        innerTransform: params => DieValue.clientTransform(params),
-        innerDiff: params => DieValue.diff(params),
-    });
-    if (dice.isError) {
-        return dice;
-    }
-
-    const piece = Piece.clientTransform({ first, second });
-
-    const ownerCharacterId = ReplaceOperation.clientTransform({
-        first: first.ownerCharacterId,
-        second: second.ownerCharacterId,
-    });
-
-    const firstPrime: UpOperation = {
-        ...piece.value?.firstPrime,
-        $v: 2,
-        $r: 1,
-        dice: dice.value.firstPrime,
-        ownerCharacterId: ownerCharacterId.firstPrime,
-    };
-
-    const secondPrime: UpOperation = {
-        ...piece.value?.secondPrime,
-        $v: 2,
-        $r: 1,
-        dice: dice.value.secondPrime,
-        ownerCharacterId: ownerCharacterId.secondPrime,
-    };
-
-    return Result.ok({
-        firstPrime: isIdRecord(firstPrime) ? undefined : firstPrime,
-        secondPrime: isIdRecord(secondPrime) ? undefined : secondPrime,
-    });
-};

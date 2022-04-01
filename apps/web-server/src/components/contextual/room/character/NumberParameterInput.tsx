@@ -11,12 +11,18 @@ import {
     parameterIsNotPrivateAndNotCreatedByMe,
 } from '../../../../resources/text/main';
 import {
-    applyCharacter,
-    CharacterState,
-    CharacterUpOperation,
-    NumParamState,
+    apply,
+    characterTemplate,
+    numParamTemplate,
+    State,
     StrIndex20,
+    UpOperation,
 } from '@flocon-trpg/core';
+
+const applyCharacter = apply(characterTemplate);
+type CharacterState = State<typeof characterTemplate>;
+type CharacterUpOperation = UpOperation<typeof characterTemplate>;
+type NumParamState = State<typeof numParamTemplate>;
 
 const inputWidth = 50;
 

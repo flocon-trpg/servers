@@ -10,12 +10,13 @@ import {
     ScriptError,
 } from '@flocon-trpg/flocon-script';
 import { isStrIndex20 } from '../indexes';
+import { State } from '../ot/generator';
 import * as ParamName from '../ot/room/paramName/types';
 import * as Room from '../ot/room/types';
 
 export class FParamNames extends FObject {
     public constructor(
-        private readonly room: Room.State,
+        private readonly room: State<typeof Room.template>,
         private readonly mode: 'Boolean' | 'Number' | 'String'
     ) {
         super();
@@ -49,7 +50,7 @@ export class FParamNames extends FObject {
         if (found != null) {
             return found;
         }
-        const result: ParamName.State = {
+        const result: State<typeof ParamName.template> = {
             $v: 1,
             $r: 1,
             name: '',

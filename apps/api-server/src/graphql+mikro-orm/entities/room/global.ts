@@ -21,7 +21,8 @@ import {
     diff,
     toUpOperation,
     RequestedBy,
-    ParticipantState,
+    roomTemplate,
+    participantTemplate,
     update,
 } from '@flocon-trpg/core';
 import { Participant } from '../participant/mikro-orm';
@@ -30,6 +31,12 @@ import { User } from '../user/mikro-orm';
 import { nullableStringToParticipantRoleType } from '../../../enums/ParticipantRoleType';
 import { convertToMaxLength100String } from '../../../utils/convertToMaxLength100String';
 import { isNonEmptyArray, ReadonlyNonEmptyArray } from '../../../utils/readonlyNonEmptyArray';
+
+type RoomState = State<typeof roomTemplate>;
+type RoomUpOperation = UpOperation<typeof roomTemplate>;
+type RoomDownOperation = DownOperation<typeof roomTemplate>;
+type RoomTwoWayOperation = TwoWayOperation<typeof roomTemplate>;
+type ParticipantState = State<typeof participantTemplate>;
 
 type IsSequentialResult<T> =
     | {
@@ -85,7 +92,7 @@ const isSequential = <T>(
 export namespace GlobalRoom {
     export namespace MikroORM {
         export namespace ToGlobal {
-            export const state = async (roomEntity: Room, em: EM): Promise<State> => {
+            export const state = async (roomEntity: Room, em: EM): Promise<RoomState> => {
                 const result = decodeDbState(roomEntity.value);
                 const participants: Record<string, ParticipantState> = {};
                 const participantEntities = await em.find(Participant, {
@@ -171,7 +178,7 @@ export namespace GlobalRoom {
                 const sortedOperationEntities = operationEntities.sort(
                     (x, y) => x.prevRevision - y.prevRevision
                 );
-                let operation: DownOperation | undefined =
+                let operation: RoomDownOperation | undefined =
                     sortedOperationEntities.length === 0
                         ? undefined
                         : downOperation(sortedOperationEntities[0]);
@@ -187,7 +194,10 @@ export namespace GlobalRoom {
                         operation = second;
                         continue;
                     }
-                    const composed = composeDownOperation({ first: operation, second });
+                    const composed = composeDownOperation(roomTemplate)({
+                        first: operation,
+                        second,
+                    });
                     if (composed.isError) {
                         return composed;
                     }
@@ -204,7 +214,7 @@ export namespace GlobalRoom {
                 source,
                 requestedBy,
             }: {
-                source: State;
+                source: RoomState;
                 requestedBy: RequestedBy;
             }): Omit<RoomGetState, 'revision' | 'createdBy'> => {
                 return {
@@ -217,18 +227,18 @@ export namespace GlobalRoom {
                 nextState,
                 requestedBy,
             }: {
-                prevState: State;
-                nextState: State;
+                prevState: RoomState;
+                nextState: RoomState;
                 requestedBy: RequestedBy;
             }): string => {
                 const prevClientState = toClientState(requestedBy)(prevState);
                 const nextClientState = toClientState(requestedBy)(nextState);
-                const diffOperation = diff({
+                const diffOperation = diff(roomTemplate)({
                     prevState: prevClientState,
                     nextState: nextClientState,
                 });
                 const upOperation =
-                    diffOperation == null ? undefined : toUpOperation(diffOperation);
+                    diffOperation == null ? undefined : toUpOperation(roomTemplate)(diffOperation);
                 return stringifyUpOperation(upOperation ?? { $v: 2, $r: 1 });
             };
         }
@@ -276,12 +286,12 @@ export namespace GlobalRoom {
         }: {
             em: EM;
             target: Room;
-            prevState: State;
-            operation: TwoWayOperation;
+            prevState: RoomState;
+            operation: RoomTwoWayOperation;
         }) => {
-            const nextState = apply({
+            const nextState = apply(roomTemplate)({
                 state: prevState,
-                operation: toUpOperation(operation),
+                operation: toUpOperation(roomTemplate)(operation),
             });
             if (nextState.isError) {
                 throw nextState.error;
@@ -333,7 +343,7 @@ export namespace GlobalRoom {
 
             const op = new RoomOp({
                 prevRevision,
-                value: toDownOperation(operation),
+                value: toDownOperation(roomTemplate)(operation),
             });
             op.room = Reference.create<Room>(target);
 
@@ -370,7 +380,7 @@ export namespace GlobalRoom {
 
     export namespace GraphQL {
         export namespace ToGlobal {
-            export const upOperation = (source: RoomOperationInput): UpOperation => {
+            export const upOperation = (source: RoomOperationInput): RoomUpOperation => {
                 return parseUpOperation(source.valueJson);
             };
         }

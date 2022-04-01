@@ -2,10 +2,11 @@ import React from 'react';
 import * as ReactKonva from 'react-konva';
 import { animated, useSpring } from '@react-spring/konva';
 import {
-    DicePieceState,
     dicePieceStrIndexes,
-    StringPieceState,
-    DieValueState,
+    dicePieceTemplate,
+    dieValueTemplate,
+    State,
+    stringPieceTemplate,
 } from '@flocon-trpg/core';
 import { StringPieceValue } from '../../../../utils/board/stringPieceValue';
 import { KonvaD6 } from './die/KonvaDice';
@@ -13,6 +14,10 @@ import { DicePieceValue } from '../../../../utils/board/dicePieceValue';
 import { usePrevious } from 'react-use';
 import { Size } from '../../../../utils/types';
 import { PieceGroup, PieceGroupProps } from './PieceGroup';
+
+type DieValueState = State<typeof dieValueTemplate>;
+type DicePieceState = State<typeof dicePieceTemplate>;
+type StringPieceState = State<typeof stringPieceTemplate>;
 
 export const stringPiece = 'stringPiece';
 export const dicePiece = 'dicePiece';

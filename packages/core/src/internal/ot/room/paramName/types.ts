@@ -1,31 +1,9 @@
-import * as t from 'io-ts';
-import { createOperation } from '../../util/createOperation';
-import * as TextOperation from '../../util/textOperation';
+import { createObjectValueTemplate, createOtValueTemplate } from '../../generator';
 
-export const state = t.type({
-    $v: t.literal(1),
-    $r: t.literal(1),
-
-    name: t.string,
-});
-
-export type State = t.TypeOf<typeof state>;
-
-export const downOperation = createOperation(1, 1, {
-    name: TextOperation.downOperation,
-});
-
-export type DownOperation = t.TypeOf<typeof downOperation>;
-
-export const upOperation = createOperation(1, 1, {
-    name: TextOperation.upOperation,
-});
-
-export type UpOperation = t.TypeOf<typeof upOperation>;
-
-export type TwoWayOperation = {
-    $v: 1;
-    $r: 1;
-
-    name?: TextOperation.TwoWayOperation;
-};
+export const template = createObjectValueTemplate(
+    {
+        name: createOtValueTemplate(false),
+    },
+    1,
+    1
+);

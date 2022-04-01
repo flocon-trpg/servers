@@ -9,6 +9,7 @@ import {
     OnSettingParams,
     ScriptError,
 } from '@flocon-trpg/flocon-script';
+import { State } from '../ot/generator';
 import * as BgmTypes from '../ot/room/bgm/types';
 import { toFFilePath, toFilePath } from './filePath';
 
@@ -17,7 +18,7 @@ const files = 'files';
 const volume = 'volume';
 
 export class FBgm extends FObject {
-    public constructor(private readonly bgm: BgmTypes.State) {
+    public constructor(private readonly bgm: State<typeof BgmTypes.template>) {
         super();
     }
 

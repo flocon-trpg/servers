@@ -8,13 +8,14 @@ import {
     OnSettingParams,
     FString,
 } from '@flocon-trpg/flocon-script';
+import { State } from '../ot/generator';
 import * as StrParam from '../ot/room/character/strParam/types';
 
 const value = 'value';
 const isValueSecret = 'isValueSecret';
 
 export class FStrParam extends FObject {
-    public constructor(private readonly strParam: StrParam.State) {
+    public constructor(private readonly strParam: State<typeof StrParam.template>) {
         super();
     }
 

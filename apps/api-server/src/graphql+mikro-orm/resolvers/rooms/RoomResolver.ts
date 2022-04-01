@@ -145,11 +145,8 @@ import {
     State,
     TwoWayOperation,
     restore,
-    CharacterState,
     UpOperation,
     RecordUpOperationElement,
-    ParticipantState,
-    ParticipantUpOperation,
     replace,
     ParticipantRole,
     createLogs,
@@ -159,6 +156,9 @@ import {
     $system,
     MaxLength100String,
     isCharacterOwner,
+    characterTemplate,
+    participantTemplate,
+    roomTemplate,
 } from '@flocon-trpg/core';
 import {
     ApplyError,
@@ -176,6 +176,13 @@ import { ResetRoomMessagesFailureType } from '../../../enums/ResetRoomMessagesFa
 import { hash } from 'bcrypt';
 import { DeleteRoomAsAdminResult } from '../../results/DeleteRoomAsAdminResult';
 import { DeleteRoomAsAdminFailureType } from '../../../enums/DeleteRoomAsAdminFailureType';
+
+type RoomState = State<typeof roomTemplate>;
+type RoomUpOperation = UpOperation<typeof roomTemplate>;
+type RoomTwoWayOperation = TwoWayOperation<typeof roomTemplate>;
+type CharacterState = State<typeof characterTemplate>;
+type ParticipantState = State<typeof participantTemplate>;
+type ParticipantUpOperation = UpOperation<typeof participantTemplate>;
 
 const bcryptSaltRounds = 10;
 
@@ -324,7 +331,7 @@ const operateParticipantAndFlush = async ({
         };
     }
 
-    const roomUpOperation: UpOperation = {
+    const roomUpOperation: RoomUpOperation = {
         $v: 2,
         $r: 1,
         participants: {
@@ -617,7 +624,7 @@ const analyzeTextAndSetToEntity = async (params: {
     context: Context | null;
     gameType: string | undefined;
     createdBy: User;
-    room: State;
+    room: RoomState;
 }) => {
     const defaultGameType = 'DiceBot';
     const analyzed = await analyze({
@@ -1598,10 +1605,10 @@ export class RoomResolver {
                 return downOperation;
             }
 
-            let prevState: State = roomState;
-            let twoWayOperation: TwoWayOperation | undefined = undefined;
+            let prevState: RoomState = roomState;
+            let twoWayOperation: RoomTwoWayOperation | undefined = undefined;
             if (downOperation.value !== undefined) {
-                const restoredRoom = restore({
+                const restoredRoom = restore(roomTemplate)({
                     nextState: roomState,
                     downOperation: downOperation.value,
                 });

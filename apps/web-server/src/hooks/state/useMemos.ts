@@ -1,8 +1,10 @@
 import React from 'react';
 import { recordToMap } from '@flocon-trpg/utils';
-import { MemoState } from '@flocon-trpg/core';
+import { State, memoTemplate } from '@flocon-trpg/core';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
 import { roomAtom } from '../../atoms/room/roomAtom';
+
+type MemoState = State<typeof memoTemplate>;
 
 export const useMemos = (): ReadonlyMap<string, MemoState> | undefined => {
     const memos = useAtomSelector(roomAtom, state => state.roomState?.state?.memos);

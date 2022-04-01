@@ -3,7 +3,7 @@ import React from 'react';
 import { DialogFooter } from '../../../ui/DialogFooter';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../../../hooks/useStateEditor';
-import { StringPieceState, CharacterState, simpleId, String } from '@flocon-trpg/core';
+import { characterTemplate, simpleId, State, String, stringPieceTemplate } from '@flocon-trpg/core';
 import { useStringPieces } from '../../../../hooks/state/useStringPieces';
 import { MyCharactersSelect } from '../character/MyCharactersSelect';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
@@ -13,6 +13,9 @@ import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithI
 import { BufferedInput } from '../../../ui/BufferedInput';
 import { PiecePositionWithCell } from '../../../../utils/types';
 import { stringPieceValueEditorAtom } from '../../../../atoms/pieceValueEditor/pieceValueEditorAtom';
+
+type CharacterState = State<typeof characterTemplate>;
+type StringPieceState = State<typeof stringPieceTemplate>;
 
 const defaultStringPieceValue = (
     piecePosition: PiecePositionWithCell,

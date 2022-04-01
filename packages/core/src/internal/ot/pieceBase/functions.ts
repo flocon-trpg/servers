@@ -1,210 +1,20 @@
 import { Result } from '@kizahasi/result';
 import { isIdRecord } from '../util/record';
 import * as ReplaceOperation from '../util/replaceOperation';
-import {
-    Apply,
-    ClientTransform,
-    Compose,
-    Diff,
-    DownError,
-    Restore,
-    ServerTransform,
-} from '../util/type';
-import { DownOperation, State, TwoWayOperation, UpOperation } from './types';
+import { ServerTransform } from '../util/type';
 import * as BoardPosition from '../boardPositionBase/functions';
+import { template } from './types';
+import { State, TwoWayOperation, UpOperation } from '../generator';
 
-export const toClientState = (source: State): State => {
+export const toClientState = (source: State<typeof template>): State<typeof template> => {
     return source;
 };
 
-export const toDownOperation = (source: TwoWayOperation): DownOperation => {
-    return {
-        ...source,
-        memo: undefined,
-        name: undefined,
-        ...BoardPosition.toDownOperation(source),
-    };
-};
-
-export const toUpOperation = (source: TwoWayOperation): UpOperation => {
-    return {
-        ...source,
-        memo: undefined,
-        name: undefined,
-        ...BoardPosition.toUpOperation(source),
-    };
-};
-
-export const apply: Apply<State, UpOperation> = ({ state, operation }) => {
-    const boardPosition = BoardPosition.apply({ state, operation });
-    if (boardPosition.isError) {
-        return boardPosition;
-    }
-    const result: State = { ...state, ...boardPosition.value };
-
-    if (operation.cellH != null) {
-        result.cellH = operation.cellH.newValue;
-    }
-    if (operation.cellW != null) {
-        result.cellW = operation.cellW.newValue;
-    }
-    if (operation.cellX != null) {
-        result.cellX = operation.cellX.newValue;
-    }
-    if (operation.cellY != null) {
-        result.cellY = operation.cellY.newValue;
-    }
-    if (operation.isCellMode != null) {
-        result.isCellMode = operation.isCellMode.newValue;
-    }
-    return Result.ok(result);
-};
-
-export const applyBack: Apply<State, DownOperation> = ({ state, operation }) => {
-    const boardPosition = BoardPosition.applyBack({ state, operation });
-    if (boardPosition.isError) {
-        return boardPosition;
-    }
-    const result = { ...state, ...boardPosition.value };
-
-    if (operation.cellH !== undefined) {
-        result.cellH = operation.cellH.oldValue;
-    }
-    if (operation.cellW !== undefined) {
-        result.cellW = operation.cellW.oldValue;
-    }
-    if (operation.cellX !== undefined) {
-        result.cellX = operation.cellX.oldValue;
-    }
-    if (operation.cellY !== undefined) {
-        result.cellY = operation.cellY.oldValue;
-    }
-    if (operation.isCellMode !== undefined) {
-        result.isCellMode = operation.isCellMode.oldValue;
-    }
-
-    return Result.ok(result);
-};
-
-export const composeDownOperation: Compose<DownOperation, DownError> = ({ first, second }) => {
-    const boardPosition = BoardPosition.composeDownOperation({ first, second });
-    if (boardPosition.isError) {
-        return boardPosition;
-    }
-    const valueProps: DownOperation = {
-        ...boardPosition.value,
-        cellH: ReplaceOperation.composeDownOperation(first.cellH, second.cellH),
-        cellW: ReplaceOperation.composeDownOperation(first.cellW, second.cellW),
-        cellX: ReplaceOperation.composeDownOperation(first.cellX, second.cellX),
-        cellY: ReplaceOperation.composeDownOperation(first.cellY, second.cellY),
-        isCellMode: ReplaceOperation.composeDownOperation(first.isCellMode, second.isCellMode),
-    };
-    return Result.ok(valueProps);
-};
-
-export const restore: Restore<State, DownOperation, TwoWayOperation> = ({
-    nextState,
-    downOperation,
-}) => {
-    if (downOperation === undefined) {
-        return Result.ok({ prevState: nextState, twoWayOperation: undefined });
-    }
-
-    const boardPosition = BoardPosition.restore({ nextState, downOperation });
-    if (boardPosition.isError) {
-        return boardPosition;
-    }
-
-    const prevState: State = {
-        ...nextState,
-        ...boardPosition.value.prevState,
-    };
-    const twoWayOperation: TwoWayOperation = { ...boardPosition.value.twoWayOperation };
-
-    if (downOperation.cellH !== undefined) {
-        prevState.cellH = downOperation.cellH.oldValue;
-        twoWayOperation.cellH = {
-            ...downOperation.cellH,
-            newValue: nextState.cellH,
-        };
-    }
-    if (downOperation.cellW !== undefined) {
-        prevState.cellW = downOperation.cellW.oldValue;
-        twoWayOperation.cellW = {
-            ...downOperation.cellW,
-            newValue: nextState.cellW,
-        };
-    }
-    if (downOperation.cellX !== undefined) {
-        prevState.cellX = downOperation.cellX.oldValue;
-        twoWayOperation.cellX = {
-            ...downOperation.cellX,
-            newValue: nextState.cellX,
-        };
-    }
-    if (downOperation.cellY !== undefined) {
-        prevState.cellY = downOperation.cellY.oldValue;
-        twoWayOperation.cellY = {
-            ...downOperation.cellY,
-            newValue: nextState.cellY,
-        };
-    }
-    if (downOperation.isCellMode !== undefined) {
-        prevState.isCellMode = downOperation.isCellMode.oldValue;
-        twoWayOperation.isCellMode = {
-            ...downOperation.isCellMode,
-            newValue: nextState.isCellMode,
-        };
-    }
-
-    return Result.ok({ prevState, twoWayOperation });
-};
-
-export const diff: Diff<State, TwoWayOperation> = ({ prevState, nextState }) => {
-    const resultType: TwoWayOperation = { ...BoardPosition.diff({ prevState, nextState }) };
-    if (prevState.cellH !== nextState.cellH) {
-        resultType.cellH = {
-            oldValue: prevState.cellH,
-            newValue: nextState.cellH,
-        };
-    }
-    if (prevState.cellW !== nextState.cellW) {
-        resultType.cellW = {
-            oldValue: prevState.cellW,
-            newValue: nextState.cellW,
-        };
-    }
-    if (prevState.cellX !== nextState.cellX) {
-        resultType.cellX = {
-            oldValue: prevState.cellX,
-            newValue: nextState.cellX,
-        };
-    }
-    if (prevState.cellY !== nextState.cellY) {
-        resultType.cellY = {
-            oldValue: prevState.cellY,
-            newValue: nextState.cellY,
-        };
-    }
-    if (prevState.isCellMode !== nextState.isCellMode) {
-        resultType.isCellMode = {
-            oldValue: prevState.isCellMode,
-            newValue: nextState.isCellMode,
-        };
-    }
-
-    if (isIdRecord(resultType)) {
-        return undefined;
-    }
-    return resultType;
-};
-
-export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperation> = ({
-    prevState,
-    currentState,
-    clientOperation,
-    serverOperation,
-}) => {
+export const serverTransform: ServerTransform<
+    State<typeof template>,
+    TwoWayOperation<typeof template>,
+    UpOperation<typeof template>
+> = ({ prevState, currentState, clientOperation, serverOperation }) => {
     const boardPosition = BoardPosition.serverTransform({
         prevState,
         currentState,
@@ -215,7 +25,11 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
         return boardPosition;
     }
 
-    const twoWayOperation: TwoWayOperation = { ...boardPosition.value };
+    const twoWayOperation: TwoWayOperation<typeof template> = {
+        ...boardPosition.value,
+        $v: undefined,
+        $r: undefined,
+    };
 
     twoWayOperation.cellH = ReplaceOperation.serverTransform({
         first: serverOperation?.cellH,
@@ -248,51 +62,4 @@ export const serverTransform: ServerTransform<State, TwoWayOperation, UpOperatio
     }
 
     return Result.ok(twoWayOperation);
-};
-
-export const clientTransform: ClientTransform<UpOperation> = ({ first, second }) => {
-    const boardPosition = BoardPosition.clientTransform({ first, second });
-    const cellH = ReplaceOperation.clientTransform({
-        first: first.cellH,
-        second: second.cellH,
-    });
-    const cellW = ReplaceOperation.clientTransform({
-        first: first.cellW,
-        second: second.cellW,
-    });
-    const cellX = ReplaceOperation.clientTransform({
-        first: first.cellX,
-        second: second.cellX,
-    });
-    const cellY = ReplaceOperation.clientTransform({
-        first: first.cellY,
-        second: second.cellY,
-    });
-    const isCellMode = ReplaceOperation.clientTransform({
-        first: first.isCellMode,
-        second: second.isCellMode,
-    });
-
-    const firstPrime: UpOperation = {
-        ...boardPosition.value?.firstPrime,
-        cellH: cellH.firstPrime,
-        cellW: cellW.firstPrime,
-        cellX: cellX.firstPrime,
-        cellY: cellY.firstPrime,
-        isCellMode: isCellMode.firstPrime,
-    };
-
-    const secondPrime: UpOperation = {
-        ...boardPosition.value?.secondPrime,
-        cellH: cellH.secondPrime,
-        cellW: cellW.secondPrime,
-        cellX: cellX.secondPrime,
-        cellY: cellY.secondPrime,
-        isCellMode: isCellMode.secondPrime,
-    };
-
-    return Result.ok({
-        firstPrime: isIdRecord(firstPrime) ? undefined : firstPrime,
-        secondPrime: isIdRecord(secondPrime) ? undefined : secondPrime,
-    });
 };

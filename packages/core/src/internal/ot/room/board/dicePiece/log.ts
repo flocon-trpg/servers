@@ -5,7 +5,6 @@ import {
     update as updateKey,
 } from '../../../util/recordOperationElement';
 import * as DicePieceValueTypes from './types';
-import * as PieceBase from '../../../pieceBase/functions';
 import * as PieceBaseTypes from '../../../pieceBase/types';
 import * as DieValue from './dieValue/functions';
 import * as DieValueTypes from './dieValue/types';
@@ -14,6 +13,15 @@ import { createOperation } from '../../../util/createOperation';
 import { record } from '../../../util/record';
 import { createType, deleteType, updateType } from '../../../pieceBase/log';
 import { maybe } from '../../../../maybe';
+import {
+    createObjectValueTemplate,
+    IoTsOptions,
+    State,
+    state,
+    toUpOperation,
+    TwoWayOperation,
+    upOperation,
+} from '../../../generator';
 
 const dieValueUpOperation = createOperation(1, 1, {
     dieType: t.type({ newValue: DieValueTypes.dieType }),
@@ -23,37 +31,41 @@ const dieValueUpOperation = createOperation(1, 1, {
 
 type DieValueUpOperation = t.TypeOf<typeof dieValueUpOperation>;
 
-const update = t.intersection([
-    t.type({
-        $v: t.literal(2),
-        $r: t.literal(1),
+const update = (options: IoTsOptions) =>
+    t.intersection([
+        t.type({
+            $v: t.literal(2),
+            $r: t.literal(1),
 
-        type: t.literal(updateType),
-    }),
-    PieceBaseTypes.upOperation,
-    t.partial({
-        ownerCharacterId: t.type({ newValue: maybe(t.string) }),
-        dice: record(
-            t.string,
-            recordUpOperationElementFactory(DieValueTypes.state, dieValueUpOperation)
-        ),
-    }),
-]);
+            type: t.literal(updateType),
+        }),
+        upOperation(createObjectValueTemplate(PieceBaseTypes.templateValue, 2, 1), options),
+        t.partial({
+            ownerCharacterId: t.type({ newValue: maybe(t.string) }),
+            dice: record(
+                t.string,
+                recordUpOperationElementFactory(
+                    state(DieValueTypes.template, options),
+                    dieValueUpOperation
+                )
+            ),
+        }),
+    ]);
 
 export const type = t.union([
     t.type({
         $v: t.literal(2),
         $r: t.literal(1),
         type: t.literal(createType),
-        value: DicePieceValueTypes.state,
+        value: state(DicePieceValueTypes.template, { exact: false }),
     }),
     t.type({
         $v: t.literal(2),
         $r: t.literal(1),
         type: t.literal(deleteType),
-        value: DicePieceValueTypes.state,
+        value: state(DicePieceValueTypes.template, { exact: false }),
     }),
-    update,
+    update({ exact: false }),
 ]);
 
 export const exactType = t.union([
@@ -61,25 +73,24 @@ export const exactType = t.union([
         $v: t.literal(2),
         $r: t.literal(1),
         type: t.literal(createType),
-        value: DicePieceValueTypes.state,
+        value: state(DicePieceValueTypes.template, { exact: true }),
     }),
     t.strict({
         $v: t.literal(2),
         $r: t.literal(1),
         type: t.literal(deleteType),
-        value: DicePieceValueTypes.state,
+        value: state(DicePieceValueTypes.template, { exact: true }),
     }),
-    t.exact(update),
+    update({ exact: true }),
 ]);
-
 export type Type = t.TypeOf<typeof type>;
 
 export const ofOperation = (
-    operation: DicePieceValueTypes.TwoWayOperation,
-    currentState: DicePieceValueTypes.State
+    operation: TwoWayOperation<typeof DicePieceValueTypes.template>,
+    currentState: State<typeof DicePieceValueTypes.template>
 ): Type => {
     return {
-        ...PieceBase.toUpOperation(operation),
+        ...toUpOperation(PieceBaseTypes.template)({ ...operation, $v: undefined, $r: undefined }),
         $v: 2,
         $r: 1,
         type: updateType,
@@ -116,7 +127,7 @@ export const ofOperation = (
                               } as const;
                           }
                           case replaceKey: {
-                              const newValue: DieValueTypes.State | undefined =
+                              const newValue: State<typeof DieValueTypes.template> | undefined =
                                   element.replace.newValue == null
                                       ? undefined
                                       : DieValue.toClientState(false)(element.replace.newValue);

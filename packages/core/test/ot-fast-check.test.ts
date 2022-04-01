@@ -1,7 +1,18 @@
 import { Result } from '@kizahasi/result';
 import fc from 'fast-check';
 import { getArbitrary } from 'fast-check-io-ts';
-import * as Room from '../src/internal/ot/room/functions';
+import {
+    State,
+    state,
+    diff,
+    apply,
+    toUpOperation,
+    applyBack,
+    toDownOperation,
+    composeDownOperation,
+    restore,
+    clientTransform,
+} from '../src';
 import * as RoomTypes from '../src/internal/ot/room/types';
 import { normalizeRoomState } from './normalizeRoomState';
 
@@ -20,7 +31,11 @@ if (TEST_NUM_RUNS == null) {
 
 console.log(`numRuns: ${numRuns}`);
 
-const expectRoomStateToEqual = (actual: RoomTypes.State, expected: RoomTypes.State) => {
+type RoomState = State<typeof RoomTypes.template>;
+// {exact:true} だとfast-check-io-tsで生成されるオブジェクトが何故か{}のみになるため、{exact:false}としている。
+const roomState = state(RoomTypes.template, { exact: false });
+
+const expectRoomStateToEqual = (actual: RoomState, expected: RoomState) => {
     expect({
         ...normalizeRoomState(actual),
         createdBy: undefined,
@@ -33,9 +48,9 @@ const expectRoomStateToEqual = (actual: RoomTypes.State, expected: RoomTypes.Sta
 // fc.preで弾かれるパターンをテストしている
 it.concurrent('tests id diff', () => {
     fc.assert(
-        fc.property(getArbitrary(RoomTypes.state), state => {
-            const diff = Room.diff({ prevState: state, nextState: state });
-            expect(diff).toBeUndefined();
+        fc.property(getArbitrary(roomState as any), (state: RoomState) => {
+            const d = diff(RoomTypes.template)({ prevState: state, nextState: state });
+            expect(d).toBeUndefined();
         }),
         { numRuns }
     );
@@ -44,17 +59,17 @@ it.concurrent('tests id diff', () => {
 it.concurrent('tests Room.apply', () => {
     fc.assert(
         fc.property(
-            getArbitrary(RoomTypes.state),
-            getArbitrary(RoomTypes.state),
-            (prevState, nextState) => {
-                const diff = Room.diff({ prevState, nextState });
-                if (diff == null) {
+            getArbitrary(roomState as any),
+            getArbitrary(roomState as any),
+            (prevState: RoomState, nextState: RoomState) => {
+                const d = diff(RoomTypes.template)({ prevState, nextState });
+                if (d == null) {
                     fc.pre(false);
                     return;
                 }
-                const actualNextState = Room.apply({
+                const actualNextState = apply(RoomTypes.template)({
                     state: prevState,
-                    operation: Room.toUpOperation(diff),
+                    operation: toUpOperation(RoomTypes.template)(d),
                 });
                 if (actualNextState.isError) {
                     throw actualNextState.error;
@@ -69,17 +84,17 @@ it.concurrent('tests Room.apply', () => {
 it.concurrent('tests Room.applyBack', () => {
     fc.assert(
         fc.property(
-            getArbitrary(RoomTypes.state),
-            getArbitrary(RoomTypes.state),
-            (prevState, nextState) => {
-                const diff = Room.diff({ prevState, nextState });
-                if (diff == null) {
+            getArbitrary(roomState as any),
+            getArbitrary(roomState as any),
+            (prevState: RoomState, nextState: RoomState) => {
+                const d = diff(RoomTypes.template)({ prevState, nextState });
+                if (d == null) {
                     fc.pre(false);
                     return;
                 }
-                const actualPrevState = Room.applyBack({
+                const actualPrevState = applyBack(RoomTypes.template)({
                     state: nextState,
-                    operation: Room.toDownOperation(diff),
+                    operation: toDownOperation(RoomTypes.template)(d),
                 });
                 if (actualPrevState.isError) {
                     throw actualPrevState.error;
@@ -94,37 +109,42 @@ it.concurrent('tests Room.applyBack', () => {
 it.concurrent('tests Room.composeDownOperation', () => {
     fc.assert(
         fc.property(
-            getArbitrary(RoomTypes.state),
-            getArbitrary(RoomTypes.state),
-            getArbitrary(RoomTypes.state),
-            (state1, state2, state3) => {
-                const diff1 = Room.diff({ prevState: state1, nextState: state2 });
-                const diff2 = Room.diff({ prevState: state2, nextState: state3 });
+            getArbitrary(roomState as any),
+            getArbitrary(roomState as any),
+            getArbitrary(roomState as any),
+            (state1: RoomState, state2: RoomState, state3: RoomState) => {
+                const diff1 = diff(RoomTypes.template)({ prevState: state1, nextState: state2 });
+                const diff2 = diff(RoomTypes.template)({ prevState: state2, nextState: state3 });
                 if (diff1 == null || diff2 == null) {
                     fc.pre(false);
                     return;
                 }
-                const actualDownOperation = Room.composeDownOperation({
-                    first: Room.toDownOperation(diff1),
-                    second: Room.toDownOperation(diff2),
+                const actualDownOperation = composeDownOperation(RoomTypes.template)({
+                    first: toDownOperation(RoomTypes.template)(diff1),
+                    second: toDownOperation(RoomTypes.template)(diff2),
                 });
                 if (actualDownOperation.isError) {
                     throw actualDownOperation.error;
                 }
-                const expectedTwoWayOperation = Room.diff({ prevState: state1, nextState: state3 });
+                const expectedTwoWayOperation = diff(RoomTypes.template)({
+                    prevState: state1,
+                    nextState: state3,
+                });
                 const actualState =
                     actualDownOperation.value == null
                         ? Result.ok(state3)
-                        : Room.applyBack({
+                        : applyBack(RoomTypes.template)({
                               state: state3,
                               operation: actualDownOperation.value,
                           });
                 const expectedState =
                     expectedTwoWayOperation == null
                         ? Result.ok(state3)
-                        : Room.applyBack({
+                        : applyBack(RoomTypes.template)({
                               state: state3,
-                              operation: Room.toDownOperation(expectedTwoWayOperation),
+                              operation: toDownOperation(RoomTypes.template)(
+                                  expectedTwoWayOperation
+                              ),
                           });
                 if (actualState.isError || expectedState.isError) {
                     throw new Error('isError should not be true');
@@ -139,17 +159,17 @@ it.concurrent('tests Room.composeDownOperation', () => {
 it.concurrent('tests Room.restore', () => {
     fc.assert(
         fc.property(
-            getArbitrary(RoomTypes.state),
-            getArbitrary(RoomTypes.state),
-            (prevState, nextState) => {
-                const diff = Room.diff({ prevState, nextState });
-                if (diff == null) {
+            getArbitrary(roomState as any),
+            getArbitrary(roomState as any),
+            (prevState: RoomState, nextState: RoomState) => {
+                const d = diff(RoomTypes.template)({ prevState, nextState });
+                if (d == null) {
                     fc.pre(false);
                     return;
                 }
-                const actual = Room.restore({
+                const actual = restore(RoomTypes.template)({
                     nextState,
-                    downOperation: Room.toDownOperation(diff),
+                    downOperation: toDownOperation(RoomTypes.template)(d),
                 });
 
                 if (actual.isError) {
@@ -165,8 +185,10 @@ it.concurrent('tests Room.restore', () => {
                     return;
                 }
 
-                const actualUpOperation = Room.toUpOperation(actual.value.twoWayOperation);
-                const actualNextState = Room.apply({
+                const actualUpOperation = toUpOperation(RoomTypes.template)(
+                    actual.value.twoWayOperation
+                );
+                const actualNextState = apply(RoomTypes.template)({
                     state: prevState,
                     operation: actualUpOperation,
                 });
@@ -175,8 +197,10 @@ it.concurrent('tests Room.restore', () => {
                 }
                 expectRoomStateToEqual(Result.get(actualNextState), nextState);
 
-                const actualDownOperation = Room.toDownOperation(actual.value.twoWayOperation);
-                const actualPrevState = Room.applyBack({
+                const actualDownOperation = toDownOperation(RoomTypes.template)(
+                    actual.value.twoWayOperation
+                );
+                const actualPrevState = applyBack(RoomTypes.template)({
                     state: nextState,
                     operation: actualDownOperation,
                 });
@@ -195,19 +219,25 @@ it.concurrent('tests Room.restore', () => {
 it.concurrent('tests Room.clientTransform', () => {
     fc.assert(
         fc.property(
-            getArbitrary(RoomTypes.state),
-            getArbitrary(RoomTypes.state),
-            getArbitrary(RoomTypes.state),
+            getArbitrary(roomState as any),
+            getArbitrary(roomState as any),
+            getArbitrary(roomState as any),
             (rootState, nextState1, nextState2) => {
-                const twoWayFirst = Room.diff({ prevState: rootState, nextState: nextState1 });
-                const twoWaySecond = Room.diff({ prevState: rootState, nextState: nextState2 });
+                const twoWayFirst = diff(RoomTypes.template)({
+                    prevState: rootState,
+                    nextState: nextState1,
+                });
+                const twoWaySecond = diff(RoomTypes.template)({
+                    prevState: rootState,
+                    nextState: nextState2,
+                });
                 if (twoWayFirst == null || twoWaySecond == null) {
                     fc.pre(false);
                     return;
                 }
-                const first = Room.toUpOperation(twoWayFirst);
-                const second = Room.toUpOperation(twoWaySecond);
-                const actual = Room.clientTransform({
+                const first = toUpOperation(RoomTypes.template)(twoWayFirst);
+                const second = toUpOperation(RoomTypes.template)(twoWaySecond);
+                const actual = clientTransform(RoomTypes.template)({
                     first,
                     second,
                 });
@@ -217,11 +247,17 @@ it.concurrent('tests Room.clientTransform', () => {
                 const firstThenSecondPrime =
                     actual.value.secondPrime == null
                         ? Result.ok(nextState1)
-                        : Room.apply({ state: nextState1, operation: actual.value.secondPrime });
+                        : apply(RoomTypes.template)({
+                              state: nextState1,
+                              operation: actual.value.secondPrime,
+                          });
                 const secondThenFirstPrime =
                     actual.value.firstPrime == null
                         ? Result.ok(nextState2)
-                        : Room.apply({ state: nextState2, operation: actual.value.firstPrime });
+                        : apply(RoomTypes.template)({
+                              state: nextState2,
+                              operation: actual.value.firstPrime,
+                          });
                 if (firstThenSecondPrime.isError) {
                     throw firstThenSecondPrime.error;
                 }

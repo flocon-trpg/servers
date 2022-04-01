@@ -15,13 +15,16 @@ import * as Rx from 'rxjs/operators';
 import { ApolloError, FetchResult, useApolloClient, useMutation } from '@apollo/client';
 import { create as createStateManager } from '../stateManagers/main';
 import { useClientId } from './useClientId';
-import { State, StateManager, UpOperation } from '@flocon-trpg/core';
+import { roomTemplate, State as S, UpOperation as U, StateManager } from '@flocon-trpg/core';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { authNotFound, MyAuthContext, notSignIn } from '../contexts/MyAuthContext';
 import { Room } from '../stateManagers/states/room';
 import { roomNotificationsAtom, Notification } from '../atoms/room/roomAtom';
 import { useUpdateAtom } from 'jotai/utils';
 import { SetAction } from '../utils/setAction';
+
+type State = S<typeof roomTemplate>;
+type UpOperation = U<typeof roomTemplate>;
 
 const sampleTime = 3000;
 

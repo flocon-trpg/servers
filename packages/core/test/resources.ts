@@ -1,4 +1,4 @@
-import { State, Player, Spectator, CharacterState, BoardState } from '../src';
+import { State, Player, Spectator, boardTemplate, characterTemplate, template } from '../src';
 import { forceMaxLength100String } from './forceMaxLength100String';
 
 export namespace Resources {
@@ -31,7 +31,9 @@ export namespace Resources {
     }
 
     export namespace Board {
-        export const emptyState = (ownerParticipantId: string | undefined): BoardState => ({
+        export const emptyState = (
+            ownerParticipantId: string | undefined
+        ): State<typeof boardTemplate> => ({
             $v: 2,
             $r: 1,
             backgroundImage: undefined,
@@ -51,7 +53,9 @@ export namespace Resources {
     }
 
     export namespace Character {
-        export const emptyState = (ownerParticipantId: string | undefined): CharacterState => ({
+        export const emptyState = (
+            ownerParticipantId: string | undefined
+        ): State<typeof characterTemplate> => ({
             $v: 2,
             $r: 1,
             chatPalette: '',
@@ -82,7 +86,7 @@ export namespace Resources {
         });
     }
 
-    export const minimumState: State = {
+    export const minimumState: State<typeof template> = {
         $v: 2,
         $r: 1,
         activeBoardId: undefined,
@@ -143,7 +147,7 @@ export namespace Resources {
         publicChannel10Name: '',
     };
 
-    export const complexState: State = {
+    export const complexState: State<typeof template> = {
         $v: 2,
         $r: 1,
         activeBoardId: undefined,

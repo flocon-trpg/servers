@@ -1,5 +1,7 @@
-import { ParticipantState } from '@flocon-trpg/core';
+import { participantTemplate, State } from '@flocon-trpg/core';
 import { VisibleTo } from './visibleTo';
+
+type ParticipantState = State<typeof participantTemplate>;
 
 export class PrivateChannelSet {
     private readonly _source: ReadonlySet<string>;

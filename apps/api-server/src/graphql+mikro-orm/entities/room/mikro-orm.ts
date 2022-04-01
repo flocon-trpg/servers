@@ -1,4 +1,4 @@
-import { DbState, DownOperation } from '@flocon-trpg/core';
+import { State, DownOperation, roomDbTemplate, roomTemplate } from '@flocon-trpg/core';
 import {
     Collection,
     Entity,
@@ -21,6 +21,9 @@ import {
     RoomPubCh,
     RoomSe as RoomSe,
 } from '../roomMessage/mikro-orm';
+
+type DbState = State<typeof roomDbTemplate>;
+type RoomDownOperation = DownOperation<typeof roomTemplate>;
 
 // Roomは最新の状況を反映するが、RoomOperationを用いて1つ前の状態に戻せるのは一部のプロパティのみ。
 // 例えばrevisionはRoomOperationをいくらapplyしても最新のまま。
@@ -98,7 +101,13 @@ export class Room {
 @Entity()
 @Unique({ properties: ['prevRevision', 'room'] })
 export class RoomOp {
-    public constructor({ prevRevision, value }: { prevRevision: number; value: DownOperation }) {
+    public constructor({
+        prevRevision,
+        value,
+    }: {
+        prevRevision: number;
+        value: RoomDownOperation;
+    }) {
         this.prevRevision = prevRevision;
         this.value = value;
     }
@@ -119,7 +128,7 @@ export class RoomOp {
     public prevRevision: number;
 
     @Property({ type: JsonType })
-    public value: DownOperation;
+    public value: RoomDownOperation;
 
     @ManyToOne(() => Room, { wrappedReference: true })
     public room!: IdentifiedReference<Room>;

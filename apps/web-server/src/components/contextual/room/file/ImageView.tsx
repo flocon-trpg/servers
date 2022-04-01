@@ -1,9 +1,11 @@
 import React from 'react';
-import { FilePath } from '@flocon-trpg/core';
+import { State, filePathTemplate } from '@flocon-trpg/core';
 import { error, loading, success, useSrcFromGraphQL } from '../../../../hooks/src';
 import { FilePathFragment } from '@flocon-trpg/typed-document-node';
 import * as Icons from '@ant-design/icons';
 import { LazyAndPreloadImage } from '../../../ui/LazyAndPreloadImage';
+
+type FilePath = State<typeof filePathTemplate>;
 
 type Props = {
     filePath: FilePathFragment | FilePath | 'Message' | 'Person';
