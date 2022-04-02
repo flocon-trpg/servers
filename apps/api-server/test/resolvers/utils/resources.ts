@@ -13,7 +13,8 @@ export namespace Resources {
         export const master = 'MasterUser';
         export const player1 = 'Player1User';
         export const player2 = 'Player2User';
-        export const spectator = 'SpectatorUser';
+        export const spectator1 = 'Spectator1User';
+        export const spectator2 = 'Spectator2User';
         export const notJoin = 'NotJoinUser';
         export const admin = 'AdminUser';
         export const notAdmin = 'NotAdminUser';

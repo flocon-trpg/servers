@@ -23,10 +23,11 @@ import {
     ParticipantRole,
     GetRoomFailureType,
     DeleteRoomAsAdminMutation,
+    WritePublicMessageMutation,
 } from '@flocon-trpg/typed-document-node';
 import { EntryToServerResultType } from '../../src/enums/EntryToServerResultType';
 import { ServerConfig } from '../../src/configType';
-import { UpOperation as U, parseState, roomTemplate } from '@flocon-trpg/core';
+import { UpOperation as U, parseState, roomTemplate, $free } from '@flocon-trpg/core';
 import axios from 'axios';
 import FormData from 'form-data';
 import urljoin from 'url-join';
@@ -112,6 +113,7 @@ namespace Assert {
     export namespace CreateRoomMutation {
         export const toBeSuccess = (source: OperationResult<CreateRoomMutation>) => {
             if (source.data?.result.__typename !== 'CreateRoomSuccessResult') {
+                console.error('failed at CreateRoomMutation.toBeSuccess', source);
                 expect(source.data?.result.__typename).toBe('CreateRoomSuccessResult');
                 throw new Error('Guard');
             }
@@ -157,6 +159,7 @@ namespace Assert {
     export namespace GetMessagesQuery {
         export const toBeSuccess = (source: OperationResult<GetMessagesQuery>) => {
             if (source.data?.result.__typename !== 'RoomMessages') {
+                console.error('failed at GetMessagesQuery.toBeSuccess', source);
                 expect(source.data?.result.__typename).toBe('RoomMessages');
                 throw new Error('Guard');
             }
@@ -175,6 +178,7 @@ namespace Assert {
     export namespace GetRoomsListQuery {
         export const toBeSuccess = (source: OperationResult<GetRoomsListQuery>) => {
             if (source.data?.result.__typename !== 'GetRoomsListSuccessResult') {
+                console.error('failed at GetRoomsListQuery.toBeSuccess', source);
                 expect(source.data?.result.__typename).toBe('GetRoomsListSuccessResult');
                 throw new Error('Guard');
             }
@@ -185,6 +189,7 @@ namespace Assert {
     export namespace GetRoomQuery {
         export const toBeSuccess = (source: OperationResult<GetRoomQuery>) => {
             if (source.data?.result.__typename !== 'GetJoinedRoomResult') {
+                console.error('failed at GetRoomQuery.toBeSuccess', source);
                 expect(source.data?.result.__typename).toBe('GetJoinedRoomResult');
                 throw new Error('Guard');
             }
@@ -213,7 +218,7 @@ namespace Assert {
             source: OperationResult<JoinRoomAsPlayerMutation | JoinRoomAsSpectatorMutation>
         ) => {
             if (source.data?.result.__typename !== 'JoinRoomSuccessResult') {
-                console.error('failed at JoinRoomMutation.toBeSuccess', source.data);
+                console.error('failed at JoinRoomMutation.toBeSuccess', source);
                 expect(source.data?.result.__typename).toBe('JoinRoomSuccessResult');
                 throw new Error('Guard');
             }
@@ -241,6 +246,7 @@ namespace Assert {
         export const toBeSuccess = async (source: Promise<OperationResult<OperateMutation>>) => {
             const sourceResult = await source;
             if (sourceResult.data?.result.__typename !== 'OperateRoomSuccessResult') {
+                console.error('failed at OperateMutation.toBeSuccess', sourceResult);
                 expect(sourceResult.data?.result.__typename).toBe('OperateRoomSuccessResult');
                 throw new Error('Guard');
             }
@@ -265,6 +271,24 @@ namespace Assert {
                 throw new Error('Guard');
             }
             return source.data.result;
+        };
+    }
+
+    export namespace WritePublicMessageMutation {
+        export const toBeSuccess = (source: OperationResult<WritePublicMessageMutation>) => {
+            if (source.data?.result.__typename !== 'RoomPublicMessage') {
+                expect(source.data?.result.__typename).toBe('RoomPublicMessage');
+                throw new Error('Guard');
+            }
+            return source.data.result;
+        };
+
+        export const toBeFailure = (source: OperationResult<WritePublicMessageMutation>) => {
+            if (source.data?.result.__typename !== 'WriteRoomPublicMessageFailureResult') {
+                expect(source.data?.result.__typename).toBe('WriteRoomPublicMessageFailureResult');
+                throw new Error('Guard');
+            }
+            return source.data.result.failureType;
         };
     }
 }
@@ -326,7 +350,7 @@ describe.each([
             try {
                 await main(server);
             } finally {
-                server.close();
+                await server.close();
             }
         };
 
@@ -803,7 +827,7 @@ describe.each([
                     const userUids = [
                         Resources.UserUid.master,
                         Resources.UserUid.player1,
-                        Resources.UserUid.spectator,
+                        Resources.UserUid.spectator1,
                         Resources.UserUid.notJoin,
                     ] as const;
                     const { clients, roomId } = await setupUsersAndRoom({
@@ -813,7 +837,7 @@ describe.each([
                         spectatorPassword,
                         autoJoin: {
                             [Resources.UserUid.player1]: 'player',
-                            [Resources.UserUid.spectator]: 'spectator',
+                            [Resources.UserUid.spectator1]: 'spectator',
                         },
                     });
 
@@ -832,7 +856,7 @@ describe.each([
                     expect(player1Result.role).toBe(ParticipantRole.Player);
 
                     const spectatorResult = Assert.GetRoomQuery.toBeSuccess(
-                        await clients[Resources.UserUid.spectator].getRoomQuery({
+                        await clients[Resources.UserUid.spectator1].getRoomQuery({
                             id: roomId,
                         })
                     );
@@ -856,7 +880,7 @@ describe.each([
                             Resources.UserUid.master,
                             Resources.UserUid.player1,
                             Resources.UserUid.player2,
-                            Resources.UserUid.spectator,
+                            Resources.UserUid.spectator1,
                             Resources.UserUid.notJoin,
                         ] as const;
                         const { clients, roomId, roomRevision, subscriptions } =
@@ -869,7 +893,7 @@ describe.each([
                                 autoJoin: {
                                     [Resources.UserUid.player1]: 'player',
                                     [Resources.UserUid.player2]: 'player',
-                                    [Resources.UserUid.spectator]: 'spectator',
+                                    [Resources.UserUid.spectator1]: 'spectator',
                                 },
                             });
 
@@ -908,7 +932,7 @@ describe.each([
                         );
                         const spectatorSubscriptionResult =
                             subscriptions.value[
-                                Resources.UserUid.spectator
+                                Resources.UserUid.spectator1
                             ].toBeExactlyOneRoomOperationEvent();
                         expect(maskTypeNames(spectatorSubscriptionResult)).toEqual(
                             maskTypeNames(operationResult.operation)
@@ -929,7 +953,7 @@ describe.each([
                         const userUids = [
                             Resources.UserUid.master,
                             Resources.UserUid.player1,
-                            Resources.UserUid.spectator,
+                            Resources.UserUid.spectator1,
                             Resources.UserUid.notJoin,
                         ] as const;
                         const { clients, roomId, roomRevision, subscriptions } =
@@ -940,7 +964,7 @@ describe.each([
                                 spectatorPassword,
                                 autoJoin: {
                                     [Resources.UserUid.player1]: 'player',
-                                    [Resources.UserUid.spectator]: 'spectator',
+                                    [Resources.UserUid.spectator1]: 'spectator',
                                 },
                             });
 
@@ -964,6 +988,250 @@ describe.each([
                 });
             });
 
+            describe('writePublicMessage mutation', () => {
+                describe.each(['1', '10'] as const)(`tests public channel`, channelKey => {
+                    it.each([Resources.UserUid.master, Resources.UserUid.player2] as const)(
+                        'tests as a master or player',
+                        async author => {
+                            await useTestServer({}, async () => {
+                                const userUids = [
+                                    author,
+                                    Resources.UserUid.master,
+                                    Resources.UserUid.player1,
+                                    Resources.UserUid.spectator1,
+                                    Resources.UserUid.notJoin,
+                                ] as const;
+                                const { clients, roomId, subscriptions } = await setupUsersAndRoom({
+                                    userUids,
+                                    roomMasterUserUid: Resources.UserUid.master,
+                                    playerPassword,
+                                    spectatorPassword,
+                                    autoJoin: {
+                                        [Resources.UserUid.player1]: 'player',
+                                        [Resources.UserUid.player2]:
+                                            author === Resources.UserUid.player2
+                                                ? 'player'
+                                                : undefined,
+                                        [Resources.UserUid.spectator1]: 'spectator',
+                                    },
+                                });
+
+                                const text = 'TEXT';
+
+                                const messageResult = Assert.WritePublicMessageMutation.toBeSuccess(
+                                    await clients[author].writePublicMessageMutation({
+                                        roomId,
+                                        text,
+                                        channelKey,
+                                    })
+                                );
+                                const eventAsAuthor =
+                                    subscriptions.value[
+                                        author
+                                    ].toBeExactlyOneRoomPublicMessageEvent();
+                                expect(eventAsAuthor).toEqual(messageResult);
+                                const eventAsMaster =
+                                    subscriptions.value[
+                                        Resources.UserUid.master
+                                    ].toBeExactlyOneRoomPublicMessageEvent();
+                                expect(eventAsMaster).toEqual(messageResult);
+                                const eventAsPlayer1 =
+                                    subscriptions.value[
+                                        Resources.UserUid.player1
+                                    ].toBeExactlyOneRoomPublicMessageEvent();
+                                expect(eventAsPlayer1).toEqual(messageResult);
+                                const eventAsSpectator1 =
+                                    subscriptions.value[
+                                        Resources.UserUid.spectator1
+                                    ].toBeExactlyOneRoomPublicMessageEvent();
+                                expect(eventAsSpectator1).toEqual(messageResult);
+                                subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
+
+                                const messagesAsAuthor = Assert.GetMessagesQuery.toBeSuccess(
+                                    await clients[author].getMessagesQuery({
+                                        roomId,
+                                    })
+                                );
+                                expect(messagesAsAuthor.publicMessages).toHaveLength(1);
+                                const messagesAsMaster = Assert.GetMessagesQuery.toBeSuccess(
+                                    await clients[Resources.UserUid.master].getMessagesQuery({
+                                        roomId,
+                                    })
+                                );
+                                expect(messagesAsMaster.publicMessages).toEqual(
+                                    messagesAsAuthor.publicMessages
+                                );
+                                const messagesAsPlayer1 = Assert.GetMessagesQuery.toBeSuccess(
+                                    await clients[Resources.UserUid.player1].getMessagesQuery({
+                                        roomId,
+                                    })
+                                );
+                                expect(messagesAsPlayer1.publicMessages).toEqual(
+                                    messagesAsAuthor.publicMessages
+                                );
+                                const messagesAsSpectator = Assert.GetMessagesQuery.toBeSuccess(
+                                    await clients[Resources.UserUid.spectator1].getMessagesQuery({
+                                        roomId,
+                                    })
+                                );
+                                expect(messagesAsSpectator.publicMessages).toEqual(
+                                    messagesAsAuthor.publicMessages
+                                );
+                            });
+                        }
+                    );
+
+                    it('tests as a spectator', async () => {
+                        await useTestServer({}, async () => {
+                            const userUids = [
+                                Resources.UserUid.master,
+                                Resources.UserUid.player1,
+                                Resources.UserUid.spectator1,
+                                Resources.UserUid.spectator2,
+                                Resources.UserUid.notJoin,
+                            ] as const;
+                            const { clients, roomId, subscriptions } = await setupUsersAndRoom({
+                                userUids,
+                                roomMasterUserUid: Resources.UserUid.master,
+                                playerPassword,
+                                spectatorPassword,
+                                autoJoin: {
+                                    [Resources.UserUid.player1]: 'player',
+                                    [Resources.UserUid.spectator1]: 'spectator',
+                                    [Resources.UserUid.spectator2]: 'spectator',
+                                },
+                            });
+
+                            const text = 'TEXT';
+
+                            Assert.WritePublicMessageMutation.toBeFailure(
+                                await clients[
+                                    Resources.UserUid.spectator1
+                                ].writePublicMessageMutation({
+                                    roomId,
+                                    text,
+                                    channelKey,
+                                })
+                            );
+                            subscriptions.all.toBeEmpty();
+
+                            const messagesAsAuthor = Assert.GetMessagesQuery.toBeSuccess(
+                                await clients[Resources.UserUid.spectator1].getMessagesQuery({
+                                    roomId,
+                                })
+                            );
+                            expect(messagesAsAuthor.publicMessages).toHaveLength(0);
+                            const messagesAsMaster = Assert.GetMessagesQuery.toBeSuccess(
+                                await clients[Resources.UserUid.master].getMessagesQuery({
+                                    roomId,
+                                })
+                            );
+                            expect(messagesAsMaster.publicMessages).toHaveLength(0);
+                            const messagesAsPlayer1 = Assert.GetMessagesQuery.toBeSuccess(
+                                await clients[Resources.UserUid.player1].getMessagesQuery({
+                                    roomId,
+                                })
+                            );
+                            expect(messagesAsPlayer1.publicMessages).toHaveLength(0);
+                            const messagesAsSpectator2 = Assert.GetMessagesQuery.toBeSuccess(
+                                await clients[Resources.UserUid.spectator2].getMessagesQuery({
+                                    roomId,
+                                })
+                            );
+                            expect(messagesAsSpectator2.publicMessages).toHaveLength(0);
+                        });
+                    });
+                });
+
+                it.each([Resources.UserUid.player2, Resources.UserUid.spectator2] as const)(
+                    `tests ${$free} channel`,
+                    async author => {
+                        await useTestServer({}, async () => {
+                            const userUids = [
+                                author,
+                                Resources.UserUid.master,
+                                Resources.UserUid.player1,
+                                Resources.UserUid.spectator1,
+                                Resources.UserUid.notJoin,
+                            ] as const;
+                            const { clients, roomId, subscriptions } = await setupUsersAndRoom({
+                                userUids,
+                                roomMasterUserUid: Resources.UserUid.master,
+                                playerPassword,
+                                spectatorPassword,
+                                autoJoin: {
+                                    [Resources.UserUid.player1]: 'player',
+                                    [Resources.UserUid.player2]:
+                                        author === Resources.UserUid.player2 ? 'player' : undefined,
+                                    [Resources.UserUid.spectator1]: 'spectator',
+                                    [Resources.UserUid.spectator2]:
+                                        author === Resources.UserUid.spectator2
+                                            ? 'spectator'
+                                            : undefined,
+                                },
+                            });
+
+                            const text = 'TEXT';
+
+                            const messageResult = Assert.WritePublicMessageMutation.toBeSuccess(
+                                await clients[author].writePublicMessageMutation({
+                                    roomId,
+                                    text,
+                                    channelKey: $free,
+                                })
+                            );
+                            const eventAsMaster =
+                                subscriptions.value[
+                                    Resources.UserUid.master
+                                ].toBeExactlyOneRoomPublicMessageEvent();
+                            expect(eventAsMaster).toEqual(messageResult);
+                            const eventAsPlayer1 =
+                                subscriptions.value[
+                                    Resources.UserUid.player1
+                                ].toBeExactlyOneRoomPublicMessageEvent();
+                            expect(eventAsPlayer1).toEqual(messageResult);
+                            const eventAsSpectator1 =
+                                subscriptions.value[
+                                    Resources.UserUid.spectator1
+                                ].toBeExactlyOneRoomPublicMessageEvent();
+                            expect(eventAsSpectator1).toEqual(messageResult);
+                            subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
+
+                            const messagesAsAuthor = Assert.GetMessagesQuery.toBeSuccess(
+                                await clients[author].getMessagesQuery({
+                                    roomId,
+                                })
+                            );
+                            expect(messagesAsAuthor.publicMessages).toHaveLength(1);
+                            const messagesAsMaster = Assert.GetMessagesQuery.toBeSuccess(
+                                await clients[Resources.UserUid.master].getMessagesQuery({
+                                    roomId,
+                                })
+                            );
+                            expect(messagesAsMaster.publicMessages).toEqual(
+                                messagesAsAuthor.publicMessages
+                            );
+                            const messagesAsPlayer1 = Assert.GetMessagesQuery.toBeSuccess(
+                                await clients[Resources.UserUid.player1].getMessagesQuery({
+                                    roomId,
+                                })
+                            );
+                            expect(messagesAsPlayer1.publicMessages).toEqual(
+                                messagesAsAuthor.publicMessages
+                            );
+                            const messagesAsSpectator1 = Assert.GetMessagesQuery.toBeSuccess(
+                                await clients[Resources.UserUid.spectator1].getMessagesQuery({
+                                    roomId,
+                                })
+                            );
+                            expect(messagesAsSpectator1.publicMessages).toEqual(
+                                messagesAsAuthor.publicMessages
+                            );
+                        });
+                    }
+                );
+            });
+
             describe('writePrivateMessage mutation', () => {
                 it('should succeed', async () => {
                     await useTestServer({}, async () => {
@@ -971,7 +1239,7 @@ describe.each([
                             Resources.UserUid.master,
                             Resources.UserUid.player1,
                             Resources.UserUid.player2,
-                            Resources.UserUid.spectator,
+                            Resources.UserUid.spectator1,
                             Resources.UserUid.notJoin,
                         ] as const;
                         const { clients, roomId, subscriptions } = await setupUsersAndRoom({
@@ -982,7 +1250,7 @@ describe.each([
                             autoJoin: {
                                 [Resources.UserUid.player1]: 'player',
                                 [Resources.UserUid.player2]: 'player',
-                                [Resources.UserUid.spectator]: 'spectator',
+                                [Resources.UserUid.spectator1]: 'spectator',
                             },
                         });
 
@@ -1002,7 +1270,7 @@ describe.each([
                                 Resources.UserUid.player2
                             ].toBeExactlyOneRoomPrivateMessageEvent();
                         expect(player2SubscriptionResult).toEqual(privateMessage);
-                        subscriptions.value[Resources.UserUid.spectator].toBeEmpty();
+                        subscriptions.value[Resources.UserUid.spectator1].toBeEmpty();
                         subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
 
                         const masterMessages = Assert.GetMessagesQuery.toBeSuccess(
@@ -1026,7 +1294,7 @@ describe.each([
                             player1Messages.privateMessages
                         );
                         const spectatorMessages = Assert.GetMessagesQuery.toBeSuccess(
-                            await clients[Resources.UserUid.spectator].getMessagesQuery({
+                            await clients[Resources.UserUid.spectator1].getMessagesQuery({
                                 roomId,
                             })
                         );
@@ -1042,7 +1310,7 @@ describe.each([
                             Resources.UserUid.master,
                             Resources.UserUid.player1,
                             Resources.UserUid.player2,
-                            Resources.UserUid.spectator,
+                            Resources.UserUid.spectator1,
                             Resources.UserUid.notJoin,
                         ] as const;
                         const { clients, roomId, subscriptions } = await setupUsersAndRoom({
@@ -1053,7 +1321,7 @@ describe.each([
                             autoJoin: {
                                 [Resources.UserUid.player1]: 'player',
                                 [Resources.UserUid.player2]: 'player',
-                                [Resources.UserUid.spectator]: 'spectator',
+                                [Resources.UserUid.spectator1]: 'spectator',
                             },
                         });
 
@@ -1070,7 +1338,7 @@ describe.each([
                             Resources.UserUid.player2
                         ].toBeExactlyOneRoomOperationEvent();
                         subscriptions.value[
-                            Resources.UserUid.spectator
+                            Resources.UserUid.spectator1
                         ].toBeExactlyOneRoomOperationEvent();
                         subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
 
@@ -1093,7 +1361,7 @@ describe.each([
                         ).not.toBeUndefined();
                         expect(
                             parseState(room.room.stateJson).participants[
-                                Resources.UserUid.spectator
+                                Resources.UserUid.spectator1
                             ]?.role
                         ).not.toBeUndefined();
                     });
@@ -1106,7 +1374,7 @@ describe.each([
                         const userUids = [
                             Resources.UserUid.master,
                             Resources.UserUid.player1,
-                            Resources.UserUid.spectator,
+                            Resources.UserUid.spectator1,
                         ] as const;
                         const { clients, roomId, subscriptions } = await setupUsersAndRoom({
                             userUids,
@@ -1115,7 +1383,7 @@ describe.each([
                             spectatorPassword,
                             autoJoin: {
                                 [Resources.UserUid.player1]: 'player',
-                                [Resources.UserUid.spectator]: 'spectator',
+                                [Resources.UserUid.spectator1]: 'spectator',
                             },
                         });
 
@@ -1131,7 +1399,7 @@ describe.each([
                             deletedBy: Resources.UserUid.master,
                         });
                         subscriptions.value[
-                            Resources.UserUid.spectator
+                            Resources.UserUid.spectator1
                         ].toBeExactlyOneDeleteRoomEvent({
                             deletedBy: Resources.UserUid.master,
                         });
@@ -1147,7 +1415,7 @@ describe.each([
                             })
                         );
                         Assert.GetRoomQuery.toBeNotFound(
-                            await clients[Resources.UserUid.spectator].getRoomQuery({
+                            await clients[Resources.UserUid.spectator1].getRoomQuery({
                                 id: roomId,
                             })
                         );
@@ -1156,14 +1424,14 @@ describe.each([
 
                 it.each([
                     Resources.UserUid.player1,
-                    Resources.UserUid.spectator,
+                    Resources.UserUid.spectator1,
                     Resources.UserUid.notJoin,
                 ] as const)('tests unauthorized mutations', async mutatedBy => {
                     await useTestServer({}, async () => {
                         const userUids = [
                             Resources.UserUid.master,
                             Resources.UserUid.player1,
-                            Resources.UserUid.spectator,
+                            Resources.UserUid.spectator1,
                             Resources.UserUid.notJoin,
                         ] as const;
                         const { clients, roomId, subscriptions } = await setupUsersAndRoom({
@@ -1173,7 +1441,7 @@ describe.each([
                             spectatorPassword,
                             autoJoin: {
                                 [Resources.UserUid.player1]: 'player',
-                                [Resources.UserUid.spectator]: 'spectator',
+                                [Resources.UserUid.spectator1]: 'spectator',
                             },
                         });
 
@@ -1196,7 +1464,7 @@ describe.each([
                             })
                         );
                         Assert.GetRoomQuery.toBeSuccess(
-                            await clients[Resources.UserUid.spectator].getRoomQuery({
+                            await clients[Resources.UserUid.spectator1].getRoomQuery({
                                 id: roomId,
                             })
                         );
@@ -1217,7 +1485,7 @@ describe.each([
                             Resources.UserUid.notAdmin,
                             Resources.UserUid.master,
                             Resources.UserUid.player1,
-                            Resources.UserUid.spectator,
+                            Resources.UserUid.spectator1,
                         ] as const;
                         const { clients, roomId, subscriptions } = await setupUsersAndRoom({
                             userUids,
@@ -1226,7 +1494,7 @@ describe.each([
                             spectatorPassword,
                             autoJoin: {
                                 [Resources.UserUid.player1]: 'player',
-                                [Resources.UserUid.spectator]: 'spectator',
+                                [Resources.UserUid.spectator1]: 'spectator',
                             },
                         });
 
@@ -1247,7 +1515,7 @@ describe.each([
                             deletedBy: Resources.UserUid.admin,
                         });
                         subscriptions.value[
-                            Resources.UserUid.spectator
+                            Resources.UserUid.spectator1
                         ].toBeExactlyOneDeleteRoomEvent({
                             deletedBy: Resources.UserUid.admin,
                         });
@@ -1263,7 +1531,7 @@ describe.each([
                             })
                         );
                         Assert.GetRoomQuery.toBeNotFound(
-                            await clients[Resources.UserUid.spectator].getRoomQuery({
+                            await clients[Resources.UserUid.spectator1].getRoomQuery({
                                 id: roomId,
                             })
                         );
@@ -1283,7 +1551,7 @@ describe.each([
                 it.each([
                     Resources.UserUid.master,
                     Resources.UserUid.player1,
-                    Resources.UserUid.spectator,
+                    Resources.UserUid.spectator1,
                     Resources.UserUid.notAdmin,
                 ] as const)('tests unauthorized mutations', async mutatedBy => {
                     await useTestServer({}, async () => {
@@ -1291,7 +1559,7 @@ describe.each([
                             Resources.UserUid.notAdmin,
                             Resources.UserUid.master,
                             Resources.UserUid.player1,
-                            Resources.UserUid.spectator,
+                            Resources.UserUid.spectator1,
                         ] as const;
                         const { clients, roomId, subscriptions } = await setupUsersAndRoom({
                             userUids,
@@ -1300,7 +1568,7 @@ describe.each([
                             spectatorPassword,
                             autoJoin: {
                                 [Resources.UserUid.player1]: 'player',
-                                [Resources.UserUid.spectator]: 'spectator',
+                                [Resources.UserUid.spectator1]: 'spectator',
                             },
                         });
 
@@ -1323,7 +1591,7 @@ describe.each([
                             })
                         );
                         Assert.GetRoomQuery.toBeSuccess(
-                            await clients[Resources.UserUid.spectator].getRoomQuery({
+                            await clients[Resources.UserUid.spectator1].getRoomQuery({
                                 id: roomId,
                             })
                         );

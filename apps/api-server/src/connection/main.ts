@@ -3,7 +3,7 @@
 import { createNodeCache } from '@flocon-trpg/cache';
 import { PubSub } from 'graphql-subscriptions';
 import { WritingMessageStatusType } from '../enums/WritingMessageStatusType';
-import { RoomEventPayload } from '../graphql+mikro-orm/resolvers/rooms/RoomResolver';
+import { all, RoomEventPayload } from '../graphql+mikro-orm/resolvers/rooms/RoomResolver';
 import { ROOM_EVENT } from '../graphql+mikro-orm/utils/Topics';
 
 export const pubSub = new PubSub();
@@ -157,6 +157,7 @@ export class InMemoryConnectionManager {
         }
         const payload: RoomEventPayload = {
             type: 'roomConnectionUpdatePayload',
+            sendTo: all,
             roomId,
             userUid,
             isConnected: true,
@@ -177,6 +178,7 @@ export class InMemoryConnectionManager {
 
         const payload1: RoomEventPayload = {
             type: 'roomConnectionUpdatePayload',
+            sendTo: all,
             roomId: deleted.roomId,
             userUid: deleted.userUid,
             isConnected: false,
@@ -187,6 +189,7 @@ export class InMemoryConnectionManager {
         await this.writingMessageStatusDatabase.onDisconnect(deleted);
         const payload2: RoomEventPayload = {
             type: 'writingMessageStatusUpdatePayload',
+            sendTo: all,
             roomId: deleted.roomId,
             userUid: deleted.userUid,
             status: WritingMessageStatusType.Disconnected,

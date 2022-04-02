@@ -188,6 +188,10 @@ const bcryptSaltRounds = 10;
 
 const find = <T>(source: Record<string, T | undefined>, key: string): T | undefined => source[key];
 
+type SendTo = {
+    // このイベントを送信するユーザーのUserUid。allの場合は制限しない（全員に送る）。
+    sendTo: typeof all | ReadonlySet<string>;
+};
 type MessageUpdatePayload = {
     type: 'messageUpdatePayload';
 
@@ -207,7 +211,6 @@ type MessageUpdatePayload = {
 type RoomOperationPayload = {
     type: 'roomOperationPayload';
     roomId: string;
-    participants: ReadonlySet<string>; // UserUid
     generateOperation: (deliverTo: string) => RoomOperation;
 };
 
@@ -239,21 +242,25 @@ type RoomMessagesResetPayload = {
     roomId: string;
 };
 
-export type RoomEventPayload =
+export const all = 'all';
+
+export type RoomEventPayload = (
     | MessageUpdatePayload
     | RoomOperationPayload
     | DeleteRoomPayload
     | RoomConnectionUpdatePayload
     | WritingMessageStatusUpdatePayload
-    | RoomMessagesResetPayload;
+    | RoomMessagesResetPayload
+) &
+    SendTo;
 
 type OperateCoreResult =
-    | {
+    | ({
           type: 'success';
           result: OperateRoomSuccessResult;
           roomOperationPayload: RoomOperationPayload;
           messageUpdatePayload: MessageUpdatePayload[];
-      }
+      } & SendTo)
     | {
           type: 'id';
           result: OperateRoomIdResult;
@@ -393,7 +400,7 @@ const operateParticipantAndFlush = async ({
         payload: {
             type: 'roomOperationPayload',
             // Roomに参加したばかりの場合、decodedToken.uidはparticipantUserUidsに含まれないためSubscriptionは実行されない。だが、そのようなユーザーにroomOperatedで通知する必要はないため問題ない。
-            participants: participantUserUids,
+            sendTo: participantUserUids,
             generateOperation,
             roomId: room.id,
         },
@@ -961,7 +968,7 @@ export class RoomResolver {
         @PubSub() pubSub: PubSubEngine
     ): Promise<typeof GetRoomLogResult> {
         const queue = async (): Promise<
-            Result<{ result: typeof GetRoomLogResult; payload?: MessageUpdatePayload }>
+            Result<{ result: typeof GetRoomLogResult; payload?: MessageUpdatePayload & SendTo }>
         > => {
             const em = context.em;
             const authorizedUserUid = ensureAuthorizedUser(context).userUid;
@@ -1012,6 +1019,7 @@ export class RoomResolver {
                 result: messages,
                 payload: {
                     type: 'messageUpdatePayload',
+                    sendTo: findResult.participantIds(),
                     roomId: room.id,
                     value: createRoomPublicMessage({
                         msg: systemMessageEntity,
@@ -1215,6 +1223,7 @@ export class RoomResolver {
                     roomId,
                     deletedBy: authorizedUserUid,
                     deletedByAdmin: false,
+                    sendTo: all,
                 },
             };
         };
@@ -1239,7 +1248,7 @@ export class RoomResolver {
     ): Promise<DeleteRoomAsAdminResult> {
         const queue = async (): Promise<{
             result: DeleteRoomAsAdminResult;
-            payload: RoomEventPayload | undefined;
+            payload: (RoomEventPayload & SendTo) | undefined;
         }> => {
             const em = context.em;
             const authorizedUserUid = ensureAuthorizedUser(context).userUid;
@@ -1258,6 +1267,7 @@ export class RoomResolver {
                 result: { failureType: undefined },
                 payload: {
                     type: 'deleteRoomPayload',
+                    sendTo: all,
                     roomId,
                     deletedBy: authorizedUserUid,
                     deletedByAdmin: true,
@@ -1691,11 +1701,11 @@ export class RoomResolver {
             const roomOperationPayload: RoomOperationPayload = {
                 type: 'roomOperationPayload',
                 roomId: args.id,
-                participants: participantUserUids,
                 generateOperation,
             };
             const result: OperateCoreResult = {
                 type: 'success',
+                sendTo: participantUserUids,
                 roomOperationPayload,
                 messageUpdatePayload: [
                     ...dicePieceLogEntities.map(
@@ -1749,9 +1759,12 @@ export class RoomResolver {
             context,
         });
         if (operateResult.type === 'success') {
-            await publishRoomEvent(pubSub, operateResult.roomOperationPayload);
+            await publishRoomEvent(pubSub, {
+                ...operateResult.roomOperationPayload,
+                sendTo: operateResult.sendTo,
+            });
             for (const messageUpdate of operateResult.messageUpdatePayload) {
-                await publishRoomEvent(pubSub, messageUpdate);
+                await publishRoomEvent(pubSub, { ...messageUpdate, sendTo: operateResult.sendTo });
             }
         }
         return operateResult.result;
@@ -1767,7 +1780,10 @@ export class RoomResolver {
     ): Promise<typeof WriteRoomPublicMessageResult> {
         const channelKey = args.channelKey;
         const queue = async (): Promise<
-            Result<{ result: typeof WriteRoomPublicMessageResult; payload?: MessageUpdatePayload }>
+            Result<{
+                result: typeof WriteRoomPublicMessageResult;
+                payload?: MessageUpdatePayload & SendTo;
+            }>
         > => {
             const em = context.em;
             const authorizedUser = ensureAuthorizedUser(context);
@@ -1859,8 +1875,9 @@ export class RoomResolver {
 
             const result: RoomPublicMessage = createRoomPublicMessage({ msg: entity, channelKey });
 
-            const payload: MessageUpdatePayload = {
+            const payload: MessageUpdatePayload & SendTo = {
                 type: 'messageUpdatePayload',
+                sendTo: findResult.participantIds(),
                 roomId: args.roomId,
                 createdBy: authorizedUser.userUid,
                 visibleTo: undefined,
@@ -1899,7 +1916,10 @@ export class RoomResolver {
         // **** main ****
 
         const queue = async (): Promise<
-            Result<{ result: typeof WriteRoomPrivateMessageResult; payload?: MessageUpdatePayload }>
+            Result<{
+                result: typeof WriteRoomPrivateMessageResult;
+                payload?: MessageUpdatePayload & SendTo;
+            }>
         > => {
             const em = context.em;
             const authorizedUser = ensureAuthorizedUser(context);
@@ -1999,8 +2019,9 @@ export class RoomResolver {
                 visibleTo: visibleToArray,
             });
 
-            const payload: MessageUpdatePayload = {
+            const payload: MessageUpdatePayload & SendTo = {
                 type: 'messageUpdatePayload',
+                sendTo: findResult.participantIds(),
                 roomId: args.roomId,
                 createdBy: authorizedUser.userUid,
                 visibleTo: visibleToArray,
@@ -2032,7 +2053,10 @@ export class RoomResolver {
         @PubSub() pubSub: PubSubEngine
     ): Promise<typeof WriteRoomSoundEffectResult> {
         const queue = async (): Promise<
-            Result<{ result: typeof WriteRoomSoundEffectResult; payload?: MessageUpdatePayload }>
+            Result<{
+                result: typeof WriteRoomSoundEffectResult;
+                payload?: MessageUpdatePayload & SendTo;
+            }>
         > => {
             const em = context.em;
             const authorizedUser = ensureAuthorizedUser(context);
@@ -2088,8 +2112,9 @@ export class RoomResolver {
                 },
             };
 
-            const payload: MessageUpdatePayload = {
+            const payload: MessageUpdatePayload & SendTo = {
                 type: 'messageUpdatePayload',
+                sendTo: findResult.participantIds(),
                 roomId: args.roomId,
                 createdBy: authorizedUser.userUid,
                 visibleTo: undefined,
@@ -2120,7 +2145,7 @@ export class RoomResolver {
         @PubSub() pubSub: PubSubEngine
     ): Promise<MakeMessageNotSecretResult> {
         const queue = async (): Promise<
-            Result<{ result: MakeMessageNotSecretResult; payload?: MessageUpdatePayload }>
+            Result<{ result: MakeMessageNotSecretResult; payload?: MessageUpdatePayload & SendTo }>
         > => {
             const em = context.em;
             const authorizedUserUid = ensureAuthorizedUser(context).userUid;
@@ -2182,6 +2207,7 @@ export class RoomResolver {
                     result: {},
                     payload: {
                         type: 'messageUpdatePayload',
+                        sendTo: findResult.participantIds(),
                         roomId: room.id,
                         visibleTo: undefined,
                         createdBy: publicMsg.createdBy?.userUid,
@@ -2227,6 +2253,7 @@ export class RoomResolver {
                     result: {},
                     payload: {
                         type: 'messageUpdatePayload',
+                        sendTo: findResult.participantIds(),
                         roomId: room.id,
                         visibleTo: (await privateMsg.visibleTo.loadItems()).map(
                             user => user.userUid
@@ -2265,7 +2292,7 @@ export class RoomResolver {
         @PubSub() pubSub: PubSubEngine
     ): Promise<DeleteMessageResult> {
         const queue = async (): Promise<
-            Result<{ result: DeleteMessageResult; payload?: MessageUpdatePayload }>
+            Result<{ result: DeleteMessageResult; payload?: MessageUpdatePayload & SendTo }>
         > => {
             const em = context.em;
             const authorizedUserUid = ensureAuthorizedUser(context).userUid;
@@ -2332,6 +2359,7 @@ export class RoomResolver {
                     result: {},
                     payload: {
                         type: 'messageUpdatePayload',
+                        sendTo: findResult.participantIds(),
                         roomId: room.id,
                         visibleTo: undefined,
                         createdBy: publicMsg.createdBy?.userUid,
@@ -2374,6 +2402,7 @@ export class RoomResolver {
                     result: {},
                     payload: {
                         type: 'messageUpdatePayload',
+                        sendTo: findResult.participantIds(),
                         roomId: room.id,
                         visibleTo: (await privateMsg.visibleTo.loadItems()).map(
                             user => user.userUid
@@ -2412,7 +2441,7 @@ export class RoomResolver {
         @PubSub() pubSub: PubSubEngine
     ): Promise<EditMessageResult> {
         const queue = async (): Promise<
-            Result<{ result: EditMessageResult; payload?: MessageUpdatePayload }>
+            Result<{ result: EditMessageResult; payload?: MessageUpdatePayload & SendTo }>
         > => {
             const em = context.em;
             const authorizedUserUid = ensureAuthorizedUser(context).userUid;
@@ -2475,6 +2504,7 @@ export class RoomResolver {
                     result: {},
                     payload: {
                         type: 'messageUpdatePayload',
+                        sendTo: findResult.participantIds(),
                         roomId: room.id,
                         visibleTo: undefined,
                         createdBy: publicMsg.createdBy?.userUid,
@@ -2521,6 +2551,7 @@ export class RoomResolver {
                     result: {},
                     payload: {
                         type: 'messageUpdatePayload',
+                        sendTo: findResult.participantIds(),
                         roomId: room.id,
                         visibleTo: (await privateMsg.visibleTo.loadItems()).map(
                             user => user.userUid
@@ -2584,6 +2615,9 @@ export class RoomResolver {
                 userUid: authorizedUserUid,
                 status: returns,
                 updatedAt: new Date().getTime(),
+
+                // 比較的頻繁に呼び出されるoperationであると考えられるため、Roomのparticipantの取得を省略して動作を軽量化させている
+                sendTo: all,
             });
         }
         return true;
@@ -2599,7 +2633,7 @@ export class RoomResolver {
         @PubSub() pubSub: PubSubEngine
     ): Promise<ResetRoomMessagesResult> {
         const queue = async (): Promise<
-            Result<{ result: ResetRoomMessagesResult; payload?: RoomMessagesResetPayload }>
+            Result<{ result: ResetRoomMessagesResult; payload?: RoomMessagesResetPayload & SendTo }>
         > => {
             const em = context.em;
             const authorizedUser = ensureAuthorizedUser(context);
@@ -2662,6 +2696,7 @@ export class RoomResolver {
                 },
                 payload: {
                     type: 'roomMessagesResetPayload',
+                    sendTo: findResult.participantIds(),
                     roomId,
                 },
             });
@@ -2700,6 +2735,11 @@ export class RoomResolver {
             return undefined;
         }
         const userUid: string = context.decodedIdToken.value.uid;
+        if (payload.sendTo !== all) {
+            if (!payload.sendTo.has(userUid)) {
+                return undefined;
+            }
+        }
 
         if (payload.type === 'roomConnectionUpdatePayload') {
             return {
@@ -2797,9 +2837,6 @@ export class RoomResolver {
             };
         }
 
-        if (!payload.participants.has(userUid)) {
-            return undefined;
-        }
         if (payload.type === 'roomOperationPayload') {
             // TODO: DeleteRoomOperationも返す
             return {
