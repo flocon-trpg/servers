@@ -74,7 +74,7 @@ jobs:
                       }
 
             - name: Test
-              run: TEST_NUM_RUNS=3000 yarn test --ci --coverage --maxWorkers=2
+              run: yarn test --ci --coverage --maxWorkers=2
 
             - name: Upload Codecov Coverage
               uses: codecov/codecov-action@v2
