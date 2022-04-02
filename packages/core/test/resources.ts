@@ -1,4 +1,4 @@
-import { State, Player, Spectator, boardTemplate, characterTemplate, template } from '../src';
+import { State, Player, Spectator, boardTemplate, characterTemplate, roomTemplate } from '../src';
 import { forceMaxLength100String } from './forceMaxLength100String';
 
 export namespace Resources {
@@ -86,7 +86,7 @@ export namespace Resources {
         });
     }
 
-    export const minimumState: State<typeof template> = {
+    export const minimumState: State<typeof roomTemplate> = {
         $v: 2,
         $r: 1,
         activeBoardId: undefined,
@@ -147,7 +147,7 @@ export namespace Resources {
         publicChannel10Name: '',
     };
 
-    export const complexState: State<typeof template> = {
+    export const complexState: State<typeof roomTemplate> = {
         $v: 2,
         $r: 1,
         activeBoardId: undefined,
