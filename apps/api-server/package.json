@@ -63,9 +63,9 @@
     "devDependencies": {
         "@flocon-trpg/typed-document-node": "workspace:*",
         "@graphql-codegen/cli": "2.6.2",
-        "@graphql-codegen/typed-document-node": "2.2.5",
-        "@graphql-codegen/typescript": "2.4.5",
-        "@graphql-codegen/typescript-operations": "2.3.2",
+        "@graphql-codegen/typed-document-node": "2.2.8",
+        "@graphql-codegen/typescript": "2.4.8",
+        "@graphql-codegen/typescript-operations": "2.3.5",
         "@types/jest": "27.4.1",
         "@types/url-join": "4.0.1",
         "@urql/core": "2.4.2",
