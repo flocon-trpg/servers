@@ -11305,8 +11305,8 @@ __metadata:
   linkType: hard
 
 "jotai@npm:^1.4.3":
-  version: 1.6.0
-  resolution: "jotai@npm:1.6.0"
+  version: 1.6.1
+  resolution: "jotai@npm:1.6.1"
   peerDependencies:
     "@babel/core": "*"
     "@babel/template": "*"
@@ -11337,7 +11337,7 @@ __metadata:
       optional: true
     xstate:
       optional: true
-  checksum: fb8ec6e283f56b063e0bf479f6b4455e843b1ef07e4bf5a25b30f4c31812f1823b6ea035a278f2a317daabc7ae55b8f44e19e23bb75647a1c912b313bc87506e
+  checksum: 671b7733dd07c90461509d3549fb31177eed7a4d67df3cba4bb83837106aa7a38b972691c496a54d581d607d3630fa57e6915e17e8a1ed1642841ffbca982cde
   languageName: node
   linkType: hard
 
