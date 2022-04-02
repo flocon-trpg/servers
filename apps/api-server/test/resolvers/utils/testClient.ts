@@ -60,6 +60,9 @@ import {
     WritePrivateMessageDocument,
     WritePrivateMessageMutation,
     WritePrivateMessageMutationVariables,
+    WritePublicMessageDocument,
+    WritePublicMessageMutation,
+    WritePublicMessageMutationVariables,
 } from '@flocon-trpg/typed-document-node';
 import { TestRoomEventSubscription } from './subscription';
 
@@ -288,6 +291,18 @@ export class TestClient {
         return this.#core
             .mutation<WritePrivateMessageMutation, WritePrivateMessageMutationVariables>(
                 WritePrivateMessageDocument,
+                variables,
+                {
+                    requestPolicy: 'network-only',
+                }
+            )
+            .toPromise();
+    }
+
+    public writePublicMessageMutation(variables: WritePublicMessageMutationVariables) {
+        return this.#core
+            .mutation<WritePublicMessageMutation, WritePublicMessageMutationVariables>(
+                WritePublicMessageDocument,
                 variables,
                 {
                     requestPolicy: 'network-only',
