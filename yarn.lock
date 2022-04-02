@@ -15795,14 +15795,14 @@ __metadata:
   linkType: hard
 
 "react-virtuoso@npm:^2.2.1":
-  version: 2.7.1
-  resolution: "react-virtuoso@npm:2.7.1"
+  version: 2.8.6
+  resolution: "react-virtuoso@npm:2.8.6"
   dependencies:
     "@virtuoso.dev/react-urx": ^0.2.12
     "@virtuoso.dev/urx": ^0.2.12
   peerDependencies:
     react: ">=16"
-  checksum: a21b61054c5766fc4d2e24b6f19328c51bda19d437fea3d8ed2fb2e9c5b9903c3929d8c66bbc60ce0c88f2c5088efafc7f00cbd63c9c79ca809a007fafd418d3
+  checksum: 61cd2f14189af95843334a37186a5ce6d75b4578d030337069d01aaea858561cedf5a83d51de77b9d81020f1676697e1aa5c140ed9764ab6538067f948fe1aa8
   languageName: node
   linkType: hard
 
