@@ -10,7 +10,7 @@ jobs:
         name: 'Full test and Codecov'
 
         runs-on: ubuntu-20.04
-        container: 'node:14'
+        container: 'node:14-buster'
 
         services:
             postgres:
@@ -35,11 +35,6 @@ jobs:
                     --health-retries 5
 
         steps:
-            - name: Upgrade Python
-              uses: actions/setup-python@v3
-              with:
-                  python-version: '3.6.x'
-
             - name: Checkout repo
               uses: actions/checkout@v2
 
