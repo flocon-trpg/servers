@@ -1,5 +1,5 @@
 import { config } from 'dotenv';
-import dotenvExpand from 'dotenv-expand';
+import { expand } from 'dotenv-expand';
 import { existsSync } from 'fs';
 
 export const loadDotenv = (): void => {
@@ -9,7 +9,7 @@ export const loadDotenv = (): void => {
 
     dotenvFiles.forEach(dotenvFile => {
         if (existsSync(dotenvFile)) {
-            dotenvExpand(
+            expand(
                 config({
                     path: dotenvFile,
                 })
