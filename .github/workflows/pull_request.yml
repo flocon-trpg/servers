@@ -9,7 +9,7 @@ jobs:
     main:
         name: 'Full test and Codecov'
 
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-20.04
         container: 'node:14'
 
         services:
