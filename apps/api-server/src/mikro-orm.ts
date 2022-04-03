@@ -36,8 +36,6 @@ const entities = [
 
 type Debug = boolean | LoggerNamespace[];
 
-const migrationPattern = /^[\w-]+\d+\.[jt]s$/;
-
 export const createSQLite = async ({
     dbName,
     debug,
@@ -45,13 +43,11 @@ export const createSQLite = async ({
     dbName: string;
     debug?: Debug;
 }): Promise<MikroORM<IDatabaseDriver<Connection>>> => {
-    // TODO: dbNameを変える。
     return await MikroORM.init({
         entities,
         dbName,
         migrations: {
             path: `./dist/__migrations__/sqlite`,
-            pattern: migrationPattern,
         },
         type: 'sqlite',
         forceUndefined: true,
@@ -75,7 +71,6 @@ export const createPostgreSQL = async ({
         dbName,
         migrations: {
             path: `./dist/__migrations__/postgresql`,
-            pattern: migrationPattern,
 
             // https://github.com/mikro-orm/mikro-orm/issues/190#issuecomment-655763246
             disableForeignKeys: false,
