@@ -1,7 +1,7 @@
 import React from 'react';
 import * as Icons from '@ant-design/icons';
 import { useMemos } from '../../../hooks/state/useMemos';
-import { MemoState, simpleId } from '@flocon-trpg/core';
+import { State, memoTemplate, simpleId } from '@flocon-trpg/core';
 import { Button, Popover, Tree, Modal, Menu, Dropdown, Input } from 'antd';
 import { DataNode } from 'rc-tree/lib/interface';
 import { BufferedInput } from '../../ui/BufferedInput';
@@ -11,6 +11,8 @@ import { cancelRnd, flex, flex1, flexColumn, flexRow, itemsCenter } from '../../
 import _ from 'lodash';
 import moment from 'moment';
 import { useSetRoomStateWithImmer } from '../../../hooks/useSetRoomStateWithImmer';
+
+type MemoState = State<typeof memoTemplate>;
 
 const padding = 4;
 const splitterPadding = 8;

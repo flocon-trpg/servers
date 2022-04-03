@@ -1,9 +1,15 @@
 import {
-    CharacterState,
-    DicePieceState,
-    ImagePieceState,
-    StringPieceState,
+    characterTemplate,
+    dicePieceTemplate,
+    imagePieceTemplate,
+    State,
+    stringPieceTemplate,
 } from '@flocon-trpg/core';
+
+type CharacterState = State<typeof characterTemplate>;
+type DicePieceState = State<typeof dicePieceTemplate>;
+type StringPieceState = State<typeof stringPieceTemplate>;
+type ImagePieceState = State<typeof imagePieceTemplate>;
 
 export const background = 'background';
 export const character = 'character';

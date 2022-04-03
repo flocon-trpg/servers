@@ -7,13 +7,14 @@ import {
     OnGettingParams,
     OnSettingParams,
 } from '@flocon-trpg/flocon-script';
+import { State } from '../ot/generator';
 import * as BoolParam from '../ot/room/character/boolParam/types';
 
 const value = 'value';
 const isValueSecret = 'isValueSecret';
 
 export class FBoolParam extends FObject {
-    public constructor(private readonly boolParam: BoolParam.State) {
+    public constructor(private readonly boolParam: State<typeof BoolParam.template>) {
         super();
     }
 

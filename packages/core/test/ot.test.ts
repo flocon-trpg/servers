@@ -1,19 +1,24 @@
 import {
-    State,
-    UpOperation,
     serverTransform,
+    State,
     TwoWayOperation,
+    UpOperation,
     client,
     admin,
     replace,
     update,
     StrIndex10,
     RequestedBy,
-    DicePieceState,
+    roomTemplate,
+    dicePieceTemplate,
 } from '../src';
 import { Resources } from './resources';
 import * as TextOperation from '../src/internal/ot/util/textOperation';
 import { forceMaxLength100String } from './forceMaxLength100String';
+
+type RoomState = State<typeof roomTemplate>;
+type RoomUpOperation = UpOperation<typeof roomTemplate>;
+type RoomTwoWayOperation = TwoWayOperation<typeof roomTemplate>;
 
 const undefinedOrError = 'undefinedOrError';
 
@@ -33,10 +38,10 @@ namespace Test {
             serverOperation,
             clientOperation,
         }: {
-            prevState: State;
-            currentState: State;
-            serverOperation: TwoWayOperation | undefined;
-            clientOperation: UpOperation;
+            prevState: RoomState;
+            currentState: RoomState;
+            serverOperation: RoomTwoWayOperation | undefined;
+            clientOperation: RoomUpOperation;
         }): void => {
             it.each`
                 userUid
@@ -63,10 +68,10 @@ namespace Test {
                 serverOperation,
                 clientOperation,
             }: {
-                prevState: State;
-                currentState: State;
-                serverOperation: TwoWayOperation | undefined;
-                clientOperation: UpOperation;
+                prevState: RoomState;
+                currentState: RoomState;
+                serverOperation: RoomTwoWayOperation | undefined;
+                clientOperation: RoomUpOperation;
             }) =>
             ({
                 testName,
@@ -75,7 +80,7 @@ namespace Test {
             }: {
                 testName: string;
                 requestedBy: RequestedBy;
-                expected: TwoWayOperation | undefined | typeof undefinedOrError;
+                expected: RoomTwoWayOperation | undefined | typeof undefinedOrError;
             }) => {
                 it(testName, () => {
                     const actualOperation = serverTransform(requestedBy)({
@@ -99,7 +104,7 @@ namespace Test {
 }
 
 describe.each([Resources.minimumState, Resources.complexState])('tests id', state => {
-    const clientOperation: UpOperation = {
+    const clientOperation: RoomUpOperation = {
         $v: 2,
         $r: 1,
     };
@@ -129,7 +134,7 @@ describe.each([Resources.minimumState, Resources.complexState])('tests id', stat
 describe.each([Resources.minimumState, Resources.complexState])('tests name', state => {
     const newName = 'NEW_NAME';
 
-    const clientOperation: UpOperation = {
+    const clientOperation: RoomUpOperation = {
         $v: 2,
         $r: 1,
         name: textUpDiff({ prev: state.name, next: newName }),
@@ -149,7 +154,7 @@ describe.each([Resources.minimumState, Resources.complexState])('tests name', st
         clientOperation,
     });
 
-    const expected: TwoWayOperation = {
+    const expected: RoomTwoWayOperation = {
         $v: 2,
         $r: 1,
         name: TextOperation.diff({ prev: state.name, next: newName }),
@@ -180,7 +185,7 @@ describe.each`
 
     const newName = 'NEW_NAME';
 
-    const clientOperation: UpOperation = {
+    const clientOperation: RoomUpOperation = {
         $v: 2,
         $r: 1,
         [key]: textUpDiff({ prev: Resources.minimumState[key], next: newName }),
@@ -200,7 +205,7 @@ describe.each`
         clientOperation,
     });
 
-    const expected: TwoWayOperation = {
+    const expected: RoomTwoWayOperation = {
         $v: 2,
         $r: 1,
         [key]: TextOperation.diff({
@@ -245,7 +250,7 @@ describe.each`
         isPaused: false,
     };
 
-    const clientOperation: UpOperation = {
+    const clientOperation: RoomUpOperation = {
         $v: 2,
         $r: 1,
         bgms: {
@@ -272,7 +277,7 @@ describe.each`
         clientOperation,
     });
 
-    const expected: TwoWayOperation | typeof undefinedOrError = isValidId
+    const expected: RoomTwoWayOperation | typeof undefinedOrError = isValidId
         ? {
               $v: 2,
               $r: 1,
@@ -301,7 +306,7 @@ describe('tests creating DicePieceValue', () => {
     const characterId = 'CHARACTER_ID';
     const dicePieceId = 'DICE_ID';
 
-    const state: State = {
+    const state: RoomState = {
         ...Resources.minimumState,
         boards: {
             [boardId]: Resources.Board.emptyState(participantId),
@@ -320,7 +325,7 @@ describe('tests creating DicePieceValue', () => {
         },
     };
 
-    const newValue: DicePieceState = {
+    const newValue: State<typeof dicePieceTemplate> = {
         $v: 2,
         $r: 1,
         memo: undefined,
@@ -348,7 +353,7 @@ describe('tests creating DicePieceValue', () => {
         ownerCharacterId: characterId,
     };
 
-    const clientOperation: UpOperation = {
+    const clientOperation: RoomUpOperation = {
         $v: 2,
         $r: 1,
         boards: {
@@ -384,7 +389,7 @@ describe('tests creating DicePieceValue', () => {
         clientOperation,
     });
 
-    const expected: TwoWayOperation = {
+    const expected: RoomTwoWayOperation = {
         $v: 2,
         $r: 1,
         boards: {
@@ -423,9 +428,9 @@ describe('tests creating Character', () => {
     const ownerParticipantId = Resources.Participant.Player1.userUid;
     const characterId = 'CHARACTER_ID';
 
-    const state: State = Resources.minimumState;
+    const state: RoomState = Resources.minimumState;
 
-    const clientOperation: UpOperation = {
+    const clientOperation: RoomUpOperation = {
         $v: 2,
         $r: 1,
         characters: {
@@ -452,7 +457,7 @@ describe('tests creating Character', () => {
         clientOperation,
     });
 
-    const expected: TwoWayOperation = {
+    const expected: RoomTwoWayOperation = {
         $v: 2,
         $r: 1,
         characters: {
@@ -485,7 +490,7 @@ describe.each([[true], [false]])(
         const characterId = 'CHARACTER_ID';
         const newName = 'NEW_NAME';
 
-        const state: State = {
+        const state: RoomState = {
             ...Resources.minimumState,
             characters: {
                 [characterId]: {
@@ -504,7 +509,7 @@ describe.each([[true], [false]])(
             },
         };
 
-        const clientOperation: UpOperation = {
+        const clientOperation: RoomUpOperation = {
             $v: 2,
             $r: 1,
             characters: {
@@ -536,7 +541,7 @@ describe.each([[true], [false]])(
             clientOperation,
         });
 
-        const expected: TwoWayOperation = {
+        const expected: RoomTwoWayOperation = {
             $v: 2,
             $r: 1,
             characters: {
@@ -574,7 +579,7 @@ describe.each([[true], [false]])(
         const ownerParticipantId = Resources.Participant.Player1.userUid;
         const characterId = 'CHARACTER_ID';
 
-        const state: State = {
+        const state: RoomState = {
             ...Resources.minimumState,
             characters: {
                 [characterId]: {
@@ -593,7 +598,7 @@ describe.each([[true], [false]])(
             },
         };
 
-        const clientOperation: UpOperation = {
+        const clientOperation: RoomUpOperation = {
             $v: 2,
             $r: 1,
             characters: {
@@ -620,7 +625,7 @@ describe.each([[true], [false]])(
             clientOperation,
         });
 
-        const expected: TwoWayOperation = {
+        const expected: RoomTwoWayOperation = {
             $v: 2,
             $r: 1,
             characters: {

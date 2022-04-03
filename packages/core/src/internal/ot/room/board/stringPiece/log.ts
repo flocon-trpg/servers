@@ -1,65 +1,74 @@
 import * as t from 'io-ts';
 import * as StringPieceValueTypes from './types';
-import * as PieceBase from '../../../pieceBase/functions';
 import * as PieceBaseTypes from '../../../pieceBase/types';
 import { createType, deleteType, updateType } from '../../../pieceBase/log';
 import { maybe } from '../../../../maybe';
+import {
+    createObjectValueTemplate,
+    IoTsOptions,
+    State,
+    state,
+    toUpOperation,
+    TwoWayOperation,
+    upOperation,
+} from '../../../generator';
 
-const update = t.intersection([
-    t.type({
-        $v: t.literal(2),
-        $r: t.literal(1),
+const update = (options: IoTsOptions) =>
+    t.intersection([
+        t.type({
+            $v: t.literal(2),
+            $r: t.literal(1),
 
-        type: t.literal(updateType),
-    }),
-    PieceBaseTypes.upOperation,
-    t.partial({
-        ownerCharacterId: t.type({ newValue: maybe(t.string) }),
-        isValuePrivateChanged: t.type({ newValue: maybe(t.string) }),
-        isValueChanged: t.boolean,
-    }),
-]);
+            type: t.literal(updateType),
+        }),
+        upOperation(createObjectValueTemplate(PieceBaseTypes.templateValue, 2, 1), options),
+        t.partial({
+            ownerCharacterId: t.type({ newValue: maybe(t.string) }),
+            isValuePrivateChanged: t.type({ newValue: maybe(t.string) }),
+            isValueChanged: t.boolean,
+        }),
+    ]);
 
 export const type = t.union([
     t.type({
         $v: t.literal(2),
         $r: t.literal(1),
         type: t.literal(createType),
-        value: StringPieceValueTypes.state,
+        value: state(StringPieceValueTypes.template, { exact: false }),
     }),
     t.type({
         $v: t.literal(2),
         $r: t.literal(1),
         type: t.literal(deleteType),
-        value: StringPieceValueTypes.state,
+        value: state(StringPieceValueTypes.template, { exact: false }),
     }),
-    update,
+    update({ exact: false }),
 ]);
 
 export const exactType = t.union([
-    t.strict({
+    t.type({
         $v: t.literal(2),
         $r: t.literal(1),
         type: t.literal(createType),
-        value: StringPieceValueTypes.state,
+        value: state(StringPieceValueTypes.template, { exact: true }),
     }),
-    t.strict({
+    t.type({
         $v: t.literal(2),
         $r: t.literal(1),
         type: t.literal(deleteType),
-        value: StringPieceValueTypes.state,
+        value: state(StringPieceValueTypes.template, { exact: true }),
     }),
-    t.exact(update),
+    update({ exact: true }),
 ]);
 
 export type Type = t.TypeOf<typeof type>;
 
 export const ofOperation = (
-    operation: StringPieceValueTypes.TwoWayOperation,
-    currentState: StringPieceValueTypes.State
+    operation: TwoWayOperation<typeof StringPieceValueTypes.template>,
+    currentState: State<typeof StringPieceValueTypes.template>
 ): Type => {
     return {
-        ...PieceBase.toUpOperation(operation),
+        ...toUpOperation(PieceBaseTypes.template)({ ...operation, $v: undefined, $r: undefined }),
         $v: 2,
         $r: 1,
         type: updateType,

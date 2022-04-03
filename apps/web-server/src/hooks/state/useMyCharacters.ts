@@ -1,7 +1,9 @@
-import { CharacterState } from '@flocon-trpg/core';
+import { characterTemplate, State } from '@flocon-trpg/core';
 import React from 'react';
 import { useMyUserUid } from '../useMyUserUid';
 import { useCharacters } from './useCharacters';
+
+type CharacterState = State<typeof characterTemplate>;
 
 export const useMyCharacters = (): ReadonlyMap<string, CharacterState> | undefined => {
     const myUserUid = useMyUserUid();

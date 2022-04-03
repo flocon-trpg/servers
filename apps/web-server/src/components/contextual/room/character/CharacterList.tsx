@@ -32,7 +32,13 @@ import {
     useNumParamNames,
     useStrParamNames,
 } from '../../../../hooks/state/useParamNames';
-import { CharacterState, ParamNameState, strIndex10Array, StrIndex20 } from '@flocon-trpg/core';
+import {
+    characterTemplate,
+    paramNameTemplate,
+    State,
+    strIndex10Array,
+    StrIndex20,
+} from '@flocon-trpg/core';
 import classNames from 'classnames';
 import { cancelRnd, flex, flexRow, itemsCenter } from '../../../../utils/className';
 import { ColumnType } from 'antd/lib/table';
@@ -62,6 +68,9 @@ import { KeySorter } from '../../../../utils/keySorter';
 import { RowKeys } from '../../../../atoms/roomConfig/types/charactersPanelConfig';
 import { DraggableTabs } from '../../../ui/DraggableTabs';
 import { moveElement } from '../../../../utils/moveElement';
+
+type CharacterState = State<typeof characterTemplate>;
+type ParamNameState = State<typeof paramNameTemplate>;
 
 type DataSource = {
     key: string;

@@ -1,4 +1,4 @@
-import { BoardState, boardState, simpleId } from '@flocon-trpg/core';
+import { state, boardTemplate, simpleId, State } from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
 import { Alert, Modal } from 'antd';
 import { atom, useAtom } from 'jotai';
@@ -11,6 +11,9 @@ import { useMyUserUid } from '../../../../hooks/useMyUserUid';
 import { formatValidationErrors } from '../../../../utils/io-ts/io-ts-reporters';
 import classNames from 'classnames';
 import { flex, flexColumn } from '../../../../utils/className';
+
+const boardState = state(boardTemplate, { exact: true });
+type BoardState = State<typeof boardTemplate>;
 
 export const importBoardModalVisibilityAtom = atom(false);
 

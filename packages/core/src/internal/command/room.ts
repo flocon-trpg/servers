@@ -14,20 +14,21 @@ import { FParamNames } from './paramNames';
 import { FStateRecord } from './stateRecord';
 import { FParticipant } from './participant';
 import * as Character from '../ot/room/character/types';
+import { State } from '../ot/generator';
 
 const name = 'name';
 const characters = 'characters';
 
 export class FRoom extends FObject {
-    // FRoom内のRoom.Stateは全てmutableとして扱う。FCharacter内のCharacter.Stateなども同様。
-    private readonly _room: Room.State;
+    // FRoom内の State<typeof Room.template> は全てmutableとして扱う。FCharacter内のCharacter.Stateなども同様。
+    private readonly _room: State<typeof Room.template>;
 
-    public constructor(source: Room.State, private readonly myUserUid: string) {
+    public constructor(source: State<typeof Room.template>, private readonly myUserUid: string) {
         super();
         this._room = cloneDeep(source);
     }
 
-    public get room(): Room.State {
+    public get room(): State<typeof Room.template> {
         return this._room;
     }
 
@@ -46,7 +47,7 @@ export class FRoom extends FObject {
             case 'booleanParameterNames':
                 return new FParamNames(this.room, 'Boolean');
             case characters:
-                return new FStateRecord<Character.State, FCharacter>({
+                return new FStateRecord<State<typeof Character.template>, FCharacter>({
                     states: this.room.characters,
                     createNewState: () => ({
                         $v: 2,

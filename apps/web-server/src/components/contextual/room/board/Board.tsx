@@ -19,7 +19,7 @@ import useConstant from 'use-constant';
 import { debounceTime } from 'rxjs/operators';
 import { Vector2d } from 'konva/types/types';
 import { Subject } from 'rxjs';
-import { PieceState, BoardState, $free } from '@flocon-trpg/core';
+import { State, pieceTemplate, boardTemplate, $free, OmitVersion } from '@flocon-trpg/core';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
 import { FilePath, FileSourceType } from '@flocon-trpg/typed-document-node';
@@ -68,6 +68,9 @@ import { BoardType } from '../../../../utils/board/boardType';
 import { useIsMyCharacter } from '../../../../hooks/state/useIsMyCharacter';
 import { imagePieceModalAtom } from './ImagePieceModal';
 import { Styles } from '../../../../styles';
+
+type BoardState = OmitVersion<State<typeof boardTemplate>>;
+type PieceState = OmitVersion<State<typeof pieceTemplate>>;
 
 const setDragEndResultToPieceState = ({
     e,

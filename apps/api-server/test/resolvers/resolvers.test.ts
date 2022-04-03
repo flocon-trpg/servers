@@ -24,11 +24,10 @@ import {
     GetRoomFailureType,
     DeleteRoomAsAdminMutation,
     WritePublicMessageMutation,
-    WriteRoomPublicMessageFailureType,
 } from '@flocon-trpg/typed-document-node';
 import { EntryToServerResultType } from '../../src/enums/EntryToServerResultType';
 import { ServerConfig } from '../../src/configType';
-import { UpOperation, parseState, $free } from '@flocon-trpg/core';
+import { UpOperation as U, parseState, roomTemplate, $free } from '@flocon-trpg/core';
 import axios from 'axios';
 import FormData from 'form-data';
 import urljoin from 'url-join';
@@ -39,6 +38,8 @@ import { maskTypeNames } from './utils/maskTypenames';
 import { TestClients } from './utils/testClients';
 import { isTruthyString, recordToArray } from '@flocon-trpg/utils';
 import { TestClient } from './utils/testClient';
+
+type UpOperation = U<typeof roomTemplate>;
 
 /*
 To run tests in this file, you need to prepare SQLite and PostgreSQL. If you want to skip them, set TEST_SKIP_RESOLVERS env to "true".

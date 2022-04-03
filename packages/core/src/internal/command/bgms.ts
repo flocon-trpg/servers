@@ -12,9 +12,10 @@ import * as RoomTypes from '../ot/room/types';
 import * as BgmTypes from '../ot/room/bgm/types';
 import { FBgm } from './bgm';
 import { isStrIndex5 } from '../indexes';
+import { State } from '../ot/generator';
 
 export class FBgms extends FObject {
-    public constructor(private readonly room: RoomTypes.State) {
+    public constructor(private readonly room: State<typeof RoomTypes.template>) {
         super();
     }
 
@@ -35,7 +36,7 @@ export class FBgms extends FObject {
         if (found != null) {
             return found;
         }
-        const newBgm: BgmTypes.State = {
+        const newBgm: State<typeof BgmTypes.template> = {
             $v: 1,
             $r: 1,
             files: [],

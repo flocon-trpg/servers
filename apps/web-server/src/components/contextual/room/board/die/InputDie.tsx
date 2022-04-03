@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { css } from '@emotion/react';
-import { DieValueState } from '@flocon-trpg/core';
+import { State, dieValueTemplate } from '@flocon-trpg/core';
 import { D6Value, noDie, noValue } from '../../../../../utils/board/dice';
 import * as Icons from '@ant-design/icons';
 import { Button } from 'antd';
@@ -9,6 +9,8 @@ import { update, replace } from '../../../../../stateManagers/states/types';
 import { ToggleButton } from '../../../../ui/ToggleButton';
 import classNames from 'classnames';
 import { flex, flexRow, itemsCenter, justifyItemsCenter } from '../../../../../utils/className';
+
+type DieValueState = State<typeof dieValueTemplate>;
 
 type AddDieProps = {
     onAdd: (dieType: DieValueState['dieType']) => void;

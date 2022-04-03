@@ -1,6 +1,8 @@
 import { recordToMap } from '@flocon-trpg/utils';
-import { execCharacterCommand, State } from '../src';
+import { execCharacterCommand, roomTemplate, State as S } from '../src';
 import { Resources } from './resources';
+
+type State = S<typeof roomTemplate>;
 
 describe('characterCommand', () => {
     const characterId = 'CHARA_ID';

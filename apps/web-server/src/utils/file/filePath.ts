@@ -5,6 +5,8 @@ import { files, getFloconUploaderFile } from './getFloconUploaderFile';
 import { WebConfig } from '../../configType';
 import { FirebaseStorage, getDownloadURL, ref } from 'firebase/storage';
 
+type FilePathState = Core.State<typeof Core.filePathTemplate>;
+
 export type FilePath = {
     path: string;
     sourceType: FileSourceType;
@@ -24,7 +26,7 @@ export namespace FilePath {
         return x.path === y.path && x.sourceType === y.sourceType;
     };
 
-    export const toGraphQL = (source: FilePath | Core.FilePath): FilePath => {
+    export const toGraphQL = (source: FilePath | FilePathState): FilePath => {
         let sourceType: FileSourceType;
         switch (source.sourceType) {
             case Core.Default:
@@ -46,7 +48,7 @@ export namespace FilePath {
         };
     };
 
-    export const toOt = (source: FilePath | Core.FilePath): Core.FilePath => {
+    export const toOt = (source: FilePath | FilePathState): FilePathState => {
         let sourceType: typeof Core.Default | typeof Core.FirebaseStorage | typeof Core.Uploader;
         switch (source.sourceType) {
             case FileSourceType.Default:
@@ -88,7 +90,7 @@ export namespace FilePath {
           };
 
     export const getSrc = async (
-        path: FilePath | Omit<Core.FilePath, '$v' | '$r'>,
+        path: FilePath | Core.OmitVersion<FilePathState>,
         config: WebConfig,
         storage: FirebaseStorage,
         idToken: string,

@@ -2,8 +2,10 @@ import { useAtomSelector } from '../../atoms/useAtomSelector';
 import { roomAtom } from '../../atoms/room/roomAtom';
 import React from 'react';
 import { recordToMap } from '@flocon-trpg/utils';
-import { CharacterState, strIndex10Array } from '@flocon-trpg/core';
+import { characterTemplate, State, strIndex10Array } from '@flocon-trpg/core';
 import { CharacterTagFilter } from '../../atoms/roomConfig/types/characterTagFilter';
+
+type CharacterState = State<typeof characterTemplate>;
 
 const hasAnyTag = (character: CharacterState): boolean => {
     return (

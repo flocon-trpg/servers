@@ -23,7 +23,7 @@ import {
     useNumParamNames,
     useStrParamNames,
 } from '../../../../hooks/state/useParamNames';
-import { CharacterState, strIndex20Array, simpleId } from '@flocon-trpg/core';
+import { strIndex20Array, simpleId, characterTemplate, State } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
 import { BufferedTextArea } from '../../../ui/BufferedTextArea';
 import { FilePath } from '../../../../utils/file/filePath';
@@ -47,6 +47,8 @@ import { EditorGroupHeader } from '../../../ui/EditorGroupHeader';
 import { OverriddenParameterNameEditor } from './OverriddenParameterNameEditor';
 import { CharacterTagsSelect } from './CharacterTagsSelect';
 import { CopyToClipboardButton } from '../../../ui/CopyToClipboardButton';
+
+type CharacterState = State<typeof characterTemplate>;
 
 type CharacterEditorModalState =
     | {

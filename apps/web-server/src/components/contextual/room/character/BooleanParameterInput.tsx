@@ -11,12 +11,18 @@ import {
     parameterIsPrivateAndNotCreatedByMe,
 } from '../../../../resources/text/main';
 import {
-    BoolParamState,
-    CharacterState,
-    CharacterUpOperation,
     StrIndex20,
-    applyCharacter,
+    characterTemplate,
+    State,
+    UpOperation,
+    apply,
+    boolParamTemplate,
 } from '@flocon-trpg/core';
+
+type BoolParamState = State<typeof boolParamTemplate>;
+type CharacterState = State<typeof characterTemplate>;
+type CharacterUpOperation = UpOperation<typeof characterTemplate>;
+const applyCharacter = apply(characterTemplate);
 
 type Props = {
     isCharacterPrivate: boolean;

@@ -7,6 +7,7 @@ import {
     ScriptError,
     beginCast,
 } from '@flocon-trpg/flocon-script';
+import { State } from '../ot/generator';
 import * as Character from '../ot/room/character/types';
 import * as Room from '../ot/room/types';
 import { FBoolParams } from './boolParams';
@@ -24,8 +25,8 @@ const stringParameters = 'stringParameters';
 
 export class FCharacter extends FObject {
     public constructor(
-        public readonly character: Character.State,
-        private readonly room: Room.State
+        public readonly character: State<typeof Character.template>,
+        private readonly room: State<typeof Room.template>
     ) {
         super();
     }

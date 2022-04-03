@@ -4,7 +4,7 @@ import { DialogFooter } from '../../../ui/DialogFooter';
 import { DrawerProps } from 'antd/lib/drawer';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../../../hooks/useStateEditor';
-import { ImagePieceState, simpleId } from '@flocon-trpg/core';
+import { imagePieceTemplate, simpleId, State } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
 import { useImagePieces } from '../../../../hooks/state/useImagePieces';
 import { InputFile } from '../file/InputFile';
@@ -19,6 +19,8 @@ import { atom, useAtom } from 'jotai';
 import { useCloneImagePiece } from '../../../../hooks/state/useCloneImagePiece';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
 import { EditorGroupHeader } from '../../../ui/EditorGroupHeader';
+
+type ImagePieceState = State<typeof imagePieceTemplate>;
 
 type ImagePieceModalType =
     | {

@@ -9,11 +9,14 @@ import { StringPieceValue } from '../../../../utils/board/stringPieceValue';
 import { keyNames } from '@flocon-trpg/utils';
 import { useUpdateAtom } from 'jotai/utils';
 import { useCharacters } from '../../../../hooks/state/useCharacters';
-import { DicePieceState, StringPieceState } from '@flocon-trpg/core';
+import { dicePieceTemplate, State, stringPieceTemplate } from '@flocon-trpg/core';
 import {
     dicePieceValueEditorAtom,
     stringPieceValueEditorAtom,
 } from '../../../../atoms/pieceValueEditor/pieceValueEditorAtom';
+
+type DicePieceState = State<typeof dicePieceTemplate>;
+type StringPieceState = State<typeof stringPieceTemplate>;
 
 type DataSource =
     | {

@@ -1,45 +1,21 @@
 import * as t from 'io-ts';
-import * as ReplaceOperation from '../../../util/replaceOperation';
-import { createOperation } from '../../../util/createOperation';
-import { Maybe, maybe } from '../../../../maybe';
-import * as NullableTextOperation from '../../../util/nullableTextOperation';
+import { maybe } from '../../../../maybe';
+import {
+    createObjectValueTemplate,
+    createOtValueTemplate,
+    createReplaceValueTemplate,
+} from '../../../generator';
 
-export const state = t.type({
-    $v: t.literal(2),
-    $r: t.literal(1),
+export const template = createObjectValueTemplate(
+    {
+        isValuePrivate: createReplaceValueTemplate(t.boolean),
+        value: createReplaceValueTemplate(maybe(t.number)),
 
-    isValuePrivate: t.boolean,
-    value: maybe(t.number),
-
-    /**
-     * @description Do not use this value for numMaxParam.
-     */
-    overriddenParameterName: maybe(t.string),
-});
-
-export type State = t.TypeOf<typeof state>;
-
-export const downOperation = createOperation(2, 1, {
-    isValuePrivate: t.type({ oldValue: t.boolean }),
-    value: t.type({ oldValue: maybe(t.number) }),
-    overriddenParameterName: NullableTextOperation.downOperation,
-});
-
-export type DownOperation = t.TypeOf<typeof downOperation>;
-
-export const upOperation = createOperation(2, 1, {
-    isValuePrivate: t.type({ newValue: t.boolean }),
-    value: t.type({ newValue: maybe(t.number) }),
-    overriddenParameterName: NullableTextOperation.upOperation,
-});
-
-export type UpOperation = t.TypeOf<typeof upOperation>;
-
-export type TwoWayOperation = {
-    $v: 2;
-    $r: 1;
-
-    isValuePrivate?: ReplaceOperation.ReplaceValueTwoWayOperation<boolean>;
-    value?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<number>>;
-    overriddenParameterName?: NullableTextOperation.TwoWayOperation;
-};
+        /**
+         * @description Do not use this value for numMaxParam.
+         */
+        overriddenParameterName: createOtValueTemplate(true),
+    },
+    2,
+    1
+);

@@ -6,7 +6,7 @@ import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { BufferedInput } from '../../../ui/BufferedInput';
 import { useSetRoomStateByApply } from '../../../../hooks/useSetRoomStateByApply';
 import { recordToMap } from '@flocon-trpg/utils';
-import { StrIndex20, strIndex20Array, UpOperation } from '@flocon-trpg/core';
+import { roomTemplate, StrIndex20, strIndex20Array, UpOperation as U } from '@flocon-trpg/core';
 import { InputModal } from '../../../ui/InputModal';
 import classNames from 'classnames';
 import { flex, flexRow } from '../../../../utils/className';
@@ -14,6 +14,8 @@ import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithI
 import { roomAtom } from '../../../../atoms/room/roomAtom';
 import { useAtomSelector } from '../../../../atoms/useAtomSelector';
 import { atom, useAtom } from 'jotai';
+
+type UpOperation = U<typeof roomTemplate>;
 
 export const characterParameterNamesEditorVisibilityAtom = atom(false);
 

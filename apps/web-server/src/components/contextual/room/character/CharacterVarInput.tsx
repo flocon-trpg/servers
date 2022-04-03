@@ -1,6 +1,8 @@
-import { CharacterState } from '@flocon-trpg/core';
+import { characterTemplate, State } from '@flocon-trpg/core';
 import React from 'react';
 import { TomlInput } from '../../../ui/Tomllnput';
+
+type CharacterState = State<typeof characterTemplate>;
 
 type Props = {
     style?: React.CSSProperties;

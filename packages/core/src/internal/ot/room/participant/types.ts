@@ -3,10 +3,9 @@
 // nameはJSONのあるエンティティとは別に保存される想定であるため、nameが見つからないもしくは一時的に取得できないという状況がありうる。そのため、maybeを付けており、TextOperationではなくReplaceOperationとして定義している。ReplaceOperationは文字数が多いと非効率化するため、maxLength100Stringとしている。
 
 import * as t from 'io-ts';
-import * as ReplaceOperation from '../../util/replaceOperation';
-import { createOperation } from '../../util/createOperation';
-import { Maybe, maybe } from '../../../maybe';
-import { MaxLength100String, maxLength100String } from '../../../maxLengthString';
+import { maybe } from '../../../maybe';
+import { maxLength100String } from '../../../maxLengthString';
+import { createObjectValueTemplate, createReplaceValueTemplate } from '../../generator';
 
 export const Player = 'Player';
 export const Spectator = 'Spectator';
@@ -15,33 +14,11 @@ export const Master = 'Master';
 const participantRole = t.union([t.literal(Player), t.literal(Spectator), t.literal(Master)]);
 export type ParticipantRole = t.TypeOf<typeof participantRole>;
 
-export const state = t.type({
-    $v: t.literal(2),
-    $r: t.literal(1),
-    name: maybe(maxLength100String),
-    role: maybe(participantRole),
-});
-
-export type State = t.TypeOf<typeof state>;
-
-export const downOperation = createOperation(2, 1, {
-    name: t.type({ oldValue: maybe(maxLength100String) }),
-    role: t.type({ oldValue: maybe(participantRole) }),
-});
-
-export type DownOperation = t.TypeOf<typeof downOperation>;
-
-export const upOperation = createOperation(2, 1, {
-    name: t.type({ newValue: maybe(maxLength100String) }),
-    role: t.type({ newValue: maybe(participantRole) }),
-});
-
-export type UpOperation = t.TypeOf<typeof upOperation>;
-
-export type TwoWayOperation = {
-    $v: 2;
-    $r: 1;
-
-    name?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<MaxLength100String>>;
-    role?: ReplaceOperation.ReplaceValueTwoWayOperation<Maybe<ParticipantRole>>;
-};
+export const template = createObjectValueTemplate(
+    {
+        name: createReplaceValueTemplate(maybe(maxLength100String)),
+        role: createReplaceValueTemplate(maybe(participantRole)),
+    },
+    2,
+    1
+);

@@ -6,10 +6,14 @@ import {
 import {
     parseState,
     parseUpOperation,
-    State,
+    roomTemplate,
+    State as S,
     stringifyUpOperation,
-    UpOperation,
+    UpOperation as U,
 } from '@flocon-trpg/core';
+
+type State = S<typeof roomTemplate>;
+type UpOperation = U<typeof roomTemplate>;
 
 export namespace Room {
     export const createState = (source: RoomGetStateFragment): State => {

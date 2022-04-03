@@ -4,8 +4,10 @@ import { ParticipantRole } from '@flocon-trpg/typed-document-node';
 import { Jdenticon } from '../../ui/Jdenticon';
 import { useRoomConnections } from '../../../hooks/useRoomConnections';
 import { useParticipants } from '../../../hooks/state/useParticipants';
-import { ParticipantState } from '@flocon-trpg/core';
+import { State, participantTemplate } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../../hooks/useMyUserUid';
+
+type ParticipantState = State<typeof participantTemplate>;
 
 type DataSource = {
     key: string;

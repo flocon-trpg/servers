@@ -1,8 +1,10 @@
-import { ParamNameState } from '@flocon-trpg/core';
+import { State, paramNameTemplate } from '@flocon-trpg/core';
 import { recordToMap } from '@flocon-trpg/utils';
 import React from 'react';
 import { roomAtom } from '../../atoms/room/roomAtom';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
+
+type ParamNameState = State<typeof paramNameTemplate>;
 
 export const useBoolParamNames = (): ReadonlyMap<string, ParamNameState> | undefined => {
     const boolParamNames = useAtomSelector(

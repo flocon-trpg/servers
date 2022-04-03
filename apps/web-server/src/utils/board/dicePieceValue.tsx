@@ -1,5 +1,8 @@
 import React from 'react';
-import { DicePieceState, DieValueState } from '@flocon-trpg/core';
+import { dicePieceTemplate, dieValueTemplate, State } from '@flocon-trpg/core';
+
+type DieValueState = State<typeof dieValueTemplate>;
+type DicePieceState = State<typeof dicePieceTemplate>;
 
 export namespace DicePieceValue {
     export const privateValueOpacity = 0.5;

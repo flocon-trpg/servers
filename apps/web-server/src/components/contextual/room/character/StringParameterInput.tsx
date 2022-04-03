@@ -10,14 +10,20 @@ import {
 } from '../../../../resources/text/main';
 import { BufferedInput } from '../../../ui/BufferedInput';
 import {
-    CharacterState,
-    CharacterUpOperation,
     StrIndex20,
-    StrParamState,
-    applyCharacter,
     toNullableTextUpOperation,
     nullableTextDiff,
+    apply,
+    characterTemplate,
+    State,
+    strParamTemplate,
+    UpOperation,
 } from '@flocon-trpg/core';
+
+const applyCharacter = apply(characterTemplate);
+type CharacterState = State<typeof characterTemplate>;
+type CharacterUpOperation = UpOperation<typeof characterTemplate>;
+type StrParamState = State<typeof strParamTemplate>;
 
 const inputWidth = 150;
 

@@ -11,7 +11,7 @@ import { FilesManagerDrawerType, some } from '../../../utils/types';
 import { VolumeBar } from '../../ui/VolumeBar';
 import { DialogFooter } from '../../ui/DialogFooter';
 import { Styles } from '../../../styles';
-import { BgmState, FilePath, StrIndex5 } from '@flocon-trpg/core';
+import { bgmTemplate, filePathTemplate, State, StrIndex5 } from '@flocon-trpg/core';
 import _ from 'lodash';
 import { cancelRnd, flex, flexColumn, flexRow, itemsCenter } from '../../../utils/className';
 import classNames from 'classnames';
@@ -23,6 +23,9 @@ import { roomAtom } from '../../../atoms/room/roomAtom';
 import { useAtomValue } from 'jotai/utils';
 import { useSetRoomStateWithImmer } from '../../../hooks/useSetRoomStateWithImmer';
 import { EditorGroupHeader } from '../../ui/EditorGroupHeader';
+
+type FilePath = State<typeof filePathTemplate>;
+type BgmState = State<typeof bgmTemplate>;
 
 const defaultVolume = 0.5;
 

@@ -12,8 +12,9 @@ import * as Character from '../ot/room/character/types';
 import * as BoolParam from '../ot/room/character/boolParam/types';
 import * as Room from '../ot/room/types';
 import { FBoolParam } from './boolParam';
+import { State } from '../ot/generator';
 
-const createDefaultState = (): BoolParam.State => ({
+const createDefaultState = (): State<typeof BoolParam.template> => ({
     $v: 2,
     $r: 1,
     value: false,
@@ -23,8 +24,8 @@ const createDefaultState = (): BoolParam.State => ({
 
 export class FBoolParams extends FObject {
     public constructor(
-        private readonly boolParams: Character.State['boolParams'],
-        private readonly room: Room.State
+        private readonly boolParams: State<typeof Character.template>['boolParams'],
+        private readonly room: State<typeof Room.template>
     ) {
         super();
     }
