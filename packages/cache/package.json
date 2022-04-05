@@ -13,7 +13,7 @@
     "scripts": {
         "build": "yarn run build:self",
         "build-ci": "yarn run build:self",
-        "build:self": "rimraf ./dist && copyfiles \"./src/**/*.ts\" ./dist && yarn build:tsc",
+        "build:self": "rimraf ./dist && yarn build:tsc",
         "build:tsc": "tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-types.json",
         "test": "jest"
     },
@@ -23,7 +23,6 @@
     "devDependencies": {
         "@types/ioredis": "4.28.8",
         "@types/jest": "27.4.1",
-        "copyfiles": "2.4.1",
         "jest": "27.5.1",
         "rimraf": "3.0.2",
         "ts-jest": "27.1.4",

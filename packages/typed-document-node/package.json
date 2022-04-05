@@ -10,13 +10,12 @@
     "scripts": {
         "build": "yarn run build:self",
         "build-ci": "yarn run build:self",
-        "build:self": "rimraf ./dist && copyfiles \"./src/**/*.ts\" ./dist && yarn build:tsc",
+        "build:self": "rimraf ./dist && yarn build:tsc",
         "build:tsc": "tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-types.json"
     },
     "name": "@flocon-trpg/typed-document-node",
     "author": "kizahasi",
     "devDependencies": {
-        "copyfiles": "2.4.1",
         "rimraf": "3.0.2",
         "typescript": "4.4.4"
     },
