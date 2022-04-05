@@ -1,4 +1,4 @@
-import * as Room from '../ot/room/types';
+import * as Room from '../ot/flocon/room/types';
 import {
     arrayClass,
     createConsoleClass,

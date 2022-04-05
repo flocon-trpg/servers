@@ -9,7 +9,7 @@ import {
     OnSettingParams,
 } from '@flocon-trpg/flocon-script';
 import { State } from '../ot/generator';
-import * as NumParam from '../ot/room/character/numParam/types';
+import * as NumParam from '../ot/flocon/room/character/numParam/types';
 
 const value = 'value';
 const isValueSecret = 'isValueSecret';

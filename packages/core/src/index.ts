@@ -39,7 +39,12 @@ export { Expression, plain, expr1, analyze } from './internal/expression';
 
 export { fakeFirebaseConfig1, fakeFirebaseConfig2 } from './internal/fake/fakeFirebaseConfig';
 
-export { Default, Uploader, FirebaseStorage, filePathTemplate } from './internal/ot/filePath/types';
+export {
+    Default,
+    Uploader,
+    FirebaseStorage,
+    filePathTemplate,
+} from './internal/ot/flocon/filePath/types';
 
 export {
     $v,
@@ -74,13 +79,16 @@ export {
 
 export { OmitVersion } from './internal/ot/generator/omitVersion';
 
-export { toClientState, serverTransform } from './internal/ot/room/functions';
+export { toClientState, serverTransform } from './internal/ot/flocon/room/functions';
 
-export { template as roomTemplate, dbTemplate as roomDbTemplate } from './internal/ot/room/types';
+export {
+    template as roomTemplate,
+    dbTemplate as roomDbTemplate,
+} from './internal/ot/flocon/room/types';
 
-export { template as bgmTemplate } from './internal/ot/room/bgm/types';
+export { template as bgmTemplate } from './internal/ot/flocon/room/bgm/types';
 
-export { template as paramNameTemplate } from './internal/ot/room/paramName/types';
+export { template as paramNameTemplate } from './internal/ot/flocon/room/paramName/types';
 
 export {
     parseState,
@@ -91,11 +99,11 @@ export {
     stringifyUpOperation,
     decodeDownOperation,
     exactDownOperation,
-} from './internal/ot/room/converter';
+} from './internal/ot/flocon/room/converter';
 
-export { template as boardPositionTemplate } from './internal/ot/boardPositionBase/types';
+export { template as boardPositionTemplate } from './internal/ot/flocon/boardPositionBase/types';
 
-export { template as pieceTemplate } from './internal/ot/pieceBase/types';
+export { template as pieceTemplate } from './internal/ot/flocon/pieceBase/types';
 
 export {
     Master,
@@ -103,62 +111,62 @@ export {
     Spectator,
     ParticipantRole,
     template as participantTemplate,
-} from './internal/ot/room/participant/types';
+} from './internal/ot/flocon/room/participant/types';
 
-export { template as boardTemplate } from './internal/ot/room/board/types';
+export { template as boardTemplate } from './internal/ot/flocon/room/board/types';
 
-export { template as characterTemplate } from './internal/ot/room/character/types';
+export { template as characterTemplate } from './internal/ot/flocon/room/character/types';
 
-export { template as boolParamTemplate } from './internal/ot/room/character/boolParam/types';
+export { template as boolParamTemplate } from './internal/ot/flocon/room/character/boolParam/types';
 
-export { template as characterPieceTemplate } from './internal/ot/room/character/characterPiece/types';
+export { template as characterPieceTemplate } from './internal/ot/flocon/room/character/characterPiece/types';
 
-export { template as commandTemplate } from './internal/ot/room/character/command/types';
+export { template as commandTemplate } from './internal/ot/flocon/room/character/command/types';
 
-export { template as numParamTemplate } from './internal/ot/room/character/numParam/types';
+export { template as numParamTemplate } from './internal/ot/flocon/room/character/numParam/types';
 
-export { template as strParamTemplate } from './internal/ot/room/character/strParam/types';
+export { template as strParamTemplate } from './internal/ot/flocon/room/character/strParam/types';
 
-export { template as portraitPieceTemplate } from './internal/ot/room/character/portraitPiece/types';
+export { template as portraitPieceTemplate } from './internal/ot/flocon/room/character/portraitPiece/types';
 
 export {
     template as dicePieceTemplate,
     dicePieceStrIndexes,
-} from './internal/ot/room/board/dicePiece/types';
+} from './internal/ot/flocon/room/board/dicePiece/types';
 
 export {
     decode as decodeDicePiece,
     parse as parseDicePiece,
-} from './internal/ot/room/board/dicePiece/converter';
+} from './internal/ot/flocon/room/board/dicePiece/converter';
 
-export { template as dieValueTemplate } from './internal/ot/room/board/dicePiece/dieValue/types';
+export { template as dieValueTemplate } from './internal/ot/flocon/room/board/dicePiece/dieValue/types';
 
 export {
     type as dicePieceLog,
     exactType as exactDicePieceLog,
     Type as DicePieceLog,
-} from './internal/ot/room/board/dicePiece/log';
+} from './internal/ot/flocon/room/board/dicePiece/log';
 
-export { template as imagePieceTemplate } from './internal/ot/room/board/imagePiece/types';
+export { template as imagePieceTemplate } from './internal/ot/flocon/room/board/imagePiece/types';
 
 export {
     template as stringPieceTemplate,
     String,
     Number,
-} from './internal/ot/room/board/stringPiece/types';
+} from './internal/ot/flocon/room/board/stringPiece/types';
 
 export {
     decode as decodeStringPiece,
     parse as parseStringPiece,
-} from './internal/ot/room/board/stringPiece/converter';
+} from './internal/ot/flocon/room/board/stringPiece/converter';
 
 export {
     type as stringPieceLog,
     exactType as exactStringPieceLog,
     Type as StringPieceLog,
-} from './internal/ot/room/board/stringPiece/log';
+} from './internal/ot/flocon/room/board/stringPiece/log';
 
-export { template as memoTemplate, Plain, Markdown } from './internal/ot/room/memo/types';
+export { template as memoTemplate, Plain, Markdown } from './internal/ot/flocon/room/memo/types';
 
 export {
     DownOperation as NullableTextDownOperation,
@@ -204,9 +212,9 @@ export {
     isOwner,
 } from './internal/ot/util/requestedBy';
 
-export { updateType, createType, deleteType } from './internal/ot/pieceBase/log';
+export { updateType, createType, deleteType } from './internal/ot/flocon/pieceBase/log';
 
-export { createLogs } from './internal/ot/room/log';
+export { createLogs } from './internal/ot/flocon/room/log';
 
 export { StateManager } from './internal/stateManagers/stateManager';
 

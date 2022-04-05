@@ -8,9 +8,9 @@ import {
     ScriptError,
 } from '@flocon-trpg/flocon-script';
 import { recordToArray } from '@flocon-trpg/utils';
-import * as Character from '../ot/room/character/types';
-import * as NumParam from '../ot/room/character/numParam/types';
-import * as Room from '../ot/room/types';
+import * as Character from '../ot/flocon/room/character/types';
+import * as NumParam from '../ot/flocon/room/character/numParam/types';
+import * as Room from '../ot/flocon/room/types';
 import { FNumParam } from './numParam';
 import { State } from '../ot/generator';
 

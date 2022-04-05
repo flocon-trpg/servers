@@ -8,8 +8,8 @@ import {
     OnGettingParams,
     ScriptError,
 } from '@flocon-trpg/flocon-script';
-import * as RoomTypes from '../ot/room/types';
-import * as BgmTypes from '../ot/room/bgm/types';
+import * as RoomTypes from '../ot/flocon/room/types';
+import * as BgmTypes from '../ot/flocon/room/bgm/types';
 import { FBgm } from './bgm';
 import { isStrIndex5 } from '../indexes';
 import { State } from '../ot/generator';

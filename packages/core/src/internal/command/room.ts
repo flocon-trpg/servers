@@ -7,13 +7,13 @@ import {
     GetCoreParams,
     SetCoreParams,
 } from '@flocon-trpg/flocon-script';
-import * as Room from '../ot/room/types';
+import * as Room from '../ot/flocon/room/types';
 import { FCharacter } from './character';
 import cloneDeep from 'lodash.clonedeep';
 import { FParamNames } from './paramNames';
 import { FStateRecord } from './stateRecord';
 import { FParticipant } from './participant';
-import * as Character from '../ot/room/character/types';
+import * as Character from '../ot/flocon/room/character/types';
 import { State } from '../ot/generator';
 
 const name = 'name';

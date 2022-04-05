@@ -8,7 +8,7 @@ import {
     FString,
     AstInfo,
 } from '@flocon-trpg/flocon-script';
-import * as FilePath from '../ot/filePath/types';
+import * as FilePath from '../ot/flocon/filePath/types';
 import { State } from '../ot/generator';
 
 export const toFFilePath = (

@@ -9,7 +9,7 @@ import {
     FString,
 } from '@flocon-trpg/flocon-script';
 import { State } from '../ot/generator';
-import * as StrParam from '../ot/room/character/strParam/types';
+import * as StrParam from '../ot/flocon/room/character/strParam/types';
 
 const value = 'value';
 const isValueSecret = 'isValueSecret';

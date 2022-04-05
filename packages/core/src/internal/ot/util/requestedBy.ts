@@ -1,5 +1,5 @@
 import { State } from '../generator';
-import * as Room from '../room/types';
+import * as Room from '../flocon/room/types';
 
 // 全てのStateに完全にアクセスできる。
 export const admin = 'admin';

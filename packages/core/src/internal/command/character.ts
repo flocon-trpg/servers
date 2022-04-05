@@ -8,8 +8,8 @@ import {
     beginCast,
 } from '@flocon-trpg/flocon-script';
 import { State } from '../ot/generator';
-import * as Character from '../ot/room/character/types';
-import * as Room from '../ot/room/types';
+import * as Character from '../ot/flocon/room/character/types';
+import * as Room from '../ot/flocon/room/types';
 import { FBoolParams } from './boolParams';
 import { toFFilePath, toFilePathOrUndefined } from './filePath';
 import { FNumParams } from './numParams';

@@ -9,7 +9,7 @@ import {
 } from '@flocon-trpg/flocon-script';
 import { maxLength100String } from '../maxLengthString';
 import { State } from '../ot/generator';
-import * as Participant from '../ot/room/participant/types';
+import * as Participant from '../ot/flocon/room/participant/types';
 
 const name = 'name';
 
