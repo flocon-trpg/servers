@@ -4,8 +4,7 @@
         "lib": ["ES2019"],
         "target": "ES2019",
         "declaration": false,
-        "inlineSourceMap": true,
-        "inlineSources": true,
+        "sourceMap": true,
         "strict": true,
         // linter checks for common issues
         "noImplicitReturns": true,
