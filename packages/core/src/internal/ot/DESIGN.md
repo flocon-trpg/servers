@@ -2,19 +2,13 @@
 
 Flocon の部屋(Room)を Operational Transformation を用いて編集する機能を提供している。ログを表すオブジェクトを生成する関数も付属している。
 
-中核となるのは`./room`にある`functions.ts`と`types.ts`。ただし Room には例えば Bgm や Participant などが 1:N の関係で存在しており、これらを 1 つのファイルで表すとあまりにもコードが長くなるため、`./room/bgm`や`./room/participant`などに分割している。
+多くの関数は`./template`のコードで自動的に生成している。ただし、toClientState は閲覧権限、serverTransform は編集権限の処理が行われているため、手動で作っている。この 2 つの関数は`./flocon`にある。基準となるのは`./room`にある`functions.ts`。ただし Room には例えば Bgm や Participant などが 1:N の関係で存在しており、これらを 1 つのファイルで表すとあまりにもコードが長くなるため、`./room/bgm`や`./room/participant`などに分割している。
 
-## types.ts
+## $vと$r
 
-型の定義と、io-ts を用いて型チェックを行う関数を提供する。
-
-io-ts では、Record の key を string にすることはできるが、例えば ('1' | '2' | '3') にすることはシンプルな方法で実現できない模様。そのため、代わりに string を使っている。
-
-types.ts の定義を変更した場合、変更した型自身および影響のある型の$vもしくは$r の値を 1 増やす。$vはversion、$r は revision を表す。2 つの型があって$vが等しいが$r が異なる場合は$rの高いほうに変換可能であり互換性があることを示す。この変換処理は migrate.ts に書く。$v が異なる場合は互換性がないため、このライブラリでは片方のサポートを停止するか、両方のバージョンをサポートしなければならない。
+State や Operation の定義を変更した場合、変更した型自身および影響のある型の$vもしくは$r の値を 1 増やす。$vはversion、$r は revision を表す。2 つの型があって$vが等しいが$r が異なる場合は$rの高いほうに変換可能であり互換性があることを示す。この変換処理は migrate.ts に書く。$v が異なる場合は互換性がないため、このライブラリでは片方のサポートを停止するか、両方のバージョンをサポートしなければならない。
 
 ## functions.ts
-
-権限の処理(例えば isPrivate === true の値は作成者以外の編集を拒否するなど)は、全て serverTransform で行う。一部の人には閲覧できない値を除外する作業は、全て toClientState で行う。他の関数では権限による制限を考慮する必要はない。
 
 クライアントに State を渡すのは文字通り toClientState で行う。クライアントに Operation を渡すには、toClientState(prevState)と toClientState(nextState)を求めてから diff する。かつては toClientOperation を定義しておりそれを用いていたが、activeBoardId（旧 activeBoardKey） が後で追加され、activeBoardId が変わったときにそれに伴う Piece の変更も含めなければならず、さらに Piece を子に持つ Character、DicePieceValue にも変更を反映させなければならず… ということをしなければならなくなり、toClientOperation を使うのはパフォーマンスこそいいもののロジックが複雑化して大変なので diff を取る作戦を採用することにした。ただ、パフォーマンスのために activeBoardId が絡まない部分だけ toClientOperation を用い、残りは diff を用いるという折衷案もありかもしれない。
 
