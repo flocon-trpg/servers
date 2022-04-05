@@ -1867,7 +1867,7 @@ __metadata:
     sanitize-filename: ^1.6.3
     sharp: ^0.29.1
     ts-jest: 27.1.4
-    ts-node: ^10.2.0
+    ts-node: ^10.7.0
     type-fest: ^2.12.0
     type-graphql: ^1.1.1
     typescript: 4.4.4
@@ -2048,7 +2048,7 @@ __metadata:
     serve: ^13.0.0
     sucrase: ^3.20.1
     ts-jest: 27.1.4
-    ts-node: ^10.2.1
+    ts-node: ^10.7.0
     typescript: 4.4.4
     url-join: ^4.0.1
     use-constant: ^1.1.0
@@ -12088,7 +12088,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:3.0.4, minimatch@npm:^3.0.4":
+"minimatch@npm:3.0.4":
   version: 3.0.4
   resolution: "minimatch@npm:3.0.4"
   dependencies:
@@ -12097,7 +12097,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:^3.0.2, minimatch@npm:^3.0.3":
+"minimatch@npm:^3.0.2, minimatch@npm:^3.0.3, minimatch@npm:^3.0.4":
   version: 3.1.2
   resolution: "minimatch@npm:3.1.2"
   dependencies:
@@ -16891,9 +16891,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-node@npm:^10.2.0, ts-node@npm:^10.2.1, ts-node@npm:^10.5.0":
-  version: 10.5.0
-  resolution: "ts-node@npm:10.5.0"
+"ts-node@npm:^10.5.0, ts-node@npm:^10.7.0":
+  version: 10.7.0
+  resolution: "ts-node@npm:10.7.0"
   dependencies:
     "@cspotcode/source-map-support": 0.7.0
     "@tsconfig/node10": ^1.0.7
@@ -16921,10 +16921,11 @@ __metadata:
   bin:
     ts-node: dist/bin.js
     ts-node-cwd: dist/bin-cwd.js
+    ts-node-esm: dist/bin-esm.js
     ts-node-script: dist/bin-script.js
     ts-node-transpile-only: dist/bin-transpile.js
     ts-script: dist/bin-script-deprecated.js
-  checksum: d51ac8a9b3582ce3705cef8d35f3372e40caa277dbd7c7baeb651961538f13d2f11f22402614348f78d9b10501bd1cb5f05ec4f2ec9a74bd0e288de769c32335
+  checksum: 2a379e43f7478d0b79e1e63af91fe222d83857727957df4bd3bdf3c0a884de5097b12feb9bbf530074526b8874c0338b0e6328cf334f3a5e2c49c71e837273f7
   languageName: node
   linkType: hard
 
