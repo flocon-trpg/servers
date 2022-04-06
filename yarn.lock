@@ -1825,7 +1825,7 @@ __metadata:
     "@types/jest": 27.4.1
     "@types/lodash": ^4.14.175
     "@types/multer": ^1.4.7
-    "@types/node": ^14.0.0
+    "@types/node": ^14.18.12
     "@types/safe-compare": ^1.1.0
     "@types/sharp": ^0.29.2
     "@types/url-join": 4.0.1
@@ -4094,10 +4094,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^14.0.0":
-  version: 14.18.2
-  resolution: "@types/node@npm:14.18.2"
-  checksum: 4684fd4aa8a4bcd25e754186a83bfc2464436188df5200174b167d1e28aa6cac77312d02790913bf2b4035dc1221cbfbd65974465126354c17d1ca396e69b859
+"@types/node@npm:^14.18.12":
+  version: 14.18.12
+  resolution: "@types/node@npm:14.18.12"
+  checksum: 8a0273caa0584020adb8802784fc7d4f18f05e6c205335b7f3818a91d6b0c22736b9f51da3428d5bc54076ad47f1a4d6d57990a3ce8489a520ac66b2b3ff24bc
   languageName: node
   linkType: hard
 
