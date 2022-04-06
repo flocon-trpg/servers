@@ -6,7 +6,7 @@
         "@flocon-trpg/core": "workspace:^",
         "@flocon-trpg/utils": "workspace:^",
         "@kizahasi/option": "^1.0.0",
-        "@kizahasi/ot-string": "^0.3.0",
+        "@kizahasi/ot-string": "^0.4.1",
         "@kizahasi/result": "^1.0.0",
         "@mikro-orm/core": "^5.1.1",
         "@mikro-orm/migrations": "^5.1.1",

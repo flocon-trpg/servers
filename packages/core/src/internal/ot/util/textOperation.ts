@@ -1,6 +1,27 @@
 import { Result } from '@kizahasi/result';
 import * as t from 'io-ts';
-import * as TextOperationCore from '@kizahasi/ot-string';
+import {
+    deserializeUpOperation,
+    apply as applyCore,
+    applyBack as applyBackCore,
+    deserializeDownOperation,
+    ComposeAndTransformError,
+    NonEmptyString,
+    PositiveInt,
+    composeUpOperation as composeUpOperationCore,
+    composeDownOperation as composeDownOperationCore,
+    serializeUpOperation,
+    serializeDownOperation,
+    applyBackAndRestore,
+    serializeTwoWayOperation,
+    deserizalizeTwoWayOperation,
+    applyAndRestore,
+    transformTwoWayOperation,
+    transformUpOperation,
+    diff as diffCore,
+    toUpOperation as toUpOperationCore,
+    toDownOperation as toDownOperationCore,
+} from '@kizahasi/ot-string';
 
 const r = 'r';
 const i = 'i';
@@ -58,81 +79,69 @@ export type TwoWayOperation = (
 )[];
 
 export const apply = (state: string, action: UpOperation | TwoWayOperation) => {
-    const action$ = TextOperationCore.TextUpOperation.ofUnit(action);
+    const action$ = deserializeUpOperation(action);
     if (action$ == null) {
         return Result.ok(state);
     }
-    return TextOperationCore.TextUpOperation.apply({
+    return applyCore({
         prevState: state,
-        action: action$,
+        upOperation: action$,
     });
 };
 
 export const applyBack = (state: string, action: DownOperation) => {
-    const action$ = TextOperationCore.TextDownOperation.ofUnit(action);
+    const action$ = deserializeDownOperation(action);
     if (action$ == null) {
         return Result.ok(state);
     }
-    return TextOperationCore.TextDownOperation.applyBack({
+    return applyBackCore({
         nextState: state,
-        action: action$,
+        downOperation: action$,
     });
 };
 
 export const composeUpOperation = (
     first: UpOperation | undefined,
     second: UpOperation | undefined
-): Result<
-    UpOperation | undefined,
-    TextOperationCore.ComposeAndTransformError<
-        TextOperationCore.NonEmptyString,
-        TextOperationCore.PositiveInt
-    >
-> => {
-    const first$ = first == null ? undefined : TextOperationCore.TextUpOperation.ofUnit(first);
-    const second$ = second == null ? undefined : TextOperationCore.TextUpOperation.ofUnit(second);
+): Result<UpOperation | undefined, ComposeAndTransformError<NonEmptyString, PositiveInt>> => {
+    const first$ = first == null ? undefined : deserializeUpOperation(first);
+    const second$ = second == null ? undefined : deserializeUpOperation(second);
     if (first$ == null) {
         return Result.ok(second);
     }
     if (second$ == null) {
         return Result.ok(first);
     }
-    const result = TextOperationCore.TextUpOperation.compose({
+    const result = composeUpOperationCore({
         first: first$,
         second: second$,
     });
     if (result.isError) {
         return result;
     }
-    return Result.ok(TextOperationCore.TextUpOperation.toUnit(result.value));
+    return Result.ok(serializeUpOperation(result.value));
 };
 
 export const composeDownOperation = (
     first: DownOperation | undefined,
     second: DownOperation | undefined
-): Result<
-    DownOperation | undefined,
-    TextOperationCore.ComposeAndTransformError<
-        TextOperationCore.PositiveInt,
-        TextOperationCore.NonEmptyString
-    >
-> => {
-    const first$ = first == null ? undefined : TextOperationCore.TextDownOperation.ofUnit(first);
-    const second$ = second == null ? undefined : TextOperationCore.TextDownOperation.ofUnit(second);
+): Result<DownOperation | undefined, ComposeAndTransformError<PositiveInt, NonEmptyString>> => {
+    const first$ = first == null ? undefined : deserializeDownOperation(first);
+    const second$ = second == null ? undefined : deserializeDownOperation(second);
     if (first$ == null) {
         return Result.ok(second);
     }
     if (second$ == null) {
         return Result.ok(first);
     }
-    const result = TextOperationCore.TextDownOperation.compose({
+    const result = composeDownOperationCore({
         first: first$,
         second: second$,
     });
     if (result.isError) {
         return result;
     }
-    return Result.ok(TextOperationCore.TextDownOperation.toUnit(result.value));
+    return Result.ok(serializeDownOperation(result.value));
 };
 
 export const restore = ({
@@ -143,25 +152,23 @@ export const restore = ({
     downOperation: DownOperation | undefined;
 }) => {
     const downOperation$ =
-        downOperation == null
-            ? undefined
-            : TextOperationCore.TextDownOperation.ofUnit(downOperation);
+        downOperation == null ? undefined : deserializeDownOperation(downOperation);
     if (downOperation$ == null) {
         return Result.ok({
             prevState: nextState,
             twoWayOperation: undefined,
         });
     }
-    const result = TextOperationCore.TextDownOperation.applyBackAndRestore({
+    const result = applyBackAndRestore({
         nextState,
-        action: downOperation$,
+        downOperation: downOperation$,
     });
     if (result.isError) {
         return result;
     }
     return Result.ok({
         prevState: result.value.prevState,
-        twoWayOperation: TextOperationCore.TextTwoWayOperation.toUnit(result.value.restored),
+        twoWayOperation: serializeTwoWayOperation(result.value.restored),
     });
 };
 
@@ -175,43 +182,42 @@ const serverTransformCore = ({
     second?: UpOperation;
     prevState: string;
 }) => {
-    const first$ = first == null ? undefined : TextOperationCore.TextTwoWayOperation.ofUnit(first);
+    const first$ = first == null ? undefined : deserizalizeTwoWayOperation(first);
     if (first$ === undefined) {
-        const second$ =
-            second == null ? undefined : TextOperationCore.TextUpOperation.ofUnit(second);
+        const second$ = second == null ? undefined : deserializeUpOperation(second);
         if (second$ === undefined) {
             return Result.ok({
                 firstPrime: undefined,
                 secondPrime: undefined,
             });
         }
-        const restoreResult = TextOperationCore.TextUpOperation.applyAndRestore({
+        const restoreResult = applyAndRestore({
             prevState,
-            action: second$,
+            upOperation: second$,
         });
         if (restoreResult.isError) {
             return restoreResult;
         }
         return Result.ok({
             firstPrime: undefined,
-            secondPrime: TextOperationCore.TextTwoWayOperation.toUnit(restoreResult.value.restored),
+            secondPrime: serializeTwoWayOperation(restoreResult.value.restored),
         });
     }
-    const second$ = second == null ? undefined : TextOperationCore.TextUpOperation.ofUnit(second);
+    const second$ = second == null ? undefined : deserializeUpOperation(second);
     if (second$ === undefined) {
         return Result.ok({
             firstPrime: first$,
             secondPrime: undefined,
         });
     }
-    const secondResult = TextOperationCore.TextUpOperation.applyAndRestore({
+    const secondResult = applyAndRestore({
         prevState,
-        action: second$,
+        upOperation: second$,
     });
     if (secondResult.isError) {
         return secondResult;
     }
-    const result = TextOperationCore.TextTwoWayOperation.serverTransform({
+    const result = transformTwoWayOperation({
         first: first$,
         second: secondResult.value.restored,
     });
@@ -219,8 +225,8 @@ const serverTransformCore = ({
         return result;
     }
     return Result.ok({
-        firstPrime: TextOperationCore.TextTwoWayOperation.toUnit(result.value.firstPrime),
-        secondPrime: TextOperationCore.TextTwoWayOperation.toUnit(result.value.secondPrime),
+        firstPrime: serializeTwoWayOperation(result.value.firstPrime),
+        secondPrime: serializeTwoWayOperation(result.value.secondPrime),
     });
 };
 
@@ -247,10 +253,9 @@ export const clientTransform = ({
     first?: UpOperation;
     second?: UpOperation;
 }) => {
-    const first$ = first == null ? undefined : TextOperationCore.TextUpOperation.ofUnit(first);
+    const first$ = first == null ? undefined : deserializeUpOperation(first);
     if (first$ === undefined) {
-        const second$ =
-            second == null ? undefined : TextOperationCore.TextUpOperation.ofUnit(second);
+        const second$ = second == null ? undefined : deserializeUpOperation(second);
         if (second$ === undefined) {
             return Result.ok({
                 firstPrime: undefined,
@@ -259,17 +264,17 @@ export const clientTransform = ({
         }
         return Result.ok({
             firstPrime: undefined,
-            secondPrime: TextOperationCore.TextUpOperation.toUnit(second$),
+            secondPrime: serializeUpOperation(second$),
         });
     }
-    const second$ = second == null ? undefined : TextOperationCore.TextUpOperation.ofUnit(second);
+    const second$ = second == null ? undefined : deserializeUpOperation(second);
     if (second$ === undefined) {
         return Result.ok({
-            firstPrime: TextOperationCore.TextUpOperation.toUnit(first$),
+            firstPrime: serializeUpOperation(first$),
             secondPrime: undefined,
         });
     }
-    const result = TextOperationCore.TextUpOperation.transform({
+    const result = transformUpOperation({
         first: first$,
         second: second$,
     });
@@ -277,8 +282,8 @@ export const clientTransform = ({
         return result;
     }
     return Result.ok({
-        firstPrime: TextOperationCore.TextUpOperation.toUnit(result.value.firstPrime),
-        secondPrime: TextOperationCore.TextUpOperation.toUnit(result.value.secondPrime),
+        firstPrime: serializeUpOperation(result.value.firstPrime),
+        secondPrime: serializeUpOperation(result.value.secondPrime),
     });
 };
 
@@ -292,10 +297,10 @@ export const diff = ({
     if (prev === next) {
         return undefined;
     }
-    return TextOperationCore.TextTwoWayOperation.toUnit(
-        TextOperationCore.TextTwoWayOperation.diff({
-            first: prev,
-            second: next,
+    return serializeTwoWayOperation(
+        diffCore({
+            prevState: prev,
+            nextState: next,
         })
     );
 };
@@ -310,30 +315,30 @@ const diffToUpOperation = ({
     if (prev === next) {
         return undefined;
     }
-    const twoWayOperation = TextOperationCore.TextTwoWayOperation.diff({
-        first: prev,
-        second: next,
+    const twoWayOperation = diffCore({
+        prevState: prev,
+        nextState: next,
     });
-    const upOperation = TextOperationCore.TextTwoWayOperation.toUpOperation(twoWayOperation);
-    return TextOperationCore.TextUpOperation.toUnit(upOperation);
+    const upOperation = toUpOperationCore(twoWayOperation);
+    return serializeUpOperation(upOperation);
 };
 
 export const toUpOperation = (source: TwoWayOperation): UpOperation => {
-    const twoWayOperation = TextOperationCore.TextTwoWayOperation.ofUnit(source);
+    const twoWayOperation = deserizalizeTwoWayOperation(source);
     if (twoWayOperation == null) {
         throw new Error('This should not happen');
     }
-    const upOperation = TextOperationCore.TextTwoWayOperation.toUpOperation(twoWayOperation);
-    return TextOperationCore.TextUpOperation.toUnit(upOperation);
+    const upOperation = toUpOperationCore(twoWayOperation);
+    return serializeUpOperation(upOperation);
 };
 
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
-    const twoWayOperation = TextOperationCore.TextTwoWayOperation.ofUnit(source);
+    const twoWayOperation = deserizalizeTwoWayOperation(source);
     if (twoWayOperation == null) {
         throw new Error('This should not happen');
     }
-    const downOperation = TextOperationCore.TextTwoWayOperation.toDownOperation(twoWayOperation);
-    return TextOperationCore.TextDownOperation.toUnit(downOperation);
+    const downOperation = toDownOperationCore(twoWayOperation);
+    return serializeDownOperation(downOperation);
 };
 
 // Ensure this:

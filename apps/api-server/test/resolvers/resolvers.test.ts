@@ -32,7 +32,7 @@ import axios from 'axios';
 import FormData from 'form-data';
 import urljoin from 'url-join';
 import { readFileSync } from 'fs';
-import { TextTwoWayOperation, TextUpOperation } from '@kizahasi/ot-string';
+import TextOperation from '@kizahasi/ot-string';
 import { OperationResult } from '@urql/core';
 import { maskTypeNames } from './utils/maskTypenames';
 import { TestClients } from './utils/testClients';
@@ -54,12 +54,12 @@ const textDiff = ({ prev, next }: { prev: string; next: string }) => {
     if (prev === next) {
         return undefined;
     }
-    const diff = TextTwoWayOperation.diff({
-        first: prev,
-        second: next,
+    const diff = TextOperation.diff({
+        prevState: prev,
+        nextState: next,
     });
-    const upOperation = TextTwoWayOperation.toUpOperation(diff);
-    return TextUpOperation.toUnit(upOperation);
+    const upOperation = TextOperation.toUpOperation(diff);
+    return TextOperation.serializeUpOperation(upOperation);
 };
 
 const clearAllRooms = async (em: EM): Promise<void> => {
