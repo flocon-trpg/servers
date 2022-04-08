@@ -14,6 +14,7 @@ const postgresClientUrl = 'postgresql://postgres:postgres@postgres:5432';
 
 const PostgreSQLConfig = {
     dbName: 'test',
+    dirName: 'src',
     clientUrl: postgresClientUrl,
     // debug: trueだとGitHub Actionsのログのサイズが巨大（10MB以上）になるのでfalseにしている
     debug: false,
@@ -32,6 +33,7 @@ export type DbConfig =
 const createSQLiteConfig = (dbName: string) => {
     return {
         dbName,
+        dirName: 'src',
         // debug: trueだとGitHub Actionsのログのサイズが巨大（10MB以上）になるのでfalseにしている
         debug: false,
     } as const;

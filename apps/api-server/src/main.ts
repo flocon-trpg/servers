@@ -55,6 +55,7 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
     const orm = await ServerConfig.createORM(
         serverConfig,
         commandLineArgs.db ?? null,
+        'dist',
         commandLineArgs.debug
     );
 

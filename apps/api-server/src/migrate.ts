@@ -99,6 +99,7 @@ export const migrateByNpmScript = async (
                 orm = await ServerConfigForMigration.createORM(
                     serverConfig.value,
                     commandLineArgs.db ?? null,
+                    'src',
                     true
                 );
                 if (orm.isError) {
@@ -122,6 +123,7 @@ export const migrateByNpmScript = async (
                 orm = await ServerConfigForMigration.createORM(
                     serverConfig.value,
                     commandLineArgs.db ?? null,
+                    'src',
                     true
                 );
                 if (orm.isError) {
@@ -142,6 +144,7 @@ export const migrateByNpmScript = async (
                 orm = await ServerConfigForMigration.createORM(
                     serverConfig.value,
                     commandLineArgs.db ?? null,
+                    'dist',
                     true
                 );
                 if (orm.isError) {
@@ -163,6 +166,7 @@ export const migrateByNpmScript = async (
                 orm = await ServerConfigForMigration.createORM(
                     serverConfig.value,
                     commandLineArgs.db ?? null,
+                    'dist',
                     true
                 );
                 if (orm.isError) {
@@ -195,6 +199,7 @@ export const migrateByNpmScript = async (
                 orm = await ServerConfigForMigration.createORM(
                     serverConfig.value,
                     commandLineArgs.db ?? null,
+                    'dist',
                     true
                 );
                 if (orm.isError) {
