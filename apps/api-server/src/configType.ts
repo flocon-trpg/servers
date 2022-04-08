@@ -2,7 +2,7 @@ import { Result } from '@kizahasi/result';
 import * as t from 'io-ts';
 import { ReadonlyDeep } from 'type-fest';
 import { DATABASE_URL, HEROKU, POSTGRESQL, SQLITE } from './env';
-import { createPostgreSQL, createSQLite } from './mikro-orm';
+import { createPostgreSQL, createSQLite, DirName } from './mikro-orm';
 import { AppConsole } from './utils/appConsole';
 import { ORM } from './utils/types';
 
@@ -97,8 +97,11 @@ export type WritableServerConfigForMigration = {
 export type ServerConfigForMigration = ReadonlyDeep<WritableServerConfigForMigration>;
 
 export namespace ServerConfigForMigration {
-    const createSQLiteORM = async (sqliteConfig: SqliteDatabaseConfig): Promise<Result<ORM>> => {
-        const result = await createSQLite({ dbName: sqliteConfig.dbName });
+    const createSQLiteORM = async (
+        sqliteConfig: SqliteDatabaseConfig,
+        dirName: DirName
+    ): Promise<Result<ORM>> => {
+        const result = await createSQLite({ dbName: sqliteConfig.dbName, dirName });
         return Result.ok(result);
     };
 
@@ -106,6 +109,7 @@ export namespace ServerConfigForMigration {
         postgresConfig: PostgresqlDatabaseConfig | undefined,
         serverConfig: ServerConfigForMigration,
         databaseArg: typeof postgresql | null,
+        dirName: DirName,
         debug: boolean
     ): Promise<Result<ORM>> => {
         if (serverConfig.heroku) {
@@ -116,6 +120,7 @@ export namespace ServerConfigForMigration {
                     driverOptions: {
                         connection: { ssl: { rejectUnauthorized: false } },
                     },
+                    dirName,
                     debug,
                 });
                 return Result.ok(result);
@@ -136,6 +141,7 @@ export namespace ServerConfigForMigration {
         }
         const result = await createPostgreSQL({
             dbName: postgresConfig.dbName,
+            dirName,
             clientUrl: postgresConfig.clientUrl,
             driverOptions: postgresConfig.driverOptions,
             debug,
@@ -146,6 +152,7 @@ export namespace ServerConfigForMigration {
     const createORMCore = async (
         serverConfig: ServerConfigForMigration,
         databaseArg: typeof postgresql | typeof sqlite | null,
+        dirName: DirName,
         debug: boolean
     ): Promise<Result<ORM>> => {
         switch (databaseArg) {
@@ -156,12 +163,13 @@ export namespace ServerConfigForMigration {
                             `Because both ${POSTGRESQL} and ${SQLITE} are set, you must use --db parameter to specify a database to use.`
                         );
                     }
-                    return await createSQLiteORM(serverConfig.sqlite);
+                    return await createSQLiteORM(serverConfig.sqlite, dirName);
                 }
                 return await createPostgresORM(
                     serverConfig.postgresql,
                     serverConfig,
                     databaseArg,
+                    dirName,
                     debug
                 );
             case sqlite: {
@@ -170,13 +178,14 @@ export namespace ServerConfigForMigration {
                         `使用するデータベースとしてSQLiteが指定されましたが、${SQLITE}の値が設定されていません。`
                     );
                 }
-                return await createSQLiteORM(serverConfig.sqlite);
+                return await createSQLiteORM(serverConfig.sqlite, dirName);
             }
             case postgresql: {
                 return await createPostgresORM(
                     serverConfig.postgresql,
                     serverConfig,
                     databaseArg,
+                    dirName,
                     debug
                 );
             }
@@ -186,10 +195,11 @@ export namespace ServerConfigForMigration {
     export async function createORM(
         serverConfig: ServerConfigForMigration,
         databaseArg: typeof postgresql | typeof sqlite | null,
+        dirName: DirName,
         debug: boolean
     ) {
         try {
-            return await createORMCore(serverConfig, databaseArg, debug);
+            return await createORMCore(serverConfig, databaseArg, dirName, debug);
         } catch (e) {
             AppConsole.error({
                 en: 'Could not connect to the database!',
@@ -221,8 +231,9 @@ export namespace ServerConfig {
     export async function createORM(
         serverConfig: ServerConfigForMigration,
         databaseArg: typeof postgresql | typeof sqlite | null,
+        dirName: DirName,
         debug: boolean
     ) {
-        return await ServerConfigForMigration.createORM(serverConfig, databaseArg, debug);
+        return await ServerConfigForMigration.createORM(serverConfig, databaseArg, dirName, debug);
     }
 }

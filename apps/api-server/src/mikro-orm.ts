@@ -35,20 +35,33 @@ const entities = [
 ];
 
 type Debug = boolean | LoggerNamespace[];
+export type DirName = 'src' | 'dist';
+
+const migrations = ({
+    dirName,
+    dbType,
+}: {
+    dirName: DirName;
+    dbType: 'sqlite' | 'mysql' | 'postgresql';
+}) => {
+    return {
+        path: `./${dirName}/__migrations__/${dbType}`,
+    };
+};
 
 export const createSQLite = async ({
     dbName,
+    dirName,
     debug,
 }: {
     dbName: string;
+    dirName: DirName;
     debug?: Debug;
 }): Promise<MikroORM<IDatabaseDriver<Connection>>> => {
     return await MikroORM.init({
         entities,
         dbName,
-        migrations: {
-            path: `./dist/__migrations__/sqlite`,
-        },
+        migrations: migrations({ dbType: 'sqlite', dirName }),
         type: 'sqlite',
         forceUndefined: true,
         debug,
@@ -57,11 +70,13 @@ export const createSQLite = async ({
 
 export const createPostgreSQL = async ({
     dbName,
+    dirName,
     clientUrl,
     debug,
     driverOptions,
 }: {
     dbName: string | undefined;
+    dirName: DirName;
     clientUrl: string;
     debug?: Debug;
     driverOptions: Dictionary<unknown> | undefined;
@@ -70,7 +85,7 @@ export const createPostgreSQL = async ({
         entities,
         dbName,
         migrations: {
-            path: `./dist/__migrations__/postgresql`,
+            ...migrations({ dbType: 'postgresql', dirName }),
 
             // https://github.com/mikro-orm/mikro-orm/issues/190#issuecomment-655763246
             disableForeignKeys: false,
