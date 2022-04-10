@@ -10,6 +10,7 @@
         "@kizahasi/result": "^1.0.0",
         "@mikro-orm/core": "^5.1.1",
         "@mikro-orm/migrations": "^5.1.1",
+        "@mikro-orm/mysql": "^5.1.1",
         "@mikro-orm/postgresql": "^5.1.1",
         "@mikro-orm/sqlite": "^5.1.1",
         "@types/bcrypt": "^5.0.0",

@@ -3,6 +3,8 @@ import {
     EntryPasswordConfig,
     firebaseAdminSecret,
     FirebaseAdminSecretConfig,
+    mysqlDatabase,
+    MysqlDatabaseConfig,
     none,
     postgresqlDatabase,
     PostgresqlDatabaseConfig,
@@ -33,6 +35,7 @@ import {
     HEROKU,
     DATABASE_URL,
     FLOCON_ADMIN,
+    MYSQL,
 } from './env';
 import { filterInt, isTruthyString } from '@flocon-trpg/utils';
 import { Result, Error } from '@kizahasi/result';
@@ -136,6 +139,11 @@ export class ServerConfigBuilder {
         return this[HEROKU];
     }
 
+    public readonly [MYSQL]: EmptyErrorResult<MysqlDatabaseConfig> | undefined;
+    public get mysql() {
+        return this[MYSQL];
+    }
+
     public readonly [ROOMHIST_COUNT]: EmptyErrorResult<number> | undefined;
     public get roomHistCount() {
         return this[ROOMHIST_COUNT];
@@ -200,6 +208,7 @@ export class ServerConfigBuilder {
         this[FLOCON_ADMIN] = ServerConfigBuilder.admin(env);
         this[FIREBASE_ADMIN_SECRET] = ServerConfigBuilder.firebaseAdminSecretProp(env);
         this[ENTRY_PASSWORD] = ServerConfigBuilder.entryPasswordProp(env);
+        this[MYSQL] = ServerConfigBuilder.mysqlProp(env);
         this[POSTGRESQL] = ServerConfigBuilder.postgresqlProp(env);
         this[SQLITE] = ServerConfigBuilder.sqliteProp(env);
     }
@@ -258,18 +267,18 @@ export class ServerConfigBuilder {
         return Result.ok(j.right);
     }
 
-    private static sqliteProp(
+    private static mysqlProp(
         env: typeof process.env
-    ): Result<SqliteDatabaseConfig, undefined> | undefined {
-        const sqliteObject = env[SQLITE];
-        if (sqliteObject == null) {
+    ): Result<MysqlDatabaseConfig, undefined> | undefined {
+        const mysqlObject = env[MYSQL];
+        if (mysqlObject == null) {
             return undefined;
         }
-        const json = tryParseJSON(sqliteObject);
+        const json = tryParseJSON(mysqlObject);
         if (json.isError) {
             return Result.error(undefined);
         }
-        const j = E.mapLeft(formatValidationErrors)(sqliteDatabase.decode(json.value));
+        const j = E.mapLeft(formatValidationErrors)(mysqlDatabase.decode(json.value));
         if (j._tag === 'Left') {
             return Result.error(undefined);
         }
@@ -294,12 +303,33 @@ export class ServerConfigBuilder {
         return Result.ok(j.right);
     }
 
+    private static sqliteProp(
+        env: typeof process.env
+    ): Result<SqliteDatabaseConfig, undefined> | undefined {
+        const sqliteObject = env[SQLITE];
+        if (sqliteObject == null) {
+            return undefined;
+        }
+        const json = tryParseJSON(sqliteObject);
+        if (json.isError) {
+            return Result.error(undefined);
+        }
+        const j = E.mapLeft(formatValidationErrors)(sqliteDatabase.decode(json.value));
+        if (j._tag === 'Left') {
+            return Result.error(undefined);
+        }
+        return Result.ok(j.right);
+    }
+
     private parseError(envKey: string): Error<string> {
         // TODO: 英語でも出力する（ADMINのエラーメッセージは英語なため整合性が取れていない）
         return Result.error(`${envKey} の値の記入方法が誤っています。`);
     }
 
     private createServerConfigForMigration(): Result<ServerConfigForMigration> {
+        if (this.mysql?.isError === true) {
+            return this.parseError(MYSQL);
+        }
         if (this.sqlite?.isError === true) {
             return this.parseError(SQLITE);
         }
@@ -310,6 +340,7 @@ export class ServerConfigBuilder {
         const result: ServerConfigForMigration = {
             herokuDatabaseUrl: this.databaseUrl,
             heroku: this.heroku ?? false,
+            mysql: ensureOk(this.mysql),
             postgresql: ensureOk(this.postgresql),
             sqlite: ensureOk(this.sqlite),
         };
@@ -333,6 +364,9 @@ export class ServerConfigBuilder {
         }
         if (this.firebaseAdminSecret?.isError === true) {
             return this.parseError(FIREBASE_ADMIN_SECRET);
+        }
+        if (this.mysql?.isError === true) {
+            return this.parseError(MYSQL);
         }
         if (this.postgresql?.isError === true) {
             return this.parseError(POSTGRESQL);
@@ -383,6 +417,7 @@ export class ServerConfigBuilder {
             firebaseAdminSecret: ensureOk(this.firebaseAdminSecret),
             firebaseProjectId,
             heroku: this.heroku ?? false,
+            mysql: ensureOk(this.mysql),
             roomHistCount: ensureOk(this.roomHistCount),
             postgresql: ensureOk(this.postgresql),
             sqlite: ensureOk(this.sqlite),

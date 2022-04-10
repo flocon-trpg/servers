@@ -308,11 +308,15 @@ const sqlite2Type: DbConfig = {
 const postgresqlType: DbConfig = {
     type: 'PostgreSQL',
 };
+const mysqlType: DbConfig = {
+    type: 'MySQL',
+};
 
 describe.each([
     [sqlite1Type, undefined],
     [sqlite2Type, plainEntryPassword],
     [postgresqlType, plainEntryPassword],
+    [mysqlType, plainEntryPassword],
 ] as const)(
     'tests of resolvers',
     (dbType, entryPasswordConfig) => {

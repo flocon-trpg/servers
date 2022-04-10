@@ -1,13 +1,17 @@
 import yargs from 'yargs';
 import { VERSION } from '../VERSION';
 
-export const postgresql = 'postgresql';
-export const sqlite = 'sqlite';
+const mysql = 'mysql';
+const postgresql = 'postgresql';
+const sqlite = 'sqlite';
 
-type DbType = typeof postgresql | typeof sqlite;
+type DbType = typeof mysql | typeof postgresql | typeof sqlite;
+const allDbTypes = [mysql, postgresql, sqlite] as const;
 
 const toDbType = (source: string) => {
     switch (source) {
+        case mysql:
+            return mysql;
         case postgresql:
             return postgresql;
         case sqlite:
@@ -26,7 +30,7 @@ const getMain = async (): Promise<Main> => {
         .option('db', {
             type: 'string',
             nargs: 1,
-            choices: [postgresql, sqlite],
+            choices: allDbTypes,
         })
         .option('debug', { type: 'boolean' })
         .version(VERSION.toString()).argv;
@@ -53,7 +57,7 @@ const getMigrationUp = async (): Promise<MigrationUpOrCheck> => {
         db: {
             type: 'string',
             nargs: 1,
-            choices: [postgresql, sqlite],
+            choices: allDbTypes,
         },
     }).argv;
 
@@ -79,7 +83,7 @@ const getMigrationDown = async (): Promise<MigrationDown> => {
             type: 'string',
             demandOption: true,
             nargs: 1,
-            choices: [postgresql, sqlite],
+            choices: allDbTypes,
         },
         count: {
             type: 'number',
@@ -119,7 +123,7 @@ const getMigrationCreate = async (): Promise<MigrationCreate> => {
             type: 'string',
             demandOption: true,
             nargs: 1,
-            choices: [postgresql, sqlite],
+            choices: allDbTypes,
         },
         init: {
             type: 'boolean',

@@ -97,3 +97,28 @@ export const createPostgreSQL = async ({
         driverOptions,
     });
 };
+
+export const createMySQL = async ({
+    dbName,
+    dirName,
+    clientUrl,
+    debug,
+    driverOptions,
+}: {
+    dbName: string | undefined;
+    dirName: DirName;
+    clientUrl: string;
+    debug?: Debug;
+    driverOptions: Dictionary<unknown> | undefined;
+}): Promise<MikroORM<IDatabaseDriver<Connection>>> => {
+    return await MikroORM.init({
+        entities,
+        dbName,
+        migrations: migrations({ dbType: 'mysql', dirName }),
+        type: 'mysql',
+        debug,
+        forceUndefined: true,
+        clientUrl,
+        driverOptions,
+    });
+};

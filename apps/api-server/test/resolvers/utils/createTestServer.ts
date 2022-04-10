@@ -1,4 +1,4 @@
-import { createPostgreSQL, createSQLite } from '../../../src/mikro-orm';
+import { createMySQL, createPostgreSQL, createSQLite } from '../../../src/mikro-orm';
 import { PromiseQueue } from '../../../src/utils/promiseQueue';
 import { InMemoryConnectionManager } from '../../../src/connection/main';
 import { BaasType } from '../../../src/enums/BaasType';
@@ -8,14 +8,24 @@ import { PubSub } from 'graphql-subscriptions';
 import { createServer } from '../../../src/createServer';
 import { Result } from '@kizahasi/result';
 import { Resources } from './resources';
+import { toBeNever } from '@flocon-trpg/utils';
 
-// github actionsではlocalhost:5432ではなくpostgres:5432のようにしないとデータベースが見つからない
 const postgresClientUrl = 'postgresql://postgres:postgres@postgres:5432';
+const mySQLClientUrl = 'mysql://mysql:mysql@mysql:3306';
 
 const PostgreSQLConfig = {
     dbName: 'test',
     dirName: 'src',
     clientUrl: postgresClientUrl,
+    // debug: trueだとGitHub Actionsのログのサイズが巨大（10MB以上）になるのでfalseにしている
+    debug: false,
+    driverOptions: undefined,
+} as const;
+
+const MySQLConfig = {
+    dbName: 'test',
+    dirName: 'src',
+    clientUrl: mySQLClientUrl,
     // debug: trueだとGitHub Actionsのログのサイズが巨大（10MB以上）になるのでfalseにしている
     debug: false,
     driverOptions: undefined,
@@ -28,7 +38,8 @@ export type DbConfig =
       }
     | {
           type: 'PostgreSQL';
-      };
+      }
+    | { type: 'MySQL' };
 
 const createSQLiteConfig = (dbName: string) => {
     return {
@@ -39,17 +50,28 @@ const createSQLiteConfig = (dbName: string) => {
     } as const;
 };
 
-export const createOrm = async (dbCofig: DbConfig) => {
-    switch (dbCofig.type) {
+export const createOrm = async (dbConfig: DbConfig) => {
+    switch (dbConfig.type) {
+        case 'MySQL':
+            return await createMySQL(MySQLConfig);
         case 'PostgreSQL':
             return await createPostgreSQL(PostgreSQLConfig);
         case 'SQLite':
-            return await createSQLite(createSQLiteConfig(dbCofig.dbName));
+            return await createSQLite(createSQLiteConfig(dbConfig.dbName));
+        default:
+            toBeNever(dbConfig);
     }
 };
 
 const setDatabaseConfig = (target: WritableServerConfig, dbConfig: DbConfig): void => {
     switch (dbConfig.type) {
+        case 'MySQL':
+            target.mysql = {
+                clientUrl: mySQLClientUrl,
+                dbName: 'test',
+                driverOptions: undefined,
+            };
+            return;
         case 'PostgreSQL':
             target.postgresql = {
                 clientUrl: postgresClientUrl,
@@ -63,6 +85,8 @@ const setDatabaseConfig = (target: WritableServerConfig, dbConfig: DbConfig): vo
                 driverOptions: undefined,
             };
             return;
+        default:
+            toBeNever(dbConfig);
     }
 };
 
@@ -86,6 +110,7 @@ export const createTestServer = async ({
         firebaseProjectId: 'FAKE_FIREBASE_PROJECTID',
         heroku: false,
         herokuDatabaseUrl: undefined,
+        mysql: undefined,
         postgresql: undefined,
         sqlite: undefined,
         roomHistCount: undefined,
