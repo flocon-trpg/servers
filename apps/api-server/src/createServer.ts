@@ -102,8 +102,6 @@ export const createServer = async ({
         };
     };
 
-    // The ApolloServer constructor requires two parameters: your schema
-    // definition and your set of resolvers.
     const apolloServer = new ApolloServer({
         schema,
         context,

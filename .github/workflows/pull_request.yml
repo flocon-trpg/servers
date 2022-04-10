@@ -13,6 +13,20 @@ jobs:
         container: 'node:14-buster'
 
         services:
+            mysql:
+                image: mysql:8.0
+                env:
+                    MYSQL_ROOT_PASSWORD: root_password
+                    MYSQL_USER: mysql
+                    MYSQL_PASSWORD: mysql
+                    MYSQL_DATABASE: test
+                options: >-
+                    --health-cmd "mysqladmin ping"
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports:
+                    - 3306:3306
             postgres:
                 image: postgres
                 env:
@@ -60,6 +74,15 @@ jobs:
                   SQLITE: >
                       {
                           "dbName": "./test2.sqlite3"
+                      }
+
+            - name: Migration-up MySQL
+              run: yarn migration-up --db mysql
+              working-directory: ./apps/api-server
+              env:
+                  MYSQL: >
+                      {
+                          "clientUrl": "mysql://mysql:mysql@mysql:3306/test"
                       }
 
             - name: Migration-up PostgreSQL
