@@ -14,7 +14,7 @@
         "@react-spring/konva": "^9.2.4",
         "@types/howler": "^2.2.4",
         "@types/html-escaper": "^3.0.0",
-        "@types/lodash": "^4.14.175",
+        "@types/lodash": "^4.14.181",
         "@types/react": "^17.0.24",
         "@types/react-color": "^3.0.5",
         "@types/react-linkify": "^1.0.1",
