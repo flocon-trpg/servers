@@ -101,7 +101,7 @@ export class RoomPubMsg {
         initTextSource: string | undefined;
     }) {
         this.initText = initText;
-        this.initTextSource = initTextSource;
+        this.initTextSource = initText === initTextSource ? undefined : initTextSource;
     }
 
     @PrimaryKey()
@@ -200,7 +200,7 @@ export class RoomPrvMsg {
         initTextSource: string | undefined;
     }) {
         this.initText = initText;
-        this.initTextSource = initTextSource;
+        this.initTextSource = initText === initTextSource ? undefined : initTextSource;
     }
 
     @PrimaryKey()
