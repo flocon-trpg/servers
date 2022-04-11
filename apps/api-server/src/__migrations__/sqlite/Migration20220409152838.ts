@@ -4,12 +4,12 @@ import { Migration } from '@mikro-orm/migrations';
 export class Migration20220409152838 extends Migration {
     replaceTextColumn({ tableName, columnName }: { tableName: string; columnName: string }) {
         this.addSql(
-            `alter table \`${tableName}\` add column \`${columnName}_temp\` varchar null default null;`
+            `alter table \`${tableName}\` add column \`${columnName}_temp\` text null default null;`
         );
         this.addSql(`update \`${tableName}\` set \`${columnName}_temp\` = \`${columnName}\`;`);
         this.addSql(`alter table \`${tableName}\` drop column \`${columnName}\`;`);
         this.addSql(
-            `alter table \`${tableName}\` add column \`${columnName}\` varchar null default null;`
+            `alter table \`${tableName}\` add column \`${columnName}\` text null default null;`
         );
         this.addSql(`update \`${tableName}\` set \`${columnName}\` = \`${columnName}_temp\`;`);
         this.addSql(`alter table \`${tableName}\` drop column \`${columnName}_temp\`;`);
