@@ -7742,14 +7742,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-visitor-keys@npm:^3.0.0":
-  version: 3.1.0
-  resolution: "eslint-visitor-keys@npm:3.1.0"
-  checksum: fd2d613bb315bc549068ca97771d868437fb60c8f13ef8d6d54669773ff53f814b759fa9e57966f15e4c50a5f5e11c6ba47060b8f201f9776311f6c5d5c11b70
-  languageName: node
-  linkType: hard
-
-"eslint-visitor-keys@npm:^3.3.0":
+"eslint-visitor-keys@npm:^3.0.0, eslint-visitor-keys@npm:^3.3.0":
   version: 3.3.0
   resolution: "eslint-visitor-keys@npm:3.3.0"
   checksum: d59e68a7c5a6d0146526b0eec16ce87fbf97fe46b8281e0d41384224375c4e52f5ffb9e16d48f4ea50785cde93f766b0c898e31ab89978d88b0e1720fbfb7808
@@ -9278,14 +9271,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ignore@npm:^5.1.4, ignore@npm:^5.1.8":
-  version: 5.1.8
-  resolution: "ignore@npm:5.1.8"
-  checksum: 967abadb61e2cb0e5c5e8c4e1686ab926f91bc1a4680d994b91947d3c65d04c3ae126dcdf67f08e0feeb8ff8407d453e641aeeddcc47a3a3cca359f283cf6121
-  languageName: node
-  linkType: hard
-
-"ignore@npm:^5.2.0":
+"ignore@npm:^5.1.4, ignore@npm:^5.1.8, ignore@npm:^5.2.0":
   version: 5.2.0
   resolution: "ignore@npm:5.2.0"
   checksum: 6b1f926792d614f64c6c83da3a1f9c83f6196c2839aa41e1e32dd7b8d174cef2e329d75caabb62cb61ce9dc432f75e67d07d122a037312db7caa73166a1bdb77
