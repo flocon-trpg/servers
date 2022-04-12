@@ -31,7 +31,7 @@ export class FStrParams extends FObject {
     }
 
     private findKeysByName(nameOrKey: string | number) {
-        return recordToArray(this.room.numParamNames)
+        return recordToArray(this.room.strParamNames)
             .filter(({ value }, i) => value.name === nameOrKey || i + 1 === nameOrKey)
             .map(({ key }) => key);
     }
