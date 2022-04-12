@@ -79,7 +79,7 @@ export const DicePieceEditorModal: React.FC = () => {
                     const boardId = modalType.boardId;
                     const pieceId = modalType.pieceId;
                     setRoomState(roomState => {
-                        const dicePieces = roomState.boards[boardId]?.dicePieces;
+                        const dicePieces = roomState.boards?.[boardId]?.dicePieces;
                         if (dicePieces == null) {
                             return;
                         }
@@ -104,7 +104,7 @@ export const DicePieceEditorModal: React.FC = () => {
             }
             const id = simpleId();
             setRoomState(roomState => {
-                const dicePieces = roomState.boards[modalType.boardId]?.dicePieces;
+                const dicePieces = roomState.boards?.[modalType.boardId]?.dicePieces;
                 if (dicePieces == null) {
                     return;
                 }
@@ -192,7 +192,7 @@ export const DicePieceEditorModal: React.FC = () => {
                 </Row>
 
                 {dicePieceStrIndexes.map(key => {
-                    const die = uiState.dice[key];
+                    const die = uiState.dice?.[key];
 
                     return (
                         <Row key={key} style={{ minHeight: 28 }} gutter={gutter} align='middle'>
@@ -206,6 +206,9 @@ export const DicePieceEditorModal: React.FC = () => {
                                         updateUiState(pieceValue => {
                                             if (pieceValue == null) {
                                                 return;
+                                            }
+                                            if (pieceValue.dice == null) {
+                                                pieceValue.dice = {};
                                             }
                                             if (e.type === replace) {
                                                 pieceValue.dice[key] =
@@ -230,7 +233,7 @@ export const DicePieceEditorModal: React.FC = () => {
                                     }}
                                     onIsValuePrivateChange={e => {
                                         updateUiState(pieceValue => {
-                                            const die = pieceValue?.dice[key];
+                                            const die = pieceValue?.dice?.[key];
                                             if (die == null) {
                                                 return;
                                             }

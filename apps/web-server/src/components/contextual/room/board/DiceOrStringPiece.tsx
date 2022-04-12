@@ -219,7 +219,7 @@ const DicePieceContent: React.FC<DicePieceContentProps> = ({
 
     const dice: DieValueState[] = [];
     dicePieceStrIndexes.forEach(i => {
-        const die = state.dice[i];
+        const die = state.dice?.[i];
         if (die != null) {
             dice.push(die);
         }

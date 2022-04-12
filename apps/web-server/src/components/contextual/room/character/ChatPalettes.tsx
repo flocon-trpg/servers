@@ -242,7 +242,8 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
                                         if (selectedCharacterId == null) {
                                             return;
                                         }
-                                        const character = roomState.characters[selectedCharacterId];
+                                        const character =
+                                            roomState.characters?.[selectedCharacterId];
                                         if (character == null) {
                                             return;
                                         }
@@ -270,7 +271,7 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
                                     if (selectedCharacterId == null) {
                                         return;
                                     }
-                                    const character = roomState.characters[selectedCharacterId];
+                                    const character = roomState.characters?.[selectedCharacterId];
                                     if (character == null) {
                                         return;
                                     }

@@ -34,8 +34,8 @@ export const createLogs = ({
         State<typeof BoardTypes.template>,
         TwoWayOperation<typeof BoardTypes.template>
     >({
-        prevState: prevState.boards,
-        nextState: nextState.boards,
+        prevState: prevState.boards ?? {},
+        nextState: nextState.boards ?? {},
         innerDiff: params => diff(BoardTypes.template)(params),
     });
     if (boardsDiff == null) {
@@ -100,7 +100,7 @@ export const createLogs = ({
             return;
         }
 
-        const nextBoard = nextState.boards[boardId];
+        const nextBoard = (nextState.boards ?? {})[boardId];
         if (nextBoard == null) {
             throw new Error('this should not happen. Board.diff has some bugs?');
         }
@@ -141,7 +141,7 @@ export const createLogs = ({
                 return;
             }
 
-            const nextDicePiece = nextBoard.dicePieces[stateId];
+            const nextDicePiece = (nextBoard.dicePieces ?? {})[stateId];
             if (nextDicePiece == null) {
                 throw new Error('this should not happen');
             }
@@ -188,7 +188,7 @@ export const createLogs = ({
                 return;
             }
 
-            const nextStringPiece = nextBoard.stringPieces[stateId];
+            const nextStringPiece = (nextBoard.stringPieces ?? {})[stateId];
             if (nextStringPiece == null) {
                 throw new Error('this should not happen');
             }

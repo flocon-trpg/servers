@@ -109,8 +109,8 @@ const createBooleanParameterColumn = ({
         title: <TableHeaderCell title={name.name} rowKey={RowKeys.BoolParam(key)} />,
         key: reactKey,
         sorter: (x, y, sortOrder) =>
-            booleanToNumber(x.character.state.boolParams[key]?.value, sortOrder) -
-            booleanToNumber(y.character.state.boolParams[key]?.value, sortOrder),
+            booleanToNumber(x.character.state.boolParams?.[key]?.value, sortOrder) -
+            booleanToNumber(y.character.state.boolParams?.[key]?.value, sortOrder),
         // eslint-disable-next-line react/display-name
         render: (_: unknown, { character, onOperateCharacter }: DataSource) => {
             return (
@@ -118,12 +118,12 @@ const createBooleanParameterColumn = ({
                     <OverriddenParameterNameEditor
                         type='table'
                         overriddenParameterName={
-                            character.state.boolParams[key]?.overriddenParameterName
+                            character.state.boolParams?.[key]?.overriddenParameterName
                         }
                         onOverriddenParameterNameChange={newName =>
                             onOperateCharacter(character =>
                                 produce(character, character => {
-                                    const boolParam = character.boolParams[key];
+                                    const boolParam = character.boolParams?.[key];
                                     if (boolParam == null) {
                                         return;
                                     }
@@ -138,7 +138,7 @@ const createBooleanParameterColumn = ({
                         isCreate={false}
                         compact
                         parameterKey={key}
-                        parameter={character.state.boolParams[key]}
+                        parameter={character.state.boolParams?.[key]}
                         createdByMe={character.createdByMe ?? false}
                         onOperate={mapping => {
                             onOperateCharacter(mapping);
@@ -168,8 +168,8 @@ const createNumberParameterColumn = ({
         sorter: (x, y, sortOrder) => {
             const defaultValue = sortOrder === 'ascend' ? Number.MAX_VALUE : Number.MIN_VALUE;
             return (
-                (x.character.state.numParams[key]?.value ?? defaultValue) -
-                (y.character.state.numParams[key]?.value ?? defaultValue)
+                (x.character.state.numParams?.[key]?.value ?? defaultValue) -
+                (y.character.state.numParams?.[key]?.value ?? defaultValue)
             );
         },
         sortDirections: ['descend', 'ascend'],
@@ -180,12 +180,12 @@ const createNumberParameterColumn = ({
                     <OverriddenParameterNameEditor
                         type='table'
                         overriddenParameterName={
-                            character.state.numParams[key]?.overriddenParameterName
+                            character.state.numParams?.[key]?.overriddenParameterName
                         }
                         onOverriddenParameterNameChange={newName =>
                             onOperateCharacter(character =>
                                 produce(character, character => {
-                                    const numParam = character.numParams[key];
+                                    const numParam = character.numParams?.[key];
                                     if (numParam == null) {
                                         return;
                                     }
@@ -200,8 +200,8 @@ const createNumberParameterColumn = ({
                         isCreate={false}
                         compact
                         parameterKey={key}
-                        numberParameter={character.state.numParams[key]}
-                        numberMaxParameter={character.state.numMaxParams[key]}
+                        numberParameter={character.state.numParams?.[key]}
+                        numberMaxParameter={character.state.numMaxParams?.[key]}
                         createdByMe={character.createdByMe ?? false}
                         onOperate={mapping => {
                             onOperateCharacter(mapping);
@@ -230,8 +230,8 @@ const createStringParameterColumn = ({
         key: reactKey,
         sorter: (x, y) => {
             // 現在の仕様では、StringParameterは他のパラメーターと異なりundefinedでも''と同じとみなされるため、それに合わせている。
-            const xValue = x.character.state.strParams[key]?.value ?? '';
-            const yValue = y.character.state.strParams[key]?.value ?? '';
+            const xValue = x.character.state.strParams?.[key]?.value ?? '';
+            const yValue = y.character.state.strParams?.[key]?.value ?? '';
             return xValue.localeCompare(yValue);
         },
         // eslint-disable-next-line react/display-name
@@ -241,12 +241,12 @@ const createStringParameterColumn = ({
                     <OverriddenParameterNameEditor
                         type='table'
                         overriddenParameterName={
-                            character.state.strParams[key]?.overriddenParameterName
+                            character.state.strParams?.[key]?.overriddenParameterName
                         }
                         onOverriddenParameterNameChange={newName =>
                             onOperateCharacter(character =>
                                 produce(character, character => {
-                                    const strParam = character.strParams[key];
+                                    const strParam = character.strParams?.[key];
                                     if (strParam == null) {
                                         return;
                                     }
@@ -261,7 +261,7 @@ const createStringParameterColumn = ({
                         isCharacterPrivate={character.state.isPrivate}
                         isCreate={false}
                         parameterKey={key}
-                        parameter={character.state.strParams[key]}
+                        parameter={character.state.strParams?.[key]}
                         createdByMe={character.createdByMe ?? false}
                         onOperate={mapping => {
                             onOperateCharacter(mapping);
@@ -426,7 +426,7 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                                         onChange={newValue => {
                                             setRoomState(state => {
                                                 const targetCharacter =
-                                                    state.characters[character.stateId];
+                                                    state.characters?.[character.stateId];
                                                 if (targetCharacter == null) {
                                                     return;
                                                 }
@@ -463,7 +463,7 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                                     onChange={newValue => {
                                         setRoomState(roomState => {
                                             const targetCharacter =
-                                                roomState.characters[character.stateId];
+                                                roomState.characters?.[character.stateId];
                                             if (targetCharacter == null) {
                                                 return;
                                             }
@@ -506,9 +506,12 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
         const operateCharacter =
             (characterId: string) => (mapping: (character: CharacterState) => CharacterState) => {
                 setRoomState(roomState => {
-                    const character = roomState.characters[characterId];
+                    const character = roomState.characters?.[characterId];
                     if (character == null) {
                         return;
+                    }
+                    if (roomState.characters == null) {
+                        roomState.characters = {};
                     }
                     roomState.characters[characterId] = mapping(character);
                 });

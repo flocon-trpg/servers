@@ -119,8 +119,8 @@ export const serverTransform =
         }
 
         const boolParams = ParamRecordOperation.serverTransform({
-            prevState: prevState.boolParams,
-            nextState: currentState.boolParams,
+            prevState: prevState.boolParams ?? {},
+            nextState: currentState.boolParams ?? {},
             first: serverOperation?.boolParams,
             second: clientOperation.boolParams,
             innerTransform: ({ prevState, nextState, first, second }) =>
@@ -137,8 +137,8 @@ export const serverTransform =
         }
 
         const numParams = ParamRecordOperation.serverTransform({
-            prevState: prevState.numParams,
-            nextState: currentState.numParams,
+            prevState: prevState.numParams ?? {},
+            nextState: currentState.numParams ?? {},
             first: serverOperation?.numParams,
             second: clientOperation.numParams,
             innerTransform: ({ prevState, nextState, first, second }) =>
@@ -155,8 +155,8 @@ export const serverTransform =
         }
 
         const numMaxParams = ParamRecordOperation.serverTransform({
-            prevState: prevState.numMaxParams,
-            nextState: currentState.numMaxParams,
+            prevState: prevState.numMaxParams ?? {},
+            nextState: currentState.numMaxParams ?? {},
             first: serverOperation?.numMaxParams,
             second: clientOperation.numMaxParams,
             innerTransform: ({ prevState, nextState, first, second }) =>
@@ -173,8 +173,8 @@ export const serverTransform =
         }
 
         const strParams = ParamRecordOperation.serverTransform({
-            prevState: prevState.strParams,
-            nextState: currentState.strParams,
+            prevState: prevState.strParams ?? {},
+            nextState: currentState.strParams ?? {},
             first: serverOperation?.strParams,
             second: clientOperation.strParams,
             innerTransform: ({ prevState, nextState, first, second }) =>

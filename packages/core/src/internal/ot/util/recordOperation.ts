@@ -73,7 +73,7 @@ export const toClientState = <TSourceState, TClientState>({
     isPrivate,
     toClientState,
 }: {
-    serverState: StringKeyRecord<TSourceState>;
+    serverState: StringKeyRecord<TSourceState> | undefined;
 
     // 対象となるユーザーの視点で、全体がprivateとなるときはtrueを返す。一部がprivateである、もしくはprivateである部分がないときはfalseを返す。
     isPrivate: (state: TSourceState, key: string) => boolean;
@@ -83,7 +83,7 @@ export const toClientState = <TSourceState, TClientState>({
 }) => {
     return (
         DualKeyRecordOperation.toClientState({
-            serverState: { [fakeKey]: serverState },
+            serverState: { [fakeKey]: serverState ?? {} },
             isPrivate: (state, key) => isPrivate(state, key.second),
             toClientState: ({ state, key }) => toClientState({ state, key: key.second }),
         })[fakeKey] ?? {}
@@ -250,8 +250,8 @@ export const serverTransform = <
     toServerState,
     cancellationPolicy,
 }: {
-    prevState: StringKeyRecord<TServerState>;
-    nextState: StringKeyRecord<TServerState>;
+    prevState: StringKeyRecord<TServerState> | undefined;
+    nextState: StringKeyRecord<TServerState> | undefined;
     first?: RecordUpOperation<TServerState, TFirstOperation>;
     second?: RecordUpOperation<TClientState, TSecondOperation>;
     toServerState: (state: TClientState, key: string) => TServerState;
@@ -272,8 +272,8 @@ export const serverTransform = <
     const result = DualKeyRecordOperation.serverTransform({
         first: first === undefined ? undefined : { [fakeKey]: first },
         second: second === undefined ? undefined : { [fakeKey]: second },
-        prevState: { [fakeKey]: prevState },
-        nextState: { [fakeKey]: nextState },
+        prevState: { [fakeKey]: prevState ?? {} },
+        nextState: { [fakeKey]: nextState ?? {} },
         innerTransform: ({ key, ...params }) => innerTransform({ ...params, key: key.second }),
         toServerState: (state, key) => toServerState(state, key.second),
         cancellationPolicy: {

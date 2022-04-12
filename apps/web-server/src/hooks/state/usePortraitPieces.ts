@@ -10,7 +10,7 @@ export const usePortraitPieces = (boardId: string) => {
             return undefined;
         }
         return [...characters].flatMap(([characterId, character]) => {
-            return recordToArray(character.portraitPieces)
+            return recordToArray(character.portraitPieces ?? {})
                 .filter(({ value: portraitPiece }) => {
                     return boardId === portraitPiece.boardId;
                 })

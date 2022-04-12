@@ -24,12 +24,24 @@ export class FParamNames extends FObject {
 
     private getParamNames() {
         switch (this.mode) {
-            case 'Boolean':
+            case 'Boolean': {
+                if (this.room.boolParamNames == null) {
+                    this.room.boolParamNames = {};
+                }
                 return this.room.boolParamNames;
-            case 'Number':
+            }
+            case 'Number': {
+                if (this.room.numParamNames == null) {
+                    this.room.numParamNames = {};
+                }
                 return this.room.numParamNames;
-            case 'String':
+            }
+            case 'String': {
+                if (this.room.strParamNames == null) {
+                    this.room.strParamNames = {};
+                }
                 return this.room.strParamNames;
+            }
         }
     }
 

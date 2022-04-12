@@ -63,6 +63,9 @@ export const ImportCharacterModal: React.FC = () => {
                                 return;
                             }
                             setRoomState(roomState => {
+                                if (roomState.characters == null) {
+                                    roomState.characters = {};
+                                }
                                 const id = simpleId();
                                 roomState.characters[id] = {
                                     ...parsed.value,

@@ -91,6 +91,9 @@ export const BoardEditorModal: React.FC = () => {
                 state: boards?.get(modalValue.stateId),
                 onUpdate: nextState => {
                     setRoomState(roomState => {
+                        if (roomState.boards == null) {
+                            roomState.boards = {};
+                        }
                         roomState.boards[modalValue.stateId] = nextState;
                     });
                 },
@@ -114,6 +117,9 @@ export const BoardEditorModal: React.FC = () => {
         onOkClick = () => {
             const id = simpleId();
             setRoomState(roomState => {
+                if (roomState.boards == null) {
+                    roomState.boards = {};
+                }
                 roomState.boards[id] = {
                     ...board,
                     ownerParticipantId: myUserUid,
@@ -139,7 +145,7 @@ export const BoardEditorModal: React.FC = () => {
     if (modalValue?.type === update) {
         onDestroy = () => {
             setRoomState(roomState => {
-                delete roomState.boards[modalValue.stateId];
+                delete roomState.boards?.[modalValue.stateId];
             });
             setModalValue(null);
         };

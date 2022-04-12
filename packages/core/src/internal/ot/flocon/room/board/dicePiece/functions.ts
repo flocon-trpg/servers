@@ -28,7 +28,9 @@ export const toClientState =
         });
         return {
             ...source,
-            dice: chooseRecord(source.dice, state => DieValue.toClientState(isAuthorized)(state)),
+            dice: chooseRecord(source.dice ?? {}, state =>
+                DieValue.toClientState(isAuthorized)(state)
+            ),
         };
     };
 

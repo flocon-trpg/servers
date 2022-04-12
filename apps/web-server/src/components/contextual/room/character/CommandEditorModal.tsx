@@ -139,7 +139,7 @@ export const CommandEditorModal: React.FC = () => {
         if (characterRef.current == null) {
             return;
         }
-        setPrivateCommands(recordToMap(characterRef.current.privateCommands));
+        setPrivateCommands(recordToMap(characterRef.current.privateCommands ?? {}));
     }, [commandEditorModalType, characterRef]);
 
     const setCommandValue = (key: string, command: string) => {

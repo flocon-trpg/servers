@@ -186,8 +186,6 @@ type ParticipantUpOperation = UpOperation<typeof participantTemplate>;
 
 const bcryptSaltRounds = 10;
 
-const find = <T>(source: Record<string, T | undefined>, key: string): T | undefined => source[key];
-
 type SendTo = {
     // このイベントを送信するユーザーのUserUid。allの場合は制限しない（全員に送る）。
     sendTo: typeof all | ReadonlySet<string>;
@@ -299,7 +297,7 @@ const operateParticipantAndFlush = async ({
 }): Promise<{ result: typeof JoinRoomResult; payload: RoomEventPayload | undefined }> => {
     const prevRevision = room.revision;
     const roomState = await GlobalRoom.MikroORM.ToGlobal.state(room, em);
-    const me = find(roomState.participants, myUserUid);
+    const me = roomState.participants?.[myUserUid];
     let participantOperation:
         | RecordUpOperationElement<ParticipantState, ParticipantUpOperation>
         | undefined = undefined;
@@ -1828,7 +1826,7 @@ export class RoomResolver {
                         currentRoomState: roomState,
                     })
                 )
-                    chara = roomState.characters[args.characterId];
+                    chara = roomState.characters?.[args.characterId];
             }
             const entityResult = await analyzeTextAndSetToEntity({
                 type: 'RoomPubMsg',
@@ -1960,7 +1958,7 @@ export class RoomResolver {
                         currentRoomState: roomState,
                     })
                 )
-                    chara = roomState.characters[args.characterId];
+                    chara = roomState.characters?.[args.characterId];
             }
             const entityResult = await analyzeTextAndSetToEntity({
                 type: 'RoomPrvMsg',

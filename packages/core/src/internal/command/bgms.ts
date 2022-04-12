@@ -24,13 +24,16 @@ export class FBgms extends FObject {
         if (!isStrIndex5(keyAsString)) {
             return undefined;
         }
-        return this.room.bgms[keyAsString];
+        return (this.room.bgms ?? {})[keyAsString];
     }
 
     private ensure(key: FValue, astInfo: AstInfo | undefined) {
         const keyAsString = beginCast(key, astInfo).addNumber().cast().toString();
         if (!isStrIndex5(keyAsString)) {
             return undefined;
+        }
+        if (this.room.bgms == null) {
+            this.room.bgms = {};
         }
         const found = this.room.bgms[keyAsString];
         if (found != null) {
@@ -50,6 +53,9 @@ export class FBgms extends FObject {
     private delete(key: FValue, astInfo: AstInfo | undefined) {
         const keyAsString = beginCast(key, astInfo).addNumber().cast().toString();
         if (!isStrIndex5(keyAsString)) {
+            return false;
+        }
+        if (this.room.bgms == null) {
             return false;
         }
         const found = this.room.bgms[keyAsString];

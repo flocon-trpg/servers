@@ -192,7 +192,7 @@ newCharacter.value.name = newCharacterById.name + '!!';
         if (actual.isError) {
             throw actual.error;
         }
-        const actualCharacters = recordToMap(actual.value.characters);
+        const actualCharacters = recordToMap(actual.value.characters ?? {});
         expect(actualCharacters.size).toBe(2);
         actualCharacters.delete(characterId);
         expect(actualCharacters.size).toBe(1);

@@ -179,7 +179,7 @@ describe('state', () => {
         it.each`
             source                                                                        | expected
             ${1}                                                                          | ${Option.none()}
-            ${undefined}                                                                  | ${Option.none()}
+            ${undefined}                                                                  | ${Option.some(undefined)}
             ${{}}                                                                         | ${Option.some({})}
             ${{ value1: { $v: 1, $r: 2, value: 1 }, value2: { $v: 1, $r: 2, value: 2 } }} | ${Option.some({ value1: { $v: 1, $r: 2, value: 1 }, value2: { $v: 1, $r: 2, value: 2 } })}
             ${{ value1: 1, value2: 2 }}                                                   | ${Option.none()}
@@ -196,7 +196,7 @@ describe('state', () => {
         it.each`
             source                                                                        | expected
             ${1}                                                                          | ${Option.none()}
-            ${undefined}                                                                  | ${Option.none()}
+            ${undefined}                                                                  | ${Option.some(undefined)}
             ${{}}                                                                         | ${Option.some({})}
             ${{ value1: { $v: 1, $r: 2, value: 1 }, value2: { $v: 1, $r: 2, value: 2 } }} | ${Option.some({ value1: { $v: 1, $r: 2, value: 1 }, value2: { $v: 1, $r: 2, value: 2 } })}
             ${{ value1: 1, value2: 2 }}                                                   | ${Option.none()}
@@ -1018,7 +1018,7 @@ describe('apply', () => {
         );
     });
 
-    it('tests RecordTemplate', () => {
+    it('tests RecordTemplate (not {})', () => {
         const state: RecordValue.State = {
             key1: {
                 $v: 1,
@@ -1078,7 +1078,32 @@ describe('apply', () => {
         );
     });
 
-    it('tests ParamRecordTemplate', () => {
+    it.each([{}, undefined] as RecordValue.State[])('tests RecordTemplate ({})', state => {
+        const operation: RecordValue.UpOperation = {
+            key: {
+                type: replace,
+                replace: {
+                    newValue: {
+                        $v: 1,
+                        $r: 2,
+                        value: 12,
+                    },
+                },
+            },
+        };
+
+        expect(apply(RecordValue.template)({ state, operation })).toEqual(
+            Result.ok({
+                key: {
+                    $v: 1,
+                    $r: 2,
+                    value: 12,
+                },
+            })
+        );
+    });
+
+    it('tests ParamRecordTemplate (not {})', () => {
         const state: ParamRecordValue.State = {
             key1: {
                 $v: 1,
@@ -1130,6 +1155,31 @@ describe('apply', () => {
             })
         );
     });
+
+    it.each([{}, undefined] as ParamRecordValue.State[])(
+        'tests ParamRecordTemplate ({})',
+        state => {
+            const operation: ParamRecordValue.UpOperation = {
+                key: {
+                    $v: 1,
+                    $r: 2,
+                    value: {
+                        newValue: 12,
+                    },
+                },
+            };
+
+            expect(apply(ParamRecordValue.template)({ state, operation })).toEqual(
+                Result.ok({
+                    key: {
+                        $v: 1,
+                        $r: 2,
+                        value: 12,
+                    },
+                })
+            );
+        }
+    );
 });
 
 describe('applyBack', () => {
@@ -1211,7 +1261,7 @@ describe('applyBack', () => {
         );
     });
 
-    it('tests RecordTemplate', () => {
+    it('tests RecordTemplate (not {})', () => {
         const state: RecordValue.State = {
             key1: {
                 $v: 1,
@@ -1271,7 +1321,32 @@ describe('applyBack', () => {
         );
     });
 
-    it('tests ParamRecordTemplate', () => {
+    it.each([{}, undefined] as RecordValue.State[])('tests RecordTemplate ({})', state => {
+        const operation: RecordValue.DownOperation = {
+            key: {
+                type: replace,
+                replace: {
+                    oldValue: {
+                        $v: 1,
+                        $r: 2,
+                        value: 11,
+                    },
+                },
+            },
+        };
+
+        expect(applyBack(RecordValue.template)({ state, operation })).toEqual(
+            Result.ok({
+                key: {
+                    $v: 1,
+                    $r: 2,
+                    value: 11,
+                },
+            })
+        );
+    });
+
+    it('tests ParamRecordTemplate (not {})', () => {
         const state: ParamRecordValue.State = {
             key1: {
                 $v: 1,
@@ -1323,6 +1398,31 @@ describe('applyBack', () => {
             })
         );
     });
+
+    it.each([{}, undefined] as ParamRecordValue.State[])(
+        'tests ParamRecordTemplate ({})',
+        state => {
+            const operation: ParamRecordValue.DownOperation = {
+                key: {
+                    $v: 1,
+                    $r: 2,
+                    value: {
+                        oldValue: 11,
+                    },
+                },
+            };
+
+            expect(applyBack(ParamRecordValue.template)({ state, operation })).toEqual(
+                Result.ok({
+                    key: {
+                        $v: 1,
+                        $r: 2,
+                        value: 11,
+                    },
+                })
+            );
+        }
+    );
 });
 
 describe('composeDownOperation', () => {
@@ -1808,7 +1908,7 @@ describe('restore', () => {
         );
     });
 
-    it('tests RecordTemplate', () => {
+    it('tests RecordTemplate (not {})', () => {
         const nextState: RecordValue.State = {
             key1: {
                 $v: 1,
@@ -1905,7 +2005,47 @@ describe('restore', () => {
         );
     });
 
-    it('tests ParamRecordTemplate', () => {
+    it.each([undefined, {}] as RecordValue.State[])('tests RecordTemplate ({})', nextState => {
+        const downOperation: RecordValue.DownOperation = {
+            key: {
+                type: replace,
+                replace: {
+                    oldValue: {
+                        $v: 1,
+                        $r: 2,
+                        value: 11,
+                    },
+                },
+            },
+        };
+
+        expect(restore(RecordValue.template)({ nextState, downOperation })).toEqual(
+            Result.ok({
+                prevState: {
+                    key: {
+                        $v: 1,
+                        $r: 2,
+                        value: 11,
+                    },
+                },
+                twoWayOperation: {
+                    key: {
+                        type: replace,
+                        replace: {
+                            oldValue: {
+                                $v: 1,
+                                $r: 2,
+                                value: 11,
+                            },
+                            newValue: undefined,
+                        },
+                    },
+                },
+            })
+        );
+    });
+
+    it('tests ParamRecordTemplate (not {})', () => {
         const nextState: ParamRecordValue.State = {
             key1: {
                 $v: 1,
@@ -1948,6 +2088,8 @@ describe('restore', () => {
             })
         );
     });
+
+    // nextStateが{}もしくはundefinedのときは、downOperationは{}もしくはundefinedしかありえないため、（正常系の）テストはしていない
 });
 
 describe('diff', () => {
@@ -2046,7 +2188,34 @@ describe('diff', () => {
         expect(diff(ObjectValue.template)({ prevState, nextState })).toBeUndefined();
     });
 
-    it('tests RecordTemplate', () => {
+    const prevRecord: RecordValue.State = {
+        key: {
+            $v: 1,
+            $r: 2,
+            value: 3,
+        },
+    };
+    const nextRecord: RecordValue.State = {
+        key: {
+            $v: 1,
+            $r: 2,
+            value: 3,
+        },
+    };
+    it.each([
+        [undefined, undefined],
+        [{}, {}],
+        [{}, undefined],
+        [undefined, {}],
+        [prevRecord, nextRecord],
+    ] as [RecordValue.State | undefined, RecordValue.State | undefined][])(
+        'tests RecordTemplate(id)',
+        (prevState, nextState) => {
+            expect(diff(RecordValue.template)({ prevState, nextState })).toBeUndefined();
+        }
+    );
+
+    it('tests RecordTemplate(not id)', () => {
         const prevState: RecordValue.State = {
             key1: {
                 $v: 1,
@@ -2111,7 +2280,7 @@ describe('diff', () => {
         });
     });
 
-    it('tests ParamRecordTemplate', () => {
+    it('tests ParamRecordTemplate(not id)', () => {
         const prevState: ParamRecordValue.State = {
             key1: {
                 $v: 1,
@@ -2166,6 +2335,33 @@ describe('diff', () => {
             },
         });
     });
+
+    const prevParamRecord: ParamRecordValue.State = {
+        key: {
+            $v: 1,
+            $r: 2,
+            value: 3,
+        },
+    };
+    const nextParamRecord: ParamRecordValue.State = {
+        key: {
+            $v: 1,
+            $r: 2,
+            value: 3,
+        },
+    };
+    it.each([
+        [undefined, undefined],
+        [{}, {}],
+        [{}, undefined],
+        [undefined, {}],
+        [prevParamRecord, nextParamRecord],
+    ] as [ParamRecordValue.State | undefined, ParamRecordValue.State | undefined][])(
+        'tests ParamRecordTemplate(id)',
+        (prevState, nextState) => {
+            expect(diff(ParamRecordValue.template)({ prevState, nextState })).toBeUndefined();
+        }
+    );
 });
 
 describe('clientTransform', () => {

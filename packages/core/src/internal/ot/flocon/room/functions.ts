@@ -110,7 +110,7 @@ export const serverTransform =
     > =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
         if (requestedBy.type === client) {
-            const me = currentState.participants[requestedBy.userUid];
+            const me = (currentState.participants ?? {})[requestedBy.userUid];
             if (me == null || me.role == null || me.role === ParticipantTypes.Spectator) {
                 // エラーを返すべきかもしれない
                 return Result.ok(undefined);

@@ -64,6 +64,9 @@ export const ImportBoardModal: React.FC = () => {
                             }
                             setRoomState(roomState => {
                                 const id = simpleId();
+                                if (roomState.boards == null) {
+                                    roomState.boards = {};
+                                }
                                 roomState.boards[id] = {
                                     ...parsed.value,
                                     ownerParticipantId: myUserUid,

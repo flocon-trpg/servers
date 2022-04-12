@@ -355,7 +355,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         onDragEnd={e => {
                             setRoomState(roomState => {
                                 const characterPiece =
-                                    roomState.characters[characterId]?.pieces?.[pieceId];
+                                    roomState.characters?.[characterId]?.pieces?.[pieceId];
                                 if (characterPiece == null) {
                                     return;
                                 }
@@ -425,7 +425,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         onDragEnd={e => {
                             setRoomState(roomState => {
                                 const portraitPiece =
-                                    roomState.characters[characterId]?.portraitPieces?.[pieceId];
+                                    roomState.characters?.[characterId]?.portraitPieces?.[pieceId];
                                 if (portraitPiece == null) {
                                     return;
                                 }
@@ -493,7 +493,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
                     onDragEnd={e => {
                         setRoomState(roomState => {
-                            const imagePiece = roomState.boards[boardId]?.imagePieces?.[pieceId];
+                            const imagePiece = roomState.boards?.[boardId]?.imagePieces?.[pieceId];
                             if (imagePiece == null) {
                                 return;
                             }
@@ -538,7 +538,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
                     onDragEnd={e => {
                         setRoomState(roomState => {
-                            const dicePiece = roomState.boards[boardId]?.dicePieces?.[pieceId];
+                            const dicePiece = roomState.boards?.[boardId]?.dicePieces?.[pieceId];
                             if (dicePiece == null) {
                                 return;
                             }
@@ -584,7 +584,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
                     onDragEnd={e => {
                         setRoomState(roomState => {
-                            const stringPiece = roomState.boards[boardId]?.stringPieces?.[pieceId];
+                            const stringPiece =
+                                roomState.boards?.[boardId]?.stringPieces?.[pieceId];
                             if (stringPiece == null) {
                                 return;
                             }
@@ -867,7 +868,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                         pageY: e.evt.pageY,
                         characterPiecesOnCursor: [...characters].flatMap(
                             ([characterId, character]) => {
-                                return recordToArray(character.pieces)
+                                return recordToArray(character.pieces ?? {})
                                     .filter(({ value: piece }) => {
                                         if (boardIdToShow !== piece.boardId) {
                                             return false;
@@ -889,7 +890,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                             }
                         ),
                         portraitsOnCursor: [...characters].flatMap(([characterId, character]) => {
-                            return recordToArray(character.portraitPieces)
+                            return recordToArray(character.portraitPieces ?? {})
                                 .filter(({ value: portrait }) => {
                                     if (boardIdToShow !== portrait.boardId) {
                                         return false;

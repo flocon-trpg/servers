@@ -101,7 +101,7 @@ export const ofOperation = (
                 : chooseRecord(operation.dice, (element, key) => {
                       switch (element.type) {
                           case updateKey: {
-                              const currentDiceState = currentState.dice[key];
+                              const currentDiceState = (currentState.dice ?? {})[key];
                               if (currentDiceState == null) {
                                   throw new Error('this should not happen');
                               }

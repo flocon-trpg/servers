@@ -24,13 +24,16 @@ const createDefaultState = (): State<typeof StrParam.template> => ({
 
 export class FStrParams extends FObject {
     public constructor(
-        private readonly strParams: State<typeof Character.template>['strParams'],
+        private readonly strParams: NonNullable<State<typeof Character.template>['strParams']>,
         private readonly room: State<typeof Room.template>
     ) {
         super();
     }
 
     private findKeysByName(nameOrKey: string | number) {
+        if (this.room.strParamNames == null) {
+            return [];
+        }
         return recordToArray(this.room.strParamNames)
             .filter(({ value }, i) => value.name === nameOrKey || i + 1 === nameOrKey)
             .map(({ key }) => key);

@@ -13,8 +13,6 @@ import bcrypt from 'bcrypt';
 type State = S<typeof roomTemplate>;
 type ParticipantState = S<typeof participantTemplate>;
 
-const find = <T>(source: Record<string, T | undefined>, key: string): T | undefined => source[key];
-
 export const NotSignIn = 'NotSignIn';
 export const AnonymousAccount = 'AnonymousAccount';
 
@@ -108,6 +106,9 @@ class FindRoomAndMyParticipantResult {
     ) {}
 
     public participantIds(): Set<string> {
+        if (this.roomState.participants == null) {
+            return new Set();
+        }
         return new Set(recordToArray(this.roomState.participants).map(({ key }) => key));
     }
 }
@@ -126,7 +127,7 @@ export const findRoomAndMyParticipant = async ({
         return null;
     }
     const state = await GlobalRoom.MikroORM.ToGlobal.state(room, em);
-    const me = find(state.participants, userUid);
+    const me = state.participants?.[userUid];
     return new FindRoomAndMyParticipantResult(room, state, me);
 };
 

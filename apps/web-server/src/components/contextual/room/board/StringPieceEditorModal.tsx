@@ -71,7 +71,7 @@ export const StringPieceEditorModal: React.FC = () => {
                     const boardId = modalType.boardId;
                     const pieceId = modalType.pieceId;
                     setRoomState(roomState => {
-                        const stringPieces = roomState.boards[boardId]?.stringPieces;
+                        const stringPieces = roomState.boards?.[boardId]?.stringPieces;
                         if (stringPieces == null) {
                             return;
                         }
@@ -96,7 +96,7 @@ export const StringPieceEditorModal: React.FC = () => {
             }
             const id = simpleId();
             setRoomState(roomState => {
-                const stringPieces = roomState.boards[modalType.boardId]?.stringPieces;
+                const stringPieces = roomState.boards?.[modalType.boardId]?.stringPieces;
                 if (stringPieces == null) {
                     return;
                 }

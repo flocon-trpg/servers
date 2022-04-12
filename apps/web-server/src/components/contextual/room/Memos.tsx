@@ -208,7 +208,7 @@ const DirSelect = ({ memoId }: DirSelectProps) => {
                 key={`DIRSELECT-${memoId}`}
                 onClick={() => {
                     setRoomState(roomState => {
-                        const memo = roomState.memos[memoId];
+                        const memo = roomState.memos?.[memoId];
                         if (memo == null) {
                             return;
                         }
@@ -239,7 +239,7 @@ const DirSelect = ({ memoId }: DirSelectProps) => {
                 }}
                 onOk={() => {
                     setRoomState(roomState => {
-                        const memo = roomState.memos[memoId];
+                        const memo = roomState.memos?.[memoId];
                         if (memo == null) {
                             return;
                         }
@@ -299,7 +299,7 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
                     value={memo.name}
                     onChange={e =>
                         setRoomState(prevState => {
-                            const memo = prevState.memos[memoId];
+                            const memo = prevState.memos?.[memoId];
                             if (memo != null) {
                                 memo.name = e.currentValue;
                             }
@@ -314,7 +314,7 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
                             title: '現在開いているメモを削除してよろしいですか？',
                             onOk: () => {
                                 setRoomState(roomState => {
-                                    delete roomState.memos[memoId];
+                                    delete roomState.memos?.[memoId];
                                 });
                             },
                         });
@@ -331,6 +331,9 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
                 disableResize
                 onChange={e => {
                     setRoomState(roomState => {
+                        if (roomState.memos == null) {
+                            roomState.memos = {};
+                        }
                         const memo = roomState.memos[memoId];
                         if (memo == null) {
                             return;
@@ -388,6 +391,9 @@ export const Memos: React.FC<Props> = ({ selectedMemoId, onSelectedMemoIdChange 
                     onClick={() => {
                         const id = simpleId();
                         setRoomState(roomState => {
+                            if (roomState.memos == null) {
+                                roomState.memos = {};
+                            }
                             roomState.memos[id] = {
                                 $v: 1,
                                 $r: 1,

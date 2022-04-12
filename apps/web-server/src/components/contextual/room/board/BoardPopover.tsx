@@ -215,7 +215,7 @@ namespace PopupEditorBase {
         return (
             <div className={classNames(flex, flexColumn)} style={{ width: '100%' }}>
                 {dicePieceStrIndexes.map(key => {
-                    const die = dicePieceValue.dice[key];
+                    const die = dicePieceValue.dice?.[key];
                     return (
                         <div
                             key={key}
@@ -240,6 +240,9 @@ namespace PopupEditorBase {
                                             return;
                                         }
                                         if (e.type === replace) {
+                                            if (dicePieceValue.dice == null) {
+                                                dicePieceValue.dice = {};
+                                            }
                                             if (e.newValue == null) {
                                                 dicePieceValue.dice[key] = undefined;
                                                 return;
@@ -253,7 +256,7 @@ namespace PopupEditorBase {
                                             };
                                             return;
                                         }
-                                        const dice = dicePieceValue.dice[key];
+                                        const dice = dicePieceValue.dice?.[key];
                                         if (dice == null) {
                                             return;
                                         }
@@ -331,7 +334,7 @@ namespace PopupEditorBase {
                     onChange={e =>
                         setRoomState(roomState => {
                             const stringPieceValue =
-                                roomState.boards[boardId]?.stringPieces?.[pieceId];
+                                roomState.boards?.[boardId]?.stringPieces?.[pieceId];
                             if (stringPieceValue == null) {
                                 return;
                             }
@@ -344,7 +347,7 @@ namespace PopupEditorBase {
                     onChange={e =>
                         setRoomState(roomState => {
                             const stringPieceValue =
-                                roomState.boards[boardId]?.stringPieces?.[pieceId];
+                                roomState.boards?.[boardId]?.stringPieces?.[pieceId];
                             if (stringPieceValue == null) {
                                 return;
                             }
@@ -513,7 +516,7 @@ namespace ContextMenuModule {
                         <Menu.Item
                             onClick={() => {
                                 setRoomState(roomState => {
-                                    delete roomState.characters[characterId]?.pieces[pieceId];
+                                    delete roomState.characters?.[characterId]?.pieces?.[pieceId];
                                 });
                                 onContextMenuClear();
                             }}
@@ -579,9 +582,8 @@ namespace ContextMenuModule {
                             <Menu.Item
                                 onClick={() => {
                                     setRoomState(roomState => {
-                                        delete roomState.characters[characterId]?.portraitPieces?.[
-                                            portraitPositionId
-                                        ];
+                                        delete roomState.characters?.[characterId]
+                                            ?.portraitPieces?.[portraitPositionId];
                                     });
                                     onContextMenuClear();
                                 }}
@@ -638,45 +640,45 @@ namespace ContextMenuModule {
         });
         const characterMenuItems = _(characters)
             .map(characterPair => {
-                const privateCommands = recordToArray(characterPair.value.privateCommands).map(
-                    ({ key, value }) => {
-                        const testResult = testCommand(value.value);
-                        if (testResult.isError) {
-                            return (
-                                <Menu.Item key={key} title={value.name} disabled>
-                                    <Tooltip title={testResult.error}>(コマンド文法エラー)</Tooltip>
-                                </Menu.Item>
-                            );
-                        }
+                const privateCommands = recordToArray(
+                    characterPair.value.privateCommands ?? {}
+                ).map(({ key, value }) => {
+                    const testResult = testCommand(value.value);
+                    if (testResult.isError) {
                         return (
-                            <Menu.Item
-                                key={key}
-                                onClick={() => {
-                                    const commandResult = execCharacterCommand({
-                                        script: value.value,
-                                        room,
-                                        characterId: characterPair.id,
-                                        myUserUid,
-                                    });
-                                    if (commandResult.isError) {
-                                        // TODO: 通知する
-                                        return;
-                                    }
-                                    const operation = diff(roomTemplate)({
-                                        prevState: room,
-                                        nextState: commandResult.value,
-                                    });
-                                    if (operation != null) {
-                                        operate(toUpOperation(roomTemplate)(operation));
-                                    }
-                                    onContextMenuClear();
-                                }}
-                            >
-                                {value.name}
+                            <Menu.Item key={key} title={value.name} disabled>
+                                <Tooltip title={testResult.error}>(コマンド文法エラー)</Tooltip>
                             </Menu.Item>
                         );
                     }
-                );
+                    return (
+                        <Menu.Item
+                            key={key}
+                            onClick={() => {
+                                const commandResult = execCharacterCommand({
+                                    script: value.value,
+                                    room,
+                                    characterId: characterPair.id,
+                                    myUserUid,
+                                });
+                                if (commandResult.isError) {
+                                    // TODO: 通知する
+                                    return;
+                                }
+                                const operation = diff(roomTemplate)({
+                                    prevState: room,
+                                    nextState: commandResult.value,
+                                });
+                                if (operation != null) {
+                                    operate(toUpOperation(roomTemplate)(operation));
+                                }
+                                onContextMenuClear();
+                            }}
+                        >
+                            {value.name}
+                        </Menu.Item>
+                    );
+                });
                 if (privateCommands.length === 0) {
                     return null;
                 }
@@ -752,7 +754,7 @@ namespace ContextMenuModule {
                         <Menu.Item
                             onClick={() => {
                                 setRoomState(roomState => {
-                                    delete roomState.boards[boardId]?.dicePieces?.[pieceId];
+                                    delete roomState.boards?.[boardId]?.dicePieces?.[pieceId];
                                 });
                                 onContextMenuClear();
                             }}
@@ -815,7 +817,7 @@ namespace ContextMenuModule {
                         <Menu.Item
                             onClick={() => {
                                 setRoomState(roomState => {
-                                    delete roomState.boards[boardId]?.stringPieces?.[pieceId];
+                                    delete roomState.boards?.[boardId]?.stringPieces?.[pieceId];
                                 });
                                 onContextMenuClear();
                             }}
@@ -887,7 +889,7 @@ namespace ContextMenuModule {
                         <Menu.Item
                             onClick={() => {
                                 setRoomState(roomState => {
-                                    delete roomState.boards[boardId]?.imagePieces[pieceId];
+                                    delete roomState.boards?.[boardId]?.imagePieces?.[pieceId];
                                 });
                                 onContextMenuClear();
                             }}
@@ -981,7 +983,7 @@ namespace ContextMenuModule {
                     <Menu.Item
                         onClick={() => {
                             setRoomState(roomState => {
-                                const pieces = roomState.characters[characterId]?.pieces;
+                                const pieces = roomState.characters?.[characterId]?.pieces;
                                 if (pieces == null) {
                                     return;
                                 }
@@ -1001,7 +1003,7 @@ namespace ContextMenuModule {
                     <Menu.Item
                         onClick={() => {
                             setRoomState(roomState => {
-                                const pieces = roomState.characters[characterId]?.pieces;
+                                const pieces = roomState.characters?.[characterId]?.pieces;
                                 if (pieces == null) {
                                     return;
                                 }
@@ -1029,7 +1031,7 @@ namespace ContextMenuModule {
                     onClick={() => {
                         setRoomState(roomState => {
                             const portraitPieces =
-                                roomState.characters[characterId]?.portraitPieces;
+                                roomState.characters?.[characterId]?.portraitPieces;
                             if (portraitPieces == null) {
                                 return;
                             }

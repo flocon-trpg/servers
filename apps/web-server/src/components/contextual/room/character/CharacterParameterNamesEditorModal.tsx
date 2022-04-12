@@ -101,7 +101,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                                 return;
                             }
                             setRoomState(state => {
-                                const targetNumParamName = state.numParamNames[key];
+                                const targetNumParamName = state.numParamNames?.[key];
                                 if (targetNumParamName == null) {
                                     return;
                                 }
@@ -156,7 +156,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                                 return;
                             }
                             setRoomState(state => {
-                                const targetBoolParamName = state.boolParamNames[key];
+                                const targetBoolParamName = state.boolParamNames?.[key];
                                 if (targetBoolParamName == null) {
                                     return;
                                 }
@@ -211,7 +211,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                                 return;
                             }
                             setRoomState(state => {
-                                const targetStrParamName = state.strParamNames[key];
+                                const targetStrParamName = state.strParamNames?.[key];
                                 if (targetStrParamName == null) {
                                     return;
                                 }

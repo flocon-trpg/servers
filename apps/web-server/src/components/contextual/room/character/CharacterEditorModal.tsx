@@ -189,6 +189,9 @@ export const CharacterEditorModal: React.FC = () => {
                 state: characters?.get(atomValue.stateId),
                 onUpdate: nextState => {
                     setRoomState(roomState => {
+                        if (roomState.characters == null) {
+                            roomState.characters = {};
+                        }
                         roomState.characters[atomValue.stateId] = nextState;
                     });
                 },
@@ -227,6 +230,9 @@ export const CharacterEditorModal: React.FC = () => {
             onOkClick = () => {
                 const id = simpleId();
                 setRoomState(roomState => {
+                    if (roomState.characters == null) {
+                        roomState.characters = {};
+                    }
                     roomState.characters[id] = {
                         ...character,
                         ownerParticipantId: myUserUid,
@@ -241,7 +247,7 @@ export const CharacterEditorModal: React.FC = () => {
         if (atomValue?.type === update) {
             onDestroy = () => {
                 setRoomState(roomState => {
-                    delete roomState.characters[atomValue.stateId];
+                    delete roomState.characters?.[atomValue.stateId];
                 });
                 setAtomValue(null);
             };
@@ -328,6 +334,9 @@ export const CharacterEditorModal: React.FC = () => {
                                                 onClick={() => {
                                                     const id = simpleId();
                                                     setRoomState(roomState => {
+                                                        if (roomState.characters == null) {
+                                                            roomState.characters = {};
+                                                        }
                                                         roomState.characters[id] = {
                                                             ...character,
                                                             name: `${character.name} (複製)`,
@@ -465,8 +474,8 @@ export const CharacterEditorModal: React.FC = () => {
                             if (paramName === undefined) {
                                 return null;
                             }
-                            const value = character.numParams[key];
-                            const maxValue = character.numMaxParams[key];
+                            const value = character.numParams?.[key];
+                            const maxValue = character.numMaxParams?.[key];
                             return (
                                 <Row
                                     key={`numParam${key}Row`}
@@ -477,7 +486,7 @@ export const CharacterEditorModal: React.FC = () => {
                                             overriddenParameterName={value?.overriddenParameterName}
                                             onOverriddenParameterNameChange={newValue =>
                                                 updateCharacter(character => {
-                                                    const param = character?.numParams[key];
+                                                    const param = character?.numParams?.[key];
                                                     if (param == null) {
                                                         return;
                                                     }
@@ -518,7 +527,7 @@ export const CharacterEditorModal: React.FC = () => {
                             if (paramName === undefined) {
                                 return null;
                             }
-                            const value = character.boolParams[key];
+                            const value = character.boolParams?.[key];
                             return (
                                 <Row
                                     key={`boolParam${key}Row`}
@@ -529,7 +538,7 @@ export const CharacterEditorModal: React.FC = () => {
                                             overriddenParameterName={value?.overriddenParameterName}
                                             onOverriddenParameterNameChange={newValue =>
                                                 updateCharacter(character => {
-                                                    const param = character?.boolParams[key];
+                                                    const param = character?.boolParams?.[key];
                                                     if (param == null) {
                                                         return;
                                                     }
@@ -571,7 +580,7 @@ export const CharacterEditorModal: React.FC = () => {
                             if (paramName === undefined) {
                                 return null;
                             }
-                            const value = character.strParams[key];
+                            const value = character.strParams?.[key];
                             return (
                                 <Row
                                     key={`strParam${key}Row`}
@@ -582,7 +591,7 @@ export const CharacterEditorModal: React.FC = () => {
                                             overriddenParameterName={value?.overriddenParameterName}
                                             onOverriddenParameterNameChange={newValue =>
                                                 updateCharacter(character => {
-                                                    const param = character?.strParams[key];
+                                                    const param = character?.strParams?.[key];
                                                     if (param == null) {
                                                         return;
                                                     }

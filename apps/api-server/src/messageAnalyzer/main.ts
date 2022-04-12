@@ -94,13 +94,13 @@ const getParameter = async ({
             return Result.ok(undefined);
         }
 
-        const matchedBoolParams = recordToArray(room.boolParamNames).filter(
+        const matchedBoolParams = recordToArray(room.boolParamNames ?? {}).filter(
             ({ value }) => value.name === parameter
         );
-        const matchedNumParams = recordToArray(room.numParamNames).filter(
+        const matchedNumParams = recordToArray(room.numParamNames ?? {}).filter(
             ({ value }) => value.name === parameter
         );
-        const matchedStrParams = recordToArray(room.strParamNames).filter(
+        const matchedStrParams = recordToArray(room.strParamNames ?? {}).filter(
             ({ value }) => value.name === parameter
         );
         const totalLength =
@@ -113,15 +113,17 @@ const getParameter = async ({
 
         const matchedBoolParams0 = matchedBoolParams[0];
         if (matchedBoolParams0 != null) {
-            return Result.ok(context.value.boolParams[matchedBoolParams0.key]?.value ?? undefined);
+            return Result.ok(
+                context.value.boolParams?.[matchedBoolParams0.key]?.value ?? undefined
+            );
         }
         const matchedNumParams0 = matchedNumParams[0];
         if (matchedNumParams0 != null) {
-            return Result.ok(context.value.numParams[matchedNumParams0.key]?.value ?? undefined);
+            return Result.ok(context.value.numParams?.[matchedNumParams0.key]?.value ?? undefined);
         }
         const matchedStrParams0 = matchedStrParams[0];
         if (matchedStrParams0 != null) {
-            return Result.ok(context.value.strParams[matchedStrParams0.key]?.value ?? undefined);
+            return Result.ok(context.value.strParams?.[matchedStrParams0.key]?.value ?? undefined);
         }
 
         return Result.ok(undefined);

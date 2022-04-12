@@ -24,13 +24,16 @@ const createDefaultState = (): State<typeof BoolParam.template> => ({
 
 export class FBoolParams extends FObject {
     public constructor(
-        private readonly boolParams: State<typeof Character.template>['boolParams'],
+        private readonly boolParams: NonNullable<State<typeof Character.template>['boolParams']>,
         private readonly room: State<typeof Room.template>
     ) {
         super();
     }
 
     private findKeysByNameOrKey(nameOrKey: string | number) {
+        if (this.room.boolParamNames == null) {
+            return [];
+        }
         return recordToArray(this.room.boolParamNames)
             .filter(({ value }, i) => value.name === nameOrKey || i + 1 === nameOrKey)
             .map(({ key }) => key);
@@ -40,7 +43,7 @@ export class FBoolParams extends FObject {
         const nameOrKey = beginCast(nameOrKeyValue, astInfo).addString().addNumber().cast();
         const keys = this.findKeysByNameOrKey(nameOrKey);
         for (const key of keys) {
-            const found = this.boolParams[key];
+            const found = (this.boolParams ?? {})[key];
             if (found == null) {
                 const newValue = createDefaultState();
                 this.boolParams[key] = newValue;

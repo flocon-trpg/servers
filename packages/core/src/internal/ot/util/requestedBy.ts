@@ -58,7 +58,7 @@ export const isBoardOwner = ({
     }
     const userUid = requestedBy.type === client ? requestedBy.userUid : undefined;
 
-    const board = currentRoomState.boards[boardId];
+    const board = (currentRoomState.boards ?? {})[boardId];
     if (board != null) {
         if (board.ownerParticipantId == null) {
             return true;
@@ -104,7 +104,7 @@ export const isCharacterOwner = ({
     }
     const userUid = requestedBy.type === client ? requestedBy.userUid : undefined;
 
-    const character = currentRoomState.characters[characterId];
+    const character = (currentRoomState.characters ?? {})[characterId];
     if (character != null) {
         if (character.ownerParticipantId == null) {
             return true;

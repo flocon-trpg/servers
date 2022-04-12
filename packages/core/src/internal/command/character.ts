@@ -33,24 +33,40 @@ export class FCharacter extends FObject {
 
     override getCore({ key, astInfo }: OnGettingParams): FValue {
         switch (key) {
-            case booleanParameters:
+            case booleanParameters: {
+                if (this.character.boolParams == null) {
+                    this.character.boolParams = {};
+                }
                 return new FBoolParams(this.character.boolParams, this.room);
+            }
             case icon:
                 return this.character.image == null
                     ? null
                     : toFFilePath(this.character.image, astInfo);
-            case maxNumberParameters:
+            case maxNumberParameters: {
+                if (this.character.numMaxParams == null) {
+                    this.character.numMaxParams = {};
+                }
                 return new FNumParams(this.character.numMaxParams, this.room);
+            }
             case name:
                 return new FString(this.character.name);
-            case numberParameters:
+            case numberParameters: {
+                if (this.character.numParams == null) {
+                    this.character.numParams = {};
+                }
                 return new FNumParams(this.character.numParams, this.room);
+            }
             case portrait:
                 return this.character.portraitImage == null
                     ? null
                     : toFFilePath(this.character.portraitImage, astInfo);
-            case stringParameters:
+            case stringParameters: {
+                if (this.character.strParams == null) {
+                    this.character.strParams = {};
+                }
                 return new FStrParams(this.character.strParams, this.room);
+            }
             default:
                 return undefined;
         }

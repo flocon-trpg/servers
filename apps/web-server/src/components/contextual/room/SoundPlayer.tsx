@@ -162,6 +162,9 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({
                         textType: 'ok',
                         onClick: () => {
                             setRoomState(roomState => {
+                                if (roomState.bgms == null) {
+                                    roomState.bgms = {};
+                                }
                                 const bgm = roomState.bgms[channelKey];
                                 if (bgm == null) {
                                     roomState.bgms[channelKey] = {
@@ -391,7 +394,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                                     return;
                                 }
                                 setRoomState(roomState => {
-                                    const bgm = roomState.bgms[channelKey];
+                                    const bgm = roomState.bgms?.[channelKey];
                                     if (bgm == null) {
                                         return;
                                     }
@@ -427,7 +430,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                     disabled={(bgmState?.files ?? []).length === 0}
                     onClick={() => {
                         setRoomState(roomState => {
-                            const bgm = roomState.bgms[channelKey];
+                            const bgm = roomState.bgms?.[channelKey];
                             if (bgm == null) {
                                 return;
                             }
@@ -442,7 +445,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                     disabled={(bgmState?.files ?? []).length === 0}
                     onClick={() => {
                         setRoomState(roomState => {
-                            delete roomState.bgms[channelKey];
+                            delete roomState.bgms?.[channelKey];
                         });
                     }}
                 >

@@ -33,7 +33,7 @@ export class FRoom extends FObject {
     }
 
     public findCharacter(stateId: string): FCharacter | undefined {
-        const character = this._room.characters[stateId];
+        const character = (this._room.characters ?? {})[stateId];
         if (character == null) {
             return undefined;
         }
@@ -48,7 +48,12 @@ export class FRoom extends FObject {
                 return new FParamNames(this.room, 'Boolean');
             case characters:
                 return new FStateRecord<State<typeof Character.template>, FCharacter>({
-                    states: this.room.characters,
+                    states: (() => {
+                        if (this.room.characters == null) {
+                            this.room.characters = {};
+                        }
+                        return this.room.characters;
+                    })(),
                     createNewState: () => ({
                         $v: 2,
                         $r: 1,
@@ -94,7 +99,12 @@ export class FRoom extends FObject {
                 return new FParamNames(this.room, 'String');
             case 'participants':
                 return new FStateRecord({
-                    states: this.room.participants,
+                    states: (() => {
+                        if (this.room.participants == null) {
+                            this.room.participants = {};
+                        }
+                        return this.room.participants;
+                    })(),
                     createNewState: undefined,
                     toRef: x => new FParticipant(x),
                     unRef: x => {

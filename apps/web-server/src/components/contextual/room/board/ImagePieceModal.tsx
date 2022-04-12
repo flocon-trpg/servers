@@ -105,7 +105,7 @@ export const ImagePieceModal: React.FC = () => {
                     const boardId = modalType.boardId;
                     const pieceId = modalType.pieceId;
                     setRoomState(roomState => {
-                        const imagePieces = roomState.boards[boardId]?.imagePieces;
+                        const imagePieces = roomState.boards?.[boardId]?.imagePieces;
                         if (imagePieces == null) {
                             return;
                         }
@@ -132,7 +132,7 @@ export const ImagePieceModal: React.FC = () => {
         onCreate = () => {
             const id = simpleId();
             setRoomState(roomState => {
-                const imagePieces = roomState.boards[modalType.boardId]?.imagePieces;
+                const imagePieces = roomState.boards?.[modalType.boardId]?.imagePieces;
                 if (imagePieces == null) {
                     return;
                 }

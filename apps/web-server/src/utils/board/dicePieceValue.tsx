@@ -35,10 +35,10 @@ export namespace DicePieceValue {
         };
         return (
             <div style={{ display: 'flex', flexDirection: 'row', padding }}>
-                {img(state.dice[1])}
-                {img(state.dice[2])}
-                {img(state.dice[3])}
-                {img(state.dice[4])}
+                {img(state.dice?.[1])}
+                {img(state.dice?.[2])}
+                {img(state.dice?.[3])}
+                {img(state.dice?.[4])}
             </div>
         );
     };

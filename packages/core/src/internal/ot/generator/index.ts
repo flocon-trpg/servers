@@ -161,14 +161,20 @@ export type IoTsOptions = {
     exact: boolean;
 };
 
+/*
+recordやparamRecordは変換なしで後方互換性を持たせられるように | undefined を付けている。
+これらが undefined の場合は {} と等しいとみなす。いつでも undefined を {} に置き換えたり、その逆をしても良い。
+例えば次のState { name: string } が存在していてこれにcharactersというRecordを追加する場面を考える。
+もし | undefined を付けないと { name: string; characters: Record<string, Character> } となるが、{ name: 'NAME' } というJSONは { name: string; characters: Record<string, Character> } の型と合わないので { name: 'NAME': characters: {}} に変換する必要が出てきてしまう。いっぽう | undefined を付けると { name: string; characters: Record<string, Character> | undefined } となるため、{ name: 'NAME' } というJSONを変換なしで使える。
+*/
 export type State<T extends AnyTemplate> = T extends OtValueTemplate
     ? If<T['nullable'], string | undefined, string>
     : T extends ReplaceValueTemplate<infer U1>
     ? t.TypeOf<U1>
     : T extends RecordValueTemplate<infer U2>
-    ? { [P in string]?: State<U2> | undefined }
+    ? { [P in string]?: State<U2> | undefined } | undefined
     : T extends ParamRecordValueTemplateBase<infer U3>
-    ? { [P in string]?: State<U3> | undefined }
+    ? { [P in string]?: State<U3> | undefined } | undefined
     : T extends ObjectValueTemplate<infer U4, infer UV, infer UR>
     ? {
           $v: UV;
@@ -192,7 +198,7 @@ export const state = <T extends AnyTemplate>(source: T, options: IoTsOptions): t
         }
         case record:
         case paramRecord: {
-            return trecord(t.string, state(source.value, options)) as any;
+            return t.union([trecord(t.string, state(source.value, options)), t.undefined]) as any;
         }
         case object: {
             const base = t.intersection([
@@ -479,7 +485,7 @@ export const apply =
             }
             case record: {
                 return RecordOperation.apply({
-                    prevState: state as Record<string, State<AnyTemplate>>,
+                    prevState: (state ?? {}) as Record<string, State<AnyTemplate>>,
                     operation: operation as RecordOperation.RecordUpOperation<
                         State<AnyTemplate>,
                         UpOperation<AnyTemplate>
@@ -493,7 +499,7 @@ export const apply =
             }
             case paramRecord: {
                 return ParamRecordOperation.apply({
-                    prevState: state,
+                    prevState: state ?? {},
                     operation: operation as Record<string, UpOperation<AnyTemplate>>,
                     innerApply: ({ prevState, operation }) =>
                         apply(template.value)({
@@ -545,7 +551,7 @@ export const applyBack =
             }
             case record: {
                 return RecordOperation.applyBack({
-                    nextState: state as Record<string, State<AnyTemplate>>,
+                    nextState: (state ?? {}) as Record<string, State<AnyTemplate>>,
                     operation: operation as RecordOperation.RecordDownOperation<
                         State<AnyTemplate>,
                         DownOperation<AnyTemplate>
@@ -559,7 +565,7 @@ export const applyBack =
             }
             case paramRecord: {
                 return ParamRecordOperation.applyBack({
-                    nextState: state,
+                    nextState: state ?? {},
                     operation: operation as Record<string, DownOperation<AnyTemplate>>,
                     innerApplyBack: ({ nextState, operation }) =>
                         applyBack(template.value)({
@@ -704,7 +710,7 @@ export const restore =
             }
             case record: {
                 return RecordOperation.restore({
-                    nextState: nextState as Record<string, State<AnyTemplate>>,
+                    nextState: (nextState ?? {}) as Record<string, State<AnyTemplate>>,
                     downOperation: downOperation as RecordOperation.RecordDownOperation<
                         State<AnyTemplate>,
                         DownOperation<AnyTemplate>
@@ -717,7 +723,7 @@ export const restore =
             }
             case paramRecord: {
                 return ParamRecordOperation.restore({
-                    nextState,
+                    nextState: nextState ?? {},
                     downOperation: downOperation as Record<
                         string,
                         DownOperation<AnyTemplate> | undefined
@@ -784,16 +790,16 @@ export const diff =
             }
             case record: {
                 return RecordOperation.diff({
-                    prevState: prevState as Record<string, State<AnyTemplate>>,
-                    nextState: nextState as Record<string, State<AnyTemplate>>,
+                    prevState: (prevState ?? {}) as Record<string, State<AnyTemplate>>,
+                    nextState: (nextState ?? {}) as Record<string, State<AnyTemplate>>,
                     innerDiff: ({ prevState, nextState }) =>
                         diff(template.value)({ prevState, nextState }),
                 });
             }
             case paramRecord: {
                 return ParamRecordOperation.diff({
-                    prevState: prevState as Record<string, State<AnyTemplate>>,
-                    nextState: nextState as Record<string, State<AnyTemplate>>,
+                    prevState: (prevState ?? {}) as Record<string, State<AnyTemplate>>,
+                    nextState: (nextState ?? {}) as Record<string, State<AnyTemplate>>,
                     innerDiff: ({ prevState, nextState }) =>
                         diff(template.value)({
                             prevState: prevState ?? template.defaultState,
