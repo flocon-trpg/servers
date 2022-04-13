@@ -1352,19 +1352,21 @@ describe.each([
                             })
                         );
                         expect(
-                            parseState(room.room.stateJson).participants[Resources.UserUid.master]
+                            parseState(room.room.stateJson).participants?.[Resources.UserUid.master]
                                 ?.role
                         ).not.toBeUndefined();
                         expect(
-                            parseState(room.room.stateJson).participants[Resources.UserUid.player1]
-                                ?.role
+                            parseState(room.room.stateJson).participants?.[
+                                Resources.UserUid.player1
+                            ]?.role
                         ).toBeUndefined();
                         expect(
-                            parseState(room.room.stateJson).participants[Resources.UserUid.player2]
-                                ?.role
+                            parseState(room.room.stateJson).participants?.[
+                                Resources.UserUid.player2
+                            ]?.role
                         ).not.toBeUndefined();
                         expect(
-                            parseState(room.room.stateJson).participants[
+                            parseState(room.room.stateJson).participants?.[
                                 Resources.UserUid.spectator1
                             ]?.role
                         ).not.toBeUndefined();
