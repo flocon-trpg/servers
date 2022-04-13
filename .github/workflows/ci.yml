@@ -11,7 +11,7 @@ on:
             - '**'
 
 jobs:
-    main:
+    tests-without-docker:
         name: Tests and exec Next.js export on Node ${{ matrix.node }} and ${{ matrix.os }}
 
         runs-on: ${{ matrix.os }}
@@ -43,3 +43,126 @@ jobs:
             - name: Next export
               run: yarn run export
               working-directory: ./apps/web-server
+
+    tests-with-docker:
+        name: 'Full test and Codecov'
+
+        runs-on: ubuntu-20.04
+        container: 'node:14-buster'
+
+        services:
+            mysql:
+                image: mysql:8.0
+                env:
+                    MYSQL_ROOT_PASSWORD: root_password
+                    MYSQL_USER: mysql
+                    MYSQL_PASSWORD: mysql
+                    MYSQL_DATABASE: test
+                options: >-
+                    --health-cmd "mysqladmin ping"
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports:
+                    - 3306:3306
+            postgres:
+                image: postgres
+                env:
+                    POSTGRES_USER: postgres
+                    POSTGRES_PASSWORD: postgres
+                    POSTGRES_DB: test
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports:
+                    - 5432:5432
+            redis:
+                image: redis
+                options: >-
+                    --health-cmd "redis-cli ping"
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v2
+
+            - name: Install
+              run: yarn
+
+            - name: Prepare packages
+              run: yarn run build-ci
+
+            - name: Migration-up SQLite(1)
+              run: yarn migration-up --db sqlite
+              working-directory: ./apps/api-server
+              env:
+                  SQLITE: >
+                      {
+                          "dbName": "./test1.sqlite3"
+                      }
+
+            - name: Migration-up SQLite(2)
+              run: yarn migration-up --db sqlite
+              working-directory: ./apps/api-server
+              env:
+                  SQLITE: >
+                      {
+                          "dbName": "./test2.sqlite3"
+                      }
+
+            - name: Migration-up MySQL
+              run: yarn migration-up --db mysql
+              working-directory: ./apps/api-server
+              env:
+                  MYSQL: >
+                      {
+                          "clientUrl": "mysql://mysql:mysql@mysql:3306/test"
+                      }
+
+            - name: Migration-up PostgreSQL
+              run: yarn migration-up --db postgresql
+              working-directory: ./apps/api-server
+              env:
+                  POSTGRESQL: >
+                      {
+                          "clientUrl": "postgresql://postgres:postgres@postgres:5432/test"
+                      }
+
+            - name: Test
+              run: yarn test --ci --coverage --maxWorkers=2
+
+            - name: Upload Codecov Coverage
+              uses: codecov/codecov-action@v2
+              with:
+                  token: ${{ secrets.CODECOV_TOKEN }}
+
+    # fails on windows because it uses crlf
+    prettier:
+        name: Lint and prettier on Node ${{ matrix.node }} and ${{ matrix.os }}
+
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+                node: ['16.x']
+                os: [ubuntu-20.04]
+
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Use Node ${{ matrix.node }}
+              uses: actions/setup-node@v2
+              with:
+                  node-version: ${{ matrix.node }}
+                  cache: yarn
+
+            - run: yarn
+
+            - name: Lint
+              run: yarn lint
+
+            - name: Prettier(check)
+              run: yarn prettier:base --check
