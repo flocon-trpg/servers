@@ -27,7 +27,7 @@ import { useAtomSelector } from '../../../atoms/useAtomSelector';
 import { MyAuthContext } from '../../../contexts/MyAuthContext';
 import { usePublishRoomEventSubscription } from '../../../hooks/usePublishRoomEventSubscription';
 import { useReadonlyRef } from '../../../hooks/useReadonlyRef';
-import { useAllRoomMessages } from '../../../hooks/useRoomMessages';
+import { useRoomMesages, useStartFetchingRoomMessages } from '../../../hooks/useRoomMessages';
 import {
     deleted,
     getRoomFailure,
@@ -311,11 +311,12 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
         error,
     } = usePublishRoomEventSubscription(roomId);
     const { state: roomState, refetch: refetchRoomState } = useRoomState(roomId, observable);
-    const allRoomMessages = useAllRoomMessages({
+    useStartFetchingRoomMessages({
         roomId,
         roomEventSubscription,
         beginFetch: roomState.type === 'joined',
     });
+    const mes = useRoomMesages({});
 
     React.useEffect(() => {
         setRoomAtomValue({ ...roomAtom.init, roomId });
@@ -326,12 +327,6 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
     React.useEffect(() => {
         setRoomAtomValue(roomAtomValue => ({ ...roomAtomValue, roomEventSubscription }));
     }, [roomEventSubscription, setRoomAtomValue]);
-    React.useEffect(() => {
-        setRoomAtomValue(roomAtomValue => ({
-            ...roomAtomValue,
-            allRoomMessagesResult: allRoomMessages,
-        }));
-    }, [allRoomMessages, setRoomAtomValue]);
 
     const newNotification = useAtomSelector(roomAtom, room => room.notifications.newValue);
     React.useEffect(() => {

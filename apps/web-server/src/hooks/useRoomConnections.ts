@@ -2,9 +2,10 @@ import { useLazyQuery } from '@apollo/client';
 import produce from 'immer';
 import React from 'react';
 import { GetRoomConnectionsDocument } from '@flocon-trpg/typed-document-node';
+import { Notification } from '@flocon-trpg/web-server-utils';
 import { useParticipants } from './state/useParticipants';
 import { useReadonlyRef } from './useReadonlyRef';
-import { roomNotificationsAtom, roomAtom, Notification } from '../atoms/room/roomAtom';
+import { roomNotificationsAtom, roomAtom, text } from '../atoms/room/roomAtom';
 import { useAtomSelector } from '../atoms/useAtomSelector';
 import { useUpdateAtom } from 'jotai/utils';
 
@@ -53,7 +54,7 @@ export function useRoomConnections() {
             produce(oldValue, draft => {
                 const value = draft[roomConnectionEvent.userUid];
                 const participant = participantsRef.current?.get(roomConnectionEvent.userUid);
-                const notification: Notification.StateElement | undefined =
+                const notification: Notification | undefined =
                     participant == null
                         ? undefined
                         : {
@@ -66,7 +67,7 @@ export function useRoomConnections() {
                 if (value == null) {
                     if (notification != null) {
                         addRoomNotification({
-                            type: Notification.text,
+                            type: text,
                             notification,
                         });
                     }
@@ -82,7 +83,7 @@ export function useRoomConnections() {
 
                 if (notification != null) {
                     addRoomNotification({
-                        type: Notification.text,
+                        type: text,
                         notification,
                     });
                 }

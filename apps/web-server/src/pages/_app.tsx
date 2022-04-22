@@ -23,7 +23,7 @@ import { AllContextProvider } from '../components/behaviors/AllContextProvider';
 import { simpleId } from '@flocon-trpg/core';
 import { Ref } from '../utils/ref';
 import { userConfigAtom } from '../atoms/userConfig/userConfigAtom';
-import { roomNotificationsAtom, Notification } from '../atoms/room/roomAtom';
+import { roomNotificationsAtom, text } from '../atoms/room/roomAtom';
 import { useAsync, useDebounce } from 'react-use';
 import { roomConfigAtom } from '../atoms/roomConfig/roomConfigAtom';
 import { setRoomConfig } from '../utils/localStorage/roomConfig';
@@ -234,7 +234,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
             return await user.getIdToken().catch(err => {
                 console.error('failed at getIdToken', err);
                 setRoomNotification({
-                    type: Notification.text,
+                    type: text,
                     notification: {
                         type: 'error',
                         message:

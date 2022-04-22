@@ -6,8 +6,13 @@ import {
     RoomPrivateMessageFragment,
     RoomPublicMessageFragment,
 } from '@flocon-trpg/typed-document-node';
-import { pieceLog, privateMessage, publicMessage } from '../../../../hooks/useRoomMessages';
-import { PrivateChannelSet } from '../../../../utils/message/PrivateChannelSet';
+import {
+    pieceLog,
+    privateMessage,
+    publicMessage,
+    PrivateChannelSet,
+    Notification,
+} from '@flocon-trpg/web-server-utils';
 import { PublicChannelNames } from '../../../../utils/types';
 import { Jdenticon } from '../../../ui/Jdenticon';
 import { isDeleted, toText } from '../../../../utils/message/message';
@@ -24,7 +29,6 @@ import { recordToMap } from '@flocon-trpg/utils';
 import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../../../../utils/className';
 import { IconView } from '../file/IconView';
-import { Notification } from '../../../../atoms/room/roomAtom';
 
 type ParticipantState = State<typeof participantTemplate>;
 
@@ -236,7 +240,7 @@ export namespace RoomMessage {
     };
 
     type IconProps = {
-        message: MessageState | Notification.StateElement;
+        message: MessageState | Notification;
         size: number;
     };
 

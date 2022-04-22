@@ -3,11 +3,22 @@ import { RoomEventSubscription } from '@flocon-trpg/typed-document-node';
 import _ from 'lodash';
 import { Source, pipe, subscribe } from 'wonka';
 import { OperationResult } from '@urql/core';
+import { privateMessage, publicMessage, RoomMessagesClient } from '@flocon-trpg/web-server-utils';
+import { Option } from '@kizahasi/option';
+import { recordForEach } from '@flocon-trpg/utils';
 
 export class TestRoomEventSubscription {
-    private values: RoomEventSubscription[] = [];
+    #values: RoomEventSubscription[] = [];
+    #messagesClient = new RoomMessagesClient();
 
     public constructor(source: Source<OperationResult<RoomEventSubscription>>) {
+        this.#messagesClient.onQuery({
+            publicMessages: [],
+            publicChannels: [],
+            pieceLogs: [],
+            privateMessages: [],
+            soundEffects: [],
+        });
         pipe(
             source,
             subscribe(result => {
@@ -15,23 +26,35 @@ export class TestRoomEventSubscription {
                     throw result.error;
                 }
                 if (result.data != null) {
-                    this.values.push(result.data);
+                    this.#values.push(result.data);
+                    if (result.data.roomEvent?.roomMessageEvent != null) {
+                        this.#messagesClient.onEvent(result.data.roomEvent?.roomMessageEvent);
+                    }
                 }
             })
         );
     }
 
     public clear() {
-        this.values = [];
+        this.#values = [];
+
+        this.#messagesClient = new RoomMessagesClient();
+        this.#messagesClient.onQuery({
+            publicMessages: [],
+            publicChannels: [],
+            pieceLogs: [],
+            privateMessages: [],
+            soundEffects: [],
+        });
     }
 
     public toBeEmpty() {
-        expect(this.values.every(x => x.roomEvent == null)).toBe(true);
+        expect(this.#values.every(x => x.roomEvent == null)).toBe(true);
     }
 
     public toBeExactlyOneDeleteRoomEvent({ deletedBy }: { deletedBy: string }) {
-        expect(this.values).toHaveLength(1);
-        const deleteRoomOperationEvents = _(this.values)
+        expect(this.#values).toHaveLength(1);
+        const deleteRoomOperationEvents = _(this.#values)
             .map(x => x.roomEvent?.deleteRoomOperation)
             .compact()
             .value();
@@ -47,8 +70,8 @@ export class TestRoomEventSubscription {
         event: 'connect' | 'disconnect';
         userUid: string;
     }) {
-        expect(this.values).toHaveLength(1);
-        const roomConnectionEvents = _(this.values)
+        expect(this.#values).toHaveLength(1);
+        const roomConnectionEvents = _(this.#values)
             .map(x => x.roomEvent?.roomConnectionEvent)
             .compact()
             .value();
@@ -59,8 +82,8 @@ export class TestRoomEventSubscription {
     }
 
     public toBeExactlyOneRoomOperationEvent() {
-        expect(this.values).toHaveLength(1);
-        const roomOperationEvents = _(this.values)
+        expect(this.#values).toHaveLength(1);
+        const roomOperationEvents = _(this.#values)
             .map(x => x.roomEvent?.roomOperation)
             .compact()
             .value();
@@ -68,75 +91,79 @@ export class TestRoomEventSubscription {
         return roomOperationEvents[0]!;
     }
 
-    public toBeExactlyOneRoomPrivateMessageEvent() {
-        expect(this.values).toHaveLength(1);
-        const roomPrivateMessages = _(this.values)
-            .map(x => {
-                const roomMessageEvent = x.roomEvent?.roomMessageEvent;
-                if (roomMessageEvent?.__typename !== 'RoomPrivateMessage') {
-                    return undefined;
-                }
-                return roomMessageEvent;
-            })
-            .compact()
-            .value();
-        expect(roomPrivateMessages).toHaveLength(1);
-        return roomPrivateMessages[0]!;
+    public toBeExactlyOneRoomMessageEvent() {
+        expect(this.#values).toHaveLength(1);
+        const value = this.#values[0]!;
+        expect(value.roomEvent).toBeTruthy();
+        const roomEvent = value.roomEvent!;
+        expect(roomEvent.deleteRoomOperation).toBeFalsy();
+        expect(roomEvent.isRoomMessagesResetEvent).toBeFalsy();
+        expect(roomEvent.roomConnectionEvent).toBeFalsy();
+        expect(roomEvent.roomOperation).toBeFalsy();
+        expect(roomEvent.writingMessageStatus).toBeFalsy();
+        const roomMessageEvents = roomEvent.roomMessageEvent;
+        expect(roomMessageEvents).toBeTruthy();
+        return roomMessageEvents!;
     }
 
-    public toBeExactlyOneRoomPublicMessageEvent() {
-        expect(this.values).toHaveLength(1);
-        const roomPublicMessages = _(this.values)
-            .map(x => {
-                const roomMessageEvent = x.roomEvent?.roomMessageEvent;
-                if (roomMessageEvent?.__typename !== 'RoomPublicMessage') {
-                    return undefined;
-                }
-                return roomMessageEvent;
-            })
-            .compact()
-            .value();
-        expect(roomPublicMessages).toHaveLength(1);
-        return roomPublicMessages[0]!;
+    public toBeExactlyOneRoomPrivateMessage() {
+        const messages = this.#messagesClient.messages.getCurrent() ?? [];
+        expect(messages).toHaveLength(1);
+        const message = messages[0]!;
+        if (message.type !== privateMessage) {
+            expect(message.type).toBe(privateMessage);
+            throw new Error('Guard');
+        }
+        return message.value;
     }
 
-    public toBeExactlyOnePieceLogEvent() {
-        expect(this.values).toHaveLength(1);
-        const pieceLogs = _(this.values)
-            .map(x => {
-                const roomMessageEvent = x.roomEvent?.roomMessageEvent;
-                if (roomMessageEvent?.__typename !== 'PieceLog') {
-                    return undefined;
-                }
-                return roomMessageEvent;
-            })
-            .compact()
-            .value();
-        expect(pieceLogs).toHaveLength(1);
-        return pieceLogs[0]!;
+    public toBeExactlyOneRoomPublicMessage() {
+        const messages = this.#messagesClient.messages.getCurrent() ?? [];
+        expect(messages).toHaveLength(1);
+        const message = messages[0]!;
+        if (message.type !== publicMessage) {
+            expect(message.type).toBe(publicMessage);
+            throw new Error('Guard');
+        }
+        return message.value;
     }
 }
 
-export class CompositeTestRoomEventSubscription {
-    public constructor(private readonly instances: TestRoomEventSubscription[]) {}
+export class CompositeTestRoomEventSubscription<TUserUids extends ReadonlyArray<string>> {
+    public constructor(
+        private readonly instances: { [_ in TUserUids[number]]: TestRoomEventSubscription }
+    ) {}
 
     public clear() {
-        this.instances.forEach(x => x.clear());
+        recordForEach<TestRoomEventSubscription>(this.instances, x => x.clear());
     }
 
     public toBeEmpty() {
-        this.instances.forEach(x => x.toBeEmpty());
+        recordForEach<TestRoomEventSubscription>(this.instances, x => x.toBeEmpty());
     }
 
-    public except(...instances: TestRoomEventSubscription[]): CompositeTestRoomEventSubscription {
-        const newSubscriptions = [...this.instances];
-        instances.forEach(x => {
-            const index = newSubscriptions.indexOf(x);
-            if (index < 0) {
-                throw new Error('the subscription not found');
-            }
-            newSubscriptions.splice(index, 1);
+    public except(...userUids: TUserUids[number][]): CompositeTestRoomEventSubscription<TUserUids> {
+        const newSubscriptions = { ...this.instances };
+        userUids.forEach(userUid => {
+            delete newSubscriptions[userUid];
         });
         return new CompositeTestRoomEventSubscription(newSubscriptions);
+    }
+
+    public distinct<T>(mapping: (subscription: TestRoomEventSubscription) => T): T {
+        let lastValue: Option<T> = Option.none();
+        recordForEach<TestRoomEventSubscription>(this.instances, instance => {
+            const mapped = mapping(instance);
+            if (!lastValue.isNone) {
+                expect(lastValue.value).toEqual(mapped);
+                return;
+            }
+            lastValue = Option.some(mapped);
+        });
+        const result = lastValue as Option<T>;
+        if (result.isNone) {
+            throw new Error('instances should not be empty.');
+        }
+        return result.value;
     }
 }

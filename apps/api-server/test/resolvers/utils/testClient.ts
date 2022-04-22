@@ -18,6 +18,9 @@ import {
     DeleteFileTagDocument,
     DeleteFileTagMutation,
     DeleteFileTagMutationVariables,
+    DeleteMessageDocument,
+    DeleteMessageMutation,
+    DeleteMessageMutationVariables,
     DeleteRoomAsAdminDocument,
     DeleteRoomAsAdminMutation,
     DeleteRoomAsAdminMutationVariables,
@@ -27,6 +30,9 @@ import {
     EditFileTagsDocument,
     EditFileTagsMutation,
     EditFileTagsMutationVariables,
+    EditMessageDocument,
+    EditMessageMutation,
+    EditMessageMutationVariables,
     EntryToServerDocument,
     EntryToServerMutation,
     EntryToServerMutationVariables,
@@ -243,6 +249,26 @@ export class TestClient {
         return this.#core
             .mutation<CreateRoomMutation, CreateRoomMutationVariables>(
                 CreateRoomDocument,
+                variables,
+                { requestPolicy: 'network-only' }
+            )
+            .toPromise();
+    }
+
+    public deleteMessageMutation(variables: DeleteMessageMutationVariables) {
+        return this.#core
+            .mutation<DeleteMessageMutation, DeleteMessageMutationVariables>(
+                DeleteMessageDocument,
+                variables,
+                { requestPolicy: 'network-only' }
+            )
+            .toPromise();
+    }
+
+    public editMessageMutation(variables: EditMessageMutationVariables) {
+        return this.#core
+            .mutation<EditMessageMutation, EditMessageMutationVariables>(
+                EditMessageDocument,
                 variables,
                 { requestPolicy: 'network-only' }
             )

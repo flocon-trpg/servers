@@ -8,6 +8,7 @@
         "@flocon-trpg/core": "workspace:^",
         "@flocon-trpg/typed-document-node": "workspace:^",
         "@flocon-trpg/utils": "workspace:^",
+        "@flocon-trpg/web-server-utils": "workspace:^",
         "@kizahasi/result": "^1.0.0",
         "@monaco-editor/react": "^4.2.2",
         "@next/bundle-analyzer": "^11.0.0",
