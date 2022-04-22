@@ -63,6 +63,7 @@
     },
     "devDependencies": {
         "@flocon-trpg/typed-document-node": "workspace:*",
+        "@flocon-trpg/web-server-utils": "workspace:*",
         "@graphql-codegen/cli": "2.6.2",
         "@graphql-codegen/typed-document-node": "2.2.5",
         "@graphql-codegen/typescript": "2.4.5",

@@ -7,7 +7,6 @@ import * as Icons from '@ant-design/icons';
 import { KonvaEventObject } from 'konva/types/Node';
 import { update } from '../../../../stateManagers/states/types';
 import * as Icon from '@ant-design/icons';
-import { Message, publicMessage, useFilteredRoomMessages } from '../../../../hooks/useRoomMessages';
 import { useMe } from '../../../../hooks/useMe';
 import { useCharacters } from '../../../../hooks/state/useCharacters';
 import { useParticipants } from '../../../../hooks/state/useParticipants';
@@ -68,6 +67,8 @@ import { BoardType } from '../../../../utils/board/boardType';
 import { useIsMyCharacter } from '../../../../hooks/state/useIsMyCharacter';
 import { imagePieceModalAtom } from './ImagePieceModal';
 import { Styles } from '../../../../styles';
+import { Message, publicMessage } from '@flocon-trpg/web-server-utils';
+import { noref, useRoomMesages } from '../../../../hooks/useRoomMessages';
 
 type BoardState = OmitVersion<State<typeof boardTemplate>>;
 type PieceState = OmitVersion<State<typeof pieceTemplate>>;
@@ -215,7 +216,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
         backgroundImage.type === success ? backgroundImage.image : undefined;
     const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
     const setRoomState = useSetRoomStateWithImmer();
-    const publicMessages = useFilteredRoomMessages({ filter: publicMessageFilter });
+    const publicMessages = useRoomMesages({ filter: publicMessageFilter });
     const myUserUid = useMyUserUid();
     const isMyCharacter = useIsMyCharacter();
     const setImagePieceModal = useUpdateAtom(imagePieceModalAtom);
@@ -237,10 +238,11 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     }
 
     const lastPublicMessage = (() => {
-        if (publicMessages.length === 0) {
+        if (publicMessages === noref || publicMessages.isError) {
             return undefined;
         }
-        const lastMessage = publicMessages[publicMessages.length - 1];
+        const publicMessagesValue = publicMessages.value.current ?? [];
+        const lastMessage = publicMessagesValue[publicMessagesValue.length - 1];
         if (lastMessage == null) {
             return;
         }

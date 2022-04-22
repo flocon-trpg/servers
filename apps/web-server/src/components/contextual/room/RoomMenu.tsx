@@ -28,7 +28,7 @@ import { flex, flexRow, itemsCenter } from '../../../utils/className';
 import { MyAuthContext } from '../../../contexts/MyAuthContext';
 import { GenerateLogModal } from './message/GenerateLogModal';
 import { useLazyQuery, useMutation } from '@apollo/client';
-import { roomNotificationsAtom, roomAtom, Notification } from '../../../atoms/room/roomAtom';
+import { roomNotificationsAtom, roomAtom, graphQLErrors, text } from '../../../atoms/room/roomAtom';
 import { useAtomSelector } from '../../../atoms/useAtomSelector';
 import { roomConfigAtom } from '../../../atoms/roomConfig/roomConfigAtom';
 import { RoomConfigUtils } from '../../../atoms/roomConfig/types/roomConfig/utils';
@@ -128,7 +128,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                     promoteToPlayer({ variables: { roomId, password: inputValue } }).then(e => {
                         if (e.errors != null) {
                             addRoomNotification({
-                                type: Notification.graphQLErrors,
+                                type: graphQLErrors,
                                 createdAt: new Date().getTime(),
                                 errors: e.errors,
                             });
@@ -185,7 +185,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                 promoteToPlayer({ variables: { roomId } }).then(e => {
                     if (e.errors != null) {
                         addRoomNotification({
-                            type: Notification.graphQLErrors,
+                            type: graphQLErrors,
                             createdAt: new Date().getTime(),
                             errors: e.errors,
                         });
@@ -265,7 +265,7 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
                 deleteRoom({ variables: { id: roomId } }).then(e => {
                     if (e.errors != null) {
                         addRoomNotification({
-                            type: Notification.graphQLErrors,
+                            type: graphQLErrors,
                             createdAt: new Date().getTime(),
                             errors: e.errors,
                         });
@@ -357,7 +357,7 @@ const ResetMessagesModal: React.FC<ResetMessagesModalProps> = ({
                 resetMessages({ variables: { roomId } }).then(e => {
                     if (e.errors != null) {
                         addRoomNotification({
-                            type: Notification.graphQLErrors,
+                            type: graphQLErrors,
                             createdAt: new Date().getTime(),
                             errors: e.errors,
                         });
@@ -439,7 +439,7 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
         changeParticipantName({ variables: { roomId, newName: inputValue } }).then(e => {
             if (e.errors != null) {
                 addRoomNotification({
-                    type: Notification.graphQLErrors,
+                    type: graphQLErrors,
                     createdAt: new Date().getTime(),
                     errors: e.errors,
                 });
@@ -449,7 +449,7 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
 
             if (e.data?.result.failureType != null) {
                 addRoomNotification({
-                    type: Notification.text,
+                    type: text,
                     notification: {
                         type: 'warning',
                         message: '名前の変更に失敗しました。',

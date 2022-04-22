@@ -458,8 +458,10 @@ export class ResetRoomMessagesResult {
     public failureType?: ResetRoomMessagesFailureType;
 }
 
+/** @deprecated This may be integrated into RoomPublicChannel. */
 export const RoomPublicChannelUpdateType = 'RoomPublicChannelUpdate';
 
+/** @deprecated This may be integrated into RoomPublicChannel. */
 @ObjectType()
 export class RoomPublicChannelUpdate {
     public __tstype!: typeof RoomPublicChannelUpdateType;

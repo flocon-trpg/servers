@@ -19,7 +19,7 @@ import { roomTemplate, State as S, UpOperation as U, StateManager } from '@floco
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { authNotFound, MyAuthContext, notSignIn } from '../contexts/MyAuthContext';
 import { Room } from '../stateManagers/states/room';
-import { roomNotificationsAtom, Notification } from '../atoms/room/roomAtom';
+import { apolloError, roomNotificationsAtom, text } from '../atoms/room/roomAtom';
 import { useUpdateAtom } from 'jotai/utils';
 import { SetAction } from '../utils/setAction';
 
@@ -251,13 +251,13 @@ export const useRoomState = (
                     } catch (e) {
                         if (e instanceof ApolloError) {
                             addRoomNotification({
-                                type: Notification.apolloError,
+                                type: apolloError,
                                 error: e,
                                 createdAt: new Date().getTime(),
                             });
                         } else {
                             addRoomNotification({
-                                type: Notification.text,
+                                type: text,
                                 notification: {
                                     type: 'error',
                                     message: 'Unknown error at operateMutation, useRoomState',
@@ -294,7 +294,7 @@ export const useRoomState = (
                             break;
                         case 'OperateRoomNonJoinedResult':
                             addRoomNotification({
-                                type: Notification.text,
+                                type: text,
                                 notification: {
                                     type: 'error',
                                     message: '部屋に入室していないため、operateできませんでした。',
@@ -308,7 +308,7 @@ export const useRoomState = (
                             break;
                         case 'OperateRoomFailureResult':
                             addRoomNotification({
-                                type: Notification.text,
+                                type: text,
                                 notification: {
                                     type: 'error',
                                     message: 'operateで問題が発生しました。',

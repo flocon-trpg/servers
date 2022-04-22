@@ -3,7 +3,6 @@ import {
     RoomMessages,
     RoomPublicChannelFragment,
 } from '@flocon-trpg/typed-document-node';
-import { PrivateChannelSet } from './PrivateChannelSet';
 import { escape } from 'html-escaper';
 import moment from 'moment';
 import { PublicChannelNames } from '../types';
@@ -32,6 +31,7 @@ import { RoomMessageFilter } from '../../components/contextual/room/message/Chan
 import { WebConfig } from '../../configType';
 import { FirebaseStorage as FirebaseStorageType } from '@firebase/storage';
 import { div, generateHtml, HtmlObject, span } from './generateHtml';
+import { PrivateChannelSet } from '@flocon-trpg/web-server-utils';
 
 type ParticipantState = State<typeof participantTemplate>;
 

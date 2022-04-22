@@ -33,7 +33,6 @@ export class TestClients<TUserUids extends ReadonlyArray<string>> {
 
     public beginSubscriptions(roomId: string) {
         const subscriptionsRecord: Record<string, TestRoomEventSubscription> = {};
-        const subscriptionsArray: TestRoomEventSubscription[] = [];
         for (const userUid in this.clients) {
             const client = (this.clients as Record<string, TestClient>)[userUid];
             if (client == null) {
@@ -42,10 +41,11 @@ export class TestClients<TUserUids extends ReadonlyArray<string>> {
 
             const subscription = client.roomEventSubscription({ roomId });
             subscriptionsRecord[userUid] = subscription;
-            subscriptionsArray.push(subscription);
         }
 
-        const allSubscriptions = new CompositeTestRoomEventSubscription(subscriptionsArray);
+        const allSubscriptions = new CompositeTestRoomEventSubscription(
+            subscriptionsRecord as { [_ in TUserUids[number]]: TestRoomEventSubscription }
+        );
         return { all: allSubscriptions, value: subscriptionsRecord as Subscriptions<TUserUids> };
     }
 }

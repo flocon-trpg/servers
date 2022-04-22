@@ -6,7 +6,7 @@ import { RoomMessage } from '../components/contextual/room/message/RoomMessage';
 import { emptyPublicChannelNames } from '../utils/types';
 import { useMessageFilter } from './useMessageFilter';
 import { usePublicChannelNames } from './state/usePublicChannelNames';
-import { newEvent, privateMessage, publicMessage } from './useRoomMessages';
+import { onQuery, privateMessage, publicMessage } from '@flocon-trpg/web-server-utils';
 import { useParticipants } from './state/useParticipants';
 import { useMyUserUid } from './useMyUserUid';
 import classNames from 'classnames';
@@ -20,6 +20,7 @@ import {
     defaultMasterVolume,
     defaultSeVolume,
 } from '../atoms/roomConfig/types/roomConfig/resources';
+import { useRoomMessageEvent } from './useRoomMessages';
 
 const argsBase: Omit<ArgsProps, 'message'> = {
     placement: 'bottomRight',
@@ -28,7 +29,7 @@ const argsBase: Omit<ArgsProps, 'message'> = {
 export function useMessageNotification(): void {
     const publicChannelNames = usePublicChannelNames();
     const publicChannelNameRef = useReadonlyRef(publicChannelNames);
-    const allRoomMessagesResult = useAtomSelector(roomAtom, state => state.allRoomMessagesResult);
+    const messageEvent = useRoomMessageEvent();
     const participantsMap = useParticipants();
     const participantsMapRef = useReadonlyRef(participantsMap);
     const masterVolume = useAtomSelector(roomConfigAtom, state => state?.masterVolume);
@@ -62,37 +63,37 @@ export function useMessageNotification(): void {
     const messageFilterRef = useReadonlyRef(messageFilter);
 
     React.useEffect(() => {
-        if (myUserUidRef.current == null || allRoomMessagesResult?.type !== newEvent) {
+        if (myUserUidRef.current == null || messageEvent == null) {
             return;
         }
         let message: RoomMessage.MessageState;
-        switch (allRoomMessagesResult.event.__typename) {
+        switch (messageEvent.__typename) {
             case 'RoomPrivateMessage':
                 if (
                     !messageFilterRef.current({
                         type: privateMessage,
-                        value: allRoomMessagesResult.event,
+                        value: messageEvent,
                     })
                 ) {
                     return;
                 }
                 message = {
                     type: privateMessage,
-                    value: allRoomMessagesResult.event,
+                    value: messageEvent,
                 };
                 break;
             case 'RoomPublicMessage':
                 if (
                     !messageFilterRef.current({
                         type: publicMessage,
-                        value: allRoomMessagesResult.event,
+                        value: messageEvent,
                     })
                 ) {
                     return;
                 }
                 message = {
                     type: publicMessage,
-                    value: allRoomMessagesResult.event,
+                    value: messageEvent,
                 };
                 break;
             default:
@@ -127,5 +128,5 @@ export function useMessageNotification(): void {
             ),
             description: <RoomMessage.Content style={{}} message={message} />,
         });
-    }, [allRoomMessagesResult, messageFilterRef, participantsMapRef, publicChannelNameRef]);
+    }, [messageEvent, messageFilterRef, participantsMapRef, publicChannelNameRef]);
 }

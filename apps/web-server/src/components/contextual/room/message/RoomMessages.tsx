@@ -21,18 +21,18 @@ import {
     Select,
 } from 'antd';
 import moment from 'moment';
+import { apolloError, failure, noref, useRoomMesages } from '../../../../hooks/useRoomMessages';
 import {
-    apolloError,
-    failure,
+    PrivateChannelSet,
+    PrivateChannelSets,
     loading,
     publicMessage,
     privateMessage,
     soundEffect,
-    useFilteredAndMapRoomMessages,
     Message,
     pieceLog,
-} from '../../../../hooks/useRoomMessages';
-import { PrivateChannelSet, PrivateChannelSets } from '../../../../utils/message/PrivateChannelSet';
+    Notification,
+} from '@flocon-trpg/web-server-utils';
 import { ChatInput } from './ChatInput';
 import {
     DeleteMessageDocument,
@@ -51,7 +51,7 @@ import { useWritingMessageStatus } from '../../../../hooks/useWritingMessageStat
 import { isDeleted, toText } from '../../../../utils/message/message';
 import { usePublicChannelNames } from '../../../../hooks/state/usePublicChannelNames';
 import { useParticipants } from '../../../../hooks/state/useParticipants';
-import { recordToMap } from '@flocon-trpg/utils';
+import { recordToMap, toBeNever } from '@flocon-trpg/utils';
 import { Color } from '../../../../utils/color';
 import * as Icons from '@ant-design/icons';
 import { InputModal } from '../../../ui/InputModal';
@@ -70,7 +70,7 @@ import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithI
 import { useMutation } from '@apollo/client';
 import { MessageTabConfig } from '../../../../atoms/roomConfig/types/messageTabConfig';
 import { atom } from 'jotai';
-import { roomAtom, Notification } from '../../../../atoms/room/roomAtom';
+import { roomAtom } from '../../../../atoms/room/roomAtom';
 import { userConfigAtom } from '../../../../atoms/userConfig/userConfigAtom';
 import { UserConfigUtils } from '../../../../atoms/userConfig/utils';
 import { MessageFilter } from '../../../../atoms/roomConfig/types/messageFilter';
@@ -102,7 +102,6 @@ const participantsAtom = atom(get => get(roomAtom).roomState?.state?.participant
 const roomIdAtom = atom(get => get(roomAtom).roomId);
 const roomMessageFontSizeDeltaAtom = atom(get => get(userConfigAtom)?.roomMessagesFontSizeDelta);
 const chatInputDirectionAtom = atom(get => get(userConfigAtom)?.chatInputDirection);
-const allRoomMessagesResultAtom = atom(get => get(roomAtom).allRoomMessagesResult);
 
 type TabEditorDrawerProps = {
     // これがundefinedの場合、Drawerのvisibleがfalseとみなされる。
@@ -423,7 +422,7 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (
 };
 
 type RoomMessageComponentProps = {
-    message: RoomMessageNameSpace.MessageState | Notification.StateElement;
+    message: RoomMessageNameSpace.MessageState | Notification;
     showPrivateMessageMembers?: boolean;
 
     // もしRoomMessageComponent内でusePublicChannelNamesをそれぞれ呼び出す形にすると、画像が読み込まれた瞬間（スクロールでメッセージ一覧を上下するときに発生しやすい）に一瞬だけpublicChannelNamesが何故かnullになる（react-virtuosoの影響？）ため、チャンネル名が一瞬だけ'?'になるためチラついて見えてしまう。そのため、このように外部からpublicChannelNamesを受け取る形にすることで解決している。
@@ -729,36 +728,32 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
 
     const filter = useMessageFilter(config);
     const thenMap = React.useCallback(
-        (messages: ReadonlyArray<Message>) => {
-            return [...messages]
-                .sort((x, y) => x.value.createdAt - y.value.createdAt)
-                .map(message => {
-                    if (message.type === soundEffect) {
-                        // soundEffectはfilterで弾いていなければならない。
-                        throw new Error('soundEffect is not supported');
+        (_: unknown, message: Message) => {
+            if (message.type === soundEffect) {
+                // soundEffectはfilterで弾いていなければならない。
+                throw new Error('soundEffect is not supported');
+            }
+            return (
+                <RoomMessageComponent
+                    key={
+                        message.type === privateMessage || message.type === publicMessage
+                            ? message.value.messageId
+                            : message.value.createdAt
                     }
-                    return (
-                        <RoomMessageComponent
-                            key={
-                                message.type === privateMessage || message.type === publicMessage
-                                    ? message.value.messageId
-                                    : message.value.createdAt
-                            }
-                            publicChannelNames={publicChannelNames}
-                            message={
-                                message.type === publicMessage ||
-                                message.type === privateMessage ||
-                                message.type === pieceLog
-                                    ? message
-                                    : message.value
-                            }
-                        />
-                    );
-                });
+                    publicChannelNames={publicChannelNames}
+                    message={
+                        message.type === publicMessage ||
+                        message.type === privateMessage ||
+                        message.type === pieceLog
+                            ? message
+                            : message.value
+                    }
+                />
+            );
         },
         [publicChannelNames]
     );
-    const messages = useFilteredAndMapRoomMessages({ filter, thenMap });
+    const messages = useRoomMesages({ filter });
 
     const writingUsers = [...writingMessageStatusResult]
         .filter(
@@ -790,15 +785,45 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
         );
     }
 
-    return (
-        <div className={classNames(flex, flexColumn)}>
-            <div style={{ padding: '0 4px' }}>
+    let content: JSX.Element = <QueryResultViewer loading compact={false} />;
+    if (messages !== noref) {
+        if (messages.isError) {
+            switch (messages.error.type) {
+                case apolloError:
+                    content = (
+                        <QueryResultViewer
+                            loading={false}
+                            error={messages.error.error}
+                            compact={false}
+                        />
+                    );
+                    break;
+                case failure:
+                    content = (
+                        <Result
+                            status='error'
+                            title='エラー'
+                            subTitle={messages.error.failureType}
+                        />
+                    );
+                    break;
+                default:
+                    toBeNever(messages.error);
+            }
+        } else {
+            content = (
                 <JumpToBottomVirtuoso
-                    items={messages}
-                    create={(_, data) => data}
+                    items={messages.value.current ?? []}
+                    create={thenMap}
                     height={contentHeight - writingStatusHeight}
                 />
-            </div>
+            );
+        }
+    }
+
+    return (
+        <div className={classNames(flex, flexColumn)}>
+            <div style={{ padding: '0 4px' }}>{content}</div>
             {writingStatus}
         </div>
     );
@@ -828,7 +853,6 @@ export const RoomMessages: React.FC<Props> = ({ height, panelId }: Props) => {
     const [isChannelNamesEditorVisible, setIsChannelNamesEditorVisible] = React.useState(false);
 
     const roomId = useAtomValue(roomIdAtom);
-    const allRoomMessagesResult = useAtomValue(allRoomMessagesResultAtom);
     const roomMessagesFontSizeDelta = useAtomValue(roomMessageFontSizeDeltaAtom);
     const chatInputDirectionCore = useAtomValue(chatInputDirectionAtom) ?? auto;
 
@@ -1015,31 +1039,8 @@ export const RoomMessages: React.FC<Props> = ({ height, panelId }: Props) => {
         );
     }, [contentHeight, editingTabConfigKey, panelId, setRoomConfig, tabs, tabsHeight]);
 
-    if (roomId == null || allRoomMessagesResult == null || draggableTabs == null) {
+    if (roomId == null || draggableTabs == null) {
         return null;
-    }
-
-    switch (allRoomMessagesResult.type) {
-        case loading:
-            return <QueryResultViewer loading compact={false} />;
-        case apolloError:
-            return (
-                <QueryResultViewer
-                    loading={false}
-                    error={allRoomMessagesResult.error}
-                    compact={false}
-                />
-            );
-        case failure:
-            return (
-                <Result
-                    status='error'
-                    title='エラー'
-                    subTitle={allRoomMessagesResult.failureType}
-                />
-            );
-        default:
-            break;
     }
 
     return (
