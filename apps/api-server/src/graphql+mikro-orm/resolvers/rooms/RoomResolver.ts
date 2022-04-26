@@ -742,13 +742,13 @@ const createRoomPublicMessage = ({
     };
 };
 
-const createRoomPrivateMessage = async ({
+const createRoomPrivateMessage = ({
     msg,
     visibleTo,
 }: {
     msg: RoomPrvMsg;
     visibleTo: string[];
-}): Promise<RoomPrivateMessage> => {
+}): RoomPrivateMessage => {
     return {
         __tstype: RoomPrivateMessageType,
         messageId: msg.id,
@@ -762,6 +762,44 @@ const createRoomPrivateMessage = async ({
         initTextSource: msg.initTextSource ?? msg.initText,
         updatedText: createUpdatedText(msg),
         textColor: msg.textColor ?? undefined,
+        commandResult:
+            msg.commandResult == null
+                ? undefined
+                : {
+                      text: msg.commandResult,
+                      isSuccess: msg.commandIsSuccess,
+                  },
+        altTextToSecret: msg.altTextToSecret ?? undefined,
+        isSecret: msg.isSecret,
+    };
+};
+
+const createRoomPublicMessageUpdate = (msg: RoomPubMsg): RoomPublicMessageUpdate => {
+    return {
+        __tstype: RoomPublicMessageUpdateType,
+        messageId: msg.id,
+        initText: msg.initText,
+        initTextSource: msg.initTextSource ?? msg.initText,
+        updatedText: createUpdatedText(msg),
+        commandResult:
+            msg.commandResult == null
+                ? undefined
+                : {
+                      text: msg.commandResult,
+                      isSuccess: msg.commandIsSuccess,
+                  },
+        altTextToSecret: msg.altTextToSecret ?? undefined,
+        isSecret: msg.isSecret,
+    };
+};
+
+const createRoomPrivateMessageUpdate = (msg: RoomPrvMsg): RoomPrivateMessageUpdate => {
+    return {
+        __tstype: RoomPrivateMessageUpdateType,
+        messageId: msg.id,
+        initText: msg.initText ?? undefined,
+        initTextSource: msg.initTextSource ?? msg.initText,
+        updatedText: createUpdatedText(msg),
         commandResult:
             msg.commandResult == null
                 ? undefined
@@ -2338,22 +2376,8 @@ export class RoomResolver {
                 publicMsg.textUpdatedAt = new Date().getTime();
                 await em.flush();
 
-                const payloadValue: RoomPublicMessageUpdate = {
-                    __tstype: RoomPublicMessageUpdateType,
-                    messageId: publicMsg.id,
-                    isSecret: publicMsg.isSecret,
-                    initText: publicMsg.initText,
-                    initTextSource: publicMsg.initTextSource,
-                    updatedText: createUpdatedText(publicMsg),
-                    commandResult:
-                        publicMsg.commandResult == null
-                            ? undefined
-                            : {
-                                  text: publicMsg.commandResult,
-                                  isSuccess: publicMsg.commandIsSuccess,
-                              },
-                    altTextToSecret: publicMsg.altTextToSecret,
-                };
+                const payloadValue: RoomPublicMessageUpdate =
+                    createRoomPublicMessageUpdate(publicMsg);
                 return Result.ok({
                     result: {},
                     payload: {
@@ -2390,22 +2414,8 @@ export class RoomResolver {
                 privateMsg.textUpdatedAt = new Date().getTime();
                 await em.flush();
 
-                const payloadValue: RoomPrivateMessageUpdate = {
-                    __tstype: RoomPrivateMessageUpdateType,
-                    messageId: privateMsg.id,
-                    isSecret: privateMsg.isSecret,
-                    initText: privateMsg.initText,
-                    initTextSource: privateMsg.initTextSource,
-                    updatedText: createUpdatedText(privateMsg),
-                    commandResult:
-                        privateMsg.commandResult == null
-                            ? undefined
-                            : {
-                                  text: privateMsg.commandResult,
-                                  isSuccess: privateMsg.commandIsSuccess,
-                              },
-                    altTextToSecret: privateMsg.altTextToSecret,
-                };
+                const payloadValue: RoomPrivateMessageUpdate =
+                    createRoomPrivateMessageUpdate(privateMsg);
                 return Result.ok({
                     result: {},
                     payload: {
@@ -2493,23 +2503,8 @@ export class RoomResolver {
                 publicMsg.textUpdatedAt = new Date().getTime();
                 await em.flush();
 
-                const payloadValue: RoomPublicMessageUpdate = {
-                    __tstype: RoomPublicMessageUpdateType,
-                    messageId: publicMsg.id,
-                    isSecret: publicMsg.isSecret,
-                    initText: publicMsg.initText,
-                    initTextSource: publicMsg.initTextSource,
-                    updatedText: createUpdatedText(publicMsg),
-                    commandResult:
-                        publicMsg.commandResult == null
-                            ? undefined
-                            : {
-                                  text: publicMsg.commandResult,
-                                  isSuccess: publicMsg.commandIsSuccess,
-                              },
-                    altTextToSecret: publicMsg.altTextToSecret,
-                    updatedAt: publicMsg.textUpdatedAt,
-                };
+                const payloadValue: RoomPublicMessageUpdate =
+                    createRoomPublicMessageUpdate(publicMsg);
                 return Result.ok({
                     result: {},
                     payload: {
@@ -2542,23 +2537,8 @@ export class RoomResolver {
                 privateMsg.textUpdatedAt = new Date().getTime();
                 await em.flush();
 
-                const payloadValue: RoomPrivateMessageUpdate = {
-                    __tstype: RoomPrivateMessageUpdateType,
-                    messageId: privateMsg.id,
-                    isSecret: privateMsg.isSecret,
-                    initText: privateMsg.initText,
-                    initTextSource: privateMsg.initTextSource,
-                    updatedText: createUpdatedText(privateMsg),
-                    commandResult:
-                        privateMsg.commandResult == null
-                            ? undefined
-                            : {
-                                  text: privateMsg.commandResult,
-                                  isSuccess: privateMsg.commandIsSuccess,
-                              },
-                    altTextToSecret: privateMsg.altTextToSecret,
-                    updatedAt: privateMsg.textUpdatedAt,
-                };
+                const payloadValue: RoomPrivateMessageUpdate =
+                    createRoomPrivateMessageUpdate(privateMsg);
                 return Result.ok({
                     result: {},
                     payload: {
