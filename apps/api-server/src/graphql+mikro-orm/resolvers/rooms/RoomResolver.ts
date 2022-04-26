@@ -2363,11 +2363,7 @@ export class RoomResolver {
                         },
                     });
                 }
-                if (
-                    publicMsg.initText == null &&
-                    publicMsg.altTextToSecret == null &&
-                    publicMsg.commandResult == null
-                ) {
+                if (publicMsg.updatedText == null && publicMsg.textUpdatedAt != null) {
                     return Result.ok({
                         result: {
                             failureType: DeleteMessageFailureType.MessageDeleted,
@@ -2401,11 +2397,7 @@ export class RoomResolver {
                         },
                     });
                 }
-                if (
-                    privateMsg.initText == null &&
-                    privateMsg.altTextToSecret == null &&
-                    privateMsg.commandResult == null
-                ) {
+                if (privateMsg.updatedText == null && privateMsg.textUpdatedAt != null) {
                     return Result.ok({
                         result: {
                             failureType: DeleteMessageFailureType.MessageDeleted,
