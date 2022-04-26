@@ -1210,7 +1210,11 @@ describe.each([
                                 .except(Resources.UserUid.notJoin)
                                 .distinct(x => x.toBeExactlyOneRoomPublicMessage());
                             expect(updatedMessage.updatedText?.currentText).toBe(editedText);
-                            expect(updatedMessage).toEqual({
+                            expect({
+                                ...updatedMessage,
+                                updatedAt: undefined,
+                                updatedText: undefined,
+                            }).toEqual({
                                 ...message,
                                 updatedAt: undefined,
                                 updatedText: undefined,
