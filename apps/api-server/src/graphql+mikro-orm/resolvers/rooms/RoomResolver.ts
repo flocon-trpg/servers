@@ -2342,6 +2342,8 @@ export class RoomResolver {
                     __tstype: RoomPublicMessageUpdateType,
                     messageId: publicMsg.id,
                     isSecret: publicMsg.isSecret,
+                    initText: publicMsg.initText,
+                    initTextSource: publicMsg.initTextSource,
                     updatedText: createUpdatedText(publicMsg),
                     commandResult:
                         publicMsg.commandResult == null
@@ -2351,7 +2353,6 @@ export class RoomResolver {
                                   isSuccess: publicMsg.commandIsSuccess,
                               },
                     altTextToSecret: publicMsg.altTextToSecret,
-                    updatedAt: publicMsg.textUpdatedAt,
                 };
                 return Result.ok({
                     result: {},
@@ -2391,10 +2392,19 @@ export class RoomResolver {
 
                 const payloadValue: RoomPrivateMessageUpdate = {
                     __tstype: RoomPrivateMessageUpdateType,
-                    updatedText: privateMsg.updatedText,
                     messageId: privateMsg.id,
                     isSecret: privateMsg.isSecret,
-                    updatedAt: privateMsg.textUpdatedAt,
+                    initText: privateMsg.initText,
+                    initTextSource: privateMsg.initTextSource,
+                    updatedText: createUpdatedText(privateMsg),
+                    commandResult:
+                        privateMsg.commandResult == null
+                            ? undefined
+                            : {
+                                  text: privateMsg.commandResult,
+                                  isSuccess: privateMsg.commandIsSuccess,
+                              },
+                    altTextToSecret: privateMsg.altTextToSecret,
                 };
                 return Result.ok({
                     result: {},
@@ -2487,6 +2497,8 @@ export class RoomResolver {
                     __tstype: RoomPublicMessageUpdateType,
                     messageId: publicMsg.id,
                     isSecret: publicMsg.isSecret,
+                    initText: publicMsg.initText,
+                    initTextSource: publicMsg.initTextSource,
                     updatedText: createUpdatedText(publicMsg),
                     commandResult:
                         publicMsg.commandResult == null
@@ -2534,6 +2546,8 @@ export class RoomResolver {
                     __tstype: RoomPrivateMessageUpdateType,
                     messageId: privateMsg.id,
                     isSecret: privateMsg.isSecret,
+                    initText: privateMsg.initText,
+                    initTextSource: privateMsg.initTextSource,
                     updatedText: createUpdatedText(privateMsg),
                     commandResult:
                         privateMsg.commandResult == null
