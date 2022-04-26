@@ -41,6 +41,7 @@ import { maskTypeNames } from './utils/maskTypenames';
 import { TestClients } from './utils/testClients';
 import { isTruthyString, recordToArray } from '@flocon-trpg/utils';
 import { TestClient } from './utils/testClient';
+import produce from 'immer';
 
 type UpOperation = U<typeof roomTemplate>;
 
@@ -52,6 +53,40 @@ const TEST_SKIP_RESOLVERS = process.env.TEST_SKIP_RESOLVERS;
 const skipResolvers = isTruthyString(TEST_SKIP_RESOLVERS);
 
 const timeout = 20000;
+
+// Dateのmillisecond部分が丸められる仕様のDBの場合でも、entity作成時のDateはflushの有無にかかわらず丸められない。このため、
+const roundMilliSecondsInObject = (source: unknown): unknown => {
+    const roundMilliSeconds = (i: number): number => {
+        return Math.round(i / 1000) * 1000;
+    };
+
+    function core(source: unknown): void {
+        if (Array.isArray(source)) {
+            source.forEach(x => core(x));
+            return;
+        }
+
+        if (typeof source !== 'object') {
+            return;
+        }
+        if (source == null) {
+            return;
+        }
+
+        for (const key in source) {
+            if (key === 'createdAt' || key === 'updatedAt') {
+                const value = (source as any)[key];
+                if (typeof value === 'number') {
+                    (source as any)[key] = roundMilliSeconds(value);
+                    continue;
+                }
+            }
+            core((source as any)[key]);
+        }
+    }
+
+    return produce(source, core);
+};
 
 const textDiff = ({ prev, next }: { prev: string; next: string }) => {
     if (prev === next) {
@@ -353,7 +388,7 @@ describe.each([
     [postgresqlType, plainEntryPassword],
     [mysqlType, plainEntryPassword],
 ] as const)(
-    'tests of resolvers',
+    'tests of resolvers %p',
     (dbType, entryPasswordConfig) => {
         if (skipResolvers) {
             console.info('SKIPS resolver tests because `TEST_SKIP_RESOLVERS` is true');
@@ -1154,7 +1189,9 @@ describe.each([
                                         roomId,
                                     })
                                 );
-                                expect(messages.publicMessages).toEqual([message]);
+                                expect(roundMilliSecondsInObject(messages.publicMessages)).toEqual(
+                                    roundMilliSecondsInObject([message])
+                                );
                             }
                         }
 
@@ -1340,7 +1377,9 @@ describe.each([
                                     roomId,
                                 })
                             );
-                            expect(messages.privateMessages).toEqual([player2SubscriptionResult]);
+                            expect(roundMilliSecondsInObject(messages.privateMessages)).toEqual(
+                                roundMilliSecondsInObject([player2SubscriptionResult])
+                            );
                         }
                     });
                 });
