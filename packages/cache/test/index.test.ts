@@ -1,18 +1,16 @@
 import { Cache, createNodeCache, createRedisCache } from '../src';
 import Redis from 'ioredis';
-import { isTruthyString } from '@flocon-trpg/utils';
+import { isFalsyString } from '@flocon-trpg/utils';
 
 /*
-To run tests in this file, you need to prepare a redis instance. If you want to skip redis tests, set TEST_SKIP_REDIS env to "true".
+To run tests in this file, you need to prepare a redis instance. If you want to skip redis tests, set REDIS_TEST env to "0".
 */
 
-const TEST_SKIP_REDIS = process.env.TEST_SKIP_REDIS;
-const skipRedis = isTruthyString(TEST_SKIP_REDIS);
+const REDIS_TEST = process.env.REDIS_TEST;
+const skipRedis = isFalsyString(REDIS_TEST);
 
 if (skipRedis) {
-    console.info('SKIPS Redis tests because `TEST_SKIP_REDIS` is true');
-} else {
-    console.log('DO Redis tests because `TEST_SKIP_REDIS` is not true');
+    console.info('Skips Redis tests because `REDIS_TEST` is falsy.');
 }
 
 const createEach = (redis: Redis.Redis): Cache[] => {
