@@ -37,8 +37,10 @@ jobs:
             - name: Test
               run: yarn test --ci --coverage --maxWorkers=2
               env:
-                  TEST_SKIP_REDIS: true
-                  TEST_SKIP_RESOLVERS: true
+                  REDIS_TEST: 0
+                  SQLITE_TEST: 0
+                  MYSQL_TEST: 0
+                  POSTGRESQL_TEST: 0
 
             - name: Next export
               run: yarn run export
@@ -95,24 +97,6 @@ jobs:
 
             - name: Prepare packages
               run: yarn run build-ci
-
-            - name: Migration-up SQLite(1)
-              run: yarn migration-up --db sqlite
-              working-directory: ./apps/api-server
-              env:
-                  SQLITE: >
-                      {
-                          "dbName": "./test1.sqlite3"
-                      }
-
-            - name: Migration-up SQLite(2)
-              run: yarn migration-up --db sqlite
-              working-directory: ./apps/api-server
-              env:
-                  SQLITE: >
-                      {
-                          "dbName": "./test2.sqlite3"
-                      }
 
             - name: Migration-up MySQL
               run: yarn migration-up --db mysql

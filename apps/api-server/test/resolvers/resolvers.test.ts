@@ -39,20 +39,16 @@ import { diff, serializeUpOperation, toUpOperation } from '@kizahasi/ot-string';
 import { OperationResult } from '@urql/core';
 import { maskTypeNames } from './utils/maskTypenames';
 import { TestClients } from './utils/testClients';
-import { isTruthyString, recordToArray } from '@flocon-trpg/utils';
+import { isFalsyString, recordToArray } from '@flocon-trpg/utils';
 import { TestClient } from './utils/testClient';
 import produce from 'immer';
+import { doAutoMigrationBeforeStart } from '../../src/migrate';
 
 type UpOperation = U<typeof roomTemplate>;
 
-/*
-To run tests in this file, you need to prepare SQLite and PostgreSQL. If you want to skip them, set TEST_SKIP_RESOLVERS env to "true".
-*/
-
-const TEST_SKIP_RESOLVERS = process.env.TEST_SKIP_RESOLVERS;
-const skipResolvers = isTruthyString(TEST_SKIP_RESOLVERS);
-
 const timeout = 20000;
+const timeout_beforeAll = 20000;
+const timeout_afterEach = 20000;
 
 // Dateのmillisecond部分が丸められる仕様のDBの場合でも、entity作成時のDateはflushの有無にかかわらず丸められない。このため、
 const roundMilliSecondsInObject = (source: unknown): unknown => {
@@ -382,27 +378,53 @@ const mysqlType: DbConfig = {
     type: 'MySQL',
 };
 
-describe.each([
-    [sqlite1Type, undefined],
-    [sqlite2Type, plainEntryPassword],
-    [postgresqlType, plainEntryPassword],
-    [mysqlType, plainEntryPassword],
-] as const)(
+const createCases = (): [DbConfig, ServerConfig['entryPassword'] | undefined][] => {
+    const result: [DbConfig, ServerConfig['entryPassword'] | undefined][] = [];
+
+    const SQLITE_TEST = process.env.SQLITE_TEST;
+    if (isFalsyString(SQLITE_TEST)) {
+        console.info('Skips SQLite tests because SQLITE_TEST env is falsy.');
+    } else {
+        result.push([sqlite1Type, undefined], [sqlite2Type, plainEntryPassword]);
+    }
+
+    const POSTGRESQL_TEST = process.env.POSTGRESQL_TEST;
+    if (isFalsyString(POSTGRESQL_TEST)) {
+        console.info('Skips PostgreSQL tests because POSTGRESQL_TEST env is falsy.');
+    } else {
+        result.push([postgresqlType, plainEntryPassword]);
+    }
+
+    const MYSQL_TEST = process.env.MYSQL_TEST;
+    if (isFalsyString(MYSQL_TEST)) {
+        console.info('Skips MySQL tests because MYSQL_TEST env is falsy.');
+    } else {
+        result.push([mysqlType, plainEntryPassword]);
+    }
+
+    return result;
+};
+
+const cases = createCases();
+
+describe.each(cases)(
     'tests of resolvers %p',
     (dbType, entryPasswordConfig) => {
-        if (skipResolvers) {
-            console.info('SKIPS resolver tests because `TEST_SKIP_RESOLVERS` is true');
-            // これがないと、テストがないため失敗とみなされる
-            test('FAKE-TEST', () => undefined);
-            return;
-        }
+        beforeAll(async () => {
+            if (dbType.type !== 'SQLite') {
+                return;
+            }
+            const orm = await createOrm(dbType);
+            await doAutoMigrationBeforeStart(orm);
+        }, timeout_beforeAll);
+
         afterEach(async () => {
             const orm = await createOrm(dbType);
             await clearAllRooms(orm.em.fork());
             await clearAllFiles(orm.em.fork());
             await clearAllUsers(orm.em.fork());
             await orm.close();
-        });
+        }, timeout_afterEach);
 
         const entryPassword = entryPasswordConfig == null ? undefined : Resources.entryPassword;
 
