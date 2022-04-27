@@ -4,6 +4,7 @@ import {
 } from '@flocon-trpg/core';
 import {
     Collection,
+    DateType,
     Entity,
     IdentifiedReference,
     JsonType,
@@ -128,8 +129,20 @@ export class RoomPubMsg {
     @Property({ nullable: true, type: TextType })
     public updatedText?: string;
 
+    /** @deprecated Do not set values to this. Set to textUpdatedAt2 instead. */
     @Property({ nullable: true, default: null })
     public textUpdatedAt?: number;
+
+    @Property({ type: DateType, nullable: true, default: null })
+    public textUpdatedAt2?: Date;
+
+    @Property({ persist: false })
+    public get textUpdatedAtValue() {
+        if (this.textUpdatedAt2 != null) {
+            return this.textUpdatedAt2.getTime();
+        }
+        return this.textUpdatedAt;
+    }
 
     // フォーマットは#nnnnnn。
     // nullishの場合はwhite
@@ -227,8 +240,20 @@ export class RoomPrvMsg {
     @Property({ nullable: true, type: TextType })
     public updatedText?: string;
 
+    /** @deprecated Do not set values to this. Set to textUpdatedAt2 instead. */
     @Property({ nullable: true, default: null })
     public textUpdatedAt?: number;
+
+    @Property({ type: DateType, nullable: true, default: null })
+    public textUpdatedAt2?: Date;
+
+    @Property({ persist: false })
+    public get textUpdatedAtValue() {
+        if (this.textUpdatedAt2 != null) {
+            return this.textUpdatedAt2.getTime();
+        }
+        return this.textUpdatedAt;
+    }
 
     // フォーマットは#nnnnnn。
     // nullishの場合はwhite

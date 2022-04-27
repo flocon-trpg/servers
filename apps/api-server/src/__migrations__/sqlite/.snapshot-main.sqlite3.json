@@ -1,39 +1,37 @@
 {
-    "namespaces": ["public"],
-    "name": "public",
+    "namespaces": [],
     "tables": [
         {
             "columns": {
                 "user_uid": {
                     "name": "user_uid",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "baas_type": {
                     "name": "baas_type",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "is_entry": {
                     "name": "is_entry",
-                    "type": "boolean",
+                    "type": "integer",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "boolean"
+                    "mappedType": "integer"
                 }
             },
             "name": "user",
-            "schema": "public",
             "indexes": [
                 {
                     "columnNames": ["baas_type"],
@@ -50,7 +48,7 @@
                     "unique": false
                 },
                 {
-                    "keyName": "user_pkey",
+                    "keyName": "primary",
                     "columnNames": ["user_uid"],
                     "composite": false,
                     "primary": true,
@@ -64,44 +62,44 @@
             "columns": {
                 "filename": {
                     "name": "filename",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "screenname": {
                     "name": "screenname",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "created_at": {
                     "name": "created_at",
-                    "type": "timestamptz(0)",
+                    "type": "datetime",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "length": 6,
+                    "length": 0,
                     "mappedType": "datetime"
                 },
                 "encoding": {
                     "name": "encoding",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "size": {
                     "name": "size",
-                    "type": "int",
+                    "type": "integer",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
@@ -110,25 +108,25 @@
                 },
                 "thumb_filename": {
                     "name": "thumb_filename",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "mimetype": {
                     "name": "mimetype",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "filesize": {
                     "name": "filesize",
-                    "type": "int",
+                    "type": "integer",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
@@ -137,43 +135,42 @@
                 },
                 "list_permission": {
                     "name": "list_permission",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "rename_permission": {
                     "name": "rename_permission",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "delete_permission": {
                     "name": "delete_permission",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "created_by_user_uid": {
                     "name": "created_by_user_uid",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 }
             },
             "name": "file",
-            "schema": "public",
             "indexes": [
                 {
                     "columnNames": ["screenname"],
@@ -232,7 +229,14 @@
                     "unique": false
                 },
                 {
-                    "keyName": "file_pkey",
+                    "columnNames": ["created_by_user_uid"],
+                    "composite": false,
+                    "keyName": "file_created_by_user_uid_index",
+                    "primary": false,
+                    "unique": false
+                },
+                {
+                    "keyName": "primary",
                     "columnNames": ["filename"],
                     "composite": false,
                     "primary": true,
@@ -244,9 +248,9 @@
                 "file_created_by_user_uid_foreign": {
                     "constraintName": "file_created_by_user_uid_foreign",
                     "columnNames": ["created_by_user_uid"],
-                    "localTableName": "public.file",
+                    "localTableName": "file",
                     "referencedColumnNames": ["user_uid"],
-                    "referencedTableName": "public.user",
+                    "referencedTableName": "user",
                     "updateRule": "cascade"
                 }
             }
@@ -255,37 +259,43 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "name": {
                     "name": "name",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "user_user_uid": {
                     "name": "user_user_uid",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 }
             },
             "name": "file_tag",
-            "schema": "public",
             "indexes": [
                 {
-                    "keyName": "file_tag_pkey",
+                    "columnNames": ["user_user_uid"],
+                    "composite": false,
+                    "keyName": "file_tag_user_user_uid_index",
+                    "primary": false,
+                    "unique": false
+                },
+                {
+                    "keyName": "primary",
                     "columnNames": ["id"],
                     "composite": false,
                     "primary": true,
@@ -297,9 +307,9 @@
                 "file_tag_user_user_uid_foreign": {
                     "constraintName": "file_tag_user_user_uid_foreign",
                     "columnNames": ["user_user_uid"],
-                    "localTableName": "public.file_tag",
+                    "localTableName": "file_tag",
                     "referencedColumnNames": ["user_uid"],
-                    "referencedTableName": "public.user",
+                    "referencedTableName": "user",
                     "updateRule": "cascade"
                 }
             }
@@ -308,28 +318,41 @@
             "columns": {
                 "file_filename": {
                     "name": "file_filename",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "file_tag_id": {
                     "name": "file_tag_id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 }
             },
             "name": "file_file_tags",
-            "schema": "public",
             "indexes": [
                 {
-                    "keyName": "file_file_tags_pkey",
+                    "columnNames": ["file_filename"],
+                    "composite": false,
+                    "keyName": "file_file_tags_file_filename_index",
+                    "primary": false,
+                    "unique": false
+                },
+                {
+                    "columnNames": ["file_tag_id"],
+                    "composite": false,
+                    "keyName": "file_file_tags_file_tag_id_index",
+                    "primary": false,
+                    "unique": false
+                },
+                {
+                    "keyName": "primary",
                     "columnNames": ["file_filename", "file_tag_id"],
                     "composite": true,
                     "primary": true,
@@ -341,18 +364,18 @@
                 "file_file_tags_file_filename_foreign": {
                     "constraintName": "file_file_tags_file_filename_foreign",
                     "columnNames": ["file_filename"],
-                    "localTableName": "public.file_file_tags",
+                    "localTableName": "file_file_tags",
                     "referencedColumnNames": ["filename"],
-                    "referencedTableName": "public.file",
+                    "referencedTableName": "file",
                     "deleteRule": "cascade",
                     "updateRule": "cascade"
                 },
                 "file_file_tags_file_tag_id_foreign": {
                     "constraintName": "file_file_tags_file_tag_id_foreign",
                     "columnNames": ["file_tag_id"],
-                    "localTableName": "public.file_file_tags",
+                    "localTableName": "file_file_tags",
                     "referencedColumnNames": ["id"],
-                    "referencedTableName": "public.file_tag",
+                    "referencedTableName": "file_tag",
                     "deleteRule": "cascade",
                     "updateRule": "cascade"
                 }
@@ -362,16 +385,16 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "version": {
                     "name": "version",
-                    "type": "int",
+                    "type": "integer",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
@@ -381,63 +404,63 @@
                 },
                 "created_at": {
                     "name": "created_at",
-                    "type": "timestamptz(0)",
+                    "type": "datetime",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "length": 6,
+                    "length": 0,
                     "mappedType": "datetime"
                 },
                 "updated_at": {
                     "name": "updated_at",
-                    "type": "timestamptz(0)",
+                    "type": "datetime",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "length": 6,
+                    "length": 0,
                     "mappedType": "datetime"
                 },
                 "player_password_hash": {
                     "name": "player_password_hash",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "spectator_password_hash": {
                     "name": "spectator_password_hash",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "created_by": {
                     "name": "created_by",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "name": {
                     "name": "name",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "value": {
                     "name": "value",
-                    "type": "jsonb",
+                    "type": "json",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
@@ -446,7 +469,7 @@
                 },
                 "revision": {
                     "name": "revision",
-                    "type": "int",
+                    "type": "integer",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
@@ -455,7 +478,6 @@
                 }
             },
             "name": "room",
-            "schema": "public",
             "indexes": [
                 {
                     "columnNames": ["version"],
@@ -486,7 +508,7 @@
                     "unique": false
                 },
                 {
-                    "keyName": "room_pkey",
+                    "keyName": "primary",
                     "columnNames": ["id"],
                     "composite": false,
                     "primary": true,
@@ -500,27 +522,27 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "created_at": {
                     "name": "created_at",
-                    "type": "timestamptz(0)",
+                    "type": "datetime",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "length": 6,
+                    "length": 0,
                     "default": "null",
                     "mappedType": "datetime"
                 },
                 "prev_revision": {
                     "name": "prev_revision",
-                    "type": "int",
+                    "type": "integer",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
@@ -529,7 +551,7 @@
                 },
                 "value": {
                     "name": "value",
-                    "type": "jsonb",
+                    "type": "json",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
@@ -538,16 +560,15 @@
                 },
                 "room_id": {
                     "name": "room_id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 }
             },
             "name": "room_op",
-            "schema": "public",
             "indexes": [
                 {
                     "columnNames": ["created_at"],
@@ -564,6 +585,13 @@
                     "unique": false
                 },
                 {
+                    "columnNames": ["room_id"],
+                    "composite": false,
+                    "keyName": "room_op_room_id_index",
+                    "primary": false,
+                    "unique": false
+                },
+                {
                     "keyName": "room_op_prev_revision_room_id_unique",
                     "columnNames": ["prev_revision", "room_id"],
                     "composite": true,
@@ -571,7 +599,7 @@
                     "unique": true
                 },
                 {
-                    "keyName": "room_op_pkey",
+                    "keyName": "primary",
                     "columnNames": ["id"],
                     "composite": false,
                     "primary": true,
@@ -583,9 +611,9 @@
                 "room_op_room_id_foreign": {
                     "constraintName": "room_op_room_id_foreign",
                     "columnNames": ["room_id"],
-                    "localTableName": "public.room_op",
+                    "localTableName": "room_op",
                     "referencedColumnNames": ["id"],
-                    "referencedTableName": "public.room",
+                    "referencedTableName": "room",
                     "updateRule": "cascade"
                 }
             }
@@ -594,16 +622,16 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "version": {
                     "name": "version",
-                    "type": "int",
+                    "type": "integer",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
@@ -613,22 +641,22 @@
                 },
                 "created_at": {
                     "name": "created_at",
-                    "type": "timestamptz(0)",
+                    "type": "datetime",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "length": 6,
+                    "length": 0,
                     "mappedType": "datetime"
                 },
                 "updated_at": {
                     "name": "updated_at",
-                    "type": "timestamptz(0)",
+                    "type": "datetime",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "length": 6,
+                    "length": 0,
                     "mappedType": "datetime"
                 },
                 "init_text_source": {
@@ -662,7 +690,7 @@
                 },
                 "text_updated_at": {
                     "name": "text_updated_at",
-                    "type": "int",
+                    "type": "integer",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
@@ -682,12 +710,12 @@
                 },
                 "text_color": {
                     "name": "text_color",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "command_result": {
                     "name": "command_result",
@@ -700,13 +728,13 @@
                 },
                 "command_is_success": {
                     "name": "command_is_success",
-                    "type": "boolean",
+                    "type": "integer",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
                     "default": "null",
-                    "mappedType": "boolean"
+                    "mappedType": "integer"
                 },
                 "alt_text_to_secret": {
                     "name": "alt_text_to_secret",
@@ -719,40 +747,40 @@
                 },
                 "is_secret": {
                     "name": "is_secret",
-                    "type": "boolean",
+                    "type": "integer",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "boolean"
+                    "mappedType": "integer"
                 },
                 "chara_state_id": {
                     "name": "chara_state_id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "chara_name": {
                     "name": "chara_name",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "chara_is_private": {
                     "name": "chara_is_private",
-                    "type": "boolean",
+                    "type": "integer",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
                     "default": "null",
-                    "mappedType": "boolean"
+                    "mappedType": "integer"
                 },
                 "chara_image_path": {
                     "name": "chara_image_path",
@@ -766,13 +794,13 @@
                 },
                 "chara_image_source_type": {
                     "name": "chara_image_source_type",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
                     "default": "null",
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "chara_portrait_image_path": {
                     "name": "chara_portrait_image_path",
@@ -786,44 +814,43 @@
                 },
                 "chara_portrait_image_source_type": {
                     "name": "chara_portrait_image_source_type",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
                     "default": "null",
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "custom_name": {
                     "name": "custom_name",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "created_by_user_uid": {
                     "name": "created_by_user_uid",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "room_id": {
                     "name": "room_id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 }
             },
             "name": "room_prv_msg",
-            "schema": "public",
             "indexes": [
                 {
                     "columnNames": ["version"],
@@ -861,7 +888,21 @@
                     "unique": false
                 },
                 {
-                    "keyName": "room_prv_msg_pkey",
+                    "columnNames": ["created_by_user_uid"],
+                    "composite": false,
+                    "keyName": "room_prv_msg_created_by_user_uid_index",
+                    "primary": false,
+                    "unique": false
+                },
+                {
+                    "columnNames": ["room_id"],
+                    "composite": false,
+                    "keyName": "room_prv_msg_room_id_index",
+                    "primary": false,
+                    "unique": false
+                },
+                {
+                    "keyName": "primary",
                     "columnNames": ["id"],
                     "composite": false,
                     "primary": true,
@@ -873,18 +914,18 @@
                 "room_prv_msg_created_by_user_uid_foreign": {
                     "constraintName": "room_prv_msg_created_by_user_uid_foreign",
                     "columnNames": ["created_by_user_uid"],
-                    "localTableName": "public.room_prv_msg",
+                    "localTableName": "room_prv_msg",
                     "referencedColumnNames": ["user_uid"],
-                    "referencedTableName": "public.user",
+                    "referencedTableName": "user",
                     "deleteRule": "set null",
                     "updateRule": "cascade"
                 },
                 "room_prv_msg_room_id_foreign": {
                     "constraintName": "room_prv_msg_room_id_foreign",
                     "columnNames": ["room_id"],
-                    "localTableName": "public.room_prv_msg",
+                    "localTableName": "room_prv_msg",
                     "referencedColumnNames": ["id"],
-                    "referencedTableName": "public.room",
+                    "referencedTableName": "room",
                     "updateRule": "cascade"
                 }
             }
@@ -893,28 +934,41 @@
             "columns": {
                 "user_user_uid": {
                     "name": "user_user_uid",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "room_prv_msg_id": {
                     "name": "room_prv_msg_id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 }
             },
             "name": "user_visible_room_prv_msgs",
-            "schema": "public",
             "indexes": [
                 {
-                    "keyName": "user_visible_room_prv_msgs_pkey",
+                    "columnNames": ["user_user_uid"],
+                    "composite": false,
+                    "keyName": "user_visible_room_prv_msgs_user_user_uid_index",
+                    "primary": false,
+                    "unique": false
+                },
+                {
+                    "columnNames": ["room_prv_msg_id"],
+                    "composite": false,
+                    "keyName": "user_visible_room_prv_msgs_room_prv_msg_id_index",
+                    "primary": false,
+                    "unique": false
+                },
+                {
+                    "keyName": "primary",
                     "columnNames": ["user_user_uid", "room_prv_msg_id"],
                     "composite": true,
                     "primary": true,
@@ -926,18 +980,18 @@
                 "user_visible_room_prv_msgs_user_user_uid_foreign": {
                     "constraintName": "user_visible_room_prv_msgs_user_user_uid_foreign",
                     "columnNames": ["user_user_uid"],
-                    "localTableName": "public.user_visible_room_prv_msgs",
+                    "localTableName": "user_visible_room_prv_msgs",
                     "referencedColumnNames": ["user_uid"],
-                    "referencedTableName": "public.user",
+                    "referencedTableName": "user",
                     "deleteRule": "cascade",
                     "updateRule": "cascade"
                 },
                 "user_visible_room_prv_msgs_room_prv_msg_id_foreign": {
                     "constraintName": "user_visible_room_prv_msgs_room_prv_msg_id_foreign",
                     "columnNames": ["room_prv_msg_id"],
-                    "localTableName": "public.user_visible_room_prv_msgs",
+                    "localTableName": "user_visible_room_prv_msgs",
                     "referencedColumnNames": ["id"],
-                    "referencedTableName": "public.room_prv_msg",
+                    "referencedTableName": "room_prv_msg",
                     "deleteRule": "cascade",
                     "updateRule": "cascade"
                 }
@@ -947,35 +1001,35 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "created_at": {
                     "name": "created_at",
-                    "type": "timestamptz(0)",
+                    "type": "datetime",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "length": 6,
+                    "length": 0,
                     "mappedType": "datetime"
                 },
                 "state_id": {
                     "name": "state_id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "value": {
                     "name": "value",
-                    "type": "jsonb",
+                    "type": "json",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
@@ -984,16 +1038,15 @@
                 },
                 "room_id": {
                     "name": "room_id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 }
             },
             "name": "dice_piece_log",
-            "schema": "public",
             "indexes": [
                 {
                     "columnNames": ["state_id"],
@@ -1003,7 +1056,14 @@
                     "unique": false
                 },
                 {
-                    "keyName": "dice_piece_log_pkey",
+                    "columnNames": ["room_id"],
+                    "composite": false,
+                    "keyName": "dice_piece_log_room_id_index",
+                    "primary": false,
+                    "unique": false
+                },
+                {
+                    "keyName": "primary",
                     "columnNames": ["id"],
                     "composite": false,
                     "primary": true,
@@ -1015,9 +1075,9 @@
                 "dice_piece_log_room_id_foreign": {
                     "constraintName": "dice_piece_log_room_id_foreign",
                     "columnNames": ["room_id"],
-                    "localTableName": "public.dice_piece_log",
+                    "localTableName": "dice_piece_log",
                     "referencedColumnNames": ["id"],
-                    "referencedTableName": "public.room",
+                    "referencedTableName": "room",
                     "updateRule": "cascade"
                 }
             }
@@ -1026,35 +1086,35 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "created_at": {
                     "name": "created_at",
-                    "type": "timestamptz(0)",
+                    "type": "datetime",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "length": 6,
+                    "length": 0,
                     "mappedType": "datetime"
                 },
                 "state_id": {
                     "name": "state_id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "value": {
                     "name": "value",
-                    "type": "jsonb",
+                    "type": "json",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
@@ -1063,16 +1123,15 @@
                 },
                 "room_id": {
                     "name": "room_id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 }
             },
             "name": "string_piece_log",
-            "schema": "public",
             "indexes": [
                 {
                     "columnNames": ["state_id"],
@@ -1082,7 +1141,14 @@
                     "unique": false
                 },
                 {
-                    "keyName": "string_piece_log_pkey",
+                    "columnNames": ["room_id"],
+                    "composite": false,
+                    "keyName": "string_piece_log_room_id_index",
+                    "primary": false,
+                    "unique": false
+                },
+                {
+                    "keyName": "primary",
                     "columnNames": ["id"],
                     "composite": false,
                     "primary": true,
@@ -1094,9 +1160,9 @@
                 "string_piece_log_room_id_foreign": {
                     "constraintName": "string_piece_log_room_id_foreign",
                     "columnNames": ["room_id"],
-                    "localTableName": "public.string_piece_log",
+                    "localTableName": "string_piece_log",
                     "referencedColumnNames": ["id"],
-                    "referencedTableName": "public.room",
+                    "referencedTableName": "room",
                     "updateRule": "cascade"
                 }
             }
@@ -1105,16 +1171,16 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "version": {
                     "name": "version",
-                    "type": "int",
+                    "type": "integer",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
@@ -1124,44 +1190,43 @@
                 },
                 "updated_at": {
                     "name": "updated_at",
-                    "type": "timestamptz(0)",
+                    "type": "datetime",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "length": 6,
+                    "length": 0,
                     "mappedType": "datetime"
                 },
                 "key": {
                     "name": "key",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "name": {
                     "name": "name",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "room_id": {
                     "name": "room_id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 }
             },
             "name": "room_pub_ch",
-            "schema": "public",
             "indexes": [
                 {
                     "columnNames": ["version"],
@@ -1185,6 +1250,13 @@
                     "unique": false
                 },
                 {
+                    "columnNames": ["room_id"],
+                    "composite": false,
+                    "keyName": "room_pub_ch_room_id_index",
+                    "primary": false,
+                    "unique": false
+                },
+                {
                     "keyName": "room_pub_ch_room_id_key_unique",
                     "columnNames": ["room_id", "key"],
                     "composite": true,
@@ -1192,7 +1264,7 @@
                     "unique": true
                 },
                 {
-                    "keyName": "room_pub_ch_pkey",
+                    "keyName": "primary",
                     "columnNames": ["id"],
                     "composite": false,
                     "primary": true,
@@ -1204,9 +1276,9 @@
                 "room_pub_ch_room_id_foreign": {
                     "constraintName": "room_pub_ch_room_id_foreign",
                     "columnNames": ["room_id"],
-                    "localTableName": "public.room_pub_ch",
+                    "localTableName": "room_pub_ch",
                     "referencedColumnNames": ["id"],
-                    "referencedTableName": "public.room",
+                    "referencedTableName": "room",
                     "updateRule": "cascade"
                 }
             }
@@ -1215,16 +1287,16 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "version": {
                     "name": "version",
-                    "type": "int",
+                    "type": "integer",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
@@ -1234,22 +1306,22 @@
                 },
                 "created_at": {
                     "name": "created_at",
-                    "type": "timestamptz(0)",
+                    "type": "datetime",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "length": 6,
+                    "length": 0,
                     "mappedType": "datetime"
                 },
                 "updated_at": {
                     "name": "updated_at",
-                    "type": "timestamptz(0)",
+                    "type": "datetime",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "length": 6,
+                    "length": 0,
                     "mappedType": "datetime"
                 },
                 "init_text_source": {
@@ -1283,7 +1355,7 @@
                 },
                 "text_updated_at": {
                     "name": "text_updated_at",
-                    "type": "int",
+                    "type": "integer",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
@@ -1303,12 +1375,12 @@
                 },
                 "text_color": {
                     "name": "text_color",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "command_result": {
                     "name": "command_result",
@@ -1321,13 +1393,13 @@
                 },
                 "command_is_success": {
                     "name": "command_is_success",
-                    "type": "boolean",
+                    "type": "integer",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
                     "default": "null",
-                    "mappedType": "boolean"
+                    "mappedType": "integer"
                 },
                 "alt_text_to_secret": {
                     "name": "alt_text_to_secret",
@@ -1340,40 +1412,40 @@
                 },
                 "is_secret": {
                     "name": "is_secret",
-                    "type": "boolean",
+                    "type": "integer",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "boolean"
+                    "mappedType": "integer"
                 },
                 "chara_state_id": {
                     "name": "chara_state_id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "chara_name": {
                     "name": "chara_name",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "chara_is_private": {
                     "name": "chara_is_private",
-                    "type": "boolean",
+                    "type": "integer",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
                     "default": "null",
-                    "mappedType": "boolean"
+                    "mappedType": "integer"
                 },
                 "chara_image_path": {
                     "name": "chara_image_path",
@@ -1407,44 +1479,43 @@
                 },
                 "chara_portrait_image_source_type": {
                     "name": "chara_portrait_image_source_type",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
                     "default": "null",
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "custom_name": {
                     "name": "custom_name",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "room_pub_ch_id": {
                     "name": "room_pub_ch_id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "created_by_user_uid": {
                     "name": "created_by_user_uid",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 }
             },
             "name": "room_pub_msg",
-            "schema": "public",
             "indexes": [
                 {
                     "columnNames": ["version"],
@@ -1489,7 +1560,21 @@
                     "unique": false
                 },
                 {
-                    "keyName": "room_pub_msg_pkey",
+                    "columnNames": ["room_pub_ch_id"],
+                    "composite": false,
+                    "keyName": "room_pub_msg_room_pub_ch_id_index",
+                    "primary": false,
+                    "unique": false
+                },
+                {
+                    "columnNames": ["created_by_user_uid"],
+                    "composite": false,
+                    "keyName": "room_pub_msg_created_by_user_uid_index",
+                    "primary": false,
+                    "unique": false
+                },
+                {
+                    "keyName": "primary",
                     "columnNames": ["id"],
                     "composite": false,
                     "primary": true,
@@ -1501,17 +1586,17 @@
                 "room_pub_msg_room_pub_ch_id_foreign": {
                     "constraintName": "room_pub_msg_room_pub_ch_id_foreign",
                     "columnNames": ["room_pub_ch_id"],
-                    "localTableName": "public.room_pub_msg",
+                    "localTableName": "room_pub_msg",
                     "referencedColumnNames": ["id"],
-                    "referencedTableName": "public.room_pub_ch",
+                    "referencedTableName": "room_pub_ch",
                     "updateRule": "cascade"
                 },
                 "room_pub_msg_created_by_user_uid_foreign": {
                     "constraintName": "room_pub_msg_created_by_user_uid_foreign",
                     "columnNames": ["created_by_user_uid"],
-                    "localTableName": "public.room_pub_msg",
+                    "localTableName": "room_pub_msg",
                     "referencedColumnNames": ["user_uid"],
-                    "referencedTableName": "public.user",
+                    "referencedTableName": "user",
                     "deleteRule": "set null",
                     "updateRule": "cascade"
                 }
@@ -1521,44 +1606,44 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "created_at": {
                     "name": "created_at",
-                    "type": "timestamptz(0)",
+                    "type": "datetime",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "length": 6,
+                    "length": 0,
                     "mappedType": "datetime"
                 },
                 "file_path": {
                     "name": "file_path",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "file_source_type": {
                     "name": "file_source_type",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "volume": {
                     "name": "volume",
-                    "type": "int",
+                    "type": "integer",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
@@ -1567,28 +1652,41 @@
                 },
                 "created_by_user_uid": {
                     "name": "created_by_user_uid",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "room_id": {
                     "name": "room_id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 }
             },
             "name": "room_se",
-            "schema": "public",
             "indexes": [
                 {
-                    "keyName": "room_se_pkey",
+                    "columnNames": ["created_by_user_uid"],
+                    "composite": false,
+                    "keyName": "room_se_created_by_user_uid_index",
+                    "primary": false,
+                    "unique": false
+                },
+                {
+                    "columnNames": ["room_id"],
+                    "composite": false,
+                    "keyName": "room_se_room_id_index",
+                    "primary": false,
+                    "unique": false
+                },
+                {
+                    "keyName": "primary",
                     "columnNames": ["id"],
                     "composite": false,
                     "primary": true,
@@ -1600,18 +1698,18 @@
                 "room_se_created_by_user_uid_foreign": {
                     "constraintName": "room_se_created_by_user_uid_foreign",
                     "columnNames": ["created_by_user_uid"],
-                    "localTableName": "public.room_se",
+                    "localTableName": "room_se",
                     "referencedColumnNames": ["user_uid"],
-                    "referencedTableName": "public.user",
+                    "referencedTableName": "user",
                     "deleteRule": "set null",
                     "updateRule": "cascade"
                 },
                 "room_se_room_id_foreign": {
                     "constraintName": "room_se_room_id_foreign",
                     "columnNames": ["room_id"],
-                    "localTableName": "public.room_se",
+                    "localTableName": "room_se",
                     "referencedColumnNames": ["id"],
-                    "referencedTableName": "public.room",
+                    "referencedTableName": "room",
                     "updateRule": "cascade"
                 }
             }
@@ -1620,57 +1718,70 @@
             "columns": {
                 "id": {
                     "name": "id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "role": {
                     "name": "role",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "name": {
                     "name": "name",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": true,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "room_id": {
                     "name": "room_id",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 },
                 "user_user_uid": {
                     "name": "user_user_uid",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
                     "nullable": false,
-                    "mappedType": "string"
+                    "mappedType": "text"
                 }
             },
             "name": "participant",
-            "schema": "public",
             "indexes": [
                 {
                     "columnNames": ["role"],
                     "composite": false,
                     "keyName": "participant_role_index",
+                    "primary": false,
+                    "unique": false
+                },
+                {
+                    "columnNames": ["room_id"],
+                    "composite": false,
+                    "keyName": "participant_room_id_index",
+                    "primary": false,
+                    "unique": false
+                },
+                {
+                    "columnNames": ["user_user_uid"],
+                    "composite": false,
+                    "keyName": "participant_user_user_uid_index",
                     "primary": false,
                     "unique": false
                 },
@@ -1682,7 +1793,7 @@
                     "unique": true
                 },
                 {
-                    "keyName": "participant_pkey",
+                    "keyName": "primary",
                     "columnNames": ["id"],
                     "composite": false,
                     "primary": true,
@@ -1694,17 +1805,17 @@
                 "participant_room_id_foreign": {
                     "constraintName": "participant_room_id_foreign",
                     "columnNames": ["room_id"],
-                    "localTableName": "public.participant",
+                    "localTableName": "participant",
                     "referencedColumnNames": ["id"],
-                    "referencedTableName": "public.room",
+                    "referencedTableName": "room",
                     "updateRule": "cascade"
                 },
                 "participant_user_user_uid_foreign": {
                     "constraintName": "participant_user_user_uid_foreign",
                     "columnNames": ["user_user_uid"],
-                    "localTableName": "public.participant",
+                    "localTableName": "participant",
                     "referencedColumnNames": ["user_uid"],
-                    "referencedTableName": "public.user",
+                    "referencedTableName": "user",
                     "updateRule": "cascade"
                 }
             }
