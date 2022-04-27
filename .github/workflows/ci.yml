@@ -38,7 +38,6 @@ jobs:
               run: yarn test --ci --coverage --maxWorkers=2
               env:
                   REDIS_TEST: 0
-                  SQLITE_TEST: 0
                   MYSQL_TEST: 0
                   POSTGRESQL_TEST: 0
 
