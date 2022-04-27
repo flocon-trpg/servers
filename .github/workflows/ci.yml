@@ -35,7 +35,7 @@ jobs:
               run: yarn build-ci
 
             - name: Test
-              run: yarn test --ci --coverage --maxWorkers=2
+              run: yarn test --ci --coverage --maxWorkers=2 --forceExit
               env:
                   REDIS_TEST: 0
                   MYSQL_TEST: 0
@@ -116,7 +116,7 @@ jobs:
                       }
 
             - name: Test
-              run: yarn test --ci --coverage --maxWorkers=2
+              run: yarn test --ci --coverage --maxWorkers=2 --forceExit
 
             - name: Upload Codecov Coverage
               uses: codecov/codecov-action@v2
