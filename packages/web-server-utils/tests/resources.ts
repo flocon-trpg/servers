@@ -37,8 +37,11 @@ export namespace Resources {
 
         export const updatedMessage3 = {
             ...message3,
-            initText: 'text3_2',
             updatedAt: message3.createdAt + 10,
+            updatedText: {
+                currentText: 'text3_2',
+                updatedAt: message3.createdAt + 10,
+            },
         };
 
         export const updateMessage3Event = {
@@ -80,8 +83,11 @@ export namespace Resources {
 
         export const updatedMessage4 = {
             ...message4,
-            initText: 'text4_2',
             updatedAt: message4.createdAt + 10,
+            updatedText: {
+                currentText: 'text4_2',
+                updatedAt: message4.createdAt + 10,
+            },
         };
 
         export const updateMessage4Event = {
