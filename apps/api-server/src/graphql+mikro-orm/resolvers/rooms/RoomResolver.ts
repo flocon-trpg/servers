@@ -738,7 +738,7 @@ const createRoomPublicMessage = ({
         character: toCharacterValueForMessage(msg),
         customName: msg.customName,
         createdAt: msg.createdAt.getTime(),
-        updatedAt: msg.textUpdatedAt,
+        updatedAt: msg.updatedAt?.getTime(),
     };
 };
 
@@ -757,7 +757,7 @@ const createRoomPrivateMessage = ({
         character: toCharacterValueForMessage(msg),
         customName: msg.customName,
         createdAt: msg.createdAt.getTime(),
-        updatedAt: msg.textUpdatedAt,
+        updatedAt: msg.updatedAt?.getTime(),
         initText: msg.initText ?? undefined,
         initTextSource: msg.initTextSource ?? msg.initText,
         updatedText: createUpdatedText(msg),
@@ -780,6 +780,7 @@ const createRoomPublicMessageUpdate = (msg: RoomPubMsg): RoomPublicMessageUpdate
         messageId: msg.id,
         initText: msg.initText,
         initTextSource: msg.initTextSource ?? msg.initText,
+        updatedAt: msg.updatedAt?.getTime(),
         updatedText: createUpdatedText(msg),
         commandResult:
             msg.commandResult == null
@@ -799,6 +800,7 @@ const createRoomPrivateMessageUpdate = (msg: RoomPrvMsg): RoomPrivateMessageUpda
         messageId: msg.id,
         initText: msg.initText ?? undefined,
         initTextSource: msg.initTextSource ?? msg.initText,
+        updatedAt: msg.updatedAt?.getTime(),
         updatedText: createUpdatedText(msg),
         commandResult:
             msg.commandResult == null
