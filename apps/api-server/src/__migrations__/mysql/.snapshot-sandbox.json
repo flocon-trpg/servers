@@ -698,6 +698,16 @@
                     "default": "null",
                     "mappedType": "integer"
                 },
+                "text_updated_at2": {
+                    "name": "text_updated_at2",
+                    "type": "date",
+                    "unsigned": false,
+                    "autoincrement": false,
+                    "primary": false,
+                    "nullable": true,
+                    "default": "null",
+                    "mappedType": "date"
+                },
                 "text_color": {
                     "name": "text_color",
                     "type": "varchar(255)",
@@ -1352,6 +1362,16 @@
                     "nullable": true,
                     "default": "null",
                     "mappedType": "integer"
+                },
+                "text_updated_at2": {
+                    "name": "text_updated_at2",
+                    "type": "date",
+                    "unsigned": false,
+                    "autoincrement": false,
+                    "primary": false,
+                    "nullable": true,
+                    "default": "null",
+                    "mappedType": "date"
                 },
                 "text_color": {
                     "name": "text_color",

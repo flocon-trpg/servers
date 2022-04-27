@@ -697,14 +697,14 @@ const toCharacterValueForMessage = (
 };
 
 const createUpdatedText = (entity: RoomPubMsg | RoomPrvMsg): UpdatedText | undefined => {
-    if (entity.textUpdatedAt == null) {
+    if (entity.textUpdatedAtValue == null) {
         return undefined;
     }
-    return { currentText: entity.updatedText, updatedAt: entity.textUpdatedAt };
+    return { currentText: entity.updatedText, updatedAt: entity.textUpdatedAtValue };
 };
 
 const isDeleted = (entity: RoomPubMsg | RoomPrvMsg): boolean => {
-    if (entity.textUpdatedAt == null) {
+    if (entity.textUpdatedAtValue == null) {
         return false;
     }
     return entity.updatedText == null;
@@ -2239,7 +2239,7 @@ export class RoomResolver {
                                   isSuccess: publicMsg.commandIsSuccess,
                               },
                     altTextToSecret: publicMsg.altTextToSecret,
-                    updatedAt: publicMsg.textUpdatedAt,
+                    updatedAt: publicMsg.textUpdatedAtValue,
                 };
                 return Result.ok({
                     result: {},
@@ -2285,7 +2285,7 @@ export class RoomResolver {
                                   isSuccess: privateMsg.commandIsSuccess,
                               },
                     altTextToSecret: privateMsg.altTextToSecret,
-                    updatedAt: privateMsg.textUpdatedAt,
+                    updatedAt: privateMsg.textUpdatedAtValue,
                 };
                 return Result.ok({
                     result: {},
@@ -2363,7 +2363,7 @@ export class RoomResolver {
                         },
                     });
                 }
-                if (publicMsg.updatedText == null && publicMsg.textUpdatedAt != null) {
+                if (publicMsg.updatedText == null && publicMsg.textUpdatedAtValue != null) {
                     return Result.ok({
                         result: {
                             failureType: DeleteMessageFailureType.MessageDeleted,
@@ -2371,7 +2371,7 @@ export class RoomResolver {
                     });
                 }
                 publicMsg.updatedText = undefined;
-                publicMsg.textUpdatedAt = new Date().getTime();
+                publicMsg.textUpdatedAt2 = new Date();
                 await em.flush();
 
                 const payloadValue: RoomPublicMessageUpdate =
@@ -2397,7 +2397,7 @@ export class RoomResolver {
                         },
                     });
                 }
-                if (privateMsg.updatedText == null && privateMsg.textUpdatedAt != null) {
+                if (privateMsg.updatedText == null && privateMsg.textUpdatedAtValue != null) {
                     return Result.ok({
                         result: {
                             failureType: DeleteMessageFailureType.MessageDeleted,
@@ -2405,7 +2405,7 @@ export class RoomResolver {
                     });
                 }
                 privateMsg.updatedText = undefined;
-                privateMsg.textUpdatedAt = new Date().getTime();
+                privateMsg.textUpdatedAt2 = new Date();
                 await em.flush();
 
                 const payloadValue: RoomPrivateMessageUpdate =
@@ -2494,7 +2494,7 @@ export class RoomResolver {
                     });
                 }
                 publicMsg.updatedText = args.text;
-                publicMsg.textUpdatedAt = new Date().getTime();
+                publicMsg.textUpdatedAt2 = new Date();
                 await em.flush();
 
                 const payloadValue: RoomPublicMessageUpdate =
@@ -2528,7 +2528,7 @@ export class RoomResolver {
                     });
                 }
                 privateMsg.updatedText = args.text;
-                privateMsg.textUpdatedAt = new Date().getTime();
+                privateMsg.textUpdatedAt2 = new Date();
                 await em.flush();
 
                 const payloadValue: RoomPrivateMessageUpdate =
