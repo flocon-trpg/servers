@@ -68,7 +68,7 @@ import { useIsMyCharacter } from '../../../../hooks/state/useIsMyCharacter';
 import { imagePieceModalAtom } from './ImagePieceModal';
 import { Styles } from '../../../../styles';
 import { Message, publicMessage } from '@flocon-trpg/web-server-utils';
-import { noref, useRoomMesages } from '../../../../hooks/useRoomMessages';
+import { notFetch, useRoomMesages } from '../../../../hooks/useRoomMessages';
 
 type BoardState = OmitVersion<State<typeof boardTemplate>>;
 type PieceState = OmitVersion<State<typeof pieceTemplate>>;
@@ -238,7 +238,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     }
 
     const lastPublicMessage = (() => {
-        if (publicMessages === noref || publicMessages.isError) {
+        if (publicMessages === notFetch || publicMessages.isError) {
             return undefined;
         }
         const publicMessagesValue = publicMessages.value.current ?? [];

@@ -9,7 +9,7 @@ import {
 } from '@flocon-trpg/typed-document-node';
 import { toBeNever } from '@flocon-trpg/utils';
 import produce from 'immer';
-import { Observable, Subject } from 'rxjs';
+import { mergeMap, Observable, Subject } from 'rxjs';
 import { Notification } from './notification';
 
 export const privateMessage = 'privateMessage';
@@ -191,30 +191,56 @@ const reduceEvent = ({
     }
 };
 
-export const loading = 'loading';
-export const onEvent = 'onEvent';
-export const onQuery = 'onQuery';
+export const event = 'event';
+export const query = 'query';
+export const reset = 'reset';
 
-export type MessagesChanged =
+type MessagesChangeCore =
     | {
-          type: typeof loading;
+          type: typeof event;
+          isLoaded: true;
+          current: readonly Message[];
+          event: RoomMessageEventFragment;
+      }
+    | {
+          type: typeof event;
+          isLoaded: false;
           current?: undefined;
           event: RoomMessageEventFragment;
       }
     | {
-          type: typeof onEvent;
+          type: typeof query;
+          isLoaded: true;
+          current: readonly Message[];
+          event?: undefined;
+      }
+    | {
+          type: typeof reset;
+          isLoaded: false;
+          current?: undefined;
+          event?: undefined;
+      };
+
+export type MessagesChange =
+    | {
+          type: typeof event;
           current: readonly Message[];
           event: RoomMessageEventFragment;
       }
     | {
-          type: typeof onQuery;
+          type: typeof query;
           current: readonly Message[];
+          event?: undefined;
+      }
+    | {
+          type: typeof reset;
+          current?: undefined;
           event?: undefined;
       };
 
 export type FilteredRoomMessages = Readonly<{
     getCurrent(): readonly Message[] | null;
-    changed: Observable<MessagesChanged>;
+    changed: Observable<MessagesChange>;
 }>;
 
 export type AllRoomMessages = FilteredRoomMessages &
@@ -366,6 +392,7 @@ class MessageSet {
     }
 }
 
+const loading = 'loading';
 const loaded = 'loaded';
 
 export class RoomMessagesClient {
@@ -376,38 +403,61 @@ export class RoomMessagesClient {
         events: [],
     };
 
-    #messagesChanged = new Subject<MessagesChanged>();
+    #messagesChanged = new Subject<MessagesChangeCore>();
 
     public readonly messages: AllRoomMessages;
 
     public constructor() {
         this.messages = {
             getCurrent: () => this.#messages ?? null,
-            changed: this.#messagesChanged,
+            changed: this.#messagesChanged.pipe(
+                mergeMap<MessagesChangeCore, MessagesChange[]>(changeEvent => {
+                    switch (changeEvent.type) {
+                        case event: {
+                            if (!changeEvent.isLoaded) {
+                                return [];
+                            }
+                            return [{ ...changeEvent, isLoaded: undefined }];
+                        }
+                        default:
+                            return [{ ...changeEvent, isLoaded: undefined }];
+                    }
+                })
+            ),
             filter: filter => {
                 return {
                     getCurrent: () => this.#messages?.filter(msg => filter(msg)) ?? null,
                     changed: new Observable(observer => {
-                        let messages = this.#messages ?? null;
-                        return this.#messagesChanged.subscribe(msg => {
-                            if (msg.type === onQuery) {
-                                messages = msg.current.filter(msg => filter(msg));
-                                observer.next({ type: onQuery, current: messages });
+                        let messages = this.#messages;
+
+                        return this.#messagesChanged.subscribe(changeEvent => {
+                            if (changeEvent.type === query) {
+                                messages = changeEvent.current.filter(msg => filter(msg));
+                                observer.next({ type: query, current: messages });
                                 return;
                             }
-                            if (msg.type === loading || messages == null) {
+                            if (changeEvent.type === reset) {
+                                messages = null;
+                                observer.next({ type: reset });
+                                return;
+                            }
+                            if (messages == null) {
                                 return;
                             }
                             const reduced = reduceEvent({
                                 sortedMessagesArray: messages,
-                                event: msg.event,
+                                event: changeEvent.event,
                                 filter,
                             });
-                            if (reduced == noChange) {
+                            if (reduced === noChange) {
                                 return;
                             }
                             messages = reduced;
-                            observer.next({ type: onEvent, current: reduced, event: msg.event });
+                            observer.next({
+                                type: event,
+                                current: reduced,
+                                event: changeEvent.event,
+                            });
                         });
                     }),
                 };
@@ -557,13 +607,13 @@ export class RoomMessagesClient {
                       events: [],
                   });
         this.#messagesState = { type: loaded, sortedMessages: newMessages };
-        this.#messagesChanged.next({ type: onQuery, current: newMessages });
+        this.#messagesChanged.next({ type: query, isLoaded: true, current: newMessages });
     }
 
     public onEvent(event: RoomMessageEventFragment): void {
         if (this.#messagesState.type === loading) {
             this.#messagesState = { type: loading, events: [...this.#messagesState.events, event] };
-            this.#messagesChanged.next({ type: loading, event });
+            this.#messagesChanged.next({ type: 'event', isLoaded: false, event });
             return;
         }
         const reduced = reduceEvent({
@@ -578,6 +628,14 @@ export class RoomMessagesClient {
             type: loaded,
             sortedMessages: reduced,
         };
-        this.#messagesChanged.next({ type: onEvent, current: reduced, event });
+        this.#messagesChanged.next({ type: 'event', isLoaded: true, current: reduced, event });
+    }
+
+    public reset(): void {
+        this.#messagesState = {
+            type: loading,
+            events: [],
+        };
+        this.#messagesChanged.next({ type: reset, isLoaded: false });
     }
 }

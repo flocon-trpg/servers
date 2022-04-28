@@ -21,7 +21,7 @@ import {
     Select,
 } from 'antd';
 import moment from 'moment';
-import { apolloError, failure, noref, useRoomMesages } from '../../../../hooks/useRoomMessages';
+import { apolloError, failure, notFetch, useRoomMesages } from '../../../../hooks/useRoomMessages';
 import {
     PrivateChannelSet,
     PrivateChannelSets,
@@ -785,7 +785,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
     }
 
     let content: JSX.Element = <QueryResultViewer loading compact={false} />;
-    if (messages !== noref) {
+    if (messages !== notFetch) {
         if (messages.isError) {
             switch (messages.error.type) {
                 case apolloError:
