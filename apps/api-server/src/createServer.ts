@@ -398,7 +398,7 @@ export const createServer = async ({
 
                     const roomId = message.payload.variables?.id;
                     if (typeof roomId === 'string') {
-                        connectionManager.onConnectToRoom({
+                        await connectionManager.onConnectToRoom({
                             connectionId: message.id,
                             userUid: decodedIdToken.value.uid,
                             roomId,
@@ -407,12 +407,12 @@ export const createServer = async ({
                         console.warn('(typeof RoomEvent.id) should be string');
                     }
                 },
-                onComplete: async (ctx, message) => {
+                onComplete: (ctx, message) => {
                     connectionManager.onLeaveRoom({ connectionId: message.id });
                 },
-                onClose: ctx => {
+                onClose: async ctx => {
                     for (const key in ctx.subscriptions) {
-                        connectionManager.onLeaveRoom({ connectionId: key });
+                        await connectionManager.onLeaveRoom({ connectionId: key });
                     }
                 },
             },
