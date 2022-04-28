@@ -4,7 +4,7 @@ import { RoomEventSubscription } from '@flocon-trpg/typed-document-node';
 import { RoomState } from '../../hooks/useRoomState';
 import { atom } from 'jotai';
 import produce from 'immer';
-import { MessagesChanged, Notification } from '@flocon-trpg/web-server-utils';
+import { Notification } from '@flocon-trpg/web-server-utils';
 
 export const text = 'text';
 export const graphQLErrors = 'graphQLErrors';
