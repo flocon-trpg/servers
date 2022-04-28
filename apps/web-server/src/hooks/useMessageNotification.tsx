@@ -6,7 +6,7 @@ import { RoomMessage } from '../components/contextual/room/message/RoomMessage';
 import { emptyPublicChannelNames } from '../utils/types';
 import { useMessageFilter } from './useMessageFilter';
 import { usePublicChannelNames } from './state/usePublicChannelNames';
-import { onQuery, privateMessage, publicMessage } from '@flocon-trpg/web-server-utils';
+import { privateMessage, publicMessage } from '@flocon-trpg/web-server-utils';
 import { useParticipants } from './state/useParticipants';
 import { useMyUserUid } from './useMyUserUid';
 import classNames from 'classnames';
@@ -14,7 +14,6 @@ import { flex, flexRow } from '../utils/className';
 import { useReadonlyRef } from './useReadonlyRef';
 import { useAtomSelector } from '../atoms/useAtomSelector';
 import { roomConfigAtom } from '../atoms/roomConfig/roomConfigAtom';
-import { roomAtom } from '../atoms/room/roomAtom';
 import { MessageFilterUtils } from '../atoms/roomConfig/types/messageFilter/utils';
 import {
     defaultMasterVolume,

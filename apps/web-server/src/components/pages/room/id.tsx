@@ -27,7 +27,7 @@ import { useAtomSelector } from '../../../atoms/useAtomSelector';
 import { MyAuthContext } from '../../../contexts/MyAuthContext';
 import { usePublishRoomEventSubscription } from '../../../hooks/usePublishRoomEventSubscription';
 import { useReadonlyRef } from '../../../hooks/useReadonlyRef';
-import { useRoomMesages, useStartFetchingRoomMessages } from '../../../hooks/useRoomMessages';
+import { useStartFetchingRoomMessages } from '../../../hooks/useRoomMessages';
 import {
     deleted,
     getRoomFailure,
@@ -316,7 +316,6 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
         roomEventSubscription,
         beginFetch: roomState.type === 'joined',
     });
-    const mes = useRoomMesages({});
 
     React.useEffect(() => {
         setRoomAtomValue({ ...roomAtom.init, roomId });
