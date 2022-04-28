@@ -1,6 +1,12 @@
 import { RoomMessageEventFragment } from '@flocon-trpg/typed-document-node';
 import { Observable } from 'rxjs';
-import { loading, Message, MessagesChanged, onEvent, onQuery, RoomMessagesClient } from '../src';
+import {
+    Message,
+    MessagesChange,
+    event as onEvent,
+    query as onQuery,
+    RoomMessagesClient,
+} from '../src';
 import { Resources } from './resources';
 
 class ObservableTester<T> {
@@ -21,14 +27,20 @@ class ObservableTester<T> {
     }
 }
 
-const q = (current: readonly Message[]): MessagesChanged => {
+const q = (current: readonly Message[]): MessagesChange => {
     return {
         type: onQuery,
         current,
     };
 };
 
-const e = (current: readonly Message[], event: RoomMessageEventFragment): MessagesChanged => {
+const e = ({
+    current,
+    event,
+}: {
+    current: readonly Message[];
+    event: RoomMessageEventFragment;
+}): MessagesChange => {
     return {
         type: onEvent,
         current,
@@ -136,7 +148,7 @@ describe('RoomMessagesClient', () => {
         client.onEvent(event);
 
         expect(client.messages.getCurrent()).toBeNull();
-        clientChanged.expect().toEqual([{ type: loading, event }]);
+        clientChanged.expect().toEqual([]);
 
         expect(filtered.getCurrent()).toBeNull();
         filteredChanged.expect().toEqual([]);
@@ -333,10 +345,10 @@ describe('RoomMessagesClient', () => {
         client.onEvent(event);
 
         expect(client.messages.getCurrent()).toEqual(expected);
-        clientChanged.expect().toEqual([e(expected, event)]);
+        clientChanged.expect().toEqual([e({ current: expected, event })]);
 
         expect(trueFiltered.getCurrent()).toEqual(expected);
-        trueFilteredChanged.expect().toEqual([e(expected, event)]);
+        trueFilteredChanged.expect().toEqual([e({ current: expected, event })]);
 
         expect(falseFiltered.getCurrent()).toEqual([]);
         falseFilteredChanged.expect().toEqual([]);

@@ -7,12 +7,12 @@ import {
     GetMessagesDocument,
 } from '@flocon-trpg/typed-document-node';
 import {
-    loading,
     Message,
     RoomMessagesClient,
     AllRoomMessages,
-    onEvent,
-    onQuery,
+    event,
+    query,
+    reset,
 } from '@flocon-trpg/web-server-utils';
 import { useMyUserUid } from './useMyUserUid';
 import { useLatest } from 'react-use';
@@ -33,14 +33,14 @@ type Error =
           failureType: GetRoomMessagesFailureType;
       };
 
-export const noref = 'noref';
+export const notFetch = 'notFetch';
 
-type RoomMessageChangeEvent = Result<AllRoomMessages, Error> | typeof noref;
+type RoomMessageChangeEvent = Result<AllRoomMessages, Error> | typeof notFetch;
 
-const changeEventAtom = atom<RoomMessageChangeEvent>(noref);
+const changeEventAtom = atom<RoomMessageChangeEvent>(notFetch);
 
 // 使い方:
-// 1. どこかでuseStartFetchingRoomMessagesを1回だけ呼ぶ。
+// 1. どこかでuseStartFetchingRoomMessagesを呼ぶ。ただし同時に複数箇所で呼び出してはならない。
 // 2. useRoomMesagesを呼ぶ。こちらは複数箇所で同時に呼び出してもいい。
 
 export const useStartFetchingRoomMessages = ({
@@ -61,18 +61,20 @@ export const useStartFetchingRoomMessages = ({
     const [getMessages, messages] = useLazyQuery(GetMessagesDocument, {
         fetchPolicy: 'network-only',
     });
+    const refCount = React.useRef(0);
 
     React.useEffect(() => {
-        if (resultRef.current !== noref) {
+        if (refCount.current >= 1) {
             appConsole.warn(
-                '`useSubscribeRoomMessages` tried to subscribe multiple times at once.'
+                'You should not use `useStartFetchingRoomMessages` hook multiple times.'
             );
-            return;
         }
-        const client = new RoomMessagesClient();
-        messagesClient.current = client;
-        setResult(Result.ok(client.messages));
-        return () => setResult(noref);
+        refCount.current += 1;
+        messagesClient.current.reset();
+        setResult(Result.ok(messagesClient.current.messages));
+        return () => {
+            refCount.current -= 1;
+        };
     }, [roomId, myUserUid, setResult, resultRef]);
 
     React.useEffect(() => {
@@ -117,49 +119,47 @@ export const useStartFetchingRoomMessages = ({
     }, [roomEventSubscription]);
 };
 
-export const filterUpdate = 'filterUpdate';
-
 type RoomMessages =
     | {
-          type: typeof loading;
+          type: typeof reset;
           current?: undefined;
-          event: RoomMessageEventFragment | undefined;
+          event?: undefined;
       }
     | {
-          type: typeof onEvent;
+          type: typeof event;
           current: readonly Message[];
           event: RoomMessageEventFragment;
       }
     | {
-          type: typeof onQuery | typeof filterUpdate;
+          type: typeof query | typeof reset;
           current: readonly Message[];
           event?: undefined;
       };
 
-type RoomMessagesResult = Result<RoomMessages, Error> | typeof noref;
+type RoomMessagesResult = Result<RoomMessages, Error> | typeof notFetch;
 
 export const useRoomMesages = ({
     filter,
 }: {
     filter?: (message: Message) => boolean;
 }): RoomMessagesResult => {
-    const [result, setResult] = React.useState<RoomMessagesResult>(noref);
+    const [result, setResult] = React.useState<RoomMessagesResult>(notFetch);
     const changeEvent = useAtomValue(changeEventAtom);
     const filterRef = useLatest(filter);
 
     React.useEffect(() => {
         setResult(oldValue => {
-            if (oldValue === noref) {
+            if (oldValue === notFetch) {
                 return oldValue;
             }
             if (oldValue.isError) {
                 return oldValue;
             }
-            if (oldValue.value.type === loading) {
+            if (oldValue.value.current == null) {
                 return oldValue;
             }
             return Result.ok({
-                type: filterUpdate,
+                type: reset,
                 current:
                     filter == null ? oldValue.value.current : oldValue.value.current.filter(filter),
             });
@@ -167,8 +167,8 @@ export const useRoomMesages = ({
     }, [filter]);
 
     React.useEffect(() => {
-        if (changeEvent === noref) {
-            setResult(noref);
+        if (changeEvent === notFetch) {
+            setResult(notFetch);
             return;
         }
         if (changeEvent.isError) {
@@ -179,13 +179,16 @@ export const useRoomMesages = ({
             filterRef.current == null
                 ? changeEvent.value
                 : changeEvent.value.filter(filterRef.current);
+        const current = eventValue.getCurrent();
         setResult(
             Result.ok({
-                type: onQuery,
-                current: eventValue.getCurrent() ?? [],
+                type: query,
+                current: current ?? [],
             })
         );
-        const subscription = eventValue.changed.subscribe(msg => setResult(Result.ok(msg)));
+        const subscription = eventValue.changed.subscribe(msg => {
+            setResult(Result.ok(msg));
+        });
         return () => subscription.unsubscribe();
     }, [changeEvent, filterRef]);
 
@@ -197,7 +200,7 @@ export const useRoomMessageEvent = () => {
     const [result, setResult] = React.useState<RoomMessageEventFragment>();
 
     React.useEffect(() => {
-        if (messages === noref || messages.isError) {
+        if (messages === notFetch || messages.isError) {
             return;
         }
         setResult(messages.value.event);
