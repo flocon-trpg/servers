@@ -14,11 +14,12 @@ jobs:
     tests-without-docker:
         name: Tests and exec Next.js export on Node ${{ matrix.node }} and ${{ matrix.os }}
 
-        runs-on: ${{ matrix.os }}
         strategy:
             matrix:
                 node: ['14.x', '16.x']
                 os: [ubuntu-20.04, windows-2019, macOS-11]
+
+        runs-on: ${{ matrix.os }}
 
         steps:
             - uses: actions/checkout@v2
@@ -46,10 +47,14 @@ jobs:
               working-directory: ./apps/web-server
 
     tests-with-docker:
-        name: 'Full test and Codecov'
+        name: 'Full tests on ${{ matrix.container }} and Codecov'
+
+        strategy:
+            matrix:
+                container: ['node:14-buster', 'node:16-buster']
 
         runs-on: ubuntu-20.04
-        container: 'node:14-buster'
+        container: ${{ matrix.container }}
 
         services:
             mysql:
@@ -118,7 +123,8 @@ jobs:
             - name: Test
               run: yarn test --ci --coverage --maxWorkers=2 --forceExit
 
-            - name: Upload Codecov Coverage
+            - name: Upload coverages to Codecov
+              if: ${{ matrix.container == 'node:16-buster' }}
               uses: codecov/codecov-action@v2
               with:
                   token: ${{ secrets.CODECOV_TOKEN }}
