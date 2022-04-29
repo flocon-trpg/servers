@@ -1,4 +1,4 @@
-import { boardTemplate, State } from '@flocon-trpg/core';
+import { State, boardTemplate } from '@flocon-trpg/core';
 import React from 'react';
 import { useMyUserUid } from '../useMyUserUid';
 import { useBoards } from './useBoards';

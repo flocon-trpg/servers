@@ -6,11 +6,11 @@ import { isIdRecord } from '../../../util/record';
 import { Result } from '@kizahasi/result';
 import {
     RequestedBy,
-    canChangeOwnerParticipantId,
-    isOwner,
     anyValue,
-    none,
+    canChangeOwnerParticipantId,
     isCharacterOwner,
+    isOwner,
+    none,
 } from '../../../util/requestedBy';
 import * as DicePieceTypes from './dicePiece/types';
 import * as DicePiece from './dicePiece/functions';

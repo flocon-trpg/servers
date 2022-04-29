@@ -6,7 +6,7 @@ import { DecodedIdToken, ResolverContext } from './graphql+mikro-orm/utils/Conte
 import { PromiseQueue } from './utils/promiseQueue';
 import ws from 'ws';
 import { Extra, useServer } from 'graphql-ws/lib/use/ws';
-import { execute, GraphQLSchema, subscribe } from 'graphql';
+import { GraphQLSchema, execute, subscribe } from 'graphql';
 import { BaasType } from './enums/BaasType';
 import { User } from './graphql+mikro-orm/entities/user/mikro-orm';
 import sanitize from 'sanitize-filename';

@@ -1,20 +1,20 @@
 import React from 'react';
 import {
+    AuthProvider,
     EmailAuthProvider,
     FacebookAuthProvider,
     GithubAuthProvider,
     GoogleAuthProvider,
     PhoneAuthProvider,
     TwitterAuthProvider,
-    signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
-    updateProfile,
-    signInWithPopup,
-    AuthProvider,
-    signInAnonymously,
+    fetchSignInMethodsForEmail,
     linkWithCredential,
     linkWithPopup,
-    fetchSignInMethodsForEmail,
+    signInAnonymously,
+    signInWithEmailAndPassword,
+    signInWithPopup,
+    updateProfile,
 } from 'firebase/auth';
 import { anonymous, email, facebook, github, google, phone, twitter } from '../../env';
 import { useWebConfig } from '../../hooks/useWebConfig';

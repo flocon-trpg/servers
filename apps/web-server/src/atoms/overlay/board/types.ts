@@ -1,8 +1,8 @@
 import {
+    State,
     characterTemplate,
     dicePieceTemplate,
     imagePieceTemplate,
-    State,
     stringPieceTemplate,
 } from '@flocon-trpg/core';
 

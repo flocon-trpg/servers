@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout as AntdLayout, Result, Modal } from 'antd';
+import { Layout as AntdLayout, Modal, Result } from 'antd';
 import { DraggableCard, horizontalPadding } from '../../ui/DraggableCard';
 import { CharacterList } from './character/CharacterList';
 import { RoomMessages } from './message/RoomMessages';

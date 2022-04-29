@@ -1,11 +1,11 @@
 import {
     State,
-    characterTemplate,
     characterPieceTemplate,
+    characterTemplate,
     dicePieceTemplate,
-    stringPieceTemplate,
     imagePieceTemplate,
     portraitPieceTemplate,
+    stringPieceTemplate,
 } from '@flocon-trpg/core';
 import { atom } from 'jotai';
 import { BoardConfig } from '../../roomConfig/types/boardConfig';

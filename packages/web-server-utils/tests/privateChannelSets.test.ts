@@ -1,5 +1,5 @@
 import fc from 'fast-check';
-import { PrivateChannelSets, PrivateChannelSet } from '../src';
+import { PrivateChannelSet, PrivateChannelSets } from '../src';
 import { expectPrivateChannels } from './expect';
 
 it('tests PrivateChannelSets', () => {

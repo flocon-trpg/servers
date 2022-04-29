@@ -6,9 +6,9 @@ import * as TextOperation from '../../../../util/textOperation';
 import * as Room from '../../types';
 import {
     RequestedBy,
-    isCharacterOwner,
     anyValue,
     canChangeOwnerCharacterId,
+    isCharacterOwner,
 } from '../../../../util/requestedBy';
 import * as Piece from '../../../pieceBase/functions';
 import { template } from './types';

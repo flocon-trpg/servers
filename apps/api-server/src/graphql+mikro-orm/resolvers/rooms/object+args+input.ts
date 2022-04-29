@@ -1,5 +1,5 @@
 import { MaxLength } from 'class-validator';
-import { ArgsType, createUnionType, Field, InputType, Int, ObjectType } from 'type-graphql';
+import { ArgsType, Field, InputType, Int, ObjectType, createUnionType } from 'type-graphql';
 import { GetRoomConnectionFailureType } from '../../../enums/GetRoomConnectionFailureType';
 import { WritingMessageStatusInputType } from '../../../enums/WritingMessageStatusInputType';
 import { WritingMessageStatusType } from '../../../enums/WritingMessageStatusType';

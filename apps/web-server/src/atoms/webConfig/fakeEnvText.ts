@@ -1,12 +1,12 @@
 import { fakeFirebaseConfig2 } from '@flocon-trpg/core';
 import {
-    email,
-    facebook,
     NEXT_PUBLIC_API_HTTP,
     NEXT_PUBLIC_API_WS,
     NEXT_PUBLIC_AUTH_PROVIDERS,
     NEXT_PUBLIC_FIREBASE_CONFIG,
     NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED,
+    email,
+    facebook,
 } from '../../env';
 
 export const fakeEnvTextSource = {

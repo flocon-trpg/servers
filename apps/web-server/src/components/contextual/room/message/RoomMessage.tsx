@@ -7,23 +7,23 @@ import {
     RoomPublicMessageFragment,
 } from '@flocon-trpg/typed-document-node';
 import {
+    Notification,
+    PrivateChannelSet,
     pieceLog,
     privateMessage,
     publicMessage,
-    PrivateChannelSet,
-    Notification,
 } from '@flocon-trpg/web-server-utils';
 import { PublicChannelNames } from '../../../../utils/types';
 import { Jdenticon } from '../../../ui/Jdenticon';
 import { isDeleted, toText } from '../../../../utils/message/message';
 import { NewTabLinkify } from '../../../ui/NewTabLinkify';
 import {
-    replace,
-    parseStringPiece,
-    parseDicePiece,
     $free,
-    participantTemplate,
     State,
+    parseDicePiece,
+    parseStringPiece,
+    participantTemplate,
+    replace,
 } from '@flocon-trpg/core';
 import { recordToMap } from '@flocon-trpg/utils';
 import classNames from 'classnames';

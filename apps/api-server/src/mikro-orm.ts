@@ -11,11 +11,11 @@ import { Participant } from './graphql+mikro-orm/entities/participant/mikro-orm'
 import { Room, RoomOp } from './graphql+mikro-orm/entities/room/mikro-orm';
 import {
     DicePieceLog,
-    StringPieceLog,
     RoomPrvMsg,
     RoomPubCh,
     RoomPubMsg,
     RoomSe,
+    StringPieceLog,
 } from './graphql+mikro-orm/entities/roomMessage/mikro-orm';
 import { User } from './graphql+mikro-orm/entities/user/mikro-orm';
 

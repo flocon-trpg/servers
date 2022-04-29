@@ -3,10 +3,10 @@ import { EM } from '../../../utils/types';
 import { User } from '../../entities/user/mikro-orm';
 import { Room } from '../../entities/room/mikro-orm';
 import { GlobalRoom } from '../../entities/room/global';
-import { anonymous, participantTemplate, roomTemplate, State as S } from '@flocon-trpg/core';
+import { State as S, anonymous, participantTemplate, roomTemplate } from '@flocon-trpg/core';
 import { recordToArray } from '@flocon-trpg/utils';
 import { BaasType } from '../../../enums/BaasType';
-import { EntryPasswordConfig, plain, ServerConfig } from '../../../configType';
+import { EntryPasswordConfig, ServerConfig, plain } from '../../../configType';
 import safeCompare from 'safe-compare';
 import bcrypt from 'bcrypt';
 

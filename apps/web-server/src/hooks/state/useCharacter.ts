@@ -1,6 +1,6 @@
 import { useAtomSelector } from '../../atoms/useAtomSelector';
 import { roomAtom } from '../../atoms/room/roomAtom';
-import { characterTemplate, State } from '@flocon-trpg/core';
+import { State, characterTemplate } from '@flocon-trpg/core';
 
 type CharacterState = State<typeof characterTemplate>;
 

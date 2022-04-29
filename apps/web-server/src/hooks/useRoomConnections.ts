@@ -5,7 +5,7 @@ import { GetRoomConnectionsDocument } from '@flocon-trpg/typed-document-node';
 import { Notification } from '@flocon-trpg/web-server-utils';
 import { useParticipants } from './state/useParticipants';
 import { useReadonlyRef } from './useReadonlyRef';
-import { roomNotificationsAtom, roomAtom, text } from '../atoms/room/roomAtom';
+import { roomAtom, roomNotificationsAtom, text } from '../atoms/room/roomAtom';
 import { useAtomSelector } from '../atoms/useAtomSelector';
 import { useUpdateAtom } from 'jotai/utils';
 

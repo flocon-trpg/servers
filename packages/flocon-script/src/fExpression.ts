@@ -22,8 +22,8 @@ import {
     UnaryOperator,
     UpdateExpression,
 } from 'estree';
-import { fPattern, FPattern } from './fPattern';
-import { fBlockStatement, FBlockStatement } from './fStatement';
+import { FPattern, fPattern } from './fPattern';
+import { FBlockStatement, fBlockStatement } from './fStatement';
 import { Range, toRange } from './range';
 import { ScriptError } from './ScriptError';
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Checkbox, Tooltip } from 'antd';
-import { EyeInvisibleOutlined, EyeOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EyeInvisibleOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
 import { ToggleButton } from '../../../ui/ToggleButton';
 import {
     addParameter,
@@ -11,12 +11,12 @@ import {
     parameterIsPrivateAndNotCreatedByMe,
 } from '../../../../resources/text/main';
 import {
-    StrIndex20,
-    characterTemplate,
     State,
+    StrIndex20,
     UpOperation,
     apply,
     boolParamTemplate,
+    characterTemplate,
 } from '@flocon-trpg/core';
 
 type BoolParamState = State<typeof boolParamTemplate>;

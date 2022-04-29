@@ -1,12 +1,12 @@
 import {
-    FObject,
-    FValue,
-    beginCast,
     FBoolean,
-    ScriptError,
+    FObject,
+    FString,
+    FValue,
     OnGettingParams,
     OnSettingParams,
-    FString,
+    ScriptError,
+    beginCast,
 } from '@flocon-trpg/flocon-script';
 import { State } from '../ot/generator';
 import * as StrParam from '../ot/flocon/room/character/strParam/types';

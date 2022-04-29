@@ -1,5 +1,5 @@
 import { $free, $system } from '@flocon-trpg/core';
-import { createUnionType, Field, ObjectType } from 'type-graphql';
+import { Field, ObjectType, createUnionType } from 'type-graphql';
 import { ResetRoomMessagesFailureType } from '../../../enums/ResetRoomMessagesFailureType';
 import { DeleteMessageFailureType } from '../../../enums/DeleteMessageFailureType';
 import { EditMessageFailureType } from '../../../enums/EditMessageFailureType';

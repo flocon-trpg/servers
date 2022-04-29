@@ -1,4 +1,4 @@
-import { atom, PrimitiveAtom } from 'jotai';
+import { PrimitiveAtom, atom } from 'jotai';
 import { create, update } from '../../utils/constants';
 import { PiecePositionWithCell } from '../../utils/types';
 

@@ -4,15 +4,15 @@ import {
     FetchResult,
     HttpLink,
     InMemoryCache,
-    Operation,
-    split,
     Observable,
+    Operation,
     from,
+    split,
 } from '@apollo/client';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { setContext } from '@apollo/client/link/context';
 import { Client, ClientOptions, createClient } from 'graphql-ws';
-import { print, GraphQLError } from 'graphql';
+import { GraphQLError, print } from 'graphql';
 import { onError } from '@apollo/client/link/error';
 import { authToken } from '@flocon-trpg/core';
 

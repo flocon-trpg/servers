@@ -8,12 +8,12 @@ import * as NumParam from './numParam/types';
 import * as StrParam from './strParam/types';
 import { maybe } from '../../../../maybe';
 import {
+    State,
     createObjectValueTemplate,
     createOtValueTemplate,
     createParamRecordValueTemplate,
     createRecordValueTemplate,
     createReplaceValueTemplate,
-    State,
 } from '../../../generator';
 
 // boolParams, numParams, numMaxParams, strParams: keyはstrIndex20などの固定キーを想定。

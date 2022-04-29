@@ -1,11 +1,11 @@
 import {
+    FBoolean,
     FObject,
     FValue,
-    beginCast,
-    FBoolean,
-    ScriptError,
     OnGettingParams,
     OnSettingParams,
+    ScriptError,
+    beginCast,
 } from '@flocon-trpg/flocon-script';
 import { State } from '../ot/generator';
 import * as BoolParam from '../ot/flocon/room/character/boolParam/types';

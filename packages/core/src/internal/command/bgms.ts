@@ -1,12 +1,12 @@
 import {
     AstInfo,
-    beginCast,
     FBoolean,
     FFunction,
     FObject,
     FValue,
     OnGettingParams,
     ScriptError,
+    beginCast,
 } from '@flocon-trpg/flocon-script';
 import * as RoomTypes from '../ot/flocon/room/types';
 import * as BgmTypes from '../ot/flocon/room/bgm/types';

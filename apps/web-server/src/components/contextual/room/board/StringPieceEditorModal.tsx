@@ -3,7 +3,7 @@ import React from 'react';
 import { DialogFooter } from '../../../ui/DialogFooter';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../../../hooks/useStateEditor';
-import { characterTemplate, simpleId, State, String, stringPieceTemplate } from '@flocon-trpg/core';
+import { State, String, characterTemplate, simpleId, stringPieceTemplate } from '@flocon-trpg/core';
 import { useStringPieces } from '../../../../hooks/state/useStringPieces';
 import { MyCharactersSelect } from '../character/MyCharactersSelect';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';

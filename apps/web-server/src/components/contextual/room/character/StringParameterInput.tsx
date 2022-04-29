@@ -3,21 +3,21 @@ import { Tooltip } from 'antd';
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 import { ToggleButton } from '../../../ui/ToggleButton';
 import {
-    parameterIsPrivate,
     parameterIsNotPrivate,
-    parameterIsPrivateAndNotCreatedByMe,
     parameterIsNotPrivateAndNotCreatedByMe,
+    parameterIsPrivate,
+    parameterIsPrivateAndNotCreatedByMe,
 } from '../../../../resources/text/main';
 import { BufferedInput } from '../../../ui/BufferedInput';
 import {
+    State,
     StrIndex20,
-    toNullableTextUpOperation,
-    nullableTextDiff,
+    UpOperation,
     apply,
     characterTemplate,
-    State,
+    nullableTextDiff,
     strParamTemplate,
-    UpOperation,
+    toNullableTextUpOperation,
 } from '@flocon-trpg/core';
 
 const applyCharacter = apply(characterTemplate);

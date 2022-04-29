@@ -4,7 +4,7 @@ import { Button, Input } from 'antd';
 import { TextAreaRef } from 'antd/lib/input/TextArea';
 import * as Icon from '@ant-design/icons';
 import { usePublicChannelNames } from '../../../../../hooks/state/usePublicChannelNames';
-import { custom, SelectedCharacterType, some } from './getSelectedCharacterType';
+import { SelectedCharacterType, custom, some } from './getSelectedCharacterType';
 import _ from 'lodash';
 import { useParticipants } from '../../../../../hooks/state/useParticipants';
 import {

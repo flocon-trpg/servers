@@ -8,11 +8,11 @@ import { NumberParameterInput } from './NumberParameterInput';
 import { BooleanParameterInput } from './BooleanParameterInput';
 import { StringParameterInput } from './StringParameterInput';
 import { ToggleButton } from '../../../ui/ToggleButton';
-import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 import {
-    characterIsPrivate,
     characterIsNotPrivate,
     characterIsNotPrivateAndNotCreatedByMe,
+    characterIsPrivate,
 } from '../../../../resources/text/main';
 import { StateEditorParams, useStateEditor } from '../../../../hooks/useStateEditor';
 import { BufferedInput } from '../../../ui/BufferedInput';
@@ -23,7 +23,7 @@ import {
     useNumParamNames,
     useStrParamNames,
 } from '../../../../hooks/state/useParamNames';
-import { strIndex20Array, simpleId, characterTemplate, State } from '@flocon-trpg/core';
+import { State, characterTemplate, simpleId, strIndex20Array } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
 import { BufferedTextArea } from '../../../ui/BufferedTextArea';
 import { FilePath } from '../../../../utils/file/filePath';

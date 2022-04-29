@@ -1,4 +1,4 @@
-import { state, characterTemplate, simpleId, State } from '@flocon-trpg/core';
+import { State, characterTemplate, simpleId, state } from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
 import { Alert, Modal } from 'antd';
 import { atom, useAtom } from 'jotai';

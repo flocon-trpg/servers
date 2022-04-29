@@ -2,7 +2,7 @@ import admin from 'firebase-admin';
 import { buildSchema } from './buildSchema';
 import { PromiseQueue } from './utils/promiseQueue';
 import { Extra } from 'graphql-ws/lib/use/ws';
-import { doAutoMigrationBeforeStart, checkMigrationsBeforeStart } from './migrate';
+import { checkMigrationsBeforeStart, doAutoMigrationBeforeStart } from './migrate';
 import { InMemoryConnectionManager, pubSub } from './connection/main';
 import { Result } from '@kizahasi/result';
 import { authToken } from '@flocon-trpg/core';

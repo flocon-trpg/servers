@@ -1,8 +1,8 @@
 import { isValidVarToml } from '@flocon-trpg/core';
 import React from 'react';
 import {
-    BufferedTextArea,
     BottomElementParams,
+    BufferedTextArea,
     Props as BufferedTextAreaProps,
 } from './BufferedTextArea';
 

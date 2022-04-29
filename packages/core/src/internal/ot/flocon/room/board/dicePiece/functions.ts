@@ -10,10 +10,10 @@ import * as ReplaceOperation from '../../../../util/replaceOperation';
 import { dicePieceStrIndexes, template } from './types';
 import * as Room from '../../types';
 import {
-    anyValue,
     RequestedBy,
-    isCharacterOwner,
+    anyValue,
     canChangeOwnerCharacterId,
+    isCharacterOwner,
 } from '../../../../util/requestedBy';
 import * as NullableTextOperation from '../../../../util/nullableTextOperation';
 import { State, TwoWayOperation, UpOperation } from '../../../../generator';

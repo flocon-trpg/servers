@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { useAtom } from 'jotai';
 import { publicEnvTxtAtom, webConfigAtom } from './webConfigAtom';
 import { fakeEnvText, fakeEnvTextSource } from './fakeEnvText';

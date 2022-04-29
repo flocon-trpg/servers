@@ -1,7 +1,7 @@
 import { MiddlewareFn } from 'type-graphql';
 import { ResolverContext } from '../utils/Contexts';
 import { consume as consumeFunction } from '../../rateLimit/consume';
-import { checkSignIn, NotSignIn } from '../resolvers/utils/helpers';
+import { NotSignIn, checkSignIn } from '../resolvers/utils/helpers';
 
 export const RateLimitMiddleware =
     (consume: number): MiddlewareFn<ResolverContext> =>

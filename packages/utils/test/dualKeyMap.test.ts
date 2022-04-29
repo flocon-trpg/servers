@@ -1,5 +1,5 @@
 import { Option } from '@kizahasi/option';
-import { both, DualKeyMap, groupJoinDualKeyMap, left, right } from '../src';
+import { DualKeyMap, both, groupJoinDualKeyMap, left, right } from '../src';
 
 describe('dualKeyMap', () => {
     it.each([undefined, new Map(), new Map([['a', new Map()]])])(

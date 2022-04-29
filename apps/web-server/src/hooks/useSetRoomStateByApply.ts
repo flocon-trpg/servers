@@ -1,4 +1,4 @@
-import { roomTemplate, UpOperation } from '@flocon-trpg/core';
+import { UpOperation, roomTemplate } from '@flocon-trpg/core';
 import { roomAtom } from '../atoms/room/roomAtom';
 import { useAtomSelector } from '../atoms/useAtomSelector';
 

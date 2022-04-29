@@ -1,10 +1,10 @@
 import {
+    FFunction,
+    FRecord,
+    FRecordRef,
     FString,
     FValue,
     OnGettingParams,
-    FRecordRef,
-    FFunction,
-    FRecord,
 } from '@flocon-trpg/flocon-script';
 import { simpleId } from '../simpleId';
 

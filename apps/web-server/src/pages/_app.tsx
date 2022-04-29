@@ -9,7 +9,7 @@ import { AppProps } from 'next/app';
 import 'firebase/auth';
 import 'firebase/storage';
 import useConstant from 'use-constant';
-import { authNotFound, FirebaseUserState, loading, notSignIn } from '../contexts/MyAuthContext';
+import { FirebaseUserState, authNotFound, loading, notSignIn } from '../contexts/MyAuthContext';
 import { appConsole } from '../utils/appConsole';
 import { enableMapSet } from 'immer';
 import Head from 'next/head';

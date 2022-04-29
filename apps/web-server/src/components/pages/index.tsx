@@ -7,7 +7,7 @@ import { Layout } from '../ui/Layout';
 import { FilesManagerDrawerType, none } from '../../utils/types';
 import { SupportedApiServers, VERSION } from '../../VERSION';
 import * as Icon from '@ant-design/icons';
-import { alpha, beta, rc, SemVer } from '@flocon-trpg/utils';
+import { SemVer, alpha, beta, rc } from '@flocon-trpg/utils';
 import { useRouter } from 'next/router';
 import classNames from 'classnames';
 import { flex, flexColumn } from '../../utils/className';

@@ -1,9 +1,9 @@
 import { atom } from 'jotai';
 import { WebConfig } from '../../configType';
-import { parse, Data } from 'envfile';
+import { Data, parse } from 'envfile';
 import { Result } from '@kizahasi/result';
-import { firebaseConfig, FirebaseConfig } from '@flocon-trpg/core';
-import { parseEnvListValue, isTruthyStringOrNullish } from '@flocon-trpg/utils';
+import { FirebaseConfig, firebaseConfig } from '@flocon-trpg/core';
+import { isTruthyStringOrNullish, parseEnvListValue } from '@flocon-trpg/utils';
 import * as E from 'fp-ts/Either';
 import { formatValidationErrors } from '../../utils/io-ts/io-ts-reporters';
 import { NEXT_PUBLIC_FIREBASE_CONFIG } from '../../env';

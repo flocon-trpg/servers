@@ -1,13 +1,13 @@
 import * as t from 'io-ts';
 import { simpleId } from '@flocon-trpg/core';
 import {
-    partialMessageTabConfig,
     MessageTabConfig,
     deserializeMessageTabConfig,
+    partialMessageTabConfig,
 } from '../messageTabConfig';
 import {
-    deserializeDraggablePanelConfigBase,
     DraggablePanelConfigBase,
+    deserializeDraggablePanelConfigBase,
     serializedDraggablePanelConfigBase,
 } from '../draggablePanelConfig';
 import { MessageTabConfigUtils } from '../messageTabConfig/utils';

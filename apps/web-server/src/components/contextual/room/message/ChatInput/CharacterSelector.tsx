@@ -4,7 +4,7 @@ import { useMyCharacters } from '../../../../../hooks/state/useMyCharacters';
 import * as Icon from '@ant-design/icons';
 import { custom, getSelectedCharacterType, none, some } from './getSelectedCharacterType';
 import classNames from 'classnames';
-import { flex, flexRow, flexNone, itemsCenter } from '../../../../../utils/className';
+import { flex, flexNone, flexRow, itemsCenter } from '../../../../../utils/className';
 import { MessagePanelConfig } from '../../../../../atoms/roomConfig/types/messagePanelConfig';
 import { Draft } from 'immer';
 import { InputDescription } from '../../../../ui/InputDescription';

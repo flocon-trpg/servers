@@ -2,7 +2,7 @@ import { useAtomSelector } from '../../atoms/useAtomSelector';
 import { roomAtom } from '../../atoms/room/roomAtom';
 import React from 'react';
 import { recordToMap } from '@flocon-trpg/utils';
-import { characterTemplate, State, strIndex10Array } from '@flocon-trpg/core';
+import { State, characterTemplate, strIndex10Array } from '@flocon-trpg/core';
 import { CharacterTagFilter } from '../../atoms/roomConfig/types/characterTagFilter';
 
 type CharacterState = State<typeof characterTemplate>;

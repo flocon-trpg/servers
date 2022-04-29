@@ -1,4 +1,4 @@
-import { participantTemplate, State } from '@flocon-trpg/core';
+import { State, participantTemplate } from '@flocon-trpg/core';
 import { visibleToToString } from './utils';
 
 type ParticipantState = State<typeof participantTemplate>;

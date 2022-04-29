@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Button, Tooltip } from 'antd';
+import { Button, Table, Tooltip } from 'antd';
 import { update } from '../../../../stateManagers/states/types';
 import * as Icon from '@ant-design/icons';
 import { useStringPieces } from '../../../../hooks/state/useStringPieces';
@@ -9,7 +9,7 @@ import { StringPieceValue } from '../../../../utils/board/stringPieceValue';
 import { keyNames } from '@flocon-trpg/utils';
 import { useUpdateAtom } from 'jotai/utils';
 import { useCharacters } from '../../../../hooks/state/useCharacters';
-import { dicePieceTemplate, State, stringPieceTemplate } from '@flocon-trpg/core';
+import { State, dicePieceTemplate, stringPieceTemplate } from '@flocon-trpg/core';
 import {
     dicePieceValueEditorAtom,
     stringPieceValueEditorAtom,

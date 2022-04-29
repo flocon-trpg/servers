@@ -1,4 +1,4 @@
-import { State, DownOperation, roomDbTemplate, roomTemplate } from '@flocon-trpg/core';
+import { DownOperation, State, roomDbTemplate, roomTemplate } from '@flocon-trpg/core';
 import {
     Collection,
     Entity,
@@ -16,10 +16,10 @@ import { EM } from '../../../utils/types';
 import { Participant } from '../participant/mikro-orm';
 import {
     DicePieceLog as DicePieceLogEntity,
-    StringPieceLog as StringPieceLogEntity,
     RoomPrvMsg,
     RoomPubCh,
     RoomSe as RoomSe,
+    StringPieceLog as StringPieceLogEntity,
 } from '../roomMessage/mikro-orm';
 
 type DbState = State<typeof roomDbTemplate>;

@@ -1,13 +1,13 @@
 import { Result } from '@kizahasi/result';
 import * as t from 'io-ts';
 import * as DualKeyRecordOperation from './dualKeyRecordOperation';
-import { record, StringKeyRecord } from './record';
+import { StringKeyRecord, record } from './record';
 import {
-    recordDownOperationElementFactory,
     RecordDownOperationElement,
     RecordTwoWayOperationElement,
-    recordUpOperationElementFactory,
     RecordUpOperationElement,
+    recordDownOperationElementFactory,
+    recordUpOperationElementFactory,
     replace,
     update,
 } from './recordOperationElement';

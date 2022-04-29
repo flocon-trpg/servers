@@ -2,9 +2,9 @@ import {
     DownOperation,
     State,
     UpOperation,
+    downOperation,
     state,
     upOperation,
-    downOperation,
 } from '../../generator';
 import * as Room from './types';
 

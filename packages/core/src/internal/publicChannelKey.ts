@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 import { $free, $system } from './constants';
-import { strIndex10Array, StrIndex10 } from './indexes';
+import { StrIndex10, strIndex10Array } from './indexes';
 
 export namespace PublicChannelKey {
     export namespace Without$System {

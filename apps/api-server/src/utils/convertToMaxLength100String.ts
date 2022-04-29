@@ -1,4 +1,4 @@
-import { maxLength100String, MaxLength100String } from '@flocon-trpg/core';
+import { MaxLength100String, maxLength100String } from '@flocon-trpg/core';
 
 export const convertToMaxLength100String = (source: string): MaxLength100String => {
     if (maxLength100String.is(source)) {
