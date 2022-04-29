@@ -19,10 +19,10 @@ jobs:
               working-directory: ./apps/web-server
             - name: mv out directory
               run: mv ./apps/web-server/out ./out
-            - name: Create web-server-static.zip
-              run: zip -r ${GITHUB_WORKSPACE}/web-server-static.zip ./out
+            - name: Create flocon_web_server.zip
+              run: zip -r ${GITHUB_WORKSPACE}/flocon_web_server.zip ./out
             - name: Release
               uses: softprops/action-gh-release@v1
               with:
-                  files: web-server-static.zip
+                  files: flocon_web_server.zip
                   draft: true
