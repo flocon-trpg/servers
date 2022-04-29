@@ -572,7 +572,10 @@ export type PromoteResult = {
 
 export type Query = {
     __typename?: 'Query';
-    /** since v0.8.0 */
+    /**
+     * 自分がadminかどうかを確認します。このQueryの実行ユーザーがadminであれば成功し、adminでなければエラーを返します。
+     * since v0.8.0
+     */
     amIAdmin: Scalars['String'];
     getAvailableGameSystems: GetAvailableGameSystemsResult;
     getDiceHelpMessage?: Maybe<Scalars['String']>;

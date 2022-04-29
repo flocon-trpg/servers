@@ -53,7 +53,11 @@ export type PongPayload = {
 
 @Resolver()
 export class MainResolver {
-    @Query(() => String, { description: 'since v0.8.0' })
+    // 本来は例えばadminならばtrue、そうでなければfalseを返す仕様にするのが自然だが、admin判定処理を他と共通化したいので@Authorizedを用いているため、adminでない場合はエラーを返す仕様となっている。このエラーは発生させても問題ない。
+    @Query(() => String, {
+        description: `自分がadminかどうかを確認します。このQueryの実行ユーザーがadminであれば成功し、adminでなければエラーを返します。
+since v0.8.0`,
+    })
     @Authorized(ADMIN)
     public async amIAdmin(@Ctx() context: ResolverContext): Promise<string> {
         return ensureAuthorizedUser(context).userUid;
