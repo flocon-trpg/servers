@@ -26,33 +26,33 @@ import {
     serializedChatPalettePanelConfig,
 } from '../chatPalettePanelConfig';
 import {
+    GameEffectPanelConfig,
     defaultGameEffectPanelConfig,
     deserializeGameEffectPanelConfig,
-    GameEffectPanelConfig,
     serializedGameEffectPanelConfig,
 } from '../gameEffectPanelConfig';
 import {
+    MemoPanelConfig,
     defaultMemoPanelsConfig,
     deserializeMemoPanelConfig,
-    MemoPanelConfig,
     serializedMemoPanelConfig,
 } from '../memoPanelConfig';
 import {
-    defaultMessagePanelsConfig,
     MessagePanelConfig,
-    serializedMessagePanelConfig,
+    defaultMessagePanelsConfig,
     deserializeMessagePanelConfig,
+    serializedMessagePanelConfig,
 } from '../messagePanelConfig';
 import {
+    ParticipantsPanelConfig,
     defaultParticipantsPanelConfig,
     deserializeParticipantsPanelConfig,
-    ParticipantsPanelConfig,
     serializedParticipantsPanelConfig,
 } from '../participantsPanelConfig';
 import {
+    PieceValuePanelConfig,
     defaultPieceValuePanelConfig,
     deserializePieceValuePanelConfig,
-    PieceValuePanelConfig,
     serializedPieceValuePanelConfig,
 } from '../pieceValuePanelConfig';
 

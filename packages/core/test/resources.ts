@@ -1,4 +1,4 @@
-import { State, Player, Spectator, boardTemplate, characterTemplate, roomTemplate } from '../src';
+import { Player, Spectator, State, boardTemplate, characterTemplate, roomTemplate } from '../src';
 import { forceMaxLength100String } from './forceMaxLength100String';
 
 export namespace Resources {

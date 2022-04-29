@@ -5,7 +5,7 @@ import { animated, useSpring, useTransition } from '@react-spring/konva';
 import { RoomPublicMessageFragment } from '@flocon-trpg/typed-document-node';
 import { interval } from 'rxjs';
 import { isDeleted, toText as toTextCore } from '../../../../utils/message/message';
-import { filePathTemplate, State } from '@flocon-trpg/core';
+import { State, filePathTemplate } from '@flocon-trpg/core';
 import { FilePath } from '../../../../utils/file/filePath';
 import { PieceGroup, PieceGroupProps } from './PieceGroup';
 import { NameLabel } from './NameLabel';

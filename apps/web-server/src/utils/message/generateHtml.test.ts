@@ -1,4 +1,4 @@
-import { div, generateHtml, HtmlObject } from './generateHtml';
+import { HtmlObject, div, generateHtml } from './generateHtml';
 
 describe('generateHtml', () => {
     it('tests XSS', () => {

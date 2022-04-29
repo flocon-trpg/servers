@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, Dropdown, Menu, notification, Table, Tooltip, Upload } from 'antd';
+import { Button, Dropdown, Menu, Table, Tooltip, Upload, notification } from 'antd';
 import { accept } from './helper';
 import urljoin from 'url-join';
 import axios from 'axios';

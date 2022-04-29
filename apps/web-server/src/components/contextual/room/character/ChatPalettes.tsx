@@ -5,9 +5,9 @@ import { useMyCharacters } from '../../../../hooks/state/useMyCharacters';
 import { GameSelector } from '../message/ChatInput/GameSelector';
 import { TextColorSelector } from '../message/ChatInput/TextColorSelector';
 import {
-    publicChannel,
     SelectedChannelType,
     SubmitMessage,
+    publicChannel,
 } from '../message/ChatInput/SubmitMessage';
 import { Subject } from 'rxjs';
 import classNames from 'classnames';

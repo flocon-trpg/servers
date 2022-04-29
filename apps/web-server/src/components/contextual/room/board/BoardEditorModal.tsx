@@ -9,7 +9,7 @@ import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../../../hooks/useStateEditor';
 import { BufferedInput } from '../../../ui/BufferedInput';
 import { useBoards } from '../../../../hooks/state/useBoards';
-import { boardTemplate, simpleId, State } from '@flocon-trpg/core';
+import { State, boardTemplate, simpleId } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
 import { FilePath } from '../../../../utils/file/filePath';
 import { atom, useAtom } from 'jotai';

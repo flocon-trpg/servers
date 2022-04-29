@@ -2,7 +2,7 @@ import React from 'react';
 import { CharacterSelector } from './CharacterSelector';
 import { GameSelector } from './GameSelector';
 import { TextColorSelector } from './TextColorSelector';
-import { publicChannel, SelectedChannelType, SubmitMessage } from './SubmitMessage';
+import { SelectedChannelType, SubmitMessage, publicChannel } from './SubmitMessage';
 import { getSelectedCharacterType } from './getSelectedCharacterType';
 import { MessagePanelConfig } from '../../../../../atoms/roomConfig/types/messagePanelConfig';
 import { atom } from 'jotai';

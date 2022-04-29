@@ -1,19 +1,19 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import {
-    Table,
+    Alert,
     Button,
-    Input,
-    Tooltip,
-    Tabs,
+    Checkbox,
+    Col,
+    Divider,
     Dropdown,
+    Input,
     Menu,
     Modal,
     Row,
-    Col,
-    Divider,
-    Checkbox,
-    Alert,
+    Table,
+    Tabs,
+    Tooltip,
 } from 'antd';
 import { update } from '../../../../stateManagers/states/types';
 import { NumberParameterInput } from './NumberParameterInput';
@@ -22,9 +22,9 @@ import { StringParameterInput } from './StringParameterInput';
 import * as Icon from '@ant-design/icons';
 import { ToggleButton } from '../../../ui/ToggleButton';
 import {
-    characterIsPrivate,
     characterIsNotPrivate,
     characterIsNotPrivateAndNotCreatedByMe,
+    characterIsPrivate,
 } from '../../../../resources/text/main';
 import { useCharacters } from '../../../../hooks/state/useCharacters';
 import {
@@ -33,11 +33,11 @@ import {
     useStrParamNames,
 } from '../../../../hooks/state/useParamNames';
 import {
+    State,
+    StrIndex20,
     characterTemplate,
     paramNameTemplate,
-    State,
     strIndex10Array,
-    StrIndex20,
 } from '@flocon-trpg/core';
 import classNames from 'classnames';
 import { cancelRnd, flex, flexRow, itemsCenter } from '../../../../utils/className';

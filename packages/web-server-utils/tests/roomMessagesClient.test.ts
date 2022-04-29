@@ -1,13 +1,6 @@
 import { RoomMessageEventFragment, RoomMessages } from '@flocon-trpg/typed-document-node';
 import { Observable } from 'rxjs';
-import {
-    Message,
-    MessagesChange,
-    event as onEvent,
-    query as onQuery,
-    RoomMessagesClient,
-    reset,
-} from '../src';
+import { Message, MessagesChange, RoomMessagesClient, event, query, reset } from '../src';
 import { Resources } from './resources';
 
 class ObservableTester<T> {
@@ -30,22 +23,22 @@ class ObservableTester<T> {
 
 const q = (current: readonly Message[]): MessagesChange => {
     return {
-        type: onQuery,
+        type: query,
         current,
     };
 };
 
 const e = ({
     current,
-    event,
+    event: eventValue,
 }: {
     current: readonly Message[];
     event: RoomMessageEventFragment;
 }): MessagesChange => {
     return {
-        type: onEvent,
+        type: event,
         current,
-        event,
+        event: eventValue,
     };
 };
 

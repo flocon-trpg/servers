@@ -1,44 +1,44 @@
 import {
-    entryPassword,
     EntryPasswordConfig,
-    firebaseAdminSecret,
     FirebaseAdminSecretConfig,
-    mysqlDatabase,
     MysqlDatabaseConfig,
-    none,
-    postgresqlDatabase,
     PostgresqlDatabaseConfig,
     ServerConfig,
     ServerConfigForMigration,
-    sqliteDatabase,
     SqliteDatabaseConfig,
     UploaderConfig,
+    entryPassword,
+    firebaseAdminSecret,
+    mysqlDatabase,
+    none,
+    postgresqlDatabase,
+    sqliteDatabase,
 } from './configType';
 import * as E from 'fp-ts/Either';
 import { formatValidationErrors } from './utils/io-ts-reporters';
 import {
     ACCESS_CONTROL_ALLOW_ORIGIN,
     AUTO_MIGRATION,
-    FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL,
+    DATABASE_URL,
     EMBUPLOADER_COUNT_QUOTA,
+    EMBUPLOADER_ENABLED,
     EMBUPLOADER_MAX_SIZE,
     EMBUPLOADER_PATH,
     EMBUPLOADER_SIZE_QUOTA,
-    EMBUPLOADER_ENABLED,
     ENTRY_PASSWORD,
+    FIREBASE_ADMIN_SECRET,
+    FIREBASE_PROJECTID,
+    FLOCON_ADMIN,
+    FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL,
+    HEROKU,
+    MYSQL,
     POSTGRESQL,
+    ROOMHIST_COUNT,
     SQLITE,
     loadDotenv,
-    FIREBASE_ADMIN_SECRET,
-    ROOMHIST_COUNT,
-    FIREBASE_PROJECTID,
-    HEROKU,
-    DATABASE_URL,
-    FLOCON_ADMIN,
-    MYSQL,
 } from './env';
 import { filterInt, isTruthyString } from '@flocon-trpg/utils';
-import { Result, Error } from '@kizahasi/result';
+import { Error, Result } from '@kizahasi/result';
 
 loadDotenv();
 

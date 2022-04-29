@@ -1,10 +1,10 @@
 import {
     AuthChecker,
-    buildSchema as buildSchemaCore,
     BuildSchemaOptions,
-    buildSchemaSync as buildSchemaSyncCore,
     PrintSchemaOptions,
     PubSubEngine,
+    buildSchema as buildSchemaCore,
+    buildSchemaSync as buildSchemaSyncCore,
 } from 'type-graphql';
 import path from 'path';
 import { GraphQLSchema } from 'graphql';
@@ -14,9 +14,9 @@ import { MainResolver } from './graphql+mikro-orm/resolvers/MainResolver';
 import { PubSubOptions } from 'graphql-subscriptions';
 import { ResolverContext } from './graphql+mikro-orm/utils/Contexts';
 import {
+    NotSignIn,
     checkSignIn,
     getUserIfEntry,
-    NotSignIn,
 } from './graphql+mikro-orm/resolvers/utils/helpers';
 import { BaasType } from './enums/BaasType';
 import { ADMIN, ENTRY } from './roles';

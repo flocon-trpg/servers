@@ -4,7 +4,7 @@ import { RoomPrivateMessage, RoomPublicMessage } from '@flocon-trpg/typed-docume
 import { usePublicChannelNames } from '../../../../hooks/state/usePublicChannelNames';
 import classNames from 'classnames';
 import { flex, flexColumn } from '../../../../utils/className';
-import { $system, $free } from '@flocon-trpg/core';
+import { $free, $system } from '@flocon-trpg/core';
 
 export type ChannelsFilterOptions = {
     includesPublicChannel1: boolean;

@@ -19,13 +19,13 @@ import { isIdRecord } from '../../util/record';
 import { Result } from '@kizahasi/result';
 import { isStrIndex20, isStrIndex5 } from '../../../indexes';
 import {
-    client,
     RequestedBy,
+    anyValue,
+    client,
+    isBoardOwner,
     isBoardVisible,
     isOwner,
-    anyValue,
     none,
-    isBoardOwner,
 } from '../../util/requestedBy';
 import { template } from './types';
 import { State, TwoWayOperation, UpOperation } from '../../generator';

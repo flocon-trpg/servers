@@ -1,4 +1,4 @@
-import { createUnionType, Field, ObjectType } from 'type-graphql';
+import { Field, ObjectType, createUnionType } from 'type-graphql';
 import { JoinRoomFailureType } from '../../enums/JoinRoomFailureType';
 import { RoomOperation } from '../entities/room/graphql';
 

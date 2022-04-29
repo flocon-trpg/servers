@@ -33,7 +33,7 @@ SOFTWARE.
 // どうもFirefoxではCSSにwidthとheightが指定されていないとSVG画像が表示されないバグがある模様なので要注意!
 // 普通に<img/>から表示するぶんには問題ないが、useImageの関数内のような呼び方だと表示されない。
 
-import { filePathTemplate, State as S } from '@flocon-trpg/core';
+import { State as S, filePathTemplate } from '@flocon-trpg/core';
 import React from 'react';
 import { FilePathFragment } from '@flocon-trpg/typed-document-node';
 import { analyzeUrl } from '../utils/analyzeUrl';

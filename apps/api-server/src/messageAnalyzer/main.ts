@@ -1,10 +1,10 @@
 import {
-    characterTemplate,
-    getVariableFromVarTomlObject,
     State,
     analyze as analyzeToExpression,
-    plain,
+    characterTemplate,
+    getVariableFromVarTomlObject,
     parseToml,
+    plain,
     roomTemplate,
 } from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';

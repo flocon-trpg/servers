@@ -4,25 +4,25 @@ import { EM } from '../../../utils/types';
 import { Reference } from '@mikro-orm/core';
 import { Result } from '@kizahasi/result';
 import {
+    DownOperation,
+    RequestedBy,
+    State,
+    TwoWayOperation,
+    UpOperation,
+    apply,
     composeDownOperation,
     decodeDbState,
     decodeDownOperation,
-    DownOperation,
+    diff,
     exactDbState,
     parseUpOperation,
-    State,
+    participantTemplate,
+    roomTemplate,
     stringifyState,
+    stringifyUpOperation,
     toClientState,
     toDownOperation,
-    TwoWayOperation,
-    UpOperation,
-    stringifyUpOperation,
-    apply,
-    diff,
     toUpOperation,
-    RequestedBy,
-    roomTemplate,
-    participantTemplate,
     update,
 } from '@flocon-trpg/core';
 import { Participant } from '../participant/mikro-orm';
@@ -30,7 +30,7 @@ import { recordForEachAsync } from '@flocon-trpg/utils';
 import { User } from '../user/mikro-orm';
 import { nullableStringToParticipantRoleType } from '../../../enums/ParticipantRoleType';
 import { convertToMaxLength100String } from '../../../utils/convertToMaxLength100String';
-import { isNonEmptyArray, ReadonlyNonEmptyArray } from '../../../utils/readonlyNonEmptyArray';
+import { ReadonlyNonEmptyArray, isNonEmptyArray } from '../../../utils/readonlyNonEmptyArray';
 
 type RoomState = State<typeof roomTemplate>;
 type RoomUpOperation = UpOperation<typeof roomTemplate>;

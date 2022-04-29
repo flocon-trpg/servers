@@ -1,11 +1,11 @@
 import {
     AstInfo,
-    beginCast,
     FFunction,
     FObject,
     FValue,
     OnGettingParams,
     ScriptError,
+    beginCast,
 } from '@flocon-trpg/flocon-script';
 import { recordToArray } from '@flocon-trpg/utils';
 import * as Character from '../ot/flocon/room/character/types';

@@ -4,13 +4,13 @@ import { isIdRecord } from '../../../../util/record';
 import { Result } from '@kizahasi/result';
 import * as Piece from '../../../pieceBase/functions';
 import {
+    RequestedBy,
     anyValue,
     canChangeOwnerParticipantId,
     isOwner,
-    RequestedBy,
 } from '../../../../util/requestedBy';
 import { template } from './types';
-import { State, UpOperation, TwoWayOperation } from '../../../../generator';
+import { State, TwoWayOperation, UpOperation } from '../../../../generator';
 
 export const toClientState = (source: State<typeof template>): State<typeof template> => {
     return source;

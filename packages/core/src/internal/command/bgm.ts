@@ -1,5 +1,4 @@
 import {
-    beginCast,
     FBoolean,
     FNumber,
     FObject,
@@ -8,6 +7,7 @@ import {
     OnGettingParams,
     OnSettingParams,
     ScriptError,
+    beginCast,
 } from '@flocon-trpg/flocon-script';
 import { State } from '../ot/generator';
 import * as BgmTypes from '../ot/flocon/room/bgm/types';

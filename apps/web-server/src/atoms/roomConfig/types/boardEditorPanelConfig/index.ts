@@ -5,8 +5,8 @@ import { record } from '../../../../utils/io-ts/record';
 import { BoardConfig, deserializeBoardConfig, serializedBoardConfig } from '../boardConfig';
 import { defaultBoardEditorPanelPosition } from '../defaultPanelPositions';
 import {
-    deserializeDraggablePanelConfigBase,
     DraggablePanelConfigBase,
+    deserializeDraggablePanelConfigBase,
     serializedDraggablePanelConfigBase,
 } from '../draggablePanelConfig';
 

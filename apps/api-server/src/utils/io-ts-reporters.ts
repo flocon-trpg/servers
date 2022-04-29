@@ -1,7 +1,7 @@
 import { Errors } from 'io-ts';
 import {
-    formatValidationErrors as formatValidationErrorsCore,
     ReporterOptions,
+    formatValidationErrors as formatValidationErrorsCore,
 } from 'io-ts-reporters';
 
 export const formatValidationErrors = (

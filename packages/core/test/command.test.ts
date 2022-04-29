@@ -1,5 +1,5 @@
 import { recordToMap } from '@flocon-trpg/utils';
-import { execCharacterCommand, roomTemplate, State as S } from '../src';
+import { State as S, execCharacterCommand, roomTemplate } from '../src';
 import { Resources } from './resources';
 
 type State = S<typeof roomTemplate>;

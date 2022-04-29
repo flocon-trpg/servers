@@ -1,4 +1,4 @@
-import { createUnionType, Field, ObjectType } from 'type-graphql';
+import { Field, ObjectType, createUnionType } from 'type-graphql';
 import { GetFileItemsFailureType } from '../../enums/GetFileItemsFailureType';
 import { FileItem } from '../entities/file/graphql';
 

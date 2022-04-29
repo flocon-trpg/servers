@@ -2,10 +2,10 @@ import {
     FObject,
     FString,
     FValue,
-    ScriptError,
-    beginCast,
     GetCoreParams,
+    ScriptError,
     SetCoreParams,
+    beginCast,
 } from '@flocon-trpg/flocon-script';
 import * as Room from '../ot/flocon/room/types';
 import { FCharacter } from './character';

@@ -11,7 +11,7 @@ import { FilesManagerDrawerType, some } from '../../../utils/types';
 import { VolumeBar } from '../../ui/VolumeBar';
 import { DialogFooter } from '../../ui/DialogFooter';
 import { Styles } from '../../../styles';
-import { bgmTemplate, filePathTemplate, State, StrIndex5 } from '@flocon-trpg/core';
+import { State, StrIndex5, bgmTemplate, filePathTemplate } from '@flocon-trpg/core';
 import _ from 'lodash';
 import { cancelRnd, flex, flexColumn, flexRow, itemsCenter } from '../../../utils/className';
 import classNames from 'classnames';

@@ -1,10 +1,10 @@
 import localforage from 'localforage';
 import {
+    SerializedUserConfig,
+    UserConfig,
     defaultUserConfig,
     deserializeUserConfig,
-    SerializedUserConfig,
     serializedUserConfig,
-    UserConfig,
 } from '../../atoms/userConfig/types';
 import { tryParseJSON } from '../tryParseJSON';
 

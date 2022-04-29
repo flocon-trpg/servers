@@ -1,4 +1,4 @@
-import { State, pieceTemplate, OmitVersion } from '@flocon-trpg/core';
+import { OmitVersion, State, pieceTemplate } from '@flocon-trpg/core';
 import { Checkbox, Col, InputNumber, Row, Space } from 'antd';
 import { Gutter } from 'antd/lib/grid/row';
 import React from 'react';

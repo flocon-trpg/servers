@@ -1,5 +1,5 @@
 import { Option } from '@kizahasi/option';
-import { both, GroupJoinResult, left, right } from './types';
+import { GroupJoinResult, both, left, right } from './types';
 import { mapToRecord } from './utils';
 
 export type DualKey<T1, T2> = {

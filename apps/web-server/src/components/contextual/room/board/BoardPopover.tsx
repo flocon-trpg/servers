@@ -1,16 +1,16 @@
 import {
-    execCharacterCommand,
-    dicePieceStrIndexes,
     State,
-    diff,
-    toUpOperation,
-    simpleId,
     boardPositionTemplate,
-    characterTemplate,
-    filePathTemplate,
-    roomTemplate,
     boardTemplate,
+    characterTemplate,
+    dicePieceStrIndexes,
+    diff,
+    execCharacterCommand,
+    filePathTemplate,
     pieceTemplate,
+    roomTemplate,
+    simpleId,
+    toUpOperation,
 } from '@flocon-trpg/core';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { Checkbox, Menu, Tooltip } from 'antd';
@@ -38,14 +38,14 @@ import { useAtomValue, useUpdateAtom } from 'jotai/utils';
 import {
     character,
     dicePiece,
-    stringPiece,
     imagePiece,
     portrait,
+    stringPiece,
 } from '../../../../atoms/overlay/board/types';
 import { boardPopoverEditorAtom } from '../../../../atoms/overlay/board/boardPopoverEditorAtom';
 import {
-    boardContextMenuAtom,
     ContextMenuState,
+    boardContextMenuAtom,
 } from '../../../../atoms/overlay/board/boardContextMenuAtom';
 import { create } from '../../../../utils/constants';
 import { useCloneImagePiece } from '../../../../hooks/state/useCloneImagePiece';

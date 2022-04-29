@@ -4,11 +4,11 @@ import {
     ChangeParticipantNameDocument,
     DeleteRoomDocument,
     DeleteRoomFailureType,
+    GetRoomAsListItemDocument,
     LeaveRoomDocument,
     ParticipantRole,
     PromoteFailureType,
     PromoteToPlayerDocument,
-    GetRoomAsListItemDocument,
     ResetMessagesDocument,
     ResetRoomMessagesFailureType,
 } from '@flocon-trpg/typed-document-node';
@@ -28,7 +28,7 @@ import { flex, flexRow, itemsCenter } from '../../../utils/className';
 import { MyAuthContext } from '../../../contexts/MyAuthContext';
 import { GenerateLogModal } from './message/GenerateLogModal';
 import { useLazyQuery, useMutation } from '@apollo/client';
-import { roomNotificationsAtom, roomAtom, graphQLErrors, text } from '../../../atoms/room/roomAtom';
+import { graphQLErrors, roomAtom, roomNotificationsAtom, text } from '../../../atoms/room/roomAtom';
 import { useAtomSelector } from '../../../atoms/useAtomSelector';
 import { roomConfigAtom } from '../../../atoms/roomConfig/roomConfigAtom';
 import { RoomConfigUtils } from '../../../atoms/roomConfig/types/roomConfig/utils';

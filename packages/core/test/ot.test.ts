@@ -1,16 +1,16 @@
 import {
-    serverTransform,
+    RequestedBy,
     State,
+    StrIndex10,
     TwoWayOperation,
     UpOperation,
-    client,
     admin,
-    replace,
-    update,
-    StrIndex10,
-    RequestedBy,
-    roomTemplate,
+    client,
     dicePieceTemplate,
+    replace,
+    roomTemplate,
+    serverTransform,
+    update,
 } from '../src';
 import { Resources } from './resources';
 import * as TextOperation from '../src/internal/ot/util/textOperation';

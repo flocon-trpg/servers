@@ -1,4 +1,4 @@
-import { boardPositionTemplate, OmitVersion, State } from '@flocon-trpg/core';
+import { OmitVersion, State, boardPositionTemplate } from '@flocon-trpg/core';
 
 type BoardPositionState = OmitVersion<State<typeof boardPositionTemplate>>;
 

@@ -1,4 +1,4 @@
-import { boardTemplate, State } from '@flocon-trpg/core';
+import { State, boardTemplate } from '@flocon-trpg/core';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
 import { roomAtom } from '../../atoms/room/roomAtom';
 

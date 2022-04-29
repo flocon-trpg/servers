@@ -1,4 +1,4 @@
-import { characterTemplate, roomTemplate, update, UpOperation } from '@flocon-trpg/core';
+import { UpOperation, characterTemplate, roomTemplate, update } from '@flocon-trpg/core';
 
 // TODO: 削除する
 export const characterUpdateOperation = (

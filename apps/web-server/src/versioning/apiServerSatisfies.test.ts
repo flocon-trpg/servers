@@ -1,4 +1,4 @@
-import { alpha, SemVer } from '@flocon-trpg/utils';
+import { SemVer, alpha } from '@flocon-trpg/utils';
 import { apiServerSatisfies } from './apiServerSatisfies';
 
 describe.each(['^', '~'] as const)('apiServerSatisfies', range => {

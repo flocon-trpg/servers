@@ -1,11 +1,11 @@
 import {
-    email,
-    google,
     NEXT_PUBLIC_API_HTTP,
     NEXT_PUBLIC_API_WS,
     NEXT_PUBLIC_AUTH_PROVIDERS,
     NEXT_PUBLIC_FIREBASE_CONFIG,
     NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED,
+    email,
+    google,
 } from '../../env';
 import { fakeFirebaseConfig1 } from '@flocon-trpg/core';
 
@@ -23,7 +23,7 @@ for (const key in envFileAsRecord) {
     process.env[key] = envFileAsRecord[key];
 }
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { useAtom } from 'jotai';
 import { publicEnvTxtAtom, webConfigAtom } from './webConfigAtom';
 import { fakeEnvText } from './fakeEnvText';

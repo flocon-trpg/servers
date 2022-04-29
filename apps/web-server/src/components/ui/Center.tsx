@@ -1,6 +1,6 @@
 import React from 'react';
 import { PropsWithChildren } from 'react';
-import { Row, Col } from 'antd';
+import { Col, Row } from 'antd';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 type Props = {};

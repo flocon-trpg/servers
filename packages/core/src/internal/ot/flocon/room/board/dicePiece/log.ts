@@ -14,12 +14,12 @@ import { record } from '../../../../util/record';
 import { createType, deleteType, updateType } from '../../../pieceBase/log';
 import { maybe } from '../../../../../maybe';
 import {
-    createObjectValueTemplate,
     IoTsOptions,
     State,
+    TwoWayOperation,
+    createObjectValueTemplate,
     state,
     toUpOperation,
-    TwoWayOperation,
     upOperation,
 } from '../../../../generator';
 

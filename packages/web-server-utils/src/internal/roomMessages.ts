@@ -1,15 +1,15 @@
 import {
-    RoomPrivateMessageFragment,
-    RoomPublicMessageFragment,
     PieceLogFragment,
-    RoomSoundEffectFragment,
-    RoomPublicChannelFragment,
-    RoomMessages,
     RoomMessageEventFragment,
+    RoomMessages,
+    RoomPrivateMessageFragment,
+    RoomPublicChannelFragment,
+    RoomPublicMessageFragment,
+    RoomSoundEffectFragment,
 } from '@flocon-trpg/typed-document-node';
 import { toBeNever } from '@flocon-trpg/utils';
 import produce from 'immer';
-import { mergeMap, Observable, Subject } from 'rxjs';
+import { Observable, Subject, mergeMap } from 'rxjs';
 import { Notification } from './notification';
 
 export const privateMessage = 'privateMessage';

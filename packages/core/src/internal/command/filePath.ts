@@ -1,12 +1,12 @@
 import {
+    AstInfo,
+    FObject,
+    FRecord,
+    FString,
     FType,
     FValue,
     ScriptError,
     beginCast,
-    FObject,
-    FRecord,
-    FString,
-    AstInfo,
 } from '@flocon-trpg/flocon-script';
 import * as FilePath from '../ot/flocon/filePath/types';
 import { State } from '../ot/generator';

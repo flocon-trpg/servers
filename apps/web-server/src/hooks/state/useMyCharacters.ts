@@ -1,4 +1,4 @@
-import { characterTemplate, State } from '@flocon-trpg/core';
+import { State, characterTemplate } from '@flocon-trpg/core';
 import React from 'react';
 import { useMyUserUid } from '../useMyUserUid';
 import { useCharacters } from './useCharacters';

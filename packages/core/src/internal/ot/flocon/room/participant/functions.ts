@@ -2,7 +2,7 @@ import { ServerTransform } from '../../../util/type';
 import * as ReplaceOperation from '../../../util/replaceOperation';
 import { isIdRecord } from '../../../util/record';
 import { Result } from '@kizahasi/result';
-import { admin, RequestedBy, isOwner } from '../../../util/requestedBy';
+import { RequestedBy, admin, isOwner } from '../../../util/requestedBy';
 import { template } from './types';
 import { State, TwoWayOperation, UpOperation } from '../../../generator';
 

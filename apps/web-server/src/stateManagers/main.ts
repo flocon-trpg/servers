@@ -4,8 +4,8 @@ import {
     apply,
     clientTransform,
     diff,
-    toUpOperation,
     roomTemplate,
+    toUpOperation,
 } from '@flocon-trpg/core';
 import { StateManager, StateManagerParameters } from '@flocon-trpg/core';
 

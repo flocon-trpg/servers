@@ -11,9 +11,9 @@ import * as ParamRecordOperation from '../util/paramRecordOperation';
 import { record as trecord } from '../util/record';
 import {
     RecordDownOperationElement,
-    recordDownOperationElementFactory,
     RecordTwoWayOperationElement,
     RecordUpOperationElement,
+    recordDownOperationElementFactory,
     recordUpOperationElementFactory,
 } from '../util/recordOperationElement';
 import {

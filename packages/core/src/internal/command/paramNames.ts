@@ -1,6 +1,5 @@
 import {
     AstInfo,
-    beginCast,
     FBoolean,
     FFunction,
     FObject,
@@ -8,6 +7,7 @@ import {
     FValue,
     OnGettingParams,
     ScriptError,
+    beginCast,
 } from '@flocon-trpg/flocon-script';
 import { isStrIndex20 } from '../indexes';
 import { State } from '../ot/generator';

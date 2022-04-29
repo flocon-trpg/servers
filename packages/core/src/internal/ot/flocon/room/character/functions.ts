@@ -17,10 +17,10 @@ import { Result } from '@kizahasi/result';
 import * as Room from '../types';
 import {
     RequestedBy,
+    canChangeOwnerParticipantId,
     isBoardVisible,
     isOwner,
     none,
-    canChangeOwnerParticipantId,
 } from '../../../util/requestedBy';
 import { State, TwoWayOperation, UpOperation } from '../../../generator';
 import {

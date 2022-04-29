@@ -5,11 +5,11 @@ import { replace } from '../../../../stateManagers/states/types';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../../../hooks/useStateEditor';
 import {
+    State,
     characterTemplate,
     dicePieceStrIndexes,
     dicePieceTemplate,
     simpleId,
-    State,
 } from '@flocon-trpg/core';
 import { useDicePieces } from '../../../../hooks/state/useDicePieces';
 import { MyCharactersSelect } from '../character/MyCharactersSelect';

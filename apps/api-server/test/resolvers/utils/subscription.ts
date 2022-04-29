@@ -3,7 +3,7 @@ import { RoomEventSubscription } from '@flocon-trpg/typed-document-node';
 import _ from 'lodash';
 import { Source, pipe, subscribe } from 'wonka';
 import { OperationResult } from '@urql/core';
-import { privateMessage, publicMessage, RoomMessagesClient } from '@flocon-trpg/web-server-utils';
+import { RoomMessagesClient, privateMessage, publicMessage } from '@flocon-trpg/web-server-utils';
 import { Option } from '@kizahasi/option';
 import { recordForEach } from '@flocon-trpg/utils';
 

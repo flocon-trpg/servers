@@ -2,27 +2,27 @@ import { Result } from '@kizahasi/result';
 import {
     DualKey,
     DualKeyMap,
-    dualKeyToJsonString,
+    both,
+    chooseDualKeyRecord,
     dualKeyRecordForEach,
+    dualKeyRecordToDualKeyMap,
+    dualKeyToJsonString,
     groupJoinDualKeyMap,
     left,
     right,
-    both,
-    dualKeyRecordToDualKeyMap,
-    chooseDualKeyRecord,
 } from '@flocon-trpg/utils';
 import * as t from 'io-ts';
 import { isValidKey } from './isValidKey';
 import { DualStringKeyRecord, record } from './record';
 import {
-    recordDownOperationElementFactory,
     RecordDownOperationElement,
     RecordTwoWayOperationElement,
-    recordUpOperationElementFactory,
     RecordUpOperationElement,
+    mapRecordOperationElement,
+    recordDownOperationElementFactory,
+    recordUpOperationElementFactory,
     replace,
     update,
-    mapRecordOperationElement,
 } from './recordOperationElement';
 
 export type DualKeyRecordDownOperation<TState, TOperation> = DualStringKeyRecord<

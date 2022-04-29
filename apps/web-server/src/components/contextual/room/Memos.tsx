@@ -2,7 +2,7 @@ import React from 'react';
 import * as Icons from '@ant-design/icons';
 import { useMemos } from '../../../hooks/state/useMemos';
 import { State, memoTemplate, simpleId } from '@flocon-trpg/core';
-import { Button, Popover, Tree, Modal, Menu, Dropdown, Input } from 'antd';
+import { Button, Dropdown, Input, Menu, Modal, Popover, Tree } from 'antd';
 import { DataNode } from 'rc-tree/lib/interface';
 import { BufferedInput } from '../../ui/BufferedInput';
 import { BufferedTextArea } from '../../ui/BufferedTextArea';

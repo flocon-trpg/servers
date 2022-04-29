@@ -16,7 +16,7 @@ import { selectAtom, useAtomValue, useUpdateAtom } from 'jotai/utils';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { useDebounce, usePrevious } from 'react-use';
-import { bufferTime, Subject } from 'rxjs';
+import { Subject, bufferTime } from 'rxjs';
 import { roomPrivateMessageInputAtom } from '../../../atoms/inputs/roomPrivateMessageInputAtom';
 import { roomPublicMessageInputAtom } from '../../../atoms/inputs/roomPublicMessageInputAtom';
 import { hideAllOverlayActionAtom } from '../../../atoms/overlay/hideAllOverlayActionAtom';

@@ -1,9 +1,9 @@
 import * as Room from '../ot/flocon/room/types';
 import {
+    ScriptError,
     arrayClass,
     createConsoleClass,
     exec,
-    ScriptError,
     test,
 } from '@flocon-trpg/flocon-script';
 import { FRoom } from './room';

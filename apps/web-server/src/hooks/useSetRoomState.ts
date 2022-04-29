@@ -1,4 +1,4 @@
-import { roomTemplate, State } from '@flocon-trpg/core';
+import { State, roomTemplate } from '@flocon-trpg/core';
 import { atom } from 'jotai';
 import { useAtomValue } from 'jotai/utils';
 import { roomAtom } from '../atoms/room/roomAtom';

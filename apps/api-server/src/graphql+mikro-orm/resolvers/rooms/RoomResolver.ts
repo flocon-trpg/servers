@@ -1,15 +1,15 @@
 import {
-    Resolver,
-    Query,
-    Args,
-    Mutation,
-    Ctx,
-    PubSub,
-    Subscription,
-    Root,
     Arg,
-    PubSubEngine,
+    Args,
     Authorized,
+    Ctx,
+    Mutation,
+    PubSub,
+    PubSubEngine,
+    Query,
+    Resolver,
+    Root,
+    Subscription,
     UseMiddleware,
 } from 'type-graphql';
 import { ResolverContext } from '../../utils/Contexts';
@@ -49,12 +49,12 @@ import { DeleteRoomFailureType } from '../../../enums/DeleteRoomFailureType';
 import { GlobalRoom } from '../../entities/room/global';
 import { EM } from '../../../utils/types';
 import {
+    DicePieceLog as DicePieceLog$MikroORM,
     RoomPrvMsg,
     RoomPubCh,
     RoomPubMsg,
     RoomSe,
     StringPieceLog as StringPieceLog$MikroORM,
-    DicePieceLog as DicePieceLog$MikroORM,
 } from '../../entities/roomMessage/mikro-orm';
 import {
     ChangeParticipantNameArgs,
@@ -66,8 +66,8 @@ import {
     GetMessagesArgs,
     GetRoomArgs,
     GetRoomConnectionFailureResultType,
-    GetRoomConnectionsResult,
     GetRoomConnectionSuccessResultType,
+    GetRoomConnectionsResult,
     JoinRoomArgs,
     MessageIdArgs,
     OperateArgs,
@@ -80,7 +80,6 @@ import {
 } from './object+args+input';
 import {
     CharacterValueForMessage,
-    ResetRoomMessagesResult,
     DeleteMessageResult,
     EditMessageResult,
     GetRoomLogFailureResultType,
@@ -89,7 +88,10 @@ import {
     GetRoomMessagesResult,
     MakeMessageNotSecretResult,
     PieceLog,
+    ResetRoomMessagesResult,
+    ResetRoomMessagesResultType,
     RoomMessageEvent,
+    RoomMessageSyntaxErrorType,
     RoomMessages,
     RoomMessagesType,
     RoomPrivateMessage,
@@ -111,11 +113,9 @@ import {
     WriteRoomPublicMessageResult,
     WriteRoomSoundEffectFailureResultType,
     WriteRoomSoundEffectResult,
-    ResetRoomMessagesResultType,
-    RoomMessageSyntaxErrorType,
 } from '../../entities/roomMessage/graphql';
 import { WriteRoomPublicMessageFailureType } from '../../../enums/WriteRoomPublicMessageFailureType';
-import { analyze, Context } from '../../../messageAnalyzer/main';
+import { Context, analyze } from '../../../messageAnalyzer/main';
 import Color from 'color';
 import { GetRoomMessagesFailureType } from '../../../enums/GetRoomMessagesFailureType';
 import {
@@ -138,27 +138,27 @@ import { WritingMessageStatusInputType } from '../../../enums/WritingMessageStat
 import { FileSourceTypeModule } from '../../../enums/FileSourceType';
 import { Result } from '@kizahasi/result';
 import {
+    $free,
+    $system,
     Master,
+    MaxLength100String,
+    ParticipantRole,
     Player,
-    serverTransform,
+    RecordUpOperationElement,
     Spectator,
     State,
     TwoWayOperation,
-    restore,
     UpOperation,
-    RecordUpOperationElement,
-    replace,
-    ParticipantRole,
-    createLogs,
     admin,
-    client,
-    $free,
-    $system,
-    MaxLength100String,
-    isCharacterOwner,
     characterTemplate,
+    client,
+    createLogs,
+    isCharacterOwner,
     participantTemplate,
+    replace,
+    restore,
     roomTemplate,
+    serverTransform,
 } from '@flocon-trpg/core';
 import {
     ApplyError,

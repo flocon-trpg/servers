@@ -3,7 +3,7 @@ import { Result } from '@kizahasi/result';
 import * as t from 'io-ts';
 import { ReadonlyDeep } from 'type-fest';
 import { DATABASE_URL, HEROKU, MYSQL, POSTGRESQL, SQLITE } from './env';
-import { createMySQL, createPostgreSQL, createSQLite, DirName } from './mikro-orm';
+import { DirName, createMySQL, createPostgreSQL, createSQLite } from './mikro-orm';
 import { AppConsole } from './utils/appConsole';
 import { ORM } from './utils/types';
 

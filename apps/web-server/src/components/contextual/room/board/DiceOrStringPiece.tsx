@@ -2,10 +2,10 @@ import React from 'react';
 import * as ReactKonva from 'react-konva';
 import { animated, useSpring } from '@react-spring/konva';
 import {
+    State,
     dicePieceStrIndexes,
     dicePieceTemplate,
     dieValueTemplate,
-    State,
     stringPieceTemplate,
 } from '@flocon-trpg/core';
 import { StringPieceValue } from '../../../../utils/board/stringPieceValue';
