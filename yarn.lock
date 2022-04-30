@@ -8135,13 +8135,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-memoize@npm:^2.5.1":
-  version: 2.5.2
-  resolution: "fast-memoize@npm:2.5.2"
-  checksum: 79fa759719ba4eac7e8c22fb3b0eb3f18f4a31e218c00b1eb4a5b53c5781921133a6b84472d59ec5a6ea8f26ad57b43cd99a350c0547ccce51489bc9a5f0b28d
-  languageName: node
-  linkType: hard
-
 "fast-shallow-equal@npm:^1.0.0":
   version: 1.0.0
   resolution: "fast-shallow-equal@npm:1.0.0"
@@ -14578,14 +14571,12 @@ __metadata:
   linkType: hard
 
 "re-resizable@npm:^6.9.1":
-  version: 6.9.1
-  resolution: "re-resizable@npm:6.9.1"
-  dependencies:
-    fast-memoize: ^2.5.1
+  version: 6.9.9
+  resolution: "re-resizable@npm:6.9.9"
   peerDependencies:
-    react: ^16.13.1 || ^17.0.0
-    react-dom: ^16.13.1 || ^17.0.0
-  checksum: b164f6b956dc1f45b6c2603f0f402b04df8306017c59d68a9a71a2c857049a314a01c3fb7aedba66d8c60c4ccf9aa182c345276825eed745e5b847b6f104d78e
+    react: ^16.13.1 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.13.1 || ^17.0.0 || ^18.0.0
+  checksum: a2c8bfe86646fb02d5c9c624b1da26f9e6a5e2f552cd96ce4db690588bee6b21177065ce8e98646c6ca0b1a9c4ce233824b75eb346800d8248ac8a87b40f1b28
   languageName: node
   linkType: hard
 
