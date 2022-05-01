@@ -124,12 +124,6 @@ export const createApolloClient = (
     })();
 
     const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
-        if (operation.operationName === 'AmIAdmin') {
-            /* AmIAdminは自分がadminなのかどうかを簡単にチェックできるqueryであり、自動的に実行され、admin専用のUIを表示するかどうかの判定などに用いられる。
-               だが、「adminならば成功、そうでないならばエラー」という仕様なので、adminでない場合はブラウザのコンソールにエラーメッセージが出てしまう。
-               これはユーザーに不具合があると誤解される可能性が高いので、AmIAdminの場合エラーメッセージは表示させないようにしている。*/
-            return;
-        }
         if (graphQLErrors) {
             graphQLErrors.map(({ message, locations, path }) =>
                 console.error(

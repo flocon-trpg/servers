@@ -1,7 +1,7 @@
 import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
 import {
-    AmIAdminDocument,
     DeleteRoomDocument,
+    GetMyRolesDocument,
     GetRoomsListDocument,
     RoomAsListItemFragment,
 } from '@flocon-trpg/typed-document-node';
@@ -20,11 +20,11 @@ type Data = RoomAsListItemFragment;
 const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
     const router = useRouter();
     const [deleteRoom] = useMutation(DeleteRoomDocument);
-    const amIAdminQueryResult = useQuery(AmIAdminDocument);
+    const getMyRolesQueryResult = useQuery(GetMyRolesDocument);
     const [getRooms] = useLazyQuery(GetRoomsListDocument, { fetchPolicy: 'network-only' });
 
     const overlay = React.useMemo(() => {
-        if (amIAdminQueryResult.data == null) {
+        if (getMyRolesQueryResult.data?.result.admin !== true) {
             return undefined;
         }
         return (
@@ -50,7 +50,7 @@ const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
                 </Menu.ItemGroup>
             </Menu>
         );
-    }, [amIAdminQueryResult.data, deleteRoom, getRooms, roomId]);
+    }, [getMyRolesQueryResult.data, deleteRoom, getRooms, roomId]);
     const join = React.useCallback(() => router.push(`/rooms/${roomId}`), [roomId, router]);
 
     const joinText = '入室';

@@ -14,9 +14,9 @@ import {
     Spin,
 } from 'antd';
 import {
-    AmIAdminDocument,
     EntryToServerDocument,
     EntryToServerResultType,
+    GetMyRolesDocument,
     IsEntryDocument,
     IsEntryQuery,
     IsEntryQueryVariables,
@@ -121,7 +121,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
     hideHeader: hideHeaderProp,
 }: PropsWithChildren<Props>) => {
     const router = useRouter();
-    const amIAdminQueryResult = useQuery(AmIAdminDocument);
+    const getMyRolesQueryResult = useQuery(GetMyRolesDocument);
     const myAuth = React.useContext(MyAuthContext);
     const myUserUid = typeof myAuth === 'string' ? null : myAuth.uid;
     const isAnonymous = typeof myAuth === 'string' ? false : myAuth.isAnonymous;
@@ -259,7 +259,9 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                                 {typeof myAuth === 'string' ? null : (
                                     <div style={{ color: 'white' }}>
                                         {myAuth.displayName} - {myAuth.uid}
-                                        {amIAdminQueryResult.data == null ? null : ' (管理者)'}
+                                        {getMyRolesQueryResult.data?.result.admin === true
+                                            ? ' (管理者)'
+                                            : null}
                                     </div>
                                 )}
                                 {typeof myAuth === 'string' ? (

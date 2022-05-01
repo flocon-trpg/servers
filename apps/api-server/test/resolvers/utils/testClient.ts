@@ -3,9 +3,6 @@ import { createClient, defaultExchanges, subscriptionExchange } from '@urql/core
 import { Resources } from './resources';
 import { createClient as createWsClient } from 'graphql-ws';
 import {
-    AmIAdminDocument,
-    AmIAdminQuery,
-    AmIAdminQueryVariables,
     CreateFileTagDocument,
     CreateFileTagMutation,
     CreateFileTagMutationVariables,
@@ -42,6 +39,9 @@ import {
     GetMessagesDocument,
     GetMessagesQuery,
     GetMessagesQueryVariables,
+    GetMyRolesDocument,
+    GetMyRolesQuery,
+    GetMyRolesQueryVariables,
     GetRoomDocument,
     GetRoomQuery,
     GetRoomQueryVariables,
@@ -213,9 +213,9 @@ export class TestClient {
             .toPromise();
     }
 
-    public amIAdminQuery(variables: AmIAdminQueryVariables) {
+    public getMyRolesQuery(variables: GetMyRolesQueryVariables) {
         return this.#core
-            .query<AmIAdminQuery, AmIAdminQueryVariables>(AmIAdminDocument, variables, {
+            .query<GetMyRolesQuery, GetMyRolesQueryVariables>(GetMyRolesDocument, variables, {
                 requestPolicy: 'network-only',
             })
             .toPromise();

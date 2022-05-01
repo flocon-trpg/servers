@@ -717,7 +717,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
     it.each([
         [Resources.UserUid.admin, true],
         [Resources.UserUid.notAdmin, false],
-    ] as const)('tests AmIAdmin', async (userUid, isAdmin) => {
+    ] as const)('tests getMyRoles', async (userUid, isAdmin) => {
         await useTestServer(
             {
                 admins: [Resources.UserUid.admin],
@@ -726,8 +726,8 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                 const clients = await setupUsers({ userUids: [userUid] as const });
                 const client = clients.clients[userUid];
 
-                const result = await client.amIAdminQuery({});
-                expect(result.data?.result).toBe(isAdmin ? userUid : undefined);
+                const result = await client.getMyRolesQuery({});
+                expect(result.data?.result.admin).toBe(isAdmin);
             }
         );
     });

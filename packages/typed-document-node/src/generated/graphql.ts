@@ -572,16 +572,13 @@ export type PromoteResult = {
 
 export type Query = {
     __typename?: 'Query';
-    /**
-     * 自分がadminかどうかを確認します。このQueryの実行ユーザーがadminであれば成功し、adminでなければエラーを返します。
-     * since v0.8.0
-     */
-    amIAdmin: Scalars['String'];
     getAvailableGameSystems: GetAvailableGameSystemsResult;
     getDiceHelpMessage?: Maybe<Scalars['String']>;
     getFiles: GetFilesResult;
     getLog: GetRoomLogResult;
     getMessages: GetRoomMessagesResult;
+    /** since v0.8.0 */
+    getMyRoles: Roles;
     getRoom: GetRoomResult;
     getRoomAsListItem: GetRoomAsListItemResult;
     getRoomConnections: GetRoomConnectionsResult;
@@ -627,6 +624,11 @@ export enum ResetRoomMessagesFailureType {
 export type ResetRoomMessagesResult = {
     __typename?: 'ResetRoomMessagesResult';
     failureType?: Maybe<ResetRoomMessagesFailureType>;
+};
+
+export type Roles = {
+    __typename?: 'Roles';
+    admin: Scalars['Boolean'];
 };
 
 export type RoomAsListItem = {
@@ -1303,10 +1305,6 @@ export type SemVerFragment = {
     prerelease?: { __typename?: 'Prerelease'; type: PrereleaseType; version: number } | null;
 };
 
-export type AmIAdminQueryVariables = Exact<{ [key: string]: never }>;
-
-export type AmIAdminQuery = { __typename?: 'Query'; result: string };
-
 export type GetAvailableGameSystemsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type GetAvailableGameSystemsQuery = {
@@ -1623,6 +1621,13 @@ export type GetLogQuery = {
                   file: { __typename?: 'FilePath'; sourceType: FileSourceType; path: string };
               }>;
           };
+};
+
+export type GetMyRolesQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetMyRolesQuery = {
+    __typename?: 'Query';
+    result: { __typename?: 'Roles'; admin: boolean };
 };
 
 export type GetRoomConnectionsQueryVariables = Exact<{
@@ -3145,26 +3150,6 @@ export const SemVerFragmentDoc = {
         },
     ],
 } as unknown as DocumentNode<SemVerFragment, unknown>;
-export const AmIAdminDocument = {
-    kind: 'Document',
-    definitions: [
-        {
-            kind: 'OperationDefinition',
-            operation: 'query',
-            name: { kind: 'Name', value: 'AmIAdmin' },
-            selectionSet: {
-                kind: 'SelectionSet',
-                selections: [
-                    {
-                        kind: 'Field',
-                        alias: { kind: 'Name', value: 'result' },
-                        name: { kind: 'Name', value: 'amIAdmin' },
-                    },
-                ],
-            },
-        },
-    ],
-} as unknown as DocumentNode<AmIAdminQuery, AmIAdminQueryVariables>;
 export const GetAvailableGameSystemsDocument = {
     kind: 'Document',
     definitions: [
@@ -3818,6 +3803,30 @@ export const GetLogDocument = {
         ...RoomSoundEffectFragmentDoc.definitions,
     ],
 } as unknown as DocumentNode<GetLogQuery, GetLogQueryVariables>;
+export const GetMyRolesDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'GetMyRoles' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'getMyRoles' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [{ kind: 'Field', name: { kind: 'Name', value: 'admin' } }],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<GetMyRolesQuery, GetMyRolesQueryVariables>;
 export const GetRoomConnectionsDocument = {
     kind: 'Document',
     definitions: [

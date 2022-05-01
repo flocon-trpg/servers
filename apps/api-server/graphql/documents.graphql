@@ -250,10 +250,6 @@ fragment SemVer on SemVer {
     }
 }
 
-query AmIAdmin {
-    result: amIAdmin
-}
-
 query GetAvailableGameSystems {
     result: getAvailableGameSystems {
         value {
@@ -359,6 +355,12 @@ query GetLog($roomId: String!) {
         ... on GetRoomLogFailureResult {
             failureType
         }
+    }
+}
+
+query GetMyRoles {
+    result: getMyRoles {
+        admin
     }
 }
 

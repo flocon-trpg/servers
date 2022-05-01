@@ -13,13 +13,8 @@ import { RoomResolver } from './graphql+mikro-orm/resolvers/rooms/RoomResolver';
 import { MainResolver } from './graphql+mikro-orm/resolvers/MainResolver';
 import { PubSubOptions } from 'graphql-subscriptions';
 import { ResolverContext } from './graphql+mikro-orm/utils/Contexts';
-import {
-    NotSignIn,
-    checkSignIn,
-    getUserIfEntry,
-} from './graphql+mikro-orm/resolvers/utils/helpers';
-import { BaasType } from './enums/BaasType';
-import { ADMIN, ENTRY } from './roles';
+import { NotSignIn } from './graphql+mikro-orm/resolvers/utils/helpers';
+import { getRolesAndCheckEntry } from './roles';
 import { ServerConfig } from './configType';
 
 export const noAuthCheck = 'noAuthCheck';
@@ -31,41 +26,16 @@ const authChecker =
             throw new Error('authChecker is disbled');
         }
 
-        let role: typeof ADMIN | typeof ENTRY | null = null;
-        if (roles.includes(ADMIN)) {
-            role = ADMIN;
-        } else if (roles.includes(ENTRY)) {
-            role = ENTRY;
-        }
-
-        const decodedIdToken = checkSignIn(context);
-        if (decodedIdToken === NotSignIn) {
-            return false;
-        }
-
-        if (role == null) {
-            return true;
-        }
-
-        const adminUserUids = serverConfig.admins;
-
-        if (role === ADMIN) {
-            if (!adminUserUids.includes(decodedIdToken.uid)) {
-                return false;
-            }
-        }
-
-        const user = await getUserIfEntry({
-            em: context.em,
-            userUid: decodedIdToken.uid,
-            baasType: BaasType.Firebase,
+        const myRoles = await getRolesAndCheckEntry({
+            context,
             serverConfig,
+            setAuthorizedUserToResolverContext: true,
         });
-        if (user == null) {
+        if (myRoles === NotSignIn) {
             return false;
         }
-        context.authorizedUser = user;
-        return true;
+
+        return myRoles.isPermitted(roles);
     };
 
 type Options = {

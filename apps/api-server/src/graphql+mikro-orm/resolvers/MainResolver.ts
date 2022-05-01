@@ -35,8 +35,13 @@ import { PrereleaseType } from '../../enums/PrereleaseType';
 import { DualKeyMap, alpha, beta, rc } from '@flocon-trpg/utils';
 import { BaasType } from '../../enums/BaasType';
 import { GetFilesResult } from '../results/GetFilesResult';
-import { ADMIN, ENTRY } from '../../roles';
-import { EditFileTagsInput, FileTag as FileTagGraphQL, GetFilesInput } from './object+args+input';
+import { ADMIN, ENTRY, getRoles } from '../../roles';
+import {
+    EditFileTagsInput,
+    FileTag as FileTagGraphQL,
+    GetFilesInput,
+    Roles,
+} from './object+args+input';
 import { File } from '../entities/file/mikro-orm';
 import { QueryOrder, Reference } from '@mikro-orm/core';
 import { FileTag as FileTagEntity } from '../entities/fileTag/mikro-orm';
@@ -53,16 +58,6 @@ export type PongPayload = {
 
 @Resolver()
 export class MainResolver {
-    // 本来は例えばadminならばtrue、そうでなければfalseを返す仕様にするのが自然だが、admin判定処理を他と共通化したいので@Authorizedを用いているため、adminでない場合はエラーを返す仕様となっている。このエラーは発生させても問題ない。
-    @Query(() => String, {
-        description: `自分がadminかどうかを確認します。このQueryの実行ユーザーがadminであれば成功し、adminでなければエラーを返します。
-since v0.8.0`,
-    })
-    @Authorized(ADMIN)
-    public async amIAdmin(@Ctx() context: ResolverContext): Promise<string> {
-        return ensureAuthorizedUser(context).userUid;
-    }
-
     @Query(() => GetAvailableGameSystemsResult)
     public async getAvailableGameSystems(): Promise<GetAvailableGameSystemsResult> {
         return {
@@ -119,6 +114,20 @@ since v0.8.0`,
                 createdBy: file.createdBy.userUid,
                 createdAt: file.createdAt?.getTime(),
             })),
+        };
+    }
+
+    @Query(() => Roles, {
+        description: 'since v0.8.0',
+    })
+    @Authorized()
+    public async getMyRoles(@Ctx() context: ResolverContext): Promise<Roles> {
+        const roles = getRoles({ context, isEntry: false });
+        if (roles === NotSignIn) {
+            throw new Error('This should not happen');
+        }
+        return {
+            admin: roles.value.has(ADMIN),
         };
     }
 
