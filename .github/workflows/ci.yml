@@ -125,7 +125,7 @@ jobs:
 
             - name: Upload coverages to Codecov
               if: ${{ matrix.container == 'node:16-buster' }}
-              uses: codecov/codecov-action@v2
+              uses: codecov/codecov-action@v3
               with:
                   token: ${{ secrets.CODECOV_TOKEN }}
 
