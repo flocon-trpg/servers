@@ -1908,7 +1908,7 @@ __metadata:
     "@ltd/j-toml": ^1.23.0
     "@types/estree": 0.0.51
     "@types/jest": 27.4.1
-    "@types/lodash.clonedeep": 4.5.6
+    "@types/lodash.clonedeep": 4.5.7
     fp-ts: ^2.11.8
     io-ts: ^2.2.16
     jest: 27.5.1
@@ -4047,12 +4047,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash.clonedeep@npm:4.5.6":
-  version: 4.5.6
-  resolution: "@types/lodash.clonedeep@npm:4.5.6"
+"@types/lodash.clonedeep@npm:4.5.7":
+  version: 4.5.7
+  resolution: "@types/lodash.clonedeep@npm:4.5.7"
   dependencies:
     "@types/lodash": "*"
-  checksum: f21159ee191262282d33af046fdf2a654a8e3077d02f42e7aaffea5768960d818e6e458d397f4288b37caee70e3d1658b8430f416f3ffe436fd374fe1c824334
+  checksum: 20d6a20970b3b54b3c10cf17ace1cea49c4905d7f7cae2575a98108466e8d4c9bea3b3449d11ccaac4da1fc9bab225f477f4c2dbea8ba877cc47f629455efb69
   languageName: node
   linkType: hard
 
