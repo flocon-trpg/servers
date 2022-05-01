@@ -1,611 +1,653 @@
 # ApolloClientでは__typenameを書かなくても全て自動的に補完してくれるようだが、urqlでは補完されないことがある(https://github.com/FormidableLabs/urql/issues/1366)。このため、__typenameで値の種類を判断する必要がある部分は全て__typenameを書くようにしている。
 
 fragment CharacterValueForMessage on CharacterValueForMessage {
-  stateId
-  isPrivate
-  name
-  image {
-    ...FilePath
-  }
-  portraitImage {
-    ...FilePath
-  }
+    stateId
+    isPrivate
+    name
+    image {
+        ...FilePath
+    }
+    portraitImage {
+        ...FilePath
+    }
 }
 
 fragment CreateRoomResult on CreateRoomResult {
-  __typename
-  ... on CreateRoomSuccessResult {
-    id
-    room {
-      ...RoomGetState
+    __typename
+    ... on CreateRoomSuccessResult {
+        id
+        room {
+            ...RoomGetState
+        }
     }
-  }
-  ... on CreateRoomFailureResult {
-    failureType
-  }
+    ... on CreateRoomFailureResult {
+        failureType
+    }
 }
 
 fragment FileItem on FileItem {
-  filename
-  thumbFilename
-  screenname
-  createdBy
-  createdAt
+    filename
+    thumbFilename
+    screenname
+    createdBy
+    createdAt
 }
 
 fragment FilePath on FilePath {
-  sourceType
-  path
+    sourceType
+    path
 }
 
 fragment FileTag on FileTag {
-  id
-  name
+    id
+    name
 }
 
 fragment GetNonJoinedRoomResult on GetNonJoinedRoomResult {
-  roomAsListItem {
-    ...RoomAsListItem
-  }
+    roomAsListItem {
+        ...RoomAsListItem
+    }
 }
 
 fragment GetRoomListResult on GetRoomsListResult {
-  __typename
-  ... on GetRoomsListSuccessResult {
-    rooms {
-      ...RoomAsListItem
+    __typename
+    ... on GetRoomsListSuccessResult {
+        rooms {
+            ...RoomAsListItem
+        }
     }
-  }
-  ... on GetRoomsListFailureResult {
-    failureType
-  }
+    ... on GetRoomsListFailureResult {
+        failureType
+    }
 }
 
 fragment GetRoomResult on GetRoomResult {
-  __typename
-  ... on GetJoinedRoomResult {
-    role
-    room {
-      ...RoomGetState
+    __typename
+    ... on GetJoinedRoomResult {
+        role
+        room {
+            ...RoomGetState
+        }
     }
-  }
-  ... on GetNonJoinedRoomResult {
-    ...GetNonJoinedRoomResult
-  }
-  ... on GetRoomFailureResult {
-    failureType
-  }
+    ... on GetNonJoinedRoomResult {
+        ...GetNonJoinedRoomResult
+    }
+    ... on GetRoomFailureResult {
+        failureType
+    }
 }
 
 fragment JoinRoomResult on JoinRoomResult {
-  __typename
-  ... on JoinRoomSuccessResult {
-    operation {
-      ...RoomOperation
+    __typename
+    ... on JoinRoomSuccessResult {
+        operation {
+            ...RoomOperation
+        }
     }
-  }
-  ... on JoinRoomFailureResult {
-    failureType
-  }
+    ... on JoinRoomFailureResult {
+        failureType
+    }
 }
 
 fragment PieceLog on PieceLog {
-  messageId
-  stateId
-  createdAt
-  logType
-  valueJson 
+    messageId
+    stateId
+    createdAt
+    logType
+    valueJson
 }
 
 fragment RoomAsListItem on RoomAsListItem {
-  id
-  name
-  createdBy
-  requiresPlayerPassword
-  requiresSpectatorPassword
+    id
+    name
+    createdBy
+    requiresPlayerPassword
+    requiresSpectatorPassword
 }
 
 fragment RoomGetState on RoomGetState {
-  revision
-  createdBy
-  stateJson
+    revision
+    createdBy
+    stateJson
 }
 
 fragment RoomOperation on RoomOperation {
-  revisionTo
-  operatedBy {
-    userUid
-    clientId
-  }
-  valueJson
+    revisionTo
+    operatedBy {
+        userUid
+        clientId
+    }
+    valueJson
 }
 
 fragment RoomPublicChannel on RoomPublicChannel {
-  key
-  name
+    key
+    name
 }
 
 fragment RoomPublicMessage on RoomPublicMessage {
-  messageId
-  channelKey
-  initText
-  initTextSource
-  updatedText {
-      currentText
-      updatedAt
-  }
-  textColor
-  commandResult {
-    text
-    isSuccess
-  }
-  altTextToSecret
-  isSecret
-  createdBy
-  character {
-    ...CharacterValueForMessage
-  }
-  customName
-  createdAt
-  updatedAt
+    messageId
+    channelKey
+    initText
+    initTextSource
+    updatedText {
+        currentText
+        updatedAt
+    }
+    textColor
+    commandResult {
+        text
+        isSuccess
+    }
+    altTextToSecret
+    isSecret
+    createdBy
+    character {
+        ...CharacterValueForMessage
+    }
+    customName
+    createdAt
+    updatedAt
 }
 
 fragment RoomPrivateMessage on RoomPrivateMessage {
-  messageId
-  visibleTo
-  initText
-  initTextSource
-  updatedText {
-      currentText
-      updatedAt
-  }
-  textColor
-  commandResult {
-    text
-    isSuccess
-  }
-  altTextToSecret
-  isSecret
-  createdBy
-  character {
-    ...CharacterValueForMessage
-  }
-  customName
-  createdAt
-  updatedAt
+    messageId
+    visibleTo
+    initText
+    initTextSource
+    updatedText {
+        currentText
+        updatedAt
+    }
+    textColor
+    commandResult {
+        text
+        isSuccess
+    }
+    altTextToSecret
+    isSecret
+    createdBy
+    character {
+        ...CharacterValueForMessage
+    }
+    customName
+    createdAt
+    updatedAt
 }
 
 fragment RoomSoundEffect on RoomSoundEffect {
-  messageId
-  file {
-    ...FilePath
-  }
-  createdBy
-  createdAt
-  volume
+    messageId
+    file {
+        ...FilePath
+    }
+    createdBy
+    createdAt
+    volume
 }
 
 fragment RoomMessageEvent on RoomMessageEvent {
-  __typename
-  ... on RoomSoundEffect {
-    ...RoomSoundEffect
-  }
-  ... on RoomPublicMessage {
-    ...RoomPublicMessage
-  }
-  ... on RoomPublicChannel {
-    ...RoomPublicChannel
-  }
-  ... on RoomPrivateMessage {
-    ...RoomPrivateMessage
-  }
-  ... on PieceLog {
-    ...PieceLog
-  }
-  ... on RoomPublicChannelUpdate {
-    key
-    name
-  }
-  ... on RoomPublicMessageUpdate {
-    messageId
-    initText
-    initTextSource
-    updatedText {
-      currentText
-      updatedAt
-    } 
-    commandResult {
-      text
-      isSuccess
+    __typename
+    ... on RoomSoundEffect {
+        ...RoomSoundEffect
     }
-    altTextToSecret
-    isSecret
-    updatedAt
-  }
-  ... on RoomPrivateMessageUpdate {
-    messageId
-    initText
-    initTextSource
-    updatedText {
-      currentText
-      updatedAt
-    } 
-    commandResult {
-      text
-      isSuccess
+    ... on RoomPublicMessage {
+        ...RoomPublicMessage
     }
-    altTextToSecret
-    isSecret
-    updatedAt
-  }
+    ... on RoomPublicChannel {
+        ...RoomPublicChannel
+    }
+    ... on RoomPrivateMessage {
+        ...RoomPrivateMessage
+    }
+    ... on PieceLog {
+        ...PieceLog
+    }
+    ... on RoomPublicChannelUpdate {
+        key
+        name
+    }
+    ... on RoomPublicMessageUpdate {
+        messageId
+        initText
+        initTextSource
+        updatedText {
+            currentText
+            updatedAt
+        }
+        commandResult {
+            text
+            isSuccess
+        }
+        altTextToSecret
+        isSecret
+        updatedAt
+    }
+    ... on RoomPrivateMessageUpdate {
+        messageId
+        initText
+        initTextSource
+        updatedText {
+            currentText
+            updatedAt
+        }
+        commandResult {
+            text
+            isSuccess
+        }
+        altTextToSecret
+        isSecret
+        updatedAt
+    }
 }
 
 fragment SemVer on SemVer {
-  major
-  minor
-  patch
-  prerelease {
-    type
-    version
-  }
+    major
+    minor
+    patch
+    prerelease {
+        type
+        version
+    }
 }
 
 query AmIAdmin {
-  result: amIAdmin
+    result: amIAdmin
 }
 
 query GetAvailableGameSystems {
-  result: getAvailableGameSystems {
-    value {
-      id
-      name
-      sortKey
+    result: getAvailableGameSystems {
+        value {
+            id
+            name
+            sortKey
+        }
     }
-  }
 }
 
 query GetDiceHelpMessages($id: String!) {
-  result: getDiceHelpMessage(id: $id)
+    result: getDiceHelpMessage(id: $id)
 }
 
 query GetFiles($input: GetFilesInput!) {
-  result: getFiles(input: $input) {
-    files {
-      ...FileItem
+    result: getFiles(input: $input) {
+        files {
+            ...FileItem
+        }
     }
-  }
 }
 
 query GetRoom($id: String!) {
-  result: getRoom(id: $id) {
-    __typename
-    ... on GetJoinedRoomResult {
-      role
-      room {
-        ...RoomGetState
-      }
+    result: getRoom(id: $id) {
+        __typename
+        ... on GetJoinedRoomResult {
+            role
+            room {
+                ...RoomGetState
+            }
+        }
+        ... on GetNonJoinedRoomResult {
+            roomAsListItem {
+                ...RoomAsListItem
+            }
+        }
+        ... on GetRoomFailureResult {
+            failureType
+        }
     }
-    ... on GetNonJoinedRoomResult {
-      roomAsListItem {
-        ...RoomAsListItem
-      }
-    }
-    ... on GetRoomFailureResult {
-      failureType
-    }
-  }
 }
 
 query GetRoomsList {
-  result: getRoomsList {
-    __typename
-    ... on GetRoomsListSuccessResult {
-      rooms {
-        ...RoomAsListItem
-      }
+    result: getRoomsList {
+        __typename
+        ... on GetRoomsListSuccessResult {
+            rooms {
+                ...RoomAsListItem
+            }
+        }
+        ... on GetRoomsListFailureResult {
+            failureType
+        }
     }
-    ... on GetRoomsListFailureResult {
-      failureType
-    }
-  }
 }
 
 query GetMessages($roomId: String!) {
-  result: getMessages(roomId: $roomId) {
-    __typename
-    ... on RoomMessages {
-      publicMessages {
-        ...RoomPublicMessage
-      }
-      privateMessages {
-        ...RoomPrivateMessage
-      }
-      pieceLogs {
-        ...PieceLog
-      }
-      publicChannels {
-        ...RoomPublicChannel
-      }
-      soundEffects {
-        ...RoomSoundEffect
-      }
+    result: getMessages(roomId: $roomId) {
+        __typename
+        ... on RoomMessages {
+            publicMessages {
+                ...RoomPublicMessage
+            }
+            privateMessages {
+                ...RoomPrivateMessage
+            }
+            pieceLogs {
+                ...PieceLog
+            }
+            publicChannels {
+                ...RoomPublicChannel
+            }
+            soundEffects {
+                ...RoomSoundEffect
+            }
+        }
+        ... on GetRoomMessagesFailureResult {
+            failureType
+        }
     }
-    ... on GetRoomMessagesFailureResult {
-      failureType
-    }
-  }
 }
 
 query GetLog($roomId: String!) {
-  result: getLog(roomId: $roomId) {
-    __typename
-    ... on RoomMessages {
-      publicMessages {
-        ...RoomPublicMessage
-      }
-      privateMessages {
-        ...RoomPrivateMessage
-      }
-      pieceLogs {
-        ...PieceLog
-      }
-      publicChannels {
-        ...RoomPublicChannel
-      }
-      soundEffects {
-        ...RoomSoundEffect
-      }
+    result: getLog(roomId: $roomId) {
+        __typename
+        ... on RoomMessages {
+            publicMessages {
+                ...RoomPublicMessage
+            }
+            privateMessages {
+                ...RoomPrivateMessage
+            }
+            pieceLogs {
+                ...PieceLog
+            }
+            publicChannels {
+                ...RoomPublicChannel
+            }
+            soundEffects {
+                ...RoomSoundEffect
+            }
+        }
+        ... on GetRoomLogFailureResult {
+            failureType
+        }
     }
-    ... on GetRoomLogFailureResult {
-      failureType
-    }
-  }
 }
 
 query GetRoomConnections($roomId: String!) {
-  result: getRoomConnections(roomId: $roomId) {
-    __typename
-    ... on GetRoomConnectionsSuccessResult {
-      fetchedAt
-      connectedUserUids
+    result: getRoomConnections(roomId: $roomId) {
+        __typename
+        ... on GetRoomConnectionsSuccessResult {
+            fetchedAt
+            connectedUserUids
+        }
+        ... on GetRoomConnectionsFailureResult {
+            failureType
+        }
     }
-    ... on GetRoomConnectionsFailureResult {
-      failureType
-    }
-  }
 }
 
 query GetServerInfo {
-  result: getServerInfo {
-    version {
-      ...SemVer
+    result: getServerInfo {
+        version {
+            ...SemVer
+        }
+        uploaderEnabled
     }
-    uploaderEnabled
-  }
 }
 
 query IsEntry {
-  result: isEntry
+    result: isEntry
 }
 
 query GetRoomAsListItem($roomId: String!) {
-  result: getRoomAsListItem(roomId: $roomId) {
-  __typename
-    ... on GetRoomAsListItemSuccessResult {
-      room {
-        ...RoomAsListItem
-      }
+    result: getRoomAsListItem(roomId: $roomId) {
+        __typename
+        ... on GetRoomAsListItemSuccessResult {
+            room {
+                ...RoomAsListItem
+            }
+        }
+        ... on GetRoomAsListItemFailureResult {
+            failureType
+        }
     }
-    ... on GetRoomAsListItemFailureResult {
-      failureType
-    }
-  }
 }
 
 mutation CreateFileTag($tagName: String!) {
-  result: createFileTag(tagName: $tagName) {
-    ...FileTag
-  }
+    result: createFileTag(tagName: $tagName) {
+        ...FileTag
+    }
 }
 
 mutation ChangeParticipantName($roomId: String!, $newName: String!) {
-  result: changeParticipantName(roomId: $roomId, newName: $newName) {
-    failureType
-  }
+    result: changeParticipantName(roomId: $roomId, newName: $newName) {
+        failureType
+    }
 }
 
 mutation CreateRoom($input: CreateRoomInput!) {
-  result: createRoom(input: $input) {
-    __typename
-    ... on CreateRoomSuccessResult {
-      ...CreateRoomResult
+    result: createRoom(input: $input) {
+        __typename
+        ... on CreateRoomSuccessResult {
+            ...CreateRoomResult
+        }
+        ... on CreateRoomFailureResult {
+            failureType
+        }
     }
-    ... on CreateRoomFailureResult {
-      failureType
-    }
-  }
 }
 
 mutation DeleteFiles($filenames: [String!]!) {
-  result: deleteFiles(filenames: $filenames)
+    result: deleteFiles(filenames: $filenames)
 }
 
 mutation DeleteFileTag($tagId: String!) {
-  result: deleteFileTag(tagId: $tagId) 
+    result: deleteFileTag(tagId: $tagId)
 }
 
 mutation DeleteRoom($id: String!) {
-  result: deleteRoom(id: $id) {
-    failureType
-  }
+    result: deleteRoom(id: $id) {
+        failureType
+    }
 }
 
 mutation DeleteRoomAsAdmin($id: String!) {
-  result: deleteRoomAsAdmin(id: $id) {
-    failureType
-  }
+    result: deleteRoomAsAdmin(id: $id) {
+        failureType
+    }
 }
 
 mutation EditFileTags($input: EditFileTagsInput!) {
-  result: editFileTags(input: $input)
+    result: editFileTags(input: $input)
 }
 
 mutation JoinRoomAsPlayer($id: String!, $name: String!, $password: String) {
-  result: joinRoomAsPlayer(id: $id, name: $name, password: $password) {
-    ...JoinRoomResult
-  }
+    result: joinRoomAsPlayer(id: $id, name: $name, password: $password) {
+        ...JoinRoomResult
+    }
 }
 
 mutation JoinRoomAsSpectator($id: String!, $name: String!, $password: String) {
-  result: joinRoomAsSpectator(id: $id, name: $name, password: $password) {
-    ...JoinRoomResult
-  }
+    result: joinRoomAsSpectator(id: $id, name: $name, password: $password) {
+        ...JoinRoomResult
+    }
 }
 
 mutation EntryToServer($password: String!) {
-  result: entryToServer(password: $password) {
-    type
-  }
+    result: entryToServer(password: $password) {
+        type
+    }
 }
 
 mutation LeaveRoom($id: String!) {
-  result: leaveRoom(id: $id) {
-    failureType
-  }
+    result: leaveRoom(id: $id) {
+        failureType
+    }
 }
 
-mutation Operate($id: String!, $revisionFrom: Int!, $operation: RoomOperationInput!, $requestId: String!) {
-  result: operate(id: $id, prevRevision: $revisionFrom, operation: $operation, requestId: $requestId) {
-    __typename
-    ... on OperateRoomSuccessResult {
-      operation {
-        ...RoomOperation
-      }
+mutation Operate(
+    $id: String!
+    $revisionFrom: Int!
+    $operation: RoomOperationInput!
+    $requestId: String!
+) {
+    result: operate(
+        id: $id
+        prevRevision: $revisionFrom
+        operation: $operation
+        requestId: $requestId
+    ) {
+        __typename
+        ... on OperateRoomSuccessResult {
+            operation {
+                ...RoomOperation
+            }
+        }
+        ... on OperateRoomIdResult {
+            requestId
+        }
+        ... on OperateRoomFailureResult {
+            failureType
+        }
+        ... on OperateRoomNonJoinedResult {
+            roomAsListItem {
+                ...RoomAsListItem
+            }
+        }
     }
-    ... on OperateRoomIdResult {
-      requestId
-    }
-    ... on OperateRoomFailureResult {
-      failureType
-    }
-    ... on OperateRoomNonJoinedResult {
-      roomAsListItem {
-        ...RoomAsListItem
-      }
-    }
-  }
 }
 
 mutation Ping($value: Float!) {
-  result: ping(value: $value) {
-    createdBy
-    value
-  }
+    result: ping(value: $value) {
+        createdBy
+        value
+    }
 }
 
 mutation PromoteToPlayer($roomId: String!, $password: String) {
-  result: promoteToPlayer(roomId: $roomId, password: $password) {
-    failureType
-  }
+    result: promoteToPlayer(roomId: $roomId, password: $password) {
+        failureType
+    }
 }
 
 mutation ResetMessages($roomId: String!) {
-  result: resetMessages(roomId: $roomId) {
-    failureType
-  }
+    result: resetMessages(roomId: $roomId) {
+        failureType
+    }
 }
 
-mutation WritePublicMessage($roomId: String!, $text: String!, $textColor: String, $channelKey: String!, $characterId: String, $customName: String, $gameType: String) {
-  result: writePublicMessage(roomId: $roomId, text: $text, textColor: $textColor, channelKey: $channelKey, characterId: $characterId, customName: $customName, gameType: $gameType) {
-    __typename
-    ... on RoomPublicMessage {
-      ...RoomPublicMessage
+mutation WritePublicMessage(
+    $roomId: String!
+    $text: String!
+    $textColor: String
+    $channelKey: String!
+    $characterId: String
+    $customName: String
+    $gameType: String
+) {
+    result: writePublicMessage(
+        roomId: $roomId
+        text: $text
+        textColor: $textColor
+        channelKey: $channelKey
+        characterId: $characterId
+        customName: $customName
+        gameType: $gameType
+    ) {
+        __typename
+        ... on RoomPublicMessage {
+            ...RoomPublicMessage
+        }
+        ... on WriteRoomPublicMessageFailureResult {
+            failureType
+        }
+        ... on RoomMessageSyntaxError {
+            errorMessage
+        }
     }
-    ... on WriteRoomPublicMessageFailureResult {
-      failureType
-    }
-    ... on RoomMessageSyntaxError {
-      errorMessage
-    }
-  }
 }
 
-mutation WritePrivateMessage($roomId: String!, $visibleTo: [String!]!, $text: String!, $textColor: String, $characterId: String, $customName: String, $gameType: String) {
-  result: writePrivateMessage(roomId: $roomId, visibleTo: $visibleTo, text: $text, textColor: $textColor, characterId: $characterId, customName: $customName, gameType: $gameType) {
-    __typename
-    ... on RoomPrivateMessage {
-      ...RoomPrivateMessage
+mutation WritePrivateMessage(
+    $roomId: String!
+    $visibleTo: [String!]!
+    $text: String!
+    $textColor: String
+    $characterId: String
+    $customName: String
+    $gameType: String
+) {
+    result: writePrivateMessage(
+        roomId: $roomId
+        visibleTo: $visibleTo
+        text: $text
+        textColor: $textColor
+        characterId: $characterId
+        customName: $customName
+        gameType: $gameType
+    ) {
+        __typename
+        ... on RoomPrivateMessage {
+            ...RoomPrivateMessage
+        }
+        ... on WriteRoomPrivateMessageFailureResult {
+            failureType
+        }
+        ... on RoomMessageSyntaxError {
+            errorMessage
+        }
     }
-    ... on WriteRoomPrivateMessageFailureResult {
-      failureType
-    }
-    ... on RoomMessageSyntaxError {
-      errorMessage
-    }
-  }
 }
 
 mutation WriteRoomSoundEffect($roomId: String!, $file: FilePathInput!, $volume: Float!) {
-  result: writeRoomSoundEffect(roomId: $roomId, file: $file, volume: $volume) {
-    __typename
-    ... on RoomSoundEffect {
-      ...RoomSoundEffect
+    result: writeRoomSoundEffect(roomId: $roomId, file: $file, volume: $volume) {
+        __typename
+        ... on RoomSoundEffect {
+            ...RoomSoundEffect
+        }
+        ... on WriteRoomSoundEffectFailureResult {
+            failureType
+        }
     }
-    ... on WriteRoomSoundEffectFailureResult {
-      failureType
-    }
-  }
 }
 
 mutation EditMessage($roomId: String!, $messageId: String!, $text: String!) {
-  result: editMessage(roomId: $roomId, messageId: $messageId, text: $text) {
-    failureType
-  }
+    result: editMessage(roomId: $roomId, messageId: $messageId, text: $text) {
+        failureType
+    }
 }
 
 mutation DeleteMessage($roomId: String!, $messageId: String!) {
-  result: deleteMessage(roomId: $roomId, messageId: $messageId) {
-    failureType
-  }
+    result: deleteMessage(roomId: $roomId, messageId: $messageId) {
+        failureType
+    }
 }
 
 mutation MakeMessageNotSecret($roomId: String!, $messageId: String!) {
-  result: makeMessageNotSecret(roomId: $roomId, messageId: $messageId) {
-    failureType
-  }
+    result: makeMessageNotSecret(roomId: $roomId, messageId: $messageId) {
+        failureType
+    }
 }
 
 mutation UpdateWritingMessageStatus($roomId: String!, $newStatus: WritingMessageStatusInputType!) {
-  result: updateWritingMessageStatus(roomId: $roomId, newStatus: $newStatus)
+    result: updateWritingMessageStatus(roomId: $roomId, newStatus: $newStatus)
 }
 
 subscription RoomEvent($id: String!) {
-  roomEvent(id: $id) {
-    isRoomMessagesResetEvent
-    roomOperation {
-      ...RoomOperation
+    roomEvent(id: $id) {
+        isRoomMessagesResetEvent
+        roomOperation {
+            ...RoomOperation
+        }
+        deleteRoomOperation {
+            deletedBy
+        }
+        roomMessageEvent {
+            ...RoomMessageEvent
+        }
+        roomConnectionEvent {
+            userUid
+            isConnected
+            updatedAt
+        }
+        writingMessageStatus {
+            userUid
+            status
+        }
     }
-    deleteRoomOperation {
-      deletedBy
-    }
-    roomMessageEvent {
-      ...RoomMessageEvent
-    }
-    roomConnectionEvent {
-      userUid
-      isConnected
-      updatedAt
-    }
-    writingMessageStatus {
-      userUid
-      status
-    }
-  }
 }
 
 subscription Pong {
-  pong {
-    createdBy
-    value
-  }
+    pong {
+        createdBy
+        value
+    }
 }
