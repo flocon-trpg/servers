@@ -3492,7 +3492,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/animated@npm:~9.4.3-beta.0, @react-spring/animated@npm:~9.4.4":
+"@react-spring/animated@npm:~9.4.4":
   version: 9.4.4
   resolution: "@react-spring/animated@npm:9.4.4"
   dependencies:
@@ -3504,17 +3504,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/core@npm:9.4.3":
-  version: 9.4.3
-  resolution: "@react-spring/core@npm:9.4.3"
+"@react-spring/core@npm:9.4.4":
+  version: 9.4.4
+  resolution: "@react-spring/core@npm:9.4.4"
   dependencies:
-    "@react-spring/animated": ~9.4.3-beta.0
-    "@react-spring/rafz": ~9.4.3-beta.0
-    "@react-spring/shared": ~9.4.3-beta.0
-    "@react-spring/types": ~9.4.3-beta.0
+    "@react-spring/animated": ~9.4.4
+    "@react-spring/rafz": ~9.4.4
+    "@react-spring/shared": ~9.4.4
+    "@react-spring/types": ~9.4.4
   peerDependencies:
     react: ^16.8.0  || ^17.0.0
-  checksum: d07be80502cdf7ad42b1bc3fc57870521658a767abcdff094d5c8571431a1b35f0060493d2cbdf00dcc49390088b5d4bad26f10139e4c3ced36b800395d179ee
+  checksum: d73d774d61b6e2b0e540bcddec05d38ca9d1f434b138a84a98e9c8069522ed5da033931d43c5781c4b2073de5a4f5b9267f4d93c6930d8ac45c3f4d85db0751f
   languageName: node
   linkType: hard
 
@@ -3534,14 +3534,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/rafz@npm:~9.4.3-beta.0, @react-spring/rafz@npm:~9.4.4":
+"@react-spring/rafz@npm:~9.4.4":
   version: 9.4.4
   resolution: "@react-spring/rafz@npm:9.4.4"
   checksum: 5019d984509071b8e92d41f6e29455d141d957ce7e40eb11b55859a13425fe70fad448738d400a669cd62005c451b1f83740e0ff64084331e098e377e8e844aa
   languageName: node
   linkType: hard
 
-"@react-spring/shared@npm:~9.4.3-beta.0, @react-spring/shared@npm:~9.4.4":
+"@react-spring/shared@npm:~9.4.4":
   version: 9.4.4
   resolution: "@react-spring/shared@npm:9.4.4"
   dependencies:
@@ -3553,7 +3553,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/types@npm:~9.4.3-beta.0, @react-spring/types@npm:~9.4.4":
+"@react-spring/types@npm:~9.4.4":
   version: 9.4.4
   resolution: "@react-spring/types@npm:9.4.4"
   checksum: 67588de3410857e27e2300f7c28c45dbaf602a2328483e50ecf56a46776e455d2c5cbfcf1bbb555ad2fa796830ea6c01f1d2ec52bdc995119ec38bf98b9a2958
