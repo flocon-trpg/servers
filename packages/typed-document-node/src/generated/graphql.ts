@@ -633,12 +633,19 @@ export type Roles = {
 
 export type RoomAsListItem = {
     __typename?: 'RoomAsListItem';
+    /** since v0.8.0 */
+    createdAt?: Maybe<Scalars['Float']>;
     /** この部屋の作成者。Firebase AuthenticationのUserUidで表現される。 */
     createdBy: Scalars['String'];
     id: Scalars['ID'];
     name: Scalars['String'];
     requiresPlayerPassword: Scalars['Boolean'];
     requiresSpectatorPassword: Scalars['Boolean'];
+    /**
+     * データベースのRoomエンティティが最後に更新された日時。Roomエンティティのみが対象であるため、例えばメッセージの投稿などは反映されないことに注意。
+     * since v0.8.0
+     */
+    updatedAt?: Maybe<Scalars['Float']>;
 };
 
 export type RoomConnectionEvent = {
@@ -660,12 +667,19 @@ export type RoomEvent = {
 
 export type RoomGetState = {
     __typename?: 'RoomGetState';
+    /** since v0.8.0 */
+    createdAt?: Maybe<Scalars['Float']>;
     /** この部屋の作成者。Firebase AuthenticationのUserUidで表現される。 */
     createdBy: Scalars['String'];
     /** Current revision of Room. Whenever Room is updated, this value is incremented by 1. This value is required when you apply RoomOperation. / Roomの現在のリビジョン。Roomが更新されるたび、この値は1増加する。RoomOperationを適用する際に必要となる。 */
     revision: Scalars['Float'];
     /** room.state をJSON化したもの */
     stateJson: Scalars['String'];
+    /**
+     * データベースのRoomエンティティが最後に更新された日時。Roomエンティティのみが対象であるため、例えばメッセージの投稿などは反映されないことに注意。
+     * since v0.8.0
+     */
+    updatedAt?: Maybe<Scalars['Float']>;
 };
 
 export type RoomMessageEvent =
@@ -915,7 +929,14 @@ type CreateRoomResult_CreateRoomFailureResult_Fragment = {
 type CreateRoomResult_CreateRoomSuccessResult_Fragment = {
     __typename: 'CreateRoomSuccessResult';
     id: string;
-    room: { __typename?: 'RoomGetState'; revision: number; createdBy: string; stateJson: string };
+    room: {
+        __typename?: 'RoomGetState';
+        revision: number;
+        createdBy: string;
+        createdAt?: number | null;
+        updatedAt?: number | null;
+        stateJson: string;
+    };
 };
 
 export type CreateRoomResultFragment =
@@ -946,6 +967,8 @@ export type GetNonJoinedRoomResultFragment = {
         id: string;
         name: string;
         createdBy: string;
+        createdAt?: number | null;
+        updatedAt?: number | null;
         requiresPlayerPassword: boolean;
         requiresSpectatorPassword: boolean;
     };
@@ -963,6 +986,8 @@ type GetRoomListResult_GetRoomsListSuccessResult_Fragment = {
         id: string;
         name: string;
         createdBy: string;
+        createdAt?: number | null;
+        updatedAt?: number | null;
         requiresPlayerPassword: boolean;
         requiresSpectatorPassword: boolean;
     }>;
@@ -975,7 +1000,14 @@ export type GetRoomListResultFragment =
 type GetRoomResult_GetJoinedRoomResult_Fragment = {
     __typename: 'GetJoinedRoomResult';
     role: ParticipantRole;
-    room: { __typename?: 'RoomGetState'; revision: number; createdBy: string; stateJson: string };
+    room: {
+        __typename?: 'RoomGetState';
+        revision: number;
+        createdBy: string;
+        createdAt?: number | null;
+        updatedAt?: number | null;
+        stateJson: string;
+    };
 };
 
 type GetRoomResult_GetNonJoinedRoomResult_Fragment = {
@@ -985,6 +1017,8 @@ type GetRoomResult_GetNonJoinedRoomResult_Fragment = {
         id: string;
         name: string;
         createdBy: string;
+        createdAt?: number | null;
+        updatedAt?: number | null;
         requiresPlayerPassword: boolean;
         requiresSpectatorPassword: boolean;
     };
@@ -1033,6 +1067,8 @@ export type RoomAsListItemFragment = {
     id: string;
     name: string;
     createdBy: string;
+    createdAt?: number | null;
+    updatedAt?: number | null;
     requiresPlayerPassword: boolean;
     requiresSpectatorPassword: boolean;
 };
@@ -1041,6 +1077,8 @@ export type RoomGetStateFragment = {
     __typename?: 'RoomGetState';
     revision: number;
     createdBy: string;
+    createdAt?: number | null;
+    updatedAt?: number | null;
     stateJson: string;
 };
 
@@ -1359,6 +1397,8 @@ export type GetRoomQuery = {
                   __typename?: 'RoomGetState';
                   revision: number;
                   createdBy: string;
+                  createdAt?: number | null;
+                  updatedAt?: number | null;
                   stateJson: string;
               };
           }
@@ -1369,6 +1409,8 @@ export type GetRoomQuery = {
                   id: string;
                   name: string;
                   createdBy: string;
+                  createdAt?: number | null;
+                  updatedAt?: number | null;
                   requiresPlayerPassword: boolean;
                   requiresSpectatorPassword: boolean;
               };
@@ -1389,6 +1431,8 @@ export type GetRoomsListQuery = {
                   id: string;
                   name: string;
                   createdBy: string;
+                  createdAt?: number | null;
+                  updatedAt?: number | null;
                   requiresPlayerPassword: boolean;
                   requiresSpectatorPassword: boolean;
               }>;
@@ -1688,6 +1732,8 @@ export type GetRoomAsListItemQuery = {
                   id: string;
                   name: string;
                   createdBy: string;
+                  createdAt?: number | null;
+                  updatedAt?: number | null;
                   requiresPlayerPassword: boolean;
                   requiresSpectatorPassword: boolean;
               };
@@ -1731,6 +1777,8 @@ export type CreateRoomMutation = {
                   __typename?: 'RoomGetState';
                   revision: number;
                   createdBy: string;
+                  createdAt?: number | null;
+                  updatedAt?: number | null;
                   stateJson: string;
               };
           };
@@ -1862,6 +1910,8 @@ export type OperateMutation = {
                   id: string;
                   name: string;
                   createdBy: string;
+                  createdAt?: number | null;
+                  updatedAt?: number | null;
                   requiresPlayerPassword: boolean;
                   requiresSpectatorPassword: boolean;
               };
@@ -2284,6 +2334,8 @@ export const RoomGetStateFragmentDoc = {
                 selections: [
                     { kind: 'Field', name: { kind: 'Name', value: 'revision' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'stateJson' } },
                 ],
             },
@@ -2395,6 +2447,8 @@ export const RoomAsListItemFragmentDoc = {
                     { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'name' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'requiresPlayerPassword' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'requiresSpectatorPassword' } },
                 ],

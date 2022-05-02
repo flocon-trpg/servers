@@ -14,6 +14,9 @@ import { Layout, loginAndEntry } from '../../ui/Layout';
 import { QueryResultViewer } from '../../ui/QueryResultViewer';
 import * as Icons from '@ant-design/icons';
 import { Styles } from '../../../styles';
+import { useGetApiSemVer } from '../../../hooks/useGetApiSemVer';
+import { SemVer, alpha } from '@flocon-trpg/utils';
+import moment from 'moment';
 
 type Data = RoomAsListItemFragment;
 
@@ -65,41 +68,60 @@ const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
     );
 };
 
-const columns = [
-    {
-        title: 'ID',
-        dataIndex: 'id',
-    },
-    {
-        title: 'Name',
-        dataIndex: 'name',
-        sorter: (x: Data, y: Data) => x.name.localeCompare(y.name),
-        // eslint-disable-next-line react/display-name
-        render: (_: any, record: Data) => (
-            <div className={classNames(flex, flexRow)}>
-                <Tooltip title={record.name}>
-                    <div
-                        style={{
-                            overflow: 'hidden',
-                            whiteSpace: 'nowrap',
-                            textOverflow: 'ellipsis',
-                            maxWidth: 400,
-                        }}
-                    >
-                        {record.name}
-                    </div>
-                </Tooltip>
-            </div>
-        ),
-    },
-    {
-        title: 'Action',
-        dataIndex: '',
-        key: 'Action',
-        // eslint-disable-next-line react/display-name
-        render: (_: any, record: Data) => <RoomButton roomId={record.id} />,
-    },
-];
+const dateToString = (dateMilliSeconds: number) =>
+    moment(dateMilliSeconds).format('YYYY/MM/DD HH:mm:ss');
+const idColumn = {
+    title: 'ID',
+    dataIndex: 'id',
+};
+const nameColumn = {
+    title: 'Name',
+    dataIndex: 'name',
+    sorter: (x: Data, y: Data) => x.name.localeCompare(y.name),
+    // eslint-disable-next-line react/display-name
+    render: (_: any, record: Data) => (
+        <div className={classNames(flex, flexRow)}>
+            <Tooltip title={record.name}>
+                <div
+                    style={{
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap',
+                        textOverflow: 'ellipsis',
+                        maxWidth: 400,
+                    }}
+                >
+                    {record.name}
+                </div>
+            </Tooltip>
+        </div>
+    ),
+};
+const createdAtColumn = {
+    title: '作成日時',
+    dataIndex: 'createdAt',
+    sorter: (x: Data, y: Data) => (x.createdAt ?? -1) < (y.createdAt ?? -1),
+    // eslint-disable-next-line react/display-name
+    render: (_: any, record: Data) =>
+        record.createdAt == null ? '?' : dateToString(record.createdAt),
+};
+const updatedAtColumn = {
+    title: '最終更新日時',
+    dataIndex: 'updatedAt',
+    sorter: (x: Data, y: Data) => (x.updatedAt ?? -1) < (y.updatedAt ?? -1),
+    // eslint-disable-next-line react/display-name
+    render: (_: any, record: Data) =>
+        record.updatedAt == null ? '?' : dateToString(record.updatedAt),
+};
+const actionColumn = {
+    title: 'Action',
+    dataIndex: '',
+    key: 'Action',
+    // eslint-disable-next-line react/display-name
+    render: (_: any, record: Data) => <RoomButton roomId={record.id} />,
+};
+
+const columnV08 = [idColumn, nameColumn, createdAtColumn, updatedAtColumn, actionColumn];
+const columnV07 = [idColumn, nameColumn, actionColumn];
 
 type RoomsListComponentProps = {
     rooms: RoomAsListItemFragment[];
@@ -109,6 +131,18 @@ const RoomsListComponent: React.FC<RoomsListComponentProps> = ({
     rooms,
 }: RoomsListComponentProps) => {
     const router = useRouter();
+    const apiSemVer = useGetApiSemVer();
+
+    let isV08OrLater: boolean | null;
+    if (apiSemVer == null || apiSemVer.isError) {
+        isV08OrLater = null;
+    } else {
+        isV08OrLater = SemVer.compare(
+            new SemVer({ major: 0, minor: 7, patch: 2, prerelease: { type: alpha, version: 1 } }),
+            '<=',
+            apiSemVer.value
+        );
+    }
 
     return React.useMemo(
         () => (
@@ -120,10 +154,15 @@ const RoomsListComponent: React.FC<RoomsListComponentProps> = ({
                     <div style={{ flex: 'auto' }} />
                 </div>
                 <div style={{ flex: '10px' }} />
-                <Table rowKey='id' style={{ flex: 'auto' }} columns={columns} dataSource={rooms} />
+                <Table
+                    rowKey='id'
+                    style={{ flex: 'auto' }}
+                    columns={isV08OrLater == null || isV08OrLater == true ? columnV08 : columnV07}
+                    dataSource={rooms}
+                />
             </div>
         ),
-        [rooms, router]
+        [isV08OrLater, rooms, router]
     );
 };
 

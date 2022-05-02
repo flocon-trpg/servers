@@ -2,59 +2,24 @@ import { Alert, Button, Collapse, Typography } from 'antd';
 import React from 'react';
 import { FilesManagerDrawer } from '../contextual/room/file/FilesManagerDrawer';
 import { QueryResultViewer } from '../ui/QueryResultViewer';
-import { GetServerInfoDocument, PrereleaseType } from '@flocon-trpg/typed-document-node';
 import { Layout } from '../ui/Layout';
 import { FilesManagerDrawerType, none } from '../../utils/types';
 import { SupportedApiServers, VERSION } from '../../VERSION';
 import * as Icon from '@ant-design/icons';
-import { SemVer, alpha, beta, rc } from '@flocon-trpg/utils';
 import { useRouter } from 'next/router';
 import classNames from 'classnames';
 import { flex, flexColumn } from '../../utils/className';
-import { useQuery } from '@apollo/client';
 import { apiServerSatisfies } from '../../versioning/apiServerSatisfies';
 import { semVerRangeToString } from '../../versioning/semVerRange';
+import { useGetApiSemVer } from '../../hooks/useGetApiSemVer';
 
 export const Index: React.FC = () => {
     const [drawerType, setDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
     const router = useRouter();
-
-    const { data: serverInfo, loading, error } = useQuery(GetServerInfoDocument);
-
-    const apiServerSemVer = (() => {
-        if (serverInfo == null) {
-            return null;
-        }
-        const prerelease = (() => {
-            if (serverInfo.result.version.prerelease == null) {
-                return undefined;
-            }
-            switch (serverInfo.result.version.prerelease.type) {
-                case PrereleaseType.Alpha:
-                    return {
-                        ...serverInfo.result.version.prerelease,
-                        type: alpha,
-                    } as const;
-                case PrereleaseType.Beta:
-                    return {
-                        ...serverInfo.result.version.prerelease,
-                        type: beta,
-                    } as const;
-                case PrereleaseType.Rc:
-                    return {
-                        ...serverInfo.result.version.prerelease,
-                        type: rc,
-                    } as const;
-            }
-        })();
-        return new SemVer({
-            ...serverInfo.result.version,
-            prerelease,
-        });
-    })();
+    const apiServerSemVer = useGetApiSemVer();
 
     let versionInfo: JSX.Element | null;
-    if (apiServerSemVer == null) {
+    if (apiServerSemVer === null || apiServerSemVer.isError) {
         versionInfo = null;
     } else {
         const supportedApiServersAsString =
@@ -67,7 +32,7 @@ export const Index: React.FC = () => {
                 return `${seed}, "${semVerRangeToString(elem)}"`;
             }, '[ ') + ' ]';
         let alert: JSX.Element | null;
-        if (apiServerSatisfies({ actual: apiServerSemVer, expected: SupportedApiServers })) {
+        if (apiServerSatisfies({ actual: apiServerSemVer.value, expected: SupportedApiServers })) {
             alert = null;
         } else {
             alert = (
@@ -140,18 +105,22 @@ export const Index: React.FC = () => {
                     <li>{`Webサーバー: ${VERSION}`}</li>
                     <li>
                         APIサーバー:{' '}
-                        {loading ? (
+                        {apiServerSemVer == null ? (
                             <span>
                                 <Icon.LoadingOutlined />
                                 取得中…
                             </span>
-                        ) : apiServerSemVer == null ? (
+                        ) : apiServerSemVer.isError ? (
                             '(エラーが発生しました)'
                         ) : (
-                            apiServerSemVer.toString()
+                            apiServerSemVer.value.toString()
                         )}
                         <div style={{ maxWidth: 800 }}>
-                            <QueryResultViewer error={error} loading={false} compact>
+                            <QueryResultViewer
+                                error={apiServerSemVer?.error}
+                                loading={false}
+                                compact
+                            >
                                 {versionInfo}
                             </QueryResultViewer>
                         </div>

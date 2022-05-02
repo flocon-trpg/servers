@@ -56,6 +56,17 @@ export class Room {
     @Property({ type: Date, nullable: true, onUpdate: () => new Date(), index: true })
     public updatedAt?: Date;
 
+    /** この部屋全体の最終更新日時。このentityだけでなく、メッセージの書き込みなども対象とした最終更新日時を表す。 */
+    /* 
+    mikro-ormのonUpdateによる日時更新はそのエンティティ以外の変更を検知しないため、例えば部屋のメッセージが追加されてもupdatedAtは更新されない。だが利用者の視点ではこれらも考慮してほしいと思われる。そのためこのプロパティを設けている。
+
+    他の案として「RoomのupdatedAt、そのRoomのRoomPubMsgのMAX(updated_at)、RoomPubMsgのMAX(updated_at)…を取得してそれらの中で最も大きい値をこの部屋全体の最終更新日時とする」というのも考えられる。これはcompleteUpdatedAtの値を手動でセットしなくとも求まるというメリットはある。だが、例えば部屋全体の最終更新日時が新しい順に10件取得したい場合に、すべての部屋ごとに全体の最終更新日時を計算しなければならないためパフォーマンス上の懸念があるため不採用とした。
+
+    Participantの増減（入退室）や名前変更などでもcompleteUpdatedAtは更新されるという仕様にしている。理由は、RoomのStateの変更によるcompleteUpdatedAtの更新は条件に関わらず常に行うとすることで規則を単純化し、コードをシンプルにするため。ただしこの仕様は後々変更するかもしれない。
+    */
+    @Property({ type: Date, nullable: true, index: true })
+    public completeUpdatedAt?: Date;
+
     @Property({ nullable: true })
     public playerPasswordHash?: string;
 

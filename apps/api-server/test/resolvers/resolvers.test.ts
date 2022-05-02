@@ -52,7 +52,7 @@ const timeout_afterEach = 20000;
 
 jest.setTimeout(timeout);
 
-// Dateのmillisecond部分が丸められる仕様のDBの場合でも、entity作成時のDateはflushの有無にかかわらず丸められない。このため、
+// Dateのmillisecond部分が丸められる仕様のDBの場合でも、entity作成時のDateはflushの有無にかかわらず丸められない。このため、その差があってもテストがパスするようにしている。
 const roundMilliSecondsInObject = (source: unknown): unknown => {
     const roundMilliSeconds = (i: number): number => {
         return Math.round(i / 1000) * 1000;
@@ -84,6 +84,24 @@ const roundMilliSecondsInObject = (source: unknown): unknown => {
     }
 
     return produce(source, core);
+};
+
+const expectDateToBeCloseTo = ({
+    expected,
+    actual,
+    acceptNullish,
+}: {
+    expected: number;
+    actual: number | null | undefined;
+    acceptNullish?: boolean;
+}) => {
+    const round = (i: number): number => {
+        return Math.round(i / 1000) * 1000;
+    };
+    if (acceptNullish && actual == null) {
+        return;
+    }
+    expect(actual == null ? actual : round(actual)).toBe(round(expected));
 };
 
 const textDiff = ({ prev, next }: { prev: string; next: string }) => {
@@ -418,7 +436,9 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
         await doAutoMigrationBeforeStart(orm);
     }, timeout_beforeAll);
 
-    afterEach(async () => {
+    // もし前回実行したテストが失敗している場合はゴミが残っているため、afterEachではなくbeforeEachを用いている。
+    beforeEach(async () => {
+        jest.useFakeTimers();
         const orm = await createOrm(dbType);
         await clearAllRooms(orm.em.fork());
         await clearAllFiles(orm.em.fork());
@@ -426,7 +446,15 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
         await orm.close();
     }, timeout_afterEach);
 
+    afterEach(() => {
+        jest.useRealTimers();
+    });
+
     const entryPassword = entryPasswordConfig == null ? undefined : Resources.entryPassword;
+    const systemTime1 = new Date(2025, 1, 1, 0, 1, 0);
+    const systemTime2 = new Date(2025, 1, 1, 0, 1, 10);
+    const systemTime3 = new Date(2025, 1, 1, 0, 1, 20);
+    const systemTime4 = new Date(2025, 1, 1, 0, 1, 30);
 
     type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
 
@@ -562,6 +590,10 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
     it.each(['public', 'unlisted'] as const)(
         'tests upload and delete file in uploader',
         async publicOrUnlisted => {
+            /* jest.useFakeTimers() を有効にしてからmulterを利用しようとするとフリーズする。 https://github.com/expressjs/multer/issues/558
+               このテストではmulterが実行されるため、jest.useFakeTimersを無効化している。*/
+            jest.useRealTimers();
+
             await useTestServer({}, async () => {
                 const userUid1 = 'User1';
                 const userUid2 = 'User2';
@@ -734,10 +766,14 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
 
     it('tests getRoomsListQuery', async () => {
         await useTestServer({}, async () => {
+            jest.setSystemTime(systemTime1);
+
             const userUids = [Resources.UserUid.master, Resources.UserUid.player1] as const;
+            const roomName = 'TEST_ROOM';
             const { clients, roomId } = await setupUsersAndRoom({
                 userUids,
                 roomMasterUserUid: Resources.UserUid.master,
+                roomName,
             });
 
             // - master can get the room
@@ -747,13 +783,23 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
             console.log('getRoomsList query result: %o', roomMasterResult);
             expect(roomMasterResult.rooms).toHaveLength(1);
             expect(roomMasterResult.rooms[0]!.id).toBe(roomId);
+            expect(roomMasterResult.rooms[0]!.name).toBe(roomName);
+            expect(roomMasterResult.rooms[0]!.createdAt).toBeTruthy();
+            expectDateToBeCloseTo({
+                actual: roomMasterResult.rooms[0]!.createdAt,
+                expected: systemTime1.getTime(),
+            });
+            expectDateToBeCloseTo({
+                actual: roomMasterResult.rooms[0]!.updatedAt,
+                expected: systemTime1.getTime(),
+                acceptNullish: true,
+            });
 
             // - another user can get the room
             const anotherUserResult = Assert.GetRoomsListQuery.toBeSuccess(
                 await clients[Resources.UserUid.player1].getRoomsListQuery()
             );
-            expect(anotherUserResult.rooms).toHaveLength(1);
-            expect(anotherUserResult.rooms[0]!.id).toBe(roomId);
+            expect(anotherUserResult.rooms).toEqual(roomMasterResult.rooms);
         });
     });
 
@@ -912,6 +958,8 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
         });
 
         it('tests getRoom', async () => {
+            jest.setSystemTime(systemTime1);
+
             await useTestServer({}, async () => {
                 const userUids = [
                     Resources.UserUid.master,
@@ -936,6 +984,12 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                     })
                 );
                 expect(masterResult.role).toBe(ParticipantRole.Master);
+                expect(masterResult.room.createdAt).toBeTruthy();
+                expectDateToBeCloseTo({
+                    actual: masterResult.room.updatedAt,
+                    expected: systemTime1.getTime(),
+                    acceptNullish: true,
+                });
 
                 const player1Result = Assert.GetRoomQuery.toBeSuccess(
                     await clients[Resources.UserUid.player1].getRoomQuery({
@@ -943,6 +997,10 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                     })
                 );
                 expect(player1Result.role).toBe(ParticipantRole.Player);
+                expect({ ...player1Result.room, stateJson: undefined }).toEqual({
+                    ...masterResult.room,
+                    stateJson: undefined,
+                });
 
                 const spectatorResult = Assert.GetRoomQuery.toBeSuccess(
                     await clients[Resources.UserUid.spectator1].getRoomQuery({
@@ -950,6 +1008,10 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                     })
                 );
                 expect(spectatorResult.role).toBe(ParticipantRole.Spectator);
+                expect({ ...spectatorResult.room, stateJson: undefined }).toEqual({
+                    ...masterResult.room,
+                    stateJson: undefined,
+                });
 
                 const nonJoinedResult = Assert.GetRoomQuery.toBeNonJoined(
                     await clients[Resources.UserUid.notJoin].getRoomQuery({
@@ -957,6 +1019,15 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                     })
                 );
                 expect(nonJoinedResult.roomAsListItem.id).toBe(roomId);
+                expectDateToBeCloseTo({
+                    actual: nonJoinedResult.roomAsListItem.createdAt,
+                    expected: systemTime1.getTime(),
+                });
+                expectDateToBeCloseTo({
+                    actual: nonJoinedResult.roomAsListItem.updatedAt,
+                    expected: systemTime1.getTime(),
+                    acceptNullish: true,
+                });
             });
         });
 
@@ -965,6 +1036,8 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
 
             it('tests a valid operation', async () => {
                 await useTestServer({}, async () => {
+                    jest.setSystemTime(systemTime1);
+
                     const userUids = [
                         Resources.UserUid.master,
                         Resources.UserUid.player1,
@@ -987,6 +1060,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         });
 
                     const newRoomName = 'NEW_ROOM_NAME';
+                    jest.setSystemTime(systemTime2);
                     const operation: UpOperation = {
                         $v: 2,
                         $r: 1,
@@ -1034,11 +1108,17 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         })
                     );
                     expect(parseState(room.room.stateJson).name).toBe(newRoomName);
+                    expectDateToBeCloseTo({
+                        actual: room.room.updatedAt,
+                        expected: systemTime2.getTime(),
+                    });
                 });
             });
 
             it('tests with invalid JSON', async () => {
                 await useTestServer({}, async () => {
+                    jest.setSystemTime(systemTime1);
+
                     const userUids = [
                         Resources.UserUid.master,
                         Resources.UserUid.player1,
@@ -1059,6 +1139,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
 
                     const invalidJSON = JSON.stringify({});
 
+                    jest.setSystemTime(systemTime2);
                     await Assert.OperateMutation.toBeFailure(
                         clients[Resources.UserUid.player1].operateMutation({
                             id: roomId,
@@ -1073,6 +1154,16 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                     );
 
                     subscriptions.all.toBeEmpty();
+
+                    const room = Assert.GetRoomQuery.toBeSuccess(
+                        await clients[Resources.UserUid.player1].getRoomQuery({
+                            id: roomId,
+                        })
+                    );
+                    expectDateToBeCloseTo({
+                        actual: room.room.updatedAt,
+                        expected: systemTime1.getTime(),
+                    });
                 });
             });
         });
@@ -1152,6 +1243,8 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
             'writePublicMessage -> edit -> delete mutation',
             async ({ doEditTest, author, channelKey }) => {
                 await useTestServer({}, async () => {
+                    jest.setSystemTime(systemTime1);
+
                     const userUids = [
                         author,
                         Resources.UserUid.master,
@@ -1178,6 +1271,8 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
 
                     // writePublicMessageMutation
                     {
+                        jest.setSystemTime(systemTime2);
+
                         message = Assert.WritePublicMessageMutation.toBeSuccess(
                             await clients[author].writePublicMessageMutation({
                                 roomId,
@@ -1194,7 +1289,6 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
 
                         for (const userUid of [
-                            author,
                             Resources.UserUid.master,
                             Resources.UserUid.player1,
                             Resources.UserUid.spectator1,
@@ -1207,11 +1301,22 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                             expect(roundMilliSecondsInObject(messages.publicMessages)).toEqual(
                                 roundMilliSecondsInObject([message])
                             );
+                            const room = Assert.GetRoomQuery.toBeSuccess(
+                                await clients[userUid].getRoomQuery({
+                                    id: roomId,
+                                })
+                            );
+                            expectDateToBeCloseTo({
+                                actual: room.room.updatedAt,
+                                expected: systemTime2.getTime(),
+                            });
                         }
                     }
 
                     // editMessageMutation
                     if (doEditTest) {
+                        jest.setSystemTime(systemTime3);
+
                         const editedText = 'EDITED_TEXT';
                         const editResult = Assert.EditMessageMutation.toBeSuccess(
                             await clients[author].editMessageMutation({
@@ -1235,7 +1340,25 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                             updatedText: undefined,
                         });
                         subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
+
+                        for (const userUid of [
+                            Resources.UserUid.master,
+                            Resources.UserUid.player1,
+                            Resources.UserUid.spectator1,
+                        ] as const) {
+                            const room = Assert.GetRoomQuery.toBeSuccess(
+                                await clients[userUid].getRoomQuery({
+                                    id: roomId,
+                                })
+                            );
+                            expectDateToBeCloseTo({
+                                actual: room.room.updatedAt,
+                                expected: systemTime3.getTime(),
+                            });
+                        }
                     }
+
+                    jest.setSystemTime(systemTime4);
 
                     const deleteResult = Assert.DeleteMessageMutation.toBeSuccess(
                         await clients[author].deleteMessageMutation({
@@ -1258,6 +1381,22 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         updatedText: undefined,
                     });
                     subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
+
+                    for (const userUid of [
+                        Resources.UserUid.master,
+                        Resources.UserUid.player1,
+                        Resources.UserUid.spectator1,
+                    ] as const) {
+                        const room = Assert.GetRoomQuery.toBeSuccess(
+                            await clients[userUid].getRoomQuery({
+                                id: roomId,
+                            })
+                        );
+                        expectDateToBeCloseTo({
+                            actual: room.room.updatedAt,
+                            expected: systemTime4.getTime(),
+                        });
+                    }
                 });
             }
         );
@@ -1285,6 +1424,8 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
             },
         ] as const)('tests invalid writePublicMessageMutation', async ({ author, channelKey }) => {
             await useTestServer({}, async () => {
+                jest.setSystemTime(systemTime1);
+
                 const userUids = [
                     Resources.UserUid.master,
                     Resources.UserUid.player1,
@@ -1305,7 +1446,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                 });
 
                 const text = 'TEXT';
-
+                jest.setSystemTime(systemTime2);
                 Assert.WritePublicMessageMutation.toBeFailure(
                     await clients[author].writePublicMessageMutation({
                         roomId,
@@ -1327,6 +1468,16 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         })
                     );
                     expect(messages.publicMessages).toHaveLength(0);
+
+                    const room = Assert.GetRoomQuery.toBeSuccess(
+                        await clients[userUid].getRoomQuery({
+                            id: roomId,
+                        })
+                    );
+                    expectDateToBeCloseTo({
+                        actual: room.room.updatedAt,
+                        expected: systemTime1.getTime(),
+                    });
                 }
             });
         });
@@ -1334,6 +1485,8 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
         describe('writePrivateMessage mutation', () => {
             it('should succeed', async () => {
                 await useTestServer({}, async () => {
+                    jest.setSystemTime(systemTime1);
+
                     const userUids = [
                         Resources.UserUid.master,
                         Resources.UserUid.player1,
@@ -1355,6 +1508,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
 
                     const text = 'TEXT';
                     const visibleTo = [Resources.UserUid.player1, Resources.UserUid.player2];
+                    jest.setSystemTime(systemTime2);
 
                     const privateMessage = Assert.WritePrivateMessageMutation.toBeSuccess(
                         await clients[Resources.UserUid.player1].writePrivateMessageMutation({
@@ -1396,6 +1550,23 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         expect(roundMilliSecondsInObject(messages.privateMessages)).toEqual(
                             roundMilliSecondsInObject([player2SubscriptionResult])
                         );
+                    }
+
+                    for (const userUid of [
+                        Resources.UserUid.master,
+                        Resources.UserUid.player1,
+                        Resources.UserUid.player2,
+                        Resources.UserUid.spectator1,
+                    ] as const) {
+                        const room = Assert.GetRoomQuery.toBeSuccess(
+                            await clients[userUid].getRoomQuery({
+                                id: roomId,
+                            })
+                        );
+                        expectDateToBeCloseTo({
+                            actual: room.room.updatedAt,
+                            expected: systemTime2.getTime(),
+                        });
                     }
                 });
             });
@@ -1517,6 +1688,8 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                 Resources.UserUid.notJoin,
             ] as const)('tests unauthorized mutations', async mutatedBy => {
                 await useTestServer({}, async () => {
+                    jest.setSystemTime(systemTime1);
+
                     const userUids = [
                         Resources.UserUid.master,
                         Resources.UserUid.player1,
@@ -1534,6 +1707,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         },
                     });
 
+                    jest.setSystemTime(systemTime2);
                     Assert.DeleteRoomMutation.toBeNotCreatedByYou(
                         await clients[mutatedBy].deleteRoomMutation({
                             id: roomId,
@@ -1542,7 +1716,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
 
                     subscriptions.all.toBeEmpty();
 
-                    Assert.GetRoomQuery.toBeSuccess(
+                    const room = Assert.GetRoomQuery.toBeSuccess(
                         await clients[Resources.UserUid.master].getRoomQuery({
                             id: roomId,
                         })
@@ -1562,6 +1736,12 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                             id: roomId,
                         })
                     );
+
+                    expectDateToBeCloseTo({
+                        actual: room.room.updatedAt,
+                        expected: systemTime1.getTime(),
+                        acceptNullish: true,
+                    });
                 });
             });
         });
@@ -1622,6 +1802,8 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                 Resources.UserUid.notAdmin,
             ] as const)('tests unauthorized mutations', async mutatedBy => {
                 await useTestServer({}, async () => {
+                    jest.setSystemTime(systemTime1);
+
                     const userUids = [
                         Resources.UserUid.notAdmin,
                         Resources.UserUid.master,
@@ -1639,6 +1821,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         },
                     });
 
+                    jest.setSystemTime(systemTime2);
                     Assert.DeleteRoomAsAdminMutation.toBeError(
                         await clients[mutatedBy].deleteRoomAsAdminMutation({
                             id: roomId,
@@ -1652,11 +1835,16 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         Resources.UserUid.player1,
                         Resources.UserUid.spectator1,
                     ] as const) {
-                        Assert.GetRoomQuery.toBeSuccess(
+                        const room = Assert.GetRoomQuery.toBeSuccess(
                             await clients[userUid].getRoomQuery({
                                 id: roomId,
                             })
                         );
+                        expectDateToBeCloseTo({
+                            actual: room.room.updatedAt,
+                            expected: systemTime1.getTime(),
+                            acceptNullish: true,
+                        });
                     }
                 });
             });
