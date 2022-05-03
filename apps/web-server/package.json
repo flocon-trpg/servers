@@ -71,7 +71,7 @@
     "devDependencies": {
         "@testing-library/react": "12.1.5",
         "@testing-library/react-hooks": "7.0.2",
-        "@types/jest": "27.4.1",
+        "@types/jest": "27.5.0",
         "jest": "27.5.1",
         "monaco-editor": "0.26.1",
         "ts-jest": "27.1.4"
