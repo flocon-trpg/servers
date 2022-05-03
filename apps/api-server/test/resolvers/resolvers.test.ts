@@ -86,24 +86,6 @@ const roundMilliSecondsInObject = (source: unknown): unknown => {
     return produce(source, core);
 };
 
-const expectDateToBeCloseTo = ({
-    expected,
-    actual,
-    acceptNullish,
-}: {
-    expected: number;
-    actual: number | null | undefined;
-    acceptNullish?: boolean;
-}) => {
-    const round = (i: number): number => {
-        return Math.round(i / 1000) * 1000;
-    };
-    if (acceptNullish && actual == null) {
-        return;
-    }
-    expect(actual == null ? actual : round(actual)).toBe(round(expected));
-};
-
 const textDiff = ({ prev, next }: { prev: string; next: string }) => {
     if (prev === next) {
         return undefined;
@@ -435,6 +417,19 @@ class SystemTimeManager {
     #systemTime2 = new Date(2025, 1, 1, 0, 1, 10);
     #systemTime3 = new Date(2025, 1, 1, 0, 1, 20);
     #systemTime4 = new Date(2025, 1, 1, 0, 1, 30);
+
+    public expect(actual: number | null | undefined, acceptNullish?: 'acceptNullish') {
+        return {
+            toBeCloseToSystemTimeType: (expected: SystemTimeType) => {
+                if (acceptNullish && actual == null) {
+                    return;
+                }
+                const expectedTime = this.get(expected).getTime();
+                expect(actual).toBeGreaterThanOrEqual(expectedTime - 2000);
+                expect(actual).toBeLessThanOrEqual(expectedTime + 2000);
+            },
+        };
+    }
 
     public get(pattern: SystemTimeType): Date {
         if (!this.enableFake) {
@@ -829,15 +824,12 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
             expect(roomMasterResult.rooms[0]!.id).toBe(roomId);
             expect(roomMasterResult.rooms[0]!.name).toBe(roomName);
             expect(roomMasterResult.rooms[0]!.createdAt).toBeTruthy();
-            expectDateToBeCloseTo({
-                actual: roomMasterResult.rooms[0]!.createdAt,
-                expected: systemTimeManager.get(1).getTime(),
-            });
-            expectDateToBeCloseTo({
-                actual: roomMasterResult.rooms[0]!.updatedAt,
-                expected: systemTimeManager.get(1).getTime(),
-                acceptNullish: true,
-            });
+            systemTimeManager
+                .expect(roomMasterResult.rooms[0]!.createdAt)
+                .toBeCloseToSystemTimeType(1);
+            systemTimeManager
+                .expect(roomMasterResult.rooms[0]!.updatedAt, 'acceptNullish')
+                .toBeCloseToSystemTimeType(1);
 
             // - another user can get the room
             const anotherUserResult = Assert.GetRoomsListQuery.toBeSuccess(
@@ -1029,12 +1021,9 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                 );
                 expect(masterResult.role).toBe(ParticipantRole.Master);
                 expect(masterResult.room.createdAt).toBeTruthy();
-                expectDateToBeCloseTo({
-                    actual: masterResult.room.updatedAt,
-                    expected: systemTimeManager.get(1).getTime(),
-                    acceptNullish: true,
-                });
-
+                systemTimeManager
+                    .expect(masterResult.room.updatedAt, 'acceptNullish')
+                    .toBeCloseToSystemTimeType(1);
                 const player1Result = Assert.GetRoomQuery.toBeSuccess(
                     await clients[Resources.UserUid.player1].getRoomQuery({
                         id: roomId,
@@ -1063,15 +1052,12 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                     })
                 );
                 expect(nonJoinedResult.roomAsListItem.id).toBe(roomId);
-                expectDateToBeCloseTo({
-                    actual: nonJoinedResult.roomAsListItem.createdAt,
-                    expected: systemTimeManager.get(1).getTime(),
-                });
-                expectDateToBeCloseTo({
-                    actual: nonJoinedResult.roomAsListItem.updatedAt,
-                    expected: systemTimeManager.get(1).getTime(),
-                    acceptNullish: true,
-                });
+                systemTimeManager
+                    .expect(nonJoinedResult.roomAsListItem.createdAt)
+                    .toBeCloseToSystemTimeType(1);
+                systemTimeManager
+                    .expect(nonJoinedResult.roomAsListItem.updatedAt, 'acceptNullish')
+                    .toBeCloseToSystemTimeType(1);
             });
         });
 
@@ -1152,10 +1138,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         })
                     );
                     expect(parseState(room.room.stateJson).name).toBe(newRoomName);
-                    expectDateToBeCloseTo({
-                        actual: room.room.updatedAt,
-                        expected: systemTimeManager.get(2).getTime(),
-                    });
+                    systemTimeManager.expect(room.room.updatedAt).toBeCloseToSystemTimeType(2);
                 });
             });
 
@@ -1204,10 +1187,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                             id: roomId,
                         })
                     );
-                    expectDateToBeCloseTo({
-                        actual: room.room.updatedAt,
-                        expected: systemTimeManager.get(1).getTime(),
-                    });
+                    systemTimeManager.expect(room.room.updatedAt).toBeCloseToSystemTimeType(1);
                 });
             });
         });
@@ -1350,10 +1330,9 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                                     id: roomId,
                                 })
                             );
-                            expectDateToBeCloseTo({
-                                actual: room.room.updatedAt,
-                                expected: systemTimeManager.get(2).getTime(),
-                            });
+                            systemTimeManager
+                                .expect(room.room.updatedAt)
+                                .toBeCloseToSystemTimeType(2);
                         }
                     }
 
@@ -1395,10 +1374,9 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                                     id: roomId,
                                 })
                             );
-                            expectDateToBeCloseTo({
-                                actual: room.room.updatedAt,
-                                expected: systemTimeManager.get(3).getTime(),
-                            });
+                            systemTimeManager
+                                .expect(room.room.updatedAt)
+                                .toBeCloseToSystemTimeType(3);
                         }
                     }
 
@@ -1436,10 +1414,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                                 id: roomId,
                             })
                         );
-                        expectDateToBeCloseTo({
-                            actual: room.room.updatedAt,
-                            expected: systemTimeManager.get(4).getTime(),
-                        });
+                        systemTimeManager.expect(room.room.updatedAt).toBeCloseToSystemTimeType(4);
                     }
                 });
             }
@@ -1518,10 +1493,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                             id: roomId,
                         })
                     );
-                    expectDateToBeCloseTo({
-                        actual: room.room.updatedAt,
-                        expected: systemTimeManager.get(1).getTime(),
-                    });
+                    systemTimeManager.expect(room.room.updatedAt).toBeCloseToSystemTimeType(1);
                 }
             });
         });
@@ -1607,10 +1579,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                                 id: roomId,
                             })
                         );
-                        expectDateToBeCloseTo({
-                            actual: room.room.updatedAt,
-                            expected: systemTimeManager.get(2).getTime(),
-                        });
+                        systemTimeManager.expect(room.room.updatedAt).toBeCloseToSystemTimeType(2);
                     }
                 });
             });
@@ -1781,11 +1750,9 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         })
                     );
 
-                    expectDateToBeCloseTo({
-                        actual: room.room.updatedAt,
-                        expected: systemTimeManager.get(1).getTime(),
-                        acceptNullish: true,
-                    });
+                    systemTimeManager
+                        .expect(room.room.updatedAt, 'acceptNullish')
+                        .toBeCloseToSystemTimeType(1);
                 });
             });
         });
@@ -1884,11 +1851,9 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                                 id: roomId,
                             })
                         );
-                        expectDateToBeCloseTo({
-                            actual: room.room.updatedAt,
-                            expected: systemTimeManager.get(1).getTime(),
-                            acceptNullish: true,
-                        });
+                        systemTimeManager
+                            .expect(room.room.updatedAt, 'acceptNullish')
+                            .toBeCloseToSystemTimeType(1);
                     }
                 });
             });
