@@ -372,7 +372,7 @@ const operateParticipantAndFlush = async ({
     });
     await em.flush();
 
-    await GlobalRoom.Global.autoRemoveOldRoomOp({
+    await GlobalRoom.Global.cleanOldRoomOp({
         em: em.fork(),
         room,
         roomHistCount,
@@ -1209,6 +1209,10 @@ export class RoomResolver {
                     ...graphqlState,
                     revision,
                     createdBy: authorizedUser.userUid,
+
+                    // CONSIDER: entityから取得するのではなく、new Date() の結果を返してもいいかもしれない
+                    createdAt: newRoom.createdAt?.getTime(),
+                    updatedAt: newRoom.completeUpdatedAt?.getTime(),
                 },
                 id: newRoom.id,
             };
@@ -1528,6 +1532,8 @@ export class RoomResolver {
                     }),
                     revision: room.revision,
                     createdBy: room.createdBy,
+                    createdAt: room.createdAt?.getTime(),
+                    updatedAt: room.completeUpdatedAt?.getTime(),
                 },
             });
         };
@@ -1712,9 +1718,10 @@ export class RoomResolver {
                 em.persist(entity);
             });
 
+            // GlobalRoom.Global.applyToEntityでcompleteUpdatedAtの更新は行っているため、ここで更新する必要はない
             await em.flush();
 
-            await GlobalRoom.Global.autoRemoveOldRoomOp({
+            await GlobalRoom.Global.cleanOldRoomOp({
                 em: em.fork(),
                 room,
                 roomHistCount: context.serverConfig.roomHistCount,
@@ -1909,6 +1916,7 @@ export class RoomResolver {
             }
 
             entity.roomPubCh = Reference.create(ch);
+            room.completeUpdatedAt = new Date();
             await em.persistAndFlush(entity);
 
             const result: RoomPublicMessage = createRoomPublicMessage({ msg: entity, channelKey });
@@ -2049,6 +2057,7 @@ export class RoomResolver {
             }
 
             entity.room = Reference.create(room);
+            room.completeUpdatedAt = new Date();
             await em.persistAndFlush(entity);
 
             const visibleToArray = [...visibleTo].sort();
@@ -2136,6 +2145,7 @@ export class RoomResolver {
             });
             entity.createdBy = Reference.create<User, 'userUid'>(authorizedUser);
             entity.room = Reference.create(room);
+            room.completeUpdatedAt = new Date();
             await em.persistAndFlush(entity);
 
             const result: RoomSoundEffect = {
@@ -2224,6 +2234,7 @@ export class RoomResolver {
                     });
                 }
                 publicMsg.isSecret = false;
+                room.completeUpdatedAt = new Date();
                 await em.flush();
 
                 const payloadValue: RoomPublicMessageUpdate = {
@@ -2270,6 +2281,7 @@ export class RoomResolver {
                     });
                 }
                 privateMsg.isSecret = false;
+                room.completeUpdatedAt = new Date();
                 await em.flush();
 
                 const payloadValue: RoomPrivateMessageUpdate = {
@@ -2372,6 +2384,7 @@ export class RoomResolver {
                 }
                 publicMsg.updatedText = undefined;
                 publicMsg.textUpdatedAt2 = new Date();
+                room.completeUpdatedAt = new Date();
                 await em.flush();
 
                 const payloadValue: RoomPublicMessageUpdate =
@@ -2406,6 +2419,7 @@ export class RoomResolver {
                 }
                 privateMsg.updatedText = undefined;
                 privateMsg.textUpdatedAt2 = new Date();
+                room.completeUpdatedAt = new Date();
                 await em.flush();
 
                 const payloadValue: RoomPrivateMessageUpdate =
@@ -2495,6 +2509,7 @@ export class RoomResolver {
                 }
                 publicMsg.updatedText = args.text;
                 publicMsg.textUpdatedAt2 = new Date();
+                room.completeUpdatedAt = new Date();
                 await em.flush();
 
                 const payloadValue: RoomPublicMessageUpdate =
@@ -2529,6 +2544,7 @@ export class RoomResolver {
                 }
                 privateMsg.updatedText = args.text;
                 privateMsg.textUpdatedAt2 = new Date();
+                room.completeUpdatedAt = new Date();
                 await em.flush();
 
                 const payloadValue: RoomPrivateMessageUpdate =
@@ -2672,6 +2688,8 @@ export class RoomResolver {
             await room.stringPieceLogs.init();
             room.stringPieceLogs.getItems().forEach(x => em.remove(x));
             room.stringPieceLogs.removeAll();
+
+            room.completeUpdatedAt = new Date();
 
             em.persist(room);
             await em.flush();

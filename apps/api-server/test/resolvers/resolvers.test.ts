@@ -52,7 +52,7 @@ const timeout_afterEach = 20000;
 
 jest.setTimeout(timeout);
 
-// Dateのmillisecond部分が丸められる仕様のDBの場合でも、entity作成時のDateはflushの有無にかかわらず丸められない。このため、
+// Dateのmillisecond部分が丸められる仕様のDBの場合でも、entity作成時のDateはflushの有無にかかわらず丸められない。このため、その差があってもテストがパスするようにしている。
 const roundMilliSecondsInObject = (source: unknown): unknown => {
     const roundMilliSeconds = (i: number): number => {
         return Math.round(i / 1000) * 1000;
@@ -409,7 +409,68 @@ const createCases = (): [DbConfig, ServerConfig['entryPassword'] | undefined][] 
 
 const cases = createCases();
 
+type SystemTimeType = 1 | 2 | 3 | 4;
+class SystemTimeManager {
+    public constructor(private readonly enableFake: boolean) {}
+
+    #systemTime1 = new Date(2025, 1, 1, 0, 1, 0);
+    #systemTime2 = new Date(2025, 1, 1, 0, 1, 10);
+    #systemTime3 = new Date(2025, 1, 1, 0, 1, 20);
+    #systemTime4 = new Date(2025, 1, 1, 0, 1, 30);
+
+    public expect(actual: number | null | undefined, acceptNullish?: 'acceptNullish') {
+        return {
+            toBeCloseToSystemTimeType: (expected: SystemTimeType) => {
+                if (acceptNullish && actual == null) {
+                    return;
+                }
+                const expectedTime = this.get(expected).getTime();
+                expect(actual).toBeGreaterThanOrEqual(expectedTime - 2000);
+                expect(actual).toBeLessThanOrEqual(expectedTime + 2000);
+            },
+        };
+    }
+
+    public get(pattern: SystemTimeType): Date {
+        if (!this.enableFake) {
+            return new Date();
+        }
+        switch (pattern) {
+            case 1:
+                return this.#systemTime1;
+            case 2:
+                return this.#systemTime2;
+            case 3:
+                return this.#systemTime3;
+            case 4:
+                return this.#systemTime4;
+        }
+    }
+
+    public set(pattern: SystemTimeType): void {
+        if (!this.enableFake) {
+            return;
+        }
+        jest.setSystemTime(this.get(pattern));
+    }
+
+    public useFakeTimers() {
+        if (this.enableFake) {
+            jest.useFakeTimers();
+        }
+    }
+
+    public useRealTimers() {
+        if (this.enableFake) {
+            jest.useRealTimers();
+        }
+    }
+}
+
 describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
+    // MySQLではjest.useFakeTimersの相性が悪い（DBにアクセスする際にフリーズする）ようなので無効化している
+    const systemTimeManager = new SystemTimeManager(dbType.type !== 'MySQL');
+
     beforeAll(async () => {
         if (dbType.type !== 'SQLite') {
             return;
@@ -418,13 +479,20 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
         await doAutoMigrationBeforeStart(orm);
     }, timeout_beforeAll);
 
-    afterEach(async () => {
+    // もし前回実行したテストが失敗している場合はゴミが残っているため、afterEachではなくbeforeEachを用いている。
+    beforeEach(async () => {
+        systemTimeManager.useFakeTimers();
+
         const orm = await createOrm(dbType);
         await clearAllRooms(orm.em.fork());
         await clearAllFiles(orm.em.fork());
         await clearAllUsers(orm.em.fork());
         await orm.close();
     }, timeout_afterEach);
+
+    afterEach(() => {
+        systemTimeManager.useRealTimers();
+    });
 
     const entryPassword = entryPasswordConfig == null ? undefined : Resources.entryPassword;
 
@@ -562,6 +630,10 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
     it.each(['public', 'unlisted'] as const)(
         'tests upload and delete file in uploader',
         async publicOrUnlisted => {
+            /* jest.useFakeTimers() を有効にしてからmulterを利用しようとするとフリーズする。 https://github.com/expressjs/multer/issues/558
+               このテストではmulterが実行されるため、jest.useFakeTimersを無効化している。*/
+            systemTimeManager.useRealTimers();
+
             await useTestServer({}, async () => {
                 const userUid1 = 'User1';
                 const userUid2 = 'User2';
@@ -734,10 +806,14 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
 
     it('tests getRoomsListQuery', async () => {
         await useTestServer({}, async () => {
+            systemTimeManager.set(1);
+
             const userUids = [Resources.UserUid.master, Resources.UserUid.player1] as const;
+            const roomName = 'TEST_ROOM';
             const { clients, roomId } = await setupUsersAndRoom({
                 userUids,
                 roomMasterUserUid: Resources.UserUid.master,
+                roomName,
             });
 
             // - master can get the room
@@ -747,13 +823,20 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
             console.log('getRoomsList query result: %o', roomMasterResult);
             expect(roomMasterResult.rooms).toHaveLength(1);
             expect(roomMasterResult.rooms[0]!.id).toBe(roomId);
+            expect(roomMasterResult.rooms[0]!.name).toBe(roomName);
+            expect(roomMasterResult.rooms[0]!.createdAt).toBeTruthy();
+            systemTimeManager
+                .expect(roomMasterResult.rooms[0]!.createdAt)
+                .toBeCloseToSystemTimeType(1);
+            systemTimeManager
+                .expect(roomMasterResult.rooms[0]!.updatedAt, 'acceptNullish')
+                .toBeCloseToSystemTimeType(1);
 
             // - another user can get the room
             const anotherUserResult = Assert.GetRoomsListQuery.toBeSuccess(
                 await clients[Resources.UserUid.player1].getRoomsListQuery()
             );
-            expect(anotherUserResult.rooms).toHaveLength(1);
-            expect(anotherUserResult.rooms[0]!.id).toBe(roomId);
+            expect(anotherUserResult.rooms).toEqual(roomMasterResult.rooms);
         });
     });
 
@@ -912,6 +995,8 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
         });
 
         it('tests getRoom', async () => {
+            systemTimeManager.set(1);
+
             await useTestServer({}, async () => {
                 const userUids = [
                     Resources.UserUid.master,
@@ -936,13 +1021,20 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                     })
                 );
                 expect(masterResult.role).toBe(ParticipantRole.Master);
-
+                expect(masterResult.room.createdAt).toBeTruthy();
+                systemTimeManager
+                    .expect(masterResult.room.updatedAt, 'acceptNullish')
+                    .toBeCloseToSystemTimeType(1);
                 const player1Result = Assert.GetRoomQuery.toBeSuccess(
                     await clients[Resources.UserUid.player1].getRoomQuery({
                         id: roomId,
                     })
                 );
                 expect(player1Result.role).toBe(ParticipantRole.Player);
+                expect({ ...player1Result.room, stateJson: undefined }).toEqual({
+                    ...masterResult.room,
+                    stateJson: undefined,
+                });
 
                 const spectatorResult = Assert.GetRoomQuery.toBeSuccess(
                     await clients[Resources.UserUid.spectator1].getRoomQuery({
@@ -950,6 +1042,10 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                     })
                 );
                 expect(spectatorResult.role).toBe(ParticipantRole.Spectator);
+                expect({ ...spectatorResult.room, stateJson: undefined }).toEqual({
+                    ...masterResult.room,
+                    stateJson: undefined,
+                });
 
                 const nonJoinedResult = Assert.GetRoomQuery.toBeNonJoined(
                     await clients[Resources.UserUid.notJoin].getRoomQuery({
@@ -957,6 +1053,12 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                     })
                 );
                 expect(nonJoinedResult.roomAsListItem.id).toBe(roomId);
+                systemTimeManager
+                    .expect(nonJoinedResult.roomAsListItem.createdAt)
+                    .toBeCloseToSystemTimeType(1);
+                systemTimeManager
+                    .expect(nonJoinedResult.roomAsListItem.updatedAt, 'acceptNullish')
+                    .toBeCloseToSystemTimeType(1);
             });
         });
 
@@ -965,6 +1067,8 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
 
             it('tests a valid operation', async () => {
                 await useTestServer({}, async () => {
+                    systemTimeManager.set(1);
+
                     const userUids = [
                         Resources.UserUid.master,
                         Resources.UserUid.player1,
@@ -987,6 +1091,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         });
 
                     const newRoomName = 'NEW_ROOM_NAME';
+                    systemTimeManager.set(2);
                     const operation: UpOperation = {
                         $v: 2,
                         $r: 1,
@@ -1034,11 +1139,14 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         })
                     );
                     expect(parseState(room.room.stateJson).name).toBe(newRoomName);
+                    systemTimeManager.expect(room.room.updatedAt).toBeCloseToSystemTimeType(2);
                 });
             });
 
             it('tests with invalid JSON', async () => {
                 await useTestServer({}, async () => {
+                    systemTimeManager.set(1);
+
                     const userUids = [
                         Resources.UserUid.master,
                         Resources.UserUid.player1,
@@ -1059,6 +1167,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
 
                     const invalidJSON = JSON.stringify({});
 
+                    systemTimeManager.set(2);
                     await Assert.OperateMutation.toBeFailure(
                         clients[Resources.UserUid.player1].operateMutation({
                             id: roomId,
@@ -1073,6 +1182,13 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                     );
 
                     subscriptions.all.toBeEmpty();
+
+                    const room = Assert.GetRoomQuery.toBeSuccess(
+                        await clients[Resources.UserUid.player1].getRoomQuery({
+                            id: roomId,
+                        })
+                    );
+                    systemTimeManager.expect(room.room.updatedAt).toBeCloseToSystemTimeType(1);
                 });
             });
         });
@@ -1152,6 +1268,8 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
             'writePublicMessage -> edit -> delete mutation',
             async ({ doEditTest, author, channelKey }) => {
                 await useTestServer({}, async () => {
+                    systemTimeManager.set(1);
+
                     const userUids = [
                         author,
                         Resources.UserUid.master,
@@ -1178,6 +1296,8 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
 
                     // writePublicMessageMutation
                     {
+                        systemTimeManager.set(2);
+
                         message = Assert.WritePublicMessageMutation.toBeSuccess(
                             await clients[author].writePublicMessageMutation({
                                 roomId,
@@ -1194,7 +1314,6 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
 
                         for (const userUid of [
-                            author,
                             Resources.UserUid.master,
                             Resources.UserUid.player1,
                             Resources.UserUid.spectator1,
@@ -1207,11 +1326,21 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                             expect(roundMilliSecondsInObject(messages.publicMessages)).toEqual(
                                 roundMilliSecondsInObject([message])
                             );
+                            const room = Assert.GetRoomQuery.toBeSuccess(
+                                await clients[userUid].getRoomQuery({
+                                    id: roomId,
+                                })
+                            );
+                            systemTimeManager
+                                .expect(room.room.updatedAt)
+                                .toBeCloseToSystemTimeType(2);
                         }
                     }
 
                     // editMessageMutation
                     if (doEditTest) {
+                        systemTimeManager.set(3);
+
                         const editedText = 'EDITED_TEXT';
                         const editResult = Assert.EditMessageMutation.toBeSuccess(
                             await clients[author].editMessageMutation({
@@ -1235,7 +1364,24 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                             updatedText: undefined,
                         });
                         subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
+
+                        for (const userUid of [
+                            Resources.UserUid.master,
+                            Resources.UserUid.player1,
+                            Resources.UserUid.spectator1,
+                        ] as const) {
+                            const room = Assert.GetRoomQuery.toBeSuccess(
+                                await clients[userUid].getRoomQuery({
+                                    id: roomId,
+                                })
+                            );
+                            systemTimeManager
+                                .expect(room.room.updatedAt)
+                                .toBeCloseToSystemTimeType(3);
+                        }
                     }
+
+                    systemTimeManager.set(4);
 
                     const deleteResult = Assert.DeleteMessageMutation.toBeSuccess(
                         await clients[author].deleteMessageMutation({
@@ -1258,6 +1404,19 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         updatedText: undefined,
                     });
                     subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
+
+                    for (const userUid of [
+                        Resources.UserUid.master,
+                        Resources.UserUid.player1,
+                        Resources.UserUid.spectator1,
+                    ] as const) {
+                        const room = Assert.GetRoomQuery.toBeSuccess(
+                            await clients[userUid].getRoomQuery({
+                                id: roomId,
+                            })
+                        );
+                        systemTimeManager.expect(room.room.updatedAt).toBeCloseToSystemTimeType(4);
+                    }
                 });
             }
         );
@@ -1285,6 +1444,8 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
             },
         ] as const)('tests invalid writePublicMessageMutation', async ({ author, channelKey }) => {
             await useTestServer({}, async () => {
+                systemTimeManager.set(1);
+
                 const userUids = [
                     Resources.UserUid.master,
                     Resources.UserUid.player1,
@@ -1305,7 +1466,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                 });
 
                 const text = 'TEXT';
-
+                systemTimeManager.set(2);
                 Assert.WritePublicMessageMutation.toBeFailure(
                     await clients[author].writePublicMessageMutation({
                         roomId,
@@ -1327,6 +1488,13 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         })
                     );
                     expect(messages.publicMessages).toHaveLength(0);
+
+                    const room = Assert.GetRoomQuery.toBeSuccess(
+                        await clients[userUid].getRoomQuery({
+                            id: roomId,
+                        })
+                    );
+                    systemTimeManager.expect(room.room.updatedAt).toBeCloseToSystemTimeType(1);
                 }
             });
         });
@@ -1334,6 +1502,8 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
         describe('writePrivateMessage mutation', () => {
             it('should succeed', async () => {
                 await useTestServer({}, async () => {
+                    systemTimeManager.set(1);
+
                     const userUids = [
                         Resources.UserUid.master,
                         Resources.UserUid.player1,
@@ -1355,6 +1525,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
 
                     const text = 'TEXT';
                     const visibleTo = [Resources.UserUid.player1, Resources.UserUid.player2];
+                    systemTimeManager.set(2);
 
                     const privateMessage = Assert.WritePrivateMessageMutation.toBeSuccess(
                         await clients[Resources.UserUid.player1].writePrivateMessageMutation({
@@ -1396,6 +1567,20 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         expect(roundMilliSecondsInObject(messages.privateMessages)).toEqual(
                             roundMilliSecondsInObject([player2SubscriptionResult])
                         );
+                    }
+
+                    for (const userUid of [
+                        Resources.UserUid.master,
+                        Resources.UserUid.player1,
+                        Resources.UserUid.player2,
+                        Resources.UserUid.spectator1,
+                    ] as const) {
+                        const room = Assert.GetRoomQuery.toBeSuccess(
+                            await clients[userUid].getRoomQuery({
+                                id: roomId,
+                            })
+                        );
+                        systemTimeManager.expect(room.room.updatedAt).toBeCloseToSystemTimeType(2);
                     }
                 });
             });
@@ -1517,6 +1702,8 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                 Resources.UserUid.notJoin,
             ] as const)('tests unauthorized mutations', async mutatedBy => {
                 await useTestServer({}, async () => {
+                    systemTimeManager.set(1);
+
                     const userUids = [
                         Resources.UserUid.master,
                         Resources.UserUid.player1,
@@ -1534,6 +1721,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         },
                     });
 
+                    systemTimeManager.set(2);
                     Assert.DeleteRoomMutation.toBeNotCreatedByYou(
                         await clients[mutatedBy].deleteRoomMutation({
                             id: roomId,
@@ -1542,7 +1730,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
 
                     subscriptions.all.toBeEmpty();
 
-                    Assert.GetRoomQuery.toBeSuccess(
+                    const room = Assert.GetRoomQuery.toBeSuccess(
                         await clients[Resources.UserUid.master].getRoomQuery({
                             id: roomId,
                         })
@@ -1562,6 +1750,10 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                             id: roomId,
                         })
                     );
+
+                    systemTimeManager
+                        .expect(room.room.updatedAt, 'acceptNullish')
+                        .toBeCloseToSystemTimeType(1);
                 });
             });
         });
@@ -1622,6 +1814,8 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                 Resources.UserUid.notAdmin,
             ] as const)('tests unauthorized mutations', async mutatedBy => {
                 await useTestServer({}, async () => {
+                    systemTimeManager.set(1);
+
                     const userUids = [
                         Resources.UserUid.notAdmin,
                         Resources.UserUid.master,
@@ -1639,6 +1833,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         },
                     });
 
+                    systemTimeManager.set(2);
                     Assert.DeleteRoomAsAdminMutation.toBeError(
                         await clients[mutatedBy].deleteRoomAsAdminMutation({
                             id: roomId,
@@ -1652,11 +1847,14 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         Resources.UserUid.player1,
                         Resources.UserUid.spectator1,
                     ] as const) {
-                        Assert.GetRoomQuery.toBeSuccess(
+                        const room = Assert.GetRoomQuery.toBeSuccess(
                             await clients[userUid].getRoomQuery({
                                 id: roomId,
                             })
                         );
+                        systemTimeManager
+                            .expect(room.room.updatedAt, 'acceptNullish')
+                            .toBeCloseToSystemTimeType(1);
                     }
                 });
             });

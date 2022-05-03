@@ -101,6 +101,8 @@ fragment RoomAsListItem on RoomAsListItem {
     id
     name
     createdBy
+    createdAt
+    updatedAt
     requiresPlayerPassword
     requiresSpectatorPassword
 }
@@ -108,6 +110,8 @@ fragment RoomAsListItem on RoomAsListItem {
 fragment RoomGetState on RoomGetState {
     revision
     createdBy
+    createdAt
+    updatedAt
     stateJson
 }
 

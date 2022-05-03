@@ -399,6 +399,16 @@
                     "length": 6,
                     "mappedType": "datetime"
                 },
+                "complete_updated_at": {
+                    "name": "complete_updated_at",
+                    "type": "timestamptz(0)",
+                    "unsigned": false,
+                    "autoincrement": false,
+                    "primary": false,
+                    "nullable": true,
+                    "length": 6,
+                    "mappedType": "datetime"
+                },
                 "player_password_hash": {
                     "name": "player_password_hash",
                     "type": "varchar(255)",
@@ -475,6 +485,13 @@
                     "columnNames": ["updated_at"],
                     "composite": false,
                     "keyName": "room_updated_at_index",
+                    "primary": false,
+                    "unique": false
+                },
+                {
+                    "columnNames": ["complete_updated_at"],
+                    "composite": false,
+                    "keyName": "room_complete_updated_at_index",
                     "primary": false,
                     "unique": false
                 },

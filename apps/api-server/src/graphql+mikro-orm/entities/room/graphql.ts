@@ -12,6 +12,16 @@ export class RoomGetState {
     @Field({ description: 'この部屋の作成者。Firebase AuthenticationのUserUidで表現される。' })
     public createdBy!: string;
 
+    @Field({ description: 'since v0.8.0', nullable: true })
+    public createdAt?: number;
+
+    @Field({
+        description: `データベースのRoomエンティティが最後に更新された日時。Roomエンティティのみが対象であるため、例えばメッセージの投稿などは反映されないことに注意。
+since v0.8.0`,
+        nullable: true,
+    })
+    public updatedAt?: number;
+
     @Field({ description: 'room.state をJSON化したもの' })
     public stateJson!: string;
 }

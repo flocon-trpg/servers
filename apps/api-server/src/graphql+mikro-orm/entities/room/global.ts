@@ -216,7 +216,7 @@ export namespace GlobalRoom {
             }: {
                 source: RoomState;
                 requestedBy: RequestedBy;
-            }): Omit<RoomGetState, 'revision' | 'createdBy'> => {
+            }): Pick<RoomGetState, 'stateJson'> => {
                 return {
                     stateJson: stringifyState(toClientState(requestedBy)(source)),
                 };
@@ -277,7 +277,7 @@ export namespace GlobalRoom {
 
         const maxJsonLength = 1_000_000;
 
-        // prevStateにおけるDbStateの部分とtargetのJSONは等しい
+        // prevStateにおけるDbStateの部分とtargetのJSONは等しいという想定
         export const applyToEntity = async ({
             em,
             target,
@@ -297,7 +297,7 @@ export namespace GlobalRoom {
                 throw nextState.error;
             }
 
-            // CONSIDER: サイズの大きいオブジェクトに対してJSON.stringifyするのは重い可能性。そもそももしJSON.stringifyが重いのであればio-tsのdecodeはより重くなりそう。
+            // CONSIDER: サイズの大きいオブジェクトに対してJSON.stringifyするのは重い可能性。そもそももしJSON.stringifyが重いのであればio-tsのdecodeはより重くなりそうだが。
             target.name = nextState.value.name;
             const newValue = exactDbState(nextState.value);
             const newValueJson = JSON.stringify(newValue);
@@ -311,6 +311,7 @@ export namespace GlobalRoom {
             target.value = newValue;
             const prevRevision = target.revision;
             target.revision += 1;
+            target.completeUpdatedAt = new Date();
 
             await recordForEachAsync(
                 operation.participants ?? {},
@@ -351,7 +352,7 @@ export namespace GlobalRoom {
             return nextState.value;
         };
 
-        export const autoRemoveOldRoomOp = async ({
+        export const cleanOldRoomOp = async ({
             em,
             room,
             roomHistCount,
