@@ -16513,8 +16513,8 @@ __metadata:
   linkType: hard
 
 "sucrase@npm:^3.20.1":
-  version: 3.20.3
-  resolution: "sucrase@npm:3.20.3"
+  version: 3.21.0
+  resolution: "sucrase@npm:3.21.0"
   dependencies:
     commander: ^4.0.0
     glob: 7.1.6
@@ -16525,7 +16525,7 @@ __metadata:
   bin:
     sucrase: bin/sucrase
     sucrase-node: bin/sucrase-node
-  checksum: ff383a0a4de0324d2466676e3049d5051f7ab517b44a5de8430aabedcf61e195b3e31f29547b47e9c6403cece9487ed8952c4b39932e9e0aeed42462fc30ad48
+  checksum: d686f255af65bab2cb4e685287a7a4fe00f241a891a2ddea8c6218ff8f412780339d4d544e4a582e93e3994d1ebbe2fbce6a555474e80641958319a2b249e836
   languageName: node
   linkType: hard
 
