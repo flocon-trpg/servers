@@ -176,6 +176,8 @@ export const BooleanParameterInput: React.FC<Props> = ({
                 };
                 onOperate(apply(operation));
             }}
+            shape='circle'
+            defaultType='dashed'
         />
     );
     if (parameter?.value == null) {

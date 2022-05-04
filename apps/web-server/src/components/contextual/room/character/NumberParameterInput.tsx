@@ -226,6 +226,8 @@ export const NumberParameterInput: React.FC<Props> = ({
                     };
                     onOperate(apply(operation));
                 }}
+                shape='circle'
+                defaultType='dashed'
             />
         );
         if (numberParameter?.value == null) {
@@ -317,6 +319,8 @@ export const NumberParameterInput: React.FC<Props> = ({
                     };
                     onOperate(apply(operation));
                 }}
+                shape='circle'
+                defaultType='dashed'
             />
         );
         if (numberMaxParameter?.value == null) {

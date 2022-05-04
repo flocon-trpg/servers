@@ -385,6 +385,8 @@ export const CharacterEditorModal: React.FC = () => {
                                             character.isPrivate = !newValue;
                                         })
                                     }
+                                    shape='circle'
+                                    defaultType='dashed'
                                 />
                             }
                         />

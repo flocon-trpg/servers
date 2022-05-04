@@ -133,6 +133,8 @@ export const StringParameterInput: React.FC<Props> = ({
                 };
                 onOperate(apply(operation));
             }}
+            shape='circle'
+            defaultType='dashed'
         />
     );
     return (

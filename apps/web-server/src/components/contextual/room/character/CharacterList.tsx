@@ -470,6 +470,8 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                                             targetCharacter.isPrivate = !newValue;
                                         });
                                     }}
+                                    shape='circle'
+                                    defaultType='dashed'
                                 />
                             ),
                         };

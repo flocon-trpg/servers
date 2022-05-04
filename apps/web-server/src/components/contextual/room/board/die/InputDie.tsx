@@ -145,6 +145,8 @@ const InputD6Die: React.FC<InputD6Props> = ({
                 checkedChildren={<Icons.EyeOutlined />}
                 unCheckedChildren={<Icons.EyeInvisibleOutlined />}
                 onChange={e => onIsValuePrivateChange(!e)}
+                shape='circle'
+                defaultType='dashed'
             />
             <div
                 css={imgButton}
