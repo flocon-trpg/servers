@@ -5,7 +5,7 @@ import { ExpressContext } from 'apollo-server-express/dist/ApolloServer';
 import { DecodedIdToken, ResolverContext } from './graphql+mikro-orm/utils/Contexts';
 import { PromiseQueue } from './utils/promiseQueue';
 import ws from 'ws';
-import { Extra, useServer } from 'graphql-ws/lib/use/ws';
+import { useServer } from 'graphql-ws/lib/use/ws';
 import { GraphQLSchema, execute, subscribe } from 'graphql';
 import { BaasType } from './enums/BaasType';
 import { User } from './graphql+mikro-orm/entities/user/mikro-orm';
@@ -76,7 +76,7 @@ export const createServer = async ({
         req: ExpressContext['req']
     ) => Promise<Result<Readonly<DecodedIdToken>, unknown> | undefined>;
     getDecodedIdTokenFromWsContext: (
-        context: Context<Extra>
+        context: Context
     ) => Promise<Result<Readonly<DecodedIdToken>, unknown> | undefined>;
     port: string | number;
     quiet?: boolean;

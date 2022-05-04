@@ -1,7 +1,6 @@
 import admin from 'firebase-admin';
 import { buildSchema } from './buildSchema';
 import { PromiseQueue } from './utils/promiseQueue';
-import { Extra } from 'graphql-ws/lib/use/ws';
 import { checkMigrationsBeforeStart, doAutoMigrationBeforeStart } from './migrate';
 import { InMemoryConnectionManager, pubSub } from './connection/main';
 import { Result } from '@kizahasi/result';
@@ -121,7 +120,7 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
         return await getDecodedIdToken(idToken);
     };
 
-    const getDecodedIdTokenFromWsContext = async (ctx: Context<Extra>) => {
+    const getDecodedIdTokenFromWsContext = async (ctx: Context) => {
         let authTokenValue: string | undefined;
         if (ctx.connectionParams != null) {
             const authTokenValueAsUnknown = ctx.connectionParams[authToken];
