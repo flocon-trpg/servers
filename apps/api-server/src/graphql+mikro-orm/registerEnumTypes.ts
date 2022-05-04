@@ -29,6 +29,7 @@ import { CreateRoomFailureType } from '../enums/CreateRoomFailureType';
 import { GetRoomsListFailureType } from '../enums/GetRoomsListFailureType';
 import { ResetRoomMessagesFailureType } from '../enums/ResetRoomMessagesFailureType';
 import { DeleteRoomAsAdminFailureType } from '../enums/DeleteRoomAsAdminFailureType';
+import { UpdateBookmarkFailureType } from '../enums/UpdateBookmarkFailureType';
 
 let hasRegistered = false;
 export const registerEnumTypes = (): void => {
@@ -111,6 +112,9 @@ export const registerEnumTypes = (): void => {
     });
     registerEnumType(RoomParameterNameType, {
         name: 'RoomParameterNameType',
+    });
+    registerEnumType(UpdateBookmarkFailureType, {
+        name: 'UpdateBookmarkFailureType',
     });
     registerEnumType(WriteRoomPrivateMessageFailureType, {
         name: 'WriteRoomPrivateMessageFailureType',

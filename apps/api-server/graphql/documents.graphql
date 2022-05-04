@@ -103,6 +103,8 @@ fragment RoomAsListItem on RoomAsListItem {
     createdBy
     createdAt
     updatedAt
+    role
+    isBookmarked
     requiresPlayerPassword
     requiresSpectatorPassword
 }
@@ -112,6 +114,8 @@ fragment RoomGetState on RoomGetState {
     createdBy
     createdAt
     updatedAt
+    role
+    isBookmarked
     stateJson
 }
 
@@ -527,6 +531,12 @@ mutation PromoteToPlayer($roomId: String!, $password: String) {
 
 mutation ResetMessages($roomId: String!) {
     result: resetMessages(roomId: $roomId) {
+        failureType
+    }
+}
+
+mutation UpdateBookmark($roomId: String!, $newValue: Boolean!) {
+    result: updateBookmark(roomId: $roomId, newValue: $newValue) {
         failureType
     }
 }

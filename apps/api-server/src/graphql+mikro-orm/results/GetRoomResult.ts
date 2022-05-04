@@ -6,7 +6,9 @@ import { RoomAsListItem } from '../entities/roomAsListItem/graphql';
 
 @ObjectType()
 export class GetJoinedRoomResult {
-    @Field(() => ParticipantRoleType, { description: '自分の現在のParticipantRoleType。' })
+    @Field(() => ParticipantRoleType, {
+        description: '自分の現在のParticipantRoleType。room.roleと同じ値をとる。',
+    })
     public role!: ParticipantRoleType;
 
     @Field()

@@ -356,6 +356,7 @@ export type Mutation = {
     ping: Pong;
     promoteToPlayer: PromoteResult;
     resetMessages: ResetRoomMessagesResult;
+    updateBookmark: UpdateBookmarkResult;
     updateWritingMessageStatus: Scalars['Boolean'];
     writePrivateMessage: WriteRoomPrivateMessageResult;
     writePublicMessage: WriteRoomPublicMessageResult;
@@ -448,6 +449,11 @@ export type MutationPromoteToPlayerArgs = {
 };
 
 export type MutationResetMessagesArgs = {
+    roomId: Scalars['String'];
+};
+
+export type MutationUpdateBookmarkArgs = {
+    newValue: Scalars['Boolean'];
     roomId: Scalars['String'];
 };
 
@@ -636,9 +642,13 @@ export type RoomAsListItem = {
     /** この部屋の作成者。Firebase AuthenticationのUserUidで表現される。 */
     createdBy: Scalars['String'];
     id: Scalars['ID'];
+    /** since v0.7.2 */
+    isBookmarked: Scalars['Boolean'];
     name: Scalars['String'];
     requiresPlayerPassword: Scalars['Boolean'];
     requiresSpectatorPassword: Scalars['Boolean'];
+    /** since v0.7.2 */
+    role?: Maybe<ParticipantRole>;
     /**
      * データベースのRoomエンティティが最後に更新された日時。Roomエンティティのみが対象であるため、例えばメッセージの投稿などは反映されないことに注意。
      * since v0.7.2
@@ -669,8 +679,12 @@ export type RoomGetState = {
     createdAt?: Maybe<Scalars['Float']>;
     /** この部屋の作成者。Firebase AuthenticationのUserUidで表現される。 */
     createdBy: Scalars['String'];
+    /** since v0.7.2 */
+    isBookmarked: Scalars['Boolean'];
     /** Current revision of Room. Whenever Room is updated, this value is incremented by 1. This value is required when you apply RoomOperation. / Roomの現在のリビジョン。Roomが更新されるたび、この値は1増加する。RoomOperationを適用する際に必要となる。 */
     revision: Scalars['Float'];
+    /** since v0.7.2 */
+    role?: Maybe<ParticipantRole>;
     /** room.state をJSON化したもの */
     stateJson: Scalars['String'];
     /**
@@ -836,6 +850,16 @@ export type SubscriptionRoomEventArgs = {
     id: Scalars['String'];
 };
 
+export enum UpdateBookmarkFailureType {
+    NotFound = 'NotFound',
+    SameValue = 'SameValue',
+}
+
+export type UpdateBookmarkResult = {
+    __typename?: 'UpdateBookmarkResult';
+    failureType?: Maybe<UpdateBookmarkFailureType>;
+};
+
 export type UpdatedText = {
     __typename?: 'UpdatedText';
     currentText?: Maybe<Scalars['String']>;
@@ -933,6 +957,8 @@ type CreateRoomResult_CreateRoomSuccessResult_Fragment = {
         createdBy: string;
         createdAt?: number | null;
         updatedAt?: number | null;
+        role?: ParticipantRole | null;
+        isBookmarked: boolean;
         stateJson: string;
     };
 };
@@ -967,6 +993,8 @@ export type GetNonJoinedRoomResultFragment = {
         createdBy: string;
         createdAt?: number | null;
         updatedAt?: number | null;
+        role?: ParticipantRole | null;
+        isBookmarked: boolean;
         requiresPlayerPassword: boolean;
         requiresSpectatorPassword: boolean;
     };
@@ -986,6 +1014,8 @@ type GetRoomListResult_GetRoomsListSuccessResult_Fragment = {
         createdBy: string;
         createdAt?: number | null;
         updatedAt?: number | null;
+        role?: ParticipantRole | null;
+        isBookmarked: boolean;
         requiresPlayerPassword: boolean;
         requiresSpectatorPassword: boolean;
     }>;
@@ -1004,6 +1034,8 @@ type GetRoomResult_GetJoinedRoomResult_Fragment = {
         createdBy: string;
         createdAt?: number | null;
         updatedAt?: number | null;
+        role?: ParticipantRole | null;
+        isBookmarked: boolean;
         stateJson: string;
     };
 };
@@ -1017,6 +1049,8 @@ type GetRoomResult_GetNonJoinedRoomResult_Fragment = {
         createdBy: string;
         createdAt?: number | null;
         updatedAt?: number | null;
+        role?: ParticipantRole | null;
+        isBookmarked: boolean;
         requiresPlayerPassword: boolean;
         requiresSpectatorPassword: boolean;
     };
@@ -1067,6 +1101,8 @@ export type RoomAsListItemFragment = {
     createdBy: string;
     createdAt?: number | null;
     updatedAt?: number | null;
+    role?: ParticipantRole | null;
+    isBookmarked: boolean;
     requiresPlayerPassword: boolean;
     requiresSpectatorPassword: boolean;
 };
@@ -1077,6 +1113,8 @@ export type RoomGetStateFragment = {
     createdBy: string;
     createdAt?: number | null;
     updatedAt?: number | null;
+    role?: ParticipantRole | null;
+    isBookmarked: boolean;
     stateJson: string;
 };
 
@@ -1397,6 +1435,8 @@ export type GetRoomQuery = {
                   createdBy: string;
                   createdAt?: number | null;
                   updatedAt?: number | null;
+                  role?: ParticipantRole | null;
+                  isBookmarked: boolean;
                   stateJson: string;
               };
           }
@@ -1409,6 +1449,8 @@ export type GetRoomQuery = {
                   createdBy: string;
                   createdAt?: number | null;
                   updatedAt?: number | null;
+                  role?: ParticipantRole | null;
+                  isBookmarked: boolean;
                   requiresPlayerPassword: boolean;
                   requiresSpectatorPassword: boolean;
               };
@@ -1431,6 +1473,8 @@ export type GetRoomsListQuery = {
                   createdBy: string;
                   createdAt?: number | null;
                   updatedAt?: number | null;
+                  role?: ParticipantRole | null;
+                  isBookmarked: boolean;
                   requiresPlayerPassword: boolean;
                   requiresSpectatorPassword: boolean;
               }>;
@@ -1732,6 +1776,8 @@ export type GetRoomAsListItemQuery = {
                   createdBy: string;
                   createdAt?: number | null;
                   updatedAt?: number | null;
+                  role?: ParticipantRole | null;
+                  isBookmarked: boolean;
                   requiresPlayerPassword: boolean;
                   requiresSpectatorPassword: boolean;
               };
@@ -1777,6 +1823,8 @@ export type CreateRoomMutation = {
                   createdBy: string;
                   createdAt?: number | null;
                   updatedAt?: number | null;
+                  role?: ParticipantRole | null;
+                  isBookmarked: boolean;
                   stateJson: string;
               };
           };
@@ -1910,6 +1958,8 @@ export type OperateMutation = {
                   createdBy: string;
                   createdAt?: number | null;
                   updatedAt?: number | null;
+                  role?: ParticipantRole | null;
+                  isBookmarked: boolean;
                   requiresPlayerPassword: boolean;
                   requiresSpectatorPassword: boolean;
               };
@@ -1958,6 +2008,16 @@ export type ResetMessagesMutation = {
         __typename?: 'ResetRoomMessagesResult';
         failureType?: ResetRoomMessagesFailureType | null;
     };
+};
+
+export type UpdateBookmarkMutationVariables = Exact<{
+    roomId: Scalars['String'];
+    newValue: Scalars['Boolean'];
+}>;
+
+export type UpdateBookmarkMutation = {
+    __typename?: 'Mutation';
+    result: { __typename?: 'UpdateBookmarkResult'; failureType?: UpdateBookmarkFailureType | null };
 };
 
 export type WritePublicMessageMutationVariables = Exact<{
@@ -2334,6 +2394,8 @@ export const RoomGetStateFragmentDoc = {
                     { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'role' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isBookmarked' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'stateJson' } },
                 ],
             },
@@ -2447,6 +2509,8 @@ export const RoomAsListItemFragmentDoc = {
                     { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'role' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isBookmarked' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'requiresPlayerPassword' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'requiresSpectatorPassword' } },
                 ],
@@ -5096,6 +5160,68 @@ export const ResetMessagesDocument = {
         },
     ],
 } as unknown as DocumentNode<ResetMessagesMutation, ResetMessagesMutationVariables>;
+export const UpdateBookmarkDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'UpdateBookmark' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'roomId' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'newValue' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'Boolean' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'updateBookmark' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'roomId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'roomId' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'newValue' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'newValue' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'failureType' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<UpdateBookmarkMutation, UpdateBookmarkMutationVariables>;
 export const WritePublicMessageDocument = {
     kind: 'Document',
     definitions: [

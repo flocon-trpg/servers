@@ -4,6 +4,7 @@ import {
     Entity,
     IdentifiedReference,
     JsonType,
+    ManyToMany,
     ManyToOne,
     OneToMany,
     PrimaryKey,
@@ -21,6 +22,7 @@ import {
     RoomSe as RoomSe,
     StringPieceLog as StringPieceLogEntity,
 } from '../roomMessage/mikro-orm';
+import { User } from '../user/mikro-orm';
 
 type DbState = State<typeof roomDbTemplate>;
 type RoomDownOperation = DownOperation<typeof roomTemplate>;
@@ -107,6 +109,9 @@ export class Room {
 
     @OneToMany(() => RoomSe, x => x.room, { orphanRemoval: true })
     public roomSes = new Collection<RoomSe>(this);
+
+    @ManyToMany(() => User, user => user.bookmarkedRooms)
+    public bookmarkedBy = new Collection<User>(this);
 }
 
 @Entity()

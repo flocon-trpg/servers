@@ -1,4 +1,5 @@
 import { Field, ID, ObjectType } from 'type-graphql';
+import { ParticipantRoleType } from '../../../enums/ParticipantRoleType';
 
 @ObjectType()
 export class RoomAsListItem {
@@ -26,4 +27,11 @@ since v0.7.2`,
 
     @Field()
     public requiresSpectatorPassword!: boolean;
+
+    @Field({ description: 'since v0.7.2' })
+    public isBookmarked!: boolean;
+
+    // Participantでない場合はnullish
+    @Field(() => ParticipantRoleType, { description: 'since v0.7.2', nullable: true })
+    public role?: ParticipantRoleType | undefined;
 }

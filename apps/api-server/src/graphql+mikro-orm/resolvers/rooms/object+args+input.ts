@@ -51,6 +51,15 @@ export class JoinRoomArgs {
 }
 
 @ArgsType()
+export class UpdateBookmarkArgs {
+    @Field()
+    public roomId!: string;
+
+    @Field()
+    public newValue!: boolean;
+}
+
+@ArgsType()
 export class PromoteArgs {
     @Field()
     public roomId!: string;

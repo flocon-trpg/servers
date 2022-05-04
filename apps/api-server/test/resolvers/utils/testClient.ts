@@ -63,6 +63,9 @@ import {
     RoomEventDocument,
     RoomEventSubscription,
     RoomEventSubscriptionVariables,
+    UpdateBookmarkDocument,
+    UpdateBookmarkMutation,
+    UpdateBookmarkMutationVariables,
     WritePrivateMessageDocument,
     WritePrivateMessageMutation,
     WritePrivateMessageMutationVariables,
@@ -71,6 +74,7 @@ import {
     WritePublicMessageMutationVariables,
 } from '@flocon-trpg/typed-document-node';
 import { TestRoomEventSubscription } from './subscription';
+import { UpdateBookmarkArgs } from '../../../src/graphql+mikro-orm/resolvers/rooms/object+args+input';
 
 const wsClient = (wsUrl: string, testAuthorizationHeaderValue: string | undefined) =>
     createWsClient({
@@ -310,6 +314,18 @@ export class TestClient {
             .mutation<OperateMutation, OperateMutationVariables>(OperateDocument, variables, {
                 requestPolicy: 'network-only',
             })
+            .toPromise();
+    }
+
+    public updateBookmarkMutation(variables: UpdateBookmarkMutationVariables) {
+        return this.#core
+            .mutation<UpdateBookmarkMutation, UpdateBookmarkMutationVariables>(
+                UpdateBookmarkDocument,
+                variables,
+                {
+                    requestPolicy: 'network-only',
+                }
+            )
             .toPromise();
     }
 

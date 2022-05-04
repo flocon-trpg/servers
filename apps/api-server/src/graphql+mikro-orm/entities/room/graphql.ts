@@ -1,5 +1,6 @@
 import { Field, InputType, ObjectType } from 'type-graphql';
 import { MaxLength } from 'class-validator';
+import { ParticipantRoleType } from '../../../enums/ParticipantRoleType';
 
 @ObjectType()
 export class RoomGetState {
@@ -24,6 +25,13 @@ since v0.7.2`,
 
     @Field({ description: 'room.state をJSON化したもの' })
     public stateJson!: string;
+
+    @Field({ description: 'since v0.7.2' })
+    public isBookmarked!: boolean;
+
+    // Participantでない場合はnullish
+    @Field(() => ParticipantRoleType, { description: 'since v0.7.2', nullable: true })
+    public role?: ParticipantRoleType | undefined;
 }
 
 @ObjectType()

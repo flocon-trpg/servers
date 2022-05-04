@@ -3,6 +3,7 @@ import { BaasType } from '../../../enums/BaasType';
 import { File } from '../file/mikro-orm';
 import { FileTag } from '../fileTag/mikro-orm';
 import { Participant } from '../participant/mikro-orm';
+import { Room } from '../room/mikro-orm';
 import { RoomPrvMsg, RoomPubMsg, RoomSe } from '../roomMessage/mikro-orm';
 
 // ユーザーがアカウント登録した時点では作られず、初めてentryなどをしたときに作られる。
@@ -43,4 +44,7 @@ export class User {
 
     @ManyToMany(() => RoomPrvMsg, x => x.visibleTo, { owner: true })
     public visibleRoomPrvMsgs = new Collection<RoomPrvMsg>(this);
+
+    @ManyToMany(() => Room, x => x.bookmarkedBy, { owner: true })
+    public bookmarkedRooms = new Collection<Room>(this);
 }

@@ -25,6 +25,7 @@ import {
     OperateMutation,
     ParticipantRole,
     RoomPublicMessageFragment,
+    UpdateBookmarkFailureType,
     WritePrivateMessageMutation,
     WritePublicMessageMutation,
 } from '@flocon-trpg/typed-document-node';
@@ -37,7 +38,7 @@ import urljoin from 'url-join';
 import { readFileSync } from 'fs';
 import { diff, serializeUpOperation, toUpOperation } from '@kizahasi/ot-string';
 import { OperationResult } from '@urql/core';
-import { maskTypeNames } from './utils/maskTypenames';
+import { maskKeys, maskTypeNames } from './utils/maskKeys';
 import { TestClients } from './utils/testClients';
 import { isFalsyString, recordToArray } from '@flocon-trpg/utils';
 import { TestClient } from './utils/testClient';
@@ -149,6 +150,7 @@ namespace Assert {
     export namespace CreateRoomMutation {
         export const toBeSuccess = (source: OperationResult<CreateRoomMutation>) => {
             if (source.data?.result.__typename !== 'CreateRoomSuccessResult') {
+                expect(source.error).toBeFalsy();
                 expect(source.data?.result.__typename).toBe('CreateRoomSuccessResult');
                 throw new Error('Guard');
             }
@@ -260,6 +262,7 @@ namespace Assert {
     export namespace GetRoomQuery {
         export const toBeSuccess = (source: OperationResult<GetRoomQuery>) => {
             if (source.data?.result.__typename !== 'GetJoinedRoomResult') {
+                expect(source.error).toBeFalsy();
                 expect(source.data?.result.__typename).toBe('GetJoinedRoomResult');
                 throw new Error('Guard');
             }
@@ -825,6 +828,8 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
             expect(roomMasterResult.rooms[0]!.id).toBe(roomId);
             expect(roomMasterResult.rooms[0]!.name).toBe(roomName);
             expect(roomMasterResult.rooms[0]!.createdAt).toBeTruthy();
+            expect(roomMasterResult.rooms[0]!.role).toBe(ParticipantRole.Master);
+            expect(roomMasterResult.rooms[0]!.isBookmarked).toBe(false);
             systemTimeManager
                 .expect(roomMasterResult.rooms[0]!.createdAt)
                 .toBeCloseToSystemTimeType(1);
@@ -836,7 +841,10 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
             const anotherUserResult = Assert.GetRoomsListQuery.toBeSuccess(
                 await clients[Resources.UserUid.player1].getRoomsListQuery()
             );
-            expect(anotherUserResult.rooms).toEqual(roomMasterResult.rooms);
+            expect(anotherUserResult.rooms[0]!.role).toBeFalsy();
+            expect(maskKeys(anotherUserResult.rooms, ['role'])).toEqual(
+                maskKeys(roomMasterResult.rooms, ['role'])
+            );
         });
     });
 
@@ -908,6 +916,167 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
             spectatorPassword: Resources.Room.spectatorPassword,
         },
     ])('room tests with correct passwords', ({ playerPassword, spectatorPassword }) => {
+        it('updateBookmark mutation', async () => {
+            await useTestServer({}, async () => {
+                const userUids = [Resources.UserUid.master, Resources.UserUid.player1] as const;
+                const { clients, roomId: room1Id } = await setupUsersAndRoom({
+                    userUids,
+                    roomMasterUserUid: Resources.UserUid.master,
+                    playerPassword,
+                    spectatorPassword,
+                    autoJoin: { [Resources.UserUid.player1]: 'player' },
+                });
+
+                const anotherRoom = await clients[Resources.UserUid.master].createRoomMutation({
+                    input: { participantName: '', roomName: '' },
+                });
+                const { id: room2Id } = Assert.CreateRoomMutation.toBeSuccess(anotherRoom);
+
+                const testRooms = async ({
+                    room1ValueAsMaster,
+                    room2ValueAsMaster,
+                    room1ValueAsPlayer,
+                    room2ValueAsPlayer,
+                }: {
+                    room1ValueAsMaster: boolean;
+                    room2ValueAsMaster: boolean;
+                    room1ValueAsPlayer: boolean;
+                    room2ValueAsPlayer: boolean;
+                }) => {
+                    const room1AsMaster = Assert.GetRoomQuery.toBeSuccess(
+                        await clients[Resources.UserUid.master].getRoomQuery({ id: room1Id })
+                    );
+                    const room2AsMaster = Assert.GetRoomQuery.toBeSuccess(
+                        await clients[Resources.UserUid.master].getRoomQuery({ id: room2Id })
+                    );
+                    const room1AsPlayer = Assert.GetRoomQuery.toBeSuccess(
+                        await clients[Resources.UserUid.player1].getRoomQuery({ id: room1Id })
+                    );
+                    expect(room1AsMaster.room.isBookmarked).toBe(room1ValueAsMaster);
+                    expect(room2AsMaster.room.isBookmarked).toBe(room2ValueAsMaster);
+                    expect(room1AsPlayer.room.isBookmarked).toBe(room1ValueAsPlayer);
+
+                    const roomsListAsMaster = Assert.GetRoomsListQuery.toBeSuccess(
+                        await clients[Resources.UserUid.master].getRoomsListQuery()
+                    );
+                    const roomsListAsPlayer = Assert.GetRoomsListQuery.toBeSuccess(
+                        await clients[Resources.UserUid.player1].getRoomsListQuery()
+                    );
+                    expect(roomsListAsMaster.rooms.find(r => r.id === room1Id)?.isBookmarked).toBe(
+                        room1ValueAsMaster
+                    );
+                    expect(roomsListAsMaster.rooms.find(r => r.id === room2Id)?.isBookmarked).toBe(
+                        room2ValueAsMaster
+                    );
+                    expect(roomsListAsPlayer.rooms.find(r => r.id === room1Id)?.isBookmarked).toBe(
+                        room1ValueAsPlayer
+                    );
+                    expect(roomsListAsPlayer.rooms.find(r => r.id === room2Id)?.isBookmarked).toBe(
+                        room2ValueAsPlayer
+                    );
+                };
+
+                // bookmark room1
+                {
+                    const bookmarked = await clients[
+                        Resources.UserUid.master
+                    ].updateBookmarkMutation({
+                        roomId: room1Id,
+                        newValue: true,
+                    });
+                    expect(bookmarked.error).toBeFalsy();
+                    expect(bookmarked.data).toBeTruthy();
+                    expect(bookmarked.data?.result.failureType).toBeFalsy();
+
+                    await testRooms({
+                        room1ValueAsMaster: true,
+                        room2ValueAsMaster: false,
+                        room1ValueAsPlayer: false,
+                        room2ValueAsPlayer: false,
+                    });
+                }
+
+                // bookmark room1 again to expect failure
+                {
+                    const bookmarked = await clients[
+                        Resources.UserUid.master
+                    ].updateBookmarkMutation({
+                        roomId: room1Id,
+                        newValue: true,
+                    });
+                    expect(bookmarked.data?.result.failureType).toBe(
+                        UpdateBookmarkFailureType.SameValue
+                    );
+
+                    await testRooms({
+                        room1ValueAsMaster: true,
+                        room2ValueAsMaster: false,
+                        room1ValueAsPlayer: false,
+                        room2ValueAsPlayer: false,
+                    });
+                }
+
+                // bookmark not found room to expect failure
+                {
+                    const bookmarked = await clients[
+                        Resources.UserUid.master
+                    ].updateBookmarkMutation({
+                        roomId: 'invalidroomid',
+                        newValue: true,
+                    });
+                    expect(bookmarked.data?.result.failureType).toBe(
+                        UpdateBookmarkFailureType.NotFound
+                    );
+
+                    await testRooms({
+                        room1ValueAsMaster: true,
+                        room2ValueAsMaster: false,
+                        room1ValueAsPlayer: false,
+                        room2ValueAsPlayer: false,
+                    });
+                }
+
+                // remove room1 bookmark
+                {
+                    const bookmarked = await clients[
+                        Resources.UserUid.master
+                    ].updateBookmarkMutation({
+                        roomId: room1Id,
+                        newValue: false,
+                    });
+                    expect(bookmarked.data).toBeTruthy();
+                    expect(bookmarked.data?.result.failureType).toBeFalsy();
+
+                    await testRooms({
+                        room1ValueAsMaster: false,
+                        room2ValueAsMaster: false,
+                        room1ValueAsPlayer: false,
+                        room2ValueAsPlayer: false,
+                    });
+                }
+
+                // remove room1 bookmark again to expect failure
+                {
+                    const bookmarked = await clients[
+                        Resources.UserUid.master
+                    ].updateBookmarkMutation({
+                        roomId: room1Id,
+                        newValue: false,
+                    });
+                    expect(bookmarked.data?.result.failureType).toBe(
+                        UpdateBookmarkFailureType.SameValue
+                    );
+
+                    await testRooms({
+                        room1ValueAsMaster: false,
+                        room2ValueAsMaster: false,
+                        room1ValueAsPlayer: false,
+                        room2ValueAsPlayer: false,
+                    });
+                }
+            });
+        });
+
         describe('joinRoomAsPlayer and joinRoomAsSpectator mutations with correct password', () => {
             it('tests successful joinRoomAsPlayer -> second joinRoomAsPlayer', async () => {
                 await useTestServer({}, async () => {
@@ -1031,10 +1200,9 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                     })
                 );
                 expect(player1Result.role).toBe(ParticipantRole.Player);
-                expect({ ...player1Result.room, stateJson: undefined }).toEqual({
-                    ...masterResult.room,
-                    stateJson: undefined,
-                });
+                expect(maskKeys(player1Result, ['stateJson', 'role', 'isBookmarked'])).toEqual(
+                    maskKeys(masterResult, ['stateJson', 'role', 'isBookmarked'])
+                );
 
                 const spectatorResult = Assert.GetRoomQuery.toBeSuccess(
                     await clients[Resources.UserUid.spectator1].getRoomQuery({
@@ -1042,10 +1210,9 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                     })
                 );
                 expect(spectatorResult.role).toBe(ParticipantRole.Spectator);
-                expect({ ...spectatorResult.room, stateJson: undefined }).toEqual({
-                    ...masterResult.room,
-                    stateJson: undefined,
-                });
+                expect(maskKeys(spectatorResult, ['stateJson', 'role', 'isBookmarked'])).toEqual(
+                    maskKeys(masterResult, ['stateJson', 'role', 'isBookmarked'])
+                );
 
                 const nonJoinedResult = Assert.GetRoomQuery.toBeNonJoined(
                     await clients[Resources.UserUid.notJoin].getRoomQuery({

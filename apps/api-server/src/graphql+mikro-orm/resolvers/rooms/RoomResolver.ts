@@ -22,7 +22,7 @@ import {
 import { JoinRoomFailureType } from '../../../enums/JoinRoomFailureType';
 import * as Room$MikroORM from '../../entities/room/mikro-orm';
 import * as Participant$MikroORM from '../../entities/participant/mikro-orm';
-import { stateToGraphQL as stateToGraphql$RoomAsListItem } from '../../entities/roomAsListItem/global';
+import * as RoomAsListItemGlobal from '../../entities/roomAsListItem/global';
 import { queueLimitReached } from '../../../utils/promiseQueue';
 import { serverTooBusyMessage } from '../utils/messages';
 import { RoomOperation, deleteRoomOperation } from '../../entities/room/graphql';
@@ -73,6 +73,7 @@ import {
     OperateArgs,
     PromoteArgs,
     RoomEvent,
+    UpdateBookmarkArgs,
     UpdateWritingMessageStateArgs,
     WritePrivateMessageArgs,
     WritePublicMessageArgs,
@@ -176,6 +177,8 @@ import { ResetRoomMessagesFailureType } from '../../../enums/ResetRoomMessagesFa
 import { hash } from 'bcrypt';
 import { DeleteRoomAsAdminResult } from '../../results/DeleteRoomAsAdminResult';
 import { DeleteRoomAsAdminFailureType } from '../../../enums/DeleteRoomAsAdminFailureType';
+import { UpdateBookmarkResult } from '../../results/UpdateBookmarkResult';
+import { UpdateBookmarkFailureType } from '../../../enums/UpdateBookmarkFailureType';
 
 type RoomState = State<typeof roomTemplate>;
 type RoomUpOperation = UpOperation<typeof roomTemplate>;
@@ -834,12 +837,19 @@ export class RoomResolver {
     public async getRoomsList(@Ctx() context: ResolverContext): Promise<typeof GetRoomsListResult> {
         const queue = async () => {
             const em = context.em;
+            const authorizedUserUid = ensureAuthorizedUser(context).userUid;
 
             // TODO: すべてを取得しているので重い
             const roomModels = await em.find(Room$MikroORM.Room, {});
-            const rooms = roomModels.map(model =>
-                stateToGraphql$RoomAsListItem({ roomEntity: model })
-            );
+            const rooms = [];
+            for (const model of roomModels) {
+                rooms.push(
+                    await RoomAsListItemGlobal.stateToGraphQL({
+                        roomEntity: model,
+                        myUserUid: authorizedUserUid,
+                    })
+                );
+            }
             return {
                 rooms,
             };
@@ -861,13 +871,17 @@ export class RoomResolver {
     ): Promise<typeof GetRoomAsListItemResult> {
         const queue = async () => {
             const em = context.em;
+            const authorizedUserUid = ensureAuthorizedUser(context).userUid;
             const roomEntity = await em.findOne(Room$MikroORM.Room, { id: roomId });
             if (roomEntity == null) {
                 return {
                     failureType: GetRoomFailureType.NotFound,
                 };
             }
-            const room = stateToGraphql$RoomAsListItem({ roomEntity: roomEntity });
+            const room = await RoomAsListItemGlobal.stateToGraphQL({
+                roomEntity: roomEntity,
+                myUserUid: authorizedUserUid,
+            });
             return { room };
         };
 
@@ -1213,6 +1227,8 @@ export class RoomResolver {
                     // CONSIDER: entityから取得するのではなく、new Date() の結果を返してもいいかもしれない
                     createdAt: newRoom.createdAt?.getTime(),
                     updatedAt: newRoom.completeUpdatedAt?.getTime(),
+                    role: newParticipant.role,
+                    isBookmarked: false,
                 },
                 id: newRoom.id,
             };
@@ -1391,6 +1407,51 @@ export class RoomResolver {
         return result;
     }
 
+    @Mutation(() => UpdateBookmarkResult)
+    @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(2))
+    public async updateBookmark(
+        @Args() args: UpdateBookmarkArgs,
+        @Ctx() context: ResolverContext
+    ): Promise<UpdateBookmarkResult> {
+        const queue = async (): Promise<UpdateBookmarkResult> => {
+            const em = context.em;
+            const authorizedUser = ensureAuthorizedUser(context);
+            const room = await em.findOne(Room$MikroORM.Room, { id: args.roomId });
+            if (room == null) {
+                return {
+                    failureType: UpdateBookmarkFailureType.NotFound,
+                };
+            }
+            await authorizedUser.bookmarkedRooms.init();
+            const isBookmarked = authorizedUser.bookmarkedRooms.contains(room);
+            if (args.newValue) {
+                if (isBookmarked) {
+                    return { failureType: UpdateBookmarkFailureType.SameValue };
+                }
+            } else {
+                if (!isBookmarked) {
+                    return { failureType: UpdateBookmarkFailureType.SameValue };
+                }
+            }
+
+            if (args.newValue) {
+                authorizedUser.bookmarkedRooms.add(room);
+            } else {
+                authorizedUser.bookmarkedRooms.remove(room);
+            }
+
+            await em.flush();
+            return { failureType: undefined };
+        };
+
+        const result = await context.promiseQueue.next(queue);
+        if (result.type === queueLimitReached) {
+            throw serverTooBusyMessage;
+        }
+        return result.value;
+    }
+
     @Mutation(() => PromoteResult)
     @Authorized(ENTRY)
     @UseMiddleware(RateLimitMiddleware(2))
@@ -1518,7 +1579,10 @@ export class RoomResolver {
             const { room, me } = findResult;
             if (me?.role == null) {
                 return Result.ok({
-                    roomAsListItem: stateToGraphql$RoomAsListItem({ roomEntity: room }),
+                    roomAsListItem: await RoomAsListItemGlobal.stateToGraphQL({
+                        roomEntity: room,
+                        myUserUid: authorizedUserUid,
+                    }),
                 });
             }
 
@@ -1534,6 +1598,14 @@ export class RoomResolver {
                     createdBy: room.createdBy,
                     createdAt: room.createdAt?.getTime(),
                     updatedAt: room.completeUpdatedAt?.getTime(),
+                    role: await RoomAsListItemGlobal.role({
+                        roomEntity: room,
+                        myUserUid: authorizedUserUid,
+                    }),
+                    isBookmarked: await RoomAsListItemGlobal.isBookmarked({
+                        roomEntity: room,
+                        myUserUid: authorizedUserUid,
+                    }),
                 },
             });
         };
@@ -1644,7 +1716,12 @@ export class RoomResolver {
             if (me === undefined) {
                 return Result.ok({
                     type: 'nonJoined',
-                    result: { roomAsListItem: stateToGraphql$RoomAsListItem({ roomEntity: room }) },
+                    result: {
+                        roomAsListItem: await RoomAsListItemGlobal.stateToGraphQL({
+                            roomEntity: room,
+                            myUserUid: authorizedUserUid,
+                        }),
+                    },
                 });
             }
             const participantUserUids = findResult.participantIds();
