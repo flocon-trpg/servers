@@ -1280,7 +1280,7 @@ export class RoomResolver {
         return result.value.result;
     }
 
-    @Mutation(() => DeleteRoomAsAdminResult, { description: 'since v0.8.0' })
+    @Mutation(() => DeleteRoomAsAdminResult, { description: 'since v0.7.2' })
     @Authorized(ADMIN)
     @UseMiddleware(RateLimitMiddleware(2))
     public async deleteRoomAsAdmin(

@@ -12,12 +12,12 @@ export class RoomGetState {
     @Field({ description: 'この部屋の作成者。Firebase AuthenticationのUserUidで表現される。' })
     public createdBy!: string;
 
-    @Field({ description: 'since v0.8.0', nullable: true })
+    @Field({ description: 'since v0.7.2', nullable: true })
     public createdAt?: number;
 
     @Field({
         description: `データベースのRoomエンティティが最後に更新された日時。Roomエンティティのみが対象であるため、例えばメッセージの投稿などは反映されないことに注意。
-since v0.8.0`,
+since v0.7.2`,
         nullable: true,
     })
     public updatedAt?: number;
@@ -76,6 +76,6 @@ export class DeleteRoomOperation {
     @Field()
     public deletedBy!: string;
 
-    @Field({ description: 'since v0.8.0' })
+    @Field({ description: 'since v0.7.2' })
     public deletedByAdmin!: boolean;
 }

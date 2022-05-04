@@ -118,7 +118,7 @@ export class MainResolver {
     }
 
     @Query(() => Roles, {
-        description: 'since v0.8.0',
+        description: 'since v0.7.2',
     })
     @Authorized()
     public async getMyRoles(@Ctx() context: ResolverContext): Promise<Roles> {

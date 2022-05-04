@@ -100,7 +100,7 @@ export enum DeleteRoomFailureType {
 export type DeleteRoomOperation = {
     __typename?: 'DeleteRoomOperation';
     deletedBy: Scalars['String'];
-    /** since v0.8.0 */
+    /** since v0.7.2 */
     deletedByAdmin: Scalars['Boolean'];
 };
 
@@ -342,7 +342,7 @@ export type Mutation = {
     deleteFiles: Array<Scalars['String']>;
     deleteMessage: DeleteMessageResult;
     deleteRoom: DeleteRoomResult;
-    /** since v0.8.0 */
+    /** since v0.7.2 */
     deleteRoomAsAdmin: DeleteRoomAsAdminResult;
     editFileTags: Scalars['Boolean'];
     editMessage: EditMessageResult;
@@ -577,7 +577,7 @@ export type Query = {
     getFiles: GetFilesResult;
     getLog: GetRoomLogResult;
     getMessages: GetRoomMessagesResult;
-    /** since v0.8.0 */
+    /** since v0.7.2 */
     getMyRoles: Roles;
     getRoom: GetRoomResult;
     getRoomAsListItem: GetRoomAsListItemResult;
@@ -633,7 +633,7 @@ export type Roles = {
 
 export type RoomAsListItem = {
     __typename?: 'RoomAsListItem';
-    /** since v0.8.0 */
+    /** since v0.7.2 */
     createdAt?: Maybe<Scalars['Float']>;
     /** この部屋の作成者。Firebase AuthenticationのUserUidで表現される。 */
     createdBy: Scalars['String'];
@@ -643,7 +643,7 @@ export type RoomAsListItem = {
     requiresSpectatorPassword: Scalars['Boolean'];
     /**
      * データベースのRoomエンティティが最後に更新された日時。Roomエンティティのみが対象であるため、例えばメッセージの投稿などは反映されないことに注意。
-     * since v0.8.0
+     * since v0.7.2
      */
     updatedAt?: Maybe<Scalars['Float']>;
 };
@@ -667,7 +667,7 @@ export type RoomEvent = {
 
 export type RoomGetState = {
     __typename?: 'RoomGetState';
-    /** since v0.8.0 */
+    /** since v0.7.2 */
     createdAt?: Maybe<Scalars['Float']>;
     /** この部屋の作成者。Firebase AuthenticationのUserUidで表現される。 */
     createdBy: Scalars['String'];
@@ -677,7 +677,7 @@ export type RoomGetState = {
     stateJson: Scalars['String'];
     /**
      * データベースのRoomエンティティが最後に更新された日時。Roomエンティティのみが対象であるため、例えばメッセージの投稿などは反映されないことに注意。
-     * since v0.8.0
+     * since v0.7.2
      */
     updatedAt?: Maybe<Scalars['Float']>;
 };
