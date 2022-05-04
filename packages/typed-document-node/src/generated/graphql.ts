@@ -198,7 +198,7 @@ export type GetFilesResult = {
 
 export type GetJoinedRoomResult = {
     __typename?: 'GetJoinedRoomResult';
-    /** 自分の現在のParticipantRole。 */
+    /** 自分の現在のParticipantRoleType。 */
     role: ParticipantRole;
     room: RoomGetState;
 };
@@ -522,8 +522,6 @@ export enum ParticipantRole {
     Master = 'Master',
     Player = 'Player',
     Spectator = 'Spectator',
-    OfNullishString = 'ofNullishString',
-    OfString = 'ofString',
 }
 
 export type PieceLog = {

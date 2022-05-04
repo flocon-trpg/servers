@@ -1,5 +1,5 @@
 import { registerEnumType } from 'type-graphql';
-import { ParticipantRole } from '../enums/ParticipantRole';
+import { ParticipantRoleType } from '../enums/ParticipantRoleType';
 import { JoinRoomFailureType } from '../enums/JoinRoomFailureType';
 import { FileSourceType } from '../enums/FileSourceType';
 import { GetRoomFailureType } from '../enums/GetRoomFailureType';
@@ -93,7 +93,8 @@ export const registerEnumTypes = (): void => {
     registerEnumType(OperateRoomFailureType, {
         name: 'OperateRoomFailureType',
     });
-    registerEnumType(ParticipantRole, {
+    registerEnumType(ParticipantRoleType, {
+        // 互換性のため'ParticipantRoleType'ではなく'ParticipantRole'としている。だが、'ParticipantRoleType'に変更することで問題が生じるかどうかは確認していない。
         name: 'ParticipantRole',
     });
     registerEnumType(PieceLogType, {

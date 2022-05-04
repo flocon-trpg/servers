@@ -166,7 +166,7 @@ import {
     NonEmptyString,
     PositiveInt,
 } from '@kizahasi/ot-string';
-import { ParticipantRole as ParticipantRoleEnum } from '../../../enums/ParticipantRole';
+import { stringToParticipantRoleType } from '../../../enums/ParticipantRoleType';
 import { ADMIN, ENTRY } from '../../../roles';
 import { ParticipantRoleType } from '../../../enums/ParticipantRoleType';
 import { RateLimitMiddleware } from '../../middlewares/RateLimitMiddleware';
@@ -1524,7 +1524,7 @@ export class RoomResolver {
 
             const roomState = await GlobalRoom.MikroORM.ToGlobal.state(room, em);
             return Result.ok({
-                role: ParticipantRoleEnum.ofString(me.role),
+                role: stringToParticipantRoleType(me.role),
                 room: {
                     ...GlobalRoom.Global.ToGraphQL.state({
                         source: roomState,
