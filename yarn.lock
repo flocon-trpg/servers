@@ -3190,28 +3190,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@monaco-editor/loader@npm:^1.2.0":
-  version: 1.2.0
-  resolution: "@monaco-editor/loader@npm:1.2.0"
+"@monaco-editor/loader@npm:^1.3.1":
+  version: 1.3.1
+  resolution: "@monaco-editor/loader@npm:1.3.1"
   dependencies:
     state-local: ^1.0.6
   peerDependencies:
     monaco-editor: ">= 0.21.0 < 1"
-  checksum: b483d8d74830f8bcfe18111b0dfe526e038b704e9a461ce2ecb25d66db2abb19fbb704569ba84b06e4b5ead4e483ae7335e3d5e2201613d4f0c077401d540bd3
+  checksum: 4772210d4e0d2d22f17c7c6bec869a20eaf3a98c6b4020e01827b42e567c4730ab0730be0f7b599d9beb314234fad1fd0b4c66bae110c83743316ec62130d2e9
   languageName: node
   linkType: hard
 
 "@monaco-editor/react@npm:^4.2.2":
-  version: 4.3.1
-  resolution: "@monaco-editor/react@npm:4.3.1"
+  version: 4.4.4
+  resolution: "@monaco-editor/react@npm:4.4.4"
   dependencies:
-    "@monaco-editor/loader": ^1.2.0
+    "@monaco-editor/loader": ^1.3.1
     prop-types: ^15.7.2
   peerDependencies:
     monaco-editor: ">= 0.25.0 < 1"
-    react: ^16.8.0 || ^17.0.0
-    react-dom: ^16.8.0 || ^17.0.0
-  checksum: 477349e64078ab3fc30e75577fbe51519c5af621cd1e3fa557e21f2a5e7291c4eabe34caa3013d578be0379c5bc43b199ee1c74853d571b05598ce866ad5a3a1
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: 82f63dd9f5a8f81899565d20a5ae57d939d5a9e30b761145c676276771c075389989808e3ea2587677197fd8dcc6b2e8e18a0fd96c42f6e15de699fb914a5e2a
   languageName: node
   linkType: hard
 
