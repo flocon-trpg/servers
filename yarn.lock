@@ -2043,7 +2043,7 @@ __metadata:
     localforage: ^1.10.0
     lodash: ^4.17.21
     moment: ^2.29.1
-    monaco-editor: 0.26.1
+    monaco-editor: 0.33.0
     next: ^11.1.2
     npm-run-all: ^4.1.5
     parse-url: ^5.0.7
@@ -12283,10 +12283,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"monaco-editor@npm:0.26.1":
-  version: 0.26.1
-  resolution: "monaco-editor@npm:0.26.1"
-  checksum: 2d531aa1245c891330e398c6ddb63fa9489a3cb4c668e304aa1ead6d5e3a14ee30e601fb94d265f7f00bfb1abe197e6dfcdfbebc1e307ea8efa99b3ecb069278
+"monaco-editor@npm:0.33.0":
+  version: 0.33.0
+  resolution: "monaco-editor@npm:0.33.0"
+  checksum: f88fd1c9be0d6845436aa92ee7f7bcc49f9e9bf452f73bb5efbbe52e50678d1c2aec4d612a943310f5e2282c1d9fcc41b792b65a5b9008e6054908e7e10311ea
   languageName: node
   linkType: hard
 
