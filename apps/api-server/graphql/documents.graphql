@@ -537,7 +537,14 @@ mutation ResetMessages($roomId: String!) {
 
 mutation UpdateBookmark($roomId: String!, $newValue: Boolean!) {
     result: updateBookmark(roomId: $roomId, newValue: $newValue) {
-        failureType
+        __typename
+        ... on UpdateBookmarkSuccessResult {
+            prevValue
+            currentValue
+        }
+        ... on UpdateBookmarkFailureResult {
+            failureType
+        }
     }
 }
 

@@ -1413,8 +1413,8 @@ export class RoomResolver {
     public async updateBookmark(
         @Args() args: UpdateBookmarkArgs,
         @Ctx() context: ResolverContext
-    ): Promise<UpdateBookmarkResult> {
-        const queue = async (): Promise<UpdateBookmarkResult> => {
+    ): Promise<typeof UpdateBookmarkResult> {
+        const queue = async (): Promise<typeof UpdateBookmarkResult> => {
             const em = context.em;
             const authorizedUser = ensureAuthorizedUser(context);
             const room = await em.findOne(Room$MikroORM.Room, { id: args.roomId });
@@ -1427,11 +1427,11 @@ export class RoomResolver {
             const isBookmarked = authorizedUser.bookmarkedRooms.contains(room);
             if (args.newValue) {
                 if (isBookmarked) {
-                    return { failureType: UpdateBookmarkFailureType.SameValue };
+                    return { prevValue: isBookmarked, currentValue: isBookmarked };
                 }
             } else {
                 if (!isBookmarked) {
-                    return { failureType: UpdateBookmarkFailureType.SameValue };
+                    return { prevValue: isBookmarked, currentValue: isBookmarked };
                 }
             }
 
@@ -1442,7 +1442,7 @@ export class RoomResolver {
             }
 
             await em.flush();
-            return { failureType: undefined };
+            return { prevValue: isBookmarked, currentValue: args.newValue };
         };
 
         const result = await context.promiseQueue.next(queue);

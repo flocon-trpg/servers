@@ -44,21 +44,18 @@ const BookmarkButton: React.FC<{ data: Data072 }> = ({ data }) => {
                     });
                 }
                 if (updateBookmarkResult.data != null) {
-                    switch (updateBookmarkResult.data.result.failureType) {
-                        case null:
-                        case undefined:
-                            setChecked(checked);
-                            break;
-                        case DocNode072.UpdateBookmarkFailureType.NotFound:
+                    switch (updateBookmarkResult.data.result.__typename) {
+                        case 'UpdateBookmarkFailureResult':
                             notification.warning({
                                 message: 'エラー',
                                 description: '該当する部屋が見つかりませんでした。',
                             });
                             break;
-                        case DocNode072.UpdateBookmarkFailureType.SameValue:
+                        case 'UpdateBookmarkSuccessResult':
+                            setChecked(updateBookmarkResult.data.result.currentValue);
                             break;
                         default:
-                            return toBeNever(updateBookmarkResult.data.result.failureType);
+                            return toBeNever(updateBookmarkResult.data.result);
                     }
                 }
                 setLoading(false);

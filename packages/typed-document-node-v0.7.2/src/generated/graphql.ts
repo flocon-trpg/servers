@@ -198,7 +198,7 @@ export type GetFilesResult = {
 
 export type GetJoinedRoomResult = {
     __typename?: 'GetJoinedRoomResult';
-    /** 自分の現在のParticipantRoleType。 */
+    /** 自分の現在のParticipantRoleType。room.roleと同じ値をとる。 */
     role: ParticipantRole;
     room: RoomGetState;
 };
@@ -850,14 +850,21 @@ export type SubscriptionRoomEventArgs = {
     id: Scalars['String'];
 };
 
+export type UpdateBookmarkFailureResult = {
+    __typename?: 'UpdateBookmarkFailureResult';
+    failureType: UpdateBookmarkFailureType;
+};
+
 export enum UpdateBookmarkFailureType {
     NotFound = 'NotFound',
-    SameValue = 'SameValue',
 }
 
-export type UpdateBookmarkResult = {
-    __typename?: 'UpdateBookmarkResult';
-    failureType?: Maybe<UpdateBookmarkFailureType>;
+export type UpdateBookmarkResult = UpdateBookmarkFailureResult | UpdateBookmarkSuccessResult;
+
+export type UpdateBookmarkSuccessResult = {
+    __typename?: 'UpdateBookmarkSuccessResult';
+    currentValue: Scalars['Boolean'];
+    prevValue: Scalars['Boolean'];
 };
 
 export type UpdatedText = {
@@ -2017,7 +2024,9 @@ export type UpdateBookmarkMutationVariables = Exact<{
 
 export type UpdateBookmarkMutation = {
     __typename?: 'Mutation';
-    result: { __typename?: 'UpdateBookmarkResult'; failureType?: UpdateBookmarkFailureType | null };
+    result:
+        | { __typename: 'UpdateBookmarkFailureResult'; failureType: UpdateBookmarkFailureType }
+        | { __typename: 'UpdateBookmarkSuccessResult'; prevValue: boolean; currentValue: boolean };
 };
 
 export type WritePublicMessageMutationVariables = Exact<{
@@ -5213,7 +5222,49 @@ export const UpdateBookmarkDocument = {
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
-                                { kind: 'Field', name: { kind: 'Name', value: 'failureType' } },
+                                { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: {
+                                            kind: 'Name',
+                                            value: 'UpdateBookmarkSuccessResult',
+                                        },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'prevValue' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'currentValue' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'InlineFragment',
+                                    typeCondition: {
+                                        kind: 'NamedType',
+                                        name: {
+                                            kind: 'Name',
+                                            value: 'UpdateBookmarkFailureResult',
+                                        },
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'failureType' },
+                                            },
+                                        ],
+                                    },
+                                },
                             ],
                         },
                     },
