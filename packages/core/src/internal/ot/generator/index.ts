@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Result } from '@kizahasi/result';
 import { Any } from 'io-ts';
 import { Apply, ClientTransform, Compose, Diff, DownError, Restore } from '../util/type';

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { RoomEventSubscription } from '@flocon-trpg/typed-document-node';
 import _ from 'lodash';
 import { Source, pipe, subscribe } from 'wonka';

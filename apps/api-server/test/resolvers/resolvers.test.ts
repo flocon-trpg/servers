@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as $MikroORM from '../../src/graphql+mikro-orm/entities/room/mikro-orm';
 import { EM } from '../../src/utils/types';
 import { User as User$MikroORM } from '../../src/graphql+mikro-orm/entities/user/mikro-orm';

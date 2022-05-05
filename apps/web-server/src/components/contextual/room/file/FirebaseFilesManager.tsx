@@ -162,7 +162,6 @@ const fileTypeColumn = (defaultFilteredValue: FilterValue | null | undefined): C
 });
 
 const getTimeCreated = (metadata: unknown): string | undefined => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const timeCreated = (metadata as any)?.timeCreated;
     if (typeof timeCreated === 'string') {
         return timeCreated;

@@ -1,6 +1,9 @@
 module.exports = {
     root: true,
     parser: '@typescript-eslint/parser',
+    parserOptions: {
+        project: './tsconfig.json',
+    },
     plugins: ['@typescript-eslint'],
     extends: [
         'eslint:recommended',
@@ -12,6 +15,8 @@ module.exports = {
         '@typescript-eslint/member-delimiter-style': ['error'],
         '@typescript-eslint/explicit-module-boundary-types': 'off',
         '@typescript-eslint/no-namespace': 'off',
+        '@typescript-eslint/no-non-null-assertion': 'off',
+        '@typescript-eslint/no-explicit-any': 'off',
         'space-before-blocks': 'warn',
         'sort-imports': [
             'error',

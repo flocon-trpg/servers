@@ -233,12 +233,7 @@ export const useRoomState = (
                         valueInput,
                         operationToPost: toPost.operationToPost,
                     });
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    let result: FetchResult<
-                        OperateMutation,
-                        Record<string, any>,
-                        Record<string, any>
-                    >;
+                    let result: FetchResult<OperateMutation>;
                     try {
                         result = await operateMutation({
                             variables: {
