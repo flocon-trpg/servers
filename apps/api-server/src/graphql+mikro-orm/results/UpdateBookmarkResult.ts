@@ -20,7 +20,7 @@ export const UpdateBookmarkResult = createUnionType({
     name: 'UpdateBookmarkResult',
     types: () => [UpdateBookmarkSuccessResult, UpdateBookmarkFailureResult] as const,
     resolveType: value => {
-        if ('bookmarked' in value) {
+        if ('currentValue' in value) {
             return UpdateBookmarkSuccessResult;
         }
         if ('failureType' in value) {
