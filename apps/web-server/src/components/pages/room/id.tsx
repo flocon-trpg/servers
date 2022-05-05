@@ -8,7 +8,7 @@ import {
     RoomAsListItemFragment,
     UpdateWritingMessageStatusDocument,
     WritingMessageStatusInputType,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import { Alert, Button, Card, Input, Result, Spin, notification as antdNotification } from 'antd';
 import produce from 'immer';
 import { atom } from 'jotai';

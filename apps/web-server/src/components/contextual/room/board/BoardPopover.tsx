@@ -18,7 +18,10 @@ import _ from 'lodash';
 import React from 'react';
 import { InputDie } from './die/InputDie';
 import { NewTabLinkify } from '../../../ui/NewTabLinkify';
-import { FileSourceType, WriteRoomSoundEffectDocument } from '@flocon-trpg/typed-document-node';
+import {
+    FileSourceType,
+    WriteRoomSoundEffectDocument,
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import { useBoards } from '../../../../hooks/state/useBoards';
 import { useCharacters } from '../../../../hooks/state/useCharacters';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';

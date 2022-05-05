@@ -1,6 +1,6 @@
 import { Howl } from 'howler';
 import React from 'react';
-import { FilePathFragment } from '@flocon-trpg/typed-document-node';
+import { FilePathFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { analyzeUrl } from '../utils/analyzeUrl';
 import { volumeCap } from '../utils/variables';
 import { success, useSrcFromGraphQL } from './src';

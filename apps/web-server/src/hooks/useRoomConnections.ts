@@ -1,7 +1,7 @@
 import { useLazyQuery } from '@apollo/client';
 import produce from 'immer';
 import React from 'react';
-import { GetRoomConnectionsDocument } from '@flocon-trpg/typed-document-node';
+import { GetRoomConnectionsDocument } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { Notification } from '@flocon-trpg/web-server-utils';
 import { useParticipants } from './state/useParticipants';
 import { useReadonlyRef } from './useReadonlyRef';

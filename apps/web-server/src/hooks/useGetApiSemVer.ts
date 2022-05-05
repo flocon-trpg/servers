@@ -1,5 +1,5 @@
 import { useQuery } from '@apollo/client';
-import { GetServerInfoDocument, PrereleaseType } from '@flocon-trpg/typed-document-node';
+import { GetServerInfoDocument, PrereleaseType } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { SemVer, alpha, beta, rc } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import React from 'react';

@@ -4,7 +4,7 @@ import {
     FilePathFragment,
     FileSourceType,
     GetServerInfoDocument,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import { DialogFooter } from '../../../ui/DialogFooter';
 import { FilesManagerDrawerType, some } from '../../../../utils/types';
 import { cancelRnd } from '../../../../utils/className';

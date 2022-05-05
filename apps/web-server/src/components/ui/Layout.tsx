@@ -16,20 +16,20 @@ import {
 import {
     EntryToServerDocument,
     EntryToServerResultType,
-    GetMyRolesDocument,
     IsEntryDocument,
     IsEntryQuery,
     IsEntryQueryVariables,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import { Center } from './Center';
 import Link from 'next/link';
 import { NotSignInResult } from './result/NotSignInResult';
 import { LoadingResult } from './result/LoadingResult';
 import * as Icon from '@ant-design/icons';
 import { useSignOut } from '../../hooks/useSignOut';
-import { useApolloClient, useMutation, useQuery } from '@apollo/client';
+import { useApolloClient, useMutation } from '@apollo/client';
 import { MyAuthContext, authNotFound, loading, notSignIn } from '../../contexts/MyAuthContext';
 import { FirebaseAuthenticationIdTokenContext } from '../../contexts/FirebaseAuthenticationIdTokenContext';
+import { useGetMyRoles } from '../../hooks/apiServer/useGetMyRoles';
 const { Header, Content } = AntdLayout;
 
 type EntryFormComponentProps = {
@@ -121,7 +121,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
     hideHeader: hideHeaderProp,
 }: PropsWithChildren<Props>) => {
     const router = useRouter();
-    const getMyRolesQueryResult = useQuery(GetMyRolesDocument);
+    const getMyRolesQueryResult = useGetMyRoles();
     const myAuth = React.useContext(MyAuthContext);
     const myUserUid = typeof myAuth === 'string' ? null : myAuth.uid;
     const isAnonymous = typeof myAuth === 'string' ? false : myAuth.isAnonymous;

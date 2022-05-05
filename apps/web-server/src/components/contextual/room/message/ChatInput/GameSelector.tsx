@@ -8,7 +8,7 @@ import { NewTabLinkify } from '../../../../ui/NewTabLinkify';
 import {
     GetAvailableGameSystemsDocument,
     GetDiceHelpMessagesDocument,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import { useQuery } from '@apollo/client';
 import { ChatPalettePanelConfig } from '../../../../../atoms/roomConfig/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '../../../../../atoms/roomConfig/types/messagePanelConfig';

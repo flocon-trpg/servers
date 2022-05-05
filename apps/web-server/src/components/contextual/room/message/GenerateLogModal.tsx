@@ -7,7 +7,7 @@ import {
     GetLogQuery,
     GetLogQueryVariables,
     GetRoomLogFailureType,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import { useParticipants } from '../../../../hooks/state/useParticipants';
 import { usePublicChannelNames } from '../../../../hooks/state/usePublicChannelNames';
 import { useReadonlyRef } from '../../../../hooks/useReadonlyRef';

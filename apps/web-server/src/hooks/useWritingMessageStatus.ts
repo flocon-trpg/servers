@@ -1,7 +1,7 @@
 import produce from 'immer';
 import React from 'react';
 import { interval } from 'rxjs';
-import { WritingMessageStatusType } from '@flocon-trpg/typed-document-node';
+import { WritingMessageStatusType } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { useAtomSelector } from '../atoms/useAtomSelector';
 import { roomAtom } from '../atoms/room/roomAtom';
 

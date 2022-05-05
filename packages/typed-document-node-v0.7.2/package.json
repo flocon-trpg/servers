@@ -1,5 +1,5 @@
 {
-    "version": "0.6.0-beta.2",
+    "version": "0.7.2",
     "license": "MIT",
     "main": "dist/cjs/index.js",
     "module": "dist/esm/index.js",
@@ -13,7 +13,7 @@
         "build:self": "rimraf ./dist && yarn build:tsc",
         "build:tsc": "tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-types.json"
     },
-    "name": "@flocon-trpg/typed-document-node",
+    "name": "@flocon-trpg/typed-document-node-v0.7.2",
     "author": "kizahasi",
     "devDependencies": {
         "rimraf": "3.0.2",

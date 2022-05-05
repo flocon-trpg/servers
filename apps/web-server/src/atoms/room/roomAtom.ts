@@ -1,6 +1,6 @@
 import { ApolloError } from '@apollo/client';
 import { GraphQLError } from 'graphql';
-import { RoomEventSubscription } from '@flocon-trpg/typed-document-node';
+import { RoomEventSubscription } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { RoomState } from '../../hooks/useRoomState';
 import { atom } from 'jotai';
 import produce from 'immer';

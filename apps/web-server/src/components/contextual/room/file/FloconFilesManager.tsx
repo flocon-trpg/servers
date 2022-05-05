@@ -10,7 +10,7 @@ import {
     FilePathFragment,
     FileSourceType,
     GetFilesDocument,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import { FloconUploaderFileLink } from './FloconUploaderFileLink';
 import { InformationIcon } from '../../../ui/InformationIcon';
 import { FileType, guessFileType, image, others, sound } from '../../../../utils/fileType';

@@ -6,7 +6,7 @@ import {
     RoomPublicChannelFragment,
     RoomPublicMessageFragment,
     RoomSoundEffectFragment,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import { toBeNever } from '@flocon-trpg/utils';
 import produce from 'immer';
 import { Observable, Subject, mergeMap } from 'rxjs';

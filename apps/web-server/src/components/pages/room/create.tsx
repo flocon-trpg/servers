@@ -1,5 +1,5 @@
 import { useMutation } from '@apollo/client';
-import { CreateRoomDocument, CreateRoomInput } from '@flocon-trpg/typed-document-node';
+import { CreateRoomDocument, CreateRoomInput } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { Alert, Button, Card, Form, Input, Spin, Switch } from 'antd';
 import { useRouter } from 'next/router';
 import React from 'react';

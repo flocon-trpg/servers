@@ -1,4 +1,4 @@
-import { FilePathFragment, FileSourceType } from '@flocon-trpg/typed-document-node';
+import { FilePathFragment, FileSourceType } from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Core from '@flocon-trpg/core';
 import { ExpiryMap } from './expiryMap';
 import { files, getFloconUploaderFile } from './getFloconUploaderFile';

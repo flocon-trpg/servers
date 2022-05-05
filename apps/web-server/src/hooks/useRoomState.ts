@@ -10,7 +10,7 @@ import {
     RoomAsListItemFragment,
     RoomEventSubscription,
     RoomOperationFragment,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Rx from 'rxjs/operators';
 import { ApolloError, FetchResult, useApolloClient, useMutation } from '@apollo/client';
 import { create as createStateManager } from '../stateManagers/main';

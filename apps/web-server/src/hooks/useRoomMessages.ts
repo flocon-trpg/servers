@@ -5,7 +5,7 @@ import {
     GetRoomMessagesFailureType,
     RoomEventSubscription,
     RoomMessageEventFragment,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import {
     AllRoomMessages,
     Message,

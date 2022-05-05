@@ -4,7 +4,7 @@ import {
     FilePathInput,
     FileSourceType,
     WriteRoomSoundEffectDocument,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Icon from '@ant-design/icons';
 import { FilesManagerDrawer } from './file/FilesManagerDrawer';
 import { FilesManagerDrawerType, some } from '../../../utils/types';

@@ -1,5 +1,5 @@
 import { Modal } from 'antd';
-import { FileItemFragment } from '@flocon-trpg/typed-document-node';
+import { FileItemFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
 
 export const DeleteFloconStorageFileModal = (
     filesToDelete: FileItemFragment | FileItemFragment[],

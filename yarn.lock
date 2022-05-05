@@ -1810,7 +1810,7 @@ __metadata:
   dependencies:
     "@flocon-trpg/cache": "workspace:^"
     "@flocon-trpg/core": "workspace:^"
-    "@flocon-trpg/typed-document-node": "workspace:*"
+    "@flocon-trpg/typed-document-node-v0.7.2": "workspace:*"
     "@flocon-trpg/utils": "workspace:^"
     "@flocon-trpg/web-server-utils": "workspace:*"
     "@graphql-codegen/cli": 2.6.2
@@ -1958,9 +1958,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@flocon-trpg/typed-document-node@workspace:*, @flocon-trpg/typed-document-node@workspace:^, @flocon-trpg/typed-document-node@workspace:packages/typed-document-node":
+"@flocon-trpg/typed-document-node-v0.7.1@workspace:^, @flocon-trpg/typed-document-node-v0.7.1@workspace:packages/typed-document-node-v0.7.1":
   version: 0.0.0-use.local
-  resolution: "@flocon-trpg/typed-document-node@workspace:packages/typed-document-node"
+  resolution: "@flocon-trpg/typed-document-node-v0.7.1@workspace:packages/typed-document-node-v0.7.1"
+  dependencies:
+    "@graphql-typed-document-node/core": ^3.1.0
+    graphql: ^15.6.0
+    rimraf: 3.0.2
+    typescript: 4.4.4
+  languageName: unknown
+  linkType: soft
+
+"@flocon-trpg/typed-document-node-v0.7.2@workspace:*, @flocon-trpg/typed-document-node-v0.7.2@workspace:^, @flocon-trpg/typed-document-node-v0.7.2@workspace:packages/typed-document-node-v0.7.2":
+  version: 0.0.0-use.local
+  resolution: "@flocon-trpg/typed-document-node-v0.7.2@workspace:packages/typed-document-node-v0.7.2"
   dependencies:
     "@graphql-typed-document-node/core": ^3.1.0
     graphql: ^15.6.0
@@ -1987,7 +1998,7 @@ __metadata:
   resolution: "@flocon-trpg/web-server-utils@workspace:packages/web-server-utils"
   dependencies:
     "@flocon-trpg/core": "workspace:^"
-    "@flocon-trpg/typed-document-node": "workspace:^"
+    "@flocon-trpg/typed-document-node-v0.7.1": "workspace:^"
     "@flocon-trpg/utils": "workspace:^"
     "@types/jest": 27.5.0
     fast-check: 2.25.0
@@ -2007,7 +2018,8 @@ __metadata:
     "@apollo/client": ^3.4.15
     "@emotion/react": ^11.4.1
     "@flocon-trpg/core": "workspace:^"
-    "@flocon-trpg/typed-document-node": "workspace:^"
+    "@flocon-trpg/typed-document-node-v0.7.1": "workspace:^"
+    "@flocon-trpg/typed-document-node-v0.7.2": "workspace:^"
     "@flocon-trpg/utils": "workspace:^"
     "@flocon-trpg/web-server-utils": "workspace:^"
     "@kizahasi/result": ^1.0.0

@@ -5,7 +5,7 @@ import {
     PieceLogType,
     RoomPrivateMessageFragment,
     RoomPublicMessageFragment,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import {
     Notification,
     PrivateChannelSet,

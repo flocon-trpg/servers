@@ -7,7 +7,7 @@ import {
     PongDocument,
     PongSubscription,
     PongSubscriptionVariables,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 
 type PongObservableResultState =
     | {

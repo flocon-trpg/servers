@@ -30,7 +30,7 @@
     },
     "dependencies": {
         "@flocon-trpg/core": "workspace:^",
-        "@flocon-trpg/typed-document-node": "workspace:^",
+        "@flocon-trpg/typed-document-node-v0.7.1": "workspace:^",
         "@flocon-trpg/utils": "workspace:^",
         "rxjs": "^7.5.5"
     }

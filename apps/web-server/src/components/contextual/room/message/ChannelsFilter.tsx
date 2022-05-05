@@ -1,6 +1,6 @@
 import React from 'react';
 import { Checkbox } from 'antd';
-import { RoomPrivateMessage, RoomPublicMessage } from '@flocon-trpg/typed-document-node';
+import { RoomPrivateMessage, RoomPublicMessage } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { usePublicChannelNames } from '../../../../hooks/state/usePublicChannelNames';
 import classNames from 'classnames';
 import { flex, flexColumn } from '../../../../utils/className';

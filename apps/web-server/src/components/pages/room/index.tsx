@@ -1,13 +1,6 @@
-import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
-import {
-    DeleteRoomDocument,
-    GetMyRolesDocument,
-    GetRoomsListDocument,
-    ParticipantRole,
-    RoomAsListItemFragment,
-    UpdateBookmarkDocument,
-    UpdateBookmarkFailureType,
-} from '@flocon-trpg/typed-document-node';
+import { useLazyQuery, useMutation } from '@apollo/client';
+import * as DocNode072 from '@flocon-trpg/typed-document-node-v0.7.2';
+import * as DocNode071 from '@flocon-trpg/typed-document-node-v0.7.1';
 import { Button, Dropdown, Menu, Modal, Table, Tooltip, notification } from 'antd';
 import classNames from 'classnames';
 import { useRouter } from 'next/router';
@@ -17,15 +10,18 @@ import { Layout, loginAndEntry } from '../../ui/Layout';
 import { QueryResultViewer } from '../../ui/QueryResultViewer';
 import * as Icons from '@ant-design/icons';
 import { Styles } from '../../../styles';
-import { useGetApiSemVer } from '../../../hooks/useGetApiSemVer';
-import { SemVer, alpha, toBeNever } from '@flocon-trpg/utils';
+import { toBeNever } from '@flocon-trpg/utils';
 import moment from 'moment';
 import { ToggleButton } from '../../ui/ToggleButton';
+import { useGetMyRoles } from '../../../hooks/apiServer/useGetMyRoles';
+import { useIsV072OrLater } from '../../../hooks/apiServer/useIsV072OrLater';
 
-type Data = RoomAsListItemFragment;
+type Data072 = DocNode072.RoomAsListItemFragment;
+type Data071 = DocNode071.RoomAsListItemFragment;
+type Data = Data072 | Data071;
 
-const BookmarkButton: React.FC<{ data: Data }> = ({ data }) => {
-    const [updateBookmark] = useMutation(UpdateBookmarkDocument);
+const BookmarkButton: React.FC<{ data: Data072 }> = ({ data }) => {
+    const [updateBookmark] = useMutation(DocNode072.UpdateBookmarkDocument);
     const [loading, setLoading] = React.useState(false);
     const [checked, setChecked] = React.useState(data.isBookmarked);
 
@@ -53,13 +49,13 @@ const BookmarkButton: React.FC<{ data: Data }> = ({ data }) => {
                         case undefined:
                             setChecked(checked);
                             break;
-                        case UpdateBookmarkFailureType.NotFound:
+                        case DocNode072.UpdateBookmarkFailureType.NotFound:
                             notification.warning({
                                 message: 'エラー',
                                 description: '該当する部屋が見つかりませんでした。',
                             });
                             break;
-                        case UpdateBookmarkFailureType.SameValue:
+                        case DocNode072.UpdateBookmarkFailureType.SameValue:
                             break;
                         default:
                             return toBeNever(updateBookmarkResult.data.result.failureType);
@@ -73,9 +69,11 @@ const BookmarkButton: React.FC<{ data: Data }> = ({ data }) => {
 
 const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
     const router = useRouter();
-    const [deleteRoom] = useMutation(DeleteRoomDocument);
-    const getMyRolesQueryResult = useQuery(GetMyRolesDocument);
-    const [getRooms] = useLazyQuery(GetRoomsListDocument, { fetchPolicy: 'network-only' });
+    const [deleteRoom] = useMutation(DocNode071.DeleteRoomDocument);
+    const [getRooms] = useLazyQuery(DocNode072.GetRoomsListDocument, {
+        fetchPolicy: 'network-only',
+    });
+    const getMyRolesQueryResult = useGetMyRoles();
 
     const overlay = React.useMemo(() => {
         if (getMyRolesQueryResult.data?.result.admin !== true) {
@@ -125,8 +123,8 @@ const dateToString = (dateMilliSeconds: number) =>
 const bookmarkColumn = {
     title: '',
     dataIndex: 'isBookmarked',
-    sorter: (x: Data, y: Data) => (x.isBookmarked ? 1 : 0) - (y.isBookmarked ? 1 : 0),
-    render: (_: any, record: Data) => <BookmarkButton data={record} />,
+    sorter: (x: Data072, y: Data072) => (x.isBookmarked ? 1 : 0) - (y.isBookmarked ? 1 : 0),
+    render: (_: any, record: Data072) => <BookmarkButton data={record} />,
     width: 60,
 };
 const nameColumn = {
@@ -154,32 +152,32 @@ const nameColumn = {
 const createdAtColumn = {
     title: '作成日時',
     dataIndex: 'createdAt',
-    sorter: (x: Data, y: Data) => (x.createdAt ?? -1) - (y.createdAt ?? -1),
+    sorter: (x: Data072, y: Data072) => (x.createdAt ?? -1) - (y.createdAt ?? -1),
     // eslint-disable-next-line react/display-name
-    render: (_: any, record: Data) =>
+    render: (_: any, record: Data072) =>
         record.createdAt == null ? '?' : dateToString(record.createdAt),
 };
 const updatedAtColumn = {
     title: '最終更新日時',
     dataIndex: 'updatedAt',
-    sorter: (x: Data, y: Data) => (x.updatedAt ?? -1) - (y.updatedAt ?? -1),
+    sorter: (x: Data072, y: Data072) => (x.updatedAt ?? -1) - (y.updatedAt ?? -1),
     // eslint-disable-next-line react/display-name
-    render: (_: any, record: Data) =>
+    render: (_: any, record: Data072) =>
         record.updatedAt == null ? '?' : dateToString(record.updatedAt),
 };
 const roleColumn = {
     title: '参加状況',
     dataIndex: 'role',
-    sorter: (x: Data, y: Data) => {
-        const toNumber = (source: Data['role']) => {
+    sorter: (x: Data072, y: Data072) => {
+        const toNumber = (source: Data072['role']) => {
             switch (source) {
                 case null:
                 case undefined:
                     return 0;
-                case ParticipantRole.Master:
-                case ParticipantRole.Player:
+                case DocNode072.ParticipantRole.Master:
+                case DocNode072.ParticipantRole.Player:
                     return 2;
-                case ParticipantRole.Spectator:
+                case DocNode072.ParticipantRole.Spectator:
                     return 1;
                 default:
                     toBeNever(source);
@@ -188,15 +186,15 @@ const roleColumn = {
         return toNumber(x.role) - toNumber(y.role);
     },
     // eslint-disable-next-line react/display-name
-    render: (_: any, record: Data) => {
+    render: (_: any, record: Data072) => {
         switch (record.role) {
             case null:
             case undefined:
                 return '-';
-            case ParticipantRole.Master:
-            case ParticipantRole.Player:
+            case DocNode072.ParticipantRole.Master:
+            case DocNode072.ParticipantRole.Player:
                 return '参加者';
-            case ParticipantRole.Spectator:
+            case DocNode072.ParticipantRole.Spectator:
                 return '観戦者';
             default:
                 toBeNever(record.role);
@@ -219,81 +217,116 @@ const columnV072 = [
     roleColumn,
     actionColumn,
 ];
-const columnV071 = [bookmarkColumn, nameColumn, actionColumn];
+const columnV071 = [nameColumn, actionColumn];
+
+const RoomsTable072: React.FC<{ rooms: readonly Data072[] }> = ({ rooms }) => {
+    return <Table rowKey='id' style={{ flex: 'auto' }} columns={columnV072} dataSource={rooms} />;
+};
+
+const RoomsTable071: React.FC<{ rooms: readonly Data071[] }> = ({ rooms }) => {
+    return <Table rowKey='id' style={{ flex: 'auto' }} columns={columnV071} dataSource={rooms} />;
+};
 
 type RoomsListComponentProps = {
-    rooms: RoomAsListItemFragment[];
+    roomsTable: React.ReactChild;
 };
 
 const RoomsListComponent: React.FC<RoomsListComponentProps> = ({
-    rooms,
+    roomsTable,
 }: RoomsListComponentProps) => {
     const router = useRouter();
-    const apiSemVer = useGetApiSemVer();
 
-    let isV072OrLater: boolean | null;
-    if (apiSemVer == null || apiSemVer.isError) {
-        isV072OrLater = null;
-    } else {
-        isV072OrLater = SemVer.compare(
-            new SemVer({ major: 0, minor: 7, patch: 2, prerelease: { type: alpha, version: 1 } }),
-            '<=',
-            apiSemVer.value
-        );
-    }
-
-    return React.useMemo(
-        () => (
-            <div style={{ display: 'flex', flexDirection: 'column', padding: 10 }}>
-                <div className={classNames(flex, flexNone)}>
-                    <div className={classNames(flexNone)}>
-                        <Button onClick={() => router.push('rooms/create')}>部屋を作成</Button>
-                    </div>
-                    <div style={{ flex: 'auto' }} />
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', padding: 10 }}>
+            <div className={classNames(flex, flexNone)}>
+                <div className={classNames(flexNone)}>
+                    <Button onClick={() => router.push('rooms/create')}>部屋を作成</Button>
                 </div>
-                <div style={{ flex: '10px' }} />
-                <Table
-                    rowKey='id'
-                    style={{ flex: 'auto' }}
-                    columns={
-                        isV072OrLater == null || isV072OrLater == true ? columnV072 : columnV071
-                    }
-                    dataSource={rooms}
-                />
+                <div style={{ flex: 'auto' }} />
             </div>
-        ),
-        [isV072OrLater, rooms, router]
+            <div style={{ flex: '10px' }} />
+            {roomsTable}
+        </div>
     );
 };
 
 const pollingInterval = 30000;
 
 const RoomCore: React.FC = () => {
-    const rooms = useQuery(GetRoomsListDocument, { fetchPolicy: 'network-only' });
+    const [getRooms072, rooms072] = useLazyQuery(DocNode072.GetRoomsListDocument, {
+        fetchPolicy: 'network-only',
+    });
+    const [getRooms071, rooms071] = useLazyQuery(DocNode071.GetRoomsListDocument, {
+        fetchPolicy: 'network-only',
+    });
+    const loading = rooms072.loading && rooms071.loading;
+    const error = rooms072.error && rooms071.error;
+    const isV072OrLater = useIsV072OrLater();
 
     React.useEffect(() => {
-        switch (rooms.data?.result.__typename) {
-            case 'GetRoomsListSuccessResult':
-                rooms.startPolling(pollingInterval);
-                break;
-            case 'GetRoomsListFailureResult':
-                rooms.stopPolling();
-                break;
+        if (isV072OrLater) {
+            getRooms072();
+        } else {
+            getRooms071();
         }
-    }, [rooms]);
+    }, [getRooms071, getRooms072, isV072OrLater]);
 
-    const roomsData = React.useMemo(() => {
-        switch (rooms.data?.result.__typename) {
+    let roomsData072;
+    switch (rooms072.data?.result.__typename) {
+        case 'GetRoomsListSuccessResult':
+            roomsData072 = rooms072.data.result.rooms;
+            break;
+        case 'GetRoomsListFailureResult':
+        case undefined:
+            roomsData072 = undefined;
+            break;
+    }
+
+    let roomsData071;
+    switch (rooms071.data?.result.__typename) {
+        case 'GetRoomsListSuccessResult':
+            roomsData071 = rooms071.data.result.rooms;
+            break;
+        case 'GetRoomsListFailureResult':
+        case undefined:
+            roomsData071 = undefined;
+            break;
+    }
+
+    React.useEffect(() => {
+        switch (rooms072.data?.result.__typename) {
             case 'GetRoomsListSuccessResult':
-                return rooms.data.result.rooms;
+                rooms072.startPolling(pollingInterval);
+                break;
             case 'GetRoomsListFailureResult':
-                return [];
+                rooms072.stopPolling();
+                break;
         }
-    }, [rooms.data]);
+    }, [rooms072]);
+    React.useEffect(() => {
+        switch (rooms071.data?.result.__typename) {
+            case 'GetRoomsListSuccessResult':
+                rooms071.startPolling(pollingInterval);
+                break;
+            case 'GetRoomsListFailureResult':
+                rooms071.stopPolling();
+                break;
+        }
+    }, [rooms071]);
 
     return (
-        <QueryResultViewer loading={rooms.loading} error={rooms.error} compact={false}>
-            {roomsData == null ? null : <RoomsListComponent rooms={roomsData} />}
+        <QueryResultViewer loading={loading} error={error} compact={false}>
+            <RoomsListComponent
+                roomsTable={
+                    roomsData072 != null ? (
+                        <RoomsTable072 rooms={roomsData072} />
+                    ) : roomsData071 != null ? (
+                        <RoomsTable071 rooms={roomsData071} />
+                    ) : (
+                        <div />
+                    )
+                }
+            />
         </QueryResultViewer>
     );
 };

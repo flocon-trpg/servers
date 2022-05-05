@@ -11,7 +11,7 @@ import {
     WritePrivateMessageDocument,
     WritePublicMessageDocument,
     WriteRoomPublicMessageFailureType,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import { UISelector } from '../../../../ui/UISelector';
 import { PrivateMessageChannelSelector } from './PrivateMessageChannelSelector';
 import { PublicMessageChannelSelector } from './PublicMessageChannelSelector';

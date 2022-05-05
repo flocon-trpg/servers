@@ -35,7 +35,7 @@ SOFTWARE.
 
 import { State as S, filePathTemplate } from '@flocon-trpg/core';
 import React from 'react';
-import { FilePathFragment } from '@flocon-trpg/typed-document-node';
+import { FilePathFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { analyzeUrl } from '../utils/analyzeUrl';
 import { useSrcFromGraphQL } from './src';
 

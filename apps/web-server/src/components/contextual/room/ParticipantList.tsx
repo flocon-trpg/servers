@@ -1,6 +1,6 @@
 import React from 'react';
 import { Table } from 'antd';
-import { ParticipantRole } from '@flocon-trpg/typed-document-node';
+import { ParticipantRole } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { Jdenticon } from '../../ui/Jdenticon';
 import { useRoomConnections } from '../../../hooks/useRoomConnections';
 import { useParticipants } from '../../../hooks/state/useParticipants';

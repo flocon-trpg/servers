@@ -1,7 +1,7 @@
 import React from 'react';
 import { Popover } from 'antd';
 import { State, filePathTemplate } from '@flocon-trpg/core';
-import { FilePathFragment } from '@flocon-trpg/typed-document-node';
+import { FilePathFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { ImageView } from './ImageView';
 
 type FilePath = State<typeof filePathTemplate>;

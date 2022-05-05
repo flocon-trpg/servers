@@ -21,7 +21,7 @@ import { Subject } from 'rxjs';
 import { $free, OmitVersion, State, boardTemplate, pieceTemplate } from '@flocon-trpg/core';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
-import { FilePath, FileSourceType } from '@flocon-trpg/typed-document-node';
+import { FilePath, FileSourceType } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { ImagePiece } from './ImagePiece';
 import { DragEndResult, Vector2 } from '../../../../utils/types';
 import { DiceOrStringPiece } from './DiceOrStringPiece';

@@ -11,7 +11,7 @@ import {
     PromoteToPlayerDocument,
     ResetMessagesDocument,
     ResetRoomMessagesFailureType,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Icon from '@ant-design/icons';
 import { RoomVolumeBar } from './RoomVolumeBar';
 import { Jdenticon } from '../../ui/Jdenticon';

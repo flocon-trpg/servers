@@ -1,4 +1,4 @@
-import { RoomMessageEventFragment, RoomMessages } from '@flocon-trpg/typed-document-node';
+import { RoomMessageEventFragment, RoomMessages } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { PrivateChannelSet } from './privateChannelSet';
 import { PrivateChannelSets } from './privateChannelSets';
 
