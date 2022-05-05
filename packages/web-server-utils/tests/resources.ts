@@ -1,4 +1,8 @@
-import { FileSourceType, PieceLogType, RoomMessages } from '@flocon-trpg/typed-document-node';
+import {
+    FileSourceType,
+    PieceLogType,
+    RoomMessages,
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import { Message, pieceLog, privateMessage, publicMessage } from '../src';
 import { soundEffect } from '../src/internal/roomMessages';
 

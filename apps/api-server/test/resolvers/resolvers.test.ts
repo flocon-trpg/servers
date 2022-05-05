@@ -8,26 +8,29 @@ import {
     CreateFileTagMutation,
     CreateRoomMutation,
     DeleteMessageMutation,
-    DeleteRoomAsAdminMutation,
     DeleteRoomFailureType,
     DeleteRoomMutation,
     EditFileTagsMutation,
     EditMessageMutation,
     GetFilesQuery,
     GetMessagesQuery,
-    GetRoomFailureType,
-    GetRoomQuery,
-    GetRoomsListQuery,
     JoinRoomAsPlayerMutation,
     JoinRoomAsSpectatorMutation,
     LeaveRoomMutation,
     OperateMutation,
     ParticipantRole,
     RoomPublicMessageFragment,
-    UpdateBookmarkFailureType,
     WritePrivateMessageMutation,
     WritePublicMessageMutation,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
+import {
+    DeleteRoomAsAdminMutation,
+    GetRoomFailureType,
+    GetRoomQuery,
+    GetRoomsListQuery,
+    UpdateBookmarkFailureType,
+    UpdateBookmarkMutation,
+} from '@flocon-trpg/typed-document-node-v0.7.2';
 import { EntryToServerResultType } from '../../src/enums/EntryToServerResultType';
 import { ServerConfig } from '../../src/configType';
 import { $free, UpOperation as U, parseState, roomTemplate } from '@flocon-trpg/core';
@@ -331,6 +334,24 @@ namespace Assert {
             if (errorType === 'GraphQL') {
                 expect(sourceResult.error?.graphQLErrors.length ?? 0).toBeGreaterThanOrEqual(1);
             }
+        };
+    }
+
+    export namespace UpdateBookmarkMutation {
+        export const toBeSuccess = (source: OperationResult<UpdateBookmarkMutation>) => {
+            if (source.data?.result.__typename !== 'UpdateBookmarkSuccessResult') {
+                expect(source.data?.result.__typename).toBe('UpdateBookmarkSuccessResult');
+                throw new Error('Guard');
+            }
+            return source.data.result;
+        };
+
+        export const toBeFailure = (source: OperationResult<UpdateBookmarkMutation>) => {
+            if (source.data?.result.__typename !== 'UpdateBookmarkFailureResult') {
+                expect(source.data?.result.__typename).toBe('UpdateBookmarkFailureResult');
+                throw new Error('Guard');
+            }
+            return source.data.result.failureType;
         };
     }
 
@@ -977,15 +998,14 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
 
                 // bookmark room1
                 {
-                    const bookmarked = await clients[
-                        Resources.UserUid.master
-                    ].updateBookmarkMutation({
-                        roomId: room1Id,
-                        newValue: true,
-                    });
-                    expect(bookmarked.error).toBeFalsy();
-                    expect(bookmarked.data).toBeTruthy();
-                    expect(bookmarked.data?.result.failureType).toBeFalsy();
+                    const bookmarked = Assert.UpdateBookmarkMutation.toBeSuccess(
+                        await clients[Resources.UserUid.master].updateBookmarkMutation({
+                            roomId: room1Id,
+                            newValue: true,
+                        })
+                    );
+                    expect(bookmarked.prevValue).toBe(false);
+                    expect(bookmarked.currentValue).toBe(true);
 
                     await testRooms({
                         room1ValueAsMaster: true,
@@ -995,17 +1015,16 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                     });
                 }
 
-                // bookmark room1 again to expect failure
+                // bookmark room1 again
                 {
-                    const bookmarked = await clients[
-                        Resources.UserUid.master
-                    ].updateBookmarkMutation({
-                        roomId: room1Id,
-                        newValue: true,
-                    });
-                    expect(bookmarked.data?.result.failureType).toBe(
-                        UpdateBookmarkFailureType.SameValue
+                    const bookmarked = Assert.UpdateBookmarkMutation.toBeSuccess(
+                        await clients[Resources.UserUid.master].updateBookmarkMutation({
+                            roomId: room1Id,
+                            newValue: true,
+                        })
                     );
+                    expect(bookmarked.prevValue).toBe(true);
+                    expect(bookmarked.currentValue).toBe(true);
 
                     await testRooms({
                         room1ValueAsMaster: true,
@@ -1017,14 +1036,11 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
 
                 // bookmark not found room to expect failure
                 {
-                    const bookmarked = await clients[
-                        Resources.UserUid.master
-                    ].updateBookmarkMutation({
-                        roomId: 'invalidroomid',
-                        newValue: true,
-                    });
-                    expect(bookmarked.data?.result.failureType).toBe(
-                        UpdateBookmarkFailureType.NotFound
+                    Assert.UpdateBookmarkMutation.toBeFailure(
+                        await clients[Resources.UserUid.master].updateBookmarkMutation({
+                            roomId: 'invalidroomid',
+                            newValue: true,
+                        })
                     );
 
                     await testRooms({
@@ -1037,14 +1053,14 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
 
                 // remove room1 bookmark
                 {
-                    const bookmarked = await clients[
-                        Resources.UserUid.master
-                    ].updateBookmarkMutation({
-                        roomId: room1Id,
-                        newValue: false,
-                    });
-                    expect(bookmarked.data).toBeTruthy();
-                    expect(bookmarked.data?.result.failureType).toBeFalsy();
+                    const bookmarked = Assert.UpdateBookmarkMutation.toBeSuccess(
+                        await clients[Resources.UserUid.master].updateBookmarkMutation({
+                            roomId: room1Id,
+                            newValue: false,
+                        })
+                    );
+                    expect(bookmarked.prevValue).toBe(true);
+                    expect(bookmarked.currentValue).toBe(false);
 
                     await testRooms({
                         room1ValueAsMaster: false,
@@ -1054,17 +1070,16 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                     });
                 }
 
-                // remove room1 bookmark again to expect failure
+                // remove room1 bookmark again
                 {
-                    const bookmarked = await clients[
-                        Resources.UserUid.master
-                    ].updateBookmarkMutation({
-                        roomId: room1Id,
-                        newValue: false,
-                    });
-                    expect(bookmarked.data?.result.failureType).toBe(
-                        UpdateBookmarkFailureType.SameValue
+                    const bookmarked = Assert.UpdateBookmarkMutation.toBeSuccess(
+                        await clients[Resources.UserUid.master].updateBookmarkMutation({
+                            roomId: room1Id,
+                            newValue: false,
+                        })
                     );
+                    expect(bookmarked.prevValue).toBe(false);
+                    expect(bookmarked.currentValue).toBe(false);
 
                     await testRooms({
                         room1ValueAsMaster: false,

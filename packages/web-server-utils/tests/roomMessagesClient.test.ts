@@ -1,4 +1,4 @@
-import { RoomMessageEventFragment, RoomMessages } from '@flocon-trpg/typed-document-node';
+import { RoomMessageEventFragment, RoomMessages } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { Observable } from 'rxjs';
 import { Message, MessagesChange, RoomMessagesClient, event, query, reset } from '../src';
 import { Resources } from './resources';

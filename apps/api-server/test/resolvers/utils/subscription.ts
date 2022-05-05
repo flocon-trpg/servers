@@ -1,4 +1,4 @@
-import { RoomEventSubscription } from '@flocon-trpg/typed-document-node';
+import { RoomEventSubscription } from '@flocon-trpg/typed-document-node-v0.7.1';
 import _ from 'lodash';
 import { Source, pipe, subscribe } from 'wonka';
 import { OperationResult } from '@urql/core';

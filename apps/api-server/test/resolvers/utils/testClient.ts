@@ -18,9 +18,6 @@ import {
     DeleteMessageDocument,
     DeleteMessageMutation,
     DeleteMessageMutationVariables,
-    DeleteRoomAsAdminDocument,
-    DeleteRoomAsAdminMutation,
-    DeleteRoomAsAdminMutationVariables,
     DeleteRoomDocument,
     DeleteRoomMutation,
     DeleteRoomMutationVariables,
@@ -39,15 +36,6 @@ import {
     GetMessagesDocument,
     GetMessagesQuery,
     GetMessagesQueryVariables,
-    GetMyRolesDocument,
-    GetMyRolesQuery,
-    GetMyRolesQueryVariables,
-    GetRoomDocument,
-    GetRoomQuery,
-    GetRoomQueryVariables,
-    GetRoomsListDocument,
-    GetRoomsListQuery,
-    GetRoomsListQueryVariables,
     JoinRoomAsPlayerDocument,
     JoinRoomAsPlayerMutation,
     JoinRoomAsPlayerMutationVariables,
@@ -63,18 +51,31 @@ import {
     RoomEventDocument,
     RoomEventSubscription,
     RoomEventSubscriptionVariables,
-    UpdateBookmarkDocument,
-    UpdateBookmarkMutation,
-    UpdateBookmarkMutationVariables,
     WritePrivateMessageDocument,
     WritePrivateMessageMutation,
     WritePrivateMessageMutationVariables,
     WritePublicMessageDocument,
     WritePublicMessageMutation,
     WritePublicMessageMutationVariables,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import { TestRoomEventSubscription } from './subscription';
-import { UpdateBookmarkArgs } from '../../../src/graphql+mikro-orm/resolvers/rooms/object+args+input';
+import {
+    DeleteRoomAsAdminDocument,
+    DeleteRoomAsAdminMutation,
+    DeleteRoomAsAdminMutationVariables,
+    GetMyRolesDocument,
+    GetMyRolesQuery,
+    GetMyRolesQueryVariables,
+    GetRoomDocument,
+    GetRoomQuery,
+    GetRoomQueryVariables,
+    GetRoomsListDocument,
+    GetRoomsListQuery,
+    GetRoomsListQueryVariables,
+    UpdateBookmarkDocument,
+    UpdateBookmarkMutation,
+    UpdateBookmarkMutationVariables,
+} from '@flocon-trpg/typed-document-node-v0.7.2';
 
 const wsClient = (wsUrl: string, testAuthorizationHeaderValue: string | undefined) =>
     createWsClient({
