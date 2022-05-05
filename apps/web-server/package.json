@@ -28,7 +28,7 @@
         "envfile": "^6.17.0",
         "firebase": "^9.6.6",
         "fp-ts": "^2.11.8",
-        "graphql": "^15.6.0",
+        "graphql": "^16.0.0",
         "graphql-ws": "^5.8.1",
         "howler": "^2.2.3",
         "html-escaper": "^3.0.3",
