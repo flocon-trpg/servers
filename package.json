@@ -29,6 +29,6 @@
         "prettier": "2.6.2"
     },
     "resolutions": {
-        "@react-spring/core": "9.4.4"
+        "@react-spring/core": "9.4.5"
     }
 }
