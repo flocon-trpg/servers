@@ -9,6 +9,7 @@ import { recordForEach } from '@flocon-trpg/utils';
 export class TestRoomEventSubscription {
     #values: RoomEventSubscription[] = [];
     #messagesClient = new RoomMessagesClient();
+    #subscription;
 
     public constructor(source: Source<OperationResult<RoomEventSubscription>>) {
         this.#messagesClient.onQuery({
@@ -18,7 +19,7 @@ export class TestRoomEventSubscription {
             privateMessages: [],
             soundEffects: [],
         });
-        pipe(
+        this.#subscription = pipe(
             source,
             subscribe(result => {
                 if (result.error != null) {
@@ -27,11 +28,15 @@ export class TestRoomEventSubscription {
                 if (result.data != null) {
                     this.#values.push(result.data);
                     if (result.data.roomEvent?.roomMessageEvent != null) {
-                        this.#messagesClient.onEvent(result.data.roomEvent?.roomMessageEvent);
+                        this.#messagesClient.onEvent(result.data.roomEvent.roomMessageEvent);
                     }
                 }
             })
         );
+    }
+
+    public unsubscribe() {
+        this.#subscription.unsubscribe();
     }
 
     public clear() {
@@ -132,6 +137,10 @@ export class CompositeTestRoomEventSubscription<TUserUids extends ReadonlyArray<
     public constructor(
         private readonly instances: { [_ in TUserUids[number]]: TestRoomEventSubscription }
     ) {}
+
+    public unsubscribe() {
+        recordForEach<TestRoomEventSubscription>(this.instances, x => x.unsubscribe());
+    }
 
     public clear() {
         recordForEach<TestRoomEventSubscription>(this.instances, x => x.clear());

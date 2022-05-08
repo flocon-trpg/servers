@@ -179,6 +179,7 @@ import { DeleteRoomAsAdminResult } from '../../results/DeleteRoomAsAdminResult';
 import { DeleteRoomAsAdminFailureType } from '../../../enums/DeleteRoomAsAdminFailureType';
 import { UpdateBookmarkResult } from '../../results/UpdateBookmarkResult';
 import { UpdateBookmarkFailureType } from '../../../enums/UpdateBookmarkFailureType';
+import { toBeNever } from '@flocon-trpg/utils';
 
 type RoomState = State<typeof roomTemplate>;
 type RoomUpOperation = UpOperation<typeof roomTemplate>;
@@ -2138,7 +2139,7 @@ export class RoomResolver {
             await em.persistAndFlush(entity);
 
             const visibleToArray = [...visibleTo].sort();
-            const result = await createRoomPrivateMessage({
+            const result = createRoomPrivateMessage({
                 msg: entity,
                 visibleTo: visibleToArray,
             });
@@ -2535,6 +2536,7 @@ export class RoomResolver {
         return result.value.value.result;
     }
 
+    // CONSIDER: 例えば'1d100'などダイスを振るメッセージでも現在はedit可能だが、editされてもinitTextなどを参照すれば問題ない。ただしロジックが少しややこしくなるので、そのようなケースはeditを拒否するように仕様変更したほうがいいのかも？
     @Mutation(() => EditMessageResult)
     @Authorized(ENTRY)
     @UseMiddleware(RateLimitMiddleware(2))
@@ -2822,108 +2824,85 @@ export class RoomResolver {
             }
         }
 
-        if (payload.type === 'roomConnectionUpdatePayload') {
-            return {
-                roomConnectionEvent: {
-                    userUid: payload.userUid,
-                    isConnected: payload.isConnected,
-                    updatedAt: payload.updatedAt,
-                },
-                isRoomMessagesResetEvent: false,
-            };
-        }
+        switch (payload.type) {
+            case 'roomConnectionUpdatePayload':
+                return {
+                    roomConnectionEvent: {
+                        userUid: payload.userUid,
+                        isConnected: payload.isConnected,
+                        updatedAt: payload.updatedAt,
+                    },
+                    isRoomMessagesResetEvent: false,
+                };
+            case 'writingMessageStatusUpdatePayload':
+                return {
+                    writingMessageStatus: {
+                        userUid: payload.userUid,
+                        status: payload.status,
+                        updatedAt: payload.updatedAt,
+                    },
+                    isRoomMessagesResetEvent: false,
+                };
+            case 'roomMessagesResetPayload':
+                return {
+                    isRoomMessagesResetEvent: true,
+                };
+            case 'messageUpdatePayload': {
+                // userUidが同じでも例えば異なるタブで同じRoomを開いているケースがある。そのため、Mutationを行ったuserUidにだけSubscriptionを送信しないことで通信量を節約、ということはできない。
 
-        if (payload.type === 'writingMessageStatusUpdatePayload') {
-            return {
-                writingMessageStatus: {
-                    userUid: payload.userUid,
-                    status: payload.status,
-                    updatedAt: payload.updatedAt,
-                },
-                isRoomMessagesResetEvent: false,
-            };
-        }
-
-        if (payload.type === 'roomMessagesResetPayload') {
-            return {
-                isRoomMessagesResetEvent: true,
-            };
-        }
-
-        if (payload.type === 'messageUpdatePayload') {
-            if (payload.value.__tstype === RoomPrivateMessageType) {
-                if (payload.value.visibleTo.every(vt => vt !== userUid)) {
-                    return undefined;
-                }
-            }
-            if (payload.value.__tstype === RoomPrivateMessageUpdateType) {
-                if (payload.visibleTo == null) {
-                    throw new Error('payload.visibleTo is required.');
-                }
-                if (payload.visibleTo.every(vt => vt !== userUid)) {
-                    return undefined;
-                }
-            }
-
-            switch (payload.value.__tstype) {
-                case RoomPrivateMessageType:
-                case RoomPublicMessageType: {
-                    if (payload.value.isSecret && payload.value.createdBy !== userUid) {
-                        return {
-                            roomMessageEvent: {
-                                ...payload.value,
-                                initText: undefined,
-                                initTextSource: undefined,
-                                commandResult: undefined,
-                            },
-                            isRoomMessagesResetEvent: false,
-                        };
+                if (payload.value.__tstype === RoomPrivateMessageType) {
+                    if (payload.value.visibleTo.every(vt => vt !== userUid)) {
+                        return undefined;
                     }
-                    break;
                 }
-                case RoomPrivateMessageUpdateType:
-                case RoomPublicMessageUpdateType:
-                    if (payload.value.isSecret && payload.createdBy !== userUid) {
-                        return {
-                            roomMessageEvent: {
-                                ...payload.value,
-                                initText: undefined,
-                                initTextSource: undefined,
-                                commandResult: undefined,
-                            },
-                            isRoomMessagesResetEvent: false,
-                        };
+                if (payload.value.__tstype === RoomPrivateMessageUpdateType) {
+                    if (payload.visibleTo == null) {
+                        throw new Error('payload.visibleTo is required.');
                     }
-                    break;
+                    if (payload.visibleTo.every(vt => vt !== userUid)) {
+                        return undefined;
+                    }
+                }
+
+                switch (payload.value.__tstype) {
+                    case RoomPrivateMessageType:
+                    case RoomPublicMessageType: {
+                        if (payload.value.isSecret && payload.value.createdBy !== userUid) {
+                            return undefined;
+                        }
+                        break;
+                    }
+                    case RoomPrivateMessageUpdateType:
+                    case RoomPublicMessageUpdateType:
+                        if (payload.value.isSecret && payload.createdBy !== userUid) {
+                            return undefined;
+                        }
+                        break;
+                }
+
+                return {
+                    roomMessageEvent: payload.value,
+                    isRoomMessagesResetEvent: false,
+                };
             }
-
-            return {
-                roomMessageEvent: payload.value,
-
-                isRoomMessagesResetEvent: false,
-            };
-        }
-
-        // userUidが同じでも例えば異なるタブで同じRoomを開いているケースがある。そのため、Mutationを行ったuserUidにだけSubscriptionを送信しないことで通信量を節約、ということはできない。
-
-        if (payload.type === 'deleteRoomPayload') {
-            // Roomが削除されたことは非公開にする必要はないので、このように全員に通知して構わない。
-            return {
-                deleteRoomOperation: {
-                    __tstype: deleteRoomOperation,
-                    deletedBy: payload.deletedBy,
-                    deletedByAdmin: payload.deletedByAdmin,
-                },
-                isRoomMessagesResetEvent: false,
-            };
-        }
-
-        if (payload.type === 'roomOperationPayload') {
-            // TODO: DeleteRoomOperationも返す
-            return {
-                roomOperation: payload.generateOperation(userUid),
-                isRoomMessagesResetEvent: false,
-            };
+            case 'deleteRoomPayload':
+                // Roomが削除されたことは非公開にする必要はないので、このように全員に通知して構わない。
+                return {
+                    deleteRoomOperation: {
+                        __tstype: deleteRoomOperation,
+                        deletedBy: payload.deletedBy,
+                        deletedByAdmin: payload.deletedByAdmin,
+                    },
+                    isRoomMessagesResetEvent: false,
+                };
+            case 'roomOperationPayload':
+                // TODO: DeleteRoomOperationも返す
+                return {
+                    roomOperation: payload.generateOperation(userUid),
+                    isRoomMessagesResetEvent: false,
+                };
+            default:
+                toBeNever(payload);
         }
     }
 }
