@@ -156,12 +156,6 @@ export const useRoomState = (
                 }
                 const newState = $stateManager.uiState;
                 if (oldValue.setStateByApply == null || $stateManager.requiresReload) {
-                    if ($stateManager.requiresReload) {
-                        console.info(
-                            '[調査用ログ]onRoomStateManagerUpdate:',
-                            JSON.stringify($stateManager.history)
-                        );
-                    }
                     return {
                         type: oldValue.type,
                         state: newState,
@@ -365,12 +359,6 @@ export const useRoomState = (
                                 return;
                             }
                             if ($stateManager.requiresReload) {
-                                if ($stateManager.requiresReload) {
-                                    console.info(
-                                        '[調査用ログ]setStateCore',
-                                        JSON.stringify($stateManager.history)
-                                    );
-                                }
                                 setState(oldValue => {
                                     if (oldValue.type !== joined) {
                                         return oldValue;
@@ -393,10 +381,6 @@ export const useRoomState = (
                         };
 
                         if (newRoomStateManager.requiresReload) {
-                            console.info(
-                                '[調査用ログ]onRoomStateManagerCreate',
-                                JSON.stringify(newRoomStateManager.history)
-                            );
                             setState({
                                 type: joined,
                                 state: newRoomStateManager.uiState,
