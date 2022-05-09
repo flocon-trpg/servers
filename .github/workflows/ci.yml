@@ -36,7 +36,7 @@ jobs:
               run: yarn build-ci
 
             - name: Test
-              run: yarn test --ci --coverage --maxWorkers=2 --forceExit
+              run: yarn test --ci --coverage --runInBand --forceExit
               env:
                   REDIS_TEST: 0
                   MYSQL_TEST: 0
@@ -121,7 +121,7 @@ jobs:
                       }
 
             - name: Test
-              run: yarn test --ci --coverage --maxWorkers=2 --forceExit
+              run: yarn test --ci --coverage --runInBand --forceExit
 
             - name: Upload coverages to Codecov
               if: ${{ matrix.container == 'node:16-buster' }}
