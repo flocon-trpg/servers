@@ -491,6 +491,19 @@ class SystemTimeManager {
     }
 }
 
+class CompositeDisposable {
+    #disposables: (() => void | Promise<void>)[] = [];
+    public add(disposable: () => void | Promise<void>) {
+        this.#disposables.push(disposable);
+    }
+
+    public async dispose() {
+        for (const d of this.#disposables) {
+            await d();
+        }
+    }
+}
+
 describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
     // MySQLではjest.useFakeTimersの相性が悪い（DBにアクセスする際にフリーズする）ようなので無効化している
     const systemTimeManager = new SystemTimeManager(dbType.type !== 'MySQL');
@@ -528,16 +541,21 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
         }: {
             admins?: ServerConfig['admins'];
         },
-        main: (server: Awaited<ReturnType<typeof createTestServer>>) => PromiseLike<void>
+        main: (params: {
+            server: Awaited<ReturnType<typeof createTestServer>>;
+            onFinally: Omit<CompositeDisposable, 'dispose'>;
+        }) => PromiseLike<void>
     ) => {
+        const onFinally = new CompositeDisposable();
         const server = await createTestServer({
             dbConfig: dbType,
             entryPasswordConfig,
             admins,
         });
         try {
-            await main(server);
+            await main({ server, onFinally });
         } finally {
+            await onFinally.dispose();
             await server.close();
         }
     };
@@ -829,16 +847,17 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
     });
 
     it('tests getRoomsListQuery', async () => {
-        await useTestServer({}, async () => {
+        await useTestServer({}, async ({ onFinally }) => {
             systemTimeManager.set(1);
 
             const userUids = [Resources.UserUid.master, Resources.UserUid.player1] as const;
             const roomName = 'TEST_ROOM';
-            const { clients, roomId } = await setupUsersAndRoom({
+            const { clients, roomId, subscriptions } = await setupUsersAndRoom({
                 userUids,
                 roomMasterUserUid: Resources.UserUid.master,
                 roomName,
             });
+            onFinally.add(() => subscriptions.all.unsubscribe());
 
             // - master can get the room
             const roomMasterResult = Assert.GetRoomsListQuery.toBeSuccess(
@@ -872,7 +891,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
     it.each([undefined, Resources.Room.spectatorPassword])(
         'tests joinRoomAsPlayer with an incorrect password',
         async spectatorPassword => {
-            await useTestServer({}, async () => {
+            await useTestServer({}, async ({ onFinally }) => {
                 const userUids = [Resources.UserUid.master, Resources.UserUid.player1] as const;
                 const { clients, subscriptions, roomId } = await setupUsersAndRoom({
                     userUids,
@@ -880,6 +899,8 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                     playerPassword: Resources.Room.playerPassword,
                     spectatorPassword,
                 });
+                onFinally.add(() => subscriptions.all.unsubscribe());
+
                 const incorrectPassword = 'INCORRECT_PASSWORD';
                 Assert.JoinRoomMutation.toBeFailure(
                     await clients[Resources.UserUid.player1].joinRoomAsPlayerMutation({
@@ -897,7 +918,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
     it.each([undefined, Resources.Room.playerPassword])(
         'tests joinRoomAsSpectator with an incorrect password',
         async playerPassword => {
-            await useTestServer({}, async () => {
+            await useTestServer({}, async ({ onFinally }) => {
                 const userUids = [Resources.UserUid.master, Resources.UserUid.player1] as const;
                 const { clients, subscriptions, roomId } = await setupUsersAndRoom({
                     userUids,
@@ -905,6 +926,8 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                     playerPassword,
                     spectatorPassword: Resources.Room.spectatorPassword,
                 });
+                onFinally.add(() => subscriptions.all.unsubscribe());
+
                 const incorrectPassword = 'INCORRECT_PASSWORD';
                 Assert.JoinRoomMutation.toBeFailure(
                     await clients[Resources.UserUid.player1].joinRoomAsSpectatorMutation({
@@ -938,15 +961,20 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
         },
     ])('room tests with correct passwords', ({ playerPassword, spectatorPassword }) => {
         it('updateBookmark mutation', async () => {
-            await useTestServer({}, async () => {
+            await useTestServer({}, async ({ onFinally }) => {
                 const userUids = [Resources.UserUid.master, Resources.UserUid.player1] as const;
-                const { clients, roomId: room1Id } = await setupUsersAndRoom({
+                const {
+                    clients,
+                    roomId: room1Id,
+                    subscriptions,
+                } = await setupUsersAndRoom({
                     userUids,
                     roomMasterUserUid: Resources.UserUid.master,
                     playerPassword,
                     spectatorPassword,
                     autoJoin: { [Resources.UserUid.player1]: 'player' },
                 });
+                onFinally.add(() => subscriptions.all.unsubscribe());
 
                 const anotherRoom = await clients[Resources.UserUid.master].createRoomMutation({
                     input: { participantName: '', roomName: '' },
@@ -1094,7 +1122,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
 
         describe('joinRoomAsPlayer and joinRoomAsSpectator mutations with correct password', () => {
             it('tests successful joinRoomAsPlayer -> second joinRoomAsPlayer', async () => {
-                await useTestServer({}, async () => {
+                await useTestServer({}, async ({ onFinally }) => {
                     const userUids = [Resources.UserUid.master, Resources.UserUid.player1] as const;
                     const { clients, subscriptions, roomId } = await setupUsersAndRoom({
                         userUids,
@@ -1102,6 +1130,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         playerPassword,
                         spectatorPassword,
                     });
+                    onFinally.add(() => subscriptions.all.unsubscribe());
 
                     Assert.JoinRoomMutation.toBeSuccess(
                         await clients[Resources.UserUid.player1].joinRoomAsPlayerMutation({
@@ -1129,7 +1158,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
             });
 
             it('tests joinRoomAsSpectator -> joinRoomAsSpectator -> joinRoomAsPlayer', async () => {
-                await useTestServer({}, async () => {
+                await useTestServer({}, async ({ onFinally }) => {
                     const userUids = [
                         Resources.UserUid.master,
                         Resources.UserUid.player1,
@@ -1141,6 +1170,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         playerPassword,
                         spectatorPassword,
                     });
+                    onFinally.add(() => subscriptions.all.unsubscribe());
 
                     Assert.JoinRoomMutation.toBeSuccess(
                         await clients[Resources.UserUid.player1].joinRoomAsSpectatorMutation({
@@ -1181,14 +1211,14 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
         it('tests getRoom', async () => {
             systemTimeManager.set(1);
 
-            await useTestServer({}, async () => {
+            await useTestServer({}, async ({ onFinally }) => {
                 const userUids = [
                     Resources.UserUid.master,
                     Resources.UserUid.player1,
                     Resources.UserUid.spectator1,
                     Resources.UserUid.notJoin,
                 ] as const;
-                const { clients, roomId } = await setupUsersAndRoom({
+                const { clients, roomId, subscriptions } = await setupUsersAndRoom({
                     userUids,
                     roomMasterUserUid: Resources.UserUid.master,
                     playerPassword,
@@ -1198,6 +1228,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         [Resources.UserUid.spectator1]: 'spectator',
                     },
                 });
+                onFinally.add(() => subscriptions.all.unsubscribe());
 
                 const masterResult = Assert.GetRoomQuery.toBeSuccess(
                     await clients[Resources.UserUid.master].getRoomQuery({
@@ -1248,7 +1279,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
             // TODO: Room.valueのJSONの容量が上限を超えるようなOperationを送信したときのテスト。例えば単にnameの文字数を一度に大量に増やそうとするとApollo ServerによりPayload Too Largeエラーが返されるため、テストには一工夫必要か。
 
             it('tests a valid operation', async () => {
-                await useTestServer({}, async () => {
+                await useTestServer({}, async ({ onFinally }) => {
                     systemTimeManager.set(1);
 
                     const userUids = [
@@ -1271,6 +1302,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                                 [Resources.UserUid.spectator1]: 'spectator',
                             },
                         });
+                    onFinally.add(() => subscriptions.all.unsubscribe());
 
                     const newRoomName = 'NEW_ROOM_NAME';
                     systemTimeManager.set(2);
@@ -1326,7 +1358,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
             });
 
             it('tests with invalid JSON', async () => {
-                await useTestServer({}, async () => {
+                await useTestServer({}, async ({ onFinally }) => {
                     systemTimeManager.set(1);
 
                     const userUids = [
@@ -1346,6 +1378,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                                 [Resources.UserUid.spectator1]: 'spectator',
                             },
                         });
+                    onFinally.add(() => subscriptions.all.unsubscribe());
 
                     const invalidJSON = JSON.stringify({});
 
@@ -1407,7 +1440,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                 },
             ] as const)('author & channelKey: %o', ({ author, channelKey }) => {
                 it('writePublicMessage(text) -> edit -> delete mutation (with date tests)', async () => {
-                    await useTestServer({}, async () => {
+                    await useTestServer({}, async ({ onFinally }) => {
                         systemTimeManager.set(1);
 
                         const userUids = [
@@ -1429,6 +1462,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                                 [Resources.UserUid.spectator1]: 'spectator',
                             },
                         });
+                        onFinally.add(() => subscriptions.all.unsubscribe());
 
                         const text = 'TEXT';
 
@@ -1559,6 +1593,8 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                                 .expect(room.room.updatedAt)
                                 .toBeCloseToSystemTimeType(4);
                         }
+
+                        subscriptions.all.unsubscribe();
                     });
                 });
 
@@ -1566,7 +1602,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                     it('writePublicMessage(1d100) -> edit to fail -> delete mutation', async () => {
                         jest.useRealTimers();
 
-                        await useTestServer({}, async () => {
+                        await useTestServer({}, async ({ onFinally }) => {
                             const userUids = [
                                 author,
                                 Resources.UserUid.master,
@@ -1586,6 +1622,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                                     [Resources.UserUid.spectator1]: 'spectator',
                                 },
                             });
+                            onFinally.add(() => subscriptions.all.unsubscribe());
 
                             const text = '1d100';
 
@@ -1674,6 +1711,8 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                                 maskKeys(message, ['__typename', 'updatedAt', 'updatedText'])
                             );
                             subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
+
+                            subscriptions.all.unsubscribe();
                         });
                     });
                 });
@@ -1702,7 +1741,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                 channelKey: $free,
             },
         ] as const)('tests invalid writePublicMessageMutation', async ({ author, channelKey }) => {
-            await useTestServer({}, async () => {
+            await useTestServer({}, async ({ onFinally }) => {
                 systemTimeManager.set(1);
 
                 const userUids = [
@@ -1723,6 +1762,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                         [Resources.UserUid.spectator2]: 'spectator',
                     },
                 });
+                onFinally.add(() => subscriptions.all.unsubscribe());
 
                 const text = 'TEXT';
                 systemTimeManager.set(2);
@@ -1760,7 +1800,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
 
         describe('writePrivateMessage mutation', () => {
             it('should succeed', async () => {
-                await useTestServer({}, async () => {
+                await useTestServer({}, async ({ onFinally }) => {
                     systemTimeManager.set(1);
 
                     const userUids = [
@@ -1781,6 +1821,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                             [Resources.UserUid.spectator1]: 'spectator',
                         },
                     });
+                    onFinally.add(() => subscriptions.all.unsubscribe());
 
                     const text = 'TEXT';
                     const visibleTo = [Resources.UserUid.player1, Resources.UserUid.player2];
@@ -1847,7 +1888,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
 
         describe('leaveRoom mutation', () => {
             it('should succeed', async () => {
-                await useTestServer({}, async () => {
+                await useTestServer({}, async ({ onFinally }) => {
                     const userUids = [
                         Resources.UserUid.master,
                         Resources.UserUid.player1,
@@ -1866,6 +1907,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                             [Resources.UserUid.spectator1]: 'spectator',
                         },
                     });
+                    onFinally.add(() => subscriptions.all.unsubscribe());
 
                     Assert.LeaveRoomMutation.toBeSuccess(
                         await clients[Resources.UserUid.player1].leaveRoomMutation({
@@ -1905,7 +1947,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
 
         describe('deleteRoom mutation', () => {
             it('should succeed', async () => {
-                await useTestServer({}, async () => {
+                await useTestServer({}, async ({ onFinally }) => {
                     const userUids = [
                         Resources.UserUid.master,
                         Resources.UserUid.player1,
@@ -1921,6 +1963,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                             [Resources.UserUid.spectator1]: 'spectator',
                         },
                     });
+                    onFinally.add(() => subscriptions.all.unsubscribe());
 
                     Assert.DeleteRoomMutation.toBeSuccess(
                         await clients[Resources.UserUid.master].deleteRoomMutation({
@@ -1960,7 +2003,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                 Resources.UserUid.spectator1,
                 Resources.UserUid.notJoin,
             ] as const)('tests unauthorized mutations', async mutatedBy => {
-                await useTestServer({}, async () => {
+                await useTestServer({}, async ({ onFinally }) => {
                     systemTimeManager.set(1);
 
                     const userUids = [
@@ -1979,6 +2022,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                             [Resources.UserUid.spectator1]: 'spectator',
                         },
                     });
+                    onFinally.add(() => subscriptions.all.unsubscribe());
 
                     systemTimeManager.set(2);
                     Assert.DeleteRoomMutation.toBeNotCreatedByYou(
@@ -2019,51 +2063,59 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
 
         describe('deleteRoomAsAdmin mutation', () => {
             it('should succeed', async () => {
-                await useTestServer({ admins: [Resources.UserUid.admin] }, async () => {
-                    const userUids = [
-                        Resources.UserUid.admin,
-                        Resources.UserUid.notAdmin,
-                        Resources.UserUid.master,
-                        Resources.UserUid.player1,
-                        Resources.UserUid.spectator1,
-                    ] as const;
-                    const { clients, roomId, subscriptions } = await setupUsersAndRoom({
-                        userUids,
-                        roomMasterUserUid: Resources.UserUid.master,
-                        playerPassword,
-                        spectatorPassword,
-                        autoJoin: {
-                            [Resources.UserUid.player1]: 'player',
-                            [Resources.UserUid.spectator1]: 'spectator',
-                        },
-                    });
+                await useTestServer(
+                    { admins: [Resources.UserUid.admin] },
+                    async ({ onFinally }) => {
+                        const userUids = [
+                            Resources.UserUid.admin,
+                            Resources.UserUid.notAdmin,
+                            Resources.UserUid.master,
+                            Resources.UserUid.player1,
+                            Resources.UserUid.spectator1,
+                        ] as const;
+                        const { clients, roomId, subscriptions } = await setupUsersAndRoom({
+                            userUids,
+                            roomMasterUserUid: Resources.UserUid.master,
+                            playerPassword,
+                            spectatorPassword,
+                            autoJoin: {
+                                [Resources.UserUid.player1]: 'player',
+                                [Resources.UserUid.spectator1]: 'spectator',
+                            },
+                        });
+                        onFinally.add(() => subscriptions.all.unsubscribe());
 
-                    Assert.DeleteRoomAsAdminMutation.toBeSuccess(
-                        await clients[Resources.UserUid.admin].deleteRoomAsAdminMutation({
-                            id: roomId,
-                        })
-                    );
-
-                    subscriptions.value[Resources.UserUid.master].toBeExactlyOneDeleteRoomEvent({
-                        deletedBy: Resources.UserUid.admin,
-                    });
-                    subscriptions.value[Resources.UserUid.player1].toBeExactlyOneDeleteRoomEvent({
-                        deletedBy: Resources.UserUid.admin,
-                    });
-                    subscriptions.value[Resources.UserUid.spectator1].toBeExactlyOneDeleteRoomEvent(
-                        {
-                            deletedBy: Resources.UserUid.admin,
-                        }
-                    );
-
-                    for (const userUid of userUids) {
-                        Assert.GetRoomQuery.toBeNotFound(
-                            await clients[userUid].getRoomQuery({
+                        Assert.DeleteRoomAsAdminMutation.toBeSuccess(
+                            await clients[Resources.UserUid.admin].deleteRoomAsAdminMutation({
                                 id: roomId,
                             })
                         );
+
+                        subscriptions.value[Resources.UserUid.master].toBeExactlyOneDeleteRoomEvent(
+                            {
+                                deletedBy: Resources.UserUid.admin,
+                            }
+                        );
+                        subscriptions.value[
+                            Resources.UserUid.player1
+                        ].toBeExactlyOneDeleteRoomEvent({
+                            deletedBy: Resources.UserUid.admin,
+                        });
+                        subscriptions.value[
+                            Resources.UserUid.spectator1
+                        ].toBeExactlyOneDeleteRoomEvent({
+                            deletedBy: Resources.UserUid.admin,
+                        });
+
+                        for (const userUid of userUids) {
+                            Assert.GetRoomQuery.toBeNotFound(
+                                await clients[userUid].getRoomQuery({
+                                    id: roomId,
+                                })
+                            );
+                        }
                     }
-                });
+                );
             });
 
             it.each([
@@ -2072,7 +2124,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                 Resources.UserUid.spectator1,
                 Resources.UserUid.notAdmin,
             ] as const)('tests unauthorized mutations', async mutatedBy => {
-                await useTestServer({}, async () => {
+                await useTestServer({}, async ({ onFinally }) => {
                     systemTimeManager.set(1);
 
                     const userUids = [
@@ -2091,6 +2143,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                             [Resources.UserUid.spectator1]: 'spectator',
                         },
                     });
+                    onFinally.add(() => subscriptions.all.unsubscribe());
 
                     systemTimeManager.set(2);
                     Assert.DeleteRoomAsAdminMutation.toBeError(
