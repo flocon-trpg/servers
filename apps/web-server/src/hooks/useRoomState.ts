@@ -223,10 +223,6 @@ export const useRoomState = (
                         return;
                     }
                     const valueInput = Room.toGraphQLInput(toPost.operationToPost, clientId);
-                    console.info('posting to server', {
-                        valueInput,
-                        operationToPost: toPost.operationToPost,
-                    });
                     let result: FetchResult<OperateMutation>;
                     try {
                         result = await operateMutation({
@@ -257,7 +253,6 @@ export const useRoomState = (
                         toPost.onPosted({ isSuccess: null });
                         return;
                     }
-                    console.info('posted to server', { valueInput, result });
                     if (result.data == null) {
                         // TODO: isSuccess: falseのケースに対応（サーバー側の対応も必要か）
                         toPost.onPosted({ isSuccess: null });
