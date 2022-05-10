@@ -13,7 +13,7 @@ export const serverTransform: ServerTransform<
     State<typeof template>,
     TwoWayOperation<typeof template>,
     UpOperation<typeof template>
-> = ({ prevState, currentState, clientOperation, serverOperation }) => {
+> = ({ prevState, clientOperation, serverOperation }) => {
     const twoWayOperation: TwoWayOperation<typeof template> = {
         $v: 1,
         $r: 1,

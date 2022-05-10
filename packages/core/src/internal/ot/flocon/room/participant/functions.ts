@@ -22,7 +22,7 @@ export const serverTransform =
         TwoWayOperation<typeof template>,
         UpOperation<typeof template>
     > =>
-    ({ prevState, currentState, clientOperation, serverOperation }) => {
+    ({ prevState, clientOperation, serverOperation }) => {
         const isAuthorized = isOwner({
             requestedBy,
             ownerParticipantId: participantKey,

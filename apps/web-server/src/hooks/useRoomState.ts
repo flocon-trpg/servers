@@ -118,8 +118,8 @@ export const useRoomState = (
     const [state, setState] = React.useState<RoomState>({ type: loading });
     // refetchしたい場合、これを前の値と異なる値にすることで、useEffectが再度実行されてrefetchになる。
     const [refetchKey, setRefetchKey] = React.useState(0);
-    // refetchとして単に () => setRefetchKey(refetchKey + 1) をそのまま返す（この値をfとする）と、レンダーのたびにfは変わるため、fをdepsに使用されたときに問題が起こる可能性が高いので、useMemoで軽減。
-    const refetch = React.useMemo(() => () => setRefetchKey(refetchKey + 1), [refetchKey]);
+    // refetchとして単に () => setRefetchKey(refetchKey + 1) をそのまま返す（この値をfとする）と、レンダーのたびにfは変わるため、fをdepsに使用されたときに問題が起こる可能性が高いので、useCallbackで対処。
+    const refetch = React.useCallback(() => setRefetchKey(refetchKey + 1), [refetchKey]);
     const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
 
     const userUid = typeof myAuth === 'string' ? null : myAuth.uid;
@@ -174,8 +174,8 @@ export const useRoomState = (
 
         const postTrigger = new Subject<void>();
         const roomOperationCache = new Map<number, RoomOperationFragment>(); // キーはrevisionTo
-        const graphQLSubscriptionSubscription = roomEventSubscription.subscribe(
-            s => {
+        const graphQLSubscriptionSubscription = roomEventSubscription.subscribe({
+            next: s => {
                 if (s.roomEvent?.deleteRoomOperation != null) {
                     setState({
                         type: deleted,
@@ -206,8 +206,8 @@ export const useRoomState = (
                     return;
                 }
             },
-            () => undefined
-        );
+            error: () => undefined,
+        });
         const postTriggerSubscription = postTrigger
             .pipe(
                 Rx.sampleTime(sampleTime),

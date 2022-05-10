@@ -56,7 +56,7 @@ const StringPieceContent: React.FC<StringPieceContentProps> = (props: StringPiec
                 x: 0,
                 fill: prevText == null || text == null ? baseColor : transitionColor,
             },
-            to: async (next, cancel) => {
+            to: async next => {
                 if (prevText == null || text == null) {
                     await next({
                         scaleX: 0,
@@ -83,7 +83,7 @@ const StringPieceContent: React.FC<StringPieceContentProps> = (props: StringPiec
                 x: 0,
                 opacity: 0,
             },
-            to: async (next, cancel) => {
+            to: async next => {
                 if (prevText == null || text == null) {
                     await next({
                         scaleX: 0,
@@ -136,7 +136,6 @@ type DicePieceContentProps = {
 } & Size;
 
 const DicePieceContent: React.FC<DicePieceContentProps> = ({
-    createdByMe,
     state,
     w,
     h,

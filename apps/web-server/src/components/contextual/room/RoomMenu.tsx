@@ -1059,7 +1059,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
                         </Menu.Item>
                     </Menu.SubMenu>
                     <Menu.Item>
-                        <Popover trigger='click' content={<RoomVolumeBar roomId={roomId} />}>
+                        <Popover trigger='click' content={<RoomVolumeBar />}>
                             ボリューム
                         </Popover>
                     </Menu.Item>
