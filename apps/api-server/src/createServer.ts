@@ -48,7 +48,7 @@ export const createServerAsError = async ({ port }: { port: string | number }) =
 
     const server = app.listen(port, () => {
         console.log(
-            `⚠️ Server ready at http://localhost:${port}, but API server is not running. Please see error messages.`
+            `⚠️ Server ready at http://localhost:${port}, but API is not working. Please see error messages.`
         );
     });
     return server;

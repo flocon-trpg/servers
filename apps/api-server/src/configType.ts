@@ -338,21 +338,21 @@ export namespace ServerConfigForMigration {
                                 return Result.error('Database config not found.');
                             }
                             return Result.error(
-                                `Because ${POSTGRESQL} and ${SQLITE} are set, you must use --db parameter to specify a database to use.`
+                                `Because ${POSTGRESQL} and ${SQLITE} are set in config, you must use --db parameter to specify a database to use.`
                             );
                         }
                         if (exactlyOneServerConfigResult.postgresql == null) {
                             return Result.error(
-                                `Because ${MYSQL} and ${SQLITE} are set, you must use --db parameter to specify a database to use.`
+                                `Because ${MYSQL} and ${SQLITE} are set in config, you must use --db parameter to specify a database to use.`
                             );
                         }
                         if (exactlyOneServerConfigResult.sqlite == null) {
                             return Result.error(
-                                `Because ${MYSQL} and ${POSTGRESQL} are set, you must use --db parameter to specify a database to use.`
+                                `Because ${MYSQL} and ${POSTGRESQL} are set in config, you must use --db parameter to specify a database to use.`
                             );
                         }
                         return Result.error(
-                            `Because ${MYSQL}, ${POSTGRESQL}, and ${SQLITE} are set, you must use --db parameter to specify a database to use.`
+                            `Because ${MYSQL}, ${POSTGRESQL}, and ${SQLITE} are set in config, you must use --db parameter to specify a database to use.`
                         );
                     }
                 }
