@@ -6,9 +6,9 @@ const defaultConfig = {
 };
 
 // https://www.npmjs.com/package/@next/bundle-analyzer
-// ANALYZEという環境変数にtrueが入っているときにWebpack Bundle Analyzerが実行される。
+// ANALYZEという環境変数に1もしくはtrueが入っているときにWebpack Bundle Analyzerが実行される。
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
-    enabled: process.env.ANALYZE === 'true',
+    enabled: ['true', '1'].includes(process.env.ANALYZE),
 });
 
 module.exports = withBundleAnalyzer(defaultConfig);

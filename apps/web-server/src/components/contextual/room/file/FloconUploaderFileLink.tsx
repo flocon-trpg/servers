@@ -1,6 +1,6 @@
 import React from 'react';
 import { FirebaseAuthenticationIdTokenContext } from '../../../../contexts/FirebaseAuthenticationIdTokenContext';
-import { FileItemFragment } from '@flocon-trpg/typed-document-node';
+import { FileItemFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { files, getFloconUploaderFile } from '../../../../utils/file/getFloconUploaderFile';
 import fileDownload from 'js-file-download';
 import { useWebConfig } from '../../../../hooks/useWebConfig';

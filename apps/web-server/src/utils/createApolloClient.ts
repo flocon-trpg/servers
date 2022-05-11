@@ -4,15 +4,15 @@ import {
     FetchResult,
     HttpLink,
     InMemoryCache,
-    Operation,
-    split,
     Observable,
+    Operation,
     from,
+    split,
 } from '@apollo/client';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { setContext } from '@apollo/client/link/context';
 import { Client, ClientOptions, createClient } from 'graphql-ws';
-import { print, GraphQLError } from 'graphql';
+import { GraphQLError, print } from 'graphql';
 import { onError } from '@apollo/client/link/error';
 import { authToken } from '@flocon-trpg/core';
 
@@ -124,14 +124,20 @@ export const createApolloClient = (
     })();
 
     const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
+        // HACK: 現在の仕様では正常な場合でもログインしていない状態でgetMyRolesを呼び出してブラウザのコンソールにエラーが出てしまい、異常が発生していると勘違いされそうなので無効化している。
+        // ログインしていないときはgetMyRolesを呼び出さないようにしようともしたが、うまくいかなかった。React 18の自動バッチング機能によりもしかしたら改善されるかもしれないため、React 18にしたらこのHACKを取り除けないかどうか見直す。
+        if (operation.operationName.toLowerCase() === 'getmyroles') {
+            return;
+        }
+
         if (graphQLErrors) {
-            graphQLErrors.map(({ message, locations, path }) =>
+            graphQLErrors.map(({ message, locations, path }) => {
                 console.error(
                     `[GraphQL error]: Message: ${message}, Location: %O, Path: %O`,
                     locations,
                     path
-                )
-            );
+                );
+            });
         }
         if (networkError) {
             console.error(`[Network error]: %O`, networkError);

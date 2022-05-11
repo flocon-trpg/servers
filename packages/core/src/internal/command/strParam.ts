@@ -1,20 +1,21 @@
 import {
-    FObject,
-    FValue,
-    beginCast,
     FBoolean,
-    ScriptError,
+    FObject,
+    FString,
+    FValue,
     OnGettingParams,
     OnSettingParams,
-    FString,
+    ScriptError,
+    beginCast,
 } from '@flocon-trpg/flocon-script';
-import * as StrParam from '../ot/room/character/strParam/types';
+import { State } from '../ot/generator';
+import * as StrParam from '../ot/flocon/room/character/strParam/types';
 
 const value = 'value';
 const isValueSecret = 'isValueSecret';
 
 export class FStrParam extends FObject {
-    public constructor(private readonly strParam: StrParam.State) {
+    public constructor(private readonly strParam: State<typeof StrParam.template>) {
         super();
     }
 

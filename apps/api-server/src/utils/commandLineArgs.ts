@@ -1,24 +1,33 @@
 import yargs from 'yargs';
 import { VERSION } from '../VERSION';
 
-export const postgresql = 'postgresql';
-export const sqlite = 'sqlite';
+const auto = 'auto';
+const mysql = 'mysql';
+const postgresql = 'postgresql';
+const sqlite = 'sqlite';
 
-type DbType = typeof postgresql | typeof sqlite;
+type DbType = typeof mysql | typeof postgresql | typeof sqlite;
+const allDbOrAutoTypes = [auto, mysql, postgresql, sqlite] as const;
 
-const toDbType = (source: string) => {
+const toDbType = (source: string): DbType | null => {
     switch (source) {
+        case mysql:
+            return mysql;
         case postgresql:
             return postgresql;
         case sqlite:
             return sqlite;
+        case auto:
+            return null;
         default:
-            return undefined;
+            throw new Error(`"${source}" is an unrecognized value.`);
     }
 };
 
 type Main = {
-    db?: DbType;
+    // nullのときはautoを表す。
+    db: DbType | null;
+
     debug: boolean;
 };
 const getMain = async (): Promise<Main> => {
@@ -26,15 +35,16 @@ const getMain = async (): Promise<Main> => {
         .option('db', {
             type: 'string',
             nargs: 1,
-            choices: [postgresql, sqlite],
+            choices: allDbOrAutoTypes,
+            default: auto,
         })
         .option('debug', { type: 'boolean' })
         .version(VERSION.toString()).argv;
 
     const result: Main = {
         debug: options.debug === true,
+        db: toDbType(options.db),
     };
-    result.db = options.db == null ? undefined : toDbType(options.db);
     return result;
 };
 let mainCache: Main | null = null;
@@ -46,19 +56,18 @@ export const loadAsMain = async (): Promise<Main> => {
 };
 
 type MigrationUpOrCheck = {
-    db?: DbType;
+    db: DbType | null;
 };
 const getMigrationUp = async (): Promise<MigrationUpOrCheck> => {
-    const options = await yargs(process.argv.slice(2)).options({
-        db: {
-            type: 'string',
-            nargs: 1,
-            choices: [postgresql, sqlite],
-        },
+    const options = await yargs(process.argv.slice(2)).option('db', {
+        type: 'string',
+        nargs: 1,
+        choices: allDbOrAutoTypes,
+        default: auto,
     }).argv;
 
     return {
-        db: options.db == null ? undefined : toDbType(options.db),
+        db: toDbType(options.db),
     };
 };
 let migrationUpCache: MigrationUpOrCheck | null = null;
@@ -70,23 +79,22 @@ export const loadMigrationUpOrCheck = async (): Promise<MigrationUpOrCheck> => {
 };
 
 type MigrationDown = {
-    db?: DbType;
+    db: DbType | null;
     count: number;
 };
 const getMigrationDown = async (): Promise<MigrationDown> => {
-    const options = await yargs(process.argv.slice(2)).options({
-        db: {
+    const options = await yargs(process.argv.slice(2))
+        .option('db', {
             type: 'string',
-            demandOption: true,
             nargs: 1,
-            choices: [postgresql, sqlite],
-        },
-        count: {
+            choices: allDbOrAutoTypes,
+            default: auto,
+        })
+        .option('count', {
             type: 'number',
             demandOption: true,
             nargs: 1,
-        },
-    }).argv;
+        }).argv;
 
     const countOption = options.count;
     let count: number;
@@ -97,7 +105,7 @@ const getMigrationDown = async (): Promise<MigrationDown> => {
     }
 
     return {
-        db: options.db == null ? undefined : toDbType(options.db),
+        db: toDbType(options.db),
         count,
     };
 };
@@ -110,24 +118,23 @@ export const loadMigrationDown = async (): Promise<MigrationDown> => {
 };
 
 type MigrationCreate = {
-    db?: DbType;
+    db: DbType | null;
     init: boolean;
 };
 const getMigrationCreate = async (): Promise<MigrationCreate> => {
-    const options = await yargs(process.argv.slice(2)).options({
-        db: {
+    const options = await yargs(process.argv.slice(2))
+        .option('db', {
             type: 'string',
-            demandOption: true,
             nargs: 1,
-            choices: [postgresql, sqlite],
-        },
-        init: {
+            choices: allDbOrAutoTypes,
+            default: auto,
+        })
+        .option('init', {
             type: 'boolean',
-        },
-    }).argv;
+        }).argv;
 
     return {
-        db: options.db == null ? undefined : toDbType(options.db),
+        db: toDbType(options.db),
         init: options.init === true,
     };
 };

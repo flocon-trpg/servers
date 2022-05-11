@@ -1,6 +1,8 @@
 import { recordToMap } from '@flocon-trpg/utils';
-import { execCharacterCommand, State } from '../src';
+import { State as S, execCharacterCommand, roomTemplate } from '../src';
 import { Resources } from './resources';
+
+type State = S<typeof roomTemplate>;
 
 describe('characterCommand', () => {
     const characterId = 'CHARA_ID';
@@ -190,7 +192,7 @@ newCharacter.value.name = newCharacterById.name + '!!';
         if (actual.isError) {
             throw actual.error;
         }
-        const actualCharacters = recordToMap(actual.value.characters);
+        const actualCharacters = recordToMap(actual.value.characters ?? {});
         expect(actualCharacters.size).toBe(2);
         actualCharacters.delete(characterId);
         expect(actualCharacters.size).toBe(1);

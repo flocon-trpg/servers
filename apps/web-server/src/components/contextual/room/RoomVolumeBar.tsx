@@ -47,11 +47,7 @@ const seVolumeAtom = atom(
     }
 );
 
-type Props = {
-    roomId: string;
-};
-
-export const RoomVolumeBar: React.FC<Props> = ({ roomId }: Props) => {
+export const RoomVolumeBar: React.FC = () => {
     const [masterVolume, setMasterVolume] = useAtom(masterVolumeAtom);
     const [channelVolumes, setChannelVolume] = useAtom(channelVolumesAtom);
     const [seVolume, setSeVolume] = useAtom(seVolumeAtom);

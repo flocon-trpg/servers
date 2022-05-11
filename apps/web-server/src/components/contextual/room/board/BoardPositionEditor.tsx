@@ -1,8 +1,10 @@
-import { BoardPositionState } from '@flocon-trpg/core';
+import { OmitVersion, State, boardPositionTemplate } from '@flocon-trpg/core';
 import { Checkbox, Col, Row } from 'antd';
 import { Gutter } from 'antd/lib/grid/row';
 import React from 'react';
 import { BoardPositionEditorBase } from './BoardPositionEditorBase';
+
+type BoardPositionState = OmitVersion<State<typeof boardPositionTemplate>>;
 
 const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;

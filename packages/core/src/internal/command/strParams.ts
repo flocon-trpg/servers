@@ -1,19 +1,20 @@
 import {
     AstInfo,
-    beginCast,
     FFunction,
     FObject,
     FValue,
     OnGettingParams,
     ScriptError,
+    beginCast,
 } from '@flocon-trpg/flocon-script';
 import { recordToArray } from '@flocon-trpg/utils';
-import * as Character from '../ot/room/character/types';
-import * as StrParam from '../ot/room/character/strParam/types';
-import * as Room from '../ot/room/types';
+import * as Character from '../ot/flocon/room/character/types';
+import * as StrParam from '../ot/flocon/room/character/strParam/types';
+import * as Room from '../ot/flocon/room/types';
 import { FStrParam } from './strParam';
+import { State } from '../ot/generator';
 
-const createDefaultState = (): StrParam.State => ({
+const createDefaultState = (): State<typeof StrParam.template> => ({
     $v: 2,
     $r: 1,
     value: '',
@@ -23,14 +24,17 @@ const createDefaultState = (): StrParam.State => ({
 
 export class FStrParams extends FObject {
     public constructor(
-        private readonly strParams: Character.State['strParams'],
-        private readonly room: Room.State
+        private readonly strParams: NonNullable<State<typeof Character.template>['strParams']>,
+        private readonly room: State<typeof Room.template>
     ) {
         super();
     }
 
     private findKeysByName(nameOrKey: string | number) {
-        return recordToArray(this.room.numParamNames)
+        if (this.room.strParamNames == null) {
+            return [];
+        }
+        return recordToArray(this.room.strParamNames)
             .filter(({ value }, i) => value.name === nameOrKey || i + 1 === nameOrKey)
             .map(({ key }) => key);
     }

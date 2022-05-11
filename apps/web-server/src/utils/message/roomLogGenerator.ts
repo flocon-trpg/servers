@@ -2,17 +2,23 @@ import {
     FileSourceType,
     RoomMessages,
     RoomPublicChannelFragment,
-} from '@flocon-trpg/typed-document-node';
-import { PrivateChannelSet } from './PrivateChannelSet';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import { escape } from 'html-escaper';
 import moment from 'moment';
 import { PublicChannelNames } from '../types';
 import {
-    messageContentMaxHeight,
     RoomMessage,
+    messageContentMaxHeight,
 } from '../../components/contextual/room/message/RoomMessage';
 import { isDeleted, toText } from './message';
-import { Default, FirebaseStorage, ParticipantState, Uploader, simpleId } from '@flocon-trpg/core';
+import {
+    Default,
+    FirebaseStorage,
+    State,
+    Uploader,
+    participantTemplate,
+    simpleId,
+} from '@flocon-trpg/core';
 import { Color } from '../color';
 import { FilePath } from '../file/filePath';
 import axios from 'axios';
@@ -24,7 +30,10 @@ import { logHtml } from './richLogHtml';
 import { RoomMessageFilter } from '../../components/contextual/room/message/ChannelsFilter';
 import { WebConfig } from '../../configType';
 import { FirebaseStorage as FirebaseStorageType } from '@firebase/storage';
-import { div, generateHtml, HtmlObject, span } from './generateHtml';
+import { HtmlObject, div, generateHtml, span } from './generateHtml';
+import { PrivateChannelSet } from '@flocon-trpg/web-server-utils';
+
+type ParticipantState = State<typeof participantTemplate>;
 
 const privateMessage = 'privateMessage';
 const publicMessage = 'publicMessage';

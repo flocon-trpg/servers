@@ -2,10 +2,11 @@ import React from 'react';
 import * as ReactKonva from 'react-konva';
 import { animated, useSpring } from '@react-spring/konva';
 import {
-    DicePieceState,
+    State,
     dicePieceStrIndexes,
-    StringPieceState,
-    DieValueState,
+    dicePieceTemplate,
+    dieValueTemplate,
+    stringPieceTemplate,
 } from '@flocon-trpg/core';
 import { StringPieceValue } from '../../../../utils/board/stringPieceValue';
 import { KonvaD6 } from './die/KonvaDice';
@@ -13,6 +14,10 @@ import { DicePieceValue } from '../../../../utils/board/dicePieceValue';
 import { usePrevious } from 'react-use';
 import { Size } from '../../../../utils/types';
 import { PieceGroup, PieceGroupProps } from './PieceGroup';
+
+type DieValueState = State<typeof dieValueTemplate>;
+type DicePieceState = State<typeof dicePieceTemplate>;
+type StringPieceState = State<typeof stringPieceTemplate>;
 
 export const stringPiece = 'stringPiece';
 export const dicePiece = 'dicePiece';
@@ -51,7 +56,7 @@ const StringPieceContent: React.FC<StringPieceContentProps> = (props: StringPiec
                 x: 0,
                 fill: prevText == null || text == null ? baseColor : transitionColor,
             },
-            to: async (next, cancel) => {
+            to: async next => {
                 if (prevText == null || text == null) {
                     await next({
                         scaleX: 0,
@@ -78,7 +83,7 @@ const StringPieceContent: React.FC<StringPieceContentProps> = (props: StringPiec
                 x: 0,
                 opacity: 0,
             },
-            to: async (next, cancel) => {
+            to: async next => {
                 if (prevText == null || text == null) {
                     await next({
                         scaleX: 0,
@@ -131,7 +136,6 @@ type DicePieceContentProps = {
 } & Size;
 
 const DicePieceContent: React.FC<DicePieceContentProps> = ({
-    createdByMe,
     state,
     w,
     h,
@@ -214,7 +218,7 @@ const DicePieceContent: React.FC<DicePieceContentProps> = ({
 
     const dice: DieValueState[] = [];
     dicePieceStrIndexes.forEach(i => {
-        const die = state.dice[i];
+        const die = state.dice?.[i];
         if (die != null) {
             dice.push(die);
         }

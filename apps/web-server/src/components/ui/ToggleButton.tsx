@@ -1,23 +1,26 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { css } from '@emotion/react';
-import { Button, Tooltip } from 'antd';
+import { Button, ButtonProps, Tooltip } from 'antd';
 import { SizeType } from 'antd/lib/config-provider/SizeContext';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 type Props = {
-    checkedChildren: React.ReactNode;
+    checkedChildren?: React.ReactNode;
     checkedIcon?: React.ReactNode;
-    unCheckedChildren: React.ReactNode;
+    unCheckedChildren?: React.ReactNode;
     unCheckedIcon?: React.ReactNode;
     tooltip?: string;
     // stringの場合、disabledが有効とみなし、さらにstringがTooltipとして出る（tooltipプロパティより優先度は高い）。
-    disabled: boolean | string;
+    disabled?: boolean | string;
+    loading?: boolean;
     showAsTextWhenDisabled?: boolean;
     hideWhenDisabled?: boolean;
     checked: boolean;
     onChange: (checked: boolean) => void;
     size?: SizeType;
+    shape?: ButtonProps['shape'];
+    defaultType?: ButtonProps['type'];
 };
 
 export const ToggleButton: React.FC<Props> = ({
@@ -27,11 +30,14 @@ export const ToggleButton: React.FC<Props> = ({
     unCheckedIcon,
     tooltip,
     disabled: disabledCore,
+    loading,
     showAsTextWhenDisabled,
     hideWhenDisabled,
     checked,
     onChange,
     size,
+    shape,
+    defaultType,
 }: Props) => {
     const disabled = typeof disabledCore === 'string' ? true : disabledCore;
     let button: JSX.Element;
@@ -51,11 +57,12 @@ export const ToggleButton: React.FC<Props> = ({
     } else {
         button = (
             <Button
-                type={disabled && showAsTextWhenDisabled === true ? 'text' : 'dashed'}
+                type={disabled && showAsTextWhenDisabled === true ? 'text' : defaultType}
                 icon={checked ? checkedIcon : unCheckedIcon}
-                shape='circle'
+                shape={shape}
                 onClick={() => onChange(!checked)}
                 disabled={disabled}
+                loading={loading}
                 size={size}
             >
                 {checked ? checkedChildren : unCheckedChildren}

@@ -1,4 +1,4 @@
-import { maxLength100String, MaxLength100String } from '../src';
+import { MaxLength100String, maxLength100String } from '../src';
 
 export const forceMaxLength100String = (source: string): MaxLength100String => {
     if (maxLength100String.is(source)) {

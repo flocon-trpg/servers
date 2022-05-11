@@ -1,15 +1,16 @@
 import {
-    execCharacterCommand,
-    BoardState,
-    CharacterState,
-    dicePieceStrIndexes,
-    PieceState,
     State,
+    boardPositionTemplate,
+    boardTemplate,
+    characterTemplate,
+    dicePieceStrIndexes,
     diff,
-    toUpOperation,
-    FilePath,
+    execCharacterCommand,
+    filePathTemplate,
+    pieceTemplate,
+    roomTemplate,
     simpleId,
-    BoardPositionState,
+    toUpOperation,
 } from '@flocon-trpg/core';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { Checkbox, Menu, Tooltip } from 'antd';
@@ -17,7 +18,10 @@ import _ from 'lodash';
 import React from 'react';
 import { InputDie } from './die/InputDie';
 import { NewTabLinkify } from '../../../ui/NewTabLinkify';
-import { FileSourceType, WriteRoomSoundEffectDocument } from '@flocon-trpg/typed-document-node';
+import {
+    FileSourceType,
+    WriteRoomSoundEffectDocument,
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import { useBoards } from '../../../../hooks/state/useBoards';
 import { useCharacters } from '../../../../hooks/state/useCharacters';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
@@ -37,14 +41,14 @@ import { useAtomValue, useUpdateAtom } from 'jotai/utils';
 import {
     character,
     dicePiece,
-    stringPiece,
     imagePiece,
     portrait,
+    stringPiece,
 } from '../../../../atoms/overlay/board/types';
 import { boardPopoverEditorAtom } from '../../../../atoms/overlay/board/boardPopoverEditorAtom';
 import {
-    boardContextMenuAtom,
     ContextMenuState,
+    boardContextMenuAtom,
 } from '../../../../atoms/overlay/board/boardContextMenuAtom';
 import { create } from '../../../../utils/constants';
 import { useCloneImagePiece } from '../../../../hooks/state/useCloneImagePiece';
@@ -67,6 +71,13 @@ import {
     characterPiece,
     characterPortrait,
 } from '../piece/BoardPositionAndPieceEditorModal';
+
+type BoardState = State<typeof boardTemplate>;
+type BoardPositionState = State<typeof boardPositionTemplate>;
+type CharacterState = State<typeof characterTemplate>;
+type RoomState = State<typeof roomTemplate>;
+type PieceState = State<typeof pieceTemplate>;
+type FilePath = State<typeof filePathTemplate>;
 
 /* absolute positionで表示するときにBoardの子として表示させると、Boardウィンドウから要素がはみ出ることができないため、ウィンドウ右端に近いところで要素を表示させるときに不便なことがある。そのため、ページ全体の子として持たせるようにしている。 */
 
@@ -207,7 +218,7 @@ namespace PopupEditorBase {
         return (
             <div className={classNames(flex, flexColumn)} style={{ width: '100%' }}>
                 {dicePieceStrIndexes.map(key => {
-                    const die = dicePieceValue.dice[key];
+                    const die = dicePieceValue.dice?.[key];
                     return (
                         <div
                             key={key}
@@ -232,6 +243,9 @@ namespace PopupEditorBase {
                                             return;
                                         }
                                         if (e.type === replace) {
+                                            if (dicePieceValue.dice == null) {
+                                                dicePieceValue.dice = {};
+                                            }
                                             if (e.newValue == null) {
                                                 dicePieceValue.dice[key] = undefined;
                                                 return;
@@ -245,7 +259,7 @@ namespace PopupEditorBase {
                                             };
                                             return;
                                         }
-                                        const dice = dicePieceValue.dice[key];
+                                        const dice = dicePieceValue.dice?.[key];
                                         if (dice == null) {
                                             return;
                                         }
@@ -323,7 +337,7 @@ namespace PopupEditorBase {
                     onChange={e =>
                         setRoomState(roomState => {
                             const stringPieceValue =
-                                roomState.boards[boardId]?.stringPieces?.[pieceId];
+                                roomState.boards?.[boardId]?.stringPieces?.[pieceId];
                             if (stringPieceValue == null) {
                                 return;
                             }
@@ -336,7 +350,7 @@ namespace PopupEditorBase {
                     onChange={e =>
                         setRoomState(roomState => {
                             const stringPieceValue =
-                                roomState.boards[boardId]?.stringPieces?.[pieceId];
+                                roomState.boards?.[boardId]?.stringPieces?.[pieceId];
                             if (stringPieceValue == null) {
                                 return;
                             }
@@ -505,7 +519,7 @@ namespace ContextMenuModule {
                         <Menu.Item
                             onClick={() => {
                                 setRoomState(roomState => {
-                                    delete roomState.characters[characterId]?.pieces[pieceId];
+                                    delete roomState.characters?.[characterId]?.pieces?.[pieceId];
                                 });
                                 onContextMenuClear();
                             }}
@@ -571,9 +585,8 @@ namespace ContextMenuModule {
                             <Menu.Item
                                 onClick={() => {
                                     setRoomState(roomState => {
-                                        delete roomState.characters[characterId]?.portraitPieces?.[
-                                            portraitPositionId
-                                        ];
+                                        delete roomState.characters?.[characterId]
+                                            ?.portraitPieces?.[portraitPositionId];
                                     });
                                     onContextMenuClear();
                                 }}
@@ -613,7 +626,7 @@ namespace ContextMenuModule {
         portraitsOnCursor: ContextMenuState['portraitsOnCursor'];
         onContextMenuClear: () => void;
         operate: ReturnType<typeof useSetRoomStateByApply>;
-        room: State;
+        room: RoomState;
         myUserUid: string;
         onSe: (filePath: FilePath, volume: number) => void;
     }): JSX.Element | null => {
@@ -630,45 +643,45 @@ namespace ContextMenuModule {
         });
         const characterMenuItems = _(characters)
             .map(characterPair => {
-                const privateCommands = recordToArray(characterPair.value.privateCommands).map(
-                    ({ key, value }) => {
-                        const testResult = testCommand(value.value);
-                        if (testResult.isError) {
-                            return (
-                                <Menu.Item key={key} title={value.name} disabled>
-                                    <Tooltip title={testResult.error}>(コマンド文法エラー)</Tooltip>
-                                </Menu.Item>
-                            );
-                        }
+                const privateCommands = recordToArray(
+                    characterPair.value.privateCommands ?? {}
+                ).map(({ key, value }) => {
+                    const testResult = testCommand(value.value);
+                    if (testResult.isError) {
                         return (
-                            <Menu.Item
-                                key={key}
-                                onClick={() => {
-                                    const commandResult = execCharacterCommand({
-                                        script: value.value,
-                                        room,
-                                        characterId: characterPair.id,
-                                        myUserUid,
-                                    });
-                                    if (commandResult.isError) {
-                                        // TODO: 通知する
-                                        return;
-                                    }
-                                    const operation = diff({
-                                        prevState: room,
-                                        nextState: commandResult.value,
-                                    });
-                                    if (operation != null) {
-                                        operate(toUpOperation(operation));
-                                    }
-                                    onContextMenuClear();
-                                }}
-                            >
-                                {value.name}
+                            <Menu.Item key={key} title={value.name} disabled>
+                                <Tooltip title={testResult.error}>(コマンド文法エラー)</Tooltip>
                             </Menu.Item>
                         );
                     }
-                );
+                    return (
+                        <Menu.Item
+                            key={key}
+                            onClick={() => {
+                                const commandResult = execCharacterCommand({
+                                    script: value.value,
+                                    room,
+                                    characterId: characterPair.id,
+                                    myUserUid,
+                                });
+                                if (commandResult.isError) {
+                                    // TODO: 通知する
+                                    return;
+                                }
+                                const operation = diff(roomTemplate)({
+                                    prevState: room,
+                                    nextState: commandResult.value,
+                                });
+                                if (operation != null) {
+                                    operate(toUpOperation(roomTemplate)(operation));
+                                }
+                                onContextMenuClear();
+                            }}
+                        >
+                            {value.name}
+                        </Menu.Item>
+                    );
+                });
                 if (privateCommands.length === 0) {
                     return null;
                 }
@@ -744,7 +757,7 @@ namespace ContextMenuModule {
                         <Menu.Item
                             onClick={() => {
                                 setRoomState(roomState => {
-                                    delete roomState.boards[boardId]?.dicePieces?.[pieceId];
+                                    delete roomState.boards?.[boardId]?.dicePieces?.[pieceId];
                                 });
                                 onContextMenuClear();
                             }}
@@ -807,7 +820,7 @@ namespace ContextMenuModule {
                         <Menu.Item
                             onClick={() => {
                                 setRoomState(roomState => {
-                                    delete roomState.boards[boardId]?.stringPieces?.[pieceId];
+                                    delete roomState.boards?.[boardId]?.stringPieces?.[pieceId];
                                 });
                                 onContextMenuClear();
                             }}
@@ -879,7 +892,7 @@ namespace ContextMenuModule {
                         <Menu.Item
                             onClick={() => {
                                 setRoomState(roomState => {
-                                    delete roomState.boards[boardId]?.imagePieces[pieceId];
+                                    delete roomState.boards?.[boardId]?.imagePieces?.[pieceId];
                                 });
                                 onContextMenuClear();
                             }}
@@ -919,6 +932,8 @@ namespace ContextMenuModule {
         const cellPosition = Piece.getCellPosition({ x, y, board });
         // TODO: x,y,w,h の値が適当
         const piecePositionWhichIsCellMode: PieceState = {
+            $v: undefined,
+            $r: undefined,
             x: 0,
             y: 0,
             w: 50,
@@ -935,6 +950,8 @@ namespace ContextMenuModule {
         };
 
         const piecePositionWhichIsNotCellMode: PieceState = {
+            $v: undefined,
+            $r: undefined,
             x,
             y,
             w: 50,
@@ -951,6 +968,8 @@ namespace ContextMenuModule {
         };
 
         const portraitPositionWhichIsNotCellMode: BoardPositionState = {
+            $v: undefined,
+            $r: undefined,
             x,
             y,
             w: 100,
@@ -967,7 +986,7 @@ namespace ContextMenuModule {
                     <Menu.Item
                         onClick={() => {
                             setRoomState(roomState => {
-                                const pieces = roomState.characters[characterId]?.pieces;
+                                const pieces = roomState.characters?.[characterId]?.pieces;
                                 if (pieces == null) {
                                     return;
                                 }
@@ -987,7 +1006,7 @@ namespace ContextMenuModule {
                     <Menu.Item
                         onClick={() => {
                             setRoomState(roomState => {
-                                const pieces = roomState.characters[characterId]?.pieces;
+                                const pieces = roomState.characters?.[characterId]?.pieces;
                                 if (pieces == null) {
                                     return;
                                 }
@@ -1015,7 +1034,7 @@ namespace ContextMenuModule {
                     onClick={() => {
                         setRoomState(roomState => {
                             const portraitPieces =
-                                roomState.characters[characterId]?.portraitPieces;
+                                roomState.characters?.[characterId]?.portraitPieces;
                             if (portraitPieces == null) {
                                 return;
                             }

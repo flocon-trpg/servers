@@ -1,5 +1,8 @@
 import React from 'react';
-import { DicePieceState, DieValueState } from '@flocon-trpg/core';
+import { State, dicePieceTemplate, dieValueTemplate } from '@flocon-trpg/core';
+
+type DieValueState = State<typeof dieValueTemplate>;
+type DicePieceState = State<typeof dicePieceTemplate>;
 
 export namespace DicePieceValue {
     export const privateValueOpacity = 0.5;
@@ -32,10 +35,10 @@ export namespace DicePieceValue {
         };
         return (
             <div style={{ display: 'flex', flexDirection: 'row', padding }}>
-                {img(state.dice[1])}
-                {img(state.dice[2])}
-                {img(state.dice[3])}
-                {img(state.dice[4])}
+                {img(state.dice?.[1])}
+                {img(state.dice?.[2])}
+                {img(state.dice?.[3])}
+                {img(state.dice?.[4])}
             </div>
         );
     };

@@ -1,9 +1,10 @@
-import { DbState, DownOperation } from '@flocon-trpg/core';
+import { DownOperation, State, roomDbTemplate, roomTemplate } from '@flocon-trpg/core';
 import {
     Collection,
     Entity,
     IdentifiedReference,
     JsonType,
+    ManyToMany,
     ManyToOne,
     OneToMany,
     PrimaryKey,
@@ -16,11 +17,15 @@ import { EM } from '../../../utils/types';
 import { Participant } from '../participant/mikro-orm';
 import {
     DicePieceLog as DicePieceLogEntity,
-    StringPieceLog as StringPieceLogEntity,
     RoomPrvMsg,
     RoomPubCh,
     RoomSe as RoomSe,
+    StringPieceLog as StringPieceLogEntity,
 } from '../roomMessage/mikro-orm';
+import { User } from '../user/mikro-orm';
+
+type DbState = State<typeof roomDbTemplate>;
+type RoomDownOperation = DownOperation<typeof roomTemplate>;
 
 // Roomは最新の状況を反映するが、RoomOperationを用いて1つ前の状態に戻せるのは一部のプロパティのみ。
 // 例えばrevisionはRoomOperationをいくらapplyしても最新のまま。
@@ -52,6 +57,17 @@ export class Room {
 
     @Property({ type: Date, nullable: true, onUpdate: () => new Date(), index: true })
     public updatedAt?: Date;
+
+    /** この部屋全体の最終更新日時。このentityだけでなく、メッセージの書き込みなども対象とした最終更新日時を表す。 */
+    /* 
+    mikro-ormのonUpdateによる日時更新はそのエンティティ以外の変更を検知しないため、例えば部屋のメッセージが追加されてもupdatedAtは更新されない。だが利用者の視点ではこれらも考慮してほしいと思われる。そのためこのプロパティを設けている。
+
+    他の案として「RoomのupdatedAt、そのRoomのRoomPubMsgのMAX(updated_at)、RoomPubMsgのMAX(updated_at)…を取得してそれらの中で最も大きい値をこの部屋全体の最終更新日時とする」というのも考えられる。これはcompleteUpdatedAtの値を手動でセットしなくとも求まるというメリットはある。だが、例えば部屋全体の最終更新日時が新しい順に10件取得したい場合に、すべての部屋ごとに全体の最終更新日時を計算しなければならないためパフォーマンス上の懸念があるため不採用とした。
+
+    Participantの増減（入退室）や名前変更などでもcompleteUpdatedAtは更新されるという仕様にしている。理由は、RoomのStateの変更によるcompleteUpdatedAtの更新は条件に関わらず常に行うとすることで規則を単純化し、コードをシンプルにするため。ただしこの仕様は後々変更するかもしれない。
+    */
+    @Property({ type: Date, nullable: true, index: true })
+    public completeUpdatedAt?: Date;
 
     @Property({ nullable: true })
     public playerPasswordHash?: string;
@@ -93,12 +109,21 @@ export class Room {
 
     @OneToMany(() => RoomSe, x => x.room, { orphanRemoval: true })
     public roomSes = new Collection<RoomSe>(this);
+
+    @ManyToMany(() => User, user => user.bookmarkedRooms)
+    public bookmarkedBy = new Collection<User>(this);
 }
 
 @Entity()
 @Unique({ properties: ['prevRevision', 'room'] })
 export class RoomOp {
-    public constructor({ prevRevision, value }: { prevRevision: number; value: DownOperation }) {
+    public constructor({
+        prevRevision,
+        value,
+    }: {
+        prevRevision: number;
+        value: RoomDownOperation;
+    }) {
         this.prevRevision = prevRevision;
         this.value = value;
     }
@@ -119,7 +144,7 @@ export class RoomOp {
     public prevRevision: number;
 
     @Property({ type: JsonType })
-    public value: DownOperation;
+    public value: RoomDownOperation;
 
     @ManyToOne(() => Room, { wrappedReference: true })
     public room!: IdentifiedReference<Room>;

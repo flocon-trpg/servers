@@ -1,4 +1,4 @@
-import { CharacterState, characterState, simpleId } from '@flocon-trpg/core';
+import { State, characterTemplate, simpleId, state } from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
 import { Alert, Modal } from 'antd';
 import { atom, useAtom } from 'jotai';
@@ -11,6 +11,9 @@ import { useMyUserUid } from '../../../../hooks/useMyUserUid';
 import { formatValidationErrors } from '../../../../utils/io-ts/io-ts-reporters';
 import classNames from 'classnames';
 import { flex, flexColumn } from '../../../../utils/className';
+
+const characterState = state(characterTemplate, { exact: true });
+type CharacterState = State<typeof characterTemplate>;
 
 export const importCharacterModalVisibilityAtom = atom(false);
 
@@ -60,6 +63,9 @@ export const ImportCharacterModal: React.FC = () => {
                                 return;
                             }
                             setRoomState(roomState => {
+                                if (roomState.characters == null) {
+                                    roomState.characters = {};
+                                }
                                 const id = simpleId();
                                 roomState.characters[id] = {
                                     ...parsed.value,

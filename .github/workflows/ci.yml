@@ -11,20 +11,21 @@ on:
             - '**'
 
 jobs:
-    main:
-        name: Tests and exec Next.js export on Node ${{ matrix.node }} and ${{ matrix.os }}
+    tests-without-docker:
+        name: Partial Tests and exec Next.js export on Node ${{ matrix.node }} and ${{ matrix.os }}
 
-        runs-on: ${{ matrix.os }}
         strategy:
             matrix:
                 node: ['14.x', '16.x']
-                os: [ubuntu-latest, windows-latest, macOS-latest]
+                os: [ubuntu-20.04, windows-2019, macOS-11]
+
+        runs-on: ${{ matrix.os }}
 
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
 
             - name: Use Node ${{ matrix.node }}
-              uses: actions/setup-node@v2
+              uses: actions/setup-node@v3
               with:
                   node-version: ${{ matrix.node }}
                   cache: yarn
@@ -35,11 +36,122 @@ jobs:
               run: yarn build-ci
 
             - name: Test
-              run: yarn test --ci --coverage --maxWorkers=2
+              run: yarn test --ci --coverage --runInBand --forceExit
               env:
-                  TEST_SKIP_REDIS: true
-                  TEST_SKIP_RESOLVERS: true
+                  REDIS_TEST: 0
+                  MYSQL_TEST: 0
+                  POSTGRESQL_TEST: 0
 
             - name: Next export
               run: yarn run export
               working-directory: ./apps/web-server
+
+    tests-with-docker:
+        name: 'Full tests on ${{ matrix.container }} and Codecov'
+
+        strategy:
+            matrix:
+                container: ['node:14-buster', 'node:16-buster']
+
+        runs-on: ubuntu-20.04
+        container: ${{ matrix.container }}
+
+        services:
+            mysql:
+                image: mysql:8.0
+                env:
+                    MYSQL_ROOT_PASSWORD: root_password
+                    MYSQL_USER: mysql
+                    MYSQL_PASSWORD: mysql
+                    MYSQL_DATABASE: test
+                options: >-
+                    --health-cmd "mysqladmin ping"
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports:
+                    - 3306:3306
+            postgres:
+                image: postgres
+                env:
+                    POSTGRES_USER: postgres
+                    POSTGRES_PASSWORD: postgres
+                    POSTGRES_DB: test
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports:
+                    - 5432:5432
+            redis:
+                image: redis
+                options: >-
+                    --health-cmd "redis-cli ping"
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v3
+
+            - name: Install
+              run: yarn
+
+            - name: Prepare packages
+              run: yarn run build-ci
+
+            - name: Migration-up MySQL
+              run: yarn migration-up --db mysql
+              working-directory: ./apps/api-server
+              env:
+                  MYSQL: >
+                      {
+                          "clientUrl": "mysql://mysql:mysql@mysql:3306/test"
+                      }
+
+            - name: Migration-up PostgreSQL
+              run: yarn migration-up --db postgresql
+              working-directory: ./apps/api-server
+              env:
+                  POSTGRESQL: >
+                      {
+                          "clientUrl": "postgresql://postgres:postgres@postgres:5432/test"
+                      }
+
+            - name: Test
+              run: yarn test --ci --coverage --runInBand --forceExit
+
+            - name: Upload coverages to Codecov
+              if: ${{ matrix.container == 'node:16-buster' }}
+              uses: codecov/codecov-action@v3
+              with:
+                  token: ${{ secrets.CODECOV_TOKEN }}
+
+    # fails on windows because it uses crlf
+    lint-and-prettier:
+        name: Lint and prettier on Node ${{ matrix.node }} and ${{ matrix.os }}
+
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+                node: ['16.x']
+                os: [ubuntu-20.04]
+
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Use Node ${{ matrix.node }}
+              uses: actions/setup-node@v3
+              with:
+                  node-version: ${{ matrix.node }}
+                  cache: yarn
+
+            - run: yarn
+
+            - name: Lint
+              run: yarn lint
+
+            - name: Prettier(check)
+              run: yarn prettier:base --check

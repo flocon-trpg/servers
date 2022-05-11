@@ -7,7 +7,13 @@ import MonacoEditor, { useMonaco } from '@monaco-editor/react';
 import { useBufferValue } from '../../../../hooks/useBufferValue';
 import { testCommand } from '../../../../utils/character/command';
 import { useSetRoomStateByApply } from '../../../../hooks/useSetRoomStateByApply';
-import { privateCommandsDiff, simpleId } from '@flocon-trpg/core';
+import {
+    commandTemplate,
+    createRecordValueTemplate,
+    diff,
+    simpleId,
+    toUpOperation,
+} from '@flocon-trpg/core';
 import classNames from 'classnames';
 import { flex, flexRow } from '../../../../utils/className';
 import { characterUpdateOperation } from '../../../../utils/character/characterUpdateOperation';
@@ -16,6 +22,9 @@ import { characterCommandLibSource } from '../../../../monaco/characterCommandLi
 import { defaultLibSource } from '../../../../monaco/defaultLibSource';
 import { useAtom } from 'jotai';
 import { commandEditorModalAtom } from '../../../../atoms/overlay/commandEditorModalAtom';
+
+const privateCommandsDiff = diff(createRecordValueTemplate(commandTemplate));
+const privateCommandsUpOperation = toUpOperation(createRecordValueTemplate(commandTemplate));
 
 /*
 Monaco Editorでは、複数のエディターごとに異なるextraLibなどを個別に設定することはできない( https://github.com/microsoft/monaco-editor/issues/2098 , https://stackoverflow.com/questions/53881473/monaco-editor-configure-libs-by-editor )。
@@ -130,7 +139,7 @@ export const CommandEditorModal: React.FC = () => {
         if (characterRef.current == null) {
             return;
         }
-        setPrivateCommands(recordToMap(characterRef.current.privateCommands));
+        setPrivateCommands(recordToMap(characterRef.current.privateCommands ?? {}));
     }, [commandEditorModalType, characterRef]);
 
     const setCommandValue = (key: string, command: string) => {
@@ -223,14 +232,15 @@ export const CommandEditorModal: React.FC = () => {
                 if (character == null) {
                     return;
                 }
+                const d = privateCommandsDiff({
+                    prevState: character.privateCommands,
+                    nextState: mapToRecord(privateCommands),
+                });
                 operate(
                     characterUpdateOperation(commandEditorModalType.characterId, {
                         $v: 2,
                         $r: 1,
-                        privateCommands: privateCommandsDiff({
-                            prevState: character.privateCommands,
-                            nextState: mapToRecord(privateCommands),
-                        }),
+                        privateCommands: d == null ? undefined : privateCommandsUpOperation(d),
                     })
                 );
                 setCommandEditorModalType(null);

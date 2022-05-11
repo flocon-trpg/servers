@@ -1,10 +1,12 @@
-import { PieceState } from '@flocon-trpg/core';
+import { OmitVersion, State, pieceTemplate } from '@flocon-trpg/core';
 import { Checkbox, Col, InputNumber, Row, Space } from 'antd';
 import { Gutter } from 'antd/lib/grid/row';
 import React from 'react';
 import { BufferedInput } from '../../../ui/BufferedInput';
 import { EditorGroupHeader } from '../../../ui/EditorGroupHeader';
 import { BoardPositionEditorBase } from './BoardPositionEditorBase';
+
+type PieceState = OmitVersion<State<typeof pieceTemplate>>;
 
 const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;

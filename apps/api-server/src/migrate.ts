@@ -98,7 +98,8 @@ export const migrateByNpmScript = async (
                 const commandLineArgs = await loadMigrationCreate();
                 orm = await ServerConfigForMigration.createORM(
                     serverConfig.value,
-                    commandLineArgs.db ?? null,
+                    commandLineArgs.db,
+                    'src',
                     true
                 );
                 if (orm.isError) {
@@ -121,7 +122,8 @@ export const migrateByNpmScript = async (
                 const commandLineArgs = await loadMigrationCreate();
                 orm = await ServerConfigForMigration.createORM(
                     serverConfig.value,
-                    commandLineArgs.db ?? null,
+                    commandLineArgs.db,
+                    'src',
                     true
                 );
                 if (orm.isError) {
@@ -141,7 +143,8 @@ export const migrateByNpmScript = async (
                 const commandLineArgs = await loadMigrationUpOrCheck();
                 orm = await ServerConfigForMigration.createORM(
                     serverConfig.value,
-                    commandLineArgs.db ?? null,
+                    commandLineArgs.db,
+                    'dist',
                     true
                 );
                 if (orm.isError) {
@@ -162,7 +165,8 @@ export const migrateByNpmScript = async (
                 const commandLineArgs = await loadMigrationDown();
                 orm = await ServerConfigForMigration.createORM(
                     serverConfig.value,
-                    commandLineArgs.db ?? null,
+                    commandLineArgs.db,
+                    'dist',
                     true
                 );
                 if (orm.isError) {
@@ -194,7 +198,8 @@ export const migrateByNpmScript = async (
                 const commandLineArgs = await loadMigrationUpOrCheck();
                 orm = await ServerConfigForMigration.createORM(
                     serverConfig.value,
-                    commandLineArgs.db ?? null,
+                    commandLineArgs.db,
+                    'dist',
                     true
                 );
                 if (orm.isError) {

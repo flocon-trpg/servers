@@ -1,5 +1,5 @@
 import { MaxLength } from 'class-validator';
-import { ArgsType, createUnionType, Field, InputType, Int, ObjectType } from 'type-graphql';
+import { ArgsType, Field, InputType, Int, ObjectType, createUnionType } from 'type-graphql';
 import { GetRoomConnectionFailureType } from '../../../enums/GetRoomConnectionFailureType';
 import { WritingMessageStatusInputType } from '../../../enums/WritingMessageStatusInputType';
 import { WritingMessageStatusType } from '../../../enums/WritingMessageStatusType';
@@ -33,6 +33,12 @@ export class DeleteRoomArgs {
 }
 
 @ArgsType()
+export class DeleteRoomAsAdminInput {
+    @Field()
+    public id!: string;
+}
+
+@ArgsType()
 export class JoinRoomArgs {
     @Field()
     public id!: string;
@@ -42,6 +48,15 @@ export class JoinRoomArgs {
 
     @Field({ nullable: true })
     public password?: string;
+}
+
+@ArgsType()
+export class UpdateBookmarkArgs {
+    @Field()
+    public roomId!: string;
+
+    @Field()
+    public newValue!: boolean;
 }
 
 @ArgsType()

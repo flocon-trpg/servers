@@ -1,6 +1,8 @@
-import { CharacterState } from '@flocon-trpg/core';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
 import { roomAtom } from '../../atoms/room/roomAtom';
+import { State, characterTemplate } from '@flocon-trpg/core';
+
+type CharacterState = State<typeof characterTemplate>;
 
 export const useCharacter = (characterId: string | undefined): CharacterState | undefined => {
     return useAtomSelector(

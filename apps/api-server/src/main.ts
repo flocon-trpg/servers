@@ -1,8 +1,7 @@
 import admin from 'firebase-admin';
 import { buildSchema } from './buildSchema';
 import { PromiseQueue } from './utils/promiseQueue';
-import { Extra } from 'graphql-ws/lib/use/ws';
-import { doAutoMigrationBeforeStart, checkMigrationsBeforeStart } from './migrate';
+import { checkMigrationsBeforeStart, doAutoMigrationBeforeStart } from './migrate';
 import { InMemoryConnectionManager, pubSub } from './connection/main';
 import { Result } from '@kizahasi/result';
 import { authToken } from '@flocon-trpg/core';
@@ -54,7 +53,8 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
     const serverConfig = serverConfigResult.value;
     const orm = await ServerConfig.createORM(
         serverConfig,
-        commandLineArgs.db ?? null,
+        commandLineArgs.db,
+        'dist',
         commandLineArgs.debug
     );
 
@@ -120,7 +120,7 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
         return await getDecodedIdToken(idToken);
     };
 
-    const getDecodedIdTokenFromWsContext = async (ctx: Context<Extra>) => {
+    const getDecodedIdTokenFromWsContext = async (ctx: Context) => {
         let authTokenValue: string | undefined;
         if (ctx.connectionParams != null) {
             const authTokenValueAsUnknown = ctx.connectionParams[authToken];

@@ -1,20 +1,21 @@
 import {
+    FBoolean,
+    FNumber,
     FObject,
     FValue,
-    beginCast,
-    FNumber,
-    FBoolean,
-    ScriptError,
     OnGettingParams,
     OnSettingParams,
+    ScriptError,
+    beginCast,
 } from '@flocon-trpg/flocon-script';
-import * as NumParam from '../ot/room/character/numParam/types';
+import { State } from '../ot/generator';
+import * as NumParam from '../ot/flocon/room/character/numParam/types';
 
 const value = 'value';
 const isValueSecret = 'isValueSecret';
 
 export class FNumParam extends FObject {
-    public constructor(private readonly numParam: NumParam.State) {
+    public constructor(private readonly numParam: State<typeof NumParam.template>) {
         super();
     }
 

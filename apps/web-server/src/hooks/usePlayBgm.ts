@@ -2,7 +2,7 @@ import React from 'react';
 import { Howl } from 'howler';
 import { done, useSrcArrayFromGraphQL } from './src';
 import { volumeCap } from '../utils/variables';
-import { BgmState } from '@flocon-trpg/core';
+import { State, bgmTemplate } from '@flocon-trpg/core';
 import _ from 'lodash';
 import { analyzeUrl } from '../utils/analyzeUrl';
 import { useDeepCompareEffect } from 'react-use';
@@ -13,6 +13,8 @@ import {
     defaultChannelVolume,
     defaultMasterVolume,
 } from '../atoms/roomConfig/types/roomConfig/resources';
+
+type BgmState = State<typeof bgmTemplate>;
 
 type PlayBgmBehaviorCoreProps = {
     bgm: BgmState | null;

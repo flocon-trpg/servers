@@ -1,22 +1,28 @@
 import React from 'react';
 import { Button, Input, InputNumber, Tooltip } from 'antd';
-import { EyeInvisibleOutlined, EyeOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EyeInvisibleOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
 import { ToggleButton } from '../../../ui/ToggleButton';
 import {
     addParameter,
     deleteParameter,
-    parameterIsPrivate,
     parameterIsNotPrivate,
-    parameterIsPrivateAndNotCreatedByMe,
     parameterIsNotPrivateAndNotCreatedByMe,
+    parameterIsPrivate,
+    parameterIsPrivateAndNotCreatedByMe,
 } from '../../../../resources/text/main';
 import {
-    applyCharacter,
-    CharacterState,
-    CharacterUpOperation,
-    NumParamState,
+    State,
     StrIndex20,
+    UpOperation,
+    apply,
+    characterTemplate,
+    numParamTemplate,
 } from '@flocon-trpg/core';
+
+const applyCharacter = apply(characterTemplate);
+type CharacterState = State<typeof characterTemplate>;
+type CharacterUpOperation = UpOperation<typeof characterTemplate>;
+type NumParamState = State<typeof numParamTemplate>;
 
 const inputWidth = 50;
 
@@ -220,6 +226,8 @@ export const NumberParameterInput: React.FC<Props> = ({
                     };
                     onOperate(apply(operation));
                 }}
+                shape='circle'
+                defaultType='dashed'
             />
         );
         if (numberParameter?.value == null) {
@@ -311,6 +319,8 @@ export const NumberParameterInput: React.FC<Props> = ({
                     };
                     onOperate(apply(operation));
                 }}
+                shape='circle'
+                defaultType='dashed'
             />
         );
         if (numberMaxParameter?.value == null) {

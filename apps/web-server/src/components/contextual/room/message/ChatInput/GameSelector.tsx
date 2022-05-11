@@ -8,7 +8,7 @@ import { NewTabLinkify } from '../../../../ui/NewTabLinkify';
 import {
     GetAvailableGameSystemsDocument,
     GetDiceHelpMessagesDocument,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import { useQuery } from '@apollo/client';
 import { ChatPalettePanelConfig } from '../../../../../atoms/roomConfig/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '../../../../../atoms/roomConfig/types/messagePanelConfig';
@@ -62,6 +62,19 @@ export const GameSelector: React.FC<Props> = ({
     const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
 
     const availableGameSystems = useQuery(GetAvailableGameSystemsDocument);
+    const sortedAvailableGameSystems = React.useMemo(
+        () =>
+            [...(availableGameSystems.data?.result.value ?? [])]
+                .sort((x, y) => x.sortKey.localeCompare(y.sortKey))
+                .map(gs => {
+                    return (
+                        <Select.Option key={gs.id} value={gs.id}>
+                            {gs.name}
+                        </Select.Option>
+                    );
+                }),
+        [availableGameSystems.data?.result.value]
+    );
     React.useEffect(() => {
         if (availableGameSystems.error == null) {
             return;
@@ -73,20 +86,20 @@ export const GameSelector: React.FC<Props> = ({
         });
     }, [addRoomNotification, availableGameSystems.error]);
 
-    return (
-        <div className={classNames(flexNone, flex, flexRow, itemsCenter)}>
-            <InputDescription style={descriptionStyle}>ダイス</InputDescription>
+    // React Developer ToolsのProfilerで計測したところ、このTableはrerenderがそれなりに時間がかかるうえにほぼ毎回rerenderされていたので、useMemoでrerenderの頻度を減らしている。
+    const select = React.useMemo(
+        () => (
             <Select
                 style={{ flex: 1, maxWidth: inputMaxWidth }}
                 placeholder='ゲームの種類'
                 showSearch
                 value={config.selectedGameSystem}
-                onSelect={(value, option) => {
+                onChange={value => {
+                    if (value == null) {
+                        return;
+                    }
                     onConfigUpdate(state => {
-                        if (typeof option.key !== 'string') {
-                            return;
-                        }
-                        state.selectedGameSystem = option.key;
+                        state.selectedGameSystem = value;
                     });
                 }}
                 filterOption={(input, option) => {
@@ -97,16 +110,16 @@ export const GameSelector: React.FC<Props> = ({
                     return value.toLowerCase().indexOf(input.toLowerCase()) >= 0;
                 }}
             >
-                {[...(availableGameSystems.data?.result.value ?? [])]
-                    .sort((x, y) => x.sortKey.localeCompare(y.sortKey))
-                    .map(gs => {
-                        return (
-                            <Select.Option key={gs.id} value={gs.id}>
-                                {gs.name}
-                            </Select.Option>
-                        );
-                    })}
+                {sortedAvailableGameSystems}
             </Select>
+        ),
+        [config.selectedGameSystem, inputMaxWidth, onConfigUpdate, sortedAvailableGameSystems]
+    );
+
+    return (
+        <div className={classNames(flexNone, flex, flexRow, itemsCenter)}>
+            <InputDescription style={descriptionStyle}>ダイス</InputDescription>
+            {select}
             <Popover
                 content={() =>
                     config.selectedGameSystem == null ? null : (

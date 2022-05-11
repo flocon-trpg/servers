@@ -1,4 +1,4 @@
-import { exec, arrayClass } from '../src';
+import { arrayClass, exec } from '../src';
 
 describe('Array', () => {
     test.each(['[]', '[1,2]'])('isArray to return true', source => {

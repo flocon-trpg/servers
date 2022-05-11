@@ -4,6 +4,7 @@ import {
 } from '@flocon-trpg/core';
 import {
     Collection,
+    DateType,
     Entity,
     IdentifiedReference,
     JsonType,
@@ -13,6 +14,7 @@ import {
     PrimaryKey,
     Property,
     Reference,
+    TextType,
     Unique,
 } from '@mikro-orm/core';
 import { v4 } from 'uuid';
@@ -30,14 +32,14 @@ import { User } from '../user/mikro-orm';
 
 変数展開が行われてから、bcdiceの処理が行われる。そのため、例えば「1d{HP}<{MP}」や「{memo}1d100」（memoに"s"という文字列が入っているときは、s1d100になる）のようなこともできる。
 
-## textSourceについて
+## initTextSourceについて
 
-変数展開が行われ、bcdiceの処理が行われる前の文字列はDBのtextに入る。変数展開が行われる前の文字列はDBのtextSourceに入る（text === textSourceになるときは、容量節約のためにtextSourceにはnullishが代入されることもありうる）。
+変数展開が行われ、bcdiceの処理が行われる前の文字列はDBのinitTextに入る。変数展開が行われる前の文字列はDBのinitTextSourceに入る（initText === initTextSourceになるときは、容量節約のためにinitTextSourceにはnullishが代入されることもありうる）。
 
 
-# text, textSource, updatedText, textUpdatedAt, commandResult, altTextToSecret, isSecretについて
+# initText, initTextSource, updatedText, textUpdatedAt, commandResult, altTextToSecret, isSecretについて
 
-initTextとinitTextSourceは、投稿時のメッセージ。編集や削除されても残る。本来ならばinitTextやinitTextSourceという名前にしたほうが良さそうだが、マイグレーションでデータが損失するのを防ぐために今の名前になっている。
+initTextとinitTextSourceは、投稿時のメッセージ。編集や削除されても残る。
 
 各プロパティの詳細な関係は、./state-table.mdを参照。
 
@@ -100,7 +102,7 @@ export class RoomPubMsg {
         initTextSource: string | undefined;
     }) {
         this.initText = initText;
-        this.initTextSource = initTextSource;
+        this.initTextSource = initText === initTextSource ? undefined : initTextSource;
     }
 
     @PrimaryKey()
@@ -116,36 +118,45 @@ export class RoomPubMsg {
     @Property({ type: Date, nullable: true, onUpdate: () => new Date(), index: true })
     public updatedAt?: Date;
 
-    // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
-    @Property({ nullable: true, length: 65535, default: '' })
+    @Property({ nullable: true, type: TextType, default: null })
     public initTextSource?: string;
 
-    // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
-    @Property({ length: 65535, default: '' })
-    public initText!: string;
+    // MySQLではtextにdefault値を設定できないのでnullable: trueにしているが、通常はinitTextがnullishになることはない。
+    // もしinitTextがnullishの場合は''として処理する。
+    @Property({ nullable: true, type: TextType, default: null })
+    public initText?: string;
 
-    // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
-    @Property({ nullable: true, length: 65535 })
+    @Property({ nullable: true, type: TextType })
     public updatedText?: string;
 
+    /** @deprecated Do not set values to this. Set to textUpdatedAt2 instead. */
     @Property({ nullable: true, default: null })
     public textUpdatedAt?: number;
+
+    @Property({ type: DateType, nullable: true, default: null })
+    public textUpdatedAt2?: Date;
+
+    @Property({ persist: false })
+    public get textUpdatedAtValue() {
+        if (this.textUpdatedAt2 != null) {
+            return this.textUpdatedAt2.getTime();
+        }
+        return this.textUpdatedAt;
+    }
 
     // フォーマットは#nnnnnn。
     // nullishの場合はwhite
     @Property({ nullable: true })
     public textColor?: string;
 
-    // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
-    @Property({ nullable: true, length: 65535 })
+    @Property({ nullable: true, type: TextType })
     public commandResult?: string;
 
     // 成功判定のあるコマンドの場合、成功したかどうかを表す。
     @Property({ nullable: true, default: null, index: true })
     public commandIsSuccess?: boolean;
 
-    // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
-    @Property({ nullable: true, length: 65535 })
+    @Property({ nullable: true, type: TextType })
     public altTextToSecret?: string;
 
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
@@ -166,17 +177,15 @@ export class RoomPubMsg {
     public charaIsPrivate?: boolean;
 
     // 「書き込んだとき」のCharaのimagePath
-    // CONSIDER: デフォルトではPostgreSQLの場合varchar(255)になるため、lengthを設定している。値は適当（MySQLの最大値）。
-    @Property({ nullable: true, length: 65535, default: null })
+    @Property({ nullable: true, type: TextType, default: null })
     public charaImagePath?: string;
 
     // 「書き込んだとき」のCharaのimageSourceType
-    @Property({ type: 'string', nullable: true, default: null })
+    @Property({ nullable: true, type: TextType, default: null })
     public charaImageSourceType?: FileSourceType;
 
     // 「書き込んだとき」のCharaのimagePath
-    // CONSIDER: デフォルトではPostgreSQLの場合varchar(255)になるため、lengthを設定している。値は適当（MySQLの最大値）。
-    @Property({ nullable: true, length: 65535, default: null })
+    @Property({ nullable: true, type: TextType, default: null })
     public charaPortraitImagePath?: string;
 
     // 「書き込んだとき」のCharaのimageSourceType
@@ -204,7 +213,7 @@ export class RoomPrvMsg {
         initTextSource: string | undefined;
     }) {
         this.initText = initText;
-        this.initTextSource = initTextSource;
+        this.initTextSource = initText === initTextSource ? undefined : initTextSource;
     }
 
     @PrimaryKey()
@@ -220,36 +229,45 @@ export class RoomPrvMsg {
     @Property({ type: Date, nullable: true, onUpdate: () => new Date(), index: true })
     public updatedAt?: Date;
 
-    // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
-    @Property({ nullable: true, length: 65535, default: '' })
+    @Property({ nullable: true, type: TextType, default: null })
     public initTextSource?: string;
 
-    // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
-    @Property({ length: 65535, default: '' })
-    public initText!: string;
+    // MySQLではtextにdefault値を設定できないのでnullable: trueにしているが、通常はinitTextがnullishになることはない。
+    // もしinitTextがnullishの場合は''として処理する。
+    @Property({ nullable: true, type: TextType, default: null })
+    public initText?: string;
 
-    // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
-    @Property({ nullable: true, length: 65535 })
+    @Property({ nullable: true, type: TextType })
     public updatedText?: string;
 
+    /** @deprecated Do not set values to this. Set to textUpdatedAt2 instead. */
     @Property({ nullable: true, default: null })
     public textUpdatedAt?: number;
+
+    @Property({ type: DateType, nullable: true, default: null })
+    public textUpdatedAt2?: Date;
+
+    @Property({ persist: false })
+    public get textUpdatedAtValue() {
+        if (this.textUpdatedAt2 != null) {
+            return this.textUpdatedAt2.getTime();
+        }
+        return this.textUpdatedAt;
+    }
 
     // フォーマットは#nnnnnn。
     // nullishの場合はwhite
     @Property({ nullable: true })
     public textColor?: string;
 
-    // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
-    @Property({ nullable: true, length: 65535 })
+    @Property({ nullable: true, type: TextType })
     public commandResult?: string;
 
     // 成功判定のあるコマンドの場合、成功したかどうかを表す。
     @Property({ nullable: true, default: null })
     public commandIsSuccess?: boolean;
 
-    // CONSIDER: 理想としてはTEXTなどのほうが良い。lengthは適当（MySQLの最大値）。
-    @Property({ nullable: true, length: 65535 })
+    @Property({ nullable: true, type: TextType })
     public altTextToSecret?: string;
 
     // eslint-disable-next-line @typescript-eslint/no-inferrable-types
@@ -270,8 +288,7 @@ export class RoomPrvMsg {
     public charaIsPrivate?: boolean;
 
     // 「書き込んだとき」のCharaのimagePath
-    // CONSIDER: デフォルトではPostgreSQLの場合varchar(255)になるため、lengthを設定している。値は適当（MySQLの最大値）。
-    @Property({ nullable: true, length: 65535, default: null })
+    @Property({ nullable: true, type: TextType, default: null })
     public charaImagePath?: string;
 
     // 「書き込んだとき」のCharaのimageSourceType
@@ -279,8 +296,7 @@ export class RoomPrvMsg {
     public charaImageSourceType?: FileSourceType;
 
     // 「書き込んだとき」のCharaのimagePath
-    // CONSIDER: デフォルトではPostgreSQLの場合varchar(255)になるため、lengthを設定している。値は適当（MySQLの最大値）。
-    @Property({ nullable: true, length: 65535, default: null })
+    @Property({ nullable: true, type: TextType, default: null })
     public charaPortraitImagePath?: string;
 
     // 「書き込んだとき」のCharaのimageSourceType

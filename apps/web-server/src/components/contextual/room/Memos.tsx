@@ -1,8 +1,8 @@
 import React from 'react';
 import * as Icons from '@ant-design/icons';
 import { useMemos } from '../../../hooks/state/useMemos';
-import { MemoState, simpleId } from '@flocon-trpg/core';
-import { Button, Popover, Tree, Modal, Menu, Dropdown, Input } from 'antd';
+import { State, memoTemplate, simpleId } from '@flocon-trpg/core';
+import { Button, Dropdown, Input, Menu, Modal, Popover, Tree } from 'antd';
 import { DataNode } from 'rc-tree/lib/interface';
 import { BufferedInput } from '../../ui/BufferedInput';
 import { BufferedTextArea } from '../../ui/BufferedTextArea';
@@ -11,6 +11,8 @@ import { cancelRnd, flex, flex1, flexColumn, flexRow, itemsCenter } from '../../
 import _ from 'lodash';
 import moment from 'moment';
 import { useSetRoomStateWithImmer } from '../../../hooks/useSetRoomStateWithImmer';
+
+type MemoState = State<typeof memoTemplate>;
 
 const padding = 4;
 const splitterPadding = 8;
@@ -206,7 +208,7 @@ const DirSelect = ({ memoId }: DirSelectProps) => {
                 key={`DIRSELECT-${memoId}`}
                 onClick={() => {
                     setRoomState(roomState => {
-                        const memo = roomState.memos[memoId];
+                        const memo = roomState.memos?.[memoId];
                         if (memo == null) {
                             return;
                         }
@@ -237,7 +239,7 @@ const DirSelect = ({ memoId }: DirSelectProps) => {
                 }}
                 onOk={() => {
                     setRoomState(roomState => {
-                        const memo = roomState.memos[memoId];
+                        const memo = roomState.memos?.[memoId];
                         if (memo == null) {
                             return;
                         }
@@ -297,7 +299,7 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
                     value={memo.name}
                     onChange={e =>
                         setRoomState(prevState => {
-                            const memo = prevState.memos[memoId];
+                            const memo = prevState.memos?.[memoId];
                             if (memo != null) {
                                 memo.name = e.currentValue;
                             }
@@ -312,7 +314,7 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
                             title: '現在開いているメモを削除してよろしいですか？',
                             onOk: () => {
                                 setRoomState(roomState => {
-                                    delete roomState.memos[memoId];
+                                    delete roomState.memos?.[memoId];
                                 });
                             },
                         });
@@ -329,6 +331,9 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
                 disableResize
                 onChange={e => {
                     setRoomState(roomState => {
+                        if (roomState.memos == null) {
+                            roomState.memos = {};
+                        }
                         const memo = roomState.memos[memoId];
                         if (memo == null) {
                             return;
@@ -386,6 +391,9 @@ export const Memos: React.FC<Props> = ({ selectedMemoId, onSelectedMemoIdChange 
                     onClick={() => {
                         const id = simpleId();
                         setRoomState(roomState => {
+                            if (roomState.memos == null) {
+                                roomState.memos = {};
+                            }
                             roomState.memos[id] = {
                                 $v: 1,
                                 $r: 1,

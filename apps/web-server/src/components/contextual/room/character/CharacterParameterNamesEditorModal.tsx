@@ -2,11 +2,11 @@ import { Button, Collapse, Form, Modal, Select, Space } from 'antd';
 import React from 'react';
 import { DialogFooter } from '../../../ui/DialogFooter';
 import { replace } from '../../../../stateManagers/states/types';
-import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { BufferedInput } from '../../../ui/BufferedInput';
 import { useSetRoomStateByApply } from '../../../../hooks/useSetRoomStateByApply';
 import { recordToMap } from '@flocon-trpg/utils';
-import { StrIndex20, strIndex20Array, UpOperation } from '@flocon-trpg/core';
+import { StrIndex20, UpOperation as U, roomTemplate, strIndex20Array } from '@flocon-trpg/core';
 import { InputModal } from '../../../ui/InputModal';
 import classNames from 'classnames';
 import { flex, flexRow } from '../../../../utils/className';
@@ -14,6 +14,8 @@ import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithI
 import { roomAtom } from '../../../../atoms/room/roomAtom';
 import { useAtomSelector } from '../../../../atoms/useAtomSelector';
 import { atom, useAtom } from 'jotai';
+
+type UpOperation = U<typeof roomTemplate>;
 
 export const characterParameterNamesEditorVisibilityAtom = atom(false);
 
@@ -99,7 +101,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                                 return;
                             }
                             setRoomState(state => {
-                                const targetNumParamName = state.numParamNames[key];
+                                const targetNumParamName = state.numParamNames?.[key];
                                 if (targetNumParamName == null) {
                                     return;
                                 }
@@ -154,7 +156,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                                 return;
                             }
                             setRoomState(state => {
-                                const targetBoolParamName = state.boolParamNames[key];
+                                const targetBoolParamName = state.boolParamNames?.[key];
                                 if (targetBoolParamName == null) {
                                     return;
                                 }
@@ -209,7 +211,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                                 return;
                             }
                             setRoomState(state => {
-                                const targetStrParamName = state.strParamNames[key];
+                                const targetStrParamName = state.strParamNames?.[key];
                                 if (targetStrParamName == null) {
                                     return;
                                 }

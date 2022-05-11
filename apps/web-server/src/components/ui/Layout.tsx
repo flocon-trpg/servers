@@ -1,17 +1,17 @@
 import React, { PropsWithChildren } from 'react';
 import { useRouter } from 'next/router';
 import {
-    Button,
+    Alert,
     Layout as AntdLayout,
-    Row,
+    Button,
+    Card,
     Col,
-    Space,
     Form,
     Input,
-    Spin,
-    Card,
-    Alert,
     Result,
+    Row,
+    Space,
+    Spin,
 } from 'antd';
 import {
     EntryToServerDocument,
@@ -19,7 +19,7 @@ import {
     IsEntryDocument,
     IsEntryQuery,
     IsEntryQueryVariables,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import { Center } from './Center';
 import Link from 'next/link';
 import { NotSignInResult } from './result/NotSignInResult';
@@ -27,8 +27,9 @@ import { LoadingResult } from './result/LoadingResult';
 import * as Icon from '@ant-design/icons';
 import { useSignOut } from '../../hooks/useSignOut';
 import { useApolloClient, useMutation } from '@apollo/client';
-import { authNotFound, loading, MyAuthContext, notSignIn } from '../../contexts/MyAuthContext';
+import { MyAuthContext, authNotFound, loading, notSignIn } from '../../contexts/MyAuthContext';
 import { FirebaseAuthenticationIdTokenContext } from '../../contexts/FirebaseAuthenticationIdTokenContext';
+import { useGetMyRoles } from '../../hooks/apiServer/useGetMyRoles';
 const { Header, Content } = AntdLayout;
 
 type EntryFormComponentProps = {
@@ -72,7 +73,7 @@ const EntryFormComponent: React.FC<EntryFormComponentProps> = (props: EntryFormC
             }}
         >
             <Form.Item label='password' name={passwordName}>
-                <Input />
+                <Input.Password />
             </Form.Item>
 
             <Form.Item>
@@ -120,6 +121,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
     hideHeader: hideHeaderProp,
 }: PropsWithChildren<Props>) => {
     const router = useRouter();
+    const getMyRolesQueryResult = useGetMyRoles();
     const myAuth = React.useContext(MyAuthContext);
     const myUserUid = typeof myAuth === 'string' ? null : myAuth.uid;
     const isAnonymous = typeof myAuth === 'string' ? false : myAuth.isAnonymous;
@@ -257,6 +259,9 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                                 {typeof myAuth === 'string' ? null : (
                                     <div style={{ color: 'white' }}>
                                         {myAuth.displayName} - {myAuth.uid}
+                                        {getMyRolesQueryResult.data?.result.admin === true
+                                            ? ' (管理者)'
+                                            : null}
                                     </div>
                                 )}
                                 {typeof myAuth === 'string' ? (

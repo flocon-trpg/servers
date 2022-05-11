@@ -1,8 +1,8 @@
 import {
     ApplyError,
-    PositiveInt,
     ComposeAndTransformError,
     NonEmptyString,
+    PositiveInt,
 } from '@kizahasi/ot-string';
 import { Result } from '@kizahasi/result';
 

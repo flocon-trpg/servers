@@ -1,6 +1,6 @@
 import { Button } from 'antd';
 import * as React from 'react';
-import { FileSourceType } from '@flocon-trpg/typed-document-node';
+import { FileSourceType } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { some } from '../../../../utils/types';
 import { FirebaseStorageLink } from './FirebaseStorageLink';
 import * as Core from '@flocon-trpg/core';
@@ -11,12 +11,14 @@ import { flex, flexRow, itemsCenter } from '../../../../utils/className';
 import { ImageView } from './ImageView';
 import { image } from '../../../../utils/fileType';
 
+type FilePathState = Core.State<typeof Core.filePathTemplate>;
+
 type Props = {
-    filePath?: FilePath | Core.FilePath;
-    onPathChange?: (path: FilePath | Core.FilePath | null) => void;
+    filePath?: FilePath | FilePathState;
+    onPathChange?: (path: FilePath | FilePathState | null) => void;
     openFilesManager: (drawerType: {
         openFileType: typeof some;
-        onOpen: (path: FilePath | Core.FilePath) => void;
+        onOpen: (path: FilePath | FilePathState) => void;
         defaultFilteredValue: FilterValue | undefined;
     }) => void;
     showImage?: boolean;
@@ -28,7 +30,7 @@ export const InputFile: React.FC<Props> = ({
     openFilesManager,
     showImage,
 }: Props) => {
-    const onOpen = (path: FilePath | Core.FilePath) => {
+    const onOpen = (path: FilePath | FilePathState) => {
         if (onPathChange != null) {
             onPathChange(path);
         }

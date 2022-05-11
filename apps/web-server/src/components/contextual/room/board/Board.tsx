@@ -7,7 +7,6 @@ import * as Icons from '@ant-design/icons';
 import { KonvaEventObject } from 'konva/types/Node';
 import { update } from '../../../../stateManagers/states/types';
 import * as Icon from '@ant-design/icons';
-import { Message, publicMessage, useFilteredRoomMessages } from '../../../../hooks/useRoomMessages';
 import { useMe } from '../../../../hooks/useMe';
 import { useCharacters } from '../../../../hooks/state/useCharacters';
 import { useParticipants } from '../../../../hooks/state/useParticipants';
@@ -19,14 +18,14 @@ import useConstant from 'use-constant';
 import { debounceTime } from 'rxjs/operators';
 import { Vector2d } from 'konva/types/types';
 import { Subject } from 'rxjs';
-import { PieceState, BoardState, $free } from '@flocon-trpg/core';
+import { $free, OmitVersion, State, boardTemplate, pieceTemplate } from '@flocon-trpg/core';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
-import { FilePath, FileSourceType } from '@flocon-trpg/typed-document-node';
+import { FilePath, FileSourceType } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { ImagePiece } from './ImagePiece';
 import { DragEndResult, Vector2 } from '../../../../utils/types';
 import { DiceOrStringPiece } from './DiceOrStringPiece';
-import { useTransition, animated } from '@react-spring/konva';
+import { animated, useTransition } from '@react-spring/konva';
 import { useCharacterPieces } from '../../../../hooks/state/useCharacterPieces';
 import { usePortraitPieces } from '../../../../hooks/state/usePortraitPieces';
 import { useDicePieces } from '../../../../hooks/state/useDicePieces';
@@ -68,6 +67,11 @@ import { BoardType } from '../../../../utils/board/boardType';
 import { useIsMyCharacter } from '../../../../hooks/state/useIsMyCharacter';
 import { imagePieceModalAtom } from './ImagePieceModal';
 import { Styles } from '../../../../styles';
+import { Message, publicMessage } from '@flocon-trpg/web-server-utils';
+import { notFetch, useRoomMesages } from '../../../../hooks/useRoomMessages';
+
+type BoardState = OmitVersion<State<typeof boardTemplate>>;
+type PieceState = OmitVersion<State<typeof pieceTemplate>>;
 
 const setDragEndResultToPieceState = ({
     e,
@@ -212,7 +216,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
         backgroundImage.type === success ? backgroundImage.image : undefined;
     const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
     const setRoomState = useSetRoomStateWithImmer();
-    const publicMessages = useFilteredRoomMessages({ filter: publicMessageFilter });
+    const publicMessages = useRoomMesages({ filter: publicMessageFilter });
     const myUserUid = useMyUserUid();
     const isMyCharacter = useIsMyCharacter();
     const setImagePieceModal = useUpdateAtom(imagePieceModalAtom);
@@ -234,10 +238,11 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     }
 
     const lastPublicMessage = (() => {
-        if (publicMessages.length === 0) {
+        if (publicMessages === notFetch || publicMessages.isError) {
             return undefined;
         }
-        const lastMessage = publicMessages[publicMessages.length - 1];
+        const publicMessagesValue = publicMessages.value.current ?? [];
+        const lastMessage = publicMessagesValue[publicMessagesValue.length - 1];
         if (lastMessage == null) {
             return;
         }
@@ -352,7 +357,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         onDragEnd={e => {
                             setRoomState(roomState => {
                                 const characterPiece =
-                                    roomState.characters[characterId]?.pieces?.[pieceId];
+                                    roomState.characters?.[characterId]?.pieces?.[pieceId];
                                 if (characterPiece == null) {
                                     return;
                                 }
@@ -422,7 +427,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         onDragEnd={e => {
                             setRoomState(roomState => {
                                 const portraitPiece =
-                                    roomState.characters[characterId]?.portraitPieces?.[pieceId];
+                                    roomState.characters?.[characterId]?.portraitPieces?.[pieceId];
                                 if (portraitPiece == null) {
                                     return;
                                 }
@@ -490,7 +495,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
                     onDragEnd={e => {
                         setRoomState(roomState => {
-                            const imagePiece = roomState.boards[boardId]?.imagePieces?.[pieceId];
+                            const imagePiece = roomState.boards?.[boardId]?.imagePieces?.[pieceId];
                             if (imagePiece == null) {
                                 return;
                             }
@@ -535,7 +540,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
                     onDragEnd={e => {
                         setRoomState(roomState => {
-                            const dicePiece = roomState.boards[boardId]?.dicePieces?.[pieceId];
+                            const dicePiece = roomState.boards?.[boardId]?.dicePieces?.[pieceId];
                             if (dicePiece == null) {
                                 return;
                             }
@@ -581,7 +586,8 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
                     onDragEnd={e => {
                         setRoomState(roomState => {
-                            const stringPiece = roomState.boards[boardId]?.stringPieces?.[pieceId];
+                            const stringPiece =
+                                roomState.boards?.[boardId]?.stringPieces?.[pieceId];
                             if (stringPiece == null) {
                                 return;
                             }
@@ -864,7 +870,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                         pageY: e.evt.pageY,
                         characterPiecesOnCursor: [...characters].flatMap(
                             ([characterId, character]) => {
-                                return recordToArray(character.pieces)
+                                return recordToArray(character.pieces ?? {})
                                     .filter(({ value: piece }) => {
                                         if (boardIdToShow !== piece.boardId) {
                                             return false;
@@ -886,7 +892,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                             }
                         ),
                         portraitsOnCursor: [...characters].flatMap(([characterId, character]) => {
-                            return recordToArray(character.portraitPieces)
+                            return recordToArray(character.portraitPieces ?? {})
                                 .filter(({ value: portrait }) => {
                                     if (boardIdToShow !== portrait.boardId) {
                                         return false;

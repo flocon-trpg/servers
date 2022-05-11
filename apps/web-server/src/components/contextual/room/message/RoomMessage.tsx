@@ -5,25 +5,32 @@ import {
     PieceLogType,
     RoomPrivateMessageFragment,
     RoomPublicMessageFragment,
-} from '@flocon-trpg/typed-document-node';
-import { pieceLog, privateMessage, publicMessage } from '../../../../hooks/useRoomMessages';
-import { PrivateChannelSet } from '../../../../utils/message/PrivateChannelSet';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
+import {
+    Notification,
+    PrivateChannelSet,
+    pieceLog,
+    privateMessage,
+    publicMessage,
+} from '@flocon-trpg/web-server-utils';
 import { PublicChannelNames } from '../../../../utils/types';
 import { Jdenticon } from '../../../ui/Jdenticon';
 import { isDeleted, toText } from '../../../../utils/message/message';
 import { NewTabLinkify } from '../../../ui/NewTabLinkify';
 import {
-    ParticipantState,
-    replace,
-    parseStringPiece,
-    parseDicePiece,
     $free,
+    State,
+    parseDicePiece,
+    parseStringPiece,
+    participantTemplate,
+    replace,
 } from '@flocon-trpg/core';
 import { recordToMap } from '@flocon-trpg/utils';
 import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../../../../utils/className';
 import { IconView } from '../file/IconView';
-import { Notification } from '../../../../atoms/room/roomAtom';
+
+type ParticipantState = State<typeof participantTemplate>;
 
 // 改行荒らし対策として、maxHeightを設けている。200pxという値は適当
 export const messageContentMaxHeight = 200;
@@ -233,7 +240,7 @@ export namespace RoomMessage {
     };
 
     type IconProps = {
-        message: MessageState | Notification.StateElement;
+        message: MessageState | Notification;
         size: number;
     };
 

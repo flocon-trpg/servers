@@ -1,7 +1,9 @@
-import { CharacterState, strIndex10Array } from '@flocon-trpg/core';
+import { State, characterTemplate, strIndex10Array } from '@flocon-trpg/core';
 import { Select } from 'antd';
 import React from 'react';
 import { useCharacterTagNames } from '../../../../hooks/state/useCharacterTagNames';
+
+type CharacterState = State<typeof characterTemplate>;
 
 const tagKey = (i: string) => `character-tag-${i}`;
 
@@ -38,21 +40,10 @@ export const CharacterTagsSelect: React.FC<Props> = ({ character, onChange }: Pr
             mode='multiple'
             style={{ width: '100%' }}
             value={values}
-            onSelect={value => {
+            onChange={value => {
                 onChange(character => {
                     strIndex10Array.forEach(i => {
-                        if (value === tagKey(i)) {
-                            character[`hasTag${i}`] = true;
-                        }
-                    });
-                });
-            }}
-            onDeselect={(value, option) => {
-                onChange(character => {
-                    strIndex10Array.forEach(i => {
-                        if (option.key === tagKey(i)) {
-                            character[`hasTag${i}`] = false;
-                        }
+                        character[`hasTag${i}`] = value.includes(tagKey(i));
                     });
                 });
             }}

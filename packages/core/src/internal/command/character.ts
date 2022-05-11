@@ -7,8 +7,9 @@ import {
     ScriptError,
     beginCast,
 } from '@flocon-trpg/flocon-script';
-import * as Character from '../ot/room/character/types';
-import * as Room from '../ot/room/types';
+import { State } from '../ot/generator';
+import * as Character from '../ot/flocon/room/character/types';
+import * as Room from '../ot/flocon/room/types';
 import { FBoolParams } from './boolParams';
 import { toFFilePath, toFilePathOrUndefined } from './filePath';
 import { FNumParams } from './numParams';
@@ -24,32 +25,48 @@ const stringParameters = 'stringParameters';
 
 export class FCharacter extends FObject {
     public constructor(
-        public readonly character: Character.State,
-        private readonly room: Room.State
+        public readonly character: State<typeof Character.template>,
+        private readonly room: State<typeof Room.template>
     ) {
         super();
     }
 
     override getCore({ key, astInfo }: OnGettingParams): FValue {
         switch (key) {
-            case booleanParameters:
+            case booleanParameters: {
+                if (this.character.boolParams == null) {
+                    this.character.boolParams = {};
+                }
                 return new FBoolParams(this.character.boolParams, this.room);
+            }
             case icon:
                 return this.character.image == null
                     ? null
                     : toFFilePath(this.character.image, astInfo);
-            case maxNumberParameters:
+            case maxNumberParameters: {
+                if (this.character.numMaxParams == null) {
+                    this.character.numMaxParams = {};
+                }
                 return new FNumParams(this.character.numMaxParams, this.room);
+            }
             case name:
                 return new FString(this.character.name);
-            case numberParameters:
+            case numberParameters: {
+                if (this.character.numParams == null) {
+                    this.character.numParams = {};
+                }
                 return new FNumParams(this.character.numParams, this.room);
+            }
             case portrait:
                 return this.character.portraitImage == null
                     ? null
                     : toFFilePath(this.character.portraitImage, astInfo);
-            case stringParameters:
+            case stringParameters: {
+                if (this.character.strParams == null) {
+                    this.character.strParams = {};
+                }
                 return new FStrParams(this.character.strParams, this.room);
+            }
             default:
                 return undefined;
         }

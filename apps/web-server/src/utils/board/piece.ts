@@ -1,4 +1,14 @@
-import { BoardState, PieceState, BoardPositionState } from '@flocon-trpg/core';
+import {
+    OmitVersion,
+    State,
+    boardPositionTemplate,
+    boardTemplate,
+    pieceTemplate,
+} from '@flocon-trpg/core';
+
+type BoardState = OmitVersion<State<typeof boardTemplate>>;
+type BoardPositionState = OmitVersion<State<typeof boardPositionTemplate>>;
+type PieceState = OmitVersion<State<typeof pieceTemplate>>;
 
 export namespace Piece {
     export const getPosition = ({

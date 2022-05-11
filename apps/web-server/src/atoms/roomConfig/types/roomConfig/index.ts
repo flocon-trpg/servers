@@ -1,11 +1,11 @@
 import * as t from 'io-ts';
 import { record } from '../../../../utils/io-ts/record';
-import { deserializeMessageFilter, MessageFilter, serializedMessageFilter } from '../messageFilter';
+import { MessageFilter, deserializeMessageFilter, serializedMessageFilter } from '../messageFilter';
 import { MessageFilterUtils } from '../messageFilter/utils';
 import {
+    PanelsConfig,
     defaultPanelsConfig,
     deserializePanelsConfig,
-    PanelsConfig,
     serializedPanelsConfig,
 } from '../panelsConfig';
 import { defaultMasterVolume, defaultPanelOpacity, defaultSeVolume } from './resources';

@@ -1,7 +1,9 @@
-import { CharacterState } from '@flocon-trpg/core';
+import { State, characterTemplate } from '@flocon-trpg/core';
 import { Select } from 'antd';
 import React from 'react';
 import { useMyCharacters } from '../../../../hooks/state/useMyCharacters';
+
+type CharacterState = State<typeof characterTemplate>;
 
 type Value = { id: string; state: CharacterState };
 
@@ -44,7 +46,7 @@ export const MyCharactersSelect: React.FC<Props> = ({
             style={{ minWidth: 150 }}
             size='small'
             value={selectedCharacterId}
-            onSelect={value => {
+            onSelect={(value: string | undefined) => {
                 if (value == null) {
                     onSelect(undefined);
                     return;

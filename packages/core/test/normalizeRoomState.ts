@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { StrParamState } from '../src';
+import { State, strParamTemplate } from '../src';
 
 const isEmpty = (source: Record<string, unknown>): boolean => {
     for (const key in source) {
@@ -22,7 +22,7 @@ const isDefaultSimpleParam = (source: Record<string, unknown>) => {
 };
 
 const isDefaultStrParam = (source: Record<string, unknown>) => {
-    const defaultStrParam: StrParamState = {
+    const defaultStrParam: State<typeof strParamTemplate> = {
         $v: 2,
         $r: 1,
         isValuePrivate: false,

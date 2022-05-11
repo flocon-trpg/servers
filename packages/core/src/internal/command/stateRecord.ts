@@ -1,10 +1,10 @@
 import {
+    FFunction,
+    FRecord,
+    FRecordRef,
     FString,
     FValue,
     OnGettingParams,
-    FRecordRef,
-    FFunction,
-    FRecord,
 } from '@flocon-trpg/flocon-script';
 import { simpleId } from '../simpleId';
 
@@ -38,7 +38,7 @@ export class FStateRecord<TSource, TRef extends FValue> extends FRecordRef<TSour
     override getCore({ key, astInfo }: OnGettingParams): FValue {
         switch (key) {
             case 'set':
-                // setを有効化すると、idに''などの適当な文字を入れてエラーになることが多発しそうなため、代わりにcreateを使ってもらうようにしている。
+                // setを有効化すると、不正なStateをセットし放題になってしまうため、代わりにcreateを使ってもらうようにしている。
                 return undefined;
             case 'create': {
                 const createNewState = this.createNewState;

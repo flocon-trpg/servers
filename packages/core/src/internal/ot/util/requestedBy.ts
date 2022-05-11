@@ -1,4 +1,5 @@
-import * as Room from '../room/types';
+import { State } from '../generator';
+import * as Room from '../flocon/room/types';
 
 // 全てのStateに完全にアクセスできる。
 export const admin = 'admin';
@@ -50,14 +51,14 @@ export const isBoardOwner = ({
 }: {
     boardId: string;
     requestedBy: RequestedBy;
-    currentRoomState: Room.State;
+    currentRoomState: State<typeof Room.template>;
 }): boolean => {
     if (requestedBy.type === admin) {
         return true;
     }
     const userUid = requestedBy.type === client ? requestedBy.userUid : undefined;
 
-    const board = currentRoomState.boards[boardId];
+    const board = (currentRoomState.boards ?? {})[boardId];
     if (board != null) {
         if (board.ownerParticipantId == null) {
             return true;
@@ -78,7 +79,7 @@ export const isBoardVisible = ({
 }: {
     boardId: string;
     requestedBy: RequestedBy;
-    currentRoomState: Room.State;
+    currentRoomState: State<typeof Room.template>;
 }): boolean => {
     if (isBoardOwner({ boardId: boardId, requestedBy, currentRoomState }) !== false) {
         return true;
@@ -93,7 +94,7 @@ export const isCharacterOwner = ({
 }: {
     requestedBy: RequestedBy;
     characterId: string | typeof anyValue | typeof none;
-    currentRoomState: Room.State;
+    currentRoomState: State<typeof Room.template>;
 }): boolean => {
     if (requestedBy.type === admin) {
         return true;
@@ -103,7 +104,7 @@ export const isCharacterOwner = ({
     }
     const userUid = requestedBy.type === client ? requestedBy.userUid : undefined;
 
-    const character = currentRoomState.characters[characterId];
+    const character = (currentRoomState.characters ?? {})[characterId];
     if (character != null) {
         if (character.ownerParticipantId == null) {
             return true;
@@ -161,7 +162,7 @@ export const canChangeOwnerCharacterId = ({
 }: {
     requestedBy: RequestedBy;
     currentOwnerCharacter: CurrentOwnerCharacter;
-    currentRoomState: Room.State;
+    currentRoomState: State<typeof Room.template>;
 }): boolean => {
     if (requestedBy.type === admin) {
         return true;

@@ -2,37 +2,38 @@ import {
     FObject,
     FString,
     FValue,
-    ScriptError,
-    beginCast,
     GetCoreParams,
+    ScriptError,
     SetCoreParams,
+    beginCast,
 } from '@flocon-trpg/flocon-script';
-import * as Room from '../ot/room/types';
+import * as Room from '../ot/flocon/room/types';
 import { FCharacter } from './character';
 import cloneDeep from 'lodash.clonedeep';
 import { FParamNames } from './paramNames';
 import { FStateRecord } from './stateRecord';
 import { FParticipant } from './participant';
-import * as Character from '../ot/room/character/types';
+import * as Character from '../ot/flocon/room/character/types';
+import { State } from '../ot/generator';
 
 const name = 'name';
 const characters = 'characters';
 
 export class FRoom extends FObject {
-    // FRoom内のRoom.Stateは全てmutableとして扱う。FCharacter内のCharacter.Stateなども同様。
-    private readonly _room: Room.State;
+    // FRoom内の State<typeof Room.template> は全てmutableとして扱う。FCharacter内のCharacter.Stateなども同様。
+    private readonly _room: State<typeof Room.template>;
 
-    public constructor(source: Room.State, private readonly myUserUid: string) {
+    public constructor(source: State<typeof Room.template>, private readonly myUserUid: string) {
         super();
         this._room = cloneDeep(source);
     }
 
-    public get room(): Room.State {
+    public get room(): State<typeof Room.template> {
         return this._room;
     }
 
     public findCharacter(stateId: string): FCharacter | undefined {
-        const character = this._room.characters[stateId];
+        const character = (this._room.characters ?? {})[stateId];
         if (character == null) {
             return undefined;
         }
@@ -46,8 +47,13 @@ export class FRoom extends FObject {
             case 'booleanParameterNames':
                 return new FParamNames(this.room, 'Boolean');
             case characters:
-                return new FStateRecord<Character.State, FCharacter>({
-                    states: this.room.characters,
+                return new FStateRecord<State<typeof Character.template>, FCharacter>({
+                    states: (() => {
+                        if (this.room.characters == null) {
+                            this.room.characters = {};
+                        }
+                        return this.room.characters;
+                    })(),
                     createNewState: () => ({
                         $v: 2,
                         $r: 1,
@@ -93,7 +99,12 @@ export class FRoom extends FObject {
                 return new FParamNames(this.room, 'String');
             case 'participants':
                 return new FStateRecord({
-                    states: this.room.participants,
+                    states: (() => {
+                        if (this.room.participants == null) {
+                            this.room.participants = {};
+                        }
+                        return this.room.participants;
+                    })(),
                     createNewState: undefined,
                     toRef: x => new FParticipant(x),
                     unRef: x => {

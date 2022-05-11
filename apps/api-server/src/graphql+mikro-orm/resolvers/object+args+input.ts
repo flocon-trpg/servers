@@ -36,3 +36,9 @@ export class FileTag {
     @Field()
     public name!: string;
 }
+
+@ObjectType()
+export class Roles {
+    @Field()
+    public admin!: boolean;
+}

@@ -2,8 +2,8 @@ import { simpleId } from '@flocon-trpg/core';
 import * as t from 'io-ts';
 import { defaultChatPalettePanelPosition } from '../defaultPanelPositions';
 import {
-    deserializeDraggablePanelConfigBase,
     DraggablePanelConfigBase,
+    deserializeDraggablePanelConfigBase,
     serializedDraggablePanelConfigBase,
 } from '../draggablePanelConfig';
 

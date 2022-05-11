@@ -1,5 +1,4 @@
 import {
-    beginCast,
     FBoolean,
     FNumber,
     FObject,
@@ -8,8 +7,10 @@ import {
     OnGettingParams,
     OnSettingParams,
     ScriptError,
+    beginCast,
 } from '@flocon-trpg/flocon-script';
-import * as BgmTypes from '../ot/room/bgm/types';
+import { State } from '../ot/generator';
+import * as BgmTypes from '../ot/flocon/room/bgm/types';
 import { toFFilePath, toFilePath } from './filePath';
 
 const isPlaying = 'isPlaying';
@@ -17,7 +18,7 @@ const files = 'files';
 const volume = 'volume';
 
 export class FBgm extends FObject {
-    public constructor(private readonly bgm: BgmTypes.State) {
+    public constructor(private readonly bgm: State<typeof BgmTypes.template>) {
         super();
     }
 

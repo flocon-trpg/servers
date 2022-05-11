@@ -1,19 +1,20 @@
 import {
     AstInfo,
-    beginCast,
     FFunction,
     FObject,
     FValue,
     OnGettingParams,
     ScriptError,
+    beginCast,
 } from '@flocon-trpg/flocon-script';
 import { recordToArray } from '@flocon-trpg/utils';
-import * as Character from '../ot/room/character/types';
-import * as BoolParam from '../ot/room/character/boolParam/types';
-import * as Room from '../ot/room/types';
+import * as Character from '../ot/flocon/room/character/types';
+import * as BoolParam from '../ot/flocon/room/character/boolParam/types';
+import * as Room from '../ot/flocon/room/types';
 import { FBoolParam } from './boolParam';
+import { State } from '../ot/generator';
 
-const createDefaultState = (): BoolParam.State => ({
+const createDefaultState = (): State<typeof BoolParam.template> => ({
     $v: 2,
     $r: 1,
     value: false,
@@ -23,14 +24,17 @@ const createDefaultState = (): BoolParam.State => ({
 
 export class FBoolParams extends FObject {
     public constructor(
-        private readonly boolParams: Character.State['boolParams'],
-        private readonly room: Room.State
+        private readonly boolParams: NonNullable<State<typeof Character.template>['boolParams']>,
+        private readonly room: State<typeof Room.template>
     ) {
         super();
     }
 
     private findKeysByNameOrKey(nameOrKey: string | number) {
-        return recordToArray(this.room.numParamNames)
+        if (this.room.boolParamNames == null) {
+            return [];
+        }
+        return recordToArray(this.room.boolParamNames)
             .filter(({ value }, i) => value.name === nameOrKey || i + 1 === nameOrKey)
             .map(({ key }) => key);
     }
@@ -39,7 +43,7 @@ export class FBoolParams extends FObject {
         const nameOrKey = beginCast(nameOrKeyValue, astInfo).addString().addNumber().cast();
         const keys = this.findKeysByNameOrKey(nameOrKey);
         for (const key of keys) {
-            const found = this.boolParams[key];
+            const found = (this.boolParams ?? {})[key];
             if (found == null) {
                 const newValue = createDefaultState();
                 this.boolParams[key] = newValue;

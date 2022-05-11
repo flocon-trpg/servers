@@ -10,18 +10,21 @@ import {
     RoomAsListItemFragment,
     RoomEventSubscription,
     RoomOperationFragment,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Rx from 'rxjs/operators';
 import { ApolloError, FetchResult, useApolloClient, useMutation } from '@apollo/client';
 import { create as createStateManager } from '../stateManagers/main';
 import { useClientId } from './useClientId';
-import { State, StateManager, UpOperation } from '@flocon-trpg/core';
+import { State as S, StateManager, UpOperation as U, roomTemplate } from '@flocon-trpg/core';
 import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
-import { authNotFound, MyAuthContext, notSignIn } from '../contexts/MyAuthContext';
+import { MyAuthContext, authNotFound, notSignIn } from '../contexts/MyAuthContext';
 import { Room } from '../stateManagers/states/room';
-import { roomNotificationsAtom, Notification } from '../atoms/room/roomAtom';
+import { apolloError, roomNotificationsAtom, text } from '../atoms/room/roomAtom';
 import { useUpdateAtom } from 'jotai/utils';
 import { SetAction } from '../utils/setAction';
+
+type State = S<typeof roomTemplate>;
+type UpOperation = U<typeof roomTemplate>;
 
 const sampleTime = 3000;
 
@@ -115,8 +118,8 @@ export const useRoomState = (
     const [state, setState] = React.useState<RoomState>({ type: loading });
     // refetchしたい場合、これを前の値と異なる値にすることで、useEffectが再度実行されてrefetchになる。
     const [refetchKey, setRefetchKey] = React.useState(0);
-    // refetchとして単に () => setRefetchKey(refetchKey + 1) をそのまま返す（この値をfとする）と、レンダーのたびにfは変わるため、fをdepsに使用されたときに問題が起こる可能性が高いので、useMemoで軽減。
-    const refetch = React.useMemo(() => () => setRefetchKey(refetchKey + 1), [refetchKey]);
+    // refetchとして単に () => setRefetchKey(refetchKey + 1) をそのまま返す（この値をfとする）と、レンダーのたびにfは変わるため、fをdepsに使用されたときに問題が起こる可能性が高いので、useCallbackで対処。
+    const refetch = React.useCallback(() => setRefetchKey(refetchKey + 1), [refetchKey]);
     const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
 
     const userUid = typeof myAuth === 'string' ? null : myAuth.uid;
@@ -153,12 +156,6 @@ export const useRoomState = (
                 }
                 const newState = $stateManager.uiState;
                 if (oldValue.setStateByApply == null || $stateManager.requiresReload) {
-                    if ($stateManager.requiresReload) {
-                        console.info(
-                            '[調査用ログ]onRoomStateManagerUpdate:',
-                            JSON.stringify($stateManager.history)
-                        );
-                    }
                     return {
                         type: oldValue.type,
                         state: newState,
@@ -177,8 +174,8 @@ export const useRoomState = (
 
         const postTrigger = new Subject<void>();
         const roomOperationCache = new Map<number, RoomOperationFragment>(); // キーはrevisionTo
-        const graphQLSubscriptionSubscription = roomEventSubscription.subscribe(
-            s => {
+        const graphQLSubscriptionSubscription = roomEventSubscription.subscribe({
+            next: s => {
                 if (s.roomEvent?.deleteRoomOperation != null) {
                     setState({
                         type: deleted,
@@ -209,8 +206,8 @@ export const useRoomState = (
                     return;
                 }
             },
-            () => undefined
-        );
+            error: () => undefined,
+        });
         const postTriggerSubscription = postTrigger
             .pipe(
                 Rx.sampleTime(sampleTime),
@@ -226,16 +223,7 @@ export const useRoomState = (
                         return;
                     }
                     const valueInput = Room.toGraphQLInput(toPost.operationToPost, clientId);
-                    console.info('posting to server', {
-                        valueInput,
-                        operationToPost: toPost.operationToPost,
-                    });
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    let result: FetchResult<
-                        OperateMutation,
-                        Record<string, any>,
-                        Record<string, any>
-                    >;
+                    let result: FetchResult<OperateMutation>;
                     try {
                         result = await operateMutation({
                             variables: {
@@ -248,13 +236,13 @@ export const useRoomState = (
                     } catch (e) {
                         if (e instanceof ApolloError) {
                             addRoomNotification({
-                                type: Notification.apolloError,
+                                type: apolloError,
                                 error: e,
                                 createdAt: new Date().getTime(),
                             });
                         } else {
                             addRoomNotification({
-                                type: Notification.text,
+                                type: text,
                                 notification: {
                                     type: 'error',
                                     message: 'Unknown error at operateMutation, useRoomState',
@@ -265,7 +253,6 @@ export const useRoomState = (
                         toPost.onPosted({ isSuccess: null });
                         return;
                     }
-                    console.info('posted to server', { valueInput, result });
                     if (result.data == null) {
                         // TODO: isSuccess: falseのケースに対応（サーバー側の対応も必要か）
                         toPost.onPosted({ isSuccess: null });
@@ -291,7 +278,7 @@ export const useRoomState = (
                             break;
                         case 'OperateRoomNonJoinedResult':
                             addRoomNotification({
-                                type: Notification.text,
+                                type: text,
                                 notification: {
                                     type: 'error',
                                     message: '部屋に入室していないため、operateできませんでした。',
@@ -305,7 +292,7 @@ export const useRoomState = (
                             break;
                         case 'OperateRoomFailureResult':
                             addRoomNotification({
-                                type: Notification.text,
+                                type: text,
                                 notification: {
                                     type: 'error',
                                     message: 'operateで問題が発生しました。',
@@ -367,12 +354,6 @@ export const useRoomState = (
                                 return;
                             }
                             if ($stateManager.requiresReload) {
-                                if ($stateManager.requiresReload) {
-                                    console.info(
-                                        '[調査用ログ]setStateCore',
-                                        JSON.stringify($stateManager.history)
-                                    );
-                                }
                                 setState(oldValue => {
                                     if (oldValue.type !== joined) {
                                         return oldValue;
@@ -395,10 +376,6 @@ export const useRoomState = (
                         };
 
                         if (newRoomStateManager.requiresReload) {
-                            console.info(
-                                '[調査用ログ]onRoomStateManagerCreate',
-                                JSON.stringify(newRoomStateManager.history)
-                            );
                             setState({
                                 type: joined,
                                 state: newRoomStateManager.uiState,

@@ -12,23 +12,23 @@
         "test": "yarn workspaces foreach -pv run test",
         "lint": "eslint \"{apps,packages}/**/*.{ts,tsx}\"",
         "prettier": "yarn prettier:base --write",
-        "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md}\""
+        "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\""
     },
     "dependencies": {
         "husky": "^7.0.4"
     },
     "devDependencies": {
-        "@commitlint/cli": "16.2.1",
-        "@commitlint/config-conventional": "16.2.1",
-        "@typescript-eslint/eslint-plugin": "5.5.0",
-        "@typescript-eslint/parser": "5.5.0",
-        "eslint": "8.4.0",
-        "eslint-config-prettier": "8.3.0",
-        "eslint-plugin-react": "7.27.1",
+        "@commitlint/cli": "16.2.4",
+        "@commitlint/config-conventional": "16.2.4",
+        "@typescript-eslint/eslint-plugin": "5.22.0",
+        "@typescript-eslint/parser": "5.22.0",
+        "eslint": "8.14.0",
+        "eslint-config-prettier": "8.5.0",
+        "eslint-plugin-react": "7.29.4",
         "eslint-plugin-react-hooks": "next",
-        "prettier": "2.5.1"
+        "prettier": "2.6.2"
     },
     "resolutions": {
-        "@react-spring/core": "9.4.3"
+        "@react-spring/core": "9.4.4"
     }
 }

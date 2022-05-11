@@ -4,7 +4,13 @@ import { DialogFooter } from '../../../ui/DialogFooter';
 import { replace } from '../../../../stateManagers/states/types';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../../../hooks/useStateEditor';
-import { DicePieceState, CharacterState, dicePieceStrIndexes, simpleId } from '@flocon-trpg/core';
+import {
+    State,
+    characterTemplate,
+    dicePieceStrIndexes,
+    dicePieceTemplate,
+    simpleId,
+} from '@flocon-trpg/core';
 import { useDicePieces } from '../../../../hooks/state/useDicePieces';
 import { MyCharactersSelect } from '../character/MyCharactersSelect';
 import { InputDie } from './die/InputDie';
@@ -16,6 +22,9 @@ import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithI
 import { BufferedInput } from '../../../ui/BufferedInput';
 import { PiecePositionWithCell } from '../../../../utils/types';
 import { dicePieceValueEditorAtom } from '../../../../atoms/pieceValueEditor/pieceValueEditorAtom';
+
+type CharacterState = State<typeof characterTemplate>;
+type DicePieceState = State<typeof dicePieceTemplate>;
 
 const defaultDicePieceValue = (
     piecePosition: PiecePositionWithCell,
@@ -70,7 +79,7 @@ export const DicePieceEditorModal: React.FC = () => {
                     const boardId = modalType.boardId;
                     const pieceId = modalType.pieceId;
                     setRoomState(roomState => {
-                        const dicePieces = roomState.boards[boardId]?.dicePieces;
+                        const dicePieces = roomState.boards?.[boardId]?.dicePieces;
                         if (dicePieces == null) {
                             return;
                         }
@@ -95,7 +104,7 @@ export const DicePieceEditorModal: React.FC = () => {
             }
             const id = simpleId();
             setRoomState(roomState => {
-                const dicePieces = roomState.boards[modalType.boardId]?.dicePieces;
+                const dicePieces = roomState.boards?.[modalType.boardId]?.dicePieces;
                 if (dicePieces == null) {
                     return;
                 }
@@ -183,7 +192,7 @@ export const DicePieceEditorModal: React.FC = () => {
                 </Row>
 
                 {dicePieceStrIndexes.map(key => {
-                    const die = uiState.dice[key];
+                    const die = uiState.dice?.[key];
 
                     return (
                         <Row key={key} style={{ minHeight: 28 }} gutter={gutter} align='middle'>
@@ -197,6 +206,9 @@ export const DicePieceEditorModal: React.FC = () => {
                                         updateUiState(pieceValue => {
                                             if (pieceValue == null) {
                                                 return;
+                                            }
+                                            if (pieceValue.dice == null) {
+                                                pieceValue.dice = {};
                                             }
                                             if (e.type === replace) {
                                                 pieceValue.dice[key] =
@@ -221,7 +233,7 @@ export const DicePieceEditorModal: React.FC = () => {
                                     }}
                                     onIsValuePrivateChange={e => {
                                         updateUiState(pieceValue => {
-                                            const die = pieceValue?.dice[key];
+                                            const die = pieceValue?.dice?.[key];
                                             if (die == null) {
                                                 return;
                                             }

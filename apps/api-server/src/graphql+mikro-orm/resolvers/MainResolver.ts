@@ -14,12 +14,12 @@ import {
 import { ResolverContext } from '../utils/Contexts';
 import { EntryToServerResultType } from '../../enums/EntryToServerResultType';
 import {
+    NotSignIn,
     checkEntry,
     checkSignIn,
     comparePassword,
     ensureAuthorizedUser,
     ensureUserUid,
-    NotSignIn,
 } from './utils/helpers';
 import { queueLimitReached } from '../../utils/promiseQueue';
 import { serverTooBusyMessage } from './utils/messages';
@@ -32,11 +32,16 @@ import { helpMessage, listAvailableGameSystems } from '../../messageAnalyzer/mai
 import { ServerInfo } from '../entities/serverInfo/graphql';
 import { VERSION } from '../../VERSION';
 import { PrereleaseType } from '../../enums/PrereleaseType';
-import { alpha, beta, DualKeyMap, rc } from '@flocon-trpg/utils';
+import { DualKeyMap, alpha, beta, rc } from '@flocon-trpg/utils';
 import { BaasType } from '../../enums/BaasType';
 import { GetFilesResult } from '../results/GetFilesResult';
-import { ENTRY } from '../../roles';
-import { EditFileTagsInput, FileTag as FileTagGraphQL, GetFilesInput } from './object+args+input';
+import { ADMIN, ENTRY, getRoles } from '../../roles';
+import {
+    EditFileTagsInput,
+    FileTag as FileTagGraphQL,
+    GetFilesInput,
+    Roles,
+} from './object+args+input';
 import { File } from '../entities/file/mikro-orm';
 import { QueryOrder, Reference } from '@mikro-orm/core';
 import { FileTag as FileTagEntity } from '../entities/fileTag/mikro-orm';
@@ -109,6 +114,20 @@ export class MainResolver {
                 createdBy: file.createdBy.userUid,
                 createdAt: file.createdAt?.getTime(),
             })),
+        };
+    }
+
+    @Query(() => Roles, {
+        description: 'since v0.7.2',
+    })
+    @Authorized()
+    public async getMyRoles(@Ctx() context: ResolverContext): Promise<Roles> {
+        const roles = getRoles({ context, isEntry: false });
+        if (roles === NotSignIn) {
+            throw new Error('This should not happen');
+        }
+        return {
+            admin: roles.value.has(ADMIN),
         };
     }
 
@@ -296,7 +315,7 @@ export class MainResolver {
         });
     }
 
-    // CONSIDER: 内部情報に簡単にアクセスできるのはセキュリティリスクになりうる。
+    // CONSIDER: 内部情報に簡単にアクセスできるのはセキュリティリスクになりうる。@Authorized(ENTRY) を付けたほうがいいか？
     @Query(() => ServerInfo)
     public async getServerInfo(@Ctx() context: ResolverContext): Promise<ServerInfo> {
         const prerelease = (() => {

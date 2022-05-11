@@ -4,24 +4,25 @@ import { EM } from '../../../utils/types';
 import { Reference } from '@mikro-orm/core';
 import { Result } from '@kizahasi/result';
 import {
+    DownOperation,
+    RequestedBy,
+    State,
+    TwoWayOperation,
+    UpOperation,
+    apply,
     composeDownOperation,
     decodeDbState,
     decodeDownOperation,
-    DownOperation,
+    diff,
     exactDbState,
     parseUpOperation,
-    State,
+    participantTemplate,
+    roomTemplate,
     stringifyState,
+    stringifyUpOperation,
     toClientState,
     toDownOperation,
-    TwoWayOperation,
-    UpOperation,
-    stringifyUpOperation,
-    apply,
-    diff,
     toUpOperation,
-    RequestedBy,
-    ParticipantState,
     update,
 } from '@flocon-trpg/core';
 import { Participant } from '../participant/mikro-orm';
@@ -29,7 +30,13 @@ import { recordForEachAsync } from '@flocon-trpg/utils';
 import { User } from '../user/mikro-orm';
 import { nullableStringToParticipantRoleType } from '../../../enums/ParticipantRoleType';
 import { convertToMaxLength100String } from '../../../utils/convertToMaxLength100String';
-import { isNonEmptyArray, ReadonlyNonEmptyArray } from '../../../utils/readonlyNonEmptyArray';
+import { ReadonlyNonEmptyArray, isNonEmptyArray } from '../../../utils/readonlyNonEmptyArray';
+
+type RoomState = State<typeof roomTemplate>;
+type RoomUpOperation = UpOperation<typeof roomTemplate>;
+type RoomDownOperation = DownOperation<typeof roomTemplate>;
+type RoomTwoWayOperation = TwoWayOperation<typeof roomTemplate>;
+type ParticipantState = State<typeof participantTemplate>;
 
 type IsSequentialResult<T> =
     | {
@@ -85,7 +92,7 @@ const isSequential = <T>(
 export namespace GlobalRoom {
     export namespace MikroORM {
         export namespace ToGlobal {
-            export const state = async (roomEntity: Room, em: EM): Promise<State> => {
+            export const state = async (roomEntity: Room, em: EM): Promise<RoomState> => {
                 const result = decodeDbState(roomEntity.value);
                 const participants: Record<string, ParticipantState> = {};
                 const participantEntities = await em.find(Participant, {
@@ -171,7 +178,7 @@ export namespace GlobalRoom {
                 const sortedOperationEntities = operationEntities.sort(
                     (x, y) => x.prevRevision - y.prevRevision
                 );
-                let operation: DownOperation | undefined =
+                let operation: RoomDownOperation | undefined =
                     sortedOperationEntities.length === 0
                         ? undefined
                         : downOperation(sortedOperationEntities[0]);
@@ -187,7 +194,10 @@ export namespace GlobalRoom {
                         operation = second;
                         continue;
                     }
-                    const composed = composeDownOperation({ first: operation, second });
+                    const composed = composeDownOperation(roomTemplate)({
+                        first: operation,
+                        second,
+                    });
                     if (composed.isError) {
                         return composed;
                     }
@@ -204,9 +214,9 @@ export namespace GlobalRoom {
                 source,
                 requestedBy,
             }: {
-                source: State;
+                source: RoomState;
                 requestedBy: RequestedBy;
-            }): Omit<RoomGetState, 'revision' | 'createdBy'> => {
+            }): Pick<RoomGetState, 'stateJson'> => {
                 return {
                     stateJson: stringifyState(toClientState(requestedBy)(source)),
                 };
@@ -217,18 +227,18 @@ export namespace GlobalRoom {
                 nextState,
                 requestedBy,
             }: {
-                prevState: State;
-                nextState: State;
+                prevState: RoomState;
+                nextState: RoomState;
                 requestedBy: RequestedBy;
             }): string => {
                 const prevClientState = toClientState(requestedBy)(prevState);
                 const nextClientState = toClientState(requestedBy)(nextState);
-                const diffOperation = diff({
+                const diffOperation = diff(roomTemplate)({
                     prevState: prevClientState,
                     nextState: nextClientState,
                 });
                 const upOperation =
-                    diffOperation == null ? undefined : toUpOperation(diffOperation);
+                    diffOperation == null ? undefined : toUpOperation(roomTemplate)(diffOperation);
                 return stringifyUpOperation(upOperation ?? { $v: 2, $r: 1 });
             };
         }
@@ -267,7 +277,7 @@ export namespace GlobalRoom {
 
         const maxJsonLength = 1_000_000;
 
-        // prevStateにおけるDbStateの部分とtargetのJSONは等しい
+        // prevStateにおけるDbStateの部分とtargetのJSONは等しいという想定
         export const applyToEntity = async ({
             em,
             target,
@@ -276,18 +286,18 @@ export namespace GlobalRoom {
         }: {
             em: EM;
             target: Room;
-            prevState: State;
-            operation: TwoWayOperation;
+            prevState: RoomState;
+            operation: RoomTwoWayOperation;
         }) => {
-            const nextState = apply({
+            const nextState = apply(roomTemplate)({
                 state: prevState,
-                operation: toUpOperation(operation),
+                operation: toUpOperation(roomTemplate)(operation),
             });
             if (nextState.isError) {
                 throw nextState.error;
             }
 
-            // CONSIDER: サイズの大きいオブジェクトに対してJSON.stringifyするのは重い可能性。そもそももしJSON.stringifyが重いのであればio-tsのdecodeはより重くなりそう。
+            // CONSIDER: サイズの大きいオブジェクトに対してJSON.stringifyするのは重い可能性。そもそももしJSON.stringifyが重いのであればio-tsのdecodeはより重くなりそうだが。
             target.name = nextState.value.name;
             const newValue = exactDbState(nextState.value);
             const newValueJson = JSON.stringify(newValue);
@@ -301,6 +311,7 @@ export namespace GlobalRoom {
             target.value = newValue;
             const prevRevision = target.revision;
             target.revision += 1;
+            target.completeUpdatedAt = new Date();
 
             await recordForEachAsync(
                 operation.participants ?? {},
@@ -333,7 +344,7 @@ export namespace GlobalRoom {
 
             const op = new RoomOp({
                 prevRevision,
-                value: toDownOperation(operation),
+                value: toDownOperation(roomTemplate)(operation),
             });
             op.room = Reference.create<Room>(target);
 
@@ -341,7 +352,7 @@ export namespace GlobalRoom {
             return nextState.value;
         };
 
-        export const autoRemoveOldRoomOp = async ({
+        export const cleanOldRoomOp = async ({
             em,
             room,
             roomHistCount,
@@ -370,7 +381,7 @@ export namespace GlobalRoom {
 
     export namespace GraphQL {
         export namespace ToGlobal {
-            export const upOperation = (source: RoomOperationInput): UpOperation => {
+            export const upOperation = (source: RoomOperationInput): RoomUpOperation => {
                 return parseUpOperation(source.valueJson);
             };
         }

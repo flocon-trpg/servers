@@ -45,6 +45,9 @@ export const BoardPositionAndPieceEditorModal: React.FC = () => {
                     state={portrait}
                     onUpdate={recipe => {
                         setRoomState(roomState => {
+                            if (roomState.characters == null) {
+                                roomState.characters = {};
+                            }
                             const pos =
                                 roomState.characters[atomValue.characterId]?.portraitPieces?.[
                                     atomValue.pieceId
@@ -71,6 +74,9 @@ export const BoardPositionAndPieceEditorModal: React.FC = () => {
                     state={piece}
                     onUpdate={recipe => {
                         setRoomState(roomState => {
+                            if (roomState.characters == null) {
+                                roomState.characters = {};
+                            }
                             const pos =
                                 roomState.characters[atomValue.characterId]?.pieces?.[
                                     atomValue.pieceId

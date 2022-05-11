@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, Dropdown, Menu, notification, Table, Tooltip, Upload } from 'antd';
+import { Button, Dropdown, Menu, Table, Tooltip, Upload, notification } from 'antd';
 import { accept } from './helper';
 import urljoin from 'url-join';
 import axios from 'axios';
@@ -10,7 +10,7 @@ import {
     FilePathFragment,
     FileSourceType,
     GetFilesDocument,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import { FloconUploaderFileLink } from './FloconUploaderFileLink';
 import { InformationIcon } from '../../../ui/InformationIcon';
 import { FileType, guessFileType, image, others, sound } from '../../../../utils/fileType';
@@ -299,7 +299,7 @@ const fileOptionsColumn: Column = {
             <Dropdown.Button
                 icon={<Icons.MoreOutlined />}
                 overlay={<FileOptionsMenu fileItem={record} />}
-                type={'text' as any}
+                type='text'
                 trigger={['click']}
             />
         );

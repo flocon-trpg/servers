@@ -1,4 +1,5 @@
 import { Field, ID, ObjectType } from 'type-graphql';
+import { ParticipantRoleType } from '../../../enums/ParticipantRoleType';
 
 @ObjectType()
 export class RoomAsListItem {
@@ -8,6 +9,16 @@ export class RoomAsListItem {
     @Field()
     public name!: string;
 
+    @Field({ description: 'since v0.7.2', nullable: true })
+    public createdAt?: number;
+
+    @Field({
+        description: `データベースのRoomエンティティが最後に更新された日時。Roomエンティティのみが対象であるため、例えばメッセージの投稿などは反映されないことに注意。
+since v0.7.2`,
+        nullable: true,
+    })
+    public updatedAt?: number;
+
     @Field({ description: 'この部屋の作成者。Firebase AuthenticationのUserUidで表現される。' })
     public createdBy!: string;
 
@@ -16,4 +27,11 @@ export class RoomAsListItem {
 
     @Field()
     public requiresSpectatorPassword!: boolean;
+
+    @Field({ description: 'since v0.7.2' })
+    public isBookmarked!: boolean;
+
+    // Participantでない場合はnullish
+    @Field(() => ParticipantRoleType, { description: 'since v0.7.2', nullable: true })
+    public role?: ParticipantRoleType | undefined;
 }

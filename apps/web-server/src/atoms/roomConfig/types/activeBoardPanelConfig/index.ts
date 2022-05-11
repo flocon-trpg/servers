@@ -7,8 +7,8 @@ import {
 } from '../boardConfig';
 import { defaultActiveBoardPanelPosition } from '../defaultPanelPositions';
 import {
-    deserializeDraggablePanelConfigBase,
     DraggablePanelConfigBase,
+    deserializeDraggablePanelConfigBase,
     serializedDraggablePanelConfigBase,
 } from '../draggablePanelConfig';
 

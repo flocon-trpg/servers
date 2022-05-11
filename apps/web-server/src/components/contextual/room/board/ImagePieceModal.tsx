@@ -4,7 +4,7 @@ import { DialogFooter } from '../../../ui/DialogFooter';
 import { DrawerProps } from 'antd/lib/drawer';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../../../hooks/useStateEditor';
-import { ImagePieceState, simpleId } from '@flocon-trpg/core';
+import { State, imagePieceTemplate, simpleId } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
 import { useImagePieces } from '../../../../hooks/state/useImagePieces';
 import { InputFile } from '../file/InputFile';
@@ -19,6 +19,8 @@ import { atom, useAtom } from 'jotai';
 import { useCloneImagePiece } from '../../../../hooks/state/useCloneImagePiece';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
 import { EditorGroupHeader } from '../../../ui/EditorGroupHeader';
+
+type ImagePieceState = State<typeof imagePieceTemplate>;
 
 type ImagePieceModalType =
     | {
@@ -103,7 +105,7 @@ export const ImagePieceModal: React.FC = () => {
                     const boardId = modalType.boardId;
                     const pieceId = modalType.pieceId;
                     setRoomState(roomState => {
-                        const imagePieces = roomState.boards[boardId]?.imagePieces;
+                        const imagePieces = roomState.boards?.[boardId]?.imagePieces;
                         if (imagePieces == null) {
                             return;
                         }
@@ -130,7 +132,7 @@ export const ImagePieceModal: React.FC = () => {
         onCreate = () => {
             const id = simpleId();
             setRoomState(roomState => {
-                const imagePieces = roomState.boards[modalType.boardId]?.imagePieces;
+                const imagePieces = roomState.boards?.[modalType.boardId]?.imagePieces;
                 if (imagePieces == null) {
                     return;
                 }

@@ -1,15 +1,16 @@
 import { $free, $system } from '@flocon-trpg/core';
 import React from 'react';
 import { MessageFilter } from '../atoms/roomConfig/types/messageFilter';
-import { PrivateChannelSets } from '../utils/message/PrivateChannelSet';
 import {
     Message,
-    pieceLog,
+    PrivateChannelSets,
     notification,
+    pieceLog,
     privateMessage,
     publicMessage,
     soundEffect,
-} from './useRoomMessages';
+} from '@flocon-trpg/web-server-utils';
+import { toBeNever } from '@flocon-trpg/utils';
 
 export function useMessageFilter(config: MessageFilter): (message: Message) => boolean {
     const {
@@ -98,6 +99,8 @@ export function useMessageFilter(config: MessageFilter): (message: Message) => b
                     return showSystem;
                 case soundEffect:
                     return false;
+                default:
+                    toBeNever(message);
             }
         },
         [

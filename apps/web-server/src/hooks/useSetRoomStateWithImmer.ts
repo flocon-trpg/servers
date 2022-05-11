@@ -1,11 +1,13 @@
-import { State } from '@flocon-trpg/core';
+import { State, roomTemplate } from '@flocon-trpg/core';
 import produce from 'immer';
 import { atom } from 'jotai';
 import { useAtomValue } from 'jotai/utils';
 import React from 'react';
 import { roomAtom } from '../atoms/room/roomAtom';
 
-type Result = (stateOrRecipe: State | ((prevState: State) => void)) => void;
+type RoomState = State<typeof roomTemplate>;
+
+type Result = (stateOrRecipe: RoomState | ((prevState: RoomState) => void)) => void;
 
 const emptySetRoomStateWithImmer: Result = (): void => {
     throw new Error('setRoomStateWithImmer is not ready');
@@ -19,7 +21,7 @@ export const useSetRoomStateWithImmer = (): Result => {
         if (setRoomStateCore == null) {
             return emptySetRoomStateWithImmer;
         }
-        return (stateOrRecipe: State | ((prevState: State) => void)): void => {
+        return (stateOrRecipe: RoomState | ((prevState: RoomState) => void)): void => {
             if (typeof stateOrRecipe === 'function') {
                 setRoomStateCore(prevState => produce(prevState, stateOrRecipe));
                 return;

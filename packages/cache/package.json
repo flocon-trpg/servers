@@ -21,11 +21,11 @@
     "author": "kizahasi",
     "description": "Core library for Flocon project(not released yet).",
     "devDependencies": {
-        "@types/ioredis": "4.28.5",
-        "@types/jest": "27.0.3",
-        "jest": "27.4.5",
+        "@types/ioredis": "4.28.10",
+        "@types/jest": "27.5.0",
+        "jest": "27.5.1",
         "rimraf": "3.0.2",
-        "ts-jest": "27.1.2",
+        "ts-jest": "27.1.4",
         "typescript": "4.4.4"
     },
     "dependencies": {

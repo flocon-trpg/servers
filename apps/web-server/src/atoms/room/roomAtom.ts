@@ -1,92 +1,82 @@
 import { ApolloError } from '@apollo/client';
 import { GraphQLError } from 'graphql';
-import { RoomEventSubscription } from '@flocon-trpg/typed-document-node';
-import { AllRoomMessagesResult } from '../../hooks/useRoomMessages';
+import { RoomEventSubscription } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { RoomState } from '../../hooks/useRoomState';
 import { atom } from 'jotai';
 import produce from 'immer';
+import { Notification } from '@flocon-trpg/web-server-utils';
 
-export namespace Notification {
-    export const text = 'text';
-    export const graphQLErrors = 'graphQLErrors';
-    export const apolloError = 'apolloError';
+export const text = 'text';
+export const graphQLErrors = 'graphQLErrors';
+export const apolloError = 'apolloError';
 
-    export type StateElement = {
-        type: 'success' | 'info' | 'warning' | 'error';
-        message: string;
-        description?: string;
-        createdAt: number;
-    };
+// systemMessageなどとマージするので、createdAtの型はそれに合わせてnumberにしている。
+export type NotificationPayload =
+    | {
+          type: typeof text;
+          notification: Notification;
+      }
+    | {
+          type: typeof graphQLErrors;
+          errors: ReadonlyArray<GraphQLError>;
+          createdAt: number;
+      }
+    | {
+          type: typeof apolloError;
+          error: ApolloError;
+          createdAt: number;
+      };
 
-    // systemMessageなどとマージするので、createdAtの型はそれに合わせてnumberにしている。
-    export type Payload =
-        | {
-              type: typeof text;
-              notification: StateElement;
-          }
-        | {
-              type: typeof graphQLErrors;
-              errors: ReadonlyArray<GraphQLError>;
-              createdAt: number;
-          }
-        | {
-              type: typeof apolloError;
-              error: ApolloError;
-              createdAt: number;
-          };
-
-    export const toTextNotification = (source: Payload): StateElement => {
-        if (source.type === text) {
-            return source.notification;
-        }
-        if (source.type === apolloError) {
-            return {
-                type: 'error',
-                message: 'Apollo error',
-                description: source.error.message,
-                createdAt: source.createdAt,
-            };
-        }
-        const firstError = source.errors[0];
+const toTextNotification = (source: NotificationPayload): Notification => {
+    if (source.type === text) {
+        return source.notification;
+    }
+    if (source.type === apolloError) {
         return {
             type: 'error',
-            message: 'GraqhQL error',
-            description: firstError == null ? undefined : firstError.message,
+            message: 'Apollo error',
+            description: source.error.message,
             createdAt: source.createdAt,
         };
+    }
+    const firstError = source.errors[0];
+    return {
+        type: 'error',
+        message: 'GraqhQL error',
+        description: firstError == null ? undefined : firstError.message,
+        createdAt: source.createdAt,
     };
+};
 
-    export type State = {
-        readonly values: ReadonlyArray<StateElement>;
-        readonly newValue: StateElement | null;
-    };
+export type Notifications = {
+    readonly values: ReadonlyArray<Notification>;
+    readonly newValue: Notification | null;
+};
 
-    export const initialState: State = { values: [], newValue: null };
-}
+const initialNotifications: Notifications = { values: [], newValue: null };
 
-export type RoomAtomValue = {
+type RoomAtomValue = {
     roomId?: string;
     roomState?: RoomState;
     roomEventSubscription?: RoomEventSubscription;
-    allRoomMessagesResult?: AllRoomMessagesResult;
-    notifications: Notification.State;
+    notifications: Notifications;
 };
 
 const initialValue: RoomAtomValue = {
-    notifications: Notification.initialState,
+    notifications: initialNotifications,
 };
 
 export const roomAtom = atom(initialValue);
 
 export const roomNotificationsAtom = atom(
     get => get(roomAtom).notifications,
-    (get, set, payload: Notification.Payload) => {
+    (get, set, payload: NotificationPayload) => {
         set(roomAtom, roomState =>
             produce(roomState, roomState => {
                 if (roomState.notifications.newValue != null) {
                     roomState.notifications.values.push(roomState.notifications.newValue);
                 }
-                roomState.notifications.newValue = Notification.toTextNotification(payload);
+                roomState.notifications.newValue = toTextNotification(payload);
             })
         );
     }

@@ -5,6 +5,7 @@
         "resolveJsonModule": false,
         "target": "ES2017",
         "module": "commonjs",
+        "sourceMap": true,
         // https://typegraphql.com/docs/0.17.0/installation.html#packages-installation
         "lib": ["es2019", "esnext.asynciterable"],
         "removeComments": true,

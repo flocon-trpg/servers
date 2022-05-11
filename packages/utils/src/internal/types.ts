@@ -5,10 +5,12 @@ export const both = 'both';
 type Left<TLeft> = {
     type: typeof left;
     left: TLeft;
+    right?: undefined;
 };
 
 type Right<TRight> = {
     type: typeof right;
+    left?: undefined;
     right: TRight;
 };
 

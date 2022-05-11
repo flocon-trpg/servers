@@ -1,40 +1,44 @@
 import {
-    entryPassword,
     EntryPasswordConfig,
-    firebaseAdminSecret,
     FirebaseAdminSecretConfig,
-    none,
-    postgresqlDatabase,
+    MysqlDatabaseConfig,
     PostgresqlDatabaseConfig,
     ServerConfig,
     ServerConfigForMigration,
-    sqliteDatabase,
     SqliteDatabaseConfig,
     UploaderConfig,
+    entryPassword,
+    firebaseAdminSecret,
+    mysqlDatabase,
+    none,
+    postgresqlDatabase,
+    sqliteDatabase,
 } from './configType';
 import * as E from 'fp-ts/Either';
 import { formatValidationErrors } from './utils/io-ts-reporters';
 import {
     ACCESS_CONTROL_ALLOW_ORIGIN,
     AUTO_MIGRATION,
-    FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL,
+    DATABASE_URL,
     EMBUPLOADER_COUNT_QUOTA,
+    EMBUPLOADER_ENABLED,
     EMBUPLOADER_MAX_SIZE,
     EMBUPLOADER_PATH,
     EMBUPLOADER_SIZE_QUOTA,
-    EMBUPLOADER_ENABLED,
     ENTRY_PASSWORD,
+    FIREBASE_ADMIN_SECRET,
+    FIREBASE_PROJECTID,
+    FLOCON_ADMIN,
+    FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL,
+    HEROKU,
+    MYSQL,
     POSTGRESQL,
+    ROOMHIST_COUNT,
     SQLITE,
     loadDotenv,
-    FIREBASE_ADMIN_SECRET,
-    ROOMHIST_COUNT,
-    FIREBASE_PROJECTID,
-    HEROKU,
-    DATABASE_URL,
 } from './env';
 import { filterInt, isTruthyString } from '@flocon-trpg/utils';
-import { Result, Error } from '@kizahasi/result';
+import { Error, Result } from '@kizahasi/result';
 
 loadDotenv();
 
@@ -52,15 +56,6 @@ const tryParseJSON = (json: string): Result<unknown> => {
 // パースなどに失敗したかどうかは確認できるようにしたいがエラーメッセージを表示するとミスで重要な情報が漏れる可能性があるため、エラーメッセージだけ除去している
 type EmptyErrorResult<T> = Result<T, undefined>;
 
-const omitErrorMessage = <T, U>(
-    source: Result<T, U> | undefined
-): EmptyErrorResult<T> | undefined => {
-    if (source?.isError) {
-        return Result.error(undefined);
-    }
-    return source;
-};
-
 // 環境変数の値に記述ミスがあった場合は続行ではなく停止すべきであるため、ガードとしてこの関数を定義している。
 // コードに問題がなければ、この関数でthrowされることはない。
 const ensureOk = <T, U>(source: Result<T, U> | undefined): T | undefined => {
@@ -71,6 +66,11 @@ const ensureOk = <T, U>(source: Result<T, U> | undefined): T | undefined => {
 };
 
 export class ServerConfigBuilder {
+    public readonly [FLOCON_ADMIN]: Result<ReadonlyArray<string>> | undefined;
+    public get admins() {
+        return this[FLOCON_ADMIN];
+    }
+
     public readonly [ACCESS_CONTROL_ALLOW_ORIGIN]: string | undefined;
     public get accessControlAllowOrigin() {
         return this[ACCESS_CONTROL_ALLOW_ORIGIN];
@@ -139,6 +139,11 @@ export class ServerConfigBuilder {
         return this[HEROKU];
     }
 
+    public readonly [MYSQL]: EmptyErrorResult<MysqlDatabaseConfig> | undefined;
+    public get mysql() {
+        return this[MYSQL];
+    }
+
     public readonly [ROOMHIST_COUNT]: EmptyErrorResult<number> | undefined;
     public get roomHistCount() {
         return this[ROOMHIST_COUNT];
@@ -200,28 +205,43 @@ export class ServerConfigBuilder {
             this[prop] = isTruthyString(value);
         }
 
-        this[FIREBASE_ADMIN_SECRET] = omitErrorMessage(
-            ServerConfigBuilder.firebaseAdminSecretProp(env)
-        );
-        this[ENTRY_PASSWORD] = omitErrorMessage(ServerConfigBuilder.entryPasswordProp(env));
-        this[POSTGRESQL] = omitErrorMessage(ServerConfigBuilder.postgresqlProp(env));
-        this[SQLITE] = omitErrorMessage(ServerConfigBuilder.sqliteProp(env));
+        this[FLOCON_ADMIN] = ServerConfigBuilder.admin(env);
+        this[FIREBASE_ADMIN_SECRET] = ServerConfigBuilder.firebaseAdminSecretProp(env);
+        this[ENTRY_PASSWORD] = ServerConfigBuilder.entryPasswordProp(env);
+        this[MYSQL] = ServerConfigBuilder.mysqlProp(env);
+        this[POSTGRESQL] = ServerConfigBuilder.postgresqlProp(env);
+        this[SQLITE] = ServerConfigBuilder.sqliteProp(env);
+    }
+
+    private static admin(env: typeof process.env): Result<ReadonlyArray<string>> {
+        const adminValue = env[FLOCON_ADMIN];
+        if (adminValue == null) {
+            return Result.ok([]);
+        }
+
+        if (/[^a-zA-Z0-9 ,]/.test(adminValue)) {
+            return Result.error(
+                `${FLOCON_ADMIN} contains invalid characters. Valid characters are [^a-zA-Z0-9 ,]. Make sure firebase UIDs are set. To set multiple UIDs, separate them by commas.`
+            );
+        }
+
+        return Result.ok(adminValue.split(',').map(s => s.trim()));
     }
 
     private static entryPasswordProp(
         env: typeof process.env
-    ): Result<EntryPasswordConfig> | undefined {
+    ): Result<EntryPasswordConfig, undefined> | undefined {
         const entryPasswordObject = env[ENTRY_PASSWORD];
         if (entryPasswordObject == null) {
             return undefined;
         }
         const json = tryParseJSON(entryPasswordObject);
         if (json.isError) {
-            return json;
+            return Result.error(undefined);
         }
         const j = E.mapLeft(formatValidationErrors)(entryPassword.decode(json.value));
         if (j._tag === 'Left') {
-            return Result.error(j.left);
+            return Result.error(undefined);
         }
         if (j.right.type !== none) {
             return Result.ok(j.right);
@@ -231,61 +251,85 @@ export class ServerConfigBuilder {
 
     private static firebaseAdminSecretProp(
         env: typeof process.env
-    ): Result<FirebaseAdminSecretConfig> | undefined {
+    ): Result<FirebaseAdminSecretConfig, undefined> | undefined {
         const firebaseAdminSecretObject = env[FIREBASE_ADMIN_SECRET];
         if (firebaseAdminSecretObject == null) {
             return undefined;
         }
         const json = tryParseJSON(firebaseAdminSecretObject);
         if (json.isError) {
-            return json;
+            return Result.error(undefined);
         }
         const j = E.mapLeft(formatValidationErrors)(firebaseAdminSecret.decode(json.value));
         if (j._tag === 'Left') {
-            return Result.error(j.left);
+            return Result.error(undefined);
         }
         return Result.ok(j.right);
     }
 
-    private static sqliteProp(env: typeof process.env): Result<SqliteDatabaseConfig> | undefined {
-        const sqliteObject = env[SQLITE];
-        if (sqliteObject == null) {
+    private static mysqlProp(
+        env: typeof process.env
+    ): Result<MysqlDatabaseConfig, undefined> | undefined {
+        const mysqlObject = env[MYSQL];
+        if (mysqlObject == null) {
             return undefined;
         }
-        const json = tryParseJSON(sqliteObject);
+        const json = tryParseJSON(mysqlObject);
         if (json.isError) {
-            return json;
+            return Result.error(undefined);
         }
-        const j = E.mapLeft(formatValidationErrors)(sqliteDatabase.decode(json.value));
+        const j = E.mapLeft(formatValidationErrors)(mysqlDatabase.decode(json.value));
         if (j._tag === 'Left') {
-            return Result.error(j.left);
+            return Result.error(undefined);
         }
         return Result.ok(j.right);
     }
 
     private static postgresqlProp(
         env: typeof process.env
-    ): Result<PostgresqlDatabaseConfig> | undefined {
+    ): Result<PostgresqlDatabaseConfig, undefined> | undefined {
         const postgresqlObject = env[POSTGRESQL];
         if (postgresqlObject == null) {
             return undefined;
         }
         const json = tryParseJSON(postgresqlObject);
         if (json.isError) {
-            return json;
+            return Result.error(undefined);
         }
         const j = E.mapLeft(formatValidationErrors)(postgresqlDatabase.decode(json.value));
         if (j._tag === 'Left') {
-            return Result.error(j.left);
+            return Result.error(undefined);
+        }
+        return Result.ok(j.right);
+    }
+
+    private static sqliteProp(
+        env: typeof process.env
+    ): Result<SqliteDatabaseConfig, undefined> | undefined {
+        const sqliteObject = env[SQLITE];
+        if (sqliteObject == null) {
+            return undefined;
+        }
+        const json = tryParseJSON(sqliteObject);
+        if (json.isError) {
+            return Result.error(undefined);
+        }
+        const j = E.mapLeft(formatValidationErrors)(sqliteDatabase.decode(json.value));
+        if (j._tag === 'Left') {
+            return Result.error(undefined);
         }
         return Result.ok(j.right);
     }
 
     private parseError(envKey: string): Error<string> {
+        // TODO: 英語でも出力する（ADMINのエラーメッセージは英語なため整合性が取れていない）
         return Result.error(`${envKey} の値の記入方法が誤っています。`);
     }
 
     private createServerConfigForMigration(): Result<ServerConfigForMigration> {
+        if (this.mysql?.isError === true) {
+            return this.parseError(MYSQL);
+        }
         if (this.sqlite?.isError === true) {
             return this.parseError(SQLITE);
         }
@@ -296,6 +340,7 @@ export class ServerConfigBuilder {
         const result: ServerConfigForMigration = {
             herokuDatabaseUrl: this.databaseUrl,
             heroku: this.heroku ?? false,
+            mysql: ensureOk(this.mysql),
             postgresql: ensureOk(this.postgresql),
             sqlite: ensureOk(this.sqlite),
         };
@@ -311,11 +356,17 @@ export class ServerConfigBuilder {
     }
 
     private createServerConfig(): Result<ServerConfig> {
+        if (this.admins?.isError === true) {
+            return this.admins;
+        }
         if (this.entryPassword?.isError === true) {
             return this.parseError(ENTRY_PASSWORD);
         }
         if (this.firebaseAdminSecret?.isError === true) {
             return this.parseError(FIREBASE_ADMIN_SECRET);
+        }
+        if (this.mysql?.isError === true) {
+            return this.parseError(MYSQL);
         }
         if (this.postgresql?.isError === true) {
             return this.parseError(POSTGRESQL);
@@ -357,21 +408,23 @@ export class ServerConfigBuilder {
             sizeQuota: ensureOk(this.uploaderSizeQuota),
             maxFileSize: ensureOk(this.uploaderMaxSize),
         };
-        const result: ServerConfig = {
+        const nonFrozenResult: ServerConfig = {
             accessControlAllowOrigin: this.accessControlAllowOrigin,
-            admins: [],
+            admins: ensureOk(this.admins) ?? [],
             autoMigration: this.autoMigration ?? false,
             herokuDatabaseUrl: this.databaseUrl,
             entryPassword: ensureOk(this.entryPassword),
             firebaseAdminSecret: ensureOk(this.firebaseAdminSecret),
             firebaseProjectId,
             heroku: this.heroku ?? false,
+            mysql: ensureOk(this.mysql),
             roomHistCount: ensureOk(this.roomHistCount),
             postgresql: ensureOk(this.postgresql),
             sqlite: ensureOk(this.sqlite),
             uploader: uploaderConfig,
             disableRateLimitExperimental: this.disableRateLimit ?? false,
         };
+        const result = Object.freeze(nonFrozenResult);
         return Result.ok(result);
     }
 

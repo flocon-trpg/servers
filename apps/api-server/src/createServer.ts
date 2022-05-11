@@ -5,8 +5,8 @@ import { ExpressContext } from 'apollo-server-express/dist/ApolloServer';
 import { DecodedIdToken, ResolverContext } from './graphql+mikro-orm/utils/Contexts';
 import { PromiseQueue } from './utils/promiseQueue';
 import ws from 'ws';
-import { Extra, useServer } from 'graphql-ws/lib/use/ws';
-import { execute, GraphQLSchema, subscribe } from 'graphql';
+import { useServer } from 'graphql-ws/lib/use/ws';
+import { GraphQLSchema, execute, subscribe } from 'graphql';
 import { BaasType } from './enums/BaasType';
 import { User } from './graphql+mikro-orm/entities/user/mikro-orm';
 import sanitize from 'sanitize-filename';
@@ -48,7 +48,7 @@ export const createServerAsError = async ({ port }: { port: string | number }) =
 
     const server = app.listen(port, () => {
         console.log(
-            `⚠️ Server ready at http://localhost:${port}, but API server is not running. Please see error messages.`
+            `⚠️ Server ready at http://localhost:${port}, but API is not working. Please see error messages.`
         );
     });
     return server;
@@ -64,6 +64,7 @@ export const createServer = async ({
     getDecodedIdTokenFromExpressRequest,
     getDecodedIdTokenFromWsContext,
     port,
+    quiet,
 }: {
     serverConfig: ServerConfig;
     promiseQueue: PromiseQueue;
@@ -75,9 +76,10 @@ export const createServer = async ({
         req: ExpressContext['req']
     ) => Promise<Result<Readonly<DecodedIdToken>, unknown> | undefined>;
     getDecodedIdTokenFromWsContext: (
-        context: Context<Extra>
+        context: Context
     ) => Promise<Result<Readonly<DecodedIdToken>, unknown> | undefined>;
     port: string | number;
+    quiet?: boolean;
 }) => {
     let rateLimiter: RateLimiterAbstract | null = null;
     if (!serverConfig.disableRateLimitExperimental) {
@@ -100,8 +102,6 @@ export const createServer = async ({
         };
     };
 
-    // The ApolloServer constructor requires two parameters: your schema
-    // definition and your set of resolvers.
     const apolloServer = new ApolloServer({
         schema,
         context,
@@ -115,15 +115,17 @@ export const createServer = async ({
     apolloServer.applyMiddleware({ app });
 
     if (serverConfig.accessControlAllowOrigin == null) {
-        AppConsole.log({
-            en: '"accessControlAllowOrigin" config was not found. "Access-Control-Allow-Origin" header will be empty.',
-            ja: '"accessControlAllowOrigin" のコンフィグが見つかりませんでした。"Access-Control-Allow-Origin" ヘッダーは空になります。',
-        });
+        !quiet &&
+            AppConsole.log({
+                en: '"accessControlAllowOrigin" config was not found. "Access-Control-Allow-Origin" header will be empty.',
+                ja: '"accessControlAllowOrigin" のコンフィグが見つかりませんでした。"Access-Control-Allow-Origin" ヘッダーは空になります。',
+            });
     } else {
-        AppConsole.log({
-            en: `"accessControlAllowOrigin" config was found. "Access-Control-Allow-Origin" header will be "${serverConfig.accessControlAllowOrigin}".`,
-            ja: `"accessControlAllowOrigin" のコンフィグが見つかりました。"Access-Control-Allow-Origin" ヘッダーは "${serverConfig.accessControlAllowOrigin}" になります。`,
-        });
+        !quiet &&
+            AppConsole.log({
+                en: `"accessControlAllowOrigin" config was found. "Access-Control-Allow-Origin" header will be "${serverConfig.accessControlAllowOrigin}".`,
+                ja: `"accessControlAllowOrigin" のコンフィグが見つかりました。"Access-Control-Allow-Origin" ヘッダーは "${serverConfig.accessControlAllowOrigin}" になります。`,
+            });
         const accessControlAllowOrigin = serverConfig.accessControlAllowOrigin;
         app.use((req, res, next) => {
             res.header('Access-Control-Allow-Origin', accessControlAllowOrigin);
@@ -138,25 +140,28 @@ export const createServer = async ({
     const applyUploader = async () => {
         const uploaderConfig = serverConfig.uploader;
         if (uploaderConfig == null || !uploaderConfig.enabled) {
-            AppConsole.log({
-                en: `The uploader of API server is disabled.`,
-                ja: `APIサーバーのアップローダーは無効化されています。`,
-            });
+            !quiet &&
+                AppConsole.log({
+                    en: `The uploader of API server is disabled.`,
+                    ja: `APIサーバーのアップローダーは無効化されています。`,
+                });
             return;
         }
         const directory = uploaderConfig.directory;
         if (directory == null) {
-            AppConsole.warn({
-                en: `The uploader of API server is disabled because "${EMBUPLOADER_PATH}" is empty.`,
-                ja: `"${EMBUPLOADER_PATH}"の値が空なので、APIサーバーのアップローダーは無効化されています。`,
-            });
+            !quiet &&
+                AppConsole.warn({
+                    en: `The uploader of API server is disabled because "${EMBUPLOADER_PATH}" is empty.`,
+                    ja: `"${EMBUPLOADER_PATH}"の値が空なので、APIサーバーのアップローダーは無効化されています。`,
+                });
             return;
         }
 
-        AppConsole.log({
-            en: `The uploader of API server is enabled.`,
-            ja: `APIサーバーのアップローダーは有効化されています。`,
-        });
+        !quiet &&
+            AppConsole.log({
+                en: `The uploader of API server is enabled.`,
+                ja: `APIサーバーのアップローダーは有効化されています。`,
+            });
 
         await ensureDir(path.resolve(directory));
         const storage = multer.diskStorage({
@@ -393,7 +398,7 @@ export const createServer = async ({
 
                     const roomId = message.payload.variables?.id;
                     if (typeof roomId === 'string') {
-                        connectionManager.onConnectToRoom({
+                        await connectionManager.onConnectToRoom({
                             connectionId: message.id,
                             userUid: decodedIdToken.value.uid,
                             roomId,
@@ -402,12 +407,12 @@ export const createServer = async ({
                         console.warn('(typeof RoomEvent.id) should be string');
                     }
                 },
-                onComplete: async (ctx, message) => {
+                onComplete: (ctx, message) => {
                     connectionManager.onLeaveRoom({ connectionId: message.id });
                 },
-                onClose: ctx => {
+                onClose: async ctx => {
                     for (const key in ctx.subscriptions) {
-                        connectionManager.onLeaveRoom({ connectionId: key });
+                        await connectionManager.onLeaveRoom({ connectionId: key });
                     }
                 },
             },
@@ -415,8 +420,10 @@ export const createServer = async ({
         );
 
         // TODO: /graphqlが含まれているとAPI_HTTPなどの設定にも/graphqlの部分も入力してしまいそうなので、対処したほうがいいと思われる。また、createServerAsErrorとの統一性も取れていない
-        console.log(`🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`);
-        console.log(`🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`);
+        !quiet &&
+            console.log(`🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`);
+        !quiet &&
+            console.log(`🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`);
     });
     return server;
 };

@@ -4,7 +4,7 @@ import { useMyCharacters } from '../../../../../hooks/state/useMyCharacters';
 import * as Icon from '@ant-design/icons';
 import { custom, getSelectedCharacterType, none, some } from './getSelectedCharacterType';
 import classNames from 'classnames';
-import { flex, flexRow, flexNone, itemsCenter } from '../../../../../utils/className';
+import { flex, flexNone, flexRow, itemsCenter } from '../../../../../utils/className';
 import { MessagePanelConfig } from '../../../../../atoms/roomConfig/types/messagePanelConfig';
 import { Draft } from 'immer';
 import { InputDescription } from '../../../../ui/InputDescription';
@@ -69,12 +69,12 @@ export const CharacterSelector: React.FC<Props> = ({
                     style={{ flex: 1, maxWidth: inputMaxWidth }}
                     placeholder='キャラクター'
                     value={config.selectedCharacterId}
-                    onSelect={(value, option) => {
+                    onChange={value => {
+                        if (value == null) {
+                            return;
+                        }
                         onConfigUpdate(draft => {
-                            if (typeof option.key !== 'string') {
-                                return;
-                            }
-                            draft.selectedCharacterId = option.key;
+                            draft.selectedCharacterId = value;
                         });
                     }}
                 >

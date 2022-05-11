@@ -8,7 +8,7 @@ import {
     RoomAsListItemFragment,
     UpdateWritingMessageStatusDocument,
     WritingMessageStatusInputType,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import { Alert, Button, Card, Input, Result, Spin, notification as antdNotification } from 'antd';
 import produce from 'immer';
 import { atom } from 'jotai';
@@ -16,7 +16,7 @@ import { selectAtom, useAtomValue, useUpdateAtom } from 'jotai/utils';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { useDebounce, usePrevious } from 'react-use';
-import { bufferTime, Subject } from 'rxjs';
+import { Subject, bufferTime } from 'rxjs';
 import { roomPrivateMessageInputAtom } from '../../../atoms/inputs/roomPrivateMessageInputAtom';
 import { roomPublicMessageInputAtom } from '../../../atoms/inputs/roomPublicMessageInputAtom';
 import { hideAllOverlayActionAtom } from '../../../atoms/overlay/hideAllOverlayActionAtom';
@@ -27,7 +27,7 @@ import { useAtomSelector } from '../../../atoms/useAtomSelector';
 import { MyAuthContext } from '../../../contexts/MyAuthContext';
 import { usePublishRoomEventSubscription } from '../../../hooks/usePublishRoomEventSubscription';
 import { useReadonlyRef } from '../../../hooks/useReadonlyRef';
-import { useAllRoomMessages } from '../../../hooks/useRoomMessages';
+import { useStartFetchingRoomMessages } from '../../../hooks/useRoomMessages';
 import {
     deleted,
     getRoomFailure,
@@ -185,7 +185,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                     参加者として入室
                 </div>
                 {roomState.requiresPlayerPassword ? (
-                    <Input
+                    <Input.Password
                         style={{ gridColumn: 2, gridRow: 3 }}
                         onChange={e => setPlayerPassword(e.target.value)}
                         value={playerPassword}
@@ -207,7 +207,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                     観戦者として入室
                 </div>
                 {roomState.requiresSpectatorPassword ? (
-                    <Input
+                    <Input.Password
                         style={{ gridColumn: 2, gridRow: 4 }}
                         onChange={e => setSpectatorPassword(e.target.value)}
                         value={spectatorPassword}
@@ -311,7 +311,7 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
         error,
     } = usePublishRoomEventSubscription(roomId);
     const { state: roomState, refetch: refetchRoomState } = useRoomState(roomId, observable);
-    const allRoomMessages = useAllRoomMessages({
+    useStartFetchingRoomMessages({
         roomId,
         roomEventSubscription,
         beginFetch: roomState.type === 'joined',
@@ -326,12 +326,6 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
     React.useEffect(() => {
         setRoomAtomValue(roomAtomValue => ({ ...roomAtomValue, roomEventSubscription }));
     }, [roomEventSubscription, setRoomAtomValue]);
-    React.useEffect(() => {
-        setRoomAtomValue(roomAtomValue => ({
-            ...roomAtomValue,
-            allRoomMessagesResult: allRoomMessages,
-        }));
-    }, [allRoomMessages, setRoomAtomValue]);
 
     const newNotification = useAtomSelector(roomAtom, room => room.notifications.newValue);
     React.useEffect(() => {

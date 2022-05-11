@@ -3,21 +3,27 @@ import { Tooltip } from 'antd';
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 import { ToggleButton } from '../../../ui/ToggleButton';
 import {
-    parameterIsPrivate,
     parameterIsNotPrivate,
-    parameterIsPrivateAndNotCreatedByMe,
     parameterIsNotPrivateAndNotCreatedByMe,
+    parameterIsPrivate,
+    parameterIsPrivateAndNotCreatedByMe,
 } from '../../../../resources/text/main';
 import { BufferedInput } from '../../../ui/BufferedInput';
 import {
-    CharacterState,
-    CharacterUpOperation,
+    State,
     StrIndex20,
-    StrParamState,
-    applyCharacter,
-    toNullableTextUpOperation,
+    UpOperation,
+    apply,
+    characterTemplate,
     nullableTextDiff,
+    strParamTemplate,
+    toNullableTextUpOperation,
 } from '@flocon-trpg/core';
+
+const applyCharacter = apply(characterTemplate);
+type CharacterState = State<typeof characterTemplate>;
+type CharacterUpOperation = UpOperation<typeof characterTemplate>;
+type StrParamState = State<typeof strParamTemplate>;
 
 const inputWidth = 150;
 
@@ -127,6 +133,8 @@ export const StringParameterInput: React.FC<Props> = ({
                 };
                 onOperate(apply(operation));
             }}
+            shape='circle'
+            defaultType='dashed'
         />
     );
     return (

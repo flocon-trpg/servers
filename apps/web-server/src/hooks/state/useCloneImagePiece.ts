@@ -15,12 +15,12 @@ export const useCloneImagePiece = () => {
                     return room;
                 }
 
-                const board = room.boards[boardId];
+                const board = room.boards?.[boardId];
                 if (board == null) {
                     return room;
                 }
 
-                const imagePiece = board.imagePieces[pieceId];
+                const imagePiece = board.imagePieces?.[pieceId];
                 if (imagePiece == null) {
                     return room;
                 }
@@ -32,11 +32,14 @@ export const useCloneImagePiece = () => {
                 newImagePieceValue.ownerParticipantId = myUserUid;
 
                 return produce(room, room => {
-                    const board = room.boards[boardId];
+                    const board = room.boards?.[boardId];
                     if (board == null) {
                         return;
                     }
                     const newId = simpleId();
+                    if (board.imagePieces == null) {
+                        board.imagePieces = {};
+                    }
                     board.imagePieces[newId] = newImagePieceValue;
                 });
             });

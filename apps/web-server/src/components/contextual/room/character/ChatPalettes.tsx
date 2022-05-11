@@ -5,9 +5,9 @@ import { useMyCharacters } from '../../../../hooks/state/useMyCharacters';
 import { GameSelector } from '../message/ChatInput/GameSelector';
 import { TextColorSelector } from '../message/ChatInput/TextColorSelector';
 import {
-    publicChannel,
     SelectedChannelType,
     SubmitMessage,
+    publicChannel,
 } from '../message/ChatInput/SubmitMessage';
 import { Subject } from 'rxjs';
 import classNames from 'classnames';
@@ -158,6 +158,22 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
             });
     }, [myCharacters]);
 
+    const onConfigUpdate = React.useCallback(
+        (recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void) => {
+            setRoomConfig(roomConfig => {
+                if (roomConfig == null) {
+                    return;
+                }
+                const chatPalettePanel = roomConfig.panels.chatPalettePanels[panelId];
+                if (chatPalettePanel == null) {
+                    return;
+                }
+                recipe(chatPalettePanel);
+            });
+        },
+        [panelId, setRoomConfig]
+    );
+
     if (config == null) {
         return null;
     }
@@ -165,21 +181,6 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
     const selectedCharacterId = config.selectedCharacterId;
     const selectedCharacter =
         selectedCharacterId == null ? undefined : myCharacters?.get(selectedCharacterId);
-
-    const onConfigUpdate = (
-        recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void
-    ) => {
-        setRoomConfig(roomConfig => {
-            if (roomConfig == null) {
-                return;
-            }
-            const chatPalettePanel = roomConfig.panels.chatPalettePanels[panelId];
-            if (chatPalettePanel == null) {
-                return;
-            }
-            recipe(chatPalettePanel);
-        });
-    };
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -189,12 +190,12 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
                     style={{ flex: 1, maxWidth: miniInputMaxWidth }}
                     placeholder='キャラクター'
                     value={config.selectedCharacterId}
-                    onSelect={(value, option) => {
+                    onChange={value => {
+                        if (value == null) {
+                            return;
+                        }
                         onConfigUpdate(draft => {
-                            if (typeof option.key !== 'string') {
-                                return;
-                            }
-                            draft.selectedCharacterId = option.key;
+                            draft.selectedCharacterId = value;
                         });
                     }}
                 >
@@ -241,7 +242,8 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
                                         if (selectedCharacterId == null) {
                                             return;
                                         }
-                                        const character = roomState.characters[selectedCharacterId];
+                                        const character =
+                                            roomState.characters?.[selectedCharacterId];
                                         if (character == null) {
                                             return;
                                         }
@@ -269,7 +271,7 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
                                     if (selectedCharacterId == null) {
                                         return;
                                     }
-                                    const character = roomState.characters[selectedCharacterId];
+                                    const character = roomState.characters?.[selectedCharacterId];
                                     if (character == null) {
                                         return;
                                     }

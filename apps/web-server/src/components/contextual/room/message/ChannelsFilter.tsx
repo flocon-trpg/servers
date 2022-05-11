@@ -1,10 +1,10 @@
 import React from 'react';
 import { Checkbox } from 'antd';
-import { RoomPrivateMessage, RoomPublicMessage } from '@flocon-trpg/typed-document-node';
+import { RoomPrivateMessage, RoomPublicMessage } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { usePublicChannelNames } from '../../../../hooks/state/usePublicChannelNames';
 import classNames from 'classnames';
 import { flex, flexColumn } from '../../../../utils/className';
-import { $system, $free } from '@flocon-trpg/core';
+import { $free, $system } from '@flocon-trpg/core';
 
 export type ChannelsFilterOptions = {
     includesPublicChannel1: boolean;

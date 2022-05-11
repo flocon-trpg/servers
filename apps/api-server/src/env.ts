@@ -1,5 +1,5 @@
 import { config } from 'dotenv';
-import dotenvExpand from 'dotenv-expand';
+import { expand } from 'dotenv-expand';
 import { existsSync } from 'fs';
 
 export const loadDotenv = (): void => {
@@ -9,7 +9,7 @@ export const loadDotenv = (): void => {
 
     dotenvFiles.forEach(dotenvFile => {
         if (existsSync(dotenvFile)) {
-            dotenvExpand(
+            expand(
                 config({
                     path: dotenvFile,
                 })
@@ -33,8 +33,9 @@ export const FIREBASE_PROJECTID = 'FIREBASE_PROJECTID';
 export const FIREBASE_ADMIN_SECRET = 'FIREBASE_ADMIN_SECRET';
 export const FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL =
     'FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL';
-export const FLOCON_API_ADMINS = 'FLOCON_API_ADMINS';
+export const FLOCON_ADMIN = 'FLOCON_ADMIN';
 export const HEROKU = 'HEROKU';
+export const MYSQL = 'MYSQL';
 export const POSTGRESQL = 'POSTGRESQL';
 export const ROOMHIST_COUNT = 'ROOMHIST_COUNT';
 export const SQLITE = 'SQLITE';

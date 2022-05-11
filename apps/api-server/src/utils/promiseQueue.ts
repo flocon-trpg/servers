@@ -15,7 +15,6 @@ type RawResult = {
     result:
         | {
               type: typeof executed;
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               value: any; // Promiseが成功したときの型はanyで、失敗したときのreasonの型もanyなので共用させている
               isError: boolean;
           }
@@ -43,7 +42,6 @@ type ResultWithTimeout<T> =
       };
 
 export class PromiseQueue {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private readonly _promises = new Subject<{
         id: string;
         execute: () => Promise<any>;

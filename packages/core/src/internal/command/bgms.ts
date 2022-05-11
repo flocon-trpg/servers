@@ -1,20 +1,21 @@
 import {
     AstInfo,
-    beginCast,
     FBoolean,
     FFunction,
     FObject,
     FValue,
     OnGettingParams,
     ScriptError,
+    beginCast,
 } from '@flocon-trpg/flocon-script';
-import * as RoomTypes from '../ot/room/types';
-import * as BgmTypes from '../ot/room/bgm/types';
+import * as RoomTypes from '../ot/flocon/room/types';
+import * as BgmTypes from '../ot/flocon/room/bgm/types';
 import { FBgm } from './bgm';
 import { isStrIndex5 } from '../indexes';
+import { State } from '../ot/generator';
 
 export class FBgms extends FObject {
-    public constructor(private readonly room: RoomTypes.State) {
+    public constructor(private readonly room: State<typeof RoomTypes.template>) {
         super();
     }
 
@@ -23,7 +24,7 @@ export class FBgms extends FObject {
         if (!isStrIndex5(keyAsString)) {
             return undefined;
         }
-        return this.room.bgms[keyAsString];
+        return (this.room.bgms ?? {})[keyAsString];
     }
 
     private ensure(key: FValue, astInfo: AstInfo | undefined) {
@@ -31,11 +32,14 @@ export class FBgms extends FObject {
         if (!isStrIndex5(keyAsString)) {
             return undefined;
         }
+        if (this.room.bgms == null) {
+            this.room.bgms = {};
+        }
         const found = this.room.bgms[keyAsString];
         if (found != null) {
             return found;
         }
-        const newBgm: BgmTypes.State = {
+        const newBgm: State<typeof BgmTypes.template> = {
             $v: 1,
             $r: 1,
             files: [],
@@ -49,6 +53,9 @@ export class FBgms extends FObject {
     private delete(key: FValue, astInfo: AstInfo | undefined) {
         const keyAsString = beginCast(key, astInfo).addNumber().cast().toString();
         if (!isStrIndex5(keyAsString)) {
+            return false;
+        }
+        if (this.room.bgms == null) {
             return false;
         }
         const found = this.room.bgms[keyAsString];

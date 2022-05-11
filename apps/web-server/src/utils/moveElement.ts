@@ -16,10 +16,7 @@ export const moveElement = <T>(
         return source;
     }
 
-    const elementToMove = source[fromIndex];
-    if (elementToMove == null) {
-        throw new Error('This should not happen');
-    }
+    const elementToMove = source[fromIndex] as T;
     source.splice(fromIndex, 1);
     source.splice(toIndex, 0, elementToMove);
     return source;

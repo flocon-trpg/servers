@@ -4,14 +4,14 @@ import { Button, Input } from 'antd';
 import { TextAreaRef } from 'antd/lib/input/TextArea';
 import * as Icon from '@ant-design/icons';
 import { usePublicChannelNames } from '../../../../../hooks/state/usePublicChannelNames';
-import { custom, SelectedCharacterType, some } from './getSelectedCharacterType';
+import { SelectedCharacterType, custom, some } from './getSelectedCharacterType';
 import _ from 'lodash';
 import { useParticipants } from '../../../../../hooks/state/useParticipants';
 import {
     WritePrivateMessageDocument,
     WritePublicMessageDocument,
     WriteRoomPublicMessageFailureType,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import { UISelector } from '../../../../ui/UISelector';
 import { PrivateMessageChannelSelector } from './PrivateMessageChannelSelector';
 import { PublicMessageChannelSelector } from './PublicMessageChannelSelector';
@@ -27,7 +27,7 @@ import { userConfigAtom } from '../../../../../atoms/userConfig/userConfigAtom';
 import { UserConfigUtils } from '../../../../../atoms/userConfig/utils';
 import { useAtomSelector } from '../../../../../atoms/useAtomSelector';
 import { useAtom } from 'jotai';
-import { roomNotificationsAtom, Notification } from '../../../../../atoms/room/roomAtom';
+import { roomNotificationsAtom } from '../../../../../atoms/room/roomAtom';
 import { Draft } from 'immer';
 import { roomPrivateMessageInputAtom } from '../../../../../atoms/inputs/roomPrivateMessageInputAtom';
 import { roomPublicMessageInputAtom } from '../../../../../atoms/inputs/roomPublicMessageInputAtom';
@@ -127,7 +127,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
                         return;
                     case 'WriteRoomPrivateMessageFailureResult':
                         addRoomNotification({
-                            type: Notification.text,
+                            type: 'text',
                             notification: {
                                 type: 'error',
                                 message: `書き込みの際にエラーが発生しました: ${res.data.result.failureType}`,
@@ -137,7 +137,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
                         return;
                     case 'RoomMessageSyntaxError':
                         addRoomNotification({
-                            type: Notification.text,
+                            type: 'text',
                             notification: {
                                 type: 'error',
                                 message: `文法エラーがあります: ${res.data.result.errorMessage}`,
@@ -281,7 +281,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
                         switch (res.data.result.failureType) {
                             case WriteRoomPublicMessageFailureType.NotAuthorized:
                                 addRoomNotification({
-                                    type: Notification.text,
+                                    type: 'text',
                                     notification: {
                                         type: 'error',
                                         message: '観戦者は雑談チャンネル以外には投稿できません。',
@@ -291,7 +291,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
                                 return;
                             default:
                                 addRoomNotification({
-                                    type: Notification.text,
+                                    type: 'text',
                                     notification: {
                                         type: 'error',
                                         message: `書き込みの際にエラーが発生しました: ${res.data.result.failureType}`,
@@ -302,7 +302,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
                         }
                     case 'RoomMessageSyntaxError':
                         addRoomNotification({
-                            type: Notification.text,
+                            type: 'text',
                             notification: {
                                 type: 'error',
                                 message: `文法エラーがあります: ${res.data.result.errorMessage}`,

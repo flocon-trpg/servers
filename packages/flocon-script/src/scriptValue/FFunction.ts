@@ -3,7 +3,7 @@ import { ScriptError } from '../ScriptError';
 import { FType } from './FType';
 import { FValue } from './FValue';
 import { tryToPropertyName } from './tryToPropertyName';
-import { FObjectBase, GetCoreParams, GetParams, SetParams, AstInfo } from './types';
+import { AstInfo, FObjectBase, GetCoreParams, GetParams, SetParams } from './types';
 
 type FFunctionParams = {
     args: FValue[];

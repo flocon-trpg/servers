@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Checkbox, Tooltip } from 'antd';
-import { EyeInvisibleOutlined, EyeOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EyeInvisibleOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
 import { ToggleButton } from '../../../ui/ToggleButton';
 import {
     addParameter,
@@ -11,12 +11,18 @@ import {
     parameterIsPrivateAndNotCreatedByMe,
 } from '../../../../resources/text/main';
 import {
-    BoolParamState,
-    CharacterState,
-    CharacterUpOperation,
+    State,
     StrIndex20,
-    applyCharacter,
+    UpOperation,
+    apply,
+    boolParamTemplate,
+    characterTemplate,
 } from '@flocon-trpg/core';
+
+type BoolParamState = State<typeof boolParamTemplate>;
+type CharacterState = State<typeof characterTemplate>;
+type CharacterUpOperation = UpOperation<typeof characterTemplate>;
+const applyCharacter = apply(characterTemplate);
 
 type Props = {
     isCharacterPrivate: boolean;
@@ -170,6 +176,8 @@ export const BooleanParameterInput: React.FC<Props> = ({
                 };
                 onOperate(apply(operation));
             }}
+            shape='circle'
+            defaultType='dashed'
         />
     );
     if (parameter?.value == null) {

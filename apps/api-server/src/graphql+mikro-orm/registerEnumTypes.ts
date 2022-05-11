@@ -1,5 +1,5 @@
 import { registerEnumType } from 'type-graphql';
-import { ParticipantRole } from '../enums/ParticipantRole';
+import { ParticipantRoleType } from '../enums/ParticipantRoleType';
 import { JoinRoomFailureType } from '../enums/JoinRoomFailureType';
 import { FileSourceType } from '../enums/FileSourceType';
 import { GetRoomFailureType } from '../enums/GetRoomFailureType';
@@ -28,6 +28,8 @@ import { GetFileItemsFailureType } from '../enums/GetFileItemsFailureType';
 import { CreateRoomFailureType } from '../enums/CreateRoomFailureType';
 import { GetRoomsListFailureType } from '../enums/GetRoomsListFailureType';
 import { ResetRoomMessagesFailureType } from '../enums/ResetRoomMessagesFailureType';
+import { DeleteRoomAsAdminFailureType } from '../enums/DeleteRoomAsAdminFailureType';
+import { UpdateBookmarkFailureType } from '../enums/UpdateBookmarkFailureType';
 
 let hasRegistered = false;
 export const registerEnumTypes = (): void => {
@@ -49,6 +51,9 @@ export const registerEnumTypes = (): void => {
     });
     registerEnumType(DeleteRoomFailureType, {
         name: 'DeleteRoomFailureType',
+    });
+    registerEnumType(DeleteRoomAsAdminFailureType, {
+        name: 'DeleteRoomAsAdminFailureType',
     });
     registerEnumType(EditMessageFailureType, {
         name: 'EditMessageFailureType',
@@ -89,7 +94,8 @@ export const registerEnumTypes = (): void => {
     registerEnumType(OperateRoomFailureType, {
         name: 'OperateRoomFailureType',
     });
-    registerEnumType(ParticipantRole, {
+    registerEnumType(ParticipantRoleType, {
+        // 互換性のため'ParticipantRoleType'ではなく'ParticipantRole'としている。だが、'ParticipantRoleType'に変更することで問題が生じるかどうかは確認していない。
         name: 'ParticipantRole',
     });
     registerEnumType(PieceLogType, {
@@ -106,6 +112,9 @@ export const registerEnumTypes = (): void => {
     });
     registerEnumType(RoomParameterNameType, {
         name: 'RoomParameterNameType',
+    });
+    registerEnumType(UpdateBookmarkFailureType, {
+        name: 'UpdateBookmarkFailureType',
     });
     registerEnumType(WriteRoomPrivateMessageFailureType, {
         name: 'WriteRoomPrivateMessageFailureType',

@@ -1,4 +1,4 @@
-import { alpha, beta, SemVer, SemverOption } from '../src';
+import { SemVer, SemverOption, alpha, beta } from '../src';
 
 it.each`
     left                                                                                         | operator | right
@@ -18,7 +18,7 @@ it.each`
             castedOperator = operator;
             break;
         default:
-            fail('Only "=" or "<" are supported');
+            fail('Only "=" and "<" are supported');
     }
 
     const leftSemver = new SemVer(left);
@@ -27,6 +27,12 @@ it.each`
     if (castedOperator === '=') {
         expect(SemVer.compare(leftSemver, '=', rightSemver)).toBe(true);
         expect(SemVer.compare(rightSemver, '=', leftSemver)).toBe(true);
+
+        expect(SemVer.compare(leftSemver, '<=', rightSemver)).toBe(true);
+        expect(SemVer.compare(rightSemver, '>=', leftSemver)).toBe(true);
+
+        expect(SemVer.compare(leftSemver, '>=', rightSemver)).toBe(true);
+        expect(SemVer.compare(rightSemver, '<=', leftSemver)).toBe(true);
         return;
     }
 

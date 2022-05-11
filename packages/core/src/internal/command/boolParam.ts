@@ -1,19 +1,20 @@
 import {
+    FBoolean,
     FObject,
     FValue,
-    beginCast,
-    FBoolean,
-    ScriptError,
     OnGettingParams,
     OnSettingParams,
+    ScriptError,
+    beginCast,
 } from '@flocon-trpg/flocon-script';
-import * as BoolParam from '../ot/room/character/boolParam/types';
+import { State } from '../ot/generator';
+import * as BoolParam from '../ot/flocon/room/character/boolParam/types';
 
 const value = 'value';
 const isValueSecret = 'isValueSecret';
 
 export class FBoolParam extends FObject {
-    public constructor(private readonly boolParam: BoolParam.State) {
+    public constructor(private readonly boolParam: State<typeof BoolParam.template>) {
         super();
     }
 

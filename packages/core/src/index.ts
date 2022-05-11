@@ -1,27 +1,3 @@
-import * as Command from './internal/ot/room/character/command/functions';
-import * as CommandTypes from './internal/ot/room/character/command/types';
-import * as RecordOperation from './internal/ot/util/recordOperation';
-
-export const privateCommandsDiff = ({
-    prevState,
-    nextState,
-}: {
-    prevState: Record<string, CommandTypes.State | undefined>;
-    nextState: Record<string, CommandTypes.State | undefined>;
-}): RecordOperation.RecordUpOperation<CommandTypes.State, CommandTypes.UpOperation> | undefined => {
-    return RecordOperation.diff<CommandTypes.State, CommandTypes.UpOperation>({
-        prevState,
-        nextState,
-        innerDiff: params => {
-            const diff = Command.diff(params);
-            if (diff == null) {
-                return undefined;
-            }
-            return Command.toUpOperation(diff);
-        },
-    });
-};
-
 export { anonymous, authToken, $free, $system } from './internal/constants';
 
 export { firebaseConfig, FirebaseConfig } from './internal/firebaseConfig';
@@ -59,28 +35,26 @@ export {
 
 export { testCommand, execCharacterCommand } from './internal/command/main';
 
-export { fakeFirebaseConfig1, fakeFirebaseConfig2 } from './internal/fake/fakeFirebaseConfig';
-
-export { Default, Uploader, FirebaseStorage, FilePath } from './internal/ot/filePath/types';
-
 export { Expression, plain, expr1, analyze } from './internal/expression';
 
-export {
-    toClientState,
-    toUpOperation,
-    toDownOperation,
-    apply,
-    applyBack,
-    composeDownOperation,
-    restore,
-    diff,
-    serverTransform,
-    clientTransform,
-} from './internal/ot/room/functions';
+export { fakeFirebaseConfig1, fakeFirebaseConfig2 } from './internal/fake/fakeFirebaseConfig';
 
 export {
-    dbState,
-    DbState,
+    Default,
+    Uploader,
+    FirebaseStorage,
+    filePathTemplate,
+} from './internal/ot/flocon/filePath/types';
+
+export {
+    $v,
+    $r,
+    atomic,
+    // replace,
+    ot,
+    record,
+    paramRecord,
+    object,
     state,
     State,
     upOperation,
@@ -88,19 +62,33 @@ export {
     downOperation,
     DownOperation,
     TwoWayOperation,
-} from './internal/ot/room/types';
+    toDownOperation,
+    toUpOperation,
+    apply,
+    applyBack,
+    composeDownOperation,
+    restore,
+    diff,
+    clientTransform,
+    createObjectValueTemplate,
+    createOtValueTemplate,
+    createParamRecordValueTemplate,
+    createRecordValueTemplate,
+    createReplaceValueTemplate,
+} from './internal/ot/generator';
+
+export { OmitVersion } from './internal/ot/generator/omitVersion';
+
+export { toClientState, serverTransform } from './internal/ot/flocon/room/functions';
 
 export {
-    State as BgmState,
-    UpOperation as BgmUpOperation,
-    DownOperation as BgmDownOperation,
-} from './internal/ot/room/bgm/types';
+    template as roomTemplate,
+    dbTemplate as roomDbTemplate,
+} from './internal/ot/flocon/room/types';
 
-export {
-    State as ParamNameState,
-    UpOperation as ParamNameUpOperation,
-    DownOperation as ParamNameDownOperation,
-} from './internal/ot/room/paramName/types';
+export { template as bgmTemplate } from './internal/ot/flocon/room/bgm/types';
+
+export { template as paramNameTemplate } from './internal/ot/flocon/room/paramName/types';
 
 export {
     parseState,
@@ -111,193 +99,74 @@ export {
     stringifyUpOperation,
     decodeDownOperation,
     exactDownOperation,
-} from './internal/ot/room/converter';
+} from './internal/ot/flocon/room/converter';
 
-export {
-    apply as applyBoardPosition,
-    diff as boardPositionDiff,
-    toUpOperation as toBoardPositionUpOperation,
-} from './internal/ot/boardPositionBase/functions';
+export { template as boardPositionTemplate } from './internal/ot/flocon/boardPositionBase/types';
 
-export {
-    State as BoardPositionState,
-    UpOperation as BoardPositionUpOperation,
-    DownOperation as BoardPositionDownOperation,
-} from './internal/ot/boardPositionBase/types';
-
-export {
-    apply as applyPiece,
-    diff as pieceDiff,
-    toUpOperation as toPieceUpOperation,
-} from './internal/ot/pieceBase/functions';
-
-export {
-    State as PieceState,
-    UpOperation as PieceUpOperation,
-    DownOperation as PieceDownOperation,
-} from './internal/ot/pieceBase/types';
+export { template as pieceTemplate } from './internal/ot/flocon/pieceBase/types';
 
 export {
     Master,
     Player,
     Spectator,
     ParticipantRole,
-    State as ParticipantState,
-    UpOperation as ParticipantUpOperation,
-    DownOperation as ParticipantDownOperation,
-} from './internal/ot/room/participant/types';
+    template as participantTemplate,
+} from './internal/ot/flocon/room/participant/types';
+
+export { template as boardTemplate } from './internal/ot/flocon/room/board/types';
+
+export { template as characterTemplate } from './internal/ot/flocon/room/character/types';
+
+export { template as boolParamTemplate } from './internal/ot/flocon/room/character/boolParam/types';
+
+export { template as characterPieceTemplate } from './internal/ot/flocon/room/character/characterPiece/types';
+
+export { template as commandTemplate } from './internal/ot/flocon/room/character/command/types';
+
+export { template as numParamTemplate } from './internal/ot/flocon/room/character/numParam/types';
+
+export { template as strParamTemplate } from './internal/ot/flocon/room/character/strParam/types';
+
+export { template as portraitPieceTemplate } from './internal/ot/flocon/room/character/portraitPiece/types';
 
 export {
-    apply as applyBoard,
-    diff as boardDiff,
-    toUpOperation as toBoardUpOperation,
-} from './internal/ot/room/board/functions';
-
-export {
-    state as boardState,
-    State as BoardState,
-    UpOperation as BoardUpOperation,
-    DownOperation as BoardDownOperation,
-} from './internal/ot/room/board/types';
-
-export {
-    apply as applyCharacter,
-    diff as characterDiff,
-    toUpOperation as toCharacterUpOperation,
-} from './internal/ot/room/character/functions';
-
-export {
-    state as characterState,
-    State as CharacterState,
-    UpOperation as CharacterUpOperation,
-    DownOperation as CharacterDownOperation,
-} from './internal/ot/room/character/types';
-
-export {
-    State as BoolParamState,
-    UpOperation as BoolParamUpOperation,
-    DownOperation as BoolParamDownOperation,
-} from './internal/ot/room/character/boolParam/types';
-
-export {
-    apply as applyCharacterPiece,
-    diff as characterPieceDiff,
-    toUpOperation as toCharacterPieceUpOperation,
-} from './internal/ot/room/character/characterPiece/functions';
-
-export {
-    State as CharacterPieceState,
-    UpOperation as CharacterPieceUpOperation,
-    DownOperation as CharacterPieceDownOperation,
-} from './internal/ot/room/character/characterPiece/types';
-
-export {
-    State as NumParamState,
-    UpOperation as NumParamUpOperation,
-    DownOperation as NumParamDownOperation,
-} from './internal/ot/room/character/numParam/types';
-
-export {
-    apply as applyStrParamCharacter,
-    diff as strParamcharacterDiff,
-    toUpOperation as toStrParamUpOperation,
-} from './internal/ot/room/character/strParam/functions';
-
-export {
-    State as StrParamState,
-    UpOperation as StrParamUpOperation,
-    DownOperation as StrParamCharacterDownOperation,
-} from './internal/ot/room/character/strParam/types';
-
-export {
-    apply as applyPortraitPiece,
-    diff as portraitPieceDiff,
-    toUpOperation as toPortraitPieceUpOperation,
-} from './internal/ot/room/character/portraitPiece/functions';
-
-export {
-    State as PortraitPieceState,
-    UpOperation as PortraitPieceUpOperation,
-    DownOperation as PortraitPieceDownOperation,
-} from './internal/ot/room/character/portraitPiece/types';
-
-export {
-    apply as applyDicePiece,
-    diff as dicePieceDiff,
-    toUpOperation as toDicePieceUpOperation,
-} from './internal/ot/room/board/dicePiece/functions';
-
-export {
-    State as DicePieceState,
-    UpOperation as DicePieceUpOperation,
-    DownOperation as DicePieceDownOperation,
+    template as dicePieceTemplate,
     dicePieceStrIndexes,
-} from './internal/ot/room/board/dicePiece/types';
+} from './internal/ot/flocon/room/board/dicePiece/types';
 
 export {
     decode as decodeDicePiece,
     parse as parseDicePiece,
-    exact as exactDicePiece,
-} from './internal/ot/room/board/dicePiece/converter';
+} from './internal/ot/flocon/room/board/dicePiece/converter';
+
+export { template as dieValueTemplate } from './internal/ot/flocon/room/board/dicePiece/dieValue/types';
 
 export {
-    apply as applyDieValue,
-    diff as dieValueDiff,
-    toUpOperation as toDieValueUpOperation,
-} from './internal/ot/room/board/dicePiece/dieValue/functions';
+    type as dicePieceLog,
+    exactType as exactDicePieceLog,
+    Type as DicePieceLog,
+} from './internal/ot/flocon/room/board/dicePiece/log';
+
+export { template as imagePieceTemplate } from './internal/ot/flocon/room/board/imagePiece/types';
 
 export {
-    State as DieValueState,
-    UpOperation as DieValueUpOperation,
-    DownOperation as DieValueDownOperation,
-} from './internal/ot/room/board/dicePiece/dieValue/types';
-
-export { type as dicePieceLog, Type as DicePieceLog } from './internal/ot/room/board/dicePiece/log';
-
-export {
-    apply as applyImagePiece,
-    diff as imagePieceDiff,
-    toUpOperation as toImagePieceUpOperation,
-} from './internal/ot/room/board/imagePiece/functions';
-
-export {
-    State as ImagePieceState,
-    UpOperation as ImagePieceUpOperation,
-    DownOperation as ImagePieceDownOperation,
-} from './internal/ot/room/board/imagePiece/types';
-
-export {
-    apply as applyStringPiece,
-    diff as stringPieceDiff,
-    toUpOperation as toStringPieceUpOperation,
-} from './internal/ot/room/board/stringPiece/functions';
-
-export {
-    State as StringPieceState,
-    UpOperation as StringPieceUpOperation,
-    DownOperation as StringPieceDownOperation,
+    template as stringPieceTemplate,
     String,
     Number,
-} from './internal/ot/room/board/stringPiece/types';
+} from './internal/ot/flocon/room/board/stringPiece/types';
 
 export {
     decode as decodeStringPiece,
     parse as parseStringPiece,
-    exact as exactStringPiece,
-} from './internal/ot/room/board/stringPiece/converter';
+} from './internal/ot/flocon/room/board/stringPiece/converter';
 
 export {
     type as stringPieceLog,
+    exactType as exactStringPieceLog,
     Type as StringPieceLog,
-} from './internal/ot/room/board/stringPiece/log';
+} from './internal/ot/flocon/room/board/stringPiece/log';
 
-export {
-    State as MemoState,
-    UpOperation as MemoUpOperation,
-    DownOperation as MemoDownOperation,
-    Plain,
-    Markdown,
-} from './internal/ot/room/memo/types';
+export { template as memoTemplate, Plain, Markdown } from './internal/ot/flocon/room/memo/types';
 
 export {
     DownOperation as NullableTextDownOperation,
@@ -343,9 +212,9 @@ export {
     isOwner,
 } from './internal/ot/util/requestedBy';
 
-export { updateType, createType, deleteType } from './internal/ot/pieceBase/log';
+export { updateType, createType, deleteType } from './internal/ot/flocon/pieceBase/log';
 
-export { createLogs } from './internal/ot/room/log';
+export { createLogs } from './internal/ot/flocon/room/log';
 
 export { StateManager } from './internal/stateManagers/stateManager';
 

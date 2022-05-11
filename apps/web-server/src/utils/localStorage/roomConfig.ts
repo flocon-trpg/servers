@@ -1,9 +1,9 @@
 import localforage from 'localforage';
 import {
-    defaultRoomConfig,
-    deserializeRoomConfig,
     RoomConfig,
     SerializedRoomConfig,
+    defaultRoomConfig,
+    deserializeRoomConfig,
     serializedRoomConfig,
 } from '../../atoms/roomConfig/types/roomConfig';
 import { tryParseJSON } from '../tryParseJSON';

@@ -1,6 +1,6 @@
 import { simpleId } from '@flocon-trpg/core';
 import * as t from 'io-ts';
-import { MessageFilter, serializedMessageFilter, deserializeMessageFilter } from '../messageFilter';
+import { MessageFilter, deserializeMessageFilter, serializedMessageFilter } from '../messageFilter';
 
 export type MessageTabConfig = {
     // 同一Panel内にある他のCharacterTabConfigのkeyと重複しないようにしなければならない

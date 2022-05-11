@@ -9,7 +9,7 @@ import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../../../hooks/useStateEditor';
 import { BufferedInput } from '../../../ui/BufferedInput';
 import { useBoards } from '../../../../hooks/state/useBoards';
-import { BoardState, simpleId } from '@flocon-trpg/core';
+import { State, boardTemplate, simpleId } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
 import { FilePath } from '../../../../utils/file/filePath';
 import { atom, useAtom } from 'jotai';
@@ -18,6 +18,8 @@ import { roomConfigAtom } from '../../../../atoms/roomConfig/roomConfigAtom';
 import { useImmerUpdateAtom } from '../../../../atoms/useImmerUpdateAtom';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
 import { CopyToClipboardButton } from '../../../ui/CopyToClipboardButton';
+
+type BoardState = State<typeof boardTemplate>;
 
 export type BoardEditorModalType =
     | {
@@ -89,6 +91,9 @@ export const BoardEditorModal: React.FC = () => {
                 state: boards?.get(modalValue.stateId),
                 onUpdate: nextState => {
                     setRoomState(roomState => {
+                        if (roomState.boards == null) {
+                            roomState.boards = {};
+                        }
                         roomState.boards[modalValue.stateId] = nextState;
                     });
                 },
@@ -112,6 +117,9 @@ export const BoardEditorModal: React.FC = () => {
         onOkClick = () => {
             const id = simpleId();
             setRoomState(roomState => {
+                if (roomState.boards == null) {
+                    roomState.boards = {};
+                }
                 roomState.boards[id] = {
                     ...board,
                     ownerParticipantId: myUserUid,
@@ -137,7 +145,7 @@ export const BoardEditorModal: React.FC = () => {
     if (modalValue?.type === update) {
         onDestroy = () => {
             setRoomState(roomState => {
-                delete roomState.boards[modalValue.stateId];
+                delete roomState.boards?.[modalValue.stateId];
             });
             setModalValue(null);
         };

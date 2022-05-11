@@ -2,8 +2,10 @@ import { useAtomSelector } from '../../atoms/useAtomSelector';
 import { roomAtom } from '../../atoms/room/roomAtom';
 import React from 'react';
 import { recordToMap } from '@flocon-trpg/utils';
-import { CharacterState, strIndex10Array } from '@flocon-trpg/core';
+import { State, characterTemplate, strIndex10Array } from '@flocon-trpg/core';
 import { CharacterTagFilter } from '../../atoms/roomConfig/types/characterTagFilter';
+
+type CharacterState = State<typeof characterTemplate>;
 
 const hasAnyTag = (character: CharacterState): boolean => {
     return (
@@ -21,38 +23,27 @@ const hasAnyTag = (character: CharacterState): boolean => {
 };
 
 export const useCharacters = (filter?: CharacterTagFilter): ReadonlyMap<string, CharacterState> => {
-    const recordOrMap = useAtomSelector(
-        roomAtom,
-        state => {
-            const characters = state.roomState?.state?.characters;
-
-            if (characters == null || filter == null) {
-                return characters;
-            }
-
-            const map = recordToMap(characters);
-            [...map].forEach(([key, value]) => {
-                if (filter.showNoTag && !hasAnyTag(value)) {
-                    return;
-                }
-                for (const index of strIndex10Array) {
-                    if (filter[`showTag${index}`] && value[`hasTag${index}`]) {
-                        return;
-                    }
-                }
-                map.delete(key);
-            });
-            return map;
-        },
-        [filter]
-    );
+    const charactersRecord = useAtomSelector(roomAtom, state => state.roomState?.state?.characters);
     return React.useMemo(() => {
-        if (recordOrMap == null) {
+        if (charactersRecord == null) {
             return new Map<string, CharacterState>();
         }
-        if (recordOrMap instanceof Map) {
-            return recordOrMap;
+        if (filter == null) {
+            return recordToMap(charactersRecord);
         }
-        return recordToMap(recordOrMap);
-    }, [recordOrMap]);
+
+        const map = recordToMap(charactersRecord);
+        [...map].forEach(([key, value]) => {
+            if (filter.showNoTag && !hasAnyTag(value)) {
+                return;
+            }
+            for (const index of strIndex10Array) {
+                if (filter[`showTag${index}`] && value[`hasTag${index}`]) {
+                    return;
+                }
+            }
+            map.delete(key);
+        });
+        return map;
+    }, [charactersRecord, filter]);
 };

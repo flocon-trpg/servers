@@ -1,4 +1,6 @@
-import { BoardPositionState } from '@flocon-trpg/core';
+import { OmitVersion, State, boardPositionTemplate } from '@flocon-trpg/core';
+
+type BoardPositionState = OmitVersion<State<typeof boardPositionTemplate>>;
 
 export namespace BoardPosition {
     export const isCursorOnIcon = ({

@@ -3,14 +3,15 @@ import { EM } from '../../../utils/types';
 import { User } from '../../entities/user/mikro-orm';
 import { Room } from '../../entities/room/mikro-orm';
 import { GlobalRoom } from '../../entities/room/global';
-import { anonymous, ParticipantState, State } from '@flocon-trpg/core';
+import { State as S, anonymous, participantTemplate, roomTemplate } from '@flocon-trpg/core';
 import { recordToArray } from '@flocon-trpg/utils';
 import { BaasType } from '../../../enums/BaasType';
-import { EntryPasswordConfig, plain, ServerConfig } from '../../../configType';
+import { EntryPasswordConfig, ServerConfig, plain } from '../../../configType';
 import safeCompare from 'safe-compare';
 import bcrypt from 'bcrypt';
 
-const find = <T>(source: Record<string, T | undefined>, key: string): T | undefined => source[key];
+type State = S<typeof roomTemplate>;
+type ParticipantState = S<typeof participantTemplate>;
 
 export const NotSignIn = 'NotSignIn';
 export const AnonymousAccount = 'AnonymousAccount';
@@ -105,6 +106,9 @@ class FindRoomAndMyParticipantResult {
     ) {}
 
     public participantIds(): Set<string> {
+        if (this.roomState.participants == null) {
+            return new Set();
+        }
         return new Set(recordToArray(this.roomState.participants).map(({ key }) => key));
     }
 }
@@ -123,7 +127,7 @@ export const findRoomAndMyParticipant = async ({
         return null;
     }
     const state = await GlobalRoom.MikroORM.ToGlobal.state(room, em);
-    const me = find(state.participants, userUid);
+    const me = state.participants?.[userUid];
     return new FindRoomAndMyParticipantResult(room, state, me);
 };
 

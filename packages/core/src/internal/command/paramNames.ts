@@ -1,6 +1,5 @@
 import {
     AstInfo,
-    beginCast,
     FBoolean,
     FFunction,
     FObject,
@@ -8,14 +7,16 @@ import {
     FValue,
     OnGettingParams,
     ScriptError,
+    beginCast,
 } from '@flocon-trpg/flocon-script';
 import { isStrIndex20 } from '../indexes';
-import * as ParamName from '../ot/room/paramName/types';
-import * as Room from '../ot/room/types';
+import { State } from '../ot/generator';
+import * as ParamName from '../ot/flocon/room/paramName/types';
+import * as Room from '../ot/flocon/room/types';
 
 export class FParamNames extends FObject {
     public constructor(
-        private readonly room: Room.State,
+        private readonly room: State<typeof Room.template>,
         private readonly mode: 'Boolean' | 'Number' | 'String'
     ) {
         super();
@@ -23,12 +24,24 @@ export class FParamNames extends FObject {
 
     private getParamNames() {
         switch (this.mode) {
-            case 'Boolean':
+            case 'Boolean': {
+                if (this.room.boolParamNames == null) {
+                    this.room.boolParamNames = {};
+                }
                 return this.room.boolParamNames;
-            case 'Number':
+            }
+            case 'Number': {
+                if (this.room.numParamNames == null) {
+                    this.room.numParamNames = {};
+                }
                 return this.room.numParamNames;
-            case 'String':
+            }
+            case 'String': {
+                if (this.room.strParamNames == null) {
+                    this.room.strParamNames = {};
+                }
                 return this.room.strParamNames;
+            }
         }
     }
 
@@ -49,7 +62,7 @@ export class FParamNames extends FObject {
         if (found != null) {
             return found;
         }
-        const result: ParamName.State = {
+        const result: State<typeof ParamName.template> = {
             $v: 1,
             $r: 1,
             name: '',

@@ -1,19 +1,19 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import {
-    Table,
+    Alert,
     Button,
-    Input,
-    Tooltip,
-    Tabs,
+    Checkbox,
+    Col,
+    Divider,
     Dropdown,
+    Input,
     Menu,
     Modal,
     Row,
-    Col,
-    Divider,
-    Checkbox,
-    Alert,
+    Table,
+    Tabs,
+    Tooltip,
 } from 'antd';
 import { update } from '../../../../stateManagers/states/types';
 import { NumberParameterInput } from './NumberParameterInput';
@@ -22,9 +22,9 @@ import { StringParameterInput } from './StringParameterInput';
 import * as Icon from '@ant-design/icons';
 import { ToggleButton } from '../../../ui/ToggleButton';
 import {
-    characterIsPrivate,
     characterIsNotPrivate,
     characterIsNotPrivateAndNotCreatedByMe,
+    characterIsPrivate,
 } from '../../../../resources/text/main';
 import { useCharacters } from '../../../../hooks/state/useCharacters';
 import {
@@ -32,7 +32,13 @@ import {
     useNumParamNames,
     useStrParamNames,
 } from '../../../../hooks/state/useParamNames';
-import { CharacterState, ParamNameState, strIndex10Array, StrIndex20 } from '@flocon-trpg/core';
+import {
+    State,
+    StrIndex20,
+    characterTemplate,
+    paramNameTemplate,
+    strIndex10Array,
+} from '@flocon-trpg/core';
 import classNames from 'classnames';
 import { cancelRnd, flex, flexRow, itemsCenter } from '../../../../utils/className';
 import { ColumnType } from 'antd/lib/table';
@@ -62,6 +68,9 @@ import { KeySorter } from '../../../../utils/keySorter';
 import { RowKeys } from '../../../../atoms/roomConfig/types/charactersPanelConfig';
 import { DraggableTabs } from '../../../ui/DraggableTabs';
 import { moveElement } from '../../../../utils/moveElement';
+
+type CharacterState = State<typeof characterTemplate>;
+type ParamNameState = State<typeof paramNameTemplate>;
 
 type DataSource = {
     key: string;
@@ -100,8 +109,8 @@ const createBooleanParameterColumn = ({
         title: <TableHeaderCell title={name.name} rowKey={RowKeys.BoolParam(key)} />,
         key: reactKey,
         sorter: (x, y, sortOrder) =>
-            booleanToNumber(x.character.state.boolParams[key]?.value, sortOrder) -
-            booleanToNumber(y.character.state.boolParams[key]?.value, sortOrder),
+            booleanToNumber(x.character.state.boolParams?.[key]?.value, sortOrder) -
+            booleanToNumber(y.character.state.boolParams?.[key]?.value, sortOrder),
         // eslint-disable-next-line react/display-name
         render: (_: unknown, { character, onOperateCharacter }: DataSource) => {
             return (
@@ -109,12 +118,12 @@ const createBooleanParameterColumn = ({
                     <OverriddenParameterNameEditor
                         type='table'
                         overriddenParameterName={
-                            character.state.boolParams[key]?.overriddenParameterName
+                            character.state.boolParams?.[key]?.overriddenParameterName
                         }
                         onOverriddenParameterNameChange={newName =>
                             onOperateCharacter(character =>
                                 produce(character, character => {
-                                    const boolParam = character.boolParams[key];
+                                    const boolParam = character.boolParams?.[key];
                                     if (boolParam == null) {
                                         return;
                                     }
@@ -129,7 +138,7 @@ const createBooleanParameterColumn = ({
                         isCreate={false}
                         compact
                         parameterKey={key}
-                        parameter={character.state.boolParams[key]}
+                        parameter={character.state.boolParams?.[key]}
                         createdByMe={character.createdByMe ?? false}
                         onOperate={mapping => {
                             onOperateCharacter(mapping);
@@ -159,8 +168,8 @@ const createNumberParameterColumn = ({
         sorter: (x, y, sortOrder) => {
             const defaultValue = sortOrder === 'ascend' ? Number.MAX_VALUE : Number.MIN_VALUE;
             return (
-                (x.character.state.numParams[key]?.value ?? defaultValue) -
-                (y.character.state.numParams[key]?.value ?? defaultValue)
+                (x.character.state.numParams?.[key]?.value ?? defaultValue) -
+                (y.character.state.numParams?.[key]?.value ?? defaultValue)
             );
         },
         sortDirections: ['descend', 'ascend'],
@@ -171,12 +180,12 @@ const createNumberParameterColumn = ({
                     <OverriddenParameterNameEditor
                         type='table'
                         overriddenParameterName={
-                            character.state.numParams[key]?.overriddenParameterName
+                            character.state.numParams?.[key]?.overriddenParameterName
                         }
                         onOverriddenParameterNameChange={newName =>
                             onOperateCharacter(character =>
                                 produce(character, character => {
-                                    const numParam = character.numParams[key];
+                                    const numParam = character.numParams?.[key];
                                     if (numParam == null) {
                                         return;
                                     }
@@ -191,8 +200,8 @@ const createNumberParameterColumn = ({
                         isCreate={false}
                         compact
                         parameterKey={key}
-                        numberParameter={character.state.numParams[key]}
-                        numberMaxParameter={character.state.numMaxParams[key]}
+                        numberParameter={character.state.numParams?.[key]}
+                        numberMaxParameter={character.state.numMaxParams?.[key]}
                         createdByMe={character.createdByMe ?? false}
                         onOperate={mapping => {
                             onOperateCharacter(mapping);
@@ -221,8 +230,8 @@ const createStringParameterColumn = ({
         key: reactKey,
         sorter: (x, y) => {
             // 現在の仕様では、StringParameterは他のパラメーターと異なりundefinedでも''と同じとみなされるため、それに合わせている。
-            const xValue = x.character.state.strParams[key]?.value ?? '';
-            const yValue = y.character.state.strParams[key]?.value ?? '';
+            const xValue = x.character.state.strParams?.[key]?.value ?? '';
+            const yValue = y.character.state.strParams?.[key]?.value ?? '';
             return xValue.localeCompare(yValue);
         },
         // eslint-disable-next-line react/display-name
@@ -232,12 +241,12 @@ const createStringParameterColumn = ({
                     <OverriddenParameterNameEditor
                         type='table'
                         overriddenParameterName={
-                            character.state.strParams[key]?.overriddenParameterName
+                            character.state.strParams?.[key]?.overriddenParameterName
                         }
                         onOverriddenParameterNameChange={newName =>
                             onOperateCharacter(character =>
                                 produce(character, character => {
-                                    const strParam = character.strParams[key];
+                                    const strParam = character.strParams?.[key];
                                     if (strParam == null) {
                                         return;
                                     }
@@ -252,7 +261,7 @@ const createStringParameterColumn = ({
                         isCharacterPrivate={character.state.isPrivate}
                         isCreate={false}
                         parameterKey={key}
-                        parameter={character.state.strParams[key]}
+                        parameter={character.state.strParams?.[key]}
                         createdByMe={character.createdByMe ?? false}
                         onOperate={mapping => {
                             onOperateCharacter(mapping);
@@ -417,7 +426,7 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                                         onChange={newValue => {
                                             setRoomState(state => {
                                                 const targetCharacter =
-                                                    state.characters[character.stateId];
+                                                    state.characters?.[character.stateId];
                                                 if (targetCharacter == null) {
                                                     return;
                                                 }
@@ -454,13 +463,15 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                                     onChange={newValue => {
                                         setRoomState(roomState => {
                                             const targetCharacter =
-                                                roomState.characters[character.stateId];
+                                                roomState.characters?.[character.stateId];
                                             if (targetCharacter == null) {
                                                 return;
                                             }
                                             targetCharacter.isPrivate = !newValue;
                                         });
                                     }}
+                                    shape='circle'
+                                    defaultType='dashed'
                                 />
                             ),
                         };
@@ -493,33 +504,38 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
         strParamNames,
     ]);
 
-    if (columns == null || characters == null) {
+    const charactersDataSource: DataSource[] = React.useMemo(() => {
+        const operateCharacter =
+            (characterId: string) => (mapping: (character: CharacterState) => CharacterState) => {
+                setRoomState(roomState => {
+                    const character = roomState.characters?.[characterId];
+                    if (character == null) {
+                        return;
+                    }
+                    if (roomState.characters == null) {
+                        roomState.characters = {};
+                    }
+                    roomState.characters[characterId] = mapping(character);
+                });
+            };
+
+        return [...characters].map(([characterId, character]) => {
+            const createdByMe = myUserUid != null && myUserUid === character.ownerParticipantId;
+            return {
+                key: characterId, // antdのtableのkeyとして必要
+                character: {
+                    stateId: characterId,
+                    state: character,
+                    createdByMe,
+                },
+                onOperateCharacter: operateCharacter(characterId),
+            };
+        });
+    }, [characters, myUserUid, setRoomState]);
+
+    if (columns == null) {
         return null;
     }
-
-    const operateCharacter =
-        (characterId: string) => (mapping: (character: CharacterState) => CharacterState) => {
-            setRoomState(roomState => {
-                const character = roomState.characters[characterId];
-                if (character == null) {
-                    return;
-                }
-                roomState.characters[characterId] = mapping(character);
-            });
-        };
-
-    const charactersDataSource: DataSource[] = [...characters].map(([characterId, character]) => {
-        const createdByMe = myUserUid != null && myUserUid === character.ownerParticipantId;
-        return {
-            key: characterId, // antdのtableのkeyとして必要
-            character: {
-                stateId: characterId,
-                state: character,
-                createdByMe,
-            },
-            onOperateCharacter: operateCharacter(characterId),
-        };
-    });
 
     return (
         <Table
@@ -660,171 +676,192 @@ export const CharacterList: React.FC = () => {
     const setImportCharacterModal = useUpdateAtom(importCharacterModalVisibilityAtom);
     const [editingTabConfigKey, setEditingTabConfigKey] = React.useState<string | undefined>();
 
-    const tabPanes = (tabs ?? []).map((tab, tabIndex) => {
-        return (
-            <Tabs.TabPane
-                key={tab.key}
-                tabKey={tab.key}
-                style={{ overflowY: 'scroll' }}
-                closable={false}
-                tab={
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            justifyItems: 'center',
-                        }}
-                    >
-                        <div style={{ flex: '0 0 auto', maxWidth: 100 }}>
-                            <CharacterTabName tabConfig={tab} />
-                        </div>
-                        <div style={{ flex: 1 }} />
-                        <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>
-                            <Dropdown
-                                trigger={['click']}
-                                overlay={
-                                    <Menu>
-                                        <Menu.Item
-                                            icon={<Icon.SettingOutlined />}
-                                            onClick={() => setEditingTabConfigKey(tab.key)}
-                                        >
-                                            編集
-                                        </Menu.Item>
-                                        <Menu.Item
-                                            icon={<Icon.DeleteOutlined />}
-                                            onClick={() => {
-                                                Modal.warn({
-                                                    onOk: () => {
-                                                        setRoomConfig(roomConfig => {
-                                                            if (roomConfig == null) {
-                                                                return;
-                                                            }
-                                                            roomConfig.panels.characterPanel.tabs.splice(
-                                                                tabIndex,
-                                                                1
-                                                            );
-                                                        });
-                                                    },
-                                                    okCancel: true,
-                                                    maskClosable: true,
-                                                    closable: true,
-                                                    content: 'タブを削除します。よろしいですか？',
-                                                });
-                                            }}
-                                        >
-                                            削除
-                                        </Menu.Item>
-                                    </Menu>
-                                }
-                            >
-                                <Button
-                                    style={{
-                                        width: 18,
-                                        minWidth: 18,
-
-                                        // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
-                                        padding: '0 2px',
-                                    }}
-                                    type='text'
-                                    size='small'
-                                    onClick={e => e.stopPropagation()}
+    return React.useMemo(() => {
+        const tabPanes = (tabs ?? []).map((tab, tabIndex) => {
+            return (
+                <Tabs.TabPane
+                    key={tab.key}
+                    tabKey={tab.key}
+                    style={{ overflowY: 'scroll' }}
+                    closable={false}
+                    tab={
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                justifyItems: 'center',
+                            }}
+                        >
+                            <div style={{ flex: '0 0 auto', maxWidth: 100 }}>
+                                <CharacterTabName tabConfig={tab} />
+                            </div>
+                            <div style={{ flex: 1 }} />
+                            <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>
+                                <Dropdown
+                                    trigger={['click']}
+                                    overlay={
+                                        <Menu>
+                                            <Menu.Item
+                                                icon={<Icon.SettingOutlined />}
+                                                onClick={() => setEditingTabConfigKey(tab.key)}
+                                            >
+                                                編集
+                                            </Menu.Item>
+                                            <Menu.Item
+                                                icon={<Icon.DeleteOutlined />}
+                                                onClick={() => {
+                                                    Modal.warn({
+                                                        onOk: () => {
+                                                            setRoomConfig(roomConfig => {
+                                                                if (roomConfig == null) {
+                                                                    return;
+                                                                }
+                                                                roomConfig.panels.characterPanel.tabs.splice(
+                                                                    tabIndex,
+                                                                    1
+                                                                );
+                                                            });
+                                                        },
+                                                        okCancel: true,
+                                                        maskClosable: true,
+                                                        closable: true,
+                                                        content:
+                                                            'タブを削除します。よろしいですか？',
+                                                    });
+                                                }}
+                                            >
+                                                削除
+                                            </Menu.Item>
+                                        </Menu>
+                                    }
                                 >
-                                    <Icon.EllipsisOutlined />
-                                </Button>
-                            </Dropdown>
-                        </div>
-                    </div>
-                }
-            >
-                <CharacterListTabPane tabConfig={tab} />
-            </Tabs.TabPane>
-        );
-    });
+                                    <Button
+                                        style={{
+                                            width: 18,
+                                            minWidth: 18,
 
-    return (
-        <div
-            style={{ display: 'flex', flexDirection: 'column', height: '100%', margin: '2px 4px' }}
-        >
-            <div style={{ paddingBottom: 8 }}>
-                <TabEditorModal
-                    config={tabs?.find(tab => tab.key === editingTabConfigKey)}
-                    onClose={() => setEditingTabConfigKey(undefined)}
-                    onChange={recipe => {
-                        if (editingTabConfigKey == null) {
-                            return;
-                        }
+                                            // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
+                                            padding: '0 2px',
+                                        }}
+                                        type='text'
+                                        size='small'
+                                        onClick={e => e.stopPropagation()}
+                                    >
+                                        <Icon.EllipsisOutlined />
+                                    </Button>
+                                </Dropdown>
+                            </div>
+                        </div>
+                    }
+                >
+                    <CharacterListTabPane tabConfig={tab} />
+                </Tabs.TabPane>
+            );
+        });
+
+        return (
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: '100%',
+                    margin: '2px 4px',
+                }}
+            >
+                <div style={{ paddingBottom: 8 }}>
+                    <TabEditorModal
+                        config={tabs?.find(tab => tab.key === editingTabConfigKey)}
+                        onClose={() => setEditingTabConfigKey(undefined)}
+                        onChange={recipe => {
+                            if (editingTabConfigKey == null) {
+                                return;
+                            }
+                            setRoomConfig(roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                const targetTabConfig = roomConfig.panels.characterPanel.tabs.find(
+                                    tab => tab.key === editingTabConfigKey
+                                );
+                                if (targetTabConfig == null) {
+                                    return;
+                                }
+                                recipe(targetTabConfig);
+                            });
+                        }}
+                    />
+                    <Button size='small' onClick={() => setCharacterEditorModal({ type: create })}>
+                        キャラクターを作成
+                    </Button>
+                    <Button size='small' onClick={() => setImportCharacterModal(true)}>
+                        キャラクターをインポート
+                    </Button>
+                    <Button
+                        size='small'
+                        onClick={() => setCharacterParameterNamesEditorVisibility(true)}
+                    >
+                        パラメーターを追加・編集・削除
+                    </Button>
+                    <Button size='small' onClick={() => setCharacterTagNamesEditorVisibility(true)}>
+                        タグを追加・編集・削除
+                    </Button>
+                </div>
+                <DraggableTabs
+                    // キャラクターウィンドウは最大で1個までしか存在しないため、静的な値で構わない
+                    dndType='CharacterListTabs'
+                    type='editable-card'
+                    onDnd={action => {
                         setRoomConfig(roomConfig => {
                             if (roomConfig == null) {
                                 return;
                             }
-                            const targetTabConfig = roomConfig.panels.characterPanel.tabs.find(
-                                tab => tab.key === editingTabConfigKey
+                            moveElement(
+                                roomConfig.panels.characterPanel.tabs,
+                                tab => tab.key,
+                                action
                             );
-                            if (targetTabConfig == null) {
-                                return;
-                            }
-                            recipe(targetTabConfig);
                         });
                     }}
-                />
-                <Button size='small' onClick={() => setCharacterEditorModal({ type: create })}>
-                    キャラクターを作成
-                </Button>
-                <Button size='small' onClick={() => setImportCharacterModal(true)}>
-                    キャラクターをインポート
-                </Button>
-                <Button
-                    size='small'
-                    onClick={() => setCharacterParameterNamesEditorVisibility(true)}
-                >
-                    パラメーターを追加・編集・削除
-                </Button>
-                <Button size='small' onClick={() => setCharacterTagNamesEditorVisibility(true)}>
-                    タグを追加・編集・削除
-                </Button>
-            </div>
-            <DraggableTabs
-                // キャラクターウィンドウは最大で1個までしか存在しないため、静的な値で構わない
-                dndType='CharacterListTabs'
-                type='editable-card'
-                onDnd={action => {
-                    setRoomConfig(roomConfig => {
-                        if (roomConfig == null) {
-                            return;
-                        }
-                        moveElement(roomConfig.panels.characterPanel.tabs, tab => tab.key, action);
-                    });
-                }}
-                onEdit={(e, type) => {
-                    if (type === 'remove') {
-                        if (typeof e !== 'string') {
+                    onEdit={(e, type) => {
+                        if (type === 'remove') {
+                            if (typeof e !== 'string') {
+                                return;
+                            }
+                            setRoomConfig(roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                const indexToSplice =
+                                    roomConfig.panels.characterPanel.tabs.findIndex(
+                                        tab => tab.key === e
+                                    );
+                                if (indexToSplice >= 0) {
+                                    roomConfig.panels.characterPanel.tabs.splice(indexToSplice, 1);
+                                }
+                            });
                             return;
                         }
                         setRoomConfig(roomConfig => {
                             if (roomConfig == null) {
                                 return;
                             }
-                            const indexToSplice = roomConfig.panels.characterPanel.tabs.findIndex(
-                                tab => tab.key === e
+                            roomConfig.panels.characterPanel.tabs.push(
+                                CharacterTabConfigUtils.createEmpty({})
                             );
-                            if (indexToSplice >= 0) {
-                                roomConfig.panels.characterPanel.tabs.splice(indexToSplice, 1);
-                            }
                         });
-                        return;
-                    }
-                    setRoomConfig(roomConfig => {
-                        if (roomConfig == null) {
-                            return;
-                        }
-                        roomConfig.panels.characterPanel.tabs.push(
-                            CharacterTabConfigUtils.createEmpty({})
-                        );
-                    });
-                }}
-            >
-                {tabPanes}
-            </DraggableTabs>
-        </div>
-    );
+                    }}
+                >
+                    {tabPanes}
+                </DraggableTabs>
+            </div>
+        );
+    }, [
+        editingTabConfigKey,
+        setCharacterEditorModal,
+        setCharacterParameterNamesEditorVisibility,
+        setCharacterTagNamesEditorVisibility,
+        setImportCharacterModal,
+        setRoomConfig,
+        tabs,
+    ]);
 };

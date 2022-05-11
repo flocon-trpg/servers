@@ -1,15 +1,15 @@
 import {
-    Resolver,
-    Query,
-    Args,
-    Mutation,
-    Ctx,
-    PubSub,
-    Subscription,
-    Root,
     Arg,
-    PubSubEngine,
+    Args,
     Authorized,
+    Ctx,
+    Mutation,
+    PubSub,
+    PubSubEngine,
+    Query,
+    Resolver,
+    Root,
+    Subscription,
     UseMiddleware,
 } from 'type-graphql';
 import { ResolverContext } from '../../utils/Contexts';
@@ -22,7 +22,7 @@ import {
 import { JoinRoomFailureType } from '../../../enums/JoinRoomFailureType';
 import * as Room$MikroORM from '../../entities/room/mikro-orm';
 import * as Participant$MikroORM from '../../entities/participant/mikro-orm';
-import { stateToGraphQL as stateToGraphql$RoomAsListItem } from '../../entities/roomAsListItem/global';
+import * as RoomAsListItemGlobal from '../../entities/roomAsListItem/global';
 import { queueLimitReached } from '../../../utils/promiseQueue';
 import { serverTooBusyMessage } from '../utils/messages';
 import { RoomOperation, deleteRoomOperation } from '../../entities/room/graphql';
@@ -49,29 +49,31 @@ import { DeleteRoomFailureType } from '../../../enums/DeleteRoomFailureType';
 import { GlobalRoom } from '../../entities/room/global';
 import { EM } from '../../../utils/types';
 import {
+    DicePieceLog as DicePieceLog$MikroORM,
     RoomPrvMsg,
     RoomPubCh,
     RoomPubMsg,
     RoomSe,
     StringPieceLog as StringPieceLog$MikroORM,
-    DicePieceLog as DicePieceLog$MikroORM,
 } from '../../entities/roomMessage/mikro-orm';
 import {
     ChangeParticipantNameArgs,
     CreateRoomInput,
     DeleteRoomArgs,
+    DeleteRoomAsAdminInput,
     EditMessageArgs,
     GetLogArgs,
     GetMessagesArgs,
     GetRoomArgs,
     GetRoomConnectionFailureResultType,
-    GetRoomConnectionsResult,
     GetRoomConnectionSuccessResultType,
+    GetRoomConnectionsResult,
     JoinRoomArgs,
     MessageIdArgs,
     OperateArgs,
     PromoteArgs,
     RoomEvent,
+    UpdateBookmarkArgs,
     UpdateWritingMessageStateArgs,
     WritePrivateMessageArgs,
     WritePublicMessageArgs,
@@ -79,7 +81,6 @@ import {
 } from './object+args+input';
 import {
     CharacterValueForMessage,
-    ResetRoomMessagesResult,
     DeleteMessageResult,
     EditMessageResult,
     GetRoomLogFailureResultType,
@@ -88,7 +89,10 @@ import {
     GetRoomMessagesResult,
     MakeMessageNotSecretResult,
     PieceLog,
+    ResetRoomMessagesResult,
+    ResetRoomMessagesResultType,
     RoomMessageEvent,
+    RoomMessageSyntaxErrorType,
     RoomMessages,
     RoomMessagesType,
     RoomPrivateMessage,
@@ -110,11 +114,9 @@ import {
     WriteRoomPublicMessageResult,
     WriteRoomSoundEffectFailureResultType,
     WriteRoomSoundEffectResult,
-    ResetRoomMessagesResultType,
-    RoomMessageSyntaxErrorType,
 } from '../../entities/roomMessage/graphql';
 import { WriteRoomPublicMessageFailureType } from '../../../enums/WriteRoomPublicMessageFailureType';
-import { analyze, Context } from '../../../messageAnalyzer/main';
+import { Context, analyze } from '../../../messageAnalyzer/main';
 import Color from 'color';
 import { GetRoomMessagesFailureType } from '../../../enums/GetRoomMessagesFailureType';
 import {
@@ -137,27 +139,27 @@ import { WritingMessageStatusInputType } from '../../../enums/WritingMessageStat
 import { FileSourceTypeModule } from '../../../enums/FileSourceType';
 import { Result } from '@kizahasi/result';
 import {
+    $free,
+    $system,
     Master,
+    MaxLength100String,
+    ParticipantRole,
     Player,
-    serverTransform,
+    RecordUpOperationElement,
     Spectator,
     State,
     TwoWayOperation,
-    restore,
-    CharacterState,
     UpOperation,
-    RecordUpOperationElement,
-    ParticipantState,
-    ParticipantUpOperation,
-    replace,
-    ParticipantRole,
-    createLogs,
     admin,
+    characterTemplate,
     client,
-    $free,
-    $system,
-    MaxLength100String,
+    createLogs,
     isCharacterOwner,
+    participantTemplate,
+    replace,
+    restore,
+    roomTemplate,
+    serverTransform,
 } from '@flocon-trpg/core';
 import {
     ApplyError,
@@ -165,19 +167,33 @@ import {
     NonEmptyString,
     PositiveInt,
 } from '@kizahasi/ot-string';
-import { ParticipantRole as ParticipantRoleEnum } from '../../../enums/ParticipantRole';
-import { ENTRY } from '../../../roles';
+import { stringToParticipantRoleType } from '../../../enums/ParticipantRoleType';
+import { ADMIN, ENTRY } from '../../../roles';
 import { ParticipantRoleType } from '../../../enums/ParticipantRoleType';
 import { RateLimitMiddleware } from '../../middlewares/RateLimitMiddleware';
 import { convertToMaxLength100String } from '../../../utils/convertToMaxLength100String';
 import { GetRoomAsListItemResult } from '../../results/GetRoomAsListItemResult';
 import { ResetRoomMessagesFailureType } from '../../../enums/ResetRoomMessagesFailureType';
 import { hash } from 'bcrypt';
+import { DeleteRoomAsAdminResult } from '../../results/DeleteRoomAsAdminResult';
+import { DeleteRoomAsAdminFailureType } from '../../../enums/DeleteRoomAsAdminFailureType';
+import { UpdateBookmarkResult } from '../../results/UpdateBookmarkResult';
+import { UpdateBookmarkFailureType } from '../../../enums/UpdateBookmarkFailureType';
+import { toBeNever } from '@flocon-trpg/utils';
+
+type RoomState = State<typeof roomTemplate>;
+type RoomUpOperation = UpOperation<typeof roomTemplate>;
+type RoomTwoWayOperation = TwoWayOperation<typeof roomTemplate>;
+type CharacterState = State<typeof characterTemplate>;
+type ParticipantState = State<typeof participantTemplate>;
+type ParticipantUpOperation = UpOperation<typeof participantTemplate>;
 
 const bcryptSaltRounds = 10;
 
-const find = <T>(source: Record<string, T | undefined>, key: string): T | undefined => source[key];
-
+type SendTo = {
+    // このイベントを送信するユーザーのUserUid。allの場合は制限しない（全員に送る）。
+    sendTo: typeof all | ReadonlySet<string>;
+};
 type MessageUpdatePayload = {
     type: 'messageUpdatePayload';
 
@@ -197,7 +213,6 @@ type MessageUpdatePayload = {
 type RoomOperationPayload = {
     type: 'roomOperationPayload';
     roomId: string;
-    participants: ReadonlySet<string>; // UserUid
     generateOperation: (deliverTo: string) => RoomOperation;
 };
 
@@ -205,6 +220,7 @@ type DeleteRoomPayload = {
     type: 'deleteRoomPayload';
     roomId: string;
     deletedBy: string;
+    deletedByAdmin: boolean;
 };
 
 export type RoomConnectionUpdatePayload = {
@@ -228,21 +244,25 @@ type RoomMessagesResetPayload = {
     roomId: string;
 };
 
-export type RoomEventPayload =
+export const all = 'all';
+
+export type RoomEventPayload = (
     | MessageUpdatePayload
     | RoomOperationPayload
     | DeleteRoomPayload
     | RoomConnectionUpdatePayload
     | WritingMessageStatusUpdatePayload
-    | RoomMessagesResetPayload;
+    | RoomMessagesResetPayload
+) &
+    SendTo;
 
 type OperateCoreResult =
-    | {
+    | ({
           type: 'success';
           result: OperateRoomSuccessResult;
           roomOperationPayload: RoomOperationPayload;
           messageUpdatePayload: MessageUpdatePayload[];
-      }
+      } & SendTo)
     | {
           type: 'id';
           result: OperateRoomIdResult;
@@ -281,7 +301,7 @@ const operateParticipantAndFlush = async ({
 }): Promise<{ result: typeof JoinRoomResult; payload: RoomEventPayload | undefined }> => {
     const prevRevision = room.revision;
     const roomState = await GlobalRoom.MikroORM.ToGlobal.state(room, em);
-    const me = find(roomState.participants, myUserUid);
+    const me = roomState.participants?.[myUserUid];
     let participantOperation:
         | RecordUpOperationElement<ParticipantState, ParticipantUpOperation>
         | undefined = undefined;
@@ -320,7 +340,7 @@ const operateParticipantAndFlush = async ({
         };
     }
 
-    const roomUpOperation: UpOperation = {
+    const roomUpOperation: RoomUpOperation = {
         $v: 2,
         $r: 1,
         participants: {
@@ -356,7 +376,7 @@ const operateParticipantAndFlush = async ({
     });
     await em.flush();
 
-    await GlobalRoom.Global.autoRemoveOldRoomOp({
+    await GlobalRoom.Global.cleanOldRoomOp({
         em: em.fork(),
         room,
         roomHistCount,
@@ -382,7 +402,7 @@ const operateParticipantAndFlush = async ({
         payload: {
             type: 'roomOperationPayload',
             // Roomに参加したばかりの場合、decodedToken.uidはparticipantUserUidsに含まれないためSubscriptionは実行されない。だが、そのようなユーザーにroomOperatedで通知する必要はないため問題ない。
-            participants: participantUserUids,
+            sendTo: participantUserUids,
             generateOperation,
             roomId: room.id,
         },
@@ -613,7 +633,7 @@ const analyzeTextAndSetToEntity = async (params: {
     context: Context | null;
     gameType: string | undefined;
     createdBy: User;
-    room: State;
+    room: RoomState;
 }) => {
     const defaultGameType = 'DiceBot';
     const analyzed = await analyze({
@@ -681,14 +701,14 @@ const toCharacterValueForMessage = (
 };
 
 const createUpdatedText = (entity: RoomPubMsg | RoomPrvMsg): UpdatedText | undefined => {
-    if (entity.textUpdatedAt == null) {
+    if (entity.textUpdatedAtValue == null) {
         return undefined;
     }
-    return { currentText: entity.updatedText, updatedAt: entity.textUpdatedAt };
+    return { currentText: entity.updatedText, updatedAt: entity.textUpdatedAtValue };
 };
 
 const isDeleted = (entity: RoomPubMsg | RoomPrvMsg): boolean => {
-    if (entity.textUpdatedAt == null) {
+    if (entity.textUpdatedAtValue == null) {
         return false;
     }
     return entity.updatedText == null;
@@ -722,17 +742,17 @@ const createRoomPublicMessage = ({
         character: toCharacterValueForMessage(msg),
         customName: msg.customName,
         createdAt: msg.createdAt.getTime(),
-        updatedAt: msg.textUpdatedAt,
+        updatedAt: msg.updatedAt?.getTime(),
     };
 };
 
-const createRoomPrivateMessage = async ({
+const createRoomPrivateMessage = ({
     msg,
     visibleTo,
 }: {
     msg: RoomPrvMsg;
     visibleTo: string[];
-}): Promise<RoomPrivateMessage> => {
+}): RoomPrivateMessage => {
     return {
         __tstype: RoomPrivateMessageType,
         messageId: msg.id,
@@ -741,11 +761,51 @@ const createRoomPrivateMessage = async ({
         character: toCharacterValueForMessage(msg),
         customName: msg.customName,
         createdAt: msg.createdAt.getTime(),
-        updatedAt: msg.textUpdatedAt,
+        updatedAt: msg.updatedAt?.getTime(),
         initText: msg.initText ?? undefined,
         initTextSource: msg.initTextSource ?? msg.initText,
         updatedText: createUpdatedText(msg),
         textColor: msg.textColor ?? undefined,
+        commandResult:
+            msg.commandResult == null
+                ? undefined
+                : {
+                      text: msg.commandResult,
+                      isSuccess: msg.commandIsSuccess,
+                  },
+        altTextToSecret: msg.altTextToSecret ?? undefined,
+        isSecret: msg.isSecret,
+    };
+};
+
+const createRoomPublicMessageUpdate = (msg: RoomPubMsg): RoomPublicMessageUpdate => {
+    return {
+        __tstype: RoomPublicMessageUpdateType,
+        messageId: msg.id,
+        initText: msg.initText,
+        initTextSource: msg.initTextSource ?? msg.initText,
+        updatedAt: msg.updatedAt?.getTime(),
+        updatedText: createUpdatedText(msg),
+        commandResult:
+            msg.commandResult == null
+                ? undefined
+                : {
+                      text: msg.commandResult,
+                      isSuccess: msg.commandIsSuccess,
+                  },
+        altTextToSecret: msg.altTextToSecret ?? undefined,
+        isSecret: msg.isSecret,
+    };
+};
+
+const createRoomPrivateMessageUpdate = (msg: RoomPrvMsg): RoomPrivateMessageUpdate => {
+    return {
+        __tstype: RoomPrivateMessageUpdateType,
+        messageId: msg.id,
+        initText: msg.initText ?? undefined,
+        initTextSource: msg.initTextSource ?? msg.initText,
+        updatedAt: msg.updatedAt?.getTime(),
+        updatedText: createUpdatedText(msg),
         commandResult:
             msg.commandResult == null
                 ? undefined
@@ -778,12 +838,19 @@ export class RoomResolver {
     public async getRoomsList(@Ctx() context: ResolverContext): Promise<typeof GetRoomsListResult> {
         const queue = async () => {
             const em = context.em;
+            const authorizedUserUid = ensureAuthorizedUser(context).userUid;
 
             // TODO: すべてを取得しているので重い
             const roomModels = await em.find(Room$MikroORM.Room, {});
-            const rooms = roomModels.map(model =>
-                stateToGraphql$RoomAsListItem({ roomEntity: model })
-            );
+            const rooms = [];
+            for (const model of roomModels) {
+                rooms.push(
+                    await RoomAsListItemGlobal.stateToGraphQL({
+                        roomEntity: model,
+                        myUserUid: authorizedUserUid,
+                    })
+                );
+            }
             return {
                 rooms,
             };
@@ -805,13 +872,17 @@ export class RoomResolver {
     ): Promise<typeof GetRoomAsListItemResult> {
         const queue = async () => {
             const em = context.em;
+            const authorizedUserUid = ensureAuthorizedUser(context).userUid;
             const roomEntity = await em.findOne(Room$MikroORM.Room, { id: roomId });
             if (roomEntity == null) {
                 return {
                     failureType: GetRoomFailureType.NotFound,
                 };
             }
-            const room = stateToGraphql$RoomAsListItem({ roomEntity: roomEntity });
+            const room = await RoomAsListItemGlobal.stateToGraphQL({
+                roomEntity: roomEntity,
+                myUserUid: authorizedUserUid,
+            });
             return { room };
         };
 
@@ -950,7 +1021,7 @@ export class RoomResolver {
         @PubSub() pubSub: PubSubEngine
     ): Promise<typeof GetRoomLogResult> {
         const queue = async (): Promise<
-            Result<{ result: typeof GetRoomLogResult; payload?: MessageUpdatePayload }>
+            Result<{ result: typeof GetRoomLogResult; payload?: MessageUpdatePayload & SendTo }>
         > => {
             const em = context.em;
             const authorizedUserUid = ensureAuthorizedUser(context).userUid;
@@ -1001,6 +1072,7 @@ export class RoomResolver {
                 result: messages,
                 payload: {
                     type: 'messageUpdatePayload',
+                    sendTo: findResult.participantIds(),
                     roomId: room.id,
                     value: createRoomPublicMessage({
                         msg: systemMessageEntity,
@@ -1152,6 +1224,12 @@ export class RoomResolver {
                     ...graphqlState,
                     revision,
                     createdBy: authorizedUser.userUid,
+
+                    // CONSIDER: entityから取得するのではなく、new Date() の結果を返してもいいかもしれない
+                    createdAt: newRoom.createdAt?.getTime(),
+                    updatedAt: newRoom.completeUpdatedAt?.getTime(),
+                    role: newParticipant.role,
+                    isBookmarked: false,
                 },
                 id: newRoom.id,
             };
@@ -1203,6 +1281,55 @@ export class RoomResolver {
                     type: 'deleteRoomPayload',
                     roomId,
                     deletedBy: authorizedUserUid,
+                    deletedByAdmin: false,
+                    sendTo: all,
+                },
+            };
+        };
+
+        const result = await context.promiseQueue.next(queue);
+        if (result.type === queueLimitReached) {
+            throw serverTooBusyMessage;
+        }
+        if (result.value.payload != null) {
+            await publishRoomEvent(pubSub, result.value.payload);
+        }
+        return result.value.result;
+    }
+
+    @Mutation(() => DeleteRoomAsAdminResult, { description: 'since v0.7.2' })
+    @Authorized(ADMIN)
+    @UseMiddleware(RateLimitMiddleware(2))
+    public async deleteRoomAsAdmin(
+        @Args() args: DeleteRoomAsAdminInput,
+        @Ctx() context: ResolverContext,
+        @PubSub() pubSub: PubSubEngine
+    ): Promise<DeleteRoomAsAdminResult> {
+        const queue = async (): Promise<{
+            result: DeleteRoomAsAdminResult;
+            payload: (RoomEventPayload & SendTo) | undefined;
+        }> => {
+            const em = context.em;
+            const authorizedUserUid = ensureAuthorizedUser(context).userUid;
+
+            const room = await em.findOne(Room$MikroORM.Room, { id: args.id });
+            if (room == null) {
+                return {
+                    result: { failureType: DeleteRoomAsAdminFailureType.NotFound },
+                    payload: undefined,
+                };
+            }
+            const roomId = room.id;
+            await Room$MikroORM.deleteRoom(em, room);
+            await em.flush();
+            return {
+                result: { failureType: undefined },
+                payload: {
+                    type: 'deleteRoomPayload',
+                    sendTo: all,
+                    roomId,
+                    deletedBy: authorizedUserUid,
+                    deletedByAdmin: true,
                 },
             };
         };
@@ -1279,6 +1406,51 @@ export class RoomResolver {
             await publishRoomEvent(pubSub, payload);
         }
         return result;
+    }
+
+    @Mutation(() => UpdateBookmarkResult)
+    @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(2))
+    public async updateBookmark(
+        @Args() args: UpdateBookmarkArgs,
+        @Ctx() context: ResolverContext
+    ): Promise<typeof UpdateBookmarkResult> {
+        const queue = async (): Promise<typeof UpdateBookmarkResult> => {
+            const em = context.em;
+            const authorizedUser = ensureAuthorizedUser(context);
+            const room = await em.findOne(Room$MikroORM.Room, { id: args.roomId });
+            if (room == null) {
+                return {
+                    failureType: UpdateBookmarkFailureType.NotFound,
+                };
+            }
+            await authorizedUser.bookmarkedRooms.init();
+            const isBookmarked = authorizedUser.bookmarkedRooms.contains(room);
+            if (args.newValue) {
+                if (isBookmarked) {
+                    return { prevValue: isBookmarked, currentValue: isBookmarked };
+                }
+            } else {
+                if (!isBookmarked) {
+                    return { prevValue: isBookmarked, currentValue: isBookmarked };
+                }
+            }
+
+            if (args.newValue) {
+                authorizedUser.bookmarkedRooms.add(room);
+            } else {
+                authorizedUser.bookmarkedRooms.remove(room);
+            }
+
+            await em.flush();
+            return { prevValue: isBookmarked, currentValue: args.newValue };
+        };
+
+        const result = await context.promiseQueue.next(queue);
+        if (result.type === queueLimitReached) {
+            throw serverTooBusyMessage;
+        }
+        return result.value;
     }
 
     @Mutation(() => PromoteResult)
@@ -1408,13 +1580,16 @@ export class RoomResolver {
             const { room, me } = findResult;
             if (me?.role == null) {
                 return Result.ok({
-                    roomAsListItem: stateToGraphql$RoomAsListItem({ roomEntity: room }),
+                    roomAsListItem: await RoomAsListItemGlobal.stateToGraphQL({
+                        roomEntity: room,
+                        myUserUid: authorizedUserUid,
+                    }),
                 });
             }
 
             const roomState = await GlobalRoom.MikroORM.ToGlobal.state(room, em);
             return Result.ok({
-                role: ParticipantRoleEnum.ofString(me.role),
+                role: stringToParticipantRoleType(me.role),
                 room: {
                     ...GlobalRoom.Global.ToGraphQL.state({
                         source: roomState,
@@ -1422,6 +1597,16 @@ export class RoomResolver {
                     }),
                     revision: room.revision,
                     createdBy: room.createdBy,
+                    createdAt: room.createdAt?.getTime(),
+                    updatedAt: room.completeUpdatedAt?.getTime(),
+                    role: await RoomAsListItemGlobal.role({
+                        roomEntity: room,
+                        myUserUid: authorizedUserUid,
+                    }),
+                    isBookmarked: await RoomAsListItemGlobal.isBookmarked({
+                        roomEntity: room,
+                        myUserUid: authorizedUserUid,
+                    }),
                 },
             });
         };
@@ -1532,7 +1717,12 @@ export class RoomResolver {
             if (me === undefined) {
                 return Result.ok({
                     type: 'nonJoined',
-                    result: { roomAsListItem: stateToGraphql$RoomAsListItem({ roomEntity: room }) },
+                    result: {
+                        roomAsListItem: await RoomAsListItemGlobal.stateToGraphQL({
+                            roomEntity: room,
+                            myUserUid: authorizedUserUid,
+                        }),
+                    },
                 });
             }
             const participantUserUids = findResult.participantIds();
@@ -1547,10 +1737,10 @@ export class RoomResolver {
                 return downOperation;
             }
 
-            let prevState: State = roomState;
-            let twoWayOperation: TwoWayOperation | undefined = undefined;
+            let prevState: RoomState = roomState;
+            let twoWayOperation: RoomTwoWayOperation | undefined = undefined;
             if (downOperation.value !== undefined) {
-                const restoredRoom = restore({
+                const restoredRoom = restore(roomTemplate)({
                     nextState: roomState,
                     downOperation: downOperation.value,
                 });
@@ -1606,9 +1796,10 @@ export class RoomResolver {
                 em.persist(entity);
             });
 
+            // GlobalRoom.Global.applyToEntityでcompleteUpdatedAtの更新は行っているため、ここで更新する必要はない
             await em.flush();
 
-            await GlobalRoom.Global.autoRemoveOldRoomOp({
+            await GlobalRoom.Global.cleanOldRoomOp({
                 em: em.fork(),
                 room,
                 roomHistCount: context.serverConfig.roomHistCount,
@@ -1633,11 +1824,11 @@ export class RoomResolver {
             const roomOperationPayload: RoomOperationPayload = {
                 type: 'roomOperationPayload',
                 roomId: args.id,
-                participants: participantUserUids,
                 generateOperation,
             };
             const result: OperateCoreResult = {
                 type: 'success',
+                sendTo: participantUserUids,
                 roomOperationPayload,
                 messageUpdatePayload: [
                     ...dicePieceLogEntities.map(
@@ -1691,9 +1882,12 @@ export class RoomResolver {
             context,
         });
         if (operateResult.type === 'success') {
-            await publishRoomEvent(pubSub, operateResult.roomOperationPayload);
+            await publishRoomEvent(pubSub, {
+                ...operateResult.roomOperationPayload,
+                sendTo: operateResult.sendTo,
+            });
             for (const messageUpdate of operateResult.messageUpdatePayload) {
-                await publishRoomEvent(pubSub, messageUpdate);
+                await publishRoomEvent(pubSub, { ...messageUpdate, sendTo: operateResult.sendTo });
             }
         }
         return operateResult.result;
@@ -1709,7 +1903,10 @@ export class RoomResolver {
     ): Promise<typeof WriteRoomPublicMessageResult> {
         const channelKey = args.channelKey;
         const queue = async (): Promise<
-            Result<{ result: typeof WriteRoomPublicMessageResult; payload?: MessageUpdatePayload }>
+            Result<{
+                result: typeof WriteRoomPublicMessageResult;
+                payload?: MessageUpdatePayload & SendTo;
+            }>
         > => {
             const em = context.em;
             const authorizedUser = ensureAuthorizedUser(context);
@@ -1754,7 +1951,7 @@ export class RoomResolver {
                         currentRoomState: roomState,
                     })
                 )
-                    chara = roomState.characters[args.characterId];
+                    chara = roomState.characters?.[args.characterId];
             }
             const entityResult = await analyzeTextAndSetToEntity({
                 type: 'RoomPubMsg',
@@ -1797,12 +1994,14 @@ export class RoomResolver {
             }
 
             entity.roomPubCh = Reference.create(ch);
+            room.completeUpdatedAt = new Date();
             await em.persistAndFlush(entity);
 
             const result: RoomPublicMessage = createRoomPublicMessage({ msg: entity, channelKey });
 
-            const payload: MessageUpdatePayload = {
+            const payload: MessageUpdatePayload & SendTo = {
                 type: 'messageUpdatePayload',
+                sendTo: findResult.participantIds(),
                 roomId: args.roomId,
                 createdBy: authorizedUser.userUid,
                 visibleTo: undefined,
@@ -1841,7 +2040,10 @@ export class RoomResolver {
         // **** main ****
 
         const queue = async (): Promise<
-            Result<{ result: typeof WriteRoomPrivateMessageResult; payload?: MessageUpdatePayload }>
+            Result<{
+                result: typeof WriteRoomPrivateMessageResult;
+                payload?: MessageUpdatePayload & SendTo;
+            }>
         > => {
             const em = context.em;
             const authorizedUser = ensureAuthorizedUser(context);
@@ -1882,7 +2084,7 @@ export class RoomResolver {
                         currentRoomState: roomState,
                     })
                 )
-                    chara = roomState.characters[args.characterId];
+                    chara = roomState.characters?.[args.characterId];
             }
             const entityResult = await analyzeTextAndSetToEntity({
                 type: 'RoomPrvMsg',
@@ -1933,16 +2135,18 @@ export class RoomResolver {
             }
 
             entity.room = Reference.create(room);
+            room.completeUpdatedAt = new Date();
             await em.persistAndFlush(entity);
 
             const visibleToArray = [...visibleTo].sort();
-            const result = await createRoomPrivateMessage({
+            const result = createRoomPrivateMessage({
                 msg: entity,
                 visibleTo: visibleToArray,
             });
 
-            const payload: MessageUpdatePayload = {
+            const payload: MessageUpdatePayload & SendTo = {
                 type: 'messageUpdatePayload',
+                sendTo: findResult.participantIds(),
                 roomId: args.roomId,
                 createdBy: authorizedUser.userUid,
                 visibleTo: visibleToArray,
@@ -1974,7 +2178,10 @@ export class RoomResolver {
         @PubSub() pubSub: PubSubEngine
     ): Promise<typeof WriteRoomSoundEffectResult> {
         const queue = async (): Promise<
-            Result<{ result: typeof WriteRoomSoundEffectResult; payload?: MessageUpdatePayload }>
+            Result<{
+                result: typeof WriteRoomSoundEffectResult;
+                payload?: MessageUpdatePayload & SendTo;
+            }>
         > => {
             const em = context.em;
             const authorizedUser = ensureAuthorizedUser(context);
@@ -2016,6 +2223,7 @@ export class RoomResolver {
             });
             entity.createdBy = Reference.create<User, 'userUid'>(authorizedUser);
             entity.room = Reference.create(room);
+            room.completeUpdatedAt = new Date();
             await em.persistAndFlush(entity);
 
             const result: RoomSoundEffect = {
@@ -2030,8 +2238,9 @@ export class RoomResolver {
                 },
             };
 
-            const payload: MessageUpdatePayload = {
+            const payload: MessageUpdatePayload & SendTo = {
                 type: 'messageUpdatePayload',
+                sendTo: findResult.participantIds(),
                 roomId: args.roomId,
                 createdBy: authorizedUser.userUid,
                 visibleTo: undefined,
@@ -2062,7 +2271,7 @@ export class RoomResolver {
         @PubSub() pubSub: PubSubEngine
     ): Promise<MakeMessageNotSecretResult> {
         const queue = async (): Promise<
-            Result<{ result: MakeMessageNotSecretResult; payload?: MessageUpdatePayload }>
+            Result<{ result: MakeMessageNotSecretResult; payload?: MessageUpdatePayload & SendTo }>
         > => {
             const em = context.em;
             const authorizedUserUid = ensureAuthorizedUser(context).userUid;
@@ -2103,6 +2312,7 @@ export class RoomResolver {
                     });
                 }
                 publicMsg.isSecret = false;
+                room.completeUpdatedAt = new Date();
                 await em.flush();
 
                 const payloadValue: RoomPublicMessageUpdate = {
@@ -2118,12 +2328,13 @@ export class RoomResolver {
                                   isSuccess: publicMsg.commandIsSuccess,
                               },
                     altTextToSecret: publicMsg.altTextToSecret,
-                    updatedAt: publicMsg.textUpdatedAt,
+                    updatedAt: publicMsg.textUpdatedAtValue,
                 };
                 return Result.ok({
                     result: {},
                     payload: {
                         type: 'messageUpdatePayload',
+                        sendTo: findResult.participantIds(),
                         roomId: room.id,
                         visibleTo: undefined,
                         createdBy: publicMsg.createdBy?.userUid,
@@ -2148,6 +2359,7 @@ export class RoomResolver {
                     });
                 }
                 privateMsg.isSecret = false;
+                room.completeUpdatedAt = new Date();
                 await em.flush();
 
                 const payloadValue: RoomPrivateMessageUpdate = {
@@ -2163,12 +2375,13 @@ export class RoomResolver {
                                   isSuccess: privateMsg.commandIsSuccess,
                               },
                     altTextToSecret: privateMsg.altTextToSecret,
-                    updatedAt: privateMsg.textUpdatedAt,
+                    updatedAt: privateMsg.textUpdatedAtValue,
                 };
                 return Result.ok({
                     result: {},
                     payload: {
                         type: 'messageUpdatePayload',
+                        sendTo: findResult.participantIds(),
                         roomId: room.id,
                         visibleTo: (await privateMsg.visibleTo.loadItems()).map(
                             user => user.userUid
@@ -2207,7 +2420,7 @@ export class RoomResolver {
         @PubSub() pubSub: PubSubEngine
     ): Promise<DeleteMessageResult> {
         const queue = async (): Promise<
-            Result<{ result: DeleteMessageResult; payload?: MessageUpdatePayload }>
+            Result<{ result: DeleteMessageResult; payload?: MessageUpdatePayload & SendTo }>
         > => {
             const em = context.em;
             const authorizedUserUid = ensureAuthorizedUser(context).userUid;
@@ -2240,11 +2453,7 @@ export class RoomResolver {
                         },
                     });
                 }
-                if (
-                    publicMsg.initText == null &&
-                    publicMsg.altTextToSecret == null &&
-                    publicMsg.commandResult == null
-                ) {
+                if (publicMsg.updatedText == null && publicMsg.textUpdatedAtValue != null) {
                     return Result.ok({
                         result: {
                             failureType: DeleteMessageFailureType.MessageDeleted,
@@ -2252,28 +2461,17 @@ export class RoomResolver {
                     });
                 }
                 publicMsg.updatedText = undefined;
-                publicMsg.textUpdatedAt = new Date().getTime();
+                publicMsg.textUpdatedAt2 = new Date();
+                room.completeUpdatedAt = new Date();
                 await em.flush();
 
-                const payloadValue: RoomPublicMessageUpdate = {
-                    __tstype: RoomPublicMessageUpdateType,
-                    messageId: publicMsg.id,
-                    isSecret: publicMsg.isSecret,
-                    updatedText: createUpdatedText(publicMsg),
-                    commandResult:
-                        publicMsg.commandResult == null
-                            ? undefined
-                            : {
-                                  text: publicMsg.commandResult,
-                                  isSuccess: publicMsg.commandIsSuccess,
-                              },
-                    altTextToSecret: publicMsg.altTextToSecret,
-                    updatedAt: publicMsg.textUpdatedAt,
-                };
+                const payloadValue: RoomPublicMessageUpdate =
+                    createRoomPublicMessageUpdate(publicMsg);
                 return Result.ok({
                     result: {},
                     payload: {
                         type: 'messageUpdatePayload',
+                        sendTo: findResult.participantIds(),
                         roomId: room.id,
                         visibleTo: undefined,
                         createdBy: publicMsg.createdBy?.userUid,
@@ -2290,11 +2488,7 @@ export class RoomResolver {
                         },
                     });
                 }
-                if (
-                    privateMsg.initText == null &&
-                    privateMsg.altTextToSecret == null &&
-                    privateMsg.commandResult == null
-                ) {
+                if (privateMsg.updatedText == null && privateMsg.textUpdatedAtValue != null) {
                     return Result.ok({
                         result: {
                             failureType: DeleteMessageFailureType.MessageDeleted,
@@ -2302,20 +2496,17 @@ export class RoomResolver {
                     });
                 }
                 privateMsg.updatedText = undefined;
-                privateMsg.textUpdatedAt = new Date().getTime();
+                privateMsg.textUpdatedAt2 = new Date();
+                room.completeUpdatedAt = new Date();
                 await em.flush();
 
-                const payloadValue: RoomPrivateMessageUpdate = {
-                    __tstype: RoomPrivateMessageUpdateType,
-                    updatedText: privateMsg.updatedText,
-                    messageId: privateMsg.id,
-                    isSecret: privateMsg.isSecret,
-                    updatedAt: privateMsg.textUpdatedAt,
-                };
+                const payloadValue: RoomPrivateMessageUpdate =
+                    createRoomPrivateMessageUpdate(privateMsg);
                 return Result.ok({
                     result: {},
                     payload: {
                         type: 'messageUpdatePayload',
+                        sendTo: findResult.participantIds(),
                         roomId: room.id,
                         visibleTo: (await privateMsg.visibleTo.loadItems()).map(
                             user => user.userUid
@@ -2345,6 +2536,7 @@ export class RoomResolver {
         return result.value.value.result;
     }
 
+    // CONSIDER: 例えば'1d100'などダイスを振るメッセージでも現在はedit可能だが、editされてもinitTextなどを参照すれば問題ない。ただしロジックが少しややこしくなるので、そのようなケースはeditを拒否するように仕様変更したほうがいいのかも？
     @Mutation(() => EditMessageResult)
     @Authorized(ENTRY)
     @UseMiddleware(RateLimitMiddleware(2))
@@ -2354,7 +2546,7 @@ export class RoomResolver {
         @PubSub() pubSub: PubSubEngine
     ): Promise<EditMessageResult> {
         const queue = async (): Promise<
-            Result<{ result: EditMessageResult; payload?: MessageUpdatePayload }>
+            Result<{ result: EditMessageResult; payload?: MessageUpdatePayload & SendTo }>
         > => {
             const em = context.em;
             const authorizedUserUid = ensureAuthorizedUser(context).userUid;
@@ -2395,28 +2587,17 @@ export class RoomResolver {
                     });
                 }
                 publicMsg.updatedText = args.text;
-                publicMsg.textUpdatedAt = new Date().getTime();
+                publicMsg.textUpdatedAt2 = new Date();
+                room.completeUpdatedAt = new Date();
                 await em.flush();
 
-                const payloadValue: RoomPublicMessageUpdate = {
-                    __tstype: RoomPublicMessageUpdateType,
-                    messageId: publicMsg.id,
-                    isSecret: publicMsg.isSecret,
-                    updatedText: createUpdatedText(publicMsg),
-                    commandResult:
-                        publicMsg.commandResult == null
-                            ? undefined
-                            : {
-                                  text: publicMsg.commandResult,
-                                  isSuccess: publicMsg.commandIsSuccess,
-                              },
-                    altTextToSecret: publicMsg.altTextToSecret,
-                    updatedAt: publicMsg.textUpdatedAt,
-                };
+                const payloadValue: RoomPublicMessageUpdate =
+                    createRoomPublicMessageUpdate(publicMsg);
                 return Result.ok({
                     result: {},
                     payload: {
                         type: 'messageUpdatePayload',
+                        sendTo: findResult.participantIds(),
                         roomId: room.id,
                         visibleTo: undefined,
                         createdBy: publicMsg.createdBy?.userUid,
@@ -2441,28 +2622,17 @@ export class RoomResolver {
                     });
                 }
                 privateMsg.updatedText = args.text;
-                privateMsg.textUpdatedAt = new Date().getTime();
+                privateMsg.textUpdatedAt2 = new Date();
+                room.completeUpdatedAt = new Date();
                 await em.flush();
 
-                const payloadValue: RoomPrivateMessageUpdate = {
-                    __tstype: RoomPrivateMessageUpdateType,
-                    messageId: privateMsg.id,
-                    isSecret: privateMsg.isSecret,
-                    updatedText: createUpdatedText(privateMsg),
-                    commandResult:
-                        privateMsg.commandResult == null
-                            ? undefined
-                            : {
-                                  text: privateMsg.commandResult,
-                                  isSuccess: privateMsg.commandIsSuccess,
-                              },
-                    altTextToSecret: privateMsg.altTextToSecret,
-                    updatedAt: privateMsg.textUpdatedAt,
-                };
+                const payloadValue: RoomPrivateMessageUpdate =
+                    createRoomPrivateMessageUpdate(privateMsg);
                 return Result.ok({
                     result: {},
                     payload: {
                         type: 'messageUpdatePayload',
+                        sendTo: findResult.participantIds(),
                         roomId: room.id,
                         visibleTo: (await privateMsg.visibleTo.loadItems()).map(
                             user => user.userUid
@@ -2526,6 +2696,9 @@ export class RoomResolver {
                 userUid: authorizedUserUid,
                 status: returns,
                 updatedAt: new Date().getTime(),
+
+                // 比較的頻繁に呼び出されるoperationであると考えられるため、Roomのparticipantの取得を省略して動作を軽量化させている
+                sendTo: all,
             });
         }
         return true;
@@ -2541,7 +2714,7 @@ export class RoomResolver {
         @PubSub() pubSub: PubSubEngine
     ): Promise<ResetRoomMessagesResult> {
         const queue = async (): Promise<
-            Result<{ result: ResetRoomMessagesResult; payload?: RoomMessagesResetPayload }>
+            Result<{ result: ResetRoomMessagesResult; payload?: RoomMessagesResetPayload & SendTo }>
         > => {
             const em = context.em;
             const authorizedUser = ensureAuthorizedUser(context);
@@ -2595,6 +2768,8 @@ export class RoomResolver {
             room.stringPieceLogs.getItems().forEach(x => em.remove(x));
             room.stringPieceLogs.removeAll();
 
+            room.completeUpdatedAt = new Date();
+
             em.persist(room);
             await em.flush();
 
@@ -2604,6 +2779,7 @@ export class RoomResolver {
                 },
                 payload: {
                     type: 'roomMessagesResetPayload',
+                    sendTo: findResult.participantIds(),
                     roomId,
                 },
             });
@@ -2622,7 +2798,7 @@ export class RoomResolver {
     }
 
     // graphql-wsでRoomOperatedのConnectionを検知しているので、もしこれのメソッドやArgsがリネームもしくは削除されるときはそちらも変える。
-    // CONSIDER: return undefined; とすると、{ roomEvent: null } というオブジェクトが全員に通知される。そのため、それを見るとイベントの内容を予想できてしまう可能性がある。例えば1セッションしか行われていない場合、秘話が送られた可能性が高い、など。この問題はおそらくfilterプロパティで解決できるかもしれない。
+    // CONSIDER: return undefined; とすると、{ roomEvent: null } というオブジェクトが全員に通知される。そのため、それを見るとイベントの内容を予想できてしまう可能性がある。例えばサイト全体で1セッションしか進行していない場合、何らかの秘話が送られた可能性が高い、など。この問題はおそらくfilterプロパティで解決できるかもしれない。
     @Subscription(() => RoomEvent, {
         topics: ROOM_EVENT,
         nullable: true,
@@ -2642,111 +2818,91 @@ export class RoomResolver {
             return undefined;
         }
         const userUid: string = context.decodedIdToken.value.uid;
-
-        if (payload.type === 'roomConnectionUpdatePayload') {
-            return {
-                roomConnectionEvent: {
-                    userUid: payload.userUid,
-                    isConnected: payload.isConnected,
-                    updatedAt: payload.updatedAt,
-                },
-                isRoomMessagesResetEvent: false,
-            };
-        }
-
-        if (payload.type === 'writingMessageStatusUpdatePayload') {
-            return {
-                writingMessageStatus: {
-                    userUid: payload.userUid,
-                    status: payload.status,
-                    updatedAt: payload.updatedAt,
-                },
-                isRoomMessagesResetEvent: false,
-            };
-        }
-
-        if (payload.type === 'roomMessagesResetPayload') {
-            return {
-                isRoomMessagesResetEvent: true,
-            };
-        }
-
-        if (payload.type === 'messageUpdatePayload') {
-            if (payload.value.__tstype === RoomPrivateMessageType) {
-                if (payload.value.visibleTo.every(vt => vt !== userUid)) {
-                    return undefined;
-                }
+        if (payload.sendTo !== all) {
+            if (!payload.sendTo.has(userUid)) {
+                return undefined;
             }
-            if (payload.value.__tstype === RoomPrivateMessageUpdateType) {
-                if (payload.visibleTo == null) {
-                    throw new Error('payload.visibleTo is required.');
-                }
-                if (payload.visibleTo.every(vt => vt !== userUid)) {
-                    return undefined;
-                }
-            }
+        }
 
-            switch (payload.value.__tstype) {
-                case RoomPrivateMessageType:
-                case RoomPublicMessageType: {
-                    if (payload.value.isSecret && payload.value.createdBy !== userUid) {
-                        return {
-                            roomMessageEvent: {
-                                ...payload.value,
-                                initText: undefined,
-                                initTextSource: undefined,
-                                commandResult: undefined,
-                            },
-                            isRoomMessagesResetEvent: false,
-                        };
+        switch (payload.type) {
+            case 'roomConnectionUpdatePayload':
+                return {
+                    roomConnectionEvent: {
+                        userUid: payload.userUid,
+                        isConnected: payload.isConnected,
+                        updatedAt: payload.updatedAt,
+                    },
+                    isRoomMessagesResetEvent: false,
+                };
+            case 'writingMessageStatusUpdatePayload':
+                return {
+                    writingMessageStatus: {
+                        userUid: payload.userUid,
+                        status: payload.status,
+                        updatedAt: payload.updatedAt,
+                    },
+                    isRoomMessagesResetEvent: false,
+                };
+            case 'roomMessagesResetPayload':
+                return {
+                    isRoomMessagesResetEvent: true,
+                };
+            case 'messageUpdatePayload': {
+                // userUidが同じでも例えば異なるタブで同じRoomを開いているケースがある。そのため、Mutationを行ったuserUidにだけSubscriptionを送信しないことで通信量を節約、ということはできない。
+
+                if (payload.value.__tstype === RoomPrivateMessageType) {
+                    if (payload.value.visibleTo.every(vt => vt !== userUid)) {
+                        return undefined;
                     }
-                    break;
                 }
-                case RoomPrivateMessageUpdateType:
-                case RoomPublicMessageUpdateType:
-                    if (payload.value.isSecret && payload.createdBy !== userUid) {
-                        return {
-                            roomMessageEvent: {
-                                ...payload.value,
-                                initText: undefined,
-                                initTextSource: undefined,
-                                commandResult: undefined,
-                            },
-                            isRoomMessagesResetEvent: false,
-                        };
+                if (payload.value.__tstype === RoomPrivateMessageUpdateType) {
+                    if (payload.visibleTo == null) {
+                        throw new Error('payload.visibleTo is required.');
                     }
-                    break;
+                    if (payload.visibleTo.every(vt => vt !== userUid)) {
+                        return undefined;
+                    }
+                }
+
+                switch (payload.value.__tstype) {
+                    case RoomPrivateMessageType:
+                    case RoomPublicMessageType: {
+                        if (payload.value.isSecret && payload.value.createdBy !== userUid) {
+                            return undefined;
+                        }
+                        break;
+                    }
+                    case RoomPrivateMessageUpdateType:
+                    case RoomPublicMessageUpdateType:
+                        if (payload.value.isSecret && payload.createdBy !== userUid) {
+                            return undefined;
+                        }
+                        break;
+                }
+
+                return {
+                    roomMessageEvent: payload.value,
+                    isRoomMessagesResetEvent: false,
+                };
             }
-
-            return {
-                roomMessageEvent: payload.value,
-
-                isRoomMessagesResetEvent: false,
-            };
-        }
-
-        // userUidが同じでも例えば異なるタブで同じRoomを開いているケースがある。そのため、Mutationを行ったuserUidにだけSubscriptionを送信しないことで通信量を節約、ということはできない。
-
-        if (payload.type === 'deleteRoomPayload') {
-            // Roomが削除されたことは非公開にする必要はないので、このように全員に通知して構わない。
-            return {
-                deleteRoomOperation: {
-                    __tstype: deleteRoomOperation,
-                    deletedBy: payload.deletedBy,
-                },
-                isRoomMessagesResetEvent: false,
-            };
-        }
-
-        if (!payload.participants.has(userUid)) {
-            return undefined;
-        }
-        if (payload.type === 'roomOperationPayload') {
-            // TODO: DeleteRoomOperationも返す
-            return {
-                roomOperation: payload.generateOperation(userUid),
-                isRoomMessagesResetEvent: false,
-            };
+            case 'deleteRoomPayload':
+                // Roomが削除されたことは非公開にする必要はないので、このように全員に通知して構わない。
+                return {
+                    deleteRoomOperation: {
+                        __tstype: deleteRoomOperation,
+                        deletedBy: payload.deletedBy,
+                        deletedByAdmin: payload.deletedByAdmin,
+                    },
+                    isRoomMessagesResetEvent: false,
+                };
+            case 'roomOperationPayload':
+                // TODO: DeleteRoomOperationも返す
+                return {
+                    roomOperation: payload.generateOperation(userUid),
+                    isRoomMessagesResetEvent: false,
+                };
+            default:
+                toBeNever(payload);
         }
     }
 }

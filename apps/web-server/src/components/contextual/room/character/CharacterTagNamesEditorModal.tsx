@@ -18,56 +18,62 @@ export const CharacterTagNamesEditorModal: React.FC = () => {
 
     const characterTagNames = useCharacterTagNames();
 
-    const inputs = strIndex10Array.map(index => {
-        const characterTagName = characterTagNames?.[`characterTag${index}Name`];
-        return (
-            <div key={`tag${index}Input`} className={classNames(flex, flexRow)}>
-                <div style={{ width: 60 }}>{`タグ${index}`}</div>
-                <BufferedInput
-                    style={{ width: 150 }}
-                    size='small'
-                    readOnly={characterTagName == null}
-                    disabled={characterTagName == null}
-                    value={characterTagName ?? ''}
-                    bufferDuration='default'
-                    onChange={({ currentValue }) => {
-                        setRoomState(roomState => {
-                            roomState[`characterTag${index}Name`] = currentValue;
-                        });
-                    }}
-                />
-                <Button
-                    size='small'
-                    onClick={() => {
-                        setRoomState(roomState => {
-                            roomState[`characterTag${index}Name`] =
-                                characterTagName == null ? '' : undefined;
-                        });
-                    }}
-                >
-                    {characterTagName == null ? <Icons.PlusOutlined /> : <Icons.DeleteOutlined />}
-                </Button>
-            </div>
-        );
-    });
+    return React.useMemo(() => {
+        const inputs = strIndex10Array.map(index => {
+            const characterTagName = characterTagNames?.[`characterTag${index}Name`];
+            return (
+                <div key={`tag${index}Input`} className={classNames(flex, flexRow)}>
+                    <div style={{ width: 60 }}>{`タグ${index}`}</div>
+                    <BufferedInput
+                        style={{ width: 150 }}
+                        size='small'
+                        readOnly={characterTagName == null}
+                        disabled={characterTagName == null}
+                        value={characterTagName ?? ''}
+                        bufferDuration='default'
+                        onChange={({ currentValue }) => {
+                            setRoomState(roomState => {
+                                roomState[`characterTag${index}Name`] = currentValue;
+                            });
+                        }}
+                    />
+                    <Button
+                        size='small'
+                        onClick={() => {
+                            setRoomState(roomState => {
+                                roomState[`characterTag${index}Name`] =
+                                    characterTagName == null ? '' : undefined;
+                            });
+                        }}
+                    >
+                        {characterTagName == null ? (
+                            <Icons.PlusOutlined />
+                        ) : (
+                            <Icons.DeleteOutlined />
+                        )}
+                    </Button>
+                </div>
+            );
+        });
 
-    return (
-        <Modal
-            title='キャラクターのタグの追加・編集・削除'
-            width={600}
-            visible={editorVisibility}
-            closable
-            onCancel={() => setEditorVisibility(false)}
-            footer={
-                <DialogFooter
-                    close={{
-                        textType: 'close',
-                        onClick: () => setEditorVisibility(false),
-                    }}
-                />
-            }
-        >
-            <div className={classNames(flex, flexColumn)}>{inputs}</div>
-        </Modal>
-    );
+        return (
+            <Modal
+                title='キャラクターのタグの追加・編集・削除'
+                width={600}
+                visible={editorVisibility}
+                closable
+                onCancel={() => setEditorVisibility(false)}
+                footer={
+                    <DialogFooter
+                        close={{
+                            textType: 'close',
+                            onClick: () => setEditorVisibility(false),
+                        }}
+                    />
+                }
+            >
+                <div className={classNames(flex, flexColumn)}>{inputs}</div>
+            </Modal>
+        );
+    }, [characterTagNames, editorVisibility, setEditorVisibility, setRoomState]);
 };

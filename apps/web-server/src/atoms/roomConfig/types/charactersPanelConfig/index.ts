@@ -6,8 +6,8 @@ import {
 } from '../characterTabConfig';
 import { defaultCharactersPanelPosition } from '../defaultPanelPositions';
 import {
-    deserializeDraggablePanelConfigBase,
     DraggablePanelConfigBase,
+    deserializeDraggablePanelConfigBase,
     serializedDraggablePanelConfigBase,
 } from '../draggablePanelConfig';
 import { CharacterTabConfigUtils } from '../characterTabConfig/utils';

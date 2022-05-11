@@ -2,44 +2,43 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import {
-    Tabs,
-    Button,
-    Menu,
-    Dropdown,
-    Tooltip,
-    Popover,
-    Drawer,
-    Col,
-    Row,
-    Checkbox,
-    Divider,
-    Radio,
     Alert,
+    Button,
+    Checkbox,
+    Col,
+    Divider,
+    Drawer,
+    Dropdown,
     Input,
+    Menu,
     Modal,
+    Popover,
+    Radio,
     Result,
+    Row,
     Select,
+    Tabs,
+    Tooltip,
 } from 'antd';
 import moment from 'moment';
+import { apolloError, failure, notFetch, useRoomMesages } from '../../../../hooks/useRoomMessages';
 import {
-    apolloError,
-    failure,
-    loading,
-    publicMessage,
-    privateMessage,
-    soundEffect,
-    useFilteredAndMapRoomMessages,
     Message,
+    Notification,
+    PrivateChannelSet,
+    PrivateChannelSets,
     pieceLog,
-} from '../../../../hooks/useRoomMessages';
-import { PrivateChannelSet, PrivateChannelSets } from '../../../../utils/message/PrivateChannelSet';
+    privateMessage,
+    publicMessage,
+    soundEffect,
+} from '@flocon-trpg/web-server-utils';
 import { ChatInput } from './ChatInput';
 import {
     DeleteMessageDocument,
     EditMessageDocument,
     MakeMessageNotSecretDocument,
     WritingMessageStatusType,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Icon from '@ant-design/icons';
 import { Gutter } from 'antd/lib/grid/row';
 import { DialogFooter } from '../../../ui/DialogFooter';
@@ -51,7 +50,7 @@ import { useWritingMessageStatus } from '../../../../hooks/useWritingMessageStat
 import { isDeleted, toText } from '../../../../utils/message/message';
 import { usePublicChannelNames } from '../../../../hooks/state/usePublicChannelNames';
 import { useParticipants } from '../../../../hooks/state/useParticipants';
-import { recordToMap } from '@flocon-trpg/utils';
+import { recordToMap, toBeNever } from '@flocon-trpg/utils';
 import { Color } from '../../../../utils/color';
 import * as Icons from '@ant-design/icons';
 import { InputModal } from '../../../ui/InputModal';
@@ -65,12 +64,12 @@ import {
     itemsCenter,
 } from '../../../../utils/className';
 import classNames from 'classnames';
-import { getUserUid, MyAuthContext } from '../../../../contexts/MyAuthContext';
+import { MyAuthContext, getUserUid } from '../../../../contexts/MyAuthContext';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
 import { useMutation } from '@apollo/client';
 import { MessageTabConfig } from '../../../../atoms/roomConfig/types/messageTabConfig';
 import { atom } from 'jotai';
-import { roomAtom, Notification } from '../../../../atoms/room/roomAtom';
+import { roomAtom } from '../../../../atoms/room/roomAtom';
 import { userConfigAtom } from '../../../../atoms/userConfig/userConfigAtom';
 import { UserConfigUtils } from '../../../../atoms/userConfig/utils';
 import { MessageFilter } from '../../../../atoms/roomConfig/types/messageFilter';
@@ -83,6 +82,8 @@ import { DraggableTabs } from '../../../ui/DraggableTabs';
 import { moveElement } from '../../../../utils/moveElement';
 import { column, row } from '../../../../atoms/userConfig/types';
 import { InputDescription } from '../../../ui/InputDescription';
+import { WritableDraft } from 'immer/dist/internal';
+import { MessagePanelConfig } from '../../../../atoms/roomConfig/types/messagePanelConfig';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -100,7 +101,6 @@ const participantsAtom = atom(get => get(roomAtom).roomState?.state?.participant
 const roomIdAtom = atom(get => get(roomAtom).roomId);
 const roomMessageFontSizeDeltaAtom = atom(get => get(userConfigAtom)?.roomMessagesFontSizeDelta);
 const chatInputDirectionAtom = atom(get => get(userConfigAtom)?.chatInputDirection);
-const allRoomMessagesResultAtom = atom(get => get(roomAtom).allRoomMessagesResult);
 
 type TabEditorDrawerProps = {
     // これがundefinedの場合、Drawerのvisibleがfalseとみなされる。
@@ -421,7 +421,7 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (
 };
 
 type RoomMessageComponentProps = {
-    message: RoomMessageNameSpace.MessageState | Notification.StateElement;
+    message: RoomMessageNameSpace.MessageState | Notification;
     showPrivateMessageMembers?: boolean;
 
     // もしRoomMessageComponent内でusePublicChannelNamesをそれぞれ呼び出す形にすると、画像が読み込まれた瞬間（スクロールでメッセージ一覧を上下するときに発生しやすい）に一瞬だけpublicChannelNamesが何故かnullになる（react-virtuosoの影響？）ため、チャンネル名が一瞬だけ'?'になるためチラついて見えてしまう。そのため、このように外部からpublicChannelNamesを受け取る形にすることで解決している。
@@ -727,36 +727,32 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
 
     const filter = useMessageFilter(config);
     const thenMap = React.useCallback(
-        (messages: ReadonlyArray<Message>) => {
-            return [...messages]
-                .sort((x, y) => x.value.createdAt - y.value.createdAt)
-                .map(message => {
-                    if (message.type === soundEffect) {
-                        // soundEffectはfilterで弾いていなければならない。
-                        throw new Error('soundEffect is not supported');
+        (_: unknown, message: Message) => {
+            if (message.type === soundEffect) {
+                // soundEffectはfilterで弾いていなければならない。
+                throw new Error('soundEffect is not supported');
+            }
+            return (
+                <RoomMessageComponent
+                    key={
+                        message.type === privateMessage || message.type === publicMessage
+                            ? message.value.messageId
+                            : message.value.createdAt
                     }
-                    return (
-                        <RoomMessageComponent
-                            key={
-                                message.type === privateMessage || message.type === publicMessage
-                                    ? message.value.messageId
-                                    : message.value.createdAt
-                            }
-                            publicChannelNames={publicChannelNames}
-                            message={
-                                message.type === publicMessage ||
-                                message.type === privateMessage ||
-                                message.type === pieceLog
-                                    ? message
-                                    : message.value
-                            }
-                        />
-                    );
-                });
+                    publicChannelNames={publicChannelNames}
+                    message={
+                        message.type === publicMessage ||
+                        message.type === privateMessage ||
+                        message.type === pieceLog
+                            ? message
+                            : message.value
+                    }
+                />
+            );
         },
         [publicChannelNames]
     );
-    const messages = useFilteredAndMapRoomMessages({ filter, thenMap });
+    const messages = useRoomMesages({ filter });
 
     const writingUsers = [...writingMessageStatusResult]
         .filter(
@@ -788,15 +784,45 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
         );
     }
 
-    return (
-        <div className={classNames(flex, flexColumn)}>
-            <div style={{ padding: '0 4px' }}>
+    let content: JSX.Element = <QueryResultViewer loading compact={false} />;
+    if (messages !== notFetch) {
+        if (messages.isError) {
+            switch (messages.error.type) {
+                case apolloError:
+                    content = (
+                        <QueryResultViewer
+                            loading={false}
+                            error={messages.error.error}
+                            compact={false}
+                        />
+                    );
+                    break;
+                case failure:
+                    content = (
+                        <Result
+                            status='error'
+                            title='エラー'
+                            subTitle={messages.error.failureType}
+                        />
+                    );
+                    break;
+                default:
+                    toBeNever(messages.error);
+            }
+        } else {
+            content = (
                 <JumpToBottomVirtuoso
-                    items={messages}
-                    create={(_, data) => data}
+                    items={messages.value.current ?? []}
+                    create={thenMap}
                     height={contentHeight - writingStatusHeight}
                 />
-            </div>
+            );
+        }
+    }
+
+    return (
+        <div className={classNames(flex, flexColumn)}>
+            <div style={{ padding: '0 4px' }}>{content}</div>
             {writingStatus}
         </div>
     );
@@ -826,13 +852,25 @@ export const RoomMessages: React.FC<Props> = ({ height, panelId }: Props) => {
     const [isChannelNamesEditorVisible, setIsChannelNamesEditorVisible] = React.useState(false);
 
     const roomId = useAtomValue(roomIdAtom);
-    const allRoomMessagesResult = useAtomValue(allRoomMessagesResultAtom);
     const roomMessagesFontSizeDelta = useAtomValue(roomMessageFontSizeDeltaAtom);
     const chatInputDirectionCore = useAtomValue(chatInputDirectionAtom) ?? auto;
 
-    if (roomId == null || allRoomMessagesResult == null || tabs == null) {
-        return null;
-    }
+    // GameSelectorの無駄なrerenderを抑止するため、useCallbackを使っている。
+    const onChatInputConfigUpdate = React.useCallback(
+        (recipe: (draft: WritableDraft<MessagePanelConfig>) => void) => {
+            setRoomConfig(roomConfig => {
+                if (roomConfig == null) {
+                    return;
+                }
+                const messagePanel = roomConfig.panels.messagePanels[panelId];
+                if (messagePanel == null) {
+                    return;
+                }
+                recipe(messagePanel);
+            });
+        },
+        [panelId, setRoomConfig]
+    );
 
     const chatInputDirection =
         chatInputDirectionCore === auto ? (height <= 500 ? row : column) : chatInputDirectionCore;
@@ -843,125 +881,166 @@ export const RoomMessages: React.FC<Props> = ({ height, panelId }: Props) => {
     );
     const tabsHeight = Math.max(0, height - 240 - (chatInputDirection === column ? spaceDiff : 0));
 
-    switch (allRoomMessagesResult.type) {
-        case loading:
-            return <QueryResultViewer loading compact={false} />;
-        case apolloError:
-            return (
-                <QueryResultViewer
-                    loading={false}
-                    error={allRoomMessagesResult.error}
-                    compact={false}
-                />
-            );
-        case failure:
-            return (
-                <Result
-                    status='error'
-                    title='エラー'
-                    subTitle={allRoomMessagesResult.failureType}
-                />
-            );
-        default:
-            break;
-    }
-
-    const tabPanels =
-        contentHeight <= 0
-            ? null
-            : tabs.map((tab, tabIndex) => {
-                  return (
-                      <Tabs.TabPane
-                          key={tab.key}
-                          tabKey={tab.key}
-                          closable={false}
-                          style={{ backgroundColor: Color.chatBackgroundColor }}
-                          tab={
-                              <div
-                                  style={{
-                                      display: 'flex',
-                                      flexDirection: 'row',
-                                      justifyItems: 'center',
-                                  }}
-                              >
-                                  <div style={{ flex: '0 0 auto', maxWidth: 100 }}>
-                                      <MessageTabName tabConfig={tab} />
-                                  </div>
-                                  <div style={{ flex: 1 }} />
-                                  <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>
-                                      <Dropdown
-                                          trigger={['click']}
-                                          overlay={
-                                              <Menu>
-                                                  <Menu.Item
-                                                      icon={<Icon.SettingOutlined />}
-                                                      onClick={() =>
-                                                          setEditingTabConfigKey(tab.key)
-                                                      }
-                                                  >
-                                                      編集
-                                                  </Menu.Item>
-                                                  <Menu.Item
-                                                      icon={<Icon.DeleteOutlined />}
-                                                      onClick={() => {
-                                                          Modal.warn({
-                                                              onOk: () => {
-                                                                  setRoomConfig(roomConfig => {
-                                                                      if (roomConfig == null) {
-                                                                          return;
-                                                                      }
-                                                                      const messagePanel =
-                                                                          roomConfig.panels
-                                                                              .messagePanels[
-                                                                              panelId
-                                                                          ];
-                                                                      if (messagePanel == null) {
-                                                                          return;
-                                                                      }
-                                                                      messagePanel.tabs.splice(
-                                                                          tabIndex,
-                                                                          1
-                                                                      );
-                                                                  });
-                                                              },
-                                                              okCancel: true,
-                                                              maskClosable: true,
-                                                              closable: true,
-                                                              content:
-                                                                  'タブを削除します。よろしいですか？',
-                                                          });
-                                                      }}
-                                                  >
-                                                      削除
-                                                  </Menu.Item>
-                                              </Menu>
-                                          }
-                                      >
-                                          <Button
-                                              style={{
-                                                  width: 18,
-                                                  minWidth: 18,
-
-                                                  // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
-                                                  padding: '0 2px',
-                                              }}
-                                              type='text'
-                                              size='small'
-                                              onClick={e => e.stopPropagation()}
-                                          >
-                                              <Icon.EllipsisOutlined />
-                                          </Button>
-                                      </Dropdown>
-                                  </div>
-                              </div>
-                          }
-                      >
-                          <MessageTabPane config={tab} contentHeight={contentHeight} />
-                      </Tabs.TabPane>
-                  );
-              });
-
     const marginX = 5;
+
+    const draggableTabs = React.useMemo(() => {
+        if (tabs == null) {
+            return undefined;
+        }
+
+        const tabPanels =
+            contentHeight <= 0
+                ? null
+                : tabs.map((tab, tabIndex) => {
+                      return (
+                          <Tabs.TabPane
+                              key={tab.key}
+                              tabKey={tab.key}
+                              closable={false}
+                              style={{ backgroundColor: Color.chatBackgroundColor }}
+                              tab={
+                                  <div
+                                      style={{
+                                          display: 'flex',
+                                          flexDirection: 'row',
+                                          justifyItems: 'center',
+                                      }}
+                                  >
+                                      <div style={{ flex: '0 0 auto', maxWidth: 100 }}>
+                                          <MessageTabName tabConfig={tab} />
+                                      </div>
+                                      <div style={{ flex: 1 }} />
+                                      <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>
+                                          <Dropdown
+                                              trigger={['click']}
+                                              overlay={
+                                                  <Menu>
+                                                      <Menu.Item
+                                                          icon={<Icon.SettingOutlined />}
+                                                          onClick={() =>
+                                                              setEditingTabConfigKey(tab.key)
+                                                          }
+                                                      >
+                                                          編集
+                                                      </Menu.Item>
+                                                      <Menu.Item
+                                                          icon={<Icon.DeleteOutlined />}
+                                                          onClick={() => {
+                                                              Modal.warn({
+                                                                  onOk: () => {
+                                                                      setRoomConfig(roomConfig => {
+                                                                          if (roomConfig == null) {
+                                                                              return;
+                                                                          }
+                                                                          const messagePanel =
+                                                                              roomConfig.panels
+                                                                                  .messagePanels[
+                                                                                  panelId
+                                                                              ];
+                                                                          if (
+                                                                              messagePanel == null
+                                                                          ) {
+                                                                              return;
+                                                                          }
+                                                                          messagePanel.tabs.splice(
+                                                                              tabIndex,
+                                                                              1
+                                                                          );
+                                                                      });
+                                                                  },
+                                                                  okCancel: true,
+                                                                  maskClosable: true,
+                                                                  closable: true,
+                                                                  content:
+                                                                      'タブを削除します。よろしいですか？',
+                                                              });
+                                                          }}
+                                                      >
+                                                          削除
+                                                      </Menu.Item>
+                                                  </Menu>
+                                              }
+                                          >
+                                              <Button
+                                                  style={{
+                                                      width: 18,
+                                                      minWidth: 18,
+
+                                                      // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
+                                                      padding: '0 2px',
+                                                  }}
+                                                  type='text'
+                                                  size='small'
+                                                  onClick={e => e.stopPropagation()}
+                                              >
+                                                  <Icon.EllipsisOutlined />
+                                              </Button>
+                                          </Dropdown>
+                                      </div>
+                                  </div>
+                              }
+                          >
+                              <MessageTabPane config={tab} contentHeight={contentHeight} />
+                          </Tabs.TabPane>
+                      );
+                  });
+
+        return (
+            <DraggableTabs
+                style={{ flexBasis: `${tabsHeight}px`, margin: `0 ${marginX}px 4px ${marginX}px` }}
+                dndType={`MessagePanelTab@${panelId}`}
+                type='editable-card'
+                onDnd={action => {
+                    setRoomConfig(roomConfig => {
+                        const messagePanel = roomConfig?.panels.messagePanels[panelId];
+                        if (messagePanel == null) {
+                            return;
+                        }
+                        moveElement(messagePanel.tabs, tab => tab.key, action);
+                    });
+                }}
+                onEdit={(e, type) => {
+                    if (type === 'remove') {
+                        if (typeof e !== 'string') {
+                            return;
+                        }
+                        setRoomConfig(roomConfig => {
+                            if (roomConfig == null) {
+                                return;
+                            }
+                            const messagePanel = roomConfig.panels.messagePanels[panelId];
+                            if (messagePanel == null) {
+                                return;
+                            }
+                            const indexToSplice = messagePanel.tabs.findIndex(
+                                tab => tab.key === editingTabConfigKey
+                            );
+                            if (indexToSplice >= 0) {
+                                messagePanel.tabs.splice(indexToSplice, 1);
+                            }
+                        });
+                        return;
+                    }
+                    setRoomConfig(roomConfig => {
+                        if (roomConfig == null) {
+                            return;
+                        }
+                        const messagePanel = roomConfig.panels.messagePanels[panelId];
+                        if (messagePanel == null) {
+                            return;
+                        }
+                        messagePanel.tabs.push(MessageTabConfigUtils.createEmpty({}));
+                    });
+                }}
+            >
+                {tabPanels}
+            </DraggableTabs>
+        );
+    }, [contentHeight, editingTabConfigKey, panelId, setRoomConfig, tabs, tabsHeight]);
+
+    if (roomId == null || draggableTabs == null) {
+        return null;
+    }
 
     return (
         <div
@@ -1059,73 +1138,14 @@ export const RoomMessages: React.FC<Props> = ({ height, panelId }: Props) => {
                     <Select.Option value={row}>横に並べる</Select.Option>
                 </Select>
             </div>
-            <DraggableTabs
-                style={{ flexBasis: `${tabsHeight}px`, margin: `0 ${marginX}px 4px ${marginX}px` }}
-                dndType={`MessagePanelTab@${panelId}`}
-                type='editable-card'
-                onDnd={action => {
-                    setRoomConfig(roomConfig => {
-                        const messagePanel = roomConfig?.panels.messagePanels[panelId];
-                        if (messagePanel == null) {
-                            return;
-                        }
-                        moveElement(messagePanel.tabs, tab => tab.key, action);
-                    });
-                }}
-                onEdit={(e, type) => {
-                    if (type === 'remove') {
-                        if (typeof e !== 'string') {
-                            return;
-                        }
-                        setRoomConfig(roomConfig => {
-                            if (roomConfig == null) {
-                                return;
-                            }
-                            const messagePanel = roomConfig.panels.messagePanels[panelId];
-                            if (messagePanel == null) {
-                                return;
-                            }
-                            const indexToSplice = messagePanel.tabs.findIndex(
-                                tab => tab.key === editingTabConfigKey
-                            );
-                            if (indexToSplice >= 0) {
-                                messagePanel.tabs.splice(indexToSplice, 1);
-                            }
-                        });
-                        return;
-                    }
-                    setRoomConfig(roomConfig => {
-                        if (roomConfig == null) {
-                            return;
-                        }
-                        const messagePanel = roomConfig.panels.messagePanels[panelId];
-                        if (messagePanel == null) {
-                            return;
-                        }
-                        messagePanel.tabs.push(MessageTabConfigUtils.createEmpty({}));
-                    });
-                }}
-            >
-                {tabPanels}
-            </DraggableTabs>
             <div style={{ flex: 1 }} />
+            {draggableTabs}
             <ChatInput
                 style={{ flex: 'auto', margin: '0 4px' }}
                 roomId={roomId}
                 panelId={panelId}
                 topElementsDirection={chatInputDirection}
-                onConfigUpdate={recipe =>
-                    setRoomConfig(roomConfig => {
-                        if (roomConfig == null) {
-                            return;
-                        }
-                        const messagePanel = roomConfig.panels.messagePanels[panelId];
-                        if (messagePanel == null) {
-                            return;
-                        }
-                        recipe(messagePanel);
-                    })
-                }
+                onConfigUpdate={onChatInputConfigUpdate}
             />
         </div>
     );

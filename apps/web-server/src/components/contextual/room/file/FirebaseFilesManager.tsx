@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Button, Dropdown, Menu, Table, Tabs, Upload, notification } from 'antd';
-import { FilePathFragment, FileSourceType } from '@flocon-trpg/typed-document-node';
+import { FilePathFragment, FileSourceType } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { ColumnGroupType, ColumnType } from 'antd/lib/table';
 import * as Icons from '@ant-design/icons';
 import { FirebaseStorageLink } from './FirebaseStorageLink';
@@ -162,7 +162,6 @@ const fileTypeColumn = (defaultFilteredValue: FilterValue | null | undefined): C
 });
 
 const getTimeCreated = (metadata: unknown): string | undefined => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const timeCreated = (metadata as any)?.timeCreated;
     if (typeof timeCreated === 'string') {
         return timeCreated;
@@ -243,7 +242,7 @@ const fileOptionsColumn = (storageType: StorageType): Column => ({
             <Dropdown.Button
                 icon={<Icons.MoreOutlined />}
                 overlay={<FileOptionsMenu reference={record.reference} storageType={storageType} />}
-                type={'text' as any}
+                type='text'
                 trigger={['click']}
             />
         );

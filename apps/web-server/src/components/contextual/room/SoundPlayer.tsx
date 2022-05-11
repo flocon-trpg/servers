@@ -4,14 +4,14 @@ import {
     FilePathInput,
     FileSourceType,
     WriteRoomSoundEffectDocument,
-} from '@flocon-trpg/typed-document-node';
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Icon from '@ant-design/icons';
 import { FilesManagerDrawer } from './file/FilesManagerDrawer';
 import { FilesManagerDrawerType, some } from '../../../utils/types';
 import { VolumeBar } from '../../ui/VolumeBar';
 import { DialogFooter } from '../../ui/DialogFooter';
 import { Styles } from '../../../styles';
-import { BgmState, FilePath, StrIndex5 } from '@flocon-trpg/core';
+import { State, StrIndex5, bgmTemplate, filePathTemplate } from '@flocon-trpg/core';
 import _ from 'lodash';
 import { cancelRnd, flex, flexColumn, flexRow, itemsCenter } from '../../../utils/className';
 import classNames from 'classnames';
@@ -23,6 +23,9 @@ import { roomAtom } from '../../../atoms/room/roomAtom';
 import { useAtomValue } from 'jotai/utils';
 import { useSetRoomStateWithImmer } from '../../../hooks/useSetRoomStateWithImmer';
 import { EditorGroupHeader } from '../../ui/EditorGroupHeader';
+
+type FilePath = State<typeof filePathTemplate>;
+type BgmState = State<typeof bgmTemplate>;
 
 const defaultVolume = 0.5;
 
@@ -159,6 +162,9 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({
                         textType: 'ok',
                         onClick: () => {
                             setRoomState(roomState => {
+                                if (roomState.bgms == null) {
+                                    roomState.bgms = {};
+                                }
                                 const bgm = roomState.bgms[channelKey];
                                 if (bgm == null) {
                                     roomState.bgms[channelKey] = {
@@ -388,7 +394,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                                     return;
                                 }
                                 setRoomState(roomState => {
-                                    const bgm = roomState.bgms[channelKey];
+                                    const bgm = roomState.bgms?.[channelKey];
                                     if (bgm == null) {
                                         return;
                                     }
@@ -424,7 +430,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                     disabled={(bgmState?.files ?? []).length === 0}
                     onClick={() => {
                         setRoomState(roomState => {
-                            const bgm = roomState.bgms[channelKey];
+                            const bgm = roomState.bgms?.[channelKey];
                             if (bgm == null) {
                                 return;
                             }
@@ -439,7 +445,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                     disabled={(bgmState?.files ?? []).length === 0}
                     onClick={() => {
                         setRoomState(roomState => {
-                            delete roomState.bgms[channelKey];
+                            delete roomState.bgms?.[channelKey];
                         });
                     }}
                 >

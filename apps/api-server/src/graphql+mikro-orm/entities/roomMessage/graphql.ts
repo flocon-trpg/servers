@@ -1,5 +1,5 @@
 import { $free, $system } from '@flocon-trpg/core';
-import { createUnionType, Field, ObjectType } from 'type-graphql';
+import { Field, ObjectType, createUnionType } from 'type-graphql';
 import { ResetRoomMessagesFailureType } from '../../../enums/ResetRoomMessagesFailureType';
 import { DeleteMessageFailureType } from '../../../enums/DeleteMessageFailureType';
 import { EditMessageFailureType } from '../../../enums/EditMessageFailureType';
@@ -458,8 +458,10 @@ export class ResetRoomMessagesResult {
     public failureType?: ResetRoomMessagesFailureType;
 }
 
+/** @deprecated This may be integrated into RoomPublicChannel. */
 export const RoomPublicChannelUpdateType = 'RoomPublicChannelUpdate';
 
+/** @deprecated This may be integrated into RoomPublicChannel. */
 @ObjectType()
 export class RoomPublicChannelUpdate {
     public __tstype!: typeof RoomPublicChannelUpdateType;

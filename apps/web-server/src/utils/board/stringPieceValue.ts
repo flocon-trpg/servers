@@ -1,4 +1,6 @@
-import { StringPieceState } from '@flocon-trpg/core';
+import { State, stringPieceTemplate } from '@flocon-trpg/core';
+
+type StringPieceState = State<typeof stringPieceTemplate>;
 
 export namespace StringPieceValue {
     export const toKonvaText = <T>(

@@ -1,4 +1,4 @@
-import { atom, Atom } from 'jotai';
+import { Atom, atom } from 'jotai';
 import { useAtomValue } from 'jotai/utils';
 import React from 'react';
 import { useLatest } from 'react-use';
