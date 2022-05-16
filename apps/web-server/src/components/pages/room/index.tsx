@@ -66,13 +66,17 @@ const BookmarkButton: React.FC<{ data: Data072 }> = ({ data }) => {
 
 const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
     const router = useRouter();
-    const [deleteRoom] = useMutation(DocNode071.DeleteRoomDocument);
+    const isV072OrLater = useIsV072OrLater();
+    const [deleteRoomAsAdmin] = useMutation(DocNode072.DeleteRoomAsAdminDocument);
     const [getRooms] = useLazyQuery(DocNode072.GetRoomsListDocument, {
         fetchPolicy: 'network-only',
     });
     const getMyRolesQueryResult = useGetMyRoles();
 
     const overlay = React.useMemo(() => {
+        if (!isV072OrLater) {
+            return undefined;
+        }
         if (getMyRolesQueryResult.data?.result.admin !== true) {
             return undefined;
         }
@@ -84,7 +88,7 @@ const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
                         onClick={() => {
                             Modal.warn({
                                 onOk: async () => {
-                                    await deleteRoom({ variables: { id: roomId } });
+                                    await deleteRoomAsAdmin({ variables: { id: roomId } });
                                     await getRooms();
                                 },
                                 okCancel: true,
@@ -99,7 +103,13 @@ const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
                 </Menu.ItemGroup>
             </Menu>
         );
-    }, [getMyRolesQueryResult.data, deleteRoom, getRooms, roomId]);
+    }, [
+        isV072OrLater,
+        getMyRolesQueryResult.data?.result.admin,
+        deleteRoomAsAdmin,
+        roomId,
+        getRooms,
+    ]);
     const join = React.useCallback(() => router.push(`/rooms/${roomId}`), [roomId, router]);
 
     const joinText = '入室';
