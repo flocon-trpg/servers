@@ -99,7 +99,7 @@
         "migration-create": "node dist/run-migrationCreate.js",
         "migration-up": "node dist/run-migrationUp.js",
         "migration-down": "node dist/run-migrationDown.js",
-        "test": "jest",
+        "test": "jest --runInBand --forceExit",
         "type-check": "tsc -p tsconfig.type-check.json",
         "tc": "yarn run type-check",
         "watch": "run-p watch:*",
