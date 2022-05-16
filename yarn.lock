@@ -2056,7 +2056,7 @@ __metadata:
     jotai: ^1.4.3
     js-file-download: ^0.4.12
     jszip: ^3.9.1
-    konva: ^7.2.5
+    konva: ^8.0.0
     less: ^4.1.1
     localforage: ^1.10.0
     lodash: ^4.17.21
@@ -11040,10 +11040,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"konva@npm:^7.2.5":
-  version: 7.2.5
-  resolution: "konva@npm:7.2.5"
-  checksum: 795ab73af38307243f867be3dab122ec6a5c37bc7f44a20359baf2bf6e1d5cd8a9ce9d7e3b69b21dd6429615b8f96254858e346e8ccb4b5fff8be6c5b60cd12d
+"konva@npm:^8.0.0":
+  version: 8.3.8
+  resolution: "konva@npm:8.3.8"
+  checksum: fe4a6eb88a6ed9686dc60ba91407ee0eb89189bf03fc9b0f0ddcff8230ff4711527b1a502d7e3d9a1e040dae7cf2072b29b85178476e7fd5cc680748c2c78034
   languageName: node
   linkType: hard
 
