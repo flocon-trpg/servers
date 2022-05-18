@@ -30,5 +30,6 @@
     },
     "resolutions": {
         "@react-spring/core": "9.4.4"
-    }
+    },
+    "packageManager": "yarn@3.2.1"
 }
