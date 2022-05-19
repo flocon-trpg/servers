@@ -229,7 +229,7 @@ export class ServerConfigBuilder {
             adminValue
                 .split(',')
                 .map(s => s.trim())
-                .filter(s => s != '')
+                .filter(s => s !== '')
         );
     }
 
