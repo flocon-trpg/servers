@@ -20,7 +20,8 @@
         "emitDecoratorMetadata": false,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
-        "noUncheckedIndexedAccess": true
+        "noUncheckedIndexedAccess": true,
+        "incremental": true
     },
     "exclude": ["node_modules"],
     "include": ["**/*.ts", "**/*.tsx"]
