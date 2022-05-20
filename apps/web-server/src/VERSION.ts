@@ -1,5 +1,5 @@
 import { SemVer } from '@flocon-trpg/utils';
-import * as packageJson from '../package.json';
+import PackageJson from '../package.json';
 import { SemVerRange } from './versioning/semVerRange';
 
 /* セキュリティ向上を目的としたversionの非表示はしていない。理由は下のとおり。
@@ -8,7 +8,7 @@ import { SemVerRange } from './versioning/semVerRange';
 - web-serverは静的ファイルを配布するだけのサーバーである。そのため、api-serverに対する攻撃は考えられるが、web-serverに対する攻撃が効果的とは思えない。もし攻撃可能であればそれはweb-serverのコードよりはサーバーの設定（もしくはVercelなどのホスティングサイト）の問題であり、web-serverのバージョンは関係ない。
 - 例えば特定のバージョンのweb-serverにXSSなどの脆弱性がある場合を考える。悪意のある人物がそのバージョンでサーバーを構築して他のユーザーを誘導して攻撃するといったケースでは、バージョンを隠すことによるメリットはない。悪意のない第三者によって構築されたことが明らかだが放置されたweb-serverに誘導して攻撃するケースの場合は、バージョンが表示されないことが逆にデメリットになりうる。
 */
-export const VERSION = packageJson.version;
+export const VERSION = PackageJson.version;
 
 // 例えば ~1.2.0 と ~3.0.0 の両方に対応可能なケースも考えられるため、配列を用いている。
 export const SupportedApiServers: ReadonlyArray<SemVerRange> = [
