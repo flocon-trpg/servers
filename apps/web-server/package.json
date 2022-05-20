@@ -71,7 +71,7 @@
     },
     "devDependencies": {
         "@next/eslint-plugin-next": "^12.1.6",
-        "@testing-library/react": "12.1.5",
+        "@testing-library/react": "13.2.0",
         "@testing-library/react-hooks": "7.0.2",
         "@types/jest": "27.5.0",
         "jest": "27.5.1",
