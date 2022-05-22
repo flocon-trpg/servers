@@ -32,7 +32,7 @@ import { noValue } from '../../../../utils/board/dice';
 import { DicePieceValue } from '../../../../utils/board/dicePieceValue';
 import { StringPieceValue } from '../../../../utils/board/stringPieceValue';
 import { Piece } from '../../../../utils/board/piece';
-import { useMutation } from '@apollo/client';
+import { useMutation } from 'urql';
 import { roomAtom } from '../../../../atoms/room/roomAtom';
 import { useAtomSelector } from '../../../../atoms/useAtomSelector';
 import { BoardConfig } from '../../../../atoms/roomConfig/types/boardConfig';
@@ -1149,7 +1149,7 @@ namespace ContextMenuModule {
         const myUserUid = useMyUserUid();
         const contextMenuState = useAtomValue(boardContextMenuAtom);
         const roomId = useAtomSelector(roomAtom, state => state.roomId);
-        const [writeSe] = useMutation(WriteRoomSoundEffectDocument);
+        const [, writeSe] = useMutation(WriteRoomSoundEffectDocument);
         const setBoardContextMenu = useUpdateAtom(boardContextMenuAtom);
         const hooks = useHooks();
         const isMyCharacter = useIsMyCharacter();
@@ -1227,16 +1227,14 @@ namespace ContextMenuModule {
                         room,
                         onSe: (se, volume) =>
                             writeSe({
-                                variables: {
-                                    roomId,
-                                    volume,
-                                    file: {
-                                        ...se,
-                                        sourceType:
-                                            se.sourceType === 'Default'
-                                                ? FileSourceType.Default
-                                                : FileSourceType.FirebaseStorage,
-                                    },
+                                roomId,
+                                volume,
+                                file: {
+                                    ...se,
+                                    sourceType:
+                                        se.sourceType === 'Default'
+                                            ? FileSourceType.Default
+                                            : FileSourceType.FirebaseStorage,
                                 },
                             }),
                         myUserUid,

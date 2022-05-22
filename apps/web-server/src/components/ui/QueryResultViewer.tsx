@@ -1,11 +1,11 @@
 import React, { PropsWithChildren } from 'react';
-import { ApolloError } from '@apollo/client';
 import { Alert, Result } from 'antd';
 import * as Icon from '@ant-design/icons';
 import { LoadingResult } from './result/LoadingResult';
+import { CombinedError } from 'urql';
 
 type Props = {
-    error?: ApolloError;
+    error?: CombinedError;
     loading?: boolean;
     loadingTitle?: string;
     compact: boolean;

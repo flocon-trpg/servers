@@ -16,12 +16,11 @@ import Head from 'next/head';
 import { loader } from '@monaco-editor/react';
 import { ExpiryMap } from '../utils/file/expiryMap';
 import urljoin from 'url-join';
-import { createApolloClient } from '../utils/createApolloClient';
+import { createUrqlClient } from '../utils/createUrqlClient';
 import { getUserConfig, setUserConfig } from '../utils/localStorage/userConfig';
 import { useMyUserUid } from '../hooks/useMyUserUid';
 import { AllContextProvider } from '../components/behaviors/AllContextProvider';
 import { simpleId } from '@flocon-trpg/core';
-import { Ref } from '../utils/ref';
 import { userConfigAtom } from '../atoms/userConfig/userConfigAtom';
 import { roomNotificationsAtom, text } from '../atoms/room/roomAtom';
 import { useAsync, useDebounce } from 'react-use';
@@ -32,7 +31,7 @@ import { RoomConfig } from '../atoms/roomConfig/types/roomConfig';
 import { useAtomValue, useUpdateAtom } from 'jotai/utils';
 import { getHttpUri, getWsUri, publicEnvTxtAtom } from '../atoms/webConfig/webConfigAtom';
 import { useWebConfig } from '../hooks/useWebConfig';
-import { atom, useAtom } from 'jotai';
+import { atom, useAtom, useSetAtom } from 'jotai';
 import { FirebaseApp, initializeApp } from 'firebase/app';
 import { Auth, getAuth } from 'firebase/auth';
 import { FirebaseStorage, getStorage } from 'firebase/storage';
@@ -47,6 +46,10 @@ export const firebaseAuthAtom = atom(get => get(firebaseAuthCoreAtom));
 
 const firebaseStorageCoreAtom = atom<FirebaseStorage | undefined>(undefined);
 export const firebaseStorageAtom = atom(get => get(firebaseStorageCoreAtom));
+
+// この値がnull ⇔ UrqlClientにおけるAuthorizationヘッダーなどが空（= API serverにおいて、Firebase Authenticationでログインしていないと判断される）
+const getIdTokenCoreAtom = atom<(() => Promise<string | null>) | null>(null);
+export const getIdTokenAtom = atom(get => get(getIdTokenCoreAtom));
 
 // localForageを用いてRoomConfigを読み込み、ReduxのStateと紐付ける。
 // Userが変わるたびに、useUserConfigが更新される必要がある。_app.tsxなどどこか一箇所でuseUserConfigを呼び出すだけでよい。
@@ -226,6 +229,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     useAutoSaveRoomConfig();
     useAutoSaveUserConfig();
 
+    const setGetIdTokenState = useSetAtom(getIdTokenCoreAtom);
     const getIdToken = React.useMemo(() => {
         if (typeof user === 'string') {
             return null;
@@ -246,18 +250,16 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
             });
         };
     }, [setRoomNotification, user]);
-    const [apolloClient, setApolloClient] = React.useState<ReturnType<typeof createApolloClient>>();
-    // useStateの引数に(() => T)を渡すとTに変換されてしまうため、useState(getIdToken) とすると正常に動かない。useState(() => getIdToken)でも駄目だった。そのため、Refを用いている。
-    const [getIdTokenState, setGetIdTokenState] = React.useState<Ref<typeof getIdToken>>({
-        value: getIdToken,
-    });
+    const [urqlClient, setUrqlClient] = React.useState<ReturnType<typeof createUrqlClient>>();
     React.useEffect(() => {
         if (httpUri == null || wsUri == null) {
             return;
         }
-        setApolloClient(createApolloClient(httpUri, wsUri, getIdToken));
-        setGetIdTokenState({ value: getIdToken });
-    }, [httpUri, wsUri, getIdToken]);
+        setUrqlClient(
+            createUrqlClient({ httpUrl: httpUri, wsUrl: wsUri, getUserIdToken: getIdToken })
+        );
+        setGetIdTokenState(getIdToken);
+    }, [httpUri, wsUri, getIdToken, setGetIdTokenState]);
     const [authNotFoundState, setAuthNotFoundState] = React.useState(false);
     React.useEffect(() => {
         setAuthNotFoundState(user === 'authNotFound');
@@ -292,7 +294,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
             </div>
         );
     }
-    if (apolloClient == null) {
+    if (urqlClient == null) {
         return <div style={{ padding: 5 }}>{'しばらくお待ち下さい… / Please wait…'}</div>;
     }
     return (
@@ -302,14 +304,9 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
             </Head>
             <AllContextProvider
                 clientId={clientId}
-                apolloClient={apolloClient}
+                client={urqlClient}
                 user={user}
                 firebaseStorageUrlCache={firebaseStorageUrlCache}
-                getIdToken={
-                    // getIdTokenを直接渡すのではなくわざわざuseStateを用いて渡している理由:
-                    // もし直接渡すと、「getIdTokenの値が変わる」の後に少し間をおいて「ApolloClientの値が変わる」ため、「getIdToken!=null ⇔ ApolloClientが認証済み」と判断しているコードにおいて、getIdTokenがnullからnon-nullに切り替わった瞬間の時点で認証されていないApolloClientが使われて、Access Denied!などのエラーが発生してしまうため。
-                    getIdTokenState.value
-                }
             >
                 <Component {...pageProps} />
             </AllContextProvider>

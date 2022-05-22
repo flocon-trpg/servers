@@ -27,8 +27,8 @@ import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../../../utils/className';
 import { MyAuthContext } from '../../../contexts/MyAuthContext';
 import { GenerateLogModal } from './message/GenerateLogModal';
-import { useLazyQuery, useMutation } from '@apollo/client';
-import { graphQLErrors, roomAtom, roomNotificationsAtom, text } from '../../../atoms/room/roomAtom';
+import { useMutation, useQuery } from 'urql';
+import { error, roomAtom, roomNotificationsAtom, text } from '../../../atoms/room/roomAtom';
 import { useAtomSelector } from '../../../atoms/useAtomSelector';
 import { roomConfigAtom } from '../../../atoms/roomConfig/roomConfigAtom';
 import { RoomConfigUtils } from '../../../atoms/roomConfig/types/roomConfig/utils';
@@ -91,8 +91,12 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
     const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
-    const [promoteToPlayer] = useMutation(PromoteToPlayerDocument);
-    const [getRoomAsListItem, getRoomAsListItemResult] = useLazyQuery(GetRoomAsListItemDocument);
+    const [, promoteToPlayer] = useMutation(PromoteToPlayerDocument);
+    const [getRoomAsListItemResult, getRoomAsListItem] = useQuery({
+        query: GetRoomAsListItemDocument,
+        pause: true,
+        variables: { roomId },
+    });
     const requiresPlayerPasswordRef = React.useRef(getRoomAsListItem);
     React.useEffect(() => {
         requiresPlayerPasswordRef.current = getRoomAsListItem;
@@ -100,7 +104,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
     React.useEffect(() => {
         setInputValue('');
         setIsPosting(false);
-        requiresPlayerPasswordRef.current({ variables: { roomId } });
+        requiresPlayerPasswordRef.current();
     }, [visible, roomId]);
 
     const title = '参加者に昇格';
@@ -125,12 +129,12 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                 okButtonProps={{ disabled: isPosting }}
                 onOk={() => {
                     setIsPosting(true);
-                    promoteToPlayer({ variables: { roomId, password: inputValue } }).then(e => {
-                        if (e.errors != null) {
+                    promoteToPlayer({ roomId, password: inputValue }).then(e => {
+                        if (e.error != null) {
                             addRoomNotification({
-                                type: graphQLErrors,
+                                type: error,
                                 createdAt: new Date().getTime(),
-                                errors: e.errors,
+                                error: e.error,
                             });
                             onOk();
                             return;
@@ -182,12 +186,12 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
             okButtonProps={{ disabled: isPosting }}
             onOk={() => {
                 setIsPosting(true);
-                promoteToPlayer({ variables: { roomId } }).then(e => {
-                    if (e.errors != null) {
+                promoteToPlayer({ roomId }).then(e => {
+                    if (e.error != null) {
                         addRoomNotification({
-                            type: graphQLErrors,
+                            type: error,
                             createdAt: new Date().getTime(),
-                            errors: e.errors,
+                            error: e.error,
                         });
                         onOk();
                         return;
@@ -246,7 +250,7 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
 }: DeleteRoomModalProps) => {
     const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
     const [isPosting, setIsPosting] = React.useState(false);
-    const [deleteRoom] = useMutation(DeleteRoomDocument);
+    const [, deleteRoom] = useMutation(DeleteRoomDocument);
     React.useEffect(() => {
         setIsPosting(false);
     }, [visible, roomId]);
@@ -262,12 +266,12 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
             cancelText={disabled ? '閉じる' : 'キャンセル'}
             onOk={() => {
                 setIsPosting(true);
-                deleteRoom({ variables: { id: roomId } }).then(e => {
-                    if (e.errors != null) {
+                deleteRoom({ id: roomId }).then(e => {
+                    if (e.error != null) {
                         addRoomNotification({
-                            type: graphQLErrors,
+                            type: error,
                             createdAt: new Date().getTime(),
-                            errors: e.errors,
+                            error: e.error,
                         });
                         onOk();
                         return;
@@ -338,7 +342,7 @@ const ResetMessagesModal: React.FC<ResetMessagesModalProps> = ({
 }: DeleteRoomModalProps) => {
     const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
     const [isPosting, setIsPosting] = React.useState(false);
-    const [resetMessages] = useMutation(ResetMessagesDocument);
+    const [, resetMessages] = useMutation(ResetMessagesDocument);
     React.useEffect(() => {
         setIsPosting(false);
     }, [visible, roomId]);
@@ -354,12 +358,12 @@ const ResetMessagesModal: React.FC<ResetMessagesModalProps> = ({
             cancelText={disabled ? '閉じる' : 'キャンセル'}
             onOk={() => {
                 setIsPosting(true);
-                resetMessages({ variables: { roomId } }).then(e => {
-                    if (e.errors != null) {
+                resetMessages({ roomId }).then(e => {
+                    if (e.error != null) {
                         addRoomNotification({
-                            type: graphQLErrors,
+                            type: error,
                             createdAt: new Date().getTime(),
-                            errors: e.errors,
+                            error: e.error,
                         });
                         onOk();
                         return;
@@ -428,7 +432,7 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
     const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
-    const [changeParticipantName] = useMutation(ChangeParticipantNameDocument);
+    const [, changeParticipantName] = useMutation(ChangeParticipantNameDocument);
     React.useEffect(() => {
         setInputValue('');
         setIsPosting(false);
@@ -436,12 +440,12 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
 
     const onOk = () => {
         setIsPosting(true);
-        changeParticipantName({ variables: { roomId, newName: inputValue } }).then(e => {
-            if (e.errors != null) {
+        changeParticipantName({ roomId, newName: inputValue }).then(e => {
+            if (e.error != null) {
                 addRoomNotification({
-                    type: graphQLErrors,
+                    type: error,
                     createdAt: new Date().getTime(),
-                    errors: e.errors,
+                    error: e.error,
                 });
                 onOkCore();
                 return;
@@ -1002,7 +1006,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
         showBackgroundBoardViewerAtom
     );
 
-    const [leaveRoomMutation] = useMutation(LeaveRoomDocument);
+    const [, leaveRoomMutation] = useMutation(LeaveRoomDocument);
     const [isBecomePlayerModalVisible, setIsBecomePlayerModalVisible] = React.useState(false);
     const [isChangeMyParticipantNameModalVisible, setIsChangeMyParticipantNameModalVisible] =
         React.useState(false);
@@ -1097,7 +1101,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
                         </Menu.Item>
                         <Menu.Item
                             onClick={() => {
-                                leaveRoomMutation({ variables: { id: roomId } }).then(result => {
+                                leaveRoomMutation({ id: roomId }).then(result => {
                                     if (result.data == null) {
                                         return;
                                     }

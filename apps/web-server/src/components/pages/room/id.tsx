@@ -1,8 +1,7 @@
-import { FetchResult, useMutation } from '@apollo/client';
+import { useMutation } from 'urql';
 import {
     GetRoomFailureType,
     JoinRoomAsPlayerDocument,
-    JoinRoomAsPlayerMutation,
     JoinRoomAsSpectatorDocument,
     JoinRoomFailureType,
     RoomAsListItemFragment,
@@ -44,6 +43,8 @@ import { Room } from '../../contextual/room/Room';
 import { Center } from '../../ui/Center';
 import { Layout, loginAndEntry, success } from '../../ui/Layout';
 import { LoadingResult } from '../../ui/result/LoadingResult';
+
+type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
 
 const debouncedWindowInnerWidthAtomCore = atom(0);
 const debouncedWindowInnerHeightAtomCore = atom(0);
@@ -109,16 +110,18 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
     );
     const [playerPassword, setPlayerPassword] = React.useState<string>('');
     const [spectatorPassword, setSpectatorPassword] = React.useState<string>('');
-    const [joinRoomAsPlayer, joinRoomAsPlayerResult] = useMutation(JoinRoomAsPlayerDocument);
-    const [joinRoomAsSpectator, joinRoomAsSpectatorResult] = useMutation(
+    const [joinRoomAsPlayerResult, joinRoomAsPlayer] = useMutation(JoinRoomAsPlayerDocument);
+    const [joinRoomAsSpectatorResult, joinRoomAsSpectator] = useMutation(
         JoinRoomAsSpectatorDocument
     );
     const [errorMessage, setErrorMessage] = React.useState<string | undefined>(undefined);
 
-    const disableJoinActions = joinRoomAsPlayerResult.loading || joinRoomAsSpectatorResult.loading;
+    const disableJoinActions =
+        joinRoomAsPlayerResult.fetching || joinRoomAsSpectatorResult.fetching;
 
     const OnGetResult = (
-        result: FetchResult<JoinRoomAsPlayerMutation, Record<string, any>, Record<string, any>>
+        // Awaited<ReturnType<typeof joinRoomAsSpectator>> も同じ型であるためjoinRoomAsSpectatorも扱える
+        result: Awaited<ReturnType<typeof joinRoomAsPlayer>>
     ) => {
         if (result.data == null) {
             setErrorMessage('Not authorized');
@@ -148,18 +151,14 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
             return;
         }
         const password = roomState.requiresPlayerPassword ? playerPassword : undefined;
-        await joinRoomAsPlayer({ variables: { id: roomState.id, password, name } }).then(
-            OnGetResult
-        );
+        await joinRoomAsPlayer({ id: roomState.id, password, name }).then(OnGetResult);
     };
     const onJoinAsSpectatorButtonClick = async () => {
         if (disableJoinActions) {
             return;
         }
         const password = roomState.requiresSpectatorPassword ? spectatorPassword : undefined;
-        await joinRoomAsSpectator({ variables: { id: roomState.id, password, name } }).then(
-            OnGetResult
-        );
+        await joinRoomAsSpectator({ id: roomState.id, password, name }).then(OnGetResult);
     };
     return (
         <Spin spinning={disableJoinActions}>
@@ -297,7 +296,7 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
     useOnResize();
     useRoomConfig(roomId);
 
-    const [updateWritingMessageStatus] = useMutation(UpdateWritingMessageStatusDocument);
+    const [, updateWritingMessageStatus] = useMutation(UpdateWritingMessageStatusDocument);
 
     React.useEffect(() => {
         hideAllOverlay();
@@ -346,10 +345,8 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
             return;
         }
         updateWritingMessageStatus({
-            variables: {
-                roomId: roomIdRef.current,
-                newStatus: writingMessageStatusInputType.value,
-            },
+            roomId: roomIdRef.current,
+            newStatus: writingMessageStatusInputType.value,
         });
     }, [roomIdRef, updateWritingMessageStatus, writingMessageStatusInputType]);
 

@@ -6,22 +6,21 @@ import {
     GetRoomQuery,
     GetRoomQueryVariables,
     OperateDocument,
-    OperateMutation,
     RoomAsListItemFragment,
     RoomEventSubscription,
     RoomOperationFragment,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Rx from 'rxjs/operators';
-import { ApolloError, FetchResult, useApolloClient, useMutation } from '@apollo/client';
+import { CombinedError, useClient, useMutation } from 'urql';
 import { create as createStateManager } from '../stateManagers/main';
 import { useClientId } from './useClientId';
 import { State as S, StateManager, UpOperation as U, roomTemplate } from '@flocon-trpg/core';
-import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { MyAuthContext, authNotFound, notSignIn } from '../contexts/MyAuthContext';
 import { Room } from '../stateManagers/states/room';
-import { apolloError, roomNotificationsAtom, text } from '../atoms/room/roomAtom';
-import { useUpdateAtom } from 'jotai/utils';
+import { error, roomNotificationsAtom, text } from '../atoms/room/roomAtom';
+import { useAtomValue, useUpdateAtom } from 'jotai/utils';
 import { SetAction } from '../utils/setAction';
+import { getIdTokenAtom } from '../pages/_app';
 
 type State = S<typeof roomTemplate>;
 type UpOperation = U<typeof roomTemplate>;
@@ -111,10 +110,10 @@ export const useRoomState = (
     roomEventSubscription: Observable<RoomEventSubscription> | null
 ): RoomStateResult => {
     const myAuth = React.useContext(MyAuthContext);
-    const hasIdToken = React.useContext(FirebaseAuthenticationIdTokenContext) != null;
+    const hasIdToken = useAtomValue(getIdTokenAtom) != null;
     const clientId = useClientId();
-    const apolloClient = useApolloClient();
-    const [operateMutation] = useMutation(OperateDocument);
+    const urqlClient = useClient();
+    const [, operateMutation] = useMutation(OperateDocument);
     const [state, setState] = React.useState<RoomState>({ type: loading });
     // refetchしたい場合、これを前の値と異なる値にすることで、useEffectが再度実行されてrefetchになる。
     const [refetchKey, setRefetchKey] = React.useState(0);
@@ -223,24 +222,20 @@ export const useRoomState = (
                         return;
                     }
                     const valueInput = Room.toGraphQLInput(toPost.operationToPost, clientId);
-                    let result: FetchResult<OperateMutation>;
-                    try {
-                        result = await operateMutation({
-                            variables: {
-                                id: roomId,
-                                operation: valueInput,
-                                revisionFrom: toPost.revision,
-                                requestId: toPost.requestId,
-                            },
-                        });
-                    } catch (e) {
-                        if (e instanceof ApolloError) {
+                    const result = await operateMutation({
+                        id: roomId,
+                        operation: valueInput,
+                        revisionFrom: toPost.revision,
+                        requestId: toPost.requestId,
+                    }).catch(e => {
+                        if (e instanceof CombinedError) {
                             addRoomNotification({
-                                type: apolloError,
+                                type: error,
                                 error: e,
                                 createdAt: new Date().getTime(),
                             });
                         } else {
+                            console.error('Unknown error at operateMutation, useRoomState', e);
                             addRoomNotification({
                                 type: text,
                                 notification: {
@@ -251,8 +246,12 @@ export const useRoomState = (
                             });
                         }
                         toPost.onPosted({ isSuccess: null });
+                        return 'error' as const;
+                    });
+                    if (result === 'error') {
                         return;
                     }
+
                     if (result.data == null) {
                         // TODO: isSuccess: falseのケースに対応（サーバー側の対応も必要か）
                         toPost.onPosted({ isSuccess: null });
@@ -311,14 +310,19 @@ export const useRoomState = (
             )
             .subscribe(() => undefined);
 
-        apolloClient
-            .query<GetRoomQuery, GetRoomQueryVariables>({
-                query: GetRoomDocument,
-                variables: { id: roomId },
-                fetchPolicy: 'network-only',
-            })
+        urqlClient
+            .query<GetRoomQuery, GetRoomQueryVariables>(
+                GetRoomDocument,
+                {
+                    id: roomId,
+                },
+                {
+                    requestPolicy: 'network-only',
+                }
+            )
+            .toPromise()
             .then(q => {
-                switch (q.data.result.__typename) {
+                switch (q.data?.result.__typename) {
                     case 'GetJoinedRoomResult': {
                         const newRoomStateManager = createStateManager(
                             Room.createState(q.data.result.room),
@@ -430,7 +434,7 @@ export const useRoomState = (
         };
     }, [
         refetchKey,
-        apolloClient,
+        urqlClient,
         roomId,
         userUid,
         myAuthErrorType,

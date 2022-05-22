@@ -26,10 +26,11 @@ import { NotSignInResult } from './result/NotSignInResult';
 import { LoadingResult } from './result/LoadingResult';
 import * as Icon from '@ant-design/icons';
 import { useSignOut } from '../../hooks/useSignOut';
-import { useApolloClient, useMutation } from '@apollo/client';
+import { useClient, useMutation } from 'urql';
 import { MyAuthContext, authNotFound, loading, notSignIn } from '../../contexts/MyAuthContext';
-import { FirebaseAuthenticationIdTokenContext } from '../../contexts/FirebaseAuthenticationIdTokenContext';
 import { useGetMyRoles } from '../../hooks/apiServer/useGetMyRoles';
+import { useAtomValue } from 'jotai';
+import { getIdTokenAtom } from '../../pages/_app';
 const { Header, Content } = AntdLayout;
 
 type EntryFormComponentProps = {
@@ -38,7 +39,7 @@ type EntryFormComponentProps = {
 };
 
 const EntryFormComponent: React.FC<EntryFormComponentProps> = (props: EntryFormComponentProps) => {
-    const [entryToServer, entryToServerResult] = useMutation(EntryToServerDocument);
+    const [entryToServerResult, entryToServer] = useMutation(EntryToServerDocument);
     const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
     const [isFinishedSuccessfully, setIsFinishedSuccessfully] = React.useState<boolean>(false);
 
@@ -53,7 +54,7 @@ const EntryFormComponent: React.FC<EntryFormComponentProps> = (props: EntryFormC
                 }
                 const password: string = e[passwordName];
                 setIsSubmitting(true);
-                entryToServer({ variables: { password } }).then(r => {
+                entryToServer({ password }).then(r => {
                     const resultType = r.data?.result.type;
                     if (resultType == null) {
                         return;
@@ -125,12 +126,12 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
     const myAuth = React.useContext(MyAuthContext);
     const myUserUid = typeof myAuth === 'string' ? null : myAuth.uid;
     const isAnonymous = typeof myAuth === 'string' ? false : myAuth.isAnonymous;
-    const apolloClient = useApolloClient();
+    const urqlClient = useClient();
     const signOut = useSignOut();
     const [isEntry, setIsEntry] = React.useState<
         'notRequired' | 'loading' | { type: 'error'; error: Error } | boolean
     >('loading');
-    const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);
+    const getIdToken = useAtomValue(getIdTokenAtom);
     const hasIdToken = getIdToken != null;
     const requiresEntry = requires === loginAndEntry;
     React.useEffect(() => {
@@ -140,13 +141,17 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                 return;
             }
             let unsubscribed = false;
-            apolloClient
-                .query<IsEntryQuery, IsEntryQueryVariables>({
-                    query: IsEntryDocument,
-                    fetchPolicy: 'network-only',
-                })
+            urqlClient
+                .query<IsEntryQuery, IsEntryQueryVariables>(
+                    IsEntryDocument,
+                    {},
+                    {
+                        requestPolicy: 'network-only',
+                    }
+                )
+                .toPromise()
                 .then(queryResult => {
-                    if (unsubscribed) {
+                    if (unsubscribed || queryResult.data == null) {
                         return;
                     }
                     setIsEntry(queryResult.data.result);
@@ -163,7 +168,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
             };
         }
         setIsEntry('notRequired');
-    }, [requiresEntry, myUserUid, apolloClient, hasIdToken]);
+    }, [requiresEntry, myUserUid, urqlClient, hasIdToken]);
 
     const getChildren = (): React.ReactNode => {
         if (typeof children === 'function') {
