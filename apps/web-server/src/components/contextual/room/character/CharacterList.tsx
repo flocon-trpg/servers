@@ -660,7 +660,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
     );
 };
 
-export const CharacterList: React.FC = () => {
+export const CharacterList: React.FC<{ panelId: string }> = ({ panelId }) => {
     const tabs = useAtomSelector(
         roomConfigAtom,
         roomConfig => roomConfig?.panels.characterPanel.tabs
@@ -700,39 +700,40 @@ export const CharacterList: React.FC = () => {
                                 <Dropdown
                                     trigger={['click']}
                                     overlay={
-                                        <Menu>
-                                            <Menu.Item
-                                                icon={<Icon.SettingOutlined />}
-                                                onClick={() => setEditingTabConfigKey(tab.key)}
-                                            >
-                                                編集
-                                            </Menu.Item>
-                                            <Menu.Item
-                                                icon={<Icon.DeleteOutlined />}
-                                                onClick={() => {
-                                                    Modal.warn({
-                                                        onOk: () => {
-                                                            setRoomConfig(roomConfig => {
-                                                                if (roomConfig == null) {
-                                                                    return;
-                                                                }
-                                                                roomConfig.panels.characterPanel.tabs.splice(
-                                                                    tabIndex,
-                                                                    1
-                                                                );
-                                                            });
-                                                        },
-                                                        okCancel: true,
-                                                        maskClosable: true,
-                                                        closable: true,
-                                                        content:
-                                                            'タブを削除します。よろしいですか？',
-                                                    });
-                                                }}
-                                            >
-                                                削除
-                                            </Menu.Item>
-                                        </Menu>
+                                        <Menu
+                                            items={[
+                                                {
+                                                    key: `編集@${panelId}@CharacterList`,
+                                                    icon: <Icon.SettingOutlined />,
+                                                    label: '編集',
+                                                    onClick: () => setEditingTabConfigKey(tab.key),
+                                                },
+                                                {
+                                                    key: `削除@${panelId}@CharacterList`,
+                                                    icon: <Icon.DeleteOutlined />,
+                                                    label: '削除',
+                                                    onClick: () =>
+                                                        Modal.warn({
+                                                            onOk: () => {
+                                                                setRoomConfig(roomConfig => {
+                                                                    if (roomConfig == null) {
+                                                                        return;
+                                                                    }
+                                                                    roomConfig.panels.characterPanel.tabs.splice(
+                                                                        tabIndex,
+                                                                        1
+                                                                    );
+                                                                });
+                                                            },
+                                                            okCancel: true,
+                                                            maskClosable: true,
+                                                            closable: true,
+                                                            content:
+                                                                'タブを削除します。よろしいですか？',
+                                                        }),
+                                                },
+                                            ]}
+                                        />
                                     }
                                 >
                                     <Button
@@ -857,6 +858,7 @@ export const CharacterList: React.FC = () => {
         );
     }, [
         editingTabConfigKey,
+        panelId,
         setCharacterEditorModal,
         setCharacterParameterNamesEditorVisibility,
         setCharacterTagNamesEditorVisibility,

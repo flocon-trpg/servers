@@ -206,29 +206,30 @@ const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({
 
     return (
         <div>
-            <Menu>
-                <Menu.Item
-                    icon={<Icons.CopyOutlined />}
-                    onClick={() => {
-                        copy(reference.fullPath).then(() => {
-                            notification.success({
-                                message: 'クリップボードにコピーしました。',
-                                placement: 'bottomRight',
+            <Menu
+                items={[
+                    {
+                        key: 'コマンドに使用するリンクとしてクリップボードにコピー@FileOptionsMenu',
+                        icon: <Icons.CopyOutlined />,
+                        label: 'コマンドに使用するリンクとしてクリップボードにコピー',
+                        onClick: () => {
+                            copy(reference.fullPath).then(() => {
+                                notification.success({
+                                    message: 'クリップボードにコピーしました。',
+                                    placement: 'bottomRight',
+                                });
                             });
-                        });
-                    }}
-                >
-                    コマンドに使用するリンクとしてクリップボードにコピー
-                </Menu.Item>
-                <Menu.Item
-                    icon={<Icons.DeleteOutlined />}
-                    onClick={() =>
-                        DeleteFirebaseStorageFileModal(storageType, reference, modalActions)
-                    }
-                >
-                    削除
-                </Menu.Item>
-            </Menu>
+                        },
+                    },
+                    {
+                        key: '削除@FileOptionsMenu',
+                        icon: <Icons.DeleteOutlined />,
+                        label: '削除',
+                        onClick: () =>
+                            DeleteFirebaseStorageFileModal(storageType, reference, modalActions),
+                    },
+                ]}
+            />
         </div>
     );
 };

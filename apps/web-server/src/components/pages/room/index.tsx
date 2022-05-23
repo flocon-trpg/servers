@@ -81,27 +81,33 @@ const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
             return undefined;
         }
         return (
-            <Menu>
-                <Menu.ItemGroup title='管理者用コマンド'>
-                    <Menu.Item
-                        icon={<Icons.DeleteOutlined />}
-                        onClick={() => {
-                            Modal.warn({
-                                onOk: async () => {
-                                    await deleteRoomAsAdmin({ variables: { id: roomId } });
-                                    await getRooms();
+            <Menu
+                items={[
+                    {
+                        key: '管理者コマンド',
+                        title: '管理者コマンド',
+                        children: [
+                            {
+                                key: '削除@管理者コマンド',
+                                icon: <Icons.DeleteOutlined />,
+                                label: <div style={Styles.Text.danger}>削除</div>,
+                                onClick: () => {
+                                    Modal.warn({
+                                        onOk: async () => {
+                                            await deleteRoomAsAdmin({ variables: { id: roomId } });
+                                            await getRooms();
+                                        },
+                                        okCancel: true,
+                                        maskClosable: true,
+                                        closable: true,
+                                        content: '部屋を削除します。よろしいですか？',
+                                    });
                                 },
-                                okCancel: true,
-                                maskClosable: true,
-                                closable: true,
-                                content: '部屋を削除します。よろしいですか？',
-                            });
-                        }}
-                    >
-                        <div style={Styles.Text.danger}>削除</div>
-                    </Menu.Item>
-                </Menu.ItemGroup>
-            </Menu>
+                            },
+                        ],
+                    },
+                ]}
+            />
         );
     }, [
         isV072OrLater,

@@ -11,6 +11,7 @@ import { cancelRnd, flex, flex1, flexColumn, flexRow, itemsCenter } from '../../
 import _ from 'lodash';
 import moment from 'moment';
 import { useSetRoomStateWithImmer } from '../../../hooks/useSetRoomStateWithImmer';
+import { ItemType } from 'antd/lib/menu/hooks/useItems';
 
 type MemoState = State<typeof memoTemplate>;
 
@@ -201,27 +202,28 @@ const DirSelect = ({ memoId }: DirSelectProps) => {
     const [isModalVisible, setIsModalVisible] = React.useState(false);
     const [newDirName, setNewDirName] = React.useState(defaultNewDirName);
 
-    const dirNames = sortedDir(memos);
-    const dirMenuItems = dirNames.map(({ dir }) => {
-        return (
-            <Menu.Item
-                key={`DIRSELECT-${memoId}`}
-                onClick={() => {
-                    setRoomState(roomState => {
-                        const memo = roomState.memos?.[memoId];
-                        if (memo == null) {
-                            return;
-                        }
-                        memo.dir = [...dir];
-                    });
-                }}
-            >
-                {dirToString(dir)}
-            </Menu.Item>
-        );
-    });
+    const dirNames = React.useMemo(() => sortedDir(memos), [memos]);
+    const dirMenuItems = React.useMemo(
+        () =>
+            dirNames.map(({ dir }): ItemType => {
+                return {
+                    key: `DIRSELECT-${memoId}`,
+                    label: dirToString(dir),
+                    onClick: () => {
+                        setRoomState(roomState => {
+                            const memo = roomState.memos?.[memoId];
+                            if (memo == null) {
+                                return;
+                            }
+                            memo.dir = [...dir];
+                        });
+                    },
+                };
+            }),
+        [dirNames, memoId, setRoomState]
+    );
 
-    const moveMemoOverlay = <Menu>{dirMenuItems}</Menu>;
+    const moveMemoOverlay = <Menu items={dirMenuItems} />;
 
     return (
         <div className={classNames(flex, flexRow)}>

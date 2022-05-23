@@ -1,5 +1,5 @@
 import { Input } from 'antd';
-import { InputProps } from 'antd/lib/input';
+import { InputProps, InputRef } from 'antd/lib/input';
 import React from 'react';
 import { useBuffer } from '../../hooks/useBuffer';
 
@@ -37,19 +37,21 @@ export const BufferedInput: React.FC<Props> = (props: Props) => {
             break;
     }
 
-    const { ref, onChangeInput } = useBuffer<string, Input>({
+    const { ref, onChangeInput } = useBuffer<string, InputRef>({
         value,
         bufferDuration,
         onChangeOutput: onChange,
         setValueToComponent: ({ value, component }) => {
-            component.setValue(value);
+            if (component.input == null) {
+                return;
+            }
+            component.input.value = value;
         },
     });
 
     return (
         <Input
             {...props}
-            value={undefined}
             ref={ref}
             defaultValue={undefined}
             onChange={e => {
