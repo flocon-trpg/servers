@@ -55,11 +55,8 @@ export const parseUpOperation = (source: string): RoomUpOperation => {
 };
 
 export const stringifyUpOperation = (source: RoomUpOperation): string => {
-    const result = upOperation(Room.template, { exact: true }).decode(source);
-    if (result._tag === 'Left') {
-        throw new Error('decode failed');
-    }
-    return JSON.stringify(result.right);
+    const result = upOperation(Room.template, { exact: true }).encode(source);
+    return JSON.stringify(result);
 };
 
 export const decodeDownOperation = (source: unknown): RoomDownOperation => {

@@ -38,6 +38,18 @@ export const object = 'object';
 
 const isKeyToIgnore = (key: string) => key === $v || key === $r;
 
+const warnNotFoundTemplate = ({
+    key,
+    objectType,
+}: {
+    key: string;
+    objectType: 'state' | 'operation';
+}): void => {
+    console.warn(
+        `"${key}" key found at ${objectType} object, but template not found. Maybe you use keys which are not supported?`
+    );
+};
+
 type If<T extends boolean, TTrue, TFalse> = T extends true
     ? TTrue
     : T extends false
@@ -406,10 +418,17 @@ export const toUpOperation =
             case object: {
                 return mapRecord(
                     twoWayOperation as Record<string, TwoWayOperation<AnyTemplate>>,
-                    (operationElement, key) =>
-                        isKeyToIgnore(key)
-                            ? operationElement
-                            : toUpOperation(template.value[key]!)(operationElement)
+                    (operationElement, key) => {
+                        if (isKeyToIgnore(key)) {
+                            return operationElement;
+                        }
+                        const templateElement = template.value[key];
+                        if (templateElement == null) {
+                            warnNotFoundTemplate({ key, objectType: 'operation' });
+                            return undefined;
+                        }
+                        return toUpOperation(templateElement)(operationElement);
+                    }
                 ) as any;
             }
             default:
@@ -454,10 +473,17 @@ export const toDownOperation =
             case object: {
                 return mapRecord(
                     twoWayOperation as Record<string, TwoWayOperation<AnyTemplate>>,
-                    (operationElement, key) =>
-                        isKeyToIgnore(key)
-                            ? operationElement
-                            : toDownOperation(template.value[key]!)(operationElement)
+                    (operationElement, key) => {
+                        if (isKeyToIgnore(key)) {
+                            return operationElement;
+                        }
+                        const templateElement = template.value[key];
+                        if (templateElement == null) {
+                            warnNotFoundTemplate({ key, objectType: 'operation' });
+                            return undefined;
+                        }
+                        return toDownOperation(templateElement)(operationElement);
+                    }
                 ) as any;
             }
             default:
@@ -515,7 +541,12 @@ export const apply =
                     if (isKeyToIgnore(key)) {
                         continue;
                     }
-                    const applied = apply(template.value[key]!)({
+                    const templateElement = template.value[key];
+                    if (templateElement == null) {
+                        warnNotFoundTemplate({ key, objectType: 'operation' });
+                        continue;
+                    }
+                    const applied = apply(templateElement)({
                         state: state[key],
                         operation: value,
                     });
@@ -581,7 +612,12 @@ export const applyBack =
                     if (isKeyToIgnore(key)) {
                         continue;
                     }
-                    const applied = applyBack(template.value[key]!)({
+                    const templateElement = template.value[key];
+                    if (templateElement == null) {
+                        warnNotFoundTemplate({ key, objectType: 'operation' });
+                        continue;
+                    }
+                    const applied = applyBack(templateElement)({
                         state: state[key],
                         operation: value,
                     });
@@ -659,7 +695,12 @@ export const composeDownOperation =
                             result[key] = value.right;
                             break;
                         default: {
-                            const composed = composeDownOperation(template.value[key]!)({
+                            const templateElement = template.value[key];
+                            if (templateElement == null) {
+                                warnNotFoundTemplate({ key, objectType: 'operation' });
+                                continue;
+                            }
+                            const composed = composeDownOperation(templateElement)({
                                 first: value.left,
                                 second: value.right,
                             });
@@ -742,7 +783,12 @@ export const restore =
                     if (isKeyToIgnore(key)) {
                         continue;
                     }
-                    const restored = restore(template.value[key]!)({
+                    const templateElement = template.value[key];
+                    if (templateElement == null) {
+                        warnNotFoundTemplate({ key, objectType: 'operation' });
+                        continue;
+                    }
+                    const restored = restore(templateElement)({
                         nextState: nextState[key],
                         downOperation: value,
                     });
@@ -816,7 +862,12 @@ export const diff =
                     if (isKeyToIgnore(key)) {
                         continue;
                     }
-                    result[key] = diff(template.value[key]!)({
+                    const templateElement = template.value[key];
+                    if (templateElement == null) {
+                        warnNotFoundTemplate({ key, objectType: 'state' });
+                        continue;
+                    }
+                    result[key] = diff(templateElement)({
                         prevState: value.left,
                         nextState: value.right,
                     });
@@ -915,7 +966,12 @@ export const clientTransform =
                             secondPrime[key] = value.right;
                             break;
                         default: {
-                            const xformed = clientTransform(template.value[key]!)({
+                            const templateElement = template.value[key];
+                            if (templateElement == null) {
+                                warnNotFoundTemplate({ key, objectType: 'operation' });
+                                continue;
+                            }
+                            const xformed = clientTransform(templateElement)({
                                 first: value.left,
                                 second: value.right,
                             });
