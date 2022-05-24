@@ -28,7 +28,5 @@
         "eslint-plugin-react-hooks": "next",
         "prettier": "2.6.2"
     },
-    "resolutions": {
-        "@react-spring/core": "9.4.4"
-    }
+    "packageManager": "yarn@3.2.1"
 }

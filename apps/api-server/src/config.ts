@@ -225,7 +225,12 @@ export class ServerConfigBuilder {
             );
         }
 
-        return Result.ok(adminValue.split(',').map(s => s.trim()));
+        return Result.ok(
+            adminValue
+                .split(',')
+                .map(s => s.trim())
+                .filter(s => s !== '')
+        );
     }
 
     private static entryPasswordProp(

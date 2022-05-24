@@ -21,9 +21,6 @@ const defaultStringPieceValue = (
     piecePosition: PiecePositionWithCell,
     ownerCharacterId: string | undefined
 ): StringPieceState => ({
-    $v: 2,
-    $r: 1,
-
     ownerCharacterId,
     value: '',
     isValuePrivate: false,
@@ -32,7 +29,11 @@ const defaultStringPieceValue = (
     name: undefined,
     opacity: undefined,
     isPositionLocked: false,
+
     ...piecePosition,
+
+    $v: 2,
+    $r: 1,
 });
 
 const gutter: [Gutter, Gutter] = [16, 16];
