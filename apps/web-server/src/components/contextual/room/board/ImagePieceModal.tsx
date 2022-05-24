@@ -44,9 +44,6 @@ const defaultImagePiece = (
     piecePosition: PiecePositionWithCell,
     ownerParticipantId: string | undefined
 ): ImagePieceState => ({
-    $v: 2,
-    $r: 1,
-
     ownerParticipantId,
     image: undefined,
     isPrivate: false,
@@ -54,7 +51,11 @@ const defaultImagePiece = (
     name: undefined,
     opacity: undefined,
     isPositionLocked: false,
+
     ...piecePosition,
+
+    $v: 2,
+    $r: 1,
 });
 
 const gutter: [Gutter, Gutter] = [16, 16];
