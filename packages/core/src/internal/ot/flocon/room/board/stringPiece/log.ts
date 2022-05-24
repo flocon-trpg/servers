@@ -68,7 +68,7 @@ export const ofOperation = (
     currentState: State<typeof StringPieceValueTypes.template>
 ): Type => {
     return {
-        ...toUpOperation(PieceBaseTypes.template)({ ...operation, $v: undefined, $r: undefined }),
+        ...toUpOperation(StringPieceValueTypes.template)(operation),
         $v: 2,
         $r: 1,
         type: updateType,
