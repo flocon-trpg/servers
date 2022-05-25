@@ -84,6 +84,7 @@ import { column, row } from '../../../../atoms/userConfig/types';
 import { InputDescription } from '../../../ui/InputDescription';
 import { WritableDraft } from 'immer/dist/internal';
 import { MessagePanelConfig } from '../../../../atoms/roomConfig/types/messagePanelConfig';
+import { ItemType } from 'antd/lib/menu/hooks/useItems';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -535,53 +536,45 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
             );
         }
     }
-    const notSecretMenuItem =
+    const notSecretMenuItem: ItemType =
         userMessage?.isSecret === true &&
         userMessage.createdBy != null &&
-        userMessage.createdBy === getUserUid(myAuth) ? (
-            <Menu.Item
-                onClick={() => {
-                    if (roomId == null) {
-                        return;
-                    }
-                    makeMessageNotSecret({ messageId: userMessage.messageId, roomId });
-                }}
-            >
-                公開
-            </Menu.Item>
-        ) : null;
-    const editMenuItem =
-        userMessage != null && createdByMe === true && userMessage.commandResult == null ? (
-            <Menu.Item
-                onClick={() => {
-                    setIsEditModalVisible(true);
-                }}
-            >
-                編集
-            </Menu.Item>
-        ) : null;
-    const deleteMenuItem =
-        userMessage != null && createdByMe === true ? (
-            <Menu.Item
-                onClick={() => {
-                    if (roomId == null) {
-                        return;
-                    }
-                    deleteMessageMutation({ messageId: userMessage.messageId, roomId });
-                }}
-            >
-                削除
-            </Menu.Item>
-        ) : null;
+        userMessage.createdBy === getUserUid(myAuth)
+            ? {
+                  key: '公開@RoomMessageComponent',
+                  label: '公開',
+                  onClick: () => {
+                      if (roomId == null) {
+                          return;
+                      }
+                      makeMessageNotSecret({ messageId: userMessage.messageId, roomId });
+                  },
+              }
+            : null;
+    const editMenuItem: ItemType =
+        userMessage != null && createdByMe === true && userMessage.commandResult == null
+            ? {
+                  key: '編集@RoomMessageComponent',
+                  label: '編集',
+                  onClick: () => setIsEditModalVisible(true),
+              }
+            : null;
+    const deleteMenuItem: ItemType =
+        userMessage != null && createdByMe === true
+            ? {
+                  key: '削除@RoomMessageComponent',
+                  label: '削除',
+                  onClick: () => {
+                      if (roomId == null) {
+                          return;
+                      }
+                      deleteMessageMutation({ messageId: userMessage.messageId, roomId });
+                  },
+              }
+            : null;
     const allMenuItemsAreNull =
         notSecretMenuItem == null && editMenuItem == null && deleteMenuItem == null;
-    const menuItems = (
-        <>
-            {notSecretMenuItem}
-            {editMenuItem}
-            {deleteMenuItem}
-        </>
-    );
+    const menuItems: ItemType[] = [notSecretMenuItem, editMenuItem, deleteMenuItem];
     const iconSize = 28;
     const iconMargin = 6;
     return (
@@ -668,7 +661,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                 }}
             >
                 {allMenuItemsAreNull ? null : (
-                    <Dropdown overlay={<Menu>{menuItems}</Menu>} trigger={['click']}>
+                    <Dropdown overlay={<Menu items={menuItems} />} trigger={['click']}>
                         <Button type='text' size='small'>
                             <Icon.EllipsisOutlined />
                         </Button>
@@ -912,51 +905,59 @@ export const RoomMessages: React.FC<Props> = ({ height, panelId }: Props) => {
                                           <Dropdown
                                               trigger={['click']}
                                               overlay={
-                                                  <Menu>
-                                                      <Menu.Item
-                                                          icon={<Icon.SettingOutlined />}
-                                                          onClick={() =>
-                                                              setEditingTabConfigKey(tab.key)
-                                                          }
-                                                      >
-                                                          編集
-                                                      </Menu.Item>
-                                                      <Menu.Item
-                                                          icon={<Icon.DeleteOutlined />}
-                                                          onClick={() => {
-                                                              Modal.warn({
-                                                                  onOk: () => {
-                                                                      setRoomConfig(roomConfig => {
-                                                                          if (roomConfig == null) {
-                                                                              return;
-                                                                          }
-                                                                          const messagePanel =
-                                                                              roomConfig.panels
-                                                                                  .messagePanels[
-                                                                                  panelId
-                                                                              ];
-                                                                          if (
-                                                                              messagePanel == null
-                                                                          ) {
-                                                                              return;
-                                                                          }
-                                                                          messagePanel.tabs.splice(
-                                                                              tabIndex,
-                                                                              1
+                                                  <Menu
+                                                      items={[
+                                                          {
+                                                              key: '編集@RoomMessages',
+                                                              label: '編集',
+                                                              icon: <Icon.SettingOutlined />,
+                                                              onClick: () =>
+                                                                  setEditingTabConfigKey(tab.key),
+                                                          },
+                                                          {
+                                                              key: '削除@RoomMessages',
+                                                              label: '削除',
+                                                              icon: <Icon.DeleteOutlined />,
+                                                              onClick: () => {
+                                                                  Modal.warn({
+                                                                      onOk: () => {
+                                                                          setRoomConfig(
+                                                                              roomConfig => {
+                                                                                  if (
+                                                                                      roomConfig ==
+                                                                                      null
+                                                                                  ) {
+                                                                                      return;
+                                                                                  }
+                                                                                  const messagePanel =
+                                                                                      roomConfig
+                                                                                          .panels
+                                                                                          .messagePanels[
+                                                                                          panelId
+                                                                                      ];
+                                                                                  if (
+                                                                                      messagePanel ==
+                                                                                      null
+                                                                                  ) {
+                                                                                      return;
+                                                                                  }
+                                                                                  messagePanel.tabs.splice(
+                                                                                      tabIndex,
+                                                                                      1
+                                                                                  );
+                                                                              }
                                                                           );
-                                                                      });
-                                                                  },
-                                                                  okCancel: true,
-                                                                  maskClosable: true,
-                                                                  closable: true,
-                                                                  content:
-                                                                      'タブを削除します。よろしいですか？',
-                                                              });
-                                                          }}
-                                                      >
-                                                          削除
-                                                      </Menu.Item>
-                                                  </Menu>
+                                                                      },
+                                                                      okCancel: true,
+                                                                      maskClosable: true,
+                                                                      closable: true,
+                                                                      content:
+                                                                          'タブを削除します。よろしいですか？',
+                                                                  });
+                                                              },
+                                                          },
+                                                      ]}
+                                                  />
                                               }
                                           >
                                               <Button

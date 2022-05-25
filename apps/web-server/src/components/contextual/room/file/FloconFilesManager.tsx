@@ -255,41 +255,43 @@ const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({ fileItem }: FileOptio
 
     return (
         <div>
-            <Menu>
-                <Menu.Item
-                    icon={<Icons.CopyOutlined />}
-                    onClick={() => {
-                        copy(fileItem.filename).then(() => {
-                            notification.success({
-                                message: 'クリップボードにコピーしました。',
-                                placement: 'bottomRight',
+            <Menu
+                items={[
+                    {
+                        key: 'コマンドに使用するリンクとしてクリップボードにコピー@FileOptionsMenu',
+                        icon: <Icons.CopyOutlined />,
+                        label: 'コマンドに使用するリンクとしてクリップボードにコピー',
+                        onClick: () => {
+                            copy(fileItem.filename).then(() => {
+                                notification.success({
+                                    message: 'クリップボードにコピーしました。',
+                                    placement: 'bottomRight',
+                                });
                             });
-                        });
-                    }}
-                >
-                    コマンドに使用するリンクとしてクリップボードにコピー
-                </Menu.Item>
-                <Menu.Item
-                    icon={<Icons.DeleteOutlined />}
-                    onClick={() =>
-                        DeleteFloconStorageFileModal([fileItem], async filenamesToDelete => {
-                            if (filenamesToDelete.length === 0) {
-                                return;
-                            }
-                            const isSuccess = await deleteFilesMutation({
-                                filenames: filenamesToDelete,
-                            })
-                                .then(() => true)
-                                .catch(() => false);
-                            if (isSuccess) {
-                                refetch();
-                            }
-                        })
-                    }
-                >
-                    削除
-                </Menu.Item>
-            </Menu>
+                        },
+                    },
+                    {
+                        key: '削除@FileOptionsMenu',
+                        icon: <Icons.DeleteOutlined />,
+                        label: '削除',
+                        onClick: async () => {
+                            DeleteFloconStorageFileModal([fileItem], async filenamesToDelete => {
+                                if (filenamesToDelete.length === 0) {
+                                    return;
+                                }
+                                const isSuccess = await deleteFilesMutation({
+                                    filenames: filenamesToDelete,
+                                })
+                                    .then(() => true)
+                                    .catch(() => false);
+                                if (isSuccess) {
+                                    await refetch();
+                                }
+                            });
+                        },
+                    },
+                ]}
+            />
         </div>
     );
 };
