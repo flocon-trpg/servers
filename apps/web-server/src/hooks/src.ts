@@ -63,37 +63,41 @@ export function useSrcArrayFromGraphQL(
             return;
         }
         let isDisposed = false;
-        Promise.all(
-            cleanPathArray.map(async path => {
-                const idToken = await getIdToken();
-                if (idToken == null) {
-                    return null;
-                }
+        const main = async () => {
+            const idToken = await getIdToken();
+            if (idToken == null) {
+                return null;
+            }
+            Promise.all(
+                cleanPathArray.map(async path => {
+                    // firebaseStorageUrlCacheContextはDeepCompareしてほしくないしされる必要もないインスタンスであるため、depsに加えてはいけない。
+                    return FilePathModule.getSrc(
+                        path,
+                        config.value,
+                        storage,
+                        idToken,
+                        firebaseStorageUrlCacheContext
+                    );
+                })
+            )
+                .then(all => {
+                    if (isDisposed) {
+                        return;
+                    }
+                    setResult({
+                        type: done,
+                        value: all.flatMap(x => (x == null ? [] : [x.src ?? null])),
+                    });
+                })
+                .catch(e => {
+                    console.log('error', e);
 
-                // firebaseStorageUrlCacheContextはDeepCompareしてほしくないしされる必要もないインスタンスであるため、depsに加えてはいけない。
-                return FilePathModule.getSrc(
-                    path,
-                    config.value,
-                    storage,
-                    idToken,
-                    firebaseStorageUrlCacheContext
-                );
-            })
-        )
-            .then(all => {
-                if (isDisposed) {
-                    return;
-                }
-                setResult({
-                    type: done,
-                    value: all.flatMap(x => (x == null ? [] : [x.src ?? null])),
+                    setResult({ type: error, error: e });
                 });
-            })
-            .catch(e => {
-                console.log('error', e);
+        };
 
-                setResult({ type: error, error: e });
-            });
+        main();
+
         return () => {
             isDisposed = true;
         };

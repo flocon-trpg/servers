@@ -35,6 +35,7 @@ import { atom, useAtom, useSetAtom } from 'jotai';
 import { FirebaseApp, initializeApp } from 'firebase/app';
 import { Auth, getAuth } from 'firebase/auth';
 import { FirebaseStorage, getStorage } from 'firebase/storage';
+import { Ref } from '../utils/ref';
 
 enableMapSet();
 
@@ -48,8 +49,9 @@ const firebaseStorageCoreAtom = atom<FirebaseStorage | undefined>(undefined);
 export const firebaseStorageAtom = atom(get => get(firebaseStorageCoreAtom));
 
 // この値がnull ⇔ UrqlClientにおけるAuthorizationヘッダーなどが空（= API serverにおいて、Firebase Authenticationでログインしていないと判断される）
-const getIdTokenCoreAtom = atom<(() => Promise<string | null>) | null>(null);
-export const getIdTokenAtom = atom(get => get(getIdTokenCoreAtom));
+// 値がfunctionだとjotaiが勝手にfunctionを実行してその結果をatomに保持してしまうため、必ずfunctionの状態で保持されるようにRefで包んでいる
+const getIdTokenCoreAtom = atom<Ref<(() => Promise<string | null>) | null>>({ value: null });
+export const getIdTokenAtom = atom(get => get(getIdTokenCoreAtom).value);
 
 // localForageを用いてRoomConfigを読み込み、ReduxのStateと紐付ける。
 // Userが変わるたびに、useUserConfigが更新される必要がある。_app.tsxなどどこか一箇所でuseUserConfigを呼び出すだけでよい。
@@ -258,7 +260,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         setUrqlClient(
             createUrqlClient({ httpUrl: httpUri, wsUrl: wsUri, getUserIdToken: getIdToken })
         );
-        setGetIdTokenState(getIdToken);
+        setGetIdTokenState({ value: getIdToken });
     }, [httpUri, wsUri, getIdToken, setGetIdTokenState]);
     const [authNotFoundState, setAuthNotFoundState] = React.useState(false);
     React.useEffect(() => {
