@@ -68,6 +68,7 @@ import { KeySorter } from '../../../../utils/keySorter';
 import { RowKeys } from '../../../../atoms/roomConfig/types/charactersPanelConfig';
 import { DraggableTabs } from '../../../ui/DraggableTabs';
 import { moveElement } from '../../../../utils/moveElement';
+import { defaultTriggerSubMenuAction } from '../../../../utils/variables';
 
 type CharacterState = State<typeof characterTemplate>;
 type ParamNameState = State<typeof paramNameTemplate>;
@@ -733,6 +734,7 @@ export const CharacterList: React.FC<{ panelId: string }> = ({ panelId }) => {
                                                         }),
                                                 },
                                             ]}
+                                            triggerSubMenuAction={defaultTriggerSubMenuAction}
                                         />
                                     }
                                 >

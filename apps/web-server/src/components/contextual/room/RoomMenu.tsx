@@ -583,7 +583,7 @@ const usePanelsMenuItem = () => {
         }
         return {
             key: 'boardPanelsMenu',
-            title: 'ボードエディター',
+            label: 'ボードエディター',
             children: [
                 ...recordToArray(boardPanels).map((pair, i) => {
                     return {
@@ -697,7 +697,7 @@ const usePanelsMenuItem = () => {
         }
         return {
             key: 'chatPalettePanelsMenu',
-            title: 'チャットパレット',
+            label: 'チャットパレット',
             children: [
                 ...recordToArray(chatPalettePanels).map((pair, i) => {
                     return {
@@ -810,7 +810,7 @@ const usePanelsMenuItem = () => {
         }
         return {
             key: 'memoPanelsMenu',
-            title: '共有メモ（部屋）',
+            label: '共有メモ（部屋）',
             children: [
                 ...recordToArray(memoPanels).map((pair, i) => {
                     return {
@@ -882,7 +882,7 @@ const usePanelsMenuItem = () => {
         }
         return {
             key: 'messagePanelsMenu',
-            title: 'メッセージ',
+            label: 'メッセージ',
             children: [
                 ...recordToArray(messagePanels).map((pair, i) => {
                     return {
@@ -1014,7 +1014,7 @@ const usePanelsMenuItem = () => {
     const menuItem = React.useMemo((): ItemType => {
         return {
             key: 'windowsMenuItem',
-            title: 'ウィンドウ',
+            label: 'ウィンドウ',
             children: [
                 characterPanelMenu,
                 activeBoardPanelMenu,
@@ -1202,7 +1202,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
             {
                 key: '自分のUser@menu',
                 icon: <Icon.UserOutlined />,
-                title: `${myAuth.displayName} - ${myAuth.uid}`,
+                label: `${myAuth.displayName} - ${myAuth.uid}`,
                 children: [
                     {
                         key: 'ログアウト@menu',

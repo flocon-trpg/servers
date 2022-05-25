@@ -27,6 +27,7 @@ import { useAtomValue, useUpdateAtom } from 'jotai/utils';
 import { useWebConfig } from '../../../../hooks/useWebConfig';
 import { getMetadata, listAll, ref, uploadBytes } from '@firebase/storage';
 import { firebaseStorageAtom } from '../../../../pages/_app';
+import { defaultTriggerSubMenuAction } from '../../../../utils/variables';
 
 type DataSource = FileState;
 
@@ -229,6 +230,7 @@ const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({
                             DeleteFirebaseStorageFileModal(storageType, reference, modalActions),
                     },
                 ]}
+                triggerSubMenuAction={defaultTriggerSubMenuAction}
             />
         </div>
     );

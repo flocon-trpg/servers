@@ -85,6 +85,7 @@ import { InputDescription } from '../../../ui/InputDescription';
 import { WritableDraft } from 'immer/dist/internal';
 import { MessagePanelConfig } from '../../../../atoms/roomConfig/types/messagePanelConfig';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
+import { defaultTriggerSubMenuAction } from '../../../../utils/variables';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -661,7 +662,15 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                 }}
             >
                 {allMenuItemsAreNull ? null : (
-                    <Dropdown overlay={<Menu items={menuItems} />} trigger={['click']}>
+                    <Dropdown
+                        overlay={
+                            <Menu
+                                items={menuItems}
+                                triggerSubMenuAction={defaultTriggerSubMenuAction}
+                            />
+                        }
+                        trigger={['click']}
+                    >
                         <Button type='text' size='small'>
                             <Icon.EllipsisOutlined />
                         </Button>
@@ -957,6 +966,9 @@ export const RoomMessages: React.FC<Props> = ({ height, panelId }: Props) => {
                                                               },
                                                           },
                                                       ]}
+                                                      triggerSubMenuAction={
+                                                          defaultTriggerSubMenuAction
+                                                      }
                                                   />
                                               }
                                           >

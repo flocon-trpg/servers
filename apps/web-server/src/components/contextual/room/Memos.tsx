@@ -12,6 +12,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import { useSetRoomStateWithImmer } from '../../../hooks/useSetRoomStateWithImmer';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
+import { defaultTriggerSubMenuAction } from '../../../utils/variables';
 
 type MemoState = State<typeof memoTemplate>;
 
@@ -223,7 +224,9 @@ const DirSelect = ({ memoId }: DirSelectProps) => {
         [dirNames, memoId, setRoomState]
     );
 
-    const moveMemoOverlay = <Menu items={dirMenuItems} />;
+    const moveMemoOverlay = (
+        <Menu items={dirMenuItems} triggerSubMenuAction={defaultTriggerSubMenuAction} />
+    );
 
     return (
         <div className={classNames(flex, flexRow)}>

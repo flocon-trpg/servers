@@ -70,6 +70,7 @@ import { Styles } from '../../../../styles';
 import { Message, publicMessage } from '@flocon-trpg/web-server-utils';
 import { notFetch, useRoomMesages } from '../../../../hooks/useRoomMessages';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
+import { defaultTriggerSubMenuAction } from '../../../../utils/variables';
 
 type BoardState = OmitVersion<State<typeof boardTemplate>>;
 type PieceState = OmitVersion<State<typeof pieceTemplate>>;
@@ -989,7 +990,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
             : [
                   {
                       key: 'ボード一覧@boardMenu',
-                      title: 'ボード一覧',
+                      label: 'ボード一覧',
                       children: dropDownMenuItems,
                   },
                   { type: 'divider' },
@@ -1005,13 +1006,16 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                   },
                   {
                       key: 'インポート@boardMenu',
-                      title: 'インポート',
+                      label: 'インポート',
                       onClick: () => setImportBoardModal(true),
                   },
               ];
 
     // activeBoardPanelモードのときは boardsMenu==null
-    const boardsMenu = boardsMenuItems == null ? null : <Menu items={boardsMenuItems} />;
+    const boardsMenu =
+        boardsMenuItems == null ? null : (
+            <Menu items={boardsMenuItems} triggerSubMenuAction={defaultTriggerSubMenuAction} />
+        );
 
     const noActiveBoardText = '';
     const descriptionStyle: React.CSSProperties = { maxWidth: 40, minWidth: 40 };

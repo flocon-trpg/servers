@@ -71,6 +71,7 @@ import {
     characterPortrait,
 } from '../piece/BoardPositionAndPieceEditorModal';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
+import { defaultTriggerSubMenuAction } from '../../../../utils/variables';
 
 type BoardState = State<typeof boardTemplate>;
 type BoardPositionState = State<typeof boardPositionTemplate>;
@@ -498,11 +499,11 @@ namespace ContextMenuModule {
         }
         return {
             key: 'コマ@boardPopover',
-            title: 'コマ',
+            label: 'コマ',
             children: [
                 ...characterPiecesOnCursor.map(({ characterId, character, pieceId }) => ({
                     key: keyNames(characterId, pieceId, 'selected-piece@boardPopover'),
-                    title: character.name,
+                    label: character.name,
                     children: [
                         {
                             key: 'コマの編集@boardPopover',
@@ -563,12 +564,12 @@ namespace ContextMenuModule {
         }
         return {
             key: '立ち絵@boardPopover',
-            title: '立ち絵',
+            label: '立ち絵',
             children: [
                 ...portraitsOnCursor.map(
                     ({ characterId, character, pieceId: portraitPositionId }) => ({
                         key: characterId + '@selected-tachie@boardPopover',
-                        title: character.name,
+                        label: character.name,
                         children: [
                             {
                                 key: '立ち絵の編集@boardPopover',
@@ -688,7 +689,7 @@ namespace ContextMenuModule {
             }
             return {
                 key: characterPair.id,
-                title: characterPair.value.name,
+                label: characterPair.value.name,
                 children: privateCommands,
             };
         });
@@ -698,7 +699,7 @@ namespace ContextMenuModule {
         return [
             {
                 key: 'キャラクターコマンド@boardPopover',
-                title: 'キャラクターコマンド',
+                label: 'キャラクターコマンド',
                 children: characterMenuItems,
             },
             { type: 'divider' },
@@ -729,7 +730,7 @@ namespace ContextMenuModule {
         }
         return {
             key: 'ダイスコマ@boardPopover',
-            title: 'ダイスコマ',
+            label: 'ダイスコマ',
             children: [
                 ...dicePiecesOnCursor.map(
                     ({ pieceId, piece, boardId }): ItemType => ({
@@ -798,18 +799,18 @@ namespace ContextMenuModule {
         }
         return {
             key: '文字列コマ@boardPopover',
-            title: '文字列コマ',
+            label: '文字列コマ',
             children: [
                 ...stringPiecesOnCursor.map(
                     ({ pieceId, piece, boardId }): ItemType => ({
                         // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が下にもあるため、キーを互いに異なるものにするように文字列を付加している。
                         key: pieceId + '@selected',
-                        title: StringPieceValue.stringify(piece),
+                        label: StringPieceValue.stringify(piece),
                         children: [
                             isMyCharacter(piece.ownerCharacterId)
                                 ? {
                                       key: '編集@boardPopover',
-                                      title: '編集',
+                                      label: '編集',
                                       onClick: () => {
                                           hooks.setStringPieceEditor({
                                               type: update,
@@ -828,7 +829,7 @@ namespace ContextMenuModule {
                                   },
                             {
                                 key: '削除@boardPopover',
-                                title: '削除',
+                                label: '削除',
                                 onClick: () => {
                                     setRoomState(roomState => {
                                         delete roomState.boards?.[boardId]?.stringPieces?.[pieceId];
@@ -864,7 +865,7 @@ namespace ContextMenuModule {
         }
         return {
             key: '画像コマ@boardPopover',
-            title: '画像コマ',
+            label: '画像コマ',
             children: [
                 ...imagePiecesOnCursor.map(
                     ({ pieceId, piece, boardId }): ItemType => ({
@@ -995,11 +996,11 @@ namespace ContextMenuModule {
         const pieceMenus = [...characters].map(([characterId, character]): ItemType => {
             return {
                 key: keyNames(characterId) + '@piece',
-                title: character.name,
+                label: character.name,
                 children: [
                     {
                         key: 'セルにスナップする@キャラコマ',
-                        title: 'セルにスナップする',
+                        label: 'セルにスナップする',
                         onClick: () => {
                             setRoomState(roomState => {
                                 const pieces = roomState.characters?.[characterId]?.pieces;
@@ -1019,7 +1020,7 @@ namespace ContextMenuModule {
                     },
                     {
                         key: 'セルにスナップしない@キャラコマ',
-                        title: 'セルにスナップしない',
+                        label: 'セルにスナップしない',
                         onClick: () => {
                             setRoomState(roomState => {
                                 const pieces = roomState.characters?.[characterId]?.pieces;
@@ -1066,7 +1067,7 @@ namespace ContextMenuModule {
 
         return {
             key: '新規作成@boardPopover',
-            title: '新規作成',
+            label: '新規作成',
             children: [
                 {
                     key: 'キャラクターコマ@boardPopover',
@@ -1075,16 +1076,16 @@ namespace ContextMenuModule {
                 },
                 {
                     key: 'キャラクター立ち絵@boardPopover',
-                    title: 'キャラクター立ち絵',
+                    label: 'キャラクター立ち絵',
                     children: portraitMenus,
                 },
                 {
                     key: 'ダイスコマ@boardPopover',
-                    title: 'ダイスコマ',
+                    label: 'ダイスコマ',
                     children: [
                         {
                             key: 'セルにスナップする@ダイスコマ@boardPopover',
-                            title: 'セルにスナップする',
+                            label: 'セルにスナップする',
                             onClick: () => {
                                 hooks.setDicePieceEditor({
                                     type: create,
@@ -1096,7 +1097,7 @@ namespace ContextMenuModule {
                         },
                         {
                             key: 'セルにスナップしない@ダイスコマ@boardPopover',
-                            title: 'セルにスナップしない',
+                            label: 'セルにスナップしない',
                             onClick: () => {
                                 hooks.setDicePieceEditor({
                                     type: create,
@@ -1110,11 +1111,11 @@ namespace ContextMenuModule {
                 },
                 {
                     key: '文字列コマ@boardPopover',
-                    title: '文字列コマ',
+                    label: '文字列コマ',
                     children: [
                         {
                             key: 'セルにスナップする@文字列コマ@boardPopover',
-                            title: 'セルにスナップする',
+                            label: 'セルにスナップする',
                             onClick: () => {
                                 hooks.setStringPieceEditor({
                                     type: create,
@@ -1126,7 +1127,7 @@ namespace ContextMenuModule {
                         },
                         {
                             key: 'セルにスナップしない@文字列コマ@boardPopover',
-                            title: 'セルにスナップしない',
+                            label: 'セルにスナップしない',
                             onClick: () => {
                                 hooks.setStringPieceEditor({
                                     type: create,
@@ -1140,11 +1141,11 @@ namespace ContextMenuModule {
                 },
                 {
                     key: '画像コマ@boardPopover',
-                    title: '画像コマ',
+                    label: '画像コマ',
                     children: [
                         {
-                            key: 'セルにスナップする@文字列コマ@boardPopover',
-                            title: 'セルにスナップする',
+                            key: 'セルにスナップする@画像コマ@boardPopover',
+                            label: 'セルにスナップする',
                             onClick: () => {
                                 hooks.setImagePieceModal({
                                     type: create,
@@ -1155,8 +1156,8 @@ namespace ContextMenuModule {
                             },
                         },
                         {
-                            key: 'セルにスナップしない@文字列コマ@boardPopover',
-                            title: 'セルにスナップしない',
+                            key: 'セルにスナップしない@画像コマ@boardPopover',
+                            label: 'セルにスナップしない',
                             onClick: () => {
                                 hooks.setImagePieceModal({
                                     type: create,
@@ -1278,7 +1279,7 @@ namespace ContextMenuModule {
                     zIndex,
                 }}
             >
-                <Menu items={menuItems} />
+                <Menu items={menuItems} triggerSubMenuAction={defaultTriggerSubMenuAction} />
             </div>
         );
     };

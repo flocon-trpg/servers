@@ -26,6 +26,7 @@ import { useWebConfig } from '../../../../hooks/useWebConfig';
 import { getHttpUri } from '../../../../atoms/webConfig/webConfigAtom';
 import { getIdTokenAtom } from '../../../../pages/_app';
 import { useAtomValue } from 'jotai';
+import { defaultTriggerSubMenuAction } from '../../../../utils/variables';
 
 type DataSource = FileItemFragment;
 
@@ -291,6 +292,7 @@ const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({ fileItem }: FileOptio
                         },
                     },
                 ]}
+                triggerSubMenuAction={defaultTriggerSubMenuAction}
             />
         </div>
     );

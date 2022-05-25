@@ -16,6 +16,7 @@ import { ToggleButton } from '../../ui/ToggleButton';
 import { useGetMyRoles } from '../../../hooks/apiServer/useGetMyRoles';
 import { useIsV072OrLater } from '../../../hooks/apiServer/useIsV072OrLater';
 import { Subscription } from 'rxjs';
+import { defaultTriggerSubMenuAction } from '../../../utils/variables';
 
 type Data072 = DocNode072.RoomAsListItemFragment;
 type Data071 = DocNode071.RoomAsListItemFragment;
@@ -88,8 +89,9 @@ const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
             <Menu
                 items={[
                     {
+                        type: 'group',
                         key: '管理者コマンド',
-                        title: '管理者コマンド',
+                        label: '管理者コマンド',
                         children: [
                             {
                                 key: '削除@管理者コマンド',
@@ -111,6 +113,7 @@ const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
                         ],
                     },
                 ]}
+                triggerSubMenuAction={defaultTriggerSubMenuAction}
             />
         );
     }, [
