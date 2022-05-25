@@ -1,4 +1,4 @@
-import { ApolloError, useLazyQuery } from '@apollo/client';
+import { CombinedError, useQuery } from 'urql';
 import React from 'react';
 import {
     GetMessagesDocument,
@@ -20,13 +20,13 @@ import { Result } from '@kizahasi/result';
 import { atom, useAtom, useAtomValue } from 'jotai';
 import { appConsole } from '../utils/appConsole';
 
-export const apolloError = 'apolloError';
+export const graphqlError = 'graphqlError';
 export const failure = 'failure';
 
 type Error =
     | {
-          type: typeof apolloError;
-          error: ApolloError;
+          type: typeof graphqlError;
+          error: CombinedError;
       }
     | {
           type: typeof failure;
@@ -58,8 +58,10 @@ export const useStartFetchingRoomMessages = ({
     const messagesClient = React.useRef(new RoomMessagesClient());
     const [result, setResult] = useAtom(changeEventAtom);
     const resultRef = useLatest(result);
-    const [getMessages, messages] = useLazyQuery(GetMessagesDocument, {
-        fetchPolicy: 'network-only',
+    const [messages, getMessages] = useQuery({
+        query: GetMessagesDocument,
+        variables: { roomId },
+        requestPolicy: 'network-only',
     });
     const refCount = React.useRef(0);
 
@@ -81,7 +83,7 @@ export const useStartFetchingRoomMessages = ({
         if (myUserUid == null || !beginFetch) {
             return;
         }
-        getMessages({ variables: { roomId } });
+        getMessages();
     }, [roomId, myUserUid, beginFetch, getMessages]);
 
     React.useEffect(() => {
@@ -106,7 +108,7 @@ export const useStartFetchingRoomMessages = ({
         }
         const messagesError = messages.error;
         if (messagesError != null) {
-            setResult(Result.error({ type: apolloError, error: messagesError }));
+            setResult(Result.error({ type: graphqlError, error: messagesError }));
         }
     }, [messages.data, messages.error, setResult]);
 

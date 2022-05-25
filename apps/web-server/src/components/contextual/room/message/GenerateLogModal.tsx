@@ -1,6 +1,5 @@
 import fileDownload from 'js-file-download';
 import React from 'react';
-import { FirebaseAuthenticationIdTokenContext } from '../../../../contexts/FirebaseAuthenticationIdTokenContext';
 import { FirebaseStorageUrlCacheContext } from '../../../../contexts/FirebaseStorageUrlCacheContext';
 import {
     GetLogDocument,
@@ -20,10 +19,10 @@ import moment from 'moment';
 import { Button, Checkbox, Modal, Progress, Radio } from 'antd';
 import classNames from 'classnames';
 import { flex, flexColumn } from '../../../../utils/className';
-import { useApolloClient } from '@apollo/client';
+import { useClient } from 'urql';
 import { useWebConfig } from '../../../../hooks/useWebConfig';
 import { useAtomValue } from 'jotai/utils';
-import { firebaseStorageAtom } from '../../../../pages/_app';
+import { firebaseStorageAtom, getIdTokenAtom } from '../../../../pages/_app';
 
 const simple = 'simple';
 const rich = 'rich';
@@ -38,15 +37,15 @@ type Props = {
 export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: Props) => {
     const roomIdRef = useReadonlyRef(roomId);
 
-    const apolloClient = useApolloClient();
-    const apolloClientRef = useReadonlyRef(apolloClient);
+    const client = useClient();
+    const clientRef = useReadonlyRef(client);
     const config = useWebConfig();
     const configRef = useReadonlyRef(config);
     const firebaseStorage = useAtomValue(firebaseStorageAtom);
     const firebaseStorageRef = useReadonlyRef(firebaseStorage);
     const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
     const firebaseStorageUrlCacheContextRef = useReadonlyRef(firebaseStorageUrlCacheContext);
-    const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);
+    const getIdToken = useAtomValue(getIdTokenAtom);
     const getIdTokenRef = useReadonlyRef(getIdToken);
     const publicChannelNames = usePublicChannelNames();
     const publicChannelNamesRef = useReadonlyRef(publicChannelNames);
@@ -101,15 +100,19 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
             }
 
             setProgress(0);
-            const logData = await apolloClientRef.current.query<GetLogQuery, GetLogQueryVariables>({
-                query: GetLogDocument,
-                fetchPolicy: 'network-only',
-                variables: {
-                    roomId: roomIdRef.current,
-                },
-            });
-            if (logData.data.result.__typename !== 'RoomMessages') {
-                if (logData.data.result.__typename === 'GetRoomLogFailureResult') {
+            const logData = await clientRef.current
+                .query<GetLogQuery, GetLogQueryVariables>(
+                    GetLogDocument,
+                    {
+                        roomId: roomIdRef.current,
+                    },
+                    {
+                        fetchPolicy: 'network-only',
+                    }
+                )
+                .toPromise();
+            if (logData?.data?.result.__typename !== 'RoomMessages') {
+                if (logData?.data?.result.__typename === 'GetRoomLogFailureResult') {
                     switch (logData.data.result.failureType) {
                         case GetRoomLogFailureType.NotAuthorized: {
                             setErrorMessage('観戦者はログをダウンロードすることはできません。');
@@ -174,7 +177,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
         main();
     }, [
         isDownloading,
-        apolloClientRef,
+        clientRef,
         publicChannelNamesRef,
         participantsRef,
         firebaseStorageUrlCacheContextRef,

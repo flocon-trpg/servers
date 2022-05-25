@@ -1,4 +1,4 @@
-import { useMutation } from '@apollo/client';
+import { useMutation } from 'urql';
 import { CreateRoomDocument, CreateRoomInput } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { Alert, Button, Card, Form, Input, Spin, Switch } from 'antd';
 import { useRouter } from 'next/router';
@@ -17,7 +17,7 @@ const spectatorPassword = 'spectatorPassword';
 
 export const RoomCreate: React.FC = () => {
     const router = useRouter();
-    const [createRoom, createRoomResult] = useMutation(CreateRoomDocument);
+    const [createRoomResult, createRoom] = useMutation(CreateRoomDocument);
     const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
     const [isPlayerPasswordEnabled, setIsPlayerPasswordEnabled] = React.useState<boolean>(false);
     const [isSpectatorPasswordEnabled, setIsSpectatorPasswordEnabled] =
@@ -51,7 +51,7 @@ export const RoomCreate: React.FC = () => {
                         : undefined,
                 };
                 setIsSubmitting(true);
-                createRoom({ variables: { input } }).then(r => {
+                createRoom({ input }).then(r => {
                     switch (r.data?.result.__typename) {
                         case 'CreateRoomSuccessResult': {
                             router.push(`/rooms/${r.data?.result.id}`);
