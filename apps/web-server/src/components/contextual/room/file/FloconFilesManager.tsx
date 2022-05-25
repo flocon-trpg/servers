@@ -18,13 +18,14 @@ import moment from 'moment';
 import copy from 'clipboard-copy';
 import * as Icons from '@ant-design/icons';
 import { DeleteFloconStorageFileModal } from './DeleteFloconStorageFileModal';
-import { FirebaseAuthenticationIdTokenContext } from '../../../../contexts/FirebaseAuthenticationIdTokenContext';
 import { useAsync } from 'react-use';
 import { LazyAndPreloadImage } from '../../../ui/LazyAndPreloadImage';
 import { getFloconUploaderFile, thumbs } from '../../../../utils/file/getFloconUploaderFile';
-import { useMutation, useQuery } from '@apollo/client';
+import { useMutation, useQuery } from 'urql';
 import { useWebConfig } from '../../../../hooks/useWebConfig';
 import { getHttpUri } from '../../../../atoms/webConfig/webConfigAtom';
+import { getIdTokenAtom } from '../../../../pages/_app';
+import { useAtomValue } from 'jotai';
 
 type DataSource = FileItemFragment;
 
@@ -37,7 +38,7 @@ type UploaderProps = {
 
 const Uploader: React.FC<UploaderProps> = ({ unlistedMode, onUploaded }: UploaderProps) => {
     const config = useWebConfig();
-    const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);
+    const getIdToken = useAtomValue(getIdTokenAtom);
 
     if (config?.value == null || getIdToken == null) {
         return null;
@@ -110,7 +111,7 @@ type ThumbProps = {
 
 const Thumb: React.FC<ThumbProps> = ({ thumbFilePath, size }: ThumbProps) => {
     const config = useWebConfig();
-    const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);
+    const getIdToken = useAtomValue(getIdTokenAtom);
     const loadingIcon = <Icons.LoadingOutlined style={{ fontSize: size }} />;
     const src = useAsync(async () => {
         if (config?.value == null || thumbFilePath == null || getIdToken == null) {
@@ -246,8 +247,11 @@ type FileOptionsMenuProps = {
 };
 
 const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({ fileItem }: FileOptionsMenuProps) => {
-    const { refetch } = useQuery(GetFilesDocument, { variables: { input: { fileTagIds: [] } } });
-    const [deleteFilesMutation] = useMutation(DeleteFilesDocument);
+    const [, refetch] = useQuery({
+        query: GetFilesDocument,
+        variables: { input: { fileTagIds: [] } },
+    });
+    const [, deleteFilesMutation] = useMutation(DeleteFilesDocument);
 
     return (
         <div>
@@ -276,7 +280,7 @@ const FileOptionsMenu: React.FC<FileOptionsMenuProps> = ({ fileItem }: FileOptio
                                     return;
                                 }
                                 const isSuccess = await deleteFilesMutation({
-                                    variables: { filenames: filenamesToDelete },
+                                    filenames: filenamesToDelete,
                                 })
                                     .then(() => true)
                                     .catch(() => false);
@@ -317,12 +321,16 @@ const FloconFilesList: React.FC<FloconFilesListProps> = ({
     onFlieOpen,
     defaultFilteredValue,
 }: FloconFilesListProps) => {
-    const getFilesQueryResult = useQuery(GetFilesDocument, {
+    const [getFilesQueryResult] = useQuery({
+        query: GetFilesDocument,
         variables: { input: { fileTagIds: [] } },
     });
     const [selectedRowKeys, setSelectedRowKeys] = React.useState<React.Key[]>([]);
-    const { refetch } = useQuery(GetFilesDocument, { variables: { input: { fileTagIds: [] } } });
-    const [deleteFilesMutation] = useMutation(DeleteFilesDocument);
+    const [, refetch] = useQuery({
+        query: GetFilesDocument,
+        variables: { input: { fileTagIds: [] } },
+    });
+    const [, deleteFilesMutation] = useMutation(DeleteFilesDocument);
 
     const columns = (() => {
         if (onFlieOpen != null) {
@@ -359,12 +367,12 @@ const FloconFilesList: React.FC<FloconFilesListProps> = ({
                             return;
                         }
                         const isSuccess = await deleteFilesMutation({
-                            variables: { filenames: filenamesToDelete },
+                            filenames: filenamesToDelete,
                         })
                             .then(() => true)
                             .catch(() => false);
                         if (isSuccess) {
-                            await refetch();
+                            refetch();
                         }
                     });
                 }}
@@ -394,7 +402,10 @@ type Props = {
 };
 
 export const FloconFilesManager: React.FC<Props> = (props: Props) => {
-    const { refetch } = useQuery(GetFilesDocument, { variables: { input: { fileTagIds: [] } } });
+    const [, refetch] = useQuery({
+        query: GetFilesDocument,
+        variables: { input: { fileTagIds: [] } },
+    });
     return (
         <div>
             <Uploader onUploaded={() => refetch()} unlistedMode />

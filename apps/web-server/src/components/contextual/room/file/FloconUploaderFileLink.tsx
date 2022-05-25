@@ -1,16 +1,17 @@
 import React from 'react';
-import { FirebaseAuthenticationIdTokenContext } from '../../../../contexts/FirebaseAuthenticationIdTokenContext';
 import { FileItemFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { files, getFloconUploaderFile } from '../../../../utils/file/getFloconUploaderFile';
 import fileDownload from 'js-file-download';
 import { useWebConfig } from '../../../../hooks/useWebConfig';
+import { getIdTokenAtom } from '../../../../pages/_app';
+import { useAtomValue } from 'jotai';
 
 type Props = {
     state: FileItemFragment;
 };
 
 export const FloconUploaderFileLink: React.FC<Props> = ({ state }: Props) => {
-    const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);
+    const getIdToken = useAtomValue(getIdTokenAtom);
     const config = useWebConfig();
     const [isDownloading, setIsDownloading] = React.useState(false);
 

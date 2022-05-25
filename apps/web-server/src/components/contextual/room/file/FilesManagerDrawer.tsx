@@ -11,7 +11,7 @@ import { cancelRnd } from '../../../../utils/className';
 import { FirebaseFilesManager } from './FirebaseFilesManager';
 import { FloconFilesManager } from './FloconFilesManager';
 import { MyAuthContext } from '../../../../contexts/MyAuthContext';
-import { useQuery } from '@apollo/client';
+import { useQuery } from 'urql';
 
 type Props = {
     drawerType: FilesManagerDrawerType | null;
@@ -21,7 +21,7 @@ type Props = {
 export const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => {
     const myAuth = React.useContext(MyAuthContext);
     const [input, setInput] = React.useState<string>('');
-    const { data: serverInfo } = useQuery(GetServerInfoDocument);
+    const [{ data: serverInfo }] = useQuery({ query: GetServerInfoDocument });
     const isEmbeddedUploaderDisabled = serverInfo?.result.uploaderEnabled !== true;
 
     const child = (() => {

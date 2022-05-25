@@ -21,7 +21,7 @@ import {
     Tooltip,
 } from 'antd';
 import moment from 'moment';
-import { apolloError, failure, notFetch, useRoomMesages } from '../../../../hooks/useRoomMessages';
+import { failure, graphqlError, notFetch, useRoomMesages } from '../../../../hooks/useRoomMessages';
 import {
     Message,
     Notification,
@@ -66,7 +66,7 @@ import {
 import classNames from 'classnames';
 import { MyAuthContext, getUserUid } from '../../../../contexts/MyAuthContext';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
-import { useMutation } from '@apollo/client';
+import { useMutation } from 'urql';
 import { MessageTabConfig } from '../../../../atoms/roomConfig/types/messageTabConfig';
 import { atom } from 'jotai';
 import { roomAtom } from '../../../../atoms/room/roomAtom';
@@ -441,9 +441,9 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
     const { message, showPrivateMessageMembers, publicChannelNames } = props;
 
     const myAuth = React.useContext(MyAuthContext);
-    const [editMessageMutation] = useMutation(EditMessageDocument);
-    const [deleteMessageMutation] = useMutation(DeleteMessageDocument);
-    const [makeMessageNotSecret] = useMutation(MakeMessageNotSecretDocument);
+    const [, editMessageMutation] = useMutation(EditMessageDocument);
+    const [, deleteMessageMutation] = useMutation(DeleteMessageDocument);
+    const [, makeMessageNotSecret] = useMutation(MakeMessageNotSecretDocument);
     const [isEditModalVisible, setIsEditModalVisible] = React.useState(false);
     const roomId = useAtomValue(roomIdAtom);
     const roomMessagesFontSizeDelta = useAtomValue(roomMessageFontSizeDeltaAtom);
@@ -547,9 +547,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                       if (roomId == null) {
                           return;
                       }
-                      makeMessageNotSecret({
-                          variables: { messageId: userMessage.messageId, roomId },
-                      });
+                      makeMessageNotSecret({ messageId: userMessage.messageId, roomId });
                   },
               }
             : null;
@@ -570,9 +568,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                       if (roomId == null) {
                           return;
                       }
-                      deleteMessageMutation({
-                          variables: { messageId: userMessage.messageId, roomId },
-                      });
+                      deleteMessageMutation({ messageId: userMessage.messageId, roomId });
                   },
               }
             : null;
@@ -681,7 +677,9 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                         return;
                     }
                     editMessageMutation({
-                        variables: { messageId: userMessage.messageId, roomId, text: value },
+                        messageId: userMessage.messageId,
+                        roomId,
+                        text: value,
                     }).then(() => {
                         setIsEditModalVisible(false);
                         setValue('');
@@ -781,7 +779,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
     if (messages !== notFetch) {
         if (messages.isError) {
             switch (messages.error.type) {
-                case apolloError:
+                case graphqlError:
                     content = (
                         <QueryResultViewer
                             loading={false}

@@ -30,9 +30,6 @@ const defaultDicePieceValue = (
     piecePosition: PiecePositionWithCell,
     ownerCharacterId: string | undefined
 ): DicePieceState => ({
-    $v: 2,
-    $r: 1,
-
     ownerCharacterId,
 
     dice: {},
@@ -40,7 +37,11 @@ const defaultDicePieceValue = (
     name: undefined,
     opacity: undefined,
     isPositionLocked: false,
+
     ...piecePosition,
+
+    $v: 2,
+    $r: 1,
 });
 
 const gutter: [Gutter, Gutter] = [16, 16];
