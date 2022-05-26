@@ -15,12 +15,12 @@ import { CombinedError, useClient, useMutation } from 'urql';
 import { create as createStateManager } from '../stateManagers/main';
 import { useClientId } from './useClientId';
 import { State as S, StateManager, UpOperation as U, roomTemplate } from '@flocon-trpg/core';
-import { MyAuthContext, authNotFound, notSignIn } from '../contexts/MyAuthContext';
 import { Room } from '../stateManagers/states/room';
 import { error, roomNotificationsAtom, text } from '../atoms/room/roomAtom';
 import { useAtomValue, useUpdateAtom } from 'jotai/utils';
 import { SetAction } from '../utils/setAction';
-import { getIdTokenAtom } from '../pages/_app';
+import { firebaseUserAtom, getIdTokenAtom } from '../pages/_app';
+import { authNotFound, notSignIn } from '../utils/firebase/firebaseUserState';
 
 type State = S<typeof roomTemplate>;
 type UpOperation = U<typeof roomTemplate>;
@@ -109,7 +109,7 @@ export const useRoomState = (
     roomId: string,
     roomEventSubscription: Observable<RoomEventSubscription> | null
 ): RoomStateResult => {
-    const myAuth = React.useContext(MyAuthContext);
+    const firebaseUser = useAtomValue(firebaseUserAtom);
     const hasIdToken = useAtomValue(getIdTokenAtom) != null;
     const clientId = useClientId();
     const urqlClient = useClient();
@@ -121,8 +121,8 @@ export const useRoomState = (
     const refetch = React.useCallback(() => setRefetchKey(refetchKey + 1), [refetchKey]);
     const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
 
-    const userUid = typeof myAuth === 'string' ? null : myAuth.uid;
-    const myAuthErrorType = typeof myAuth === 'string' ? myAuth : null;
+    const userUid = typeof firebaseUser === 'string' ? null : firebaseUser.uid;
+    const myAuthErrorType = typeof firebaseUser === 'string' ? firebaseUser : null;
 
     React.useEffect(() => {
         setState({ type: loading });

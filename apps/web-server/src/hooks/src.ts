@@ -50,16 +50,16 @@ export function useSrcArrayFromGraphQL(
     }));
 
     useDeepCompareEffect(() => {
+        if (cleanPathArray == null) {
+            setResult({ type: nullishArg });
+            return;
+        }
         if (getIdToken == null || config == null || storage == null) {
             setResult({ type: loading });
             return;
         }
         if (config.isError) {
             setResult({ type: invalidWebConfig });
-            return;
-        }
-        if (cleanPathArray == null) {
-            setResult({ type: nullishArg });
             return;
         }
         let isDisposed = false;

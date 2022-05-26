@@ -27,10 +27,11 @@ import { LoadingResult } from './result/LoadingResult';
 import * as Icon from '@ant-design/icons';
 import { useSignOut } from '../../hooks/useSignOut';
 import { useClient, useMutation } from 'urql';
-import { MyAuthContext, authNotFound, loading, notSignIn } from '../../contexts/MyAuthContext';
 import { useGetMyRoles } from '../../hooks/apiServer/useGetMyRoles';
 import { useAtomValue } from 'jotai';
-import { getIdTokenAtom } from '../../pages/_app';
+import { firebaseUserAtom, getIdTokenAtom } from '../../pages/_app';
+import { authNotFound, loading, notSignIn } from '../../utils/firebase/firebaseUserState';
+
 const { Header, Content } = AntdLayout;
 
 type EntryFormComponentProps = {
@@ -123,9 +124,9 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
 }: PropsWithChildren<Props>) => {
     const router = useRouter();
     const getMyRolesQueryResult = useGetMyRoles();
-    const myAuth = React.useContext(MyAuthContext);
-    const myUserUid = typeof myAuth === 'string' ? null : myAuth.uid;
-    const isAnonymous = typeof myAuth === 'string' ? false : myAuth.isAnonymous;
+    const firebaseUser = useAtomValue(firebaseUserAtom);
+    const myUserUid = typeof firebaseUser === 'string' ? null : firebaseUser.uid;
+    const isAnonymous = typeof firebaseUser === 'string' ? false : firebaseUser.isAnonymous;
     const urqlClient = useClient();
     const signOut = useSignOut();
     const [isEntry, setIsEntry] = React.useState<
@@ -177,7 +178,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
         return children;
     };
 
-    if (myAuth === authNotFound) {
+    if (firebaseUser === authNotFound) {
         return (
             <Result status='info' title='Firebase Authentication インスタンスが見つかりません。' />
         );
@@ -189,10 +190,10 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
             showChildren = true;
             return getChildren();
         }
-        if (myAuth === loading) {
+        if (firebaseUser === loading) {
             return <LoadingResult title='Firebase Authentication による認証を行っています…' />;
         }
-        if (myAuth === notSignIn) {
+        if (firebaseUser === notSignIn) {
             return <NotSignInResult />;
         }
         switch (isEntry) {
@@ -260,16 +261,16 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                         <Col flex={0}>
                             <Space>
                                 {/* UserOutlinedを付けている理由は、room/[id] を開いたときにヘッダーを隠して代わりにメニューにユーザーを表示する仕組みであり、そちらのユーザー名のほうにもUserOutlinedを付けることでそれがユーザー名だということが連想され、入室時の名前と区別させやすくなるようにするため。 */}
-                                {typeof myAuth === 'string' ? null : <Icon.UserOutlined />}
-                                {typeof myAuth === 'string' ? null : (
+                                {typeof firebaseUser === 'string' ? null : <Icon.UserOutlined />}
+                                {typeof firebaseUser === 'string' ? null : (
                                     <div style={{ color: 'white' }}>
-                                        {myAuth.displayName} - {myAuth.uid}
+                                        {firebaseUser.displayName} - {firebaseUser.uid}
                                         {getMyRolesQueryResult.data?.result.admin === true
                                             ? ' (管理者)'
                                             : null}
                                     </div>
                                 )}
-                                {typeof myAuth === 'string' ? (
+                                {typeof firebaseUser === 'string' ? (
                                     <Button key='2' onClick={() => router.push('/signin')}>
                                         ログイン/ユーザー登録
                                     </Button>

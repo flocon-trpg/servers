@@ -23,7 +23,6 @@ import { roomAtom } from '../../../atoms/room/roomAtom';
 import { roomConfigAtom } from '../../../atoms/roomConfig/roomConfigAtom';
 import { RoomConfigUtils } from '../../../atoms/roomConfig/types/roomConfig/utils';
 import { useAtomSelector } from '../../../atoms/useAtomSelector';
-import { MyAuthContext } from '../../../contexts/MyAuthContext';
 import { usePublishRoomEventSubscription } from '../../../hooks/usePublishRoomEventSubscription';
 import { useReadonlyRef } from '../../../hooks/useReadonlyRef';
 import { useStartFetchingRoomMessages } from '../../../hooks/useRoomMessages';
@@ -43,6 +42,7 @@ import { Room } from '../../contextual/room/Room';
 import { Center } from '../../ui/Center';
 import { Layout, loginAndEntry, success } from '../../ui/Layout';
 import { LoadingResult } from '../../ui/result/LoadingResult';
+import { firebaseUserAtom } from '../../../pages/_app';
 
 type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
 
@@ -104,9 +104,9 @@ type JoinRoomFormProps = {
 };
 
 const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRoomFormProps) => {
-    const myAuth = React.useContext(MyAuthContext);
+    const firebaseUser = useAtomValue(firebaseUserAtom);
     const [name, setName] = React.useState<string>(
-        typeof myAuth === 'string' ? '' : myAuth.displayName ?? ''
+        typeof firebaseUser === 'string' ? '' : firebaseUser.displayName ?? ''
     );
     const [playerPassword, setPlayerPassword] = React.useState<string>('');
     const [spectatorPassword, setSpectatorPassword] = React.useState<string>('');
@@ -251,7 +251,7 @@ function useBufferedWritingMessageStatusInputType() {
     return [result, onNext] as const;
 }
 
-// localForageを用いてRoomConfigを読み込み、ReduxのStateと紐付ける。
+// localForageを用いてRoomConfigを読み込み、atomと紐付ける。
 // Roomが変わるたびに、useRoomConfigが更新される必要がある。RoomのComponentのどこか一箇所でuseRoomConfigを呼び出すだけでよい。
 const useRoomConfig = (roomId: string): boolean => {
     const [result, setResult] = React.useState<boolean>(false);

@@ -10,8 +10,9 @@ import { FilesManagerDrawerType, some } from '../../../../utils/types';
 import { cancelRnd } from '../../../../utils/className';
 import { FirebaseFilesManager } from './FirebaseFilesManager';
 import { FloconFilesManager } from './FloconFilesManager';
-import { MyAuthContext } from '../../../../contexts/MyAuthContext';
 import { useQuery } from 'urql';
+import { useAtomValue } from 'jotai';
+import { firebaseUserAtom } from '../../../../pages/_app';
 
 type Props = {
     drawerType: FilesManagerDrawerType | null;
@@ -19,13 +20,13 @@ type Props = {
 };
 
 export const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => {
-    const myAuth = React.useContext(MyAuthContext);
+    const firebaseUser = useAtomValue(firebaseUserAtom);
     const [input, setInput] = React.useState<string>('');
     const [{ data: serverInfo }] = useQuery({ query: GetServerInfoDocument });
     const isEmbeddedUploaderDisabled = serverInfo?.result.uploaderEnabled !== true;
 
     const child = (() => {
-        if (typeof myAuth === 'string') {
+        if (typeof firebaseUser === 'string') {
             return (
                 <Result
                     status='warning'

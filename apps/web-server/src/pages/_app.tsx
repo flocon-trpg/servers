@@ -6,10 +6,7 @@ import 'firebase/storage';
 
 import React from 'react';
 import { AppProps } from 'next/app';
-import 'firebase/auth';
-import 'firebase/storage';
 import useConstant from 'use-constant';
-import { FirebaseUserState, authNotFound, loading, notSignIn } from '../contexts/MyAuthContext';
 import { appConsole } from '../utils/appConsole';
 import { enableMapSet } from 'immer';
 import Head from 'next/head';
@@ -36,6 +33,13 @@ import { FirebaseApp, initializeApp } from 'firebase/app';
 import { Auth, getAuth } from 'firebase/auth';
 import { FirebaseStorage, getStorage } from 'firebase/storage';
 import { Ref } from '../utils/ref';
+import { storybookAtom } from '../atoms/storybook/storybookAtom';
+import {
+    FirebaseUserState,
+    authNotFound,
+    loading,
+    notSignIn,
+} from '../utils/firebase/firebaseUserState';
 
 enableMapSet();
 
@@ -43,15 +47,36 @@ const firebaseAppCoreAtom = atom<FirebaseApp | undefined>(undefined);
 export const firebaseAppAtom = atom(get => get(firebaseAppCoreAtom));
 
 const firebaseAuthCoreAtom = atom<Auth | undefined>(undefined);
-export const firebaseAuthAtom = atom(get => get(firebaseAuthCoreAtom));
+export const firebaseAuthAtom = atom(get => {
+    const mock = get(storybookAtom).mock?.auth;
+    if (mock != null) {
+        return mock;
+    }
+    return get(firebaseAuthCoreAtom);
+});
 
 const firebaseStorageCoreAtom = atom<FirebaseStorage | undefined>(undefined);
-export const firebaseStorageAtom = atom(get => get(firebaseStorageCoreAtom));
+export const firebaseStorageAtom = atom(get => {
+    const mock = get(storybookAtom).mock?.storage;
+    if (mock != null) {
+        return mock;
+    }
+    return get(firebaseStorageCoreAtom);
+});
 
 // この値がnull ⇔ UrqlClientにおけるAuthorizationヘッダーなどが空（= API serverにおいて、Firebase Authenticationでログインしていないと判断される）
 // 値がfunctionだとjotaiが勝手にfunctionを実行してその結果をatomに保持してしまうため、必ずfunctionの状態で保持されるようにRefで包んでいる
 const getIdTokenCoreAtom = atom<Ref<(() => Promise<string | null>) | null>>({ value: null });
 export const getIdTokenAtom = atom(get => get(getIdTokenCoreAtom).value);
+
+const firebaseUserCoreAtom = atom<FirebaseUserState>(loading);
+export const firebaseUserAtom = atom(get => {
+    const mock = get(storybookAtom).mock?.user;
+    if (mock != null) {
+        return mock;
+    }
+    return get(firebaseUserCoreAtom);
+});
 
 // localForageを用いてRoomConfigを読み込み、ReduxのStateと紐付ける。
 // Userが変わるたびに、useUserConfigが更新される必要がある。_app.tsxなどどこか一箇所でuseUserConfigを呼び出すだけでよい。
@@ -110,30 +135,30 @@ const useAutoSaveRoomConfig = () => {
     const roomConfig = useAtomValue(roomConfigAtom);
 
     // throttleでは非常に重くなるため、debounceを使っている
-    const [debouncedUserConfig, setDebouncedUserConfig] = React.useState<RoomConfig | null>(null);
+    const [debouncedRoomConfig, setDebouncedRoomConfig] = React.useState<RoomConfig | null>(null);
     useDebounce(
         () => {
-            setDebouncedUserConfig(roomConfig);
+            setDebouncedRoomConfig(roomConfig);
         },
         throttleTimespan,
         [roomConfig]
     );
 
     useAsync(async () => {
-        if (debouncedUserConfig == null) {
+        if (debouncedRoomConfig == null) {
             return;
         }
 
-        // localForageから値を読み込んだ直後は常に値の書き込みが1回発生する仕様となっている。RoomConfigの場合はUserConfigと比べて、不正な値が自動的されることがあるため、この仕様はより正当化される。
+        // localForageから値を読み込んだ直後は常に値の書き込みが1回発生する仕様となっている。無駄な処理ではあるが、パフォーマンスの問題はほぼ生じないと判断している。
         // CONSIDER: configをユーザーが更新した直後にすぐブラウザを閉じると、閉じる直前のconfigが保存されないケースがある。余裕があれば直したい（閉じるときに強制保存orダイアログを出すなど）。
-        await setRoomConfig(debouncedUserConfig);
-    }, [debouncedUserConfig]);
+        await setRoomConfig(debouncedRoomConfig);
+    }, [debouncedRoomConfig]);
 };
 
-// _app.tsxで1回のみ呼ばれることを想定。firebase authのデータを取得したい場合はContextで行う。
-const useFirebaseUser = (): FirebaseUserState => {
+// _app.tsxで1回のみ呼ばれることを想定。
+const useSubscribeFirebaseUser = (): void => {
     const auth = useAtomValue(firebaseAuthAtom);
-    const [user, setUser] = React.useState<FirebaseUserState>(loading);
+    const setUser = useUpdateAtom(firebaseUserCoreAtom);
     React.useEffect(() => {
         if (auth == null) {
             setUser(authNotFound);
@@ -150,8 +175,7 @@ const useFirebaseUser = (): FirebaseUserState => {
         return () => {
             unsubscribe();
         };
-    }, [auth]);
-    return user;
+    }, [auth, setUser]);
 };
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
@@ -224,8 +248,9 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         appConsole.log(`GraphQL WebSocket URL: ${wsUri}`);
     }, [wsUri]);
 
-    const user = useFirebaseUser();
-    const myUserUid = useMyUserUid(user);
+    useSubscribeFirebaseUser();
+    const user = useAtomValue(firebaseUserAtom);
+    const myUserUid = useMyUserUid();
 
     useUserConfig(myUserUid ?? null);
     useAutoSaveRoomConfig();
@@ -307,7 +332,6 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
             <AllContextProvider
                 clientId={clientId}
                 client={urqlClient}
-                user={user}
                 firebaseStorageUrlCache={firebaseStorageUrlCache}
             >
                 <Component {...pageProps} />

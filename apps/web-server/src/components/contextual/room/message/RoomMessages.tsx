@@ -64,7 +64,6 @@ import {
     itemsCenter,
 } from '../../../../utils/className';
 import classNames from 'classnames';
-import { MyAuthContext, getUserUid } from '../../../../contexts/MyAuthContext';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
 import { useMutation } from 'urql';
 import { MessageTabConfig } from '../../../../atoms/roomConfig/types/messageTabConfig';
@@ -86,6 +85,8 @@ import { WritableDraft } from 'immer/dist/internal';
 import { MessagePanelConfig } from '../../../../atoms/roomConfig/types/messagePanelConfig';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import { defaultTriggerSubMenuAction } from '../../../../utils/variables';
+import { firebaseUserAtom } from '../../../../pages/_app';
+import { getUserUid } from '../../../../utils/firebase/firebaseUserState';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -115,7 +116,7 @@ type TabEditorDrawerProps = {
 const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerProps) => {
     const { config, onChange: onChangeCore, onClose } = props;
 
-    const myAuth = React.useContext(MyAuthContext);
+    const firebaseUser = useAtomValue(firebaseUserAtom);
     const publicChannelNames = usePublicChannelNames();
     const participantsMap = useParticipants();
 
@@ -326,7 +327,7 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
                     {hiwaSelectValue === custom &&
                         participantsMap.size <= 1 &&
                         [...participantsMap]
-                            .filter(([userUid]) => getUserUid(myAuth) !== userUid)
+                            .filter(([userUid]) => getUserUid(firebaseUser) !== userUid)
                             .sort(([, x], [, y]) => (x.name ?? '').localeCompare(y.name ?? ''))
                             .map(([userUid, participant]) => {
                                 return (
@@ -441,7 +442,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
 
     const { message, showPrivateMessageMembers, publicChannelNames } = props;
 
-    const myAuth = React.useContext(MyAuthContext);
+    const firebaseUser = useAtomValue(firebaseUserAtom);
     const [, editMessageMutation] = useMutation(EditMessageDocument);
     const [, deleteMessageMutation] = useMutation(DeleteMessageDocument);
     const [, makeMessageNotSecret] = useMutation(MakeMessageNotSecretDocument);
@@ -460,10 +461,10 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
         message.type === privateMessage || message.type === publicMessage ? message.value : null;
 
     let createdByMe: boolean | null;
-    if (typeof myAuth === 'string' || userMessage == null) {
+    if (typeof firebaseUser === 'string' || userMessage == null) {
         createdByMe = null;
     } else {
-        createdByMe = myAuth.uid === userMessage.createdBy;
+        createdByMe = firebaseUser.uid === userMessage.createdBy;
     }
 
     const createdAt =
@@ -540,7 +541,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
     const notSecretMenuItem: ItemType =
         userMessage?.isSecret === true &&
         userMessage.createdBy != null &&
-        userMessage.createdBy === getUserUid(myAuth)
+        userMessage.createdBy === getUserUid(firebaseUser)
             ? {
                   key: '公開@RoomMessageComponent',
                   label: '公開',
@@ -716,7 +717,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
 
     const writingStatusHeight = 16;
 
-    const myAuth = React.useContext(MyAuthContext);
+    const firebaseUser = useAtomValue(firebaseUserAtom);
     const writingMessageStatusResult = useWritingMessageStatus();
     const publicChannelNames = usePublicChannelNames();
     const participants = useAtomValue(participantsAtom);
@@ -757,7 +758,8 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
     const writingUsers = [...writingMessageStatusResult]
         .filter(
             ([key, value]) =>
-                key !== getUserUid(myAuth) && value.current === WritingMessageStatusType.Writing
+                key !== getUserUid(firebaseUser) &&
+                value.current === WritingMessageStatusType.Writing
         )
         .map(([key]) => key)
         .map(userUid => participantsMap?.get(userUid)?.name ?? '')

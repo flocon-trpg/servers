@@ -19,6 +19,7 @@ import { useLatest } from 'react-use';
 import { Result } from '@kizahasi/result';
 import { atom, useAtom, useAtomValue } from 'jotai';
 import { appConsole } from '../utils/appConsole';
+import { useUpdateAtom } from 'jotai/utils';
 
 export const graphqlError = 'graphqlError';
 export const failure = 'failure';
@@ -62,6 +63,7 @@ export const useStartFetchingRoomMessages = ({
         query: GetMessagesDocument,
         variables: { roomId },
         requestPolicy: 'network-only',
+        pause: true,
     });
     const refCount = React.useRef(0);
 
@@ -137,6 +139,38 @@ type RoomMessages =
           current: readonly Message[];
           event?: undefined;
       };
+
+// Storybook用
+export const useRoomMessagesStub = () => {
+    const setResult = useUpdateAtom(changeEventAtom);
+    const messagesClient = React.useRef(new RoomMessagesClient());
+    const onQuery = React.useCallback(
+        (query: Parameters<typeof messagesClient.current.onQuery>[0]) => {
+            messagesClient.current.onQuery(query);
+            setResult(Result.ok(messagesClient.current.messages));
+        },
+        [setResult]
+    );
+    const onEvent = React.useCallback(
+        (event: Parameters<typeof messagesClient.current.onEvent>[0]) => {
+            messagesClient.current.onEvent(event);
+            setResult(Result.ok(messagesClient.current.messages));
+        },
+        [setResult]
+    );
+    const setToNotFetch = React.useCallback(() => {
+        setResult('notFetch');
+    }, [setResult]);
+
+    return React.useMemo(
+        () => ({
+            onQuery,
+            onEvent,
+            setToNotFetch,
+        }),
+        [onEvent, onQuery, setToNotFetch]
+    );
+};
 
 type RoomMessagesResult = Result<RoomMessages, Error> | typeof notFetch;
 

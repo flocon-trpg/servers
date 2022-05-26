@@ -3,9 +3,10 @@ import { CreateRoomDocument, CreateRoomInput } from '@flocon-trpg/typed-document
 import { Alert, Button, Card, Form, Input, Spin, Switch } from 'antd';
 import { useRouter } from 'next/router';
 import React from 'react';
-import { MyAuthContext } from '../../../contexts/MyAuthContext';
 import { Center } from '../../ui/Center';
 import { Layout, loginAndEntry } from '../../ui/Layout';
+import { useAtomValue } from 'jotai';
+import { firebaseUserAtom } from '../../../pages/_app';
 
 const labelCol = 10;
 const wrapperCol = 24 - labelCol;
@@ -22,7 +23,7 @@ export const RoomCreate: React.FC = () => {
     const [isPlayerPasswordEnabled, setIsPlayerPasswordEnabled] = React.useState<boolean>(false);
     const [isSpectatorPasswordEnabled, setIsSpectatorPasswordEnabled] =
         React.useState<boolean>(false);
-    const myAuth = React.useContext(MyAuthContext);
+    const firebaseUser = useAtomValue(firebaseUserAtom);
 
     // TODO: 横幅などが足りないため、Formで表現するようなものではない気がする。
     const form = (
@@ -32,7 +33,8 @@ export const RoomCreate: React.FC = () => {
             wrapperCol={{ span: wrapperCol }}
             style={{ width: 600 }}
             initialValues={{
-                [participantName]: typeof myAuth === 'string' ? undefined : myAuth.displayName,
+                [participantName]:
+                    typeof firebaseUser === 'string' ? undefined : firebaseUser.displayName,
             }}
             onFinish={e => {
                 if (isSubmitting) {

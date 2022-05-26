@@ -1,7 +1,8 @@
 import { updateProfile } from '@firebase/auth';
 import { Alert, Button, Card, Form, Input, Spin, Switch } from 'antd';
+import { useAtomValue } from 'jotai';
 import React from 'react';
-import { MyAuthContext } from '../../contexts/MyAuthContext';
+import { firebaseUserAtom } from '../../pages/_app';
 import { Center } from '../ui/Center';
 import { Layout, login } from '../ui/Layout';
 
@@ -9,18 +10,18 @@ const labelCol = 10;
 const wrapperCol = 24 - labelCol;
 
 export const Profile: React.FC = () => {
-    const myAuth = React.useContext(MyAuthContext);
+    const firebaseUser = useAtomValue(firebaseUserAtom);
     const [isSubmitting, setIsSubmitting] = React.useState(false);
     const [submitErrorMessage, setSubmitErrorMessage] = React.useState<string>();
     const [displayName, setDisplayName] = React.useState<string | null>();
     React.useEffect(() => {
-        if (typeof myAuth == 'string') {
+        if (typeof firebaseUser == 'string') {
             return;
         }
-        setDisplayName(myAuth.displayName);
-    }, [myAuth]);
+        setDisplayName(firebaseUser.displayName);
+    }, [firebaseUser]);
 
-    if (typeof myAuth === 'string') {
+    if (typeof firebaseUser === 'string') {
         return null;
     }
 
@@ -32,7 +33,7 @@ export const Profile: React.FC = () => {
             style={{ width: 600 }}
             onFinish={() => {
                 setIsSubmitting(true);
-                updateProfile(myAuth, { displayName })
+                updateProfile(firebaseUser, { displayName })
                     .catch((err: unknown) => {
                         if (err instanceof Error) {
                             setSubmitErrorMessage(err.message);

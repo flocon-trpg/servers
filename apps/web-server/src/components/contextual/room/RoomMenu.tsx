@@ -25,7 +25,6 @@ import { useMyUserUid } from '../../../hooks/useMyUserUid';
 import { useSignOut } from '../../../hooks/useSignOut';
 import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../../../utils/className';
-import { MyAuthContext } from '../../../contexts/MyAuthContext';
 import { GenerateLogModal } from './message/GenerateLogModal';
 import { useMutation, useQuery } from 'urql';
 import { error, roomAtom, roomNotificationsAtom, text } from '../../../atoms/room/roomAtom';
@@ -47,6 +46,7 @@ import {
 } from '../../../atoms/roomConfig/types/roomConfig/resources';
 import { Styles } from '../../../styles';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
+import { firebaseUserAtom } from '../../../pages/_app';
 
 const panelOpacityAtom = atom(
     get => get(roomConfigAtom)?.panelOpacity,
@@ -1052,7 +1052,7 @@ const usePanelsMenuItem = () => {
 export const RoomMenu: React.FC = React.memo(function RoomMenu() {
     const me = useMe();
     const myUserUid = useMyUserUid();
-    const myAuth = React.useContext(MyAuthContext);
+    const firebaseUser = useAtomValue(firebaseUserAtom);
     const router = useRouter();
     const signOut = useSignOut();
     const roomId = useAtomSelector(roomAtom, state => state.roomId);
@@ -1079,7 +1079,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
     const panelsMenuItem = usePanelsMenuItem();
 
     return React.useMemo(() => {
-        if (me == null || myUserUid == null || typeof myAuth === 'string' || roomId == null) {
+        if (me == null || myUserUid == null || typeof firebaseUser === 'string' || roomId == null) {
             return null;
         }
         const menuItems: ItemType[] = [
@@ -1202,7 +1202,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
             {
                 key: '自分のUser@menu',
                 icon: <Icon.UserOutlined />,
-                label: `${myAuth.displayName} - ${myAuth.uid}`,
+                label: `${firebaseUser.displayName} - ${firebaseUser.uid}`,
                 children: [
                     {
                         key: 'ログアウト@menu',
@@ -1273,7 +1273,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
         isResetMessagesModalVisible,
         leaveRoomMutation,
         me,
-        myAuth,
+        firebaseUser,
         myUserUid,
         panelsMenuItem,
         roomId,

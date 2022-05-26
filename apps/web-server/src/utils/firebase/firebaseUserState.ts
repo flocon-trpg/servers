@@ -1,7 +1,4 @@
-import React from 'react';
 import { User } from 'firebase/auth';
-
-// CONSIDER: Contextをやめてjotaiに移行するべきか？
 
 export const loading = 'loading';
 export const notSignIn = 'notSignIn';
@@ -15,5 +12,3 @@ export const getUserUid = (source: FirebaseUserState): string | undefined => {
     }
     return source.uid;
 };
-
-export const MyAuthContext = React.createContext(loading as FirebaseUserState);

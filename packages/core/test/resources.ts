@@ -1,5 +1,12 @@
-import { Player, Spectator, State, boardTemplate, characterTemplate, roomTemplate } from '../src';
-import { forceMaxLength100String } from './forceMaxLength100String';
+import {
+    Player,
+    Spectator,
+    State,
+    boardTemplate,
+    characterTemplate,
+    forceMaxLength100String,
+    roomTemplate,
+} from '../src';
 
 export namespace Resources {
     const boardId = 'BOARD_ID';
