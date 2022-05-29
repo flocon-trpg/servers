@@ -32,7 +32,7 @@ class Dir {
 
     public get reactKey(): string {
         return this.dir.reduce(
-            (seed, elem) => `${seed}:${elem.replace('/', '//').replace(':', '/:')}`,
+            (seed, elem) => `${seed}:${elem.replaceAll('/', '//').replaceAll(':', '/:')}`,
             ''
         );
     }
