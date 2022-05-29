@@ -2,7 +2,7 @@ import { OmitVersion, State, pieceTemplate } from '@flocon-trpg/core';
 import { Checkbox, Col, InputNumber, Row, Space } from 'antd';
 import { Gutter } from 'antd/lib/grid/row';
 import React from 'react';
-import { BufferedInput } from '../../../ui/BufferedInput';
+import { CollaborativeInput } from '../../../ui/CollaborativeInput';
 import { EditorGroupHeader } from '../../../ui/EditorGroupHeader';
 import { BoardPositionEditorBase } from './BoardPositionEditorBase';
 
@@ -21,7 +21,7 @@ export const PiecePositionEditor: React.FC<Props> = ({ state, onUpdate, showName
     let nameElement: JSX.Element | null = null;
     if (showNameInput === true) {
         const inputElement = (
-            <BufferedInput
+            <CollaborativeInput
                 style={{ width: 150 }}
                 bufferDuration='default'
                 value={state.name ?? ''}

@@ -42,7 +42,6 @@ import {
 import * as Icon from '@ant-design/icons';
 import { Gutter } from 'antd/lib/grid/row';
 import { DialogFooter } from '../../../ui/DialogFooter';
-import { BufferedInput } from '../../../ui/BufferedInput';
 import { QueryResultViewer } from '../../../ui/QueryResultViewer';
 import { useMessageFilter } from '../../../../hooks/useMessageFilter';
 import { RoomMessage as RoomMessageNameSpace } from './RoomMessage';
@@ -87,6 +86,7 @@ import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import { defaultTriggerSubMenuAction } from '../../../../utils/variables';
 import { firebaseUserAtom } from '../../../../pages/_app';
 import { getUserUid } from '../../../../utils/firebase/firebaseUserState';
+import { CollaborativeInput } from '../../../ui/CollaborativeInput';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -403,7 +403,7 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (
                         <Col flex='auto' />
                         <Col flex={0}>チャンネル{i}</Col>
                         <Col span={drawerInputSpan}>
-                            <BufferedInput
+                            <CollaborativeInput
                                 bufferDuration='default'
                                 value={publicChannelNames == null ? '' : publicChannelNames[key]}
                                 onChange={e => {

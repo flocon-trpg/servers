@@ -57,7 +57,6 @@ import { flex, flexColumn, flexRow, itemsCenter } from '../../../../utils/classN
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
 import { useIsMyCharacter } from '../../../../hooks/state/useIsMyCharacter';
 import { characterEditorModalAtom } from '../character/CharacterEditorModal';
-import { BufferedInput } from '../../../ui/BufferedInput';
 import {
     dicePieceValueEditorAtom,
     stringPieceValueEditorAtom,
@@ -72,6 +71,7 @@ import {
 } from '../piece/BoardPositionAndPieceEditorModal';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import { defaultTriggerSubMenuAction } from '../../../../utils/variables';
+import { CollaborativeInput } from '../../../ui/CollaborativeInput';
 
 type BoardState = State<typeof boardTemplate>;
 type BoardPositionState = State<typeof boardPositionTemplate>;
@@ -332,7 +332,7 @@ namespace PopupEditorBase {
 
         return (
             <div className={classNames(flex, flexColumn)} style={{ width: '100%' }}>
-                <BufferedInput
+                <CollaborativeInput
                     bufferDuration='default'
                     value={stringPieceValue.value}
                     onChange={e =>

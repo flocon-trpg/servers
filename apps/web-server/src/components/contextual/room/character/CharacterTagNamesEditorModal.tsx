@@ -1,7 +1,6 @@
 import { Button, Modal } from 'antd';
 import React from 'react';
 import { DialogFooter } from '../../../ui/DialogFooter';
-import { BufferedInput } from '../../../ui/BufferedInput';
 import { strIndex10Array } from '@flocon-trpg/core';
 import classNames from 'classnames';
 import { flex, flexColumn, flexRow } from '../../../../utils/className';
@@ -9,6 +8,7 @@ import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithI
 import { atom, useAtom } from 'jotai';
 import { useCharacterTagNames } from '../../../../hooks/state/useCharacterTagNames';
 import * as Icons from '@ant-design/icons';
+import { CollaborativeInput } from '../../../ui/CollaborativeInput';
 
 export const characterTagNamesEditorVisibilityAtom = atom(false);
 
@@ -24,10 +24,9 @@ export const CharacterTagNamesEditorModal: React.FC = () => {
             return (
                 <div key={`tag${index}Input`} className={classNames(flex, flexRow)}>
                     <div style={{ width: 60 }}>{`タグ${index}`}</div>
-                    <BufferedInput
+                    <CollaborativeInput
                         style={{ width: 150 }}
                         size='small'
-                        readOnly={characterTagName == null}
                         disabled={characterTagName == null}
                         value={characterTagName ?? ''}
                         bufferDuration='default'

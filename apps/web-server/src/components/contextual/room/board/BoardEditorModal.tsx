@@ -7,7 +7,6 @@ import { FilesManagerDrawer } from '../file/FilesManagerDrawer';
 import { FilesManagerDrawerType } from '../../../../utils/types';
 import { Gutter } from 'antd/lib/grid/row';
 import { StateEditorParams, useStateEditor } from '../../../../hooks/useStateEditor';
-import { BufferedInput } from '../../../ui/BufferedInput';
 import { useBoards } from '../../../../hooks/state/useBoards';
 import { State, boardTemplate, simpleId } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
@@ -18,6 +17,7 @@ import { roomConfigAtom } from '../../../../atoms/roomConfig/roomConfigAtom';
 import { useImmerUpdateAtom } from '../../../../atoms/useImmerUpdateAtom';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
 import { CopyToClipboardButton } from '../../../ui/CopyToClipboardButton';
+import { CollaborativeInput } from '../../../ui/CollaborativeInput';
 
 type BoardState = State<typeof boardTemplate>;
 
@@ -184,7 +184,7 @@ export const BoardEditorModal: React.FC = () => {
                     <Col flex='auto' />
                     <Col flex={0}>名前</Col>
                     <Col span={inputSpan}>
-                        <BufferedInput
+                        <CollaborativeInput
                             bufferDuration='default'
                             size='small'
                             value={board.name}

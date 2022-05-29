@@ -586,6 +586,7 @@ const MemoPanel: React.FC<ConfigAndKeyProps<MemoPanelConfig>> = React.memo(funct
             <Memos
                 selectedMemoId={config.selectedMemoId}
                 onSelectedMemoIdChange={onSelectedMemoIdChange}
+                height={config.height}
             />
         </DraggableCard>
     );

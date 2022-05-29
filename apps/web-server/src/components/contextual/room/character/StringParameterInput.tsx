@@ -8,7 +8,6 @@ import {
     parameterIsPrivate,
     parameterIsPrivateAndNotCreatedByMe,
 } from '../../../../resources/text/main';
-import { BufferedInput } from '../../../ui/BufferedInput';
 import {
     State,
     StrIndex20,
@@ -19,6 +18,7 @@ import {
     strParamTemplate,
     toNullableTextUpOperation,
 } from '@flocon-trpg/core';
+import { CollaborativeInput } from '../../../ui/CollaborativeInput';
 
 const applyCharacter = apply(characterTemplate);
 type CharacterState = State<typeof characterTemplate>;
@@ -57,7 +57,7 @@ export const StringParameterInput: React.FC<Props> = ({
         };
 
     const input = ({ disabled }: { disabled: boolean }) => (
-        <BufferedInput
+        <CollaborativeInput
             style={{ width: inputWidth }}
             size='small'
             bufferDuration='default'

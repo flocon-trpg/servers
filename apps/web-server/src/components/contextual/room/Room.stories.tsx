@@ -15,7 +15,9 @@ import {
     authData,
     generateRoomData,
     generateRoomMessagesData,
+    storageData,
     userData,
+    webConfigData,
 } from '../../../stubObject';
 import { ParticipantRole } from '@flocon-trpg/core';
 import { useRoomMessagesStub } from '../../../hooks/useRoomMessages';
@@ -32,29 +34,25 @@ export const Player: React.FC<WebConfig & { myParticipantRole: ParticipantRole }
     React.useEffect(() => {
         setStorybook({
             isStorybook: true,
-            mock: {
+            stub: {
                 auth: { ...authData, currentUser: userData },
                 webConfig: Result.ok({
+                    ...webConfigData,
                     isUnlistedFirebaseStorageEnabled,
                     isPublicFirebaseStorageEnabled,
-                    firebaseConfig: {
-                        apiKey: '',
-                        appId: '',
-                        authDomain: '',
-                        messagingSenderId: '',
-                        projectId: '',
-                        storageBucket: '',
-                    },
                 }),
                 user: userData,
+                storage: storageData,
             },
         });
     }, [isPublicFirebaseStorageEnabled, isUnlistedFirebaseStorageEnabled, setStorybook]);
     const room = React.useMemo(() => {
         return generateRoomData({
             myParticipantRole,
-            setCharacterTagNames: false,
-            setPublicChannelNames: false,
+            setCharacterTagNames: true,
+            setPublicChannelNames: true,
+            setCharacters: true,
+            setParamNames: true,
         });
     }, [myParticipantRole]);
     useRoomStub({ roomId, room });

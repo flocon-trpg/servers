@@ -94,7 +94,8 @@ export namespace FilePath {
         config: WebConfig,
         storage: FirebaseStorage,
         idToken: string,
-        cache: ExpiryMap<string, string> | null
+        cache: ExpiryMap<string, string> | null,
+        autoRedirect = false
     ): Promise<SrcResult> => {
         switch (path.sourceType) {
             case FileSourceType.Uploader: {
@@ -144,12 +145,23 @@ export namespace FilePath {
                     blob: undefined,
                 };
             }
-            default:
+            default: {
+                if (autoRedirect) {
+                    const redirected = await fetch(path.path);
+                    if (redirected.ok) {
+                        return {
+                            type: Core.Default,
+                            src: redirected.url,
+                            blob: undefined,
+                        };
+                    }
+                }
                 return {
                     type: Core.Default,
                     src: path.path,
                     blob: undefined,
                 };
+            }
         }
     };
 }

@@ -4,13 +4,17 @@ import React from 'react';
 import { roomAtom } from '../../atoms/room/roomAtom';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
 
+const emptyRecord = {};
+
 type ParamNameState = State<typeof paramNameTemplate>;
 
 export const useBoolParamNames = (): ReadonlyMap<string, ParamNameState> | undefined => {
-    const boolParamNames = useAtomSelector(
-        roomAtom,
-        state => state.roomState?.state?.boolParamNames
-    );
+    const boolParamNames = useAtomSelector(roomAtom, state => {
+        if (state.roomState?.state == null) {
+            return undefined;
+        }
+        return state.roomState.state.boolParamNames ?? emptyRecord;
+    });
     return React.useMemo(() => {
         if (boolParamNames == null) {
             return undefined;
@@ -20,7 +24,12 @@ export const useBoolParamNames = (): ReadonlyMap<string, ParamNameState> | undef
 };
 
 export const useNumParamNames = (): ReadonlyMap<string, ParamNameState> | undefined => {
-    const numParamNames = useAtomSelector(roomAtom, state => state.roomState?.state?.numParamNames);
+    const numParamNames = useAtomSelector(roomAtom, state => {
+        if (state.roomState?.state == null) {
+            return undefined;
+        }
+        return state.roomState.state.numParamNames ?? emptyRecord;
+    });
     return React.useMemo(() => {
         if (numParamNames == null) {
             return undefined;
@@ -30,7 +39,12 @@ export const useNumParamNames = (): ReadonlyMap<string, ParamNameState> | undefi
 };
 
 export const useStrParamNames = (): ReadonlyMap<string, ParamNameState> | undefined => {
-    const strParamNames = useAtomSelector(roomAtom, state => state.roomState?.state?.strParamNames);
+    const strParamNames = useAtomSelector(roomAtom, state => {
+        if (state.roomState?.state == null) {
+            return undefined;
+        }
+        return state.roomState.state.strParamNames ?? emptyRecord;
+    });
     return React.useMemo(() => {
         if (strParamNames == null) {
             return undefined;

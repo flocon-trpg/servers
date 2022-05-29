@@ -5,16 +5,25 @@ import {
     RoomPrivateMessage,
     RoomPublicMessage,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
-import { State as S, roomTemplate } from '@flocon-trpg/core';
+import { State as S, characterTemplate, roomTemplate } from '@flocon-trpg/core';
 import { WebConfig } from '../configType';
 import { UserConfig, defaultUserConfig } from '../atoms/userConfig/types';
+import { FirebaseStorage } from '@firebase/storage';
+import { FirebaseApp } from '@firebase/app';
 
 type State = S<typeof roomTemplate>;
+type CharacterState = S<typeof characterTemplate>;
 
 const myUserUid = 'my-user-uid';
 const userUid1 = 'user-uid-1';
 const myParticipantName = 'participant-name';
 const displayName = 'display-name';
+
+const appData: FirebaseApp = {
+    name: '',
+    options: {},
+    automaticDataCollectionEnabled: false,
+};
 
 export const firebaseConfigData: Config = {
     apiKey: '',
@@ -41,7 +50,7 @@ export const webConfigData: WebConfig = {
 export const userConfigData: UserConfig = defaultUserConfig(myUserUid);
 
 export const authData: Auth = {
-    app: { name: '', options: {}, automaticDataCollectionEnabled: false },
+    app: appData,
     name: '',
     config: firebaseConfigData,
     setPersistence: function (): Promise<void> {
@@ -69,13 +78,65 @@ export const authData: Auth = {
     },
 };
 
+export const storageData: FirebaseStorage = {
+    app: appData,
+    maxUploadRetryTime: 1000,
+    maxOperationRetryTime: 1000,
+};
+
+const characterBase: CharacterState = {
+    $v: 2,
+    $r: 1,
+    ownerParticipantId: undefined,
+    isPrivate: false,
+    name: '',
+    memo: '',
+    image: undefined,
+    portraitImage: undefined,
+    privateVarToml: '',
+    hasTag1: false,
+    hasTag2: false,
+    hasTag3: false,
+    hasTag4: false,
+    hasTag5: false,
+    hasTag6: false,
+    hasTag7: false,
+    hasTag8: false,
+    hasTag9: false,
+    hasTag10: false,
+    chatPalette: '',
+    boolParams: undefined,
+    numParams: undefined,
+    numMaxParams: undefined,
+    strParams: undefined,
+    pieces: undefined,
+    portraitPieces: undefined,
+    privateCommands: undefined,
+};
+
+// https://dummyimage.com/ というダミー画像生成サイトを利用している
+const generateDummyImage = (type: 1 | 2, size: 'small' | 'large') => {
+    const sizeParam = size === 'small' ? '200x200' : '400x600';
+    switch (type) {
+        case 1:
+            return `https://dummyimage.com/${sizeParam}/fffebd/000000.png&text=sample1`;
+        case 2:
+            return `https://dummyimage.com/${sizeParam}/bffffe/000000.png&text=sample2`;
+    }
+};
+
 export type GenerateRoomDataParams = {
     myParticipantRole: ParticipantRole;
+    setCharacters: boolean;
     setCharacterTagNames: boolean;
     setPublicChannelNames: boolean;
+    setParamNames: boolean;
 };
 
 export const generateRoomData = (params: GenerateRoomDataParams): State => {
+    const characterId1 = 'character-id-1';
+    const characterId2 = 'character-id-2';
+
     const result: State = {
         $v: 2,
         $r: 1,
@@ -119,14 +180,116 @@ export const generateRoomData = (params: GenerateRoomDataParams): State => {
         },
     };
 
+    if (params.setCharacters) {
+        result.characters = {
+            [characterId1]: {
+                ...characterBase,
+                ownerParticipantId: myUserUid,
+                name: 'character-1-name',
+                memo: 'character-1-memo',
+                image: {
+                    $v: 1,
+                    $r: 1,
+                    path: generateDummyImage(1, 'small'),
+                    sourceType: 'Default',
+                },
+                portraitImage: {
+                    $v: 1,
+                    $r: 1,
+                    path: generateDummyImage(1, 'large'),
+                    sourceType: 'Default',
+                },
+                chatPalette: 'character-1-chatpalette',
+                boolParams: {
+                    1: {
+                        $v: 2,
+                        $r: 1,
+                        isValuePrivate: false,
+                        value: true,
+                        overriddenParameterName: undefined,
+                    },
+                },
+                numParams: {
+                    1: {
+                        $v: 2,
+                        $r: 1,
+                        isValuePrivate: false,
+                        value: 5,
+                        overriddenParameterName: undefined,
+                    },
+                    2: {
+                        $v: 2,
+                        $r: 1,
+                        isValuePrivate: false,
+                        value: 5,
+                        overriddenParameterName: undefined,
+                    },
+                },
+                numMaxParams: {
+                    1: {
+                        $v: 2,
+                        $r: 1,
+                        isValuePrivate: false,
+                        value: 10,
+                        overriddenParameterName: undefined,
+                    },
+                },
+                strParams: {
+                    1: {
+                        $v: 2,
+                        $r: 1,
+                        isValuePrivate: false,
+                        value: 'サンプル',
+                        overriddenParameterName: undefined,
+                    },
+                },
+            },
+            [characterId2]: {
+                ...characterBase,
+                ownerParticipantId: myUserUid,
+                name: 'character-2-name',
+                memo: 'character-2-memo',
+                image: {
+                    $v: 1,
+                    $r: 1,
+                    path: generateDummyImage(2, 'small'),
+                    sourceType: 'Default',
+                },
+                portraitImage: {
+                    $v: 1,
+                    $r: 1,
+                    path: generateDummyImage(2, 'large'),
+                    sourceType: 'Default',
+                },
+                hasTag1: true,
+                chatPalette: 'character-2-chatpalette',
+            },
+        };
+    }
+
     ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).forEach(i => {
         if (params.setCharacterTagNames) {
             result[`characterTag${i}Name`] = `characterTag${i}Name`;
         }
+
         if (params.setPublicChannelNames) {
             result[`publicChannel${i}Name`] = `publicChannel${i}Name`;
         }
     });
+
+    ([1, 2] as const).forEach(i => {
+        if (params.setParamNames) {
+            if (result.numParamNames == null) {
+                result.numParamNames = {};
+            }
+            result.numParamNames[i.toString()] = { $v: 1, $r: 1, name: `数値${i}` };
+        }
+    });
+
+    if (params.setParamNames) {
+        result.boolParamNames = { 1: { $v: 1, $r: 1, name: '真偽値1' } };
+        result.strParamNames = { 1: { $v: 1, $r: 1, name: '文字列1' } };
+    }
 
     return result;
 };
@@ -218,7 +381,7 @@ export const userData: User = {
         throw new Error('Function not implemented.');
     },
     getIdToken: function (): Promise<string> {
-        throw new Error('Function not implemented.');
+        return Promise.resolve(myUserUid);
     },
     getIdTokenResult: function (): Promise<IdTokenResult> {
         throw new Error('Function not implemented.');

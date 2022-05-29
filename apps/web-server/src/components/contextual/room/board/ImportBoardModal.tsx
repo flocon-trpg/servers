@@ -3,7 +3,6 @@ import { Result } from '@kizahasi/result';
 import { Alert, Modal } from 'antd';
 import { atom, useAtom } from 'jotai';
 import React from 'react';
-import { BufferedTextArea } from '../../../ui/BufferedTextArea';
 import { DialogFooter } from '../../../ui/DialogFooter';
 import * as E from 'fp-ts/Either';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
@@ -11,6 +10,7 @@ import { useMyUserUid } from '../../../../hooks/useMyUserUid';
 import { formatValidationErrors } from '../../../../utils/io-ts/io-ts-reporters';
 import classNames from 'classnames';
 import { flex, flexColumn } from '../../../../utils/className';
+import { CollaborativeInput } from '../../../ui/CollaborativeInput';
 
 const boardState = state(boardTemplate, { exact: true });
 type BoardState = State<typeof boardTemplate>;
@@ -84,17 +84,14 @@ export const ImportBoardModal: React.FC = () => {
                 <div>
                     インポートしたボードの作成者は常に自分になります。ただしボード内に存在するコマの作成者の情報は保持されます(これらの仕様は後で変更されるかもしれません)。
                 </div>
-                <BufferedTextArea
+                <CollaborativeInput
+                    multiline
                     value={value}
                     onChange={e => {
                         setValue(e.currentValue);
                     }}
                     bufferDuration='short'
                     placeholder='ここにJSONをペーストしてください。'
-                    disableResize
-                    spellCheck={false}
-                    rows={15}
-                    bottomElement={() => null}
                 />
                 <div>
                     {parsed?.error != null && (

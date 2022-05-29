@@ -10,9 +10,9 @@ import { useMyUserUid } from '../../../../hooks/useMyUserUid';
 import { create, update } from '../../../../utils/constants';
 import { useAtom } from 'jotai';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
-import { BufferedInput } from '../../../ui/BufferedInput';
 import { PiecePositionWithCell } from '../../../../utils/types';
 import { stringPieceValueEditorAtom } from '../../../../atoms/pieceValueEditor/pieceValueEditorAtom';
+import { CollaborativeInput } from '../../../ui/CollaborativeInput';
 
 type CharacterState = State<typeof characterTemplate>;
 type StringPieceState = State<typeof stringPieceTemplate>;
@@ -164,7 +164,7 @@ export const StringPieceEditorModal: React.FC = () => {
                     <Col flex='auto' />
                     <Col flex={0}>名前</Col>
                     <Col span={inputSpan}>
-                        <BufferedInput
+                        <CollaborativeInput
                             bufferDuration='default'
                             size='small'
                             value={uiState.name ?? ''}
@@ -186,7 +186,7 @@ export const StringPieceEditorModal: React.FC = () => {
                     <Col flex='auto' />
                     <Col flex={0}>値</Col>
                     <Col span={inputSpan}>
-                        <BufferedInput
+                        <CollaborativeInput
                             bufferDuration='default'
                             size='small'
                             value={uiState.value}

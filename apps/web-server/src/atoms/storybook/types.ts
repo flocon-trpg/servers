@@ -7,11 +7,11 @@ import { FirebaseUserState } from '../../utils/firebase/firebaseUserState';
 export type StorybookAtomValueType =
     | {
           isStorybook: false;
-          mock?: undefined;
+          stub?: undefined;
       }
     | {
           isStorybook: true;
-          mock: {
+          stub: {
               auth?: Auth;
               user?: FirebaseUserState;
               storage?: FirebaseStorage;
