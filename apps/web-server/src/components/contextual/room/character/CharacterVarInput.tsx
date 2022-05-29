@@ -7,30 +7,24 @@ type CharacterState = State<typeof characterTemplate>;
 type Props = {
     style?: React.CSSProperties;
     classNames?: string;
-    disableResize?: boolean;
     character: CharacterState | undefined;
     onChange: (newValue: string) => void;
-    rows?: number;
 };
 
 export const CharacterVarInput: React.FC<Props> = ({
     style,
     classNames,
-    disableResize,
     character,
     onChange,
-    rows,
 }: Props) => {
     return (
         <TomlInput
             style={style}
-            classNames={classNames}
-            disableResize={disableResize}
+            className={classNames}
             size='small'
             bufferDuration='default'
-            readOnly={character == null}
+            disabled={character == null}
             value={character?.privateVarToml ?? ''}
-            rows={rows}
             onChange={e => {
                 if (character == null) {
                     return;

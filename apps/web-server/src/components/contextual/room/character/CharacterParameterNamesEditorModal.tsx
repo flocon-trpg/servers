@@ -3,7 +3,6 @@ import React from 'react';
 import { DialogFooter } from '../../../ui/DialogFooter';
 import { replace } from '../../../../stateManagers/states/types';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { BufferedInput } from '../../../ui/BufferedInput';
 import { useSetRoomStateByApply } from '../../../../hooks/useSetRoomStateByApply';
 import { recordToMap } from '@flocon-trpg/utils';
 import { StrIndex20, UpOperation as U, roomTemplate, strIndex20Array } from '@flocon-trpg/core';
@@ -14,6 +13,7 @@ import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithI
 import { roomAtom } from '../../../../atoms/room/roomAtom';
 import { useAtomSelector } from '../../../../atoms/useAtomSelector';
 import { atom, useAtom } from 'jotai';
+import { CollaborativeInput } from '../../../ui/CollaborativeInput';
 
 type UpOperation = U<typeof roomTemplate>;
 
@@ -92,7 +92,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                 name={`numParameter${key}`}
             >
                 <Space>
-                    <BufferedInput
+                    <CollaborativeInput
                         size='small'
                         value={state.name}
                         bufferDuration={200}
@@ -147,7 +147,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                 name={`boolParameter${key}`}
             >
                 <Space>
-                    <BufferedInput
+                    <CollaborativeInput
                         size='small'
                         value={state.name}
                         bufferDuration={200}
@@ -202,7 +202,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
                 name={`strParameter${key}`}
             >
                 <Space>
-                    <BufferedInput
+                    <CollaborativeInput
                         size='small'
                         value={state.name}
                         bufferDuration={200}

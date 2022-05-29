@@ -37,6 +37,8 @@ const room = generateRoomData({
     myParticipantRole: 'Player',
     setCharacterTagNames: true,
     setPublicChannelNames: true,
+    setCharacters: true,
+    setParamNames: true,
 });
 
 export const Default: React.FC<
@@ -46,7 +48,7 @@ export const Default: React.FC<
     React.useEffect(() => {
         setStorybook({
             isStorybook: true,
-            mock: {
+            stub: {
                 auth: { ...authData, currentUser: userData },
                 webConfig: Result.ok({
                     isUnlistedFirebaseStorageEnabled: false,

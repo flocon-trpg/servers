@@ -10,6 +10,8 @@ const room = generateRoomData({
     myParticipantRole: 'Player',
     setCharacterTagNames: false,
     setPublicChannelNames: false,
+    setCharacters: false,
+    setParamNames: false,
 });
 
 export const Default: React.FC = () => {
@@ -17,12 +19,18 @@ export const Default: React.FC = () => {
     React.useEffect(() => {
         setStorybook({
             isStorybook: true,
-            mock: {},
+            stub: {},
         });
     }, [setStorybook]);
     useRoomStub({ room });
     const [selectedMemoId, setSelectedMemoId] = React.useState<string>('');
-    return <Memos selectedMemoId={selectedMemoId} onSelectedMemoIdChange={setSelectedMemoId} />;
+    return (
+        <Memos
+            selectedMemoId={selectedMemoId}
+            onSelectedMemoIdChange={setSelectedMemoId}
+            height={300}
+        />
+    );
 };
 
 export default {

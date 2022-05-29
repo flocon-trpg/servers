@@ -87,8 +87,8 @@ export const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) 
                     borderStyle: 'solid',
                     borderColor,
                     backgroundColor: Styles.backgroundColor,
-                    height: '100%', // heightとwidthを設定することで、childrenの（親要素の）大きさがDraggableCardの大きさに連動するようになる
-                    width: '100%',
+                    height: props.size?.height, // heightとwidthを設定することで、childrenの（親要素の）大きさがDraggableCardの大きさに連動するようになる
+                    width: props.size?.width,
                     opacity: panelOpacity,
                 }}
             >

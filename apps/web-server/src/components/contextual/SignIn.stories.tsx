@@ -58,7 +58,7 @@ export const Default: React.FC<{
     React.useEffect(() => {
         setStorybook({
             isStorybook: true,
-            mock: {
+            stub: {
                 auth: { ...authData, currentUser: { ...userData, isAnonymous: amIAnonymous } },
                 webConfig: Result.ok(webConfigData),
             },

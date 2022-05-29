@@ -1,25 +1,36 @@
 import { isValidVarToml } from '@flocon-trpg/core';
+import classNames from 'classnames';
 import React from 'react';
-import {
-    BottomElementParams,
-    BufferedTextArea,
-    Props as BufferedTextAreaProps,
-} from './BufferedTextArea';
+import { flex, flex1, flexColumn } from '../../utils/className';
+import { CollaborativeInput, OnSkippingParams, Props as PropsCore } from './CollaborativeInput';
 
-type Props = Omit<BufferedTextAreaProps, 'spellCheck'>;
+type Props = Exclude<PropsCore, 'style' | 'className'>;
 
 export const TomlInput: React.FC<Props> = (props: Props) => {
     const { ...inputProps } = props;
-    const bottomElement = (params: BottomElementParams): JSX.Element | null => {
+    const [bottomElement, setBottomElement] = React.useState<JSX.Element>();
+    const onSkipping = (params: OnSkippingParams): void => {
         if (params.isSkipping) {
-            return <div>編集中…</div>;
+            setBottomElement(<div>編集中…</div>);
+            return;
         }
         const result = isValidVarToml(params.currentValue);
         if (result.isError) {
-            return <div>TOML文法エラー</div>;
+            setBottomElement(<div>TOML文法エラー</div>);
+            return;
         }
-        return <div>OK</div>;
+        setBottomElement(<div>OK</div>);
     };
 
-    return <BufferedTextArea {...inputProps} spellCheck={false} bottomElement={bottomElement} />;
+    return (
+        <div className={classNames(flex, flexColumn)}>
+            <CollaborativeInput
+                {...inputProps}
+                style={undefined}
+                className={classNames(flex1)}
+                onSkipping={onSkipping}
+            />
+            {bottomElement}
+        </div>
+    );
 };
