@@ -68,7 +68,7 @@
         "@graphql-codegen/typed-document-node": "2.2.8",
         "@graphql-codegen/typescript": "2.4.8",
         "@graphql-codegen/typescript-operations": "2.3.5",
-        "@types/jest": "27.5.0",
+        "@types/jest": "27.5.1",
         "@types/url-join": "4.0.1",
         "@urql/core": "2.4.4",
         "axios": "0.27.2",
