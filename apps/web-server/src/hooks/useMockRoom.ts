@@ -11,9 +11,9 @@ type State = S<typeof roomTemplate>;
 const apply = a(roomTemplate);
 
 const errorMessage =
-    'You called useRoomStub but useAtomValue(storybookAtom).isStorybook is false. If this is storybook, change storybookAtom value. If this is not storybook, do not call useRoomStub.';
+    'You called useMockRoom but useAtomValue(storybookAtom).isStorybook is false. If this is storybook, change storybookAtom value. If this is not storybook, do not call useMockRoom.';
 
-export const useRoomStub = ({ roomId, room }: { roomId?: string; room: State }) => {
+export const useMockRoom = ({ roomId, room }: { roomId?: string; room: State }) => {
     const isStorybook = useAtomValue(storybookAtom).isStorybook;
     const isStorybookRef = useLatest(isStorybook);
 
@@ -56,7 +56,7 @@ export const useRoomStub = ({ roomId, room }: { roomId?: string; room: State }) 
                 },
             };
         });
-    }, [isStorybookRef, setRoom]);
+    }, [isStorybookRef, room, setRoom]);
 
     React.useEffect(() => {
         setRoom(roomAtomValue => {

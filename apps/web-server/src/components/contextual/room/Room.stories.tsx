@@ -5,23 +5,23 @@ import { Result } from '@kizahasi/result';
 import { Room } from './Room';
 import { WebConfig } from '../../../configType';
 import { storybookAtom } from '../../../atoms/storybook/storybookAtom';
-import { useRoomStub } from '../../../hooks/useRoomStub';
+import { useMockRoom } from '../../../hooks/useMockRoom';
 import { useUpdateAtom } from 'jotai/utils';
 import { roomConfigAtom } from '../../../atoms/roomConfig/roomConfigAtom';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { defaultRoomConfig } from '../../../atoms/roomConfig/types/roomConfig';
 import {
-    authData,
-    generateRoomData,
-    generateRoomMessagesData,
-    storageData,
-    userData,
+    createMockRoom,
+    createMockRoomMessages,
+    mockAuth,
+    mockStorage,
+    mockUser,
     webConfigData,
-} from '../../../stubObject';
+} from '../../../mocks';
 import { ParticipantRole } from '@flocon-trpg/core';
-import { useRoomMessagesStub } from '../../../hooks/useRoomMessages';
-import { useUserConfigStub } from '../../../hooks/useUserConfigStub';
+import { useMockRoomMessages } from '../../../hooks/useRoomMessages';
+import { useMockUserConfig } from '../../../hooks/useMockUserConfig';
 
 const roomId = '';
 
@@ -34,20 +34,20 @@ export const Player: React.FC<WebConfig & { myParticipantRole: ParticipantRole }
     React.useEffect(() => {
         setStorybook({
             isStorybook: true,
-            stub: {
-                auth: { ...authData, currentUser: userData },
+            mock: {
+                auth: { ...mockAuth, currentUser: mockUser },
                 webConfig: Result.ok({
                     ...webConfigData,
                     isUnlistedFirebaseStorageEnabled,
                     isPublicFirebaseStorageEnabled,
                 }),
-                user: userData,
-                storage: storageData,
+                user: mockUser,
+                storage: mockStorage,
             },
         });
     }, [isPublicFirebaseStorageEnabled, isUnlistedFirebaseStorageEnabled, setStorybook]);
     const room = React.useMemo(() => {
-        return generateRoomData({
+        return createMockRoom({
             myParticipantRole,
             setCharacterTagNames: true,
             setPublicChannelNames: true,
@@ -55,12 +55,12 @@ export const Player: React.FC<WebConfig & { myParticipantRole: ParticipantRole }
             setParamNames: true,
         });
     }, [myParticipantRole]);
-    useRoomStub({ roomId, room });
-    useUserConfigStub();
-    const { onQuery, setToNotFetch } = useRoomMessagesStub();
+    useMockRoom({ roomId, room });
+    useMockUserConfig();
+    const { onQuery, setToNotFetch } = useMockRoomMessages();
     React.useEffect(() => {
         setToNotFetch();
-        onQuery(generateRoomMessagesData({ setGeneralMessages: true }));
+        onQuery(createMockRoomMessages({ setGeneralMessages: true }));
     }, [onQuery, setToNotFetch]);
     const setRoomConfig = useUpdateAtom(roomConfigAtom);
     React.useEffect(() => {
