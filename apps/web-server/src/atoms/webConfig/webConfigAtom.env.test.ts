@@ -8,6 +8,9 @@ import {
     google,
 } from '../../env';
 import { fakeFirebaseConfig1 } from '@flocon-trpg/core';
+import { useAtom } from 'jotai';
+import { fakeEnvText } from './fakeEnvText';
+import { act, renderHook } from '@testing-library/react';
 
 const envFile = {
     [NEXT_PUBLIC_API_HTTP]: 'https://processenv.example.com/',
@@ -23,10 +26,7 @@ for (const key in envFileAsRecord) {
     process.env[key] = envFileAsRecord[key];
 }
 
-import { act, renderHook } from '@testing-library/react-hooks';
-import { useAtom } from 'jotai';
 import { publicEnvTxtAtom, webConfigAtom } from './webConfigAtom';
-import { fakeEnvText } from './fakeEnvText';
 
 describe('webConfigAtom (process.env exists)', () => {
     it('tests env.txt is not fetched', () => {
