@@ -143,6 +143,12 @@ jobs:
               with:
                   token: ${{ secrets.CODECOV_TOKEN }}
 
+            # 現状ではStorybookがビルドできるかどうかだけチェックしている。後々GitHub Pagesあたりに自動publishする機能を付けるかも。
+            - name: Build Storybook
+              if: ${{ matrix.container == 'node:16-buster' }}
+              run: yarn run build-storybook
+              working-directory: ./apps/web-server
+
     # fails on windows because it uses crlf
     lint-and-prettier:
         name: Lint and prettier on Node ${{ matrix.node }} and ${{ matrix.os }}
