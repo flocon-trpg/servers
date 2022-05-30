@@ -148,8 +148,8 @@ const mergeEnv = (envs: Envs): Env => {
 export const webConfigAtom = atom<Result<WebConfig> | null>(get => {
     const storybook = get(storybookAtom);
     const envs = get(envsAtom);
-    if (storybook.stub?.webConfig != null) {
-        return storybook.stub.webConfig;
+    if (storybook.mock?.webConfig != null) {
+        return storybook.mock.webConfig;
     }
     if (envs == null) {
         return null;

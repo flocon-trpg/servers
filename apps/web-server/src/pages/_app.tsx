@@ -48,18 +48,18 @@ export const firebaseAppAtom = atom(get => get(firebaseAppCoreAtom));
 
 const firebaseAuthCoreAtom = atom<Auth | undefined>(undefined);
 export const firebaseAuthAtom = atom(get => {
-    const stub = get(storybookAtom).stub?.auth;
-    if (stub != null) {
-        return stub;
+    const mock = get(storybookAtom).mock?.auth;
+    if (mock != null) {
+        return mock;
     }
     return get(firebaseAuthCoreAtom);
 });
 
 const firebaseStorageCoreAtom = atom<FirebaseStorage | undefined>(undefined);
 export const firebaseStorageAtom = atom(get => {
-    const stub = get(storybookAtom).stub?.storage;
-    if (stub != null) {
-        return stub;
+    const mock = get(storybookAtom).mock?.storage;
+    if (mock != null) {
+        return mock;
     }
     return get(firebaseStorageCoreAtom);
 });
@@ -68,18 +68,18 @@ export const firebaseStorageAtom = atom(get => {
 // 値がfunctionだとjotaiが勝手にfunctionを実行してその結果をatomに保持してしまうため、必ずfunctionの状態で保持されるようにRefで包んでいる
 const getIdTokenCoreAtom = atom<Ref<(() => Promise<string | null>) | null>>({ value: null });
 export const getIdTokenAtom = atom(get => {
-    const stubUser = get(storybookAtom).stub?.user;
-    if (stubUser != null && typeof stubUser !== 'string') {
-        return stubUser.getIdToken;
+    const mockUser = get(storybookAtom).mock?.user;
+    if (mockUser != null && typeof mockUser !== 'string') {
+        return mockUser.getIdToken;
     }
     return get(getIdTokenCoreAtom).value;
 });
 
 const firebaseUserCoreAtom = atom<FirebaseUserState>(loading);
 export const firebaseUserAtom = atom(get => {
-    const stub = get(storybookAtom).stub?.user;
-    if (stub != null) {
-        return stub;
+    const mock = get(storybookAtom).mock?.user;
+    if (mock != null) {
+        return mock;
     }
     return get(firebaseUserCoreAtom);
 });

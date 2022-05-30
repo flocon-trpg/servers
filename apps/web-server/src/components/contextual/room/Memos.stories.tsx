@@ -1,12 +1,12 @@
 import React from 'react';
 import { ComponentMeta } from '@storybook/react';
 import { Memos } from './Memos';
-import { useRoomStub } from '../../../hooks/useRoomStub';
+import { useMockRoom } from '../../../hooks/useMockRoom';
 import { storybookAtom } from '../../../atoms/storybook/storybookAtom';
 import { useSetAtom } from 'jotai';
-import { generateRoomData } from '../../../stubObject';
+import { createMockRoom } from '../../../mocks';
 
-const room = generateRoomData({
+const room = createMockRoom({
     myParticipantRole: 'Player',
     setCharacterTagNames: false,
     setPublicChannelNames: false,
@@ -19,10 +19,10 @@ export const Default: React.FC = () => {
     React.useEffect(() => {
         setStorybook({
             isStorybook: true,
-            stub: {},
+            mock: {},
         });
     }, [setStorybook]);
-    useRoomStub({ room });
+    useMockRoom({ room });
     const [selectedMemoId, setSelectedMemoId] = React.useState<string>('');
     return (
         <Memos

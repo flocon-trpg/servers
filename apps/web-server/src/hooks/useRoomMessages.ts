@@ -141,7 +141,7 @@ type RoomMessages =
       };
 
 // Storybook用
-export const useRoomMessagesStub = () => {
+export const useMockRoomMessages = () => {
     const setResult = useUpdateAtom(changeEventAtom);
     const messagesClient = React.useRef(new RoomMessagesClient());
     const onQuery = React.useCallback(

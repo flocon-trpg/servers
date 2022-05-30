@@ -3,8 +3,8 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { useSetAtom } from 'jotai';
 import { RoomMessages } from './RoomMessages';
 import { storybookAtom } from '../../../../atoms/storybook/storybookAtom';
-import { useRoomStub } from '../../../../hooks/useRoomStub';
-import { useRoomMessagesStub } from '../../../../hooks/useRoomMessages';
+import { useMockRoom } from '../../../../hooks/useMockRoom';
+import { useMockRoomMessages } from '../../../../hooks/useRoomMessages';
 import { useUpdateAtom } from 'jotai/utils';
 import { roomConfigAtom } from '../../../../atoms/roomConfig/roomConfigAtom';
 import { defaultRoomConfig } from '../../../../atoms/roomConfig/types/roomConfig';
@@ -12,13 +12,13 @@ import { Result } from '@kizahasi/result';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import {
-    GenerateRoomMessagesDataParams,
-    authData,
-    generateRoomData,
-    generateRoomMessagesData,
-    userData,
-} from '../../../../stubObject';
-import { useUserConfigStub } from '../../../../hooks/useUserConfigStub';
+    CreateMockRoomMessagesParams,
+    createMockRoom,
+    createMockRoomMessages,
+    mockAuth,
+    mockUser,
+} from '../../../../mocks';
+import { useMockUserConfig } from '../../../../hooks/useMockUserConfig';
 
 const roomId = '';
 
@@ -33,7 +33,7 @@ const getExactlyOneKey = (record: Record<string, unknown>): string => {
     throw new Error();
 };
 
-const room = generateRoomData({
+const room = createMockRoom({
     myParticipantRole: 'Player',
     setCharacterTagNames: true,
     setPublicChannelNames: true,
@@ -42,14 +42,14 @@ const room = generateRoomData({
 });
 
 export const Default: React.FC<
-    { height: number; fetchingMessages: boolean } & GenerateRoomMessagesDataParams
+    { height: number; fetchingMessages: boolean } & CreateMockRoomMessagesParams
 > = ({ height, fetchingMessages, setGeneralMessages }) => {
     const setStorybook = useSetAtom(storybookAtom);
     React.useEffect(() => {
         setStorybook({
             isStorybook: true,
-            stub: {
-                auth: { ...authData, currentUser: userData },
+            mock: {
+                auth: { ...mockAuth, currentUser: mockUser },
                 webConfig: Result.ok({
                     isUnlistedFirebaseStorageEnabled: false,
                     isPublicFirebaseStorageEnabled: false,
@@ -62,19 +62,19 @@ export const Default: React.FC<
                         storageBucket: '',
                     },
                 }),
-                user: userData,
+                user: mockUser,
             },
         });
     }, [setStorybook]);
-    useRoomStub({ roomId, room });
-    useUserConfigStub();
-    const { onQuery, setToNotFetch } = useRoomMessagesStub();
+    useMockRoom({ roomId, room });
+    useMockUserConfig();
+    const { onQuery, setToNotFetch } = useMockRoomMessages();
     React.useEffect(() => {
         setToNotFetch();
         if (fetchingMessages) {
             return;
         }
-        onQuery(generateRoomMessagesData({ setGeneralMessages }));
+        onQuery(createMockRoomMessages({ setGeneralMessages }));
     }, [onQuery, setToNotFetch, fetchingMessages, setGeneralMessages]);
     const setRoomConfig = useUpdateAtom(roomConfigAtom);
     const roomConfig = React.useMemo(() => defaultRoomConfig(roomId), []);

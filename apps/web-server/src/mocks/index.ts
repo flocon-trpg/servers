@@ -10,6 +10,7 @@ import { WebConfig } from '../configType';
 import { UserConfig, defaultUserConfig } from '../atoms/userConfig/types';
 import { FirebaseStorage } from '@firebase/storage';
 import { FirebaseApp } from '@firebase/app';
+import { Client, createClient } from '@urql/core';
 
 type State = S<typeof roomTemplate>;
 type CharacterState = S<typeof characterTemplate>;
@@ -47,9 +48,9 @@ export const webConfigData: WebConfig = {
     isPublicFirebaseStorageEnabled: false,
 };
 
-export const userConfigData: UserConfig = defaultUserConfig(myUserUid);
+export const mockUserConfig: UserConfig = defaultUserConfig(myUserUid);
 
-export const authData: Auth = {
+export const mockAuth: Auth = {
     app: appData,
     name: '',
     config: firebaseConfigData,
@@ -78,7 +79,7 @@ export const authData: Auth = {
     },
 };
 
-export const storageData: FirebaseStorage = {
+export const mockStorage: FirebaseStorage = {
     app: appData,
     maxUploadRetryTime: 1000,
     maxOperationRetryTime: 1000,
@@ -114,6 +115,42 @@ const characterBase: CharacterState = {
     privateCommands: undefined,
 };
 
+export const dummyUrqlOperation = {
+    kind: 'query' as const,
+    get key(): never {
+        throw new Error();
+    },
+    get context(): never {
+        throw new Error();
+    },
+    get query(): never {
+        throw new Error();
+    },
+};
+
+export type MockUrqlClientParams = {
+    mockQuery?: Client['executeQuery'];
+};
+
+export const createMockUrqlClient = ({ mockQuery }: MockUrqlClientParams): Client => {
+    // https://formidable.com/open-source/urql/docs/advanced/testing/ では executeQuery と executeMutation と executeSubscription のみからなるオブジェクトを作る例を紹介しているが、query メソッドなども利用することがあるので Client インスタンスを作ってからメソッドを差し替える方法をとっている。
+
+    const result = createClient({ url: 'https://localhost/mock-urql-client', exchanges: [] });
+    result.executeQuery = query => {
+        if (mockQuery == null) {
+            throw new Error('mockQuery is not implemented.');
+        }
+        return mockQuery(query);
+    };
+    result.executeMutation = (): never => {
+        throw new Error('Not implemented.');
+    };
+    result.executeSubscription = (): never => {
+        throw new Error('Not implemented.');
+    };
+    return result;
+};
+
 // https://dummyimage.com/ というダミー画像生成サイトを利用している
 const generateDummyImage = (type: 1 | 2, size: 'small' | 'large') => {
     const sizeParam = size === 'small' ? '200x200' : '400x600';
@@ -125,7 +162,7 @@ const generateDummyImage = (type: 1 | 2, size: 'small' | 'large') => {
     }
 };
 
-export type GenerateRoomDataParams = {
+export type CreateMockRoomParams = {
     myParticipantRole: ParticipantRole;
     setCharacters: boolean;
     setCharacterTagNames: boolean;
@@ -133,7 +170,7 @@ export type GenerateRoomDataParams = {
     setParamNames: boolean;
 };
 
-export const generateRoomData = (params: GenerateRoomDataParams): State => {
+export const createMockRoom = (params: CreateMockRoomParams): State => {
     const characterId1 = 'character-id-1';
     const characterId2 = 'character-id-2';
 
@@ -294,11 +331,11 @@ export const generateRoomData = (params: GenerateRoomDataParams): State => {
     return result;
 };
 
-export type GenerateRoomMessagesDataParams = {
+export type CreateMockRoomMessagesParams = {
     setGeneralMessages: boolean;
 };
 
-export const generateRoomMessagesData = (params: GenerateRoomMessagesDataParams): RoomMessages => {
+export const createMockRoomMessages = (params: CreateMockRoomMessagesParams): RoomMessages => {
     const m1: RoomPublicMessage = {
         __typename: 'RoomPublicMessage',
         messageId: '1',
@@ -370,7 +407,7 @@ export const generateRoomMessagesData = (params: GenerateRoomMessagesDataParams)
     return result;
 };
 
-export const userData: User = {
+export const mockUser: User = {
     emailVerified: false,
     isAnonymous: false,
     metadata: {},
