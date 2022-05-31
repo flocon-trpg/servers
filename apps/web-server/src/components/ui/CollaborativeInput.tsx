@@ -2,7 +2,7 @@
 import React from 'react';
 import Quill from 'quill';
 import QuillDelta from 'quill-delta';
-import { css } from '@emotion/react';
+import { SerializedStyles, css } from '@emotion/react';
 import { useBuffer } from '../../hooks/useBuffer';
 import { diff, serializeUpOperation, toUpOperation } from '@kizahasi/ot-string';
 import { useLatest, usePrevious } from 'react-use';
@@ -28,23 +28,48 @@ quill.bubble.css:389 に、下のようにplaceholderに関するstyleが記述�
 
 borderはantdになるべく合わせている。
 */
-const generateBaseCss = ({ size }: { size: 'small' | 'medium' }) => {
-    const isSmall = size === 'small';
+const generateBaseCss = ({ size }: { size: 'verySmall' | 'small' | 'medium' }) => {
+    let fontSize: string;
+    let padding: string;
+    let paddingX: string;
+    switch (size) {
+        case 'verySmall': {
+            fontSize = '0.7rem';
+            padding = '2px 4px';
+            paddingX = '4px';
+            break;
+        }
+        case 'small': {
+            fontSize = '0.75rem';
+            padding = '2px 4px';
+            paddingX = '4px';
+            break;
+        }
+        case 'medium': {
+            fontSize = '0.8rem';
+            padding = '4px 8px';
+            paddingX = '8px';
+            break;
+        }
+    }
     return css`
         .ql-editor.ql-blank::before {
             color: rgb(140, 140, 140);
             font-style: normal;
-            left: ${isSmall ? '4px' : '8px'};
-            right: ${isSmall ? '4px' : '8px'};
+            left: ${paddingX};
+            right: ${paddingX};
         }
 
         .ql-editor {
-            padding: ${isSmall ? '2px 4px' : '4px 8px'};
+            font-size: ${fontSize};
+            padding: ${padding};
             border: 1px solid #434343;
             border-radius: 2px;
         }
     `;
 };
+
+const verySmallCss = generateBaseCss({ size: 'verySmall' });
 
 const smallCss = generateBaseCss({ size: 'small' });
 
@@ -119,7 +144,7 @@ export type Props = {
     disabled?: boolean;
     className?: string;
     style?: React.CSSProperties;
-    size?: 'small' | 'medium' | undefined;
+    size?: 'verySmall' | 'small' | 'medium' | undefined;
 };
 
 const useWarnPlaceholderChanges = ({
@@ -263,10 +288,20 @@ export const CollaborativeInput: React.FC<Props> = ({
 
     useWarnPlaceholderChanges({ quill, placeholderProp: placeholder });
 
-    const isSmall = size === 'small';
+    let sizeCss: SerializedStyles;
+    switch (size) {
+        case 'verySmall':
+            sizeCss = verySmallCss;
+            break;
+        case 'small':
+            sizeCss = smallCss;
+            break;
+        default:
+            sizeCss = mediumCss;
+    }
     const cssValue = React.useMemo(() => {
-        return css([isSmall ? smallCss : mediumCss, disabled ? disabledCss : null]);
-    }, [isSmall, disabled]);
+        return css([sizeCss, disabled ? disabledCss : null]);
+    }, [sizeCss, disabled]);
 
     /* 
     refのあるdivにはQuillによってclassが自動的にセットされる。もしcssをrefのあるdivと同じ場所に置くと、cssValueが変わったときにrefのあるdivに入っていたclassが消失してしまう。
