@@ -77,7 +77,7 @@
         "isomorphic-ws": "4.0.1",
         "jest": "27.5.1",
         "ts-jest": "27.1.5",
-        "url-join": "4.0.1",
+        "url-join": "5.0.0",
         "ws": "8.7.0"
     },
     "engines": {
