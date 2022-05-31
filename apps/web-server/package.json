@@ -90,6 +90,7 @@
         "@testing-library/react": "13.2.0",
         "@types/jest": "27.5.0",
         "babel-loader": "8.2.5",
+        "chromatic": "6.5.4",
         "jest": "27.5.1",
         "monaco-editor": "0.33.0",
         "sass-loader": "13.0.0",
@@ -130,7 +131,7 @@
         "tc": "yarn run type-check",
         "storybook": "run-s build:less storybook:core",
         "storybook:core": "start-storybook -p 6006",
-        "build-storybook": "run-s build:less build-storybook:core",
+        "build-storybook": "yarn build:less && yarn build-storybook:core",
         "build-storybook:core": "build-storybook"
     },
     "license": "MIT"
