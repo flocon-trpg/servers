@@ -1843,7 +1843,7 @@ __metadata:
     "@urql/core": 2.4.4
     apollo-server-express: ^3.3.0
     axios: 0.27.2
-    bcdice: ^3.3.0
+    bcdice: ^3.6.0
     bcrypt: ^5.0.1
     check-disk-space: ^3.0.1
     class-validator: ^0.13.1
@@ -5452,13 +5452,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bcdice@npm:^3.3.0":
-  version: 3.5.1
-  resolution: "bcdice@npm:3.5.1"
+"bcdice@npm:^3.6.0":
+  version: 3.6.0
+  resolution: "bcdice@npm:3.6.0"
   dependencies:
     lodash: ^4.17.20
     source-map-support: ^0.5.19
-  checksum: f91085f5bc9e3943954c0358f7bd03513a8eff167df48bd3010e2774cbff49f03969e8c715ae0969deb81fc724de147166f5f37e94a71606aff562f61007aab1
+  checksum: 818ff5f0118f2a636c6b29f01e22424f1d1d3c995dbedabb113b1d158c98071c7af21a00d0ed0db733a94a959d6802af552f4797bb327d19064fed2c9f63a075
   languageName: node
   linkType: hard
 

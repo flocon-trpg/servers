@@ -27,7 +27,7 @@
         "@types/ws": "^8.0.0",
         "@types/yargs": "^17.0.3",
         "apollo-server-express": "^3.3.0",
-        "bcdice": "^3.3.0",
+        "bcdice": "^3.6.0",
         "bcrypt": "^5.0.1",
         "check-disk-space": "^3.0.1",
         "class-validator": "^0.13.1",
