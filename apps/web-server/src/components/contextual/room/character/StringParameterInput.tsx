@@ -19,6 +19,8 @@ import {
     toNullableTextUpOperation,
 } from '@flocon-trpg/core';
 import { CollaborativeInput } from '../../../ui/CollaborativeInput';
+import classNames from 'classnames';
+import { flex, flex1, flexNone } from '../../../../utils/className';
 
 const applyCharacter = apply(characterTemplate);
 type CharacterState = State<typeof characterTemplate>;
@@ -59,6 +61,7 @@ export const StringParameterInput: React.FC<Props> = ({
     const input = ({ disabled }: { disabled: boolean }) => (
         <CollaborativeInput
             style={{ width: inputWidth }}
+            className={classNames(flex1)}
             size='small'
             bufferDuration='default'
             disabled={disabled}
@@ -92,7 +95,7 @@ export const StringParameterInput: React.FC<Props> = ({
         if (compact) {
             return (
                 <Tooltip title={parameterIsPrivateAndNotCreatedByMe}>
-                    <EyeInvisibleOutlined />
+                    <EyeInvisibleOutlined className={classNames(flexNone)} />
                 </Tooltip>
             );
         }
@@ -100,7 +103,7 @@ export const StringParameterInput: React.FC<Props> = ({
             <>
                 {input({ disabled: true })}
                 <Tooltip title={parameterIsPrivateAndNotCreatedByMe}>
-                    <EyeInvisibleOutlined />
+                    <EyeInvisibleOutlined className={classNames(flexNone)} />
                 </Tooltip>
             </>
         );
@@ -138,7 +141,7 @@ export const StringParameterInput: React.FC<Props> = ({
         />
     );
     return (
-        <div style={{ whiteSpace: 'nowrap' }}>
+        <div className={classNames(flex)} style={{ whiteSpace: 'nowrap' }}>
             {input({ disabled: false })}
             {compact && !createdByMe ? null : isPrivateButton}
         </div>
