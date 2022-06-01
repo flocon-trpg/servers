@@ -1985,6 +1985,7 @@ __metadata:
   resolution: "@flocon-trpg/utils@workspace:packages/utils"
   dependencies:
     "@kizahasi/option": ^1.0.0
+    "@kizahasi/result": ^1.0.1
     "@types/jest": 27.5.0
     jest: 27.5.1
     rimraf: 3.0.2
