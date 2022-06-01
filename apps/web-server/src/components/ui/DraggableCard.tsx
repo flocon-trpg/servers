@@ -2,7 +2,6 @@ import React, { PropsWithChildren } from 'react';
 import { NumberSize, ResizeDirection } from 're-resizable';
 import { CloseOutlined } from '@ant-design/icons';
 import { cancelRnd } from '../../utils/className';
-import { Rnd, Props as RndProps } from './Rnd';
 import { ControlPosition } from 'react-draggable';
 import { useAtomSelector } from '../../atoms/useAtomSelector';
 import { roomConfigAtom } from '../../atoms/roomConfig/roomConfigAtom';
@@ -11,10 +10,10 @@ import {
     minPanelOpacity,
 } from '../../atoms/roomConfig/types/roomConfig/resources';
 import { Styles } from '../../styles';
+import { Rnd, Props as RndProps } from 'react-rnd';
 
 // 上からheader、topElement、children、bottomElementの順で描画される。children以外はheightが固定されている。
 // それぞれの要素は、styleにheightやpaddingなどが自動的に設定されたdivに包まれる。このdivのstyleは、自動的に設定されていない値であれば、*ContainerStyleというプロパティに渡すことで好きな値をセットすることができる。
-// divに包んでいる理由は、
 // デザインはantdのCardを参考にしているところもあるが、結構変えている。
 
 const defaultBottomElementContainerHeight = 60;
@@ -29,8 +28,8 @@ const borderWidth = 2;
 type Props = {
     bottomElement?: React.ReactNode;
     bottomElementContainerHeight?: number;
-    bottomElementContainerStyle?: Omit<React.CSSProperties, 'height' | 'backgroundColor'>;
-    childrenContainerStyle?: Omit<React.CSSProperties, 'height' | 'backgroundColor'>;
+    bottomElementContainerStyle?: Omit<React.CSSProperties, 'flex' | 'backgroundColor'>;
+    childrenContainerStyle?: Omit<React.CSSProperties, 'flex' | 'backgroundColor'>;
     position: RndProps['position'];
     size: RndProps['size'];
     onDragStop: (data: ControlPosition) => void;
@@ -44,8 +43,11 @@ type Props = {
     minWidth?: string | number;
     topElement?: React.ReactNode;
     topElementContainerHeight?: number;
-    topElementContainerStyle?: Omit<React.CSSProperties, 'height' | 'backgroundColor'>;
+    topElementContainerStyle?: Omit<React.CSSProperties, 'flex' | 'backgroundColor'>;
     zIndex: number;
+    // これをtrueにするとリサイズ時のパフォーマンス向上が期待できるが、ユーザー体験は損なわれる。
+    // また、リサイズ中はcontent自体がなくなるため、content内で例えば'network-only'のuseQueryが初めに呼び出されるようになっている場合は無駄な処理が発生してしまう。
+    hideElementsOnResize?: boolean;
 };
 
 export const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) => {
@@ -64,6 +66,30 @@ export const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) 
     panelOpacity = Math.max(minPanelOpacity, panelOpacity);
     panelOpacity = Math.min(1, panelOpacity);
 
+    const [resizing, setResizing] = React.useState(false);
+
+    const header = (
+        <div
+            style={{
+                flex: `0 1 ${props.headerHeight ?? defaultHeaderHeight}px`,
+                display: 'flex',
+                alignItems: 'center',
+                background: headerBackgroundColor,
+                color: headerColor,
+                fontSize: 14,
+                padding: `0 ${horizontalPadding}px`,
+            }}
+        >
+            <div style={{ flex: 0, whiteSpace: 'nowrap' }}>{props.header}</div>
+            <div style={{ flex: 'auto' }} />
+            <div style={{ flex: 0, cursor: 'pointer' }} onClick={() => props.onClose()}>
+                <CloseOutlined style={{ opacity: 0.7 }} />
+            </div>
+        </div>
+    );
+
+    const hideElementsOnResize = props.hideElementsOnResize === true && resizing;
+
     return (
         <Rnd
             cancel={`.${cancelRnd}`}
@@ -71,9 +97,19 @@ export const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) 
             size={props.size}
             minHeight={props.minHeight}
             minWidth={props.minWidth}
-            onDragStop={props.onDragStop}
-            onResizeStop={props.onResizeStop}
-            style={{ zIndex: props.zIndex }}
+            onDragStop={(_, data) => props.onDragStop(data)}
+            onResizeStart={() => setResizing(true)}
+            onResizeStop={(_, dir, __, delta) => {
+                props.onResizeStop(dir, delta);
+                setResizing(false);
+            }}
+            style={{
+                display: 'flex',
+                flexDirection: 'column',
+                backgroundColor: Styles.backgroundColor,
+                zIndex: props.zIndex,
+                opacity: panelOpacity,
+            }}
             onMouseDown={e => {
                 if ((e.buttons & 1) !== 1) {
                     return;
@@ -81,68 +117,47 @@ export const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) 
                 props.onMoveToFront();
             }}
         >
+            {header}
             <div
+                className={cancelRnd}
                 style={{
+                    flex: 1,
+                    display: 'flex',
                     borderWidth: `0 ${borderWidth}px ${borderWidth}px ${borderWidth}px`,
                     borderStyle: 'solid',
                     borderColor,
-                    backgroundColor: Styles.backgroundColor,
-                    height: '100%', // heightとwidthを設定することで、childrenの（親要素の）大きさがDraggableCardの大きさに連動するようになる
-                    width: '100%',
-                    opacity: panelOpacity,
+                    overflow: 'auto',
                 }}
             >
                 <div
                     style={{
-                        alignItems: 'center',
-                        background: headerBackgroundColor,
-                        color: headerColor,
-                        display: 'flex', // display: flexとalignItems: centerを組み合わせることで、headerが中央に表示されるようにしている
-                        fontSize: 14,
-                        height: props.headerHeight ?? defaultHeaderHeight,
-                        padding: `0 ${horizontalPadding}px`,
-                    }}
-                >
-                    <div style={{ flex: 0, whiteSpace: 'nowrap' }}>{props.header}</div>
-                    <div style={{ flex: 'auto' }} />
-                    <div style={{ flex: 0, cursor: 'pointer' }} onClick={() => props.onClose()}>
-                        <CloseOutlined style={{ opacity: 0.7 }} />
-                    </div>
-                </div>
-                <div
-                    className={cancelRnd}
-                    style={{
                         ...props.topElementContainerStyle,
+                        flex: `0 1 ${topElementContainerHeight}px`,
                         backgroundColor: Styles.backgroundColor,
-                        height: `${topElementContainerHeight}px`,
                         //padding: `6px ${horizontalPadding}px`
                     }}
                 >
-                    {props.topElement}
+                    {!hideElementsOnResize && props.topElement}
                 </div>
                 <div
-                    className={cancelRnd}
                     style={{
                         ...props.childrenContainerStyle,
+                        flex: 1,
                         backgroundColor: Styles.backgroundColor,
-                        height: `calc(100% - ${
-                            props.headerHeight ?? defaultHeaderHeight
-                        }px - ${topElementContainerHeight}px - ${bottomElementContainerHeight}px)`,
                         // padding: `12px ${horizontalPadding}px`,
                     }}
                 >
-                    {props.children}
+                    {!hideElementsOnResize && props.children}
                 </div>
                 <div
-                    className={cancelRnd}
                     style={{
                         ...props.bottomElementContainerStyle,
+                        flex: `0 1 ${bottomElementContainerHeight}px`,
                         backgroundColor: Styles.backgroundColor,
-                        height: `${bottomElementContainerHeight}px`,
                         //padding: `6px ${horizontalPadding}px`
                     }}
                 >
-                    {props.bottomElement}
+                    {!hideElementsOnResize && props.bottomElement}
                 </div>
             </div>
         </Rnd>

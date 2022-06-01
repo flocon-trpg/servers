@@ -30,8 +30,8 @@ import { useUpdateAtom } from 'jotai/utils';
 import { roomPublicMessageInputAtom } from '../../../../atoms/inputs/roomPublicMessageInputAtom';
 import { roomPrivateMessageInputAtom } from '../../../../atoms/inputs/roomPrivateMessageInputAtom';
 import { useImmerUpdateAtom } from '../../../../atoms/useImmerUpdateAtom';
-import { BufferedTextArea } from '../../../ui/BufferedTextArea';
 import { CharacterVarInput } from './CharacterVarInput';
+import { CollaborativeInput } from '../../../ui/CollaborativeInput';
 
 const descriptionStyle: React.CSSProperties = {
     flexBasis: '80px',
@@ -76,14 +76,13 @@ const ChatPaletteList: React.FC<ChatPaletteListProps> = ({
 
     if (isEditMode) {
         return (
-            <BufferedTextArea
+            <CollaborativeInput
+                multiline
                 style={{ minHeight: 'calc(100% - 32px)' }}
-                disableResize
                 size='small'
                 bufferDuration='default'
                 value={chatPaletteText ?? ''}
                 onChange={e => onChange(e.currentValue)}
-                spellCheck={false}
             />
         );
     }
@@ -235,7 +234,6 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
                             <CharacterVarInput
                                 style={{ padding: '0 0 2px 0' }}
                                 classNames={classNames(flex1)}
-                                disableResize
                                 character={selectedCharacter}
                                 onChange={newValue =>
                                     setRoomState(roomState => {

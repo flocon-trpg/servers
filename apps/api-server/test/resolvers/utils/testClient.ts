@@ -103,7 +103,7 @@ const createUrqlClient = (
                     subscribe: sink => ({
                         unsubscribe: wsClient(wsUrl, testAuthorizationHeaderValue).subscribe(
                             operation,
-                            sink as any
+                            sink
                         ),
                     }),
                 }),

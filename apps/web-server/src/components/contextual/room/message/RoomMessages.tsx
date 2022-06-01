@@ -21,7 +21,7 @@ import {
     Tooltip,
 } from 'antd';
 import moment from 'moment';
-import { apolloError, failure, notFetch, useRoomMesages } from '../../../../hooks/useRoomMessages';
+import { failure, graphqlError, notFetch, useRoomMesages } from '../../../../hooks/useRoomMessages';
 import {
     Message,
     Notification,
@@ -42,7 +42,6 @@ import {
 import * as Icon from '@ant-design/icons';
 import { Gutter } from 'antd/lib/grid/row';
 import { DialogFooter } from '../../../ui/DialogFooter';
-import { BufferedInput } from '../../../ui/BufferedInput';
 import { QueryResultViewer } from '../../../ui/QueryResultViewer';
 import { useMessageFilter } from '../../../../hooks/useMessageFilter';
 import { RoomMessage as RoomMessageNameSpace } from './RoomMessage';
@@ -64,9 +63,8 @@ import {
     itemsCenter,
 } from '../../../../utils/className';
 import classNames from 'classnames';
-import { MyAuthContext, getUserUid } from '../../../../contexts/MyAuthContext';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
-import { useMutation } from '@apollo/client';
+import { useMutation } from 'urql';
 import { MessageTabConfig } from '../../../../atoms/roomConfig/types/messageTabConfig';
 import { atom } from 'jotai';
 import { roomAtom } from '../../../../atoms/room/roomAtom';
@@ -84,6 +82,11 @@ import { column, row } from '../../../../atoms/userConfig/types';
 import { InputDescription } from '../../../ui/InputDescription';
 import { WritableDraft } from 'immer/dist/internal';
 import { MessagePanelConfig } from '../../../../atoms/roomConfig/types/messagePanelConfig';
+import { ItemType } from 'antd/lib/menu/hooks/useItems';
+import { defaultTriggerSubMenuAction } from '../../../../utils/variables';
+import { firebaseUserAtom } from '../../../../pages/_app';
+import { getUserUid } from '../../../../utils/firebase/firebaseUserState';
+import { CollaborativeInput } from '../../../ui/CollaborativeInput';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
@@ -113,7 +116,7 @@ type TabEditorDrawerProps = {
 const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerProps) => {
     const { config, onChange: onChangeCore, onClose } = props;
 
-    const myAuth = React.useContext(MyAuthContext);
+    const firebaseUser = useAtomValue(firebaseUserAtom);
     const publicChannelNames = usePublicChannelNames();
     const participantsMap = useParticipants();
 
@@ -324,7 +327,7 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
                     {hiwaSelectValue === custom &&
                         participantsMap.size <= 1 &&
                         [...participantsMap]
-                            .filter(([userUid]) => getUserUid(myAuth) !== userUid)
+                            .filter(([userUid]) => getUserUid(firebaseUser) !== userUid)
                             .sort(([, x], [, y]) => (x.name ?? '').localeCompare(y.name ?? ''))
                             .map(([userUid, participant]) => {
                                 return (
@@ -400,7 +403,7 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (
                         <Col flex='auto' />
                         <Col flex={0}>チャンネル{i}</Col>
                         <Col span={drawerInputSpan}>
-                            <BufferedInput
+                            <CollaborativeInput
                                 bufferDuration='default'
                                 value={publicChannelNames == null ? '' : publicChannelNames[key]}
                                 onChange={e => {
@@ -439,10 +442,10 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
 
     const { message, showPrivateMessageMembers, publicChannelNames } = props;
 
-    const myAuth = React.useContext(MyAuthContext);
-    const [editMessageMutation] = useMutation(EditMessageDocument);
-    const [deleteMessageMutation] = useMutation(DeleteMessageDocument);
-    const [makeMessageNotSecret] = useMutation(MakeMessageNotSecretDocument);
+    const firebaseUser = useAtomValue(firebaseUserAtom);
+    const [, editMessageMutation] = useMutation(EditMessageDocument);
+    const [, deleteMessageMutation] = useMutation(DeleteMessageDocument);
+    const [, makeMessageNotSecret] = useMutation(MakeMessageNotSecretDocument);
     const [isEditModalVisible, setIsEditModalVisible] = React.useState(false);
     const roomId = useAtomValue(roomIdAtom);
     const roomMessagesFontSizeDelta = useAtomValue(roomMessageFontSizeDeltaAtom);
@@ -458,10 +461,10 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
         message.type === privateMessage || message.type === publicMessage ? message.value : null;
 
     let createdByMe: boolean | null;
-    if (typeof myAuth === 'string' || userMessage == null) {
+    if (typeof firebaseUser === 'string' || userMessage == null) {
         createdByMe = null;
     } else {
-        createdByMe = myAuth.uid === userMessage.createdBy;
+        createdByMe = firebaseUser.uid === userMessage.createdBy;
     }
 
     const createdAt =
@@ -535,57 +538,45 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
             );
         }
     }
-    const notSecretMenuItem =
+    const notSecretMenuItem: ItemType =
         userMessage?.isSecret === true &&
         userMessage.createdBy != null &&
-        userMessage.createdBy === getUserUid(myAuth) ? (
-            <Menu.Item
-                onClick={() => {
-                    if (roomId == null) {
-                        return;
-                    }
-                    makeMessageNotSecret({
-                        variables: { messageId: userMessage.messageId, roomId },
-                    });
-                }}
-            >
-                公開
-            </Menu.Item>
-        ) : null;
-    const editMenuItem =
-        userMessage != null && createdByMe === true && userMessage.commandResult == null ? (
-            <Menu.Item
-                onClick={() => {
-                    setIsEditModalVisible(true);
-                }}
-            >
-                編集
-            </Menu.Item>
-        ) : null;
-    const deleteMenuItem =
-        userMessage != null && createdByMe === true ? (
-            <Menu.Item
-                onClick={() => {
-                    if (roomId == null) {
-                        return;
-                    }
-                    deleteMessageMutation({
-                        variables: { messageId: userMessage.messageId, roomId },
-                    });
-                }}
-            >
-                削除
-            </Menu.Item>
-        ) : null;
+        userMessage.createdBy === getUserUid(firebaseUser)
+            ? {
+                  key: '公開@RoomMessageComponent',
+                  label: '公開',
+                  onClick: () => {
+                      if (roomId == null) {
+                          return;
+                      }
+                      makeMessageNotSecret({ messageId: userMessage.messageId, roomId });
+                  },
+              }
+            : null;
+    const editMenuItem: ItemType =
+        userMessage != null && createdByMe === true && userMessage.commandResult == null
+            ? {
+                  key: '編集@RoomMessageComponent',
+                  label: '編集',
+                  onClick: () => setIsEditModalVisible(true),
+              }
+            : null;
+    const deleteMenuItem: ItemType =
+        userMessage != null && createdByMe === true
+            ? {
+                  key: '削除@RoomMessageComponent',
+                  label: '削除',
+                  onClick: () => {
+                      if (roomId == null) {
+                          return;
+                      }
+                      deleteMessageMutation({ messageId: userMessage.messageId, roomId });
+                  },
+              }
+            : null;
     const allMenuItemsAreNull =
         notSecretMenuItem == null && editMenuItem == null && deleteMenuItem == null;
-    const menuItems = (
-        <>
-            {notSecretMenuItem}
-            {editMenuItem}
-            {deleteMenuItem}
-        </>
-    );
+    const menuItems: ItemType[] = [notSecretMenuItem, editMenuItem, deleteMenuItem];
     const iconSize = 28;
     const iconMargin = 6;
     return (
@@ -672,7 +663,15 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                 }}
             >
                 {allMenuItemsAreNull ? null : (
-                    <Dropdown overlay={<Menu>{menuItems}</Menu>} trigger={['click']}>
+                    <Dropdown
+                        overlay={
+                            <Menu
+                                items={menuItems}
+                                triggerSubMenuAction={defaultTriggerSubMenuAction}
+                            />
+                        }
+                        trigger={['click']}
+                    >
                         <Button type='text' size='small'>
                             <Icon.EllipsisOutlined />
                         </Button>
@@ -688,7 +687,9 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                         return;
                     }
                     editMessageMutation({
-                        variables: { messageId: userMessage.messageId, roomId, text: value },
+                        messageId: userMessage.messageId,
+                        roomId,
+                        text: value,
                     }).then(() => {
                         setIsEditModalVisible(false);
                         setValue('');
@@ -716,7 +717,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
 
     const writingStatusHeight = 16;
 
-    const myAuth = React.useContext(MyAuthContext);
+    const firebaseUser = useAtomValue(firebaseUserAtom);
     const writingMessageStatusResult = useWritingMessageStatus();
     const publicChannelNames = usePublicChannelNames();
     const participants = useAtomValue(participantsAtom);
@@ -757,7 +758,8 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
     const writingUsers = [...writingMessageStatusResult]
         .filter(
             ([key, value]) =>
-                key !== getUserUid(myAuth) && value.current === WritingMessageStatusType.Writing
+                key !== getUserUid(firebaseUser) &&
+                value.current === WritingMessageStatusType.Writing
         )
         .map(([key]) => key)
         .map(userUid => participantsMap?.get(userUid)?.name ?? '')
@@ -788,7 +790,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
     if (messages !== notFetch) {
         if (messages.isError) {
             switch (messages.error.type) {
-                case apolloError:
+                case graphqlError:
                     content = (
                         <QueryResultViewer
                             loading={false}
@@ -914,51 +916,62 @@ export const RoomMessages: React.FC<Props> = ({ height, panelId }: Props) => {
                                           <Dropdown
                                               trigger={['click']}
                                               overlay={
-                                                  <Menu>
-                                                      <Menu.Item
-                                                          icon={<Icon.SettingOutlined />}
-                                                          onClick={() =>
-                                                              setEditingTabConfigKey(tab.key)
-                                                          }
-                                                      >
-                                                          編集
-                                                      </Menu.Item>
-                                                      <Menu.Item
-                                                          icon={<Icon.DeleteOutlined />}
-                                                          onClick={() => {
-                                                              Modal.warn({
-                                                                  onOk: () => {
-                                                                      setRoomConfig(roomConfig => {
-                                                                          if (roomConfig == null) {
-                                                                              return;
-                                                                          }
-                                                                          const messagePanel =
-                                                                              roomConfig.panels
-                                                                                  .messagePanels[
-                                                                                  panelId
-                                                                              ];
-                                                                          if (
-                                                                              messagePanel == null
-                                                                          ) {
-                                                                              return;
-                                                                          }
-                                                                          messagePanel.tabs.splice(
-                                                                              tabIndex,
-                                                                              1
+                                                  <Menu
+                                                      items={[
+                                                          {
+                                                              key: '編集@RoomMessages',
+                                                              label: '編集',
+                                                              icon: <Icon.SettingOutlined />,
+                                                              onClick: () =>
+                                                                  setEditingTabConfigKey(tab.key),
+                                                          },
+                                                          {
+                                                              key: '削除@RoomMessages',
+                                                              label: '削除',
+                                                              icon: <Icon.DeleteOutlined />,
+                                                              onClick: () => {
+                                                                  Modal.warn({
+                                                                      onOk: () => {
+                                                                          setRoomConfig(
+                                                                              roomConfig => {
+                                                                                  if (
+                                                                                      roomConfig ==
+                                                                                      null
+                                                                                  ) {
+                                                                                      return;
+                                                                                  }
+                                                                                  const messagePanel =
+                                                                                      roomConfig
+                                                                                          .panels
+                                                                                          .messagePanels[
+                                                                                          panelId
+                                                                                      ];
+                                                                                  if (
+                                                                                      messagePanel ==
+                                                                                      null
+                                                                                  ) {
+                                                                                      return;
+                                                                                  }
+                                                                                  messagePanel.tabs.splice(
+                                                                                      tabIndex,
+                                                                                      1
+                                                                                  );
+                                                                              }
                                                                           );
-                                                                      });
-                                                                  },
-                                                                  okCancel: true,
-                                                                  maskClosable: true,
-                                                                  closable: true,
-                                                                  content:
-                                                                      'タブを削除します。よろしいですか？',
-                                                              });
-                                                          }}
-                                                      >
-                                                          削除
-                                                      </Menu.Item>
-                                                  </Menu>
+                                                                      },
+                                                                      okCancel: true,
+                                                                      maskClosable: true,
+                                                                      closable: true,
+                                                                      content:
+                                                                          'タブを削除します。よろしいですか？',
+                                                                  });
+                                                              },
+                                                          },
+                                                      ]}
+                                                      triggerSubMenuAction={
+                                                          defaultTriggerSubMenuAction
+                                                      }
+                                                  />
                                               }
                                           >
                                               <Button

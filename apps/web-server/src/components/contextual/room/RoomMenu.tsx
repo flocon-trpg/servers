@@ -25,10 +25,9 @@ import { useMyUserUid } from '../../../hooks/useMyUserUid';
 import { useSignOut } from '../../../hooks/useSignOut';
 import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../../../utils/className';
-import { MyAuthContext } from '../../../contexts/MyAuthContext';
 import { GenerateLogModal } from './message/GenerateLogModal';
-import { useLazyQuery, useMutation } from '@apollo/client';
-import { graphQLErrors, roomAtom, roomNotificationsAtom, text } from '../../../atoms/room/roomAtom';
+import { useMutation, useQuery } from 'urql';
+import { error, roomAtom, roomNotificationsAtom, text } from '../../../atoms/room/roomAtom';
 import { useAtomSelector } from '../../../atoms/useAtomSelector';
 import { roomConfigAtom } from '../../../atoms/roomConfig/roomConfigAtom';
 import { RoomConfigUtils } from '../../../atoms/roomConfig/types/roomConfig/utils';
@@ -39,13 +38,15 @@ import { useUpdateAtom } from 'jotai/utils';
 import { useImmerUpdateAtom } from '../../../atoms/useImmerUpdateAtom';
 import { editRoomDrawerVisibilityAtom } from '../../../atoms/overlay/editRoomDrawerVisibilityAtom';
 import { OpacityBar } from '../../ui/VolumeBar';
-import { atom, useAtom } from 'jotai';
+import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import produce from 'immer';
 import {
     defaultPanelOpacity,
     minPanelOpacity,
 } from '../../../atoms/roomConfig/types/roomConfig/resources';
 import { Styles } from '../../../styles';
+import { ItemType } from 'antd/lib/menu/hooks/useItems';
+import { firebaseUserAtom } from '../../../pages/_app';
 
 const panelOpacityAtom = atom(
     get => get(roomConfigAtom)?.panelOpacity,
@@ -75,6 +76,8 @@ const showBackgroundBoardViewerAtom = atom(
     }
 );
 
+const panelsOpacityModalVisibilityAtom = atom(false);
+
 type BecomePlayerModalProps = {
     roomId: string;
     visible: boolean;
@@ -91,8 +94,12 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
     const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
-    const [promoteToPlayer] = useMutation(PromoteToPlayerDocument);
-    const [getRoomAsListItem, getRoomAsListItemResult] = useLazyQuery(GetRoomAsListItemDocument);
+    const [, promoteToPlayer] = useMutation(PromoteToPlayerDocument);
+    const [getRoomAsListItemResult, getRoomAsListItem] = useQuery({
+        query: GetRoomAsListItemDocument,
+        pause: true,
+        variables: { roomId },
+    });
     const requiresPlayerPasswordRef = React.useRef(getRoomAsListItem);
     React.useEffect(() => {
         requiresPlayerPasswordRef.current = getRoomAsListItem;
@@ -100,7 +107,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
     React.useEffect(() => {
         setInputValue('');
         setIsPosting(false);
-        requiresPlayerPasswordRef.current({ variables: { roomId } });
+        requiresPlayerPasswordRef.current();
     }, [visible, roomId]);
 
     const title = '参加者に昇格';
@@ -125,12 +132,12 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                 okButtonProps={{ disabled: isPosting }}
                 onOk={() => {
                     setIsPosting(true);
-                    promoteToPlayer({ variables: { roomId, password: inputValue } }).then(e => {
-                        if (e.errors != null) {
+                    promoteToPlayer({ roomId, password: inputValue }).then(e => {
+                        if (e.error != null) {
                             addRoomNotification({
-                                type: graphQLErrors,
+                                type: error,
                                 createdAt: new Date().getTime(),
-                                errors: e.errors,
+                                error: e.error,
                             });
                             onOk();
                             return;
@@ -182,12 +189,12 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
             okButtonProps={{ disabled: isPosting }}
             onOk={() => {
                 setIsPosting(true);
-                promoteToPlayer({ variables: { roomId } }).then(e => {
-                    if (e.errors != null) {
+                promoteToPlayer({ roomId }).then(e => {
+                    if (e.error != null) {
                         addRoomNotification({
-                            type: graphQLErrors,
+                            type: error,
                             createdAt: new Date().getTime(),
-                            errors: e.errors,
+                            error: e.error,
                         });
                         onOk();
                         return;
@@ -246,7 +253,7 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
 }: DeleteRoomModalProps) => {
     const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
     const [isPosting, setIsPosting] = React.useState(false);
-    const [deleteRoom] = useMutation(DeleteRoomDocument);
+    const [, deleteRoom] = useMutation(DeleteRoomDocument);
     React.useEffect(() => {
         setIsPosting(false);
     }, [visible, roomId]);
@@ -262,12 +269,12 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
             cancelText={disabled ? '閉じる' : 'キャンセル'}
             onOk={() => {
                 setIsPosting(true);
-                deleteRoom({ variables: { id: roomId } }).then(e => {
-                    if (e.errors != null) {
+                deleteRoom({ id: roomId }).then(e => {
+                    if (e.error != null) {
                         addRoomNotification({
-                            type: graphQLErrors,
+                            type: error,
                             createdAt: new Date().getTime(),
-                            errors: e.errors,
+                            error: e.error,
                         });
                         onOk();
                         return;
@@ -338,7 +345,7 @@ const ResetMessagesModal: React.FC<ResetMessagesModalProps> = ({
 }: DeleteRoomModalProps) => {
     const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
     const [isPosting, setIsPosting] = React.useState(false);
-    const [resetMessages] = useMutation(ResetMessagesDocument);
+    const [, resetMessages] = useMutation(ResetMessagesDocument);
     React.useEffect(() => {
         setIsPosting(false);
     }, [visible, roomId]);
@@ -354,12 +361,12 @@ const ResetMessagesModal: React.FC<ResetMessagesModalProps> = ({
             cancelText={disabled ? '閉じる' : 'キャンセル'}
             onOk={() => {
                 setIsPosting(true);
-                resetMessages({ variables: { roomId } }).then(e => {
-                    if (e.errors != null) {
+                resetMessages({ roomId }).then(e => {
+                    if (e.error != null) {
                         addRoomNotification({
-                            type: graphQLErrors,
+                            type: error,
                             createdAt: new Date().getTime(),
-                            errors: e.errors,
+                            error: e.error,
                         });
                         onOk();
                         return;
@@ -412,6 +419,40 @@ const ResetMessagesModal: React.FC<ResetMessagesModalProps> = ({
     );
 };
 
+const PanelsOpacityModal: React.FC<{
+    visible: boolean;
+    onClose: () => void;
+}> = ({ visible, onClose }) => {
+    const [panelOpacity, setPanelOpacity] = useAtom(panelOpacityAtom);
+    const opacityStyle: React.CSSProperties = React.useMemo(
+        () => ({
+            padding: '0 4px',
+        }),
+        []
+    );
+    return (
+        <Modal
+            visible={visible}
+            closable
+            title='ウィンドウの透過度の設定'
+            okButtonProps={{ style: { display: 'none' } }}
+            cancelText='閉じる'
+            onCancel={() => onClose()}
+        >
+            <div className={classNames(flex, flexRow, itemsCenter)} style={opacityStyle}>
+                <div>透過度</div>
+                <OpacityBar
+                    value={panelOpacity ?? defaultPanelOpacity}
+                    minValue={minPanelOpacity}
+                    onChange={setPanelOpacity}
+                    inputNumberType='0-1'
+                    readonly={false}
+                />
+            </div>
+        </Modal>
+    );
+};
+
 type ChangeMyParticipantNameModalProps = {
     roomId: string;
     visible: boolean;
@@ -428,7 +469,7 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
     const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
-    const [changeParticipantName] = useMutation(ChangeParticipantNameDocument);
+    const [, changeParticipantName] = useMutation(ChangeParticipantNameDocument);
     React.useEffect(() => {
         setInputValue('');
         setIsPosting(false);
@@ -436,12 +477,12 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
 
     const onOk = () => {
         setIsPosting(true);
-        changeParticipantName({ variables: { roomId, newName: inputValue } }).then(e => {
-            if (e.errors != null) {
+        changeParticipantName({ roomId, newName: inputValue }).then(e => {
+            if (e.error != null) {
                 addRoomNotification({
-                    type: graphQLErrors,
+                    type: error,
                     createdAt: new Date().getTime(),
-                    errors: e.errors,
+                    error: e.error,
                 });
                 onOkCore();
                 return;
@@ -483,7 +524,7 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
     );
 };
 
-const PanelsMenu: React.FC = () => {
+const usePanelsMenuItem = () => {
     const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
     const activeBoardPanel = useAtomSelector(
         roomConfigAtom,
@@ -503,26 +544,15 @@ const PanelsMenu: React.FC = () => {
     const memoPanels = useAtomSelector(roomConfigAtom, state => state?.panels.memoPanels);
     const messagePanels = useAtomSelector(roomConfigAtom, state => state?.panels.messagePanels);
     const pieceValuePanel = useAtomSelector(roomConfigAtom, state => state?.panels.pieceValuePanel);
-    const [panelOpacity, setPanelOpacity] = useAtom(panelOpacityAtom);
+    const setIsPanelsOpacityModalVisible = useSetAtom(panelsOpacityModalVisibilityAtom);
 
     const activeBoardPanelMenu = React.useMemo(() => {
         if (activeBoardPanel == null) {
             return null;
         }
-        return (
-            <Menu.Item
-                onClick={() => {
-                    setRoomConfig(roomConfig => {
-                        if (roomConfig == null) {
-                            return;
-                        }
-                        roomConfig.panels.activeBoardPanel.isMinimized = false;
-                        RoomConfigUtils.bringPanelToFront(roomConfig, {
-                            type: 'activeBoardPanel',
-                        });
-                    });
-                }}
-            >
+        return {
+            key: 'activeBoardPanelMenu',
+            label: (
                 <div>
                     <span>
                         {activeBoardPanel.isMinimized ? (
@@ -533,40 +563,52 @@ const PanelsMenu: React.FC = () => {
                     </span>
                     <span>ボードビュアー</span>
                 </div>
-            </Menu.Item>
-        );
+            ),
+            onClick: () => {
+                setRoomConfig(roomConfig => {
+                    if (roomConfig == null) {
+                        return;
+                    }
+                    roomConfig.panels.activeBoardPanel.isMinimized = false;
+                    RoomConfigUtils.bringPanelToFront(roomConfig, {
+                        type: 'activeBoardPanel',
+                    });
+                });
+            },
+        };
     }, [activeBoardPanel, setRoomConfig]);
     const boardPanelsMenu = React.useMemo(() => {
         if (boardPanels == null) {
             return null;
         }
-        return (
-            <Menu.SubMenu title='ボードエディター'>
-                {recordToArray(boardPanels).map((pair, i) => {
-                    return (
-                        <Menu.Item
-                            key={pair.key}
-                            onClick={() => {
-                                setRoomConfig(roomConfig => {
-                                    if (roomConfig == null) {
-                                        return;
-                                    }
-                                    const boardEditorPanel =
-                                        roomConfig?.panels.boardEditorPanels[pair.key];
-                                    if (boardEditorPanel == null) {
-                                        return;
-                                    }
+        return {
+            key: 'boardPanelsMenu',
+            label: 'ボードエディター',
+            children: [
+                ...recordToArray(boardPanels).map((pair, i) => {
+                    return {
+                        key: pair.key,
+                        onClick: () => {
+                            setRoomConfig(roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                const boardEditorPanel =
+                                    roomConfig?.panels.boardEditorPanels[pair.key];
+                                if (boardEditorPanel == null) {
+                                    return;
+                                }
 
-                                    // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
-                                    boardEditorPanel.isMinimized = false;
+                                // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
+                                boardEditorPanel.isMinimized = false;
 
-                                    RoomConfigUtils.bringPanelToFront(roomConfig, {
-                                        type: 'boardEditorPanel',
-                                        panelId: pair.key,
-                                    });
+                                RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                    type: 'boardEditorPanel',
+                                    panelId: pair.key,
                                 });
-                            }}
-                        >
+                            });
+                        },
+                        label: (
                             <div>
                                 <span>
                                     {pair.value.isMinimized ? (
@@ -577,12 +619,21 @@ const PanelsMenu: React.FC = () => {
                                 </span>
                                 <span>{`パネル${i + 1}`}</span>
                             </div>
-                        </Menu.Item>
-                    );
-                })}
-                <Menu.Divider />
-                <Menu.Item
-                    onClick={() => {
+                        ),
+                    };
+                }),
+                { type: 'divider' },
+                {
+                    key: '新規作成@boardPanelsMenu',
+                    label: (
+                        <div>
+                            <span>
+                                <Icon.PlusOutlined />
+                            </span>
+                            <span>新規作成</span>
+                        </div>
+                    ),
+                    onClick: () => {
                         setRoomConfig(roomConfig => {
                             if (roomConfig == null) {
                                 return;
@@ -603,36 +654,19 @@ const PanelsMenu: React.FC = () => {
                                 panelId,
                             });
                         });
-                    }}
-                >
-                    <div>
-                        <span>
-                            <Icon.PlusOutlined />
-                        </span>
-                        <span>新規作成</span>
-                    </div>
-                </Menu.Item>
-            </Menu.SubMenu>
-        );
+                    },
+                },
+            ],
+        };
     }, [boardPanels, setRoomConfig]);
+
     const characterPanelMenu = React.useMemo(() => {
         if (characterPanel == null) {
             return null;
         }
-        return (
-            <Menu.Item
-                onClick={() => {
-                    setRoomConfig(roomConfig => {
-                        if (roomConfig == null) {
-                            return;
-                        }
-                        roomConfig.panels.characterPanel.isMinimized = false;
-                        RoomConfigUtils.bringPanelToFront(roomConfig, {
-                            type: 'characterPanel',
-                        });
-                    });
-                }}
-            >
+        return {
+            key: 'characterPanelMenu',
+            label: (
                 <div>
                     <span>
                         {characterPanel.isMinimized ? (
@@ -643,40 +677,32 @@ const PanelsMenu: React.FC = () => {
                     </span>
                     <span>キャラクター一覧</span>
                 </div>
-            </Menu.Item>
-        );
+            ),
+            onClick: () => {
+                setRoomConfig(roomConfig => {
+                    if (roomConfig == null) {
+                        return;
+                    }
+                    roomConfig.panels.characterPanel.isMinimized = false;
+                    RoomConfigUtils.bringPanelToFront(roomConfig, {
+                        type: 'characterPanel',
+                    });
+                });
+            },
+        };
     }, [characterPanel, setRoomConfig]);
     const chatPalettePanelsMenu = React.useMemo(() => {
         if (chatPalettePanels == null) {
             return null;
         }
-        return (
-            <Menu.SubMenu title='チャットパレット'>
-                {recordToArray(chatPalettePanels).map((pair, i) => {
-                    return (
-                        <Menu.Item
-                            key={pair.key}
-                            onClick={() => {
-                                setRoomConfig(roomConfig => {
-                                    if (roomConfig == null) {
-                                        return;
-                                    }
-                                    const chatPalettePanel =
-                                        roomConfig?.panels.chatPalettePanels[pair.key];
-                                    if (chatPalettePanel == null) {
-                                        return;
-                                    }
-
-                                    // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
-                                    chatPalettePanel.isMinimized = false;
-
-                                    RoomConfigUtils.bringPanelToFront(roomConfig, {
-                                        type: 'chatPalettePanel',
-                                        panelId: pair.key,
-                                    });
-                                });
-                            }}
-                        >
+        return {
+            key: 'chatPalettePanelsMenu',
+            label: 'チャットパレット',
+            children: [
+                ...recordToArray(chatPalettePanels).map((pair, i) => {
+                    return {
+                        key: pair.key,
+                        label: (
                             <div>
                                 <span>
                                     {pair.value.isMinimized ? (
@@ -687,12 +713,41 @@ const PanelsMenu: React.FC = () => {
                                 </span>
                                 <span>{`パネル${i + 1}`}</span>
                             </div>
-                        </Menu.Item>
-                    );
-                })}
-                <Menu.Divider />
-                <Menu.Item
-                    onClick={() => {
+                        ),
+                        onClick: () => {
+                            setRoomConfig(roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                const chatPalettePanel =
+                                    roomConfig?.panels.chatPalettePanels[pair.key];
+                                if (chatPalettePanel == null) {
+                                    return;
+                                }
+
+                                // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
+                                chatPalettePanel.isMinimized = false;
+
+                                RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                    type: 'chatPalettePanel',
+                                    panelId: pair.key,
+                                });
+                            });
+                        },
+                    };
+                }),
+                { type: 'divider' },
+                {
+                    key: '新規作成@chatPalettePanelsMenu',
+                    label: (
+                        <div>
+                            <span>
+                                <Icon.PlusOutlined />
+                            </span>
+                            <span>新規作成</span>
+                        </div>
+                    ),
+                    onClick: () => {
                         setRoomConfig(roomConfig => {
                             if (roomConfig == null) {
                                 return;
@@ -713,36 +768,18 @@ const PanelsMenu: React.FC = () => {
                                 panelId,
                             });
                         });
-                    }}
-                >
-                    <div>
-                        <span>
-                            <Icon.PlusOutlined />
-                        </span>
-                        <span>新規作成</span>
-                    </div>
-                </Menu.Item>
-            </Menu.SubMenu>
-        );
+                    },
+                },
+            ],
+        };
     }, [chatPalettePanels, setRoomConfig]);
     const gameEffectPanelMenu = React.useMemo(() => {
         if (gameEffectPanel == null) {
             return null;
         }
-        return (
-            <Menu.Item
-                onClick={() => {
-                    setRoomConfig(roomConfig => {
-                        if (roomConfig == null) {
-                            return;
-                        }
-                        roomConfig.panels.gameEffectPanel.isMinimized = false;
-                        RoomConfigUtils.bringPanelToFront(roomConfig, {
-                            type: 'gameEffectPanel',
-                        });
-                    });
-                }}
-            >
+        return {
+            key: 'gameEffectPanelMenu',
+            label: (
                 <div>
                     <span>
                         {gameEffectPanel.isMinimized ? (
@@ -753,39 +790,32 @@ const PanelsMenu: React.FC = () => {
                     </span>
                     <span>SE, BGM</span>
                 </div>
-            </Menu.Item>
-        );
+            ),
+            onClick: () => {
+                setRoomConfig(roomConfig => {
+                    if (roomConfig == null) {
+                        return;
+                    }
+                    roomConfig.panels.gameEffectPanel.isMinimized = false;
+                    RoomConfigUtils.bringPanelToFront(roomConfig, {
+                        type: 'gameEffectPanel',
+                    });
+                });
+            },
+        };
     }, [gameEffectPanel, setRoomConfig]);
     const memoPanelsMenu = React.useMemo(() => {
         if (memoPanels == null) {
             return null;
         }
-        return (
-            <Menu.SubMenu title='共有メモ（部屋）'>
-                {recordToArray(memoPanels).map((pair, i) => {
-                    return (
-                        <Menu.Item
-                            key={pair.key}
-                            onClick={() => {
-                                setRoomConfig(roomConfig => {
-                                    if (roomConfig == null) {
-                                        return;
-                                    }
-                                    const memoPanel = roomConfig?.panels.memoPanels[pair.key];
-                                    if (memoPanel == null) {
-                                        return;
-                                    }
-
-                                    // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
-                                    memoPanel.isMinimized = false;
-
-                                    RoomConfigUtils.bringPanelToFront(roomConfig, {
-                                        type: 'memoPanel',
-                                        panelId: pair.key,
-                                    });
-                                });
-                            }}
-                        >
+        return {
+            key: 'memoPanelsMenu',
+            label: '共有メモ（部屋）',
+            children: [
+                ...recordToArray(memoPanels).map((pair, i) => {
+                    return {
+                        key: pair.key,
+                        label: (
                             <div>
                                 <span>
                                     {pair.value.isMinimized ? (
@@ -796,12 +826,40 @@ const PanelsMenu: React.FC = () => {
                                 </span>
                                 <span>{`パネル${i + 1}`}</span>
                             </div>
-                        </Menu.Item>
-                    );
-                })}
-                <Menu.Divider />
-                <Menu.Item
-                    onClick={() => {
+                        ),
+                        onClick: () => {
+                            setRoomConfig(roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                const memoPanel = roomConfig?.panels.memoPanels[pair.key];
+                                if (memoPanel == null) {
+                                    return;
+                                }
+
+                                // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
+                                memoPanel.isMinimized = false;
+
+                                RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                    type: 'memoPanel',
+                                    panelId: pair.key,
+                                });
+                            });
+                        },
+                    };
+                }),
+                { type: 'divider' },
+                {
+                    key: '新規作成@memoPanelsMenu',
+                    label: (
+                        <div>
+                            <span>
+                                <Icon.PlusOutlined />
+                            </span>
+                            <span>新規作成</span>
+                        </div>
+                    ),
+                    onClick: () => {
                         setRoomConfig(roomConfig => {
                             if (roomConfig == null) {
                                 return;
@@ -813,48 +871,23 @@ const PanelsMenu: React.FC = () => {
                                 panelId,
                             });
                         });
-                    }}
-                >
-                    <div>
-                        <span>
-                            <Icon.PlusOutlined />
-                        </span>
-                        <span>新規作成</span>
-                    </div>
-                </Menu.Item>
-            </Menu.SubMenu>
-        );
+                    },
+                },
+            ],
+        };
     }, [memoPanels, setRoomConfig]);
     const messagePanelsMenu = React.useMemo(() => {
         if (messagePanels == null) {
             return null;
         }
-        return (
-            <Menu.SubMenu title='メッセージ'>
-                {recordToArray(messagePanels).map((pair, i) => {
-                    return (
-                        <Menu.Item
-                            key={pair.key}
-                            onClick={() => {
-                                setRoomConfig(roomConfig => {
-                                    if (roomConfig == null) {
-                                        return;
-                                    }
-                                    const messagePanel = roomConfig?.panels.messagePanels[pair.key];
-                                    if (messagePanel == null) {
-                                        return;
-                                    }
-
-                                    // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
-                                    messagePanel.isMinimized = false;
-
-                                    RoomConfigUtils.bringPanelToFront(roomConfig, {
-                                        type: 'messagePanel',
-                                        panelId: pair.key,
-                                    });
-                                });
-                            }}
-                        >
+        return {
+            key: 'messagePanelsMenu',
+            label: 'メッセージ',
+            children: [
+                ...recordToArray(messagePanels).map((pair, i) => {
+                    return {
+                        key: pair.key,
+                        label: (
                             <div>
                                 <span>
                                     {pair.value.isMinimized ? (
@@ -865,12 +898,40 @@ const PanelsMenu: React.FC = () => {
                                 </span>
                                 <span>{`パネル${i + 1}`}</span>
                             </div>
-                        </Menu.Item>
-                    );
-                })}
-                <Menu.Divider />
-                <Menu.Item
-                    onClick={() => {
+                        ),
+                        onClick: () => {
+                            setRoomConfig(roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                const messagePanel = roomConfig?.panels.messagePanels[pair.key];
+                                if (messagePanel == null) {
+                                    return;
+                                }
+
+                                // これは通常の操作が行われた場合は必要ないが、設定ファイルがおかしくなったりしたときのために書いている。これがないと、設定ファイルを直接編集しない限りは、isMinimized: trueになっているpanelを永遠に削除することができない。
+                                messagePanel.isMinimized = false;
+
+                                RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                    type: 'messagePanel',
+                                    panelId: pair.key,
+                                });
+                            });
+                        },
+                    };
+                }),
+                { type: 'divider' },
+                {
+                    key: '新規作成@messagePanelsMenu',
+                    label: (
+                        <div>
+                            <span>
+                                <Icon.PlusOutlined />
+                            </span>
+                            <span>新規作成</span>
+                        </div>
+                    ),
+                    onClick: () => {
                         setRoomConfig(roomConfig => {
                             if (roomConfig == null) {
                                 return;
@@ -882,36 +943,18 @@ const PanelsMenu: React.FC = () => {
                                 panelId,
                             });
                         });
-                    }}
-                >
-                    <div>
-                        <span>
-                            <Icon.PlusOutlined />
-                        </span>
-                        <span>新規作成</span>
-                    </div>
-                </Menu.Item>
-            </Menu.SubMenu>
-        );
+                    },
+                },
+            ],
+        };
     }, [messagePanels, setRoomConfig]);
     const participantPanelMenu = React.useMemo(() => {
         if (participantPanel == null) {
             return null;
         }
-        return (
-            <Menu.Item
-                onClick={() => {
-                    setRoomConfig(roomConfig => {
-                        if (roomConfig == null) {
-                            return;
-                        }
-                        roomConfig.panels.participantPanel.isMinimized = false;
-                        RoomConfigUtils.bringPanelToFront(roomConfig, {
-                            type: 'participantPanel',
-                        });
-                    });
-                }}
-            >
+        return {
+            key: 'participantPanelMenu',
+            label: (
                 <div>
                     <span>
                         {participantPanel.isMinimized ? (
@@ -922,27 +965,27 @@ const PanelsMenu: React.FC = () => {
                     </span>
                     <span>入室者</span>
                 </div>
-            </Menu.Item>
-        );
+            ),
+            onClick: () => {
+                setRoomConfig(roomConfig => {
+                    if (roomConfig == null) {
+                        return;
+                    }
+                    roomConfig.panels.participantPanel.isMinimized = false;
+                    RoomConfigUtils.bringPanelToFront(roomConfig, {
+                        type: 'participantPanel',
+                    });
+                });
+            },
+        };
     }, [participantPanel, setRoomConfig]);
     const pieceValuePanelMenu = React.useMemo(() => {
         if (pieceValuePanel == null) {
             return null;
         }
-        return (
-            <Menu.Item
-                onClick={() => {
-                    setRoomConfig(roomConfig => {
-                        if (roomConfig == null) {
-                            return;
-                        }
-                        roomConfig.panels.pieceValuePanel.isMinimized = false;
-                        RoomConfigUtils.bringPanelToFront(roomConfig, {
-                            type: 'pieceValuePanel',
-                        });
-                    });
-                }}
-            >
+        return {
+            key: 'pieceValuePanelMenu',
+            label: (
                 <div>
                     <span>
                         {pieceValuePanel.isMinimized ? (
@@ -953,46 +996,63 @@ const PanelsMenu: React.FC = () => {
                     </span>
                     <span>コマ</span>
                 </div>
-            </Menu.Item>
-        );
+            ),
+            onClick: () => {
+                setRoomConfig(roomConfig => {
+                    if (roomConfig == null) {
+                        return;
+                    }
+                    roomConfig.panels.pieceValuePanel.isMinimized = false;
+                    RoomConfigUtils.bringPanelToFront(roomConfig, {
+                        type: 'pieceValuePanel',
+                    });
+                });
+            },
+        };
     }, [pieceValuePanel, setRoomConfig]);
-    const opacityStyle: React.CSSProperties = React.useMemo(
-        () => ({
-            padding: '0 4px',
-        }),
-        []
-    );
 
-    return (
-        <Menu.SubMenu title='ウィンドウ'>
-            {characterPanelMenu}
-            {activeBoardPanelMenu}
-            {boardPanelsMenu}
-            {chatPalettePanelsMenu}
-            {messagePanelsMenu}
-            {memoPanelsMenu}
-            {pieceValuePanelMenu}
-            {gameEffectPanelMenu}
-            {participantPanelMenu}
-            <Menu.Divider />
-            <div className={classNames(flex, flexRow, itemsCenter)} style={opacityStyle}>
-                <div>透過度</div>
-                <OpacityBar
-                    value={panelOpacity ?? defaultPanelOpacity}
-                    minValue={minPanelOpacity}
-                    onChange={setPanelOpacity}
-                    inputNumberType='0-1'
-                    readonly={false}
-                />
-            </div>
-        </Menu.SubMenu>
-    );
+    const menuItem = React.useMemo((): ItemType => {
+        return {
+            key: 'windowsMenuItem',
+            label: 'ウィンドウ',
+            children: [
+                characterPanelMenu,
+                activeBoardPanelMenu,
+                boardPanelsMenu,
+                chatPalettePanelsMenu,
+                messagePanelsMenu,
+                memoPanelsMenu,
+                pieceValuePanelMenu,
+                gameEffectPanelMenu,
+                participantPanelMenu,
+                { type: 'divider' },
+                {
+                    key: '透過度の設定',
+                    label: '透過度の設定',
+                    onClick: () => setIsPanelsOpacityModalVisible(true),
+                },
+            ],
+        };
+    }, [
+        activeBoardPanelMenu,
+        boardPanelsMenu,
+        characterPanelMenu,
+        chatPalettePanelsMenu,
+        gameEffectPanelMenu,
+        memoPanelsMenu,
+        messagePanelsMenu,
+        participantPanelMenu,
+        pieceValuePanelMenu,
+        setIsPanelsOpacityModalVisible,
+    ]);
+
+    return menuItem;
 };
 
 export const RoomMenu: React.FC = React.memo(function RoomMenu() {
     const me = useMe();
     const myUserUid = useMyUserUid();
-    const myAuth = React.useContext(MyAuthContext);
+    const firebaseUser = useAtomValue(firebaseUserAtom);
     const router = useRouter();
     const signOut = useSignOut();
     const roomId = useAtomSelector(roomAtom, state => state.roomId);
@@ -1002,50 +1062,67 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
         showBackgroundBoardViewerAtom
     );
 
-    const [leaveRoomMutation] = useMutation(LeaveRoomDocument);
+    const [, leaveRoomMutation] = useMutation(LeaveRoomDocument);
     const [isBecomePlayerModalVisible, setIsBecomePlayerModalVisible] = React.useState(false);
     const [isChangeMyParticipantNameModalVisible, setIsChangeMyParticipantNameModalVisible] =
         React.useState(false);
     const [isDeleteRoomModalVisible, setIsDeleteRoomModalVisible] = React.useState(false);
+    const [isPanelsOpacityModalVisible, setIsPanelsOpacityModalVisible] = useAtom(
+        panelsOpacityModalVisibilityAtom
+    );
     const [isResetMessagesModalVisible, setIsResetMessagesModalVisible] = React.useState(false);
     const [isGenerateLogModalVisible, setIsGenerateSimpleLogModalVisible] = React.useState(false);
     const [filesManagerDrawerType, setFilesManagerDrawerType] =
         React.useState<FilesManagerDrawerType | null>(null);
     const setEditRoomDrawerVisibility = useUpdateAtom(editRoomDrawerVisibilityAtom);
 
+    const panelsMenuItem = usePanelsMenuItem();
+
     return React.useMemo(() => {
-        if (me == null || myUserUid == null || typeof myAuth === 'string' || roomId == null) {
+        if (me == null || myUserUid == null || typeof firebaseUser === 'string' || roomId == null) {
             return null;
         }
-
-        return (
-            <>
-                <Menu triggerSubMenuAction='click' selectable={false} mode='horizontal'>
-                    <Menu.Item onClick={() => router.push('/')}>
-                        <img src='/assets/logo.png' width={24} height={24} />
-                    </Menu.Item>
-                    <Menu.SubMenu title='部屋'>
-                        <Menu.Item onClick={() => setEditRoomDrawerVisibility(true)}>
-                            編集
-                        </Menu.Item>
-                        <Menu.Item onClick={() => setIsDeleteRoomModalVisible(true)}>
-                            <span style={Styles.Text.danger}>削除</span>
-                        </Menu.Item>
-                        <Menu.Item onClick={() => setIsResetMessagesModalVisible(true)}>
-                            <span style={Styles.Text.danger}>ログの初期化</span>
-                        </Menu.Item>
-                        <Menu.Divider />
-                        <Menu.Item onClick={() => setIsGenerateSimpleLogModalVisible(true)}>
-                            ログをダウンロード
-                        </Menu.Item>
-                    </Menu.SubMenu>
-                    <Menu.SubMenu title='表示'>
-                        <PanelsMenu />
-                        <Menu.Item
-                            onClick={() => {
-                                setShowBackgroundBoardViewerAtom(!showBackgroundBoardViewer);
-                            }}
-                        >
+        const menuItems: ItemType[] = [
+            {
+                key: 'logo@menu',
+                label: <img src='/assets/logo.png' width={24} height={24} />,
+                onClick: () => router.push('/'),
+            },
+            {
+                key: '部屋@menu',
+                label: '部屋',
+                children: [
+                    {
+                        key: '編集@menu',
+                        label: '編集',
+                        onClick: () => setEditRoomDrawerVisibility(true),
+                    },
+                    {
+                        key: '削除@menu',
+                        label: <span style={Styles.Text.danger}>削除</span>,
+                        onClick: () => setIsDeleteRoomModalVisible(true),
+                    },
+                    {
+                        key: 'ログの初期化@menu',
+                        label: <span style={Styles.Text.danger}>ログの初期化</span>,
+                        onClick: () => setIsResetMessagesModalVisible(true),
+                    },
+                    { type: 'divider' },
+                    {
+                        key: 'ログをダウンロード@menu',
+                        label: 'ログをダウンロード',
+                        onClick: () => setIsGenerateSimpleLogModalVisible(true),
+                    },
+                ],
+            },
+            {
+                key: '表示@menu',
+                label: '表示',
+                children: [
+                    panelsMenuItem,
+                    {
+                        key: '最背面にボードビュアーを表示する@menu',
+                        label: (
                             <div>
                                 <span>
                                     {showBackgroundBoardViewer ? (
@@ -1056,69 +1133,94 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
                                 </span>
                                 <span>最背面にボードビュアーを表示する</span>
                             </div>
-                        </Menu.Item>
-                    </Menu.SubMenu>
-                    <Menu.Item>
-                        <Popover trigger='click' content={<RoomVolumeBar />}>
-                            ボリューム
-                        </Popover>
-                    </Menu.Item>
-                    <Menu.Item onClick={() => setFilesManagerDrawerType({ openFileType: none })}>
-                        アップローダー
-                    </Menu.Item>
-                    <Menu.SubMenu
-                        title={
-                            <div className={classNames(flex, flexRow, itemsCenter)}>
-                                <Jdenticon
-                                    hashOrValue={myUserUid}
-                                    size={20}
-                                    tooltipMode={{ type: 'userUid' }}
-                                />
-                                <span style={{ marginLeft: 4 }}>{me.name}</span>
-                            </div>
-                        }
-                    >
-                        <Menu.Item onClick={() => setIsChangeMyParticipantNameModalVisible(true)}>
-                            名前を変更
-                        </Menu.Item>
-                        <Menu.Item
-                            disabled={
-                                me.role === ParticipantRole.Player ||
-                                me.role === ParticipantRole.Master
-                            }
-                            onClick={() => setIsBecomePlayerModalVisible(true)}
-                        >
-                            {me.role === ParticipantRole.Player ||
+                        ),
+                        onClick: () => {
+                            setShowBackgroundBoardViewerAtom(!showBackgroundBoardViewer);
+                        },
+                    },
+                ],
+            },
+            {
+                key: 'ボリューム@menu',
+                label: (
+                    <Popover trigger='click' content={<RoomVolumeBar />}>
+                        ボリューム
+                    </Popover>
+                ),
+            },
+            {
+                key: 'アップローダー@menu',
+                label: 'アップローダー',
+                onClick: () => setFilesManagerDrawerType({ openFileType: none }),
+            },
+            {
+                key: '自分のParticipant@menu',
+                label: (
+                    <div className={classNames(flex, flexRow, itemsCenter)}>
+                        <Jdenticon
+                            hashOrValue={myUserUid}
+                            size={20}
+                            tooltipMode={{ type: 'userUid' }}
+                        />
+                        <span style={{ marginLeft: 4 }}>{me.name}</span>
+                    </div>
+                ),
+                children: [
+                    {
+                        key: '名前を変更@menu',
+                        label: '名前を変更',
+                        onClick: () => setIsChangeMyParticipantNameModalVisible(true),
+                    },
+                    {
+                        key: '参加者に昇格@menu',
+                        label:
+                            me.role === ParticipantRole.Player ||
                             me.role === ParticipantRole.Master ? (
                                 <Tooltip title='すでに昇格済みです。'>参加者に昇格</Tooltip>
                             ) : (
                                 '参加者に昇格'
-                            )}
-                        </Menu.Item>
-                        <Menu.Item
-                            onClick={() => {
-                                leaveRoomMutation({ variables: { id: roomId } }).then(result => {
-                                    if (result.data == null) {
-                                        return;
-                                    }
-                                    router.push(path.rooms.index);
-                                });
-                            }}
-                        >
-                            退室する
-                        </Menu.Item>
-                    </Menu.SubMenu>
-                    <Menu.SubMenu
-                        icon={<Icon.UserOutlined />}
-                        title={
-                            <span>
-                                {myAuth.displayName} - {myAuth.uid}
-                            </span>
-                        }
-                    >
-                        <Menu.Item onClick={() => signOut()}>ログアウト</Menu.Item>
-                    </Menu.SubMenu>
-                </Menu>
+                            ),
+                        disabled:
+                            me.role === ParticipantRole.Player ||
+                            me.role === ParticipantRole.Master,
+                        onClick: () => setIsBecomePlayerModalVisible(true),
+                    },
+                    {
+                        key: '退室する@menu',
+                        label: '退室する',
+                        onClick: () => {
+                            leaveRoomMutation({ id: roomId }).then(result => {
+                                if (result.data == null) {
+                                    return;
+                                }
+                                router.push(path.rooms.index);
+                            });
+                        },
+                    },
+                ],
+            },
+            {
+                key: '自分のUser@menu',
+                icon: <Icon.UserOutlined />,
+                label: `${firebaseUser.displayName} - ${firebaseUser.uid}`,
+                children: [
+                    {
+                        key: 'ログアウト@menu',
+                        label: 'ログアウト',
+                        onClick: () => signOut(),
+                    },
+                ],
+            },
+        ];
+
+        return (
+            <>
+                <Menu
+                    items={menuItems}
+                    triggerSubMenuAction='click'
+                    selectable={false}
+                    mode='horizontal'
+                />
                 <FilesManagerDrawer
                     drawerType={filesManagerDrawerType}
                     onClose={() => setFilesManagerDrawerType(null)}
@@ -1142,6 +1244,10 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
                     roomId={roomId}
                     roomCreatedByMe={myUserUid === createdBy}
                 />
+                <PanelsOpacityModal
+                    visible={isPanelsOpacityModalVisible}
+                    onClose={() => setIsPanelsOpacityModalVisible(false)}
+                />
                 <ResetMessagesModal
                     visible={isResetMessagesModalVisible}
                     onOk={() => setIsResetMessagesModalVisible(false)}
@@ -1163,14 +1269,17 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
         isChangeMyParticipantNameModalVisible,
         isDeleteRoomModalVisible,
         isGenerateLogModalVisible,
+        isPanelsOpacityModalVisible,
         isResetMessagesModalVisible,
         leaveRoomMutation,
         me,
-        myAuth,
+        firebaseUser,
         myUserUid,
+        panelsMenuItem,
         roomId,
         router,
         setEditRoomDrawerVisibility,
+        setIsPanelsOpacityModalVisible,
         setShowBackgroundBoardViewerAtom,
         showBackgroundBoardViewer,
         signOut,

@@ -20,7 +20,7 @@ import { useReadonlyRef } from '../../../../../hooks/useReadonlyRef';
 import classNames from 'classnames';
 import { flex, flexColumn, flexNone } from '../../../../../utils/className';
 import { $free, PublicChannelKey } from '@flocon-trpg/core';
-import { useMutation } from '@apollo/client';
+import { useMutation } from 'urql';
 import { ChatPalettePanelConfig } from '../../../../../atoms/roomConfig/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '../../../../../atoms/roomConfig/types/messagePanelConfig';
 import { userConfigAtom } from '../../../../../atoms/userConfig/userConfigAtom';
@@ -53,7 +53,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
 }: PrivateMessageElementProps) => {
     const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
     const [text, setText] = useAtom(roomPrivateMessageInputAtom);
-    const [writePrivateMessage] = useMutation(WritePrivateMessageDocument);
+    const [, writePrivateMessage] = useMutation(WritePrivateMessageDocument);
     const textAreaRef = React.useRef<TextAreaRef | null>(null);
     const [isPosting, setIsPosting] = React.useState(false); // 現状、並列投稿は「PublicMessage1つとPrivateMessage1つの最大2つまで」という制限になっているが、これは単に実装が楽だからというのが一番の理由。
     const roomMessagesFontSizeDelta = useAtomSelector(
@@ -110,15 +110,13 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
         }
         setIsPosting(true);
         writePrivateMessage({
-            variables: {
-                roomId,
-                text,
-                textColor: config.selectedTextColor,
-                visibleTo: [...participantIdsOfSendTo],
-                characterId,
-                customName: customNameVariable,
-                gameType: config.selectedGameSystem,
-            },
+            roomId,
+            text,
+            textColor: config.selectedTextColor,
+            visibleTo: [...participantIdsOfSendTo],
+            characterId,
+            customName: customNameVariable,
+            gameType: config.selectedGameSystem,
         })
             .then(res => {
                 switch (res.data?.result.__typename) {
@@ -215,7 +213,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
 }: PublicMessageElementProps) => {
     const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
     const [text, setText] = useAtom(roomPublicMessageInputAtom);
-    const [writePublicMessage] = useMutation(WritePublicMessageDocument);
+    const [, writePublicMessage] = useMutation(WritePublicMessageDocument);
     const textAreaRef = React.useRef<TextAreaRef | null>(null);
     const [isPosting, setIsPosting] = React.useState(false); // 現状、並列投稿は「PublicMessage1つとPrivateMessage1つの最大2つまで」という制限になっているが、これは単に実装が楽だからというのが一番の理由。
     const roomMessagesFontSizeDelta = useAtomSelector(
@@ -262,15 +260,13 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
 
         setIsPosting(true);
         writePublicMessage({
-            variables: {
-                roomId,
-                text,
-                textColor: config.selectedTextColor,
-                channelKey: selectedPublicChannelKey,
-                characterId,
-                customName: customNameVariable,
-                gameType: config.selectedGameSystem,
-            },
+            roomId,
+            text,
+            textColor: config.selectedTextColor,
+            channelKey: selectedPublicChannelKey,
+            characterId,
+            customName: customNameVariable,
+            gameType: config.selectedGameSystem,
         })
             .then(res => {
                 switch (res.data?.result.__typename) {

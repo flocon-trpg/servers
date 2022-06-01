@@ -1,6 +1,5 @@
 import React from 'react';
 import { Button, Popover, Select } from 'antd';
-import { apolloError } from '../../../../../hooks/useRoomMessages';
 import classNames from 'classnames';
 import { flex, flexNone, flexRow, itemsCenter } from '../../../../../utils/className';
 import * as Icons from '@ant-design/icons';
@@ -9,10 +8,10 @@ import {
     GetAvailableGameSystemsDocument,
     GetDiceHelpMessagesDocument,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
-import { useQuery } from '@apollo/client';
+import { useQuery } from 'urql';
 import { ChatPalettePanelConfig } from '../../../../../atoms/roomConfig/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '../../../../../atoms/roomConfig/types/messagePanelConfig';
-import { roomNotificationsAtom } from '../../../../../atoms/room/roomAtom';
+import { error, roomNotificationsAtom } from '../../../../../atoms/room/roomAtom';
 import { Draft } from 'immer';
 import { useUpdateAtom } from 'jotai/utils';
 import { InputDescription } from '../../../../ui/InputDescription';
@@ -22,7 +21,10 @@ type HelpMessageProps = {
 };
 
 const HelpMessage = ({ gameSystemId }: HelpMessageProps) => {
-    const message = useQuery(GetDiceHelpMessagesDocument, { variables: { id: gameSystemId } });
+    const [message] = useQuery({
+        query: GetDiceHelpMessagesDocument,
+        variables: { id: gameSystemId },
+    });
     if (message.error != null) {
         return <div>取得中にエラーが発生しました。</div>;
     }
@@ -61,7 +63,7 @@ export const GameSelector: React.FC<Props> = ({
 }: Props) => {
     const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
 
-    const availableGameSystems = useQuery(GetAvailableGameSystemsDocument);
+    const [availableGameSystems] = useQuery({ query: GetAvailableGameSystemsDocument });
     const sortedAvailableGameSystems = React.useMemo(
         () =>
             [...(availableGameSystems.data?.result.value ?? [])]
@@ -80,7 +82,7 @@ export const GameSelector: React.FC<Props> = ({
             return;
         }
         addRoomNotification({
-            type: apolloError,
+            type: error,
             error: availableGameSystems.error,
             createdAt: new Date().getTime(),
         });

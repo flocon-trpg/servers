@@ -1,4 +1,4 @@
-import { ApolloError, useSubscription } from '@apollo/client';
+import { CombinedError, useSubscription } from 'urql';
 import React from 'react';
 import { Observable, Subject } from 'rxjs';
 import { RoomEventDocument, RoomEventSubscription } from '@flocon-trpg/typed-document-node-v0.7.1';
@@ -6,13 +6,14 @@ import { RoomEventDocument, RoomEventSubscription } from '@flocon-trpg/typed-doc
 type Result = {
     observable: Observable<RoomEventSubscription>;
     data?: RoomEventSubscription;
-    loading: boolean;
-    error?: ApolloError;
+    fetching: boolean;
+    error?: CombinedError;
 };
 
 // 1つのSubscriptionのみで、複数の場所でsubscribeできるようにするHook。Rxにおけるpublishのようなことをしている。ただ、現状では必要ないかもしれない。
 export function usePublishRoomEventSubscription(roomId: string): Result {
-    const { data, loading, error } = useSubscription(RoomEventDocument, {
+    const [{ data, fetching, error }] = useSubscription({
+        query: RoomEventDocument,
         variables: { id: roomId },
     });
     const [subject, setSubject] = React.useState(new Subject<RoomEventSubscription>());
@@ -44,7 +45,7 @@ export function usePublishRoomEventSubscription(roomId: string): Result {
     return {
         observable: subject,
         data,
-        loading,
+        fetching,
         error,
     };
 }

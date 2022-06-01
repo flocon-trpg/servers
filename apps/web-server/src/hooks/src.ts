@@ -1,13 +1,12 @@
 import { State, filePathTemplate } from '@flocon-trpg/core';
 import React from 'react';
 import { useDeepCompareEffect } from 'react-use';
-import { FirebaseAuthenticationIdTokenContext } from '../contexts/FirebaseAuthenticationIdTokenContext';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
 import { FilePathFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { FilePath as FilePathModule } from '../utils/file/filePath';
 import { useWebConfig } from './useWebConfig';
 import { useAtomValue } from 'jotai/utils';
-import { firebaseStorageAtom } from '../pages/_app';
+import { firebaseStorageAtom, getIdTokenAtom } from '../pages/_app';
 
 type FilePath = State<typeof filePathTemplate>;
 
@@ -42,7 +41,7 @@ export function useSrcArrayFromGraphQL(
     const storage = useAtomValue(firebaseStorageAtom);
     const [result, setResult] = React.useState<SrcArrayResult>({ type: loading });
     const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
-    const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);
+    const getIdToken = useAtomValue(getIdTokenAtom);
 
     // deep equalityでチェックされるため、余計なプロパティを取り除いている
     const cleanPathArray = pathArray?.map(path => ({
@@ -51,6 +50,10 @@ export function useSrcArrayFromGraphQL(
     }));
 
     useDeepCompareEffect(() => {
+        if (cleanPathArray == null) {
+            setResult({ type: nullishArg });
+            return;
+        }
         if (getIdToken == null || config == null || storage == null) {
             setResult({ type: loading });
             return;
@@ -59,42 +62,42 @@ export function useSrcArrayFromGraphQL(
             setResult({ type: invalidWebConfig });
             return;
         }
-        if (cleanPathArray == null) {
-            setResult({ type: nullishArg });
-            return;
-        }
         let isDisposed = false;
-        Promise.all(
-            cleanPathArray.map(async path => {
-                const idToken = await getIdToken();
-                if (idToken == null) {
-                    return null;
-                }
+        const main = async () => {
+            const idToken = await getIdToken();
+            if (idToken == null) {
+                return null;
+            }
+            Promise.all(
+                cleanPathArray.map(async path => {
+                    // firebaseStorageUrlCacheContextはDeepCompareしてほしくないしされる必要もないインスタンスであるため、depsに加えてはいけない。
+                    return FilePathModule.getSrc(
+                        path,
+                        config.value,
+                        storage,
+                        idToken,
+                        firebaseStorageUrlCacheContext
+                    );
+                })
+            )
+                .then(all => {
+                    if (isDisposed) {
+                        return;
+                    }
+                    setResult({
+                        type: done,
+                        value: all.flatMap(x => (x == null ? [] : [x.src ?? null])),
+                    });
+                })
+                .catch(e => {
+                    console.log('error', e);
 
-                // firebaseStorageUrlCacheContextはDeepCompareしてほしくないしされる必要もないインスタンスであるため、depsに加えてはいけない。
-                return FilePathModule.getSrc(
-                    path,
-                    config.value,
-                    storage,
-                    idToken,
-                    firebaseStorageUrlCacheContext
-                );
-            })
-        )
-            .then(all => {
-                if (isDisposed) {
-                    return;
-                }
-                setResult({
-                    type: done,
-                    value: all.flatMap(x => (x == null ? [] : [x.src ?? null])),
+                    setResult({ type: error, error: e });
                 });
-            })
-            .catch(e => {
-                console.log('error', e);
+        };
 
-                setResult({ type: error, error: e });
-            });
+        main();
+
         return () => {
             isDisposed = true;
         };

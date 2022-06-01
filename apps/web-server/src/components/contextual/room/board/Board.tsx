@@ -69,6 +69,8 @@ import { imagePieceModalAtom } from './ImagePieceModal';
 import { Styles } from '../../../../styles';
 import { Message, publicMessage } from '@flocon-trpg/web-server-utils';
 import { notFetch, useRoomMesages } from '../../../../hooks/useRoomMessages';
+import { ItemType } from 'antd/lib/menu/hooks/useItems';
+import { defaultTriggerSubMenuAction } from '../../../../utils/variables';
 
 type BoardState = OmitVersion<State<typeof boardTemplate>>;
 type PieceState = OmitVersion<State<typeof pieceTemplate>>;
@@ -956,7 +958,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
         );
     })();
 
-    const dropDownItems =
+    const dropDownMenuItems: ItemType[] | null =
         boardEditorPanelId == null
             ? null
             : [...boards].map(([boardId, board]) => {
@@ -964,52 +966,55 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                       // 自分が作成者でないBoardはActiveBoardとして含まれていることがあるが、エディターで表示させると混乱を招くので除外している
                       return null;
                   }
-                  return (
-                      <Menu.Item
-                          key={boardId}
-                          onClick={() =>
-                              setRoomConfig(roomConfig => {
-                                  if (roomConfig == null) {
-                                      return;
-                                  }
-                                  const boardEditorPanel =
-                                      roomConfig.panels.boardEditorPanels[boardEditorPanelId];
-                                  if (boardEditorPanel == null) {
-                                      return;
-                                  }
-                                  boardEditorPanel.activeBoardId = boardId;
-                              })
-                          }
-                      >
-                          {board.name === '' ? '(名前なし)' : board.name}
-                      </Menu.Item>
-                  );
+                  return {
+                      key: boardId,
+                      onClick: () =>
+                          setRoomConfig(roomConfig => {
+                              if (roomConfig == null) {
+                                  return;
+                              }
+                              const boardEditorPanel =
+                                  roomConfig.panels.boardEditorPanels[boardEditorPanelId];
+                              if (boardEditorPanel == null) {
+                                  return;
+                              }
+                              boardEditorPanel.activeBoardId = boardId;
+                          }),
+                      label: board.name === '' ? '(名前なし)' : board.name,
+                  };
               });
+
+    const boardsMenuItems: ItemType[] | null =
+        dropDownMenuItems == null
+            ? null
+            : [
+                  {
+                      key: 'ボード一覧@boardMenu',
+                      label: 'ボード一覧',
+                      children: dropDownMenuItems,
+                  },
+                  { type: 'divider' },
+                  {
+                      key: '新規作成@boardMenu',
+                      icon: <Icons.PlusOutlined />,
+                      label: '新規作成',
+                      onClick: () =>
+                          setBoardEditorModal({
+                              type: create,
+                              boardEditorPanelId,
+                          }),
+                  },
+                  {
+                      key: 'インポート@boardMenu',
+                      label: 'インポート',
+                      onClick: () => setImportBoardModal(true),
+                  },
+              ];
 
     // activeBoardPanelモードのときは boardsMenu==null
     const boardsMenu =
-        dropDownItems == null ? null : (
-            <Menu>
-                <Menu.ItemGroup title='ボード一覧'>{dropDownItems}</Menu.ItemGroup>
-                <Menu.Divider />
-                <Menu.Item
-                    icon={<Icons.PlusOutlined />}
-                    onClick={() =>
-                        setBoardEditorModal({
-                            type: create,
-                            boardEditorPanelId,
-                        })
-                    }
-                >
-                    新規作成
-                </Menu.Item>
-                <Menu.Item
-                    icon={<Icons.ImportOutlined />}
-                    onClick={() => setImportBoardModal(true)}
-                >
-                    インポート
-                </Menu.Item>
-            </Menu>
+        boardsMenuItems == null ? null : (
+            <Menu items={boardsMenuItems} triggerSubMenuAction={defaultTriggerSubMenuAction} />
         );
 
     const noActiveBoardText = '';

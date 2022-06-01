@@ -1,4 +1,4 @@
-import { ApolloError, useLazyQuery } from '@apollo/client';
+import { CombinedError, useQuery } from 'urql';
 import React from 'react';
 import {
     GetMessagesDocument,
@@ -19,14 +19,15 @@ import { useLatest } from 'react-use';
 import { Result } from '@kizahasi/result';
 import { atom, useAtom, useAtomValue } from 'jotai';
 import { appConsole } from '../utils/appConsole';
+import { useUpdateAtom } from 'jotai/utils';
 
-export const apolloError = 'apolloError';
+export const graphqlError = 'graphqlError';
 export const failure = 'failure';
 
 type Error =
     | {
-          type: typeof apolloError;
-          error: ApolloError;
+          type: typeof graphqlError;
+          error: CombinedError;
       }
     | {
           type: typeof failure;
@@ -58,8 +59,11 @@ export const useStartFetchingRoomMessages = ({
     const messagesClient = React.useRef(new RoomMessagesClient());
     const [result, setResult] = useAtom(changeEventAtom);
     const resultRef = useLatest(result);
-    const [getMessages, messages] = useLazyQuery(GetMessagesDocument, {
-        fetchPolicy: 'network-only',
+    const [messages, getMessages] = useQuery({
+        query: GetMessagesDocument,
+        variables: { roomId },
+        requestPolicy: 'network-only',
+        pause: true,
     });
     const refCount = React.useRef(0);
 
@@ -81,7 +85,7 @@ export const useStartFetchingRoomMessages = ({
         if (myUserUid == null || !beginFetch) {
             return;
         }
-        getMessages({ variables: { roomId } });
+        getMessages();
     }, [roomId, myUserUid, beginFetch, getMessages]);
 
     React.useEffect(() => {
@@ -106,7 +110,7 @@ export const useStartFetchingRoomMessages = ({
         }
         const messagesError = messages.error;
         if (messagesError != null) {
-            setResult(Result.error({ type: apolloError, error: messagesError }));
+            setResult(Result.error({ type: graphqlError, error: messagesError }));
         }
     }, [messages.data, messages.error, setResult]);
 
@@ -135,6 +139,38 @@ type RoomMessages =
           current: readonly Message[];
           event?: undefined;
       };
+
+// Storybook用
+export const useMockRoomMessages = () => {
+    const setResult = useUpdateAtom(changeEventAtom);
+    const messagesClient = React.useRef(new RoomMessagesClient());
+    const onQuery = React.useCallback(
+        (query: Parameters<typeof messagesClient.current.onQuery>[0]) => {
+            messagesClient.current.onQuery(query);
+            setResult(Result.ok(messagesClient.current.messages));
+        },
+        [setResult]
+    );
+    const onEvent = React.useCallback(
+        (event: Parameters<typeof messagesClient.current.onEvent>[0]) => {
+            messagesClient.current.onEvent(event);
+            setResult(Result.ok(messagesClient.current.messages));
+        },
+        [setResult]
+    );
+    const setToNotFetch = React.useCallback(() => {
+        setResult('notFetch');
+    }, [setResult]);
+
+    return React.useMemo(
+        () => ({
+            onQuery,
+            onEvent,
+            setToNotFetch,
+        }),
+        [onEvent, onQuery, setToNotFetch]
+    );
+};
 
 type RoomMessagesResult = Result<RoomMessages, Error> | typeof notFetch;
 

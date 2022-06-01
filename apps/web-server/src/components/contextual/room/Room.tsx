@@ -408,7 +408,8 @@ const CharacterPanel: React.FC = React.memo(function CharacterPanel() {
             minWidth={150}
             zIndex={config.zIndex}
         >
-            <CharacterList />
+            {/* 現状ではCharacterListは最大でも1つしか存在しないため、panelIdは適当で構わない */}
+            <CharacterList panelId='CharacterList' />
         </DraggableCard>
     );
 });
@@ -585,6 +586,7 @@ const MemoPanel: React.FC<ConfigAndKeyProps<MemoPanelConfig>> = React.memo(funct
             <Memos
                 selectedMemoId={config.selectedMemoId}
                 onSelectedMemoIdChange={onSelectedMemoIdChange}
+                height={config.height}
             />
         </DraggableCard>
     );

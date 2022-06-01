@@ -27,6 +27,7 @@ import { useAtomValue } from 'jotai/utils';
 import { firebaseAuthAtom } from '../../pages/_app';
 import { atom, useAtom } from 'jotai';
 import { useUpdateAtom } from 'jotai/utils';
+import { storybookAtom } from '../../atoms/storybook/storybookAtom';
 
 const displayName = 'new user';
 const formWidth = 400;
@@ -40,7 +41,8 @@ const errorAtom = atom<Error | string | undefined>(undefined);
 const isSubmittingAtom = atom(false);
 const emailModeAtom = atom(false);
 
-const useLoginWithAuthProvider = () => {
+const useLoginWithAuthProvider = (): ((provider: AuthProvider) => Promise<void>) => {
+    const isStorybook = useAtomValue(storybookAtom).isStorybook;
     const auth = useAtomValue(firebaseAuthAtom);
     const router = useRouter();
     const setError = useUpdateAtom(errorAtom);
@@ -74,6 +76,11 @@ const useLoginWithAuthProvider = () => {
         },
         [auth, router, setError]
     );
+    if (isStorybook) {
+        return () => {
+            return new Promise<void>(() => undefined);
+        };
+    }
     return result;
 };
 

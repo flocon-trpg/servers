@@ -1,20 +1,14 @@
+import { useAtomValue } from 'jotai';
 import React from 'react';
-import {
-    FirebaseUserState,
-    MyAuthContext,
-    authNotFound,
-    loading,
-    notSignIn,
-} from '../contexts/MyAuthContext';
+import { firebaseUserAtom } from '../pages/_app';
+import { authNotFound, loading, notSignIn } from '../utils/firebase/firebaseUserState';
 
-// MyAuthContextが取得できない場所では、引数として渡すことでMyAuthContextの代わりに使わせることができる
-export const useMyUserUid = (myAuth?: FirebaseUserState) => {
+export const useMyUserUid = () => {
     const [result, setResult] = React.useState<string>();
-    const myAuthContext = React.useContext(MyAuthContext);
-    const $myAuth = myAuth ?? myAuthContext;
+    const firebaseUser = useAtomValue(firebaseUserAtom);
     React.useEffect(() => {
         // $myAuthが切り替わったときに、loadingならば前のuidを返す作りにしている
-        switch ($myAuth) {
+        switch (firebaseUser) {
             case loading:
                 return;
             case authNotFound:
@@ -22,8 +16,8 @@ export const useMyUserUid = (myAuth?: FirebaseUserState) => {
                 setResult(undefined);
                 return;
             default:
-                setResult($myAuth.uid);
+                setResult(firebaseUser.uid);
         }
-    }, [$myAuth]);
+    }, [firebaseUser]);
     return result;
 };

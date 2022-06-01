@@ -10,8 +10,6 @@ import { useImagePieces } from '../../../../hooks/state/useImagePieces';
 import { InputFile } from '../file/InputFile';
 import { FilesManagerDrawerType, PiecePositionWithCell } from '../../../../utils/types';
 import { FilesManagerDrawer } from '../file/FilesManagerDrawer';
-import { BufferedInput } from '../../../ui/BufferedInput';
-import { BufferedTextArea } from '../../../ui/BufferedTextArea';
 import { FilePath } from '../../../../utils/file/filePath';
 import { useAtomValue } from 'jotai/utils';
 import { create, update } from '../../../../utils/constants';
@@ -19,6 +17,7 @@ import { atom, useAtom } from 'jotai';
 import { useCloneImagePiece } from '../../../../hooks/state/useCloneImagePiece';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
 import { EditorGroupHeader } from '../../../ui/EditorGroupHeader';
+import { CollaborativeInput } from '../../../ui/CollaborativeInput';
 
 type ImagePieceState = State<typeof imagePieceTemplate>;
 
@@ -218,7 +217,7 @@ export const ImagePieceModal: React.FC = () => {
                     <Col flex='auto' />
                     <Col flex={0}>名前</Col>
                     <Col span={inputSpan}>
-                        <BufferedInput
+                        <CollaborativeInput
                             bufferDuration='default'
                             size='small'
                             value={uiState.name ?? ''}
@@ -242,11 +241,11 @@ export const ImagePieceModal: React.FC = () => {
                     <Col flex='auto' />
                     <Col flex={0}></Col>
                     <Col span={inputSpan}>
-                        <BufferedTextArea
+                        <CollaborativeInput
+                            multiline
                             size='small'
                             bufferDuration='default'
                             value={uiState.memo ?? ''}
-                            rows={8}
                             onChange={e =>
                                 updateUiState(pieceValue => {
                                     if (pieceValue == null) {

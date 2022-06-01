@@ -15,7 +15,6 @@ import {
     characterIsPrivate,
 } from '../../../../resources/text/main';
 import { StateEditorParams, useStateEditor } from '../../../../hooks/useStateEditor';
-import { BufferedInput } from '../../../ui/BufferedInput';
 import { useCharacters } from '../../../../hooks/state/useCharacters';
 import { useParticipants } from '../../../../hooks/state/useParticipants';
 import {
@@ -25,7 +24,6 @@ import {
 } from '../../../../hooks/state/useParamNames';
 import { State, characterTemplate, simpleId, strIndex20Array } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
-import { BufferedTextArea } from '../../../ui/BufferedTextArea';
 import { FilePath } from '../../../../utils/file/filePath';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
 import { atom } from 'jotai';
@@ -47,6 +45,7 @@ import { EditorGroupHeader } from '../../../ui/EditorGroupHeader';
 import { OverriddenParameterNameEditor } from './OverriddenParameterNameEditor';
 import { CharacterTagsSelect } from './CharacterTagsSelect';
 import { CopyToClipboardButton } from '../../../ui/CopyToClipboardButton';
+import { CollaborativeInput } from '../../../ui/CollaborativeInput';
 
 type CharacterState = State<typeof characterTemplate>;
 
@@ -396,7 +395,7 @@ export const CharacterEditorModal: React.FC = () => {
                         <Row
                             leftContent='名前'
                             rightContent={
-                                <BufferedInput
+                                <CollaborativeInput
                                     bufferDuration='default'
                                     size='small'
                                     value={character.name}
@@ -631,12 +630,11 @@ export const CharacterEditorModal: React.FC = () => {
                         <div>
                             <EditorGroupHeader>メモ</EditorGroupHeader>
 
-                            <BufferedTextArea
+                            <CollaborativeInput
+                                multiline
                                 size='small'
                                 bufferDuration='default'
                                 value={character.memo}
-                                rows={10}
-                                disableResize
                                 onChange={e => {
                                     updateCharacter(character => {
                                         if (character == null) {
@@ -653,8 +651,6 @@ export const CharacterEditorModal: React.FC = () => {
 
                                     <CharacterVarInput
                                         character={character}
-                                        rows={10}
-                                        disableResize
                                         onChange={newValue =>
                                             updateCharacter(character => {
                                                 if (character == null) {
