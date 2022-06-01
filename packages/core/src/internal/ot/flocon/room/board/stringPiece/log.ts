@@ -67,7 +67,7 @@ export const ofOperation = (
     operation: TwoWayOperation<typeof StringPieceValueTypes.template>,
     currentState: State<typeof StringPieceValueTypes.template>
 ): Type => {
-    return {
+    const result = {
         ...toUpOperation(StringPieceValueTypes.template)(operation),
         $v: 2,
         $r: 1,
@@ -81,5 +81,6 @@ export const ofOperation = (
                 : {
                       newValue: operation.isValuePrivate.newValue ? undefined : currentState.value,
                   },
-    };
+    } as const;
+    return exactType.encode(result);
 };

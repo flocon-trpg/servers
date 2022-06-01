@@ -89,7 +89,7 @@ export const ofOperation = (
     operation: TwoWayOperation<typeof DicePieceValueTypes.template>,
     currentState: State<typeof DicePieceValueTypes.template>
 ): Type => {
-    return {
+    const result = {
         ...toUpOperation(DicePieceValueTypes.template)(operation),
         $v: 2,
         $r: 1,
@@ -140,5 +140,6 @@ export const ofOperation = (
                           }
                       }
                   }),
-    };
+    } as const;
+    return exactType.encode(result);
 };
