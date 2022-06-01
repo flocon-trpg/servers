@@ -336,12 +336,14 @@ export type CreateMockRoomMessagesParams = {
 };
 
 export const createMockRoomMessages = (params: CreateMockRoomMessagesParams): RoomMessages => {
+    const createdAt = new Date(2020, 3, 12, 13, 14, 15).getTime();
+
     const m1: RoomPublicMessage = {
         __typename: 'RoomPublicMessage',
         messageId: '1',
         channelKey: $free,
         isSecret: false,
-        createdAt: new Date().getTime(),
+        createdAt,
         createdBy: userUid1,
         initText: 'text',
         initTextSource: 'text',
@@ -352,7 +354,7 @@ export const createMockRoomMessages = (params: CreateMockRoomMessagesParams): Ro
         messageId: '2',
         channelKey: '1',
         isSecret: false,
-        createdAt: new Date().getTime(),
+        createdAt,
         createdBy: myUserUid,
         initText: 'text',
         initTextSource: 'text',
@@ -363,7 +365,7 @@ export const createMockRoomMessages = (params: CreateMockRoomMessagesParams): Ro
         messageId: '3',
         channelKey: '2',
         isSecret: false,
-        createdAt: new Date().getTime(),
+        createdAt,
         createdBy: userUid1,
         initText: 'text',
         initTextSource: 'text',
@@ -373,7 +375,7 @@ export const createMockRoomMessages = (params: CreateMockRoomMessagesParams): Ro
         __typename: 'RoomPrivateMessage',
         messageId: '4',
         isSecret: false,
-        createdAt: new Date().getTime(),
+        createdAt,
         createdBy: myUserUid,
         initText: 'text',
         initTextSource: 'text',
@@ -384,7 +386,7 @@ export const createMockRoomMessages = (params: CreateMockRoomMessagesParams): Ro
         __typename: 'RoomPrivateMessage',
         messageId: '5',
         isSecret: false,
-        createdAt: new Date().getTime(),
+        createdAt,
         createdBy: userUid1,
         initText: 'text',
         initTextSource: 'text',
