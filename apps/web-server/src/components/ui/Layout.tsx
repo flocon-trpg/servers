@@ -26,10 +26,12 @@ import { NotSignInResult } from './result/NotSignInResult';
 import { LoadingResult } from './result/LoadingResult';
 import * as Icon from '@ant-design/icons';
 import { useSignOut } from '../../hooks/useSignOut';
-import { useApolloClient, useMutation } from '@apollo/client';
-import { MyAuthContext, authNotFound, loading, notSignIn } from '../../contexts/MyAuthContext';
-import { FirebaseAuthenticationIdTokenContext } from '../../contexts/FirebaseAuthenticationIdTokenContext';
+import { useClient, useMutation } from 'urql';
 import { useGetMyRoles } from '../../hooks/apiServer/useGetMyRoles';
+import { useAtomValue } from 'jotai';
+import { firebaseUserAtom, getIdTokenAtom } from '../../pages/_app';
+import { authNotFound, loading, notSignIn } from '../../utils/firebase/firebaseUserState';
+
 const { Header, Content } = AntdLayout;
 
 type EntryFormComponentProps = {
@@ -38,7 +40,7 @@ type EntryFormComponentProps = {
 };
 
 const EntryFormComponent: React.FC<EntryFormComponentProps> = (props: EntryFormComponentProps) => {
-    const [entryToServer, entryToServerResult] = useMutation(EntryToServerDocument);
+    const [entryToServerResult, entryToServer] = useMutation(EntryToServerDocument);
     const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
     const [isFinishedSuccessfully, setIsFinishedSuccessfully] = React.useState<boolean>(false);
 
@@ -53,7 +55,7 @@ const EntryFormComponent: React.FC<EntryFormComponentProps> = (props: EntryFormC
                 }
                 const password: string = e[passwordName];
                 setIsSubmitting(true);
-                entryToServer({ variables: { password } }).then(r => {
+                entryToServer({ password }).then(r => {
                     const resultType = r.data?.result.type;
                     if (resultType == null) {
                         return;
@@ -122,15 +124,15 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
 }: PropsWithChildren<Props>) => {
     const router = useRouter();
     const getMyRolesQueryResult = useGetMyRoles();
-    const myAuth = React.useContext(MyAuthContext);
-    const myUserUid = typeof myAuth === 'string' ? null : myAuth.uid;
-    const isAnonymous = typeof myAuth === 'string' ? false : myAuth.isAnonymous;
-    const apolloClient = useApolloClient();
+    const firebaseUser = useAtomValue(firebaseUserAtom);
+    const myUserUid = typeof firebaseUser === 'string' ? null : firebaseUser.uid;
+    const isAnonymous = typeof firebaseUser === 'string' ? false : firebaseUser.isAnonymous;
+    const urqlClient = useClient();
     const signOut = useSignOut();
     const [isEntry, setIsEntry] = React.useState<
         'notRequired' | 'loading' | { type: 'error'; error: Error } | boolean
     >('loading');
-    const getIdToken = React.useContext(FirebaseAuthenticationIdTokenContext);
+    const getIdToken = useAtomValue(getIdTokenAtom);
     const hasIdToken = getIdToken != null;
     const requiresEntry = requires === loginAndEntry;
     React.useEffect(() => {
@@ -140,13 +142,17 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                 return;
             }
             let unsubscribed = false;
-            apolloClient
-                .query<IsEntryQuery, IsEntryQueryVariables>({
-                    query: IsEntryDocument,
-                    fetchPolicy: 'network-only',
-                })
+            urqlClient
+                .query<IsEntryQuery, IsEntryQueryVariables>(
+                    IsEntryDocument,
+                    {},
+                    {
+                        requestPolicy: 'network-only',
+                    }
+                )
+                .toPromise()
                 .then(queryResult => {
-                    if (unsubscribed) {
+                    if (unsubscribed || queryResult.data == null) {
                         return;
                     }
                     setIsEntry(queryResult.data.result);
@@ -163,7 +169,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
             };
         }
         setIsEntry('notRequired');
-    }, [requiresEntry, myUserUid, apolloClient, hasIdToken]);
+    }, [requiresEntry, myUserUid, urqlClient, hasIdToken]);
 
     const getChildren = (): React.ReactNode => {
         if (typeof children === 'function') {
@@ -172,7 +178,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
         return children;
     };
 
-    if (myAuth === authNotFound) {
+    if (firebaseUser === authNotFound) {
         return (
             <Result status='info' title='Firebase Authentication インスタンスが見つかりません。' />
         );
@@ -184,10 +190,10 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
             showChildren = true;
             return getChildren();
         }
-        if (myAuth === loading) {
+        if (firebaseUser === loading) {
             return <LoadingResult title='Firebase Authentication による認証を行っています…' />;
         }
-        if (myAuth === notSignIn) {
+        if (firebaseUser === notSignIn) {
             return <NotSignInResult />;
         }
         switch (isEntry) {
@@ -255,16 +261,16 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                         <Col flex={0}>
                             <Space>
                                 {/* UserOutlinedを付けている理由は、room/[id] を開いたときにヘッダーを隠して代わりにメニューにユーザーを表示する仕組みであり、そちらのユーザー名のほうにもUserOutlinedを付けることでそれがユーザー名だということが連想され、入室時の名前と区別させやすくなるようにするため。 */}
-                                {typeof myAuth === 'string' ? null : <Icon.UserOutlined />}
-                                {typeof myAuth === 'string' ? null : (
+                                {typeof firebaseUser === 'string' ? null : <Icon.UserOutlined />}
+                                {typeof firebaseUser === 'string' ? null : (
                                     <div style={{ color: 'white' }}>
-                                        {myAuth.displayName} - {myAuth.uid}
+                                        {firebaseUser.displayName} - {firebaseUser.uid}
                                         {getMyRolesQueryResult.data?.result.admin === true
                                             ? ' (管理者)'
                                             : null}
                                     </div>
                                 )}
-                                {typeof myAuth === 'string' ? (
+                                {typeof firebaseUser === 'string' ? (
                                     <Button key='2' onClick={() => router.push('/signin')}>
                                         ログイン/ユーザー登録
                                     </Button>

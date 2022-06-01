@@ -1,4 +1,4 @@
-import { useLazyQuery, useMutation } from '@apollo/client';
+import { useMutation, useQuery } from 'urql';
 import * as DocNode072 from '@flocon-trpg/typed-document-node-v0.7.2';
 import * as DocNode071 from '@flocon-trpg/typed-document-node-v0.7.1';
 import { Button, Dropdown, Menu, Modal, Table, Tooltip, notification } from 'antd';
@@ -15,13 +15,15 @@ import moment from 'moment';
 import { ToggleButton } from '../../ui/ToggleButton';
 import { useGetMyRoles } from '../../../hooks/apiServer/useGetMyRoles';
 import { useIsV072OrLater } from '../../../hooks/apiServer/useIsV072OrLater';
+import { Subscription } from 'rxjs';
+import { defaultTriggerSubMenuAction } from '../../../utils/variables';
 
 type Data072 = DocNode072.RoomAsListItemFragment;
 type Data071 = DocNode071.RoomAsListItemFragment;
 type Data = Data072 | Data071;
 
 const BookmarkButton: React.FC<{ data: Data072 }> = ({ data }) => {
-    const [updateBookmark] = useMutation(DocNode072.UpdateBookmarkDocument);
+    const [, updateBookmark] = useMutation(DocNode072.UpdateBookmarkDocument);
     const [loading, setLoading] = React.useState(false);
     const [checked, setChecked] = React.useState(data.isBookmarked);
 
@@ -35,9 +37,10 @@ const BookmarkButton: React.FC<{ data: Data072 }> = ({ data }) => {
             onChange={async checked => {
                 setLoading(true);
                 const updateBookmarkResult = await updateBookmark({
-                    variables: { roomId: data.id, newValue: checked },
+                    roomId: data.id,
+                    newValue: checked,
                 });
-                if (updateBookmarkResult.errors != null) {
+                if (updateBookmarkResult.error != null) {
                     notification.error({
                         message: 'エラー',
                         description: 'APIサーバーとの通信でエラーが発生しました。',
@@ -67,9 +70,11 @@ const BookmarkButton: React.FC<{ data: Data072 }> = ({ data }) => {
 const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
     const router = useRouter();
     const isV072OrLater = useIsV072OrLater();
-    const [deleteRoomAsAdmin] = useMutation(DocNode072.DeleteRoomAsAdminDocument);
-    const [getRooms] = useLazyQuery(DocNode072.GetRoomsListDocument, {
-        fetchPolicy: 'network-only',
+    const [, deleteRoomAsAdmin] = useMutation(DocNode072.DeleteRoomAsAdminDocument);
+    const [, getRooms] = useQuery({
+        query: DocNode072.GetRoomsListDocument,
+        pause: true,
+        requestPolicy: 'network-only',
     });
     const getMyRolesQueryResult = useGetMyRoles();
 
@@ -81,27 +86,35 @@ const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
             return undefined;
         }
         return (
-            <Menu>
-                <Menu.ItemGroup title='管理者用コマンド'>
-                    <Menu.Item
-                        icon={<Icons.DeleteOutlined />}
-                        onClick={() => {
-                            Modal.warn({
-                                onOk: async () => {
-                                    await deleteRoomAsAdmin({ variables: { id: roomId } });
-                                    await getRooms();
+            <Menu
+                items={[
+                    {
+                        type: 'group',
+                        key: '管理者コマンド',
+                        label: '管理者コマンド',
+                        children: [
+                            {
+                                key: '削除@管理者コマンド',
+                                icon: <Icons.DeleteOutlined />,
+                                label: <div style={Styles.Text.danger}>削除</div>,
+                                onClick: () => {
+                                    Modal.warn({
+                                        onOk: async () => {
+                                            await deleteRoomAsAdmin({ id: roomId });
+                                            await getRooms();
+                                        },
+                                        okCancel: true,
+                                        maskClosable: true,
+                                        closable: true,
+                                        content: '部屋を削除します。よろしいですか？',
+                                    });
                                 },
-                                okCancel: true,
-                                maskClosable: true,
-                                closable: true,
-                                content: '部屋を削除します。よろしいですか？',
-                            });
-                        }}
-                    >
-                        <div style={Styles.Text.danger}>削除</div>
-                    </Menu.Item>
-                </Menu.ItemGroup>
-            </Menu>
+                            },
+                        ],
+                    },
+                ]}
+                triggerSubMenuAction={defaultTriggerSubMenuAction}
+            />
         );
     }, [
         isV072OrLater,
@@ -260,15 +273,26 @@ const RoomsListComponent: React.FC<RoomsListComponentProps> = ({
 const pollingInterval = 30000;
 
 const RoomCore: React.FC = () => {
-    const [getRooms072, rooms072] = useLazyQuery(DocNode072.GetRoomsListDocument, {
-        fetchPolicy: 'network-only',
+    const [rooms072, getRooms072] = useQuery({
+        query: DocNode072.GetRoomsListDocument,
+        requestPolicy: 'network-only',
     });
-    const [getRooms071, rooms071] = useLazyQuery(DocNode071.GetRoomsListDocument, {
-        fetchPolicy: 'network-only',
+    const [rooms071, getRooms071] = useQuery({
+        query: DocNode071.GetRoomsListDocument,
+        requestPolicy: 'network-only',
     });
-    const loading = rooms072.loading && rooms071.loading;
+    const fetching = rooms072.fetching && rooms071.fetching;
     const error = rooms072.error && rooms071.error;
     const isV072OrLater = useIsV072OrLater();
+    const subscriptionsRef = React.useRef(new Subscription());
+
+    React.useEffect(() => {
+        const subscriptions = subscriptionsRef.current;
+        return () => {
+            subscriptions.unsubscribe();
+            subscriptionsRef.current = new Subscription();
+        };
+    }, []);
 
     React.useEffect(() => {
         if (isV072OrLater) {
@@ -301,28 +325,22 @@ const RoomCore: React.FC = () => {
     }
 
     React.useEffect(() => {
-        switch (rooms072.data?.result.__typename) {
-            case 'GetRoomsListSuccessResult':
-                rooms072.startPolling(pollingInterval);
-                break;
-            case 'GetRoomsListFailureResult':
-                rooms072.stopPolling();
-                break;
+        if (rooms072.data?.result.__typename === 'GetRoomsListSuccessResult') {
+            const id = setInterval(() => getRooms072(), pollingInterval);
+            subscriptionsRef.current.add(() => clearInterval(id));
+            return () => clearInterval(id);
         }
-    }, [rooms072]);
+    }, [getRooms072, rooms072.data?.result.__typename]);
     React.useEffect(() => {
-        switch (rooms071.data?.result.__typename) {
-            case 'GetRoomsListSuccessResult':
-                rooms071.startPolling(pollingInterval);
-                break;
-            case 'GetRoomsListFailureResult':
-                rooms071.stopPolling();
-                break;
+        if (rooms071.data?.result.__typename === 'GetRoomsListSuccessResult') {
+            const id = setInterval(() => getRooms071(), pollingInterval);
+            subscriptionsRef.current.add(() => clearInterval(id));
+            return () => clearInterval(id);
         }
-    }, [rooms071]);
+    }, [getRooms071, rooms071.data?.result.__typename]);
 
     return (
-        <QueryResultViewer loading={loading} error={error} compact={false}>
+        <QueryResultViewer loading={fetching} error={error} compact={false}>
             <RoomsListComponent
                 roomsTable={
                     roomsData072 != null ? (

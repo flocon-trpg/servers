@@ -8,6 +8,7 @@ import * as E from 'fp-ts/Either';
 import { formatValidationErrors } from '../../utils/io-ts/io-ts-reporters';
 import { NEXT_PUBLIC_FIREBASE_CONFIG } from '../../env';
 import { FetchTextState } from '../../utils/types';
+import { storybookAtom } from '../storybook/storybookAtom';
 
 type Env = {
     firebaseConfig?: FirebaseConfig;
@@ -148,7 +149,11 @@ const mergeEnv = (envs: Envs): Env => {
 };
 
 export const webConfigAtom = atom<Result<WebConfig> | null>(get => {
+    const storybook = get(storybookAtom);
     const envs = get(envsAtom);
+    if (storybook.mock?.webConfig != null) {
+        return storybook.mock.webConfig;
+    }
     if (envs == null) {
         return null;
     }

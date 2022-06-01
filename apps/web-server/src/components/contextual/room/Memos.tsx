@@ -4,13 +4,23 @@ import { useMemos } from '../../../hooks/state/useMemos';
 import { State, memoTemplate, simpleId } from '@flocon-trpg/core';
 import { Button, Dropdown, Input, Menu, Modal, Popover, Tree } from 'antd';
 import { DataNode } from 'rc-tree/lib/interface';
-import { BufferedInput } from '../../ui/BufferedInput';
-import { BufferedTextArea } from '../../ui/BufferedTextArea';
 import classNames from 'classnames';
-import { cancelRnd, flex, flex1, flexColumn, flexRow, itemsCenter } from '../../../utils/className';
+import {
+    cancelRnd,
+    flex,
+    flex1,
+    flexAuto,
+    flexColumn,
+    flexNone,
+    flexRow,
+    itemsCenter,
+} from '../../../utils/className';
 import _ from 'lodash';
 import moment from 'moment';
 import { useSetRoomStateWithImmer } from '../../../hooks/useSetRoomStateWithImmer';
+import { ItemType } from 'antd/lib/menu/hooks/useItems';
+import { defaultTriggerSubMenuAction } from '../../../utils/variables';
+import { CollaborativeInput } from '../../ui/CollaborativeInput';
 
 type MemoState = State<typeof memoTemplate>;
 
@@ -30,7 +40,7 @@ class Dir {
 
     public get reactKey(): string {
         return this.dir.reduce(
-            (seed, elem) => `${seed}:${elem.replace('/', '//').replace(':', '/:')}`,
+            (seed, elem) => `${seed}:${elem.replaceAll('/', '//').replaceAll(':', '/:')}`,
             ''
         );
     }
@@ -201,27 +211,30 @@ const DirSelect = ({ memoId }: DirSelectProps) => {
     const [isModalVisible, setIsModalVisible] = React.useState(false);
     const [newDirName, setNewDirName] = React.useState(defaultNewDirName);
 
-    const dirNames = sortedDir(memos);
-    const dirMenuItems = dirNames.map(({ dir }) => {
-        return (
-            <Menu.Item
-                key={`DIRSELECT-${memoId}`}
-                onClick={() => {
-                    setRoomState(roomState => {
-                        const memo = roomState.memos?.[memoId];
-                        if (memo == null) {
-                            return;
-                        }
-                        memo.dir = [...dir];
-                    });
-                }}
-            >
-                {dirToString(dir)}
-            </Menu.Item>
-        );
-    });
+    const dirNames = React.useMemo(() => sortedDir(memos), [memos]);
+    const dirMenuItems = React.useMemo(
+        () =>
+            dirNames.map(({ dir }): ItemType => {
+                return {
+                    key: `DIRSELECT-${memoId}`,
+                    label: dirToString(dir),
+                    onClick: () => {
+                        setRoomState(roomState => {
+                            const memo = roomState.memos?.[memoId];
+                            if (memo == null) {
+                                return;
+                            }
+                            memo.dir = [...dir];
+                        });
+                    },
+                };
+            }),
+        [dirNames, memoId, setRoomState]
+    );
 
-    const moveMemoOverlay = <Menu>{dirMenuItems}</Menu>;
+    const moveMemoOverlay = (
+        <Menu items={dirMenuItems} triggerSubMenuAction={defaultTriggerSubMenuAction} />
+    );
 
     return (
         <div className={classNames(flex, flexRow)}>
@@ -268,9 +281,10 @@ const DirSelect = ({ memoId }: DirSelectProps) => {
 type MemoProps = {
     memoId: string | undefined;
     memo: MemoState | undefined;
+    height: number;
 };
 
-const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
+const Memo: React.FC<MemoProps> = ({ memoId, memo, height }: MemoProps) => {
     const setRoomState = useSetRoomStateWithImmer();
 
     if (memoId == null) {
@@ -288,15 +302,21 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
     return (
         <div
             className={classNames(flex1, flex, flexColumn)}
-            style={{ padding: `${padding}px ${padding}px 0 ${padding}px` }}
+            style={{ padding: `${padding}px ${padding}px 0 ${padding}px`, height: '100%' }}
         >
             <div
-                className={classNames(flex, flexRow, itemsCenter)}
-                style={{ paddingBottom: padding }}
+                className={classNames(flexNone, flex, flexRow, itemsCenter)}
+                style={{
+                    paddingBottom: padding,
+                    // 名前が長いときでも一応おさまるようにheightを設定している
+                    height: 30,
+                }}
             >
-                <BufferedInput
+                <CollaborativeInput
                     bufferDuration='default'
                     value={memo.name}
+                    style={{ width: '100%' }}
+                    placeholder='名前'
                     onChange={e =>
                         setRoomState(prevState => {
                             const memo = prevState.memos?.[memoId];
@@ -323,12 +343,13 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
                     削除
                 </Button>
             </div>
-            <BufferedTextArea
-                style={{ flex: 1, height: '100%', resize: 'none' }}
+            <CollaborativeInput
+                multiline
+                className={classNames(flexAuto)}
+                style={{ height: height - 50 }}
                 bufferDuration='default'
                 value={memo.text}
                 placeholder='本文'
-                disableResize
                 onChange={e => {
                     setRoomState(roomState => {
                         if (roomState.memos == null) {
@@ -349,9 +370,14 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
 type Props = {
     selectedMemoId: string | undefined;
     onSelectedMemoIdChange: (newId: string) => void;
+    height: number;
 };
 
-export const Memos: React.FC<Props> = ({ selectedMemoId, onSelectedMemoIdChange }: Props) => {
+export const Memos: React.FC<Props> = ({
+    selectedMemoId,
+    onSelectedMemoIdChange,
+    height,
+}: Props) => {
     const setRoomState = useSetRoomStateWithImmer();
     const memos = useMemos();
     const memo = selectedMemoId == null ? undefined : memos?.get(selectedMemoId);
@@ -366,7 +392,7 @@ export const Memos: React.FC<Props> = ({ selectedMemoId, onSelectedMemoIdChange 
             }}
         >
             <div
-                className={classNames(flex, flexRow, itemsCenter)}
+                className={classNames(flexNone, flex, flexRow, itemsCenter)}
                 style={{
                     padding: `${padding}px ${padding}px ${splitterPadding}px ${padding}px`,
                 }}
@@ -411,7 +437,7 @@ export const Memos: React.FC<Props> = ({ selectedMemoId, onSelectedMemoIdChange 
                     新規作成
                 </Button>
             </div>
-            <Memo memoId={selectedMemoId} memo={memo} />
+            <Memo memoId={selectedMemoId} memo={memo} height={height - 64} />
         </div>
     );
 };

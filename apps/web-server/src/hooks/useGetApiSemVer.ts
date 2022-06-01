@@ -1,11 +1,11 @@
-import { useQuery } from '@apollo/client';
+import { useQuery } from 'urql';
 import { GetServerInfoDocument, PrereleaseType } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { SemVer, alpha, beta, rc } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import React from 'react';
 
 export const useGetApiSemVer = () => {
-    const { data: serverInfo, error } = useQuery(GetServerInfoDocument);
+    const [{ data: serverInfo, error }] = useQuery({ query: GetServerInfoDocument });
 
     return React.useMemo(() => {
         if (error != null) {

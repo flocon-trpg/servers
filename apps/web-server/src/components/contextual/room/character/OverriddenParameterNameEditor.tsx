@@ -1,10 +1,10 @@
 import { Button, Tooltip } from 'antd';
 import React from 'react';
 import * as Icons from '@ant-design/icons';
-import { BufferedInput } from '../../../ui/BufferedInput';
 import classNames from 'classnames';
 import { flex, flexRow } from '../../../../utils/className';
 import { InputDescription } from '../../../ui/InputDescription';
+import { CollaborativeInput } from '../../../ui/CollaborativeInput';
 
 type PropsBase = {
     style?: React.CSSProperties;
@@ -48,7 +48,7 @@ export const OverriddenParameterNameEditor: React.FC<Props> = ({
         overriddenParameterNameArea = (
             <>
                 <Tooltip title='このキャラクターにのみ代わりに用いられている変数名です。'>
-                    <BufferedInput
+                    <CollaborativeInput
                         style={{ maxWidth: 80 }}
                         size='small'
                         value={overriddenParameterName ?? ''}

@@ -17,7 +17,7 @@ import { cancelRnd, flex, flexColumn, flexRow, itemsCenter } from '../../../util
 import classNames from 'classnames';
 import { sound } from '../../../utils/fileType';
 import { FilePath as FilePathModule } from '../../../utils/file/filePath';
-import { useMutation } from '@apollo/client';
+import { useMutation } from 'urql';
 import { atom } from 'jotai';
 import { roomAtom } from '../../../atoms/room/roomAtom';
 import { useAtomValue } from 'jotai/utils';
@@ -250,7 +250,7 @@ const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({
     const [filesManagerDrawerType, setFilesManagerDrawerType] =
         React.useState<FilesManagerDrawerType | null>(null);
 
-    const [writeRoomSoundEffect] = useMutation(WriteRoomSoundEffectDocument);
+    const [, writeRoomSoundEffect] = useMutation(WriteRoomSoundEffectDocument);
     const [fileInput, setFileInput] = React.useState<FilePathInput>();
     const [volumeInput, setVolumeInput] = React.useState<number>(defaultVolume);
 
@@ -285,7 +285,9 @@ const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({
 
                             // Promiseの結果を待たずに処理を続行している
                             writeRoomSoundEffect({
-                                variables: { roomId, file: fileInput, volume: volumeInput },
+                                roomId,
+                                file: fileInput,
+                                volume: volumeInput,
                             });
                             setFileInput(undefined);
                             onClose();

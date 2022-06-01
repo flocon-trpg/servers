@@ -1,14 +1,12 @@
-import { ApolloError } from '@apollo/client';
-import { GraphQLError } from 'graphql';
 import { RoomEventSubscription } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { RoomState } from '../../hooks/useRoomState';
 import { atom } from 'jotai';
 import produce from 'immer';
 import { Notification } from '@flocon-trpg/web-server-utils';
+import { CombinedError } from '@urql/core';
 
 export const text = 'text';
-export const graphQLErrors = 'graphQLErrors';
-export const apolloError = 'apolloError';
+export const error = 'error';
 
 // systemMessageなどとマージするので、createdAtの型はそれに合わせてnumberにしている。
 export type NotificationPayload =
@@ -17,13 +15,8 @@ export type NotificationPayload =
           notification: Notification;
       }
     | {
-          type: typeof graphQLErrors;
-          errors: ReadonlyArray<GraphQLError>;
-          createdAt: number;
-      }
-    | {
-          type: typeof apolloError;
-          error: ApolloError;
+          type: typeof error;
+          error: CombinedError;
           createdAt: number;
       };
 
@@ -31,19 +24,10 @@ const toTextNotification = (source: NotificationPayload): Notification => {
     if (source.type === text) {
         return source.notification;
     }
-    if (source.type === apolloError) {
-        return {
-            type: 'error',
-            message: 'Apollo error',
-            description: source.error.message,
-            createdAt: source.createdAt,
-        };
-    }
-    const firstError = source.errors[0];
     return {
         type: 'error',
         message: 'GraqhQL error',
-        description: firstError == null ? undefined : firstError.message,
+        description: source.error.message,
         createdAt: source.createdAt,
     };
 };

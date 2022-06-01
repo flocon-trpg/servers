@@ -14,7 +14,6 @@ import {
 } from '@flocon-trpg/core';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { Checkbox, Menu, Tooltip } from 'antd';
-import _ from 'lodash';
 import React from 'react';
 import { InputDie } from './die/InputDie';
 import { NewTabLinkify } from '../../../ui/NewTabLinkify';
@@ -32,7 +31,7 @@ import { noValue } from '../../../../utils/board/dice';
 import { DicePieceValue } from '../../../../utils/board/dicePieceValue';
 import { StringPieceValue } from '../../../../utils/board/stringPieceValue';
 import { Piece } from '../../../../utils/board/piece';
-import { useMutation } from '@apollo/client';
+import { useMutation } from 'urql';
 import { roomAtom } from '../../../../atoms/room/roomAtom';
 import { useAtomSelector } from '../../../../atoms/useAtomSelector';
 import { BoardConfig } from '../../../../atoms/roomConfig/types/boardConfig';
@@ -58,7 +57,6 @@ import { flex, flexColumn, flexRow, itemsCenter } from '../../../../utils/classN
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
 import { useIsMyCharacter } from '../../../../hooks/state/useIsMyCharacter';
 import { characterEditorModalAtom } from '../character/CharacterEditorModal';
-import { BufferedInput } from '../../../ui/BufferedInput';
 import {
     dicePieceValueEditorAtom,
     stringPieceValueEditorAtom,
@@ -71,6 +69,9 @@ import {
     characterPiece,
     characterPortrait,
 } from '../piece/BoardPositionAndPieceEditorModal';
+import { ItemType } from 'antd/lib/menu/hooks/useItems';
+import { defaultTriggerSubMenuAction } from '../../../../utils/variables';
+import { CollaborativeInput } from '../../../ui/CollaborativeInput';
 
 type BoardState = State<typeof boardTemplate>;
 type BoardPositionState = State<typeof boardPositionTemplate>;
@@ -331,7 +332,7 @@ namespace PopupEditorBase {
 
         return (
             <div className={classNames(flex, flexColumn)} style={{ width: '100%' }}>
-                <BufferedInput
+                <CollaborativeInput
                     bufferDuration='default'
                     value={stringPieceValue.value}
                     onChange={e =>
@@ -492,57 +493,57 @@ namespace ContextMenuModule {
         onContextMenuClear,
         hooks,
         setRoomState,
-    }: SelectedCharacterPiecesMenuProps): JSX.Element | null => {
+    }: SelectedCharacterPiecesMenuProps): ItemType => {
         if (characterPiecesOnCursor.length === 0) {
             return null;
         }
-        return (
-            <Menu.ItemGroup title='コマ'>
-                {characterPiecesOnCursor.map(({ characterId, character, pieceId }) => (
-                    // characterIdとpieceIdを組み合わせてkeyにしている場所が他にもあるため、キーを互いに異なるものにするように文字列を付加している。
-                    <Menu.SubMenu
-                        key={keyNames(characterId, pieceId, 'selected-piece')}
-                        title={character.name}
-                    >
-                        <Menu.Item
-                            onClick={() => {
+        return {
+            key: 'コマ@boardPopover',
+            label: 'コマ',
+            children: [
+                ...characterPiecesOnCursor.map(({ characterId, character, pieceId }) => ({
+                    key: keyNames(characterId, pieceId, 'selected-piece@boardPopover'),
+                    label: character.name,
+                    children: [
+                        {
+                            key: 'コマの編集@boardPopover',
+                            label: 'コマの編集',
+                            onClick: () => {
                                 hooks.setBoardPositionAndPieceEditorModal({
                                     type: characterPiece,
                                     characterId,
                                     pieceId,
                                 });
                                 onContextMenuClear();
-                            }}
-                        >
-                            コマの編集
-                        </Menu.Item>
-                        <Menu.Item
-                            onClick={() => {
+                            },
+                        },
+                        {
+                            key: 'コマの削除@boardPopover',
+                            label: 'コマの削除',
+                            onClick: () => {
                                 setRoomState(roomState => {
                                     delete roomState.characters?.[characterId]?.pieces?.[pieceId];
                                 });
                                 onContextMenuClear();
-                            }}
-                        >
-                            コマを削除
-                        </Menu.Item>
-                        <Menu.Divider />
-                        <Menu.Item
-                            onClick={() => {
+                            },
+                        },
+                        { type: 'divider' },
+                        {
+                            key: 'キャラクターの編集@boardPopover',
+                            label: 'キャラクターの編集',
+                            onClick: () => {
                                 hooks.setCharacterEditor({
                                     type: update,
                                     stateId: characterId,
                                 });
                                 onContextMenuClear();
-                            }}
-                        >
-                            キャラクターの編集
-                        </Menu.Item>
-                    </Menu.SubMenu>
-                ))}
-                <Menu.Divider />
-            </Menu.ItemGroup>
-        );
+                            },
+                        },
+                    ],
+                })),
+                { type: 'divider' },
+            ],
+        };
     };
 
     type SelectedPortraitPiecesMenuProps = {
@@ -557,60 +558,60 @@ namespace ContextMenuModule {
         onContextMenuClear,
         hooks,
         setRoomState,
-    }: SelectedPortraitPiecesMenuProps): JSX.Element | null => {
+    }: SelectedPortraitPiecesMenuProps): ItemType => {
         if (portraitsOnCursor.length === 0) {
             return null;
         }
-        return (
-            <Menu.ItemGroup title='立ち絵'>
-                {portraitsOnCursor.map(
-                    ({ characterId, character, pieceId: portraitPositionId }) => (
-                        // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が他にもあるため、キーを互いに異なるものにするように文字列を付加している。
-                        <Menu.SubMenu
-                            key={keyNames(characterId) + '@selected-tachie'}
-                            title={character.name}
-                        >
-                            <Menu.Item
-                                onClick={() => {
+        return {
+            key: '立ち絵@boardPopover',
+            label: '立ち絵',
+            children: [
+                ...portraitsOnCursor.map(
+                    ({ characterId, character, pieceId: portraitPositionId }) => ({
+                        key: characterId + '@selected-tachie@boardPopover',
+                        label: character.name,
+                        children: [
+                            {
+                                key: '立ち絵の編集@boardPopover',
+                                label: '立ち絵の編集',
+                                onClick: () => {
                                     hooks.setBoardPositionAndPieceEditorModal({
                                         type: characterPortrait,
                                         characterId,
                                         pieceId: portraitPositionId,
                                     });
                                     onContextMenuClear();
-                                }}
-                            >
-                                立ち絵の編集
-                            </Menu.Item>
-                            <Menu.Item
-                                onClick={() => {
+                                },
+                            },
+                            {
+                                key: '立ち絵を削除@boardPopover',
+                                label: '立ち絵を削除',
+                                onClick: () => {
                                     setRoomState(roomState => {
                                         delete roomState.characters?.[characterId]
                                             ?.portraitPieces?.[portraitPositionId];
                                     });
                                     onContextMenuClear();
-                                }}
-                            >
-                                立ち絵を削除
-                            </Menu.Item>
-                            <Menu.Divider />
-                            <Menu.Item
-                                onClick={() => {
+                                },
+                            },
+                            { type: 'divider' },
+                            {
+                                key: 'キャラクターを編集@boardPopover',
+                                label: 'キャラクターを編集',
+                                onClick: () => {
                                     hooks.setCharacterEditor({
                                         type: update,
                                         stateId: characterId,
                                     });
                                     onContextMenuClear();
-                                }}
-                            >
-                                キャラクターを編集
-                            </Menu.Item>
-                        </Menu.SubMenu>
-                    )
-                )}
-                <Menu.Divider />
-            </Menu.ItemGroup>
-        );
+                                },
+                            },
+                        ],
+                    })
+                ),
+                { type: 'divider' },
+            ],
+        };
     };
 
     const selectedCharacterCommandsMenu = ({
@@ -629,9 +630,9 @@ namespace ContextMenuModule {
         room: RoomState;
         myUserUid: string;
         onSe: (filePath: FilePath, volume: number) => void;
-    }): JSX.Element | null => {
+    }): ItemType[] => {
         if (characterPiecesOnCursor.length + portraitsOnCursor.length === 0) {
-            return null;
+            return [];
         }
 
         const characters: { id: string; value: CharacterState }[] = [];
@@ -641,67 +642,68 @@ namespace ContextMenuModule {
             }
             characters.push({ id: elem.characterId, value: elem.character });
         });
-        const characterMenuItems = _(characters)
-            .map(characterPair => {
-                const privateCommands = recordToArray(
-                    characterPair.value.privateCommands ?? {}
-                ).map(({ key, value }) => {
+        const characterMenuItems = characters.map((characterPair): ItemType => {
+            const privateCommands = recordToArray(characterPair.value.privateCommands ?? {}).map(
+                ({ key, value }): ItemType => {
                     const testResult = testCommand(value.value);
                     if (testResult.isError) {
-                        return (
-                            <Menu.Item key={key} title={value.name} disabled>
-                                <Tooltip title={testResult.error}>(コマンド文法エラー)</Tooltip>
-                            </Menu.Item>
-                        );
+                        return {
+                            key: key,
+                            label: (
+                                <Tooltip overlay={'コマンド文法エラー - ' + testResult.error}>
+                                    {' '}
+                                    {value.name}
+                                </Tooltip>
+                            ),
+                            disabled: true,
+                        };
                     }
-                    return (
-                        <Menu.Item
-                            key={key}
-                            onClick={() => {
-                                const commandResult = execCharacterCommand({
-                                    script: value.value,
-                                    room,
-                                    characterId: characterPair.id,
-                                    myUserUid,
-                                });
-                                if (commandResult.isError) {
-                                    // TODO: 通知する
-                                    return;
-                                }
-                                const operation = diff(roomTemplate)({
-                                    prevState: room,
-                                    nextState: commandResult.value,
-                                });
-                                if (operation != null) {
-                                    operate(toUpOperation(roomTemplate)(operation));
-                                }
-                                onContextMenuClear();
-                            }}
-                        >
-                            {value.name}
-                        </Menu.Item>
-                    );
-                });
-                if (privateCommands.length === 0) {
-                    return null;
+                    return {
+                        key,
+                        label: value.name,
+                        onClick: () => {
+                            const commandResult = execCharacterCommand({
+                                script: value.value,
+                                room,
+                                characterId: characterPair.id,
+                                myUserUid,
+                            });
+                            if (commandResult.isError) {
+                                // TODO: 通知する
+                                return;
+                            }
+                            const operation = diff(roomTemplate)({
+                                prevState: room,
+                                nextState: commandResult.value,
+                            });
+                            if (operation != null) {
+                                operate(toUpOperation(roomTemplate)(operation));
+                            }
+                            onContextMenuClear();
+                        },
+                    };
                 }
-                return (
-                    <Menu.ItemGroup key={characterPair.id} title={characterPair.value.name}>
-                        {privateCommands}
-                    </Menu.ItemGroup>
-                );
-            })
-            .compact()
-            .value();
+            );
+            if (privateCommands.length === 0) {
+                return null;
+            }
+            return {
+                key: characterPair.id,
+                label: characterPair.value.name,
+                children: privateCommands,
+            };
+        });
         if (characterMenuItems.length === 0) {
-            return null;
+            return [];
         }
-        return (
-            <>
-                <Menu.ItemGroup title='キャラクターコマンド'>{characterMenuItems}</Menu.ItemGroup>
-                <Menu.Divider />
-            </>
-        );
+        return [
+            {
+                key: 'キャラクターコマンド@boardPopover',
+                label: 'キャラクターコマンド',
+                children: characterMenuItems,
+            },
+            { type: 'divider' },
+        ];
     };
 
     const youCannotEditPieceMessage = '自分以外が作成したコマでは、値を編集することはできません。';
@@ -722,53 +724,57 @@ namespace ContextMenuModule {
         hooks,
         isMyCharacter,
         setRoomState,
-    }: SelectedDicePiecesMenuProps): JSX.Element | null => {
+    }: SelectedDicePiecesMenuProps): ItemType => {
         if (dicePiecesOnCursor.length === 0) {
             return null;
         }
-        return (
-            <Menu.ItemGroup title='ダイスコマ'>
-                {dicePiecesOnCursor.map(({ pieceId, piece, boardId }) => (
-                    // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が下にもあるため、キーを互いに異なるものにするように文字列を付加している。
-                    <Menu.SubMenu
-                        key={pieceId + '@selected'}
-                        title={
+        return {
+            key: 'ダイスコマ@boardPopover',
+            label: 'ダイスコマ',
+            children: [
+                ...dicePiecesOnCursor.map(
+                    ({ pieceId, piece, boardId }): ItemType => ({
+                        key: pieceId + '@selected',
+                        label: (
                             <DicePieceValue.images state={piece} size={22} padding='6px 0 0 0' />
-                        }
-                    >
-                        {isMyCharacter(piece.ownerCharacterId) ? (
-                            <Menu.Item
-                                onClick={() => {
-                                    hooks.setDicePieceEditor({
-                                        type: update,
-                                        boardId: boardIdToShow,
-                                        pieceId,
+                        ),
+                        children: [
+                            isMyCharacter(piece.ownerCharacterId)
+                                ? {
+                                      key: '編集@boardPopover',
+                                      label: '編集',
+                                      onClick: () => {
+                                          hooks.setDicePieceEditor({
+                                              type: update,
+                                              boardId: boardIdToShow,
+                                              pieceId,
+                                          });
+                                          onContextMenuClear();
+                                      },
+                                  }
+                                : {
+                                      key: '編集@boardPopover',
+                                      label: (
+                                          <Tooltip title={youCannotEditPieceMessage}>編集</Tooltip>
+                                      ),
+                                      disabled: true,
+                                  },
+                            {
+                                key: '削除@boardPopover',
+                                label: '削除',
+                                onClick: () => {
+                                    setRoomState(roomState => {
+                                        delete roomState.boards?.[boardId]?.dicePieces?.[pieceId];
                                     });
                                     onContextMenuClear();
-                                }}
-                            >
-                                編集
-                            </Menu.Item>
-                        ) : (
-                            <Menu.Item disabled>
-                                <Tooltip title={youCannotEditPieceMessage}>編集</Tooltip>
-                            </Menu.Item>
-                        )}
-                        <Menu.Item
-                            onClick={() => {
-                                setRoomState(roomState => {
-                                    delete roomState.boards?.[boardId]?.dicePieces?.[pieceId];
-                                });
-                                onContextMenuClear();
-                            }}
-                        >
-                            削除
-                        </Menu.Item>
-                    </Menu.SubMenu>
-                ))}
-                <Menu.Divider />
-            </Menu.ItemGroup>
-        );
+                                },
+                            },
+                        ],
+                    })
+                ),
+                { type: 'divider' },
+            ],
+        };
     };
 
     type SelectedNumberPiecesMenuProps = {
@@ -787,51 +793,56 @@ namespace ContextMenuModule {
         hooks,
         isMyCharacter,
         setRoomState,
-    }: SelectedNumberPiecesMenuProps): JSX.Element | null => {
+    }: SelectedNumberPiecesMenuProps): ItemType => {
         if (stringPiecesOnCursor.length === 0) {
             return null;
         }
-        return (
-            <Menu.ItemGroup title='文字列コマ'>
-                {stringPiecesOnCursor.map(({ pieceId, piece, boardId }) => (
-                    // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が下にもあるため、キーを互いに異なるものにするように文字列を付加している。
-                    <Menu.SubMenu
-                        key={pieceId + '@selected'}
-                        title={StringPieceValue.stringify(piece)}
-                    >
-                        {isMyCharacter(piece.ownerCharacterId) ? (
-                            <Menu.Item
-                                onClick={() => {
-                                    hooks.setStringPieceEditor({
-                                        type: update,
-                                        boardId: boardIdToShow,
-                                        pieceId,
+        return {
+            key: '文字列コマ@boardPopover',
+            label: '文字列コマ',
+            children: [
+                ...stringPiecesOnCursor.map(
+                    ({ pieceId, piece, boardId }): ItemType => ({
+                        // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が下にもあるため、キーを互いに異なるものにするように文字列を付加している。
+                        key: pieceId + '@selected',
+                        label: StringPieceValue.stringify(piece),
+                        children: [
+                            isMyCharacter(piece.ownerCharacterId)
+                                ? {
+                                      key: '編集@boardPopover',
+                                      label: '編集',
+                                      onClick: () => {
+                                          hooks.setStringPieceEditor({
+                                              type: update,
+                                              boardId: boardIdToShow,
+                                              pieceId,
+                                          });
+                                          onContextMenuClear();
+                                      },
+                                  }
+                                : {
+                                      key: '編集@boardPopover',
+                                      disabled: true,
+                                      label: (
+                                          <Tooltip title={youCannotEditPieceMessage}>編集</Tooltip>
+                                      ),
+                                  },
+                            {
+                                key: '削除@boardPopover',
+                                label: '削除',
+                                onClick: () => {
+                                    setRoomState(roomState => {
+                                        delete roomState.boards?.[boardId]?.stringPieces?.[pieceId];
                                     });
                                     onContextMenuClear();
-                                }}
-                            >
-                                編集
-                            </Menu.Item>
-                        ) : (
-                            <Menu.Item disabled>
-                                <Tooltip title={youCannotEditPieceMessage}>編集</Tooltip>
-                            </Menu.Item>
-                        )}
-                        <Menu.Item
-                            onClick={() => {
-                                setRoomState(roomState => {
-                                    delete roomState.boards?.[boardId]?.stringPieces?.[pieceId];
-                                });
-                                onContextMenuClear();
-                            }}
-                        >
-                            削除
-                        </Menu.Item>
-                    </Menu.SubMenu>
-                ))}
-                <Menu.Divider />
-            </Menu.ItemGroup>
-        );
+                                },
+                            },
+                        ],
+                    })
+                ),
+                { type: 'divider' },
+            ],
+        };
     };
 
     type SelectedImagePiecesMenuProps = {
@@ -848,62 +859,64 @@ namespace ContextMenuModule {
         boardId: boardIdToShow,
         hooks,
         setRoomState,
-    }: SelectedImagePiecesMenuProps): JSX.Element | null => {
+    }: SelectedImagePiecesMenuProps): ItemType => {
         if (imagePiecesOnCursor.length === 0) {
             return null;
         }
-        return (
-            <Menu.ItemGroup title='画像コマ'>
-                {imagePiecesOnCursor.map(({ pieceId, piece, boardId }) => (
-                    <Menu.SubMenu
-                        key={pieceId + '@selected'}
-                        title={
+        return {
+            key: '画像コマ@boardPopover',
+            label: '画像コマ',
+            children: [
+                ...imagePiecesOnCursor.map(
+                    ({ pieceId, piece, boardId }): ItemType => ({
+                        key: pieceId + '@selected',
+                        label: (
                             <div className={classNames(flex, flexRow, itemsCenter)}>
                                 {piece.image == null ? null : (
                                     <ImageView filePath={piece.image} size={26} />
                                 )}
                                 <div style={{ paddingLeft: 3 }}>{piece.name}</div>
                             </div>
-                        }
-                    >
-                        <Menu.Item
-                            onClick={() => {
-                                hooks.setImagePieceModal({
-                                    type: update,
-                                    boardId: boardIdToShow,
-                                    pieceId,
-                                });
-                                onContextMenuClear();
-                            }}
-                        >
-                            編集
-                        </Menu.Item>
-                        <Menu.Item
-                            onClick={() => {
-                                hooks.cloneImagePiece({
-                                    boardId,
-                                    pieceId,
-                                });
-                                onContextMenuClear();
-                            }}
-                        >
-                            複製
-                        </Menu.Item>
-                        <Menu.Item
-                            onClick={() => {
-                                setRoomState(roomState => {
-                                    delete roomState.boards?.[boardId]?.imagePieces?.[pieceId];
-                                });
-                                onContextMenuClear();
-                            }}
-                        >
-                            削除
-                        </Menu.Item>
-                    </Menu.SubMenu>
-                ))}
-                <Menu.Divider />
-            </Menu.ItemGroup>
-        );
+                        ),
+                        children: [
+                            {
+                                key: '編集@画像コマ@boardPopover',
+                                label: '編集',
+                                onClick: () => {
+                                    hooks.setImagePieceModal({
+                                        type: update,
+                                        boardId: boardIdToShow,
+                                        pieceId,
+                                    });
+                                    onContextMenuClear();
+                                },
+                            },
+                            {
+                                key: '複製@画像コマ@boardPopover',
+                                label: '複製',
+                                onClick: () => {
+                                    hooks.cloneImagePiece({
+                                        boardId,
+                                        pieceId,
+                                    });
+                                    onContextMenuClear();
+                                },
+                            },
+                            {
+                                key: '削除@画像コマ@boardPopover',
+                                label: '削除',
+                                onClick: () => {
+                                    setRoomState(roomState => {
+                                        delete roomState.boards?.[boardId]?.imagePieces?.[pieceId];
+                                    });
+                                    onContextMenuClear();
+                                },
+                            },
+                        ],
+                    })
+                ),
+            ],
+        };
     };
 
     type BasicMenuProps = {
@@ -922,7 +935,7 @@ namespace ContextMenuModule {
         setRoomState,
         characters,
         board,
-    }: BasicMenuProps): JSX.Element | null => {
+    }: BasicMenuProps): ItemType => {
         const boardId = contextMenuState.boardId;
         const boardConfig = contextMenuState.boardConfig;
         const { x, y } = toBoardPosition({
@@ -980,11 +993,15 @@ namespace ContextMenuModule {
             name: undefined,
         };
 
-        const pieceMenus = [...characters].map(([characterId, character]) => {
-            return (
-                <Menu.SubMenu key={keyNames(characterId) + '@piece'} title={character.name}>
-                    <Menu.Item
-                        onClick={() => {
+        const pieceMenus = [...characters].map(([characterId, character]): ItemType => {
+            return {
+                key: keyNames(characterId) + '@piece',
+                label: character.name,
+                children: [
+                    {
+                        key: 'セルにスナップする@キャラコマ',
+                        label: 'セルにスナップする',
+                        onClick: () => {
                             setRoomState(roomState => {
                                 const pieces = roomState.characters?.[characterId]?.pieces;
                                 if (pieces == null) {
@@ -999,12 +1016,12 @@ namespace ContextMenuModule {
                                 };
                             });
                             onContextMenuClear();
-                        }}
-                    >
-                        セルにスナップする
-                    </Menu.Item>
-                    <Menu.Item
-                        onClick={() => {
+                        },
+                    },
+                    {
+                        key: 'セルにスナップしない@キャラコマ',
+                        label: 'セルにスナップしない',
+                        onClick: () => {
                             setRoomState(roomState => {
                                 const pieces = roomState.characters?.[characterId]?.pieces;
                                 if (pieces == null) {
@@ -1019,125 +1036,141 @@ namespace ContextMenuModule {
                                 };
                             });
                             onContextMenuClear();
-                        }}
-                    >
-                        セルにスナップしない
-                    </Menu.Item>
-                </Menu.SubMenu>
-            );
+                        },
+                    },
+                ],
+            };
         });
 
-        const portraitMenus = [...characters].map(([characterId, character]) => {
-            return (
-                <Menu.Item
-                    key={keyNames(characterId) + '@portrait'}
-                    onClick={() => {
-                        setRoomState(roomState => {
-                            const portraitPieces =
-                                roomState.characters?.[characterId]?.portraitPieces;
-                            if (portraitPieces == null) {
-                                return;
-                            }
-                            portraitPieces[simpleId()] = {
-                                ...portraitPositionWhichIsNotCellMode,
-                                $v: 2,
-                                $r: 1,
-                                boardId,
-                                isPrivate: false,
-                            };
-                        });
-                        onContextMenuClear();
-                    }}
-                >
-                    {character.name}
-                </Menu.Item>
-            );
+        const portraitMenus = [...characters].map(([characterId, character]): ItemType => {
+            return {
+                key: keyNames(characterId) + '@portrait',
+                label: character.name,
+                onClick: () => {
+                    setRoomState(roomState => {
+                        const portraitPieces = roomState.characters?.[characterId]?.portraitPieces;
+                        if (portraitPieces == null) {
+                            return;
+                        }
+                        portraitPieces[simpleId()] = {
+                            ...portraitPositionWhichIsNotCellMode,
+                            $v: 2,
+                            $r: 1,
+                            boardId,
+                            isPrivate: false,
+                        };
+                    });
+                    onContextMenuClear();
+                },
+            };
         });
 
-        return (
-            <Menu.ItemGroup title='新規作成'>
-                <Menu.SubMenu title='キャラクターコマ'>{pieceMenus}</Menu.SubMenu>
-                <Menu.SubMenu title='キャラクター立ち絵'>{portraitMenus}</Menu.SubMenu>
-                <Menu.SubMenu title='ダイスコマ'>
-                    <Menu.Item
-                        onClick={() => {
-                            hooks.setDicePieceEditor({
-                                type: create,
-                                boardId,
-                                piecePosition: piecePositionWhichIsCellMode,
-                            });
-                            onContextMenuClear();
-                        }}
-                    >
-                        セルにスナップする
-                    </Menu.Item>
-                    <Menu.Item
-                        onClick={() => {
-                            hooks.setDicePieceEditor({
-                                type: create,
-                                boardId,
-                                piecePosition: piecePositionWhichIsNotCellMode,
-                            });
-                            onContextMenuClear();
-                        }}
-                    >
-                        セルにスナップしない
-                    </Menu.Item>
-                </Menu.SubMenu>
-                <Menu.SubMenu title='文字列コマ'>
-                    <Menu.Item
-                        onClick={() => {
-                            hooks.setStringPieceEditor({
-                                type: create,
-                                boardId,
-                                piecePosition: piecePositionWhichIsCellMode,
-                            });
-                            onContextMenuClear();
-                        }}
-                    >
-                        セルにスナップする
-                    </Menu.Item>
-                    <Menu.Item
-                        onClick={() => {
-                            hooks.setStringPieceEditor({
-                                type: create,
-                                boardId,
-                                piecePosition: piecePositionWhichIsNotCellMode,
-                            });
-                            onContextMenuClear();
-                        }}
-                    >
-                        セルにスナップしない
-                    </Menu.Item>
-                </Menu.SubMenu>
-                <Menu.SubMenu title='画像コマ'>
-                    <Menu.Item
-                        onClick={() => {
-                            hooks.setImagePieceModal({
-                                type: create,
-                                boardId,
-                                piecePosition: piecePositionWhichIsCellMode,
-                            });
-                            onContextMenuClear();
-                        }}
-                    >
-                        セルにスナップする
-                    </Menu.Item>
-                    <Menu.Item
-                        onClick={() => {
-                            hooks.setImagePieceModal({
-                                type: create,
-                                boardId,
-                                piecePosition: piecePositionWhichIsNotCellMode,
-                            });
-                            onContextMenuClear();
-                        }}
-                    >
-                        セルにスナップしない
-                    </Menu.Item>
-                </Menu.SubMenu>
-            </Menu.ItemGroup>
-        );
+        return {
+            key: '新規作成@boardPopover',
+            label: '新規作成',
+            children: [
+                {
+                    key: 'キャラクターコマ@boardPopover',
+                    label: 'キャラクターコマ',
+                    children: pieceMenus,
+                },
+                {
+                    key: 'キャラクター立ち絵@boardPopover',
+                    label: 'キャラクター立ち絵',
+                    children: portraitMenus,
+                },
+                {
+                    key: 'ダイスコマ@boardPopover',
+                    label: 'ダイスコマ',
+                    children: [
+                        {
+                            key: 'セルにスナップする@ダイスコマ@boardPopover',
+                            label: 'セルにスナップする',
+                            onClick: () => {
+                                hooks.setDicePieceEditor({
+                                    type: create,
+                                    boardId,
+                                    piecePosition: piecePositionWhichIsCellMode,
+                                });
+                                onContextMenuClear();
+                            },
+                        },
+                        {
+                            key: 'セルにスナップしない@ダイスコマ@boardPopover',
+                            label: 'セルにスナップしない',
+                            onClick: () => {
+                                hooks.setDicePieceEditor({
+                                    type: create,
+                                    boardId,
+                                    piecePosition: piecePositionWhichIsNotCellMode,
+                                });
+                                onContextMenuClear();
+                            },
+                        },
+                    ],
+                },
+                {
+                    key: '文字列コマ@boardPopover',
+                    label: '文字列コマ',
+                    children: [
+                        {
+                            key: 'セルにスナップする@文字列コマ@boardPopover',
+                            label: 'セルにスナップする',
+                            onClick: () => {
+                                hooks.setStringPieceEditor({
+                                    type: create,
+                                    boardId,
+                                    piecePosition: piecePositionWhichIsCellMode,
+                                });
+                                onContextMenuClear();
+                            },
+                        },
+                        {
+                            key: 'セルにスナップしない@文字列コマ@boardPopover',
+                            label: 'セルにスナップしない',
+                            onClick: () => {
+                                hooks.setStringPieceEditor({
+                                    type: create,
+                                    boardId,
+                                    piecePosition: piecePositionWhichIsNotCellMode,
+                                });
+                                onContextMenuClear();
+                            },
+                        },
+                    ],
+                },
+                {
+                    key: '画像コマ@boardPopover',
+                    label: '画像コマ',
+                    children: [
+                        {
+                            key: 'セルにスナップする@画像コマ@boardPopover',
+                            label: 'セルにスナップする',
+                            onClick: () => {
+                                hooks.setImagePieceModal({
+                                    type: create,
+                                    boardId,
+                                    piecePosition: piecePositionWhichIsCellMode,
+                                });
+                                onContextMenuClear();
+                            },
+                        },
+                        {
+                            key: 'セルにスナップしない@画像コマ@boardPopover',
+                            label: 'セルにスナップしない',
+                            onClick: () => {
+                                hooks.setImagePieceModal({
+                                    type: create,
+                                    boardId,
+                                    piecePosition: piecePositionWhichIsNotCellMode,
+                                });
+                                onContextMenuClear();
+                            },
+                        },
+                    ],
+                },
+            ],
+        };
     };
 
     export const Main: React.FC = () => {
@@ -1149,7 +1182,7 @@ namespace ContextMenuModule {
         const myUserUid = useMyUserUid();
         const contextMenuState = useAtomValue(boardContextMenuAtom);
         const roomId = useAtomSelector(roomAtom, state => state.roomId);
-        const [writeSe] = useMutation(WriteRoomSoundEffectDocument);
+        const [, writeSe] = useMutation(WriteRoomSoundEffectDocument);
         const setBoardContextMenu = useUpdateAtom(boardContextMenuAtom);
         const hooks = useHooks();
         const isMyCharacter = useIsMyCharacter();
@@ -1172,6 +1205,70 @@ namespace ContextMenuModule {
         }
 
         const onContextMenuClear = () => setBoardContextMenu(null);
+        const menuItems: ItemType[] = [
+            selectedCharacterPiecesMenu({
+                ...contextMenuState,
+                onContextMenuClear,
+                hooks,
+                setRoomState,
+            }),
+            selectedPortraitPiecesMenu({
+                ...contextMenuState,
+                onContextMenuClear,
+                hooks,
+                setRoomState,
+            }),
+            selectedDicePiecesMenu({
+                ...contextMenuState,
+                onContextMenuClear,
+                boardId,
+                hooks,
+                setRoomState,
+                isMyCharacter,
+            }),
+            selectedStringPiecesMenu({
+                ...contextMenuState,
+                onContextMenuClear,
+                boardId,
+                hooks,
+                setRoomState,
+                isMyCharacter,
+            }),
+            selectedImagePiecesMenu({
+                ...contextMenuState,
+                onContextMenuClear,
+                boardId,
+                hooks,
+                setRoomState,
+            }),
+            ...selectedCharacterCommandsMenu({
+                ...contextMenuState,
+                onContextMenuClear,
+                operate: operate,
+                room,
+                onSe: (se, volume) =>
+                    writeSe({
+                        roomId,
+                        volume,
+                        file: {
+                            ...se,
+                            sourceType:
+                                se.sourceType === 'Default'
+                                    ? FileSourceType.Default
+                                    : FileSourceType.FirebaseStorage,
+                        },
+                    }),
+                myUserUid,
+            }),
+            basicMenu({
+                contextMenuState,
+                onContextMenuClear,
+                hooks,
+                setRoomState,
+                characters,
+                board,
+            }),
+        ];
 
         return (
             <div
@@ -1182,74 +1279,7 @@ namespace ContextMenuModule {
                     zIndex,
                 }}
             >
-                <Menu>
-                    {/* React.FCなどを用いるとantdがエラーを出すので、単なるJSX.Elementを返す関数として定義している */}
-
-                    {selectedCharacterPiecesMenu({
-                        ...contextMenuState,
-                        onContextMenuClear,
-                        hooks,
-                        setRoomState,
-                    })}
-                    {selectedPortraitPiecesMenu({
-                        ...contextMenuState,
-                        onContextMenuClear,
-                        hooks,
-                        setRoomState,
-                    })}
-                    {selectedDicePiecesMenu({
-                        ...contextMenuState,
-                        onContextMenuClear,
-                        boardId,
-                        hooks,
-                        setRoomState,
-                        isMyCharacter,
-                    })}
-                    {selectedStringPiecesMenu({
-                        ...contextMenuState,
-                        onContextMenuClear,
-                        boardId,
-                        hooks,
-                        setRoomState,
-                        isMyCharacter,
-                    })}
-                    {selectedImagePiecesMenu({
-                        ...contextMenuState,
-                        onContextMenuClear,
-                        boardId,
-                        hooks,
-                        setRoomState,
-                    })}
-                    {selectedCharacterCommandsMenu({
-                        ...contextMenuState,
-                        onContextMenuClear,
-                        operate: operate,
-                        room,
-                        onSe: (se, volume) =>
-                            writeSe({
-                                variables: {
-                                    roomId,
-                                    volume,
-                                    file: {
-                                        ...se,
-                                        sourceType:
-                                            se.sourceType === 'Default'
-                                                ? FileSourceType.Default
-                                                : FileSourceType.FirebaseStorage,
-                                    },
-                                },
-                            }),
-                        myUserUid,
-                    })}
-                    {basicMenu({
-                        contextMenuState,
-                        onContextMenuClear,
-                        hooks,
-                        setRoomState,
-                        characters,
-                        board,
-                    })}
-                </Menu>
+                <Menu items={menuItems} triggerSubMenuAction={defaultTriggerSubMenuAction} />
             </div>
         );
     };

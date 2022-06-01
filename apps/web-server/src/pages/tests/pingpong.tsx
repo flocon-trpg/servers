@@ -1,6 +1,5 @@
-import { useApolloClient, useMutation, useSubscription } from '@apollo/client';
+import { CombinedError, useClient, useMutation, useSubscription } from 'urql';
 import { Button, InputNumber } from 'antd';
-import { GraphQLError } from 'graphql';
 import React from 'react';
 import {
     PingDocument,
@@ -8,6 +7,7 @@ import {
     PongSubscription,
     PongSubscriptionVariables,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { pipe, subscribe } from 'wonka';
 
 type PongObservableResultState =
     | {
@@ -18,43 +18,33 @@ type PongObservableResultState =
           };
       }
     | {
-          type: 'errors';
-          errors: readonly GraphQLError[];
-      }
-    | {
-          type: 'observableError';
-          error: any;
-      }
-    | {
-          type: 'complete';
+          type: 'error';
+          error: CombinedError;
       };
 
 const PingPongCore: React.FC = () => {
-    const apolloClient = useApolloClient();
-    const [pingMutation, pingMutationResult] = useMutation(PingDocument);
-    const pongSubscription = useSubscription(PongDocument);
+    const urqlClient = useClient();
+    const [pingMutationResult, pingMutation] = useMutation(PingDocument);
+    const [pongSubscription] = useSubscription({ query: PongDocument });
     const [postValue, setPostValue] = React.useState(0);
     const [pongObservableResult, setPongObservableResult] =
         React.useState<PongObservableResultState>();
 
     React.useEffect(() => {
-        const subscription = apolloClient
-            .subscribe<PongSubscription, PongSubscriptionVariables>({ query: PongDocument })
-            .subscribe(
-                pong => {
-                    if (pong.data != null) {
-                        setPongObservableResult({ type: 'success', value: pong.data.pong });
-                        return;
-                    }
-                    if (pong.errors != null) {
-                        setPongObservableResult({ type: 'errors', errors: pong.errors });
-                    }
-                },
-                error => setPongObservableResult({ type: 'observableError', error }),
-                () => setPongObservableResult({ type: 'complete' })
-            );
+        const subscription = pipe(
+            urqlClient.subscription<PongSubscription, PongSubscriptionVariables>(PongDocument),
+            subscribe(pong => {
+                if (pong.data != null) {
+                    setPongObservableResult({ type: 'success', value: pong.data.pong });
+                    return;
+                }
+                if (pong.error != null) {
+                    setPongObservableResult({ type: 'error', error: pong.error });
+                }
+            })
+        );
         return () => subscription.unsubscribe();
-    }, [apolloClient]);
+    }, [urqlClient]);
 
     const pingMutationResponse: JSX.Element | null = (() => {
         if (pingMutationResult.error != null) {
@@ -83,14 +73,8 @@ const PingPongCore: React.FC = () => {
                         <div>{pongObservableResult.value.createdBy ?? '(anonymous)'}</div>
                     </>
                 );
-            case 'errors':
-                return pongObservableResult.errors.map((error, index) => (
-                    <div key={index}>{error.message}</div>
-                ));
-            case 'observableError':
-                return <div>{pongObservableResult.error}</div>;
-            case 'complete':
-                return <div>complete</div>;
+            case 'error':
+                return <div>{pongObservableResult.error.message}</div>;
         }
     })();
 
@@ -98,7 +82,7 @@ const PingPongCore: React.FC = () => {
         if (pongSubscription.error != null) {
             return <div>{pongSubscription.error.message}</div>;
         }
-        if (pongSubscription.loading) {
+        if (pongSubscription.fetching) {
             return <div>loading</div>;
         }
         if (pongSubscription.data != null) {
@@ -121,17 +105,14 @@ const PingPongCore: React.FC = () => {
                 value={postValue}
                 onChange={value => (typeof value === 'number' ? setPostValue(value) : undefined)}
             />
-            <Button
-                onClick={() => pingMutation({ variables: { value: postValue } })}
-                type='primary'
-            >
+            <Button onClick={() => pingMutation({ value: postValue })} type='primary'>
                 Ping
             </Button>
             <h3>ping response (mutation)</h3>
             {pingMutationResponse}
-            <h3>pong (observable)</h3>
+            <h3>pong (subscription method)</h3>
             {pongObservableResponse}
-            <h3>pong (hooks)</h3>
+            <h3>pong (useSubscription hook)</h3>
             {pongHooksResponse}
         </div>
     );

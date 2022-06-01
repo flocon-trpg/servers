@@ -1,4 +1,4 @@
-import { useLazyQuery } from '@apollo/client';
+import { useQuery } from 'urql';
 import produce from 'immer';
 import React from 'react';
 import { GetRoomConnectionsDocument } from '@flocon-trpg/typed-document-node-v0.7.1';
@@ -20,8 +20,11 @@ export function useRoomConnections() {
         state => state.roomEventSubscription?.roomEvent?.roomConnectionEvent
     );
     const [result, setResult] = React.useState<RoomConnectionsResult>({});
-    const [getRoomConnections, roomConnections] = useLazyQuery(GetRoomConnectionsDocument, {
-        fetchPolicy: 'network-only',
+    const [roomConnections, getRoomConnections] = useQuery({
+        query: GetRoomConnectionsDocument,
+        requestPolicy: 'network-only',
+        pause: true,
+        variables: roomId == null ? undefined : { roomId },
     });
     const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
     const participants = useParticipants();
@@ -30,7 +33,7 @@ export function useRoomConnections() {
     React.useEffect(() => {
         setResult({});
         if (roomId != null) {
-            getRoomConnections({ variables: { roomId } });
+            getRoomConnections();
         }
     }, [roomId, getRoomConnections]);
     React.useEffect(() => {
