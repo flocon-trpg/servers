@@ -1,13 +1,13 @@
 import { Cache, createNodeCache, createRedisCache } from '../src';
 import Redis from 'ioredis';
-import { isFalsyString } from '@flocon-trpg/utils';
+import { parseStringToBoolean } from '@flocon-trpg/utils';
 
 /*
 To run tests in this file, you need to prepare a redis instance. If you want to skip redis tests, set REDIS_TEST env to "0".
 */
 
 const REDIS_TEST = process.env.REDIS_TEST;
-const skipRedis = isFalsyString(REDIS_TEST);
+const skipRedis = parseStringToBoolean(REDIS_TEST).value === false;
 
 if (skipRedis) {
     console.info('Skips Redis tests because `REDIS_TEST` is falsy.');
