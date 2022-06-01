@@ -89,10 +89,12 @@ const disabledCss = css`
 export type OnSkippingParams =
     | {
           isSkipping: false;
+          previousValue: string;
           currentValue: string;
       }
     | {
           isSkipping: true;
+          previousValue?: undefined;
           currentValue?: undefined;
       };
 
@@ -136,7 +138,7 @@ export type Props = {
     // だが、そうするとメインのElementとBottomElementの2つを返すことになるため、React.Fragmentもしくはdivで包む必要がある。どちらの場合でもstyleやclassNameの設定で混乱する可能性があるため、ボツにした。
     onSkipping?: (params: OnSkippingParams) => void;
     onGetQuill?: (nextQuill: Quill | undefined) => void;
-    // trueの場合、styleなどからheightをpxなどの値で指定することを推奨。そうしないとスクロールバーが出たときの挙動がややおかしくなるため。
+    // trueならばtextareaのように、そうでなければinputのようにふるまう
     multiline?: boolean;
     bufferDuration: number | 'default' | 'short' | null;
     // placeholderの変更は反映されない。最初の値が常に使われる。
@@ -239,7 +241,11 @@ export const CollaborativeInput: React.FC<Props> = ({
         value,
         bufferDuration,
         onChangeOutput: params => {
-            onSkippingRef.current({ isSkipping: false, currentValue: value });
+            onSkippingRef.current({
+                isSkipping: false,
+                previousValue: params.previousValue,
+                currentValue: params.currentValue,
+            });
             multiline
                 ? onChange(params)
                 : onChange({

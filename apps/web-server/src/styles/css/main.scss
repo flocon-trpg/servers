@@ -53,6 +53,10 @@ html {
     flex-direction: column;
 }
 
+.flex-initial {
+    flex: '0 1 auto';
+}
+
 .flex-1 {
     flex: 1;
 }
