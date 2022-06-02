@@ -491,6 +491,7 @@ export const toDownOperation =
         }
     };
 
+/** StateにUpOperationを適用する。 */
 export const apply =
     <T extends AnyTemplate>(template: T): Apply<State<T>, UpOperation<T>> =>
     ({ state, operation }) => {
@@ -562,6 +563,7 @@ export const apply =
         }
     };
 
+/** StateにDownOperationを適用する。 */
 export const applyBack =
     <T extends AnyTemplate>(template: T): Apply<State<T>, DownOperation<T>> =>
     ({ state, operation }) => {
@@ -633,6 +635,7 @@ export const applyBack =
         }
     };
 
+/** 連続する2つのDownOperationを合成する。*/
 export const composeDownOperation =
     <T extends AnyTemplate>(template: T): Compose<DownOperation<T>, DownError> =>
     ({ first, second }) => {
@@ -718,6 +721,10 @@ export const composeDownOperation =
         }
     };
 
+/**
+ * Stateを用いて、DownOperationからTwoWayOperationを復元する。
+ * @param nextState - DownOperationが適用される前の状態のState。
+ */
 export const restore =
     <T extends AnyTemplate>(template: T): Restore<State<T>, DownOperation<T>, TwoWayOperation<T>> =>
     ({ nextState, downOperation }) => {
@@ -807,6 +814,7 @@ export const restore =
         }
     };
 
+/** 2つのStateオブジェクトの差分を取る。*/
 export const diff =
     <T extends AnyTemplate>(template: T): Diff<State<T>, TwoWayOperation<T>> =>
     ({ prevState, nextState }) => {
@@ -882,6 +890,11 @@ export const diff =
         }
     };
 
+/**
+ * ユーザーの権限を考慮せずに、通常のOperational Transformを行う。主にクライアント側で使われる。
+ *
+ * この関数は次の2つの制約がある。`first`適用前のStateと`second`適用前のStateは等しい。このStateに対して`first`と`secondPrime`を順に適用したStateと、`second`と`firstPrime`を順に適用したStateは等しい。
+ */
 export const clientTransform =
     <T extends AnyTemplate>(template: T): ClientTransform<UpOperation<T>> =>
     ({ first, second }) => {

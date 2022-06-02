@@ -1,3 +1,3 @@
-# @kizahasi/util
+# utils
 
-Contains a number of utility functions/types/classes etc.
+他のどのパッケージからも利用可能な、汎用性の高いコードが含まれるパッケージ。

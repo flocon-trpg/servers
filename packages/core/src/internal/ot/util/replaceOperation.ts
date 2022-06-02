@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-namespace */
 type ServerTransformParameters<T> = {
     first: { oldValue: T; newValue: T } | undefined;
     second: { newValue: T } | undefined;

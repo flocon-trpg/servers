@@ -1,13 +1,13 @@
 import { State } from '../generator';
 import * as Room from '../flocon/room/types';
 
-// 全てのStateに完全にアクセスできる。
+/** 全てのStateに完全にアクセスできる。*/
 export const admin = 'admin';
 
-// userUidに基づき、一部のStateへのアクセスを制限する。
+/* userUidに基づき、一部のStateへのアクセスを制限する。*/
 export const client = 'client';
 
-// アクセス制限のあるStateを全て制限する。
+/* アクセス制限のあるStateへのアクセスを全て制限する。*/
 export const restrict = 'restrict';
 
 export type RequestedBy =

@@ -1,12 +1,8 @@
-# @kizahasi/flocon-script
+# flocon-script
 
-A sandboxed JavaScript-like language interpreter in JavaScript. One of core libraries for Flocon project.
+JavaScript をサンドボックス環境で実行します。ただし全ての機能には対応していません。
 
-![GitHub](https://img.shields.io/github/license/kizahasi/flocon-script) [![npm version](https://img.shields.io/npm/v/@kizahasi/flocon-script.svg?style=flat)](https://www.npmjs.com/package/@kizahasi/flocon-script) [![CI](https://github.com/kizahasi/flocon-script/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/kizahasi/flocon-script/actions/workflows/ci.yml) [![publish](https://github.com/kizahasi/flocon-script/actions/workflows/publish.yml/badge.svg?branch=release)](https://github.com/kizahasi/flocon-script/actions/workflows/publish.yml)
-
-## Install
-
-`npm install @kizahasi/flocon-script` or `yarn add @kizahasi/flocon-script`
+将来、このパッケージは削除して、代わりに[quickjs-emscripten](https://github.com/justjake/quickjs-emscripten)などに置き換えるかもしれません。
 
 ## Usage
 
@@ -34,9 +30,12 @@ array
 `,
     globalThis
 );
-console.log(execResult.result); // [3]
+// console.log(Array.isArray(array)); が実行され、"[MY HEADER!] true"が出力される
+
+console.log(execResult.result);
+// => [3]
 ```
 
-## License
+## テストの実行
 
-Released under MIT License
+`yarn run test`

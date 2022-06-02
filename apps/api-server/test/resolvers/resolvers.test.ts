@@ -47,6 +47,7 @@ import { parseStringToBoolean, recordToArray } from '@flocon-trpg/utils';
 import { TestClient } from './utils/testClient';
 import produce from 'immer';
 import { doAutoMigrationBeforeStart } from '../../src/migrate';
+import { sqlite1DbName, sqlite2DbName } from './utils/databaseConfig';
 
 type UpOperation = U<typeof roomTemplate>;
 
@@ -391,11 +392,11 @@ const wsGraphQLUri = 'ws://localhost:4000/graphql';
 
 const sqlite1Type: DbConfig = {
     type: 'SQLite',
-    dbName: './test1.sqlite3',
+    dbName: sqlite1DbName,
 };
 const sqlite2Type: DbConfig = {
     type: 'SQLite',
-    dbName: './test2.sqlite3',
+    dbName: sqlite2DbName,
 };
 const postgresqlType: DbConfig = {
     type: 'PostgreSQL',
