@@ -8,8 +8,10 @@ import {
 } from '@flocon-trpg/typed-document-node-v0.7.1';
 import {
     AllRoomMessages,
+    Diff,
     Message,
     RoomMessagesClient,
+    clear,
     event,
     query,
     reset,
@@ -20,6 +22,7 @@ import { Result } from '@kizahasi/result';
 import { atom, useAtom, useAtomValue } from 'jotai';
 import { appConsole } from '../utils/appConsole';
 import { useUpdateAtom } from 'jotai/utils';
+import { toBeNever } from '@flocon-trpg/utils';
 
 export const graphqlError = 'graphqlError';
 export const failure = 'failure';
@@ -74,7 +77,7 @@ export const useStartFetchingRoomMessages = ({
             );
         }
         refCount.current += 1;
-        messagesClient.current.reset();
+        messagesClient.current.clear();
         setResult(Result.ok(messagesClient.current.messages));
         return () => {
             refCount.current -= 1;
@@ -127,17 +130,17 @@ type RoomMessages =
     | {
           type: typeof reset;
           current?: undefined;
-          event?: undefined;
+          diff?: undefined;
       }
     | {
           type: typeof event;
           current: readonly Message[];
-          event: RoomMessageEventFragment;
+          diff: Diff;
       }
     | {
           type: typeof query | typeof reset;
           current: readonly Message[];
-          event?: undefined;
+          diff?: undefined;
       };
 
 // Storybook用
@@ -200,7 +203,25 @@ export const useRoomMesages = ({
             })
         );
         const subscription = eventValue.changed.subscribe(msg => {
-            setResult(Result.ok(msg));
+            switch (msg.type) {
+                case event: {
+                    if (msg.diff == null) {
+                        return;
+                    }
+                    setResult(Result.ok({ type: event, current: msg.current, diff: msg.diff }));
+                    return;
+                }
+                case query: {
+                    setResult(Result.ok({ type: query, current: msg.current }));
+                    return;
+                }
+                case clear: {
+                    setResult(Result.ok({ type: reset, current: msg.current }));
+                    return;
+                }
+                default:
+                    toBeNever(msg);
+            }
         });
         return () => subscription.unsubscribe();
     }, [changeEvent, filter]);
@@ -210,13 +231,13 @@ export const useRoomMesages = ({
 
 export const useRoomMessageEvent = () => {
     const messages = useRoomMesages({});
-    const [result, setResult] = React.useState<RoomMessageEventFragment>();
+    const [result, setResult] = React.useState<Diff>();
 
     React.useEffect(() => {
-        if (messages === notFetch || messages.isError) {
+        if (messages === notFetch || messages.isError || messages.value.diff == null) {
             return;
         }
-        setResult(messages.value.event);
+        setResult(messages.value.diff);
     }, [messages]);
 
     return result;

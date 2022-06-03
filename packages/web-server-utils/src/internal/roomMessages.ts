@@ -10,6 +10,7 @@ import {
 import { toBeNever } from '@flocon-trpg/utils';
 import produce from 'immer';
 import { Observable, Subject, mergeMap } from 'rxjs';
+import { FilteredSortedArray, SortedArray } from './filteredArray';
 import { Notification } from './notification';
 
 export const privateMessage = 'privateMessage';
@@ -18,23 +19,25 @@ export const pieceLog = 'pieceLog';
 export const publicChannel = 'publicChannel';
 export const soundEffect = 'soundEffect';
 
-type RoomMessage =
-    | {
-          type: typeof privateMessage;
-          value: RoomPrivateMessageFragment;
-      }
-    | {
-          type: typeof publicMessage;
-          value: RoomPublicMessageFragment;
-      }
-    | {
-          type: typeof pieceLog;
-          value: PieceLogFragment;
-      }
-    | {
-          type: typeof soundEffect;
-          value: RoomSoundEffectFragment;
-      };
+type PrivateMessageType = {
+    type: typeof privateMessage;
+    value: RoomPrivateMessageFragment;
+};
+type PublicMessageType = {
+    type: typeof publicMessage;
+    value: RoomPublicMessageFragment;
+};
+type PieceLogType = {
+    type: typeof pieceLog;
+    value: PieceLogFragment;
+};
+
+type SoundEffectType = {
+    type: typeof soundEffect;
+    value: RoomSoundEffectFragment;
+};
+
+type RoomMessage = PrivateMessageType | PublicMessageType | PieceLogType | SoundEffectType;
 
 const createRoomMessage = (
     source:
@@ -78,12 +81,12 @@ export type RoomMessageEvent =
 
 export const notification = 'notification';
 
-export type Message =
-    | {
-          type: typeof notification;
-          value: Notification;
-      }
-    | RoomMessage;
+type NotificationType = {
+    type: typeof notification;
+    value: Notification;
+};
+
+export type Message = NotificationType | RoomMessage;
 
 const compareUpdatedAt = (
     left: number | null | undefined,
@@ -99,33 +102,44 @@ const compareUpdatedAt = (
     return left < right;
 };
 
-const findMessageIndexFromEnd = (
-    messages: readonly Message[],
-    predicate: (msg: Message) => boolean
-): number => {
-    for (let i = messages.length - 1; i >= 0; i--) {
-        const element = messages[i];
-        if (element == null) {
-            throw new Error('This should not happen');
-        }
-        if (predicate(element)) {
-            return i;
-        }
-    }
-    return -1;
-};
+export const noChange = 'noChange';
 
-const noChange = 'noChange';
+export const reset = 'reset';
 
-const reduceEvent = ({
-    sortedMessagesArray,
+type DiffBase<T> =
+    | {
+          prevValue: T;
+          nextValue: T;
+      }
+    | {
+          prevValue: T;
+          nextValue: undefined;
+      }
+    | {
+          prevValue: undefined;
+          nextValue: T;
+      };
+
+export type Diff =
+    | DiffBase<PublicMessageType>
+    | DiffBase<PrivateMessageType>
+    | DiffBase<PieceLogType>
+    | DiffBase<SoundEffectType>
+    | DiffBase<NotificationType>
+    | {
+          prevValue: { type: typeof reset; value: readonly Message[] };
+          nextValue: { type: typeof reset; value: readonly Message[] };
+      };
+
+// 引数のmessagesには変更は加えられない
+const reduceEvent = <T extends SortedArray<Message> | FilteredSortedArray<Message>>({
+    messages: messagesSource,
     event,
-    filter,
 }: {
-    sortedMessagesArray: readonly Message[];
+    messages: T;
     event: RoomMessageEventFragment;
-    filter: (message: Message) => boolean;
-}): readonly Message[] | typeof noChange => {
+}): { messages: T; diff: Diff | null } | typeof noChange => {
+    const messages = messagesSource.clone() as T;
     switch (event.__typename) {
         case 'RoomPrivateMessage':
         case 'RoomPublicMessage':
@@ -135,57 +149,69 @@ const reduceEvent = ({
             if (newValue == null) {
                 return noChange;
             }
-            if (!filter(newValue)) {
-                return noChange;
+            const added = messages.add(newValue);
+            if (added === false) {
+                return { messages, diff: null };
             }
-            const insertInto = findMessageIndexFromEnd(
-                sortedMessagesArray,
-                msg => msg.value.createdAt < newValue.value.createdAt
-            );
-            return produce(sortedMessagesArray, state => {
-                if (insertInto === -1) {
-                    state.unshift(newValue);
-                    return;
-                }
-                state.splice(insertInto + 1, 0, newValue);
-            });
+            return {
+                messages,
+                diff: {
+                    prevValue: undefined,
+                    nextValue: newValue,
+                },
+            };
         }
         case 'RoomPublicChannel':
         case 'RoomPublicChannelUpdate':
             return noChange;
         case 'RoomPrivateMessageUpdate':
         case 'RoomPublicMessageUpdate': {
-            const index = findMessageIndexFromEnd(
-                sortedMessagesArray,
-                msg => msg.type !== notification && msg.value.messageId === event.messageId
-            );
-            if (index === -1) {
+            const updateResult = messages.updateLast(msg => {
+                if (
+                    msg.type === notification ||
+                    msg.type === pieceLog ||
+                    msg.type === soundEffect
+                ) {
+                    return undefined;
+                }
+                if (msg.value.messageId !== event.messageId) {
+                    return undefined;
+                }
+                if (!compareUpdatedAt(msg.value.updatedAt, '<', event.updatedAt)) {
+                    return undefined;
+                }
+                return produce(msg, msg => {
+                    msg.value.altTextToSecret = event.altTextToSecret;
+                    msg.value.commandResult = event.commandResult;
+                    msg.value.isSecret = event.isSecret;
+                    msg.value.initText = event.initText;
+                    msg.value.initTextSource = event.initTextSource;
+                    msg.value.updatedText = event.updatedText;
+                    msg.value.updatedAt = event.updatedAt;
+                });
+            });
+            if (updateResult == null) {
                 return noChange;
             }
-            return produce(sortedMessagesArray, draft => {
-                const target = draft[index];
-                if (
-                    target == null ||
-                    target.type === pieceLog ||
-                    target.type === soundEffect ||
-                    target.type === notification
-                ) {
-                    return;
-                }
-                if (!compareUpdatedAt(target.value.updatedAt, '<', event.updatedAt)) {
-                    return;
-                }
-                target.value.altTextToSecret = event.altTextToSecret;
-                target.value.commandResult = event.commandResult;
-                target.value.isSecret = event.isSecret;
-                target.value.initText = event.initText;
-                target.value.initTextSource = event.initTextSource;
-                target.value.updatedText = event.updatedText;
-                target.value.updatedAt = event.updatedAt;
-            });
+            return {
+                messages,
+                diff: {
+                    prevValue: updateResult.oldValue,
+                    nextValue: updateResult.newValue as any,
+                },
+            };
         }
-        case 'RoomMessagesReset':
-            return [];
+        case 'RoomMessagesReset': {
+            const prevValue = messages.toArray(x => x);
+            messages.clear();
+            return {
+                messages,
+                diff: {
+                    prevValue: { type: reset, value: prevValue },
+                    nextValue: { type: reset, value: [] },
+                },
+            };
+        }
         case undefined:
             return noChange;
     }
@@ -193,31 +219,36 @@ const reduceEvent = ({
 
 export const event = 'event';
 export const query = 'query';
-export const reset = 'reset';
+export const clear = 'clear';
 
 type MessagesChangeCore =
     | {
           type: typeof event;
           isLoaded: true;
-          current: readonly Message[];
+          current: SortedArray<Message>;
+          // nullの場合、イベントにより変更されたMessageが無かったことを表す。
+          diff: Diff | null;
           event: RoomMessageEventFragment;
       }
     | {
           type: typeof event;
           isLoaded: false;
           current?: undefined;
+          diff?: undefined;
           event: RoomMessageEventFragment;
       }
     | {
           type: typeof query;
           isLoaded: true;
-          current: readonly Message[];
+          current: SortedArray<Message>;
+          diff?: undefined;
           event?: undefined;
       }
     | {
-          type: typeof reset;
+          type: typeof clear;
           isLoaded: false;
           current?: undefined;
+          diff?: undefined;
           event?: undefined;
       };
 
@@ -225,17 +256,18 @@ export type MessagesChange =
     | {
           type: typeof event;
           current: readonly Message[];
-          event: RoomMessageEventFragment;
+          // nullの場合、イベントにより変更されたMessageが無かったことを表す。
+          diff: Diff | null;
       }
     | {
           type: typeof query;
           current: readonly Message[];
-          event?: undefined;
+          diff?: undefined;
       }
     | {
-          type: typeof reset;
+          type: typeof clear;
           current?: undefined;
-          event?: undefined;
+          diff?: undefined;
       };
 
 export type FilteredRoomMessages = Readonly<{
@@ -392,13 +424,15 @@ class MessageSet {
     }
 }
 
+const createSortKey = (message: Message): number => message.value.createdAt;
+
 const loading = 'loading';
 const loaded = 'loaded';
 
 export class RoomMessagesClient {
     #messagesState:
         | { type: typeof loading; events: RoomMessageEventFragment[] }
-        | { type: typeof loaded; sortedMessages: readonly Message[] } = {
+        | { type: typeof loaded; messages: SortedArray<Message> } = {
         type: loading,
         events: [],
     };
@@ -409,7 +443,7 @@ export class RoomMessagesClient {
 
     public constructor() {
         this.messages = {
-            getCurrent: () => this.#messages ?? null,
+            getCurrent: () => this.#messages?.toArray(x => x) ?? null,
             changed: this.#messagesChanged.pipe(
                 mergeMap<MessagesChangeCore, MessagesChange[]>(changeEvent => {
                     switch (changeEvent.type) {
@@ -417,47 +451,74 @@ export class RoomMessagesClient {
                             if (!changeEvent.isLoaded) {
                                 return [];
                             }
-                            return [{ ...changeEvent, isLoaded: undefined }];
+                            return [
+                                {
+                                    ...changeEvent,
+                                    current: changeEvent.current.toArray(x => x),
+                                    isLoaded: undefined,
+                                },
+                            ];
+                        }
+                        case query: {
+                            return [
+                                {
+                                    ...changeEvent,
+                                    current: changeEvent.current.toArray(x => x),
+                                    isLoaded: undefined,
+                                },
+                            ];
                         }
                         default:
-                            return [{ ...changeEvent, isLoaded: undefined }];
+                            return [
+                                {
+                                    ...changeEvent,
+                                    isLoaded: undefined,
+                                },
+                            ];
                     }
                 })
             ),
             filter: filter => {
                 return {
-                    getCurrent: () => this.#messages?.filter(msg => filter(msg)) ?? null,
+                    getCurrent: () =>
+                        this.#messages == null
+                            ? null
+                            : this.#messages.toArray(x => (filter(x) ? x : undefined)),
                     changed: new Observable(observer => {
-                        let messages = this.#messages;
+                        let messages =
+                            this.#messages == null ? null : this.#messages.createFiltered(filter);
 
                         return this.#messagesChanged.subscribe(changeEvent => {
                             if (changeEvent.type === query) {
-                                messages = changeEvent.current.filter(msg => filter(msg));
-                                observer.next({ type: query, current: messages });
+                                messages = changeEvent.current.createFiltered(filter);
+                                observer.next({ type: query, current: messages.toArray(x => x) });
                                 return;
                             }
-                            if (changeEvent.type === reset) {
+                            if (changeEvent.type === clear) {
                                 messages = null;
-                                observer.next({ type: reset });
+                                observer.next({ type: clear });
                                 return;
                             }
                             if (messages == null) {
                                 return;
                             }
                             const reduced = reduceEvent({
-                                sortedMessagesArray: messages,
+                                messages,
                                 event: changeEvent.event,
-                                filter,
                             });
                             if (reduced === noChange) {
-                                return;
+                                observer.next({
+                                    type: event,
+                                    current: messages.toArray(x => x),
+                                    diff: null,
+                                });
+                            } else {
+                                observer.next({
+                                    type: event,
+                                    current: reduced.messages.toArray(x => x),
+                                    diff: reduced.diff,
+                                });
                             }
-                            messages = reduced;
-                            observer.next({
-                                type: event,
-                                current: reduced,
-                                event: changeEvent.event,
-                            });
                         });
                     }),
                 };
@@ -469,7 +530,7 @@ export class RoomMessagesClient {
         if (this.#messagesState.type === loading) {
             return null;
         }
-        return this.#messagesState.sortedMessages;
+        return this.#messagesState.messages;
     }
 
     static #reduce({
@@ -602,12 +663,19 @@ export class RoomMessagesClient {
                       events: this.#messagesState.events,
                   })
                 : RoomMessagesClient.#reduce({
-                      state: this.#messagesState.sortedMessages,
+                      state: this.#messagesState.messages.toArray(x => x),
                       messages,
                       events: [],
                   });
-        this.#messagesState = { type: loaded, sortedMessages: newMessages };
-        this.#messagesChanged.next({ type: query, isLoaded: true, current: newMessages });
+        this.#messagesState = {
+            type: loaded,
+            messages: new SortedArray(createSortKey, newMessages),
+        };
+        this.#messagesChanged.next({
+            type: query,
+            isLoaded: true,
+            current: new SortedArray(createSortKey, newMessages),
+        });
     }
 
     public onEvent(event: RoomMessageEventFragment): void {
@@ -617,25 +685,37 @@ export class RoomMessagesClient {
             return;
         }
         const reduced = reduceEvent({
-            sortedMessagesArray: this.#messagesState.sortedMessages,
+            messages: this.#messagesState.messages,
             event,
-            filter: () => true,
         });
         if (reduced === noChange) {
+            this.#messagesChanged.next({
+                type: 'event',
+                isLoaded: true,
+                current: this.#messagesState.messages.clone(),
+                diff: null,
+                event,
+            });
             return;
         }
         this.#messagesState = {
             type: loaded,
-            sortedMessages: reduced,
+            messages: reduced.messages,
         };
-        this.#messagesChanged.next({ type: 'event', isLoaded: true, current: reduced, event });
+        this.#messagesChanged.next({
+            type: 'event',
+            isLoaded: true,
+            current: reduced.messages,
+            diff: reduced.diff,
+            event,
+        });
     }
 
-    public reset(): void {
+    public clear(): void {
         this.#messagesState = {
             type: loading,
             events: [],
         };
-        this.#messagesChanged.next({ type: reset, isLoaded: false });
+        this.#messagesChanged.next({ type: clear, isLoaded: false });
     }
 }

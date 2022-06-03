@@ -28,7 +28,7 @@ const argsBase: Omit<ArgsProps, 'message'> = {
 export function useMessageNotification(): void {
     const publicChannelNames = usePublicChannelNames();
     const publicChannelNameRef = useReadonlyRef(publicChannelNames);
-    const messageEvent = useRoomMessageEvent();
+    const messageDiff = useRoomMessageEvent();
     const participantsMap = useParticipants();
     const participantsMapRef = useReadonlyRef(participantsMap);
     const masterVolume = useAtomSelector(roomConfigAtom, state => state?.masterVolume);
@@ -62,38 +62,20 @@ export function useMessageNotification(): void {
     const messageFilterRef = useReadonlyRef(messageFilter);
 
     React.useEffect(() => {
-        if (myUserUidRef.current == null || messageEvent == null) {
+        if (myUserUidRef.current == null || messageDiff == null) {
             return;
         }
-        let message: RoomMessage.MessageState;
-        switch (messageEvent.__typename) {
-            case 'RoomPrivateMessage':
-                if (
-                    !messageFilterRef.current({
-                        type: privateMessage,
-                        value: messageEvent,
-                    })
-                ) {
+        // 削除（現時点ではメッセージのインスタンスが消えることはないので起こらないが）や変更は無視する
+        if (messageDiff.prevValue != null || messageDiff.nextValue == null) {
+            return;
+        }
+        const message = messageDiff.nextValue;
+        switch (message.type) {
+            case privateMessage:
+            case publicMessage:
+                if (!messageFilterRef.current(message)) {
                     return;
                 }
-                message = {
-                    type: privateMessage,
-                    value: messageEvent,
-                };
-                break;
-            case 'RoomPublicMessage':
-                if (
-                    !messageFilterRef.current({
-                        type: publicMessage,
-                        value: messageEvent,
-                    })
-                ) {
-                    return;
-                }
-                message = {
-                    type: publicMessage,
-                    value: messageEvent,
-                };
                 break;
             default:
                 return;
@@ -127,5 +109,5 @@ export function useMessageNotification(): void {
             ),
             description: <RoomMessage.Content style={{}} message={message} />,
         });
-    }, [messageEvent, messageFilterRef, participantsMapRef, publicChannelNameRef]);
+    }, [messageDiff, messageFilterRef, participantsMapRef, publicChannelNameRef]);
 }
