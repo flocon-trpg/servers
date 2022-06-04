@@ -3,7 +3,7 @@ import { WebConfig } from '../../configType';
 import { Data, parse } from 'envfile';
 import { Result } from '@kizahasi/result';
 import { FirebaseConfig, firebaseConfig } from '@flocon-trpg/core';
-import { isTruthyStringOrNullish, parseEnvListValue } from '@flocon-trpg/utils';
+import { parseEnvListValue, parseStringToBoolean } from '@flocon-trpg/utils';
 import * as E from 'fp-ts/Either';
 import { formatValidationErrors } from '../../utils/io-ts/io-ts-reporters';
 import { NEXT_PUBLIC_FIREBASE_CONFIG } from '../../env';
@@ -24,32 +24,39 @@ type Envs = {
 
 const parseConfig = (env: Data | undefined): Result<Env> => {
     /* 
-    Because of Next.js restrictions, we cannot do like this,:
+    Because of Next.js restrictions, we cannot do like these:
     
+    // invalid code 1
     const NEXT_PUBLIC_FOO = 'NEXT_PUBLIC_FOO';
     const alwaysUndefined = process.env[NEXT_PUBLIC_FOO];
     
-    nor like this,:
-
-    import { NEXT_PUBLIC_FOO } from 'somewhere';
+    // invalid code 2
+    import { NEXT_PUBLIC_FOO } from './somewhere';
     const alwaysUndefined = process.env[NEXT_PUBLIC_FOO];
 
-    nor like this.:
-
+    // invalid code 3
     const f = (env) => {
         const alwaysUndefined = env[NEXT_PUBLIC_FOO];
     }
     f(process.env);
 
-    Instead, we must do like this:
+    Instead, we must do like these:
 
-    const okValue = process.env.NEXT_PUBLIC_FOO;
+    // valid code 1
+    const validValue = process.env.NEXT_PUBLIC_FOO;
 
-    or like this:
-
-    const okValue = process,env['NEXT_PUBLIC_FOO'];
+    // valid code 2
+    const validValue = process,env['NEXT_PUBLIC_FOO'];
     */
 
+    const isUnlistedFirebaseStorageEnabled = parseStringToBoolean(
+        env == null
+            ? process.env.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED
+            : env.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED
+    );
+    if (isUnlistedFirebaseStorageEnabled.error) {
+        console.warn(isUnlistedFirebaseStorageEnabled.error.ja);
+    }
     const result: Env = {
         http: env == null ? process.env.NEXT_PUBLIC_API_HTTP : env.NEXT_PUBLIC_API_HTTP,
         ws: env == null ? process.env.NEXT_PUBLIC_API_WS : env.NEXT_PUBLIC_API_WS,
@@ -59,12 +66,7 @@ const parseConfig = (env: Data | undefined): Result<Env> => {
                     ? process.env.NEXT_PUBLIC_AUTH_PROVIDERS
                     : env.NEXT_PUBLIC_AUTH_PROVIDERS
             ) ?? undefined,
-        isUnlistedFirebaseStorageEnabled:
-            isTruthyStringOrNullish(
-                env == null
-                    ? process.env.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED
-                    : env.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED
-            ) ?? undefined,
+        isUnlistedFirebaseStorageEnabled: isUnlistedFirebaseStorageEnabled.value,
     };
 
     const firebaseFile =

@@ -20,7 +20,8 @@
     "name": "@flocon-trpg/utils",
     "author": "kizahasi",
     "dependencies": {
-        "@kizahasi/option": "^1.0.0"
+        "@kizahasi/option": "^1.0.0",
+        "@kizahasi/result": "^1.0.1"
     },
     "devDependencies": {
         "@types/jest": "27.5.0",

@@ -37,7 +37,7 @@ import {
     SQLITE,
     loadDotenv,
 } from './env';
-import { filterInt, isTruthyString } from '@flocon-trpg/utils';
+import { filterInt, parseStringToBoolean } from '@flocon-trpg/utils';
 import { Error, Result } from '@kizahasi/result';
 
 loadDotenv();
@@ -202,7 +202,11 @@ export class ServerConfigBuilder {
                 this[prop] = undefined;
                 continue;
             }
-            this[prop] = isTruthyString(value);
+            const propValue = parseStringToBoolean(value);
+            if (propValue.isError) {
+                console.warn(propValue.error.ja);
+            }
+            this[prop] = propValue.value;
         }
 
         this[FLOCON_ADMIN] = ServerConfigBuilder.admin(env);

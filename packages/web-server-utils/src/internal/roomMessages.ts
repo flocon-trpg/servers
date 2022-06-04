@@ -428,7 +428,8 @@ export class RoomMessagesClient {
                 return {
                     getCurrent: () => this.#messages?.filter(msg => filter(msg)) ?? null,
                     changed: new Observable(observer => {
-                        let messages = this.#messages;
+                        let messages: readonly Message[] | null =
+                            this.#messages?.filter(msg => filter(msg)) ?? null;
 
                         return this.#messagesChanged.subscribe(changeEvent => {
                             if (changeEvent.type === query) {

@@ -145,26 +145,6 @@ export const useRoomMesages = ({
 }): RoomMessagesResult => {
     const [result, setResult] = React.useState<RoomMessagesResult>(notFetch);
     const changeEvent = useAtomValue(changeEventAtom);
-    const filterRef = useLatest(filter);
-
-    React.useEffect(() => {
-        setResult(oldValue => {
-            if (oldValue === notFetch) {
-                return oldValue;
-            }
-            if (oldValue.isError) {
-                return oldValue;
-            }
-            if (oldValue.value.current == null) {
-                return oldValue;
-            }
-            return Result.ok({
-                type: reset,
-                current:
-                    filter == null ? oldValue.value.current : oldValue.value.current.filter(filter),
-            });
-        });
-    }, [filter]);
 
     React.useEffect(() => {
         if (changeEvent === notFetch) {
@@ -175,22 +155,20 @@ export const useRoomMesages = ({
             setResult(changeEvent);
             return;
         }
-        const eventValue =
-            filterRef.current == null
-                ? changeEvent.value
-                : changeEvent.value.filter(filterRef.current);
-        const current = eventValue.getCurrent();
+        const fileredChangeEvent =
+            filter == null ? changeEvent.value : changeEvent.value.filter(filter);
+        const current = fileredChangeEvent.getCurrent();
         setResult(
             Result.ok({
                 type: query,
                 current: current ?? [],
             })
         );
-        const subscription = eventValue.changed.subscribe(msg => {
+        const subscription = fileredChangeEvent.changed.subscribe(msg => {
             setResult(Result.ok(msg));
         });
         return () => subscription.unsubscribe();
-    }, [changeEvent, filterRef]);
+    }, [changeEvent, filter]);
 
     return result;
 };

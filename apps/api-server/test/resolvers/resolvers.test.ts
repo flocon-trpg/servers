@@ -43,7 +43,7 @@ import { diff, serializeUpOperation, toUpOperation } from '@kizahasi/ot-string';
 import { OperationResult } from '@urql/core';
 import { maskKeys, maskTypeNames } from './utils/maskKeys';
 import { TestClients } from './utils/testClients';
-import { isFalsyString, recordToArray } from '@flocon-trpg/utils';
+import { parseStringToBoolean, recordToArray } from '@flocon-trpg/utils';
 import { TestClient } from './utils/testClient';
 import produce from 'immer';
 import { doAutoMigrationBeforeStart } from '../../src/migrate';
@@ -408,21 +408,21 @@ const createCases = (): [DbConfig, ServerConfig['entryPassword'] | undefined][] 
     const result: [DbConfig, ServerConfig['entryPassword'] | undefined][] = [];
 
     const SQLITE_TEST = process.env.SQLITE_TEST;
-    if (isFalsyString(SQLITE_TEST)) {
+    if (parseStringToBoolean(SQLITE_TEST).value === false) {
         console.info('Skips SQLite tests because SQLITE_TEST env is falsy.');
     } else {
         result.push([sqlite1Type, undefined], [sqlite2Type, plainEntryPassword]);
     }
 
     const POSTGRESQL_TEST = process.env.POSTGRESQL_TEST;
-    if (isFalsyString(POSTGRESQL_TEST)) {
+    if (parseStringToBoolean(POSTGRESQL_TEST).value === false) {
         console.info('Skips PostgreSQL tests because POSTGRESQL_TEST env is falsy.');
     } else {
         result.push([postgresqlType, plainEntryPassword]);
     }
 
     const MYSQL_TEST = process.env.MYSQL_TEST;
-    if (isFalsyString(MYSQL_TEST)) {
+    if (parseStringToBoolean(MYSQL_TEST).value === false) {
         console.info('Skips MySQL tests because MYSQL_TEST env is falsy.');
     } else {
         result.push([mysqlType, plainEntryPassword]);
