@@ -24,16 +24,16 @@ describe('RoomChannels', () => {
                 init: {
                     ...Resources.RoomMessages.empty,
                     publicMessages: [
-                        Resources.RoomPublicMessage.message1,
-                        Resources.RoomPublicMessage.message3,
+                        Resources.RoomPublicMessage.message1a,
+                        Resources.RoomPublicMessage.message3a,
                     ],
                     publicChannels: [
                         Resources.RoomPublicChannel.channel1,
                         Resources.RoomPublicChannel.channel2,
                     ],
                     privateMessages: [
-                        Resources.RoomPrivateMessage.message2,
-                        Resources.RoomPrivateMessage.message4,
+                        Resources.RoomPrivateMessage.message2a,
+                        Resources.RoomPrivateMessage.message4a,
                     ],
                 },
                 expectedPublicChannels: new Map([
@@ -47,8 +47,8 @@ describe('RoomChannels', () => {
                     ],
                 ]),
                 expectedPrivateChannels: [
-                    Resources.RoomPrivateMessage.message2.visibleTo,
-                    Resources.RoomPrivateMessage.message4.visibleTo,
+                    Resources.RoomPrivateMessage.message2a.visibleTo,
+                    Resources.RoomPrivateMessage.message4a.visibleTo,
                 ],
             },
         ])('non-empty instances', ({ init, expectedPublicChannels, expectedPrivateChannels }) => {

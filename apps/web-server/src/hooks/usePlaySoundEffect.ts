@@ -8,6 +8,7 @@ import { useAtomSelector } from '../atoms/useAtomSelector';
 import { roomConfigAtom } from '../atoms/roomConfig/roomConfigAtom';
 import { useLatest } from 'react-use';
 import { useRoomMessageEvent } from './useRoomMessages';
+import { soundEffect } from '@flocon-trpg/web-server-utils';
 
 // 長過ぎる曲をSEにしようとした場合、何もしないと部屋に再入室しない限りその曲を止めることができない。それを防ぐため、最大15秒までしか流れないようにしている。15秒という長さは適当。
 const musicLengthLimit = 15 * 1000;
@@ -69,18 +70,28 @@ function usePlaySoundEffectCore(value?: SoundEffect): void {
 }
 
 export function usePlaySoundEffect(): void {
-    const messageEvent = useRoomMessageEvent();
+    const messageDiff = useRoomMessageEvent();
+    const [soundEffectState, setSoundEffectState] = React.useState<SoundEffect>();
 
-    let soundEffect: SoundEffect | undefined = undefined;
-    if (messageEvent != null) {
-        if (messageEvent.__typename === 'RoomSoundEffect') {
-            soundEffect = {
-                filePath: messageEvent.file,
-                volume: messageEvent.volume,
-                messageId: messageEvent.messageId,
-            };
+    React.useEffect(() => {
+        if (messageDiff == null) {
+            setSoundEffectState(undefined);
+            return;
         }
-    }
+        if (messageDiff.prevValue != null || messageDiff.nextValue == null) {
+            setSoundEffectState(undefined);
+            return;
+        }
+        if (messageDiff.nextValue.type !== soundEffect) {
+            setSoundEffectState(undefined);
+            return;
+        }
+        setSoundEffectState({
+            filePath: messageDiff.nextValue.value.file,
+            volume: messageDiff.nextValue.value.volume,
+            messageId: messageDiff.nextValue.value.messageId,
+        });
+    }, [messageDiff]);
 
-    usePlaySoundEffectCore(soundEffect);
+    usePlaySoundEffectCore(soundEffectState);
 }
