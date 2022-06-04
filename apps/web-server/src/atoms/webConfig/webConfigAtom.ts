@@ -25,30 +25,29 @@ type Envs = {
 
 const parseConfig = (env: Data | undefined): Result<Env> => {
     /* 
-    Because of Next.js restrictions, we cannot do like this,:
+    Because of Next.js restrictions, we cannot do like these:
     
+    // invalid code 1
     const NEXT_PUBLIC_FOO = 'NEXT_PUBLIC_FOO';
     const alwaysUndefined = process.env[NEXT_PUBLIC_FOO];
     
-    nor like this,:
-
-    import { NEXT_PUBLIC_FOO } from 'somewhere';
+    // invalid code 2
+    import { NEXT_PUBLIC_FOO } from './somewhere';
     const alwaysUndefined = process.env[NEXT_PUBLIC_FOO];
 
-    nor like this.:
-
+    // invalid code 3
     const f = (env) => {
         const alwaysUndefined = env[NEXT_PUBLIC_FOO];
     }
     f(process.env);
 
-    Instead, we must do like this:
+    Instead, we must do like these:
 
-    const okValue = process.env.NEXT_PUBLIC_FOO;
+    // valid code 1
+    const validValue = process.env.NEXT_PUBLIC_FOO;
 
-    or like this:
-
-    const okValue = process,env['NEXT_PUBLIC_FOO'];
+    // valid code 2
+    const validValue = process,env['NEXT_PUBLIC_FOO'];
     */
 
     const isUnlistedFirebaseStorageEnabled = parseStringToBoolean(

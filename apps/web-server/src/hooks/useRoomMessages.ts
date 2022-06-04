@@ -194,15 +194,16 @@ export const useRoomMesages = ({
             setResult(changeEvent);
             return;
         }
-        const eventValue = filter == null ? changeEvent.value : changeEvent.value.filter(filter);
-        const current = eventValue.getCurrent();
+        const fileredChangeEvent =
+            filter == null ? changeEvent.value : changeEvent.value.filter(filter);
+        const current = fileredChangeEvent.getCurrent();
         setResult(
             Result.ok({
                 type: query,
                 current: current ?? [],
             })
         );
-        const subscription = eventValue.changed.subscribe(msg => {
+        const subscription = fileredChangeEvent.changed.subscribe(msg => {
             switch (msg.type) {
                 case event: {
                     if (msg.diff == null) {

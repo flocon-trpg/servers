@@ -206,7 +206,7 @@ export class ServerConfigBuilder {
             if (propValue.isError) {
                 console.warn(propValue.error.ja);
             }
-            this[prop] = propValue.value ?? false;
+            this[prop] = propValue.value;
         }
 
         this[FLOCON_ADMIN] = ServerConfigBuilder.admin(env);
