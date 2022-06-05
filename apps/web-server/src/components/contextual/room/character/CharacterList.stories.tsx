@@ -89,3 +89,8 @@ export const Empty = Template.bind({});
 Empty.args = {
     stateType: 'none',
 };
+
+export const Spectator = Template.bind({});
+Spectator.args = {
+    myParticipantRole: 'Spectator',
+};
