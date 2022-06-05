@@ -35,7 +35,7 @@ export const firebaseConfigData: Config = {
     sdkClientVersion: '',
 };
 
-export const webConfigData: WebConfig = {
+export const mockWebConfig: WebConfig = {
     firebaseConfig: {
         apiKey: '',
         appId: '',

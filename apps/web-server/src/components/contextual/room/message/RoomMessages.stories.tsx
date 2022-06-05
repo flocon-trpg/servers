@@ -5,7 +5,6 @@ import { RoomMessages } from './RoomMessages';
 import { storybookAtom } from '../../../../atoms/storybook/storybookAtom';
 import { useMockRoom } from '../../../../hooks/useMockRoom';
 import { useMockRoomMessages } from '../../../../hooks/useRoomMessages';
-import { useUpdateAtom } from 'jotai/utils';
 import { roomConfigAtom } from '../../../../atoms/roomConfig/roomConfigAtom';
 import { defaultRoomConfig } from '../../../../atoms/roomConfig/types/roomConfig';
 import { Result } from '@kizahasi/result';
@@ -76,7 +75,7 @@ export const Default: React.FC<
         }
         onQuery(createMockRoomMessages({ setGeneralMessages }));
     }, [onQuery, setToNotFetch, fetchingMessages, setGeneralMessages]);
-    const setRoomConfig = useUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useSetAtom(roomConfigAtom);
     const roomConfig = React.useMemo(() => defaultRoomConfig(roomId), []);
     React.useEffect(() => {
         setRoomConfig(roomConfig);

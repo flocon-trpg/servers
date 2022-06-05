@@ -6,7 +6,6 @@ import { Room } from './Room';
 import { WebConfig } from '../../../configType';
 import { storybookAtom } from '../../../atoms/storybook/storybookAtom';
 import { useMockRoom } from '../../../hooks/useMockRoom';
-import { useUpdateAtom } from 'jotai/utils';
 import { roomConfigAtom } from '../../../atoms/roomConfig/roomConfigAtom';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -17,7 +16,7 @@ import {
     mockAuth,
     mockStorage,
     mockUser,
-    webConfigData,
+    mockWebConfig,
 } from '../../../mocks';
 import { ParticipantRole } from '@flocon-trpg/core';
 import { useMockRoomMessages } from '../../../hooks/useRoomMessages';
@@ -37,7 +36,7 @@ export const Player: React.FC<WebConfig & { myParticipantRole: ParticipantRole }
             mock: {
                 auth: { ...mockAuth, currentUser: mockUser },
                 webConfig: Result.ok({
-                    ...webConfigData,
+                    ...mockWebConfig,
                     isUnlistedFirebaseStorageEnabled,
                     isPublicFirebaseStorageEnabled,
                 }),
@@ -62,7 +61,7 @@ export const Player: React.FC<WebConfig & { myParticipantRole: ParticipantRole }
         setToNotFetch();
         onQuery(createMockRoomMessages({ setGeneralMessages: true }));
     }, [onQuery, setToNotFetch]);
-    const setRoomConfig = useUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useSetAtom(roomConfigAtom);
     React.useEffect(() => {
         setRoomConfig(defaultRoomConfig(roomId));
     }, [setRoomConfig]);

@@ -5,7 +5,7 @@ import { useSetAtom } from 'jotai';
 import { storybookAtom } from '../../atoms/storybook/storybookAtom';
 import { Result } from '@kizahasi/result';
 import * as Env from '../../env';
-import { mockAuth, mockUser, webConfigData } from '../../mocks';
+import { mockAuth, mockUser, mockWebConfig } from '../../mocks';
 
 export const Default: React.FC<{
     amIAnonymous: boolean;
@@ -60,7 +60,7 @@ export const Default: React.FC<{
             isStorybook: true,
             mock: {
                 auth: { ...mockAuth, currentUser: { ...mockUser, isAnonymous: amIAnonymous } },
-                webConfig: Result.ok(webConfigData),
+                webConfig: Result.ok(mockWebConfig),
             },
         });
     }, [amIAnonymous, authProviders, setStorybook]);

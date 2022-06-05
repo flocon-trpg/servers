@@ -135,7 +135,6 @@ const useAutoSaveUserConfig = () => {
     }, [debouncedUserConfig]);
 };
 
-// _app.tsxで1回のみ呼ばれることを想定。
 const useAutoSaveRoomConfig = () => {
     const throttleTimespan = 500;
     const roomConfig = useAtomValue(roomConfigAtom);
