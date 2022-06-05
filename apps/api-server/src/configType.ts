@@ -166,7 +166,7 @@ export namespace ServerConfigForMigration {
                 return Result.ok(result);
             }
             AppConsole.logJa(
-                `${HEROKU}の値がtrueですが、${DATABASE_URL}の値が見つかりませんでした。${DATABASE_URL}によるデータベースの参照はスキップします…`
+                `${HEROKU}の値がtrueですが、${DATABASE_URL}の値が見つかりませんでした。Heroku以外で動かしている可能性があります。${DATABASE_URL}によるデータベースの参照はスキップされます。`
             );
         }
         if (postgresConfig == null) {
@@ -309,6 +309,15 @@ export namespace ServerConfigForMigration {
     ): Promise<Result<ORM>> => {
         switch (databaseArg) {
             case null: {
+                if (serverConfig.heroku) {
+                    return await createPostgresORM(
+                        serverConfig.postgresql,
+                        serverConfig,
+                        databaseArg,
+                        dirName,
+                        debug
+                    );
+                }
                 const exactlyOneServerConfigResult = isExactlyOneServerConfig(serverConfig);
                 switch (exactlyOneServerConfigResult.type) {
                     case mysql:
