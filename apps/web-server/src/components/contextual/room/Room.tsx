@@ -408,8 +408,7 @@ const CharacterPanel: React.FC = React.memo(function CharacterPanel() {
             minWidth={150}
             zIndex={config.zIndex}
         >
-            {/* 現状ではCharacterListは最大でも1つしか存在しないため、panelIdは適当で構わない */}
-            <CharacterList panelId='CharacterList' />
+            <CharacterList />
         </DraggableCard>
     );
 });

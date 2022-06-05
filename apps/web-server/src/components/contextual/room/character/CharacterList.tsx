@@ -661,7 +661,10 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
     );
 };
 
-export const CharacterList: React.FC<{ panelId: string }> = ({ panelId }) => {
+const CharacterListWithPanelId: React.FC<{
+    // 複数のCharacterListが存在する場合は、panelIdをそれぞれ異なるものにする。
+    panelId: string;
+}> = ({ panelId }) => {
     const tabs = useAtomSelector(
         roomConfigAtom,
         roomConfig => roomConfig?.panels.characterPanel.tabs
@@ -868,4 +871,9 @@ export const CharacterList: React.FC<{ panelId: string }> = ({ panelId }) => {
         setRoomConfig,
         tabs,
     ]);
+};
+
+export const CharacterList: React.FC = () => {
+    // 現状ではCharacterListは最大でも1つしか存在しないため、panelIdは適当で構わない
+    return <CharacterListWithPanelId panelId='CharacterList' />;
 };

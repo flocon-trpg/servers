@@ -25,8 +25,7 @@ import classNames from 'classnames';
 import { flex, flexColumn, flexRow } from '../../utils/className';
 import { useAtomValue } from 'jotai/utils';
 import { firebaseAuthAtom } from '../../pages/_app';
-import { atom, useAtom } from 'jotai';
-import { useUpdateAtom } from 'jotai/utils';
+import { atom, useAtom, useSetAtom } from 'jotai';
 import { storybookAtom } from '../../atoms/storybook/storybookAtom';
 
 const displayName = 'new user';
@@ -45,7 +44,7 @@ const useLoginWithAuthProvider = (): ((provider: AuthProvider) => Promise<void>)
     const isStorybook = useAtomValue(storybookAtom).isStorybook;
     const auth = useAtomValue(firebaseAuthAtom);
     const router = useRouter();
-    const setError = useUpdateAtom(errorAtom);
+    const setError = useSetAtom(errorAtom);
     const result = React.useCallback(
         async (provider: AuthProvider) => {
             if (auth == null) {
@@ -89,9 +88,9 @@ const Email: React.FC = () => {
     const wrapperCol = 16;
 
     const router = useRouter();
-    const setError = useUpdateAtom(errorAtom);
+    const setError = useSetAtom(errorAtom);
     const [isSubmitting, setIsSubmitting] = useAtom(isSubmittingAtom);
-    const setEmailMode = useUpdateAtom(emailModeAtom);
+    const setEmailMode = useSetAtom(emailModeAtom);
     const [email, setEmail] = React.useState('');
     const [password, setPassword] = React.useState('');
     const auth = useAtomValue(firebaseAuthAtom);
@@ -272,14 +271,14 @@ const areProvidersEmpty = (providers: string[]): boolean => {
 };
 
 export const SignIn: React.FC = () => {
-    const setIsSubmitting = useUpdateAtom(isSubmittingAtom);
+    const setIsSubmitting = useSetAtom(isSubmittingAtom);
     React.useEffect(() => {
         setIsSubmitting(false);
     }, [setIsSubmitting]);
 
     const config = useWebConfig();
     const router = useRouter();
-    const setError = useUpdateAtom(errorAtom);
+    const setError = useSetAtom(errorAtom);
     const auth = useAtomValue(firebaseAuthAtom);
     const [emailMode, setEmailMode] = useAtom(emailModeAtom);
     const authError = useAtomValue(errorAtom);
