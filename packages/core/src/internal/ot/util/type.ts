@@ -20,6 +20,9 @@ export type TwoWayError =
     | ApplyError<PositiveInt>
     | ComposeAndTransformError<NonEmptyString, NonEmptyString>;
 
+/**
+ * `state`に対して`operation`を適用します。
+ */
 export type Apply<TState, TOperation> = (params: {
     state: TState;
     operation: TOperation;
