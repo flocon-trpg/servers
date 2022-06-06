@@ -23,7 +23,7 @@ import { BoardContextMenu, PieceTooltip, PopoverEditor } from './board/BoardPopo
 import { useMyUserUid } from '../../../hooks/useMyUserUid';
 import { ImagePieceModal } from './board/ImagePieceModal';
 import { CommandEditorModal } from './character/CommandEditorModal';
-import { ChatPalette } from './character/ChatPalettes';
+import { ChatPalette } from './character/ChatPalette';
 import { Board } from './board/Board';
 import { useAtomSelector } from '../../../atoms/useAtomSelector';
 import { roomConfigAtom } from '../../../atoms/roomConfig/roomConfigAtom';

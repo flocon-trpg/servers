@@ -15,6 +15,7 @@ export {
     groupJoin4DualKeyMap,
 } from './internal/dualKeyMap';
 export { filterInt } from './internal/filterInt';
+export { getExactlyOneKey } from './internal/getExactlyOneKey';
 export { parseStringToBoolean } from './internal/parseStringToBoolean';
 export { keyNames } from './internal/keyNames';
 export { groupJoinMap } from './internal/groupJoinMap';
