@@ -37,6 +37,7 @@ import {
     flex,
     flex1,
     flexAuto,
+    flexColumn,
     flexRow,
     itemsCenter,
     justifyEnd,
@@ -626,47 +627,52 @@ export const CharacterEditorModal: React.FC = () => {
                         {strParamNames.size === 0 && <div>文字列パラメーターはありません。</div>}
                     </div>
 
-                    <div className={flexAuto} style={{ paddingLeft: 60 }}>
-                        <div>
-                            <EditorGroupHeader>メモ</EditorGroupHeader>
+                    <div
+                        className={classNames(flexAuto, flex, flexColumn)}
+                        style={{ paddingLeft: 60, overflow: 'hidden' }}
+                    >
+                        <EditorGroupHeader>メモ</EditorGroupHeader>
 
-                            <CollaborativeInput
-                                multiline
-                                size='small'
-                                bufferDuration='default'
-                                value={character.memo}
-                                onChange={e => {
-                                    updateCharacter(character => {
-                                        if (character == null) {
-                                            return;
-                                        }
-                                        character.memo = e.currentValue;
-                                    });
-                                }}
-                            />
+                        <CollaborativeInput
+                            style={{ overflow: 'auto', flex: '1 0 auto', maxHeight: 300 }}
+                            multiline
+                            size='small'
+                            bufferDuration='default'
+                            value={character.memo}
+                            onChange={e => {
+                                updateCharacter(character => {
+                                    if (character == null) {
+                                        return;
+                                    }
+                                    character.memo = e.currentValue;
+                                });
+                            }}
+                        />
 
-                            {createdByMe && (
-                                <>
-                                    <EditorGroupHeader>変数</EditorGroupHeader>
+                        {createdByMe && (
+                            <>
+                                <EditorGroupHeader>変数</EditorGroupHeader>
 
-                                    <CharacterVarInput
-                                        character={character}
-                                        onChange={newValue =>
-                                            updateCharacter(character => {
-                                                if (character == null) {
-                                                    return;
-                                                }
-                                                character.privateVarToml = newValue;
-                                            })
-                                        }
-                                    />
-                                </>
-                            )}
+                                <CharacterVarInput
+                                    style={{ overflow: 'auto', flex: '1 0 auto', maxHeight: 300 }}
+                                    character={character}
+                                    onChange={newValue =>
+                                        updateCharacter(character => {
+                                            if (character == null) {
+                                                return;
+                                            }
+                                            character.privateVarToml = newValue;
+                                        })
+                                    }
+                                />
+                            </>
+                        )}
 
-                            {createdByMe && atomValue?.type === update && (
-                                <>
-                                    <EditorGroupHeader>コマンド</EditorGroupHeader>
+                        {createdByMe && atomValue?.type === update && (
+                            <>
+                                <EditorGroupHeader>コマンド</EditorGroupHeader>
 
+                                <div>
                                     <Button
                                         onClick={() =>
                                             setCommandEditorModal({
@@ -676,34 +682,34 @@ export const CharacterEditorModal: React.FC = () => {
                                     >
                                         編集
                                     </Button>
-                                </>
-                            )}
+                                </div>
+                            </>
+                        )}
 
-                            <EditorGroupHeader>エクスポート</EditorGroupHeader>
+                        <EditorGroupHeader>エクスポート</EditorGroupHeader>
 
-                            <div>
-                                <CopyToClipboardButton
-                                    clipboardText={async () => {
-                                        const characterToExport: typeof character = {
-                                            ...character,
-                                            pieces: {},
-                                            portraitPieces: {},
-                                        };
-                                        return JSON.stringify(characterToExport);
-                                    }}
-                                >
-                                    クリップボードにエクスポート
-                                </CopyToClipboardButton>
-                                <p>
-                                    {
-                                        'キャラクターコマ、キャラクター立ち絵コマはエクスポートされません。'
-                                    }
-                                    <br />
-                                    {
-                                        '自分が閲覧できない値はエクスポートされません。例えば、他のユーザーによって非公開にされている値はエクスポートの対象外ですが、自分が非公開にしている値は自分が閲覧可能なためエクスポートの対象内となります。'
-                                    }
-                                </p>
-                            </div>
+                        <div>
+                            <CopyToClipboardButton
+                                clipboardText={async () => {
+                                    const characterToExport: typeof character = {
+                                        ...character,
+                                        pieces: {},
+                                        portraitPieces: {},
+                                    };
+                                    return JSON.stringify(characterToExport);
+                                }}
+                            >
+                                クリップボードにエクスポート
+                            </CopyToClipboardButton>
+                            <p>
+                                {
+                                    'キャラクターコマ、キャラクター立ち絵コマはエクスポートされません。'
+                                }
+                                <br />
+                                {
+                                    '自分が閲覧できない値はエクスポートされません。例えば、他のユーザーによって非公開にされている値はエクスポートの対象外ですが、自分が非公開にしている値は自分が閲覧可能なためエクスポートの対象内となります。'
+                                }
+                            </p>
                         </div>
                     </div>
                 </div>
