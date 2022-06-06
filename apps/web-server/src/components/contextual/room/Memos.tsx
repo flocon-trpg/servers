@@ -281,10 +281,9 @@ const DirSelect = ({ memoId }: DirSelectProps) => {
 type MemoProps = {
     memoId: string | undefined;
     memo: MemoState | undefined;
-    height: number;
 };
 
-const Memo: React.FC<MemoProps> = ({ memoId, memo, height }: MemoProps) => {
+const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
     const setRoomState = useSetRoomStateWithImmer();
 
     if (memoId == null) {
@@ -302,7 +301,11 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo, height }: MemoProps) => {
     return (
         <div
             className={classNames(flex1, flex, flexColumn)}
-            style={{ padding: `${padding}px ${padding}px 0 ${padding}px`, height: '100%' }}
+            style={{
+                padding: `${padding}px ${padding}px 0 ${padding}px`,
+                height: '100%',
+                overflow: 'hidden',
+            }}
         >
             <div
                 className={classNames(flexNone, flex, flexRow, itemsCenter)}
@@ -346,7 +349,7 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo, height }: MemoProps) => {
             <CollaborativeInput
                 multiline
                 className={classNames(flexAuto)}
-                style={{ height: height - 50 }}
+                style={{ overflow: 'auto' }}
                 bufferDuration='default'
                 value={memo.text}
                 placeholder='本文'
@@ -370,14 +373,9 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo, height }: MemoProps) => {
 type Props = {
     selectedMemoId: string | undefined;
     onSelectedMemoIdChange: (newId: string) => void;
-    height: number;
 };
 
-export const Memos: React.FC<Props> = ({
-    selectedMemoId,
-    onSelectedMemoIdChange,
-    height,
-}: Props) => {
+export const Memos: React.FC<Props> = ({ selectedMemoId, onSelectedMemoIdChange }: Props) => {
     const setRoomState = useSetRoomStateWithImmer();
     const memos = useMemos();
     const memo = selectedMemoId == null ? undefined : memos?.get(selectedMemoId);
@@ -437,7 +435,7 @@ export const Memos: React.FC<Props> = ({
                     新規作成
                 </Button>
             </div>
-            <Memo memoId={selectedMemoId} memo={memo} height={height - 64} />
+            <Memo memoId={selectedMemoId} memo={memo} />
         </div>
     );
 };

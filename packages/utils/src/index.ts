@@ -4,6 +4,7 @@ export {
     compositeKeyToJsonString,
     compositeKeyEquals,
 } from './internal/compositeKey';
+export { delay } from './internal/delay';
 export {
     DualKey,
     DualKeyMap,
