@@ -16,9 +16,12 @@ type State = S<typeof roomTemplate>;
 type CharacterState = S<typeof characterTemplate>;
 
 const myUserUid = 'my-user-uid';
-const userUid1 = 'user-uid-1';
-const myParticipantName = 'participant-name';
-const displayName = 'display-name';
+const myParticipantName = 'my-participant-name';
+const anotherPlayerUserUid = 'player-user-uid';
+const anotherPlayerParticipantName = 'player-participant-name1';
+const anotherSpectatorUserUid = 'spectator-user-uid';
+const anotherSpectatorParticipantName = 'spectator-participant-name2';
+const myDisplayName = 'my-display-name';
 
 const appData: FirebaseApp = {
     name: '',
@@ -152,13 +155,15 @@ export const createMockUrqlClient = ({ mockQuery }: MockUrqlClientParams): Clien
 };
 
 // https://dummyimage.com/ というダミー画像生成サイトを利用している
-const generateDummyImage = (type: 1 | 2, size: 'small' | 'large') => {
+const generateDummyImage = (type: 1 | 2 | 3, size: 'small' | 'large') => {
     const sizeParam = size === 'small' ? '200x200' : '400x600';
     switch (type) {
         case 1:
             return `https://dummyimage.com/${sizeParam}/fffebd/000000.png&text=sample1`;
         case 2:
             return `https://dummyimage.com/${sizeParam}/bffffe/000000.png&text=sample2`;
+        case 3:
+            return `https://dummyimage.com/${sizeParam}/efbfff/000000.png&text=sample3`;
     }
 };
 
@@ -173,6 +178,7 @@ export type CreateMockRoomParams = {
 export const createMockRoom = (params: CreateMockRoomParams): State => {
     const characterId1 = 'character-id-1';
     const characterId2 = 'character-id-2';
+    const characterId3 = 'character-id-3';
 
     const result: State = {
         $v: 2,
@@ -213,6 +219,18 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
                 $r: 1,
                 name: forceMaxLength100String(myParticipantName),
                 role: params.myParticipantRole,
+            },
+            [anotherPlayerUserUid]: {
+                $v: 2,
+                $r: 1,
+                name: forceMaxLength100String(anotherPlayerParticipantName),
+                role: 'Player',
+            },
+            [anotherSpectatorUserUid]: {
+                $v: 2,
+                $r: 1,
+                name: forceMaxLength100String(anotherSpectatorParticipantName),
+                role: 'Spectator',
             },
         },
     };
@@ -301,6 +319,25 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
                 hasTag1: true,
                 chatPalette: 'character-2-chatpalette',
             },
+            [characterId3]: {
+                ...characterBase,
+                ownerParticipantId: anotherPlayerUserUid,
+                name: 'character-3-name',
+                memo: 'character-3-memo',
+                image: {
+                    $v: 1,
+                    $r: 1,
+                    path: generateDummyImage(3, 'small'),
+                    sourceType: 'Default',
+                },
+                portraitImage: {
+                    $v: 1,
+                    $r: 1,
+                    path: generateDummyImage(3, 'large'),
+                    sourceType: 'Default',
+                },
+                chatPalette: 'character-3-chatpalette',
+            },
         };
     }
 
@@ -344,7 +381,7 @@ export const createMockRoomMessages = (params: CreateMockRoomMessagesParams): Ro
         channelKey: $free,
         isSecret: false,
         createdAt,
-        createdBy: userUid1,
+        createdBy: anotherPlayerUserUid,
         initText: 'text',
         initTextSource: 'text',
     };
@@ -366,7 +403,7 @@ export const createMockRoomMessages = (params: CreateMockRoomMessagesParams): Ro
         channelKey: '2',
         isSecret: false,
         createdAt,
-        createdBy: userUid1,
+        createdBy: anotherPlayerUserUid,
         initText: 'text',
         initTextSource: 'text',
     };
@@ -387,10 +424,10 @@ export const createMockRoomMessages = (params: CreateMockRoomMessagesParams): Ro
         messageId: '5',
         isSecret: false,
         createdAt,
-        createdBy: userUid1,
+        createdBy: anotherPlayerUserUid,
         initText: 'text',
         initTextSource: 'text',
-        visibleTo: [myUserUid, userUid1],
+        visibleTo: [myUserUid, anotherPlayerUserUid],
     };
 
     const result: RoomMessages = {
@@ -431,7 +468,7 @@ export const mockUser: User = {
     toJSON: function (): object {
         throw new Error('Function not implemented.');
     },
-    displayName,
+    displayName: myDisplayName,
     email: null,
     phoneNumber: null,
     photoURL: null,
