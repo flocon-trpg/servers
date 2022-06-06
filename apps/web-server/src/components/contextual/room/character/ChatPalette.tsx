@@ -38,6 +38,7 @@ const descriptionStyle: React.CSSProperties = {
 };
 
 type ChatPaletteListProps = {
+    className?: string;
     chatPaletteText: string | null;
     onClick: (text: string) => void;
     onDoubleClick: (text: string) => void;
@@ -46,6 +47,7 @@ type ChatPaletteListProps = {
 };
 
 const ChatPaletteList: React.FC<ChatPaletteListProps> = ({
+    className,
     chatPaletteText,
     onClick,
     onDoubleClick,
@@ -77,8 +79,9 @@ const ChatPaletteList: React.FC<ChatPaletteListProps> = ({
     if (isEditMode) {
         return (
             <CollaborativeInput
+                className={className}
+                style={{ overflow: 'auto' }}
                 multiline
-                style={{ minHeight: 'calc(100% - 32px)' }}
                 size='small'
                 bufferDuration='default'
                 value={chatPaletteText ?? ''}
@@ -99,6 +102,7 @@ const ChatPaletteList: React.FC<ChatPaletteListProps> = ({
 
     return (
         <select
+            className={className}
             style={{
                 ...baseStyle,
                 backgroundColor: 'transparent',
@@ -106,7 +110,7 @@ const ChatPaletteList: React.FC<ChatPaletteListProps> = ({
                 borderColor: '#303030',
                 outline: 'none',
             }}
-            size={10}
+            size={4}
             onChange={e => onClick(e.target.value)}
             onDoubleClick={e => onDoubleClick(e.currentTarget.value)}
         >
@@ -213,7 +217,7 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
                 descriptionStyle={descriptionStyle}
             />
             <UISelector
-                style={{ padding: '2px 0' }}
+                style={{ padding: '2px 0', overflow: 'hidden' }}
                 className={classNames(flex1, flex, flexColumn)}
                 keys={[nonEditKey, editKey, editVarKey] as const}
                 activeKey={uiSelectorKey}
@@ -232,8 +236,8 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
                     if (uiSelectorKey === editVarKey) {
                         return (
                             <CharacterVarInput
-                                style={{ padding: '0 0 2px 0' }}
-                                classNames={classNames(flex1)}
+                                style={{ padding: '0 0 2px 0', overflow: 'auto' }}
+                                className={classNames(flex1)}
                                 character={selectedCharacter}
                                 onChange={newValue =>
                                     setRoomState(roomState => {
@@ -254,6 +258,7 @@ export const ChatPalette: React.FC<ChatPaletteProps> = ({ roomId, panelId }: Cha
 
                     return (
                         <ChatPaletteList
+                            className={classNames(flex1)}
                             chatPaletteText={selectedCharacter?.chatPalette ?? null}
                             onClick={text => {
                                 if (selectedChannelType === publicChannel) {

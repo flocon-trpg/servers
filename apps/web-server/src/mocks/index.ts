@@ -254,7 +254,25 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
                     path: generateDummyImage(1, 'large'),
                     sourceType: 'Default',
                 },
-                chatPalette: 'character-1-chatpalette',
+                chatPalette: `私のHPは{HP}です
+MPは{MP}です
+あああ
+いいいい
+ううう
+ええええ
+あのイーハトーヴォのすきとおった風、夏でも底に冷たさをもつ青いそら、うつくしい森で飾られたモリーオ市、郊外のぎらぎらひかる草の波。
+またそのなかでいっしょになったたくさんのひとたち、ファゼーロとロザーロ、羊飼のミーロや、顔の赤いこどもたち、地主のテーモ、山猫博士のボーガント・デストゥパーゴなど、いまこの暗い巨きな石の建物のなかで考えていると、みんなむかし風のなつかしい青い幻燈のように思われます。では、わたくしはいつかの小さなみだしをつけながら、しずかにあの年のイーハトーヴォの五月から十月までを書きつけましょう。`,
+                privateVarToml: `HP=1
+MP=2
+SAN=30
+Foo=4
+Bar=5
+Hoge=6
+Fuga=7
+Param8=8
+Param9=9
+Param10=10
+Param11=11`,
                 boolParams: {
                     1: {
                         $v: 2,

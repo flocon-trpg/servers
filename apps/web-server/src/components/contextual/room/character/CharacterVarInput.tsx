@@ -6,21 +6,21 @@ type CharacterState = State<typeof characterTemplate>;
 
 type Props = {
     style?: React.CSSProperties;
-    classNames?: string;
+    className?: string;
     character: CharacterState | undefined;
     onChange: (newValue: string) => void;
 };
 
 export const CharacterVarInput: React.FC<Props> = ({
     style,
-    classNames,
+    className,
     character,
     onChange,
 }: Props) => {
     return (
         <TomlInput
             style={style}
-            className={classNames}
+            className={className}
             size='small'
             bufferDuration='default'
             disabled={character == null}
