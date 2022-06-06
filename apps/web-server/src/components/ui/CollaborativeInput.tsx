@@ -274,9 +274,14 @@ export const CollaborativeInput: React.FC<Props> = ({
 
         quill.setText(valueRef.current);
 
+        let prevText = quill.getText();
         const textChangeHandler = () => {
-            onSkippingRef.current({ isSkipping: true });
-            onChangeInput(quill.getText());
+            const currentText = quill.getText();
+            if (prevText !== currentText) {
+                onSkippingRef.current({ isSkipping: true });
+                onChangeInput(currentText);
+            }
+            prevText = currentText;
         };
         quill.on('text-change', textChangeHandler);
     }, [onChangeInput, onSkippingRef, quill, valueRef]);
