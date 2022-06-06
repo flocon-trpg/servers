@@ -1,10 +1,5 @@
+import { delay } from '@flocon-trpg/utils';
 import { PromiseQueue, PromiseQueueResult, executed } from '../../src/utils/promiseQueue';
-
-const delay = (delayBy: number) => {
-    return new Promise<void>(next => {
-        setTimeout(() => next(), delayBy);
-    });
-};
 
 class ExpectPromiseQueueResult<T> {
     private _value: PromiseQueueResult<T> | undefined = undefined;
