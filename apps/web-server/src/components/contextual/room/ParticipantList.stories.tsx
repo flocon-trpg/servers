@@ -20,9 +20,7 @@ export const Master: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myPar
             isStorybook: true,
             mock: {
                 auth: { ...mockAuth, currentUser: mockUser },
-                webConfig: Result.ok(mockWebConfig),
                 user: mockUser,
-                storage: mockStorage,
             },
         });
     }, [setStorybook]);
