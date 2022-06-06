@@ -23,6 +23,10 @@ const anotherSpectatorUserUid = 'spectator-user-uid';
 const anotherSpectatorParticipantName = 'spectator-participant-name2';
 const myDisplayName = 'my-display-name';
 
+export const myRichCharacterId = 'character-id-1';
+export const mySimpleCharacterId = 'character-id-2';
+export const anotherPlayerCharacterId1 = 'character-id-3';
+
 const appData: FirebaseApp = {
     name: '',
     options: {},
@@ -176,10 +180,6 @@ export type CreateMockRoomParams = {
 };
 
 export const createMockRoom = (params: CreateMockRoomParams): State => {
-    const characterId1 = 'character-id-1';
-    const characterId2 = 'character-id-2';
-    const characterId3 = 'character-id-3';
-
     const result: State = {
         $v: 2,
         $r: 1,
@@ -237,11 +237,26 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
 
     if (params.setCharacters) {
         result.characters = {
-            [characterId1]: {
+            [myRichCharacterId]: {
                 ...characterBase,
                 ownerParticipantId: myUserUid,
                 name: 'character-1-name',
-                memo: 'character-1-memo',
+                memo: `吾輩は猫である。名前はまだ無い。
+どこで生れたかとんと見当がつかぬ。
+何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。
+吾輩はここで始めて人間というものを見た。
+しかもあとで聞くとそれは書生という人間中で一番獰悪な種族であったそうだ。
+この書生というのは時々我々を捕えて煮て食うという話である。
+しかしその当時は何という考もなかったから別段恐しいとも思わなかった。
+ただ彼の掌に載せられてスーと持ち上げられた時何だかフワフワした感じがあったばかりである。
+掌の上で少し落ちついて書生の顔を見たのがいわゆる人間というものの見始であろう。
+この時妙なものだと思った感じが今でも残っている。
+第一毛をもって装飾されべきはずの顔がつるつるしてまるで薬缶だ。
+その後猫にもだいぶ逢ったがこんな片輪には一度も出会わした事がない。
+のみならず顔の真中があまりに突起している。
+そうしてその穴の中から時々ぷうぷうと煙を吹く。
+どうも咽せぽくて実に弱った。
+これが人間の飲む煙草というものである事はようやくこの頃知った。`,
                 image: {
                     $v: 1,
                     $r: 1,
@@ -317,7 +332,7 @@ Param11=11`,
                     },
                 },
             },
-            [characterId2]: {
+            [mySimpleCharacterId]: {
                 ...characterBase,
                 ownerParticipantId: myUserUid,
                 name: 'character-2-name',
@@ -337,7 +352,7 @@ Param11=11`,
                 hasTag1: true,
                 chatPalette: 'character-2-chatpalette',
             },
-            [characterId3]: {
+            [anotherPlayerCharacterId1]: {
                 ...characterBase,
                 ownerParticipantId: anotherPlayerUserUid,
                 name: 'character-3-name',
