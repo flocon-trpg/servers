@@ -66,7 +66,6 @@ export const ParticipantList: React.FC = () => {
             {
                 title: '名前',
                 key: '名前',
-                width: 80,
                 // eslint-disable-next-line react/display-name
                 render: (_: unknown, { participant }: DataSource) => (
                     <span>{participant.state.name}</span>
