@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Children, memo } from 'react';
 import * as Icons from '@ant-design/icons';
 import { useMemos } from '../../../hooks/state/useMemos';
 import { State, memoTemplate, simpleId } from '@flocon-trpg/core';
@@ -27,6 +27,13 @@ type MemoState = State<typeof memoTemplate>;
 const padding = 4;
 const splitterPadding = 8;
 
+const dirToKey = (dir: readonly string[]): string => {
+    return dir.reduce(
+        (seed, elem) => `${seed}:${elem.replaceAll('/', '//').replaceAll(':', '/:')}`,
+        ''
+    );
+};
+
 class Dir {
     public constructor(public readonly dir: string[]) {}
 
@@ -39,10 +46,7 @@ class Dir {
     }
 
     public get reactKey(): string {
-        return this.dir.reduce(
-            (seed, elem) => `${seed}:${elem.replaceAll('/', '//').replaceAll(':', '/:')}`,
-            ''
-        );
+        return dirToKey(this.dir);
     }
 }
 
@@ -164,7 +168,20 @@ const sortedDir = (memos: ReturnType<typeof useMemos>) => {
         return [];
     }
     return [...memos]
-        .sort(([, x], [, y]) => {
+        .flatMap(([, memo]) => {
+            // {dir: ['a', 'b', 'c']} => [[], ['a'], ['a','b'], ['a','b','c']]
+            function* allDir() {
+                let result: string[] = [];
+                yield result;
+                for (const d of memo.dir) {
+                    result = [...result, d];
+                    yield result;
+                }
+            }
+
+            return [...allDir()].map(dir => ({ dir }));
+        })
+        .sort((x, y) => {
             for (let i = 0; ; i++) {
                 const xElem = x.dir[i];
                 const yElem = y.dir[i];
@@ -184,7 +201,7 @@ const sortedDir = (memos: ReturnType<typeof useMemos>) => {
                 return xElem.localeCompare(yElem);
             }
         })
-        .reduce((seed, [, elem]) => {
+        .reduce((seed, elem) => {
             const last = _.last(seed);
             if (!_.isEqual(elem.dir, last?.dir)) {
                 seed.push({ dir: elem.dir });
@@ -193,44 +210,61 @@ const sortedDir = (memos: ReturnType<typeof useMemos>) => {
         }, [] as { dir: string[] }[]);
 };
 
-const dirToString = (dir: string[]) => {
+const dirToElement = (dir: string[]) => {
     if (dir.length === 0) {
         return '（ルート）';
     }
-    return dir.reduce((seed, elem) => (seed === '' ? elem : `${seed}/${elem}`), '');
+    const children = dir.map((d, i) => {
+        return (
+            <React.Fragment key={i}>
+                {i !== 0 && ' / '}
+                <Icons.FolderFilled />
+                {' ' + d}
+            </React.Fragment>
+        );
+    });
+    return <span>{children}</span>;
 };
 
 type DirSelectProps = {
     memoId: string;
 };
 
-const defaultNewDirName = 'a new group';
+const defaultNewDirName = '新規グループ';
 const DirSelect = ({ memoId }: DirSelectProps) => {
     const memos = useMemos();
+    const selectedMemo = memos?.get(memoId);
     const setRoomState = useSetRoomStateWithImmer();
-    const [isModalVisible, setIsModalVisible] = React.useState(false);
+    const [newGroupModalState, setNewGroupModalState] = React.useState(false);
     const [newDirName, setNewDirName] = React.useState(defaultNewDirName);
 
     const dirNames = React.useMemo(() => sortedDir(memos), [memos]);
-    const dirMenuItems = React.useMemo(
-        () =>
-            dirNames.map(({ dir }): ItemType => {
-                return {
-                    key: `DIRSELECT-${memoId}`,
-                    label: dirToString(dir),
-                    onClick: () => {
-                        setRoomState(roomState => {
-                            const memo = roomState.memos?.[memoId];
-                            if (memo == null) {
-                                return;
-                            }
-                            memo.dir = [...dir];
-                        });
-                    },
-                };
-            }),
-        [dirNames, memoId, setRoomState]
-    );
+    const dirMenuItems: ItemType[] = React.useMemo(() => {
+        const moveItems = dirNames.map(({ dir }): ItemType => {
+            return {
+                key: `MEMO-DIRSELECT-${dirToKey(dir)}`,
+                label: dirToElement(dir),
+                onClick: () => {
+                    setRoomState(roomState => {
+                        const memo = roomState.memos?.[memoId];
+                        if (memo == null) {
+                            return;
+                        }
+                        memo.dir = [...dir];
+                    });
+                },
+            };
+        });
+        return [
+            ...moveItems,
+            { type: 'divider' },
+            {
+                key: `MEMO-NEWDIR`,
+                label: 'グループを新規作成して移動',
+                onClick: () => setNewGroupModalState(true),
+            },
+        ];
+    }, [dirNames, memoId, setRoomState]);
 
     const moveMemoOverlay = (
         <Menu items={dirMenuItems} triggerSubMenuAction={defaultTriggerSubMenuAction} />
@@ -239,16 +273,16 @@ const DirSelect = ({ memoId }: DirSelectProps) => {
     return (
         <div className={classNames(flex, flexRow)}>
             <Dropdown overlay={moveMemoOverlay} trigger={['click']}>
-                <Button>既存のグループに移動</Button>
+                <Button>移動</Button>
             </Dropdown>
-            <Button onClick={() => setIsModalVisible(true)}>新規グループに移動</Button>
             <Modal
+                width={600}
                 className={cancelRnd}
-                title='新規グループの名前'
-                visible={isModalVisible}
+                title='グループの新規作成と移動'
+                visible={newGroupModalState}
                 onCancel={() => {
                     setNewDirName(defaultNewDirName);
-                    setIsModalVisible(false);
+                    setNewGroupModalState(false);
                 }}
                 onOk={() => {
                     setRoomState(roomState => {
@@ -259,16 +293,25 @@ const DirSelect = ({ memoId }: DirSelectProps) => {
                         memo.dir = [...memo.dir, newDirName];
                     });
                     setNewDirName(defaultNewDirName);
-                    setIsModalVisible(false);
+                    setNewGroupModalState(false);
                 }}
             >
                 <div className={classNames(flex, flexColumn)}>
-                    <Input
-                        onChange={e => {
-                            setNewDirName(e.target.value);
-                        }}
-                        value={newDirName}
-                    />
+                    <div className={classNames(flex, flexRow, itemsCenter)}>
+                        <div
+                            className={classNames(flex, flexRow, itemsCenter)}
+                            style={{ whiteSpace: 'nowrap' }}
+                        >
+                            {selectedMemo && dirToElement(selectedMemo.dir)}
+                        </div>
+                        <div style={{ padding: '0 4px' }}>{'/'}</div>
+                        <Input
+                            onChange={e => {
+                                setNewDirName(e.target.value);
+                            }}
+                            value={newDirName}
+                        />
+                    </div>
                     <div style={{ paddingTop: 8 }}>
                         同じ名前のグループが既に存在する場合、グループは新規作成されず、メモはその既に存在するグループ内に移動します。
                     </div>
