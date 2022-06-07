@@ -1,5 +1,4 @@
 import { ParticipantRole } from '@flocon-trpg/core';
-import { Result } from '@kizahasi/result';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { useSetAtom } from 'jotai';
 import React from 'react';
@@ -7,7 +6,7 @@ import { roomConfigAtom } from '../../../atoms/roomConfig/roomConfigAtom';
 import { defaultRoomConfig } from '../../../atoms/roomConfig/types/roomConfig';
 import { storybookAtom } from '../../../atoms/storybook/storybookAtom';
 import { useMockUserConfig } from '../../../hooks/useMockUserConfig';
-import { createMockRoom, mockAuth, mockStorage, mockUser, mockWebConfig } from '../../../mocks';
+import { createMockRoom, mockAuth, mockUser } from '../../../mocks';
 import { useMockRoom } from '../../../hooks/useMockRoom';
 import { ParticipantList } from './ParticipantList';
 

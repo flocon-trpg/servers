@@ -431,6 +431,7 @@ export const CharacterEditorModal: React.FC = () => {
                                     }
                                     openFilesManager={setFilesManagerDrawerType}
                                     showImage
+                                    maxWidthOfLink={100}
                                 />
                             }
                         />
@@ -451,6 +452,7 @@ export const CharacterEditorModal: React.FC = () => {
                                     }
                                     openFilesManager={setFilesManagerDrawerType}
                                     showImage
+                                    maxWidthOfLink={100}
                                 />
                             }
                         />

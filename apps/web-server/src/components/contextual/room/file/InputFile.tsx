@@ -1,4 +1,4 @@
-import { Button } from 'antd';
+import { Button, Tooltip } from 'antd';
 import * as React from 'react';
 import { FileSourceType } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { some } from '../../../../utils/types';
@@ -22,6 +22,7 @@ type Props = {
         defaultFilteredValue: FilterValue | undefined;
     }) => void;
     showImage?: boolean;
+    maxWidthOfLink?: number;
 };
 
 export const InputFile: React.FC<Props> = ({
@@ -29,6 +30,7 @@ export const InputFile: React.FC<Props> = ({
     onPathChange,
     openFilesManager,
     showImage,
+    maxWidthOfLink,
 }: Props) => {
     const onOpen = (path: FilePath | FilePathState) => {
         if (onPathChange != null) {
@@ -47,12 +49,28 @@ export const InputFile: React.FC<Props> = ({
             return <span>（ファイルが選択されていません）</span>;
         }
         switch (filePath.sourceType) {
-            case FileSourceType.Default:
-                return (
-                    <a href={filePath.path} target='_blank' rel='noopener noreferrer'>
+            case FileSourceType.Default: {
+                const a = (ellipsis: boolean) => (
+                    <a
+                        href={filePath.path}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        style={
+                            ellipsis
+                                ? {
+                                      maxWidth: maxWidthOfLink,
+                                      textOverflow: 'ellipsis',
+                                      overflow: 'hidden',
+                                      whiteSpace: 'nowrap',
+                                  }
+                                : undefined
+                        }
+                    >
                         {filePath.path}
                     </a>
                 );
+                return <Tooltip overlay={a(false)}>{a(true)}</Tooltip>;
+            }
             case FileSourceType.FirebaseStorage:
                 return <FirebaseStorageLink reference={filePath.path} />;
         }
