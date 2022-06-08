@@ -1,8 +1,42 @@
 # 開発者向け Readme
 
-## サーバー設置方法
+ローカルで動かす場合、yarn のインストールが必須となります。npm や pnpm には対応していません。
 
-サーバー設置方法は[公式サイト](https://flocon.app)をご覧ください。
+Flocon は yarn v3[^1] のワークスペースを採用しています。ビルドやテストは、全体で行うことも、特定のパッケージのみに対して行うこともできます。例えば、この Markdown ファイルがあるディレクトリで`yarn run build`を実行すると全パッケージがビルドされます。`./packages/core`に移動してから`yarn run build`を実行すると`core`パッケージとそれに依存するパッケージのみがビルドされます。パッケージは`./apps`と`./packages`にあります。
+
+使用されるパッケージはすべて事前にビルドして JavaScript ファイルなどを生成しておく必要があります。前述のとおり、この Markdown ファイルがあるディレクトリで`yarn run build`を実行すれば全パッケージがビルドされるので、ビルドに関しては少なくともこれを実行しておけば問題ありません。このドキュメントは、これ以降、依存するパッケージは全てビルド済みという前提で書かれています。
+
+現時点では watch スクリプトはありません。ご了承ください。
+
+## ローカルでの API サーバーの実行方法
+
+[環境変数のセット](https://flocon.app/docs/server/details/api-server/vars)が必須です。また、環境変数のセットにおいて、Firebase プロジェクトの準備も必要になります。
+
+データベースとして PostgreSQL もしくは MySQL を使う場合は対応するデータベースサーバーを起動しておく必要があります。SQLite の場合は不要です。
+
+```console
+cd ./apps/api-server
+yarn run start
+```
+
+## ローカルでの Web サーバーの実行方法
+
+[環境変数のセット](https://flocon.app/docs/server/details/web-server/vars)が必須です。また、環境変数のセットにおいて、Firebase プロジェクトの準備も必要になります。
+
+開発用サーバーを動かす場合:
+
+```console
+cd ./apps/web-server
+yarn run dev
+```
+
+静的ファイルを出力して動かす場合:
+
+```console
+cd ./apps/web-server
+yarn run export
+yarn run serve
+```
 
 ## Storybook
 
@@ -18,6 +52,13 @@ yarn run build:deps && yarn run storybook
 ```
 
 ## テストの実行
+
+テストの実行方法には次の 2 つがあります。
+
+-   Github Actions（[act は services に対応していない](https://github.com/nektos/act/issues/173)ため使えません）
+-   ローカルで実行
+
+このドキュメントではローカルで実行する方法を説明します。
 
 ### クイックスタート
 
@@ -53,3 +94,18 @@ Redis を使用したテストは`./packages/cache`パッケージにのみ存�
 テストに使われるデータベースの接続方法は [./apps/api-server/test/utils/databaseConfig.ts](./apps/api-server/test/utils/databaseConfig.ts) にあります。
 
 リレーショナルデータベースを使用したテストは [api-server](./apps/api-server) パッケージにのみ存在します。このパッケージをテストしない場合は`MYSQL_TEST`、`POSTGRESQL_TEST`、`SQLITE_TEST`の値は利用されません。
+
+## ブランチ名について
+
+※ 現在採用しているフローおよびブランチ名は暫定です。
+
+-   `main`: 開発ブランチです。
+-   `release`: リリース済みのコード置き場です。
+-   `prerelease/v*.*.*`: 重要度の高いバグ修正を含んだリリースの前段階となるブランチです。\*には数値等が入ります。必ずしも存在するとは限りません。
+
+### リリースまでの流れ
+
+`release`ブランチにマージされたコードがリリースされます[^2]。基本的には`main`ブランチからマージされます。ただし、重要度の高いバグ修正をリリースしたいが`main`ブランチがまだ不安定でマージできない場合は、代わりに`release`ブランチから`prerelease/v*.*.*`ブランチを切り、そのバグ修正をコミットして、`release`ブランチにマージしてリリースします。バグ修正の内容を`main`ブランチに反映させるため、そちらにもマージします。
+
+[^1]: グローバルインストールする yarn のバージョンは v1 で構いません。詳細は <https://www.wantedly.com/companies/wantedly/post_articles/325643> のポイント 3 を参照してください。
+[^2]: 正確にはタグの push によって自動リリースされます。
