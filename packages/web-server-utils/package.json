@@ -22,7 +22,7 @@
     "devDependencies": {
         "@types/jest": "27.5.2",
         "fast-check": "2.25.0",
-        "immer": "9.0.12",
+        "immer": "9.0.14",
         "jest": "27.5.1",
         "rimraf": "3.0.2",
         "ts-jest": "27.1.5",

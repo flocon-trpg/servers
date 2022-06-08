@@ -2847,7 +2847,7 @@ __metadata:
     "@flocon-trpg/utils": "workspace:^"
     "@types/jest": 27.5.2
     fast-check: 2.25.0
-    immer: 9.0.12
+    immer: 9.0.14
     jest: 27.5.1
     rimraf: 3.0.2
     rxjs: ^7.5.5
@@ -13918,10 +13918,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"immer@npm:9.0.12, immer@npm:^9.0.6":
-  version: 9.0.12
-  resolution: "immer@npm:9.0.12"
-  checksum: bcbec6d76dac65e49068eb67ece4d407116e62b8cde3126aa89c801e408f5047763ba0aeb62f1938c1aa704bb6612f1d8302bb2a86fa1fc60fcc12d8b25dc895
+"immer@npm:9.0.14, immer@npm:^9.0.6":
+  version: 9.0.14
+  resolution: "immer@npm:9.0.14"
+  checksum: 17f1365c06d653e672a4f609f08e7203e9ab4b4284818332d6ca9b3f3577a0e3c0066ca7933b636fbae560df79a4b3fde70ed717ce3c6e95c39bf3d5861d5be9
   languageName: node
   linkType: hard
 
