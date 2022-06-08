@@ -180,14 +180,29 @@ export const CharacterEditorModal: React.FC = () => {
         case create:
             stateEditorParams = {
                 type: create,
-                initState: defaultCharacter,
+                createInitState: () => defaultCharacter,
+                onCreate: newValue => {
+                    if (newValue == null) {
+                        return;
+                    }
+                    const id = simpleId();
+                    setRoomState(roomState => {
+                        if (roomState.characters == null) {
+                            roomState.characters = {};
+                        }
+                        roomState.characters[id] = {
+                            ...newValue,
+                            ownerParticipantId: myUserUid,
+                        };
+                    });
+                },
             };
             break;
         case update:
             stateEditorParams = {
                 type: update,
                 state: characters?.get(atomValue.stateId),
-                onUpdate: nextState => {
+                updateWithImmer: nextState => {
                     setRoomState(roomState => {
                         if (roomState.characters == null) {
                             roomState.characters = {};
@@ -199,9 +214,9 @@ export const CharacterEditorModal: React.FC = () => {
             break;
     }
     const {
-        uiState: character,
-        updateUiState: updateCharacter,
-        resetUiState: resetCharacterToCreate,
+        state: character,
+        updateState: updateCharacter,
+        ok,
     } = useStateEditor(stateEditorParams);
     const [filesManagerDrawerType, setFilesManagerDrawerType] =
         React.useState<FilesManagerDrawerType | null>(null);
@@ -224,24 +239,6 @@ export const CharacterEditorModal: React.FC = () => {
             }
             return isMyCharacter(atomValue.stateId);
         })();
-
-        let onOkClick: (() => void) | undefined = undefined;
-        if (atomValue?.type === create) {
-            onOkClick = () => {
-                const id = simpleId();
-                setRoomState(roomState => {
-                    if (roomState.characters == null) {
-                        roomState.characters = {};
-                    }
-                    roomState.characters[id] = {
-                        ...character,
-                        ownerParticipantId: myUserUid,
-                    };
-                });
-                resetCharacterToCreate();
-                setAtomValue(null);
-            };
-        }
 
         let onDestroy: (() => void) | undefined = undefined;
         if (atomValue?.type === update) {
@@ -280,9 +277,15 @@ export const CharacterEditorModal: React.FC = () => {
                             onClick: () => setAtomValue(null),
                         }}
                         ok={
-                            onOkClick == null
-                                ? undefined
-                                : { textType: 'create', onClick: onOkClick }
+                            atomValue?.type === create
+                                ? {
+                                      textType: 'create',
+                                      onClick: () => {
+                                          ok();
+                                          setAtomValue(null);
+                                      },
+                                  }
+                                : undefined
                         }
                         destroy={
                             onDestroy == null
@@ -726,12 +729,13 @@ export const CharacterEditorModal: React.FC = () => {
         atomValue,
         boolParamNames,
         character,
+        close,
         filesManagerDrawerType,
         isMyCharacter,
         myUserUid,
         numParamNames,
+        ok,
         participantName,
-        resetCharacterToCreate,
         setAtomValue,
         setCommandEditorModal,
         setRoomState,

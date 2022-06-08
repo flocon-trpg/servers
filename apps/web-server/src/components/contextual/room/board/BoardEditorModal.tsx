@@ -82,14 +82,40 @@ export const BoardEditorModal: React.FC = () => {
         case create:
             stateEditorParams = {
                 type: create,
-                initState: defaultBoard,
+                createInitState: () => defaultBoard,
+                onCreate: board => {
+                    if (board == null) {
+                        return;
+                    }
+                    const id = simpleId();
+                    setRoomState(roomState => {
+                        if (roomState.boards == null) {
+                            roomState.boards = {};
+                        }
+                        roomState.boards[id] = {
+                            ...board,
+                            ownerParticipantId: myUserUid,
+                        };
+                    });
+                    setRoomConfigAtom(roomConfig => {
+                        if (modalValue.boardEditorPanelId == null) {
+                            return;
+                        }
+                        const originBoardEditorPanel =
+                            roomConfig?.panels.boardEditorPanels[modalValue.boardEditorPanelId];
+                        if (originBoardEditorPanel == null) {
+                            return;
+                        }
+                        originBoardEditorPanel.activeBoardId = id;
+                    });
+                },
             };
             break;
         case update:
             stateEditorParams = {
                 type: update,
                 state: boards?.get(modalValue.stateId),
-                onUpdate: nextState => {
+                updateWithImmer: nextState => {
                     setRoomState(roomState => {
                         if (roomState.boards == null) {
                             roomState.boards = {};
@@ -100,45 +126,12 @@ export const BoardEditorModal: React.FC = () => {
             };
             break;
     }
-    const {
-        uiState: board,
-        updateUiState: updateBoard,
-        resetUiState: resetBoardToCreate,
-    } = useStateEditor(stateEditorParams);
+    const { state: board, updateState: updateBoard, ok } = useStateEditor(stateEditorParams);
     const [filesManagerDrawerType, setFilesManagerDrawerType] =
         React.useState<FilesManagerDrawerType | null>(null);
 
     if (myUserUid == null || board == null) {
         return null;
-    }
-
-    let onOkClick: (() => void) | undefined = undefined;
-    if (modalValue?.type === create) {
-        onOkClick = () => {
-            const id = simpleId();
-            setRoomState(roomState => {
-                if (roomState.boards == null) {
-                    roomState.boards = {};
-                }
-                roomState.boards[id] = {
-                    ...board,
-                    ownerParticipantId: myUserUid,
-                };
-            });
-            resetBoardToCreate(defaultBoard);
-            setModalValue(null);
-            setRoomConfigAtom(roomConfig => {
-                if (modalValue.boardEditorPanelId == null) {
-                    return;
-                }
-                const originBoardEditorPanel =
-                    roomConfig?.panels.boardEditorPanels[modalValue.boardEditorPanelId];
-                if (originBoardEditorPanel == null) {
-                    return;
-                }
-                originBoardEditorPanel.activeBoardId = id;
-            });
-        };
     }
 
     let onDestroy: (() => void) | undefined = undefined;
@@ -164,7 +157,17 @@ export const BoardEditorModal: React.FC = () => {
                         textType: modalValue?.type === create ? 'cancel' : 'close',
                         onClick: () => setModalValue(null),
                     }}
-                    ok={onOkClick == null ? undefined : { textType: 'create', onClick: onOkClick }}
+                    ok={
+                        modalValue?.type === create
+                            ? {
+                                  textType: 'create',
+                                  onClick: () => {
+                                      ok();
+                                      setModalValue(null);
+                                  },
+                              }
+                            : undefined
+                    }
                     destroy={
                         onDestroy == null
                             ? undefined

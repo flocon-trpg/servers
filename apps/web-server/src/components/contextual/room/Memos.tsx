@@ -1,4 +1,4 @@
-import React, { Children, memo } from 'react';
+import React from 'react';
 import * as Icons from '@ant-design/icons';
 import { useMemos } from '../../../hooks/state/useMemos';
 import { State, memoTemplate, simpleId } from '@flocon-trpg/core';
