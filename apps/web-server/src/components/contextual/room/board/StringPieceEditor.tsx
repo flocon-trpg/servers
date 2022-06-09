@@ -74,7 +74,7 @@ export const StringPieceEditor: React.FC<{
             return {
                 createInitState: () => defaultStringPieceValue(createMode.piecePosition, undefined),
                 onCreate: newState => {
-                    if (newState == null) {
+                    if (newState == null || activeCharacter == null) {
                         return;
                     }
                     const id = simpleId();
@@ -83,11 +83,11 @@ export const StringPieceEditor: React.FC<{
                         if (stringPieces == null) {
                             return;
                         }
-                        stringPieces[id] = newState;
+                        stringPieces[id] = { ...newState, ownerCharacterId: activeCharacter.id };
                     });
                 },
             };
-        }, [createMode, setRoomState]);
+        }, [activeCharacter, createMode, setRoomState]);
     const updateModeParams: UpdateModeParams<StringPieceState | undefined> | undefined =
         React.useMemo(() => {
             if (updateMode == null) {

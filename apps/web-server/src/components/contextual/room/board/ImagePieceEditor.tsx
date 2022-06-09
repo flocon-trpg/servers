@@ -67,7 +67,7 @@ export const ImagePieceEditor: React.FC<{
     // TODO: useStateEditorの性質上、useMemoでは不十分
     const createModeParams: CreateModeParams<ImagePieceState | undefined> | undefined =
         React.useMemo(() => {
-            if (createMode == null) {
+            if (createMode == null || myUserUid == null) {
                 return undefined;
             }
             return {
@@ -82,11 +82,11 @@ export const ImagePieceEditor: React.FC<{
                         if (imagePieces == null) {
                             return;
                         }
-                        imagePieces[id] = newState;
+                        imagePieces[id] = { ...newState, ownerParticipantId: myUserUid };
                     });
                 },
             };
-        }, [createMode, setRoomState]);
+        }, [createMode, myUserUid, setRoomState]);
     const updateModeParams: UpdateModeParams<ImagePieceState | undefined> | undefined =
         React.useMemo(() => {
             if (updateMode == null) {
