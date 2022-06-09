@@ -6,7 +6,11 @@ import { DrawerProps } from 'antd/lib/drawer';
 import { FilesManagerDrawer } from '../file/FilesManagerDrawer';
 import { FilesManagerDrawerType } from '../../../../utils/types';
 import { Gutter } from 'antd/lib/grid/row';
-import { StateEditorParams, useStateEditor } from '../../../../hooks/useStateEditor';
+import {
+    CreateModeParams,
+    UpdateModeParams,
+    useStateEditor,
+} from '../../../../hooks/useStateEditor';
 import { useBoards } from '../../../../hooks/state/useBoards';
 import { State, boardTemplate, simpleId } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
@@ -74,59 +78,62 @@ export const BoardEditorModal: React.FC = () => {
     const [modalValue, setModalValue] = useAtom(boardEditorModalAtom);
     const setRoomConfigAtom = useImmerUpdateAtom(roomConfigAtom);
     const boards = useBoards();
-    let stateEditorParams: StateEditorParams<BoardState | undefined> | undefined;
-    switch (modalValue?.type) {
-        case undefined:
-            stateEditorParams = undefined;
-            break;
-        case create:
-            stateEditorParams = {
-                type: create,
-                createInitState: () => defaultBoard,
-                onCreate: board => {
-                    if (board == null) {
+    // TODO: useStateEditorの性質上、useMemoでは不十分
+    const createMode: CreateModeParams<BoardState | undefined> | undefined = React.useMemo(() => {
+        if (modalValue?.type !== create) {
+            return undefined;
+        }
+        return {
+            createInitState: () => defaultBoard,
+            onCreate: board => {
+                if (board == null) {
+                    return;
+                }
+                const id = simpleId();
+                setRoomState(roomState => {
+                    if (roomState.boards == null) {
+                        roomState.boards = {};
+                    }
+                    roomState.boards[id] = {
+                        ...board,
+                        ownerParticipantId: myUserUid,
+                    };
+                });
+                setRoomConfigAtom(roomConfig => {
+                    if (modalValue.boardEditorPanelId == null) {
                         return;
                     }
-                    const id = simpleId();
-                    setRoomState(roomState => {
-                        if (roomState.boards == null) {
-                            roomState.boards = {};
-                        }
-                        roomState.boards[id] = {
-                            ...board,
-                            ownerParticipantId: myUserUid,
-                        };
-                    });
-                    setRoomConfigAtom(roomConfig => {
-                        if (modalValue.boardEditorPanelId == null) {
-                            return;
-                        }
-                        const originBoardEditorPanel =
-                            roomConfig?.panels.boardEditorPanels[modalValue.boardEditorPanelId];
-                        if (originBoardEditorPanel == null) {
-                            return;
-                        }
-                        originBoardEditorPanel.activeBoardId = id;
-                    });
-                },
-            };
-            break;
-        case update:
-            stateEditorParams = {
-                type: update,
-                state: boards?.get(modalValue.stateId),
-                updateWithImmer: nextState => {
-                    setRoomState(roomState => {
-                        if (roomState.boards == null) {
-                            roomState.boards = {};
-                        }
-                        roomState.boards[modalValue.stateId] = nextState;
-                    });
-                },
-            };
-            break;
-    }
-    const { state: board, updateState: updateBoard, ok } = useStateEditor(stateEditorParams);
+                    const originBoardEditorPanel =
+                        roomConfig?.panels.boardEditorPanels[modalValue.boardEditorPanelId];
+                    if (originBoardEditorPanel == null) {
+                        return;
+                    }
+                    originBoardEditorPanel.activeBoardId = id;
+                });
+            },
+        };
+    }, [modalValue, myUserUid, setRoomConfigAtom, setRoomState]);
+    const updateMode: UpdateModeParams<BoardState | undefined> | undefined = React.useMemo(() => {
+        if (modalValue?.type !== update) {
+            return undefined;
+        }
+        return {
+            state: boards?.get(modalValue.stateId),
+            updateWithImmer: nextState => {
+                setRoomState(roomState => {
+                    if (roomState.boards == null) {
+                        roomState.boards = {};
+                    }
+                    roomState.boards[modalValue.stateId] = nextState;
+                });
+            },
+        };
+    }, [boards, modalValue, setRoomState]);
+    const {
+        state: board,
+        updateState: updateBoard,
+        ok,
+    } = useStateEditor({ createMode, updateMode });
     const [filesManagerDrawerType, setFilesManagerDrawerType] =
         React.useState<FilesManagerDrawerType | null>(null);
 

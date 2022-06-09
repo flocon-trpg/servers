@@ -6,7 +6,7 @@ import { PiecePositionWithCell } from '../../../../utils/types';
 import { close, create, ok, update } from '../../../../utils/constants';
 import { atom, useAtom } from 'jotai';
 import { Subject } from 'rxjs';
-import { ImagePieceEditor, Props } from './ImagePieceEditor';
+import { CreateMode, ImagePieceEditor, UpdateMode } from './ImagePieceEditor';
 
 type ImagePieceModalType =
     | {
@@ -30,37 +30,37 @@ export const ImagePieceModal: React.FC = () => {
     const [modalType, setModalType] = useAtom(imagePieceModalAtom);
     const actionRequest = React.useMemo(() => new Subject<typeof ok | typeof close>(), []);
 
-    let visible: boolean;
-    let props: Props;
-    switch (modalType?.type) {
-        case undefined: {
-            visible = false;
-            props = {
-                type: undefined,
-            };
-            break;
-        }
-        case update: {
-            visible = true;
-            props = {
-                type: update,
-                actionRequest,
-                boardId: modalType.boardId,
-                pieceId: modalType.pieceId,
-            };
-            break;
-        }
-        case create: {
-            visible = true;
-            props = {
-                type: create,
-                actionRequest,
-                boardId: modalType.boardId,
-                piecePosition: modalType.piecePosition,
-            };
-            break;
-        }
-    }
+    // TODO: useStateEditorの性質上、useMemoでは不十分
+    const {
+        visible,
+        createMode,
+        updateMode,
+    }: { visible: boolean; createMode?: CreateMode; updateMode?: UpdateMode } =
+        React.useMemo(() => {
+            switch (modalType?.type) {
+                case undefined: {
+                    return { visible: false };
+                }
+                case update: {
+                    return {
+                        visible: true,
+                        updateMode: {
+                            boardId: modalType.boardId,
+                            pieceId: modalType.pieceId,
+                        },
+                    };
+                }
+                case create: {
+                    return {
+                        visible: true,
+                        createMode: {
+                            boardId: modalType.boardId,
+                            piecePosition: modalType.piecePosition,
+                        },
+                    };
+                }
+            }
+        }, [modalType]);
 
     return (
         <Modal
@@ -88,7 +88,11 @@ export const ImagePieceModal: React.FC = () => {
                 />
             }
         >
-            <ImagePieceEditor {...props} />
+            <ImagePieceEditor
+                createMode={createMode}
+                updateMode={updateMode}
+                actionRequest={actionRequest}
+            />
         </Modal>
     );
 };

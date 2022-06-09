@@ -5,43 +5,43 @@ import { close, create, ok, update } from '../../../../utils/constants';
 import { useAtom } from 'jotai';
 import { dicePieceValueEditorAtom } from '../../../../atoms/pieceValueEditor/pieceValueEditorAtom';
 import { Subject } from 'rxjs';
-import { DicePieceEditor, Props } from './DicePieceEditor';
+import { CreateMode, DicePieceEditor, UpdateMode } from './DicePieceEditor';
 
 export const DicePieceEditorModal: React.FC = () => {
     const [modalType, setModalType] = useAtom(dicePieceValueEditorAtom);
     const actionRequest = React.useMemo(() => new Subject<typeof ok | typeof close>(), []);
 
-    let visible: boolean;
-    let props: Props;
-    switch (modalType?.type) {
-        case undefined: {
-            visible = false;
-            props = {
-                type: undefined,
-            };
-            break;
-        }
-        case update: {
-            visible = !modalType.closed;
-            props = {
-                type: update,
-                actionRequest,
-                boardId: modalType.boardId,
-                pieceId: modalType.pieceId,
-            };
-            break;
-        }
-        case create: {
-            visible = true;
-            props = {
-                type: create,
-                actionRequest,
-                boardId: modalType.boardId,
-                piecePosition: modalType.piecePosition,
-            };
-            break;
-        }
-    }
+    // TODO: useStateEditorの性質上、useMemoでは不十分
+    const {
+        visible,
+        createMode,
+        updateMode,
+    }: { visible: boolean; updateMode?: UpdateMode; createMode?: CreateMode } =
+        React.useMemo(() => {
+            switch (modalType?.type) {
+                case undefined: {
+                    return { visible: false };
+                }
+                case update: {
+                    return {
+                        visible: !modalType.closed,
+                        updateMode: {
+                            boardId: modalType.boardId,
+                            pieceId: modalType.pieceId,
+                        },
+                    };
+                }
+                case create: {
+                    return {
+                        visible: true,
+                        createMode: {
+                            boardId: modalType.boardId,
+                            piecePosition: modalType.piecePosition,
+                        },
+                    };
+                }
+            }
+        }, [modalType]);
 
     return (
         <Modal
@@ -68,7 +68,11 @@ export const DicePieceEditorModal: React.FC = () => {
                 />
             }
         >
-            <DicePieceEditor {...props} />
+            <DicePieceEditor
+                createMode={createMode}
+                updateMode={updateMode}
+                actionRequest={actionRequest}
+            />
         </Modal>
     );
 };

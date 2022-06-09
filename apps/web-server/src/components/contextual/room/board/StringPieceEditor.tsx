@@ -1,10 +1,14 @@
 import React from 'react';
 import { Checkbox, Col, Row } from 'antd';
 import { Gutter } from 'antd/lib/grid/row';
-import { StateEditorParams, useStateEditor } from '../../../../hooks/useStateEditor';
+import {
+    CreateModeParams,
+    UpdateModeParams,
+    useStateEditor,
+} from '../../../../hooks/useStateEditor';
 import { State, String, characterTemplate, simpleId, stringPieceTemplate } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
-import { close, create, ok, update } from '../../../../utils/constants';
+import { close, ok } from '../../../../utils/constants';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
 import { PiecePositionWithCell } from '../../../../utils/types';
 import { CollaborativeInput } from '../../../ui/CollaborativeInput';
@@ -39,48 +43,43 @@ const defaultStringPieceValue = (
     $r: 1,
 });
 
-export type Props =
-    | {
-          type: undefined;
-      }
-    | {
-          type: typeof create;
-          actionRequest: ActionRequest;
-          boardId: string;
-          piecePosition: PiecePositionWithCell;
-      }
-    | {
-          type: typeof update;
-          actionRequest: ActionRequest;
-          boardId: string;
-          pieceId: string;
-      };
+export type CreateMode = {
+    boardId: string;
+    piecePosition: PiecePositionWithCell;
+};
 
-export const StringPieceEditor: React.FC<Props> = props => {
+export type UpdateMode = {
+    boardId: string;
+    pieceId: string;
+};
+
+export const StringPieceEditor: React.FC<{
+    actionRequest?: ActionRequest;
+    createMode?: CreateMode;
+    updateMode?: UpdateMode;
+}> = ({ actionRequest, createMode, updateMode }) => {
     const setRoomState = useSetRoomStateWithImmer();
     const myUserUid = useMyUserUid();
-    const stringPieces = useStringPieces(props.type === update ? props.boardId : undefined);
+    const stringPieces = useStringPieces(updateMode == null ? undefined : updateMode.boardId);
     const [activeCharacter, setActiveCharacter] = React.useState<{
         id: string;
         state: CharacterState;
     }>();
-
-    let stateEditorParams: StateEditorParams<StringPieceState | undefined> | undefined;
-    switch (props.type) {
-        case undefined:
-            stateEditorParams = undefined;
-            break;
-        case create:
-            stateEditorParams = {
-                type: create,
-                createInitState: () => defaultStringPieceValue(props.piecePosition, undefined),
+    // TODO: useStateEditorの性質上、useMemoでは不十分
+    const createModeParams: CreateModeParams<StringPieceState | undefined> | undefined =
+        React.useMemo(() => {
+            if (createMode == null) {
+                return undefined;
+            }
+            return {
+                createInitState: () => defaultStringPieceValue(createMode.piecePosition, undefined),
                 onCreate: newState => {
-                    if (newState == null || props.type !== create) {
+                    if (newState == null) {
                         return;
                     }
                     const id = simpleId();
                     setRoomState(roomState => {
-                        const stringPieces = roomState.boards?.[props.boardId]?.stringPieces;
+                        const stringPieces = roomState.boards?.[createMode.boardId]?.stringPieces;
                         if (stringPieces == null) {
                             return;
                         }
@@ -88,17 +87,20 @@ export const StringPieceEditor: React.FC<Props> = props => {
                     });
                 },
             };
-            break;
-        case update:
-            stateEditorParams = {
-                type: update,
-                state: stringPieces?.get(props.pieceId),
+        }, [createMode, setRoomState]);
+    const updateModeParams: UpdateModeParams<StringPieceState | undefined> | undefined =
+        React.useMemo(() => {
+            if (updateMode == null) {
+                return undefined;
+            }
+            return {
+                state: stringPieces?.get(updateMode.pieceId),
                 updateWithImmer: newState => {
-                    if (myUserUid == null || props.type !== update) {
+                    if (myUserUid == null) {
                         return;
                     }
-                    const boardId = props.boardId;
-                    const pieceId = props.pieceId;
+                    const boardId = updateMode.boardId;
+                    const pieceId = updateMode.pieceId;
                     setRoomState(roomState => {
                         const stringPieces = roomState.boards?.[boardId]?.stringPieces;
                         if (stringPieces == null) {
@@ -108,10 +110,11 @@ export const StringPieceEditor: React.FC<Props> = props => {
                     });
                 },
             };
-            break;
-    }
-    const { state, updateState, ok } = useStateEditor(stateEditorParams);
-    const actionRequest = props.type == null ? undefined : props.actionRequest;
+        }, [myUserUid, setRoomState, stringPieces, updateMode]);
+    const { state, updateState, ok } = useStateEditor({
+        createMode: createModeParams,
+        updateMode: updateModeParams,
+    });
     React.useEffect(() => {
         if (actionRequest == null) {
             return;
@@ -137,7 +140,7 @@ export const StringPieceEditor: React.FC<Props> = props => {
             <Row gutter={gutter} align='middle'>
                 <Col flex='auto' />
                 <Col flex={0}>ID</Col>
-                <Col span={inputSpan}>{props.type === update ? props.pieceId : '(なし)'}</Col>
+                <Col span={inputSpan}>{updateMode != null ? updateMode.pieceId : '(なし)'}</Col>
             </Row>
             <Row gutter={gutter} align='middle'>
                 <Col flex='auto' />
@@ -145,9 +148,9 @@ export const StringPieceEditor: React.FC<Props> = props => {
                 <Col span={inputSpan}>
                     <MyCharactersSelect
                         selectedCharacterId={
-                            props.type === update ? state.ownerCharacterId : activeCharacter?.id
+                            updateMode != null ? state.ownerCharacterId : activeCharacter?.id
                         }
-                        readOnly={props.type === update}
+                        readOnly={createMode == null}
                         onSelect={setActiveCharacter}
                     />
                 </Col>

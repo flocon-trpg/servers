@@ -2,7 +2,6 @@ import produce from 'immer';
 import React from 'react';
 import { useLatest } from 'react-use';
 import { Option } from '@kizahasi/option';
-import { create, update } from '../utils/constants';
 
 // Symbol() でなくとも {} などでもいい
 const emptySymbol = Symbol();
@@ -11,165 +10,146 @@ export type Recipe<T> = (state: T) => T | void;
 type CreateInitState<T> = () => T;
 type OnCreate<T> = (newState: T) => void;
 
-export type StateEditorParams<T> =
-    | {
-          type: typeof create;
-          createInitState: CreateInitState<T>;
-          onCreate?: OnCreate<T>;
-      }
-    | {
-          type: typeof update;
-          state: T;
-          updateWithImmer: Recipe<T>;
-      };
+export type CreateModeParams<T> = {
+    createInitState: CreateInitState<T>;
+    onCreate?: OnCreate<T>;
+};
 
-type ReferencedStateEditorParams<T> =
-    | {
-          type: typeof create;
-          createInitState: React.MutableRefObject<CreateInitState<T> | undefined>;
-          onCreate: React.MutableRefObject<OnCreate<T> | undefined>;
-      }
-    | {
-          type: typeof update;
-          state: T;
-          updateWithImmer: React.MutableRefObject<Recipe<T> | undefined>;
-      };
-
-function useReferencedParams<T>(
-    params: StateEditorParams<T> | undefined
-): ReferencedStateEditorParams<T> | undefined {
-    const createInitStateRef = React.useRef<CreateInitState<T>>();
-    const onCreateRef = React.useRef<OnCreate<T>>();
-    const updateWithImmerRef = React.useRef<Recipe<T>>();
-
-    React.useEffect(() => {
-        switch (params?.type) {
-            case create: {
-                createInitStateRef.current = params.createInitState;
-                onCreateRef.current = params.onCreate;
-                updateWithImmerRef.current = undefined;
-                break;
-            }
-            case update: {
-                createInitStateRef.current = undefined;
-                onCreateRef.current = undefined;
-                updateWithImmerRef.current = params.updateWithImmer;
-                break;
-            }
-            default: {
-                createInitStateRef.current = undefined;
-                onCreateRef.current = undefined;
-                updateWithImmerRef.current = undefined;
-                break;
-            }
-        }
-    }, [params]);
-
-    const state = params?.type === update ? params.state : undefined;
-    return React.useMemo(() => {
-        switch (params?.type) {
-            case create:
-                return {
-                    type: create,
-                    createInitState: createInitStateRef,
-                    onCreate: onCreateRef,
-                };
-            case update: {
-                return {
-                    type: update,
-                    updateWithImmer: updateWithImmerRef,
-                    state: state!,
-                };
-            }
-            default:
-                return undefined;
-        }
-    }, [params?.type, state]);
-}
+export type UpdateModeParams<T> = {
+    state: T;
+    updateWithImmer: Recipe<T>;
+};
 
 // Stateを新規作成(create)もしくは更新(update)するUIで、2つの処理を極力共通化するためのhook。createはボタンなどを押すまで作成されず、updateは値が変わるたびにStateにその変更が反映される場面を想定。
-export function useStateEditor<T>(params: StateEditorParams<T> | undefined) {
+//
+// createModeとupdateModeが両方ともnon-nullishであってはならない。もしその場合は、暫定的にcreateModeのほうを無視することにしている。両方ともnullishなのは問題ない。
+// createModeを渡す際は、useMemoなど（厳密に言うと、useMemoには常に同じ値を返すという保証はないため不十分）を使って更新を最小限に抑える必要がある。そうでないと、createMode != null のとき、createInitState()が実行されたときからstateが変わらなくなってしまう。
+//
+// 引数をcreateModeとupdateModeにわけている理由は、前者は頻繁に更新してほしくなく、後者は逆に常に更新してほしい値であり、もしこれらが統合されているとuseMemoを呼ぶ際にdepsの指定方法が困難になるため。
+export function useStateEditor<T>({
+    createMode,
+    updateMode,
+}: {
+    createMode: CreateModeParams<T> | undefined;
+    updateMode: UpdateModeParams<T> | undefined;
+}) {
+    React.useEffect(() => {
+        if (updateMode != null && createMode != null) {
+            console.warn('useStateEditorにおいて、updateとcreateの両方がnon-nullishです。');
+        }
+    }, [updateMode, createMode]);
+
     // 例えばcreateモード→updateモードと来て再びcreateモードになったときに、以前のcreateモードのStateを復元するために用いられるRef。
     const stateToCreateCacheRef = React.useRef<T | typeof emptySymbol>(emptySymbol);
 
-    const safeParams = useReferencedParams(params);
-    const safeParamsRef = useLatest(safeParams);
+    const createModeRef = useLatest(createMode);
+    const updateModeRef = useLatest(updateMode);
 
     const [state, setState] = React.useState<T | typeof emptySymbol>(
         (() => {
-            switch (params?.type) {
-                case undefined:
-                    return emptySymbol;
-                case update:
-                    return params.state;
-                case create:
-                    return params.createInitState();
+            if (updateMode != null) {
+                return updateMode.state;
             }
+            if (createMode != null) {
+                return createMode.createInitState();
+            }
+            return emptySymbol;
         })()
     );
     const stateRef = useLatest(state);
 
-    const stateProp = params?.type === update ? params.state : emptySymbol;
-    // update ならば state を常に更新
+    /*
+このuseEffectのdepsを例えば[createMode]から[createMode != null]に変更することで「createを渡す際はuseMemoなどを使う必要がある」という制約を外すことができそうだが、それはうまくいかない。
+例えば次のようなantdのModalを使ったコードを考える。
+
+
+const SampleUI = ({stateEditorParams}) => {
+    const stateEditorResult = useStateEditor(stateEditorParams);
+
+    // 何らかのStateを編集するUI。stateEditorResultを使用している。
+    return <div>……</div>;
+}
+
+export const SampleModal = () => {
+    const [someModalState, setSomeModalState] = useAtom(someModalStateAtom);
+
+    let visible;
+    let stateEditorParams;
+    switch (someModalState.type) {
+        case 'closed':
+            visible = false;
+            stateEditorParams = undefined;
+            break;
+        case 'update':
+            visible = true;
+            stateEditorParams = ……;
+            break;
+        case 'create':
+            visible = true;
+            stateEditorParams = ……;
+            break;
+    }
+
+    return <Modal visible={visible}><SampleUI stateEditorParams={stateEditorParams}></Modal>
+}
+
+
+「新たなStateを作成するため、Modalをcreateモードで開く」→「新規作成されたStateをどこかに反映させて、Modalを閉じる」→「さらに新たなStateを作成するため、Modalを再度createモードで開く」
+という流れが実行されるケースを考える。この際、stateEditorParams.createMode == null の値の流れは一見すると
+false → true → false
+になりそうだが、実際は
+false → false
+になる。理由は、Modalが非表示のときはSampleUIはレンダリングされないため。これにより、最初に作成したStateが破棄されず残ってしまう。
+
+よって、depsを[createMode == null]にすることは困難である。
+    */
     React.useEffect(() => {
-        if (stateProp !== emptySymbol) {
-            setState(stateProp);
+        if (createMode == null) {
+            return;
         }
-    }, [stateProp]);
-    // update 以外に切り替わったときも state を更新
+        if (stateToCreateCacheRef.current === emptySymbol) {
+            stateToCreateCacheRef.current = createMode.createInitState();
+        }
+        setState(stateToCreateCacheRef.current);
+    }, [createMode]);
     React.useEffect(() => {
-        switch (params?.type) {
-            case create: {
-                if (safeParamsRef.current?.type !== create) {
-                    throw new Error('This should not happen');
-                }
-                if (stateToCreateCacheRef.current === emptySymbol) {
-                    stateToCreateCacheRef.current =
-                        safeParamsRef.current.createInitState.current!();
-                }
-                setState(stateToCreateCacheRef.current);
-                break;
-            }
-            case undefined: {
-                setState(emptySymbol);
-                break;
-            }
+        if (updateMode == null) {
+            return;
         }
-    }, [params?.type, safeParamsRef]);
+        setState(updateMode.state);
+    }, [updateMode]);
 
     const updateState = React.useCallback(
         (recipe: Recipe<T>) => {
-            if (safeParamsRef.current?.type === create) {
-                setState(uiState => produce(uiState, recipe));
-                return;
+            if (createModeRef.current != null) {
+                setState(state => produce(state, recipe));
             }
-            if (safeParamsRef.current?.type === update) {
-                safeParamsRef.current.updateWithImmer.current!(
-                    produce(safeParamsRef.current.state, recipe)
-                );
+            if (updateModeRef.current != null) {
+                updateModeRef.current.updateWithImmer(produce(updateModeRef.current.state, recipe));
             }
         },
-        [safeParamsRef]
+        [createModeRef, updateModeRef]
     );
 
     const ok = React.useCallback(() => {
-        if (safeParamsRef.current == null) {
-            return Option.none();
-        }
-        if (safeParamsRef.current?.type === create) {
+        if (createModeRef.current != null) {
             const currentState = stateRef.current;
             if (currentState === emptySymbol) {
                 throw new Error('This should not happen.');
             }
-            const onCreate = safeParamsRef.current.onCreate.current;
+            const onCreate = createModeRef.current.onCreate;
             if (onCreate != null) {
                 onCreate(currentState);
             }
+
+            // createInitState内で例えばPiecePositionを用いているかもしれないため、ここで次のStateを作成せず、必要になったときに作成するようにしている。
+            // setStateは実行していない。理由は、まず、okを実行する場合は「すぐModalなどを閉じる（createModeをundefinedにする）」と「ModalなどのUIをdisabledにして、反映に成功したらModalを閉じる、失敗したらdisabledを解除する」の2つのケースのみが現時点では想定される。前者のケースではsetStateにセットする値は何でもよく、後者では何もセットしないほうがいい。よってsetStateは実行していない。
             stateToCreateCacheRef.current = emptySymbol;
+
             return Option.some(currentState);
         }
         return Option.none();
-    }, [safeParamsRef, stateRef]);
+    }, [createModeRef, stateRef]);
 
     return React.useMemo(
         () => ({
@@ -179,7 +159,7 @@ export function useStateEditor<T>(params: StateEditorParams<T> | undefined) {
             // UI の操作などがあり、State を変更したい際に実行する。
             updateState,
 
-            // create モードの場合は、これを実行すると新規作成するとみなされる。新規作成処理を行うには、onClose に書くか、この関数の戻り値を利用する。
+            // create モードの場合は、これを実行すると新規作成するとみなされる。新規作成処理を行うには、onClose に書くか、この関数の戻り値を利用する。新規作成処理内に、paramsをundefinedに変更する処理を行うことを強く推奨する（そうしないとcreateモードが終わったと認識されないが、その一方でsetState(emptySymbol)も実行されるため、不具合が生じる可能性が高い）。
             // create モード以外の場合は何も起こらない。
             ok,
         }),

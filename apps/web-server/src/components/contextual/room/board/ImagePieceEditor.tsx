@@ -1,10 +1,14 @@
 import React from 'react';
 import { Button, Col, Row, Tooltip } from 'antd';
 import { Gutter } from 'antd/lib/grid/row';
-import { StateEditorParams, useStateEditor } from '../../../../hooks/useStateEditor';
+import {
+    CreateModeParams,
+    UpdateModeParams,
+    useStateEditor,
+} from '../../../../hooks/useStateEditor';
 import { State, imagePieceTemplate, simpleId } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
-import { close, create, ok, update } from '../../../../utils/constants';
+import { close, ok } from '../../../../utils/constants';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
 import { FilesManagerDrawerType, PiecePositionWithCell } from '../../../../utils/types';
 import { CollaborativeInput } from '../../../ui/CollaborativeInput';
@@ -41,45 +45,40 @@ const inputSpan = 16;
 
 type ActionRequest = Subscribable<typeof ok | typeof close>;
 
-export type Props =
-    | {
-          type: undefined;
-      }
-    | {
-          type: typeof create;
-          actionRequest: ActionRequest;
-          boardId: string;
-          piecePosition: PiecePositionWithCell;
-      }
-    | {
-          type: typeof update;
-          actionRequest: ActionRequest;
-          boardId: string;
-          pieceId: string;
-      };
+export type CreateMode = {
+    boardId: string;
+    piecePosition: PiecePositionWithCell;
+};
 
-export const ImagePieceEditor: React.FC<Props> = props => {
+export type UpdateMode = {
+    boardId: string;
+    pieceId: string;
+};
+
+export const ImagePieceEditor: React.FC<{
+    actionRequest?: ActionRequest;
+    createMode?: CreateMode;
+    updateMode?: UpdateMode;
+}> = ({ actionRequest, createMode, updateMode }) => {
     const setRoomState = useSetRoomStateWithImmer();
     const myUserUid = useMyUserUid();
-    const imagePieces = useImagePieces(props.type === update ? props.boardId : undefined);
+    const imagePieces = useImagePieces(updateMode == null ? undefined : updateMode.boardId);
     const clone = useCloneImagePiece();
-
-    let stateEditorParams: StateEditorParams<ImagePieceState | undefined> | undefined;
-    switch (props.type) {
-        case undefined:
-            stateEditorParams = undefined;
-            break;
-        case create:
-            stateEditorParams = {
-                type: create,
-                createInitState: () => defaultImagePiece(props.piecePosition, undefined),
+    // TODO: useStateEditorの性質上、useMemoでは不十分
+    const createModeParams: CreateModeParams<ImagePieceState | undefined> | undefined =
+        React.useMemo(() => {
+            if (createMode == null) {
+                return undefined;
+            }
+            return {
+                createInitState: () => defaultImagePiece(createMode.piecePosition, undefined),
                 onCreate: newState => {
-                    if (newState == null || props.type !== create) {
+                    if (newState == null) {
                         return;
                     }
                     const id = simpleId();
                     setRoomState(roomState => {
-                        const imagePieces = roomState.boards?.[props.boardId]?.imagePieces;
+                        const imagePieces = roomState.boards?.[createMode.boardId]?.imagePieces;
                         if (imagePieces == null) {
                             return;
                         }
@@ -87,17 +86,20 @@ export const ImagePieceEditor: React.FC<Props> = props => {
                     });
                 },
             };
-            break;
-        case update:
-            stateEditorParams = {
-                type: update,
-                state: imagePieces?.get(props.pieceId),
+        }, [createMode, setRoomState]);
+    const updateModeParams: UpdateModeParams<ImagePieceState | undefined> | undefined =
+        React.useMemo(() => {
+            if (updateMode == null) {
+                return undefined;
+            }
+            return {
+                state: imagePieces?.get(updateMode.pieceId),
                 updateWithImmer: newState => {
-                    if (myUserUid == null || props.type !== update) {
+                    if (myUserUid == null) {
                         return;
                     }
-                    const boardId = props.boardId;
-                    const pieceId = props.pieceId;
+                    const boardId = updateMode.boardId;
+                    const pieceId = updateMode.pieceId;
                     setRoomState(roomState => {
                         const imagePieces = roomState.boards?.[boardId]?.imagePieces;
                         if (imagePieces == null) {
@@ -107,10 +109,11 @@ export const ImagePieceEditor: React.FC<Props> = props => {
                     });
                 },
             };
-            break;
-    }
-    const { state, updateState, ok } = useStateEditor(stateEditorParams);
-    const actionRequest = props.type == null ? undefined : props.actionRequest;
+        }, [imagePieces, myUserUid, setRoomState, updateMode]);
+    const { state, updateState, ok } = useStateEditor({
+        createMode: createModeParams,
+        updateMode: updateModeParams,
+    });
     React.useEffect(() => {
         if (actionRequest == null) {
             return;
@@ -140,12 +143,12 @@ export const ImagePieceEditor: React.FC<Props> = props => {
                 <Row gutter={gutter} align='middle'>
                     <Col flex='auto' />
                     <Col flex={0}>ID</Col>
-                    <Col span={inputSpan}>{props.type === update ? props.pieceId : '(なし)'}</Col>
+                    <Col span={inputSpan}>{updateMode != null ? updateMode.pieceId : '(なし)'}</Col>
                 </Row>
 
                 <div style={{ height: 8 }} />
 
-                {props.type !== update ? null : (
+                {updateMode == null ? null : (
                     <>
                         <Row gutter={gutter} align='middle'>
                             <Col flex='auto' />
@@ -157,8 +160,8 @@ export const ImagePieceEditor: React.FC<Props> = props => {
                                         size='small'
                                         onClick={() => {
                                             clone({
-                                                boardId: props.boardId,
-                                                pieceId: props.pieceId,
+                                                boardId: updateMode.boardId,
+                                                pieceId: updateMode.pieceId,
                                             });
                                         }}
                                     >

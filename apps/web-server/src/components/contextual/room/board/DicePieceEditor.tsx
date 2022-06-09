@@ -2,7 +2,11 @@ import React from 'react';
 import { Col, Row } from 'antd';
 import { replace } from '../../../../stateManagers/states/types';
 import { Gutter } from 'antd/lib/grid/row';
-import { StateEditorParams, useStateEditor } from '../../../../hooks/useStateEditor';
+import {
+    CreateModeParams,
+    UpdateModeParams,
+    useStateEditor,
+} from '../../../../hooks/useStateEditor';
 import {
     State,
     characterTemplate,
@@ -15,7 +19,7 @@ import { MyCharactersSelect } from '../character/MyCharactersSelect';
 import { InputDie } from './die/InputDie';
 import { noValue } from '../../../../utils/board/dice';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
-import { close, create, ok, update } from '../../../../utils/constants';
+import { close, ok } from '../../../../utils/constants';
 import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithImmer';
 import { PiecePositionWithCell } from '../../../../utils/types';
 import { CollaborativeInput } from '../../../ui/CollaborativeInput';
@@ -47,49 +51,45 @@ const inputSpan = 16;
 
 type ActionRequest = Subscribable<typeof ok | typeof close>;
 
-export type Props =
-    | {
-          type: undefined;
-      }
-    | {
-          type: typeof create;
-          actionRequest: ActionRequest;
-          boardId: string;
-          piecePosition: PiecePositionWithCell;
-      }
-    | {
-          type: typeof update;
-          actionRequest: ActionRequest;
-          boardId: string;
-          pieceId: string;
-      };
+export type CreateMode = {
+    boardId: string;
+    piecePosition: PiecePositionWithCell;
+};
 
-export const DicePieceEditor: React.FC<Props> = props => {
+export type UpdateMode = {
+    boardId: string;
+    pieceId: string;
+};
+
+export const DicePieceEditor: React.FC<{
+    actionRequest?: ActionRequest;
+    createMode?: CreateMode;
+    updateMode?: UpdateMode;
+}> = ({ actionRequest, createMode: createModeProp, updateMode: updateModeProp }) => {
     const setRoomState = useSetRoomStateWithImmer();
     const myUserUid = useMyUserUid();
-    const dicePieces = useDicePieces(props.type === update ? props.boardId : undefined);
+    const dicePieces = useDicePieces(updateModeProp == null ? undefined : updateModeProp.boardId);
     const [activeCharacter, setActiveCharacter] = React.useState<{
         id: string;
         state: CharacterState;
     }>();
 
-    let stateEditorParams: StateEditorParams<DicePieceState | undefined> | undefined;
-    switch (props.type) {
-        case undefined:
-            stateEditorParams = undefined;
-            break;
-        case create:
-            stateEditorParams = {
-                type: create,
-                // createする際にownerCharacterIdをセットする必要がある
-                createInitState: () => defaultDicePieceValue(props.piecePosition, undefined),
+    // TODO: useStateEditorの性質上、useMemoでは不十分
+    const createMode: CreateModeParams<DicePieceState | undefined> | undefined =
+        React.useMemo(() => {
+            if (createModeProp == null) {
+                return undefined;
+            }
+            return {
+                createInitState: () =>
+                    defaultDicePieceValue(createModeProp.piecePosition, undefined),
                 onCreate: newState => {
-                    if (newState == null || activeCharacter == null || props.type !== create) {
+                    if (newState == null || activeCharacter == null) {
                         return;
                     }
                     const id = simpleId();
                     setRoomState(roomState => {
-                        const dicePieces = roomState.boards?.[props.boardId]?.dicePieces;
+                        const dicePieces = roomState.boards?.[createModeProp.boardId]?.dicePieces;
                         if (dicePieces == null) {
                             return;
                         }
@@ -97,16 +97,19 @@ export const DicePieceEditor: React.FC<Props> = props => {
                     });
                 },
             };
-            break;
-        case update:
-            stateEditorParams = {
-                type: update,
-                state: dicePieces?.get(props.pieceId),
+        }, [activeCharacter, createModeProp, setRoomState]);
+    const updateMode: UpdateModeParams<DicePieceState | undefined> | undefined =
+        React.useMemo(() => {
+            if (updateModeProp == null) {
+                return undefined;
+            }
+            return {
+                state: dicePieces?.get(updateModeProp.pieceId),
                 updateWithImmer: newState => {
-                    if (newState == null || myUserUid == null || props?.type !== update) {
+                    if (newState == null || myUserUid == null) {
                         return;
                     }
-                    const { boardId, pieceId } = props;
+                    const { boardId, pieceId } = updateModeProp;
                     setRoomState(roomState => {
                         const dicePieces = roomState.boards?.[boardId]?.dicePieces;
                         if (dicePieces == null) {
@@ -116,10 +119,8 @@ export const DicePieceEditor: React.FC<Props> = props => {
                     });
                 },
             };
-            break;
-    }
-    const { state, updateState, ok } = useStateEditor(stateEditorParams);
-    const actionRequest = props.type == null ? undefined : props.actionRequest;
+        }, [dicePieces, updateModeProp, myUserUid, setRoomState]);
+    const { state, updateState, ok } = useStateEditor({ createMode, updateMode });
     React.useEffect(() => {
         if (actionRequest == null) {
             return;
@@ -145,7 +146,7 @@ export const DicePieceEditor: React.FC<Props> = props => {
             <Row gutter={gutter} align='middle'>
                 <Col flex='auto' />
                 <Col flex={0}>ID</Col>
-                <Col span={inputSpan}>{props.type === update ? props.pieceId : '(なし)'}</Col>
+                <Col span={inputSpan}>{updateModeProp?.pieceId ?? '(なし)'}</Col>
             </Row>
             <Row gutter={gutter} align='middle'>
                 <Col flex='auto' />
@@ -153,9 +154,9 @@ export const DicePieceEditor: React.FC<Props> = props => {
                 <Col span={inputSpan}>
                     <MyCharactersSelect
                         selectedCharacterId={
-                            props.type === update ? state.ownerCharacterId : activeCharacter?.id
+                            createModeProp == null ? state.ownerCharacterId : activeCharacter?.id
                         }
-                        readOnly={props.type === update}
+                        readOnly={createModeProp == null}
                         onSelect={setActiveCharacter}
                     />
                 </Col>

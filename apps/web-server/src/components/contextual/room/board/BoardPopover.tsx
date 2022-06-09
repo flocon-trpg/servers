@@ -729,7 +729,7 @@ namespace ContextMenuModule {
             return null;
         }
         return {
-            key: 'ダイスコマ@boardPopover',
+            key: 'ダイスコマ@selectedDicePiecesMenu',
             label: 'ダイスコマ',
             children: [
                 ...dicePiecesOnCursor.map(
@@ -741,7 +741,7 @@ namespace ContextMenuModule {
                         children: [
                             isMyCharacter(piece.ownerCharacterId)
                                 ? {
-                                      key: '編集@boardPopover',
+                                      key: '編集@selectedDicePiecesMenu',
                                       label: '編集',
                                       onClick: () => {
                                           hooks.setDicePieceEditor({
@@ -753,14 +753,14 @@ namespace ContextMenuModule {
                                       },
                                   }
                                 : {
-                                      key: '編集@boardPopover',
+                                      key: '編集@selectedDicePiecesMenu',
                                       label: (
                                           <Tooltip title={youCannotEditPieceMessage}>編集</Tooltip>
                                       ),
                                       disabled: true,
                                   },
                             {
-                                key: '削除@boardPopover',
+                                key: '削除@selectedDicePiecesMenu',
                                 label: '削除',
                                 onClick: () => {
                                     setRoomState(roomState => {
@@ -994,12 +994,13 @@ namespace ContextMenuModule {
         };
 
         const pieceMenus = [...characters].map(([characterId, character]): ItemType => {
+            const rootKey = keyNames(characterId) + '@piece';
             return {
-                key: keyNames(characterId) + '@piece',
+                key: rootKey,
                 label: character.name,
                 children: [
                     {
-                        key: 'セルにスナップする@キャラコマ',
+                        key: `セルにスナップする@キャラコマ@${rootKey}`,
                         label: 'セルにスナップする',
                         onClick: () => {
                             setRoomState(roomState => {
@@ -1019,7 +1020,7 @@ namespace ContextMenuModule {
                         },
                     },
                     {
-                        key: 'セルにスナップしない@キャラコマ',
+                        key: `セルにスナップしない@キャラコマ@${rootKey}`,
                         label: 'セルにスナップしない',
                         onClick: () => {
                             setRoomState(roomState => {

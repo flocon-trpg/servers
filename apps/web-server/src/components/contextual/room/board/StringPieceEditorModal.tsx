@@ -5,7 +5,7 @@ import { close, create, ok, update } from '../../../../utils/constants';
 import { useAtom } from 'jotai';
 import { stringPieceValueEditorAtom } from '../../../../atoms/pieceValueEditor/pieceValueEditorAtom';
 import { Subject } from 'rxjs';
-import { Props, StringPieceEditor } from './StringPieceEditor';
+import { CreateMode, StringPieceEditor, UpdateMode } from './StringPieceEditor';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -15,37 +15,37 @@ export const StringPieceEditorModal: React.FC = () => {
     const [modalType, setModalType] = useAtom(stringPieceValueEditorAtom);
     const actionRequest = React.useMemo(() => new Subject<typeof ok | typeof close>(), []);
 
-    let visible: boolean;
-    let props: Props;
-    switch (modalType?.type) {
-        case undefined: {
-            visible = false;
-            props = {
-                type: undefined,
-            };
-            break;
-        }
-        case update: {
-            visible = true;
-            props = {
-                type: update,
-                actionRequest,
-                boardId: modalType.boardId,
-                pieceId: modalType.pieceId,
-            };
-            break;
-        }
-        case create: {
-            visible = true;
-            props = {
-                type: create,
-                actionRequest,
-                boardId: modalType.boardId,
-                piecePosition: modalType.piecePosition,
-            };
-            break;
-        }
-    }
+    // TODO: useStateEditorの性質上、useMemoでは不十分
+    const {
+        visible,
+        createMode,
+        updateMode,
+    }: { visible: boolean; createMode?: CreateMode; updateMode?: UpdateMode } =
+        React.useMemo(() => {
+            switch (modalType?.type) {
+                case undefined: {
+                    return { visible: false };
+                }
+                case update: {
+                    return {
+                        visible: true,
+                        updateMode: {
+                            boardId: modalType.boardId,
+                            pieceId: modalType.pieceId,
+                        },
+                    };
+                }
+                case create: {
+                    return {
+                        visible: true,
+                        createMode: {
+                            boardId: modalType.boardId,
+                            piecePosition: modalType.piecePosition,
+                        },
+                    };
+                }
+            }
+        }, [modalType]);
 
     return (
         <Modal
@@ -73,7 +73,11 @@ export const StringPieceEditorModal: React.FC = () => {
                 />
             }
         >
-            <StringPieceEditor {...props} />
+            <StringPieceEditor
+                createMode={createMode}
+                updateMode={updateMode}
+                actionRequest={actionRequest}
+            />
         </Modal>
     );
 };

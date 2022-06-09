@@ -14,7 +14,11 @@ import {
     characterIsNotPrivateAndNotCreatedByMe,
     characterIsPrivate,
 } from '../../../../resources/text/main';
-import { StateEditorParams, useStateEditor } from '../../../../hooks/useStateEditor';
+import {
+    CreateModeParams,
+    UpdateModeParams,
+    useStateEditor,
+} from '../../../../hooks/useStateEditor';
 import { useCharacters } from '../../../../hooks/state/useCharacters';
 import { useParticipants } from '../../../../hooks/state/useParticipants';
 import {
@@ -172,14 +176,13 @@ export const CharacterEditorModal: React.FC = () => {
         }
         return undefined;
     }, [atomValue, participants]);
-    let stateEditorParams: StateEditorParams<CharacterState | undefined> | undefined;
-    switch (atomValue?.type) {
-        case undefined:
-            stateEditorParams = undefined;
-            break;
-        case create:
-            stateEditorParams = {
-                type: create,
+    // TODO: useStateEditorの性質上、useMemoでは不十分
+    const createMode: CreateModeParams<CharacterState | undefined> | undefined =
+        React.useMemo(() => {
+            if (atomValue?.type !== create) {
+                return undefined;
+            }
+            return {
                 createInitState: () => defaultCharacter,
                 onCreate: newValue => {
                     if (newValue == null) {
@@ -197,10 +200,13 @@ export const CharacterEditorModal: React.FC = () => {
                     });
                 },
             };
-            break;
-        case update:
-            stateEditorParams = {
-                type: update,
+        }, [atomValue?.type, myUserUid, setRoomState]);
+    const updateMode: UpdateModeParams<CharacterState | undefined> | undefined =
+        React.useMemo(() => {
+            if (atomValue?.type !== update) {
+                return undefined;
+            }
+            return {
                 state: characters?.get(atomValue.stateId),
                 updateWithImmer: nextState => {
                     setRoomState(roomState => {
@@ -211,13 +217,12 @@ export const CharacterEditorModal: React.FC = () => {
                     });
                 },
             };
-            break;
-    }
+        }, [atomValue, characters, setRoomState]);
     const {
         state: character,
         updateState: updateCharacter,
         ok,
-    } = useStateEditor(stateEditorParams);
+    } = useStateEditor({ createMode, updateMode });
     const [filesManagerDrawerType, setFilesManagerDrawerType] =
         React.useState<FilesManagerDrawerType | null>(null);
 
