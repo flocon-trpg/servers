@@ -145,21 +145,17 @@ jobs:
 
     # fails on windows because it uses crlf
     lint-and-prettier:
-        name: Lint and prettier on Node ${{ matrix.node }} and ${{ matrix.os }}
+        name: Lint and prettier
 
-        runs-on: ${{ matrix.os }}
-        strategy:
-            matrix:
-                node: ['16.x']
-                os: [ubuntu-20.04]
+        runs-on: ubuntu-20.04
 
         steps:
             - uses: actions/checkout@v3
 
-            - name: Use Node ${{ matrix.node }}
+            - name: Use Node 16.x
               uses: actions/setup-node@v3
               with:
-                  node-version: ${{ matrix.node }}
+                  node-version: 16.x
                   cache: yarn
 
             - run: yarn
@@ -171,15 +167,11 @@ jobs:
               run: yarn prettier:base --check
 
     publish-storybook:
-        name: Publish Storybook to Chromatic on Node ${{ matrix.node }} and ${{ matrix.os }}
+        name: Publish Storybook to Chromatic
 
         if: ${{ github.event_name == 'push' }}
 
-        runs-on: ${{ matrix.os }}
-        strategy:
-            matrix:
-                node: ['16.x']
-                os: [ubuntu-20.04]
+        runs-on: ubuntu-20.04
 
         steps:
             - uses: actions/checkout@v3
@@ -187,10 +179,10 @@ jobs:
                   # Requires full git history: https://github.com/chromaui/action#getting-started
                   fetch-depth: 0
 
-            - name: Use Node ${{ matrix.node }}
+            - name: Use Node 16.x
               uses: actions/setup-node@v3
               with:
-                  node-version: ${{ matrix.node }}
+                  node-version: 16.x
                   cache: yarn
 
             - run: yarn
