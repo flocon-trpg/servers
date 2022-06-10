@@ -2,9 +2,28 @@
 
 ローカルで動かす場合、yarn のインストールが必須となります。npm や pnpm には対応していません。
 
-Flocon は yarn v3[^1] のワークスペースを採用しています。ビルドやテストは、全体で行うことも、特定のパッケージのみに対して行うこともできます。例えば、この Markdown ファイルがあるディレクトリで`yarn run build`を実行すると全パッケージがビルドされます。`./packages/core`に移動してから`yarn run build`を実行すると`core`パッケージとそれに依存するパッケージのみがビルドされます。パッケージは`./apps`と`./packages`にあります。
+Flocon は yarn v3[^1] のワークスペースを採用しています。📦パッケージの一覧は次のとおりです。
 
-使用されるパッケージはすべて事前にビルドして JavaScript ファイルなどを生成しておく必要があります。前述のとおり、この Markdown ファイルがあるディレクトリで`yarn run build`を実行すれば全パッケージがビルドされるので、ビルドに関しては少なくともこれを実行しておけば問題ありません。このドキュメントは、これ以降、依存するパッケージは全てビルド済みという前提で書かれています。
+```
+Flocon
+┣ 📂 apps
+┃ ┣ 📦 api-server
+┃ ┗ 📦 web-server
+┣ 📂 packages
+┃ ┣ 📦 cache
+┃ ┣ 📦 core
+┃ ┣ 📦 flocon-script
+┃ ┣ 📦 typed-document-node-v0.7.1 
+┃ ┣ 📦 typed-document-node-v0.7.2
+┃ ┣ 📦 utils
+┃ ┗ 📦 web-server-utils
+┣ 📄 README_developer.md (このファイル)
+┗ ……
+```
+
+ビルドやテストは、全体で行うことも、特定のパッケージのみに対して行うこともできます。例えば、この Markdown ファイルがあるディレクトリで`yarn run build`を実行すると全パッケージがビルドされます。`./packages/core`に移動してから`yarn run build`を実行すると`core`パッケージとそれに依存するパッケージのみがビルドされます。
+
+`web-server`パッケージを除き、使用するパッケージはすべて事前にビルドして JavaScript ファイルなどを生成しておく必要があります。前述のとおり、この Markdown ファイルがあるディレクトリで`yarn run build`を実行すれば全パッケージがビルドされるので、ビルドに関しては少なくともこれを実行しておけば間違いはありません。このドキュメントは、これ以降、依存するパッケージは全てビルド済みという前提で書かれています。
 
 現時点では watch スクリプトはありません。ご了承ください。
 
@@ -62,6 +81,8 @@ yarn run build:deps && yarn run storybook
 
 ### クイックスタート
 
+次のようにすることで、全てのパッケージをテストできます。
+
 #### Linux
 
 ```console
@@ -94,6 +115,10 @@ Redis を使用したテストは`./packages/cache`パッケージにのみ存�
 テストに使われるデータベースの接続方法は [./apps/api-server/test/utils/databaseConfig.ts](./apps/api-server/test/utils/databaseConfig.ts) にあります。
 
 リレーショナルデータベースを使用したテストは [api-server](./apps/api-server) パッケージにのみ存在します。このパッケージをテストしない場合は`MYSQL_TEST`、`POSTGRESQL_TEST`、`SQLITE_TEST`の値は利用されません。
+
+#### Node.js 14 以前における web-server パッケージのテスト
+
+`web-server` のコードには String.prototype.replaceAll メソッドが含まれています。このメソッドは多くのブラウザや Node.js 16 などでは対応していますが、Node.js 14 などでは未対応です。このため、Node.js 14 では web-server パッケージの一部のテストに失敗します。なお、Node.js 14 で問題が生じるのはテストのみであり、`yarn run dev`、`yarn run build`、`yarn run export` などは正常に動作すると思われます。
 
 ## ブランチ名について
 
