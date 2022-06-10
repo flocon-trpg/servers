@@ -16,6 +16,7 @@ import { Subscribable } from 'rxjs';
 import { useStringPieces } from '../../../../../../hooks/state/useStringPieces';
 import { MyCharactersSelect } from '../MyCharactersSelect/MyCharactersSelect';
 import { IsCellModeSelector } from '../IsCellModeSelector/IsCellModeSelector';
+import { applyPiecePositionWithCell } from '../../../../../../utils/applyPiecePositionWithCell';
 
 type CharacterState = State<typeof characterTemplate>;
 type StringPieceState = State<typeof stringPieceTemplate>;
@@ -78,6 +79,15 @@ export const StringPieceEditor: React.FC<{
             return {
                 createInitState: () =>
                     defaultStringPieceValue(createMode.piecePosition, true, undefined),
+                updateInitState: prevState => {
+                    if (prevState == null) {
+                        return;
+                    }
+                    applyPiecePositionWithCell({
+                        state: prevState,
+                        operation: createMode.piecePosition,
+                    });
+                },
                 onCreate: newState => {
                     if (newState == null || activeCharacter == null) {
                         return;

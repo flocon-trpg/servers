@@ -20,6 +20,7 @@ import { FilePath } from '../../../../../../utils/file/filePath';
 import { EditorGroupHeader } from '../../../../../ui/EditorGroupHeader/EditorGroupHeader';
 import { FilesManagerDrawer } from '../../../../file/FilesManagerDrawer/FilesManagerDrawer';
 import { IsCellModeSelector } from '../IsCellModeSelector/IsCellModeSelector';
+import { applyPiecePositionWithCell } from '../../../../../../utils/applyPiecePositionWithCell';
 
 type ImagePieceState = State<typeof imagePieceTemplate>;
 
@@ -76,6 +77,15 @@ export const ImagePieceEditor: React.FC<{
             }
             return {
                 createInitState: () => defaultImagePiece(createMode.piecePosition, true, undefined),
+                updateInitState: prevState => {
+                    if (prevState == null) {
+                        return;
+                    }
+                    applyPiecePositionWithCell({
+                        state: prevState,
+                        operation: createMode.piecePosition,
+                    });
+                },
                 onCreate: newState => {
                     if (newState == null) {
                         return;

@@ -25,6 +25,7 @@ import { PiecePositionWithCell } from '../../../../../../utils/types';
 import { CollaborativeInput } from '../../../../../ui/CollaborativeInput/CollaborativeInput';
 import { Subscribable } from 'rxjs';
 import { IsCellModeSelector } from '../IsCellModeSelector/IsCellModeSelector';
+import { applyPiecePositionWithCell } from '../../../../../../utils/applyPiecePositionWithCell';
 
 type CharacterState = State<typeof characterTemplate>;
 type DicePieceState = State<typeof dicePieceTemplate>;
@@ -86,6 +87,15 @@ export const DicePieceEditor: React.FC<{
             return {
                 createInitState: () =>
                     defaultDicePieceValue(createModeProp.piecePosition, true, undefined),
+                updateInitState: prevState => {
+                    if (prevState == null) {
+                        return;
+                    }
+                    applyPiecePositionWithCell({
+                        state: prevState,
+                        operation: createModeProp.piecePosition,
+                    });
+                },
                 onCreate: newState => {
                     if (newState == null || activeCharacter == null) {
                         return;
