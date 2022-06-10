@@ -9,7 +9,7 @@ import { PublicChannelNames } from '../types';
 import {
     RoomMessage,
     messageContentMaxHeight,
-} from '../../components/contextual/room/message/RoomMessage';
+} from '../../components/models/room/Room/subcomponents/RoomMessagesPanelContent/subcomponents/RoomMessage/RoomMessage';
 import { isDeleted, toText } from './message';
 import {
     Default,
@@ -27,7 +27,7 @@ import { analyzeUrl } from '../analyzeUrl';
 import { ExpiryMap } from '../file/expiryMap';
 import { logCss } from './richLogCss';
 import { logHtml } from './richLogHtml';
-import { RoomMessageFilter } from '../../components/contextual/room/message/ChannelsFilter';
+import { RoomMessageFilter } from '../../components/models/room/Room/subcomponents/RoomMenu/subcomponents/GenerageLogModal/subcomponents/ChannelsFilter/ChannelsFilter';
 import { WebConfig } from '../../configType';
 import { FirebaseStorage as FirebaseStorageType } from '@firebase/storage';
 import { HtmlObject, div, generateHtml, span } from './generateHtml';

@@ -1,8 +1,8 @@
 import { atom } from 'jotai';
-import { boardEditorModalAtom } from '../../components/contextual/room/board/BoardEditorModal';
-import { imagePieceModalAtom } from '../../components/contextual/room/board/ImagePieceModal';
-import { characterEditorModalAtom } from '../../components/contextual/room/character/CharacterEditorModal';
-import { characterParameterNamesEditorVisibilityAtom } from '../../components/contextual/room/character/CharacterParameterNamesEditorModal';
+import { boardEditorModalAtom } from '../../components/models/room/Room/subcomponents/BoardEditorModal/BoardEditorModal';
+import { imagePieceModalAtom } from '../../components/models/room/Room/subcomponents/ImagePieceModal/ImagePieceModal';
+import { characterEditorModalAtom } from '../../components/models/room/Room/subcomponents/CharacterEditorModal/CharacterEditorModal';
+import { characterParameterNamesEditorVisibilityAtom } from '../../components/models/room/Room/subcomponents/CharacterParameterNamesEditorModal/CharacterParameterNamesEditorModal';
 import {
     dicePieceValueEditorAtom,
     stringPieceValueEditorAtom,

@@ -1,3 +1,3 @@
-import { RoomIndex } from '../../components/pages/room';
+import { RoomIndexPage } from '../../components/pages/room/RoomIndexPage/RoomIndexPage';
 
-export default RoomIndex;
+export default RoomIndexPage;

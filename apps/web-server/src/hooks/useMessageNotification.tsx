@@ -2,7 +2,7 @@ import { notification } from 'antd';
 import { ArgsProps } from 'antd/lib/notification';
 import { Howl } from 'howler';
 import React from 'react';
-import { RoomMessage } from '../components/contextual/room/message/RoomMessage';
+import { RoomMessage } from '../components/models/room/Room/subcomponents/RoomMessagesPanelContent/subcomponents/RoomMessage/RoomMessage';
 import { emptyPublicChannelNames } from '../utils/types';
 import { useMessageFilter } from './useMessageFilter';
 import { usePublicChannelNames } from './state/usePublicChannelNames';
