@@ -12,6 +12,7 @@ type OnCreate<T> = (newState: T) => void;
 
 export type CreateModeParams<T> = {
     createInitState: CreateInitState<T>;
+    updateInitState?: Recipe<T>;
     onCreate?: OnCreate<T>;
 };
 
@@ -109,6 +110,11 @@ false → false
         }
         if (stateToCreateCacheRef.current === emptySymbol) {
             stateToCreateCacheRef.current = createMode.createInitState();
+        } else {
+            if (createMode.updateInitState != null) {
+                const newState = produce(stateToCreateCacheRef.current, createMode.updateInitState);
+                stateToCreateCacheRef.current = newState;
+            }
         }
         setState(stateToCreateCacheRef.current);
     }, [createMode]);
