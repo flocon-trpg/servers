@@ -80,7 +80,6 @@ export type PiecePositionWithCell = PiecePositionWithoutCell & {
     cellY: number;
     cellW: number;
     cellH: number;
-    isCellMode: boolean;
 };
 export type FetchTextState =
     | {

@@ -24,23 +24,26 @@ import { useSetRoomStateWithImmer } from '../../../../hooks/useSetRoomStateWithI
 import { PiecePositionWithCell } from '../../../../utils/types';
 import { CollaborativeInput } from '../../../ui/CollaborativeInput';
 import { Subscribable } from 'rxjs';
+import { IsCellModeSelector } from './IsCellModeSelector';
 
 type CharacterState = State<typeof characterTemplate>;
 type DicePieceState = State<typeof dicePieceTemplate>;
 
 const defaultDicePieceValue = (
     piecePosition: PiecePositionWithCell,
+    isCellMode: boolean,
     ownerCharacterId: string | undefined
 ): DicePieceState => ({
+    ...piecePosition,
+
     ownerCharacterId,
+    isCellMode,
 
     dice: {},
     memo: undefined,
     name: undefined,
     opacity: undefined,
     isPositionLocked: false,
-
-    ...piecePosition,
 
     $v: 2,
     $r: 1,
@@ -82,7 +85,7 @@ export const DicePieceEditor: React.FC<{
             }
             return {
                 createInitState: () =>
-                    defaultDicePieceValue(createModeProp.piecePosition, undefined),
+                    defaultDicePieceValue(createModeProp.piecePosition, true, undefined),
                 onCreate: newState => {
                     if (newState == null || activeCharacter == null) {
                         return;
@@ -148,6 +151,25 @@ export const DicePieceEditor: React.FC<{
                 <Col flex={0}>ID</Col>
                 <Col span={inputSpan}>{updateModeProp?.pieceId ?? '(なし)'}</Col>
             </Row>
+
+            <Row gutter={gutter} align='middle'>
+                <Col flex='auto' />
+                <Col flex={0}></Col>
+                <Col span={inputSpan}>
+                    <IsCellModeSelector
+                        value={state.isCellMode}
+                        onChange={newValue =>
+                            updateState(prevState => {
+                                if (prevState == null) {
+                                    return;
+                                }
+                                prevState.isCellMode = newValue;
+                            })
+                        }
+                    />
+                </Col>
+            </Row>
+
             <Row gutter={gutter} align='middle'>
                 <Col flex='auto' />
                 <Col flex={0}>所有者</Col>

@@ -19,22 +19,26 @@ import { InputFile } from '../file/InputFile';
 import { FilePath } from '../../../../utils/file/filePath';
 import { EditorGroupHeader } from '../../../ui/EditorGroupHeader';
 import { FilesManagerDrawer } from '../file/FilesManagerDrawer';
+import { IsCellModeSelector } from './IsCellModeSelector';
 
 type ImagePieceState = State<typeof imagePieceTemplate>;
 
 const defaultImagePiece = (
     piecePosition: PiecePositionWithCell,
+    isCellMode: boolean,
     ownerParticipantId: string | undefined
 ): ImagePieceState => ({
+    ...piecePosition,
+
     ownerParticipantId,
+    isCellMode,
+
     image: undefined,
     isPrivate: false,
     memo: undefined,
     name: undefined,
     opacity: undefined,
     isPositionLocked: false,
-
-    ...piecePosition,
 
     $v: 2,
     $r: 1,
@@ -71,7 +75,7 @@ export const ImagePieceEditor: React.FC<{
                 return undefined;
             }
             return {
-                createInitState: () => defaultImagePiece(createMode.piecePosition, undefined),
+                createInitState: () => defaultImagePiece(createMode.piecePosition, true, undefined),
                 onCreate: newState => {
                     if (newState == null) {
                         return;
@@ -173,6 +177,24 @@ export const ImagePieceEditor: React.FC<{
                         <div style={{ height: 8 }} />
                     </>
                 )}
+
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
+                    <Col flex={0}></Col>
+                    <Col span={inputSpan}>
+                        <IsCellModeSelector
+                            value={state.isCellMode}
+                            onChange={newValue =>
+                                updateState(prevState => {
+                                    if (prevState == null) {
+                                        return;
+                                    }
+                                    prevState.isCellMode = newValue;
+                                })
+                            }
+                        />
+                    </Col>
+                </Row>
 
                 {/* TODO: isPrivateがまだ未実装 */}
 

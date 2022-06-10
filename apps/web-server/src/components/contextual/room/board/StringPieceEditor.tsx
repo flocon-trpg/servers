@@ -15,6 +15,7 @@ import { CollaborativeInput } from '../../../ui/CollaborativeInput';
 import { Subscribable } from 'rxjs';
 import { useStringPieces } from '../../../../hooks/state/useStringPieces';
 import { MyCharactersSelect } from '../character/MyCharactersSelect';
+import { IsCellModeSelector } from './IsCellModeSelector';
 
 type CharacterState = State<typeof characterTemplate>;
 type StringPieceState = State<typeof stringPieceTemplate>;
@@ -26,9 +27,14 @@ const inputSpan = 16;
 
 const defaultStringPieceValue = (
     piecePosition: PiecePositionWithCell,
+    isCellMode: boolean,
     ownerCharacterId: string | undefined
 ): StringPieceState => ({
+    ...piecePosition,
+
     ownerCharacterId,
+    isCellMode,
+
     value: '',
     isValuePrivate: false,
     valueInputType: String,
@@ -36,8 +42,6 @@ const defaultStringPieceValue = (
     name: undefined,
     opacity: undefined,
     isPositionLocked: false,
-
-    ...piecePosition,
 
     $v: 2,
     $r: 1,
@@ -72,7 +76,8 @@ export const StringPieceEditor: React.FC<{
                 return undefined;
             }
             return {
-                createInitState: () => defaultStringPieceValue(createMode.piecePosition, undefined),
+                createInitState: () =>
+                    defaultStringPieceValue(createMode.piecePosition, true, undefined),
                 onCreate: newState => {
                     if (newState == null || activeCharacter == null) {
                         return;
@@ -141,6 +146,23 @@ export const StringPieceEditor: React.FC<{
                 <Col flex='auto' />
                 <Col flex={0}>ID</Col>
                 <Col span={inputSpan}>{updateMode != null ? updateMode.pieceId : '(なし)'}</Col>
+            </Row>
+            <Row gutter={gutter} align='middle'>
+                <Col flex='auto' />
+                <Col flex={0}></Col>
+                <Col span={inputSpan}>
+                    <IsCellModeSelector
+                        value={state.isCellMode}
+                        onChange={newValue =>
+                            updateState(prevState => {
+                                if (prevState == null) {
+                                    return;
+                                }
+                                prevState.isCellMode = newValue;
+                            })
+                        }
+                    />
+                </Col>
             </Row>
             <Row gutter={gutter} align='middle'>
                 <Col flex='auto' />

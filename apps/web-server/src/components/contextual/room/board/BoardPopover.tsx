@@ -72,6 +72,7 @@ import {
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import { defaultTriggerSubMenuAction } from '../../../../utils/variables';
 import { CollaborativeInput } from '../../../ui/CollaborativeInput';
+import { PiecePositionWithCell } from '../../../../utils/types';
 
 type BoardState = State<typeof boardTemplate>;
 type BoardPositionState = State<typeof boardPositionTemplate>;
@@ -943,12 +944,25 @@ namespace ContextMenuModule {
             boardConfig,
         });
         const cellPosition = Piece.getCellPosition({ x, y, board });
-        // TODO: x,y,w,h の値が適当
-        const piecePositionWhichIsCellMode: PieceState = {
+
+        // TODO: w,h の値が適当
+
+        const piecePosition: PiecePositionWithCell = {
+            x,
+            y,
+            w: 50,
+            h: 50,
+            cellX: cellPosition.cellX,
+            cellY: cellPosition.cellY,
+            cellW: 1,
+            cellH: 1,
+        };
+
+        const pieceStateWhichIsCellMode: PieceState = {
             $v: undefined,
             $r: undefined,
-            x: 0,
-            y: 0,
+            x,
+            y,
             w: 50,
             h: 50,
             opacity: undefined,
@@ -962,7 +976,7 @@ namespace ContextMenuModule {
             name: undefined,
         };
 
-        const piecePositionWhichIsNotCellMode: PieceState = {
+        const pieceStateWhichIsNotCellMode: PieceState = {
             $v: undefined,
             $r: undefined,
             x,
@@ -972,8 +986,8 @@ namespace ContextMenuModule {
             opacity: undefined,
             isCellMode: false,
             isPositionLocked: false,
-            cellX: 0,
-            cellY: 0,
+            cellX: cellPosition.cellX,
+            cellY: cellPosition.cellY,
             cellW: 1,
             cellH: 1,
             memo: undefined,
@@ -1009,7 +1023,7 @@ namespace ContextMenuModule {
                                     return;
                                 }
                                 pieces[simpleId()] = {
-                                    ...piecePositionWhichIsCellMode,
+                                    ...pieceStateWhichIsCellMode,
                                     $v: 2,
                                     $r: 1,
                                     boardId,
@@ -1029,7 +1043,7 @@ namespace ContextMenuModule {
                                     return;
                                 }
                                 pieces[simpleId()] = {
-                                    ...piecePositionWhichIsNotCellMode,
+                                    ...pieceStateWhichIsNotCellMode,
                                     $v: 2,
                                     $r: 1,
                                     boardId,
@@ -1083,92 +1097,38 @@ namespace ContextMenuModule {
                 {
                     key: 'ダイスコマ@boardPopover',
                     label: 'ダイスコマ',
-                    children: [
-                        {
-                            key: 'セルにスナップする@ダイスコマ@boardPopover',
-                            label: 'セルにスナップする',
-                            onClick: () => {
-                                hooks.setDicePieceEditor({
-                                    type: create,
-                                    boardId,
-                                    piecePosition: piecePositionWhichIsCellMode,
-                                });
-                                onContextMenuClear();
-                            },
-                        },
-                        {
-                            key: 'セルにスナップしない@ダイスコマ@boardPopover',
-                            label: 'セルにスナップしない',
-                            onClick: () => {
-                                hooks.setDicePieceEditor({
-                                    type: create,
-                                    boardId,
-                                    piecePosition: piecePositionWhichIsNotCellMode,
-                                });
-                                onContextMenuClear();
-                            },
-                        },
-                    ],
+                    onClick: () => {
+                        hooks.setDicePieceEditor({
+                            type: create,
+                            boardId,
+                            piecePosition,
+                        });
+                        onContextMenuClear();
+                    },
                 },
                 {
                     key: '文字列コマ@boardPopover',
                     label: '文字列コマ',
-                    children: [
-                        {
-                            key: 'セルにスナップする@文字列コマ@boardPopover',
-                            label: 'セルにスナップする',
-                            onClick: () => {
-                                hooks.setStringPieceEditor({
-                                    type: create,
-                                    boardId,
-                                    piecePosition: piecePositionWhichIsCellMode,
-                                });
-                                onContextMenuClear();
-                            },
-                        },
-                        {
-                            key: 'セルにスナップしない@文字列コマ@boardPopover',
-                            label: 'セルにスナップしない',
-                            onClick: () => {
-                                hooks.setStringPieceEditor({
-                                    type: create,
-                                    boardId,
-                                    piecePosition: piecePositionWhichIsNotCellMode,
-                                });
-                                onContextMenuClear();
-                            },
-                        },
-                    ],
+                    onClick: () => {
+                        hooks.setStringPieceEditor({
+                            type: create,
+                            boardId,
+                            piecePosition,
+                        });
+                        onContextMenuClear();
+                    },
                 },
                 {
                     key: '画像コマ@boardPopover',
                     label: '画像コマ',
-                    children: [
-                        {
-                            key: 'セルにスナップする@画像コマ@boardPopover',
-                            label: 'セルにスナップする',
-                            onClick: () => {
-                                hooks.setImagePieceModal({
-                                    type: create,
-                                    boardId,
-                                    piecePosition: piecePositionWhichIsCellMode,
-                                });
-                                onContextMenuClear();
-                            },
-                        },
-                        {
-                            key: 'セルにスナップしない@画像コマ@boardPopover',
-                            label: 'セルにスナップしない',
-                            onClick: () => {
-                                hooks.setImagePieceModal({
-                                    type: create,
-                                    boardId,
-                                    piecePosition: piecePositionWhichIsNotCellMode,
-                                });
-                                onContextMenuClear();
-                            },
-                        },
-                    ],
+                    onClick: () => {
+                        hooks.setImagePieceModal({
+                            type: create,
+                            boardId,
+                            piecePosition,
+                        });
+                        onContextMenuClear();
+                    },
                 },
             ],
         };
