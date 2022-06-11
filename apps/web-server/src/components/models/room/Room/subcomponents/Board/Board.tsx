@@ -4,7 +4,6 @@ import { success, useImageFromGraphQL } from '../../../../../../hooks/image';
 import * as ReactKonva from 'react-konva';
 import { Button, Dropdown, InputNumber, Menu, Popover } from 'antd';
 import * as Icons from '@ant-design/icons';
-import { KonvaEventObject } from 'konva/types/Node';
 import { update } from '../../../../../../stateManagers/states/types';
 import * as Icon from '@ant-design/icons';
 import { useMe } from '../../../../../../hooks/useMe';
@@ -14,7 +13,6 @@ import { useBoards } from '../../../../../../hooks/state/useBoards';
 import { ActiveBoardSelectorModal } from './subcomponents/ActiveBoardSelectorModal/ActiveBoardSelecterModal';
 import useConstant from 'use-constant';
 import { debounceTime } from 'rxjs/operators';
-import { Vector2d } from 'konva/types/types';
 import { Subject } from 'rxjs';
 import { $free, OmitVersion, State, boardTemplate, pieceTemplate } from '@flocon-trpg/core';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
@@ -80,6 +78,8 @@ import {
     toCellPosition,
     toCellSize,
 } from '../../../../../../utils/positionAndSizeAndRect';
+import { KonvaEventObject } from 'konva/lib/Node';
+import { Vector2d } from 'konva/lib/types';
 
 type BoardState = OmitVersion<State<typeof boardTemplate>>;
 type PieceState = OmitVersion<State<typeof pieceTemplate>>;

@@ -28,7 +28,7 @@ import { useMyUserUid } from '../../../../hooks/useMyUserUid';
 import { ImagePieceModal } from './subcomponents/ImagePieceModal/ImagePieceModal';
 import { CommandEditorModal } from './subcomponents/CommandEditorModal/CommandEditorModal';
 import { ChatPalettePanelContent } from './subcomponents/ChatPalettePanelContent/ChatPalettePanelContent';
-import { Board } from './subcomponents/Board/Board';
+import { Props as BoardProps } from './subcomponents/Board/Board';
 import { useAtomSelector } from '../../../../atoms/useAtomSelector';
 import { roomConfigAtom } from '../../../../atoms/roomConfig/roomConfigAtom';
 import { RoomConfigUtils } from '../../../../atoms/roomConfig/types/roomConfig/utils';
@@ -51,6 +51,29 @@ import { ChatPalettePanelConfig } from '../../../../atoms/roomConfig/types/chatP
 import { MemoPanelConfig } from '../../../../atoms/roomConfig/types/memoPanelConfig';
 import { ControlPosition } from 'react-draggable';
 import { NumberSize, ResizeDirection } from 're-resizable';
+import dynamic from 'next/dynamic';
+
+/*
+Boardをdynamicを使わず直接importすると、next exportのときに次のエラーが出る（next export以外は問題なしの模様）。
+
+Error occurred prerendering page "/rooms/[id]". Read more: https://nextjs.org/docs/messages/prerender-error
+Error: Cannot find module 'canvas'
+Require stack:
+- /home/runner/work/servers/servers/node_modules/konva/cmj/index-node.js
+- /home/runner/work/servers/servers/node_modules/react-konva/lib/ReactKonva.js
+- /home/runner/work/servers/servers/apps/web-server/.next/server/pages/rooms/[id].js
+
+index-node.jsを見てみると、次のコードがある(konva@v8.3.9で確認)。ここでエラーが出ていると思われる。
+
+const Canvas = require("canvas");
+
+もしかするとyarn add canvasで直るかもしれないが、このパッケージのReadmeによると「node-canvas is a Cairo-backed Canvas implementation for Node.js.」とのことであり、詳しくは調査していないが、next exportを使うか否かで挙動が変わってしまう可能性がある。そのため、代わりにdynamicを使うことで対処している。
+今のところreact-konvaはBoardでしか使っていないが、他のコンポーネントでも使うのであればそちらもdynamicを使ったほうがよさそう。
+*/
+const Board: React.ComponentType<BoardProps> = dynamic(
+    () => import('./subcomponents/Board/Board').then(mod => mod.Board as any),
+    { ssr: false }
+);
 
 const overflowHidden = { overflow: 'hidden' } as const;
 
