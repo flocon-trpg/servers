@@ -1,5 +1,4 @@
 import Konva from 'konva';
-import { KonvaEventObject, NodeConfig } from 'konva/types/Node';
 import React, { PropsWithChildren } from 'react';
 import * as ReactKonva from 'react-konva';
 import { animated, useSpring } from '@react-spring/konva';
@@ -9,6 +8,7 @@ import {
     PixelPosition,
     PixelSize,
 } from '../../../../../../utils/positionAndSizeAndRect';
+import { KonvaEventObject, NodeConfig } from 'konva/lib/Node';
 
 const minimalImageSize = 10;
 
