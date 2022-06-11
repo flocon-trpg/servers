@@ -21,17 +21,22 @@ import { noValue } from '../../../../../../utils/board/dice';
 import { useMyUserUid } from '../../../../../../hooks/useMyUserUid';
 import { close, ok } from '../../../../../../utils/constants';
 import { useSetRoomStateWithImmer } from '../../../../../../hooks/useSetRoomStateWithImmer';
-import { PiecePositionWithCell } from '../../../../../../utils/types';
 import { CollaborativeInput } from '../../../../../ui/CollaborativeInput/CollaborativeInput';
 import { Subscribable } from 'rxjs';
 import { IsCellModeSelector } from '../IsCellModeSelector/IsCellModeSelector';
-import { applyPiecePositionWithCell } from '../../../../../../utils/applyPiecePositionWithCell';
+import { usePixelRectToCompositeRect } from '../../../../../../hooks/usePixelRectToCompositeRect';
+import {
+    CompositeRect,
+    PixelPosition,
+    PixelSize,
+    applyCompositeRect,
+} from '../../../../../../utils/positionAndSizeAndRect';
 
 type CharacterState = State<typeof characterTemplate>;
 type DicePieceState = State<typeof dicePieceTemplate>;
 
 const defaultDicePieceValue = (
-    piecePosition: PiecePositionWithCell,
+    piecePosition: CompositeRect,
     isCellMode: boolean,
     ownerCharacterId: string | undefined
 ): DicePieceState => ({
@@ -50,6 +55,7 @@ const defaultDicePieceValue = (
     $r: 1,
 });
 
+const pieceSize: PixelSize = { w: 50, h: 50 };
 const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
@@ -57,7 +63,7 @@ type ActionRequest = Subscribable<typeof ok | typeof close>;
 
 export type CreateMode = {
     boardId: string;
-    piecePosition: PiecePositionWithCell;
+    piecePosition: PixelPosition;
 };
 
 export type UpdateMode = {
@@ -72,28 +78,36 @@ export const DicePieceEditor: React.FC<{
 }> = ({ actionRequest, createMode: createModeProp, updateMode: updateModeProp }) => {
     const setRoomState = useSetRoomStateWithImmer();
     const myUserUid = useMyUserUid();
-    const dicePieces = useDicePieces(updateModeProp == null ? undefined : updateModeProp.boardId);
+    const boardId = updateModeProp?.boardId ?? createModeProp?.boardId;
+    const dicePieces = useDicePieces(boardId);
     const [activeCharacter, setActiveCharacter] = React.useState<{
         id: string;
         state: CharacterState;
     }>();
 
+    // TODO: useStateEditorの性質上、useMemo由来のhookでは不十分
+    const compositeRect = usePixelRectToCompositeRect({
+        boardId: updateModeProp?.boardId ?? createModeProp?.boardId,
+        pixelRect:
+            createModeProp?.piecePosition == null
+                ? undefined
+                : { ...createModeProp.piecePosition, ...pieceSize },
+    });
     // TODO: useStateEditorの性質上、useMemoでは不十分
     const createMode: CreateModeParams<DicePieceState | undefined> | undefined =
         React.useMemo(() => {
-            if (createModeProp == null) {
+            if (createModeProp == null || compositeRect == null) {
                 return undefined;
             }
             return {
-                createInitState: () =>
-                    defaultDicePieceValue(createModeProp.piecePosition, true, undefined),
+                createInitState: () => defaultDicePieceValue(compositeRect, true, undefined),
                 updateInitState: prevState => {
                     if (prevState == null) {
                         return;
                     }
-                    applyPiecePositionWithCell({
+                    applyCompositeRect({
                         state: prevState,
-                        operation: createModeProp.piecePosition,
+                        operation: compositeRect,
                     });
                 },
                 onCreate: newState => {
@@ -110,7 +124,7 @@ export const DicePieceEditor: React.FC<{
                     });
                 },
             };
-        }, [activeCharacter, createModeProp, setRoomState]);
+        }, [activeCharacter, compositeRect, createModeProp, setRoomState]);
     const updateMode: UpdateModeParams<DicePieceState | undefined> | undefined =
         React.useMemo(() => {
             if (updateModeProp == null) {
@@ -154,6 +168,21 @@ export const DicePieceEditor: React.FC<{
         return null;
     }
 
+    const isCellModeSelectorRow =
+        state == null || boardId == null ? null : (
+            <Row gutter={gutter} align='middle'>
+                <Col flex='auto' />
+                <Col flex={0}></Col>
+                <Col span={inputSpan}>
+                    <IsCellModeSelector
+                        value={state}
+                        onChange={newState => updateState(() => newState)}
+                        boardId={boardId}
+                    />
+                </Col>
+            </Row>
+        );
+
     return (
         <div>
             <Row gutter={gutter} align='middle'>
@@ -162,23 +191,7 @@ export const DicePieceEditor: React.FC<{
                 <Col span={inputSpan}>{updateModeProp?.pieceId ?? '(なし)'}</Col>
             </Row>
 
-            <Row gutter={gutter} align='middle'>
-                <Col flex='auto' />
-                <Col flex={0}></Col>
-                <Col span={inputSpan}>
-                    <IsCellModeSelector
-                        value={state.isCellMode}
-                        onChange={newValue =>
-                            updateState(prevState => {
-                                if (prevState == null) {
-                                    return;
-                                }
-                                prevState.isCellMode = newValue;
-                            })
-                        }
-                    />
-                </Col>
-            </Row>
+            {isCellModeSelectorRow}
 
             <Row gutter={gutter} align='middle'>
                 <Col flex='auto' />

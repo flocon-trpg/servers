@@ -1,9 +1,7 @@
 import {
     State,
     boardPositionTemplate,
-    boardTemplate,
     characterTemplate,
-    dicePieceStrIndexes,
     diff,
     execCharacterCommand,
     filePathTemplate,
@@ -13,9 +11,8 @@ import {
     toUpOperation,
 } from '@flocon-trpg/core';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
-import { Checkbox, Menu, Tooltip } from 'antd';
+import { Menu, Tooltip } from 'antd';
 import React from 'react';
-import { InputDie } from '../InputDie/InputDie';
 import { NewTabLinkify } from '../../../../../ui/NewTabLinkify/NewTabLinkify';
 import {
     FileSourceType,
@@ -25,12 +22,10 @@ import { useBoards } from '../../../../../../hooks/state/useBoards';
 import { useCharacters } from '../../../../../../hooks/state/useCharacters';
 import { useMyUserUid } from '../../../../../../hooks/useMyUserUid';
 import { useSetRoomStateByApply } from '../../../../../../hooks/useSetRoomStateByApply';
-import { replace, update } from '../../../../../../stateManagers/states/types';
+import { update } from '../../../../../../stateManagers/states/types';
 import { testCommand } from '../../../../../../utils/character/command';
-import { noValue } from '../../../../../../utils/board/dice';
 import { DicePieceValue } from '../../../../../../utils/board/dicePieceValue';
 import { StringPieceValue } from '../../../../../../utils/board/stringPieceValue';
-import { Piece } from '../../../../../../utils/board/piece';
 import { useMutation } from 'urql';
 import { roomAtom } from '../../../../../../atoms/room/roomAtom';
 import { useAtomSelector } from '../../../../../../atoms/useAtomSelector';
@@ -53,7 +48,7 @@ import { create } from '../../../../../../utils/constants';
 import { useCloneImagePiece } from '../../../../../../hooks/state/useCloneImagePiece';
 import { ImageView } from '../../../../file/ImageView/ImageView';
 import classNames from 'classnames';
-import { flex, flexColumn, flexRow, itemsCenter } from '../../../../../../utils/className';
+import { flex, flexRow, itemsCenter } from '../../../../../../utils/className';
 import { useSetRoomStateWithImmer } from '../../../../../../hooks/useSetRoomStateWithImmer';
 import { useIsMyCharacter } from '../../../../../../hooks/state/useIsMyCharacter';
 import { characterEditorModalAtom } from '../CharacterEditorModal/CharacterEditorModal';
@@ -71,10 +66,20 @@ import {
 } from '../BoardPositionAndPieceEditorModal/BoardPositionAndPieceEditorModal';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import { defaultTriggerSubMenuAction } from '../../../../../../utils/variables';
-import { CollaborativeInput } from '../../../../../ui/CollaborativeInput/CollaborativeInput';
-import { PiecePositionWithCell } from '../../../../../../utils/types';
+import {
+    UpdateMode as DicePiceUpdateMode,
+    DicePieceEditor,
+} from '../DicePieceEditor/DicePieceEditor';
+import {
+    UpdateMode as StringPiceUpdateMode,
+    StringPieceEditor,
+} from '../StringPieceEditor/StringPieceEditor';
+import {
+    CellConfig,
+    CompositeRect,
+    toCellPosition,
+} from '../../../../../../utils/positionAndSizeAndRect';
 
-type BoardState = State<typeof boardTemplate>;
 type BoardPositionState = State<typeof boardPositionTemplate>;
 type CharacterState = State<typeof characterTemplate>;
 type RoomState = State<typeof roomTemplate>;
@@ -161,211 +166,101 @@ export const PieceTooltip: React.FC = () => {
     }
 };
 
-namespace PopupEditorBase {
-    type CharacterPieceProps = {
-        characterId: string;
-        pieceId: string;
-    };
+type CharacterPieceProps = {
+    characterId: string;
+    pieceId: string;
+};
 
-    type PieceProps = {
-        boardId: string;
-        pieceId: string;
-    };
+type PieceProps = {
+    boardId: string;
+    pieceId: string;
+};
 
-    export const Character: React.FC<CharacterPieceProps> = ({
-        pieceId,
-        characterId,
-    }: CharacterPieceProps) => {
-        const setRoomState = useSetRoomStateWithImmer();
+const CharacterContent: React.FC<CharacterPieceProps> = ({
+    pieceId,
+    characterId,
+}: CharacterPieceProps) => {
+    const setRoomState = useSetRoomStateWithImmer();
 
-        const characterPieceValue = useAtomSelector(
-            roomAtom,
-            roomState => roomState.roomState?.state?.characters?.[characterId]?.pieces?.[pieceId]
-        );
-        if (characterPieceValue == null) {
-            return null;
-        }
+    const characterPieceValue = useAtomSelector(
+        roomAtom,
+        roomState => roomState.roomState?.state?.characters?.[characterId]?.pieces?.[pieceId]
+    );
+    if (characterPieceValue == null) {
+        return null;
+    }
 
-        return (
-            <PiecePositionEditor
-                showNameInput
-                state={characterPieceValue}
-                onUpdate={recipe => {
-                    setRoomState(roomState => {
-                        const characterPieceValue =
-                            roomState?.characters?.[characterId]?.pieces?.[pieceId];
-                        if (characterPieceValue == null) {
-                            return;
-                        }
-                        recipe(characterPieceValue);
-                    });
-                }}
-            />
-        );
-    };
-
-    export const DicePiece: React.FC<PieceProps> = ({ boardId, pieceId }: PieceProps) => {
-        const setRoomState = useSetRoomStateWithImmer();
-
-        const dicePieceValue = useAtomSelector(
-            roomAtom,
-            roomState => roomState.roomState?.state?.boards?.[boardId]?.dicePieces?.[pieceId]
-        );
-        if (dicePieceValue == null) {
-            return null;
-        }
-
-        const titleWidth = 60;
-
-        return (
-            <div className={classNames(flex, flexColumn)} style={{ width: '100%' }}>
-                {dicePieceStrIndexes.map(key => {
-                    const die = dicePieceValue.dice?.[key];
-                    return (
-                        <div
-                            key={key}
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                minHeight: 26,
-                            }}
-                        >
-                            <div
-                                style={{ flex: 0, minWidth: titleWidth, width: titleWidth }}
-                            >{`ダイス${key}`}</div>
-                            <InputDie
-                                size='small'
-                                state={die ?? null}
-                                onChange={e => {
-                                    setRoomState(roomState => {
-                                        const dicePieceValue =
-                                            roomState?.boards?.[boardId]?.dicePieces?.[pieceId];
-                                        if (dicePieceValue == null) {
-                                            return;
-                                        }
-                                        if (e.type === replace) {
-                                            if (dicePieceValue.dice == null) {
-                                                dicePieceValue.dice = {};
-                                            }
-                                            if (e.newValue == null) {
-                                                dicePieceValue.dice[key] = undefined;
-                                                return;
-                                            }
-                                            dicePieceValue.dice[key] = {
-                                                $v: 1,
-                                                $r: 1,
-                                                dieType: e.newValue.dieType,
-                                                isValuePrivate: false,
-                                                value: undefined,
-                                            };
-                                            return;
-                                        }
-                                        const dice = dicePieceValue.dice?.[key];
-                                        if (dice == null) {
-                                            return;
-                                        }
-                                        dice.value =
-                                            e.newValue === noValue ? undefined : e.newValue;
-                                    });
-                                }}
-                                onIsValuePrivateChange={e => {
-                                    setRoomState(roomState => {
-                                        const die =
-                                            roomState?.boards?.[boardId]?.dicePieces?.[pieceId]
-                                                ?.dice?.[key];
-                                        if (die == null) {
-                                            return;
-                                        }
-                                        die.isValuePrivate = e;
-                                    });
-                                }}
-                            />
-                        </div>
-                    );
-                })}
-            </div>
-        );
-    };
-
-    export const PortraitPiece: React.FC<CharacterPieceProps> = ({
-        pieceId,
-        characterId,
-    }: CharacterPieceProps) => {
-        const setRoomState = useSetRoomStateWithImmer();
-
-        const portraitPieceValue = useAtomSelector(
-            roomAtom,
-            roomState =>
-                roomState.roomState?.state?.characters?.[characterId]?.portraitPieces?.[pieceId]
-        );
-        if (portraitPieceValue == null) {
-            return null;
-        }
-
-        return (
-            <BoardPositionEditor
-                state={portraitPieceValue}
-                onUpdate={recipe => {
-                    setRoomState(roomState => {
-                        const portraitPieceValue =
-                            roomState?.characters?.[characterId]?.portraitPieces?.[pieceId];
-                        if (portraitPieceValue == null) {
-                            return;
-                        }
-                        recipe(portraitPieceValue);
-                    });
-                }}
-            />
-        );
-    };
-
-    export const StringPiece: React.FC<PieceProps> = ({ boardId, pieceId }: PieceProps) => {
-        const setRoomState = useSetRoomStateWithImmer();
-        const stringPieceValue = useAtomSelector(
-            roomAtom,
-            roomState => roomState.roomState?.state?.boards?.[boardId]?.stringPieces?.[pieceId]
-        );
-
-        if (stringPieceValue == null) {
-            return null;
-        }
-
-        return (
-            <div className={classNames(flex, flexColumn)} style={{ width: '100%' }}>
-                <CollaborativeInput
-                    bufferDuration='default'
-                    value={stringPieceValue.value}
-                    onChange={e =>
-                        setRoomState(roomState => {
-                            const stringPieceValue =
-                                roomState.boards?.[boardId]?.stringPieces?.[pieceId];
-                            if (stringPieceValue == null) {
-                                return;
-                            }
-                            stringPieceValue.value = e.currentValue;
-                        })
+    return (
+        <PiecePositionEditor
+            showNameInput
+            state={characterPieceValue}
+            onUpdate={recipe => {
+                setRoomState(roomState => {
+                    const characterPieceValue =
+                        roomState?.characters?.[characterId]?.pieces?.[pieceId];
+                    if (characterPieceValue == null) {
+                        return;
                     }
-                />
-                <Checkbox
-                    checked={stringPieceValue.isValuePrivate}
-                    onChange={e =>
-                        setRoomState(roomState => {
-                            const stringPieceValue =
-                                roomState.boards?.[boardId]?.stringPieces?.[pieceId];
-                            if (stringPieceValue == null) {
-                                return;
-                            }
-                            stringPieceValue.isValuePrivate = e.target.checked;
-                        })
+                    recipe(characterPieceValue);
+                });
+            }}
+        />
+    );
+};
+
+const DicePieceContent: React.FC<PieceProps> = ({ boardId, pieceId }: PieceProps) => {
+    const updateMode: DicePiceUpdateMode = React.useMemo(() => {
+        return {
+            boardId,
+            pieceId,
+        };
+    }, [boardId, pieceId]);
+
+    return <DicePieceEditor updateMode={updateMode} />;
+};
+
+const PortraitPieceContent: React.FC<CharacterPieceProps> = ({
+    pieceId,
+    characterId,
+}: CharacterPieceProps) => {
+    const setRoomState = useSetRoomStateWithImmer();
+
+    const portraitPieceValue = useAtomSelector(
+        roomAtom,
+        roomState =>
+            roomState.roomState?.state?.characters?.[characterId]?.portraitPieces?.[pieceId]
+    );
+    if (portraitPieceValue == null) {
+        return null;
+    }
+
+    return (
+        <BoardPositionEditor
+            state={portraitPieceValue}
+            onUpdate={recipe => {
+                setRoomState(roomState => {
+                    const portraitPieceValue =
+                        roomState?.characters?.[characterId]?.portraitPieces?.[pieceId];
+                    if (portraitPieceValue == null) {
+                        return;
                     }
-                >
-                    値を非公開にする
-                </Checkbox>
-            </div>
-        );
-    };
-}
+                    recipe(portraitPieceValue);
+                });
+            }}
+        />
+    );
+};
+
+const StringPieceContent: React.FC<PieceProps> = ({ boardId, pieceId }: PieceProps) => {
+    const updateMode: StringPiceUpdateMode = React.useMemo(() => {
+        return {
+            boardId,
+            pieceId,
+        };
+    }, [boardId, pieceId]);
+
+    return <StringPieceEditor updateMode={updateMode} />;
+};
 
 export const PopoverEditor: React.FC = () => {
     const popoverEditor = useAtomValue(boardPopoverEditorAtom);
@@ -382,23 +277,25 @@ export const PopoverEditor: React.FC = () => {
     switch (popoverEditor.dblClickOn.type) {
         case character:
             children = (
-                <PopupEditorBase.Character
+                <CharacterContent
                     characterId={popoverEditor.dblClickOn.characterId}
                     pieceId={popoverEditor.dblClickOn.pieceId}
                 />
             );
+            width = 400;
             break;
         case dicePiece:
             children = (
-                <PopupEditorBase.DicePiece
+                <DicePieceContent
                     boardId={popoverEditor.dblClickOn.boardId}
                     pieceId={popoverEditor.dblClickOn.pieceId}
                 />
             );
+            width = 400;
             break;
         case portrait:
             children = (
-                <PopupEditorBase.PortraitPiece
+                <PortraitPieceContent
                     characterId={popoverEditor.dblClickOn.characterId}
                     pieceId={popoverEditor.dblClickOn.pieceId}
                 />
@@ -407,11 +304,12 @@ export const PopoverEditor: React.FC = () => {
             break;
         case stringPiece:
             children = (
-                <PopupEditorBase.StringPiece
+                <StringPieceContent
                     boardId={popoverEditor.dblClickOn.boardId}
                     pieceId={popoverEditor.dblClickOn.pieceId}
                 />
             );
+            width = 400;
             break;
         default:
             children = null;
@@ -926,7 +824,7 @@ namespace ContextMenuModule {
         hooks: ReturnType<typeof useHooks>;
         setRoomState: ReturnType<typeof useSetRoomStateWithImmer>;
         characters: ReadonlyMap<string, CharacterState>;
-        board: BoardState;
+        board: CellConfig;
     };
 
     const basicMenu = ({
@@ -943,11 +841,12 @@ namespace ContextMenuModule {
             konvaOffset: { x: contextMenuState.offsetX, y: contextMenuState.offsetY },
             boardConfig,
         });
-        const cellPosition = Piece.getCellPosition({ x, y, board });
+        const cellPosition = toCellPosition({ pixelPosition: { x, y }, cellConfig: board });
 
         // TODO: w,h の値が適当
+        // TODO: w,h は必要なくなるかも
 
-        const piecePosition: PiecePositionWithCell = {
+        const piecePosition: CompositeRect = {
             x,
             y,
             w: 50,

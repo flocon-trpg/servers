@@ -1,12 +1,12 @@
 import React from 'react';
 import * as ReactKonva from 'react-konva';
 import Konva from 'konva';
-import { Size, Vector2 } from '../../../../../../../../../utils/types';
+import { PixelPosition, PixelSize } from '../../../../../../../../../utils/positionAndSizeAndRect';
 
 type Props = {
     text?: string;
-} & Vector2 &
-    Size;
+} & PixelPosition &
+    PixelSize;
 
 export const NameLabel: React.FC<Props> = (props: Props) => {
     const xRatio = 1;

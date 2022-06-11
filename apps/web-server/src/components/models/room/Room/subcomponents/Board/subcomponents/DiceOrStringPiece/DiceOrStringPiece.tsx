@@ -12,8 +12,8 @@ import { StringPieceValue } from '../../../../../../../../utils/board/stringPiec
 import { KonvaD6 } from '../../../KonvaDice/KonvaDice';
 import { DicePieceValue } from '../../../../../../../../utils/board/dicePieceValue';
 import { usePrevious } from 'react-use';
-import { Size } from '../../../../../../../../utils/types';
 import { PieceGroup, PieceGroupProps } from '../../../PieceGroup/PieceGroup';
+import { PixelSize } from '../../../../../../../../utils/positionAndSizeAndRect';
 
 type DieValueState = State<typeof dieValueTemplate>;
 type DicePieceState = State<typeof dicePieceTemplate>;
@@ -35,7 +35,7 @@ export type DiceOrStringPieceState =
 type StringPieceContentProps = {
     createdByMe: boolean;
     state: StringPieceState;
-} & Size;
+} & PixelSize;
 
 const StringPieceContent: React.FC<StringPieceContentProps> = (props: StringPieceContentProps) => {
     const text = StringPieceValue.toKonvaText(props.state, props.createdByMe, undefined);
@@ -133,7 +133,7 @@ type DicePieceContentProps = {
     createdByMe: boolean;
     state: DicePieceState;
     opacity: number;
-} & Size;
+} & PixelSize;
 
 const DicePieceContent: React.FC<DicePieceContentProps> = ({
     state,
@@ -309,7 +309,7 @@ type ValueContentProps = {
     createdByMe: boolean;
     state: DiceOrStringPieceState;
     opacity: number;
-} & Size;
+} & PixelSize;
 
 const ValueContent: React.FC<ValueContentProps> = (props: ValueContentProps) => {
     switch (props.state.type) {

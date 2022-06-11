@@ -2,17 +2,17 @@ import { Modal } from 'antd';
 import React from 'react';
 import { DialogFooter } from '../../../../../ui/DialogFooter/DialogFooter';
 import { DrawerProps } from 'antd/lib/drawer';
-import { PiecePositionWithCell } from '../../../../../../utils/types';
 import { close, create, ok, update } from '../../../../../../utils/constants';
 import { atom, useAtom } from 'jotai';
 import { Subject } from 'rxjs';
 import { CreateMode, ImagePieceEditor, UpdateMode } from '../ImagePieceEditor/ImagePieceEditor';
+import { PixelPosition } from '../../../../../../utils/positionAndSizeAndRect';
 
 type ImagePieceModalType =
     | {
           type: typeof create;
           boardId: string;
-          piecePosition: PiecePositionWithCell;
+          piecePosition: PixelPosition;
       }
     | {
           type: typeof update;

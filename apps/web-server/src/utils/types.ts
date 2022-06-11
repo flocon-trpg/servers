@@ -58,29 +58,6 @@ export const reset = 'reset';
 
 export type Reset = { type: typeof reset };
 
-export type Vector2 = {
-    x: number;
-    y: number;
-};
-
-export type Size = {
-    w: number;
-    h: number;
-};
-
-export type DragEndResult = {
-    readonly newPosition?: Vector2;
-    readonly newSize?: Size;
-};
-
-export type PiecePositionWithoutCell = Vector2 & Size;
-
-export type PiecePositionWithCell = PiecePositionWithoutCell & {
-    cellX: number;
-    cellY: number;
-    cellW: number;
-    cellH: number;
-};
 export type FetchTextState =
     | {
           // fetch関数などの実行が完了していない状態。

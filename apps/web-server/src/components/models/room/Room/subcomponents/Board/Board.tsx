@@ -10,9 +10,7 @@ import * as Icon from '@ant-design/icons';
 import { useMe } from '../../../../../../hooks/useMe';
 import { useCharacters } from '../../../../../../hooks/state/useCharacters';
 import { useParticipants } from '../../../../../../hooks/state/useParticipants';
-import { Piece } from '../../../../../../utils/board/piece';
 import { useBoards } from '../../../../../../hooks/state/useBoards';
-import { BoardPosition } from '../../../../../../utils/board/boardPosition';
 import { ActiveBoardSelectorModal } from './subcomponents/ActiveBoardSelectorModal/ActiveBoardSelecterModal';
 import useConstant from 'use-constant';
 import { debounceTime } from 'rxjs/operators';
@@ -23,7 +21,6 @@ import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { useMyUserUid } from '../../../../../../hooks/useMyUserUid';
 import { FilePath, FileSourceType } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { ImagePiece } from './subcomponents/ImagePiece/ImagePiece';
-import { DragEndResult, Vector2 } from '../../../../../../utils/types';
 import { DiceOrStringPiece } from './subcomponents/DiceOrStringPiece/DiceOrStringPiece';
 import { animated, useTransition } from '@react-spring/konva';
 import { useCharacterPieces } from '../../../../../../hooks/state/useCharacterPieces';
@@ -74,6 +71,15 @@ import { Message, publicMessage } from '@flocon-trpg/web-server-utils';
 import { notFetch, useRoomMesages } from '../../../../../../hooks/useRoomMessages';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import { defaultTriggerSubMenuAction } from '../../../../../../utils/variables';
+import {
+    DragEndResult,
+    PixelPosition,
+    isCursorOnPixelRect,
+    isCursorOnState,
+    stateToPixelRect,
+    toCellPosition,
+    toCellSize,
+} from '../../../../../../utils/positionAndSizeAndRect';
 
 type BoardState = OmitVersion<State<typeof boardTemplate>>;
 type PieceState = OmitVersion<State<typeof pieceTemplate>>;
@@ -89,12 +95,12 @@ const setDragEndResultToPieceState = ({
 }): void => {
     if (piece.isCellMode) {
         if (e.newPosition != null) {
-            const position = Piece.getCellPosition({ ...e.newPosition, board });
+            const position = toCellPosition({ pixelPosition: e.newPosition, cellConfig: board });
             piece.cellX = position.cellX;
             piece.cellY = position.cellY;
         }
         if (e.newSize != null) {
-            const size = Piece.getCellSize({ ...e.newSize, board });
+            const size = toCellSize({ pixelSize: e.newSize, cellConfig: board });
             piece.cellW = size.cellW;
             piece.cellH = size.cellH;
         }
@@ -169,7 +175,7 @@ type BoardCoreProps = {
     boardId: string;
     boardType: BoardType;
     onClick?: (e: KonvaEventObject<MouseEvent>) => void;
-    onContextMenu?: (e: KonvaEventObject<PointerEvent>, stateOffset: Vector2) => void; // stateOffsetは、configなどのxy座標を基準にした位置。
+    onContextMenu?: (e: KonvaEventObject<PointerEvent>, stateOffset: PixelPosition) => void; // stateOffsetは、configなどのxy座標を基準にした位置。
     canvasWidth: number;
     canvasHeight: number;
 };
@@ -322,7 +328,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 }
                 return (
                     <ImagePiece
-                        {...Piece.getPosition({ ...board, state: piece })}
+                        {...stateToPixelRect({ cellConfig: board, state: piece })}
                         opacity={1}
                         label={piece.name}
                         key={keyNames(characterId, pieceId)}
@@ -459,7 +465,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             };
             return (
                 <ImagePiece
-                    {...Piece.getPosition({ ...board, state: piece })}
+                    {...stateToPixelRect({ cellConfig: board, state: piece })}
                     opacity={1}
                     key={pieceId}
                     filePath={piece.image ?? defaultImageFilePath}
@@ -514,7 +520,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
         const dicePieceElements = [...(dicePieces ?? [])].map(([pieceId, piece]) => {
             return (
                 <DiceOrStringPiece
-                    {...Piece.getPosition({ ...board, state: piece })}
+                    {...stateToPixelRect({ cellConfig: board, state: piece })}
                     key={pieceId}
                     opacity={1}
                     state={{ type: dicePiece, state: piece }}
@@ -559,7 +565,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
         const stringPieceElements = [...(numberPieces ?? [])].map(([pieceId, piece]) => {
             return (
                 <DiceOrStringPiece
-                    {...Piece.getPosition({ ...board, state: piece })}
+                    {...stateToPixelRect({ cellConfig: board, state: piece })}
                     key={pieceId}
                     opacity={1}
                     state={{ type: 'stringPiece', state: piece }}
@@ -880,8 +886,8 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                         if (boardIdToShow !== piece.boardId) {
                                             return false;
                                         }
-                                        return Piece.isCursorOnIcon({
-                                            ...board,
+                                        return isCursorOnState({
+                                            cellConfig: board,
                                             state: piece,
                                             cursorPosition: stateOffset,
                                         });
@@ -902,8 +908,8 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                     if (boardIdToShow !== portrait.boardId) {
                                         return false;
                                     }
-                                    return BoardPosition.isCursorOnIcon({
-                                        state: portrait,
+                                    return isCursorOnPixelRect({
+                                        pixelRect: portrait,
                                         cursorPosition: stateOffset,
                                     });
                                 })
@@ -918,8 +924,8 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                         }),
                         imagePiecesOnCursor: [...(imagePieces ?? [])]
                             .filter(([, piece]) => {
-                                return Piece.isCursorOnIcon({
-                                    ...board,
+                                return isCursorOnState({
+                                    cellConfig: board,
                                     state: piece,
                                     cursorPosition: stateOffset,
                                 });
@@ -931,8 +937,8 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                             })),
                         dicePiecesOnCursor: [...(dicePieces ?? [])]
                             .filter(([, piece]) => {
-                                return Piece.isCursorOnIcon({
-                                    ...board,
+                                return isCursorOnState({
+                                    cellConfig: board,
                                     state: piece,
                                     cursorPosition: stateOffset,
                                 });
@@ -944,8 +950,8 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                             })),
                         stringPiecesOnCursor: [...(stringPieces ?? [])]
                             .filter(([, piece]) => {
-                                return Piece.isCursorOnIcon({
-                                    ...board,
+                                return isCursorOnState({
+                                    cellConfig: board,
                                     state: piece,
                                     cursorPosition: stateOffset,
                                 });

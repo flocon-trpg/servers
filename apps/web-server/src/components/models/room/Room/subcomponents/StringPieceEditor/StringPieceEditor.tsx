@@ -10,24 +10,31 @@ import { State, String, characterTemplate, simpleId, stringPieceTemplate } from 
 import { useMyUserUid } from '../../../../../../hooks/useMyUserUid';
 import { close, ok } from '../../../../../../utils/constants';
 import { useSetRoomStateWithImmer } from '../../../../../../hooks/useSetRoomStateWithImmer';
-import { PiecePositionWithCell } from '../../../../../../utils/types';
 import { CollaborativeInput } from '../../../../../ui/CollaborativeInput/CollaborativeInput';
 import { Subscribable } from 'rxjs';
 import { useStringPieces } from '../../../../../../hooks/state/useStringPieces';
 import { MyCharactersSelect } from '../MyCharactersSelect/MyCharactersSelect';
 import { IsCellModeSelector } from '../IsCellModeSelector/IsCellModeSelector';
-import { applyPiecePositionWithCell } from '../../../../../../utils/applyPiecePositionWithCell';
+import {
+    CompositeRect,
+    PixelPosition,
+    PixelRect,
+    PixelSize,
+    applyCompositeRect,
+} from '../../../../../../utils/positionAndSizeAndRect';
+import { usePixelRectToCompositeRect } from '../../../../../../hooks/usePixelRectToCompositeRect';
 
 type CharacterState = State<typeof characterTemplate>;
 type StringPieceState = State<typeof stringPieceTemplate>;
 
 type ActionRequest = Subscribable<typeof ok | typeof close>;
 
+const pieceSize: PixelSize = { w: 50, h: 50 };
 const gutter: [Gutter, Gutter] = [16, 16];
 const inputSpan = 16;
 
 const defaultStringPieceValue = (
-    piecePosition: PiecePositionWithCell,
+    piecePosition: CompositeRect,
     isCellMode: boolean,
     ownerCharacterId: string | undefined
 ): StringPieceState => ({
@@ -50,7 +57,7 @@ const defaultStringPieceValue = (
 
 export type CreateMode = {
     boardId: string;
-    piecePosition: PiecePositionWithCell;
+    piecePosition: PixelPosition;
 };
 
 export type UpdateMode = {
@@ -65,27 +72,35 @@ export const StringPieceEditor: React.FC<{
 }> = ({ actionRequest, createMode, updateMode }) => {
     const setRoomState = useSetRoomStateWithImmer();
     const myUserUid = useMyUserUid();
-    const stringPieces = useStringPieces(updateMode == null ? undefined : updateMode.boardId);
+    const boardId = updateMode?.boardId ?? createMode?.boardId;
+    const stringPieces = useStringPieces(boardId);
     const [activeCharacter, setActiveCharacter] = React.useState<{
         id: string;
         state: CharacterState;
     }>();
+    // TODO: useStateEditorの性質上、useMemo由来のhookでは不十分
+    const compositeRect = usePixelRectToCompositeRect({
+        boardId: updateMode?.boardId ?? createMode?.boardId,
+        pixelRect:
+            createMode?.piecePosition == null
+                ? undefined
+                : { ...createMode.piecePosition, ...pieceSize },
+    });
     // TODO: useStateEditorの性質上、useMemoでは不十分
     const createModeParams: CreateModeParams<StringPieceState | undefined> | undefined =
         React.useMemo(() => {
-            if (createMode == null) {
+            if (createMode == null || compositeRect == null) {
                 return undefined;
             }
             return {
-                createInitState: () =>
-                    defaultStringPieceValue(createMode.piecePosition, true, undefined),
+                createInitState: () => defaultStringPieceValue(compositeRect, true, undefined),
                 updateInitState: prevState => {
                     if (prevState == null) {
                         return;
                     }
-                    applyPiecePositionWithCell({
+                    applyCompositeRect({
                         state: prevState,
-                        operation: createMode.piecePosition,
+                        operation: compositeRect,
                     });
                 },
                 onCreate: newState => {
@@ -102,7 +117,7 @@ export const StringPieceEditor: React.FC<{
                     });
                 },
             };
-        }, [activeCharacter, createMode, setRoomState]);
+        }, [activeCharacter, compositeRect, createMode, setRoomState]);
     const updateModeParams: UpdateModeParams<StringPieceState | undefined> | undefined =
         React.useMemo(() => {
             if (updateMode == null) {
@@ -150,6 +165,21 @@ export const StringPieceEditor: React.FC<{
         return null;
     }
 
+    const isCellModeSelectorRow =
+        state == null || boardId == null ? null : (
+            <Row gutter={gutter} align='middle'>
+                <Col flex='auto' />
+                <Col flex={0}></Col>
+                <Col span={inputSpan}>
+                    <IsCellModeSelector
+                        value={state}
+                        onChange={newState => updateState(() => newState)}
+                        boardId={boardId}
+                    />
+                </Col>
+            </Row>
+        );
+
     return (
         <div>
             <Row gutter={gutter} align='middle'>
@@ -157,23 +187,7 @@ export const StringPieceEditor: React.FC<{
                 <Col flex={0}>ID</Col>
                 <Col span={inputSpan}>{updateMode != null ? updateMode.pieceId : '(なし)'}</Col>
             </Row>
-            <Row gutter={gutter} align='middle'>
-                <Col flex='auto' />
-                <Col flex={0}></Col>
-                <Col span={inputSpan}>
-                    <IsCellModeSelector
-                        value={state.isCellMode}
-                        onChange={newValue =>
-                            updateState(prevState => {
-                                if (prevState == null) {
-                                    return;
-                                }
-                                prevState.isCellMode = newValue;
-                            })
-                        }
-                    />
-                </Col>
-            </Row>
+            {isCellModeSelectorRow}
             <Row gutter={gutter} align='middle'>
                 <Col flex='auto' />
                 <Col flex={0}>所有者</Col>

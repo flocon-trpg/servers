@@ -2,9 +2,13 @@ import Konva from 'konva';
 import { KonvaEventObject, NodeConfig } from 'konva/types/Node';
 import React, { PropsWithChildren } from 'react';
 import * as ReactKonva from 'react-konva';
-import { DragEndResult, Size, Vector2 } from '../../../../../../utils/types';
 import { animated, useSpring } from '@react-spring/konva';
 import { KonvaNodeEvents } from 'react-konva';
+import {
+    DragEndResult,
+    PixelPosition,
+    PixelSize,
+} from '../../../../../../utils/positionAndSizeAndRect';
 
 const minimalImageSize = 10;
 
@@ -18,8 +22,8 @@ export type PieceGroupProps = {
     onDblClick?: (e: KonvaEventObject<MouseEvent>) => void;
     onMouseEnter?: () => void;
     onMouseLeave?: () => void;
-} & Vector2 &
-    Size;
+} & PixelPosition &
+    PixelSize;
 
 export const PieceGroup: React.FC<PropsWithChildren<PieceGroupProps>> = ({
     isSelected,

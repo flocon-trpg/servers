@@ -1,12 +1,12 @@
 import { PrimitiveAtom, atom } from 'jotai';
 import { create, update } from '../../utils/constants';
-import { PiecePositionWithCell } from '../../utils/types';
+import { PixelPosition } from '../../utils/positionAndSizeAndRect';
 
 type PieceValueEditorState =
     | {
           type: typeof create;
           boardId: string;
-          piecePosition: PiecePositionWithCell;
+          piecePosition: PixelPosition;
       }
     | {
           type: typeof update;
@@ -22,7 +22,7 @@ type PieceValueEditorAction =
     | {
           type: typeof create;
           boardId: string;
-          piecePosition: PiecePositionWithCell;
+          piecePosition: PixelPosition;
       }
     | {
           type: typeof update;
