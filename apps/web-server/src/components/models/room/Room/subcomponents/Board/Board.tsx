@@ -489,11 +489,6 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             pageY: e.evt.pageY,
                             dblClickOn: { type: 'imagePiece', piece, boardId, pieceId },
                         });
-                        setImagePieceModal({
-                            type: update,
-                            boardId,
-                            pieceId,
-                        });
                     }}
                     onMouseEnter={() =>
                         (mouseOverOnRef.current = {

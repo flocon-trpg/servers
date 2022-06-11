@@ -79,6 +79,10 @@ import {
     CompositeRect,
     toCellPosition,
 } from '../../../../../../utils/positionAndSizeAndRect';
+import {
+    ImagePieceEditor,
+    UpdateMode as ImagePieceUpdateMode,
+} from '../ImagePieceEditor/ImagePieceEditor';
 
 type BoardPositionState = State<typeof boardPositionTemplate>;
 type CharacterState = State<typeof characterTemplate>;
@@ -219,6 +223,17 @@ const DicePieceContent: React.FC<PieceProps> = ({ boardId, pieceId }: PieceProps
     return <DicePieceEditor updateMode={updateMode} />;
 };
 
+const ImagePieceContent: React.FC<PieceProps> = ({ boardId, pieceId }: PieceProps) => {
+    const updateMode: ImagePieceUpdateMode = React.useMemo(() => {
+        return {
+            boardId,
+            pieceId,
+        };
+    }, [boardId, pieceId]);
+
+    return <ImagePieceEditor updateMode={updateMode} />;
+};
+
 const PortraitPieceContent: React.FC<CharacterPieceProps> = ({
     pieceId,
     characterId,
@@ -287,6 +302,15 @@ export const PopoverEditor: React.FC = () => {
         case dicePiece:
             children = (
                 <DicePieceContent
+                    boardId={popoverEditor.dblClickOn.boardId}
+                    pieceId={popoverEditor.dblClickOn.pieceId}
+                />
+            );
+            width = 400;
+            break;
+        case imagePiece:
+            children = (
+                <ImagePieceContent
                     boardId={popoverEditor.dblClickOn.boardId}
                     pieceId={popoverEditor.dblClickOn.pieceId}
                 />
