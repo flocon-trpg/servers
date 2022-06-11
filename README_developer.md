@@ -2,7 +2,7 @@
 
 ローカルで動かす場合、yarn のインストールが必須となります。npm や pnpm には対応していません。
 
-Flocon は yarn v3[^1] のワークスペースを採用しています。📦パッケージの一覧は次のとおりです。
+Flocon は yarn v3[^1] のワークスペースを採用しています。📦 パッケージの一覧は次のとおりです。
 
 ```
 Flocon
@@ -13,7 +13,7 @@ Flocon
 ┃ ┣ 📦 cache
 ┃ ┣ 📦 core
 ┃ ┣ 📦 flocon-script
-┃ ┣ 📦 typed-document-node-v0.7.1 
+┃ ┣ 📦 typed-document-node-v0.7.1
 ┃ ┣ 📦 typed-document-node-v0.7.2
 ┃ ┣ 📦 utils
 ┃ ┗ 📦 web-server-utils
