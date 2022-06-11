@@ -1,5 +1,5 @@
 import { Auth, Config, IdTokenResult, Unsubscribe, User } from 'firebase/auth';
-import { $free, ParticipantRole, forceMaxLength100String } from '@flocon-trpg/core';
+import { $free, ParticipantRole, boardTemplate, forceMaxLength100String } from '@flocon-trpg/core';
 import {
     RoomMessages,
     RoomPrivateMessage,
@@ -13,6 +13,7 @@ import { FirebaseApp } from '@firebase/app';
 import { Client, createClient } from '@urql/core';
 
 type State = S<typeof roomTemplate>;
+type BoardState = S<typeof boardTemplate>;
 type CharacterState = S<typeof characterTemplate>;
 
 const myUserUid = 'my-user-uid';
@@ -26,6 +27,9 @@ const myDisplayName = 'my-display-name';
 export const myRichCharacterId = 'character-id-1';
 export const mySimpleCharacterId = 'character-id-2';
 export const anotherPlayerCharacterId1 = 'character-id-3';
+
+export const defaultBoardId = 'board-id-1';
+export const anotherBoardId = 'board-id-2';
 
 const appData: FirebaseApp = {
     name: '',
@@ -90,6 +94,24 @@ export const mockStorage: FirebaseStorage = {
     app: appData,
     maxUploadRetryTime: 1000,
     maxOperationRetryTime: 1000,
+};
+
+const boardBase: BoardState = {
+    $v: 2,
+    $r: 1,
+    ownerParticipantId: undefined,
+    name: '',
+    backgroundImage: undefined,
+    backgroundImageZoom: 1,
+    cellColumnCount: 5,
+    cellRowCount: 7,
+    cellHeight: 50,
+    cellWidth: 50,
+    cellOffsetX: 0,
+    cellOffsetY: 0,
+    dicePieces: undefined,
+    imagePieces: undefined,
+    stringPieces: undefined,
 };
 
 const characterBase: CharacterState = {
@@ -173,6 +195,7 @@ const generateDummyImage = (type: 1 | 2 | 3, size: 'small' | 'large') => {
 
 export type CreateMockRoomParams = {
     myParticipantRole: ParticipantRole;
+    setBoards: boolean;
     setCharacters: boolean;
     setCharacterTagNames: boolean;
     setPublicChannelNames: boolean;
@@ -180,10 +203,14 @@ export type CreateMockRoomParams = {
 };
 
 export const createMockRoom = (params: CreateMockRoomParams): State => {
+    if (params.setBoards && !params.setCharacters) {
+        throw new Error('setCharacters must be true when setBoards is true.');
+    }
+
     const result: State = {
         $v: 2,
         $r: 1,
-        activeBoardId: '',
+        activeBoardId: undefined,
         createdBy: '',
         name: '',
         boolParamNames: undefined,
@@ -234,6 +261,146 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
             },
         },
     };
+
+    if (params.setBoards) {
+        // TODO: 画像コマ、キャラクターコマ、立ち絵コマも追加する
+        // TODO: 背景画像の設定
+        result.boards = {
+            [defaultBoardId]: {
+                ...boardBase,
+                name: 'board-1-name',
+                ownerParticipantId: myUserUid,
+                dicePieces: {
+                    ['dice-piece-1']: {
+                        $v: 2,
+                        $r: 1,
+                        ownerCharacterId: myRichCharacterId,
+                        dice: {
+                            1: {
+                                $v: 1,
+                                $r: 1,
+                                dieType: 'D6',
+                                isValuePrivate: false,
+                                value: 1,
+                            },
+                            2: {
+                                $v: 1,
+                                $r: 1,
+                                dieType: 'D6',
+                                isValuePrivate: false,
+                                value: 2,
+                            },
+                        },
+                        cellX: 0,
+                        cellY: 0,
+                        cellW: 1,
+                        cellH: 1,
+                        x: 10,
+                        y: 10,
+                        w: 40,
+                        h: 30,
+                        isCellMode: false,
+                        isPositionLocked: false,
+                        memo: 'dice-memo-1',
+                        name: 'dice-name-1',
+                        opacity: 0.7,
+                    },
+                    ['dice-piece-2']: {
+                        $v: 2,
+                        $r: 1,
+                        ownerCharacterId: myRichCharacterId,
+                        dice: {
+                            1: {
+                                $v: 1,
+                                $r: 1,
+                                dieType: 'D6',
+                                isValuePrivate: false,
+                                value: 3,
+                            },
+                            2: {
+                                $v: 1,
+                                $r: 1,
+                                dieType: 'D6',
+                                isValuePrivate: false,
+                                value: 4,
+                            },
+                            3: {
+                                $v: 1,
+                                $r: 1,
+                                dieType: 'D6',
+                                isValuePrivate: false,
+                                value: 5,
+                            },
+                            4: {
+                                $v: 1,
+                                $r: 1,
+                                dieType: 'D6',
+                                isValuePrivate: false,
+                                value: undefined,
+                            },
+                        },
+                        cellX: 1,
+                        cellY: 0,
+                        cellW: 1,
+                        cellH: 2,
+                        x: 10,
+                        y: 10,
+                        w: 10,
+                        h: 10,
+                        isCellMode: true,
+                        isPositionLocked: false,
+                        memo: 'dice-memo-2',
+                        name: 'dice-name-2',
+                        opacity: 0.7,
+                    },
+                },
+                stringPieces: {
+                    ['string-piece-1']: {
+                        $v: 2,
+                        $r: 1,
+                        ownerCharacterId: myRichCharacterId,
+                        cellX: 0,
+                        cellY: 0,
+                        cellH: 1,
+                        cellW: 1,
+                        x: 110,
+                        y: 10,
+                        w: 20,
+                        h: 40,
+                        isCellMode: false,
+                        isPositionLocked: false,
+                        memo: 'string-memo-1',
+                        name: 'string-name-1',
+                        value: '文字列コマ1',
+                        valueInputType: 'String',
+                        isValuePrivate: false,
+                        opacity: 0.7,
+                    },
+                    ['string-piece-2']: {
+                        $v: 2,
+                        $r: 1,
+                        ownerCharacterId: myRichCharacterId,
+                        cellX: 3,
+                        cellY: 0,
+                        cellW: 1,
+                        cellH: 2,
+                        x: 10,
+                        y: 10,
+                        w: 10,
+                        h: 10,
+                        isCellMode: true,
+                        isPositionLocked: false,
+                        memo: 'string-memo-2',
+                        name: 'string-name-2',
+                        value: '文字列コマ2',
+                        valueInputType: 'String',
+                        isValuePrivate: false,
+                        opacity: 0.7,
+                    },
+                },
+            },
+        };
+    }
 
     if (params.setCharacters) {
         result.characters = {

@@ -729,7 +729,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     );
 };
 
-type Props = {
+export type Props = {
     canvasWidth: number;
     canvasHeight: number;
 } & (

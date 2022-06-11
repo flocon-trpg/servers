@@ -42,6 +42,7 @@ export const Player: React.FC<{ myParticipantRole: ParticipantRole; characterSta
             myParticipantRole,
             setCharacterTagNames: true,
             setPublicChannelNames: true,
+            setBoards: true,
             setCharacters: true,
             setParamNames: true,
         });

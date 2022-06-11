@@ -13,6 +13,7 @@ const room = createMockRoom({
     myParticipantRole: 'Player',
     setCharacterTagNames: false,
     setPublicChannelNames: false,
+    setBoards: false,
     setCharacters: false,
     setParamNames: false,
 });

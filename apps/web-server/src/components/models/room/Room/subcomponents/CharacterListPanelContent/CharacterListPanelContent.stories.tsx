@@ -59,6 +59,7 @@ export const Default: React.FC<{ stateType: StateType; myParticipantRole: Partic
             myParticipantRole,
             setCharacterTagNames: true,
             setPublicChannelNames: true,
+            setBoards: stateType === 'default',
             setCharacters: true,
             setParamNames: true,
         });
