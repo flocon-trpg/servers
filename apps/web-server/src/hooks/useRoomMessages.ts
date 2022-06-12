@@ -45,7 +45,7 @@ const changeEventAtom = atom<RoomMessageChangeEvent>(notFetch);
 
 // 使い方:
 // 1. どこかでuseStartFetchingRoomMessagesを呼ぶ。ただし同時に複数箇所で呼び出してはならない。
-// 2. useRoomMesagesを呼ぶ。こちらは複数箇所で同時に呼び出してもいい。
+// 2. useRoomMessagesを呼ぶ。こちらは複数箇所で同時に呼び出してもいい。
 
 export const useStartFetchingRoomMessages = ({
     roomId,
@@ -177,7 +177,7 @@ export const useMockRoomMessages = () => {
 
 type RoomMessagesResult = Result<RoomMessages, Error> | typeof notFetch;
 
-export const useRoomMesages = ({
+export const useRoomMessages = ({
     filter,
 }: {
     filter?: (message: Message) => boolean;
@@ -231,7 +231,7 @@ export const useRoomMesages = ({
 };
 
 export const useRoomMessageEvent = () => {
-    const messages = useRoomMesages({});
+    const messages = useRoomMessages({});
     const [result, setResult] = React.useState<Diff>();
 
     React.useEffect(() => {

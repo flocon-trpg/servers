@@ -66,7 +66,7 @@ import { useIsMyCharacter } from '../../../../../../hooks/state/useIsMyCharacter
 import { imagePieceModalAtom } from '../ImagePieceModal/ImagePieceModal';
 import { Styles } from '../../../../../../styles';
 import { Message, publicMessage } from '@flocon-trpg/web-server-utils';
-import { notFetch, useRoomMesages } from '../../../../../../hooks/useRoomMessages';
+import { notFetch, useRoomMessages } from '../../../../../../hooks/useRoomMessages';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import { defaultTriggerSubMenuAction } from '../../../../../../utils/variables';
 import {
@@ -227,7 +227,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
         backgroundImage.type === success ? backgroundImage.image : undefined;
     const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
     const setRoomState = useSetRoomStateWithImmer();
-    const publicMessages = useRoomMesages({ filter: publicMessageFilter });
+    const publicMessages = useRoomMessages({ filter: publicMessageFilter });
     const myUserUid = useMyUserUid();
     const isMyCharacter = useIsMyCharacter();
     const setImagePieceModal = useUpdateAtom(imagePieceModalAtom);

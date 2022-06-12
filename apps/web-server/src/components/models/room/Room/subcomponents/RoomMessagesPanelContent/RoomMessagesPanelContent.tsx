@@ -25,7 +25,7 @@ import {
     failure,
     graphqlError,
     notFetch,
-    useRoomMesages,
+    useRoomMessages,
 } from '../../../../../../hooks/useRoomMessages';
 import {
     Message,
@@ -758,7 +758,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
         },
         [publicChannelNames]
     );
-    const messages = useRoomMesages({ filter });
+    const messages = useRoomMessages({ filter });
 
     const writingUsers = [...writingMessageStatusResult]
         .filter(
