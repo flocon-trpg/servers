@@ -58,14 +58,14 @@ export const Default: React.FC<
     }, [setStorybook]);
     useMockRoom({ roomId, room });
     useMockUserConfig();
-    const { onQuery, setToNotFetch } = useMockRoomMessages();
+    const { onQuery, setAsNotFetch } = useMockRoomMessages();
     React.useEffect(() => {
-        setToNotFetch();
+        setAsNotFetch();
         if (fetchingMessages) {
             return;
         }
         onQuery(createMockRoomMessages({ setGeneralMessages }));
-    }, [onQuery, setToNotFetch, fetchingMessages, setGeneralMessages]);
+    }, [onQuery, setAsNotFetch, fetchingMessages, setGeneralMessages]);
     const setRoomConfig = useSetAtom(roomConfigAtom);
     const roomConfig = React.useMemo(() => defaultRoomConfig(roomId), []);
     React.useEffect(() => {

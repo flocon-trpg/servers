@@ -161,7 +161,7 @@ export const useMockRoomMessages = () => {
         },
         [setResult]
     );
-    const setToNotFetch = React.useCallback(() => {
+    const setAsNotFetch = React.useCallback(() => {
         setResult('notFetch');
     }, [setResult]);
 
@@ -169,9 +169,9 @@ export const useMockRoomMessages = () => {
         () => ({
             onQuery,
             onEvent,
-            setToNotFetch,
+            setAsNotFetch,
         }),
-        [onEvent, onQuery, setToNotFetch]
+        [onEvent, onQuery, setAsNotFetch]
     );
 };
 

@@ -57,18 +57,18 @@ export const Player: React.FC<WebConfig & { myParticipantRole: ParticipantRole }
     }, [myParticipantRole]);
     useMockRoom({ roomId, room });
     useMockUserConfig();
-    const { onQuery, setToNotFetch } = useMockRoomMessages();
+    const { onQuery, setAsNotFetch } = useMockRoomMessages();
     React.useEffect(() => {
-        setToNotFetch();
+        setAsNotFetch();
         onQuery(createMockRoomMessages({ setGeneralMessages: true }));
-    }, [onQuery, setToNotFetch]);
+    }, [onQuery, setAsNotFetch]);
     const setRoomConfig = useSetAtom(roomConfigAtom);
     React.useEffect(() => {
         setRoomConfig(defaultRoomConfig(roomId));
     }, [setRoomConfig]);
     return (
         <DndProvider backend={HTML5Backend}>
-            <Room />
+            <Room debug={{ window: { innerHeight: 600, innerWidth: 500 } }} />
         </DndProvider>
     );
 };

@@ -2885,6 +2885,8 @@ __metadata:
     "@storybook/react": 6.5.7
     "@storybook/testing-library": 0.0.11
     "@testing-library/react": 13.2.0
+    "@types/color": ^3.0.3
+    "@types/color-name": ^1.1.1
     "@types/howler": ^2.2.4
     "@types/html-escaper": ^3.0.0
     "@types/jest": 27.5.2
@@ -2902,6 +2904,8 @@ __metadata:
     chromatic: 6.5.6
     classnames: ^2.3.1
     clipboard-copy: ^4.0.1
+    color: ^4.2.3
+    color-name: ^1.1.4
     envfile: ^6.17.0
     firebase: ^9.6.6
     fp-ts: ^2.11.8
@@ -6078,14 +6082,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/color-name@npm:*":
+"@types/color-name@npm:*, @types/color-name@npm:^1.1.1":
   version: 1.1.1
   resolution: "@types/color-name@npm:1.1.1"
   checksum: b71fcad728cc68abcba1d405742134410c8f8eb3c2ef18113b047afca158ad23a4f2c229bcf71a38f4a818dead375c45b20db121d0e69259c2d81e97a740daa6
   languageName: node
   linkType: hard
 
-"@types/color@npm:^3.0.2":
+"@types/color@npm:^3.0.2, @types/color@npm:^3.0.3":
   version: 3.0.3
   resolution: "@types/color@npm:3.0.3"
   dependencies:
@@ -9719,7 +9723,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"color-name@npm:^1.0.0, color-name@npm:~1.1.4":
+"color-name@npm:^1.0.0, color-name@npm:^1.1.4, color-name@npm:~1.1.4":
   version: 1.1.4
   resolution: "color-name@npm:1.1.4"
   checksum: b0445859521eb4021cd0fb0cc1a75cecf67fceecae89b63f62b201cca8d345baf8b952c966862a9d9a2632987d4f6581f0ec8d957dfacece86f0a7919316f610

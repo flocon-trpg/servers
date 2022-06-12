@@ -907,7 +907,16 @@ const RoomMessagePanels: React.FC = () => {
 const childrenContainerPadding = `12px ${horizontalPadding}px`;
 const bottomContainerPadding = `0px ${horizontalPadding}px`;
 
-export const Room: React.FC = () => {
+type Props = {
+    debug?: {
+        window?: {
+            innerHeight?: number;
+            innerWidth?: number;
+        };
+    };
+};
+
+export const Room: React.FC<Props> = ({ debug }) => {
     const myUserUid = useMyUserUid();
     const innerWidth = useAtomValue(debouncedWindowInnerWidthAtom);
     const innerHeight = useAtomValue(debouncedWindowInnerHeightAtom);
@@ -955,8 +964,11 @@ export const Room: React.FC = () => {
                 <div className={classNames(relative)}>
                     {showBackgroundBoardViewer == true && (
                         <Board
-                            canvasWidth={innerWidth}
-                            canvasHeight={innerHeight - 40 /* TODO: 40という値は適当 */}
+                            canvasWidth={debug?.window?.innerWidth ?? innerWidth}
+                            canvasHeight={
+                                (debug?.window?.innerHeight ?? innerHeight) -
+                                40 /* TODO: 40という値は適当 */
+                            }
                             type='activeBoard'
                             isBackground={true}
                             config={activeBoardBackgroundConfig}

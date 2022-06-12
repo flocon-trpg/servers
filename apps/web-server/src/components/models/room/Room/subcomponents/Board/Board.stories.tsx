@@ -93,7 +93,6 @@ const activeBoardProps: Props = {
     canvasWidth: 500,
     canvasHeight: 400,
     type: 'activeBoard',
-    // TODO: isBackground: trueのケースの追加
     isBackground: false,
     config: {
         board: {
@@ -111,6 +110,11 @@ const activeBoardProps: Props = {
         height: 400,
         zIndex: 1,
     },
+};
+
+const backgroundActiveBoardProps: Props = {
+    ...activeBoardProps,
+    isBackground: true,
 };
 
 export default {
@@ -132,7 +136,18 @@ ActiveBoard.args = {
     boardProps: activeBoardProps,
 };
 
+export const BackgroundActiveBoard = Template.bind({});
+BackgroundActiveBoard.args = {
+    setActiveBoard: true,
+    boardProps: backgroundActiveBoardProps,
+};
+
 export const ActiveBoardNotFound = Template.bind({});
 ActiveBoardNotFound.args = {
     boardProps: activeBoardProps,
+};
+
+export const BackgroundActiveBoardNotFound = Template.bind({});
+BackgroundActiveBoardNotFound.args = {
+    boardProps: backgroundActiveBoardProps,
 };

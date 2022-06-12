@@ -11,6 +11,8 @@ import { UserConfig, defaultUserConfig } from '../atoms/userConfig/types';
 import { FirebaseStorage } from '@firebase/storage';
 import { FirebaseApp } from '@firebase/app';
 import { Client, createClient } from '@urql/core';
+import ColorName from 'color-name';
+import Color from 'color';
 
 type State = S<typeof roomTemplate>;
 type BoardState = S<typeof boardTemplate>;
@@ -181,16 +183,51 @@ export const createMockUrqlClient = ({ mockQuery }: MockUrqlClientParams): Clien
 };
 
 // https://dummyimage.com/ というダミー画像生成サイトを利用している
-const generateDummyImage = (type: 1 | 2 | 3, size: 'small' | 'large') => {
-    const sizeParam = size === 'small' ? '200x200' : '400x600';
+const generateDummyImage = ({
+    width,
+    height,
+    text,
+    bgColor,
+    textColor,
+}: {
+    width: number;
+    height: number;
+    text?: string;
+    bgColor: ColorName.RGB | string;
+    textColor?: ColorName.RGB | string;
+}) => {
+    const size = `${width}x${height}`;
+    const toHex = (color: ColorName.RGB | string) =>
+        (typeof color === 'string' ? color : Color.rgb(color).hex()).replaceAll('#', '');
+    const bgHexColor = toHex(bgColor);
+    const textHexColor = textColor == null ? '000000' : toHex(textColor);
+    const textParam = text == null ? '' : `&text=${text}`;
+    return `https://dummyimage.com/${size}/${bgHexColor}/${textHexColor}.png${textParam}`;
+};
+
+const generateDummyAvatarImage = (type: 1 | 2 | 3, size: 'small' | 'large') => {
+    let bgColor: ColorName.RGB;
+    let text: string;
     switch (type) {
         case 1:
-            return `https://dummyimage.com/${sizeParam}/fffebd/000000.png&text=sample1`;
+            bgColor = ColorName.red;
+            text = 'sample1';
+            break;
         case 2:
-            return `https://dummyimage.com/${sizeParam}/bffffe/000000.png&text=sample2`;
+            bgColor = ColorName.green;
+            text = 'sample2';
+            break;
         case 3:
-            return `https://dummyimage.com/${sizeParam}/efbfff/000000.png&text=sample3`;
+            bgColor = ColorName.blue;
+            text = 'sample3';
+            break;
     }
+    return generateDummyImage({
+        text,
+        width: size === 'small' ? 200 : 400,
+        height: size === 'small' ? 200 : 600,
+        bgColor,
+    });
 };
 
 export type CreateMockRoomParams = {
@@ -263,11 +300,21 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
     };
 
     if (params.setBoards) {
-        // TODO: 画像コマ、キャラクターコマ、立ち絵コマも追加する
-        // TODO: 背景画像の設定
+        result.activeBoardId = defaultBoardId;
         result.boards = {
             [defaultBoardId]: {
                 ...boardBase,
+                backgroundImage: {
+                    $v: 1,
+                    $r: 1,
+                    sourceType: 'Default',
+                    path: generateDummyImage({
+                        width: 300,
+                        height: 300,
+                        text: 'background',
+                        bgColor: ColorName.gray,
+                    }),
+                },
                 name: 'board-1-name',
                 ownerParticipantId: myUserUid,
                 dicePieces: {
@@ -354,6 +401,69 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
                         opacity: 0.7,
                     },
                 },
+                imagePieces: {
+                    ['image-piece-1']: {
+                        $v: 2,
+                        $r: 1,
+                        ownerParticipantId: myUserUid,
+                        cellX: 0,
+                        cellY: 0,
+                        cellH: 1,
+                        cellW: 1,
+                        x: 210,
+                        y: 10,
+                        w: 30,
+                        h: 40,
+                        isCellMode: false,
+                        isPositionLocked: false,
+                        memo: 'image-memo-1',
+                        name: 'image-name-1',
+                        image: {
+                            $v: 1,
+                            $r: 1,
+                            sourceType: 'Default',
+                            path: generateDummyImage({
+                                width: 200,
+                                height: 200,
+                                text: 'image1',
+                                bgColor: ColorName.cyan,
+                            }),
+                        },
+                        isPrivate: false,
+                        opacity: 0.7,
+                    },
+                    // 画像コマは現時点ではCellModeに対応していないため表示されない
+                    ['image-piece-2']: {
+                        $v: 2,
+                        $r: 1,
+                        ownerParticipantId: myUserUid,
+                        cellX: 5,
+                        cellY: 0,
+                        cellH: 2,
+                        cellW: 1,
+                        x: 10,
+                        y: 10,
+                        w: 10,
+                        h: 10,
+                        isCellMode: true,
+                        isPositionLocked: false,
+                        memo: 'image-memo-2',
+                        name: 'image-name-2',
+                        image: {
+                            $v: 1,
+                            $r: 1,
+                            sourceType: 'Default',
+                            path: generateDummyImage({
+                                width: 200,
+                                height: 200,
+                                text: 'image2',
+                                bgColor: ColorName.cyan,
+                            }),
+                        },
+                        isPrivate: false,
+                        opacity: 0.7,
+                    },
+                },
                 stringPieces: {
                     ['string-piece-1']: {
                         $v: 2,
@@ -427,13 +537,13 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
                 image: {
                     $v: 1,
                     $r: 1,
-                    path: generateDummyImage(1, 'small'),
+                    path: generateDummyAvatarImage(1, 'small'),
                     sourceType: 'Default',
                 },
                 portraitImage: {
                     $v: 1,
                     $r: 1,
-                    path: generateDummyImage(1, 'large'),
+                    path: generateDummyAvatarImage(1, 'large'),
                     sourceType: 'Default',
                 },
                 chatPalette: `私のHPは{HP}です
@@ -498,6 +608,47 @@ Param11=11`,
                         overriddenParameterName: undefined,
                     },
                 },
+                pieces: params.setBoards
+                    ? {
+                          [defaultBoardId]: {
+                              $v: 2,
+                              $r: 1,
+                              boardId: defaultBoardId,
+                              cellX: 0,
+                              cellY: 0,
+                              cellH: 1,
+                              cellW: 1,
+                              x: 10,
+                              y: 110,
+                              w: 40,
+                              h: 40,
+                              isCellMode: false,
+                              isPositionLocked: false,
+                              isPrivate: false,
+                              memo: 'charapiece-memo-1',
+                              name: 'charapiece-name-1',
+                              opacity: 0.7,
+                          },
+                      }
+                    : undefined,
+                portraitPieces: params.setBoards
+                    ? {
+                          [defaultBoardId]: {
+                              $v: 2,
+                              $r: 1,
+                              boardId: defaultBoardId,
+                              x: 60,
+                              y: 110,
+                              w: 40,
+                              h: 40,
+                              isPositionLocked: false,
+                              isPrivate: false,
+                              memo: 'portrait-memo-1',
+                              name: 'portrait-name-1',
+                              opacity: 0.7,
+                          },
+                      }
+                    : undefined,
             },
             [mySimpleCharacterId]: {
                 ...characterBase,
@@ -507,13 +658,13 @@ Param11=11`,
                 image: {
                     $v: 1,
                     $r: 1,
-                    path: generateDummyImage(2, 'small'),
+                    path: generateDummyAvatarImage(2, 'small'),
                     sourceType: 'Default',
                 },
                 portraitImage: {
                     $v: 1,
                     $r: 1,
-                    path: generateDummyImage(2, 'large'),
+                    path: generateDummyAvatarImage(2, 'large'),
                     sourceType: 'Default',
                 },
                 hasTag1: true,
@@ -527,13 +678,13 @@ Param11=11`,
                 image: {
                     $v: 1,
                     $r: 1,
-                    path: generateDummyImage(3, 'small'),
+                    path: generateDummyAvatarImage(3, 'small'),
                     sourceType: 'Default',
                 },
                 portraitImage: {
                     $v: 1,
                     $r: 1,
-                    path: generateDummyImage(3, 'large'),
+                    path: generateDummyAvatarImage(3, 'large'),
                     sourceType: 'Default',
                 },
                 chatPalette: 'character-3-chatpalette',
