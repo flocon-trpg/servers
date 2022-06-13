@@ -24,8 +24,8 @@ const roomId = '';
 export const Default: React.FC<{
     myParticipantRole: ParticipantRole;
     boardProps: Props;
-    setActiveBoard: boolean;
-}> = ({ boardProps, myParticipantRole, setActiveBoard }) => {
+    removeActiveBoard: boolean;
+}> = ({ boardProps, myParticipantRole, removeActiveBoard }) => {
     const setStorybook = useSetAtom(storybookAtom);
     React.useEffect(() => {
         setStorybook({
@@ -47,13 +47,13 @@ export const Default: React.FC<{
             setCharacters: true,
             setParamNames: true,
         });
-        if (setActiveBoard) {
+        if (removeActiveBoard) {
             return produce(result, result => {
-                result.activeBoardId = defaultBoardId;
+                result.activeBoardId = undefined;
             });
         }
         return result;
-    }, [myParticipantRole, setActiveBoard]);
+    }, [myParticipantRole, removeActiveBoard]);
     useMockRoom({ roomId, room });
     useMockUserConfig();
     const setRoomConfig = useSetAtom(roomConfigAtom);
@@ -132,22 +132,22 @@ Spectator.args = {
 
 export const ActiveBoard = Template.bind({});
 ActiveBoard.args = {
-    setActiveBoard: true,
     boardProps: activeBoardProps,
 };
 
 export const BackgroundActiveBoard = Template.bind({});
 BackgroundActiveBoard.args = {
-    setActiveBoard: true,
     boardProps: backgroundActiveBoardProps,
 };
 
 export const ActiveBoardNotFound = Template.bind({});
 ActiveBoardNotFound.args = {
     boardProps: activeBoardProps,
+    removeActiveBoard: true,
 };
 
 export const BackgroundActiveBoardNotFound = Template.bind({});
 BackgroundActiveBoardNotFound.args = {
     boardProps: backgroundActiveBoardProps,
+    removeActiveBoard: true,
 };
