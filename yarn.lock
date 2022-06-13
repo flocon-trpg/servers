@@ -103,6 +103,35 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ardatan/relay-compiler@npm:12.0.0":
+  version: 12.0.0
+  resolution: "@ardatan/relay-compiler@npm:12.0.0"
+  dependencies:
+    "@babel/core": ^7.14.0
+    "@babel/generator": ^7.14.0
+    "@babel/parser": ^7.14.0
+    "@babel/runtime": ^7.0.0
+    "@babel/traverse": ^7.14.0
+    "@babel/types": ^7.0.0
+    babel-preset-fbjs: ^3.4.0
+    chalk: ^4.0.0
+    fb-watchman: ^2.0.0
+    fbjs: ^3.0.0
+    glob: ^7.1.1
+    immutable: ~3.7.6
+    invariant: ^2.2.4
+    nullthrows: ^1.1.1
+    relay-runtime: 12.0.0
+    signedsource: ^1.0.0
+    yargs: ^15.3.1
+  peerDependencies:
+    graphql: "*"
+  bin:
+    relay-compiler: bin/relay-compiler
+  checksum: f0cec120d02961ee8652e0dde72d9e425bc97cad5d0f767d8764cfd30952294eb2838432f33e4da8bb6999d0c13dcd1df128280666bfea373294d98aa8033ae7
+  languageName: node
+  linkType: hard
+
 "@babel/code-frame@npm:^7.0.0, @babel/code-frame@npm:^7.10.4, @babel/code-frame@npm:^7.12.13, @babel/code-frame@npm:^7.14.5, @babel/code-frame@npm:^7.16.7, @babel/code-frame@npm:^7.5.5, @babel/code-frame@npm:^7.8.3":
   version: 7.16.7
   resolution: "@babel/code-frame@npm:7.16.7"
@@ -2658,9 +2687,9 @@ __metadata:
     "@flocon-trpg/utils": "workspace:^"
     "@flocon-trpg/web-server-utils": "workspace:*"
     "@graphql-codegen/cli": 2.6.2
-    "@graphql-codegen/typed-document-node": 2.2.12
-    "@graphql-codegen/typescript": 2.5.0
-    "@graphql-codegen/typescript-operations": 2.4.1
+    "@graphql-codegen/typed-document-node": 2.2.13
+    "@graphql-codegen/typescript": 2.5.1
+    "@graphql-codegen/typescript-operations": 2.4.2
     "@kizahasi/option": ^1.0.0
     "@kizahasi/ot-string": ^0.4.1
     "@kizahasi/result": ^1.0.0
@@ -3133,58 +3162,58 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-codegen/typed-document-node@npm:2.2.12":
-  version: 2.2.12
-  resolution: "@graphql-codegen/typed-document-node@npm:2.2.12"
+"@graphql-codegen/typed-document-node@npm:2.2.13":
+  version: 2.2.13
+  resolution: "@graphql-codegen/typed-document-node@npm:2.2.13"
   dependencies:
     "@graphql-codegen/plugin-helpers": ^2.4.0
-    "@graphql-codegen/visitor-plugin-common": 2.9.0
+    "@graphql-codegen/visitor-plugin-common": 2.9.1
     auto-bind: ~4.0.0
     change-case-all: 1.0.14
     tslib: ~2.4.0
   peerDependencies:
     graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
-  checksum: 72ec45fc390f4e8e7c503f3423f7cda91dd7a7f0fefb941d908cf6df9d31a4d54994e55d10ded10a439c524dbe7338e0a220df197c86e9c27a37d893dd8bbbf7
+  checksum: b1ff3016b1804cb8f2f78efc42f3f2c3293895dc7919a4f6fd2c9b1898e87201006909a7a962cfc165b256a4ffb80b985ddd936660314d28352e693bfc817bb3
   languageName: node
   linkType: hard
 
-"@graphql-codegen/typescript-operations@npm:2.4.1":
-  version: 2.4.1
-  resolution: "@graphql-codegen/typescript-operations@npm:2.4.1"
+"@graphql-codegen/typescript-operations@npm:2.4.2":
+  version: 2.4.2
+  resolution: "@graphql-codegen/typescript-operations@npm:2.4.2"
   dependencies:
     "@graphql-codegen/plugin-helpers": ^2.4.0
-    "@graphql-codegen/typescript": ^2.5.0
-    "@graphql-codegen/visitor-plugin-common": 2.9.0
+    "@graphql-codegen/typescript": ^2.5.1
+    "@graphql-codegen/visitor-plugin-common": 2.9.1
     auto-bind: ~4.0.0
     tslib: ~2.4.0
   peerDependencies:
     graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
-  checksum: e05856dfdb35abaa02265c4da876a435af0553f14fbf22f2f10b1bafd45c1ec48831db386d5cad0f73ddd97445cbc3524c852c99f1844dfb60659d591b4dade1
+  checksum: 593e7dadf1c2f068a9b12249f4b6c1551acaefa1b93f09caf3017f70266da7c9967826c84f184a4ef5e20ec6a2ab9a778c88dac7c6ca87e06c831ca5d04005c9
   languageName: node
   linkType: hard
 
-"@graphql-codegen/typescript@npm:2.5.0, @graphql-codegen/typescript@npm:^2.5.0":
-  version: 2.5.0
-  resolution: "@graphql-codegen/typescript@npm:2.5.0"
+"@graphql-codegen/typescript@npm:2.5.1, @graphql-codegen/typescript@npm:^2.5.1":
+  version: 2.5.1
+  resolution: "@graphql-codegen/typescript@npm:2.5.1"
   dependencies:
     "@graphql-codegen/plugin-helpers": ^2.4.0
     "@graphql-codegen/schema-ast": ^2.4.1
-    "@graphql-codegen/visitor-plugin-common": 2.9.0
+    "@graphql-codegen/visitor-plugin-common": 2.9.1
     auto-bind: ~4.0.0
     tslib: ~2.4.0
   peerDependencies:
     graphql: ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
-  checksum: ead7ef64d530b84d757e6deb487190cea6713c2dbcf7a0441f61f2e436496b8bc604a88bd5a2d3d8501ea3c434c168091e36da4c799a3e1143ea983b5f8bb37f
+  checksum: 9bf6ebf4379eeb40c2de63086f703867eea7395eae034e5a9b73c62eb5057ab0973008e8e04b646fe43c51b955e4017b6b28f0c2db69e74d7b774939f2863be2
   languageName: node
   linkType: hard
 
-"@graphql-codegen/visitor-plugin-common@npm:2.9.0":
-  version: 2.9.0
-  resolution: "@graphql-codegen/visitor-plugin-common@npm:2.9.0"
+"@graphql-codegen/visitor-plugin-common@npm:2.9.1":
+  version: 2.9.1
+  resolution: "@graphql-codegen/visitor-plugin-common@npm:2.9.1"
   dependencies:
     "@graphql-codegen/plugin-helpers": ^2.4.0
     "@graphql-tools/optimize": ^1.0.1
-    "@graphql-tools/relay-operation-optimizer": ^6.3.7
+    "@graphql-tools/relay-operation-optimizer": ^6.4.14
     "@graphql-tools/utils": ^8.3.0
     auto-bind: ~4.0.0
     change-case-all: 1.0.14
@@ -3194,7 +3223,7 @@ __metadata:
     tslib: ~2.4.0
   peerDependencies:
     graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
-  checksum: 20a5e9183e7d80761946dc2c88d3f367f056a5b5b3502da45c71689125ac0ea4be76c884ed1fe8ae9f68a824f35e03c293491ea40214ab600c8e7142af3c3b26
+  checksum: 5edba24e78ecb8db0968e222c44ee52067daf7d35553778ccfc49773fdb1bb8f0fa3ea2437e24761111bb5a1888a92530c145df4cb1cdb4331529837560ce137
   languageName: node
   linkType: hard
 
@@ -3426,16 +3455,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/relay-operation-optimizer@npm:^6.3.7":
-  version: 6.4.1
-  resolution: "@graphql-tools/relay-operation-optimizer@npm:6.4.1"
+"@graphql-tools/relay-operation-optimizer@npm:^6.4.14":
+  version: 6.4.14
+  resolution: "@graphql-tools/relay-operation-optimizer@npm:6.4.14"
   dependencies:
-    "@graphql-tools/utils": ^8.5.1
-    relay-compiler: 12.0.0
-    tslib: ~2.3.0
+    "@ardatan/relay-compiler": 12.0.0
+    "@graphql-tools/utils": 8.6.13
+    tslib: ^2.4.0
   peerDependencies:
-    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
-  checksum: 479d8375881899b27d3b1bfcb92824004e0757ba8a0bed252d9f77fc258e0ab41379d82e9ec20b823782a2d2bf2a6d68d1e43ea72780cc0fc22a18732de3709c
+    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+  checksum: 70e5cd96fa288bcfb0cba1fc0f48b92ad1ffd63c597560f4fc0b95b309fa4a7c735f5753dba2eef1cd58dd93c7c5c452d80dbd3bbe9cf6e7a5e50933f3dc15d3
   languageName: node
   linkType: hard
 
@@ -3493,14 +3522,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/utils@npm:^8.1.1, @graphql-tools/utils@npm:^8.3.0, @graphql-tools/utils@npm:^8.5.1, @graphql-tools/utils@npm:^8.5.2":
-  version: 8.6.1
-  resolution: "@graphql-tools/utils@npm:8.6.1"
+"@graphql-tools/utils@npm:8.6.13, @graphql-tools/utils@npm:^8.1.1, @graphql-tools/utils@npm:^8.3.0, @graphql-tools/utils@npm:^8.5.1, @graphql-tools/utils@npm:^8.5.2":
+  version: 8.6.13
+  resolution: "@graphql-tools/utils@npm:8.6.13"
   dependencies:
-    tslib: ~2.3.0
+    tslib: ^2.4.0
   peerDependencies:
-    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
-  checksum: 1286a2a6160f32038aff4b6cb9da1c844fc2762eec4e6e224238583cf890f335586dccd82cba4bd4e6f50678a6acd678c7043c1bb0d63c4c05c7fd5aa0e177ec
+    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+  checksum: ff95efe476d145c66936ab3fee33cc425f111dac35129bea828b12ada965344ab746d6a746f4ebaa261e3d957922381e49fcc061bd480a44f8f6252ac3b59e48
   languageName: node
   linkType: hard
 
@@ -21357,35 +21386,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"relay-compiler@npm:12.0.0":
-  version: 12.0.0
-  resolution: "relay-compiler@npm:12.0.0"
-  dependencies:
-    "@babel/core": ^7.14.0
-    "@babel/generator": ^7.14.0
-    "@babel/parser": ^7.14.0
-    "@babel/runtime": ^7.0.0
-    "@babel/traverse": ^7.14.0
-    "@babel/types": ^7.0.0
-    babel-preset-fbjs: ^3.4.0
-    chalk: ^4.0.0
-    fb-watchman: ^2.0.0
-    fbjs: ^3.0.0
-    glob: ^7.1.1
-    immutable: ~3.7.6
-    invariant: ^2.2.4
-    nullthrows: ^1.1.1
-    relay-runtime: 12.0.0
-    signedsource: ^1.0.0
-    yargs: ^15.3.1
-  peerDependencies:
-    graphql: ^15.0.0
-  bin:
-    relay-compiler: bin/relay-compiler
-  checksum: 3a7245adda15b866893438474725834381046e04ddd209810ca6077364360da718131e97fa9cb651e8991da6e4b889c9a48af9fb85cea7311561a5120f9a4d60
-  languageName: node
-  linkType: hard
-
 "relay-runtime@npm:12.0.0":
   version: 12.0.0
   resolution: "relay-runtime@npm:12.0.0"
@@ -24038,7 +24038,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2, tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.1.0, tslib@npm:^2.3.0, tslib@npm:~2.4.0":
+"tslib@npm:^2, tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.1.0, tslib@npm:^2.3.0, tslib@npm:^2.4.0, tslib@npm:~2.4.0":
   version: 2.4.0
   resolution: "tslib@npm:2.4.0"
   checksum: 8c4aa6a3c5a754bf76aefc38026134180c053b7bd2f81338cb5e5ebf96fefa0f417bff221592bf801077f5bf990562f6264fecbc42cd3309b33872cb6fc3b113
