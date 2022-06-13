@@ -2921,7 +2921,7 @@ __metadata:
     "@types/jest": 27.5.2
     "@types/lodash": ^4.14.181
     "@types/quill": ^2.0.9
-    "@types/react": ^17.0.24
+    "@types/react": ^18.0.0
     "@types/react-color": ^3.0.5
     "@types/react-linkify": ^1.0.1
     "@types/sinonjs__fake-timers": 8.1.2
@@ -6738,14 +6738,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:^17.0.24":
-  version: 17.0.44
-  resolution: "@types/react@npm:17.0.44"
+"@types/react@npm:*, @types/react@npm:^18.0.0":
+  version: 18.0.12
+  resolution: "@types/react@npm:18.0.12"
   dependencies:
     "@types/prop-types": "*"
     "@types/scheduler": "*"
     csstype: ^3.0.2
-  checksum: ebee02778ca08f954c316dc907802264e0121c87b8fa2e7e0156ab0ef2a1b0a09d968c016a3600ec4c9a17dc09b4274f292d9b15a1a5369bb7e4072def82808f
+  checksum: 526ea13b3adf7fe4b475e55b7426510a7861ef2910664a9014ef42cba0c699d5167dc378eb161e2ec26c07a3b6fde9b6bdcbbb6f4b5580612246bc289395ef03
   languageName: node
   linkType: hard
 

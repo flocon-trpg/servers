@@ -18,7 +18,7 @@
         "@types/html-escaper": "^3.0.0",
         "@types/lodash": "^4.14.181",
         "@types/quill": "^2.0.9",
-        "@types/react": "^17.0.24",
+        "@types/react": "^18.0.0",
         "@types/react-color": "^3.0.5",
         "@types/react-linkify": "^1.0.1",
         "@types/url-join": "^4.0.1",
