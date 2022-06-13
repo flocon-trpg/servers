@@ -1008,17 +1008,17 @@ namespace ContextMenuModule {
             label: '新規作成',
             children: [
                 {
-                    key: 'キャラクターコマ@boardPopover',
+                    key: 'キャラクターコマ@新規作成@boardPopover',
                     label: 'キャラクターコマ',
                     children: pieceMenus,
                 },
                 {
-                    key: 'キャラクター立ち絵@boardPopover',
+                    key: 'キャラクター立ち絵@新規作成@boardPopover',
                     label: 'キャラクター立ち絵',
                     children: portraitMenus,
                 },
                 {
-                    key: 'ダイスコマ@boardPopover',
+                    key: 'ダイスコマ@新規作成@boardPopover',
                     label: 'ダイスコマ',
                     onClick: () => {
                         hooks.setDicePieceEditor({
@@ -1030,7 +1030,7 @@ namespace ContextMenuModule {
                     },
                 },
                 {
-                    key: '文字列コマ@boardPopover',
+                    key: '文字列コマ@新規作成@boardPopover',
                     label: '文字列コマ',
                     onClick: () => {
                         hooks.setStringPieceEditor({
@@ -1042,7 +1042,7 @@ namespace ContextMenuModule {
                     },
                 },
                 {
-                    key: '画像コマ@boardPopover',
+                    key: '画像コマ@新規作成@boardPopover',
                     label: '画像コマ',
                     onClick: () => {
                         hooks.setImagePieceModal({
