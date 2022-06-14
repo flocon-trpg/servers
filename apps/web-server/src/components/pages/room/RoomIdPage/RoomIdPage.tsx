@@ -14,7 +14,7 @@ import { atom } from 'jotai';
 import { selectAtom, useAtomValue, useUpdateAtom } from 'jotai/utils';
 import { useRouter } from 'next/router';
 import React from 'react';
-import { useDebounce, usePrevious } from 'react-use';
+import { useDebounce, useLatest, usePrevious } from 'react-use';
 import { Subject, bufferTime } from 'rxjs';
 import { roomPrivateMessageInputAtom } from '../../../models/room/Room/subcomponents/atoms/roomPrivateMessageInputAtom/roomPrivateMessageInputAtom';
 import { roomPublicMessageInputAtom } from '../../../models/room/Room/subcomponents/atoms/roomPublicMessageInputAtom/roomPublicMessageInputAtom';
@@ -24,7 +24,6 @@ import { roomConfigAtom } from '../../../../atoms/roomConfigAtom/roomConfigAtom'
 import { RoomConfigUtils } from '../../../../atoms/roomConfigAtom/types/roomConfig/utils';
 import { useAtomSelector } from '../../../../hooks/useAtomSelector';
 import { usePublishRoomEventSubscription } from '../../../../hooks/usePublishRoomEventSubscription';
-import { useReadonlyRef } from '../../../../hooks/useReadonlyRef';
 import { useStartFetchingRoomMessages } from '../../../../hooks/useRoomMessages';
 import {
     deleted,
@@ -287,7 +286,7 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
     roomId: string;
     children: JSX.Element;
 }) => {
-    const roomIdRef = useReadonlyRef(roomId);
+    const roomIdRef = useLatest(roomId);
     const setRoomAtomValue = useUpdateAtom(roomAtom);
     const setRoomPublicMessageInput = useUpdateAtom(roomPublicMessageInputAtom);
     const setRoomPrivateMessageInput = useUpdateAtom(roomPrivateMessageInputAtom);

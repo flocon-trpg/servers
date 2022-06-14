@@ -6,13 +6,13 @@ import { hideAllOverlayActionAtom } from '../atoms/hideAllOverlayActionAtom/hide
 import { roomAtom } from '../atoms/roomAtom/roomAtom';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
 import { firebaseAuthAtom } from '../pages/_app';
-import { useReadonlyRef } from './useReadonlyRef';
+import { useLatest } from 'react-use';
 
 export function useSignOut() {
     const setRoom = useUpdateAtom(roomAtom);
     const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
     const auth = useAtomValue(firebaseAuthAtom);
-    const firebaseStorageUrlCacheContextRef = useReadonlyRef(firebaseStorageUrlCacheContext);
+    const firebaseStorageUrlCacheContextRef = useLatest(firebaseStorageUrlCacheContext);
     const setPublicFiles = useUpdateAtom(publicFilesAtom);
     const setUnlistedFiles = useUpdateAtom(unlistedFilesAtom);
     const hideAllOverlay = useUpdateAtom(hideAllOverlayActionAtom);

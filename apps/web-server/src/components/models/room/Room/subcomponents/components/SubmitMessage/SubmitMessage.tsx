@@ -16,7 +16,6 @@ import { UISelector } from '../../../../../../ui/UISelector/UISelector';
 import { PrivateMessageChannelSelector } from './subcomponents/components/PrivateMessageChannelSelector/PrivateMessageChannelSelector';
 import { PublicMessageChannelSelector } from './subcomponents/components/PublicMessageChannelSelector/PublicMessageChannelSelector';
 import { Observable } from 'rxjs';
-import { useReadonlyRef } from '../../../../../../../hooks/useReadonlyRef';
 import classNames from 'classnames';
 import { flex, flexColumn, flexNone } from '../../../../../../../styles/className';
 import { $free, PublicChannelKey } from '@flocon-trpg/core';
@@ -32,6 +31,7 @@ import { Draft } from 'immer';
 import { roomPrivateMessageInputAtom } from '../../atoms/roomPrivateMessageInputAtom/roomPrivateMessageInputAtom';
 import { roomPublicMessageInputAtom } from '../../atoms/roomPublicMessageInputAtom/roomPublicMessageInputAtom';
 import { useUpdateAtom } from 'jotai/utils';
+import { useLatest } from 'react-use';
 
 /* react-virtuosoはおそらくheightを指定しなければ正常に動作しないため、もしこれが可変だとheightの指定が無理とは言わないまでも面倒になる。そのため、70pxという適当な値で固定している */
 const height = 70;
@@ -152,7 +152,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
                 }
             });
     };
-    const onPostRef = useReadonlyRef(onPost);
+    const onPostRef = useLatest(onPost);
 
     React.useEffect(() => {
         if (autoSubmitter == null) {
@@ -315,7 +315,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
                 }
             });
     };
-    const onPostRef = useReadonlyRef(onPost);
+    const onPostRef = useLatest(onPost);
 
     React.useEffect(() => {
         if (autoSubmitter == null) {

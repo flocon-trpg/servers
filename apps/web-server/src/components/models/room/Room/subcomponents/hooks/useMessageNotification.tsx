@@ -11,7 +11,7 @@ import { useParticipants } from './useParticipants';
 import { useMyUserUid } from '../../../../../../hooks/useMyUserUid';
 import classNames from 'classnames';
 import { flex, flexRow } from '../../../../../../styles/className';
-import { useReadonlyRef } from '../../../../../../hooks/useReadonlyRef';
+import { useLatest } from 'react-use';
 import { useAtomSelector } from '../../../../../../hooks/useAtomSelector';
 import { roomConfigAtom } from '../../../../../../atoms/roomConfigAtom/roomConfigAtom';
 import { MessageFilterUtils } from '../../../../../../atoms/roomConfigAtom/types/messageFilter/utils';
@@ -27,10 +27,10 @@ const argsBase: Omit<ArgsProps, 'message'> = {
 
 export function useMessageNotification(): void {
     const publicChannelNames = usePublicChannelNames();
-    const publicChannelNameRef = useReadonlyRef(publicChannelNames);
+    const publicChannelNameRef = useLatest(publicChannelNames);
     const messageDiff = useRoomMessageEvent();
     const participantsMap = useParticipants();
-    const participantsMapRef = useReadonlyRef(participantsMap);
+    const participantsMapRef = useLatest(participantsMap);
     const masterVolume = useAtomSelector(roomConfigAtom, state => state?.masterVolume);
     const seVolume = useAtomSelector(roomConfigAtom, state => state?.seVolume);
     const volumeRef = React.useRef(
@@ -59,7 +59,7 @@ export function useMessageNotification(): void {
     }, [messageNotificationFilter]);
 
     const messageFilter = useMessageFilter(messageNotificationFilterRef.current);
-    const messageFilterRef = useReadonlyRef(messageFilter);
+    const messageFilterRef = useLatest(messageFilter);
 
     React.useEffect(() => {
         if (myUserUidRef.current == null || messageDiff == null) {

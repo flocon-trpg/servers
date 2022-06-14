@@ -4,7 +4,7 @@ import React from 'react';
 import { GetRoomConnectionsDocument } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { Notification } from '@flocon-trpg/web-server-utils';
 import { useParticipants } from './useParticipants';
-import { useReadonlyRef } from '../../../../../../hooks/useReadonlyRef';
+import { useLatest } from 'react-use';
 import { roomAtom, roomNotificationsAtom, text } from '../../../../../../atoms/roomAtom/roomAtom';
 import { useAtomSelector } from '../../../../../../hooks/useAtomSelector';
 import { useUpdateAtom } from 'jotai/utils';
@@ -28,7 +28,7 @@ export function useRoomConnections() {
     });
     const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
     const participants = useParticipants();
-    const participantsRef = useReadonlyRef(participants);
+    const participantsRef = useLatest(participants);
 
     React.useEffect(() => {
         setResult({});

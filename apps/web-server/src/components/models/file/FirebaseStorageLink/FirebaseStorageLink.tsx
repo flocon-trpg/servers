@@ -1,8 +1,8 @@
 import { StorageReference, getDownloadURL, ref } from 'firebase/storage';
 import { useAtomValue } from 'jotai/utils';
 import React from 'react';
+import { useLatest } from 'react-use';
 import { FirebaseStorageUrlCacheContext } from '../../../../contexts/FirebaseStorageUrlCacheContext';
-import { useReadonlyRef } from '../../../../hooks/useReadonlyRef';
 import { firebaseStorageAtom } from '../../../../pages/_app';
 import { fileName } from '../../../../utils/filename';
 
@@ -12,7 +12,7 @@ type Props = {
 
 export const FirebaseStorageLink: React.FC<Props> = ({ reference }: Props) => {
     const cache = React.useContext(FirebaseStorageUrlCacheContext);
-    const cacheRef = useReadonlyRef(cache);
+    const cacheRef = useLatest(cache);
     const [url, setUrl] = React.useState<string>();
     const [fullPath, setFullPath] = React.useState<string>(
         typeof reference === 'string' ? '' : reference.fullPath

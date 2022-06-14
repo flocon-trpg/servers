@@ -7,7 +7,6 @@ import { diff, serializeUpOperation, toUpOperation } from '@kizahasi/ot-string';
 import { useLatest, usePrevious } from 'react-use';
 // react-quilljs などを使わず直接 Quill を使うと、next build 時に ReferenceError: document is not defined というエラーが出てビルドできない。おそらくawait importでも回避できそうだが、react-quilljs を利用することで解決している。
 import { useQuill } from 'react-quilljs';
-import { useReadonlyRef } from '../../../hooks/useReadonlyRef';
 import useConstant from 'use-constant';
 import { Subject, Subscription, debounceTime } from 'rxjs';
 
@@ -147,8 +146,8 @@ function useBuffer<TValue, TComponent>({
         throw new Error('bufferDuration < 0');
     }
 
-    const onChangeRef = useReadonlyRef(onChangeOutput);
-    const setValueToComponentRef = useReadonlyRef(setValueToComponent);
+    const onChangeRef = useLatest(onChangeOutput);
+    const setValueToComponentRef = useLatest(setValueToComponent);
 
     const ref = React.useRef<TComponent | null>(null);
     const subject = useConstant(() => new Subject<TValue>());
@@ -164,7 +163,7 @@ function useBuffer<TValue, TComponent>({
         previousValue?: TValue;
         currentValue: TValue;
     }>({ currentValue: value });
-    const changeParamsRef = useReadonlyRef(changeParams);
+    const changeParamsRef = useLatest(changeParams);
     const [subscriptionUpdateKey, setSubscriptionUpdateKey] = React.useState(0);
 
     React.useEffect(() => {

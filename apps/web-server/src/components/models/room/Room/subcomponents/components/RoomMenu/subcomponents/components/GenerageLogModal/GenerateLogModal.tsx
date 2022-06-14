@@ -9,7 +9,6 @@ import {
 } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { useParticipants } from '../../../../../hooks/useParticipants';
 import { usePublicChannelNames } from '../../../../../hooks/usePublicChannelNames';
-import { useReadonlyRef } from '../../../../../../../../../../hooks/useReadonlyRef';
 import {
     ChannelsFilter,
     ChannelsFilterOptions,
@@ -23,6 +22,7 @@ import { useClient } from 'urql';
 import { useWebConfig } from '../../../../../../../../../../hooks/useWebConfig';
 import { useAtomValue } from 'jotai/utils';
 import { firebaseStorageAtom, getIdTokenAtom } from '../../../../../../../../../../pages/_app';
+import { useLatest } from 'react-use';
 
 const simple = 'simple';
 const rich = 'rich';
@@ -35,37 +35,37 @@ type Props = {
 };
 
 export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: Props) => {
-    const roomIdRef = useReadonlyRef(roomId);
+    const roomIdRef = useLatest(roomId);
 
     const client = useClient();
-    const clientRef = useReadonlyRef(client);
+    const clientRef = useLatest(client);
     const config = useWebConfig();
-    const configRef = useReadonlyRef(config);
+    const configRef = useLatest(config);
     const firebaseStorage = useAtomValue(firebaseStorageAtom);
-    const firebaseStorageRef = useReadonlyRef(firebaseStorage);
+    const firebaseStorageRef = useLatest(firebaseStorage);
     const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
-    const firebaseStorageUrlCacheContextRef = useReadonlyRef(firebaseStorageUrlCacheContext);
+    const firebaseStorageUrlCacheContextRef = useLatest(firebaseStorageUrlCacheContext);
     const getIdToken = useAtomValue(getIdTokenAtom);
-    const getIdTokenRef = useReadonlyRef(getIdToken);
+    const getIdTokenRef = useLatest(getIdToken);
     const publicChannelNames = usePublicChannelNames();
-    const publicChannelNamesRef = useReadonlyRef(publicChannelNames);
+    const publicChannelNamesRef = useLatest(publicChannelNames);
     const participants = useParticipants();
-    const participantsRef = useReadonlyRef(participants);
+    const participantsRef = useLatest(participants);
 
     // これがfalseからtrueになったときのみダウンロードが開始される
     const [isDownloading, setIsDownloading] = React.useState(false);
 
     const [logMode, setLogMode] = React.useState<LogMode>(rich);
-    const logModeRef = useReadonlyRef(logMode);
+    const logModeRef = useLatest(logMode);
     const [channelsFilterOptions, setChannelsFilterOptions] = React.useState(
         ChannelsFilterOptions.defaultValue
     );
-    const channelsFilterOptionsRef = useReadonlyRef(channelsFilterOptions);
+    const channelsFilterOptionsRef = useLatest(channelsFilterOptions);
 
     const [showCreatedAt, setShowCreatedAt] = React.useState(true);
-    const showCreatedAtRef = useReadonlyRef(showCreatedAt);
+    const showCreatedAtRef = useLatest(showCreatedAt);
     const [showUsernameAlways, setShowUsernameAlways] = React.useState(true);
-    const showUsernameAlwaysRef = useReadonlyRef(showUsernameAlways);
+    const showUsernameAlwaysRef = useLatest(showUsernameAlways);
 
     const [progress, setProgress] = React.useState<number>();
     const [errorMessage, setErrorMessage] = React.useState<string>();

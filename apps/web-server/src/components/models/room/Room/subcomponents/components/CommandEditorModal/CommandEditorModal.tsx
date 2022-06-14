@@ -2,7 +2,6 @@ import { mapToRecord, recordToMap } from '@flocon-trpg/utils';
 import { Button, Input, Modal, Select } from 'antd';
 import React from 'react';
 import { useCharacter } from '../../hooks/useCharacter';
-import { useReadonlyRef } from '../../../../../../../hooks/useReadonlyRef';
 import MonacoEditor, { useMonaco } from '@monaco-editor/react';
 import { useBufferValue } from '../../../../../../../hooks/useBufferValue';
 import { testCommand } from '../../../../../../../utils/character/command';
@@ -17,7 +16,7 @@ import {
 import classNames from 'classnames';
 import { flex, flexRow } from '../../../../../../../styles/className';
 import { characterUpdateOperation } from '../../../../../../../utils/character/characterUpdateOperation';
-import { usePrevious } from 'react-use';
+import { useLatest, usePrevious } from 'react-use';
 import { characterCommandLibSource } from '../../../../../../../monaco/characterCommandLibSource';
 import { defaultLibSource } from '../../../../../../../monaco/defaultLibSource';
 import { useAtom } from 'jotai';
@@ -123,7 +122,7 @@ export const CommandEditorModal: React.FC = () => {
     const operate = useSetRoomStateByApply();
     const [commandEditorModalType, setCommandEditorModalType] = useAtom(commandEditorModalAtom);
     const character = useCharacter(commandEditorModalType?.characterId);
-    const characterRef = useReadonlyRef(character);
+    const characterRef = useLatest(character);
     const [privateCommands, setPrivateCommands] = React.useState<Map<string, CommandState>>(
         new Map()
     );
