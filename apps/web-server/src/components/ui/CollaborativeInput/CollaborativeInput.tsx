@@ -3,11 +3,13 @@ import React from 'react';
 import Quill from 'quill';
 import QuillDelta from 'quill-delta';
 import { SerializedStyles, css } from '@emotion/react';
-import { useBuffer } from '../../../hooks/useBuffer';
 import { diff, serializeUpOperation, toUpOperation } from '@kizahasi/ot-string';
 import { useLatest, usePrevious } from 'react-use';
 // react-quilljs などを使わず直接 Quill を使うと、next build 時に ReferenceError: document is not defined というエラーが出てビルドできない。おそらくawait importでも回避できそうだが、react-quilljs を利用することで解決している。
 import { useQuill } from 'react-quilljs';
+import { useReadonlyRef } from '../../../hooks/useReadonlyRef';
+import useConstant from 'use-constant';
+import { Subject, Subscription, debounceTime } from 'rxjs';
 
 /*
 quill.bubble.css:389 に、下のようにplaceholderに関するstyleが記述されている。
@@ -129,6 +131,99 @@ const createDelta = ({ prev, next }: { prev: string; next: string }): QuillDelta
     }
     return result;
 };
+
+function useBuffer<TValue, TComponent>({
+    value,
+    bufferDuration,
+    onChangeOutput,
+    setValueToComponent,
+}: {
+    value: TValue;
+    bufferDuration: number | null;
+    onChangeOutput: (params: { previousValue: TValue; currentValue: TValue }) => void;
+    setValueToComponent: (params: { value: TValue; component: TComponent }) => void;
+}) {
+    if (bufferDuration != null && bufferDuration < 0) {
+        throw new Error('bufferDuration < 0');
+    }
+
+    const onChangeRef = useReadonlyRef(onChangeOutput);
+    const setValueToComponentRef = useReadonlyRef(setValueToComponent);
+
+    const ref = React.useRef<TComponent | null>(null);
+    const subject = useConstant(() => new Subject<TValue>());
+    const latestOnChangeInputValueRef = React.useRef(value);
+    const onChangeInput: (value: TValue) => void = useConstant(() => {
+        return x => {
+            latestOnChangeInputValueRef.current = x;
+            subject.next(x);
+        };
+    });
+    const [, setSubscription] = React.useState<Subscription>();
+    const [changeParams, setChangeParams] = React.useState<{
+        previousValue?: TValue;
+        currentValue: TValue;
+    }>({ currentValue: value });
+    const changeParamsRef = useReadonlyRef(changeParams);
+    const [subscriptionUpdateKey, setSubscriptionUpdateKey] = React.useState(0);
+
+    React.useEffect(() => {
+        if (ref.current != null) {
+            setValueToComponentRef.current({ value, component: ref.current });
+        }
+
+        setSubscriptionUpdateKey(oldState => oldState + 1);
+        setChangeParams({ currentValue: value });
+    }, [setValueToComponentRef, value]);
+
+    React.useEffect(() => {
+        const newSubscription = (
+            bufferDuration == null ? subject : subject.pipe(debounceTime(bufferDuration))
+        ).subscribe(newValue => {
+            setChangeParams(oldResult => {
+                return {
+                    previousValue: oldResult.currentValue,
+                    currentValue: newValue,
+                };
+            });
+        });
+        setSubscription(oldSubscription => {
+            oldSubscription?.unsubscribe();
+            return newSubscription;
+        });
+        return () => {
+            newSubscription.unsubscribe();
+        };
+    }, [subject, bufferDuration, subscriptionUpdateKey]);
+
+    React.useEffect(() => {
+        if (changeParams.previousValue !== undefined) {
+            onChangeRef.current({
+                previousValue: changeParams.previousValue,
+                currentValue: changeParams.currentValue,
+            });
+        }
+    }, [changeParams, onChangeRef]);
+
+    // unmount時にonChangeを実行させている
+    React.useEffect(() => {
+        const $changeParamsRef = changeParamsRef;
+        const $latestOnChangeInputValueRef = latestOnChangeInputValueRef;
+        const $onChangeRef = onChangeRef;
+        return () => {
+            const previousValue = $changeParamsRef.current.currentValue;
+            const currentValue = $latestOnChangeInputValueRef.current;
+            if (previousValue !== currentValue) {
+                $onChangeRef.current({ previousValue, currentValue });
+            }
+        };
+    }, [changeParamsRef, onChangeRef]);
+
+    return {
+        onChangeInput,
+        ref,
+    };
+}
 
 export type Props = {
     value: string;

@@ -7,9 +7,9 @@ import {
 } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { DialogFooter } from '../../../ui/DialogFooter/DialogFooter';
 import { FilesManagerDrawerType, some } from '../../../../utils/types';
-import { cancelRnd } from '../../../../utils/className';
-import { FirebaseFilesManager } from './subcomponents/FirebaseFilesManager/FirebaseFilesManager';
-import { FloconFilesManager } from './subcomponents/FloconFilesManager/FloconFilesManager';
+import { cancelRnd } from '../../../../styles/className';
+import { FirebaseFilesManager } from './subcomponents/components/FirebaseFilesManager/FirebaseFilesManager';
+import { FloconFilesManager } from './subcomponents/components/FloconFilesManager/FloconFilesManager';
 import { useQuery } from 'urql';
 import { useAtomValue } from 'jotai';
 import { firebaseUserAtom } from '../../../../pages/_app';

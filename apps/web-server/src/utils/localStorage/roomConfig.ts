@@ -5,7 +5,7 @@ import {
     defaultRoomConfig,
     deserializeRoomConfig,
     serializedRoomConfig,
-} from '../../atoms/roomConfig/types/roomConfig';
+} from '../../atoms/roomConfigAtom/types/roomConfig';
 import { tryParseJSON } from '../tryParseJSON';
 
 const roomConfigKey = (roomId: string) => `room@${roomId}`;

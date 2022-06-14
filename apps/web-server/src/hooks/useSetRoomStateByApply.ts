@@ -1,6 +1,6 @@
 import { UpOperation, roomTemplate } from '@flocon-trpg/core';
-import { roomAtom } from '../atoms/room/roomAtom';
-import { useAtomSelector } from '../atoms/useAtomSelector';
+import { roomAtom } from '../atoms/roomAtom/roomAtom';
+import { useAtomSelector } from './useAtomSelector';
 
 const emptyOperate = (operation: UpOperation<typeof roomTemplate>): void => {
     throw new Error('useOperate is not ready');

@@ -3,7 +3,7 @@ import produce from 'immer';
 import { atom } from 'jotai';
 import { useAtomValue } from 'jotai/utils';
 import React from 'react';
-import { roomAtom } from '../atoms/room/roomAtom';
+import { roomAtom } from '../atoms/roomAtom/roomAtom';
 
 type RoomState = State<typeof roomTemplate>;
 

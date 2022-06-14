@@ -27,7 +27,7 @@ import { LoadingResult } from '../LoadingResult/LoadingResult';
 import * as Icon from '@ant-design/icons';
 import { useSignOut } from '../../../hooks/useSignOut';
 import { useClient, useMutation } from 'urql';
-import { useGetMyRoles } from '../../../hooks/apiServer/useGetMyRoles';
+import { useGetMyRoles } from '../../../hooks/useGetMyRoles';
 import { useAtomValue } from 'jotai';
 import { firebaseUserAtom, getIdTokenAtom } from '../../../pages/_app';
 import { authNotFound, loading, notSignIn } from '../../../utils/firebase/firebaseUserState';

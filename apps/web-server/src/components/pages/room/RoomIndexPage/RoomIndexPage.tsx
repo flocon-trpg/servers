@@ -5,7 +5,7 @@ import { Button, Dropdown, Menu, Modal, Table, Tooltip, notification } from 'ant
 import classNames from 'classnames';
 import { useRouter } from 'next/router';
 import React from 'react';
-import { flex, flexNone, flexRow } from '../../../../utils/className';
+import { flex, flexNone, flexRow } from '../../../../styles/className';
 import { Layout, loginAndEntry } from '../../../ui/Layout/Layout';
 import { QueryResultViewer } from '../../../ui/QueryResultViewer/QueryResultViewer';
 import * as Icons from '@ant-design/icons';
@@ -13,8 +13,8 @@ import { Styles } from '../../../../styles';
 import { toBeNever } from '@flocon-trpg/utils';
 import moment from 'moment';
 import { ToggleButton } from '../../../ui/ToggleButton/ToggleButton';
-import { useGetMyRoles } from '../../../../hooks/apiServer/useGetMyRoles';
-import { useIsV072OrLater } from '../../../../hooks/apiServer/useIsV072OrLater';
+import { useGetMyRoles } from '../../../../hooks/useGetMyRoles';
+import { useIsV072OrLater } from '../../../../hooks/useIsV072OrLater';
 import { Subscription } from 'rxjs';
 import { defaultTriggerSubMenuAction } from '../../../../utils/variables';
 

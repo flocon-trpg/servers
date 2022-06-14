@@ -8,7 +8,7 @@ import { SupportedApiServers, VERSION } from '../../../VERSION';
 import * as Icon from '@ant-design/icons';
 import { useRouter } from 'next/router';
 import classNames from 'classnames';
-import { flex, flexColumn } from '../../../utils/className';
+import { flex, flexColumn } from '../../../styles/className';
 import { apiServerSatisfies } from '../../../versioning/apiServerSatisfies';
 import { semVerRangeToString } from '../../../versioning/semVerRange';
 import { useGetApiSemVer } from '../../../hooks/useGetApiSemVer';

@@ -2,7 +2,7 @@ import React from 'react';
 import { ComponentMeta } from '@storybook/react';
 import { SignIn } from './SignIn';
 import { useSetAtom } from 'jotai';
-import { storybookAtom } from '../../../../atoms/storybook/storybookAtom';
+import { storybookAtom } from '../../../../atoms/storybookAtom/storybookAtom';
 import { Result } from '@kizahasi/result';
 import * as Env from '../../../../env';
 import { mockAuth, mockUser, mockWebConfig } from '../../../../mocks';

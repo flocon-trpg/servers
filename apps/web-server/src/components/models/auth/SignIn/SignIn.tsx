@@ -22,11 +22,11 @@ import { Alert, Button, Form, Input, Tooltip } from 'antd';
 import { Center } from '../../../ui/Center/Center';
 import { useRouter } from 'next/router';
 import classNames from 'classnames';
-import { flex, flexColumn, flexRow } from '../../../../utils/className';
+import { flex, flexColumn, flexRow } from '../../../../styles/className';
 import { useAtomValue } from 'jotai/utils';
 import { firebaseAuthAtom } from '../../../../pages/_app';
 import { atom, useAtom, useSetAtom } from 'jotai';
-import { storybookAtom } from '../../../../atoms/storybook/storybookAtom';
+import { storybookAtom } from '../../../../atoms/storybookAtom/storybookAtom';
 
 const displayName = 'new user';
 const formWidth = 400;

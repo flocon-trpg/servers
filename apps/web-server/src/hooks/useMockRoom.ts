@@ -1,9 +1,9 @@
 import React from 'react';
-import { roomAtom } from '../atoms/room/roomAtom';
-import { useImmerUpdateAtom } from '../atoms/useImmerUpdateAtom';
+import { roomAtom } from '../atoms/roomAtom/roomAtom';
+import { useImmerUpdateAtom } from './useImmerUpdateAtom';
 import { joined } from './useRoomState';
 import { useAtomValue } from 'jotai';
-import { storybookAtom } from '../atoms/storybook/storybookAtom';
+import { storybookAtom } from '../atoms/storybookAtom/storybookAtom';
 import { useLatest } from 'react-use';
 import { State as S, apply as a, roomTemplate } from '@flocon-trpg/core';
 

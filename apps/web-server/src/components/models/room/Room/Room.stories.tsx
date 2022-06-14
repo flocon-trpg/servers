@@ -4,12 +4,12 @@ import { useSetAtom } from 'jotai';
 import { Result } from '@kizahasi/result';
 import { Room } from './Room';
 import { WebConfig } from '../../../../configType';
-import { storybookAtom } from '../../../../atoms/storybook/storybookAtom';
+import { storybookAtom } from '../../../../atoms/storybookAtom/storybookAtom';
 import { useMockRoom } from '../../../../hooks/useMockRoom';
-import { roomConfigAtom } from '../../../../atoms/roomConfig/roomConfigAtom';
+import { roomConfigAtom } from '../../../../atoms/roomConfigAtom/roomConfigAtom';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { defaultRoomConfig } from '../../../../atoms/roomConfig/types/roomConfig';
+import { defaultRoomConfig } from '../../../../atoms/roomConfigAtom/types/roomConfig';
 import {
     createMockRoom,
     createMockRoomMessages,

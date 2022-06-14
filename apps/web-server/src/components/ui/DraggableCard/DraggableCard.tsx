@@ -1,14 +1,14 @@
 import React, { PropsWithChildren } from 'react';
 import { NumberSize, ResizeDirection } from 're-resizable';
 import { CloseOutlined } from '@ant-design/icons';
-import { cancelRnd } from '../../../utils/className';
+import { cancelRnd } from '../../../styles/className';
 import { ControlPosition } from 'react-draggable';
-import { useAtomSelector } from '../../../atoms/useAtomSelector';
-import { roomConfigAtom } from '../../../atoms/roomConfig/roomConfigAtom';
+import { useAtomSelector } from '../../../hooks/useAtomSelector';
+import { roomConfigAtom } from '../../../atoms/roomConfigAtom/roomConfigAtom';
 import {
     defaultPanelOpacity,
     minPanelOpacity,
-} from '../../../atoms/roomConfig/types/roomConfig/resources';
+} from '../../../atoms/roomConfigAtom/types/roomConfig/resources';
 import { Styles } from '../../../styles';
 import { Rnd, Props as RndProps } from 'react-rnd';
 

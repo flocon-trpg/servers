@@ -1,6 +1,10 @@
 import { FilterValue } from 'antd/lib/table/interface';
 import { FilePath } from './file/filePath';
 
+export type BoardType =
+    | { type: 'boardEditor'; boardEditorPanelId: string }
+    | { type: 'activeBoardViewer'; isBackground: boolean };
+
 export type CharacterTagNames = {
     characterTag1Name: string | undefined;
     characterTag2Name: string | undefined;
@@ -69,3 +73,7 @@ export type FetchTextState =
           // fetch関数などを実行した結果、ファイルが見つかった場合はそのファイルの内容。見つからなかった場合はnull。
           value: string | null;
       };
+
+export type SetAction<State> = State | ((prevState: State) => State);
+
+export type Ref<T> = { value: T };

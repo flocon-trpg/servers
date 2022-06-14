@@ -1,9 +1,9 @@
 import { useAtomValue, useUpdateAtom } from 'jotai/utils';
 import React from 'react';
-import { publicFilesAtom } from '../atoms/firebaseStorage/publicFilesAtom';
-import { unlistedFilesAtom } from '../atoms/firebaseStorage/unlistedFilesAtom';
-import { hideAllOverlayActionAtom } from '../atoms/overlay/hideAllOverlayActionAtom';
-import { roomAtom } from '../atoms/room/roomAtom';
+import { publicFilesAtom } from '../atoms/publicFilesAtom/publicFilesAtom';
+import { unlistedFilesAtom } from '../atoms/unlistedFilesAtom/unlistedFilesAtom';
+import { hideAllOverlayActionAtom } from '../atoms/hideAllOverlayActionAtom/hideAllOverlayActionAtom';
+import { roomAtom } from '../atoms/roomAtom/roomAtom';
 import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
 import { firebaseAuthAtom } from '../pages/_app';
 import { useReadonlyRef } from './useReadonlyRef';

@@ -2,7 +2,7 @@ import React from 'react';
 import * as jdenticon from 'jdenticon';
 import { Popover } from 'antd';
 import classNames from 'classnames';
-import { flex, flexColumn } from '../../../utils/className';
+import { flex, flexColumn } from '../../../styles/className';
 
 const userUid = 'userUid';
 const none = 'none';

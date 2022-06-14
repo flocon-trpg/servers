@@ -3,7 +3,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { CollaborativeInput, OnChangeParams } from './CollaborativeInput';
 import { interval } from 'rxjs';
 import classNames from 'classnames';
-import { flex, flex1, flexColumn, flexInitial } from '../../../utils/className';
+import { flex, flex1, flexColumn, flexInitial } from '../../../styles/className';
 
 const Main: React.FC<{
     bufferDuration: number | 'default' | 'short' | null;

@@ -7,7 +7,7 @@ import * as Core from '@flocon-trpg/core';
 import { FilterValue } from 'antd/lib/table/interface';
 import { FilePath } from '../../../../utils/file/filePath';
 import classNames from 'classnames';
-import { flex, flexRow, itemsCenter } from '../../../../utils/className';
+import { flex, flexRow, itemsCenter } from '../../../../styles/className';
 import { ImageView } from '../ImageView/ImageView';
 import { image } from '../../../../utils/fileType';
 

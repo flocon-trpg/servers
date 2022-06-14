@@ -16,11 +16,11 @@ import { create as createStateManager } from '../stateManagers/main';
 import { useClientId } from './useClientId';
 import { State as S, StateManager, UpOperation as U, roomTemplate } from '@flocon-trpg/core';
 import { Room } from '../stateManagers/states/room';
-import { error, roomNotificationsAtom, text } from '../atoms/room/roomAtom';
+import { error, roomNotificationsAtom, text } from '../atoms/roomAtom/roomAtom';
 import { useAtomValue, useUpdateAtom } from 'jotai/utils';
-import { SetAction } from '../utils/setAction';
 import { firebaseUserAtom, getIdTokenAtom } from '../pages/_app';
 import { authNotFound, notSignIn } from '../utils/firebase/firebaseUserState';
+import { SetAction } from '../utils/types';
 
 type State = S<typeof roomTemplate>;
 type UpOperation = U<typeof roomTemplate>;

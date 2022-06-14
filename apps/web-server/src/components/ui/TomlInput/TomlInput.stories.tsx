@@ -3,7 +3,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { OnChangeParams } from '../CollaborativeInput/CollaborativeInput';
 import { interval } from 'rxjs';
 import classNames from 'classnames';
-import { flex, flex1, flexColumn, flexInitial } from '../../../utils/className';
+import { flex, flex1, flexColumn, flexInitial } from '../../../styles/className';
 import { TomlInput } from './Tomllnput';
 
 const Main: React.FC<{

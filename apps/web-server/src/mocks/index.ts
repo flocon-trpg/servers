@@ -7,7 +7,7 @@ import {
 } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { State as S, characterTemplate, roomTemplate } from '@flocon-trpg/core';
 import { WebConfig } from '../configType';
-import { UserConfig, defaultUserConfig } from '../atoms/userConfig/types';
+import { UserConfig, defaultUserConfig } from '../atoms/userConfigAtom/types';
 import { FirebaseStorage } from '@firebase/storage';
 import { FirebaseApp } from '@firebase/app';
 import { Client, createClient } from '@urql/core';

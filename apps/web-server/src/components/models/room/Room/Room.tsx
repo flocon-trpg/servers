@@ -1,54 +1,54 @@
 import React from 'react';
 import { Layout as AntdLayout, Modal, Result } from 'antd';
 import { DraggableCard, horizontalPadding } from '../../../ui/DraggableCard/DraggableCard';
-import { CharacterListPanelContent } from './subcomponents/CharacterListPanelContent/CharacterListPanelContent';
-import { RoomMessagesPanelContent } from './subcomponents/RoomMessagesPanelContent/RoomMessagesPanelContent';
-import { CharacterParameterNamesEditorModal } from './subcomponents/CharacterParameterNamesEditorModal/CharacterParameterNamesEditorModal';
-import { CharacterEditorModal } from './subcomponents/CharacterEditorModal/CharacterEditorModal';
-import { BoardEditorModal } from './subcomponents/BoardEditorModal/BoardEditorModal';
-import { SoundPlayerPanelContent } from './subcomponents/SoundPlayerPanelContent/SoundPlayerPanelContent';
-import { EditRoomDrawer } from './subcomponents/EditRoomDrawer/EditRoomDrawer';
-import { ParticipantListPanelContent } from './subcomponents/ParticipantListPanelContent/ParticipantListPanelContent';
+import { CharacterListPanelContent } from './subcomponents/components/CharacterListPanelContent/CharacterListPanelContent';
+import { RoomMessagesPanelContent } from './subcomponents/components/RoomMessagesPanelContent/RoomMessagesPanelContent';
+import { CharacterParameterNamesEditorModal } from './subcomponents/components/CharacterParameterNamesEditorModal/CharacterParameterNamesEditorModal';
+import { CharacterEditorModal } from './subcomponents/components/CharacterEditorModal/CharacterEditorModal';
+import { BoardEditorModal } from './subcomponents/components/BoardEditorModal/BoardEditorModal';
+import { SoundPlayerPanelContent } from './subcomponents/components/SoundPlayerPanelContent/SoundPlayerPanelContent';
+import { EditRoomDrawer } from './subcomponents/components/EditRoomDrawer/EditRoomDrawer';
+import { ParticipantListPanelContent } from './subcomponents/components/ParticipantListPanelContent/ParticipantListPanelContent';
 import { LoadingResult } from '../../../ui/LoadingResult/LoadingResult';
-import { usePlayBgm } from '../../../../hooks/usePlayBgm';
-import { usePlaySoundEffect } from '../../../../hooks/usePlaySoundEffect';
-import { useMessageNotification } from '../../../../hooks/useMessageNotification';
-import { RoomMenu } from './subcomponents/RoomMenu/RoomMenu';
+import { usePlayBgm } from './subcomponents/hooks/usePlayBgm';
+import { usePlaySoundEffect } from './subcomponents/hooks/usePlaySoundEffect';
+import { useMessageNotification } from './subcomponents/hooks/useMessageNotification';
+import { RoomMenu } from './subcomponents/components/RoomMenu/RoomMenu';
 import { recordToArray } from '@flocon-trpg/utils';
-import { PieceListPanelContent } from './subcomponents/PieceListPanelContent/PieceListPanelContent';
-import { StringPieceEditorModal } from './subcomponents/StringPieceEditorModal/StringPieceEditorModal';
-import { DicePieceEditorModal } from './subcomponents/DicePieceEditorModal/DicePieceEditorModal';
-import { MemosPanelContent } from './subcomponents/MemosPanelContent/MemosPanelContent';
+import { PieceListPanelContent } from './subcomponents/components/PieceListPanelContent/PieceListPanelContent';
+import { StringPieceEditorModal } from './subcomponents/components/StringPieceEditorModal/StringPieceEditorModal';
+import { DicePieceEditorModal } from './subcomponents/components/DicePieceEditorModal/DicePieceEditorModal';
+import { MemosPanelContent } from './subcomponents/components/MemosPanelContent/MemosPanelContent';
 import {
     BoardContextMenu,
     PieceTooltip,
     PopoverEditor,
-} from './subcomponents/BoardPopover/BoardPopover';
+} from './subcomponents/components/BoardPopover/BoardPopover';
 import { useMyUserUid } from '../../../../hooks/useMyUserUid';
-import { ImagePieceModal } from './subcomponents/ImagePieceModal/ImagePieceModal';
-import { CommandEditorModal } from './subcomponents/CommandEditorModal/CommandEditorModal';
-import { ChatPalettePanelContent } from './subcomponents/ChatPalettePanelContent/ChatPalettePanelContent';
-import { Props as BoardProps } from './subcomponents/Board/Board';
-import { useAtomSelector } from '../../../../atoms/useAtomSelector';
-import { roomConfigAtom } from '../../../../atoms/roomConfig/roomConfigAtom';
-import { RoomConfigUtils } from '../../../../atoms/roomConfig/types/roomConfig/utils';
-import { roomAtom } from '../../../../atoms/room/roomAtom';
-import { useImmerUpdateAtom } from '../../../../atoms/useImmerUpdateAtom';
-import { CharacterTagNamesEditorModal } from './subcomponents/CharacterTagNamesEditorModal/CharacterTagNamesEditorModal';
-import { ImportCharacterModal } from './subcomponents/ImportCharacterModal/ImportCharacterModal';
-import { ImportBoardModal } from './subcomponents/ImportBoardModal/ImportBoardModal';
+import { ImagePieceModal } from './subcomponents/components/ImagePieceModal/ImagePieceModal';
+import { CommandEditorModal } from './subcomponents/components/CommandEditorModal/CommandEditorModal';
+import { ChatPalettePanelContent } from './subcomponents/components/ChatPalettePanelContent/ChatPalettePanelContent';
+import { Props as BoardProps } from './subcomponents/components/Board/Board';
+import { useAtomSelector } from '../../../../hooks/useAtomSelector';
+import { roomConfigAtom } from '../../../../atoms/roomConfigAtom/roomConfigAtom';
+import { RoomConfigUtils } from '../../../../atoms/roomConfigAtom/types/roomConfig/utils';
+import { roomAtom } from '../../../../atoms/roomAtom/roomAtom';
+import { useImmerUpdateAtom } from '../../../../hooks/useImmerUpdateAtom';
+import { CharacterTagNamesEditorModal } from './subcomponents/components/CharacterTagNamesEditorModal/CharacterTagNamesEditorModal';
+import { ImportCharacterModal } from './subcomponents/components/ImportCharacterModal/ImportCharacterModal';
+import { ImportBoardModal } from './subcomponents/components/ImportBoardModal/ImportBoardModal';
 import { useAtomValue } from 'jotai/utils';
 import {
     debouncedWindowInnerHeightAtom,
     debouncedWindowInnerWidthAtom,
 } from '../../../pages/room/RoomIdPage/RoomIdPage';
-import { BoardPositionAndPieceEditorModal } from './subcomponents/BoardPositionAndPieceEditorModal/BoardPositionAndPieceEditorModal';
+import { BoardPositionAndPieceEditorModal } from './subcomponents/components/BoardPositionAndPieceEditorModal/BoardPositionAndPieceEditorModal';
 import classNames from 'classnames';
-import { relative } from '../../../../utils/className';
-import { MessagePanelConfig } from '../../../../atoms/roomConfig/types/messagePanelConfig';
-import { BoardEditorPanelConfig } from '../../../../atoms/roomConfig/types/boardEditorPanelConfig';
-import { ChatPalettePanelConfig } from '../../../../atoms/roomConfig/types/chatPalettePanelConfig';
-import { MemoPanelConfig } from '../../../../atoms/roomConfig/types/memoPanelConfig';
+import { relative } from '../../../../styles/className';
+import { MessagePanelConfig } from '../../../../atoms/roomConfigAtom/types/messagePanelConfig';
+import { BoardEditorPanelConfig } from '../../../../atoms/roomConfigAtom/types/boardEditorPanelConfig';
+import { ChatPalettePanelConfig } from '../../../../atoms/roomConfigAtom/types/chatPalettePanelConfig';
+import { MemoPanelConfig } from '../../../../atoms/roomConfigAtom/types/memoPanelConfig';
 import { ControlPosition } from 'react-draggable';
 import { NumberSize, ResizeDirection } from 're-resizable';
 import dynamic from 'next/dynamic';
@@ -71,7 +71,7 @@ const Canvas = require("canvas");
 今のところreact-konvaはBoardでしか使っていないが、他のコンポーネントでも使うのであればそちらもdynamicを使ったほうがよさそう。
 */
 const Board: React.ComponentType<BoardProps> = dynamic(
-    () => import('./subcomponents/Board/Board').then(mod => mod.Board as any),
+    () => import('./subcomponents/components/Board/Board').then(mod => mod.Board as any),
     { ssr: false }
 );
 

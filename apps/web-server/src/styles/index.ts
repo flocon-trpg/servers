@@ -8,4 +8,5 @@ export namespace Styles {
     }
 
     export const backgroundColor = '#141414';
+    export const chatBackgroundColor = '#1B1B1B';
 }

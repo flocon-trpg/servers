@@ -1,6 +1,6 @@
 import React from 'react';
 import { State, filePathTemplate } from '@flocon-trpg/core';
-import { error, loading, success, useSrcFromGraphQL } from '../../../../hooks/src';
+import { error, loading, success, useSrcFromGraphQL } from '../../../../hooks/srcHooks';
 import { FilePathFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Icons from '@ant-design/icons';
 import { LazyAndPreloadImage } from '../../../ui/LazyAndPreloadImage/LazyAndPreloadImage';

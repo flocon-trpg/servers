@@ -1,6 +1,6 @@
 import { useUpdateAtom } from 'jotai/utils';
 import React from 'react';
-import { userConfigAtom } from '../atoms/userConfig/userConfigAtom';
+import { userConfigAtom } from '../atoms/userConfigAtom/userConfigAtom';
 import { mockUserConfig } from '../mocks';
 
 export const useMockUserConfig = () => {
