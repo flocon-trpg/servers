@@ -1,76 +1,21 @@
 import React from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
-import { useSetAtom } from 'jotai';
 import { RoomMessagesPanelContent } from './RoomMessagesPanelContent';
-import { storybookAtom } from '../../../../../../../atoms/storybookAtom/storybookAtom';
-import { useMockRoom } from '../../../../../../../hooks/useMockRoom';
-import { useMockRoomMessages } from '../../../../../../../hooks/useRoomMessages';
-import { roomConfigAtom } from '../../../../../../../atoms/roomConfigAtom/roomConfigAtom';
-import { defaultRoomConfig } from '../../../../../../../atoms/roomConfigAtom/types/roomConfig';
-import { Result } from '@kizahasi/result';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import {
-    CreateMockRoomMessagesParams,
-    createMockRoom,
-    createMockRoomMessages,
-    mockAuth,
-    mockUser,
-} from '../../../../../../../mocks';
-import { useMockUserConfig } from '../../../../../../../hooks/useMockUserConfig';
+import { CreateMockRoomMessagesParams } from '../../../../../../../mocks';
 import { getExactlyOneKey } from '@flocon-trpg/utils';
-
-const roomId = '';
-
-const room = createMockRoom({
-    myParticipantRole: 'Player',
-    setCharacterTagNames: true,
-    setPublicChannelNames: true,
-    setBoards: true,
-    setCharacters: true,
-    setParamNames: true,
-});
+import { useSetupMocks } from '../../../../../../../hooks/useSetupMocks';
 
 export const Default: React.FC<
     { height: number; fetchingMessages: boolean } & CreateMockRoomMessagesParams
 > = ({ height, fetchingMessages, setGeneralMessages }) => {
-    const setStorybook = useSetAtom(storybookAtom);
-    React.useEffect(() => {
-        setStorybook({
-            isStorybook: true,
-            mock: {
-                auth: { ...mockAuth, currentUser: mockUser },
-                webConfig: Result.ok({
-                    isUnlistedFirebaseStorageEnabled: false,
-                    isPublicFirebaseStorageEnabled: false,
-                    firebaseConfig: {
-                        apiKey: '',
-                        appId: '',
-                        authDomain: '',
-                        messagingSenderId: '',
-                        projectId: '',
-                        storageBucket: '',
-                    },
-                }),
-                user: mockUser,
-            },
-        });
-    }, [setStorybook]);
-    useMockRoom({ roomId, room });
-    useMockUserConfig();
-    const { onQuery, setAsNotFetch } = useMockRoomMessages();
-    React.useEffect(() => {
-        setAsNotFetch();
-        if (fetchingMessages) {
-            return;
-        }
-        onQuery(createMockRoomMessages({ setGeneralMessages }));
-    }, [onQuery, setAsNotFetch, fetchingMessages, setGeneralMessages]);
-    const setRoomConfig = useSetAtom(roomConfigAtom);
-    const roomConfig = React.useMemo(() => defaultRoomConfig(roomId), []);
-    React.useEffect(() => {
-        setRoomConfig(roomConfig);
-    }, [roomConfig, setRoomConfig]);
+    const { roomConfig } = useSetupMocks({
+        roomMessagesConfig: {
+            setGeneralMessages,
+            doNotQuery: fetchingMessages,
+        },
+    });
     return (
         <DndProvider backend={HTML5Backend}>
             <RoomMessagesPanelContent

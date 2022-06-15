@@ -1,44 +1,12 @@
 import { ParticipantRole } from '@flocon-trpg/core';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
-import { useSetAtom } from 'jotai';
 import React from 'react';
-import { roomConfigAtom } from '../../../../../../../atoms/roomConfigAtom/roomConfigAtom';
-import { defaultRoomConfig } from '../../../../../../../atoms/roomConfigAtom/types/roomConfig';
-import { storybookAtom } from '../../../../../../../atoms/storybookAtom/storybookAtom';
-import { useMockUserConfig } from '../../../../../../../hooks/useMockUserConfig';
-import { createMockRoom, mockAuth, mockUser } from '../../../../../../../mocks';
-import { useMockRoom } from '../../../../../../../hooks/useMockRoom';
 import { ParticipantListPanelContent } from './ParticipantListPanelContent';
-
-const roomId = '';
+import { useSetupMocks } from '../../../../../../../hooks/useSetupMocks';
 
 export const Master: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
-    const setStorybook = useSetAtom(storybookAtom);
-    React.useEffect(() => {
-        setStorybook({
-            isStorybook: true,
-            mock: {
-                auth: { ...mockAuth, currentUser: mockUser },
-                user: mockUser,
-            },
-        });
-    }, [setStorybook]);
-    const room = React.useMemo(() => {
-        return createMockRoom({
-            myParticipantRole,
-            setCharacterTagNames: true,
-            setPublicChannelNames: true,
-            setBoards: true,
-            setCharacters: true,
-            setParamNames: true,
-        });
-    }, [myParticipantRole]);
-    useMockRoom({ roomId, room });
-    useMockUserConfig();
-    const setRoomConfig = useSetAtom(roomConfigAtom);
-    React.useEffect(() => {
-        setRoomConfig(defaultRoomConfig(roomId));
-    }, [setRoomConfig]);
+    useSetupMocks({ roomConfig: { myParticipantRole } });
+
     return <ParticipantListPanelContent />;
 };
 

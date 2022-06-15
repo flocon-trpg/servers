@@ -1,65 +1,31 @@
-import { ParticipantRole } from '@flocon-trpg/core';
-import { Result } from '@kizahasi/result';
+import { ParticipantRole, State as S, roomTemplate } from '@flocon-trpg/core';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
-import produce from 'immer';
-import { useSetAtom } from 'jotai';
 import React from 'react';
-import { roomConfigAtom } from '../../../../../../../atoms/roomConfigAtom/roomConfigAtom';
-import { defaultRoomConfig } from '../../../../../../../atoms/roomConfigAtom/types/roomConfig';
-import { storybookAtom } from '../../../../../../../atoms/storybookAtom/storybookAtom';
-import { useMockRoom } from '../../../../../../../hooks/useMockRoom';
-import { useMockUserConfig } from '../../../../../../../hooks/useMockUserConfig';
-import {
-    createMockRoom,
-    defaultBoardId,
-    mockAuth,
-    mockStorage,
-    mockUser,
-    mockWebConfig,
-} from '../../../../../../../mocks';
+import { useSetupMocks } from '../../../../../../../hooks/useSetupMocks';
+import { defaultBoardId } from '../../../../../../../mocks';
 import { Board, Props } from './Board';
 
-const roomId = '';
+type RoomState = S<typeof roomTemplate>;
 
 export const Default: React.FC<{
     myParticipantRole: ParticipantRole;
     boardProps: Props;
     removeActiveBoard: boolean;
 }> = ({ boardProps, myParticipantRole, removeActiveBoard }) => {
-    const setStorybook = useSetAtom(storybookAtom);
-    React.useEffect(() => {
-        setStorybook({
-            isStorybook: true,
-            mock: {
-                auth: { ...mockAuth, currentUser: mockUser },
-                webConfig: Result.ok(mockWebConfig),
-                user: mockUser,
-                storage: mockStorage,
-            },
-        });
-    }, [setStorybook]);
-    const room = React.useMemo(() => {
-        const result = createMockRoom({
-            myParticipantRole,
-            setCharacterTagNames: true,
-            setPublicChannelNames: true,
-            setBoards: true,
-            setCharacters: true,
-            setParamNames: true,
-        });
+    const updateRoom = React.useMemo(() => {
         if (removeActiveBoard) {
-            return produce(result, result => {
-                result.activeBoardId = undefined;
-            });
+            return (room: RoomState) => {
+                room.activeBoardId = undefined;
+            };
         }
-        return result;
-    }, [myParticipantRole, removeActiveBoard]);
-    useMockRoom({ roomId, room });
-    useMockUserConfig();
-    const setRoomConfig = useSetAtom(roomConfigAtom);
-    React.useEffect(() => {
-        setRoomConfig(defaultRoomConfig(roomId));
-    }, [setRoomConfig]);
+        return undefined;
+    }, [removeActiveBoard]);
+    useSetupMocks({
+        roomConfig: {
+            myParticipantRole,
+            update: updateRoom,
+        },
+    });
     return <Board {...boardProps} />;
 };
 
