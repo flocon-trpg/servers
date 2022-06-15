@@ -185,12 +185,12 @@ export namespace Resources {
             value: RoomPublicMessage.updatedMessage3b,
         };
 
-        export const privateMessage4: Message = {
+        export const privateMessage4a: Message = {
             type: privateMessage,
             value: RoomPrivateMessage.message4a,
         };
 
-        export const updatedPrivateMessage4: Message = {
+        export const updatedPrivateMessage4b: Message = {
             type: privateMessage,
             value: RoomPrivateMessage.updatedMessage4b,
         };
