@@ -33,6 +33,15 @@ export const anotherPlayerCharacterId1 = 'character-id-3';
 export const defaultBoardId = 'board-id-1';
 export const anotherBoardId = 'board-id-2';
 
+export const dicePieceKey1 = 'dice-piece-1';
+export const dicePieceKey2 = 'dice-piece-2';
+
+export const imagePieceKey1 = 'image-piece-1';
+export const imagePieceKey2 = 'image-piece-2';
+
+export const stringPieceKey1 = 'string-piece-1';
+export const stringPieceKey2 = 'string-piece-2';
+
 const appData: FirebaseApp = {
     name: '',
     options: {},
@@ -318,7 +327,7 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
                 name: 'board-1-name',
                 ownerParticipantId: myUserUid,
                 dicePieces: {
-                    ['dice-piece-1']: {
+                    [dicePieceKey1]: {
                         $v: 2,
                         $r: 1,
                         ownerCharacterId: myRichCharacterId,
@@ -352,7 +361,7 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
                         name: 'dice-name-1',
                         opacity: 0.7,
                     },
-                    ['dice-piece-2']: {
+                    [dicePieceKey2]: {
                         $v: 2,
                         $r: 1,
                         ownerCharacterId: myRichCharacterId,
@@ -402,7 +411,7 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
                     },
                 },
                 imagePieces: {
-                    ['image-piece-1']: {
+                    [imagePieceKey1]: {
                         $v: 2,
                         $r: 1,
                         ownerParticipantId: myUserUid,
@@ -433,7 +442,7 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
                         opacity: 0.7,
                     },
                     // 画像コマは現時点ではCellModeに対応していないため表示されない
-                    ['image-piece-2']: {
+                    [imagePieceKey2]: {
                         $v: 2,
                         $r: 1,
                         ownerParticipantId: myUserUid,
@@ -465,7 +474,7 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
                     },
                 },
                 stringPieces: {
-                    ['string-piece-1']: {
+                    [stringPieceKey1]: {
                         $v: 2,
                         $r: 1,
                         ownerCharacterId: myRichCharacterId,
@@ -486,7 +495,7 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
                         isValuePrivate: false,
                         opacity: 0.7,
                     },
-                    ['string-piece-2']: {
+                    [stringPieceKey2]: {
                         $v: 2,
                         $r: 1,
                         ownerCharacterId: myRichCharacterId,
