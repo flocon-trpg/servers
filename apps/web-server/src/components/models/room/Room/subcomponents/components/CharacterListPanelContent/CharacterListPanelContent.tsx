@@ -393,6 +393,7 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                                             setCharacterEditorModal({
                                                 type: update,
                                                 stateId: character.stateId,
+                                                selectedPieceType: null,
                                             })
                                         }
                                     >

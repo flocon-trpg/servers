@@ -45,13 +45,11 @@ import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '../../../../../../../styles/className';
 import { useSetRoomStateWithImmer } from '../../../../../../../hooks/useSetRoomStateWithImmer';
 import { useIsMyCharacter } from '../../hooks/useIsMyCharacter';
-import { characterEditorModalAtom } from '../CharacterEditorModal/CharacterEditorModal';
+import { characterEditorModalAtom, piece } from '../CharacterEditorModal/CharacterEditorModal';
 import {
     dicePieceValueEditorAtom,
     stringPieceValueEditorAtom,
 } from '../../atoms/pieceValueEditorAtom/pieceValueEditorAtom';
-import { PiecePositionEditor } from '../PiecePositionEditor/PiecePositionEditor';
-import { BoardPositionEditor } from '../BoardPositionEditor/BoardPositionEditor';
 import { imagePieceModalAtom } from '../ImagePieceModal/ImagePieceModal';
 import {
     boardPositionAndPieceEditorModalAtom,
@@ -160,46 +158,9 @@ export const PieceTooltip: React.FC = () => {
     }
 };
 
-type CharacterPieceProps = {
-    characterId: string;
-    pieceId: string;
-};
-
 type PieceProps = {
     boardId: string;
     pieceId: string;
-};
-
-const CharacterContent: React.FC<CharacterPieceProps> = ({
-    pieceId,
-    characterId,
-}: CharacterPieceProps) => {
-    const setRoomState = useSetRoomStateWithImmer();
-
-    const characterPieceValue = useAtomSelector(
-        roomAtom,
-        roomState => roomState.roomState?.state?.characters?.[characterId]?.pieces?.[pieceId]
-    );
-    if (characterPieceValue == null) {
-        return null;
-    }
-
-    return (
-        <PiecePositionEditor
-            showNameInput
-            state={characterPieceValue}
-            onUpdate={recipe => {
-                setRoomState(roomState => {
-                    const characterPieceValue =
-                        roomState?.characters?.[characterId]?.pieces?.[pieceId];
-                    if (characterPieceValue == null) {
-                        return;
-                    }
-                    recipe(characterPieceValue);
-                });
-            }}
-        />
-    );
 };
 
 const DicePieceContent: React.FC<PieceProps> = ({ boardId, pieceId }: PieceProps) => {
@@ -224,38 +185,6 @@ const ImagePieceContent: React.FC<PieceProps> = ({ boardId, pieceId }: PieceProp
     return <ImagePieceEditor updateMode={updateMode} />;
 };
 
-const PortraitPieceContent: React.FC<CharacterPieceProps> = ({
-    pieceId,
-    characterId,
-}: CharacterPieceProps) => {
-    const setRoomState = useSetRoomStateWithImmer();
-
-    const portraitPieceValue = useAtomSelector(
-        roomAtom,
-        roomState =>
-            roomState.roomState?.state?.characters?.[characterId]?.portraitPieces?.[pieceId]
-    );
-    if (portraitPieceValue == null) {
-        return null;
-    }
-
-    return (
-        <BoardPositionEditor
-            state={portraitPieceValue}
-            onUpdate={recipe => {
-                setRoomState(roomState => {
-                    const portraitPieceValue =
-                        roomState?.characters?.[characterId]?.portraitPieces?.[pieceId];
-                    if (portraitPieceValue == null) {
-                        return;
-                    }
-                    recipe(portraitPieceValue);
-                });
-            }}
-        />
-    );
-};
-
 const StringPieceContent: React.FC<PieceProps> = ({ boardId, pieceId }: PieceProps) => {
     const updateMode: StringPiceUpdateMode = React.useMemo(() => {
         return {
@@ -269,70 +198,85 @@ const StringPieceContent: React.FC<PieceProps> = ({ boardId, pieceId }: PiecePro
 
 export const PopoverEditor: React.FC = () => {
     const popoverEditor = useAtomValue(boardPopoverEditorAtom);
+    const setCharacterEditorModal = useUpdateAtom(characterEditorModalAtom);
 
-    if (popoverEditor == null) {
+    const [childrenState, setChildrenState] = React.useState<{
+        children: JSX.Element;
+        width: number;
+    }>();
+    React.useEffect(() => {
+        if (popoverEditor == null) {
+            setChildrenState(undefined);
+            return;
+        }
+        // characterとportraitはともにキャラクターに関するものであり、キャラクター編集画面が出たほうが便利だと思われる。
+        // キャラクター編集画面は大画面でありPopoverでは表示が難しいため、代わりにModalを表示させている。
+        switch (popoverEditor.dblClickOn.type) {
+            case character:
+                setChildrenState(undefined);
+                setCharacterEditorModal({
+                    type: update,
+                    stateId: popoverEditor.dblClickOn.characterId,
+                    selectedPieceType: piece,
+                    boardId: popoverEditor.dblClickOn.boardId,
+                    pieceId: popoverEditor.dblClickOn.pieceId,
+                });
+                break;
+            case portrait:
+                setChildrenState(undefined);
+                setCharacterEditorModal({
+                    type: update,
+                    stateId: popoverEditor.dblClickOn.characterId,
+                    selectedPieceType: portrait,
+                    boardId: popoverEditor.dblClickOn.boardId,
+                    pieceId: popoverEditor.dblClickOn.pieceId,
+                });
+                break;
+            case dicePiece:
+                setChildrenState({
+                    children: (
+                        <DicePieceContent
+                            boardId={popoverEditor.dblClickOn.boardId}
+                            pieceId={popoverEditor.dblClickOn.pieceId}
+                        />
+                    ),
+                    width: 400,
+                });
+                break;
+            case imagePiece:
+                setChildrenState({
+                    children: (
+                        <ImagePieceContent
+                            boardId={popoverEditor.dblClickOn.boardId}
+                            pieceId={popoverEditor.dblClickOn.pieceId}
+                        />
+                    ),
+                    width: 400,
+                });
+                break;
+            case stringPiece:
+                setChildrenState({
+                    children: (
+                        <StringPieceContent
+                            boardId={popoverEditor.dblClickOn.boardId}
+                            pieceId={popoverEditor.dblClickOn.pieceId}
+                        />
+                    ),
+                    width: 400,
+                });
+                break;
+            default:
+                setChildrenState(undefined);
+                break;
+        }
+    }, [popoverEditor, setCharacterEditorModal]);
+
+    if (childrenState == null || popoverEditor == null) {
         return null;
     }
 
     const left = popoverEditor.pageX - 30;
     const top = popoverEditor.pageY - 3;
-
-    let children: JSX.Element | null;
-    let width: number | undefined = undefined;
-    switch (popoverEditor.dblClickOn.type) {
-        case character:
-            children = (
-                <CharacterContent
-                    characterId={popoverEditor.dblClickOn.characterId}
-                    pieceId={popoverEditor.dblClickOn.pieceId}
-                />
-            );
-            width = 400;
-            break;
-        case dicePiece:
-            children = (
-                <DicePieceContent
-                    boardId={popoverEditor.dblClickOn.boardId}
-                    pieceId={popoverEditor.dblClickOn.pieceId}
-                />
-            );
-            width = 400;
-            break;
-        case imagePiece:
-            children = (
-                <ImagePieceContent
-                    boardId={popoverEditor.dblClickOn.boardId}
-                    pieceId={popoverEditor.dblClickOn.pieceId}
-                />
-            );
-            width = 400;
-            break;
-        case portrait:
-            children = (
-                <PortraitPieceContent
-                    characterId={popoverEditor.dblClickOn.characterId}
-                    pieceId={popoverEditor.dblClickOn.pieceId}
-                />
-            );
-            width = 400;
-            break;
-        case stringPiece:
-            children = (
-                <StringPieceContent
-                    boardId={popoverEditor.dblClickOn.boardId}
-                    pieceId={popoverEditor.dblClickOn.pieceId}
-                />
-            );
-            width = 400;
-            break;
-        default:
-            children = null;
-            break;
-    }
-
-    if (children == null) {
-        return null;
-    }
 
     return (
         <div
@@ -340,13 +284,13 @@ export const PopoverEditor: React.FC = () => {
                 position: 'absolute',
                 left,
                 top,
-                width,
+                width: childrenState.width,
                 padding,
                 backgroundColor,
                 zIndex,
             }}
         >
-            {children}
+            {childrenState.children}
         </div>
     );
 };
@@ -399,6 +343,7 @@ namespace ContextMenuModule {
         onContextMenuClear: () => void;
         hooks: ReturnType<typeof useHooks>;
         setRoomState: ReturnType<typeof useSetRoomStateWithImmer>;
+        boardId: string;
     };
 
     const selectedCharacterPiecesMenu = ({
@@ -406,6 +351,7 @@ namespace ContextMenuModule {
         onContextMenuClear,
         hooks,
         setRoomState,
+        boardId,
     }: SelectedCharacterPiecesMenuProps): ItemType => {
         if (characterPiecesOnCursor.length === 0) {
             return null;
@@ -448,6 +394,9 @@ namespace ContextMenuModule {
                                 hooks.setCharacterEditor({
                                     type: update,
                                     stateId: characterId,
+                                    selectedPieceType: piece,
+                                    boardId,
+                                    pieceId,
                                 });
                                 onContextMenuClear();
                             },
@@ -464,6 +413,7 @@ namespace ContextMenuModule {
         onContextMenuClear: () => void;
         hooks: ReturnType<typeof useHooks>;
         setRoomState: ReturnType<typeof useSetRoomStateWithImmer>;
+        boardId: string;
     };
 
     const selectedPortraitPiecesMenu = ({
@@ -471,6 +421,7 @@ namespace ContextMenuModule {
         onContextMenuClear,
         hooks,
         setRoomState,
+        boardId,
     }: SelectedPortraitPiecesMenuProps): ItemType => {
         if (portraitsOnCursor.length === 0) {
             return null;
@@ -515,6 +466,9 @@ namespace ContextMenuModule {
                                     hooks.setCharacterEditor({
                                         type: update,
                                         stateId: characterId,
+                                        selectedPieceType: portrait,
+                                        boardId,
+                                        pieceId: portraitPositionId,
                                     });
                                     onContextMenuClear();
                                 },

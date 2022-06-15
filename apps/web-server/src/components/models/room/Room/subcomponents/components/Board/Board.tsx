@@ -63,7 +63,6 @@ import { useSetRoomStateWithImmer } from '../../../../../../../hooks/useSetRoomS
 import { importBoardModalVisibilityAtom } from '../ImportBoardModal/ImportBoardModal';
 import { BoardType } from '../../../../../../../utils/types';
 import { useIsMyCharacter } from '../../hooks/useIsMyCharacter';
-import { imagePieceModalAtom } from '../ImagePieceModal/ImagePieceModal';
 import { Styles } from '../../../../../../../styles';
 import { Message, publicMessage } from '@flocon-trpg/web-server-utils';
 import { notFetch, useRoomMessages } from '../../../../../../../hooks/useRoomMessages';
@@ -230,7 +229,6 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const publicMessages = useRoomMessages({ filter: publicMessageFilter });
     const myUserUid = useMyUserUid();
     const isMyCharacter = useIsMyCharacter();
-    const setImagePieceModal = useUpdateAtom(imagePieceModalAtom);
 
     /*
         TransitionにHTMLImageElementを含めないと、フェードアウトが発生しない模様（おそらくフェードアウト時には画像が捨てられているため）。そのため含めている。
@@ -353,7 +351,13 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             setBoardPopoverEditor({
                                 pageX: e.evt.pageX,
                                 pageY: e.evt.pageY,
-                                dblClickOn: { type: 'character', character, characterId, pieceId },
+                                dblClickOn: {
+                                    type: 'character',
+                                    character,
+                                    characterId,
+                                    boardId,
+                                    pieceId,
+                                },
                             });
                         }}
                         onMouseEnter={() =>
@@ -361,6 +365,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                                 type: 'character',
                                 character,
                                 characterId,
+                                boardId,
                                 pieceId,
                             })
                         }
@@ -423,7 +428,13 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             setBoardPopoverEditor({
                                 pageX: e.evt.pageX,
                                 pageY: e.evt.pageY,
-                                dblClickOn: { type: 'portrait', character, characterId, pieceId },
+                                dblClickOn: {
+                                    type: 'portrait',
+                                    character,
+                                    characterId,
+                                    pieceId,
+                                    boardId,
+                                },
                             });
                         }}
                         onMouseEnter={() =>
@@ -431,6 +442,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                                 type: 'portrait',
                                 character,
                                 characterId,
+                                boardId,
                                 pieceId,
                             })
                         }

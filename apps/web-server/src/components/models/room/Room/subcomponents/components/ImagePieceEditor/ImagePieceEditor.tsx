@@ -23,6 +23,7 @@ import {
     applyCompositeRect,
 } from '../../utils/positionAndSizeAndRect';
 import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
+import { IsPositionLockedSelector } from '../IsPositionLockedSelector/IsPositionLockedSelector';
 
 type ImagePieceState = State<typeof imagePieceTemplate>;
 
@@ -213,6 +214,19 @@ export const ImagePieceEditor: React.FC<{
                         </Row>
                         <div style={{ height: 8 }} />
                     </>
+                )}
+
+                {state != null && (
+                    <Row gutter={gutter} align='middle'>
+                        <Col flex='auto' />
+                        <Col flex={0}></Col>
+                        <Col span={inputSpan}>
+                            <IsPositionLockedSelector
+                                value={state}
+                                onChange={newState => updateState(() => newState)}
+                            />
+                        </Col>
+                    </Row>
                 )}
 
                 {isCellModeSelectorRow}

@@ -22,7 +22,8 @@ export const Player: React.FC<{ myParticipantRole: ParticipantRole; characterSta
 
     const setModalState = useSetAtom(characterEditorModalAtom);
     React.useEffect(() => {
-        setModalState({ type: 'update', stateId: characterStateId });
+        // TODO: selectedPieceTypeを変化させる
+        setModalState({ type: 'update', stateId: characterStateId, selectedPieceType: null });
     }, [characterStateId, setModalState]);
 
     return (

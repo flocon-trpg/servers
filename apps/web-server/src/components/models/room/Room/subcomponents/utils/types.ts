@@ -39,6 +39,7 @@ export type ClickOn =
       }
     | {
           type: typeof character | typeof portrait;
+          boardId: string;
           characterId: string;
           pieceId: string;
           character: CharacterState;

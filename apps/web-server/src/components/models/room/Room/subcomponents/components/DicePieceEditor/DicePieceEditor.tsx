@@ -27,6 +27,7 @@ import {
     PixelSize,
     applyCompositeRect,
 } from '../../utils/positionAndSizeAndRect';
+import { IsPositionLockedSelector } from '../IsPositionLockedSelector/IsPositionLockedSelector';
 
 type CharacterState = State<typeof characterTemplate>;
 type DicePieceState = State<typeof dicePieceTemplate>;
@@ -186,6 +187,19 @@ export const DicePieceEditor: React.FC<{
                 <Col flex={0}>ID</Col>
                 <Col span={inputSpan}>{updateModeProp?.pieceId ?? '(なし)'}</Col>
             </Row>
+
+            {state != null && (
+                <Row gutter={gutter} align='middle'>
+                    <Col flex='auto' />
+                    <Col flex={0}></Col>
+                    <Col span={inputSpan}>
+                        <IsPositionLockedSelector
+                            value={state}
+                            onChange={newState => updateState(() => newState)}
+                        />
+                    </Col>
+                </Row>
+            )}
 
             {isCellModeSelectorRow}
 

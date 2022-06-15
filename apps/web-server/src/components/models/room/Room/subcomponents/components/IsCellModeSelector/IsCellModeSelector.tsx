@@ -15,9 +15,15 @@ type Props<T extends StateBase> = {
     value: T;
     onChange: (newValue: T) => void;
     boardId: string;
+    disabled?: boolean;
 };
 
-export const IsCellModeSelector = <T extends StateBase>({ value, onChange, boardId }: Props<T>) => {
+export const IsCellModeSelector = <T extends StateBase>({
+    value,
+    onChange,
+    boardId,
+    disabled,
+}: Props<T>) => {
     const cellRect = usePixelRectToCompositeRect({ boardId, pixelRect: value });
     const pixelRect = useCellRectToCompositeRect({ boardId, cellRect: value });
 
@@ -72,7 +78,7 @@ export const IsCellModeSelector = <T extends StateBase>({ value, onChange, board
     return (
         <Checkbox
             checked={value.isCellMode}
-            disabled={cellRect == null || pixelRect == null}
+            disabled={disabled === true || cellRect == null || pixelRect == null}
             onChange={onChangeCallback}
         >
             セルにスナップさせる

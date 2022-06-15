@@ -43,6 +43,10 @@ import { OverriddenParameterNameEditor } from '../OverriddenParameterNameEditor/
 import { CharacterTagsSelect } from './subcomponent/components/CharacterTagsSelect/CharacterTagsSelect';
 import { CopyToClipboardButton } from '../../../../../../ui/CopyToClipboardButton/CopyToClipboardButton';
 import { CollaborativeInput } from '../../../../../../ui/CollaborativeInput/CollaborativeInput';
+import { IsCellModeSelector } from '../IsCellModeSelector/IsCellModeSelector';
+import { useCharacterPiece } from '../../hooks/useCharacterPiece';
+import { IsPositionLockedSelector } from '../IsPositionLockedSelector/IsPositionLockedSelector';
+import { usePortraitPiece } from '../../hooks/usePortraitPiece';
 
 type CharacterState = State<typeof characterTemplate>;
 
@@ -56,7 +60,21 @@ type CharacterEditorModalState =
 
           // BufferedInputの変更内容が保存されていない状態でModalを閉じてもその変更が反映されるように、updateモードのModalが閉じられたときはPieceValueEditorStateをnullにするのではなくclosedをfalseに切り替えるようにしている。
           closed: boolean;
+
+          selectedPieceType: null;
+      }
+    | {
+          type: typeof update;
+          stateId: string;
+          closed: boolean;
+
+          selectedPieceType: typeof piece | typeof portrait;
+          boardId: string;
+          pieceId: string;
       };
+
+export const piece = 'piece';
+export const portrait = 'portrait';
 
 export type CharacterEditorModalAction =
     | {
@@ -65,6 +83,16 @@ export type CharacterEditorModalAction =
     | {
           type: typeof update;
           stateId: string;
+
+          selectedPieceType: null;
+      }
+    | {
+          type: typeof update;
+          stateId: string;
+
+          selectedPieceType: typeof piece | typeof portrait;
+          boardId: string;
+          pieceId: string;
       }
     | null;
 
@@ -114,6 +142,96 @@ const Row: React.FC<RowProps> = ({ leftContent, rightContent }: RowProps) => {
             </div>
             <div className={flex1}>{rightContent}</div>
         </div>
+    );
+};
+
+const pieceEditorTitle = 'コマの位置';
+
+const CharacterPieceEditor: React.FC<{ boardId: string; pieceId: string }> = ({
+    boardId,
+    pieceId,
+}) => {
+    const setRoomState = useSetRoomStateWithImmer();
+    const piece = useCharacterPiece({ boardId, pieceId });
+
+    if (piece == null) {
+        return null;
+    }
+
+    return (
+        <>
+            <EditorGroupHeader>{pieceEditorTitle}</EditorGroupHeader>
+            <Row
+                rightContent={
+                    <IsPositionLockedSelector
+                        value={piece.piece}
+                        onChange={newValue => {
+                            setRoomState(room => {
+                                const pieces = room?.characters?.[piece.characterId]?.pieces;
+                                if (pieces == null) {
+                                    return;
+                                }
+                                pieces[pieceId] = newValue;
+                            });
+                        }}
+                    />
+                }
+            />
+            <Row
+                rightContent={
+                    <IsCellModeSelector
+                        // 常にdisabled===falseでも問題なく動くが、より直感的な挙動にするためにdisabledを設定している
+                        disabled={piece.piece.isPositionLocked}
+                        value={piece.piece}
+                        boardId={boardId}
+                        onChange={newValue => {
+                            setRoomState(room => {
+                                const pieces = room?.characters?.[piece.characterId]?.pieces;
+                                if (pieces == null) {
+                                    return;
+                                }
+                                pieces[pieceId] = newValue;
+                            });
+                        }}
+                    />
+                }
+            />
+        </>
+    );
+};
+
+const PortraitPieceEditor: React.FC<{ boardId: string; pieceId: string }> = ({
+    boardId,
+    pieceId,
+}) => {
+    const setRoomState = useSetRoomStateWithImmer();
+    const piece = usePortraitPiece({ boardId, pieceId });
+
+    if (piece == null) {
+        return null;
+    }
+
+    return (
+        <>
+            <EditorGroupHeader>{pieceEditorTitle}</EditorGroupHeader>
+            <Row
+                rightContent={
+                    <IsPositionLockedSelector
+                        value={piece.piece}
+                        onChange={newValue => {
+                            setRoomState(room => {
+                                const portraitPieces =
+                                    room?.characters?.[piece.characterId]?.portraitPieces;
+                                if (portraitPieces == null) {
+                                    return;
+                                }
+                                portraitPieces[pieceId] = newValue;
+                            });
+                        }}
+                    />
+                }
+            />
+        </>
     );
 };
 
@@ -300,6 +418,20 @@ export const CharacterEditorModal: React.FC = () => {
             >
                 <div className={classNames(flex, flexRow)}>
                     <div style={{ minWidth: 500 }}>
+                        {atomValue?.type === update && atomValue.selectedPieceType === piece && (
+                            <CharacterPieceEditor
+                                pieceId={atomValue.pieceId}
+                                boardId={atomValue.boardId}
+                            />
+                        )}
+
+                        {atomValue?.type === update && atomValue.selectedPieceType === portrait && (
+                            <PortraitPieceEditor
+                                pieceId={atomValue.pieceId}
+                                boardId={atomValue.boardId}
+                            />
+                        )}
+
                         {atomValue?.type === update && (
                             <>
                                 <EditorGroupHeader>作成者</EditorGroupHeader>
