@@ -1,58 +1,24 @@
 import React from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { useSetAtom } from 'jotai';
-import { storybookAtom } from '../../../../../../../atoms/storybookAtom/storybookAtom';
-import { useMockRoom } from '../../../../../../../hooks/useMockRoom';
-import { defaultRoomConfig } from '../../../../../../../atoms/roomConfigAtom/types/roomConfig';
-import { roomConfigAtom } from '../../../../../../../atoms/roomConfigAtom/roomConfigAtom';
 import {
     anotherPlayerCharacterId1,
-    createMockRoom,
-    mockAuth,
-    mockStorage,
-    mockUser,
-    mockWebConfig,
     myRichCharacterId,
     mySimpleCharacterId,
 } from '../../../../../../../mocks';
 import { ParticipantRole } from '@flocon-trpg/core';
 import { CharacterEditorModal, characterEditorModalAtom } from './CharacterEditorModal';
-import { Result } from '@kizahasi/result';
-
-const roomId = '';
+import { useSetupMocks } from '../../../../../../../hooks/useSetupMocks';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole; characterStateId: string }> = ({
     myParticipantRole,
     characterStateId,
 }) => {
-    const setStorybook = useSetAtom(storybookAtom);
-    React.useEffect(() => {
-        setStorybook({
-            isStorybook: true,
-            mock: {
-                auth: { ...mockAuth, currentUser: mockUser },
-                webConfig: Result.ok(mockWebConfig),
-                user: mockUser,
-                storage: mockStorage,
-            },
-        });
-    }, [setStorybook]);
-    const room = React.useMemo(() => {
-        return createMockRoom({
+    useSetupMocks({
+        roomConfig: {
             myParticipantRole,
-            setCharacterTagNames: true,
-            setPublicChannelNames: true,
-            setBoards: true,
-            setCharacters: true,
-            setParamNames: true,
-        });
-    }, [myParticipantRole]);
-    useMockRoom({ roomId, room });
-    const setRoomConfig = useSetAtom(roomConfigAtom);
-    const roomConfig = React.useMemo(() => defaultRoomConfig(roomId), []);
-    React.useEffect(() => {
-        setRoomConfig(roomConfig);
-    }, [roomConfig, setRoomConfig]);
+        },
+    });
 
     const setModalState = useSetAtom(characterEditorModalAtom);
     React.useEffect(() => {

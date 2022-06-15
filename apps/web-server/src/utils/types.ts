@@ -76,4 +76,6 @@ export type FetchTextState =
 
 export type SetAction<State> = State | ((prevState: State) => State);
 
+export type Recipe<T> = (state: T) => T | void;
+
 export type Ref<T> = { value: T };

@@ -2,11 +2,11 @@ import produce from 'immer';
 import React from 'react';
 import { useLatest } from 'react-use';
 import { Option } from '@kizahasi/option';
+import { Recipe } from '../../../../../../utils/types';
 
 // Symbol() でなくとも {} などでもいい
 const emptySymbol = Symbol();
 
-export type Recipe<T> = (state: T) => T | void;
 type CreateInitState<T> = () => T;
 type OnCreate<T> = (newState: T) => void;
 
