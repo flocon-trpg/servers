@@ -43,10 +43,9 @@ import { OverriddenParameterNameEditor } from '../OverriddenParameterNameEditor/
 import { CharacterTagsSelect } from './subcomponent/components/CharacterTagsSelect/CharacterTagsSelect';
 import { CopyToClipboardButton } from '../../../../../../ui/CopyToClipboardButton/CopyToClipboardButton';
 import { CollaborativeInput } from '../../../../../../ui/CollaborativeInput/CollaborativeInput';
-import { IsCellModeSelector } from '../IsCellModeSelector/IsCellModeSelector';
 import { useCharacterPiece } from '../../hooks/useCharacterPiece';
-import { IsPositionLockedSelector } from '../IsPositionLockedSelector/IsPositionLockedSelector';
 import { usePortraitPiece } from '../../hooks/usePortraitPiece';
+import { BoardPositionRectEditor, PieceRectEditor } from '../RectEditor/RectEditor';
 
 type CharacterState = State<typeof characterTemplate>;
 
@@ -161,40 +160,18 @@ const CharacterPieceEditor: React.FC<{ boardId: string; pieceId: string }> = ({
     return (
         <>
             <EditorGroupHeader>{pieceEditorTitle}</EditorGroupHeader>
-            <Row
-                rightContent={
-                    <IsPositionLockedSelector
-                        value={piece.piece}
-                        onChange={newValue => {
-                            setRoomState(room => {
-                                const pieces = room?.characters?.[piece.characterId]?.pieces;
-                                if (pieces == null) {
-                                    return;
-                                }
-                                pieces[pieceId] = newValue;
-                            });
-                        }}
-                    />
-                }
-            />
-            <Row
-                rightContent={
-                    <IsCellModeSelector
-                        // 常にdisabled===falseでも問題なく動くが、より直感的な挙動にするためにdisabledを設定している
-                        disabled={piece.piece.isPositionLocked}
-                        value={piece.piece}
-                        boardId={boardId}
-                        onChange={newValue => {
-                            setRoomState(room => {
-                                const pieces = room?.characters?.[piece.characterId]?.pieces;
-                                if (pieces == null) {
-                                    return;
-                                }
-                                pieces[pieceId] = newValue;
-                            });
-                        }}
-                    />
-                }
+            <PieceRectEditor
+                value={piece.piece}
+                onChange={newValue => {
+                    setRoomState(room => {
+                        const pieces = room?.characters?.[piece.characterId]?.pieces;
+                        if (pieces == null) {
+                            return;
+                        }
+                        pieces[pieceId] = newValue;
+                    });
+                }}
+                boardId={boardId}
             />
         </>
     );
@@ -216,7 +193,7 @@ const PortraitPieceEditor: React.FC<{ boardId: string; pieceId: string }> = ({
             <EditorGroupHeader>{pieceEditorTitle}</EditorGroupHeader>
             <Row
                 rightContent={
-                    <IsPositionLockedSelector
+                    <BoardPositionRectEditor
                         value={piece.piece}
                         onChange={newValue => {
                             setRoomState(room => {

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Checkbox } from 'antd';
-import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
-import { CompositeRect } from '../../utils/positionAndSizeAndRect';
-import { useCellRectToCompositeRect } from '../../hooks/useCellRectToCompositeRect';
+import { usePixelRectToCompositeRect } from '../../../../../hooks/usePixelRectToCompositeRect';
+import { CompositeRect } from '../../../../../utils/positionAndSizeAndRect';
+import { useCellRectToCompositeRect } from '../../../../../hooks/useCellRectToCompositeRect';
 import produce from 'immer';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
 import { useLatest } from 'react-use';

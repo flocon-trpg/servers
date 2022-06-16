@@ -10,16 +10,14 @@ import { CollaborativeInput } from '../../../../../../ui/CollaborativeInput/Coll
 import { Subscribable } from 'rxjs';
 import { useStringPieces } from '../../hooks/useStringPieces';
 import { MyCharactersSelect } from '../MyCharactersSelect/MyCharactersSelect';
-import { IsCellModeSelector } from '../IsCellModeSelector/IsCellModeSelector';
 import {
     CompositeRect,
     PixelPosition,
-    PixelRect,
     PixelSize,
     applyCompositeRect,
 } from '../../utils/positionAndSizeAndRect';
 import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
-import { IsPositionLockedSelector } from '../IsPositionLockedSelector/IsPositionLockedSelector';
+import { PieceRectEditor } from '../RectEditor/RectEditor';
 
 type CharacterState = State<typeof characterTemplate>;
 type StringPieceState = State<typeof stringPieceTemplate>;
@@ -158,24 +156,9 @@ export const StringPieceEditor: React.FC<{
         return () => subscription.unsubscribe();
     }, [actionRequest, ok]);
 
-    if (myUserUid == null || state == null) {
+    if (myUserUid == null || state == null || boardId == null) {
         return null;
     }
-
-    const isCellModeSelectorRow =
-        state == null || boardId == null ? null : (
-            <Row gutter={gutter} align='middle'>
-                <Col flex='auto' />
-                <Col flex={0}></Col>
-                <Col span={inputSpan}>
-                    <IsCellModeSelector
-                        value={state}
-                        onChange={newState => updateState(() => newState)}
-                        boardId={boardId}
-                    />
-                </Col>
-            </Row>
-        );
 
     return (
         <div>
@@ -184,19 +167,11 @@ export const StringPieceEditor: React.FC<{
                 <Col flex={0}>ID</Col>
                 <Col span={inputSpan}>{updateMode != null ? updateMode.pieceId : '(なし)'}</Col>
             </Row>
-            {state != null && (
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
-                    <Col flex={0}></Col>
-                    <Col span={inputSpan}>
-                        <IsPositionLockedSelector
-                            value={state}
-                            onChange={newState => updateState(() => newState)}
-                        />
-                    </Col>
-                </Row>
-            )}
-            {isCellModeSelectorRow}
+            <PieceRectEditor
+                value={state}
+                onChange={newState => updateState(() => newState)}
+                boardId={boardId}
+            />
             <Row gutter={gutter} align='middle'>
                 <Col flex='auto' />
                 <Col flex={0}>所有者</Col>

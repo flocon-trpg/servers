@@ -15,7 +15,6 @@ import { InputFile } from '../../../../../file/InputFile/InputFile';
 import { FilePath } from '../../../../../../../utils/file/filePath';
 import { EditorGroupHeader } from '../../../../../../ui/EditorGroupHeader/EditorGroupHeader';
 import { FilesManagerDrawer } from '../../../../../file/FilesManagerDrawer/FilesManagerDrawer';
-import { IsCellModeSelector } from '../IsCellModeSelector/IsCellModeSelector';
 import {
     CompositeRect,
     PixelPosition,
@@ -23,7 +22,7 @@ import {
     applyCompositeRect,
 } from '../../utils/positionAndSizeAndRect';
 import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
-import { IsPositionLockedSelector } from '../IsPositionLockedSelector/IsPositionLockedSelector';
+import { PieceRectEditor } from '../RectEditor/RectEditor';
 
 type ImagePieceState = State<typeof imagePieceTemplate>;
 
@@ -160,24 +159,9 @@ export const ImagePieceEditor: React.FC<{
     const [filesManagerDrawerType, setFilesManagerDrawerType] =
         React.useState<FilesManagerDrawerType | null>(null);
 
-    if (myUserUid == null || state == null) {
+    if (myUserUid == null || state == null || boardId == null) {
         return null;
     }
-
-    const isCellModeSelectorRow =
-        state == null || boardId == null ? null : (
-            <Row gutter={gutter} align='middle'>
-                <Col flex='auto' />
-                <Col flex={0}></Col>
-                <Col span={inputSpan}>
-                    <IsCellModeSelector
-                        value={state}
-                        onChange={newState => updateState(() => newState)}
-                        boardId={boardId}
-                    />
-                </Col>
-            </Row>
-        );
 
     return (
         <>
@@ -189,6 +173,12 @@ export const ImagePieceEditor: React.FC<{
                 </Row>
 
                 <div style={{ height: 8 }} />
+
+                <PieceRectEditor
+                    value={state}
+                    onChange={newState => updateState(() => newState)}
+                    boardId={boardId}
+                />
 
                 {updateMode == null ? null : (
                     <>
@@ -215,21 +205,6 @@ export const ImagePieceEditor: React.FC<{
                         <div style={{ height: 8 }} />
                     </>
                 )}
-
-                {state != null && (
-                    <Row gutter={gutter} align='middle'>
-                        <Col flex='auto' />
-                        <Col flex={0}></Col>
-                        <Col span={inputSpan}>
-                            <IsPositionLockedSelector
-                                value={state}
-                                onChange={newState => updateState(() => newState)}
-                            />
-                        </Col>
-                    </Row>
-                )}
-
-                {isCellModeSelectorRow}
 
                 {/* TODO: isPrivateがまだ未実装 */}
 

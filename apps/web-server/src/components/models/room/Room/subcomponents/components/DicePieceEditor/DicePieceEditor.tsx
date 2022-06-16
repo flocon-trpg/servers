@@ -19,7 +19,6 @@ import { close, ok } from '../../../../../../../utils/constants';
 import { useSetRoomStateWithImmer } from '../../../../../../../hooks/useSetRoomStateWithImmer';
 import { CollaborativeInput } from '../../../../../../ui/CollaborativeInput/CollaborativeInput';
 import { Subscribable } from 'rxjs';
-import { IsCellModeSelector } from '../IsCellModeSelector/IsCellModeSelector';
 import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
 import {
     CompositeRect,
@@ -27,7 +26,7 @@ import {
     PixelSize,
     applyCompositeRect,
 } from '../../utils/positionAndSizeAndRect';
-import { IsPositionLockedSelector } from '../IsPositionLockedSelector/IsPositionLockedSelector';
+import { PieceRectEditor } from '../RectEditor/RectEditor';
 
 type CharacterState = State<typeof characterTemplate>;
 type DicePieceState = State<typeof dicePieceTemplate>;
@@ -161,24 +160,9 @@ export const DicePieceEditor: React.FC<{
         return () => subscription.unsubscribe();
     }, [actionRequest, ok]);
 
-    if (myUserUid == null || state == null) {
+    if (myUserUid == null || state == null || boardId == null) {
         return null;
     }
-
-    const isCellModeSelectorRow =
-        state == null || boardId == null ? null : (
-            <Row gutter={gutter} align='middle'>
-                <Col flex='auto' />
-                <Col flex={0}></Col>
-                <Col span={inputSpan}>
-                    <IsCellModeSelector
-                        value={state}
-                        onChange={newState => updateState(() => newState)}
-                        boardId={boardId}
-                    />
-                </Col>
-            </Row>
-        );
 
     return (
         <div>
@@ -188,20 +172,11 @@ export const DicePieceEditor: React.FC<{
                 <Col span={inputSpan}>{updateModeProp?.pieceId ?? '(なし)'}</Col>
             </Row>
 
-            {state != null && (
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
-                    <Col flex={0}></Col>
-                    <Col span={inputSpan}>
-                        <IsPositionLockedSelector
-                            value={state}
-                            onChange={newState => updateState(() => newState)}
-                        />
-                    </Col>
-                </Row>
-            )}
-
-            {isCellModeSelectorRow}
+            <PieceRectEditor
+                value={state}
+                onChange={newState => updateState(() => newState)}
+                boardId={boardId}
+            />
 
             <Row gutter={gutter} align='middle'>
                 <Col flex='auto' />
