@@ -42,7 +42,6 @@ import {
     debouncedWindowInnerHeightAtom,
     debouncedWindowInnerWidthAtom,
 } from '../../../pages/room/RoomIdPage/RoomIdPage';
-import { BoardPositionAndPieceEditorModal } from './subcomponents/components/BoardPositionAndPieceEditorModal/BoardPositionAndPieceEditorModal';
 import classNames from 'classnames';
 import { relative } from '../../../../styles/className';
 import { MessagePanelConfig } from '../../../../atoms/roomConfigAtom/types/messagePanelConfig';
@@ -990,7 +989,6 @@ export const Room: React.FC<Props> = ({ debug }) => {
                 <PopoverEditor />
 
                 <BoardEditorModal />
-                <BoardPositionAndPieceEditorModal />
                 <CharacterEditorModal />
                 <CharacterTagNamesEditorModal />
                 <DicePieceEditorModal />

@@ -51,11 +51,6 @@ import {
     stringPieceValueEditorAtom,
 } from '../../atoms/pieceValueEditorAtom/pieceValueEditorAtom';
 import { imagePieceModalAtom } from '../ImagePieceModal/ImagePieceModal';
-import {
-    boardPositionAndPieceEditorModalAtom,
-    characterPiece,
-    characterPortrait,
-} from '../BoardPositionAndPieceEditorModal/BoardPositionAndPieceEditorModal';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import { defaultTriggerSubMenuAction } from '../../../../../../../utils/variables';
 import {
@@ -315,7 +310,6 @@ const useHooks = () => {
     const setDicePieceEditor = useUpdateAtom(dicePieceValueEditorAtom);
     const setStringPieceEditor = useUpdateAtom(stringPieceValueEditorAtom);
     const setImagePieceModal = useUpdateAtom(imagePieceModalAtom);
-    const setBoardPositionAndPieceEditorModal = useUpdateAtom(boardPositionAndPieceEditorModalAtom);
     const cloneImagePiece = useCloneImagePiece();
     return React.useMemo(
         () => ({
@@ -323,7 +317,6 @@ const useHooks = () => {
             setDicePieceEditor,
             setStringPieceEditor,
             setImagePieceModal,
-            setBoardPositionAndPieceEditorModal,
             cloneImagePiece,
         }),
         [
@@ -331,7 +324,6 @@ const useHooks = () => {
             setDicePieceEditor,
             setStringPieceEditor,
             setImagePieceModal,
-            setBoardPositionAndPieceEditorModal,
             cloneImagePiece,
         ]
     );
@@ -365,31 +357,8 @@ namespace ContextMenuModule {
                     label: character.name,
                     children: [
                         {
-                            key: 'コマの編集@boardPopover',
-                            label: 'コマの編集',
-                            onClick: () => {
-                                hooks.setBoardPositionAndPieceEditorModal({
-                                    type: characterPiece,
-                                    characterId,
-                                    pieceId,
-                                });
-                                onContextMenuClear();
-                            },
-                        },
-                        {
-                            key: 'コマの削除@boardPopover',
-                            label: 'コマの削除',
-                            onClick: () => {
-                                setRoomState(roomState => {
-                                    delete roomState.characters?.[characterId]?.pieces?.[pieceId];
-                                });
-                                onContextMenuClear();
-                            },
-                        },
-                        { type: 'divider' },
-                        {
-                            key: 'キャラクターの編集@boardPopover',
-                            label: 'キャラクターの編集',
+                            key: '編集@コマ@boardPopover',
+                            label: '編集',
                             onClick: () => {
                                 hooks.setCharacterEditor({
                                     type: update,
@@ -397,6 +366,16 @@ namespace ContextMenuModule {
                                     selectedPieceType: piece,
                                     boardId,
                                     pieceId,
+                                });
+                                onContextMenuClear();
+                            },
+                        },
+                        {
+                            key: 'コマの削除@コマ@boardPopover',
+                            label: 'コマの削除',
+                            onClick: () => {
+                                setRoomState(roomState => {
+                                    delete roomState.characters?.[characterId]?.pieces?.[pieceId];
                                 });
                                 onContextMenuClear();
                             },
@@ -436,32 +415,8 @@ namespace ContextMenuModule {
                         label: character.name,
                         children: [
                             {
-                                key: '立ち絵の編集@boardPopover',
-                                label: '立ち絵の編集',
-                                onClick: () => {
-                                    hooks.setBoardPositionAndPieceEditorModal({
-                                        type: characterPortrait,
-                                        characterId,
-                                        pieceId: portraitPositionId,
-                                    });
-                                    onContextMenuClear();
-                                },
-                            },
-                            {
-                                key: '立ち絵を削除@boardPopover',
-                                label: '立ち絵を削除',
-                                onClick: () => {
-                                    setRoomState(roomState => {
-                                        delete roomState.characters?.[characterId]
-                                            ?.portraitPieces?.[portraitPositionId];
-                                    });
-                                    onContextMenuClear();
-                                },
-                            },
-                            { type: 'divider' },
-                            {
-                                key: 'キャラクターを編集@boardPopover',
-                                label: 'キャラクターを編集',
+                                key: '編集@立ち絵@boardPopover',
+                                label: '編集',
                                 onClick: () => {
                                     hooks.setCharacterEditor({
                                         type: update,
@@ -469,6 +424,17 @@ namespace ContextMenuModule {
                                         selectedPieceType: portrait,
                                         boardId,
                                         pieceId: portraitPositionId,
+                                    });
+                                    onContextMenuClear();
+                                },
+                            },
+                            {
+                                key: '立ち絵を削除@立ち絵@boardPopover',
+                                label: '立ち絵を削除',
+                                onClick: () => {
+                                    setRoomState(roomState => {
+                                        delete roomState.characters?.[characterId]
+                                            ?.portraitPieces?.[portraitPositionId];
                                     });
                                     onContextMenuClear();
                                 },
