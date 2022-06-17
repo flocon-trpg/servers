@@ -12,17 +12,17 @@ import {
     Tabs,
     Tooltip,
 } from 'antd';
-import { update } from '../../../../../../../stateManagers/states/types';
+import { update } from '@/stateManagers/states/types';
 import { NumberParameterInput } from '../NumberParameterInput/NumberParameterInput';
 import { BooleanParameterInput } from '../BooleanParameterInput/BooleanParameterInput';
 import { StringParameterInput } from '../StringParameterInput/StringParameterInput';
 import * as Icon from '@ant-design/icons';
-import { ToggleButton } from '../../../../../../ui/ToggleButton/ToggleButton';
+import { ToggleButton } from '@/components/ui/ToggleButton/ToggleButton';
 import {
     characterIsNotPrivate,
     characterIsNotPrivateAndNotCreatedByMe,
     characterIsPrivate,
-} from '../../../../../../../resources/text/main';
+} from '@/resources/text/main';
 import { useCharacters } from '../../hooks/useCharacters';
 import { useBoolParamNames, useNumParamNames, useStrParamNames } from '../../hooks/useParamNames';
 import {
@@ -33,34 +33,34 @@ import {
     strIndex10Array,
 } from '@flocon-trpg/core';
 import classNames from 'classnames';
-import { cancelRnd, flex, flexRow, itemsCenter } from '../../../../../../../styles/className';
+import { cancelRnd, flex, flexRow, itemsCenter } from '@/styles/className';
 import { ColumnType } from 'antd/lib/table';
 import { SortOrder } from 'antd/lib/table/interface';
 import { IconView } from '../../../../../file/IconView/IconView';
-import { useSetRoomStateWithImmer } from '../../../../../../../hooks/useSetRoomStateWithImmer';
-import { create } from '../../../../../../../utils/constants';
+import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
+import { create } from '@/utils/constants';
 import { useUpdateAtom } from 'jotai/utils';
 import { characterEditorModalAtom } from '../CharacterEditorModal/CharacterEditorModal';
 import { OverriddenParameterNameEditor } from '../OverriddenParameterNameEditor/OverriddenParameterNameEditor';
 import produce from 'immer';
 import { characterParameterNamesEditorVisibilityAtom } from '../CharacterParameterNamesEditorModal/CharacterParameterNamesEditorModal';
-import { useMyUserUid } from '../../../../../../../hooks/useMyUserUid';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { characterTagNamesEditorVisibilityAtom } from '../CharacterTagNamesEditorModal/CharacterTagNamesEditorModal';
-import { CharacterTabConfig } from '../../../../../../../atoms/roomConfigAtom/types/characterTabConfig';
-import { useAtomSelector } from '../../../../../../../hooks/useAtomSelector';
-import { roomConfigAtom } from '../../../../../../../atoms/roomConfigAtom/roomConfigAtom';
+import { CharacterTabConfig } from '@/atoms/roomConfigAtom/types/characterTabConfig';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { CharacterTabName } from './subcomponents/components/CharacterTabName/CharacterTabName';
-import { useImmerUpdateAtom } from '../../../../../../../hooks/useImmerUpdateAtom';
-import { CharacterTabConfigUtils } from '../../../../../../../atoms/roomConfigAtom/types/characterTabConfig/utils';
-import { DialogFooter } from '../../../../../../ui/DialogFooter/DialogFooter';
+import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
+import { CharacterTabConfigUtils } from '@/atoms/roomConfigAtom/types/characterTabConfig/utils';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { useCharacterTagNames } from '../../hooks/useCharacterTagNames';
 import { importCharacterModalVisibilityAtom } from '../ImportCharacterModal/ImportCharacterModal';
 import { useDrag, useDrop } from 'react-dnd';
-import { KeySorter } from '../../../../../../../utils/keySorter';
-import { RowKeys } from '../../../../../../../atoms/roomConfigAtom/types/charactersPanelConfig';
-import { DraggableTabs } from '../../../../../../ui/DraggableTabs/DraggableTabs';
-import { moveElement } from '../../../../../../../utils/moveElement';
-import { defaultTriggerSubMenuAction } from '../../../../../../../utils/variables';
+import { KeySorter } from '@/utils/keySorter';
+import { RowKeys } from '@/atoms/roomConfigAtom/types/charactersPanelConfig';
+import { DraggableTabs } from '@/components/ui/DraggableTabs/DraggableTabs';
+import { moveElement } from '@/utils/moveElement';
+import { defaultTriggerSubMenuAction } from '@/utils/variables';
 import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
 
 type CharacterState = State<typeof characterTemplate>;

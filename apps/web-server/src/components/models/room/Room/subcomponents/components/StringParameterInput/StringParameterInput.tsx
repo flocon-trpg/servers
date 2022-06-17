@@ -1,13 +1,13 @@
 import React from 'react';
 import { Tooltip } from 'antd';
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
-import { ToggleButton } from '../../../../../../ui/ToggleButton/ToggleButton';
+import { ToggleButton } from '@/components/ui/ToggleButton/ToggleButton';
 import {
     parameterIsNotPrivate,
     parameterIsNotPrivateAndNotCreatedByMe,
     parameterIsPrivate,
     parameterIsPrivateAndNotCreatedByMe,
-} from '../../../../../../../resources/text/main';
+} from '@/resources/text/main';
 import {
     State,
     StrIndex20,
@@ -18,9 +18,9 @@ import {
     strParamTemplate,
     toNullableTextUpOperation,
 } from '@flocon-trpg/core';
-import { CollaborativeInput } from '../../../../../../ui/CollaborativeInput/CollaborativeInput';
+import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 import classNames from 'classnames';
-import { flex, flex1, flexNone } from '../../../../../../../styles/className';
+import { flex, flex1, flexNone } from '@/styles/className';
 
 const applyCharacter = apply(characterTemplate);
 type CharacterState = State<typeof characterTemplate>;

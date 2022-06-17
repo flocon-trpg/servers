@@ -1,19 +1,19 @@
 import { Button, Collapse, Form, Modal, Select, Space } from 'antd';
 import React from 'react';
-import { DialogFooter } from '../../../../../../ui/DialogFooter/DialogFooter';
-import { replace } from '../../../../../../../stateManagers/states/types';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
+import { replace } from '@/stateManagers/states/types';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { useSetRoomStateByApply } from '../../../../../../../hooks/useSetRoomStateByApply';
+import { useSetRoomStateByApply } from '@/hooks/useSetRoomStateByApply';
 import { recordToMap } from '@flocon-trpg/utils';
 import { StrIndex20, UpOperation as U, roomTemplate, strIndex20Array } from '@flocon-trpg/core';
-import { InputModal } from '../../../../../../ui/InputModal/InputModal';
+import { InputModal } from '@/components/ui/InputModal/InputModal';
 import classNames from 'classnames';
-import { flex, flexRow } from '../../../../../../../styles/className';
-import { useSetRoomStateWithImmer } from '../../../../../../../hooks/useSetRoomStateWithImmer';
-import { roomAtom } from '../../../../../../../atoms/roomAtom/roomAtom';
-import { useAtomSelector } from '../../../../../../../hooks/useAtomSelector';
+import { flex, flexRow } from '@/styles/className';
+import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
+import { roomAtom } from '@/atoms/roomAtom/roomAtom';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { atom, useAtom } from 'jotai';
-import { CollaborativeInput } from '../../../../../../ui/CollaborativeInput/CollaborativeInput';
+import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 
 type UpOperation = U<typeof roomTemplate>;
 

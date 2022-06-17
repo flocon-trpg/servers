@@ -1,7 +1,7 @@
 import React from 'react';
-import { roomAtom } from '../../../../../../atoms/roomAtom/roomAtom';
-import { useAtomSelector } from '../../../../../../hooks/useAtomSelector';
-import { CharacterTagNames } from '../../../../../../utils/types';
+import { roomAtom } from '@/atoms/roomAtom/roomAtom';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { CharacterTagNames } from '@/utils/types';
 
 export function useCharacterTagNames(): Partial<CharacterTagNames> {
     const characterTag1Name = useAtomSelector(

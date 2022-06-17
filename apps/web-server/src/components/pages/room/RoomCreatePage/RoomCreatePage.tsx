@@ -3,10 +3,10 @@ import { CreateRoomDocument, CreateRoomInput } from '@flocon-trpg/typed-document
 import { Alert, Button, Card, Form, Input, Spin, Switch } from 'antd';
 import { useRouter } from 'next/router';
 import React from 'react';
-import { Center } from '../../../ui/Center/Center';
-import { Layout, loginAndEntry } from '../../../ui/Layout/Layout';
+import { Center } from '@/components/ui/Center/Center';
+import { Layout, loginAndEntry } from '@/components/ui/Layout/Layout';
 import { useAtomValue } from 'jotai';
-import { firebaseUserAtom } from '../../../../pages/_app';
+import { firebaseUserAtom } from '@/pages/_app';
 
 const labelCol = 10;
 const wrapperCol = 24 - labelCol;

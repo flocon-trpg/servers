@@ -6,29 +6,23 @@ import {
     WriteRoomSoundEffectDocument,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Icon from '@ant-design/icons';
-import { FilesManagerDrawer } from '../../../../../file/FilesManagerDrawer/FilesManagerDrawer';
-import { FilesManagerDrawerType, some } from '../../../../../../../utils/types';
-import { VolumeBar } from '../../../../../../ui/VolumeBar/VolumeBar';
-import { DialogFooter } from '../../../../../../ui/DialogFooter/DialogFooter';
-import { Styles } from '../../../../../../../styles';
+import { FilesManagerDrawer } from '@/components/models/file/FilesManagerDrawer/FilesManagerDrawer';
+import { FilesManagerDrawerType, some } from '@/utils/types';
+import { VolumeBar } from '@/components/ui/VolumeBar/VolumeBar';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
+import { Styles } from '@/styles';
 import { State, StrIndex5, bgmTemplate, filePathTemplate } from '@flocon-trpg/core';
 import _ from 'lodash';
-import {
-    cancelRnd,
-    flex,
-    flexColumn,
-    flexRow,
-    itemsCenter,
-} from '../../../../../../../styles/className';
+import { cancelRnd, flex, flexColumn, flexRow, itemsCenter } from '@/styles/className';
 import classNames from 'classnames';
-import { sound } from '../../../../../../../utils/fileType';
-import { FilePath as FilePathModule } from '../../../../../../../utils/file/filePath';
+import { sound } from '@/utils/fileType';
+import { FilePath as FilePathModule } from '@/utils/file/filePath';
 import { useMutation } from 'urql';
 import { atom } from 'jotai';
-import { roomAtom } from '../../../../../../../atoms/roomAtom/roomAtom';
+import { roomAtom } from '@/atoms/roomAtom/roomAtom';
 import { useAtomValue } from 'jotai/utils';
-import { useSetRoomStateWithImmer } from '../../../../../../../hooks/useSetRoomStateWithImmer';
-import { EditorGroupHeader } from '../../../../../../ui/EditorGroupHeader/EditorGroupHeader';
+import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
+import { EditorGroupHeader } from '@/components/ui/EditorGroupHeader/EditorGroupHeader';
 
 type FilePath = State<typeof filePathTemplate>;
 type BgmState = State<typeof bgmTemplate>;

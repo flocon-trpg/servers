@@ -1,6 +1,6 @@
 import fileDownload from 'js-file-download';
 import React from 'react';
-import { FirebaseStorageUrlCacheContext } from '../../../../../../../../../../contexts/FirebaseStorageUrlCacheContext';
+import { FirebaseStorageUrlCacheContext } from '@/contexts/FirebaseStorageUrlCacheContext';
 import {
     GetLogDocument,
     GetLogQuery,
@@ -17,11 +17,11 @@ import { generateAsRichLog, generateAsStaticHtml } from '../../../../../utils/ro
 import moment from 'moment';
 import { Button, Checkbox, Modal, Progress, Radio } from 'antd';
 import classNames from 'classnames';
-import { flex, flexColumn } from '../../../../../../../../../../styles/className';
+import { flex, flexColumn } from '@/styles/className';
 import { useClient } from 'urql';
-import { useWebConfig } from '../../../../../../../../../../hooks/useWebConfig';
+import { useWebConfig } from '@/hooks/useWebConfig';
 import { useAtomValue } from 'jotai/utils';
-import { firebaseStorageAtom, getIdTokenAtom } from '../../../../../../../../../../pages/_app';
+import { firebaseStorageAtom, getIdTokenAtom } from '@/pages/_app';
 import { useLatest } from 'react-use';
 
 const simple = 'simple';

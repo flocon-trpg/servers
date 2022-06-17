@@ -2,17 +2,17 @@ import React from 'react';
 import { Button, Tooltip } from 'antd';
 import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
 import { State, imagePieceTemplate, simpleId } from '@flocon-trpg/core';
-import { useMyUserUid } from '../../../../../../../hooks/useMyUserUid';
-import { close, ok } from '../../../../../../../utils/constants';
-import { useSetRoomStateWithImmer } from '../../../../../../../hooks/useSetRoomStateWithImmer';
-import { FilesManagerDrawerType } from '../../../../../../../utils/types';
-import { CollaborativeInput } from '../../../../../../ui/CollaborativeInput/CollaborativeInput';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { close, ok } from '@/utils/constants';
+import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
+import { FilesManagerDrawerType } from '@/utils/types';
+import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 import { Subscribable } from 'rxjs';
 import { useImagePieces } from '../../hooks/useImagePieces';
 import { useCloneImagePiece } from '../../hooks/useCloneImagePiece';
-import { InputFile } from '../../../../../file/InputFile/InputFile';
-import { FilePath } from '../../../../../../../utils/file/filePath';
-import { FilesManagerDrawer } from '../../../../../file/FilesManagerDrawer/FilesManagerDrawer';
+import { InputFile } from '@/components/models/file/InputFile/InputFile';
+import { FilePath } from '@/utils/file/filePath';
+import { FilesManagerDrawer } from '@/components/models/file/FilesManagerDrawer/FilesManagerDrawer';
 import {
     CompositeRect,
     PixelPosition,
@@ -21,7 +21,7 @@ import {
 } from '../../utils/positionAndSizeAndRect';
 import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
 import { PieceRectEditor } from '../RectEditor/RectEditor';
-import { usePersistentMemo } from '../../../../../../../hooks/usePersistentMemo';
+import { usePersistentMemo } from '@/hooks/usePersistentMemo';
 import { Table, TableRow } from '@/components/ui/Table/Table';
 
 type ImagePieceState = State<typeof imagePieceTemplate>;

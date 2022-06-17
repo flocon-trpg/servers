@@ -2,7 +2,7 @@ import { updateProfile } from '@firebase/auth';
 import { Alert, Button, Card, Form, Input, Spin, Switch } from 'antd';
 import { useAtomValue } from 'jotai';
 import React from 'react';
-import { firebaseUserAtom } from '../../../pages/_app';
+import { firebaseUserAtom } from '@/pages/_app';
 import { Center } from '../../ui/Center/Center';
 import { Layout, login } from '../../ui/Layout/Layout';
 

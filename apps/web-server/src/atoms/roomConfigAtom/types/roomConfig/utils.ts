@@ -2,7 +2,7 @@ import { RoomConfig } from '.';
 import { ResizeDirection } from 're-resizable';
 import { recordToArray } from '@flocon-trpg/utils';
 import { BoardConfig, defaultBoardConfig } from '../boardConfig';
-import { BoardType } from '../../../../utils/types';
+import { BoardType } from '@/utils/types';
 
 export namespace RoomConfigUtils {
     export const activeBoardPanel = 'activeBoardPanel';

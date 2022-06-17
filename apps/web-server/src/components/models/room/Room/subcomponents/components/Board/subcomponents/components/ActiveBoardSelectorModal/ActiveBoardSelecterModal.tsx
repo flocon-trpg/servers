@@ -2,8 +2,8 @@ import { Select } from 'antd';
 import Modal from 'antd/lib/modal/Modal';
 import React from 'react';
 import { useMyBoards } from '../../../../../hooks/useMyBoards';
-import { useSetRoomStateByApply } from '../../../../../../../../../../hooks/useSetRoomStateByApply';
-import { cancelRnd } from '../../../../../../../../../../styles/className';
+import { useSetRoomStateByApply } from '@/hooks/useSetRoomStateByApply';
+import { cancelRnd } from '@/styles/className';
 
 type Props = {
     visible: boolean;

@@ -13,23 +13,23 @@ import {
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { Menu, Tooltip } from 'antd';
 import React from 'react';
-import { NewTabLinkify } from '../../../../../../ui/NewTabLinkify/NewTabLinkify';
+import { NewTabLinkify } from '@/components/ui/NewTabLinkify/NewTabLinkify';
 import {
     FileSourceType,
     WriteRoomSoundEffectDocument,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { useBoards } from '../../hooks/useBoards';
 import { useCharacters } from '../../hooks/useCharacters';
-import { useMyUserUid } from '../../../../../../../hooks/useMyUserUid';
-import { useSetRoomStateByApply } from '../../../../../../../hooks/useSetRoomStateByApply';
-import { update } from '../../../../../../../stateManagers/states/types';
-import { testCommand } from '../../../../../../../utils/character/command';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { useSetRoomStateByApply } from '@/hooks/useSetRoomStateByApply';
+import { update } from '@/stateManagers/states/types';
+import { testCommand } from '@/utils/character/command';
 import { DicePieceValue } from '../../utils/dicePieceValue';
 import { StringPieceValue } from '../../utils/stringPieceValue';
 import { useMutation } from 'urql';
-import { roomAtom } from '../../../../../../../atoms/roomAtom/roomAtom';
-import { useAtomSelector } from '../../../../../../../hooks/useAtomSelector';
-import { BoardConfig } from '../../../../../../../atoms/roomConfigAtom/types/boardConfig';
+import { roomAtom } from '@/atoms/roomAtom/roomAtom';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { BoardConfig } from '@/atoms/roomConfigAtom/types/boardConfig';
 import { boardTooltipAtom } from '../../atoms/boardTooltipAtom/boardTooltipAtom';
 import { useAtomValue, useUpdateAtom } from 'jotai/utils';
 import { character, dicePiece, imagePiece, portrait, stringPiece } from '../../utils/types';
@@ -38,12 +38,12 @@ import {
     ContextMenuState,
     boardContextMenuAtom,
 } from '../../atoms/boardContextMenuAtom/boardContextMenuAtom';
-import { create } from '../../../../../../../utils/constants';
+import { create } from '@/utils/constants';
 import { useCloneImagePiece } from '../../hooks/useCloneImagePiece';
 import { ImageView } from '../../../../../file/ImageView/ImageView';
 import classNames from 'classnames';
-import { flex, flexRow, itemsCenter } from '../../../../../../../styles/className';
-import { useSetRoomStateWithImmer } from '../../../../../../../hooks/useSetRoomStateWithImmer';
+import { flex, flexRow, itemsCenter } from '@/styles/className';
+import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
 import { useIsMyCharacter } from '../../hooks/useIsMyCharacter';
 import { characterEditorModalAtom, piece } from '../CharacterEditorModal/CharacterEditorModal';
 import {
@@ -52,7 +52,7 @@ import {
 } from '../../atoms/pieceValueEditorAtom/pieceValueEditorAtom';
 import { imagePieceModalAtom } from '../ImagePieceModal/ImagePieceModal';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
-import { defaultTriggerSubMenuAction } from '../../../../../../../utils/variables';
+import { defaultTriggerSubMenuAction } from '@/utils/variables';
 import {
     UpdateMode as DicePiceUpdateMode,
     DicePieceEditor,

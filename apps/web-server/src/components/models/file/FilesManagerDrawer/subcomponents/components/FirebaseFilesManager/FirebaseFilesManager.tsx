@@ -5,29 +5,29 @@ import { ColumnGroupType, ColumnType } from 'antd/lib/table';
 import * as Icons from '@ant-design/icons';
 import { FirebaseStorageLink } from '../../../../FirebaseStorageLink/FirebaseStorageLink';
 import copy from 'clipboard-copy';
-import { fileName } from '../../../../../../../utils/filename';
-import { InformationIcon } from '../../../../../../ui/InformationIcon/InformationIcon';
+import { fileName } from '@/utils/filename';
+import { InformationIcon } from '@/components/ui/InformationIcon/InformationIcon';
 import { FilterValue } from 'antd/lib/table/interface';
 import moment from 'moment';
-import { useMyUserUid } from '../../../../../../../hooks/useMyUserUid';
-import { $public, StorageType, unlisted } from '../../../../../../../utils/file/firebaseStorage';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { $public, StorageType, unlisted } from '@/utils/file/firebaseStorage';
 import {
     DeleteFirebaseStorageFileModal,
     useDeleteFirebaseStorageFileModalActions,
 } from './subcomponents/DeleteFirebaseStorageFileModal/DeleteFirebaseStorageFileModal';
 import { accept } from '../../../utils/helper';
-import { FileType, guessFileType, image, others, sound } from '../../../../../../../utils/fileType';
-import { FileState, Reference } from '../../../../../../../atoms/fileState';
+import { FileType, guessFileType, image, others, sound } from '@/utils/fileType';
+import { FileState, Reference } from '@/atoms/fileState';
 import { useAtom } from 'jotai';
-import { unlistedFilesAtom } from '../../../../../../../atoms/unlistedFilesAtom/unlistedFilesAtom';
-import { publicFilesAtom } from '../../../../../../../atoms/publicFilesAtom/publicFilesAtom';
-import { reloadUnlistedFilesKeyAtom } from '../../../../../../../atoms/reloadUnlistedFilesKeyAtom/reloadUnlistedFilesKeyAtom';
-import { reloadPublicFilesKeyAtom } from '../../../../../../../atoms/reloadPublicFilesKeyAtom/reloadPublicFilesKeyAtom';
+import { unlistedFilesAtom } from '@/atoms/unlistedFilesAtom/unlistedFilesAtom';
+import { publicFilesAtom } from '@/atoms/publicFilesAtom/publicFilesAtom';
+import { reloadUnlistedFilesKeyAtom } from '@/atoms/reloadUnlistedFilesKeyAtom/reloadUnlistedFilesKeyAtom';
+import { reloadPublicFilesKeyAtom } from '@/atoms/reloadPublicFilesKeyAtom/reloadPublicFilesKeyAtom';
 import { useAtomValue, useUpdateAtom } from 'jotai/utils';
-import { useWebConfig } from '../../../../../../../hooks/useWebConfig';
+import { useWebConfig } from '@/hooks/useWebConfig';
 import { getMetadata, listAll, ref, uploadBytes } from '@firebase/storage';
-import { firebaseStorageAtom } from '../../../../../../../pages/_app';
-import { defaultTriggerSubMenuAction } from '../../../../../../../utils/variables';
+import { firebaseStorageAtom } from '@/pages/_app';
+import { defaultTriggerSubMenuAction } from '@/utils/variables';
 
 type DataSource = FileState;
 

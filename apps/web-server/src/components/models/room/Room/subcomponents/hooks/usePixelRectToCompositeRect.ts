@@ -1,4 +1,4 @@
-import { usePersistentMemo } from '../../../../../../hooks/usePersistentMemo';
+import { usePersistentMemo } from '@/hooks/usePersistentMemo';
 import {
     CompositeRect,
     PixelRect,

@@ -1,18 +1,18 @@
 import React from 'react';
 import { Howl } from 'howler';
-import { done, useSrcArrayFromGraphQL } from '../../../../../../hooks/srcHooks';
-import { volumeCap } from '../../../../../../utils/variables';
+import { done, useSrcArrayFromGraphQL } from '@/hooks/srcHooks';
+import { volumeCap } from '@/utils/variables';
 import { State, bgmTemplate } from '@flocon-trpg/core';
 import _ from 'lodash';
-import { analyzeUrl } from '../../../../../../utils/analyzeUrl';
+import { analyzeUrl } from '@/utils/analyzeUrl';
 import { useDeepCompareEffect } from 'react-use';
-import { useAtomSelector } from '../../../../../../hooks/useAtomSelector';
-import { roomAtom } from '../../../../../../atoms/roomAtom/roomAtom';
-import { roomConfigAtom } from '../../../../../../atoms/roomConfigAtom/roomConfigAtom';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { roomAtom } from '@/atoms/roomAtom/roomAtom';
+import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import {
     defaultChannelVolume,
     defaultMasterVolume,
-} from '../../../../../../atoms/roomConfigAtom/types/roomConfig/resources';
+} from '@/atoms/roomConfigAtom/types/roomConfig/resources';
 
 type BgmState = State<typeof bgmTemplate>;
 

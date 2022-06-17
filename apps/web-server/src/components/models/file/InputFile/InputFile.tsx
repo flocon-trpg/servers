@@ -1,15 +1,15 @@
 import { Button, Tooltip } from 'antd';
 import * as React from 'react';
 import { FileSourceType } from '@flocon-trpg/typed-document-node-v0.7.1';
-import { some } from '../../../../utils/types';
+import { some } from '@/utils/types';
 import { FirebaseStorageLink } from '../FirebaseStorageLink/FirebaseStorageLink';
 import * as Core from '@flocon-trpg/core';
 import { FilterValue } from 'antd/lib/table/interface';
-import { FilePath } from '../../../../utils/file/filePath';
+import { FilePath } from '@/utils/file/filePath';
 import classNames from 'classnames';
-import { flex, flexRow, itemsCenter } from '../../../../styles/className';
+import { flex, flexRow, itemsCenter } from '@/styles/className';
 import { ImageView } from '../ImageView/ImageView';
-import { image } from '../../../../utils/fileType';
+import { image } from '@/utils/fileType';
 
 type FilePathState = Core.State<typeof Core.filePathTemplate>;
 

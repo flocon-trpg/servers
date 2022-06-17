@@ -5,18 +5,18 @@ import { Button, Dropdown, Menu, Modal, Table, Tooltip, notification } from 'ant
 import classNames from 'classnames';
 import { useRouter } from 'next/router';
 import React from 'react';
-import { flex, flexNone, flexRow } from '../../../../styles/className';
-import { Layout, loginAndEntry } from '../../../ui/Layout/Layout';
-import { QueryResultViewer } from '../../../ui/QueryResultViewer/QueryResultViewer';
+import { flex, flexNone, flexRow } from '@/styles/className';
+import { Layout, loginAndEntry } from '@/components/ui/Layout/Layout';
+import { QueryResultViewer } from '@/components/ui/QueryResultViewer/QueryResultViewer';
 import * as Icons from '@ant-design/icons';
-import { Styles } from '../../../../styles';
+import { Styles } from '@/styles';
 import { toBeNever } from '@flocon-trpg/utils';
 import moment from 'moment';
-import { ToggleButton } from '../../../ui/ToggleButton/ToggleButton';
-import { useGetMyRoles } from '../../../../hooks/useGetMyRoles';
-import { useIsV072OrLater } from '../../../../hooks/useIsV072OrLater';
+import { ToggleButton } from '@/components/ui/ToggleButton/ToggleButton';
+import { useGetMyRoles } from '@/hooks/useGetMyRoles';
+import { useIsV072OrLater } from '@/hooks/useIsV072OrLater';
 import { Subscription } from 'rxjs';
-import { defaultTriggerSubMenuAction } from '../../../../utils/variables';
+import { defaultTriggerSubMenuAction } from '@/utils/variables';
 
 type Data072 = DocNode072.RoomAsListItemFragment;
 type Data071 = DocNode071.RoomAsListItemFragment;

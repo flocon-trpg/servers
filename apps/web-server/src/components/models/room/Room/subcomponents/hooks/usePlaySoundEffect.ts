@@ -1,13 +1,13 @@
 import { Howl } from 'howler';
 import React from 'react';
 import { FilePathFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
-import { analyzeUrl } from '../../../../../../utils/analyzeUrl';
-import { volumeCap } from '../../../../../../utils/variables';
-import { success, useSrcFromGraphQL } from '../../../../../../hooks/srcHooks';
-import { useAtomSelector } from '../../../../../../hooks/useAtomSelector';
-import { roomConfigAtom } from '../../../../../../atoms/roomConfigAtom/roomConfigAtom';
+import { analyzeUrl } from '@/utils/analyzeUrl';
+import { volumeCap } from '@/utils/variables';
+import { success, useSrcFromGraphQL } from '@/hooks/srcHooks';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { useLatest } from 'react-use';
-import { useRoomMessageEvent } from '../../../../../../hooks/useRoomMessages';
+import { useRoomMessageEvent } from '@/hooks/useRoomMessages';
 import { soundEffect } from '@flocon-trpg/web-server-utils';
 
 // 長過ぎる曲をSEにしようとした場合、何もしないと部屋に再入室しない限りその曲を止めることができない。それを防ぐため、最大15秒までしか流れないようにしている。15秒という長さは適当。

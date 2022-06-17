@@ -18,12 +18,7 @@ import {
     Tooltip,
 } from 'antd';
 import moment from 'moment';
-import {
-    failure,
-    graphqlError,
-    notFetch,
-    useRoomMessages,
-} from '../../../../../../../hooks/useRoomMessages';
+import { failure, graphqlError, notFetch, useRoomMessages } from '@/hooks/useRoomMessages';
 import {
     Message,
     Notification,
@@ -42,8 +37,8 @@ import {
     WritingMessageStatusType,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Icon from '@ant-design/icons';
-import { DialogFooter } from '../../../../../../ui/DialogFooter/DialogFooter';
-import { QueryResultViewer } from '../../../../../../ui/QueryResultViewer/QueryResultViewer';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
+import { QueryResultViewer } from '@/components/ui/QueryResultViewer/QueryResultViewer';
 import { useMessageFilter } from '../../hooks/useMessageFilter';
 import { RoomMessage as RoomMessageNameSpace } from './subcomponents/components/RoomMessage/RoomMessage';
 import { useWritingMessageStatus } from '../../hooks/useWritingMessageStatus';
@@ -52,42 +47,35 @@ import { usePublicChannelNames } from '../../hooks/usePublicChannelNames';
 import { useParticipants } from '../../hooks/useParticipants';
 import { keyNames, recordToMap, toBeNever } from '@flocon-trpg/utils';
 import * as Icons from '@ant-design/icons';
-import { InputModal } from '../../../../../../ui/InputModal/InputModal';
-import { JumpToBottomVirtuoso } from '../../../../../../ui/JumpToBottomVirtuoso/JumpToBottomVirtuoso';
-import {
-    cancelRnd,
-    flex,
-    flexColumn,
-    flexNone,
-    flexRow,
-    itemsCenter,
-} from '../../../../../../../styles/className';
+import { InputModal } from '@/components/ui/InputModal/InputModal';
+import { JumpToBottomVirtuoso } from '@/components/ui/JumpToBottomVirtuoso/JumpToBottomVirtuoso';
+import { cancelRnd, flex, flexColumn, flexNone, flexRow, itemsCenter } from '@/styles/className';
 import classNames from 'classnames';
-import { useSetRoomStateWithImmer } from '../../../../../../../hooks/useSetRoomStateWithImmer';
+import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
 import { useMutation } from 'urql';
-import { MessageTabConfig } from '../../../../../../../atoms/roomConfigAtom/types/messageTabConfig';
+import { MessageTabConfig } from '@/atoms/roomConfigAtom/types/messageTabConfig';
 import { atom } from 'jotai';
-import { roomAtom } from '../../../../../../../atoms/roomAtom/roomAtom';
-import { userConfigAtom } from '../../../../../../../atoms/userConfigAtom/userConfigAtom';
-import { UserConfigUtils } from '../../../../../../../atoms/userConfigAtom/utils';
-import { MessageFilter } from '../../../../../../../atoms/roomConfigAtom/types/messageFilter';
-import { roomConfigAtom } from '../../../../../../../atoms/roomConfigAtom/roomConfigAtom';
-import { MessageTabConfigUtils } from '../../../../../../../atoms/roomConfigAtom/types/messageTabConfig/utils';
-import { useImmerUpdateAtom } from '../../../../../../../hooks/useImmerUpdateAtom';
+import { roomAtom } from '@/atoms/roomAtom/roomAtom';
+import { userConfigAtom } from '@/atoms/userConfigAtom/userConfigAtom';
+import { UserConfigUtils } from '@/atoms/userConfigAtom/utils';
+import { MessageFilter } from '@/atoms/roomConfigAtom/types/messageFilter';
+import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { MessageTabConfigUtils } from '@/atoms/roomConfigAtom/types/messageTabConfig/utils';
+import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
 import { useAtomValue } from 'jotai/utils';
 import { MessageTabName } from './subcomponents/components/MessageTabName/MessageTabName';
-import { DraggableTabs } from '../../../../../../ui/DraggableTabs/DraggableTabs';
-import { moveElement } from '../../../../../../../utils/moveElement';
-import { column, row } from '../../../../../../../atoms/userConfigAtom/types';
-import { InputDescription } from '../../../../../../ui/InputDescription/InputDescription';
+import { DraggableTabs } from '@/components/ui/DraggableTabs/DraggableTabs';
+import { moveElement } from '@/utils/moveElement';
+import { column, row } from '@/atoms/userConfigAtom/types';
+import { InputDescription } from '@/components/ui/InputDescription/InputDescription';
 import { WritableDraft } from 'immer/dist/internal';
-import { MessagePanelConfig } from '../../../../../../../atoms/roomConfigAtom/types/messagePanelConfig';
+import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
-import { defaultTriggerSubMenuAction } from '../../../../../../../utils/variables';
-import { firebaseUserAtom } from '../../../../../../../pages/_app';
-import { getUserUid } from '../../../../../../../utils/firebase/firebaseUserState';
-import { CollaborativeInput } from '../../../../../../ui/CollaborativeInput/CollaborativeInput';
-import { Styles } from '../../../../../../../styles';
+import { defaultTriggerSubMenuAction } from '@/utils/variables';
+import { firebaseUserAtom } from '@/pages/_app';
+import { getUserUid } from '@/utils/firebase/firebaseUserState';
+import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
+import { Styles } from '@/styles';
 import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
 
 const headerHeight = 20;

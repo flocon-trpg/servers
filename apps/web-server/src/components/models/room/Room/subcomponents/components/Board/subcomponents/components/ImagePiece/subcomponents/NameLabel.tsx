@@ -1,7 +1,10 @@
 import React from 'react';
 import * as ReactKonva from 'react-konva';
 import Konva from 'konva';
-import { PixelPosition, PixelSize } from '../../../../../../utils/positionAndSizeAndRect';
+import {
+    PixelPosition,
+    PixelSize,
+} from '@/components/models/room/Room/subcomponents/utils/positionAndSizeAndRect';
 
 type Props = {
     text?: string;

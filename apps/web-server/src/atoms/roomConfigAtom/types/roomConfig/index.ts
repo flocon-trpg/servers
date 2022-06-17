@@ -1,5 +1,5 @@
 import * as t from 'io-ts';
-import { record } from '../../../../utils/io-ts/record';
+import { record } from '@/utils/io-ts/record';
 import { MessageFilter, deserializeMessageFilter, serializedMessageFilter } from '../messageFilter';
 import { MessageFilterUtils } from '../messageFilter/utils';
 import {

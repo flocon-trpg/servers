@@ -3,7 +3,7 @@ import { Checkbox } from 'antd';
 import { RoomPrivateMessage, RoomPublicMessage } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { usePublicChannelNames } from '../../../../../../../../hooks/usePublicChannelNames';
 import classNames from 'classnames';
-import { flex, flexColumn } from '../../../../../../../../../../../../../styles/className';
+import { flex, flexColumn } from '@/styles/className';
 import { $free, $system } from '@flocon-trpg/core';
 
 export type ChannelsFilterOptions = {

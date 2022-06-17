@@ -1,7 +1,7 @@
 import React from 'react';
-import { roomAtom } from '../../../../../../atoms/roomAtom/roomAtom';
-import { useAtomSelector } from '../../../../../../hooks/useAtomSelector';
-import { PublicChannelNames } from '../../../../../../utils/types';
+import { roomAtom } from '@/atoms/roomAtom/roomAtom';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { PublicChannelNames } from '@/utils/types';
 
 export function usePublicChannelNames(): PublicChannelNames | null {
     const publicChannel1Name = useAtomSelector(

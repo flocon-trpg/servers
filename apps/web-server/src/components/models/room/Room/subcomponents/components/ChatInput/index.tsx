@@ -4,9 +4,9 @@ import { GameSelector } from '../GameSelector/GameSelector';
 import { TextColorSelector } from './TextColorSelector';
 import { SelectedChannelType, SubmitMessage, publicChannel } from '../SubmitMessage/SubmitMessage';
 import { getSelectedCharacterType } from './getSelectedCharacterType';
-import { MessagePanelConfig } from '../../../../../../../atoms/roomConfigAtom/types/messagePanelConfig';
+import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import { atom } from 'jotai';
-import { roomConfigAtom } from '../../../../../../../atoms/roomConfigAtom/roomConfigAtom';
+import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { Draft } from 'immer';
 import { useAtomValue } from 'jotai/utils';
 

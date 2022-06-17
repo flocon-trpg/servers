@@ -1,7 +1,7 @@
 import React from 'react';
 import { recordToMap } from '@flocon-trpg/utils';
-import { useAtomSelector } from '../../../../../../hooks/useAtomSelector';
-import { roomAtom } from '../../../../../../atoms/roomAtom/roomAtom';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { roomAtom } from '@/atoms/roomAtom/roomAtom';
 
 export const useImagePieces = (boardId: string | undefined) => {
     const imagePieces = useAtomSelector(

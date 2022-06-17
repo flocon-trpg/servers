@@ -1,13 +1,13 @@
 import { Modal } from 'antd';
 import React from 'react';
-import { DialogFooter } from '../../../../../../ui/DialogFooter/DialogFooter';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { DrawerProps } from 'antd/lib/drawer';
-import { close, create, ok, update } from '../../../../../../../utils/constants';
+import { close, create, ok, update } from '@/utils/constants';
 import { atom, useAtom } from 'jotai';
 import { Subject } from 'rxjs';
 import { CreateMode, ImagePieceEditor, UpdateMode } from '../ImagePieceEditor/ImagePieceEditor';
 import { PixelPosition } from '../../utils/positionAndSizeAndRect';
-import { usePersistentMemo } from '../../../../../../../hooks/usePersistentMemo';
+import { usePersistentMemo } from '@/hooks/usePersistentMemo';
 import useConstant from 'use-constant';
 
 type ImagePieceModalType =

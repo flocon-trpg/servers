@@ -1,11 +1,11 @@
 import React from 'react';
 import { Table } from 'antd';
 import { ParticipantRole } from '@flocon-trpg/typed-document-node-v0.7.1';
-import { Jdenticon } from '../../../../../../ui/Jdenticon/Jdenticon';
+import { Jdenticon } from '@/components/ui/Jdenticon/Jdenticon';
 import { useRoomConnections } from '../../hooks/useRoomConnections';
 import { useParticipants } from '../../hooks/useParticipants';
 import { State, participantTemplate } from '@flocon-trpg/core';
-import { useMyUserUid } from '../../../../../../../hooks/useMyUserUid';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
 
 type ParticipantState = State<typeof participantTemplate>;
 

@@ -16,17 +16,17 @@ import {
     signInWithPopup,
     updateProfile,
 } from 'firebase/auth';
-import { anonymous, email, facebook, github, google, phone, twitter } from '../../../../env';
-import { useWebConfig } from '../../../../hooks/useWebConfig';
+import { anonymous, email, facebook, github, google, phone, twitter } from '@/env';
+import { useWebConfig } from '@/hooks/useWebConfig';
 import { Alert, Button, Form, Input, Tooltip } from 'antd';
-import { Center } from '../../../ui/Center/Center';
+import { Center } from '@/components/ui/Center/Center';
 import { useRouter } from 'next/router';
 import classNames from 'classnames';
-import { flex, flexColumn, flexRow } from '../../../../styles/className';
+import { flex, flexColumn, flexRow } from '@/styles/className';
 import { useAtomValue } from 'jotai/utils';
-import { firebaseAuthAtom } from '../../../../pages/_app';
+import { firebaseAuthAtom } from '@/pages/_app';
 import { atom, useAtom, useSetAtom } from 'jotai';
-import { storybookAtom } from '../../../../atoms/storybookAtom/storybookAtom';
+import { storybookAtom } from '@/atoms/storybookAtom/storybookAtom';
 
 const displayName = 'new user';
 const formWidth = 400;

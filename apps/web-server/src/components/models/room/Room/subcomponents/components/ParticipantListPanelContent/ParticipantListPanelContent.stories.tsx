@@ -2,7 +2,7 @@ import { ParticipantRole } from '@flocon-trpg/core';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 import { ParticipantListPanelContent } from './ParticipantListPanelContent';
-import { useSetupMocks } from '../../../../../../../hooks/useSetupMocks';
+import { useSetupMocks } from '@/hooks/useSetupMocks';
 
 export const Master: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
     useSetupMocks({ roomConfig: { myParticipantRole } });

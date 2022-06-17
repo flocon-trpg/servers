@@ -3,9 +3,9 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { RoomMessagesPanelContent } from './RoomMessagesPanelContent';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { CreateMockRoomMessagesParams } from '../../../../../../../mocks';
+import { CreateMockRoomMessagesParams } from '@/mocks';
 import { getExactlyOneKey } from '@flocon-trpg/utils';
-import { useSetupMocks } from '../../../../../../../hooks/useSetupMocks';
+import { useSetupMocks } from '@/hooks/useSetupMocks';
 
 export const Default: React.FC<
     { height: number; fetchingMessages: boolean } & CreateMockRoomMessagesParams

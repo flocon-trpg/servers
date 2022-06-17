@@ -1,12 +1,12 @@
 import { DrawerProps, Modal } from 'antd';
 import React from 'react';
-import { DialogFooter } from '../../../../../../ui/DialogFooter/DialogFooter';
-import { close, create, ok, update } from '../../../../../../../utils/constants';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
+import { close, create, ok, update } from '@/utils/constants';
 import { useAtom } from 'jotai';
 import { stringPieceValueEditorAtom } from '../../atoms/pieceValueEditorAtom/pieceValueEditorAtom';
 import { Subject } from 'rxjs';
 import { CreateMode, StringPieceEditor, UpdateMode } from '../StringPieceEditor/StringPieceEditor';
-import { usePersistentMemo } from '../../../../../../../hooks/usePersistentMemo';
+import { usePersistentMemo } from '@/hooks/usePersistentMemo';
 import useConstant from 'use-constant';
 
 const drawerBaseProps: Partial<DrawerProps> = {

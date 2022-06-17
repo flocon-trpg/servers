@@ -8,7 +8,7 @@ import {
     stringPieceTemplate,
 } from '@flocon-trpg/core';
 import { atom } from 'jotai';
-import { BoardConfig } from '../../../../../../../atoms/roomConfigAtom/types/boardConfig';
+import { BoardConfig } from '@/atoms/roomConfigAtom/types/boardConfig';
 
 type CharacterState = State<typeof characterTemplate>;
 type CharacterPieceState = State<typeof characterPieceTemplate>;

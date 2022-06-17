@@ -1,5 +1,5 @@
 import React from 'react';
-import { replace } from '../../../../../../../stateManagers/states/types';
+import { replace } from '@/stateManagers/states/types';
 import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
 import {
     State,
@@ -12,10 +12,10 @@ import { useDicePieces } from '../../hooks/useDicePieces';
 import { MyCharactersSelect } from '../MyCharactersSelect/MyCharactersSelect';
 import { InputDie } from '../InputDie/InputDie';
 import { noValue } from '../../utils/types';
-import { useMyUserUid } from '../../../../../../../hooks/useMyUserUid';
-import { close, ok } from '../../../../../../../utils/constants';
-import { useSetRoomStateWithImmer } from '../../../../../../../hooks/useSetRoomStateWithImmer';
-import { CollaborativeInput } from '../../../../../../ui/CollaborativeInput/CollaborativeInput';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { close, ok } from '@/utils/constants';
+import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
+import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 import { Subscribable } from 'rxjs';
 import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
 import {
@@ -25,7 +25,7 @@ import {
     applyCompositeRect,
 } from '../../utils/positionAndSizeAndRect';
 import { PieceRectEditor } from '../RectEditor/RectEditor';
-import { usePersistentMemo } from '../../../../../../../hooks/usePersistentMemo';
+import { usePersistentMemo } from '@/hooks/usePersistentMemo';
 import { Table, TableRow } from '@/components/ui/Table/Table';
 import { keyNames } from '@flocon-trpg/utils';
 

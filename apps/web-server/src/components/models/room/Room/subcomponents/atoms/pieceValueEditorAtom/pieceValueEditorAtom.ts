@@ -1,5 +1,5 @@
 import { PrimitiveAtom, atom } from 'jotai';
-import { create, update } from '../../../../../../../utils/constants';
+import { create, update } from '@/utils/constants';
 import { PixelPosition } from '../../utils/positionAndSizeAndRect';
 
 type PieceValueEditorState =

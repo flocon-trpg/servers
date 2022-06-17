@@ -1,15 +1,15 @@
 import React, { PropsWithChildren } from 'react';
 import { NumberSize, ResizeDirection } from 're-resizable';
 import { CloseOutlined } from '@ant-design/icons';
-import { cancelRnd } from '../../../styles/className';
+import { cancelRnd } from '@/styles/className';
 import { ControlPosition } from 'react-draggable';
-import { useAtomSelector } from '../../../hooks/useAtomSelector';
-import { roomConfigAtom } from '../../../atoms/roomConfigAtom/roomConfigAtom';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import {
     defaultPanelOpacity,
     minPanelOpacity,
-} from '../../../atoms/roomConfigAtom/types/roomConfig/resources';
-import { Styles } from '../../../styles';
+} from '@/atoms/roomConfigAtom/types/roomConfig/resources';
+import { Styles } from '@/styles';
 import { Rnd, Props as RndProps } from 'react-rnd';
 
 // 上からheader、topElement、children、bottomElementの順で描画される。children以外はheightが固定されている。

@@ -3,16 +3,11 @@ import { Select } from 'antd';
 import { usePublicChannelNames } from '../../../../../hooks/usePublicChannelNames';
 import { $free, PublicChannelKey } from '@flocon-trpg/core';
 import classNames from 'classnames';
-import {
-    flex,
-    flexNone,
-    flexRow,
-    itemsCenter,
-} from '../../../../../../../../../../styles/className';
-import { ChatPalettePanelConfig } from '../../../../../../../../../../atoms/roomConfigAtom/types/chatPalettePanelConfig';
-import { MessagePanelConfig } from '../../../../../../../../../../atoms/roomConfigAtom/types/messagePanelConfig';
+import { flex, flexNone, flexRow, itemsCenter } from '@/styles/className';
+import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
+import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import { Draft } from 'immer';
-import { InputDescription } from '../../../../../../../../../ui/InputDescription/InputDescription';
+import { InputDescription } from '@/components/ui/InputDescription/InputDescription';
 
 type Props = {
     config: ChatPalettePanelConfig | MessagePanelConfig;

@@ -25,12 +25,12 @@ import Link from 'next/link';
 import { NotSignInResult } from '../NotSignInResult/NotSignInResult';
 import { LoadingResult } from '../LoadingResult/LoadingResult';
 import * as Icon from '@ant-design/icons';
-import { useSignOut } from '../../../hooks/useSignOut';
+import { useSignOut } from '@/hooks/useSignOut';
 import { useClient, useMutation } from 'urql';
-import { useGetMyRoles } from '../../../hooks/useGetMyRoles';
+import { useGetMyRoles } from '@/hooks/useGetMyRoles';
 import { useAtomValue } from 'jotai';
-import { firebaseUserAtom, getIdTokenAtom } from '../../../pages/_app';
-import { authNotFound, loading, notSignIn } from '../../../utils/firebase/firebaseUserState';
+import { firebaseUserAtom, getIdTokenAtom } from '@/pages/_app';
+import { authNotFound, loading, notSignIn } from '@/utils/firebase/firebaseUserState';
 
 const { Header, Content } = AntdLayout;
 

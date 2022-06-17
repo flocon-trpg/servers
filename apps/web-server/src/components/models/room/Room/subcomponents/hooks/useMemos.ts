@@ -1,8 +1,8 @@
 import React from 'react';
 import { recordToMap } from '@flocon-trpg/utils';
 import { State, memoTemplate } from '@flocon-trpg/core';
-import { useAtomSelector } from '../../../../../../hooks/useAtomSelector';
-import { roomAtom } from '../../../../../../atoms/roomAtom/roomAtom';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { roomAtom } from '@/atoms/roomAtom/roomAtom';
 
 type MemoState = State<typeof memoTemplate>;
 

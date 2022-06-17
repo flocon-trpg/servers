@@ -3,7 +3,7 @@ import { OmitVersion, State, boardPositionTemplate, pieceTemplate } from '@floco
 import { InputNumber, Space } from 'antd';
 import produce from 'immer';
 import React from 'react';
-import { CollaborativeInput } from '../../../../../../ui/CollaborativeInput/CollaborativeInput';
+import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 import { IsCellModeSelector } from './subcomponents/components/IsCellModeSelector/IsCellModeSelector';
 import { IsPositionLockedSelector } from './subcomponents/components/IsPositionLockedSelector/IsPositionLockedSelector';
 

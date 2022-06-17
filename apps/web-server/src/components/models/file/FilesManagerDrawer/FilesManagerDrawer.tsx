@@ -5,14 +5,14 @@ import {
     FileSourceType,
     GetServerInfoDocument,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
-import { DialogFooter } from '../../../ui/DialogFooter/DialogFooter';
-import { FilesManagerDrawerType, some } from '../../../../utils/types';
-import { cancelRnd } from '../../../../styles/className';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
+import { FilesManagerDrawerType, some } from '@/utils/types';
+import { cancelRnd } from '@/styles/className';
 import { FirebaseFilesManager } from './subcomponents/components/FirebaseFilesManager/FirebaseFilesManager';
 import { FloconFilesManager } from './subcomponents/components/FloconFilesManager/FloconFilesManager';
 import { useQuery } from 'urql';
 import { useAtomValue } from 'jotai';
-import { firebaseUserAtom } from '../../../../pages/_app';
+import { firebaseUserAtom } from '@/pages/_app';
 
 type Props = {
     drawerType: FilesManagerDrawerType | null;

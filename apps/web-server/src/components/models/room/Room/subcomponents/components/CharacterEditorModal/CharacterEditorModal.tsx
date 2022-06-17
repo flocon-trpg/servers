@@ -1,44 +1,44 @@
 import { Button, Modal, Tooltip } from 'antd';
 import React from 'react';
-import { DialogFooter } from '../../../../../../ui/DialogFooter/DialogFooter';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { InputFile } from '../../../../../file/InputFile/InputFile';
-import { FilesManagerDrawerType } from '../../../../../../../utils/types';
+import { FilesManagerDrawerType } from '@/utils/types';
 import { FilesManagerDrawer } from '../../../../../file/FilesManagerDrawer/FilesManagerDrawer';
 import { NumberParameterInput } from '../NumberParameterInput/NumberParameterInput';
 import { BooleanParameterInput } from '../BooleanParameterInput/BooleanParameterInput';
 import { StringParameterInput } from '../StringParameterInput/StringParameterInput';
-import { ToggleButton } from '../../../../../../ui/ToggleButton/ToggleButton';
+import { ToggleButton } from '@/components/ui/ToggleButton/ToggleButton';
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 import {
     characterIsNotPrivate,
     characterIsNotPrivateAndNotCreatedByMe,
     characterIsPrivate,
-} from '../../../../../../../resources/text/main';
+} from '@/resources/text/main';
 import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
 import { useCharacters } from '../../hooks/useCharacters';
 import { useParticipants } from '../../hooks/useParticipants';
 import { useBoolParamNames, useNumParamNames, useStrParamNames } from '../../hooks/useParamNames';
 import { State, characterTemplate, simpleId, strIndex20Array } from '@flocon-trpg/core';
-import { useMyUserUid } from '../../../../../../../hooks/useMyUserUid';
-import { FilePath } from '../../../../../../../utils/file/filePath';
-import { useSetRoomStateWithImmer } from '../../../../../../../hooks/useSetRoomStateWithImmer';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { FilePath } from '@/utils/file/filePath';
+import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
 import { atom } from 'jotai';
-import { create, update } from '../../../../../../../utils/constants';
+import { create, update } from '@/utils/constants';
 import { useAtomValue, useUpdateAtom } from 'jotai/utils';
 import { commandEditorModalAtom } from '../../atoms/commandEditorModalAtom/commandEditorModalAtom';
 import { useIsMyCharacter } from '../../hooks/useIsMyCharacter';
 import { CharacterVarInput } from '../CharacterVarInput/CharacterVarInput';
 import classNames from 'classnames';
-import { flex, flexAuto, flexColumn, flexRow } from '../../../../../../../styles/className';
-import { EditorGroupHeader } from '../../../../../../ui/EditorGroupHeader/EditorGroupHeader';
+import { flex, flexAuto, flexColumn, flexRow } from '@/styles/className';
+import { EditorGroupHeader } from '@/components/ui/EditorGroupHeader/EditorGroupHeader';
 import { OverriddenParameterNameEditor } from '../OverriddenParameterNameEditor/OverriddenParameterNameEditor';
 import { CharacterTagsSelect } from './subcomponent/components/CharacterTagsSelect/CharacterTagsSelect';
-import { CopyToClipboardButton } from '../../../../../../ui/CopyToClipboardButton/CopyToClipboardButton';
-import { CollaborativeInput } from '../../../../../../ui/CollaborativeInput/CollaborativeInput';
+import { CopyToClipboardButton } from '@/components/ui/CopyToClipboardButton/CopyToClipboardButton';
+import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 import { useCharacterPiece } from '../../hooks/useCharacterPiece';
 import { usePortraitPiece } from '../../hooks/usePortraitPiece';
 import { BoardPositionRectEditor, PieceRectEditor } from '../RectEditor/RectEditor';
-import { usePersistentMemo } from '../../../../../../../hooks/usePersistentMemo';
+import { usePersistentMemo } from '@/hooks/usePersistentMemo';
 import { Table, TableCombinedRow, TableHeader, TableRow } from '@/components/ui/Table/Table';
 import { keyNames } from '@flocon-trpg/utils';
 

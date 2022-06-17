@@ -1,7 +1,7 @@
 import { isValidVarToml } from '@flocon-trpg/core';
 import classNames from 'classnames';
 import React from 'react';
-import { flex, flex1, flexColumn } from '../../../styles/className';
+import { flex, flex1, flexColumn } from '@/styles/className';
 import { CollaborativeInput, Props as PropsCore } from '../CollaborativeInput/CollaborativeInput';
 
 export type CreateBottomElementParams =

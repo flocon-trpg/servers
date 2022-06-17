@@ -3,9 +3,9 @@ import { Button, Input, Modal, Select } from 'antd';
 import React from 'react';
 import { useCharacter } from '../../hooks/useCharacter';
 import MonacoEditor, { useMonaco } from '@monaco-editor/react';
-import { useBufferValue } from '../../../../../../../hooks/useBufferValue';
-import { testCommand } from '../../../../../../../utils/character/command';
-import { useSetRoomStateByApply } from '../../../../../../../hooks/useSetRoomStateByApply';
+import { useBufferValue } from '@/hooks/useBufferValue';
+import { testCommand } from '@/utils/character/command';
+import { useSetRoomStateByApply } from '@/hooks/useSetRoomStateByApply';
 import {
     commandTemplate,
     createRecordValueTemplate,
@@ -14,11 +14,11 @@ import {
     toUpOperation,
 } from '@flocon-trpg/core';
 import classNames from 'classnames';
-import { flex, flexRow } from '../../../../../../../styles/className';
-import { characterUpdateOperation } from '../../../../../../../utils/character/characterUpdateOperation';
+import { flex, flexRow } from '@/styles/className';
+import { characterUpdateOperation } from '@/utils/character/characterUpdateOperation';
 import { useLatest, usePrevious } from 'react-use';
-import { characterCommandLibSource } from '../../../../../../../monaco/characterCommandLibSource';
-import { defaultLibSource } from '../../../../../../../monaco/defaultLibSource';
+import { characterCommandLibSource } from '@/monaco/characterCommandLibSource';
+import { defaultLibSource } from '@/monaco/defaultLibSource';
 import { useAtom } from 'jotai';
 import { commandEditorModalAtom } from '../../atoms/commandEditorModalAtom/commandEditorModalAtom';
 

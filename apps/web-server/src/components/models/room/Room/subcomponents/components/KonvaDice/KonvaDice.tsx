@@ -1,7 +1,7 @@
 import React from 'react';
 import * as ReactKonva from 'react-konva';
 import { animated, useTransition } from '@react-spring/konva';
-import { success, useImage } from '../../../../../../../hooks/imageHooks';
+import { success, useImage } from '@/hooks/imageHooks';
 
 export const question = 'question';
 

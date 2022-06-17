@@ -3,10 +3,10 @@ import { Checkbox } from 'antd';
 import { Gutter } from 'antd/lib/grid/row';
 import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
 import { State, String, characterTemplate, simpleId, stringPieceTemplate } from '@flocon-trpg/core';
-import { useMyUserUid } from '../../../../../../../hooks/useMyUserUid';
-import { close, ok } from '../../../../../../../utils/constants';
-import { useSetRoomStateWithImmer } from '../../../../../../../hooks/useSetRoomStateWithImmer';
-import { CollaborativeInput } from '../../../../../../ui/CollaborativeInput/CollaborativeInput';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { close, ok } from '@/utils/constants';
+import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
+import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 import { Subscribable } from 'rxjs';
 import { useStringPieces } from '../../hooks/useStringPieces';
 import { MyCharactersSelect } from '../MyCharactersSelect/MyCharactersSelect';
@@ -18,7 +18,7 @@ import {
 } from '../../utils/positionAndSizeAndRect';
 import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
 import { PieceRectEditor } from '../RectEditor/RectEditor';
-import { usePersistentMemo } from '../../../../../../../hooks/usePersistentMemo';
+import { usePersistentMemo } from '@/hooks/usePersistentMemo';
 import { Table, TableRow } from '@/components/ui/Table/Table';
 
 type CharacterState = State<typeof characterTemplate>;
@@ -27,8 +27,6 @@ type StringPieceState = State<typeof stringPieceTemplate>;
 type ActionRequest = Subscribable<typeof ok | typeof close>;
 
 const pieceSize: PixelSize = { w: 50, h: 50 };
-const gutter: [Gutter, Gutter] = [16, 16];
-const inputSpan = 16;
 
 const defaultStringPieceValue = (
     piecePosition: CompositeRect,

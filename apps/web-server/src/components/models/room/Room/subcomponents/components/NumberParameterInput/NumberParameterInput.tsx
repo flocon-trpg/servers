@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Input, InputNumber, Tooltip } from 'antd';
 import { DeleteOutlined, EyeInvisibleOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
-import { ToggleButton } from '../../../../../../ui/ToggleButton/ToggleButton';
+import { ToggleButton } from '@/components/ui/ToggleButton/ToggleButton';
 import {
     addParameter,
     deleteParameter,
@@ -9,7 +9,7 @@ import {
     parameterIsNotPrivateAndNotCreatedByMe,
     parameterIsPrivate,
     parameterIsPrivateAndNotCreatedByMe,
-} from '../../../../../../../resources/text/main';
+} from '@/resources/text/main';
 import {
     State,
     StrIndex20,

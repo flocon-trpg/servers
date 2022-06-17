@@ -13,10 +13,10 @@ import {
     privateMessage,
     publicMessage,
 } from '@flocon-trpg/web-server-utils';
-import { PublicChannelNames } from '../../../../../../../../../../utils/types';
-import { Jdenticon } from '../../../../../../../../../ui/Jdenticon/Jdenticon';
+import { PublicChannelNames } from '@/utils/types';
+import { Jdenticon } from '@/components/ui/Jdenticon/Jdenticon';
 import { isDeleted, toText } from '../../../../../utils/message';
-import { NewTabLinkify } from '../../../../../../../../../ui/NewTabLinkify/NewTabLinkify';
+import { NewTabLinkify } from '@/components/ui/NewTabLinkify/NewTabLinkify';
 import {
     $free,
     State,
@@ -27,8 +27,8 @@ import {
 } from '@flocon-trpg/core';
 import { recordToMap } from '@flocon-trpg/utils';
 import classNames from 'classnames';
-import { flex, flexRow, itemsCenter } from '../../../../../../../../../../styles/className';
-import { IconView } from '../../../../../../../../file/IconView/IconView';
+import { flex, flexRow, itemsCenter } from '@/styles/className';
+import { IconView } from '@/components/models/file/IconView/IconView';
 
 type ParticipantState = State<typeof participantTemplate>;
 

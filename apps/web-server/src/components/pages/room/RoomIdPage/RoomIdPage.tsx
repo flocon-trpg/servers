@@ -16,15 +16,15 @@ import { useRouter } from 'next/router';
 import React from 'react';
 import { useDebounce, useLatest, usePrevious } from 'react-use';
 import { Subject, bufferTime } from 'rxjs';
-import { roomPrivateMessageInputAtom } from '../../../models/room/Room/subcomponents/atoms/roomPrivateMessageInputAtom/roomPrivateMessageInputAtom';
-import { roomPublicMessageInputAtom } from '../../../models/room/Room/subcomponents/atoms/roomPublicMessageInputAtom/roomPublicMessageInputAtom';
-import { hideAllOverlayActionAtom } from '../../../../atoms/hideAllOverlayActionAtom/hideAllOverlayActionAtom';
-import { roomAtom } from '../../../../atoms/roomAtom/roomAtom';
-import { roomConfigAtom } from '../../../../atoms/roomConfigAtom/roomConfigAtom';
-import { RoomConfigUtils } from '../../../../atoms/roomConfigAtom/types/roomConfig/utils';
-import { useAtomSelector } from '../../../../hooks/useAtomSelector';
-import { usePublishRoomEventSubscription } from '../../../../hooks/usePublishRoomEventSubscription';
-import { useStartFetchingRoomMessages } from '../../../../hooks/useRoomMessages';
+import { roomPrivateMessageInputAtom } from '@/components/models/room/Room/subcomponents/atoms/roomPrivateMessageInputAtom/roomPrivateMessageInputAtom';
+import { roomPublicMessageInputAtom } from '@/components/models/room/Room/subcomponents/atoms/roomPublicMessageInputAtom/roomPublicMessageInputAtom';
+import { hideAllOverlayActionAtom } from '@/atoms/hideAllOverlayActionAtom/hideAllOverlayActionAtom';
+import { roomAtom } from '@/atoms/roomAtom/roomAtom';
+import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { usePublishRoomEventSubscription } from '@/hooks/usePublishRoomEventSubscription';
+import { useStartFetchingRoomMessages } from '@/hooks/useRoomMessages';
 import {
     deleted,
     getRoomFailure,
@@ -34,14 +34,14 @@ import {
     myAuthIsUnavailable,
     nonJoined,
     useRoomState,
-} from '../../../../hooks/useRoomState';
-import { getRoomConfig } from '../../../../utils/localStorage/roomConfig';
-import { Ref } from '../../../../utils/types';
-import { Room } from '../../../models/room/Room/Room';
-import { Center } from '../../../ui/Center/Center';
-import { Layout, loginAndEntry, success } from '../../../ui/Layout/Layout';
-import { LoadingResult } from '../../../ui/LoadingResult/LoadingResult';
-import { firebaseUserAtom } from '../../../../pages/_app';
+} from '@/hooks/useRoomState';
+import { getRoomConfig } from '@/utils/localStorage/roomConfig';
+import { Ref } from '@/utils/types';
+import { Room } from '@/components/models/room/Room/Room';
+import { Center } from '@/components/ui/Center/Center';
+import { Layout, loginAndEntry, success } from '@/components/ui/Layout/Layout';
+import { LoadingResult } from '@/components/ui/LoadingResult/LoadingResult';
+import { firebaseUserAtom } from '@/pages/_app';
 
 type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
 

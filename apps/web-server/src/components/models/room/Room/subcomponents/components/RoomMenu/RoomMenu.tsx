@@ -14,44 +14,39 @@ import {
 } from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Icon from '@ant-design/icons';
 import { RoomVolumeBar } from './subcomponents/components/RoomVolumeBar/RoomVolumeBar';
-import { Jdenticon } from '../../../../../../ui/Jdenticon/Jdenticon';
-import { path } from '../../../../../../../resources/path';
+import { Jdenticon } from '@/components/ui/Jdenticon/Jdenticon';
+import { path } from '@/resources/path';
 import { useRouter } from 'next/router';
 import { recordToArray } from '@flocon-trpg/utils';
-import { FilesManagerDrawer } from '../../../../../file/FilesManagerDrawer/FilesManagerDrawer';
-import { FilesManagerDrawerType, none } from '../../../../../../../utils/types';
+import { FilesManagerDrawer } from '@/components/models/file/FilesManagerDrawer/FilesManagerDrawer';
+import { FilesManagerDrawerType, none } from '@/utils/types';
 import { useMe } from '../../hooks/useMe';
-import { useMyUserUid } from '../../../../../../../hooks/useMyUserUid';
-import { useSignOut } from '../../../../../../../hooks/useSignOut';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { useSignOut } from '@/hooks/useSignOut';
 import classNames from 'classnames';
-import { flex, flexRow, itemsCenter } from '../../../../../../../styles/className';
+import { flex, flexRow, itemsCenter } from '@/styles/className';
 import { GenerateLogModal } from './subcomponents/components/GenerageLogModal/GenerateLogModal';
 import { useMutation, useQuery } from 'urql';
-import {
-    error,
-    roomAtom,
-    roomNotificationsAtom,
-    text,
-} from '../../../../../../../atoms/roomAtom/roomAtom';
-import { useAtomSelector } from '../../../../../../../hooks/useAtomSelector';
-import { roomConfigAtom } from '../../../../../../../atoms/roomConfigAtom/roomConfigAtom';
-import { RoomConfigUtils } from '../../../../../../../atoms/roomConfigAtom/types/roomConfig/utils';
+import { error, roomAtom, roomNotificationsAtom, text } from '@/atoms/roomAtom/roomAtom';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
 import { simpleId } from '@flocon-trpg/core';
-import { defaultMessagePanelConfig } from '../../../../../../../atoms/roomConfigAtom/types/messagePanelConfig';
-import { defaultMemoPanelConfig } from '../../../../../../../atoms/roomConfigAtom/types/memoPanelConfig';
+import { defaultMessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
+import { defaultMemoPanelConfig } from '@/atoms/roomConfigAtom/types/memoPanelConfig';
 import { useUpdateAtom } from 'jotai/utils';
-import { useImmerUpdateAtom } from '../../../../../../../hooks/useImmerUpdateAtom';
+import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
 import { editRoomDrawerVisibilityAtom } from '../../atoms/editRoomDrawerVisibilityAtom/editRoomDrawerVisibilityAtom';
-import { OpacityBar } from '../../../../../../ui/VolumeBar/VolumeBar';
+import { OpacityBar } from '@/components/ui/VolumeBar/VolumeBar';
 import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import produce from 'immer';
 import {
     defaultPanelOpacity,
     minPanelOpacity,
-} from '../../../../../../../atoms/roomConfigAtom/types/roomConfig/resources';
-import { Styles } from '../../../../../../../styles';
+} from '@/atoms/roomConfigAtom/types/roomConfig/resources';
+import { Styles } from '@/styles';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
-import { firebaseUserAtom } from '../../../../../../../pages/_app';
+import { firebaseUserAtom } from '@/pages/_app';
 
 const panelOpacityAtom = atom(
     get => get(roomConfigAtom)?.panelOpacity,

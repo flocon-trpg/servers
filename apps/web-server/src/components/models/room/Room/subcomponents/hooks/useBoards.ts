@@ -1,5 +1,5 @@
-import { useAtomSelector } from '../../../../../../hooks/useAtomSelector';
-import { roomAtom } from '../../../../../../atoms/roomAtom/roomAtom';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { roomAtom } from '@/atoms/roomAtom/roomAtom';
 import React from 'react';
 import { State, boardTemplate } from '@flocon-trpg/core';
 import { recordToMap } from '@flocon-trpg/utils';

@@ -1,12 +1,12 @@
 import { Modal } from 'antd';
 import React from 'react';
-import { DialogFooter } from '../../../../../../ui/DialogFooter/DialogFooter';
-import { close, create, ok, update } from '../../../../../../../utils/constants';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
+import { close, create, ok, update } from '@/utils/constants';
 import { useAtom } from 'jotai';
 import { dicePieceValueEditorAtom } from '../../atoms/pieceValueEditorAtom/pieceValueEditorAtom';
 import { Subject } from 'rxjs';
 import { CreateMode, DicePieceEditor, UpdateMode } from '../DicePieceEditor/DicePieceEditor';
-import { usePersistentMemo } from '../../../../../../../hooks/usePersistentMemo';
+import { usePersistentMemo } from '@/hooks/usePersistentMemo';
 import useConstant from 'use-constant';
 
 export const DicePieceEditorModal: React.FC = () => {

@@ -1,8 +1,8 @@
 import React from 'react';
 import { recordForEach } from '@flocon-trpg/utils';
 import { Master, Player, Spectator, State, participantTemplate } from '@flocon-trpg/core';
-import { useAtomSelector } from '../../../../../../hooks/useAtomSelector';
-import { roomAtom } from '../../../../../../atoms/roomAtom/roomAtom';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { roomAtom } from '@/atoms/roomAtom/roomAtom';
 
 type ParticipantState = State<typeof participantTemplate>;
 

@@ -1,4 +1,4 @@
-import { MessagePanelConfig } from '../../../../../../../atoms/roomConfigAtom/types/messagePanelConfig';
+import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 
 export const none = 'none';
 export const some = 'some';

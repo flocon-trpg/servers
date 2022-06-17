@@ -4,18 +4,12 @@ import { css } from '@emotion/react';
 import { Button, Popover } from 'antd';
 import { SketchPicker } from 'react-color';
 import classNames from 'classnames';
-import {
-    cancelRnd,
-    flex,
-    flexNone,
-    flexRow,
-    itemsCenter,
-} from '../../../../../../../styles/className';
-import { rgb } from '../../../../../../../utils/rgb';
+import { cancelRnd, flex, flexNone, flexRow, itemsCenter } from '@/styles/className';
+import { rgb } from '@/utils/rgb';
 import { Draft } from 'immer';
-import { ChatPalettePanelConfig } from '../../../../../../../atoms/roomConfigAtom/types/chatPalettePanelConfig';
-import { MessagePanelConfig } from '../../../../../../../atoms/roomConfigAtom/types/messagePanelConfig';
-import { InputDescription } from '../../../../../../ui/InputDescription/InputDescription';
+import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
+import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
+import { InputDescription } from '@/components/ui/InputDescription/InputDescription';
 
 type Props = {
     config: ChatPalettePanelConfig | MessagePanelConfig;

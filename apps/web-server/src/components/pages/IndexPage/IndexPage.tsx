@@ -3,15 +3,15 @@ import React from 'react';
 import { FilesManagerDrawer } from '../../models/file/FilesManagerDrawer/FilesManagerDrawer';
 import { QueryResultViewer } from '../../ui/QueryResultViewer/QueryResultViewer';
 import { Layout } from '../../ui/Layout/Layout';
-import { FilesManagerDrawerType, none } from '../../../utils/types';
-import { SupportedApiServers, VERSION } from '../../../VERSION';
+import { FilesManagerDrawerType, none } from '@/utils/types';
+import { SupportedApiServers, VERSION } from '@/VERSION';
 import * as Icon from '@ant-design/icons';
 import { useRouter } from 'next/router';
 import classNames from 'classnames';
-import { flex, flexColumn } from '../../../styles/className';
-import { apiServerSatisfies } from '../../../versioning/apiServerSatisfies';
-import { semVerRangeToString } from '../../../versioning/semVerRange';
-import { useGetApiSemVer } from '../../../hooks/useGetApiSemVer';
+import { flex, flexColumn } from '@/styles/className';
+import { apiServerSatisfies } from '@/versioning/apiServerSatisfies';
+import { semVerRangeToString } from '@/versioning/semVerRange';
+import { useGetApiSemVer } from '@/hooks/useGetApiSemVer';
 import Link from 'next/link';
 
 export const IndexPage: React.FC = () => {

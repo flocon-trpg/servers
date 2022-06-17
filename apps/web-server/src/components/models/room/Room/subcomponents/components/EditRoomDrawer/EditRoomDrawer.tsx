@@ -1,10 +1,10 @@
 import { Drawer, Input } from 'antd';
 import React from 'react';
-import { DialogFooter } from '../../../../../../ui/DialogFooter/DialogFooter';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { DrawerProps } from 'antd/lib/drawer';
-import { useSetRoomStateWithImmer } from '../../../../../../../hooks/useSetRoomStateWithImmer';
-import { useAtomSelector } from '../../../../../../../hooks/useAtomSelector';
-import { roomAtom } from '../../../../../../../atoms/roomAtom/roomAtom';
+import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { roomAtom } from '@/atoms/roomAtom/roomAtom';
 import { editRoomDrawerVisibilityAtom } from '../../atoms/editRoomDrawerVisibilityAtom/editRoomDrawerVisibilityAtom';
 import { useAtom } from 'jotai';
 import { Table, TableRow } from '@/components/ui/Table/Table';

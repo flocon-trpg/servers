@@ -1,12 +1,12 @@
 import React from 'react';
-import { success, useImageFromGraphQL } from '../../../../../../../../../../hooks/imageHooks';
+import { success, useImageFromGraphQL } from '@/hooks/imageHooks';
 import * as ReactKonva from 'react-konva';
 import { animated, useSpring, useTransition } from '@react-spring/konva';
 import { RoomPublicMessageFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { interval } from 'rxjs';
 import { isDeleted, toText as toTextCore } from '../../../../../utils/message';
 import { State, filePathTemplate } from '@flocon-trpg/core';
-import { FilePath } from '../../../../../../../../../../utils/file/filePath';
+import { FilePath } from '@/utils/file/filePath';
 import { PieceGroup, PieceGroupProps } from '../../../../PieceGroup/PieceGroup';
 import { NameLabel } from './subcomponents/NameLabel';
 

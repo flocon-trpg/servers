@@ -1,8 +1,8 @@
 import { simpleId } from '@flocon-trpg/core';
 import produce from 'immer';
 import React from 'react';
-import { useMyUserUid } from '../../../../../../hooks/useMyUserUid';
-import { useSetRoomState } from '../../../../../../hooks/useSetRoomState';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { useSetRoomState } from '@/hooks/useSetRoomState';
 
 export const useCloneImagePiece = () => {
     const setRoomState = useSetRoomState();

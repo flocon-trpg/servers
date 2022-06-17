@@ -5,7 +5,7 @@ import {
 } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { escape } from 'html-escaper';
 import moment from 'moment';
-import { PublicChannelNames } from '../../../../../../utils/types';
+import { PublicChannelNames } from '@/utils/types';
 import {
     RoomMessage,
     messageContentMaxHeight,
@@ -19,17 +19,17 @@ import {
     participantTemplate,
     simpleId,
 } from '@flocon-trpg/core';
-import { FilePath } from '../../../../../../utils/file/filePath';
+import { FilePath } from '@/utils/file/filePath';
 import axios from 'axios';
 import JSZip from 'jszip';
-import { analyzeUrl } from '../../../../../../utils/analyzeUrl';
-import { ExpiryMap } from '../../../../../../utils/file/expiryMap';
+import { analyzeUrl } from '@/utils/analyzeUrl';
+import { ExpiryMap } from '@/utils/file/expiryMap';
 import { RoomMessageFilter } from '../components/RoomMenu/subcomponents/components/GenerageLogModal/subcomponents/components/ChannelsFilter/ChannelsFilter';
-import { WebConfig } from '../../../../../../configType';
+import { WebConfig } from '@/configType';
 import { FirebaseStorage as FirebaseStorageType } from '@firebase/storage';
 import { HtmlObject, div, generateHtml, span } from './generateHtml';
 import { PrivateChannelSet } from '@flocon-trpg/web-server-utils';
-import { Styles } from '../../../../../../styles';
+import { Styles } from '@/styles';
 
 const logHtml = (messageDivs: string[]) => `
 <!DOCTYPE html>

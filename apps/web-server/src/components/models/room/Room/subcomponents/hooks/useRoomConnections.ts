@@ -5,8 +5,8 @@ import { GetRoomConnectionsDocument } from '@flocon-trpg/typed-document-node-v0.
 import { Notification } from '@flocon-trpg/web-server-utils';
 import { useParticipants } from './useParticipants';
 import { useLatest } from 'react-use';
-import { roomAtom, roomNotificationsAtom, text } from '../../../../../../atoms/roomAtom/roomAtom';
-import { useAtomSelector } from '../../../../../../hooks/useAtomSelector';
+import { roomAtom, roomNotificationsAtom, text } from '@/atoms/roomAtom/roomAtom';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { useUpdateAtom } from 'jotai/utils';
 
 export type RoomConnectionsResult = {

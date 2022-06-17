@@ -1,6 +1,6 @@
 import { $free, $system } from '@flocon-trpg/core';
 import React from 'react';
-import { MessageFilter } from '../../../../../../atoms/roomConfigAtom/types/messageFilter';
+import { MessageFilter } from '@/atoms/roomConfigAtom/types/messageFilter';
 import {
     Message,
     PrivateChannelSets,

@@ -1,14 +1,10 @@
 import React from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { useSetAtom } from 'jotai';
-import {
-    anotherPlayerCharacterId1,
-    myRichCharacterId,
-    mySimpleCharacterId,
-} from '../../../../../../../mocks';
+import { anotherPlayerCharacterId1, myRichCharacterId, mySimpleCharacterId } from '@/mocks';
 import { ParticipantRole } from '@flocon-trpg/core';
 import { CharacterEditorModal, characterEditorModalAtom } from './CharacterEditorModal';
-import { useSetupMocks } from '../../../../../../../hooks/useSetupMocks';
+import { useSetupMocks } from '@/hooks/useSetupMocks';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole; characterStateId: string }> = ({
     myParticipantRole,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Layout as AntdLayout, Modal, Result } from 'antd';
-import { DraggableCard, horizontalPadding } from '../../../ui/DraggableCard/DraggableCard';
+import { DraggableCard, horizontalPadding } from '@/components/ui/DraggableCard/DraggableCard';
 import { CharacterListPanelContent } from './subcomponents/components/CharacterListPanelContent/CharacterListPanelContent';
 import { RoomMessagesPanelContent } from './subcomponents/components/RoomMessagesPanelContent/RoomMessagesPanelContent';
 import { CharacterParameterNamesEditorModal } from './subcomponents/components/CharacterParameterNamesEditorModal/CharacterParameterNamesEditorModal';
@@ -9,7 +9,7 @@ import { BoardEditorModal } from './subcomponents/components/BoardEditorModal/Bo
 import { SoundPlayerPanelContent } from './subcomponents/components/SoundPlayerPanelContent/SoundPlayerPanelContent';
 import { EditRoomDrawer } from './subcomponents/components/EditRoomDrawer/EditRoomDrawer';
 import { ParticipantListPanelContent } from './subcomponents/components/ParticipantListPanelContent/ParticipantListPanelContent';
-import { LoadingResult } from '../../../ui/LoadingResult/LoadingResult';
+import { LoadingResult } from '@/components/ui/LoadingResult/LoadingResult';
 import { usePlayBgm } from './subcomponents/hooks/usePlayBgm';
 import { usePlaySoundEffect } from './subcomponents/hooks/usePlaySoundEffect';
 import { useMessageNotification } from './subcomponents/hooks/useMessageNotification';
@@ -24,16 +24,16 @@ import {
     PieceTooltip,
     PopoverEditor,
 } from './subcomponents/components/BoardPopover/BoardPopover';
-import { useMyUserUid } from '../../../../hooks/useMyUserUid';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { ImagePieceModal } from './subcomponents/components/ImagePieceModal/ImagePieceModal';
 import { CommandEditorModal } from './subcomponents/components/CommandEditorModal/CommandEditorModal';
 import { ChatPalettePanelContent } from './subcomponents/components/ChatPalettePanelContent/ChatPalettePanelContent';
 import { Props as BoardProps } from './subcomponents/components/Board/Board';
-import { useAtomSelector } from '../../../../hooks/useAtomSelector';
-import { roomConfigAtom } from '../../../../atoms/roomConfigAtom/roomConfigAtom';
-import { RoomConfigUtils } from '../../../../atoms/roomConfigAtom/types/roomConfig/utils';
-import { roomAtom } from '../../../../atoms/roomAtom/roomAtom';
-import { useImmerUpdateAtom } from '../../../../hooks/useImmerUpdateAtom';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
+import { roomAtom } from '@/atoms/roomAtom/roomAtom';
+import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
 import { CharacterTagNamesEditorModal } from './subcomponents/components/CharacterTagNamesEditorModal/CharacterTagNamesEditorModal';
 import { ImportCharacterModal } from './subcomponents/components/ImportCharacterModal/ImportCharacterModal';
 import { ImportBoardModal } from './subcomponents/components/ImportBoardModal/ImportBoardModal';
@@ -41,13 +41,13 @@ import { useAtomValue } from 'jotai/utils';
 import {
     debouncedWindowInnerHeightAtom,
     debouncedWindowInnerWidthAtom,
-} from '../../../pages/room/RoomIdPage/RoomIdPage';
+} from '@/components/pages/room/RoomIdPage/RoomIdPage';
 import classNames from 'classnames';
-import { relative } from '../../../../styles/className';
-import { MessagePanelConfig } from '../../../../atoms/roomConfigAtom/types/messagePanelConfig';
-import { BoardEditorPanelConfig } from '../../../../atoms/roomConfigAtom/types/boardEditorPanelConfig';
-import { ChatPalettePanelConfig } from '../../../../atoms/roomConfigAtom/types/chatPalettePanelConfig';
-import { MemoPanelConfig } from '../../../../atoms/roomConfigAtom/types/memoPanelConfig';
+import { relative } from '@/styles/className';
+import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
+import { BoardEditorPanelConfig } from '@/atoms/roomConfigAtom/types/boardEditorPanelConfig';
+import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
+import { MemoPanelConfig } from '@/atoms/roomConfigAtom/types/memoPanelConfig';
 import { ControlPosition } from 'react-draggable';
 import { NumberSize, ResizeDirection } from 're-resizable';
 import dynamic from 'next/dynamic';

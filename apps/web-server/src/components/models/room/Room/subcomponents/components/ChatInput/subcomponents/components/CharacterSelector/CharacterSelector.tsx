@@ -4,15 +4,10 @@ import { useMyCharacters } from '../../../../../hooks/useMyCharacters';
 import * as Icon from '@ant-design/icons';
 import { custom, getSelectedCharacterType, none, some } from '../../../getSelectedCharacterType';
 import classNames from 'classnames';
-import {
-    flex,
-    flexNone,
-    flexRow,
-    itemsCenter,
-} from '../../../../../../../../../../styles/className';
-import { MessagePanelConfig } from '../../../../../../../../../../atoms/roomConfigAtom/types/messagePanelConfig';
+import { flex, flexNone, flexRow, itemsCenter } from '@/styles/className';
+import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import { Draft } from 'immer';
-import { InputDescription } from '../../../../../../../../../ui/InputDescription/InputDescription';
+import { InputDescription } from '@/components/ui/InputDescription/InputDescription';
 
 type Props = {
     config: MessagePanelConfig;

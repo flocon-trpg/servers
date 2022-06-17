@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Table, Tooltip } from 'antd';
-import { update } from '../../../../../../../stateManagers/states/types';
+import { update } from '@/stateManagers/states/types';
 import * as Icon from '@ant-design/icons';
 import { useStringPieces } from '../../hooks/useStringPieces';
 import { useDicePieces } from '../../hooks/useDicePieces';

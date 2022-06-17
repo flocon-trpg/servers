@@ -1,14 +1,10 @@
 import { Modal } from 'antd';
 import { useUpdateAtom } from 'jotai/utils';
 import React from 'react';
-import { Reference } from '../../../../../../../../../atoms/fileState';
-import { reloadPublicFilesKeyAtom } from '../../../../../../../../../atoms/reloadPublicFilesKeyAtom/reloadPublicFilesKeyAtom';
-import { reloadUnlistedFilesKeyAtom } from '../../../../../../../../../atoms/reloadUnlistedFilesKeyAtom/reloadUnlistedFilesKeyAtom';
-import {
-    $public,
-    StorageType,
-    unlisted,
-} from '../../../../../../../../../utils/file/firebaseStorage';
+import { Reference } from '@/atoms/fileState';
+import { reloadPublicFilesKeyAtom } from '@/atoms/reloadPublicFilesKeyAtom/reloadPublicFilesKeyAtom';
+import { reloadUnlistedFilesKeyAtom } from '@/atoms/reloadUnlistedFilesKeyAtom/reloadUnlistedFilesKeyAtom';
+import { $public, StorageType, unlisted } from '@/utils/file/firebaseStorage';
 import { deleteObject } from 'firebase/storage';
 
 export const useDeleteFirebaseStorageFileModalActions = () => {

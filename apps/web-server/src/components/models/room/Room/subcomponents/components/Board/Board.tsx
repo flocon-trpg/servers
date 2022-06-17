@@ -1,10 +1,10 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
-import { success, useImageFromGraphQL } from '../../../../../../../hooks/imageHooks';
+import { success, useImageFromGraphQL } from '@/hooks/imageHooks';
 import * as ReactKonva from 'react-konva';
 import { Button, Dropdown, InputNumber, Menu, Popover } from 'antd';
 import * as Icons from '@ant-design/icons';
-import { update } from '../../../../../../../stateManagers/states/types';
+import { update } from '@/stateManagers/states/types';
 import * as Icon from '@ant-design/icons';
 import { useMe } from '../../hooks/useMe';
 import { useCharacters } from '../../hooks/useCharacters';
@@ -16,7 +16,7 @@ import { debounceTime } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { $free, OmitVersion, State, boardTemplate, pieceTemplate } from '@flocon-trpg/core';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
-import { useMyUserUid } from '../../../../../../../hooks/useMyUserUid';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { FilePath, FileSourceType } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { ImagePiece } from './subcomponents/components/ImagePiece/ImagePiece';
 import { DiceOrStringPiece } from './subcomponents/components/DiceOrStringPiece/DiceOrStringPiece';
@@ -26,48 +26,38 @@ import { usePortraitPieces } from '../../hooks/usePortraitPieces';
 import { useDicePieces } from '../../hooks/useDicePieces';
 import { useStringPieces } from '../../hooks/useStringPieces';
 import { useImagePieces } from '../../hooks/useImagePieces';
-import { useAllContext } from '../../../../../../../hooks/useAllContext';
-import { AllContextProvider } from '../../../../../../behaviors/AllContextProvider';
-import { range } from '../../../../../../../utils/range';
+import { useAllContext } from '@/hooks/useAllContext';
+import { AllContextProvider } from '@/components/behaviors/AllContextProvider';
+import { range } from '@/utils/range';
 import classNames from 'classnames';
-import {
-    cancelRnd,
-    flex,
-    flexColumn,
-    flexRow,
-    itemsCenter,
-    itemsEnd,
-} from '../../../../../../../styles/className';
+import { cancelRnd, flex, flexColumn, flexRow, itemsCenter, itemsEnd } from '@/styles/className';
 import { SketchPicker } from 'react-color';
 import { css } from '@emotion/react';
-import { rgba } from '../../../../../../../utils/rgba';
-import { roomConfigAtom } from '../../../../../../../atoms/roomConfigAtom/roomConfigAtom';
-import { roomAtom } from '../../../../../../../atoms/roomAtom/roomAtom';
-import { useAtomSelector } from '../../../../../../../hooks/useAtomSelector';
-import {
-    BoardConfig,
-    defaultBoardConfig,
-} from '../../../../../../../atoms/roomConfigAtom/types/boardConfig';
-import { RoomConfigUtils } from '../../../../../../../atoms/roomConfigAtom/types/roomConfig/utils';
-import { ActiveBoardPanelConfig } from '../../../../../../../atoms/roomConfigAtom/types/activeBoardPanelConfig';
-import { BoardEditorPanelConfig } from '../../../../../../../atoms/roomConfigAtom/types/boardEditorPanelConfig';
-import { useImmerUpdateAtom } from '../../../../../../../hooks/useImmerUpdateAtom';
+import { rgba } from '@/utils/rgba';
+import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { roomAtom } from '@/atoms/roomAtom/roomAtom';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { BoardConfig, defaultBoardConfig } from '@/atoms/roomConfigAtom/types/boardConfig';
+import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
+import { ActiveBoardPanelConfig } from '@/atoms/roomConfigAtom/types/activeBoardPanelConfig';
+import { BoardEditorPanelConfig } from '@/atoms/roomConfigAtom/types/boardEditorPanelConfig';
+import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
 import { boardTooltipAtom } from '../../atoms/boardTooltipAtom/boardTooltipAtom';
 import { boardPopoverEditorAtom } from '../../atoms/boardPopoverEditorAtom/boardPopoverEditorAtom';
 import { MouseOverOn } from '../../utils/types';
 import { useUpdateAtom } from 'jotai/utils';
 import { boardContextMenuAtom } from '../../atoms/boardContextMenuAtom/boardContextMenuAtom';
-import { create } from '../../../../../../../utils/constants';
+import { create } from '@/utils/constants';
 import { boardEditorModalAtom } from '../BoardEditorModal/BoardEditorModal';
-import { useSetRoomStateWithImmer } from '../../../../../../../hooks/useSetRoomStateWithImmer';
+import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
 import { importBoardModalVisibilityAtom } from '../ImportBoardModal/ImportBoardModal';
-import { BoardType } from '../../../../../../../utils/types';
+import { BoardType } from '@/utils/types';
 import { useIsMyCharacter } from '../../hooks/useIsMyCharacter';
-import { Styles } from '../../../../../../../styles';
+import { Styles } from '@/styles';
 import { Message, publicMessage } from '@flocon-trpg/web-server-utils';
-import { notFetch, useRoomMessages } from '../../../../../../../hooks/useRoomMessages';
+import { notFetch, useRoomMessages } from '@/hooks/useRoomMessages';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
-import { defaultTriggerSubMenuAction } from '../../../../../../../utils/variables';
+import { defaultTriggerSubMenuAction } from '@/utils/variables';
 import {
     DragEndResult,
     PixelPosition,

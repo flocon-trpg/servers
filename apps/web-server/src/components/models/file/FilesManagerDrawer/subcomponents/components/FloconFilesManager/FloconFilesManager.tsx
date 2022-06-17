@@ -12,24 +12,21 @@ import {
     GetFilesDocument,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { FloconUploaderFileLink } from '../FirebaseFilesManager/subcomponents/FloconUploaderFileLink/FloconUploaderFileLink';
-import { InformationIcon } from '../../../../../../ui/InformationIcon/InformationIcon';
-import { FileType, guessFileType, image, others, sound } from '../../../../../../../utils/fileType';
+import { InformationIcon } from '@/components/ui/InformationIcon/InformationIcon';
+import { FileType, guessFileType, image, others, sound } from '@/utils/fileType';
 import moment from 'moment';
 import copy from 'clipboard-copy';
 import * as Icons from '@ant-design/icons';
 import { DeleteFloconStorageFileModal } from '../FirebaseFilesManager/subcomponents/DeleteFloconStorageFileModal/DeleteFloconStorageFileModal';
 import { useAsync } from 'react-use';
-import { LazyAndPreloadImage } from '../../../../../../ui/LazyAndPreloadImage/LazyAndPreloadImage';
-import {
-    getFloconUploaderFile,
-    thumbs,
-} from '../../../../../../../utils/file/getFloconUploaderFile';
+import { LazyAndPreloadImage } from '@/components/ui/LazyAndPreloadImage/LazyAndPreloadImage';
+import { getFloconUploaderFile, thumbs } from '@/utils/file/getFloconUploaderFile';
 import { useMutation, useQuery } from 'urql';
-import { useWebConfig } from '../../../../../../../hooks/useWebConfig';
-import { getHttpUri } from '../../../../../../../atoms/webConfigAtom/webConfigAtom';
-import { getIdTokenAtom } from '../../../../../../../pages/_app';
+import { useWebConfig } from '@/hooks/useWebConfig';
+import { getHttpUri } from '@/atoms/webConfigAtom/webConfigAtom';
+import { getIdTokenAtom } from '@/pages/_app';
 import { useAtomValue } from 'jotai';
-import { defaultTriggerSubMenuAction } from '../../../../../../../utils/variables';
+import { defaultTriggerSubMenuAction } from '@/utils/variables';
 
 type DataSource = FileItemFragment;
 

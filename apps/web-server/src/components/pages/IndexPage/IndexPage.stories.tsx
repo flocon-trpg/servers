@@ -5,7 +5,7 @@ import { fromValue, never } from 'wonka';
 import * as Doc071 from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Doc072 from '@flocon-trpg/typed-document-node-v0.7.2';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
-import { createMockUrqlClient, dummyUrqlOperation } from '../../../mocks';
+import { createMockUrqlClient, dummyUrqlOperation } from '@/mocks';
 
 type Version = Doc071.GetServerInfoQuery['result']['version'];
 

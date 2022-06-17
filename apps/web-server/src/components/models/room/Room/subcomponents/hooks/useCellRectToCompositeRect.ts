@@ -1,4 +1,4 @@
-import { usePersistentMemo } from '../../../../../../hooks/usePersistentMemo';
+import { usePersistentMemo } from '@/hooks/usePersistentMemo';
 import { CellRect, CompositeRect, cellRectToCompositeRect } from '../utils/positionAndSizeAndRect';
 import { useCellConfig } from './useCellConfig';
 

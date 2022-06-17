@@ -1,12 +1,9 @@
 import React from 'react';
 import { FileItemFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
-import {
-    files,
-    getFloconUploaderFile,
-} from '../../../../../../../../../utils/file/getFloconUploaderFile';
+import { files, getFloconUploaderFile } from '@/utils/file/getFloconUploaderFile';
 import fileDownload from 'js-file-download';
-import { useWebConfig } from '../../../../../../../../../hooks/useWebConfig';
-import { getIdTokenAtom } from '../../../../../../../../../pages/_app';
+import { useWebConfig } from '@/hooks/useWebConfig';
+import { getIdTokenAtom } from '@/pages/_app';
 import { useAtomValue } from 'jotai';
 
 type Props = {

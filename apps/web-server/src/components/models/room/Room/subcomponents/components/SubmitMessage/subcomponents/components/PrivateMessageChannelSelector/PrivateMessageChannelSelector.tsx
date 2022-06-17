@@ -1,14 +1,9 @@
 import React from 'react';
-import { useMyUserUid } from '../../../../../../../../../../hooks/useMyUserUid';
-import {
-    flex,
-    flexNone,
-    flexRow,
-    itemsCenter,
-} from '../../../../../../../../../../styles/className';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { flex, flexNone, flexRow, itemsCenter } from '@/styles/className';
 import classNames from 'classnames';
 import { ParticipantsSelect } from './subcomponents/components/ParticipantsSelect/ParticipantsSelect';
-import { InputDescription } from '../../../../../../../../../ui/InputDescription/InputDescription';
+import { InputDescription } from '@/components/ui/InputDescription/InputDescription';
 
 // TODO: playerの場合、characterの情報も一緒に載せたほうがわかりやすい
 

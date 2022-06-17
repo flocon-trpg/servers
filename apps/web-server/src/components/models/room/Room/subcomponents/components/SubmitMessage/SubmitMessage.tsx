@@ -12,21 +12,21 @@ import {
     WritePublicMessageDocument,
     WriteRoomPublicMessageFailureType,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
-import { UISelector } from '../../../../../../ui/UISelector/UISelector';
+import { UISelector } from '@/components/ui/UISelector/UISelector';
 import { PrivateMessageChannelSelector } from './subcomponents/components/PrivateMessageChannelSelector/PrivateMessageChannelSelector';
 import { PublicMessageChannelSelector } from './subcomponents/components/PublicMessageChannelSelector/PublicMessageChannelSelector';
 import { Observable } from 'rxjs';
 import classNames from 'classnames';
-import { flex, flexColumn, flexNone } from '../../../../../../../styles/className';
+import { flex, flexColumn, flexNone } from '@/styles/className';
 import { $free, PublicChannelKey } from '@flocon-trpg/core';
 import { useMutation } from 'urql';
-import { ChatPalettePanelConfig } from '../../../../../../../atoms/roomConfigAtom/types/chatPalettePanelConfig';
-import { MessagePanelConfig } from '../../../../../../../atoms/roomConfigAtom/types/messagePanelConfig';
-import { userConfigAtom } from '../../../../../../../atoms/userConfigAtom/userConfigAtom';
-import { UserConfigUtils } from '../../../../../../../atoms/userConfigAtom/utils';
-import { useAtomSelector } from '../../../../../../../hooks/useAtomSelector';
+import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
+import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
+import { userConfigAtom } from '@/atoms/userConfigAtom/userConfigAtom';
+import { UserConfigUtils } from '@/atoms/userConfigAtom/utils';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { useAtom } from 'jotai';
-import { roomNotificationsAtom } from '../../../../../../../atoms/roomAtom/roomAtom';
+import { roomNotificationsAtom } from '@/atoms/roomAtom/roomAtom';
 import { Draft } from 'immer';
 import { roomPrivateMessageInputAtom } from '../../atoms/roomPrivateMessageInputAtom/roomPrivateMessageInputAtom';
 import { roomPublicMessageInputAtom } from '../../atoms/roomPublicMessageInputAtom/roomPublicMessageInputAtom';

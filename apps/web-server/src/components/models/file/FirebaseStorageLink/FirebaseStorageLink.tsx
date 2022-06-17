@@ -2,9 +2,9 @@ import { StorageReference, getDownloadURL, ref } from 'firebase/storage';
 import { useAtomValue } from 'jotai/utils';
 import React from 'react';
 import { useLatest } from 'react-use';
-import { FirebaseStorageUrlCacheContext } from '../../../../contexts/FirebaseStorageUrlCacheContext';
-import { firebaseStorageAtom } from '../../../../pages/_app';
-import { fileName } from '../../../../utils/filename';
+import { FirebaseStorageUrlCacheContext } from '@/contexts/FirebaseStorageUrlCacheContext';
+import { firebaseStorageAtom } from '@/pages/_app';
+import { fileName } from '@/utils/filename';
 
 type Props = {
     reference: StorageReference | string;

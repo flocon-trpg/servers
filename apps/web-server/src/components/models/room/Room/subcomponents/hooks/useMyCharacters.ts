@@ -1,6 +1,6 @@
 import { State, characterTemplate } from '@flocon-trpg/core';
 import React from 'react';
-import { useMyUserUid } from '../../../../../../hooks/useMyUserUid';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useCharacters } from './useCharacters';
 
 type CharacterState = State<typeof characterTemplate>;

@@ -5,15 +5,10 @@ import { State, dieValueTemplate } from '@flocon-trpg/core';
 import { D6Value, noDie, noValue } from '../../utils/types';
 import * as Icons from '@ant-design/icons';
 import { Button } from 'antd';
-import { replace, update } from '../../../../../../../stateManagers/states/types';
-import { ToggleButton } from '../../../../../../ui/ToggleButton/ToggleButton';
+import { replace, update } from '@/stateManagers/states/types';
+import { ToggleButton } from '@/components/ui/ToggleButton/ToggleButton';
 import classNames from 'classnames';
-import {
-    flex,
-    flexRow,
-    itemsCenter,
-    justifyItemsCenter,
-} from '../../../../../../../styles/className';
+import { flex, flexRow, itemsCenter, justifyItemsCenter } from '@/styles/className';
 
 type DieValueState = State<typeof dieValueTemplate>;
 

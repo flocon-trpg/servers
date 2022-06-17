@@ -14,13 +14,13 @@ import {
     flexNone,
     flexRow,
     itemsCenter,
-} from '../../../../../../../styles/className';
+} from '@/styles/className';
 import _ from 'lodash';
 import moment from 'moment';
-import { useSetRoomStateWithImmer } from '../../../../../../../hooks/useSetRoomStateWithImmer';
+import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
-import { defaultTriggerSubMenuAction } from '../../../../../../../utils/variables';
-import { CollaborativeInput } from '../../../../../../ui/CollaborativeInput/CollaborativeInput';
+import { defaultTriggerSubMenuAction } from '@/utils/variables';
+import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 
 type MemoState = State<typeof memoTemplate>;
 

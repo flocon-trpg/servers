@@ -1,6 +1,6 @@
 import { strIndex10Array } from '@flocon-trpg/core';
 import React from 'react';
-import { CharacterTabConfig } from '../../../../../../../../../../atoms/roomConfigAtom/types/characterTabConfig';
+import { CharacterTabConfig } from '@/atoms/roomConfigAtom/types/characterTabConfig';
 import { useCharacterTagNames } from '../../../../../hooks/useCharacterTagNames';
 
 const generateTabName = (

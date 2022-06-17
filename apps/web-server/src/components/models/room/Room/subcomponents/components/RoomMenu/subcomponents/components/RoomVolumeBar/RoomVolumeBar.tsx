@@ -1,15 +1,10 @@
 import classNames from 'classnames';
 import React from 'react';
-import { VolumeBar } from '../../../../../../../../../ui/VolumeBar/VolumeBar';
-import { defaultChannelVolume } from '../../../../../../../../../../atoms/roomConfigAtom/types/roomConfig/resources';
-import {
-    flex,
-    flexColumn,
-    flexRow,
-    itemsCenter,
-} from '../../../../../../../../../../styles/className';
+import { VolumeBar } from '@/components/ui/VolumeBar/VolumeBar';
+import { defaultChannelVolume } from '@/atoms/roomConfigAtom/types/roomConfig/resources';
+import { flex, flexColumn, flexRow, itemsCenter } from '@/styles/className';
 import { atom, useAtom } from 'jotai';
-import { roomConfigAtom } from '../../../../../../../../../../atoms/roomConfigAtom/roomConfigAtom';
+import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import produce from 'immer';
 
 const masterVolumeAtom = atom(

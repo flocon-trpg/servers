@@ -1,14 +1,14 @@
 import { Button, Modal } from 'antd';
 import React from 'react';
-import { DialogFooter } from '../../../../../../ui/DialogFooter/DialogFooter';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { strIndex10Array } from '@flocon-trpg/core';
 import classNames from 'classnames';
-import { flex, flexColumn, flexRow } from '../../../../../../../styles/className';
-import { useSetRoomStateWithImmer } from '../../../../../../../hooks/useSetRoomStateWithImmer';
+import { flex, flexColumn, flexRow } from '@/styles/className';
+import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
 import { atom, useAtom } from 'jotai';
 import { useCharacterTagNames } from '../../hooks/useCharacterTagNames';
 import * as Icons from '@ant-design/icons';
-import { CollaborativeInput } from '../../../../../../ui/CollaborativeInput/CollaborativeInput';
+import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 
 export const characterTagNamesEditorVisibilityAtom = atom(false);
 
