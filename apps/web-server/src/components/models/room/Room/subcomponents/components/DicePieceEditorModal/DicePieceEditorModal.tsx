@@ -6,18 +6,19 @@ import { useAtom } from 'jotai';
 import { dicePieceValueEditorAtom } from '../../atoms/pieceValueEditorAtom/pieceValueEditorAtom';
 import { Subject } from 'rxjs';
 import { CreateMode, DicePieceEditor, UpdateMode } from '../DicePieceEditor/DicePieceEditor';
+import { usePersistentMemo } from '../../../../../../../hooks/usePersistentMemo';
+import useConstant from 'use-constant';
 
 export const DicePieceEditorModal: React.FC = () => {
     const [modalType, setModalType] = useAtom(dicePieceValueEditorAtom);
-    const actionRequest = React.useMemo(() => new Subject<typeof ok | typeof close>(), []);
+    const actionRequest = useConstant(() => new Subject<typeof ok | typeof close>());
 
-    // TODO: useStateEditorの性質上、useMemoでは不十分
     const {
         visible,
         createMode,
         updateMode,
     }: { visible: boolean; updateMode?: UpdateMode; createMode?: CreateMode } =
-        React.useMemo(() => {
+        usePersistentMemo(() => {
             switch (modalType?.type) {
                 case undefined: {
                     return { visible: false };

@@ -18,6 +18,7 @@ import {
 } from '../../utils/positionAndSizeAndRect';
 import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
 import { PieceRectEditor } from '../RectEditor/RectEditor';
+import { usePersistentMemo } from '../../../../../../../hooks/usePersistentMemo';
 
 type CharacterState = State<typeof characterTemplate>;
 type StringPieceState = State<typeof stringPieceTemplate>;
@@ -73,7 +74,6 @@ export const StringPieceEditor: React.FC<{
         id: string;
         state: CharacterState;
     }>();
-    // TODO: useStateEditorの性質上、useMemo由来のhookでは不十分
     const compositeRect = usePixelRectToCompositeRect({
         boardId: updateMode?.boardId ?? createMode?.boardId,
         pixelRect:
@@ -81,9 +81,8 @@ export const StringPieceEditor: React.FC<{
                 ? undefined
                 : { ...createMode.piecePosition, ...pieceSize },
     });
-    // TODO: useStateEditorの性質上、useMemoでは不十分
     const createModeParams: CreateModeParams<StringPieceState | undefined> | undefined =
-        React.useMemo(() => {
+        usePersistentMemo(() => {
             if (createMode == null || compositeRect == null) {
                 return undefined;
             }
@@ -114,7 +113,7 @@ export const StringPieceEditor: React.FC<{
             };
         }, [activeCharacter, compositeRect, createMode, setRoomState]);
     const updateModeParams: UpdateModeParams<StringPieceState | undefined> | undefined =
-        React.useMemo(() => {
+        usePersistentMemo(() => {
             if (updateMode == null) {
                 return undefined;
             }

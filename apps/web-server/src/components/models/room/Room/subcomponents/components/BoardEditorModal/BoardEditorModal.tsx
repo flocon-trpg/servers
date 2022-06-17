@@ -18,6 +18,7 @@ import { useImmerUpdateAtom } from '../../../../../../../hooks/useImmerUpdateAto
 import { useSetRoomStateWithImmer } from '../../../../../../../hooks/useSetRoomStateWithImmer';
 import { CopyToClipboardButton } from '../../../../../../ui/CopyToClipboardButton/CopyToClipboardButton';
 import { CollaborativeInput } from '../../../../../../ui/CollaborativeInput/CollaborativeInput';
+import { usePersistentMemo } from '../../../../../../../hooks/usePersistentMemo';
 
 type BoardState = State<typeof boardTemplate>;
 
@@ -74,57 +75,58 @@ export const BoardEditorModal: React.FC = () => {
     const [modalValue, setModalValue] = useAtom(boardEditorModalAtom);
     const setRoomConfigAtom = useImmerUpdateAtom(roomConfigAtom);
     const boards = useBoards();
-    // TODO: useStateEditorの性質上、useMemoでは不十分
-    const createMode: CreateModeParams<BoardState | undefined> | undefined = React.useMemo(() => {
-        if (modalValue?.type !== create) {
-            return undefined;
-        }
-        return {
-            createInitState: () => defaultBoard,
-            onCreate: board => {
-                if (board == null) {
-                    return;
-                }
-                const id = simpleId();
-                setRoomState(roomState => {
-                    if (roomState.boards == null) {
-                        roomState.boards = {};
-                    }
-                    roomState.boards[id] = {
-                        ...board,
-                        ownerParticipantId: myUserUid,
-                    };
-                });
-                setRoomConfigAtom(roomConfig => {
-                    if (modalValue.boardEditorPanelId == null) {
+    const createMode: CreateModeParams<BoardState | undefined> | undefined =
+        usePersistentMemo(() => {
+            if (modalValue?.type !== create) {
+                return undefined;
+            }
+            return {
+                createInitState: () => defaultBoard,
+                onCreate: board => {
+                    if (board == null) {
                         return;
                     }
-                    const originBoardEditorPanel =
-                        roomConfig?.panels.boardEditorPanels[modalValue.boardEditorPanelId];
-                    if (originBoardEditorPanel == null) {
-                        return;
-                    }
-                    originBoardEditorPanel.activeBoardId = id;
-                });
-            },
-        };
-    }, [modalValue, myUserUid, setRoomConfigAtom, setRoomState]);
-    const updateMode: UpdateModeParams<BoardState | undefined> | undefined = React.useMemo(() => {
-        if (modalValue?.type !== update) {
-            return undefined;
-        }
-        return {
-            state: boards?.get(modalValue.stateId),
-            updateWithImmer: nextState => {
-                setRoomState(roomState => {
-                    if (roomState.boards == null) {
-                        roomState.boards = {};
-                    }
-                    roomState.boards[modalValue.stateId] = nextState;
-                });
-            },
-        };
-    }, [boards, modalValue, setRoomState]);
+                    const id = simpleId();
+                    setRoomState(roomState => {
+                        if (roomState.boards == null) {
+                            roomState.boards = {};
+                        }
+                        roomState.boards[id] = {
+                            ...board,
+                            ownerParticipantId: myUserUid,
+                        };
+                    });
+                    setRoomConfigAtom(roomConfig => {
+                        if (modalValue.boardEditorPanelId == null) {
+                            return;
+                        }
+                        const originBoardEditorPanel =
+                            roomConfig?.panels.boardEditorPanels[modalValue.boardEditorPanelId];
+                        if (originBoardEditorPanel == null) {
+                            return;
+                        }
+                        originBoardEditorPanel.activeBoardId = id;
+                    });
+                },
+            };
+        }, [modalValue, myUserUid, setRoomConfigAtom, setRoomState]);
+    const updateMode: UpdateModeParams<BoardState | undefined> | undefined =
+        usePersistentMemo(() => {
+            if (modalValue?.type !== update) {
+                return undefined;
+            }
+            return {
+                state: boards?.get(modalValue.stateId),
+                updateWithImmer: nextState => {
+                    setRoomState(roomState => {
+                        if (roomState.boards == null) {
+                            roomState.boards = {};
+                        }
+                        roomState.boards[modalValue.stateId] = nextState;
+                    });
+                },
+            };
+        }, [boards, modalValue, setRoomState]);
     const {
         state: board,
         updateState: updateBoard,

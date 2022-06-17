@@ -27,6 +27,7 @@ import {
     applyCompositeRect,
 } from '../../utils/positionAndSizeAndRect';
 import { PieceRectEditor } from '../RectEditor/RectEditor';
+import { usePersistentMemo } from '../../../../../../../hooks/usePersistentMemo';
 
 type CharacterState = State<typeof characterTemplate>;
 type DicePieceState = State<typeof dicePieceTemplate>;
@@ -81,7 +82,6 @@ export const DicePieceEditor: React.FC<{
         state: CharacterState;
     }>();
 
-    // TODO: useStateEditorの性質上、useMemo由来のhookでは不十分
     const compositeRect = usePixelRectToCompositeRect({
         boardId: updateModeProp?.boardId ?? createModeProp?.boardId,
         pixelRect:
@@ -89,9 +89,8 @@ export const DicePieceEditor: React.FC<{
                 ? undefined
                 : { ...createModeProp.piecePosition, ...pieceSize },
     });
-    // TODO: useStateEditorの性質上、useMemoでは不十分
     const createMode: CreateModeParams<DicePieceState | undefined> | undefined =
-        React.useMemo(() => {
+        usePersistentMemo(() => {
             if (createModeProp == null || compositeRect == null) {
                 return undefined;
             }
@@ -122,7 +121,7 @@ export const DicePieceEditor: React.FC<{
             };
         }, [activeCharacter, compositeRect, createModeProp, setRoomState]);
     const updateMode: UpdateModeParams<DicePieceState | undefined> | undefined =
-        React.useMemo(() => {
+        usePersistentMemo(() => {
             if (updateModeProp == null) {
                 return undefined;
             }

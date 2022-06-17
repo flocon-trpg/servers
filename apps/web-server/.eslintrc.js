@@ -33,7 +33,12 @@ module.exports = {
         '@typescript-eslint/member-delimiter-style': ['error'],
         '@typescript-eslint/explicit-module-boundary-types': 'off',
         'react-hooks/rules-of-hooks': 'error',
-        'react-hooks/exhaustive-deps': 'error',
+        'react-hooks/exhaustive-deps': [
+            'error',
+            {
+                additionalHooks: '^usePersistentMemo$',
+            },
+        ],
         '@typescript-eslint/no-namespace': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/no-explicit-any': 'off',

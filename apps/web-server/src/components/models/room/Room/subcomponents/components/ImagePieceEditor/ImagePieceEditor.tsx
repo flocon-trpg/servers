@@ -23,6 +23,7 @@ import {
 } from '../../utils/positionAndSizeAndRect';
 import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
 import { PieceRectEditor } from '../RectEditor/RectEditor';
+import { usePersistentMemo } from '../../../../../../../hooks/usePersistentMemo';
 
 type ImagePieceState = State<typeof imagePieceTemplate>;
 
@@ -73,7 +74,6 @@ export const ImagePieceEditor: React.FC<{
     const boardId = updateMode?.boardId ?? createMode?.boardId;
     const imagePieces = useImagePieces(boardId);
     const clone = useCloneImagePiece();
-    // TODO: useStateEditorの性質上、useMemo由来のhookでは不十分
     const compositeRect = usePixelRectToCompositeRect({
         boardId: updateMode?.boardId ?? createMode?.boardId,
         pixelRect:
@@ -81,9 +81,8 @@ export const ImagePieceEditor: React.FC<{
                 ? undefined
                 : { ...createMode.piecePosition, ...pieceSize },
     });
-    // TODO: useStateEditorの性質上、useMemoでは不十分
     const createModeParams: CreateModeParams<ImagePieceState | undefined> | undefined =
-        React.useMemo(() => {
+        usePersistentMemo(() => {
             if (createMode == null || myUserUid == null || compositeRect == null) {
                 return undefined;
             }
@@ -114,7 +113,7 @@ export const ImagePieceEditor: React.FC<{
             };
         }, [compositeRect, createMode, myUserUid, setRoomState]);
     const updateModeParams: UpdateModeParams<ImagePieceState | undefined> | undefined =
-        React.useMemo(() => {
+        usePersistentMemo(() => {
             if (updateMode == null) {
                 return undefined;
             }

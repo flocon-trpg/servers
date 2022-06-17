@@ -6,6 +6,8 @@ import { useAtom } from 'jotai';
 import { stringPieceValueEditorAtom } from '../../atoms/pieceValueEditorAtom/pieceValueEditorAtom';
 import { Subject } from 'rxjs';
 import { CreateMode, StringPieceEditor, UpdateMode } from '../StringPieceEditor/StringPieceEditor';
+import { usePersistentMemo } from '../../../../../../../hooks/usePersistentMemo';
+import useConstant from 'use-constant';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
@@ -13,15 +15,14 @@ const drawerBaseProps: Partial<DrawerProps> = {
 
 export const StringPieceEditorModal: React.FC = () => {
     const [modalType, setModalType] = useAtom(stringPieceValueEditorAtom);
-    const actionRequest = React.useMemo(() => new Subject<typeof ok | typeof close>(), []);
+    const actionRequest = useConstant(() => new Subject<typeof ok | typeof close>());
 
-    // TODO: useStateEditorの性質上、useMemoでは不十分
     const {
         visible,
         createMode,
         updateMode,
     }: { visible: boolean; createMode?: CreateMode; updateMode?: UpdateMode } =
-        React.useMemo(() => {
+        usePersistentMemo(() => {
             switch (modalType?.type) {
                 case undefined: {
                     return { visible: false };

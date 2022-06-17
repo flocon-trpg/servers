@@ -7,6 +7,8 @@ import { atom, useAtom } from 'jotai';
 import { Subject } from 'rxjs';
 import { CreateMode, ImagePieceEditor, UpdateMode } from '../ImagePieceEditor/ImagePieceEditor';
 import { PixelPosition } from '../../utils/positionAndSizeAndRect';
+import { usePersistentMemo } from '../../../../../../../hooks/usePersistentMemo';
+import useConstant from 'use-constant';
 
 type ImagePieceModalType =
     | {
@@ -28,15 +30,14 @@ const drawerBaseProps: Partial<DrawerProps> = {
 
 export const ImagePieceModal: React.FC = () => {
     const [modalType, setModalType] = useAtom(imagePieceModalAtom);
-    const actionRequest = React.useMemo(() => new Subject<typeof ok | typeof close>(), []);
+    const actionRequest = useConstant(() => new Subject<typeof ok | typeof close>());
 
-    // TODO: useStateEditorの性質上、useMemoでは不十分
     const {
         visible,
         createMode,
         updateMode,
     }: { visible: boolean; createMode?: CreateMode; updateMode?: UpdateMode } =
-        React.useMemo(() => {
+        usePersistentMemo(() => {
             switch (modalType?.type) {
                 case undefined: {
                     return { visible: false };

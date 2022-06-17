@@ -46,6 +46,7 @@ import { CollaborativeInput } from '../../../../../../ui/CollaborativeInput/Coll
 import { useCharacterPiece } from '../../hooks/useCharacterPiece';
 import { usePortraitPiece } from '../../hooks/usePortraitPiece';
 import { BoardPositionRectEditor, PieceRectEditor } from '../RectEditor/RectEditor';
+import { usePersistentMemo } from '../../../../../../../hooks/usePersistentMemo';
 
 type CharacterState = State<typeof characterTemplate>;
 
@@ -263,9 +264,8 @@ export const CharacterEditorModal: React.FC = () => {
         }
         return undefined;
     }, [atomValue, participants]);
-    // TODO: useStateEditorの性質上、useMemoでは不十分
     const createMode: CreateModeParams<CharacterState | undefined> | undefined =
-        React.useMemo(() => {
+        usePersistentMemo(() => {
             if (atomValue?.type !== create) {
                 return undefined;
             }
@@ -289,7 +289,7 @@ export const CharacterEditorModal: React.FC = () => {
             };
         }, [atomValue?.type, myUserUid, setRoomState]);
     const updateMode: UpdateModeParams<CharacterState | undefined> | undefined =
-        React.useMemo(() => {
+        usePersistentMemo(() => {
             if (atomValue?.type !== update) {
                 return undefined;
             }
