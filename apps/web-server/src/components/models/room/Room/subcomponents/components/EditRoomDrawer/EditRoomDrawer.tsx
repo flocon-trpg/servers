@@ -1,20 +1,17 @@
-import { Col, Drawer, Input, Row } from 'antd';
+import { Drawer, Input } from 'antd';
 import React from 'react';
 import { DialogFooter } from '../../../../../../ui/DialogFooter/DialogFooter';
 import { DrawerProps } from 'antd/lib/drawer';
-import { Gutter } from 'antd/lib/grid/row';
 import { useSetRoomStateWithImmer } from '../../../../../../../hooks/useSetRoomStateWithImmer';
 import { useAtomSelector } from '../../../../../../../hooks/useAtomSelector';
 import { roomAtom } from '../../../../../../../atoms/roomAtom/roomAtom';
 import { editRoomDrawerVisibilityAtom } from '../../atoms/editRoomDrawerVisibilityAtom/editRoomDrawerVisibilityAtom';
 import { useAtom } from 'jotai';
+import { Table, TableRow } from '@/components/ui/Table/Table';
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
 };
-
-const gutter: [Gutter, Gutter] = [16, 16];
-const inputSpan = 16;
 
 export const EditRoomDrawer: React.FC = () => {
     const [editRoomDrawerVisibility, setEditRoomDrawerVisibility] = useAtom(
@@ -39,23 +36,19 @@ export const EditRoomDrawer: React.FC = () => {
                 />
             }
         >
-            <div>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
-                    <Col flex={0}>名前</Col>
-                    <Col span={inputSpan}>
-                        <Input
-                            size='small'
-                            value={name}
-                            onChange={e => {
-                                operateAsStateWithImmer(state => {
-                                    state.name = e.target.value;
-                                });
-                            }}
-                        />
-                    </Col>
-                </Row>
-            </div>
+            <Table>
+                <TableRow label='名前'>
+                    <Input
+                        size='small'
+                        value={name}
+                        onChange={e => {
+                            operateAsStateWithImmer(state => {
+                                state.name = e.target.value;
+                            });
+                        }}
+                    />
+                </TableRow>
+            </Table>
         </Drawer>
     );
 };

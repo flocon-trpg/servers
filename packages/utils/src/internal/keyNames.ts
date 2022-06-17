@@ -1,7 +1,8 @@
 import { CompositeKey } from './compositeKey';
 import { DualKey } from './dualKeyMap';
 
-type Key = string | CompositeKey | DualKey<string, string>;
+// DualKeyもstringではなくstring|numberにしたほうが一貫性があるが、現時点で需要がほぼないのでまだ未対応
+type Key = string | number | CompositeKey | DualKey<string, string>;
 
 const isCompositeKey = (source: CompositeKey | DualKey<string, string>): source is CompositeKey => {
     if (!('createdBy' in source)) {
@@ -16,6 +17,8 @@ const isCompositeKey = (source: CompositeKey | DualKey<string, string>): source 
 function* keyToStrings(key: Key) {
     if (typeof key === 'string') {
         yield key;
+    } else if (typeof key === 'number') {
+        yield key.toString();
     } else if (isCompositeKey(key)) {
         yield key.createdBy;
         yield key.id;

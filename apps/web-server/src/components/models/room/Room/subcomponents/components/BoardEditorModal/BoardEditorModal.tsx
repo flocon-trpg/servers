@@ -1,11 +1,10 @@
-import { Col, Divider, InputNumber, Modal, Row } from 'antd';
+import { Divider, InputNumber, Modal } from 'antd';
 import React from 'react';
 import { DialogFooter } from '../../../../../../ui/DialogFooter/DialogFooter';
 import { InputFile } from '../../../../../file/InputFile/InputFile';
 import { DrawerProps } from 'antd/lib/drawer';
 import { FilesManagerDrawer } from '../../../../../file/FilesManagerDrawer/FilesManagerDrawer';
 import { FilesManagerDrawerType } from '../../../../../../../utils/types';
-import { Gutter } from 'antd/lib/grid/row';
 import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
 import { useBoards } from '../../hooks/useBoards';
 import { State, boardTemplate, simpleId } from '@flocon-trpg/core';
@@ -19,6 +18,7 @@ import { useSetRoomStateWithImmer } from '../../../../../../../hooks/useSetRoomS
 import { CopyToClipboardButton } from '../../../../../../ui/CopyToClipboardButton/CopyToClipboardButton';
 import { CollaborativeInput } from '../../../../../../ui/CollaborativeInput/CollaborativeInput';
 import { usePersistentMemo } from '../../../../../../../hooks/usePersistentMemo';
+import { Table, TableRow } from '@/components/ui/Table/Table';
 
 type BoardState = State<typeof boardTemplate>;
 
@@ -65,9 +65,6 @@ const defaultBoard: BoardState = {
     imagePieces: {},
     stringPieces: {},
 };
-
-const gutter: [Gutter, Gutter] = [16, 16];
-const inputSpan = 16;
 
 export const BoardEditorModal: React.FC = () => {
     const myUserUid = useMyUserUid();
@@ -188,10 +185,8 @@ export const BoardEditorModal: React.FC = () => {
             }
         >
             <div>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
-                    <Col flex={0}>名前</Col>
-                    <Col span={inputSpan}>
+                <Table>
+                    <TableRow label='名前'>
                         <CollaborativeInput
                             bufferDuration='default'
                             size='small'
@@ -208,13 +203,10 @@ export const BoardEditorModal: React.FC = () => {
                                 });
                             }}
                         />
-                    </Col>
-                </Row>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
-                    <Col flex={0}>背景画像</Col>
-                    <Col span={inputSpan}>
+                    </TableRow>
+                    <TableRow label='背景画像'>
                         <InputFile
+                            style={{ maxWidth: 450 }}
                             filePath={board.backgroundImage ?? undefined}
                             onPathChange={path =>
                                 updateBoard(board => {
@@ -227,12 +219,8 @@ export const BoardEditorModal: React.FC = () => {
                             }
                             openFilesManager={setFilesManagerDrawerType}
                         />
-                    </Col>
-                </Row>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
-                    <Col flex={0}>背景画像の拡大率</Col>
-                    <Col span={inputSpan}>
+                    </TableRow>
+                    <TableRow label='背景画像の拡大率'>
                         <InputNumber
                             size='small'
                             value={board.backgroundImageZoom * 100}
@@ -259,12 +247,8 @@ export const BoardEditorModal: React.FC = () => {
                                     : undefined
                             }
                         />
-                    </Col>
-                </Row>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
-                    <Col flex={0}>セルの大きさ</Col>
-                    <Col span={inputSpan}>
+                    </TableRow>
+                    <TableRow label='セルの大きさ'>
                         {/* cellWidth === cellHeight という前提だが、もし異なる場合は代表してcellWidthの値を用いることにしている */}
                         <InputNumber
                             size='small'
@@ -281,12 +265,8 @@ export const BoardEditorModal: React.FC = () => {
                                     : undefined
                             }
                         />
-                    </Col>
-                </Row>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
-                    <Col flex={0}>セルの基準点</Col>
-                    <Col span={inputSpan}>
+                    </TableRow>
+                    <TableRow label='セルの基準点'>
                         <span>x=</span>
                         <InputNumber
                             size='small'
@@ -317,8 +297,8 @@ export const BoardEditorModal: React.FC = () => {
                                     : undefined
                             }
                         />
-                    </Col>
-                </Row>
+                    </TableRow>
+                </Table>
                 <Divider dashed />
                 <CopyToClipboardButton
                     clipboardText={async () => {

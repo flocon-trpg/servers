@@ -2,16 +2,13 @@
 import React from 'react';
 import {
     Alert,
+    Table as AntdTable,
     Button,
     Checkbox,
-    Col,
-    Divider,
     Dropdown,
     Input,
     Menu,
     Modal,
-    Row,
-    Table,
     Tabs,
     Tooltip,
 } from 'antd';
@@ -56,7 +53,6 @@ import { CharacterTabName } from './subcomponents/components/CharacterTabName/Ch
 import { useImmerUpdateAtom } from '../../../../../../../hooks/useImmerUpdateAtom';
 import { CharacterTabConfigUtils } from '../../../../../../../atoms/roomConfigAtom/types/characterTabConfig/utils';
 import { DialogFooter } from '../../../../../../ui/DialogFooter/DialogFooter';
-import { Gutter } from 'antd/lib/grid/row';
 import { useCharacterTagNames } from '../../hooks/useCharacterTagNames';
 import { importCharacterModalVisibilityAtom } from '../ImportCharacterModal/ImportCharacterModal';
 import { useDrag, useDrop } from 'react-dnd';
@@ -65,6 +61,7 @@ import { RowKeys } from '../../../../../../../atoms/roomConfigAtom/types/charact
 import { DraggableTabs } from '../../../../../../ui/DraggableTabs/DraggableTabs';
 import { moveElement } from '../../../../../../../utils/moveElement';
 import { defaultTriggerSubMenuAction } from '../../../../../../../utils/variables';
+import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
 
 type CharacterState = State<typeof characterTemplate>;
 type ParamNameState = State<typeof paramNameTemplate>;
@@ -536,7 +533,7 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
     }
 
     return (
-        <Table
+        <AntdTable
             columns={columns}
             dataSource={charactersDataSource}
             size='small'
@@ -546,9 +543,6 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
         />
     );
 };
-
-const modalGutter: [Gutter, Gutter] = [16, 16];
-const modalInputSpan = 18;
 
 type TabEditorModalProps = {
     // これがundefinedの場合、Modalのvisibleがfalseとみなされる。
@@ -607,10 +601,8 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
                 />
             }
         >
-            <Row gutter={modalGutter} align='middle'>
-                <Col flex='auto' />
-                <Col flex={0}>タブ名</Col>
-                <Col span={modalInputSpan}>
+            <Table>
+                <TableRow label='タブ名'>
                     <Input
                         value={config?.tabName ?? ''}
                         onChange={e =>
@@ -629,13 +621,9 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
                             />
                         </>
                     )}
-                </Col>
-            </Row>
-            <Divider />
-            <Row gutter={modalGutter} align='middle'>
-                <Col flex='auto' />
-                <Col flex={0}></Col>
-                <Col span={modalInputSpan}>
+                </TableRow>
+                <TableDivider />
+                <TableRow>
                     <Checkbox
                         checked={config?.showNoTag ?? false}
                         onChange={e =>
@@ -646,14 +634,10 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
                     >
                         <span>タグのないキャラクター</span>
                     </Checkbox>
-                </Col>
-            </Row>
-            <Divider dashed />
-            <Row gutter={modalGutter} align='middle'>
-                <Col flex='auto' />
-                <Col flex={0}></Col>
-                <Col span={modalInputSpan}>{tagCheckBoxes}</Col>
-            </Row>
+                </TableRow>
+                <TableDivider dashed />
+                <TableRow>{tagCheckBoxes}</TableRow>
+            </Table>
         </Modal>
     );
 };

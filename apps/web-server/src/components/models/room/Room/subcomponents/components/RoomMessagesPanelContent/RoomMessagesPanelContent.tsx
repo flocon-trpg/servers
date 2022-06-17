@@ -5,8 +5,6 @@ import {
     Alert,
     Button,
     Checkbox,
-    Col,
-    Divider,
     Drawer,
     Dropdown,
     Input,
@@ -15,7 +13,6 @@ import {
     Popover,
     Radio,
     Result,
-    Row,
     Select,
     Tabs,
     Tooltip,
@@ -45,7 +42,6 @@ import {
     WritingMessageStatusType,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Icon from '@ant-design/icons';
-import { Gutter } from 'antd/lib/grid/row';
 import { DialogFooter } from '../../../../../../ui/DialogFooter/DialogFooter';
 import { QueryResultViewer } from '../../../../../../ui/QueryResultViewer/QueryResultViewer';
 import { useMessageFilter } from '../../hooks/useMessageFilter';
@@ -54,7 +50,7 @@ import { useWritingMessageStatus } from '../../hooks/useWritingMessageStatus';
 import { isDeleted, toText } from '../../utils/message';
 import { usePublicChannelNames } from '../../hooks/usePublicChannelNames';
 import { useParticipants } from '../../hooks/useParticipants';
-import { recordToMap, toBeNever } from '@flocon-trpg/utils';
+import { keyNames, recordToMap, toBeNever } from '@flocon-trpg/utils';
 import * as Icons from '@ant-design/icons';
 import { InputModal } from '../../../../../../ui/InputModal/InputModal';
 import { JumpToBottomVirtuoso } from '../../../../../../ui/JumpToBottomVirtuoso/JumpToBottomVirtuoso';
@@ -92,11 +88,10 @@ import { firebaseUserAtom } from '../../../../../../../pages/_app';
 import { getUserUid } from '../../../../../../../utils/firebase/firebaseUserState';
 import { CollaborativeInput } from '../../../../../../ui/CollaborativeInput/CollaborativeInput';
 import { Styles } from '../../../../../../../styles';
+import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
 
 const headerHeight = 20;
 const contentMinHeight = 22;
-const drawerGutter: [Gutter, Gutter] = [16, 16];
-const drawerInputSpan = 18;
 
 const none = 'none';
 const some = 'some';
@@ -175,10 +170,8 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
                 />
             }
         >
-            <Row gutter={drawerGutter} align='middle'>
-                <Col flex='auto' />
-                <Col flex={0}>タブ名</Col>
-                <Col span={drawerInputSpan}>
+            <Table>
+                <TableRow label='タブ名'>
                     <Input
                         value={config?.tabName ?? ''}
                         onChange={e => onChange({ tabName: e.target.value })}
@@ -193,13 +186,9 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
                             />
                         </>
                     )}
-                </Col>
-            </Row>
-            <Divider />
-            <Row gutter={drawerGutter} align='middle'>
-                <Col flex='auto' />
-                <Col flex={0}>特殊チャンネル</Col>
-                <Col span={drawerInputSpan}>
+                </TableRow>
+                <TableDivider />
+                <TableRow label='特殊チャンネル'>
                     <Checkbox
                         checked={config?.showNotification ?? false}
                         onChange={e => onChange({ showNotification: e.target.checked })}
@@ -220,13 +209,9 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
                     >
                         <span>雑談</span>
                     </Checkbox>
-                </Col>
-            </Row>
-            <Divider dashed />
-            <Row gutter={drawerGutter} align='middle'>
-                <Col flex='auto' />
-                <Col flex={0}>一般チャンネル</Col>
-                <Col span={drawerInputSpan}>
+                </TableRow>
+                <TableDivider dashed />
+                <TableRow label='一般チャンネル'>
                     <Checkbox
                         checked={config?.showPublic1 ?? false}
                         onChange={e => onChange({ showPublic1: e.target.checked })}
@@ -296,13 +281,9 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
                     >
                         <span>{publicChannelNames?.publicChannel10Name}</span>
                     </Checkbox>
-                </Col>
-            </Row>
-            <Divider dashed />
-            <Row gutter={drawerGutter} align='middle'>
-                <Col flex='auto' />
-                <Col flex={0}>秘話</Col>
-                <Col span={drawerInputSpan}>
+                </TableRow>
+                <TableDivider dashed />
+                <TableRow label='秘話'>
                     <Radio.Group
                         style={{ marginBottom: 5 }}
                         value={hiwaSelectValue}
@@ -365,8 +346,8 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
                     {hiwaSelectValue === custom && participantsMap.size <= 1 && (
                         <Alert type='info' showIcon message='自分以外の入室者がいません。' />
                     )}
-                </Col>
-            </Row>
+                </TableRow>
+            </Table>
         </Drawer>
     );
 };
@@ -401,13 +382,14 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (
                 />
             }
         >
-            {([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).map(i => {
-                const key = `publicChannel${i}Name` as const;
-                return (
-                    <Row key={i} gutter={drawerGutter} align='middle'>
-                        <Col flex='auto' />
-                        <Col flex={0}>チャンネル{i}</Col>
-                        <Col span={drawerInputSpan}>
+            <Table>
+                {([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).map(i => {
+                    const key = `publicChannel${i}Name` as const;
+                    return (
+                        <TableRow
+                            key={keyNames('RoomMessagesPanelContent', 'ChannelNamesEditor', i)}
+                            label={`チャンネル${i}`}
+                        >
                             <CollaborativeInput
                                 bufferDuration='default'
                                 value={publicChannelNames == null ? '' : publicChannelNames[key]}
@@ -420,10 +402,10 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (
                                     });
                                 }}
                             />
-                        </Col>
-                    </Row>
-                );
-            })}
+                        </TableRow>
+                    );
+                })}
+            </Table>
         </Drawer>
     );
 };

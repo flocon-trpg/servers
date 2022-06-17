@@ -1,7 +1,5 @@
 import React from 'react';
-import { Col, Row } from 'antd';
 import { replace } from '../../../../../../../stateManagers/states/types';
-import { Gutter } from 'antd/lib/grid/row';
 import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
 import {
     State,
@@ -28,6 +26,8 @@ import {
 } from '../../utils/positionAndSizeAndRect';
 import { PieceRectEditor } from '../RectEditor/RectEditor';
 import { usePersistentMemo } from '../../../../../../../hooks/usePersistentMemo';
+import { Table, TableRow } from '@/components/ui/Table/Table';
+import { keyNames } from '@flocon-trpg/utils';
 
 type CharacterState = State<typeof characterTemplate>;
 type DicePieceState = State<typeof dicePieceTemplate>;
@@ -53,8 +53,6 @@ const defaultDicePieceValue = (
 });
 
 const pieceSize: PixelSize = { w: 50, h: 50 };
-const gutter: [Gutter, Gutter] = [16, 16];
-const inputSpan = 16;
 
 type ActionRequest = Subscribable<typeof ok | typeof close>;
 
@@ -164,109 +162,93 @@ export const DicePieceEditor: React.FC<{
     }
 
     return (
-        <div>
-            <Row gutter={gutter} align='middle'>
-                <Col flex='auto' />
-                <Col flex={0}>ID</Col>
-                <Col span={inputSpan}>{updateModeProp?.pieceId ?? '(なし)'}</Col>
-            </Row>
-
+        <Table>
+            <TableRow label='ID'>{updateModeProp?.pieceId ?? '(なし)'}</TableRow>
             <PieceRectEditor
                 value={state}
                 onChange={newState => updateState(() => newState)}
                 boardId={boardId}
             />
-
-            <Row gutter={gutter} align='middle'>
-                <Col flex='auto' />
-                <Col flex={0}>所有者</Col>
-                <Col span={inputSpan}>
-                    <MyCharactersSelect
-                        selectedCharacterId={
-                            createModeProp == null ? state.ownerCharacterId : activeCharacter?.id
+            <TableRow label='所有者'>
+                <MyCharactersSelect
+                    selectedCharacterId={
+                        createModeProp == null ? state.ownerCharacterId : activeCharacter?.id
+                    }
+                    readOnly={createModeProp == null}
+                    onSelect={setActiveCharacter}
+                />
+            </TableRow>
+            <TableRow label='名前'>
+                <CollaborativeInput
+                    bufferDuration='default'
+                    size='small'
+                    value={state.name ?? ''}
+                    onChange={e => {
+                        if (e.previousValue === e.currentValue) {
+                            return;
                         }
-                        readOnly={createModeProp == null}
-                        onSelect={setActiveCharacter}
-                    />
-                </Col>
-            </Row>
-
-            <Row gutter={gutter} align='middle'>
-                <Col flex='auto' />
-                <Col flex={0}>名前</Col>
-                <Col span={inputSpan}>
-                    <CollaborativeInput
-                        bufferDuration='default'
-                        size='small'
-                        value={state.name ?? ''}
-                        onChange={e => {
-                            if (e.previousValue === e.currentValue) {
+                        updateState(pieceValue => {
+                            if (pieceValue == null) {
                                 return;
                             }
-                            updateState(pieceValue => {
-                                if (pieceValue == null) {
-                                    return;
-                                }
-                                pieceValue.name = e.currentValue;
-                            });
-                        }}
-                    />
-                </Col>
-            </Row>
-
+                            pieceValue.name = e.currentValue;
+                        });
+                    }}
+                />
+            </TableRow>
             {dicePieceStrIndexes.map(key => {
                 const die = state.dice?.[key];
 
+                // minHeight: 28
                 return (
-                    <Row key={key} style={{ minHeight: 28 }} gutter={gutter} align='middle'>
-                        <Col flex='auto' />
-                        <Col flex={0}>{`ダイス${key}`}</Col>
-                        <Col span={inputSpan}>
-                            <InputDie
-                                size='small'
-                                state={die ?? null}
-                                onChange={e => {
-                                    updateState(pieceValue => {
-                                        if (pieceValue == null) {
-                                            return;
-                                        }
-                                        if (pieceValue.dice == null) {
-                                            pieceValue.dice = {};
-                                        }
-                                        if (e.type === replace) {
-                                            pieceValue.dice[key] =
-                                                e.newValue == null
-                                                    ? undefined
-                                                    : {
-                                                          $v: 1,
-                                                          $r: 1,
-                                                          dieType: e.newValue.dieType,
-                                                          isValuePrivate: false,
-                                                          value: undefined,
-                                                      };
-                                            return;
-                                        }
-                                        const die = pieceValue.dice[key];
-                                        if (die == null) {
-                                            return;
-                                        }
-                                        die.value = e.newValue === noValue ? undefined : e.newValue;
-                                    });
-                                }}
-                                onIsValuePrivateChange={e => {
-                                    updateState(pieceValue => {
-                                        const die = pieceValue?.dice?.[key];
-                                        if (die == null) {
-                                            return;
-                                        }
-                                        die.isValuePrivate = e;
-                                    });
-                                }}
-                            />
-                        </Col>
-                    </Row>
+                    <TableRow
+                        key={keyNames('DicePieceEditor', 'ダイス', key)}
+                        label={`ダイス${key}`}
+                    >
+                        <InputDie
+                            size='small'
+                            state={die ?? null}
+                            onChange={e => {
+                                updateState(pieceValue => {
+                                    if (pieceValue == null) {
+                                        return;
+                                    }
+                                    if (pieceValue.dice == null) {
+                                        pieceValue.dice = {};
+                                    }
+                                    if (e.type === replace) {
+                                        pieceValue.dice[key] =
+                                            e.newValue == null
+                                                ? undefined
+                                                : {
+                                                      $v: 1,
+                                                      $r: 1,
+                                                      dieType: e.newValue.dieType,
+                                                      isValuePrivate: false,
+                                                      value: undefined,
+                                                  };
+                                        return;
+                                    }
+                                    const die = pieceValue.dice[key];
+                                    if (die == null) {
+                                        return;
+                                    }
+                                    die.value = e.newValue === noValue ? undefined : e.newValue;
+                                });
+                            }}
+                            onIsValuePrivateChange={e => {
+                                updateState(pieceValue => {
+                                    const die = pieceValue?.dice?.[key];
+                                    if (die == null) {
+                                        return;
+                                    }
+                                    die.isValuePrivate = e;
+                                });
+                            }}
+                        />
+                    </TableRow>
                 );
             })}
-        </div>
+        </Table>
     );
 };

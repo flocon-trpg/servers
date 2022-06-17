@@ -29,15 +29,7 @@ import { commandEditorModalAtom } from '../../atoms/commandEditorModalAtom/comma
 import { useIsMyCharacter } from '../../hooks/useIsMyCharacter';
 import { CharacterVarInput } from '../CharacterVarInput/CharacterVarInput';
 import classNames from 'classnames';
-import {
-    flex,
-    flex1,
-    flexAuto,
-    flexColumn,
-    flexRow,
-    itemsCenter,
-    justifyEnd,
-} from '../../../../../../../styles/className';
+import { flex, flexAuto, flexColumn, flexRow } from '../../../../../../../styles/className';
 import { EditorGroupHeader } from '../../../../../../ui/EditorGroupHeader/EditorGroupHeader';
 import { OverriddenParameterNameEditor } from '../OverriddenParameterNameEditor/OverriddenParameterNameEditor';
 import { CharacterTagsSelect } from './subcomponent/components/CharacterTagsSelect/CharacterTagsSelect';
@@ -47,6 +39,8 @@ import { useCharacterPiece } from '../../hooks/useCharacterPiece';
 import { usePortraitPiece } from '../../hooks/usePortraitPiece';
 import { BoardPositionRectEditor, PieceRectEditor } from '../RectEditor/RectEditor';
 import { usePersistentMemo } from '../../../../../../../hooks/usePersistentMemo';
+import { Table, TableCombinedRow, TableHeader, TableRow } from '@/components/ui/Table/Table';
+import { keyNames } from '@flocon-trpg/utils';
 
 type CharacterState = State<typeof characterTemplate>;
 
@@ -125,26 +119,6 @@ export const characterEditorModalAtom = atom<
     }
 );
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-type RowProps = {
-    leftContent?: React.ReactNode;
-    rightContent?: React.ReactNode;
-};
-
-const Row: React.FC<RowProps> = ({ leftContent, rightContent }: RowProps) => {
-    return (
-        <div className={classNames(flex, flexRow, itemsCenter)}>
-            <div
-                className={classNames(justifyEnd, flex)}
-                style={{ flexBasis: 240, paddingRight: 20 }}
-            >
-                {leftContent}
-            </div>
-            <div className={flex1}>{rightContent}</div>
-        </div>
-    );
-};
-
 const pieceEditorTitle = 'コマの位置';
 
 const CharacterPieceEditor: React.FC<{ boardId: string; pieceId: string }> = ({
@@ -160,7 +134,7 @@ const CharacterPieceEditor: React.FC<{ boardId: string; pieceId: string }> = ({
 
     return (
         <>
-            <EditorGroupHeader>{pieceEditorTitle}</EditorGroupHeader>
+            <TableHeader>{pieceEditorTitle}</TableHeader>
             <PieceRectEditor
                 value={piece.piece}
                 onChange={newValue => {
@@ -191,23 +165,19 @@ const PortraitPieceEditor: React.FC<{ boardId: string; pieceId: string }> = ({
 
     return (
         <>
-            <EditorGroupHeader>{pieceEditorTitle}</EditorGroupHeader>
-            <Row
-                rightContent={
-                    <BoardPositionRectEditor
-                        value={piece.piece}
-                        onChange={newValue => {
-                            setRoomState(room => {
-                                const portraitPieces =
-                                    room?.characters?.[piece.characterId]?.portraitPieces;
-                                if (portraitPieces == null) {
-                                    return;
-                                }
-                                portraitPieces[pieceId] = newValue;
-                            });
-                        }}
-                    />
-                }
+            <TableHeader>{pieceEditorTitle}</TableHeader>
+            <BoardPositionRectEditor
+                value={piece.piece}
+                onChange={newValue => {
+                    setRoomState(room => {
+                        const portraitPieces =
+                            room?.characters?.[piece.characterId]?.portraitPieces;
+                        if (portraitPieces == null) {
+                            return;
+                        }
+                        portraitPieces[pieceId] = newValue;
+                    });
+                }}
             />
         </>
     );
@@ -394,7 +364,7 @@ export const CharacterEditorModal: React.FC = () => {
                 }
             >
                 <div className={classNames(flex, flexRow)}>
-                    <div style={{ minWidth: 500 }}>
+                    <Table style={{ minWidth: 500 }}>
                         {atomValue?.type === update && atomValue.selectedPieceType === piece && (
                             <CharacterPieceEditor
                                 pieceId={atomValue.pieceId}
@@ -411,176 +381,159 @@ export const CharacterEditorModal: React.FC = () => {
 
                         {atomValue?.type === update && (
                             <>
-                                <EditorGroupHeader>作成者</EditorGroupHeader>
-                                <Row
-                                    leftContent='作成者'
-                                    rightContent={
-                                        <>
-                                            <span>{participantName}</span>
-                                            {createdByMe && (
-                                                <span
-                                                    style={{ paddingLeft: 2, fontWeight: 'bold' }}
-                                                >
-                                                    (自分)
-                                                </span>
-                                            )}
-                                        </>
-                                    }
-                                />
+                                <TableHeader>作成者</TableHeader>
+                                <TableRow label='作成者'>
+                                    <>
+                                        <span>{participantName}</span>
+                                        {createdByMe && (
+                                            <span style={{ paddingLeft: 2, fontWeight: 'bold' }}>
+                                                (自分)
+                                            </span>
+                                        )}
+                                    </>
+                                </TableRow>
                             </>
                         )}
 
                         {atomValue?.type !== update ? null : (
                             <>
-                                <EditorGroupHeader>アクション</EditorGroupHeader>
+                                <TableHeader>アクション</TableHeader>
 
-                                <Row
-                                    rightContent={
-                                        <Tooltip title='コマを除き、このキャラクターを複製します。'>
-                                            {/* TODO: 複製したことを何らかの形で通知したほうがいい */}
-                                            <Button
-                                                size='small'
-                                                onClick={() => {
-                                                    const id = simpleId();
-                                                    setRoomState(roomState => {
-                                                        if (roomState.characters == null) {
-                                                            roomState.characters = {};
-                                                        }
-                                                        roomState.characters[id] = {
-                                                            ...character,
-                                                            name: `${character.name} (複製)`,
-                                                        };
-                                                    });
-                                                }}
-                                            >
-                                                このキャラクターを複製
-                                            </Button>
-                                        </Tooltip>
-                                    }
-                                />
+                                <TableRow>
+                                    <Tooltip title='コマを除き、このキャラクターを複製します。'>
+                                        {/* TODO: 複製したことを何らかの形で通知したほうがいい */}
+                                        <Button
+                                            size='small'
+                                            onClick={() => {
+                                                const id = simpleId();
+                                                setRoomState(roomState => {
+                                                    if (roomState.characters == null) {
+                                                        roomState.characters = {};
+                                                    }
+                                                    roomState.characters[id] = {
+                                                        ...character,
+                                                        name: `${character.name} (複製)`,
+                                                    };
+                                                });
+                                            }}
+                                        >
+                                            このキャラクターを複製
+                                        </Button>
+                                    </Tooltip>
+                                </TableRow>
                             </>
                         )}
 
-                        <EditorGroupHeader>全体公開</EditorGroupHeader>
+                        <TableHeader>全体公開</TableHeader>
 
-                        <Row
-                            leftContent='全体公開'
-                            rightContent={
-                                <ToggleButton
-                                    size='small'
-                                    disabled={
-                                        createdByMe || atomValue?.type === create
-                                            ? false
-                                            : characterIsNotPrivateAndNotCreatedByMe
-                                    }
-                                    showAsTextWhenDisabled
-                                    checked={!character.isPrivate}
-                                    checkedChildren={<EyeOutlined />}
-                                    unCheckedChildren={<EyeInvisibleOutlined />}
-                                    tooltip={
-                                        character.isPrivate
-                                            ? characterIsPrivate({
-                                                  isCreate,
-                                              })
-                                            : characterIsNotPrivate({
-                                                  isCreate,
-                                              })
-                                    }
-                                    onChange={newValue =>
-                                        updateCharacter(character => {
-                                            if (character == null) {
-                                                return;
-                                            }
-                                            character.isPrivate = !newValue;
-                                        })
-                                    }
-                                    shape='circle'
-                                    defaultType='dashed'
-                                />
-                            }
-                        />
-
-                        <EditorGroupHeader>共通パラメーター</EditorGroupHeader>
-
-                        <Row
-                            leftContent='名前'
-                            rightContent={
-                                <CollaborativeInput
-                                    bufferDuration='default'
-                                    size='small'
-                                    value={character.name}
-                                    onChange={e => {
-                                        if (e.previousValue === e.currentValue) {
+                        <TableRow label='全体公開'>
+                            <ToggleButton
+                                size='small'
+                                disabled={
+                                    createdByMe || atomValue?.type === create
+                                        ? false
+                                        : characterIsNotPrivateAndNotCreatedByMe
+                                }
+                                showAsTextWhenDisabled
+                                checked={!character.isPrivate}
+                                checkedChildren={<EyeOutlined />}
+                                unCheckedChildren={<EyeInvisibleOutlined />}
+                                tooltip={
+                                    character.isPrivate
+                                        ? characterIsPrivate({
+                                              isCreate,
+                                          })
+                                        : characterIsNotPrivate({
+                                              isCreate,
+                                          })
+                                }
+                                onChange={newValue =>
+                                    updateCharacter(character => {
+                                        if (character == null) {
                                             return;
                                         }
-                                        updateCharacter(character => {
-                                            if (character == null) {
-                                                return;
-                                            }
-                                            character.name = e.currentValue;
-                                        });
-                                    }}
-                                />
-                            }
-                        />
+                                        character.isPrivate = !newValue;
+                                    })
+                                }
+                                shape='circle'
+                                defaultType='dashed'
+                            />
+                        </TableRow>
 
-                        <Row
-                            leftContent='アイコン画像'
-                            rightContent={
-                                <InputFile
-                                    filePath={character.image ?? undefined}
-                                    onPathChange={path =>
-                                        updateCharacter(character => {
-                                            if (character == null) {
-                                                return;
-                                            }
-                                            character.image =
-                                                path == null ? undefined : FilePath.toOt(path);
-                                        })
-                                    }
-                                    openFilesManager={setFilesManagerDrawerType}
-                                    showImage
-                                    maxWidthOfLink={100}
-                                />
-                            }
-                        />
+                        <TableHeader>共通パラメーター</TableHeader>
 
-                        <Row
-                            leftContent='立ち絵画像'
-                            rightContent={
-                                <InputFile
-                                    filePath={character.portraitImage ?? undefined}
-                                    onPathChange={path =>
-                                        updateCharacter(character => {
-                                            if (character == null) {
-                                                return;
-                                            }
-                                            character.portraitImage =
-                                                path == null ? undefined : FilePath.toOt(path);
-                                        })
-                                    }
-                                    openFilesManager={setFilesManagerDrawerType}
-                                    showImage
-                                    maxWidthOfLink={100}
-                                />
-                            }
-                        />
-
-                        <EditorGroupHeader>タグ</EditorGroupHeader>
-
-                        <CharacterTagsSelect
-                            character={character}
-                            onChange={recipe =>
-                                updateCharacter(character => {
-                                    if (character == null) {
+                        <TableRow label='名前'>
+                            <CollaborativeInput
+                                bufferDuration='default'
+                                size='small'
+                                value={character.name}
+                                onChange={e => {
+                                    if (e.previousValue === e.currentValue) {
                                         return;
                                     }
-                                    recipe(character);
-                                })
-                            }
-                        />
+                                    updateCharacter(character => {
+                                        if (character == null) {
+                                            return;
+                                        }
+                                        character.name = e.currentValue;
+                                    });
+                                }}
+                            />
+                        </TableRow>
 
-                        <EditorGroupHeader>数値パラメーター</EditorGroupHeader>
+                        <TableRow label='アイコン画像'>
+                            <InputFile
+                                filePath={character.image ?? undefined}
+                                onPathChange={path =>
+                                    updateCharacter(character => {
+                                        if (character == null) {
+                                            return;
+                                        }
+                                        character.image =
+                                            path == null ? undefined : FilePath.toOt(path);
+                                    })
+                                }
+                                openFilesManager={setFilesManagerDrawerType}
+                                showImage
+                                maxWidthOfLink={100}
+                            />
+                        </TableRow>
+
+                        <TableRow label='立ち絵画像'>
+                            <InputFile
+                                filePath={character.portraitImage ?? undefined}
+                                onPathChange={path =>
+                                    updateCharacter(character => {
+                                        if (character == null) {
+                                            return;
+                                        }
+                                        character.portraitImage =
+                                            path == null ? undefined : FilePath.toOt(path);
+                                    })
+                                }
+                                openFilesManager={setFilesManagerDrawerType}
+                                showImage
+                                maxWidthOfLink={100}
+                            />
+                        </TableRow>
+
+                        <TableHeader>タグ</TableHeader>
+
+                        <TableCombinedRow>
+                            <CharacterTagsSelect
+                                character={character}
+                                onChange={recipe =>
+                                    updateCharacter(character => {
+                                        if (character == null) {
+                                            return;
+                                        }
+                                        recipe(character);
+                                    })
+                                }
+                            />
+                        </TableCombinedRow>
+
+                        <TableHeader>数値パラメーター</TableHeader>
 
                         {strIndex20Array.map(key => {
                             const paramName = numParamNames.get(key);
@@ -590,9 +543,9 @@ export const CharacterEditorModal: React.FC = () => {
                             const value = character.numParams?.[key];
                             const maxValue = character.numMaxParams?.[key];
                             return (
-                                <Row
-                                    key={`numParam${key}Row`}
-                                    leftContent={
+                                <TableRow
+                                    key={keyNames('CharacterEditorModal', `numParam${key}Row`)}
+                                    label={
                                         <OverriddenParameterNameEditor
                                             type='editor'
                                             baseName={paramName.name}
@@ -608,32 +561,33 @@ export const CharacterEditorModal: React.FC = () => {
                                             }
                                         />
                                     }
-                                    rightContent={
-                                        <NumberParameterInput
-                                            isCharacterPrivate={character.isPrivate}
-                                            isCreate={isCreate}
-                                            compact={false}
-                                            parameterKey={key}
-                                            numberParameter={value}
-                                            numberMaxParameter={maxValue}
-                                            createdByMe={createdByMe}
-                                            onOperate={mapping => {
-                                                updateCharacter(character => {
-                                                    if (character == null) {
-                                                        return;
-                                                    }
-                                                    return mapping(character);
-                                                });
-                                            }}
-                                        />
-                                    }
-                                />
+                                >
+                                    <NumberParameterInput
+                                        isCharacterPrivate={character.isPrivate}
+                                        isCreate={isCreate}
+                                        compact={false}
+                                        parameterKey={key}
+                                        numberParameter={value}
+                                        numberMaxParameter={maxValue}
+                                        createdByMe={createdByMe}
+                                        onOperate={mapping => {
+                                            updateCharacter(character => {
+                                                if (character == null) {
+                                                    return;
+                                                }
+                                                return mapping(character);
+                                            });
+                                        }}
+                                    />
+                                </TableRow>
                             );
                         })}
 
-                        {numParamNames.size === 0 && <div>数値パラメーターはありません。</div>}
+                        {numParamNames.size === 0 && (
+                            <TableCombinedRow>数値パラメーターはありません。</TableCombinedRow>
+                        )}
 
-                        <EditorGroupHeader>チェックマークパラメーター</EditorGroupHeader>
+                        <TableHeader>チェックマークパラメーター</TableHeader>
 
                         {strIndex20Array.map(key => {
                             const paramName = boolParamNames.get(key);
@@ -642,9 +596,9 @@ export const CharacterEditorModal: React.FC = () => {
                             }
                             const value = character.boolParams?.[key];
                             return (
-                                <Row
-                                    key={`boolParam${key}Row`}
-                                    leftContent={
+                                <TableRow
+                                    key={keyNames('CharacterEditorModal', `boolParam${key}Row`)}
+                                    label={
                                         <OverriddenParameterNameEditor
                                             type='editor'
                                             baseName={paramName.name}
@@ -660,33 +614,34 @@ export const CharacterEditorModal: React.FC = () => {
                                             }
                                         />
                                     }
-                                    rightContent={
-                                        <BooleanParameterInput
-                                            isCharacterPrivate={character.isPrivate}
-                                            isCreate={isCreate}
-                                            compact={false}
-                                            parameterKey={key}
-                                            parameter={value}
-                                            createdByMe={createdByMe}
-                                            onOperate={mapping => {
-                                                updateCharacter(character => {
-                                                    if (character == null) {
-                                                        return;
-                                                    }
-                                                    return mapping(character);
-                                                });
-                                            }}
-                                        />
-                                    }
-                                />
+                                >
+                                    <BooleanParameterInput
+                                        isCharacterPrivate={character.isPrivate}
+                                        isCreate={isCreate}
+                                        compact={false}
+                                        parameterKey={key}
+                                        parameter={value}
+                                        createdByMe={createdByMe}
+                                        onOperate={mapping => {
+                                            updateCharacter(character => {
+                                                if (character == null) {
+                                                    return;
+                                                }
+                                                return mapping(character);
+                                            });
+                                        }}
+                                    />
+                                </TableRow>
                             );
                         })}
 
                         {boolParamNames.size === 0 && (
-                            <div>チェックマークパラメーターはありません。</div>
+                            <TableCombinedRow>
+                                チェックマークパラメーターはありません。
+                            </TableCombinedRow>
                         )}
 
-                        <EditorGroupHeader>文字列パラメーター</EditorGroupHeader>
+                        <TableHeader>文字列パラメーター</TableHeader>
 
                         {strIndex20Array.map(key => {
                             const paramName = strParamNames.get(key);
@@ -695,9 +650,9 @@ export const CharacterEditorModal: React.FC = () => {
                             }
                             const value = character.strParams?.[key];
                             return (
-                                <Row
-                                    key={`strParam${key}Row`}
-                                    leftContent={
+                                <TableRow
+                                    key={keyNames('CharacterEditorModal', `strParam${key}Row`)}
+                                    label={
                                         <OverriddenParameterNameEditor
                                             type='editor'
                                             baseName={paramName.name}
@@ -713,30 +668,31 @@ export const CharacterEditorModal: React.FC = () => {
                                             }
                                         />
                                     }
-                                    rightContent={
-                                        <StringParameterInput
-                                            compact={false}
-                                            isCharacterPrivate={character.isPrivate}
-                                            isCreate={isCreate}
-                                            parameterKey={key}
-                                            parameter={value}
-                                            createdByMe={createdByMe}
-                                            onOperate={mapping => {
-                                                updateCharacter(character => {
-                                                    if (character == null) {
-                                                        return;
-                                                    }
-                                                    return mapping(character);
-                                                });
-                                            }}
-                                        />
-                                    }
-                                />
+                                >
+                                    <StringParameterInput
+                                        compact={false}
+                                        isCharacterPrivate={character.isPrivate}
+                                        isCreate={isCreate}
+                                        parameterKey={key}
+                                        parameter={value}
+                                        createdByMe={createdByMe}
+                                        onOperate={mapping => {
+                                            updateCharacter(character => {
+                                                if (character == null) {
+                                                    return;
+                                                }
+                                                return mapping(character);
+                                            });
+                                        }}
+                                    />
+                                </TableRow>
                             );
                         })}
 
-                        {strParamNames.size === 0 && <div>文字列パラメーターはありません。</div>}
-                    </div>
+                        {strParamNames.size === 0 && (
+                            <TableCombinedRow>文字列パラメーターはありません。</TableCombinedRow>
+                        )}
+                    </Table>
 
                     <div
                         className={classNames(flexAuto, flex, flexColumn)}

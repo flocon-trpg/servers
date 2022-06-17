@@ -1,6 +1,5 @@
 import React from 'react';
-import { Button, Col, Row, Tooltip } from 'antd';
-import { Gutter } from 'antd/lib/grid/row';
+import { Button, Tooltip } from 'antd';
 import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
 import { State, imagePieceTemplate, simpleId } from '@flocon-trpg/core';
 import { useMyUserUid } from '../../../../../../../hooks/useMyUserUid';
@@ -13,7 +12,6 @@ import { useImagePieces } from '../../hooks/useImagePieces';
 import { useCloneImagePiece } from '../../hooks/useCloneImagePiece';
 import { InputFile } from '../../../../../file/InputFile/InputFile';
 import { FilePath } from '../../../../../../../utils/file/filePath';
-import { EditorGroupHeader } from '../../../../../../ui/EditorGroupHeader/EditorGroupHeader';
 import { FilesManagerDrawer } from '../../../../../file/FilesManagerDrawer/FilesManagerDrawer';
 import {
     CompositeRect,
@@ -24,6 +22,7 @@ import {
 import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
 import { PieceRectEditor } from '../RectEditor/RectEditor';
 import { usePersistentMemo } from '../../../../../../../hooks/usePersistentMemo';
+import { Table, TableRow } from '@/components/ui/Table/Table';
 
 type ImagePieceState = State<typeof imagePieceTemplate>;
 
@@ -49,8 +48,6 @@ const defaultImagePiece = (
 });
 
 const pieceSize: PixelSize = { w: 50, h: 50 };
-const gutter: [Gutter, Gutter] = [16, 16];
-const inputSpan = 16;
 
 type ActionRequest = Subscribable<typeof ok | typeof close>;
 
@@ -164,14 +161,8 @@ export const ImagePieceEditor: React.FC<{
 
     return (
         <>
-            <div>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
-                    <Col flex={0}>ID</Col>
-                    <Col span={inputSpan}>{updateMode != null ? updateMode.pieceId : '(なし)'}</Col>
-                </Row>
-
-                <div style={{ height: 8 }} />
+            <Table>
+                <TableRow label='ID'>{updateMode != null ? updateMode.pieceId : '(なし)'}</TableRow>
 
                 <PieceRectEditor
                     value={state}
@@ -180,99 +171,77 @@ export const ImagePieceEditor: React.FC<{
                 />
 
                 {updateMode == null ? null : (
-                    <>
-                        <Row gutter={gutter} align='middle'>
-                            <Col flex='auto' />
-                            <Col flex={0}></Col>
-                            <Col span={inputSpan}>
-                                {/* TODO: 複製したことを何らかの形で通知したほうがいい */}
-                                <Tooltip title='このコマを複製します。'>
-                                    <Button
-                                        size='small'
-                                        onClick={() => {
-                                            clone({
-                                                boardId: updateMode.boardId,
-                                                pieceId: updateMode.pieceId,
-                                            });
-                                        }}
-                                    >
-                                        このコマを複製
-                                    </Button>
-                                </Tooltip>
-                            </Col>
-                        </Row>
-                        <div style={{ height: 8 }} />
-                    </>
+                    <TableRow>
+                        {/* TODO: 複製したことを何らかの形で通知したほうがいい */}
+                        <Tooltip title='このコマを複製します。'>
+                            <Button
+                                size='small'
+                                onClick={() => {
+                                    clone({
+                                        boardId: updateMode.boardId,
+                                        pieceId: updateMode.pieceId,
+                                    });
+                                }}
+                            >
+                                このコマを複製
+                            </Button>
+                        </Tooltip>
+                    </TableRow>
                 )}
 
                 {/* TODO: isPrivateがまだ未実装 */}
 
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
-                    <Col flex={0}>画像</Col>
-                    <Col span={inputSpan}>
-                        <InputFile
-                            filePath={state.image ?? undefined}
-                            onPathChange={path =>
-                                updateState(pieceValue => {
-                                    if (pieceValue == null) {
-                                        return;
-                                    }
-                                    pieceValue.image =
-                                        path == null ? undefined : FilePath.toOt(path);
-                                })
-                            }
-                            openFilesManager={setFilesManagerDrawerType}
-                            showImage
-                        />
-                    </Col>
-                </Row>
-
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
-                    <Col flex={0}>名前</Col>
-                    <Col span={inputSpan}>
-                        <CollaborativeInput
-                            bufferDuration='default'
-                            size='small'
-                            value={state.name ?? ''}
-                            onChange={e => {
-                                if (e.previousValue === e.currentValue) {
+                <TableRow label='画像'>
+                    <InputFile
+                        filePath={state.image ?? undefined}
+                        onPathChange={path =>
+                            updateState(pieceValue => {
+                                if (pieceValue == null) {
                                     return;
                                 }
-                                updateState(pieceValue => {
-                                    if (pieceValue == null) {
-                                        return;
-                                    }
-                                    pieceValue.name = e.currentValue;
-                                });
-                            }}
-                        />
-                    </Col>
-                </Row>
+                                pieceValue.image = path == null ? undefined : FilePath.toOt(path);
+                            })
+                        }
+                        openFilesManager={setFilesManagerDrawerType}
+                        showImage
+                    />
+                </TableRow>
 
-                <EditorGroupHeader>メモ</EditorGroupHeader>
-                <Row gutter={gutter} align='middle'>
-                    <Col flex='auto' />
-                    <Col flex={0}></Col>
-                    <Col span={inputSpan}>
-                        <CollaborativeInput
-                            multiline
-                            size='small'
-                            bufferDuration='default'
-                            value={state.memo ?? ''}
-                            onChange={e =>
-                                updateState(pieceValue => {
-                                    if (pieceValue == null) {
-                                        return;
-                                    }
-                                    pieceValue.memo = e.currentValue;
-                                })
+                <TableRow label='名前'>
+                    <CollaborativeInput
+                        bufferDuration='default'
+                        size='small'
+                        value={state.name ?? ''}
+                        onChange={e => {
+                            if (e.previousValue === e.currentValue) {
+                                return;
                             }
-                        />
-                    </Col>
-                </Row>
-            </div>
+                            updateState(pieceValue => {
+                                if (pieceValue == null) {
+                                    return;
+                                }
+                                pieceValue.name = e.currentValue;
+                            });
+                        }}
+                    />
+                </TableRow>
+                <TableRow label='メモ'>
+                    <CollaborativeInput
+                        multiline
+                        size='small'
+                        bufferDuration='default'
+                        value={state.memo ?? ''}
+                        onChange={e =>
+                            updateState(pieceValue => {
+                                if (pieceValue == null) {
+                                    return;
+                                }
+                                pieceValue.memo = e.currentValue;
+                            })
+                        }
+                    />
+                </TableRow>
+            </Table>
 
             <FilesManagerDrawer
                 drawerType={filesManagerDrawerType}

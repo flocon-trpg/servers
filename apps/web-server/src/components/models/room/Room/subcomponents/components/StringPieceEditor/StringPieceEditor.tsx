@@ -1,5 +1,5 @@
 import React from 'react';
-import { Checkbox, Col, Row } from 'antd';
+import { Checkbox } from 'antd';
 import { Gutter } from 'antd/lib/grid/row';
 import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
 import { State, String, characterTemplate, simpleId, stringPieceTemplate } from '@flocon-trpg/core';
@@ -19,6 +19,7 @@ import {
 import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
 import { PieceRectEditor } from '../RectEditor/RectEditor';
 import { usePersistentMemo } from '../../../../../../../hooks/usePersistentMemo';
+import { Table, TableRow } from '@/components/ui/Table/Table';
 
 type CharacterState = State<typeof characterTemplate>;
 type StringPieceState = State<typeof stringPieceTemplate>;
@@ -160,88 +161,69 @@ export const StringPieceEditor: React.FC<{
     }
 
     return (
-        <div>
-            <Row gutter={gutter} align='middle'>
-                <Col flex='auto' />
-                <Col flex={0}>ID</Col>
-                <Col span={inputSpan}>{updateMode != null ? updateMode.pieceId : '(なし)'}</Col>
-            </Row>
+        <Table>
+            <TableRow label='ID'>{updateMode != null ? updateMode.pieceId : '(なし)'}</TableRow>
             <PieceRectEditor
                 value={state}
                 onChange={newState => updateState(() => newState)}
                 boardId={boardId}
             />
-            <Row gutter={gutter} align='middle'>
-                <Col flex='auto' />
-                <Col flex={0}>所有者</Col>
-                <Col span={inputSpan}>
-                    <MyCharactersSelect
-                        selectedCharacterId={
-                            updateMode != null ? state.ownerCharacterId : activeCharacter?.id
+            <TableRow label='所有者'>
+                <MyCharactersSelect
+                    selectedCharacterId={
+                        updateMode != null ? state.ownerCharacterId : activeCharacter?.id
+                    }
+                    readOnly={createMode == null}
+                    onSelect={setActiveCharacter}
+                />
+            </TableRow>
+            <TableRow label='名前'>
+                <CollaborativeInput
+                    bufferDuration='default'
+                    size='small'
+                    value={state.name ?? ''}
+                    onChange={e => {
+                        if (e.previousValue === e.currentValue) {
+                            return;
                         }
-                        readOnly={createMode == null}
-                        onSelect={setActiveCharacter}
-                    />
-                </Col>
-            </Row>
-            <Row gutter={gutter} align='middle'>
-                <Col flex='auto' />
-                <Col flex={0}>名前</Col>
-                <Col span={inputSpan}>
-                    <CollaborativeInput
-                        bufferDuration='default'
-                        size='small'
-                        value={state.name ?? ''}
-                        onChange={e => {
-                            if (e.previousValue === e.currentValue) {
+                        updateState(pieceValue => {
+                            if (pieceValue == null) {
                                 return;
                             }
-                            updateState(pieceValue => {
-                                if (pieceValue == null) {
-                                    return;
-                                }
-                                pieceValue.name = e.currentValue;
-                            });
-                        }}
-                    />
-                </Col>
-            </Row>
-            <Row gutter={gutter} align='middle'>
-                <Col flex='auto' />
-                <Col flex={0}>値</Col>
-                <Col span={inputSpan}>
-                    <CollaborativeInput
-                        bufferDuration='default'
-                        size='small'
-                        value={state.value}
-                        onChange={({ currentValue }) => {
-                            updateState(state => {
-                                if (state == null) {
-                                    return;
-                                }
-                                state.value = currentValue;
-                            });
-                        }}
-                    />
-                </Col>
-            </Row>
-            <Row gutter={gutter} align='middle'>
-                <Col flex='auto' />
-                <Col flex={0}>値を非公開にする</Col>
-                <Col span={inputSpan}>
-                    <Checkbox
-                        checked={state.isValuePrivate}
-                        onChange={e =>
-                            updateState(state => {
-                                if (state == null) {
-                                    return;
-                                }
-                                state.isValuePrivate = e.target.checked;
-                            })
-                        }
-                    />
-                </Col>
-            </Row>
-        </div>
+                            pieceValue.name = e.currentValue;
+                        });
+                    }}
+                />
+            </TableRow>
+            <TableRow label='値'>
+                <CollaborativeInput
+                    bufferDuration='default'
+                    size='small'
+                    value={state.value}
+                    onChange={({ currentValue }) => {
+                        updateState(state => {
+                            if (state == null) {
+                                return;
+                            }
+                            state.value = currentValue;
+                        });
+                    }}
+                />
+            </TableRow>
+
+            <TableRow label='値を非公開にする'>
+                <Checkbox
+                    checked={state.isValuePrivate}
+                    onChange={e =>
+                        updateState(state => {
+                            if (state == null) {
+                                return;
+                            }
+                            state.isValuePrivate = e.target.checked;
+                        })
+                    }
+                />
+            </TableRow>
+        </Table>
     );
 };

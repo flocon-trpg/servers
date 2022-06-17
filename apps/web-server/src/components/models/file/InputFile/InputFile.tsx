@@ -23,6 +23,7 @@ type Props = {
     }) => void;
     showImage?: boolean;
     maxWidthOfLink?: number;
+    style?: React.CSSProperties;
 };
 
 export const InputFile: React.FC<Props> = ({
@@ -31,6 +32,7 @@ export const InputFile: React.FC<Props> = ({
     openFilesManager,
     showImage,
     maxWidthOfLink,
+    style,
 }: Props) => {
     const onOpen = (path: FilePath | FilePathState) => {
         if (onPathChange != null) {
@@ -77,7 +79,7 @@ export const InputFile: React.FC<Props> = ({
     })();
 
     return (
-        <div className={classNames(flex, flexRow, itemsCenter)}>
+        <div className={classNames(flex, flexRow, itemsCenter)} style={style}>
             {imageElement}
             {imageElement == null ? null : <div style={{ width: 4 }} />}
             {fileNameElement}
