@@ -34,7 +34,7 @@
         "graphql-ws": "^5.8.1",
         "howler": "^2.2.3",
         "html-escaper": "^3.0.3",
-        "husky": "^7.0.2",
+        "husky": "^8.0.0",
         "immer": "^9.0.6",
         "io-ts": "^2.2.16",
         "io-ts-reporters": "^2.0.0",
