@@ -1,6 +1,5 @@
 import React from 'react';
 import { Checkbox } from 'antd';
-import { Gutter } from 'antd/lib/grid/row';
 import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
 import { State, String, characterTemplate, simpleId, stringPieceTemplate } from '@flocon-trpg/core';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
@@ -18,7 +17,7 @@ import {
 } from '../../utils/positionAndSizeAndRect';
 import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
 import { PieceRectEditor } from '../RectEditor/RectEditor';
-import { usePersistentMemo } from '@/hooks/usePersistentMemo';
+import { useMemoOne } from 'use-memo-one';
 import { Table, TableRow } from '@/components/ui/Table/Table';
 
 type CharacterState = State<typeof characterTemplate>;
@@ -81,7 +80,7 @@ export const StringPieceEditor: React.FC<{
                 : { ...createMode.piecePosition, ...pieceSize },
     });
     const createModeParams: CreateModeParams<StringPieceState | undefined> | undefined =
-        usePersistentMemo(() => {
+        useMemoOne(() => {
             if (createMode == null || compositeRect == null) {
                 return undefined;
             }
@@ -112,7 +111,7 @@ export const StringPieceEditor: React.FC<{
             };
         }, [activeCharacter, compositeRect, createMode, setRoomState]);
     const updateModeParams: UpdateModeParams<StringPieceState | undefined> | undefined =
-        usePersistentMemo(() => {
+        useMemoOne(() => {
             if (updateMode == null) {
                 return undefined;
             }

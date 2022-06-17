@@ -7,7 +7,7 @@ import { atom, useAtom } from 'jotai';
 import { Subject } from 'rxjs';
 import { CreateMode, ImagePieceEditor, UpdateMode } from '../ImagePieceEditor/ImagePieceEditor';
 import { PixelPosition } from '../../utils/positionAndSizeAndRect';
-import { usePersistentMemo } from '@/hooks/usePersistentMemo';
+import { useMemoOne } from 'use-memo-one';
 import useConstant from 'use-constant';
 
 type ImagePieceModalType =
@@ -36,32 +36,31 @@ export const ImagePieceModal: React.FC = () => {
         visible,
         createMode,
         updateMode,
-    }: { visible: boolean; createMode?: CreateMode; updateMode?: UpdateMode } =
-        usePersistentMemo(() => {
-            switch (modalType?.type) {
-                case undefined: {
-                    return { visible: false };
-                }
-                case update: {
-                    return {
-                        visible: true,
-                        updateMode: {
-                            boardId: modalType.boardId,
-                            pieceId: modalType.pieceId,
-                        },
-                    };
-                }
-                case create: {
-                    return {
-                        visible: true,
-                        createMode: {
-                            boardId: modalType.boardId,
-                            piecePosition: modalType.piecePosition,
-                        },
-                    };
-                }
+    }: { visible: boolean; createMode?: CreateMode; updateMode?: UpdateMode } = useMemoOne(() => {
+        switch (modalType?.type) {
+            case undefined: {
+                return { visible: false };
             }
-        }, [modalType]);
+            case update: {
+                return {
+                    visible: true,
+                    updateMode: {
+                        boardId: modalType.boardId,
+                        pieceId: modalType.pieceId,
+                    },
+                };
+            }
+            case create: {
+                return {
+                    visible: true,
+                    createMode: {
+                        boardId: modalType.boardId,
+                        piecePosition: modalType.piecePosition,
+                    },
+                };
+            }
+        }
+    }, [modalType]);
 
     return (
         <Modal

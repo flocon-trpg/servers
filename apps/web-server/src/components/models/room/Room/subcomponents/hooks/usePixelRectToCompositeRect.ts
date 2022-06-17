@@ -1,4 +1,4 @@
-import { usePersistentMemo } from '@/hooks/usePersistentMemo';
+import { useMemoOne } from 'use-memo-one';
 import {
     CompositeRect,
     PixelRect,
@@ -15,7 +15,7 @@ export const usePixelRectToCompositeRect = ({
 }): CompositeRect | undefined => {
     const cellConfig = useCellConfig(boardId);
 
-    return usePersistentMemo(() => {
+    return useMemoOne(() => {
         if (cellConfig == null || pixelRect?.x == null) {
             return undefined;
         }

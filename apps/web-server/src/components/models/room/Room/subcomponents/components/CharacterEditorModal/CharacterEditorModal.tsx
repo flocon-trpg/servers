@@ -38,9 +38,9 @@ import { CollaborativeInput } from '@/components/ui/CollaborativeInput/Collabora
 import { useCharacterPiece } from '../../hooks/useCharacterPiece';
 import { usePortraitPiece } from '../../hooks/usePortraitPiece';
 import { BoardPositionRectEditor, PieceRectEditor } from '../RectEditor/RectEditor';
-import { usePersistentMemo } from '@/hooks/usePersistentMemo';
 import { Table, TableCombinedRow, TableHeader, TableRow } from '@/components/ui/Table/Table';
 import { keyNames } from '@flocon-trpg/utils';
+import { useMemoOne } from 'use-memo-one';
 
 type CharacterState = State<typeof characterTemplate>;
 
@@ -234,47 +234,45 @@ export const CharacterEditorModal: React.FC = () => {
         }
         return undefined;
     }, [atomValue, participants]);
-    const createMode: CreateModeParams<CharacterState | undefined> | undefined =
-        usePersistentMemo(() => {
-            if (atomValue?.type !== create) {
-                return undefined;
-            }
-            return {
-                createInitState: () => defaultCharacter,
-                onCreate: newValue => {
-                    if (newValue == null) {
-                        return;
+    const createMode: CreateModeParams<CharacterState | undefined> | undefined = useMemoOne(() => {
+        if (atomValue?.type !== create) {
+            return undefined;
+        }
+        return {
+            createInitState: () => defaultCharacter,
+            onCreate: newValue => {
+                if (newValue == null) {
+                    return;
+                }
+                const id = simpleId();
+                setRoomState(roomState => {
+                    if (roomState.characters == null) {
+                        roomState.characters = {};
                     }
-                    const id = simpleId();
-                    setRoomState(roomState => {
-                        if (roomState.characters == null) {
-                            roomState.characters = {};
-                        }
-                        roomState.characters[id] = {
-                            ...newValue,
-                            ownerParticipantId: myUserUid,
-                        };
-                    });
-                },
-            };
-        }, [atomValue?.type, myUserUid, setRoomState]);
-    const updateMode: UpdateModeParams<CharacterState | undefined> | undefined =
-        usePersistentMemo(() => {
-            if (atomValue?.type !== update) {
-                return undefined;
-            }
-            return {
-                state: characters?.get(atomValue.stateId),
-                updateWithImmer: nextState => {
-                    setRoomState(roomState => {
-                        if (roomState.characters == null) {
-                            roomState.characters = {};
-                        }
-                        roomState.characters[atomValue.stateId] = nextState;
-                    });
-                },
-            };
-        }, [atomValue, characters, setRoomState]);
+                    roomState.characters[id] = {
+                        ...newValue,
+                        ownerParticipantId: myUserUid,
+                    };
+                });
+            },
+        };
+    }, [atomValue?.type, myUserUid, setRoomState]);
+    const updateMode: UpdateModeParams<CharacterState | undefined> | undefined = useMemoOne(() => {
+        if (atomValue?.type !== update) {
+            return undefined;
+        }
+        return {
+            state: characters?.get(atomValue.stateId),
+            updateWithImmer: nextState => {
+                setRoomState(roomState => {
+                    if (roomState.characters == null) {
+                        roomState.characters = {};
+                    }
+                    roomState.characters[atomValue.stateId] = nextState;
+                });
+            },
+        };
+    }, [atomValue, characters, setRoomState]);
     const {
         state: character,
         updateState: updateCharacter,

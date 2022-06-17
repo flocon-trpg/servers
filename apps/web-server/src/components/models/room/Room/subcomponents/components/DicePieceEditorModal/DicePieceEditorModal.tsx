@@ -6,7 +6,7 @@ import { useAtom } from 'jotai';
 import { dicePieceValueEditorAtom } from '../../atoms/pieceValueEditorAtom/pieceValueEditorAtom';
 import { Subject } from 'rxjs';
 import { CreateMode, DicePieceEditor, UpdateMode } from '../DicePieceEditor/DicePieceEditor';
-import { usePersistentMemo } from '@/hooks/usePersistentMemo';
+import { useMemoOne } from 'use-memo-one';
 import useConstant from 'use-constant';
 
 export const DicePieceEditorModal: React.FC = () => {
@@ -17,32 +17,31 @@ export const DicePieceEditorModal: React.FC = () => {
         visible,
         createMode,
         updateMode,
-    }: { visible: boolean; updateMode?: UpdateMode; createMode?: CreateMode } =
-        usePersistentMemo(() => {
-            switch (modalType?.type) {
-                case undefined: {
-                    return { visible: false };
-                }
-                case update: {
-                    return {
-                        visible: !modalType.closed,
-                        updateMode: {
-                            boardId: modalType.boardId,
-                            pieceId: modalType.pieceId,
-                        },
-                    };
-                }
-                case create: {
-                    return {
-                        visible: true,
-                        createMode: {
-                            boardId: modalType.boardId,
-                            piecePosition: modalType.piecePosition,
-                        },
-                    };
-                }
+    }: { visible: boolean; updateMode?: UpdateMode; createMode?: CreateMode } = useMemoOne(() => {
+        switch (modalType?.type) {
+            case undefined: {
+                return { visible: false };
             }
-        }, [modalType]);
+            case update: {
+                return {
+                    visible: !modalType.closed,
+                    updateMode: {
+                        boardId: modalType.boardId,
+                        pieceId: modalType.pieceId,
+                    },
+                };
+            }
+            case create: {
+                return {
+                    visible: true,
+                    createMode: {
+                        boardId: modalType.boardId,
+                        piecePosition: modalType.piecePosition,
+                    },
+                };
+            }
+        }
+    }, [modalType]);
 
     return (
         <Modal

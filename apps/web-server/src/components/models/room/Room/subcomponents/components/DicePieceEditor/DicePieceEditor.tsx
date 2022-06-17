@@ -25,7 +25,7 @@ import {
     applyCompositeRect,
 } from '../../utils/positionAndSizeAndRect';
 import { PieceRectEditor } from '../RectEditor/RectEditor';
-import { usePersistentMemo } from '@/hooks/usePersistentMemo';
+import { useMemoOne } from 'use-memo-one';
 import { Table, TableRow } from '@/components/ui/Table/Table';
 import { keyNames } from '@flocon-trpg/utils';
 
@@ -87,59 +87,57 @@ export const DicePieceEditor: React.FC<{
                 ? undefined
                 : { ...createModeProp.piecePosition, ...pieceSize },
     });
-    const createMode: CreateModeParams<DicePieceState | undefined> | undefined =
-        usePersistentMemo(() => {
-            if (createModeProp == null || compositeRect == null) {
-                return undefined;
-            }
-            return {
-                createInitState: () => defaultDicePieceValue(compositeRect, true, undefined),
-                updateInitState: prevState => {
-                    if (prevState == null) {
+    const createMode: CreateModeParams<DicePieceState | undefined> | undefined = useMemoOne(() => {
+        if (createModeProp == null || compositeRect == null) {
+            return undefined;
+        }
+        return {
+            createInitState: () => defaultDicePieceValue(compositeRect, true, undefined),
+            updateInitState: prevState => {
+                if (prevState == null) {
+                    return;
+                }
+                applyCompositeRect({
+                    state: prevState,
+                    operation: compositeRect,
+                });
+            },
+            onCreate: newState => {
+                if (newState == null || activeCharacter == null) {
+                    return;
+                }
+                const id = simpleId();
+                setRoomState(roomState => {
+                    const dicePieces = roomState.boards?.[createModeProp.boardId]?.dicePieces;
+                    if (dicePieces == null) {
                         return;
                     }
-                    applyCompositeRect({
-                        state: prevState,
-                        operation: compositeRect,
-                    });
-                },
-                onCreate: newState => {
-                    if (newState == null || activeCharacter == null) {
+                    dicePieces[id] = { ...newState, ownerCharacterId: activeCharacter.id };
+                });
+            },
+        };
+    }, [activeCharacter, compositeRect, createModeProp, setRoomState]);
+    const updateMode: UpdateModeParams<DicePieceState | undefined> | undefined = useMemoOne(() => {
+        if (updateModeProp == null) {
+            return undefined;
+        }
+        return {
+            state: dicePieces?.get(updateModeProp.pieceId),
+            updateWithImmer: newState => {
+                if (newState == null || myUserUid == null) {
+                    return;
+                }
+                const { boardId, pieceId } = updateModeProp;
+                setRoomState(roomState => {
+                    const dicePieces = roomState.boards?.[boardId]?.dicePieces;
+                    if (dicePieces == null) {
                         return;
                     }
-                    const id = simpleId();
-                    setRoomState(roomState => {
-                        const dicePieces = roomState.boards?.[createModeProp.boardId]?.dicePieces;
-                        if (dicePieces == null) {
-                            return;
-                        }
-                        dicePieces[id] = { ...newState, ownerCharacterId: activeCharacter.id };
-                    });
-                },
-            };
-        }, [activeCharacter, compositeRect, createModeProp, setRoomState]);
-    const updateMode: UpdateModeParams<DicePieceState | undefined> | undefined =
-        usePersistentMemo(() => {
-            if (updateModeProp == null) {
-                return undefined;
-            }
-            return {
-                state: dicePieces?.get(updateModeProp.pieceId),
-                updateWithImmer: newState => {
-                    if (newState == null || myUserUid == null) {
-                        return;
-                    }
-                    const { boardId, pieceId } = updateModeProp;
-                    setRoomState(roomState => {
-                        const dicePieces = roomState.boards?.[boardId]?.dicePieces;
-                        if (dicePieces == null) {
-                            return;
-                        }
-                        dicePieces[pieceId] = newState;
-                    });
-                },
-            };
-        }, [dicePieces, updateModeProp, myUserUid, setRoomState]);
+                    dicePieces[pieceId] = newState;
+                });
+            },
+        };
+    }, [dicePieces, updateModeProp, myUserUid, setRoomState]);
     const { state, updateState, ok } = useStateEditor({ createMode, updateMode });
     React.useEffect(() => {
         if (actionRequest == null) {

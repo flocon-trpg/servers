@@ -36,7 +36,7 @@ module.exports = {
         'react-hooks/exhaustive-deps': [
             'error',
             {
-                additionalHooks: '^usePersistentMemo$',
+                additionalHooks: '^use(Memo|Callback)One$',
             },
         ],
         '@typescript-eslint/no-namespace': 'off',

@@ -21,7 +21,7 @@ import {
 } from '../../utils/positionAndSizeAndRect';
 import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
 import { PieceRectEditor } from '../RectEditor/RectEditor';
-import { usePersistentMemo } from '@/hooks/usePersistentMemo';
+import { useMemoOne } from 'use-memo-one';
 import { Table, TableRow } from '@/components/ui/Table/Table';
 
 type ImagePieceState = State<typeof imagePieceTemplate>;
@@ -79,7 +79,7 @@ export const ImagePieceEditor: React.FC<{
                 : { ...createMode.piecePosition, ...pieceSize },
     });
     const createModeParams: CreateModeParams<ImagePieceState | undefined> | undefined =
-        usePersistentMemo(() => {
+        useMemoOne(() => {
             if (createMode == null || myUserUid == null || compositeRect == null) {
                 return undefined;
             }
@@ -110,7 +110,7 @@ export const ImagePieceEditor: React.FC<{
             };
         }, [compositeRect, createMode, myUserUid, setRoomState]);
     const updateModeParams: UpdateModeParams<ImagePieceState | undefined> | undefined =
-        usePersistentMemo(() => {
+        useMemoOne(() => {
             if (updateMode == null) {
                 return undefined;
             }

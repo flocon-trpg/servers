@@ -2979,6 +2979,7 @@ __metadata:
     url-join: ^4.0.1
     urql: ^2.2.0
     use-constant: ^1.1.0
+    use-memo-one: ^1.1.2
   languageName: unknown
   linkType: soft
 
@@ -24835,6 +24836,15 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0
   checksum: 51026866a8552237ff3958f365953f1b1f1e1c2f9edd1909e0ffd35e27efebe70f94bc14d63c6a839b4d4fe40382f084983ccbb87f48de932e7cc44f61f09891
+  languageName: node
+  linkType: hard
+
+"use-memo-one@npm:^1.1.2":
+  version: 1.1.2
+  resolution: "use-memo-one@npm:1.1.2"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0
+  checksum: 71f4598ce422b64a971dc93f45dc245158977f8882f56be82d4629c21577c22244959ac3aa99bd9559d64007b632d58aa43b256981afe56603c77ce3fdee165f
   languageName: node
   linkType: hard
 
