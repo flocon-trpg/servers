@@ -16,7 +16,7 @@
         "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\""
     },
     "dependencies": {
-        "husky": "^7.0.4"
+        "husky": "^8.0.0"
     },
     "devDependencies": {
         "@commitlint/cli": "16.3.0",
