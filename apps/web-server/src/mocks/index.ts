@@ -99,6 +99,9 @@ export const mockAuth: Auth = {
     signOut: function (): Promise<void> {
         throw new Error('Function not implemented.');
     },
+    beforeAuthStateChanged: function () {
+        throw new Error('Function not implemented.');
+    },
 };
 
 export const mockStorage: FirebaseStorage = {
