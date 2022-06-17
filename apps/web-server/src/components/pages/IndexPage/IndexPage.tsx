@@ -12,6 +12,7 @@ import { flex, flexColumn } from '../../../styles/className';
 import { apiServerSatisfies } from '../../../versioning/apiServerSatisfies';
 import { semVerRangeToString } from '../../../versioning/semVerRange';
 import { useGetApiSemVer } from '../../../hooks/useGetApiSemVer';
+import Link from 'next/link';
 
 export const IndexPage: React.FC = () => {
     const [drawerType, setDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
@@ -130,10 +131,10 @@ export const IndexPage: React.FC = () => {
                 <Typography.Title level={3}>利用規約・プライバシーポリシー</Typography.Title>
                 <ul>
                     <li>
-                        <a href='/tos'>利用規約</a>
+                        <Link href='/tos'>利用規約</Link>
                     </li>
                     <li>
-                        <a href='/privacy_policy'>プライバシーポリシー</a>
+                        <Link href='/privacy_policy'>プライバシーポリシー</Link>
                     </li>
                 </ul>
                 <div style={{ height: spacing }} />
