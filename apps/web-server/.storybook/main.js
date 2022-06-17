@@ -1,4 +1,5 @@
 const path = require('path');
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
 module.exports = {
     stories: ['../src/**/*.stories.mdx', '../src/**/*.stories.@(js|jsx|ts|tsx)'],
@@ -9,9 +10,13 @@ module.exports = {
     ],
     // https://storybook.js.org/docs/react/configure/images-and-assets#serving-static-files-via-storybook-configuration
     staticDirs: ['../public'],
-    // scssを@importするための設定
-    // https://blog.gaji.jp/2021/10/20/8350/
     webpackFinal: async config => {
+        // tsconfigのpathsを使うための設定
+        // https://stackoverflow.com/questions/71677948/how-to-add-typescript-paths-to-storybook
+        config.resolve.plugins = [new TsconfigPathsPlugin()];
+
+        // scssを@importするための設定
+        // https://blog.gaji.jp/2021/10/20/8350/
         config.module.rules.push({
             test: /\.scss$/,
             use: [

@@ -21,7 +21,16 @@
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "noUncheckedIndexedAccess": true,
-        "incremental": true
+        "incremental": true,
+
+        // pathsを使うにはbaseUrlのセットが必要
+        // https://nextjs.org/docs/advanced-features/module-path-aliases
+        //
+        // pathsを変更した場合、jest.config.jsのmoduleNameMapperもあわせて変更する必要がある
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./src/*"]
+        }
     },
     "exclude": ["node_modules"],
     "include": ["**/*.ts", "**/*.tsx"]

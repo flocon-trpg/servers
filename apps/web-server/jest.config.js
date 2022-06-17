@@ -1,12 +1,18 @@
-module.exports = {
-    preset: 'ts-jest',
-    testEnvironment: 'jsdom',
+// https://nextjs.org/docs/testing#setting-up-jest-with-the-rust-compiler
 
-    // これがないとテストした際に@testing-library/reactなどが正常に動かない
-    // https://zenn.dev/garypippi/articles/c79cb002e001681a73cd
-    globals: {
-        'ts-jest': {
-            tsconfig: './tsconfig.jest.json',
-        },
+const nextJest = require('next/jest');
+
+const createJestConfig = nextJest({
+    dir: './',
+});
+
+const customJestConfig = {
+    moduleDirectories: ['node_modules', '<rootDir>/'],
+    testEnvironment: 'jest-environment-jsdom',
+
+    moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/src/$1',
     },
 };
+
+module.exports = createJestConfig(customJestConfig);

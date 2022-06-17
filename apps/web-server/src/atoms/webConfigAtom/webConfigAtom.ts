@@ -88,29 +88,24 @@ const parseConfig = (env: Data | undefined): Result<Env> => {
     return Result.ok(result);
 };
 
-let processEnvConfigCache: Result<Env> | null = null;
-const getProcessEnvConfig = () => {
-    if (processEnvConfigCache == null) {
-        processEnvConfigCache = parseConfig(undefined);
-    }
-    return processEnvConfigCache;
-};
+const processEnv = parseConfig(undefined);
 
-const processEnvAtom = atom(getProcessEnvConfig());
+export const mockProcessEnvAtom = atom<Data | null>(null);
 
 export const publicEnvTxtAtom = atom<FetchTextState>({ fetched: false });
 
 export const envsAtom = atom<Result<Envs> | null>(get => {
-    const processEnv = get(processEnvAtom);
-    if (processEnv.isError) {
-        return processEnv;
+    const mockProcessEnv = get(mockProcessEnvAtom);
+    const $processEnv = mockProcessEnv == null ? processEnv : parseConfig(mockProcessEnv);
+    if ($processEnv.isError) {
+        return $processEnv;
     }
     const publicEnvTxt = get(publicEnvTxtAtom);
     if (!publicEnvTxt.fetched) {
         return null;
     }
     if (publicEnvTxt.value == null) {
-        return Result.ok({ processEnv: processEnv.value, publicEnvTxt: undefined });
+        return Result.ok({ processEnv: $processEnv.value, publicEnvTxt: undefined });
     }
     const publicEnvTxtObject = parse(publicEnvTxt.value);
     const publicEnvTxtResult = parseConfig(publicEnvTxtObject);
@@ -118,7 +113,7 @@ export const envsAtom = atom<Result<Envs> | null>(get => {
         return publicEnvTxtResult;
     }
     return Result.ok({
-        processEnv: processEnv.value,
+        processEnv: $processEnv.value,
         publicEnvTxt: publicEnvTxtResult.value,
     });
 });
