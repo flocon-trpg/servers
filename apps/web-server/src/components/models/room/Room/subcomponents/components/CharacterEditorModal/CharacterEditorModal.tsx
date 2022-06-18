@@ -263,7 +263,7 @@ export const CharacterEditorModal: React.FC = () => {
         }
         return {
             state: characters?.get(atomValue.stateId),
-            updateWithImmer: nextState => {
+            onUpdate: nextState => {
                 setRoomState(roomState => {
                     if (roomState.characters == null) {
                         roomState.characters = {};

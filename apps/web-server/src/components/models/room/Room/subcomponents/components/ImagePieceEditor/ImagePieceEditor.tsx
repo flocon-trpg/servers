@@ -116,7 +116,7 @@ export const ImagePieceEditor: React.FC<{
             }
             return {
                 state: imagePieces?.get(updateMode.pieceId),
-                updateWithImmer: newState => {
+                onUpdate: newState => {
                     if (myUserUid == null) {
                         return;
                     }

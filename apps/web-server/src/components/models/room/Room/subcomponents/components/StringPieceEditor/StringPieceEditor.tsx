@@ -117,7 +117,7 @@ export const StringPieceEditor: React.FC<{
             }
             return {
                 state: stringPieces?.get(updateMode.pieceId),
-                updateWithImmer: newState => {
+                onUpdate: newState => {
                     if (myUserUid == null) {
                         return;
                     }

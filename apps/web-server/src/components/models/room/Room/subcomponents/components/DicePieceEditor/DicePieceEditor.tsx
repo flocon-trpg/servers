@@ -123,7 +123,7 @@ export const DicePieceEditor: React.FC<{
         }
         return {
             state: dicePieces?.get(updateModeProp.pieceId),
-            updateWithImmer: newState => {
+            onUpdate: newState => {
                 if (newState == null || myUserUid == null) {
                     return;
                 }

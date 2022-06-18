@@ -112,7 +112,7 @@ export const BoardEditorModal: React.FC = () => {
         }
         return {
             state: boards?.get(modalValue.stateId),
-            updateWithImmer: nextState => {
+            onUpdate: nextState => {
                 setRoomState(roomState => {
                     if (roomState.boards == null) {
                         roomState.boards = {};

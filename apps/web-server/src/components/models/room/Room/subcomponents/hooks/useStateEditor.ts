@@ -18,7 +18,7 @@ export type CreateModeParams<T> = {
 
 export type UpdateModeParams<T> = {
     state: T;
-    updateWithImmer: Recipe<T>;
+    onUpdate: (newValue: T) => void;
 };
 
 // Stateを新規作成(create)もしくは更新(update)するUIで、2つの処理を極力共通化するためのhook。createはボタンなどを押すまで作成されず、updateは値が変わるたびにStateにその変更が反映される場面を想定。
@@ -128,13 +128,15 @@ false → false
     const updateState = React.useCallback(
         (recipe: Recipe<T>) => {
             if (createModeRef.current != null) {
-                setState(state => produce(state, recipe));
+                const newState = produce(stateRef.current, recipe);
+                setState(newState);
+                stateToCreateCacheRef.current = newState;
             }
             if (updateModeRef.current != null) {
-                updateModeRef.current.updateWithImmer(produce(updateModeRef.current.state, recipe));
+                updateModeRef.current.onUpdate(produce(updateModeRef.current.state, recipe));
             }
         },
-        [createModeRef, updateModeRef]
+        [createModeRef, stateRef, updateModeRef]
     );
 
     const ok = React.useCallback(() => {
