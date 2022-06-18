@@ -48,6 +48,7 @@ const CellPositionEditorRow = <T extends PieceState>({
                 <Space>
                     <InputNumber
                         disabled={disabled}
+                        size='small'
                         value={value.cellX}
                         onChange={newValue => {
                             if (typeof newValue !== 'number') {
@@ -62,6 +63,7 @@ const CellPositionEditorRow = <T extends PieceState>({
                     <span>*</span>
                     <InputNumber
                         disabled={disabled}
+                        size='small'
                         value={value.cellY}
                         onChange={newValue => {
                             if (typeof newValue !== 'number') {
@@ -79,6 +81,7 @@ const CellPositionEditorRow = <T extends PieceState>({
                 <Space>
                     <InputNumber
                         disabled={disabled}
+                        size='small'
                         value={value.cellW}
                         onChange={newValue => {
                             if (typeof newValue !== 'number') {
@@ -93,6 +96,7 @@ const CellPositionEditorRow = <T extends PieceState>({
                     <span>*</span>
                     <InputNumber
                         disabled={disabled}
+                        size='small'
                         value={value.cellH}
                         onChange={newValue => {
                             if (typeof newValue !== 'number') {
