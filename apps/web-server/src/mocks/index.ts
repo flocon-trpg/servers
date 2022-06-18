@@ -19,11 +19,11 @@ type BoardState = S<typeof boardTemplate>;
 type CharacterState = S<typeof characterTemplate>;
 
 const myUserUid = 'my-user-uid';
-const myParticipantName = 'my-participant-name';
+const myParticipantName = 'my-ptc-name';
 const anotherPlayerUserUid = 'player-user-uid';
-const anotherPlayerParticipantName = 'player-participant-name1';
+const anotherPlayerParticipantName = 'player-ptc-name1';
 const anotherSpectatorUserUid = 'spectator-user-uid';
-const anotherSpectatorParticipantName = 'spectator-participant-name2';
+const anotherSpectatorParticipantName = 'spectator-ptc-name2';
 const myDisplayName = 'my-display-name';
 
 export const myRichCharacterId = 'character-id-1';
