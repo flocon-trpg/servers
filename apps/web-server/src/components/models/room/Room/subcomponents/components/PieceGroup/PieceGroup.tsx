@@ -83,7 +83,7 @@ export const PieceGroup: React.FC<PropsWithChildren<PieceGroupProps>> = ({
         }
         const x = e.target.x();
         const y = e.target.y();
-        // セルにスナップする設定の場合、このようにxy座標をリセットしないと少しだけ動かしたときにprops.xとprops.yの値が変わらないため再レンダリングされない。そのため、スナップしない。
+        // セルにスナップさせる設定の場合、このようにxy座標をリセットしないと少しだけ動かしたときにprops.xとprops.yの値が変わらないため再レンダリングされない。そのため、スナップしない。
         e.target.x(x);
         e.target.y(y);
         if (onDragEndProp != null) {

@@ -847,8 +847,8 @@ namespace ContextMenuModule {
                 label: character.name,
                 children: [
                     {
-                        key: `セルにスナップする@キャラコマ@${rootKey}`,
-                        label: 'セルにスナップする',
+                        key: `セルにスナップさせる@キャラコマ@${rootKey}`,
+                        label: 'セルにスナップさせる',
                         onClick: () => {
                             setRoomState(roomState => {
                                 const pieces = roomState.characters?.[characterId]?.pieces;
@@ -867,8 +867,8 @@ namespace ContextMenuModule {
                         },
                     },
                     {
-                        key: `セルにスナップしない@キャラコマ@${rootKey}`,
-                        label: 'セルにスナップしない',
+                        key: `セルにスナップさせない@キャラコマ@${rootKey}`,
+                        label: 'セルにスナップさせない',
                         onClick: () => {
                             setRoomState(roomState => {
                                 const pieces = roomState.characters?.[characterId]?.pieces;
