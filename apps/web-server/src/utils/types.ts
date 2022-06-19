@@ -1,4 +1,6 @@
+import { PixelPosition } from '@/components/models/room/Room/subcomponents/utils/positionAndSizeAndRect';
 import { FilterValue } from 'antd/lib/table/interface';
+import { create, update } from './constants';
 import { FilePath } from './file/filePath';
 
 export type BoardType =
@@ -79,3 +81,15 @@ export type SetAction<State> = State | ((prevState: State) => State);
 export type Recipe<T> = (state: T) => T | void;
 
 export type Ref<T> = { value: T };
+
+export type PieceValueEditorState =
+    | {
+          type: typeof create;
+          boardId: string;
+          piecePosition: PixelPosition;
+      }
+    | {
+          type: typeof update;
+          boardId: string;
+          pieceId: string;
+      };

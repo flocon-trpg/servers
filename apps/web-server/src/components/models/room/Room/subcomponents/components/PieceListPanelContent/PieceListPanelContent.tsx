@@ -10,10 +10,8 @@ import { keyNames } from '@flocon-trpg/utils';
 import { useUpdateAtom } from 'jotai/utils';
 import { useCharacters } from '../../hooks/useCharacters';
 import { State, dicePieceTemplate, stringPieceTemplate } from '@flocon-trpg/core';
-import {
-    dicePieceValueEditorAtom,
-    stringPieceValueEditorAtom,
-} from '../../atoms/pieceValueEditorAtom/pieceValueEditorAtom';
+import { stringPieceModalAtom } from '../StringPieceEditorModal/StringPieceEditorModal';
+import { dicePieceModalAtom } from '../DicePieceEditorModal/DicePieceEditorModal';
 
 type DicePieceState = State<typeof dicePieceTemplate>;
 type StringPieceState = State<typeof stringPieceTemplate>;
@@ -40,8 +38,8 @@ export const PieceListPanelContent: React.FC<Props> = ({ boardId }: Props) => {
     const characters = useCharacters();
     const dicePieces = useDicePieces(boardId);
     const stringPieces = useStringPieces(boardId);
-    const setDicePieceValueEditor = useUpdateAtom(dicePieceValueEditorAtom);
-    const setStringPieceValueEditor = useUpdateAtom(stringPieceValueEditorAtom);
+    const setDicePieceModal = useUpdateAtom(dicePieceModalAtom);
+    const setStringPieceModal = useUpdateAtom(stringPieceModalAtom);
 
     if (dicePieces == null || stringPieces == null) {
         return null;
@@ -60,14 +58,14 @@ export const PieceListPanelContent: React.FC<Props> = ({ boardId }: Props) => {
                             size='small'
                             onClick={() => {
                                 if (dataSource.type === 'dice') {
-                                    setDicePieceValueEditor({
+                                    setDicePieceModal({
                                         type: update,
                                         boardId,
                                         pieceId: dataSource.pieceId,
                                     });
                                 }
                                 if (dataSource.type === 'string') {
-                                    setStringPieceValueEditor({
+                                    setStringPieceModal({
                                         type: update,
                                         boardId,
                                         pieceId: dataSource.pieceId,

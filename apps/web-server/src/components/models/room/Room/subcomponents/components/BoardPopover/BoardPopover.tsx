@@ -46,10 +46,6 @@ import { flex, flexRow, itemsCenter } from '@/styles/className';
 import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
 import { useIsMyCharacter } from '../../hooks/useIsMyCharacter';
 import { characterEditorModalAtom, piece } from '../CharacterEditorModal/CharacterEditorModal';
-import {
-    dicePieceValueEditorAtom,
-    stringPieceValueEditorAtom,
-} from '../../atoms/pieceValueEditorAtom/pieceValueEditorAtom';
 import { imagePieceModalAtom } from '../ImagePieceModal/ImagePieceModal';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import { defaultTriggerSubMenuAction } from '@/utils/variables';
@@ -66,6 +62,8 @@ import {
     ImagePieceEditor,
     UpdateMode as ImagePieceUpdateMode,
 } from '../ImagePieceEditor/ImagePieceEditor';
+import { stringPieceModalAtom } from '../StringPieceEditorModal/StringPieceEditorModal';
+import { dicePieceModalAtom } from '../DicePieceEditorModal/DicePieceEditorModal';
 
 type BoardPositionState = State<typeof boardPositionTemplate>;
 type CharacterState = State<typeof characterTemplate>;
@@ -306,23 +304,23 @@ const toBoardPosition = ({
 
 // 1つ1つ個別に渡すコードを書くのが面倒なのでこのように1つにまとめて全て渡している
 const useHooks = () => {
-    const setCharacterEditor = useUpdateAtom(characterEditorModalAtom);
-    const setDicePieceEditor = useUpdateAtom(dicePieceValueEditorAtom);
-    const setStringPieceEditor = useUpdateAtom(stringPieceValueEditorAtom);
+    const setCharacterModal = useUpdateAtom(characterEditorModalAtom);
+    const setDicePieceModal = useUpdateAtom(dicePieceModalAtom);
+    const setStringPieceModal = useUpdateAtom(stringPieceModalAtom);
     const setImagePieceModal = useUpdateAtom(imagePieceModalAtom);
     const cloneImagePiece = useCloneImagePiece();
     return React.useMemo(
         () => ({
-            setCharacterEditor,
-            setDicePieceEditor,
-            setStringPieceEditor,
+            setCharacterModal,
+            setDicePieceModal,
+            setStringPieceModal,
             setImagePieceModal,
             cloneImagePiece,
         }),
         [
-            setCharacterEditor,
-            setDicePieceEditor,
-            setStringPieceEditor,
+            setCharacterModal,
+            setDicePieceModal,
+            setStringPieceModal,
             setImagePieceModal,
             cloneImagePiece,
         ]
@@ -360,7 +358,7 @@ namespace ContextMenuModule {
                             key: '編集@コマ@boardPopover',
                             label: '編集',
                             onClick: () => {
-                                hooks.setCharacterEditor({
+                                hooks.setCharacterModal({
                                     type: update,
                                     stateId: characterId,
                                     selectedPieceType: piece,
@@ -418,7 +416,7 @@ namespace ContextMenuModule {
                                 key: '編集@立ち絵@boardPopover',
                                 label: '編集',
                                 onClick: () => {
-                                    hooks.setCharacterEditor({
+                                    hooks.setCharacterModal({
                                         type: update,
                                         stateId: characterId,
                                         selectedPieceType: portrait,
@@ -577,7 +575,7 @@ namespace ContextMenuModule {
                                       key: '編集@selectedDicePiecesMenu',
                                       label: '編集',
                                       onClick: () => {
-                                          hooks.setDicePieceEditor({
+                                          hooks.setDicePieceModal({
                                               type: update,
                                               boardId: boardIdToShow,
                                               pieceId,
@@ -645,7 +643,7 @@ namespace ContextMenuModule {
                                       key: '編集@boardPopover',
                                       label: '編集',
                                       onClick: () => {
-                                          hooks.setStringPieceEditor({
+                                          hooks.setStringPieceModal({
                                               type: update,
                                               boardId: boardIdToShow,
                                               pieceId,
@@ -931,7 +929,7 @@ namespace ContextMenuModule {
                     key: 'ダイスコマ@新規作成@boardPopover',
                     label: 'ダイスコマ',
                     onClick: () => {
-                        hooks.setDicePieceEditor({
+                        hooks.setDicePieceModal({
                             type: create,
                             boardId,
                             piecePosition,
@@ -943,7 +941,7 @@ namespace ContextMenuModule {
                     key: '文字列コマ@新規作成@boardPopover',
                     label: '文字列コマ',
                     onClick: () => {
-                        hooks.setStringPieceEditor({
+                        hooks.setStringPieceModal({
                             type: create,
                             boardId,
                             piecePosition,

@@ -25,7 +25,6 @@ import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
 import { atom } from 'jotai';
 import { create, update } from '@/utils/constants';
 import { useAtomValue, useUpdateAtom } from 'jotai/utils';
-import { commandEditorModalAtom } from '../../atoms/commandEditorModalAtom/commandEditorModalAtom';
 import { useIsMyCharacter } from '../../hooks/useIsMyCharacter';
 import { CharacterVarInput } from '../CharacterVarInput/CharacterVarInput';
 import classNames from 'classnames';
@@ -41,6 +40,7 @@ import { BoardPositionRectEditor, PieceRectEditor } from '../RectEditor/RectEdit
 import { Table, TableCombinedRow, TableHeader, TableRow } from '@/components/ui/Table/Table';
 import { keyNames } from '@flocon-trpg/utils';
 import { useMemoOne } from 'use-memo-one';
+import { commandEditorModalAtom } from '../CommandEditorModal/CommandEditorModal';
 
 type CharacterState = State<typeof characterTemplate>;
 

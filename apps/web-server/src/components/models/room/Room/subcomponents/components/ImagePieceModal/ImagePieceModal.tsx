@@ -6,23 +6,11 @@ import { close, create, ok, update } from '@/utils/constants';
 import { atom, useAtom } from 'jotai';
 import { Subject } from 'rxjs';
 import { CreateMode, ImagePieceEditor, UpdateMode } from '../ImagePieceEditor/ImagePieceEditor';
-import { PixelPosition } from '../../utils/positionAndSizeAndRect';
 import { useMemoOne } from 'use-memo-one';
 import useConstant from 'use-constant';
+import { PieceValueEditorState } from '@/utils/types';
 
-type ImagePieceModalType =
-    | {
-          type: typeof create;
-          boardId: string;
-          piecePosition: PixelPosition;
-      }
-    | {
-          type: typeof update;
-          boardId: string;
-          pieceId: string;
-      };
-
-export const imagePieceModalAtom = atom<ImagePieceModalType | null>(null);
+export const imagePieceModalAtom = atom<PieceValueEditorState | null>(null);
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,

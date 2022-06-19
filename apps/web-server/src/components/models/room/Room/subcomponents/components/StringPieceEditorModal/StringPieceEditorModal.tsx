@@ -2,19 +2,21 @@ import { DrawerProps, Modal } from 'antd';
 import React from 'react';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { close, create, ok, update } from '@/utils/constants';
-import { useAtom } from 'jotai';
-import { stringPieceValueEditorAtom } from '../../atoms/pieceValueEditorAtom/pieceValueEditorAtom';
+import { atom, useAtom } from 'jotai';
 import { Subject } from 'rxjs';
 import { CreateMode, StringPieceEditor, UpdateMode } from '../StringPieceEditor/StringPieceEditor';
 import { useMemoOne } from 'use-memo-one';
 import useConstant from 'use-constant';
+import { PieceValueEditorState } from '@/utils/types';
+
+export const stringPieceModalAtom = atom<PieceValueEditorState | null>(null);
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,
 };
 
 export const StringPieceEditorModal: React.FC = () => {
-    const [modalType, setModalType] = useAtom(stringPieceValueEditorAtom);
+    const [modalType, setModalType] = useAtom(stringPieceModalAtom);
     const actionRequest = useConstant(() => new Subject<typeof ok | typeof close>());
 
     const {

@@ -2,15 +2,17 @@ import { Modal } from 'antd';
 import React from 'react';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { close, create, ok, update } from '@/utils/constants';
-import { useAtom } from 'jotai';
-import { dicePieceValueEditorAtom } from '../../atoms/pieceValueEditorAtom/pieceValueEditorAtom';
+import { atom, useAtom } from 'jotai';
 import { Subject } from 'rxjs';
 import { CreateMode, DicePieceEditor, UpdateMode } from '../DicePieceEditor/DicePieceEditor';
 import { useMemoOne } from 'use-memo-one';
 import useConstant from 'use-constant';
+import { PieceValueEditorState } from '@/utils/types';
+
+export const dicePieceModalAtom = atom<PieceValueEditorState | null>(null);
 
 export const DicePieceEditorModal: React.FC = () => {
-    const [modalType, setModalType] = useAtom(dicePieceValueEditorAtom);
+    const [modalType, setModalType] = useAtom(dicePieceModalAtom);
     const actionRequest = useConstant(() => new Subject<typeof ok | typeof close>());
 
     const {

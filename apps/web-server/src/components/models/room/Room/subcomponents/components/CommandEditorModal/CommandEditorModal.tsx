@@ -19,11 +19,16 @@ import { characterUpdateOperation } from '@/utils/character/characterUpdateOpera
 import { useLatest, usePrevious } from 'react-use';
 import { characterCommandLibSource } from '@/monaco/characterCommandLibSource';
 import { defaultLibSource } from '@/monaco/defaultLibSource';
-import { useAtom } from 'jotai';
-import { commandEditorModalAtom } from '../../atoms/commandEditorModalAtom/commandEditorModalAtom';
+import { atom, useAtom } from 'jotai';
 
 const privateCommandsDiff = diff(createRecordValueTemplate(commandTemplate));
 const privateCommandsUpOperation = toUpOperation(createRecordValueTemplate(commandTemplate));
+
+export type CommandEditorModalType = {
+    characterId: string;
+};
+
+export const commandEditorModalAtom = atom<CommandEditorModalType | null>(null);
 
 /*
 Monaco Editorでは、複数のエディターごとに異なるextraLibなどを個別に設定することはできない( https://github.com/microsoft/monaco-editor/issues/2098 , https://stackoverflow.com/questions/53881473/monaco-editor-configure-libs-by-editor )。
