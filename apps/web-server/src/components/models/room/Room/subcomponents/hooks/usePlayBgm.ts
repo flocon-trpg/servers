@@ -3,9 +3,9 @@ import { Howl } from 'howler';
 import { done, useSrcArrayFromGraphQL } from '@/hooks/srcHooks';
 import { volumeCap } from '@/utils/variables';
 import { State, bgmTemplate } from '@flocon-trpg/core';
-import _ from 'lodash';
+import { compact } from 'lodash';
 import { analyzeUrl } from '@/utils/analyzeUrl';
-import { useDeepCompareEffect } from 'react-use';
+import { useDeepCompareEffect, useLatest } from 'react-use';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { roomAtom } from '@/atoms/roomAtom/roomAtom';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
@@ -16,30 +16,23 @@ import {
 
 type BgmState = State<typeof bgmTemplate>;
 
-type PlayBgmBehaviorCoreProps = {
+type PlayBgmCoreProps = {
     bgm: BgmState | null;
     volumeConfig: number;
 };
 
-function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmBehaviorCoreProps): void {
+function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmCoreProps): void {
     // bgm == null ⇔ volume == null
     // bgm == null のときはvolumeを求めようがない
-    const getVolume = () => {
-        if (bgm == null) {
-            return null;
-        }
-        return bgm.volume * volumeConfig;
-    };
-    const volume = getVolume();
-    const volumeRef = React.useRef(volume);
-    React.useEffect(() => {
-        volumeRef.current = volume;
-    }, [volume]);
+    let volume: number | null;
+    if (bgm == null) {
+        volume = null;
+    } else {
+        volume = bgm.volume * volumeConfig;
+    }
+    const volumeRef = useLatest(volume);
 
-    const isPausedRef = React.useRef(bgm?.isPaused);
-    React.useEffect(() => {
-        isPausedRef.current = bgm?.isPaused;
-    }, [bgm?.isPaused]);
+    const isPausedRef = useLatest(bgm?.isPaused);
 
     const urlArray = useSrcArrayFromGraphQL(bgm?.files);
     const howlRef = React.useRef<Howl>();
@@ -49,7 +42,7 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmBehaviorCoreProps): void {
             return;
         }
 
-        const src = _(urlArray.value).compact().value();
+        const src = compact(urlArray.value);
         if (src.length === 0) {
             return;
         }
@@ -80,7 +73,7 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmBehaviorCoreProps): void {
         if (isPausedRef.current === false) {
             howl.volume(Math.min(volume, volumeCap));
         }
-    }, [volume]);
+    }, [volume, isPausedRef]);
 
     React.useEffect(() => {
         if (bgm?.isPaused == null) {
@@ -97,7 +90,7 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmBehaviorCoreProps): void {
         howl.stop();
         howl.volume(Math.min(volumeRef.current ?? 0, volumeCap));
         howl.play();
-    }, [bgm?.isPaused]);
+    }, [bgm?.isPaused, volumeRef]);
 }
 
 export function usePlayBgm(): void {
@@ -106,24 +99,14 @@ export function usePlayBgm(): void {
         useAtomSelector(roomConfigAtom, state => state?.masterVolume) ?? defaultMasterVolume;
     const channelVolumes = useAtomSelector(roomConfigAtom, state => state?.channelVolumes) ?? {};
 
-    usePlayBgmCore({
-        bgm: bgms['1'] ?? null,
-        volumeConfig: masterVolume * (channelVolumes['1'] ?? defaultChannelVolume),
+    const createPlayBgmCoreProps = (bgmKey: string): PlayBgmCoreProps => ({
+        bgm: bgms[bgmKey] ?? null,
+        volumeConfig: masterVolume * (channelVolumes[bgmKey] ?? defaultChannelVolume),
     });
-    usePlayBgmCore({
-        bgm: bgms['2'] ?? null,
-        volumeConfig: masterVolume * (channelVolumes['2'] ?? defaultChannelVolume),
-    });
-    usePlayBgmCore({
-        bgm: bgms['3'] ?? null,
-        volumeConfig: masterVolume * (channelVolumes['3'] ?? defaultChannelVolume),
-    });
-    usePlayBgmCore({
-        bgm: bgms['4'] ?? null,
-        volumeConfig: masterVolume * (channelVolumes['4'] ?? defaultChannelVolume),
-    });
-    usePlayBgmCore({
-        bgm: bgms['5'] ?? null,
-        volumeConfig: masterVolume * (channelVolumes['5'] ?? defaultChannelVolume),
-    });
+
+    usePlayBgmCore(createPlayBgmCoreProps('1'));
+    usePlayBgmCore(createPlayBgmCoreProps('2'));
+    usePlayBgmCore(createPlayBgmCoreProps('3'));
+    usePlayBgmCore(createPlayBgmCoreProps('4'));
+    usePlayBgmCore(createPlayBgmCoreProps('5'));
 }
