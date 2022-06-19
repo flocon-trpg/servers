@@ -152,13 +152,14 @@ export const StringPieceEditor: React.FC<{
         });
         return () => subscription.unsubscribe();
     }, [actionRequest, ok]);
+    const labelStyle: React.CSSProperties = React.useMemo(() => ({ minWidth: 100 }), []);
 
     if (myUserUid == null || state == null || boardId == null) {
         return null;
     }
 
     return (
-        <Table>
+        <Table labelStyle={labelStyle}>
             <TableRow label='ID'>{updateMode != null ? updateMode.pieceId : '(なし)'}</TableRow>
             <PieceRectEditor
                 value={state}

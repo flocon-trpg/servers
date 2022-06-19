@@ -19,14 +19,19 @@ const tableCss = css`
     }
 `;
 
-export const Table: React.FC<{ children: React.ReactNode; style?: React.CSSProperties }> = ({
-    children,
-    style,
-}) => {
+const LabelStyleContext = React.createContext<React.CSSProperties | undefined>(undefined);
+
+export const Table: React.FC<{
+    children: React.ReactNode;
+    style?: React.CSSProperties;
+    labelStyle?: React.CSSProperties;
+}> = ({ children, style, labelStyle }) => {
     return (
-        <table css={tableCss} style={style}>
-            <tbody>{children}</tbody>
-        </table>
+        <LabelStyleContext.Provider value={labelStyle}>
+            <table css={tableCss} style={style}>
+                <tbody>{children}</tbody>
+            </table>
+        </LabelStyleContext.Provider>
     );
 };
 
@@ -34,9 +39,10 @@ export const TableRow: React.FC<{ children: React.ReactNode; label?: React.React
     children,
     label,
 }) => {
+    const labelStyle = React.useContext(LabelStyleContext);
     return (
         <tr>
-            <td className='label' align='right'>
+            <td className='label' align='right' style={labelStyle}>
                 {label}
             </td>
             <td>{children}</td>

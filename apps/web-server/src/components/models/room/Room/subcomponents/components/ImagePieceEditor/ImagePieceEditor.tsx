@@ -151,6 +151,7 @@ export const ImagePieceEditor: React.FC<{
         });
         return () => subscription.unsubscribe();
     }, [actionRequest, ok]);
+    const labelStyle: React.CSSProperties = React.useMemo(() => ({ minWidth: 100 }), []);
 
     const [filesManagerDrawerType, setFilesManagerDrawerType] =
         React.useState<FilesManagerDrawerType | null>(null);
@@ -161,7 +162,7 @@ export const ImagePieceEditor: React.FC<{
 
     return (
         <>
-            <Table>
+            <Table labelStyle={labelStyle}>
                 <TableRow label='ID'>{updateMode != null ? updateMode.pieceId : '(なし)'}</TableRow>
 
                 <PieceRectEditor
