@@ -24879,15 +24879,15 @@ __metadata:
   linkType: hard
 
 "urql@npm:^2.2.0":
-  version: 2.2.0
-  resolution: "urql@npm:2.2.0"
+  version: 2.2.2
+  resolution: "urql@npm:2.2.2"
   dependencies:
     "@urql/core": ^2.4.3
     wonka: ^4.0.14
   peerDependencies:
     graphql: ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     react: ">= 16.8.0"
-  checksum: e3dad5a7b88f30315b774a8d5eb73a19d57377e76f25416540e0be3a8222a1fca26e1f46f7b241b2f79a270a4227dfda75f5621c632af0e05b39799834a66df7
+  checksum: 5069d50ebcbe2634903b491bb0a2585fbf9cacb953e80349cafec5f6aff348c75e18b1dd37b1353531ea28d9df6490ebe597f6e6c536c53a0660d514c080fdb4
   languageName: node
   linkType: hard
 
