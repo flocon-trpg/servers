@@ -24,15 +24,12 @@ describe('CollaborativeInput', () => {
         ${1000}               | ${true}       | ${false}
         ${1000}               | ${true}       | ${true}
     `('テキスト変更直後のonChange', async ({ bufferDuration, invokeUpdate1, invokeUpdate2 }) => {
-        const onChangeHistory: OnChangeParams[] = [];
-        const onChange = (params: OnChangeParams) => {
-            onChangeHistory.push(params);
-        };
+        const onChange = jest.fn<void, [OnChangeParams]>();
         let quill: Quill | undefined;
         const onGetQuill = (newQuill: Quill | undefined) => {
             quill = newQuill;
         };
-        render(
+        const { unmount } = render(
             <CollaborativeInput
                 value='TEXT_VALUE1'
                 bufferDuration={bufferDuration}
@@ -49,7 +46,13 @@ describe('CollaborativeInput', () => {
         if (invokeUpdate2) {
             quill.setText('TEXT_VALUE3');
         }
-        expect(onChangeHistory).toEqual([]);
+        expect(onChange).not.toHaveBeenCalled();
+        unmount();
+        if (invokeUpdate1 || invokeUpdate2) {
+            expect(onChange).toHaveBeenCalled();
+        } else {
+            expect(onChange).not.toHaveBeenCalled();
+        }
     });
 
     test.each(['default', 'short', 1000] as const)(
