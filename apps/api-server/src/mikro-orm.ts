@@ -81,7 +81,8 @@ export const createPostgreSQL = async ({
     debug?: Debug;
     driverOptions: Dictionary<unknown> | undefined;
 }): Promise<MikroORM<IDatabaseDriver<Connection>>> => {
-    return await MikroORM.init({
+    // HACK: driverOptionsにundefinedをセットするとmikro-ormでエラーが出るため、undefinedを渡さないようにしている。
+    const opts: Parameters<typeof MikroORM.init>[0] = {
         entities,
         dbName,
         migrations: {
@@ -94,8 +95,11 @@ export const createPostgreSQL = async ({
         debug,
         forceUndefined: true,
         clientUrl,
-        driverOptions,
-    });
+    };
+    if (driverOptions != null) {
+        opts.driverOptions = driverOptions;
+    }
+    return await MikroORM.init(opts);
 };
 
 export const createMySQL = async ({
@@ -111,7 +115,8 @@ export const createMySQL = async ({
     debug?: Debug;
     driverOptions: Dictionary<unknown> | undefined;
 }): Promise<MikroORM<IDatabaseDriver<Connection>>> => {
-    return await MikroORM.init({
+    // HACK: driverOptionsにundefinedをセットするとmikro-ormでエラーが出るため、undefinedを渡さないようにしている。
+    const opts: Parameters<typeof MikroORM.init>[0] = {
         entities,
         dbName,
         migrations: migrations({ dbType: 'mysql', dirName }),
@@ -119,6 +124,9 @@ export const createMySQL = async ({
         debug,
         forceUndefined: true,
         clientUrl,
-        driverOptions,
-    });
+    };
+    if (driverOptions != null) {
+        opts.driverOptions = driverOptions;
+    }
+    return await MikroORM.init(opts);
 };
