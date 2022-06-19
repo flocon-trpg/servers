@@ -13452,11 +13452,11 @@ __metadata:
   linkType: hard
 
 "graphql-ws@npm:^5.4.1, graphql-ws@npm:^5.8.1":
-  version: 5.8.1
-  resolution: "graphql-ws@npm:5.8.1"
+  version: 5.9.0
+  resolution: "graphql-ws@npm:5.9.0"
   peerDependencies:
     graphql: ">=0.11 <=16"
-  checksum: 0e8d08a1155204655510f8dc902f295ae5494cf01390c87226cef8d9b460fac5101ec96802ccf056d479d7e57a2a6b575fc4769b2123ae330396ac1d44912a8a
+  checksum: b13abfc4094314940f7ffd1e5c9fa34b6b1a64d477d3f1728740d04edd36e1191c83dcec3c2d7f3d6653995b1ba32edeb75f92921710d716b4cc7fc349d1f276
   languageName: node
   linkType: hard
 
