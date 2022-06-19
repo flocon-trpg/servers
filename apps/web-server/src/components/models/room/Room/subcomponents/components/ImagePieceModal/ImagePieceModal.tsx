@@ -8,9 +8,9 @@ import { Subject } from 'rxjs';
 import { CreateMode, ImagePieceEditor, UpdateMode } from '../ImagePieceEditor/ImagePieceEditor';
 import { useMemoOne } from 'use-memo-one';
 import useConstant from 'use-constant';
-import { PieceValueEditorState } from '@/utils/types';
+import { PieceModalState } from '@/utils/types';
 
-export const imagePieceModalAtom = atom<PieceValueEditorState | null>(null);
+export const imagePieceModalAtom = atom<PieceModalState | null>(null);
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,

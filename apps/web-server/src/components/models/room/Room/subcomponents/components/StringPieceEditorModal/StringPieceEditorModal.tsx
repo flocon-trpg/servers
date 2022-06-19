@@ -7,9 +7,9 @@ import { Subject } from 'rxjs';
 import { CreateMode, StringPieceEditor, UpdateMode } from '../StringPieceEditor/StringPieceEditor';
 import { useMemoOne } from 'use-memo-one';
 import useConstant from 'use-constant';
-import { PieceValueEditorState } from '@/utils/types';
+import { PieceModalState } from '@/utils/types';
 
-export const stringPieceModalAtom = atom<PieceValueEditorState | null>(null);
+export const stringPieceModalAtom = atom<PieceModalState | null>(null);
 
 const drawerBaseProps: Partial<DrawerProps> = {
     width: 600,

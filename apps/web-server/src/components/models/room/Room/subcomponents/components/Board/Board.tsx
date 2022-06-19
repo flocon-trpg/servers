@@ -341,7 +341,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             setBoardPopoverEditor({
                                 pageX: e.evt.pageX,
                                 pageY: e.evt.pageY,
-                                dblClickOn: {
+                                clickOn: {
                                     type: 'character',
                                     character,
                                     characterId,
@@ -418,7 +418,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                             setBoardPopoverEditor({
                                 pageX: e.evt.pageX,
                                 pageY: e.evt.pageY,
-                                dblClickOn: {
+                                clickOn: {
                                     type: 'portrait',
                                     character,
                                     characterId,
@@ -489,7 +489,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         setBoardPopoverEditor({
                             pageX: e.evt.pageX,
                             pageY: e.evt.pageY,
-                            dblClickOn: { type: 'imagePiece', piece, boardId, pieceId },
+                            clickOn: { type: 'imagePiece', piece, boardId, pieceId },
                         });
                     }}
                     onMouseEnter={() =>
@@ -539,7 +539,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         setBoardPopoverEditor({
                             pageX: e.evt.pageX,
                             pageY: e.evt.pageY,
-                            dblClickOn: { type: 'dicePiece', piece, pieceId, boardId },
+                            clickOn: { type: 'dicePiece', piece, pieceId, boardId },
                         });
                     }}
                     onMouseEnter={() =>
@@ -585,7 +585,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         setBoardPopoverEditor({
                             pageX: e.evt.pageX,
                             pageY: e.evt.pageY,
-                            dblClickOn: { type: 'stringPiece', piece, pieceId, boardId },
+                            clickOn: { type: 'stringPiece', piece, pieceId, boardId },
                         });
                     }}
                     onMouseEnter={() =>

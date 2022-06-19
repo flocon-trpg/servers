@@ -7,9 +7,9 @@ import { Subject } from 'rxjs';
 import { CreateMode, DicePieceEditor, UpdateMode } from '../DicePieceEditor/DicePieceEditor';
 import { useMemoOne } from 'use-memo-one';
 import useConstant from 'use-constant';
-import { PieceValueEditorState } from '@/utils/types';
+import { PieceModalState } from '@/utils/types';
 
-export const dicePieceModalAtom = atom<PieceValueEditorState | null>(null);
+export const dicePieceModalAtom = atom<PieceModalState | null>(null);
 
 export const DicePieceEditorModal: React.FC = () => {
     const [modalType, setModalType] = useAtom(dicePieceModalAtom);

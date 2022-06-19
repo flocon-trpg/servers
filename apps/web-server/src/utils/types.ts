@@ -82,7 +82,7 @@ export type Recipe<T> = (state: T) => T | void;
 
 export type Ref<T> = { value: T };
 
-export type PieceValueEditorState =
+export type PieceModalState =
     | {
           type: typeof create;
           boardId: string;

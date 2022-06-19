@@ -204,33 +204,33 @@ export const PopoverEditor: React.FC = () => {
         }
         // characterとportraitはともにキャラクターに関するものであり、キャラクター編集画面が出たほうが便利だと思われる。
         // キャラクター編集画面は大画面でありPopoverでは表示が難しいため、代わりにModalを表示させている。
-        switch (popoverEditor.dblClickOn.type) {
+        switch (popoverEditor.clickOn.type) {
             case character:
                 setChildrenState(undefined);
                 setCharacterEditorModal({
                     type: update,
-                    stateId: popoverEditor.dblClickOn.characterId,
+                    stateId: popoverEditor.clickOn.characterId,
                     selectedPieceType: piece,
-                    boardId: popoverEditor.dblClickOn.boardId,
-                    pieceId: popoverEditor.dblClickOn.pieceId,
+                    boardId: popoverEditor.clickOn.boardId,
+                    pieceId: popoverEditor.clickOn.pieceId,
                 });
                 break;
             case portrait:
                 setChildrenState(undefined);
                 setCharacterEditorModal({
                     type: update,
-                    stateId: popoverEditor.dblClickOn.characterId,
+                    stateId: popoverEditor.clickOn.characterId,
                     selectedPieceType: portrait,
-                    boardId: popoverEditor.dblClickOn.boardId,
-                    pieceId: popoverEditor.dblClickOn.pieceId,
+                    boardId: popoverEditor.clickOn.boardId,
+                    pieceId: popoverEditor.clickOn.pieceId,
                 });
                 break;
             case dicePiece:
                 setChildrenState({
                     children: (
                         <DicePieceContent
-                            boardId={popoverEditor.dblClickOn.boardId}
-                            pieceId={popoverEditor.dblClickOn.pieceId}
+                            boardId={popoverEditor.clickOn.boardId}
+                            pieceId={popoverEditor.clickOn.pieceId}
                         />
                     ),
                     width: 400,
@@ -240,8 +240,8 @@ export const PopoverEditor: React.FC = () => {
                 setChildrenState({
                     children: (
                         <ImagePieceContent
-                            boardId={popoverEditor.dblClickOn.boardId}
-                            pieceId={popoverEditor.dblClickOn.pieceId}
+                            boardId={popoverEditor.clickOn.boardId}
+                            pieceId={popoverEditor.clickOn.pieceId}
                         />
                     ),
                     width: 400,
@@ -251,8 +251,8 @@ export const PopoverEditor: React.FC = () => {
                 setChildrenState({
                     children: (
                         <StringPieceContent
-                            boardId={popoverEditor.dblClickOn.boardId}
-                            pieceId={popoverEditor.dblClickOn.pieceId}
+                            boardId={popoverEditor.clickOn.boardId}
+                            pieceId={popoverEditor.clickOn.pieceId}
                         />
                     ),
                     width: 400,
@@ -308,6 +308,7 @@ const useHooks = () => {
     const setDicePieceModal = useUpdateAtom(dicePieceModalAtom);
     const setStringPieceModal = useUpdateAtom(stringPieceModalAtom);
     const setImagePieceModal = useUpdateAtom(imagePieceModalAtom);
+    const setPopoverEditor = useUpdateAtom(boardPopoverEditorAtom);
     const cloneImagePiece = useCloneImagePiece();
     return React.useMemo(
         () => ({
@@ -315,6 +316,7 @@ const useHooks = () => {
             setDicePieceModal,
             setStringPieceModal,
             setImagePieceModal,
+            setPopoverEditor,
             cloneImagePiece,
         }),
         [
@@ -322,6 +324,7 @@ const useHooks = () => {
             setDicePieceModal,
             setStringPieceModal,
             setImagePieceModal,
+            setPopoverEditor,
             cloneImagePiece,
         ]
     );
@@ -540,18 +543,20 @@ namespace ContextMenuModule {
     const youCannotEditPieceMessage = '自分以外が作成したコマでは、値を編集することはできません。';
 
     type SelectedDicePiecesMenuProps = {
+        pageX: number;
+        pageY: number;
         dicePiecesOnCursor: ContextMenuState['dicePiecesOnCursor'];
         onContextMenuClear: () => void;
-        boardId: string;
         hooks: ReturnType<typeof useHooks>;
         isMyCharacter: ReturnType<typeof useIsMyCharacter>;
         setRoomState: ReturnType<typeof useSetRoomStateWithImmer>;
     };
 
     const selectedDicePiecesMenu = ({
+        pageX,
+        pageY,
         dicePiecesOnCursor,
         onContextMenuClear,
-        boardId: boardIdToShow,
         hooks,
         isMyCharacter,
         setRoomState,
@@ -575,10 +580,15 @@ namespace ContextMenuModule {
                                       key: '編集@selectedDicePiecesMenu',
                                       label: '編集',
                                       onClick: () => {
-                                          hooks.setDicePieceModal({
-                                              type: update,
-                                              boardId: boardIdToShow,
-                                              pieceId,
+                                          hooks.setPopoverEditor({
+                                              pageX,
+                                              pageY,
+                                              clickOn: {
+                                                  type: 'dicePiece',
+                                                  boardId,
+                                                  pieceId,
+                                                  piece,
+                                              },
                                           });
                                           onContextMenuClear();
                                       },
@@ -609,18 +619,20 @@ namespace ContextMenuModule {
     };
 
     type SelectedNumberPiecesMenuProps = {
+        pageX: number;
+        pageY: number;
         stringPiecesOnCursor: ContextMenuState['stringPiecesOnCursor'];
         onContextMenuClear: () => void;
-        boardId: string;
         hooks: ReturnType<typeof useHooks>;
         isMyCharacter: ReturnType<typeof useIsMyCharacter>;
         setRoomState: ReturnType<typeof useSetRoomStateWithImmer>;
     };
 
     const selectedStringPiecesMenu = ({
+        pageX,
+        pageY,
         stringPiecesOnCursor,
         onContextMenuClear,
-        boardId: boardIdToShow,
         hooks,
         isMyCharacter,
         setRoomState,
@@ -643,10 +655,15 @@ namespace ContextMenuModule {
                                       key: '編集@boardPopover',
                                       label: '編集',
                                       onClick: () => {
-                                          hooks.setStringPieceModal({
-                                              type: update,
-                                              boardId: boardIdToShow,
-                                              pieceId,
+                                          hooks.setPopoverEditor({
+                                              pageX,
+                                              pageY,
+                                              clickOn: {
+                                                  type: 'stringPiece',
+                                                  boardId,
+                                                  pieceId,
+                                                  piece,
+                                              },
                                           });
                                           onContextMenuClear();
                                       },
@@ -677,6 +694,8 @@ namespace ContextMenuModule {
     };
 
     type SelectedImagePiecesMenuProps = {
+        pageX: number;
+        pageY: number;
         imagePiecesOnCursor: ContextMenuState['imagePiecesOnCursor'];
         onContextMenuClear: () => void;
         boardId: string;
@@ -685,9 +704,10 @@ namespace ContextMenuModule {
     };
 
     const selectedImagePiecesMenu = ({
+        pageX,
+        pageY,
         imagePiecesOnCursor,
         onContextMenuClear,
-        boardId: boardIdToShow,
         hooks,
         setRoomState,
     }: SelectedImagePiecesMenuProps): ItemType => {
@@ -714,10 +734,15 @@ namespace ContextMenuModule {
                                 key: '編集@画像コマ@boardPopover',
                                 label: '編集',
                                 onClick: () => {
-                                    hooks.setImagePieceModal({
-                                        type: update,
-                                        boardId: boardIdToShow,
-                                        pieceId,
+                                    hooks.setPopoverEditor({
+                                        pageX,
+                                        pageY,
+                                        clickOn: {
+                                            type: 'imagePiece',
+                                            boardId,
+                                            pieceId,
+                                            piece,
+                                        },
                                     });
                                     onContextMenuClear();
                                 },
@@ -1013,7 +1038,6 @@ namespace ContextMenuModule {
             selectedDicePiecesMenu({
                 ...contextMenuState,
                 onContextMenuClear,
-                boardId,
                 hooks,
                 setRoomState,
                 isMyCharacter,
@@ -1021,7 +1045,6 @@ namespace ContextMenuModule {
             selectedStringPiecesMenu({
                 ...contextMenuState,
                 onContextMenuClear,
-                boardId,
                 hooks,
                 setRoomState,
                 isMyCharacter,
