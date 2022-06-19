@@ -7,7 +7,7 @@ type Props<T> = {
 };
 
 describe('useStateEditor', () => {
-    it.each([true, false])('tests { createMode: undefined, updateMode: undefined }', okFirst => {
+    it.each([true, false])('tests empty mode', okFirst => {
         const { result } = renderHook(props => useStateEditor<string>(props), {
             initialProps: { createMode: undefined, updateMode: undefined },
         });
@@ -98,41 +98,64 @@ describe('useStateEditor', () => {
         expect(onCreate.mock.lastCall[0]).toBe('init1');
     });
 
-    it.each([true, false])('tests createMode->createMode', setUpdateInitState => {
-        const initialProps: Props<string> = {
-            createMode: {
-                createInitState: () => 'init1',
-                onCreate: () => undefined,
-            },
-            updateMode: undefined,
-        };
-        const { result, rerender } = renderHook(props => useStateEditor<string>(props), {
-            initialProps,
-        });
-        act(() => {
-            result.current.updateState(() => 'updated1');
-        });
-        const onCreate = jest.fn<void, string[]>(() => undefined);
-        const props2: Props<string> = {
-            createMode: {
-                createInitState: () => 'init2',
-                updateInitState: setUpdateInitState
-                    ? (prevState: string) => {
-                          expect(prevState).toBe('updated1');
-                          return 'updated-updated1';
-                      }
-                    : undefined,
-                onCreate,
-            },
-            updateMode: undefined,
-        };
-        rerender(props2);
-        // ok を実行しない限り、createInitStateは原則として実行されない。
-        // 理由は、以前のstateが残っていたほうがユーザー体験の向上が期待できるため。
-        // ただし、PiecePositionなど一部の値を変更したいこともあるので、その場合はupdateInitStateを使う。
-        expect(result.current.state).toBe(setUpdateInitState ? 'updated-updated1' : 'updated1');
-        expect(onCreate).not.toHaveBeenCalled();
-    });
+    it.each([
+        {
+            setUpdateInitState: true,
+            emptyModeBeforeSecondCreateMode: true,
+        },
+        {
+            setUpdateInitState: false,
+            emptyModeBeforeSecondCreateMode: true,
+        },
+        {
+            setUpdateInitState: true,
+            emptyModeBeforeSecondCreateMode: false,
+        },
+        {
+            setUpdateInitState: false,
+            emptyModeBeforeSecondCreateMode: false,
+        },
+    ])(
+        'tests createMode->updateState->(empty mode)?->createMode',
+        ({ setUpdateInitState, emptyModeBeforeSecondCreateMode }) => {
+            const initialProps: Props<string> = {
+                createMode: {
+                    createInitState: () => 'init1',
+                    onCreate: () => undefined,
+                },
+                updateMode: undefined,
+            };
+            const { result, rerender } = renderHook(props => useStateEditor<string>(props), {
+                initialProps,
+            });
+            act(() => {
+                result.current.updateState(() => 'updated1');
+            });
+            if (emptyModeBeforeSecondCreateMode) {
+                rerender({ createMode: undefined, updateMode: undefined });
+            }
+            const onCreate = jest.fn<void, string[]>(() => undefined);
+            const props2: Props<string> = {
+                createMode: {
+                    createInitState: () => 'init2',
+                    updateInitState: setUpdateInitState
+                        ? (prevState: string) => {
+                              expect(prevState).toBe('updated1');
+                              return 'updated-updated1';
+                          }
+                        : undefined,
+                    onCreate,
+                },
+                updateMode: undefined,
+            };
+            rerender(props2);
+            // ok を実行しない限り、createInitStateは原則として実行されない。
+            // 理由は、以前のstateが残っていたほうがユーザー体験の向上が期待できるため。
+            // ただし、PiecePositionなど一部の値を変更したいこともあるので、その場合はupdateInitStateを使う。
+            expect(result.current.state).toBe(setUpdateInitState ? 'updated-updated1' : 'updated1');
+            expect(onCreate).not.toHaveBeenCalled();
+        }
+    );
 
     it('tests updateMode', () => {
         const updateWithImmer = jest.fn();
