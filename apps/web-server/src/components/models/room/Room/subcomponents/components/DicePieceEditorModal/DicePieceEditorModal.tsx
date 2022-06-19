@@ -24,7 +24,7 @@ export const DicePieceEditorModal: React.FC = () => {
             }
             case update: {
                 return {
-                    visible: !modalType.closed,
+                    visible: true,
                     updateMode: {
                         boardId: modalType.boardId,
                         pieceId: modalType.pieceId,

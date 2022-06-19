@@ -1,4 +1,4 @@
-import { PrimitiveAtom, atom } from 'jotai';
+import { atom } from 'jotai';
 import { create, update } from '@/utils/constants';
 import { PixelPosition } from '../../utils/positionAndSizeAndRect';
 
@@ -12,54 +12,9 @@ type PieceValueEditorState =
           type: typeof update;
           boardId: string;
           pieceId: string;
-
-          // BufferedInputの変更内容が保存されていない状態でModalを閉じてもその変更が反映されるように、updateモードのModalが閉じられたときはPieceValueEditorStateをnullにするのではなくclosedをfalseに切り替えるようにしている。
-          closed: boolean;
       }
     | null;
 
-type PieceValueEditorAction =
-    | {
-          type: typeof create;
-          boardId: string;
-          piecePosition: PixelPosition;
-      }
-    | {
-          type: typeof update;
-          boardId: string;
-          pieceId: string;
-      }
-    | null;
+export const dicePieceValueEditorAtom = atom<PieceValueEditorState>(null);
 
-const createAtom = (sourceAtom: PrimitiveAtom<PieceValueEditorState>) => {
-    return atom<PieceValueEditorState, PieceValueEditorAction>(
-        get => get(sourceAtom),
-        (get, set, newValue) => {
-            switch (newValue?.type) {
-                case create:
-                    set(sourceAtom, newValue);
-                    break;
-                case update:
-                    set(sourceAtom, {
-                        ...newValue,
-                        closed: false,
-                    });
-                    break;
-                case undefined: {
-                    const prevValue = get(sourceAtom);
-                    if (prevValue?.type === update) {
-                        set(sourceAtom, { ...prevValue, closed: true });
-                        return;
-                    }
-                    set(sourceAtom, newValue);
-                }
-            }
-        }
-    );
-};
-
-const dicePieceValueEditorPrimitiveAtom = atom<PieceValueEditorState>(null);
-export const dicePieceValueEditorAtom = createAtom(dicePieceValueEditorPrimitiveAtom);
-
-const stringPieceValueEditorPrimitiveAtom = atom<PieceValueEditorState>(null);
-export const stringPieceValueEditorAtom = createAtom(stringPieceValueEditorPrimitiveAtom);
+export const stringPieceValueEditorAtom = atom<PieceValueEditorState>(null);
