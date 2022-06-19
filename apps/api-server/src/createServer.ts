@@ -106,6 +106,8 @@ export const createServer = async ({
         schema,
         context,
         debug,
+        csrfPrevention: true,
+        cache: 'bounded',
     });
     await apolloServer.start();
 
