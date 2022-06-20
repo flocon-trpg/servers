@@ -35,7 +35,7 @@
         "dotenv": "^16.0.0",
         "dotenv-expand": "^8.0.0",
         "express": "^4.17.1",
-        "firebase-admin": "^10.0.0",
+        "firebase-admin": "^11.0.0",
         "fp-ts": "^2.11.8",
         "fs-extra": "^10.0.0",
         "graphql": "^15.6.0",
