@@ -865,113 +865,95 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
             return undefined;
         }
 
-        const tabPanels =
-            contentHeight <= 0
-                ? null
-                : tabs.map((tab, tabIndex) => {
-                      return (
-                          <Tabs.TabPane
-                              key={tab.key}
-                              tabKey={tab.key}
-                              closable={false}
-                              style={{ backgroundColor: Styles.chatBackgroundColor }}
-                              tab={
-                                  <div
-                                      style={{
-                                          display: 'flex',
-                                          flexDirection: 'row',
-                                          justifyItems: 'center',
-                                      }}
-                                  >
-                                      <div style={{ flex: '0 0 auto', maxWidth: 100 }}>
-                                          <MessageTabName tabConfig={tab} />
-                                      </div>
-                                      <div style={{ flex: 1 }} />
-                                      <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>
-                                          <Dropdown
-                                              trigger={['click']}
-                                              overlay={
-                                                  <Menu
-                                                      items={[
-                                                          {
-                                                              key: '編集@RoomMessages',
-                                                              label: '編集',
-                                                              icon: <Icon.SettingOutlined />,
-                                                              onClick: () =>
-                                                                  setEditingTabConfigKey(tab.key),
-                                                          },
-                                                          {
-                                                              key: '削除@RoomMessages',
-                                                              label: '削除',
-                                                              icon: <Icon.DeleteOutlined />,
-                                                              onClick: () => {
-                                                                  Modal.warn({
-                                                                      onOk: () => {
-                                                                          setRoomConfig(
-                                                                              roomConfig => {
-                                                                                  if (
-                                                                                      roomConfig ==
-                                                                                      null
-                                                                                  ) {
-                                                                                      return;
-                                                                                  }
-                                                                                  const messagePanel =
-                                                                                      roomConfig
-                                                                                          .panels
-                                                                                          .messagePanels[
-                                                                                          panelId
-                                                                                      ];
-                                                                                  if (
-                                                                                      messagePanel ==
-                                                                                      null
-                                                                                  ) {
-                                                                                      return;
-                                                                                  }
-                                                                                  messagePanel.tabs.splice(
-                                                                                      tabIndex,
-                                                                                      1
-                                                                                  );
-                                                                              }
-                                                                          );
-                                                                      },
-                                                                      okCancel: true,
-                                                                      maskClosable: true,
-                                                                      closable: true,
-                                                                      content:
-                                                                          'タブを削除します。よろしいですか？',
-                                                                  });
-                                                              },
-                                                          },
-                                                      ]}
-                                                      triggerSubMenuAction={
-                                                          defaultTriggerSubMenuAction
-                                                      }
-                                                  />
-                                              }
-                                          >
-                                              <Button
-                                                  style={{
-                                                      width: 18,
-                                                      minWidth: 18,
+        const createTabPane = (tab: MessageTabConfig, tabIndex: number) => {
+            const onTabDelete = () => {
+                Modal.warn({
+                    onOk: () => {
+                        setRoomConfig(roomConfig => {
+                            if (roomConfig == null) {
+                                return;
+                            }
+                            const messagePanel = roomConfig.panels.messagePanels[panelId];
+                            if (messagePanel == null) {
+                                return;
+                            }
+                            messagePanel.tabs.splice(tabIndex, 1);
+                        });
+                    },
+                    okCancel: true,
+                    maskClosable: true,
+                    closable: true,
+                    content: 'タブを削除します。よろしいですか？',
+                });
+            };
 
-                                                      // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
-                                                      padding: '0 2px',
-                                                  }}
-                                                  type='text'
-                                                  size='small'
-                                                  onClick={e => e.stopPropagation()}
-                                              >
-                                                  <Icon.EllipsisOutlined />
-                                              </Button>
-                                          </Dropdown>
-                                      </div>
-                                  </div>
-                              }
-                          >
-                              <MessageTabPane config={tab} contentHeight={contentHeight} />
-                          </Tabs.TabPane>
-                      );
-                  });
+            return (
+                <Tabs.TabPane
+                    key={tab.key}
+                    tabKey={tab.key}
+                    closable={false}
+                    style={{ backgroundColor: Styles.chatBackgroundColor }}
+                    tab={
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                justifyItems: 'center',
+                            }}
+                        >
+                            <div style={{ flex: '0 0 auto', maxWidth: 100 }}>
+                                <MessageTabName tabConfig={tab} />
+                            </div>
+                            <div style={{ flex: 1 }} />
+                            <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>
+                                <Dropdown
+                                    trigger={['click']}
+                                    overlay={
+                                        <Menu
+                                            items={[
+                                                {
+                                                    key: '編集@RoomMessages',
+                                                    label: '編集',
+                                                    icon: <Icon.SettingOutlined />,
+                                                    onClick: () => setEditingTabConfigKey(tab.key),
+                                                },
+                                                {
+                                                    key: '削除@RoomMessages',
+                                                    label: '削除',
+                                                    icon: <Icon.DeleteOutlined />,
+                                                    onClick: () => onTabDelete(),
+                                                },
+                                            ]}
+                                            triggerSubMenuAction={defaultTriggerSubMenuAction}
+                                        />
+                                    }
+                                >
+                                    <Button
+                                        style={{
+                                            width: 18,
+                                            minWidth: 18,
+
+                                            // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
+                                            padding: '0 2px',
+                                        }}
+                                        type='text'
+                                        size='small'
+                                        onClick={e => e.stopPropagation()}
+                                    >
+                                        <Icon.EllipsisOutlined />
+                                    </Button>
+                                </Dropdown>
+                            </div>
+                        </div>
+                    }
+                >
+                    <MessageTabPane config={tab} contentHeight={contentHeight} />
+                </Tabs.TabPane>
+            );
+        };
+
+        const tabPanels =
+            contentHeight <= 0 ? null : tabs.map((tab, tabIndex) => createTabPane(tab, tabIndex));
 
         return (
             <DraggableTabs
