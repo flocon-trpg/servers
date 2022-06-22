@@ -36,6 +36,35 @@ import { useLatest } from 'react-use';
 /* react-virtuosoはおそらくheightを指定しなければ正常に動作しないため、もしこれが可変だとheightの指定が無理とは言わないまでも面倒になる。そのため、70pxという適当な値で固定している */
 const height = 70;
 
+/*
+次のコードでonSubmitを実行すると、最後にfocus()を実行しているのにもかかわらずTextAreaにfocusされない。理由は、disabled===trueのときにfocusしようとしても無視されるため。
+
+
+const [isPosting, setIsPosting] = React.useState<boolean>(false);
+const textAreaRef = React.useRef(null);
+
+const onSubmit = async () => {
+    setIsPosting(true);
+    await 投稿する();
+    setIsPosting(false);
+    textAreaRef.current?.focus();
+}
+
+<Input.TextArea ref={textAreaRef} disabled={isPosting} />
+
+
+それを防ぐため、isPostingの型をbooleanではなくIsPostingStateにして、focusがtrueに変わったタイミングでuseEffectを用いてfocus()を実行するようにしている。
+*/
+type IsPostingState =
+    | {
+          isPosting: false;
+          focus: boolean;
+      }
+    | {
+          isPosting: true;
+          focus: false;
+      };
+
 type PrivateMessageElementProps = {
     roomId: string;
     config: ChatPalettePanelConfig | MessagePanelConfig;
@@ -55,7 +84,15 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
     const [text, setText] = useAtom(roomPrivateMessageInputAtom);
     const [, writePrivateMessage] = useMutation(WritePrivateMessageDocument);
     const textAreaRef = React.useRef<TextAreaRef | null>(null);
-    const [isPosting, setIsPosting] = React.useState(false); // 現状、並列投稿は「PublicMessage1つとPrivateMessage1つの最大2つまで」という制限になっているが、これは単に実装が楽だからというのが一番の理由。
+    const [isPostingState, setIsPostingState] = React.useState<IsPostingState>({
+        isPosting: false,
+        focus: false,
+    });
+    React.useEffect(() => {
+        if (isPostingState.focus) {
+            textAreaRef.current?.focus();
+        }
+    }, [isPostingState.focus]);
     const roomMessagesFontSizeDelta = useAtomSelector(
         userConfigAtom,
         state => state?.roomMessagesFontSizeDelta
@@ -93,7 +130,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
     }) へ投稿`;
 
     const onPost = (text: string, focusOnFinish: boolean) => {
-        if (isPosting || text.trim() === '') {
+        if (isPostingState.isPosting || text.trim() === '') {
             return;
         }
         let characterId: string | undefined;
@@ -108,7 +145,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
         } else {
             customNameVariable = undefined;
         }
-        setIsPosting(true);
+        setIsPostingState({ isPosting: true, focus: false });
         writePrivateMessage({
             roomId,
             text,
@@ -119,6 +156,14 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
             gameType: config.selectedGameSystem,
         })
             .then(res => {
+                if (res.error != null) {
+                    addRoomNotification({
+                        type: 'error',
+                        error: res.error,
+                        createdAt: new Date().getTime(),
+                    });
+                }
+
                 switch (res.data?.result.__typename) {
                     case 'RoomPrivateMessage':
                         setText('');
@@ -146,10 +191,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
                 }
             })
             .finally(() => {
-                setIsPosting(false);
-                if (focusOnFinish) {
-                    textAreaRef.current?.focus();
-                }
+                setIsPostingState({ isPosting: false, focus: focusOnFinish });
             });
     };
     const onPostRef = useLatest(onPost);
@@ -179,7 +221,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
                     resize: 'none',
                     height,
                 }}
-                disabled={isPosting}
+                disabled={isPostingState.isPosting}
                 value={text}
                 placeholder={placeholder}
                 onChange={e => {
@@ -189,10 +231,10 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
             />
             <Button
                 style={{ width: 80 }}
-                disabled={isPosting || text.trim() === ''}
+                disabled={isPostingState.isPosting || text.trim() === ''}
                 onClick={() => onPost(text, true)}
             >
-                {isPosting ? <Icon.LoadingOutlined /> : '投稿'}
+                {isPostingState.isPosting ? <Icon.LoadingOutlined /> : '投稿'}
             </Button>
         </div>
     );
@@ -215,7 +257,15 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
     const [text, setText] = useAtom(roomPublicMessageInputAtom);
     const [, writePublicMessage] = useMutation(WritePublicMessageDocument);
     const textAreaRef = React.useRef<TextAreaRef | null>(null);
-    const [isPosting, setIsPosting] = React.useState(false); // 現状、並列投稿は「PublicMessage1つとPrivateMessage1つの最大2つまで」という制限になっているが、これは単に実装が楽だからというのが一番の理由。
+    const [isPostingState, setIsPostingState] = React.useState<IsPostingState>({
+        isPosting: false,
+        focus: false,
+    });
+    React.useEffect(() => {
+        if (isPostingState.focus) {
+            textAreaRef.current?.focus();
+        }
+    }, [isPostingState.focus]);
     const roomMessagesFontSizeDelta = useAtomSelector(
         userConfigAtom,
         state => state?.roomMessagesFontSizeDelta
@@ -242,7 +292,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
     }
 
     const onPost = (text: string, focusOnFinish: boolean) => {
-        if (isPosting || text.trim() === '') {
+        if (isPostingState.isPosting || text.trim() === '') {
             return;
         }
         let characterId: string | undefined;
@@ -258,7 +308,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
             customNameVariable = undefined;
         }
 
-        setIsPosting(true);
+        setIsPostingState({ isPosting: true, focus: false });
         writePublicMessage({
             roomId,
             text,
@@ -269,6 +319,14 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
             gameType: config.selectedGameSystem,
         })
             .then(res => {
+                if (res.error != null) {
+                    addRoomNotification({
+                        type: 'error',
+                        error: res.error,
+                        createdAt: new Date().getTime(),
+                    });
+                }
+
                 switch (res.data?.result.__typename) {
                     case 'RoomPublicMessage':
                         setText('');
@@ -309,10 +367,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
                 }
             })
             .finally(() => {
-                setIsPosting(false);
-                if (focusOnFinish) {
-                    textAreaRef.current?.focus();
-                }
+                setIsPostingState({ isPosting: false, focus: focusOnFinish });
             });
     };
     const onPostRef = useLatest(onPost);
@@ -342,7 +397,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
                     resize: 'none',
                     height: 70 /* react-virtuosoはおそらくheightを指定しなければ正常に動作しないため、もしこれが可変だとheightの指定が無理とは言わないまでも面倒になる。そのため、70pxという適当な値で固定している */,
                 }}
-                disabled={isPosting}
+                disabled={isPostingState.isPosting}
                 value={text}
                 placeholder={placeholder}
                 onChange={e => {
@@ -352,10 +407,10 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
             />
             <Button
                 style={{ width: 80 }}
-                disabled={isPosting || text.trim() === ''}
+                disabled={isPostingState.isPosting || text.trim() === ''}
                 onClick={() => onPost(text, true)}
             >
-                {isPosting ? <Icon.LoadingOutlined /> : '投稿'}
+                {isPostingState.isPosting ? <Icon.LoadingOutlined /> : '投稿'}
             </Button>
         </div>
     );

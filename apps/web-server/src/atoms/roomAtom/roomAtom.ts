@@ -8,7 +8,7 @@ import { CombinedError } from '@urql/core';
 export const text = 'text';
 export const error = 'error';
 
-// systemMessageなどとマージするので、createdAtの型はそれに合わせてnumberにしている。
+// systemMessageなどと一緒に表示するので、createdAtの型はそれに合わせてnumberにしている。
 export type NotificationPayload =
     | {
           type: typeof text;
