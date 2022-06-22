@@ -464,6 +464,56 @@ describe.each(
 
             it.each([
                 {
+                    query: {
+                        ...Resources.RoomMessages.empty,
+                        publicMessages: [Resources.RoomPublicMessage.message1a],
+                    },
+                    event1: Resources.RoomPublicMessage.message3a,
+                    event2: Resources.RoomPublicMessage.message7b,
+                    expected: [
+                        Resources.Message.publicMessage1,
+                        Resources.Message.publicMessage3a,
+                        Resources.Message.publicMessage7,
+                    ],
+                },
+            ])(
+                '(clear) -> onQuery -> onEvent -> onEvent -> clear',
+                ({ query, event1, event2, expected }) => {
+                    const baseClient = new RoomMessagesClient();
+                    const client =
+                        filter == null ? baseClient.messages : baseClient.messages.filter(filter);
+                    const clientChanged = new MessagesChangeTester(client.changed);
+
+                    if (clearOnInit !== 'none') {
+                        if (clearOnInit === 'query->clear') {
+                            baseClient.onQuery(queryBeforeClear);
+                        }
+                        baseClient.clear();
+                        clientChanged.clearChanges();
+                    }
+
+                    baseClient.onQuery(query);
+
+                    clientChanged.clearChanges();
+
+                    baseClient.onEvent(event1);
+
+                    clientChanged.clearChanges();
+
+                    baseClient.onEvent(event2);
+
+                    expect(client.getCurrent()).toEqual(expected.filter(arrayFilter));
+                    clientChanged.expectToBeOneEvent(expected.filter(arrayFilter));
+
+                    baseClient.clear();
+
+                    expect(client.getCurrent()).toBeNull();
+                    clientChanged.expectToBeOneClear();
+                }
+            );
+
+            it.each([
+                {
                     events: [
                         Resources.RoomPublicMessage.updateMessage3aTo3bEvent,
                         Resources.RoomPrivateMessage.updateMessage4aTo4bEvent,

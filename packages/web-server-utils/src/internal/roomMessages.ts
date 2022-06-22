@@ -513,6 +513,7 @@ export class RoomMessagesClient {
                                     diff: null,
                                 });
                             } else {
+                                messages = reduced.messages;
                                 observer.next({
                                     type: event,
                                     current: reduced.messages.toArray(x => x),
