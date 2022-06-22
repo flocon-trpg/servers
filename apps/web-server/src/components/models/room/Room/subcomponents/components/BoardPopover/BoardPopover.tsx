@@ -244,7 +244,7 @@ export const PopoverEditor: React.FC = () => {
                             pieceId={popoverEditor.clickOn.pieceId}
                         />
                     ),
-                    width: 400,
+                    width: 500,
                 });
                 break;
             case stringPiece:

@@ -194,6 +194,7 @@ export const ImagePieceEditor: React.FC<{
 
                 <TableRow label='画像'>
                     <InputFile
+                        style={{ maxWidth: 350 }}
                         filePath={state.image ?? undefined}
                         onPathChange={path =>
                             updateState(pieceValue => {
@@ -228,6 +229,7 @@ export const ImagePieceEditor: React.FC<{
                 </TableRow>
                 <TableRow label='メモ'>
                     <CollaborativeInput
+                        style={{ height: 100 }}
                         multiline
                         size='small'
                         bufferDuration='default'
