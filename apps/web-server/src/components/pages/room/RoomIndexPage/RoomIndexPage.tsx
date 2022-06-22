@@ -101,7 +101,7 @@ const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
                                     Modal.warn({
                                         onOk: async () => {
                                             await deleteRoomAsAdmin({ id: roomId });
-                                            await getRooms();
+                                            getRooms();
                                         },
                                         okCancel: true,
                                         maskClosable: true,
@@ -249,10 +249,12 @@ const RoomsTable071: React.FC<{ rooms: readonly Data071[] }> = ({ rooms }) => {
 
 type RoomsListComponentProps = {
     roomsTable: React.ReactChild;
+    onReload: () => void;
 };
 
 const RoomsListComponent: React.FC<RoomsListComponentProps> = ({
     roomsTable,
+    onReload,
 }: RoomsListComponentProps) => {
     const router = useRouter();
 
@@ -260,7 +262,26 @@ const RoomsListComponent: React.FC<RoomsListComponentProps> = ({
         <div style={{ display: 'flex', flexDirection: 'column', padding: 10 }}>
             <div className={classNames(flex, flexNone)}>
                 <div className={classNames(flexNone)}>
-                    <Button onClick={() => router.push('rooms/create')}>部屋を作成</Button>
+                    <Button
+                        icon={<Icons.PlusOutlined />}
+                        onClick={() => router.push('rooms/create')}
+                    >
+                        部屋を作成
+                    </Button>
+                </div>
+                <div style={{ paddingLeft: 4 }} className={classNames(flexNone)}>
+                    <Button
+                        icon={<Icons.ReloadOutlined />}
+                        onClick={() => {
+                            onReload();
+                            notification.open({
+                                message: '再読み込みしました。',
+                                placement: 'bottomRight',
+                            });
+                        }}
+                    >
+                        再読み込み
+                    </Button>
                 </div>
                 <div style={{ flex: 'auto' }} />
             </div>
@@ -269,8 +290,6 @@ const RoomsListComponent: React.FC<RoomsListComponentProps> = ({
         </div>
     );
 };
-
-const pollingInterval = 30000;
 
 const Room: React.FC = () => {
     const [rooms072, getRooms072] = useQuery({
@@ -324,21 +343,6 @@ const Room: React.FC = () => {
             break;
     }
 
-    React.useEffect(() => {
-        if (rooms072.data?.result.__typename === 'GetRoomsListSuccessResult') {
-            const id = setInterval(() => getRooms072(), pollingInterval);
-            subscriptionsRef.current.add(() => clearInterval(id));
-            return () => clearInterval(id);
-        }
-    }, [getRooms072, rooms072.data?.result.__typename]);
-    React.useEffect(() => {
-        if (rooms071.data?.result.__typename === 'GetRoomsListSuccessResult') {
-            const id = setInterval(() => getRooms071(), pollingInterval);
-            subscriptionsRef.current.add(() => clearInterval(id));
-            return () => clearInterval(id);
-        }
-    }, [getRooms071, rooms071.data?.result.__typename]);
-
     return (
         <QueryResultViewer loading={fetching} error={error} compact={false}>
             <RoomsListComponent
@@ -351,6 +355,13 @@ const Room: React.FC = () => {
                         <div />
                     )
                 }
+                onReload={() => {
+                    if (isV072OrLater) {
+                        getRooms072();
+                    } else {
+                        getRooms071();
+                    }
+                }}
             />
         </QueryResultViewer>
     );
