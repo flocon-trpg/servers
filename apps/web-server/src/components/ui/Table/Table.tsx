@@ -66,11 +66,13 @@ export const TableHeader: React.FC<{ children: React.ReactNode }> = ({ children 
     );
 };
 
+const dividerStyle: React.CSSProperties = { margin: '12px 0' };
+
 export const TableDivider: React.FC<{ dashed?: boolean }> = ({ dashed }) => {
     return (
         <tr>
             <td colSpan={2}>
-                <Divider dashed={dashed} />
+                <Divider style={dividerStyle} dashed={dashed} />
             </td>
         </tr>
     );

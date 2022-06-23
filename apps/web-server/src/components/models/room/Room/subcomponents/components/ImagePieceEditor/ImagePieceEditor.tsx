@@ -22,7 +22,11 @@ import {
 import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
 import { PieceRectEditor } from '../RectEditor/RectEditor';
 import { useMemoOne } from 'use-memo-one';
-import { Table, TableRow } from '@/components/ui/Table/Table';
+import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
+import { PieceEditorMemoRow } from '../PieceEditorMemoRow/PieceEditorMemoRow';
+import { PieceEditorNameRow } from '../PieceEditorNameRow/PieceEditorNameRow';
+import { PieceEditorCloneButtonRow } from '../PieceEditorCloneButtonRow/PieceEditorCloneButtonRow';
+import { PieceEditorIdRow } from '../PieceEditorIdRow/PieceEditorIdRow';
 
 type ImagePieceState = State<typeof imagePieceTemplate>;
 
@@ -163,33 +167,6 @@ export const ImagePieceEditor: React.FC<{
     return (
         <>
             <Table labelStyle={labelStyle}>
-                <TableRow label='ID'>{updateMode != null ? updateMode.pieceId : '(なし)'}</TableRow>
-
-                <PieceRectEditor
-                    value={state}
-                    onChange={newState => updateState(() => newState)}
-                    boardId={boardId}
-                />
-
-                {updateMode == null ? null : (
-                    <TableRow>
-                        {/* TODO: 複製したことを何らかの形で通知したほうがいい */}
-                        <Tooltip title='このコマを複製します。'>
-                            <Button
-                                size='small'
-                                onClick={() => {
-                                    clone({
-                                        boardId: updateMode.boardId,
-                                        pieceId: updateMode.pieceId,
-                                    });
-                                }}
-                            >
-                                このコマを複製
-                            </Button>
-                        </Tooltip>
-                    </TableRow>
-                )}
-
                 {/* TODO: isPrivateがまだ未実装 */}
 
                 <TableRow label='画像'>
@@ -209,41 +186,56 @@ export const ImagePieceEditor: React.FC<{
                     />
                 </TableRow>
 
-                <TableRow label='名前'>
-                    <CollaborativeInput
-                        bufferDuration='default'
-                        size='small'
-                        value={state.name ?? ''}
-                        onChange={e => {
-                            if (e.previousValue === e.currentValue) {
+                <TableDivider />
+
+                <PieceEditorNameRow
+                    state={state.name}
+                    onChange={newValue =>
+                        updateState(pieceValue => {
+                            if (pieceValue == null) {
                                 return;
                             }
-                            updateState(pieceValue => {
-                                if (pieceValue == null) {
-                                    return;
-                                }
-                                pieceValue.name = e.currentValue;
+                            pieceValue.name = newValue;
+                        })
+                    }
+                />
+
+                <PieceEditorMemoRow
+                    state={state.memo}
+                    onChange={newValue =>
+                        updateState(pieceValue => {
+                            if (pieceValue == null) {
+                                return;
+                            }
+                            pieceValue.memo = newValue;
+                        })
+                    }
+                />
+
+                <TableDivider />
+
+                <PieceRectEditor
+                    value={state}
+                    onChange={newState => updateState(() => newState)}
+                    boardId={boardId}
+                />
+
+                <TableDivider />
+
+                {updateMode == null ? null : (
+                    <PieceEditorCloneButtonRow
+                        onClick={() => {
+                            clone({
+                                boardId: updateMode.boardId,
+                                pieceId: updateMode.pieceId,
                             });
                         }}
                     />
-                </TableRow>
-                <TableRow label='メモ'>
-                    <CollaborativeInput
-                        style={{ height: 100 }}
-                        multiline
-                        size='small'
-                        bufferDuration='default'
-                        value={state.memo ?? ''}
-                        onChange={e =>
-                            updateState(pieceValue => {
-                                if (pieceValue == null) {
-                                    return;
-                                }
-                                pieceValue.memo = e.currentValue;
-                            })
-                        }
-                    />
-                </TableRow>
+                )}
+
+                <TableDivider />
+
+                <PieceEditorIdRow pieceId={updateMode?.pieceId} />
             </Table>
 
             <FilesManagerDrawer

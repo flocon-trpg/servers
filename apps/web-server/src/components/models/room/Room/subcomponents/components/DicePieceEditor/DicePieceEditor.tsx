@@ -26,8 +26,11 @@ import {
 } from '../../utils/positionAndSizeAndRect';
 import { PieceRectEditor } from '../RectEditor/RectEditor';
 import { useMemoOne } from 'use-memo-one';
-import { Table, TableRow } from '@/components/ui/Table/Table';
+import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
 import { keyNames } from '@flocon-trpg/utils';
+import { PieceEditorNameRow } from '../PieceEditorNameRow/PieceEditorNameRow';
+import { PieceEditorMemoRow } from '../PieceEditorMemoRow/PieceEditorMemoRow';
+import { PieceEditorIdRow } from '../PieceEditorIdRow/PieceEditorIdRow';
 
 type CharacterState = State<typeof characterTemplate>;
 type DicePieceState = State<typeof dicePieceTemplate>;
@@ -162,39 +165,6 @@ export const DicePieceEditor: React.FC<{
 
     return (
         <Table labelStyle={labelStyle}>
-            <TableRow label='ID'>{updateModeProp?.pieceId ?? '(なし)'}</TableRow>
-            <PieceRectEditor
-                value={state}
-                onChange={newState => updateState(() => newState)}
-                boardId={boardId}
-            />
-            <TableRow label='所有者'>
-                <MyCharactersSelect
-                    selectedCharacterId={
-                        createModeProp == null ? state.ownerCharacterId : activeCharacter?.id
-                    }
-                    readOnly={createModeProp == null}
-                    onSelect={setActiveCharacter}
-                />
-            </TableRow>
-            <TableRow label='名前'>
-                <CollaborativeInput
-                    bufferDuration='default'
-                    size='small'
-                    value={state.name ?? ''}
-                    onChange={e => {
-                        if (e.previousValue === e.currentValue) {
-                            return;
-                        }
-                        updateState(pieceValue => {
-                            if (pieceValue == null) {
-                                return;
-                            }
-                            pieceValue.name = e.currentValue;
-                        });
-                    }}
-                />
-            </TableRow>
             {dicePieceStrIndexes.map(key => {
                 const die = state.dice?.[key];
 
@@ -248,6 +218,54 @@ export const DicePieceEditor: React.FC<{
                     </TableRow>
                 );
             })}
+
+            <TableDivider />
+
+            <PieceEditorNameRow
+                state={state.name}
+                onChange={newValue =>
+                    updateState(pieceValue => {
+                        if (pieceValue == null) {
+                            return;
+                        }
+                        pieceValue.name = newValue;
+                    })
+                }
+            />
+
+            <PieceEditorMemoRow
+                state={state.memo}
+                onChange={newValue =>
+                    updateState(pieceValue => {
+                        if (pieceValue == null) {
+                            return;
+                        }
+                        pieceValue.memo = newValue;
+                    })
+                }
+            />
+
+            <TableDivider />
+
+            <PieceRectEditor
+                value={state}
+                onChange={newState => updateState(() => newState)}
+                boardId={boardId}
+            />
+
+            <TableDivider />
+
+            <PieceEditorIdRow pieceId={updateModeProp?.pieceId} />
+
+            <TableRow label='所有者'>
+                <MyCharactersSelect
+                    selectedCharacterId={
+                        createModeProp == null ? state.ownerCharacterId : activeCharacter?.id
+                    }
+                    readOnly={createModeProp == null}
+                    onSelect={setActiveCharacter}
+                />
+            </TableRow>
         </Table>
     );
 };

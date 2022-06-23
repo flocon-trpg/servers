@@ -18,7 +18,10 @@ import {
 import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
 import { PieceRectEditor } from '../RectEditor/RectEditor';
 import { useMemoOne } from 'use-memo-one';
-import { Table, TableRow } from '@/components/ui/Table/Table';
+import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
+import { PieceEditorNameRow } from '../PieceEditorNameRow/PieceEditorNameRow';
+import { PieceEditorMemoRow } from '../PieceEditorMemoRow/PieceEditorMemoRow';
+import { PieceEditorIdRow } from '../PieceEditorIdRow/PieceEditorIdRow';
 
 type CharacterState = State<typeof characterTemplate>;
 type StringPieceState = State<typeof stringPieceTemplate>;
@@ -160,39 +163,6 @@ export const StringPieceEditor: React.FC<{
 
     return (
         <Table labelStyle={labelStyle}>
-            <TableRow label='ID'>{updateMode != null ? updateMode.pieceId : '(なし)'}</TableRow>
-            <PieceRectEditor
-                value={state}
-                onChange={newState => updateState(() => newState)}
-                boardId={boardId}
-            />
-            <TableRow label='所有者'>
-                <MyCharactersSelect
-                    selectedCharacterId={
-                        updateMode != null ? state.ownerCharacterId : activeCharacter?.id
-                    }
-                    readOnly={createMode == null}
-                    onSelect={setActiveCharacter}
-                />
-            </TableRow>
-            <TableRow label='名前'>
-                <CollaborativeInput
-                    bufferDuration='default'
-                    size='small'
-                    value={state.name ?? ''}
-                    onChange={e => {
-                        if (e.previousValue === e.currentValue) {
-                            return;
-                        }
-                        updateState(pieceValue => {
-                            if (pieceValue == null) {
-                                return;
-                            }
-                            pieceValue.name = e.currentValue;
-                        });
-                    }}
-                />
-            </TableRow>
             <TableRow label='値'>
                 <CollaborativeInput
                     bufferDuration='default'
@@ -220,6 +190,54 @@ export const StringPieceEditor: React.FC<{
                             state.isValuePrivate = e.target.checked;
                         })
                     }
+                />
+            </TableRow>
+
+            <TableDivider />
+
+            <PieceEditorNameRow
+                state={state.name}
+                onChange={newValue =>
+                    updateState(pieceValue => {
+                        if (pieceValue == null) {
+                            return;
+                        }
+                        pieceValue.name = newValue;
+                    })
+                }
+            />
+
+            <PieceEditorMemoRow
+                state={state.memo}
+                onChange={newValue =>
+                    updateState(pieceValue => {
+                        if (pieceValue == null) {
+                            return;
+                        }
+                        pieceValue.memo = newValue;
+                    })
+                }
+            />
+
+            <TableDivider />
+
+            <PieceRectEditor
+                value={state}
+                onChange={newState => updateState(() => newState)}
+                boardId={boardId}
+            />
+
+            <TableDivider />
+
+            <PieceEditorIdRow pieceId={updateMode?.pieceId} />
+
+            <TableRow label='所有者'>
+                <MyCharactersSelect
+                    selectedCharacterId={
+                        updateMode != null ? state.ownerCharacterId : activeCharacter?.id
+                    }
+                    readOnly={createMode == null}
+                    onSelect={setActiveCharacter}
                 />
             </TableRow>
         </Table>
