@@ -1,4 +1,4 @@
-import { SemVer, beta } from '@flocon-trpg/utils';
+import { SemVer } from '@flocon-trpg/utils';
 import PackageJson from '../package.json';
 import { SemVerRange } from './versioning/semVerRange';
 
@@ -17,10 +17,6 @@ export const SupportedApiServers: ReadonlyArray<SemVerRange> = [
             major: 0,
             minor: 7,
             patch: 6,
-            prerelease: {
-                type: beta,
-                version: 1,
-            },
         }),
         range: { type: '~' },
     },
