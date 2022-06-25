@@ -15,7 +15,6 @@ import { noValue } from '../../utils/types';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { close, ok } from '@/utils/constants';
 import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
-import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 import { Subscribable } from 'rxjs';
 import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
 import {

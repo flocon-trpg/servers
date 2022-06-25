@@ -904,7 +904,6 @@ const RoomMessagePanels: React.FC = () => {
 };
 
 const childrenContainerPadding = `12px ${horizontalPadding}px`;
-const bottomContainerPadding = `0px ${horizontalPadding}px`;
 
 type Props = {
     debug?: {

@@ -1,12 +1,10 @@
 import React from 'react';
-import { Button, Tooltip } from 'antd';
 import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
 import { State, imagePieceTemplate, simpleId } from '@flocon-trpg/core';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { close, ok } from '@/utils/constants';
 import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
 import { FilesManagerDrawerType } from '@/utils/types';
-import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 import { Subscribable } from 'rxjs';
 import { useImagePieces } from '../../hooks/useImagePieces';
 import { useCloneImagePiece } from '../../hooks/useCloneImagePiece';
