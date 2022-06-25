@@ -90,12 +90,16 @@ const createUrqlClient = (
     httpUrl: string,
     wsUrl: string,
     testAuthorizationHeaderValue: string | undefined
-) =>
-    createClient({
+) => {
+    const headers: Record<string, string> = {};
+    if (testAuthorizationHeaderValue != null) {
+        headers[Resources.testAuthorizationHeader] = testAuthorizationHeaderValue;
+    }
+    return createClient({
         url: httpUrl,
-        fetchOptions: () => ({
-            headers: { [Resources.testAuthorizationHeader]: testAuthorizationHeaderValue },
-        }),
+        fetchOptions: {
+            headers,
+        },
         exchanges: [
             ...defaultExchanges,
             subscriptionExchange({
@@ -103,13 +107,14 @@ const createUrqlClient = (
                     subscribe: sink => ({
                         unsubscribe: wsClient(wsUrl, testAuthorizationHeaderValue).subscribe(
                             operation,
-                            sink as any
+                            sink
                         ),
                     }),
                 }),
             }),
         ],
     });
+};
 
 type Client = ReturnType<typeof createUrqlClient>;
 

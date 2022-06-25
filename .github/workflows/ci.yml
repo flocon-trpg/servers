@@ -35,8 +35,17 @@ jobs:
             - name: Prepare packages
               run: yarn build-ci
 
-            - name: Test
+            - name: Test for Node 16 or higher
+              if: ${{ matrix.node != '14.x' }}
               run: yarn test --ci --coverage --runInBand --forceExit
+              env:
+                  REDIS_TEST: 0
+                  MYSQL_TEST: 0
+                  POSTGRESQL_TEST: 0
+
+            - name: Test for Node 14
+              if: ${{ matrix.node == '14.x' }}
+              run: yarn test-node14 --ci --coverage --runInBand --forceExit
               env:
                   REDIS_TEST: 0
                   MYSQL_TEST: 0
@@ -120,8 +129,13 @@ jobs:
                           "clientUrl": "postgresql://postgres:postgres@postgres:5432/test"
                       }
 
-            - name: Test
+            - name: Test for Node 16 or higher
+              if: ${{ matrix.container != 'node:14-buster' }}
               run: yarn test --ci --coverage --runInBand --forceExit
+
+            - name: Test for Node 14
+              if: ${{ matrix.container == 'node:14-buster' }}
+              run: yarn test-node14 --ci --coverage --runInBand --forceExit
 
             - name: Upload coverages to Codecov
               if: ${{ matrix.container == 'node:16-buster' }}
@@ -131,21 +145,17 @@ jobs:
 
     # fails on windows because it uses crlf
     lint-and-prettier:
-        name: Lint and prettier on Node ${{ matrix.node }} and ${{ matrix.os }}
+        name: Lint and prettier
 
-        runs-on: ${{ matrix.os }}
-        strategy:
-            matrix:
-                node: ['16.x']
-                os: [ubuntu-20.04]
+        runs-on: ubuntu-20.04
 
         steps:
             - uses: actions/checkout@v3
 
-            - name: Use Node ${{ matrix.node }}
+            - name: Use Node 16.x
               uses: actions/setup-node@v3
               with:
-                  node-version: ${{ matrix.node }}
+                  node-version: 16.x
                   cache: yarn
 
             - run: yarn
@@ -155,3 +165,34 @@ jobs:
 
             - name: Prettier(check)
               run: yarn prettier:base --check
+
+    publish-storybook:
+        name: Publish Storybook to Chromatic
+
+        if: ${{ github.event_name == 'push' }}
+
+        runs-on: ubuntu-20.04
+
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                  # Requires full git history: https://github.com/chromaui/action#getting-started
+                  fetch-depth: 0
+
+            - name: Use Node 16.x
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 16.x
+                  cache: yarn
+
+            - run: yarn
+
+            - name: Build web-server deps
+              run: yarn build:deps
+              working-directory: ./apps/web-server
+
+            - name: Publish to Chromatic
+              uses: chromaui/action@v1
+              with:
+                  workingDir: ./apps/web-server
+                  projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}

@@ -10,16 +10,17 @@
         "build": "yarn workspaces foreach -ptv run build:self",
         "build-ci": "yarn workspaces foreach -ptv run build-ci",
         "test": "yarn workspaces foreach -pv run test",
+        "test-node14": "yarn workspaces foreach -pv --exclude '{@flocon-trpg/servers,@flocon-trpg/web-server}' run test",
         "lint": "eslint \"{apps,packages}/**/*.{ts,tsx}\"",
         "prettier": "yarn prettier:base --write",
         "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\""
     },
     "dependencies": {
-        "husky": "^7.0.4"
+        "husky": "^8.0.0"
     },
     "devDependencies": {
-        "@commitlint/cli": "16.2.4",
-        "@commitlint/config-conventional": "16.2.4",
+        "@commitlint/cli": "17.0.2",
+        "@commitlint/config-conventional": "17.0.2",
         "@typescript-eslint/eslint-plugin": "5.22.0",
         "@typescript-eslint/parser": "5.22.0",
         "eslint": "8.14.0",

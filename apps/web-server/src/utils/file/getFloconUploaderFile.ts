@@ -1,6 +1,6 @@
 import axios from 'axios';
 import urljoin from 'url-join';
-import { getHttpUri } from '../../atoms/webConfig/webConfigAtom';
+import { getHttpUri } from '../../atoms/webConfigAtom/webConfigAtom';
 import { WebConfig } from '../../configType';
 
 export const files = 'files';

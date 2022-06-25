@@ -6,36 +6,40 @@ import 'firebase/storage';
 
 import React from 'react';
 import { AppProps } from 'next/app';
-import 'firebase/auth';
-import 'firebase/storage';
 import useConstant from 'use-constant';
-import { FirebaseUserState, authNotFound, loading, notSignIn } from '../contexts/MyAuthContext';
 import { appConsole } from '../utils/appConsole';
 import { enableMapSet } from 'immer';
 import Head from 'next/head';
 import { loader } from '@monaco-editor/react';
 import { ExpiryMap } from '../utils/file/expiryMap';
 import urljoin from 'url-join';
-import { createApolloClient } from '../utils/createApolloClient';
+import { createUrqlClient } from '../utils/createUrqlClient';
 import { getUserConfig, setUserConfig } from '../utils/localStorage/userConfig';
 import { useMyUserUid } from '../hooks/useMyUserUid';
 import { AllContextProvider } from '../components/behaviors/AllContextProvider';
 import { simpleId } from '@flocon-trpg/core';
-import { Ref } from '../utils/ref';
-import { userConfigAtom } from '../atoms/userConfig/userConfigAtom';
-import { roomNotificationsAtom, text } from '../atoms/room/roomAtom';
+import { userConfigAtom } from '../atoms/userConfigAtom/userConfigAtom';
+import { roomNotificationsAtom, text } from '../atoms/roomAtom/roomAtom';
 import { useAsync, useDebounce } from 'react-use';
-import { roomConfigAtom } from '../atoms/roomConfig/roomConfigAtom';
+import { roomConfigAtom } from '../atoms/roomConfigAtom/roomConfigAtom';
 import { setRoomConfig } from '../utils/localStorage/roomConfig';
-import { UserConfig } from '../atoms/userConfig/types';
-import { RoomConfig } from '../atoms/roomConfig/types/roomConfig';
+import { UserConfig } from '../atoms/userConfigAtom/types';
+import { RoomConfig } from '../atoms/roomConfigAtom/types/roomConfig';
 import { useAtomValue, useUpdateAtom } from 'jotai/utils';
-import { getHttpUri, getWsUri, publicEnvTxtAtom } from '../atoms/webConfig/webConfigAtom';
+import { getHttpUri, getWsUri, publicEnvTxtAtom } from '../atoms/webConfigAtom/webConfigAtom';
 import { useWebConfig } from '../hooks/useWebConfig';
-import { atom, useAtom } from 'jotai';
+import { atom, useAtom, useSetAtom } from 'jotai';
 import { FirebaseApp, initializeApp } from 'firebase/app';
 import { Auth, getAuth } from 'firebase/auth';
 import { FirebaseStorage, getStorage } from 'firebase/storage';
+import { Ref } from '../utils/types';
+import { storybookAtom } from '../atoms/storybookAtom/storybookAtom';
+import {
+    FirebaseUserState,
+    authNotFound,
+    loading,
+    notSignIn,
+} from '../utils/firebase/firebaseUserState';
 
 enableMapSet();
 
@@ -43,10 +47,42 @@ const firebaseAppCoreAtom = atom<FirebaseApp | undefined>(undefined);
 export const firebaseAppAtom = atom(get => get(firebaseAppCoreAtom));
 
 const firebaseAuthCoreAtom = atom<Auth | undefined>(undefined);
-export const firebaseAuthAtom = atom(get => get(firebaseAuthCoreAtom));
+export const firebaseAuthAtom = atom(get => {
+    const mock = get(storybookAtom).mock?.auth;
+    if (mock != null) {
+        return mock;
+    }
+    return get(firebaseAuthCoreAtom);
+});
 
 const firebaseStorageCoreAtom = atom<FirebaseStorage | undefined>(undefined);
-export const firebaseStorageAtom = atom(get => get(firebaseStorageCoreAtom));
+export const firebaseStorageAtom = atom(get => {
+    const mock = get(storybookAtom).mock?.storage;
+    if (mock != null) {
+        return mock;
+    }
+    return get(firebaseStorageCoreAtom);
+});
+
+// この値がnull ⇔ UrqlClientにおけるAuthorizationヘッダーなどが空（= API serverにおいて、Firebase Authenticationでログインしていないと判断される）
+// 値がfunctionだとjotaiが勝手にfunctionを実行してその結果をatomに保持してしまうため、必ずfunctionの状態で保持されるようにRefで包んでいる
+const getIdTokenCoreAtom = atom<Ref<(() => Promise<string | null>) | null>>({ value: null });
+export const getIdTokenAtom = atom(get => {
+    const mockUser = get(storybookAtom).mock?.user;
+    if (mockUser != null && typeof mockUser !== 'string') {
+        return mockUser.getIdToken;
+    }
+    return get(getIdTokenCoreAtom).value;
+});
+
+const firebaseUserCoreAtom = atom<FirebaseUserState>(loading);
+export const firebaseUserAtom = atom(get => {
+    const mock = get(storybookAtom).mock?.user;
+    if (mock != null) {
+        return mock;
+    }
+    return get(firebaseUserCoreAtom);
+});
 
 // localForageを用いてRoomConfigを読み込み、ReduxのStateと紐付ける。
 // Userが変わるたびに、useUserConfigが更新される必要がある。_app.tsxなどどこか一箇所でuseUserConfigを呼び出すだけでよい。
@@ -99,36 +135,35 @@ const useAutoSaveUserConfig = () => {
     }, [debouncedUserConfig]);
 };
 
-// _app.tsxで1回のみ呼ばれることを想定。
 const useAutoSaveRoomConfig = () => {
     const throttleTimespan = 500;
     const roomConfig = useAtomValue(roomConfigAtom);
 
     // throttleでは非常に重くなるため、debounceを使っている
-    const [debouncedUserConfig, setDebouncedUserConfig] = React.useState<RoomConfig | null>(null);
+    const [debouncedRoomConfig, setDebouncedRoomConfig] = React.useState<RoomConfig | null>(null);
     useDebounce(
         () => {
-            setDebouncedUserConfig(roomConfig);
+            setDebouncedRoomConfig(roomConfig);
         },
         throttleTimespan,
         [roomConfig]
     );
 
     useAsync(async () => {
-        if (debouncedUserConfig == null) {
+        if (debouncedRoomConfig == null) {
             return;
         }
 
-        // localForageから値を読み込んだ直後は常に値の書き込みが1回発生する仕様となっている。RoomConfigの場合はUserConfigと比べて、不正な値が自動的されることがあるため、この仕様はより正当化される。
+        // localForageから値を読み込んだ直後は常に値の書き込みが1回発生する仕様となっている。無駄な処理ではあるが、パフォーマンスの問題はほぼ生じないと判断している。
         // CONSIDER: configをユーザーが更新した直後にすぐブラウザを閉じると、閉じる直前のconfigが保存されないケースがある。余裕があれば直したい（閉じるときに強制保存orダイアログを出すなど）。
-        await setRoomConfig(debouncedUserConfig);
-    }, [debouncedUserConfig]);
+        await setRoomConfig(debouncedRoomConfig);
+    }, [debouncedRoomConfig]);
 };
 
-// _app.tsxで1回のみ呼ばれることを想定。firebase authのデータを取得したい場合はContextで行う。
-const useFirebaseUser = (): FirebaseUserState => {
+// _app.tsxで1回のみ呼ばれることを想定。
+const useSubscribeFirebaseUser = (): void => {
     const auth = useAtomValue(firebaseAuthAtom);
-    const [user, setUser] = React.useState<FirebaseUserState>(loading);
+    const setUser = useUpdateAtom(firebaseUserCoreAtom);
     React.useEffect(() => {
         if (auth == null) {
             setUser(authNotFound);
@@ -145,8 +180,7 @@ const useFirebaseUser = (): FirebaseUserState => {
         return () => {
             unsubscribe();
         };
-    }, [auth]);
-    return user;
+    }, [auth, setUser]);
 };
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
@@ -219,13 +253,15 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         appConsole.log(`GraphQL WebSocket URL: ${wsUri}`);
     }, [wsUri]);
 
-    const user = useFirebaseUser();
-    const myUserUid = useMyUserUid(user);
+    useSubscribeFirebaseUser();
+    const user = useAtomValue(firebaseUserAtom);
+    const myUserUid = useMyUserUid();
 
     useUserConfig(myUserUid ?? null);
     useAutoSaveRoomConfig();
     useAutoSaveUserConfig();
 
+    const setGetIdTokenState = useSetAtom(getIdTokenCoreAtom);
     const getIdToken = React.useMemo(() => {
         if (typeof user === 'string') {
             return null;
@@ -246,18 +282,16 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
             });
         };
     }, [setRoomNotification, user]);
-    const [apolloClient, setApolloClient] = React.useState<ReturnType<typeof createApolloClient>>();
-    // useStateの引数に(() => T)を渡すとTに変換されてしまうため、useState(getIdToken) とすると正常に動かない。useState(() => getIdToken)でも駄目だった。そのため、Refを用いている。
-    const [getIdTokenState, setGetIdTokenState] = React.useState<Ref<typeof getIdToken>>({
-        value: getIdToken,
-    });
+    const [urqlClient, setUrqlClient] = React.useState<ReturnType<typeof createUrqlClient>>();
     React.useEffect(() => {
         if (httpUri == null || wsUri == null) {
             return;
         }
-        setApolloClient(createApolloClient(httpUri, wsUri, getIdToken));
+        setUrqlClient(
+            createUrqlClient({ httpUrl: httpUri, wsUrl: wsUri, getUserIdToken: getIdToken })
+        );
         setGetIdTokenState({ value: getIdToken });
-    }, [httpUri, wsUri, getIdToken]);
+    }, [httpUri, wsUri, getIdToken, setGetIdTokenState]);
     const [authNotFoundState, setAuthNotFoundState] = React.useState(false);
     React.useEffect(() => {
         setAuthNotFoundState(user === 'authNotFound');
@@ -292,7 +326,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
             </div>
         );
     }
-    if (apolloClient == null) {
+    if (urqlClient == null) {
         return <div style={{ padding: 5 }}>{'しばらくお待ち下さい… / Please wait…'}</div>;
     }
     return (
@@ -302,14 +336,8 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
             </Head>
             <AllContextProvider
                 clientId={clientId}
-                apolloClient={apolloClient}
-                user={user}
+                client={urqlClient}
                 firebaseStorageUrlCache={firebaseStorageUrlCache}
-                getIdToken={
-                    // getIdTokenを直接渡すのではなくわざわざuseStateを用いて渡している理由:
-                    // もし直接渡すと、「getIdTokenの値が変わる」の後に少し間をおいて「ApolloClientの値が変わる」ため、「getIdToken!=null ⇔ ApolloClientが認証済み」と判断しているコードにおいて、getIdTokenがnullからnon-nullに切り替わった瞬間の時点で認証されていないApolloClientが使われて、Access Denied!などのエラーが発生してしまうため。
-                    getIdTokenState.value
-                }
             >
                 <Component {...pageProps} />
             </AllContextProvider>

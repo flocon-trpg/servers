@@ -1,3 +1,4 @@
+@use './quill.bubble.css';
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap');
 
 html {
@@ -50,6 +51,10 @@ html {
 
 .flex-column {
     flex-direction: column;
+}
+
+.flex-initial {
+    flex: '0 1 auto';
 }
 
 .flex-1 {

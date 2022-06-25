@@ -19,6 +19,8 @@ export {
 
 export { MaxLength100String, maxLength100String } from './internal/maxLengthString';
 
+export { forceMaxLength100String } from './internal/forceMaxLength100String';
+
 export { maybe, Maybe } from './internal/maybe';
 
 export { PublicChannelKey } from './internal/publicChannelKey';

@@ -1,3 +1,3 @@
-import { Profile } from '../components/pages/profile';
+import { ProfilePage } from '../components/pages/ProfilePage/ProfilePage';
 
-export default Profile;
+export default ProfilePage;

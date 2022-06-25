@@ -29,6 +29,17 @@ import { RateLimiterAbstract, RateLimiterMemory } from 'rate-limiter-flexible';
 import { consume } from './rateLimit/consume';
 import { EMBUPLOADER_PATH } from './env';
 import { Html } from './html/Html';
+import gql from 'graphql-tag';
+
+const isRoomEventSubscription = (query: string) => {
+    const parsedQuery = gql(query);
+    return parsedQuery.definitions.some(t => {
+        if (t.kind !== 'OperationDefinition') {
+            return false;
+        }
+        return t.name?.value.toLowerCase() === 'roomevent';
+    });
+};
 
 const setupIndexAsSuccess = (app: ReturnType<typeof express>) => {
     app.get('/', (req, res) => {
@@ -106,6 +117,8 @@ export const createServer = async ({
         schema,
         context,
         debug,
+        csrfPrevention: true,
+        cache: 'bounded',
     });
     await apolloServer.start();
 
@@ -388,7 +401,9 @@ export const createServer = async ({
                     return result;
                 },
                 onSubscribe: async (ctx, message) => {
-                    if (message.payload.operationName?.toLowerCase() !== 'roomevent') {
+                    message.payload.query;
+                    // Apollo Clientなどではmessage.payload.operationNameが使えるがurqlではnullishなので、queryを代わりに使っている
+                    if (!isRoomEventSubscription(message.payload.query)) {
                         return;
                     }
                     const decodedIdToken = await getDecodedIdTokenFromWsContext(ctx);

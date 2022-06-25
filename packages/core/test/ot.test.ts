@@ -7,6 +7,7 @@ import {
     admin,
     client,
     dicePieceTemplate,
+    forceMaxLength100String,
     replace,
     roomTemplate,
     serverTransform,
@@ -14,7 +15,6 @@ import {
 } from '../src';
 import { Resources } from './resources';
 import * as TextOperation from '../src/internal/ot/util/textOperation';
-import { forceMaxLength100String } from './forceMaxLength100String';
 
 type RoomState = State<typeof roomTemplate>;
 type RoomUpOperation = UpOperation<typeof roomTemplate>;

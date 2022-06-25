@@ -18,93 +18,96 @@ export namespace Resources {
         };
     }
 
+    /*
+    message1aの1の番号が若いほどcreatedAtが小さい（ただしupdatedMessageは例外）。aの部分はaかbのいずれかであり、filterのテストに用いる。
+    */
     export namespace RoomPublicMessage {
-        export const message1 = {
+        export const message1a = {
             __typename: 'RoomPublicMessage' as const,
             messageId: 'messageid1',
             channelKey: '1',
             isSecret: false,
             createdAt: 1_500_000_001,
-            initText: 'text1',
+            initText: 'a:text1',
             initTextSource: 'textsource1',
         };
 
-        export const message3 = {
+        export const message3a = {
             __typename: 'RoomPublicMessage' as const,
             messageId: 'messageid3',
             channelKey: '1',
             isSecret: false,
             createdAt: 1_500_000_003,
-            initText: 'text3',
+            initText: 'a:text3',
             initTextSource: 'textsource3',
         };
 
-        export const updatedMessage3 = {
-            ...message3,
-            updatedAt: message3.createdAt + 10,
+        export const updatedMessage3b = {
+            ...message3a,
+            updatedAt: message3a.createdAt + 10,
             updatedText: {
-                currentText: 'text3_2',
-                updatedAt: message3.createdAt + 10,
+                currentText: 'b:text3_2',
+                updatedAt: message3a.createdAt + 10,
             },
         };
 
-        export const updateMessage3Event = {
-            ...updatedMessage3,
+        export const updateMessage3aTo3bEvent = {
+            ...updatedMessage3b,
             __typename: 'RoomPublicMessageUpdate' as const,
         };
 
-        export const message7 = {
+        export const message7b = {
             __typename: 'RoomPublicMessage' as const,
             messageId: 'messageid7',
             channelKey: '1',
             isSecret: false,
             createdAt: 1_500_000_007,
-            initText: 'text7',
+            initText: 'b:text7',
             initTextSource: 'textsource7',
         };
     }
 
     export namespace RoomPrivateMessage {
-        export const message2 = {
+        export const message2a = {
             __typename: 'RoomPrivateMessage' as const,
             messageId: 'messageid2',
             isSecret: false,
             createdAt: 1_500_000_002,
-            initText: 'text2',
+            initText: 'a:text2',
             initTextSource: 'textsource2',
             visibleTo: ['userId1', 'userId2'],
         };
 
-        export const message4 = {
+        export const message4a = {
             __typename: 'RoomPrivateMessage' as const,
             messageId: 'messageid4',
             isSecret: false,
             createdAt: 1_500_000_004,
-            initText: 'text4',
+            initText: 'a:text4',
             initTextSource: 'textsource4',
             visibleTo: ['userId1', 'userId3'],
         };
 
-        export const updatedMessage4 = {
-            ...message4,
-            updatedAt: message4.createdAt + 10,
+        export const updatedMessage4b = {
+            ...message4a,
+            updatedAt: message4a.createdAt + 10,
             updatedText: {
-                currentText: 'text4_2',
-                updatedAt: message4.createdAt + 10,
+                currentText: 'b:text4_2',
+                updatedAt: message4a.createdAt + 10,
             },
         };
 
-        export const updateMessage4Event = {
-            ...updatedMessage4,
+        export const updateMessage4aTo4bEvent = {
+            ...updatedMessage4b,
             __typename: 'RoomPrivateMessageUpdate' as const,
         };
 
-        export const message8 = {
+        export const message8b = {
             __typename: 'RoomPrivateMessage' as const,
             messageId: 'messageid8',
             isSecret: false,
             createdAt: 1_500_000_008,
-            initText: 'text8',
+            initText: 'b:text8',
             initTextSource: 'textsource8',
             visibleTo: ['userId1', 'userId2', 'userId3'],
         };
@@ -164,32 +167,32 @@ export namespace Resources {
     export namespace Message {
         export const publicMessage1: Message = {
             type: publicMessage,
-            value: RoomPublicMessage.message1,
+            value: RoomPublicMessage.message1a,
         };
 
         export const privateMessage2: Message = {
             type: privateMessage,
-            value: RoomPrivateMessage.message2,
+            value: RoomPrivateMessage.message2a,
         };
 
-        export const publicMessage3: Message = {
+        export const publicMessage3a: Message = {
             type: publicMessage,
-            value: RoomPublicMessage.message3,
+            value: RoomPublicMessage.message3a,
         };
 
-        export const updatedPublicMessage3: Message = {
+        export const updatedPublicMessage3b: Message = {
             type: publicMessage,
-            value: RoomPublicMessage.updatedMessage3,
+            value: RoomPublicMessage.updatedMessage3b,
         };
 
-        export const privateMessage4: Message = {
+        export const privateMessage4a: Message = {
             type: privateMessage,
-            value: RoomPrivateMessage.message4,
+            value: RoomPrivateMessage.message4a,
         };
 
-        export const updatedPrivateMessage4: Message = {
+        export const updatedPrivateMessage4b: Message = {
             type: privateMessage,
-            value: RoomPrivateMessage.updatedMessage4,
+            value: RoomPrivateMessage.updatedMessage4b,
         };
 
         export const soundEffect5: Message = {
@@ -204,12 +207,12 @@ export namespace Resources {
 
         export const publicMessage7: Message = {
             type: publicMessage,
-            value: RoomPublicMessage.message7,
+            value: RoomPublicMessage.message7b,
         };
 
         export const privateMessage8: Message = {
             type: privateMessage,
-            value: RoomPrivateMessage.message8,
+            value: RoomPrivateMessage.message8b,
         };
     }
 }

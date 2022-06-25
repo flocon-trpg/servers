@@ -2,12 +2,15 @@
     "compilerOptions": {
         /* Visit https://aka.ms/tsconfig.json to read more about this file */
 
+        // Node 14 で推奨される設定を使用している
+        // https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping#node-14
+
         "resolveJsonModule": false,
-        "target": "ES2017",
+        "target": "ES2020",
         "module": "commonjs",
         "sourceMap": true,
         // https://typegraphql.com/docs/0.17.0/installation.html#packages-installation
-        "lib": ["es2019", "esnext.asynciterable"],
+        "lib": ["es2020", "esnext.asynciterable"],
         "removeComments": true,
         "strict": true,
         "esModuleInterop": true,

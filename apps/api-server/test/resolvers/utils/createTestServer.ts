@@ -9,9 +9,7 @@ import { createServer } from '../../../src/createServer';
 import { Result } from '@kizahasi/result';
 import { Resources } from './resources';
 import { toBeNever } from '@flocon-trpg/utils';
-
-const postgresClientUrl = 'postgresql://postgres:postgres@postgres:5432';
-const mySQLClientUrl = 'mysql://mysql:mysql@mysql:3306';
+import { mySQLClientUrl, postgresClientUrl } from './databaseConfig';
 
 const PostgreSQLConfig = {
     dbName: 'test',
@@ -41,7 +39,7 @@ export type DbConfig =
       }
     | { type: 'MySQL' };
 
-const createSQLiteConfig = (dbName: string) => {
+const createSQLiteConfig = (dbName: string): Parameters<typeof createSQLite>[0] => {
     return {
         dbName,
         dirName: 'src',

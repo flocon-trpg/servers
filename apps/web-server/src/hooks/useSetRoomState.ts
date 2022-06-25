@@ -1,8 +1,8 @@
 import { State, roomTemplate } from '@flocon-trpg/core';
 import { atom } from 'jotai';
 import { useAtomValue } from 'jotai/utils';
-import { roomAtom } from '../atoms/room/roomAtom';
-import { SetAction } from '../utils/setAction';
+import { roomAtom } from '../atoms/roomAtom/roomAtom';
+import { SetAction } from '../utils/types';
 
 const emptySetRoomState = (setState: SetAction<State<typeof roomTemplate>>): void => {
     throw new Error('setRoomState is not ready');

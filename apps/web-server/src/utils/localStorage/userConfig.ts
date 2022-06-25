@@ -5,7 +5,7 @@ import {
     defaultUserConfig,
     deserializeUserConfig,
     serializedUserConfig,
-} from '../../atoms/userConfig/types';
+} from '../../atoms/userConfigAtom/types';
 import { tryParseJSON } from '../tryParseJSON';
 
 const userConfigKey = (userUid: string) => `user@${userUid}`;

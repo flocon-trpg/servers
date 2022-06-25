@@ -1,5 +1,11 @@
+import { PixelPosition } from '@/components/models/room/Room/subcomponents/utils/positionAndSizeAndRect';
 import { FilterValue } from 'antd/lib/table/interface';
+import { create, update } from './constants';
 import { FilePath } from './file/filePath';
+
+export type BoardType =
+    | { type: 'boardEditor'; boardEditorPanelId: string }
+    | { type: 'activeBoardViewer'; isBackground: boolean };
 
 export type CharacterTagNames = {
     characterTag1Name: string | undefined;
@@ -58,30 +64,6 @@ export const reset = 'reset';
 
 export type Reset = { type: typeof reset };
 
-export type Vector2 = {
-    x: number;
-    y: number;
-};
-
-export type Size = {
-    w: number;
-    h: number;
-};
-
-export type DragEndResult = {
-    readonly newPosition?: Vector2;
-    readonly newSize?: Size;
-};
-
-export type PiecePositionWithoutCell = Vector2 & Size;
-
-export type PiecePositionWithCell = PiecePositionWithoutCell & {
-    cellX: number;
-    cellY: number;
-    cellW: number;
-    cellH: number;
-    isCellMode: boolean;
-};
 export type FetchTextState =
     | {
           // fetch関数などの実行が完了していない状態。
@@ -92,4 +74,22 @@ export type FetchTextState =
 
           // fetch関数などを実行した結果、ファイルが見つかった場合はそのファイルの内容。見つからなかった場合はnull。
           value: string | null;
+      };
+
+export type SetAction<State> = State | ((prevState: State) => State);
+
+export type Recipe<T> = (state: T) => T | void;
+
+export type Ref<T> = { value: T };
+
+export type PieceModalState =
+    | {
+          type: typeof create;
+          boardId: string;
+          piecePosition: PixelPosition;
+      }
+    | {
+          type: typeof update;
+          boardId: string;
+          pieceId: string;
       };

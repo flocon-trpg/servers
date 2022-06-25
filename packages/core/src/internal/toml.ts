@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-namespace */
 import * as t from 'io-ts';
 import {
     LocalDate as TomlLocalDate,

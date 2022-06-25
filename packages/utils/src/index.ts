@@ -4,6 +4,7 @@ export {
     compositeKeyToJsonString,
     compositeKeyEquals,
 } from './internal/compositeKey';
+export { delay } from './internal/delay';
 export {
     DualKey,
     DualKeyMap,
@@ -15,6 +16,7 @@ export {
     groupJoin4DualKeyMap,
 } from './internal/dualKeyMap';
 export { filterInt } from './internal/filterInt';
+export { getExactlyOneKey } from './internal/getExactlyOneKey';
 export { parseStringToBoolean } from './internal/parseStringToBoolean';
 export { keyNames } from './internal/keyNames';
 export { groupJoinMap } from './internal/groupJoinMap';

@@ -1,3 +1,3 @@
-import { RoomCreate } from '../../components/pages/room/create';
+import { RoomCreatePage } from '../../components/pages/room/RoomCreatePage/RoomCreatePage';
 
-export default RoomCreate;
+export default RoomCreatePage;

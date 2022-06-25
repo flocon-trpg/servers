@@ -7,7 +7,7 @@
 
         "target": "ES2017",
         "module": "esnext", // Next.js
-        "lib": ["dom", "es2019"],
+        "lib": ["dom", "es2021"],
         "allowJs": true,
         "jsx": "preserve",
         "noEmit": true,
@@ -20,7 +20,17 @@
         "emitDecoratorMetadata": false,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
-        "noUncheckedIndexedAccess": true
+        "noUncheckedIndexedAccess": true,
+        "incremental": true,
+
+        // pathsを使うにはbaseUrlのセットが必要
+        // https://nextjs.org/docs/advanced-features/module-path-aliases
+        //
+        // pathsを変更した場合、jest.config.jsのmoduleNameMapperもあわせて変更する必要がある
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./src/*"]
+        }
     },
     "exclude": ["node_modules"],
     "include": ["**/*.ts", "**/*.tsx"]
