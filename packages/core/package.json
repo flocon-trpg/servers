@@ -21,7 +21,7 @@
     "author": "kizahasi",
     "description": "Core library for Flocon project(not released yet).",
     "devDependencies": {
-        "@types/estree": "0.0.51",
+        "@types/estree": "0.0.52",
         "@types/jest": "27.5.2",
         "@types/lodash.clonedeep": "4.5.7",
         "jest": "27.5.1",

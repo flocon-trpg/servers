@@ -2875,7 +2875,7 @@ __metadata:
     "@kizahasi/ot-string": ^0.4.1
     "@kizahasi/result": ^1.0.1
     "@ltd/j-toml": ^1.23.0
-    "@types/estree": 0.0.51
+    "@types/estree": 0.0.52
     "@types/jest": 27.5.2
     "@types/lodash.clonedeep": 4.5.7
     fp-ts: ^2.11.8
@@ -2894,7 +2894,7 @@ __metadata:
   dependencies:
     "@flocon-trpg/utils": "workspace:^"
     "@kizahasi/option": ^1.0.0
-    "@types/estree": 0.0.51
+    "@types/estree": 0.0.52
     "@types/jest": 27.5.2
     acorn: ^8.5.0
     jest: 27.5.1
@@ -6291,7 +6291,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/estree@npm:*, @types/estree@npm:0.0.51, @types/estree@npm:^0.0.51":
+"@types/estree@npm:*, @types/estree@npm:0.0.52":
+  version: 0.0.52
+  resolution: "@types/estree@npm:0.0.52"
+  checksum: d1cba22160e7aebf865ea0dbc30807bee272fdafdb57d8dd25749f4b312cd9a99e9e933340b7b26284d7a47c8805aba43bb46cf5f1df00cdaaec67bbdc894d4a
+  languageName: node
+  linkType: hard
+
+"@types/estree@npm:^0.0.51":
   version: 0.0.51
   resolution: "@types/estree@npm:0.0.51"
   checksum: e56a3bcf759fd9185e992e7fdb3c6a5f81e8ff120e871641607581fb3728d16c811702a7d40fa5f869b7f7b4437ab6a87eb8d98ffafeee51e85bbe955932a189
