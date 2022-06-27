@@ -2818,7 +2818,6 @@ __metadata:
     fp-ts: ^2.11.8
     fs-extra: ^10.0.0
     graphql: ^15.6.0
-    graphql-tag: ^2.12.6
     graphql-ws: ^5.8.1
     immer: ^9.0.6
     inquirer: ^8.2.0
@@ -13457,7 +13456,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphql-tag@npm:^2.11.0, graphql-tag@npm:^2.12.6":
+"graphql-tag@npm:^2.11.0":
   version: 2.12.6
   resolution: "graphql-tag@npm:2.12.6"
   dependencies:

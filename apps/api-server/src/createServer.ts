@@ -29,10 +29,10 @@ import { RateLimiterAbstract, RateLimiterMemory } from 'rate-limiter-flexible';
 import { consume } from './rateLimit/consume';
 import { EMBUPLOADER_PATH } from './env';
 import { Html } from './html/Html';
-import gql from 'graphql-tag';
+import { parse } from 'graphql';
 
 const isRoomEventSubscription = (query: string) => {
-    const parsedQuery = gql(query);
+    const parsedQuery = parse(query);
     return parsedQuery.definitions.some(t => {
         if (t.kind !== 'OperationDefinition') {
             return false;
