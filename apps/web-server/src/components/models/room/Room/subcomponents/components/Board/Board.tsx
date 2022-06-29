@@ -609,11 +609,11 @@ const BoardCore: React.FC<BoardCoreProps> = ({
         pieces = (
             <AllContextProvider {...allContext}>
                 <ReactKonva.Layer>
-                    {portraitPositionElements}
-                    {characterPieceElements}
                     {imagePieceElements}
                     {dicePieceElements}
                     {stringPieceElements}
+                    {portraitPositionElements}
+                    {characterPieceElements}
                 </ReactKonva.Layer>
             </AllContextProvider>
         );
