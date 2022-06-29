@@ -1,16 +1,19 @@
+import { flex, flexRow, justifyEnd } from '@/styles/className';
 import { Button, Modal } from 'antd';
+import classNames from 'classnames';
 import React from 'react';
 
-type closeTextType = 'close' | 'cancel';
-type okTextType = 'ok' | 'create' | 'post' | 'loading';
+type CloseTextType = 'close' | 'cancel';
+type OkTextType = 'ok' | 'create' | 'post' | 'loading';
 
 type Props = {
     close?: {
-        textType: closeTextType;
+        textType: CloseTextType;
         onClick?: () => void;
+        disabled?: boolean;
     };
     ok?: {
-        textType: okTextType;
+        textType: OkTextType;
         onClick: () => void;
         disabled?: boolean;
     };
@@ -22,9 +25,10 @@ type Props = {
         };
         disabled?: boolean;
     };
+    custom?: React.ReactNode;
 };
 
-export const DialogFooter: React.FC<Props> = ({ close, ok, destroy }: Props) => {
+export const DialogFooter: React.FC<Props> = ({ close, ok, destroy, custom }: Props) => {
     if (close == null && ok == null && destroy == null) {
         return null;
     }
@@ -43,11 +47,12 @@ export const DialogFooter: React.FC<Props> = ({ close, ok, destroy }: Props) => 
         closeButton = (
             <Button
                 onClick={() => {
-                    if (close.onClick != null) {
-                        close.onClick();
+                    if (close.disabled === true) {
+                        return;
                     }
+                    close.onClick && close.onClick();
                 }}
-                style={{ marginLeft: 8 }}
+                disabled={close.disabled ?? false}
             >
                 {closeText}
             </Button>
@@ -59,6 +64,9 @@ export const DialogFooter: React.FC<Props> = ({ close, ok, destroy }: Props) => 
         destroyButton = (
             <Button
                 onClick={() => {
+                    if (destroy.disabled === true) {
+                        return;
+                    }
                     if (destroy.onClick != null) {
                         if (destroy.modal == null) {
                             destroy.onClick();
@@ -80,7 +88,7 @@ export const DialogFooter: React.FC<Props> = ({ close, ok, destroy }: Props) => 
                         });
                     }
                 }}
-                style={{ marginLeft: 8 }}
+                disabled={destroy.disabled ?? false}
                 danger
             >
                 削除
@@ -108,11 +116,13 @@ export const DialogFooter: React.FC<Props> = ({ close, ok, destroy }: Props) => 
         okButton = (
             <Button
                 onClick={() => {
+                    if (ok.disabled === true) {
+                        return;
+                    }
                     ok.onClick();
                 }}
                 disabled={ok.disabled ?? false}
                 type='primary'
-                style={{ marginLeft: 8 }}
             >
                 {okText}
             </Button>
@@ -120,8 +130,9 @@ export const DialogFooter: React.FC<Props> = ({ close, ok, destroy }: Props) => 
     }
 
     return (
-        <div style={{ textAlign: 'right' }}>
+        <div className={classNames(flex, flexRow, justifyEnd)} style={{ gap: '0 8px' }}>
             {closeButton}
+            {custom}
             {destroyButton}
             {okButton}
         </div>

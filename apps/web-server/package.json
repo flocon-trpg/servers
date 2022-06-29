@@ -4,11 +4,13 @@
     "description": "Flocon Web server",
     "dependencies": {
         "@emotion/react": "^11.4.1",
+        "@emotion/styled": "^11.9.3",
         "@flocon-trpg/core": "workspace:^",
         "@flocon-trpg/typed-document-node-v0.7.1": "workspace:^",
         "@flocon-trpg/typed-document-node-v0.7.2": "workspace:^",
         "@flocon-trpg/utils": "workspace:^",
         "@flocon-trpg/web-server-utils": "workspace:^",
+        "@kizahasi/option": "^1.0.0",
         "@kizahasi/ot-string": "^0.4.1",
         "@kizahasi/result": "^1.0.0",
         "@monaco-editor/react": "^4.2.2",
