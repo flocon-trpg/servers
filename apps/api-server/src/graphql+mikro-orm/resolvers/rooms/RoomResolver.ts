@@ -2461,7 +2461,7 @@ export class RoomResolver {
                     });
                 }
                 publicMsg.updatedText = undefined;
-                publicMsg.textUpdatedAt2 = new Date();
+                publicMsg.textUpdatedAt3 = new Date();
                 room.completeUpdatedAt = new Date();
                 await em.flush();
 
@@ -2496,7 +2496,7 @@ export class RoomResolver {
                     });
                 }
                 privateMsg.updatedText = undefined;
-                privateMsg.textUpdatedAt2 = new Date();
+                privateMsg.textUpdatedAt3 = new Date();
                 room.completeUpdatedAt = new Date();
                 await em.flush();
 
@@ -2587,7 +2587,7 @@ export class RoomResolver {
                     });
                 }
                 publicMsg.updatedText = args.text;
-                publicMsg.textUpdatedAt2 = new Date();
+                publicMsg.textUpdatedAt3 = new Date();
                 room.completeUpdatedAt = new Date();
                 await em.flush();
 
@@ -2622,7 +2622,7 @@ export class RoomResolver {
                     });
                 }
                 privateMsg.updatedText = args.text;
-                privateMsg.textUpdatedAt2 = new Date();
+                privateMsg.textUpdatedAt3 = new Date();
                 room.completeUpdatedAt = new Date();
                 await em.flush();
 

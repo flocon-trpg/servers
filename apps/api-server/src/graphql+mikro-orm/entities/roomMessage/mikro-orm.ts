@@ -129,15 +129,22 @@ export class RoomPubMsg {
     @Property({ nullable: true, type: TextType })
     public updatedText?: string;
 
-    /** @deprecated Do not set values to this. Set to textUpdatedAt2 instead. */
+    /** @deprecated Do not set any value to this. Set to textUpdatedAt3 instead. */
     @Property({ nullable: true, default: null })
     public textUpdatedAt?: number;
 
+    /** @deprecated Do not set any value to this. Set to textUpdatedAt3 instead. */
     @Property({ type: DateType, nullable: true, default: null })
     public textUpdatedAt2?: Date;
 
+    @Property({ type: Date, nullable: true, default: null })
+    public textUpdatedAt3?: Date;
+
     @Property({ persist: false })
     public get textUpdatedAtValue() {
+        if (this.textUpdatedAt3 != null) {
+            return this.textUpdatedAt3.getTime();
+        }
         if (this.textUpdatedAt2 != null) {
             return this.textUpdatedAt2.getTime();
         }
@@ -240,15 +247,22 @@ export class RoomPrvMsg {
     @Property({ nullable: true, type: TextType })
     public updatedText?: string;
 
-    /** @deprecated Do not set values to this. Set to textUpdatedAt2 instead. */
+    /** @deprecated Do not set any value to this. Set to textUpdatedAt3 instead. */
     @Property({ nullable: true, default: null })
     public textUpdatedAt?: number;
 
+    /** @deprecated Do not set any value to this. Set to textUpdatedAt3 instead. */
     @Property({ type: DateType, nullable: true, default: null })
     public textUpdatedAt2?: Date;
 
+    @Property({ type: Date, nullable: true, default: null })
+    public textUpdatedAt3?: Date;
+
     @Property({ persist: false })
     public get textUpdatedAtValue() {
+        if (this.textUpdatedAt3 != null) {
+            return this.textUpdatedAt3.getTime();
+        }
         if (this.textUpdatedAt2 != null) {
             return this.textUpdatedAt2.getTime();
         }
