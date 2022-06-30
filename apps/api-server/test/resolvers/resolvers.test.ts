@@ -11,7 +11,6 @@ import {
     DeleteRoomFailureType,
     DeleteRoomMutation,
     EditFileTagsMutation,
-    EditMessageFailureType,
     EditMessageMutation,
     GetFilesQuery,
     GetMessagesQuery,
@@ -43,11 +42,12 @@ import { diff, serializeUpOperation, toUpOperation } from '@kizahasi/ot-string';
 import { OperationResult } from '@urql/core';
 import { maskKeys, maskTypeNames } from './utils/maskKeys';
 import { TestClients } from './utils/testClients';
-import { parseStringToBoolean, recordToArray } from '@flocon-trpg/utils';
+import { delay, parseStringToBoolean, recordToArray } from '@flocon-trpg/utils';
 import { TestClient } from './utils/testClient';
 import produce from 'immer';
 import { doAutoMigrationBeforeStart } from '../../src/migrate';
 import { sqlite1DbName, sqlite2DbName } from './utils/databaseConfig';
+import { MakeMessageNotSecretMutation } from '@flocon-trpg/typed-document-node-v0.7.1/src/generated/graphql';
 
 type UpOperation = U<typeof roomTemplate>;
 
@@ -318,6 +318,20 @@ namespace Assert {
         };
     }
 
+    export namespace MakeMessageNotSecretMutation {
+        export const toBeSuccess = (source: OperationResult<MakeMessageNotSecretMutation>) => {
+            expect(source.data?.result.failureType ?? undefined).toBeUndefined();
+        };
+
+        export const toBeFailure = (source: OperationResult<MakeMessageNotSecretMutation>) => {
+            if (source.data?.result.failureType == null) {
+                expect(source.data?.result.failureType ?? undefined).not.toBeUndefined();
+                throw new Error('Guard');
+            }
+            return source.data.result.failureType;
+        };
+    }
+
     export namespace OperateMutation {
         export const toBeSuccess = async (source: Promise<OperationResult<OperateMutation>>) => {
             const sourceResult = await source;
@@ -505,7 +519,7 @@ class CompositeDisposable {
     }
 }
 
-describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
+describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
     // MySQLではjest.useFakeTimersの相性が悪い（DBにアクセスする際にフリーズする）ようなので無効化している
     const systemTimeManager = new SystemTimeManager(dbType.type !== 'MySQL');
 
@@ -960,7 +974,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
             playerPassword: Resources.Room.playerPassword,
             spectatorPassword: Resources.Room.spectatorPassword,
         },
-    ])('room tests with correct passwords', ({ playerPassword, spectatorPassword }) => {
+    ])('room tests with correct passwords: %o', ({ playerPassword, spectatorPassword }) => {
         it('updateBookmark mutation', async () => {
             await useTestServer({}, async ({ onFinally }) => {
                 const userUids = [Resources.UserUid.master, Resources.UserUid.player1] as const;
@@ -1467,25 +1481,25 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
 
                         const text = 'TEXT';
 
-                        let message: RoomPublicMessageFragment;
+                        let authorMessage: RoomPublicMessageFragment;
 
                         // writePublicMessageMutation
                         {
                             systemTimeManager.set(2);
 
-                            message = Assert.WritePublicMessageMutation.toBeSuccess(
+                            authorMessage = Assert.WritePublicMessageMutation.toBeSuccess(
                                 await clients[author].writePublicMessageMutation({
                                     roomId,
                                     text,
                                     channelKey,
                                 })
                             );
-                            expect(message.initText).toBe(text);
+                            expect(authorMessage.initText).toBe(text);
                             expect(
                                 subscriptions.all
                                     .except(Resources.UserUid.notJoin)
                                     .distinct(x => x.toBeExactlyOneRoomPublicMessage())
-                            ).toEqual(message);
+                            ).toEqual(authorMessage);
                             subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
 
                             for (const userUid of [
@@ -1499,7 +1513,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                                     })
                                 );
                                 expect(roundMilliSecondsInObject(messages.publicMessages)).toEqual(
-                                    roundMilliSecondsInObject([message])
+                                    roundMilliSecondsInObject([authorMessage])
                                 );
                                 const room = Assert.GetRoomQuery.toBeSuccess(
                                     await clients[userUid].getRoomQuery({
@@ -1521,7 +1535,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                                 await clients[author].editMessageMutation({
                                     roomId,
                                     text: editedText,
-                                    messageId: message.messageId,
+                                    messageId: authorMessage.messageId,
                                 })
                             );
                             expect(editResult.failureType).toBeFalsy();
@@ -1534,7 +1548,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                                 updatedAt: undefined,
                                 updatedText: undefined,
                             }).toEqual({
-                                ...message,
+                                ...authorMessage,
                                 updatedAt: undefined,
                                 updatedText: undefined,
                             });
@@ -1558,41 +1572,43 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
 
                         systemTimeManager.set(4);
 
-                        const deleteResult = Assert.DeleteMessageMutation.toBeSuccess(
-                            await clients[author].deleteMessageMutation({
-                                roomId,
-                                messageId: message.messageId,
-                            })
-                        );
-                        expect(deleteResult.failureType).toBeFalsy();
-                        const deletedMessage = subscriptions.all
-                            .except(Resources.UserUid.notJoin)
-                            .distinct(x => x.toBeExactlyOneRoomPublicMessage());
-                        expect(deletedMessage.updatedText?.currentText).toBeFalsy();
-                        expect({
-                            ...deletedMessage,
-                            updatedAt: undefined,
-                            updatedText: undefined,
-                        }).toEqual({
-                            ...message,
-                            updatedAt: undefined,
-                            updatedText: undefined,
-                        });
-                        subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
-
-                        for (const userUid of [
-                            Resources.UserUid.master,
-                            Resources.UserUid.player1,
-                            Resources.UserUid.spectator1,
-                        ] as const) {
-                            const room = Assert.GetRoomQuery.toBeSuccess(
-                                await clients[userUid].getRoomQuery({
-                                    id: roomId,
+                        {
+                            const deleteResult = Assert.DeleteMessageMutation.toBeSuccess(
+                                await clients[author].deleteMessageMutation({
+                                    roomId,
+                                    messageId: authorMessage.messageId,
                                 })
                             );
-                            systemTimeManager
-                                .expect(room.room.updatedAt)
-                                .toBeCloseToSystemTimeType(4);
+                            expect(deleteResult.failureType).toBeFalsy();
+                            const deletedMessage = subscriptions.all
+                                .except(Resources.UserUid.notJoin)
+                                .distinct(x => x.toBeExactlyOneRoomPublicMessage());
+                            expect(deletedMessage.updatedText?.currentText).toBeFalsy();
+                            expect({
+                                ...deletedMessage,
+                                updatedAt: undefined,
+                                updatedText: undefined,
+                            }).toEqual({
+                                ...authorMessage,
+                                updatedAt: undefined,
+                                updatedText: undefined,
+                            });
+                            subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
+
+                            for (const userUid of [
+                                Resources.UserUid.master,
+                                Resources.UserUid.player1,
+                                Resources.UserUid.spectator1,
+                            ] as const) {
+                                const room = Assert.GetRoomQuery.toBeSuccess(
+                                    await clients[userUid].getRoomQuery({
+                                        id: roomId,
+                                    })
+                                );
+                                systemTimeManager
+                                    .expect(room.room.updatedAt)
+                                    .toBeCloseToSystemTimeType(4);
+                            }
                         }
 
                         subscriptions.all.unsubscribe();
@@ -1600,7 +1616,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                 });
 
                 describe.each([undefined, 'Kamigakari'])('gameType: %o', gameType => {
-                    it('writePublicMessage(1d100) -> edit to fail -> delete mutation', async () => {
+                    it('writePublicMessage(1d100) -> edit -> delete mutation', async () => {
                         jest.useRealTimers();
 
                         await useTestServer({}, async ({ onFinally }) => {
@@ -1627,11 +1643,11 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
 
                             const text = '1d100';
 
-                            let message: RoomPublicMessageFragment;
+                            let authorMessage: RoomPublicMessageFragment;
 
                             // writePublicMessageMutation
                             {
-                                message = Assert.WritePublicMessageMutation.toBeSuccess(
+                                authorMessage = Assert.WritePublicMessageMutation.toBeSuccess(
                                     await clients[author].writePublicMessageMutation({
                                         roomId,
                                         text,
@@ -1639,17 +1655,17 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                                         gameType,
                                     })
                                 );
-                                expect(message.initText).toBe(text);
-                                expect(message.initTextSource).toBe(text);
-                                expect(message.updatedText).toBeFalsy();
-                                expect(message.commandResult).toBeTruthy();
+                                expect(authorMessage.initText).toBe(text);
+                                expect(authorMessage.initTextSource).toBe(text);
+                                expect(authorMessage.updatedText).toBeFalsy();
+                                expect(authorMessage.commandResult).toBeTruthy();
                                 expect(
                                     maskTypeNames(
                                         subscriptions.all
                                             .except(Resources.UserUid.notJoin)
                                             .distinct(x => x.toBeExactlyOneRoomPublicMessage())
                                     )
-                                ).toEqual(maskTypeNames(message));
+                                ).toEqual(maskTypeNames(authorMessage));
                                 subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
 
                                 for (const userUid of [
@@ -1664,7 +1680,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                                     );
                                     expect(
                                         roundMilliSecondsInObject(messages.publicMessages)
-                                    ).toEqual(roundMilliSecondsInObject([message]));
+                                    ).toEqual(roundMilliSecondsInObject([authorMessage]));
                                 }
                             }
 
@@ -1675,7 +1691,7 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                                     await clients[author].editMessageMutation({
                                         roomId,
                                         text: editedText,
-                                        messageId: message.messageId,
+                                        messageId: authorMessage.messageId,
                                     })
                                 );
                                 expect(editResult.failureType).toBeFalsy();
@@ -1690,29 +1706,275 @@ describe.each(cases)('tests of resolvers %p', (dbType, entryPasswordConfig) => {
                                         'updatedText',
                                     ])
                                 ).toEqual(
-                                    maskKeys(message, ['__typename', 'updatedAt', 'updatedText'])
+                                    maskKeys(authorMessage, [
+                                        '__typename',
+                                        'updatedAt',
+                                        'updatedText',
+                                    ])
                                 );
                                 subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
                             }
 
-                            const deleteResult = Assert.DeleteMessageMutation.toBeSuccess(
-                                await clients[author].deleteMessageMutation({
+                            {
+                                const deleteResult = Assert.DeleteMessageMutation.toBeSuccess(
+                                    await clients[author].deleteMessageMutation({
+                                        roomId,
+                                        messageId: authorMessage.messageId,
+                                    })
+                                );
+                                expect(deleteResult.failureType).toBeFalsy();
+                                const deletedMessage = subscriptions.all
+                                    .except(Resources.UserUid.notJoin)
+                                    .distinct(x => x.toBeExactlyOneRoomPublicMessage());
+                                expect(deletedMessage.updatedText?.currentText).toBeFalsy();
+                                expect(
+                                    maskKeys(deletedMessage, [
+                                        '__typename',
+                                        'updatedAt',
+                                        'updatedText',
+                                    ])
+                                ).toEqual(
+                                    maskKeys(authorMessage, [
+                                        '__typename',
+                                        'updatedAt',
+                                        'updatedText',
+                                    ])
+                                );
+                                subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
+                            }
+                            subscriptions.all.unsubscribe();
+                        });
+                    });
+
+                    it('writePublicMessage(s1d100) -> edit -> reveal value -> delete mutation', async () => {
+                        jest.useRealTimers();
+
+                        await useTestServer({}, async ({ onFinally }) => {
+                            const userUids = [
+                                author,
+                                Resources.UserUid.master,
+                                Resources.UserUid.player1,
+                                Resources.UserUid.spectator1,
+                                Resources.UserUid.notJoin,
+                            ] as const;
+                            const { clients, roomId, subscriptions } = await setupUsersAndRoom({
+                                userUids,
+                                roomMasterUserUid: Resources.UserUid.master,
+                                playerPassword,
+                                spectatorPassword,
+                                autoJoin: {
+                                    [Resources.UserUid.player1]: 'player',
+                                    [Resources.UserUid.player2]:
+                                        author === Resources.UserUid.player2 ? 'player' : undefined,
+                                    [Resources.UserUid.spectator1]: 'spectator',
+                                },
+                            });
+                            onFinally.add(() => subscriptions.all.unsubscribe());
+
+                            const text = 's1d100';
+
+                            let authorMessage: RoomPublicMessageFragment;
+
+                            // writePublicMessageMutation
+                            {
+                                authorMessage = Assert.WritePublicMessageMutation.toBeSuccess(
+                                    await clients[author].writePublicMessageMutation({
+                                        roomId,
+                                        text,
+                                        channelKey,
+                                        gameType,
+                                    })
+                                );
+                                expect(authorMessage.initText).toBe(text);
+                                expect(authorMessage.initTextSource).toBe(text);
+                                expect(authorMessage.updatedText).toBeFalsy();
+                                expect(authorMessage.altTextToSecret).toBeTruthy();
+                                expect(authorMessage.commandResult).toBeTruthy();
+                                expect(authorMessage.isSecret).toBe(true);
+                                expect(
+                                    maskTypeNames(
+                                        subscriptions.value[
+                                            author
+                                        ].toBeExactlyOneRoomPublicMessage()
+                                    )
+                                ).toEqual(maskTypeNames(authorMessage));
+                                const nonAuthorMessage = subscriptions.all
+                                    .except(author, Resources.UserUid.notJoin)
+                                    .distinct(x => x.toBeExactlyOneRoomPublicMessage());
+                                expect(nonAuthorMessage.initText).toBeFalsy();
+                                expect(nonAuthorMessage.initTextSource).toBeFalsy();
+                                expect(nonAuthorMessage.updatedText).toBeFalsy();
+                                expect(nonAuthorMessage.altTextToSecret).toBeTruthy();
+                                expect(nonAuthorMessage.commandResult).toBeFalsy();
+                                expect(authorMessage.isSecret).toBe(true);
+                                const maskingKeys = [
+                                    '__typename',
+                                    'initText',
+                                    'initTextSource',
+                                    'updatedText',
+                                    'commandResult',
+                                ];
+                                expect(maskKeys(nonAuthorMessage, maskingKeys)).toEqual(
+                                    maskKeys(authorMessage, maskingKeys)
+                                );
+                                subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
+
+                                for (const userUid of [
+                                    Resources.UserUid.master,
+                                    Resources.UserUid.player1,
+                                    Resources.UserUid.spectator1,
+                                ] as const) {
+                                    const messages = Assert.GetMessagesQuery.toBeSuccess(
+                                        await clients[userUid].getMessagesQuery({
+                                            roomId,
+                                        })
+                                    );
+
+                                    expect(messages.publicMessages).toHaveLength(1);
+
+                                    if (userUid === author) {
+                                        expect(
+                                            messages.publicMessages[0]?.commandResult
+                                        ).toBeTruthy();
+                                    } else {
+                                        expect(
+                                            messages.publicMessages[0]?.commandResult
+                                        ).toBeFalsy();
+                                    }
+
+                                    const maskingKeys = [
+                                        '__typename',
+                                        'initText',
+                                        'initTextSource',
+                                        'updatedText',
+                                        'commandResult',
+                                    ];
+                                    expect(
+                                        maskKeys(
+                                            roundMilliSecondsInObject(messages.publicMessages),
+                                            maskingKeys
+                                        )
+                                    ).toEqual(
+                                        maskKeys(
+                                            roundMilliSecondsInObject([authorMessage]),
+                                            maskingKeys
+                                        )
+                                    );
+                                }
+                            }
+
+                            let updatedAuthorMessage: RoomPublicMessageFragment | null = null;
+
+                            // editMessageMutation
+                            if (doEditTest) {
+                                const editedText = 'EDITED_TEXT';
+                                const editResult = Assert.EditMessageMutation.toBeSuccess(
+                                    await clients[author].editMessageMutation({
+                                        roomId,
+                                        text: editedText,
+                                        messageId: authorMessage.messageId,
+                                    })
+                                );
+                                expect(editResult.failureType).toBeFalsy();
+                                updatedAuthorMessage =
+                                    subscriptions.value[author].toBeExactlyOneRoomPublicMessage();
+                                expect(updatedAuthorMessage.updatedText?.currentText).toBe(
+                                    editedText
+                                );
+                                expect(updatedAuthorMessage.commandResult).toBeTruthy();
+                                const updatedNonAuthorMessage = subscriptions.all
+                                    .except(author, Resources.UserUid.notJoin)
+                                    .distinct(x => x.toBeExactlyOneRoomPublicMessage());
+                                expect(updatedNonAuthorMessage.updatedText?.currentText).toBe(
+                                    editedText
+                                );
+                                expect(updatedNonAuthorMessage.commandResult).toBeFalsy();
+                                const maskingKeysForAuthor = [
+                                    '__typename',
+                                    'updatedAt',
+                                    'updatedText',
+                                ];
+                                const maskingKeysForNonAuthor = [
+                                    '__typename',
+                                    'updatedAt',
+                                    'updatedText',
+                                    'commandResult',
+                                ];
+                                expect(
+                                    maskKeys(updatedAuthorMessage, maskingKeysForAuthor)
+                                ).toEqual(maskKeys(authorMessage, maskingKeysForAuthor));
+                                expect(
+                                    maskKeys(updatedNonAuthorMessage, maskingKeysForNonAuthor)
+                                ).toEqual(maskKeys(authorMessage, maskingKeysForNonAuthor));
+                                subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
+                            }
+
+                            Assert.MakeMessageNotSecretMutation.toBeFailure(
+                                await clients[Resources.UserUid.player1].makeMessageNotSecret({
                                     roomId,
-                                    messageId: message.messageId,
+                                    messageId: authorMessage.messageId,
                                 })
                             );
-                            expect(deleteResult.failureType).toBeFalsy();
-                            const deletedMessage = subscriptions.all
-                                .except(Resources.UserUid.notJoin)
-                                .distinct(x => x.toBeExactlyOneRoomPublicMessage());
-                            expect(deletedMessage.updatedText?.currentText).toBeFalsy();
-                            expect(
-                                maskKeys(deletedMessage, ['__typename', 'updatedAt', 'updatedText'])
-                            ).toEqual(
-                                maskKeys(message, ['__typename', 'updatedAt', 'updatedText'])
+                            Assert.MakeMessageNotSecretMutation.toBeFailure(
+                                await clients[Resources.UserUid.notJoin].makeMessageNotSecret({
+                                    roomId,
+                                    messageId: authorMessage.messageId,
+                                })
                             );
-                            subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
 
+                            {
+                                Assert.MakeMessageNotSecretMutation.toBeSuccess(
+                                    await clients[author].makeMessageNotSecret({
+                                        roomId,
+                                        messageId: authorMessage.messageId,
+                                    })
+                                );
+                                const updatedMessage = subscriptions.all
+                                    .except(Resources.UserUid.notJoin)
+                                    .distinct(x => x.toBeExactlyOneRoomPublicMessage());
+                                if (doEditTest) {
+                                    expect(updatedMessage.updatedText).toBeTruthy();
+                                } else {
+                                    expect(updatedMessage.updatedText).toBeFalsy();
+                                }
+                                expect(updatedMessage.isSecret).toBe(false);
+                                expect(updatedMessage.commandResult).toBeTruthy();
+                                const maskingKeys = ['__typename', 'updatedAt', 'isSecret'];
+                                expect(
+                                    maskKeys(roundMilliSecondsInObject(updatedMessage), maskingKeys)
+                                ).toEqual(
+                                    maskKeys(
+                                        roundMilliSecondsInObject(
+                                            updatedAuthorMessage ?? authorMessage
+                                        ),
+                                        maskingKeys
+                                    )
+                                );
+                            }
+
+                            {
+                                const deleteResult = Assert.DeleteMessageMutation.toBeSuccess(
+                                    await clients[author].deleteMessageMutation({
+                                        roomId,
+                                        messageId: authorMessage.messageId,
+                                    })
+                                );
+                                expect(deleteResult.failureType).toBeFalsy();
+                                const deletedMessage = subscriptions.all
+                                    .except(Resources.UserUid.notJoin)
+                                    .distinct(x => x.toBeExactlyOneRoomPublicMessage());
+                                expect(deletedMessage.updatedText?.currentText).toBeFalsy();
+                                const maskingKeys = [
+                                    '__typename',
+                                    'updatedAt',
+                                    'updatedText',
+                                    'isSecret',
+                                ];
+                                expect(maskKeys(deletedMessage, maskingKeys)).toEqual(
+                                    maskKeys(authorMessage, maskingKeys)
+                                );
+                                subscriptions.value[Resources.UserUid.notJoin].toBeEmpty();
+                            }
                             subscriptions.all.unsubscribe();
                         });
                     });

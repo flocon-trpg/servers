@@ -277,7 +277,7 @@ export class RoomPrvMsg {
     @Property({ nullable: true, type: TextType })
     public commandResult?: string;
 
-    // 成功判定のあるコマンドの場合、成功したかどうかを表す。
+    /** 成功判定のあるコマンドの場合、成功したかどうかを表す。*/
     @Property({ nullable: true, default: null })
     public commandIsSuccess?: boolean;
 
