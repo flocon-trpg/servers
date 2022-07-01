@@ -45,6 +45,9 @@ import {
     LeaveRoomDocument,
     LeaveRoomMutation,
     LeaveRoomMutationVariables,
+    MakeMessageNotSecretDocument,
+    MakeMessageNotSecretMutation,
+    MakeMessageNotSecretMutationVariables,
     OperateDocument,
     OperateMutation,
     OperateMutationVariables,
@@ -295,7 +298,7 @@ export class TestClient {
             .toPromise();
     }
 
-    public async joinRoomAsSpectatorMutation(variables: JoinRoomAsSpectatorMutationVariables) {
+    public joinRoomAsSpectatorMutation(variables: JoinRoomAsSpectatorMutationVariables) {
         return this.#core
             .mutation<JoinRoomAsSpectatorMutation, JoinRoomAsSpectatorMutationVariables>(
                 JoinRoomAsSpectatorDocument,
@@ -307,11 +310,23 @@ export class TestClient {
             .toPromise();
     }
 
-    public async leaveRoomMutation(variables: LeaveRoomMutationVariables) {
+    public leaveRoomMutation(variables: LeaveRoomMutationVariables) {
         return this.#core
             .mutation<LeaveRoomMutation, LeaveRoomMutationVariables>(LeaveRoomDocument, variables, {
                 requestPolicy: 'network-only',
             })
+            .toPromise();
+    }
+
+    public makeMessageNotSecret(variables: MakeMessageNotSecretMutationVariables) {
+        return this.#core
+            .mutation<MakeMessageNotSecretMutation, MakeMessageNotSecretMutationVariables>(
+                MakeMessageNotSecretDocument,
+                variables,
+                {
+                    requestPolicy: 'network-only',
+                }
+            )
             .toPromise();
     }
 
