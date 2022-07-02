@@ -10,8 +10,6 @@ import { createClient as createWsClient } from 'graphql-ws';
 import { authExchange } from '@urql/exchange-auth';
 import { authToken } from '@flocon-trpg/core';
 
-// (() => Promise<string | null>) | null ではなく string | null にしても一見良さそうだが、それは問題が起こることがある。
-// 理由は、おそらく前のidTokenがexpireしてからonIdTokenChangedが呼び出されるまでの間にはラグがあることがあり、string | null だとその間に認証が必要な処理が一時的にすべてできなくなるという問題が発生するため。それを防ぐためPromiseにして、idTokenが必要なときはgetUserIdToken()を常に呼び出すようにしている。
 type GetUserIdToken = (() => Promise<string | null>) | null;
 
 const execGetUserIdToken = async (source: GetUserIdToken): Promise<string | null> => {

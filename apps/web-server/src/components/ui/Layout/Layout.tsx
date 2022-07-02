@@ -29,8 +29,9 @@ import { useSignOut } from '@/hooks/useSignOut';
 import { useClient, useMutation } from 'urql';
 import { useGetMyRoles } from '@/hooks/useGetMyRoles';
 import { useAtomValue } from 'jotai';
-import { firebaseUserAtom, getIdTokenAtom } from '@/pages/_app';
+import { firebaseUserAtom } from '@/pages/_app';
 import { authNotFound, loading, notSignIn } from '@/utils/firebase/firebaseUserState';
+import { useGetIdToken } from '@/hooks/useGetIdToken';
 
 const { Header, Content } = AntdLayout;
 
@@ -132,12 +133,11 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
     const [isEntry, setIsEntry] = React.useState<
         'notRequired' | 'loading' | { type: 'error'; error: Error } | boolean
     >('loading');
-    const getIdToken = useAtomValue(getIdTokenAtom);
-    const hasIdToken = getIdToken != null;
+    const { canGetIdToken } = useGetIdToken();
     const requiresEntry = requires === loginAndEntry;
     React.useEffect(() => {
         if (requiresEntry && myUserUid != null) {
-            if (!hasIdToken) {
+            if (!canGetIdToken) {
                 setIsEntry('loading');
                 return;
             }
@@ -169,7 +169,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
             };
         }
         setIsEntry('notRequired');
-    }, [requiresEntry, myUserUid, urqlClient, hasIdToken]);
+    }, [requiresEntry, myUserUid, urqlClient, canGetIdToken]);
 
     const getChildren = (): React.ReactNode => {
         if (typeof children === 'function') {

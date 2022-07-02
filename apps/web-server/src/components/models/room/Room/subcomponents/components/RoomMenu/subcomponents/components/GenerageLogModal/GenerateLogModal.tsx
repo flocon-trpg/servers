@@ -21,8 +21,9 @@ import { flex, flexColumn } from '@/styles/className';
 import { useClient } from 'urql';
 import { useWebConfig } from '@/hooks/useWebConfig';
 import { useAtomValue } from 'jotai/utils';
-import { firebaseStorageAtom, getIdTokenAtom } from '@/pages/_app';
+import { firebaseStorageAtom } from '@/pages/_app';
 import { useLatest } from 'react-use';
+import { useGetIdToken } from '@/hooks/useGetIdToken';
 
 const simple = 'simple';
 const rich = 'rich';
@@ -45,8 +46,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
     const firebaseStorageRef = useLatest(firebaseStorage);
     const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
     const firebaseStorageUrlCacheContextRef = useLatest(firebaseStorageUrlCacheContext);
-    const getIdToken = useAtomValue(getIdTokenAtom);
-    const getIdTokenRef = useLatest(getIdToken);
+    const { getIdToken } = useGetIdToken();
     const publicChannelNames = usePublicChannelNames();
     const publicChannelNamesRef = useLatest(publicChannelNames);
     const participants = useParticipants();
@@ -87,14 +87,13 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                 publicChannelNamesRef.current == null ||
                 participantsRef.current == null ||
                 firebaseStorageUrlCacheContextRef.current == null ||
-                getIdTokenRef.current == null ||
                 configRef.current?.value == null ||
                 firebaseStorageRef.current == null
             ) {
                 return;
             }
 
-            const idToken = await getIdTokenRef.current();
+            const idToken = await getIdToken();
             if (idToken == null) {
                 return;
             }
@@ -181,7 +180,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
         publicChannelNamesRef,
         participantsRef,
         firebaseStorageUrlCacheContextRef,
-        getIdTokenRef,
+        getIdToken,
         roomIdRef,
         logModeRef,
         channelsFilterOptionsRef,
