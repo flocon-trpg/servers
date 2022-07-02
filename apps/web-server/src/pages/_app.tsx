@@ -28,7 +28,7 @@ import { getHttpUri, getWsUri, publicEnvTxtAtom } from '../atoms/webConfigAtom/w
 import { useWebConfig } from '../hooks/useWebConfig';
 import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { FirebaseApp, initializeApp } from 'firebase/app';
-import { Auth, User, getAuth } from 'firebase/auth';
+import { Auth, getAuth } from 'firebase/auth';
 import { FirebaseStorage, getStorage } from 'firebase/storage';
 import { storybookAtom } from '../atoms/storybookAtom/storybookAtom';
 import {
