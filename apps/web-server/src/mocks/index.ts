@@ -13,6 +13,7 @@ import { FirebaseApp } from '@firebase/app';
 import { Client, createClient } from '@urql/core';
 import ColorName from 'color-name';
 import Color from 'color';
+import moment from 'moment';
 
 type State = S<typeof roomTemplate>;
 type BoardState = S<typeof boardTemplate>;
@@ -823,7 +824,20 @@ export const mockUser: User = {
         return Promise.resolve(myUserUid);
     },
     getIdTokenResult: function (): Promise<IdTokenResult> {
-        throw new Error('Function not implemented.');
+        // TODO: antdがmomentを使わなくなった場合はdayjsなどに置き換える。
+        const authTime = moment().subtract(1, 'day');
+        const expirationTime = moment().add(1, 'day');
+        const issuedAtTime = moment();
+
+        return Promise.resolve({
+            token: myUserUid,
+            authTime: authTime.toISOString(),
+            expirationTime: expirationTime.toISOString(),
+            issuedAtTime: issuedAtTime.toISOString(),
+            signInProvider: null,
+            signInSecondFactor: null,
+            claims: {},
+        });
     },
     reload: function (): Promise<void> {
         throw new Error('Function not implemented.');
