@@ -37,7 +37,7 @@ import {
     loading,
     notSignIn,
 } from '../utils/firebase/firebaseUserState';
-import { useGetIdToken } from '@/hooks/useGetIdToken';
+import { useGetIdTokenResult } from '@/hooks/useGetIdTokenResult';
 
 enableMapSet();
 
@@ -249,7 +249,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     const user = useAtomValue(firebaseUserAtom);
     const userValue = useAtomValue(firebaseUserValueAtom);
     const myUserUid = useMyUserUid();
-    const { getIdToken } = useGetIdToken();
+    const { getIdTokenResult, canGetIdTokenResult } = useGetIdTokenResult();
 
     useUserConfig(myUserUid ?? null);
     useAutoSaveRoomConfig();
@@ -260,13 +260,29 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         if (httpUri == null || wsUri == null) {
             return;
         }
-        setUrqlClient(
-            createUrqlClient({ httpUrl: httpUri, wsUrl: wsUri, getUserIdToken: getIdToken })
-        );
+        if (canGetIdTokenResult) {
+            setUrqlClient(
+                createUrqlClient({
+                    httpUrl: httpUri,
+                    wsUrl: wsUri,
+                    useIdToken: true,
+                    getUserIdTokenResult: getIdTokenResult,
+                })
+            );
+        } else {
+            setUrqlClient(
+                createUrqlClient({
+                    httpUrl: httpUri,
+                    wsUrl: wsUri,
+                    useIdToken: false,
+                })
+            );
+        }
     }, [
         httpUri,
         wsUri,
-        getIdToken,
+        getIdTokenResult,
+        canGetIdTokenResult,
         /*
         # userValueをdepsに加えている理由
         
