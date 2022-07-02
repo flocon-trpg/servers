@@ -2,7 +2,7 @@ import { updateProfile } from '@firebase/auth';
 import { Alert, Button, Card, Form, Input, Spin, Switch } from 'antd';
 import { useAtomValue } from 'jotai';
 import React from 'react';
-import { firebaseUserAtom } from '@/pages/_app';
+import { firebaseUserValueAtom } from '@/pages/_app';
 import { Center } from '../../ui/Center/Center';
 import { Layout, login } from '../../ui/Layout/Layout';
 
@@ -10,18 +10,18 @@ const labelCol = 10;
 const wrapperCol = 24 - labelCol;
 
 export const ProfilePage: React.FC = () => {
-    const firebaseUser = useAtomValue(firebaseUserAtom);
+    const firebaseUser = useAtomValue(firebaseUserValueAtom);
     const [isSubmitting, setIsSubmitting] = React.useState(false);
     const [submitErrorMessage, setSubmitErrorMessage] = React.useState<string>();
     const [displayName, setDisplayName] = React.useState<string | null>();
     React.useEffect(() => {
-        if (typeof firebaseUser == 'string') {
+        if (firebaseUser == null) {
             return;
         }
         setDisplayName(firebaseUser.displayName);
     }, [firebaseUser]);
 
-    if (typeof firebaseUser === 'string') {
+    if (firebaseUser == null) {
         return null;
     }
 

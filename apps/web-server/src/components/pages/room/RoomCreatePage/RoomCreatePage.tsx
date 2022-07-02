@@ -6,7 +6,7 @@ import React from 'react';
 import { Center } from '@/components/ui/Center/Center';
 import { Layout, loginAndEntry } from '@/components/ui/Layout/Layout';
 import { useAtomValue } from 'jotai';
-import { firebaseUserAtom } from '@/pages/_app';
+import { firebaseUserValueAtom } from '@/pages/_app';
 
 const labelCol = 10;
 const wrapperCol = 24 - labelCol;
@@ -23,7 +23,7 @@ export const RoomCreatePage: React.FC = () => {
     const [isPlayerPasswordEnabled, setIsPlayerPasswordEnabled] = React.useState<boolean>(false);
     const [isSpectatorPasswordEnabled, setIsSpectatorPasswordEnabled] =
         React.useState<boolean>(false);
-    const firebaseUser = useAtomValue(firebaseUserAtom);
+    const firebaseUser = useAtomValue(firebaseUserValueAtom);
 
     // TODO: 横幅などが足りないため、Formで表現するようなものではない気がする。
     const form = (
@@ -33,8 +33,7 @@ export const RoomCreatePage: React.FC = () => {
             wrapperCol={{ span: wrapperCol }}
             style={{ width: 600 }}
             initialValues={{
-                [participantName]:
-                    typeof firebaseUser === 'string' ? undefined : firebaseUser.displayName,
+                [participantName]: firebaseUser?.displayName ?? undefined,
             }}
             onFinish={e => {
                 if (isSubmitting) {

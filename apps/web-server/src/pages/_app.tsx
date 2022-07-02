@@ -83,6 +83,13 @@ export const firebaseUserAtom = atom(get => {
     }
     return get(firebaseUserCoreAtom);
 });
+export const firebaseUserValueAtom = atom(get => {
+    const user = get(firebaseUserCoreAtom);
+    if (typeof user === 'string') {
+        return null;
+    }
+    return user;
+});
 
 // localForageを用いてRoomConfigを読み込み、ReduxのStateと紐付ける。
 // Userが変わるたびに、useUserConfigが更新される必要がある。_app.tsxなどどこか一箇所でuseUserConfigを呼び出すだけでよい。

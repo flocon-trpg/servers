@@ -41,7 +41,7 @@ import { Room } from '@/components/models/room/Room/Room';
 import { Center } from '@/components/ui/Center/Center';
 import { Layout, loginAndEntry, success } from '@/components/ui/Layout/Layout';
 import { LoadingResult } from '@/components/ui/LoadingResult/LoadingResult';
-import { firebaseUserAtom } from '@/pages/_app';
+import { firebaseUserValueAtom } from '@/pages/_app';
 
 type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
 
@@ -103,10 +103,8 @@ type JoinRoomFormProps = {
 };
 
 const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRoomFormProps) => {
-    const firebaseUser = useAtomValue(firebaseUserAtom);
-    const [name, setName] = React.useState<string>(
-        typeof firebaseUser === 'string' ? '' : firebaseUser.displayName ?? ''
-    );
+    const firebaseUser = useAtomValue(firebaseUserValueAtom);
+    const [name, setName] = React.useState<string>(firebaseUser?.displayName ?? '');
     const [playerPassword, setPlayerPassword] = React.useState<string>('');
     const [spectatorPassword, setSpectatorPassword] = React.useState<string>('');
     const [joinRoomAsPlayerResult, joinRoomAsPlayer] = useMutation(JoinRoomAsPlayerDocument);

@@ -12,7 +12,7 @@ import { FirebaseFilesManager } from './subcomponents/components/FirebaseFilesMa
 import { FloconFilesManager } from './subcomponents/components/FloconFilesManager/FloconFilesManager';
 import { useQuery } from 'urql';
 import { useAtomValue } from 'jotai';
-import { firebaseUserAtom } from '@/pages/_app';
+import { firebaseUserValueAtom } from '@/pages/_app';
 
 type Props = {
     drawerType: FilesManagerDrawerType | null;
@@ -20,13 +20,13 @@ type Props = {
 };
 
 export const FilesManagerDrawer: React.FC<Props> = ({ drawerType, onClose }: Props) => {
-    const firebaseUser = useAtomValue(firebaseUserAtom);
+    const firebaseUser = useAtomValue(firebaseUserValueAtom);
     const [input, setInput] = React.useState<string>('');
     const [{ data: serverInfo }] = useQuery({ query: GetServerInfoDocument });
     const isEmbeddedUploaderDisabled = serverInfo?.result.uploaderEnabled !== true;
 
     const child = (() => {
-        if (typeof firebaseUser === 'string') {
+        if (firebaseUser == null) {
             return (
                 <Result
                     status='warning'

@@ -46,7 +46,7 @@ import {
 } from '@/atoms/roomConfigAtom/types/roomConfig/resources';
 import { Styles } from '@/styles';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
-import { firebaseUserAtom } from '@/pages/_app';
+import { firebaseUserValueAtom } from '@/pages/_app';
 
 const panelOpacityAtom = atom(
     get => get(roomConfigAtom)?.panelOpacity,
@@ -1052,7 +1052,7 @@ const usePanelsMenuItem = () => {
 export const RoomMenu: React.FC = React.memo(function RoomMenu() {
     const me = useMe();
     const myUserUid = useMyUserUid();
-    const firebaseUser = useAtomValue(firebaseUserAtom);
+    const firebaseUser = useAtomValue(firebaseUserValueAtom);
     const router = useRouter();
     const signOut = useSignOut();
     const roomId = useAtomSelector(roomAtom, state => state.roomId);
@@ -1079,7 +1079,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
     const panelsMenuItem = usePanelsMenuItem();
 
     return React.useMemo(() => {
-        if (me == null || myUserUid == null || typeof firebaseUser === 'string' || roomId == null) {
+        if (me == null || myUserUid == null || firebaseUser == null || roomId == null) {
             return null;
         }
         const menuItems: ItemType[] = [
