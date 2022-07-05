@@ -3,7 +3,7 @@ import React from 'react';
 import { FilePathFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { analyzeUrl } from '@/utils/analyzeUrl';
 import { volumeCap } from '@/utils/variables';
-import { success, useSrcFromGraphQL } from '@/hooks/srcHooks';
+import { useSrcFromGraphQL } from '@/hooks/srcHooks';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { useLatest } from 'react-use';
@@ -35,18 +35,28 @@ function usePlaySoundEffectCore(value?: SoundEffect): void {
         volumeConfigRef.current = volumeConfig;
     }, [volumeConfig]);
 
-    const url = useSrcFromGraphQL(value?.filePath, [value?.messageId]);
+    const url = useSrcFromGraphQL(value?.filePath);
+
+    // value?.messageIdが変わったときに音声を流すuseEffectの処理をトリガーさせるための処理。
+    // url.srcが同じでも、新しいsrcObjectオブジェクトを作成することで、srcObjectへの参照を変えることでトリガーさせている。
+    const [srcObject, setSrcObject] = React.useState<{ src: string | undefined }>({
+        src: undefined,
+    });
+    React.useEffect(() => {
+        setSrcObject({ src: url.src });
+    }, [url.src, value?.messageId]);
+
     const howlsRef = React.useRef<Map<string, { howl: Howl; volume: number }>>(new Map());
 
     React.useEffect(() => {
         const value = valueRef.current;
 
-        if (url.type !== success || value == null) {
+        if (srcObject.src == null || value == null) {
             return;
         }
 
         const howl = new Howl({
-            src: [analyzeUrl(url.value).directLink],
+            src: [analyzeUrl(srcObject.src).directLink],
             loop: false,
             volume: Math.min(value.volume * volumeConfigRef.current, volumeCap),
         });
@@ -60,7 +70,7 @@ function usePlaySoundEffectCore(value?: SoundEffect): void {
             howl.stop();
             howlsRef.current.delete(value.messageId);
         }, musicLengthLimit + fadeout);
-    }, [url, valueRef]);
+    }, [srcObject, valueRef]);
 
     React.useEffect(() => {
         howlsRef.current.forEach(({ howl, volume }) => {

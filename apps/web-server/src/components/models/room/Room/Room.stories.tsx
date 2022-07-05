@@ -8,6 +8,9 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { mockWebConfig } from '@/mocks';
 import { ParticipantRole } from '@flocon-trpg/core';
 import { useSetupMocks } from '@/hooks/useSetupMocks';
+import { QueryClient, QueryClientProvider } from 'react-query';
+
+const queryClient = new QueryClient();
 
 export const Player: React.FC<WebConfig & { myParticipantRole: ParticipantRole }> = ({
     isUnlistedFirebaseStorageEnabled,
@@ -31,9 +34,11 @@ export const Player: React.FC<WebConfig & { myParticipantRole: ParticipantRole }
     });
 
     return (
-        <DndProvider backend={HTML5Backend}>
-            <Room debug={{ window: { innerHeight: 600, innerWidth: 500 } }} />
-        </DndProvider>
+        <QueryClientProvider client={queryClient}>
+            <DndProvider backend={HTML5Backend}>
+                <Room debug={{ window: { innerHeight: 600, innerWidth: 500 } }} />
+            </DndProvider>
+        </QueryClientProvider>
     );
 };
 

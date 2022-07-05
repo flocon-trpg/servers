@@ -1,6 +1,6 @@
 import React from 'react';
 import { Howl } from 'howler';
-import { done, useSrcArrayFromGraphQL } from '@/hooks/srcHooks';
+import { loaded, useSrcArrayFromGraphQL } from '@/hooks/srcHooks';
 import { volumeCap } from '@/utils/variables';
 import { State, bgmTemplate } from '@flocon-trpg/core';
 import { compact } from 'lodash';
@@ -38,11 +38,11 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmCoreProps): void {
     const howlRef = React.useRef<Howl>();
 
     useDeepCompareEffect(() => {
-        if (urlArray.type !== done || volumeRef.current == null) {
+        if (urlArray.type !== loaded || volumeRef.current == null) {
             return;
         }
 
-        const src = compact(urlArray.value);
+        const src = compact(urlArray.srcData);
         if (src.length === 0) {
             return;
         }
