@@ -4,6 +4,9 @@ import React from 'react';
 import { useSetupMocks } from '@/hooks/useSetupMocks';
 import { defaultBoardId } from '@/mocks';
 import { Board, Props } from './Board';
+import { QueryClient, QueryClientProvider } from 'react-query';
+
+const queryClient = new QueryClient();
 
 type RoomState = S<typeof roomTemplate>;
 
@@ -26,7 +29,11 @@ export const Default: React.FC<{
             update: updateRoom,
         },
     });
-    return <Board {...boardProps} />;
+    return (
+        <QueryClientProvider client={queryClient}>
+            <Board {...boardProps} />
+        </QueryClientProvider>
+    );
 };
 
 const boardEditorProps: Props = {

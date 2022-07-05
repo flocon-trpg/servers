@@ -1,7 +1,6 @@
 import { FilePathFragment, FileSourceType } from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Core from '@flocon-trpg/core';
-import { ExpiryMap } from './expiryMap';
-import { files, getFloconUploaderFile } from './getFloconUploaderFile';
+import { files, getFloconUploaderFile, idTokenIsNull } from './getFloconUploaderFile';
 import { WebConfig } from '../../configType';
 import { FirebaseStorage, getDownloadURL, ref } from 'firebase/storage';
 
@@ -72,7 +71,7 @@ export namespace FilePath {
         };
     };
 
-    type SrcResult =
+    export type SrcResult =
         | {
               type: typeof Core.Default | typeof Core.FirebaseStorage;
               src: string;
@@ -89,22 +88,30 @@ export namespace FilePath {
               blob: undefined;
           };
 
-    export const getSrc = async (
-        path: FilePath | Core.OmitVersion<FilePathState>,
-        config: WebConfig,
-        storage: FirebaseStorage,
-        idToken: string,
-        cache: ExpiryMap<string, string> | null,
-        autoRedirect = false
-    ): Promise<SrcResult> => {
+    export const getSrc = async ({
+        path,
+        config,
+        storage,
+        getIdToken,
+        autoRedirect,
+    }: {
+        path: FilePath | Core.OmitVersion<FilePathState>;
+        config: WebConfig;
+        storage: FirebaseStorage;
+        getIdToken: () => Promise<string | null>;
+        autoRedirect?: boolean;
+    }): Promise<SrcResult | typeof idTokenIsNull> => {
         switch (path.sourceType) {
             case FileSourceType.Uploader: {
                 const axiosResponse = await getFloconUploaderFile({
                     filename: path.path,
                     config,
-                    idToken,
+                    getIdToken,
                     mode: files,
                 });
+                if (axiosResponse === idTokenIsNull) {
+                    return idTokenIsNull;
+                }
                 if (axiosResponse.data == null) {
                     return {
                         type: Core.Uploader,
@@ -121,14 +128,6 @@ export namespace FilePath {
                 };
             }
             case FileSourceType.FirebaseStorage: {
-                const cachedUrl = cache?.get(path.path);
-                if (cachedUrl != null) {
-                    return {
-                        type: Core.FirebaseStorage,
-                        src: cachedUrl,
-                        blob: undefined,
-                    };
-                }
                 const storageRef = ref(storage, path.path);
                 const url = await getDownloadURL(storageRef).catch(() => null);
                 if (typeof url !== 'string') {
@@ -138,7 +137,6 @@ export namespace FilePath {
                         blob: undefined,
                     };
                 }
-                cache?.set(path.path, url, 1000 * 60 * 10);
                 return {
                     type: Core.FirebaseStorage,
                     src: url,
@@ -146,7 +144,7 @@ export namespace FilePath {
                 };
             }
             default: {
-                if (autoRedirect) {
+                if (autoRedirect === true) {
                     const redirected = await fetch(path.path);
                     if (redirected.ok) {
                         return {

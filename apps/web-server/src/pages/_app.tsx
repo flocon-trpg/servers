@@ -11,7 +11,6 @@ import { appConsole } from '../utils/appConsole';
 import { enableMapSet } from 'immer';
 import Head from 'next/head';
 import { loader } from '@monaco-editor/react';
-import { ExpiryMap } from '../utils/file/expiryMap';
 import urljoin from 'url-join';
 import { createUrqlClient } from '../utils/createUrqlClient';
 import { getUserConfig, setUserConfig } from '../utils/localStorage/userConfig';
@@ -38,6 +37,7 @@ import {
     notSignIn,
 } from '../utils/firebase/firebaseUserState';
 import { useGetIdTokenResult } from '@/hooks/useGetIdTokenResult';
+import { QueryClient } from 'react-query';
 
 enableMapSet();
 
@@ -296,6 +296,15 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         */
         userValue,
     ]);
+
+    const [reactQueryClient, setReactQueryClient] = React.useState<QueryClient | null>(null);
+    React.useEffect(() => {
+        setReactQueryClient(new QueryClient());
+    }, [
+        // ユーザーが変わったときにreact-queryのキャッシュを破棄させるため、userValueをdepsに加えている。
+        userValue,
+    ]);
+
     const [authNotFoundState, setAuthNotFoundState] = React.useState(false);
     React.useEffect(() => {
         setAuthNotFoundState(user === 'authNotFound');
@@ -305,8 +314,6 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     React.useEffect(() => {
         appConsole.log(`clientId: ${clientId}`);
     }, [clientId]);
-
-    const firebaseStorageUrlCache = useConstant(() => new ExpiryMap<string, string>());
 
     React.useEffect(() => {
         // monaco editorのコンテキストメニューなどを日本語にしている。
@@ -330,7 +337,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
             </div>
         );
     }
-    if (urqlClient == null) {
+    if (urqlClient == null || reactQueryClient == null) {
         return <div style={{ padding: 5 }}>{'しばらくお待ち下さい… / Please wait…'}</div>;
     }
     return (
@@ -340,8 +347,8 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
             </Head>
             <AllContextProvider
                 clientId={clientId}
-                client={urqlClient}
-                firebaseStorageUrlCache={firebaseStorageUrlCache}
+                urqlClient={urqlClient}
+                reactQueryClient={reactQueryClient}
             >
                 <Component {...pageProps} />
             </AllContextProvider>

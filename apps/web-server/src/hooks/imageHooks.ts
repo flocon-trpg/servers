@@ -116,7 +116,7 @@ export function useImageFromGraphQL(
     filePath: FilePathFragment | S<typeof filePathTemplate> | null | undefined,
     crossOrigin?: string
 ): State {
-    const src = useSrcFromGraphQL(filePath);
+    const { src } = useSrcFromGraphQL(filePath);
 
-    return useImage(src.type === success ? src.value : null, undefined, crossOrigin);
+    return useImage(src ?? null, undefined, crossOrigin);
 }

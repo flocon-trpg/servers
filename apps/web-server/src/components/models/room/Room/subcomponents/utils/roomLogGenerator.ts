@@ -23,13 +23,13 @@ import { FilePath } from '@/utils/file/filePath';
 import axios from 'axios';
 import JSZip from 'jszip';
 import { analyzeUrl } from '@/utils/analyzeUrl';
-import { ExpiryMap } from '@/utils/file/expiryMap';
 import { RoomMessageFilter } from '../components/RoomMenu/subcomponents/components/GenerageLogModal/subcomponents/components/ChannelsFilter/ChannelsFilter';
 import { WebConfig } from '@/configType';
 import { FirebaseStorage as FirebaseStorageType } from '@firebase/storage';
 import { HtmlObject, div, generateHtml, span } from './generateHtml';
 import { PrivateChannelSet } from '@flocon-trpg/web-server-utils';
 import { Styles } from '@/styles';
+import { idTokenIsNull } from '@/utils/file/getFloconUploaderFile';
 
 const logHtml = (messageDivs: string[]) => `
 <!DOCTYPE html>
@@ -529,8 +529,7 @@ class ImageDownloader {
 
     public constructor(
         private readonly config: WebConfig,
-        private readonly storage: FirebaseStorageType,
-        private readonly firebaseStorageUrlCache: ExpiryMap<string, string>
+        private readonly storage: FirebaseStorageType
     ) {}
 
     private findCache(filePath: FilePath) {
@@ -557,18 +556,23 @@ class ImageDownloader {
         };
     }
 
-    public async download(filePath: FilePath, idToken: string): Promise<ImageResult | null> {
+    public async download(
+        filePath: FilePath,
+        getIdToken: () => Promise<string | null>
+    ): Promise<ImageResult | null> {
         const cache = this.findCache(filePath);
         if (cache !== undefined) {
             return cache;
         }
-        const srcResult = await FilePath.getSrc(
-            filePath,
-            this.config,
-            this.storage,
-            idToken,
-            this.firebaseStorageUrlCache
-        );
+        const srcResult = await FilePath.getSrc({
+            path: filePath,
+            config: this.config,
+            storage: this.storage,
+            getIdToken,
+        });
+        if (srcResult === idTokenIsNull) {
+            return null;
+        }
         switch (srcResult.type) {
             case Default:
                 break;
@@ -657,18 +661,16 @@ export const generateAsRichLog = async ({
     params,
     config,
     storage,
-    idToken,
-    firebaseStorageUrlCache,
+    getIdToken,
     onProgressChange,
 }: {
     params: GenerateLogParams;
     config: WebConfig;
     storage: FirebaseStorageType;
-    idToken: string;
-    firebaseStorageUrlCache: ExpiryMap<string, string>;
+    getIdToken: () => Promise<string | null>;
     onProgressChange: (p: RichLogProgress) => void;
 }): Promise<Blob> => {
-    const imageDownloader = new ImageDownloader(config, storage, firebaseStorageUrlCache);
+    const imageDownloader = new ImageDownloader(config, storage);
     const zip = new JSZip();
 
     const cssFolder = zip.folder('css');
@@ -715,7 +717,7 @@ export const generateAsRichLog = async ({
         if (msg.value.createdBy?.characterImage != null) {
             const image = await imageDownloader.download(
                 msg.value.createdBy.characterImage,
-                idToken
+                getIdToken
             );
             if (image != null) {
                 imgAvatarFolder.file(image.filename, image.blob);

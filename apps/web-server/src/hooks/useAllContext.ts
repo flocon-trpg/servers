@@ -2,17 +2,17 @@ import { useClient } from 'urql';
 import React from 'react';
 import { Props } from '../components/behaviors/AllContextProvider';
 import { ClientIdContext } from '../contexts/ClientIdContext';
-import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
+import { useQueryClient } from 'react-query';
 
 // AllContextProviderと合わせて使うためのhook
 export const useAllContext = (): Props => {
     const clientId = React.useContext(ClientIdContext);
-    const client = useClient();
-    const firebaseStorageUrlCache = React.useContext(FirebaseStorageUrlCacheContext);
+    const urqlClient = useClient();
+    const reactQueryClient = useQueryClient();
 
     return {
         clientId,
-        client,
-        firebaseStorageUrlCache,
+        urqlClient,
+        reactQueryClient,
     };
 };

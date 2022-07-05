@@ -1,6 +1,5 @@
 import fileDownload from 'js-file-download';
 import React from 'react';
-import { FirebaseStorageUrlCacheContext } from '@/contexts/FirebaseStorageUrlCacheContext';
 import {
     GetLogDocument,
     GetLogQuery,
@@ -44,8 +43,6 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
     const configRef = useLatest(config);
     const firebaseStorage = useAtomValue(firebaseStorageAtom);
     const firebaseStorageRef = useLatest(firebaseStorage);
-    const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
-    const firebaseStorageUrlCacheContextRef = useLatest(firebaseStorageUrlCacheContext);
     const { getIdToken } = useGetIdToken();
     const publicChannelNames = usePublicChannelNames();
     const publicChannelNamesRef = useLatest(publicChannelNames);
@@ -86,15 +83,9 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
             if (
                 publicChannelNamesRef.current == null ||
                 participantsRef.current == null ||
-                firebaseStorageUrlCacheContextRef.current == null ||
                 configRef.current?.value == null ||
                 firebaseStorageRef.current == null
             ) {
-                return;
-            }
-
-            const idToken = await getIdToken();
-            if (idToken == null) {
                 return;
             }
 
@@ -156,8 +147,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                 },
                 config: configRef.current.value,
                 storage: firebaseStorageRef.current,
-                idToken,
-                firebaseStorageUrlCache: firebaseStorageUrlCacheContextRef.current,
+                getIdToken,
                 onProgressChange: p => setProgress(p.percent),
             }).catch(err => {
                 setErrorMessage(err.message);
@@ -179,7 +169,6 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
         clientRef,
         publicChannelNamesRef,
         participantsRef,
-        firebaseStorageUrlCacheContextRef,
         getIdToken,
         roomIdRef,
         logModeRef,

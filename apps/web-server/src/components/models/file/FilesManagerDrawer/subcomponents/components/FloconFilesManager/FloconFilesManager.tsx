@@ -20,7 +20,7 @@ import * as Icons from '@ant-design/icons';
 import { DeleteFloconStorageFileModal } from '../FirebaseFilesManager/subcomponents/DeleteFloconStorageFileModal/DeleteFloconStorageFileModal';
 import { useAsync } from 'react-use';
 import { LazyAndPreloadImage } from '@/components/ui/LazyAndPreloadImage/LazyAndPreloadImage';
-import { getFloconUploaderFile, thumbs } from '@/utils/file/getFloconUploaderFile';
+import { getFloconUploaderFile, idTokenIsNull, thumbs } from '@/utils/file/getFloconUploaderFile';
 import { useMutation, useQuery } from 'urql';
 import { useWebConfig } from '@/hooks/useWebConfig';
 import { getHttpUri } from '@/atoms/webConfigAtom/webConfigAtom';
@@ -117,16 +117,15 @@ const Thumb: React.FC<ThumbProps> = ({ thumbFilePath, size }: ThumbProps) => {
         if (config?.value == null || thumbFilePath == null) {
             return null;
         }
-        const idToken = await getIdToken();
-        if (idToken == null) {
-            return;
-        }
         const axiosResponse = await getFloconUploaderFile({
             filename: thumbFilePath,
             config: config.value,
-            idToken,
+            getIdToken,
             mode: thumbs,
         });
+        if (axiosResponse === idTokenIsNull) {
+            return null;
+        }
         if (axiosResponse.data == null) {
             return null;
         }
