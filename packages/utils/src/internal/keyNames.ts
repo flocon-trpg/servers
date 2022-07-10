@@ -1,5 +1,6 @@
 import { CompositeKey } from './compositeKey';
 import { DualKey } from './dualKeyMap';
+import { NonEmptyArray } from './nonEmptyArray';
 
 // DualKeyもstringではなくstring|numberにしたほうが一貫性があるが、現時点で需要がほぼないのでまだ未対応
 type Key = string | number | CompositeKey | DualKey<string, string>;
@@ -27,8 +28,6 @@ function* keyToStrings(key: Key) {
         yield key.second;
     }
 }
-
-type NonEmptyArray<T> = [T, ...T[]];
 
 // classNamesを参考にした命名。keyNamesの代わりにkeysは名前が汎用的すぎて衝突しやすいと思うため不採用。
 // clsxを参考にkeyxなどといった命名法も考えられるが、clsxはclassNamesとシグネチャが異なるようなので、もしかしたら適切ではないかもしれないと考え見送った。
