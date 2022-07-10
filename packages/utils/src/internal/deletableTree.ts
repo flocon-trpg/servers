@@ -14,6 +14,11 @@ export class DeletableTree<TKey, TValue> {
         return this.#source.absolutePath;
     }
 
+    public get value() {
+        // 常に this.get([]) と等しい
+        return this.#source.value;
+    }
+
     /** 指定したkeyにあるnodeを基準とした新しいTreeオブジェクトを返します。nodeへの参照は共有されます。absolutePathは引き継がれます。 */
     public createSubTree(
         key: readonly TKey[],
