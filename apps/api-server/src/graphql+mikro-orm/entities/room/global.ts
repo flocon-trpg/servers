@@ -26,11 +26,14 @@ import {
     update,
 } from '@flocon-trpg/core';
 import { Participant } from '../participant/mikro-orm';
-import { recordForEachAsync } from '@flocon-trpg/utils';
+import {
+    ReadonlyNonEmptyArray,
+    isReadonlyNonEmptyArray,
+    recordForEachAsync,
+} from '@flocon-trpg/utils';
 import { User } from '../user/mikro-orm';
 import { nullableStringToParticipantRoleType } from '../../../enums/ParticipantRoleType';
 import { convertToMaxLength100String } from '../../../utils/convertToMaxLength100String';
-import { ReadonlyNonEmptyArray, isNonEmptyArray } from '../../../utils/readonlyNonEmptyArray';
 
 type RoomState = State<typeof roomTemplate>;
 type RoomUpOperation = UpOperation<typeof roomTemplate>;
@@ -60,7 +63,7 @@ const isSequential = <T>(
     const sorted = array
         .map(value => ({ index: getIndex(value), value }))
         .sort((x, y) => x.index - y.index);
-    if (!isNonEmptyArray(sorted)) {
+    if (!isReadonlyNonEmptyArray(sorted)) {
         throw new Error('this should not happen');
     }
     const minIndex = sorted[0].index;
@@ -141,7 +144,7 @@ export namespace GlobalRoom {
                     room: { id: roomId },
                     prevRevision: { $gte: revisionRange.from },
                 });
-                if (!isNonEmptyArray(operationEntities)) {
+                if (!isReadonlyNonEmptyArray(operationEntities)) {
                     if (revisionRange.expectedTo == null) {
                         return Result.ok(undefined);
                     }
