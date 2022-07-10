@@ -2917,11 +2917,15 @@ __metadata:
     "@types/estree": 0.0.51
     "@types/jest": 27.5.2
     "@types/lodash.clonedeep": 4.5.7
+    "@types/sanitize-filename": 1.6.3
+    "@types/truncate-utf8-bytes": 1.0.0
     fp-ts: ^2.11.8
     io-ts: ^2.2.16
     jest: 27.5.1
     lodash.clonedeep: ^4.5.0
     rimraf: 3.0.2
+    sanitize-filename: ^1.6.3
+    truncate-utf8-bytes: ^1.0.2
     ts-jest: 27.1.5
     typescript: 4.4.4
   languageName: unknown
@@ -6833,6 +6837,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/sanitize-filename@npm:1.6.3":
+  version: 1.6.3
+  resolution: "@types/sanitize-filename@npm:1.6.3"
+  dependencies:
+    sanitize-filename: "*"
+  checksum: 009d69b8d1dc68640d1fa7e45d292562f34cf556e7def713794ba2e3a3f90c0b304e48f0bec01d82484dee9212b7ee8b541c97aba0e6b10b42a71ca851395941
+  languageName: node
+  linkType: hard
+
 "@types/scheduler@npm:*":
   version: 0.16.2
   resolution: "@types/scheduler@npm:0.16.2"
@@ -6909,6 +6922,13 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: 9578470db0b527c26e246a1220ae9bffc6bf47f20f89c54aac467c083ab1f7e16c00d9a7b4bb6cb4e2dfae465027270827e5908a6236063f6214625e50585d78
+  languageName: node
+  linkType: hard
+
+"@types/truncate-utf8-bytes@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@types/truncate-utf8-bytes@npm:1.0.0"
+  checksum: df4d452de2f0c9c0811dfd965f2a2e2ed463a3a9836d5504cad766308a40f5e9d6fa14281ab0d960690d1ff2a16dd04b6bdd78b7ff2cb99febfe71cec900d391
   languageName: node
   linkType: hard
 
@@ -22124,7 +22144,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sanitize-filename@npm:^1.6.3":
+"sanitize-filename@npm:*, sanitize-filename@npm:^1.6.3":
   version: 1.6.3
   resolution: "sanitize-filename@npm:1.6.3"
   dependencies:
@@ -24087,7 +24107,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"truncate-utf8-bytes@npm:^1.0.0":
+"truncate-utf8-bytes@npm:^1.0.0, truncate-utf8-bytes@npm:^1.0.2":
   version: 1.0.2
   resolution: "truncate-utf8-bytes@npm:1.0.2"
   dependencies:
