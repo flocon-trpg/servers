@@ -1,4 +1,5 @@
 import { Field, ID, ObjectType } from 'type-graphql';
+import { FileListType } from '../../../enums/FileListType';
 
 @ObjectType()
 export class FileItem {
@@ -25,4 +26,7 @@ export class FileItem {
             'ファイルをアップロードしたユーザー。Firebase AuthenticationのUserUidで表現される。',
     })
     public createdBy!: string;
+
+    @Field(() => FileListType)
+    public listType!: FileListType;
 }
