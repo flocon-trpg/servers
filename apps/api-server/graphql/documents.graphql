@@ -31,6 +31,7 @@ fragment FileItem on FileItem {
     screenname
     createdBy
     createdAt
+    listType
 }
 
 fragment FilePath on FilePath {

@@ -2986,6 +2986,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@flocon-trpg/typed-document-node-v0.7.8@workspace:^, @flocon-trpg/typed-document-node-v0.7.8@workspace:packages/typed-document-node-v0.7.8":
+  version: 0.0.0-use.local
+  resolution: "@flocon-trpg/typed-document-node-v0.7.8@workspace:packages/typed-document-node-v0.7.8"
+  dependencies:
+    "@graphql-typed-document-node/core": ^3.1.0
+    graphql: ^15.6.0
+    rimraf: 3.0.2
+    typescript: 4.4.4
+  languageName: unknown
+  linkType: soft
+
 "@flocon-trpg/utils@workspace:^, @flocon-trpg/utils@workspace:packages/utils":
   version: 0.0.0-use.local
   resolution: "@flocon-trpg/utils@workspace:packages/utils"
@@ -3030,6 +3041,7 @@ __metadata:
     "@flocon-trpg/core": "workspace:^"
     "@flocon-trpg/typed-document-node-v0.7.1": "workspace:^"
     "@flocon-trpg/typed-document-node-v0.7.2": "workspace:^"
+    "@flocon-trpg/typed-document-node-v0.7.8": "workspace:^"
     "@flocon-trpg/utils": "workspace:^"
     "@flocon-trpg/web-server-utils": "workspace:^"
     "@kizahasi/option": ^1.0.0

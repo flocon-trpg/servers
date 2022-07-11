@@ -50,6 +50,7 @@ import path from 'path';
 import { thumbsDir } from '../../utils/thumbsDir';
 import { RateLimitMiddleware } from '../middlewares/RateLimitMiddleware';
 import { FilePermissionType } from '../../enums/FilePermissionType';
+import { FileListType } from '../../enums/FileListType';
 
 export type PongPayload = {
     value: number;
@@ -113,6 +114,10 @@ export class MainResolver {
                 ...file,
                 createdBy: file.createdBy.userUid,
                 createdAt: file.createdAt?.getTime(),
+                listType:
+                    file.listPermission === FilePermissionType.Private
+                        ? FileListType.Unlisted
+                        : FileListType.Public,
             })),
         };
     }
