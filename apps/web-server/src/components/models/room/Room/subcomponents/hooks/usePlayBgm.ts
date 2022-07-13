@@ -43,11 +43,13 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmCoreProps): void {
         }
 
         const src = compact(urlArray.srcData);
-        if (src.length === 0) {
+        const urls = compact(src.map(s => analyzeUrl(s)));
+        if (urls.length === 0) {
             return;
         }
+
         const howl = new Howl({
-            src: src.map(s => analyzeUrl(s).directLink),
+            src: urls.map(url => url.directLink),
             loop: true,
             volume: Math.min(volumeRef.current, volumeCap),
         });

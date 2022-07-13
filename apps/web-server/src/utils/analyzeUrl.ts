@@ -1,4 +1,4 @@
-import parseUrl from 'parse-url';
+import { extname } from './extname';
 
 export const others = 'others';
 export const dropbox = 'dropbox';
@@ -23,34 +23,31 @@ type Result =
 // '/path/name'
 // '/path/name.git'
 // '/'
-const getFileData = (pathname: string): { fileName: string; fileExtension: string | null } => {
+const getFileData = (pathname: string) => {
     const fileName = pathname.split('/').pop();
     if (fileName == null) {
         throw new Error('This should not happen');
     }
-    const fileNameArray = fileName.split('.');
-    const last = fileNameArray.pop();
-    if (last == null) {
-        throw new Error('This should not happen');
-    }
-    const secondLast = fileNameArray.pop();
-    if (secondLast == null || secondLast === '') {
-        return {
-            fileName: last,
-            fileExtension: null,
-        };
-    }
-    return {
-        fileName: secondLast,
-        fileExtension: last,
-    };
+    return extname(fileName);
 };
 
-export const analyzeUrl = (url: string): Result => {
-    const parsed = parseUrl(url);
+export const analyzeUrl = (url: string): Result | null => {
+    let parsed: URL;
+    try {
+        parsed = new URL(url);
+    } catch {
+        return null;
+    }
+    switch (parsed.protocol) {
+        case 'http:':
+        case 'https:':
+            break;
+        default:
+            return null;
+    }
     const fileData = getFileData(parsed.pathname);
-    if (parsed.protocol === 'https') {
-        switch (parsed.resource) {
+    if (parsed.protocol === 'https:') {
+        switch (parsed.host) {
             case 'www.dropbox.com':
                 return {
                     ...fileData,

@@ -9,7 +9,7 @@ export const others = 'others';
 export type FileType = typeof image | typeof sound | typeof others;
 
 export const guessFileType = (name: string): FileType => {
-    switch (extname(name)?.toLowerCase()) {
+    switch (extname(name).fileExtension?.toLowerCase()) {
         case 'jpg':
         case 'jpeg':
         case 'png':

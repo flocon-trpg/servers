@@ -55,8 +55,13 @@ function usePlaySoundEffectCore(value?: SoundEffect): void {
             return;
         }
 
+        const url = analyzeUrl(srcObject.src);
+        if (url == null) {
+            return;
+        }
+
         const howl = new Howl({
-            src: [analyzeUrl(srcObject.src).directLink],
+            src: [url.directLink],
             loop: false,
             volume: Math.min(value.volume * volumeConfigRef.current, volumeCap),
         });
