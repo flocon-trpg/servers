@@ -535,7 +535,11 @@ class ImageDownloader {
     private findCache(filePath: FilePath) {
         switch (filePath.sourceType) {
             case FileSourceType.Default: {
-                return this.defaultImages.get(analyzeUrl(filePath.path).directLink);
+                const url = analyzeUrl(filePath.path);
+                if (url == null) {
+                    return undefined;
+                }
+                return this.defaultImages.get(url.directLink);
             }
             case FileSourceType.FirebaseStorage: {
                 return this.firebaseImages.get(filePath.path);
@@ -547,7 +551,11 @@ class ImageDownloader {
     }
 
     private analyzeUrl(url: string) {
-        const { directLink, fileExtension } = analyzeUrl(url);
+        const analyzed = analyzeUrl(url);
+        if (analyzed == null) {
+            return analyzed;
+        }
+        const { directLink, fileExtension } = analyzed;
         return {
             directLink,
             // Firebase Storageのファイル名は長すぎる上に%などの文字が含まれており、imgのsrcに渡すと正常に動作しない、messages.jsのファイルサイズが大きくなるという2つの問題点があるため、ランダムな文字列に置き換えている。
@@ -592,15 +600,19 @@ class ImageDownloader {
                 break;
             }
         }
+        const url = this.analyzeUrl(srcResult.src);
+        if (url == null) {
+            return null;
+        }
         if (srcResult.type === Uploader) {
             const result: ImageResult = {
-                filename: this.analyzeUrl(srcResult.src).filename,
+                filename: url.filename,
                 blob: srcResult.blob,
             };
             this.uploaderImages.set(filePath.path, result);
             return result;
         }
-        const { directLink, filename } = this.analyzeUrl(srcResult.src);
+        const { directLink, filename } = url;
         const image = await axios.get(directLink, { responseType: 'blob' }).catch(() => null);
         if (image == null) {
             if (filePath.sourceType === FileSourceType.FirebaseStorage) {

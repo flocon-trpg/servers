@@ -98,7 +98,8 @@ export function useImage(src: string | null, size?: Size, crossOrigin?: string):
             img.addEventListener('load', onload);
             img.addEventListener('error', onerror);
             crossOrigin && (img.crossOrigin = crossOrigin);
-            img.src = analyzeUrl(src).directLink;
+            const url = analyzeUrl(src);
+            if (url != null) img.src = url.directLink;
 
             return function cleanup() {
                 img.removeEventListener('load', onload);
