@@ -35,6 +35,7 @@ describe('analyzeUrl', () => {
         './foo',
         'file:./foo',
         'file:///',
+        'javascript:alert("hello!")',
         'ftp://example.com/foo.txt',
         'git@github.com:flocon-trpg/servers.git',
     ])('tests "%o"', invalidUrl => {

@@ -23,7 +23,7 @@ type FileSource =
 
 type PracticalProps = {
     filesSource: FileSource[];
-    style?: React.CSSProperties;
+    defaultFileTypeFilter: string | null;
 };
 
 const toFilePath = (filesSourceRef: { current: FileSource[] }): FilePath[] => {
@@ -36,13 +36,17 @@ const toFilePath = (filesSourceRef: { current: FileSource[] }): FilePath[] => {
             }
             filesSourceRef.current = filesSourceRef.current.filter(x => x.path !== file.path);
         };
+        const onOpen = () => console.log('open', file.path);
+        const onClipboard = () => console.log('clipboard', file.path);
         if (file.type === image) {
             return {
                 fileType: file.type,
                 path: file.path,
                 key: file.path,
-                onClick,
+                onSelect: onClick,
                 onDelete,
+                onOpen,
+                onClipboard,
                 thumb: file.thumb,
             };
         }
@@ -50,14 +54,19 @@ const toFilePath = (filesSourceRef: { current: FileSource[] }): FilePath[] => {
             fileType: file.type,
             path: file.path,
             key: file.path,
-            onClick,
+            onSelect: onClick,
             onDelete,
+            onOpen,
+            onClipboard,
             icon: file.type,
         };
     });
 };
 
-const Practical: React.FC<PracticalProps> = ({ filesSource, style }: PracticalProps) => {
+const Practical: React.FC<PracticalProps> = ({
+    filesSource,
+    defaultFileTypeFilter,
+}: PracticalProps) => {
     const filesSourceRef = React.useRef(filesSource);
     React.useEffect(() => {
         filesSourceRef.current = filesSource;
@@ -69,13 +78,13 @@ const Practical: React.FC<PracticalProps> = ({ filesSource, style }: PracticalPr
 
     return (
         <FileBrowser
+            height={null}
             files={filesState}
-            style={style}
-            onShouldUpdateFilesList={() => {
+            onDelete={() => {
                 setFilesState(toFilePath(filesSourceRef));
             }}
             fileTypes={{
-                defaultFileTypeFilter: null,
+                defaultFileTypeFilter,
                 fileTypes: [
                     {
                         fileType: image,
@@ -91,24 +100,31 @@ const Practical: React.FC<PracticalProps> = ({ filesSource, style }: PracticalPr
                     },
                 ],
             }}
-            disableCreate={() => false}
+            isLocked={() => false}
             onFileCreate={() => Promise.resolve(true)}
+            // TODO: ensuredFolderPathsを用いたstoryも作成する
+            ensuredFolderPaths={[]}
         />
     );
 };
 
 type Props = {
-    style?: FileBrowserProps['style'];
     files?: FileBrowserProps['files'] | undefined;
     filesSource?: FileSource[];
+    defaultFileTypeFilter?: string | null;
 };
 
-export const Default: React.FC<Props> = ({ files, filesSource, style }) => {
+export const Default: React.FC<Props> = ({ files, filesSource, defaultFileTypeFilter }) => {
     if (files == null) {
         if (filesSource == null) {
             throw new Error();
         }
-        return <Practical filesSource={filesSource} style={style} />;
+        return (
+            <Practical
+                filesSource={filesSource}
+                defaultFileTypeFilter={defaultFileTypeFilter ?? null}
+            />
+        );
     }
 
     if (filesSource != null) {
@@ -117,10 +133,11 @@ export const Default: React.FC<Props> = ({ files, filesSource, style }) => {
 
     return (
         <FileBrowser
+            height={null}
             files={files}
-            style={style}
-            disableCreate={() => false}
+            isLocked={() => false}
             onFileCreate={() => Promise.resolve(true)}
+            ensuredFolderPaths={[]}
         />
     );
 };
@@ -129,9 +146,6 @@ export default {
     title: 'models/file/FileBrowser',
     component: Default,
     args: {
-        style: {
-            height: 300,
-        },
         filesSource: [
             {
                 type: image,
@@ -201,6 +215,11 @@ export default {
 
 const Template: ComponentStory<typeof Default> = args => <Default {...args} />;
 
+export const Filtered = Template.bind({});
+Filtered.args = {
+    defaultFileTypeFilter: others,
+};
+
 const deleteSuccess = async () => {
     await delay(1000);
 };
@@ -220,6 +239,8 @@ ManyFiles.args = {
             type: others,
             onClick: () => undefined,
             onDelete: i % 2 === 0 ? deleteSuccess : deleteFail,
+            onOpen: () => undefined,
+            onClipboard: () => undefined,
             path,
         };
     }),

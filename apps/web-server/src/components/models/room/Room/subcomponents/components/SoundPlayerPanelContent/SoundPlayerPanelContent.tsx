@@ -1,19 +1,15 @@
 import React from 'react';
-import { Button, Checkbox, Divider, Drawer, Tooltip } from 'antd';
+import { Button, Checkbox, Modal, Tooltip } from 'antd';
 import {
     FilePathInput,
-    FileSourceType,
     WriteRoomSoundEffectDocument,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Icon from '@ant-design/icons';
-import { FilesManagerDrawer } from '@/components/models/file/FilesManagerDrawer/FilesManagerDrawer';
-import { FilesManagerDrawerType, some } from '@/utils/types';
 import { VolumeBar } from '@/components/ui/VolumeBar/VolumeBar';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { Styles } from '@/styles';
 import { State, StrIndex5, bgmTemplate, filePathTemplate } from '@flocon-trpg/core';
-import _ from 'lodash';
-import { cancelRnd, flex, flexColumn, flexRow, itemsCenter } from '@/styles/className';
+import { flex, flexColumn, flexRow, itemsCenter } from '@/styles/className';
 import classNames from 'classnames';
 import { sound } from '@/utils/fileType';
 import { FilePath as FilePathModule } from '@/utils/file/filePath';
@@ -22,15 +18,27 @@ import { atom } from 'jotai';
 import { roomAtom } from '@/atoms/roomAtom/roomAtom';
 import { useAtomValue } from 'jotai/utils';
 import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
-import { EditorGroupHeader } from '@/components/ui/EditorGroupHeader/EditorGroupHeader';
+import { FileSelectorModal } from '@/components/models/file/FileSelectorModal/FileSelectorModal';
+import { FileView } from '@/components/models/file/FileView/FileView';
+import { keyNames } from '@flocon-trpg/utils';
+import { setStateWithImmer } from '@/utils/setStateWithImmer';
+import { FileSelector } from '@/components/models/file/FileSelector/FileSelector';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { useLatest } from 'react-use';
+import { stretchedModalWidth } from '@/utils/variables';
+import { Fieldset } from '@/components/ui/Fieldset/Fieldset';
 
 type FilePath = State<typeof filePathTemplate>;
 type BgmState = State<typeof bgmTemplate>;
 
+const maxWidthOfLink = 300;
 const defaultVolume = 0.5;
+const initBgmState: BgmState = { $v: 1, $r: 1, isPaused: true, files: [], volume: defaultVolume };
+
+const bgmsAtom = atom(get => get(roomAtom).roomState?.state?.bgms);
 
 const toKey = (source: FilePathInput | FilePath): string => {
-    return `${source.sourceType}:${source.path}`;
+    return keyNames('SoundPlayer', source.sourceType, source.path);
 };
 
 type VolumeBarForSoundPlayerProps = {
@@ -62,131 +70,138 @@ const VolumeBarForSoundPlayer: React.FC<VolumeBarForSoundPlayerProps> = ({
     );
 };
 
-type FilePathViewProps = {
-    filePath: FilePathInput | FilePath;
-    closable?: boolean;
-    onClose?: () => void;
-};
-
-const FilePathView: React.FC<FilePathViewProps> = ({
-    filePath,
-    closable,
-    onClose,
-}: FilePathViewProps) => {
-    let fileName: string;
-    if (filePath.sourceType === FileSourceType.FirebaseStorage) {
-        fileName = _(filePath.path.split('/')).last() ?? '';
-    } else {
-        fileName = filePath.path;
-    }
-
-    return (
-        <div className={classNames(flex, flexRow, itemsCenter)}>
-            <div
-                style={{
-                    flex: 1,
-                    textOverflow: 'ellipsis',
-                    overflow: 'hidden',
-                    whiteSpace: 'nowrap',
-                }}
-            >
-                {fileName}
-            </div>
-            {closable && (
-                <Button
-                    type='text'
-                    size='small'
-                    style={{ flex: 0 }}
-                    onClick={() => (onClose == null ? undefined : onClose())}
-                >
-                    <Icon.CloseOutlined />
-                </Button>
-            )}
-        </div>
-    );
-};
-
-type BgmPlayerDrawerProps = {
+type BgmSimpleModalProps = {
     channelKey: StrIndex5;
     visible: boolean;
     onClose: () => void;
 };
 
-const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({
-    channelKey,
-    visible,
-    onClose,
-}: BgmPlayerDrawerProps) => {
+/** 1曲のみからなるBGMを設定するModal */
+const BgmSimpleModal: React.FC<BgmSimpleModalProps> = ({ channelKey, visible, onClose }) => {
     const setRoomState = useSetRoomStateWithImmer();
-
-    const [filesManagerDrawerType, setFilesManagerDrawerType] =
-        React.useState<FilesManagerDrawerType | null>(null);
-
-    const [filesInput, setFilesInput] = React.useState<FilePathInput[]>([]);
-    const [volumeInput, setVolumeInput] = React.useState<number>(defaultVolume);
-    const [isNotPausedInput, setIsNotPausedInput] = React.useState(false);
+    const currentBgmState = useAtomSelector(bgmsAtom, bgms => bgms?.[channelKey]);
+    const currentBgmStateRef = useLatest(currentBgmState);
+    const [newBgmState, setNewBgmStateCore] = React.useState<BgmState>(
+        currentBgmState ?? initBgmState
+    );
+    const setNewBgmState = setStateWithImmer(setNewBgmStateCore);
 
     React.useEffect(() => {
-        setFilesInput([]);
-        setVolumeInput(defaultVolume);
-        setIsNotPausedInput(false);
-    }, [visible]);
+        setNewBgmStateCore(currentBgmStateRef.current ?? initBgmState);
+    }, [currentBgmStateRef, visible, setNewBgmStateCore]);
 
-    const tags = filesInput.map(file => {
+    return (
+        <Modal
+            visible={visible}
+            onCancel={onClose}
+            width={stretchedModalWidth}
+            footer={<DialogFooter close={{ onClick: onClose, textType: 'cancel' }} />}
+        >
+            <div className={classNames(flex, flexColumn)}>
+                <Fieldset legend='BGMファイルの選択'>
+                    <FileSelector
+                        uploaderFileBrowserHeight={null}
+                        onSelect={newValue => {
+                            setRoomState(room => {
+                                if (room.bgms == null) {
+                                    room.bgms = {};
+                                }
+                                room.bgms[channelKey] = { ...newBgmState, files: [newValue] };
+                            });
+                            onClose();
+                        }}
+                        defaultFileTypeFilter={sound}
+                    />
+                </Fieldset>
+                <Fieldset legend='オプション'>
+                    <VolumeBarForSoundPlayer
+                        volumeBarValue={newBgmState.volume}
+                        onVolumeBarValueChange={newValue =>
+                            setNewBgmState(state => {
+                                state.volume = newValue;
+                            })
+                        }
+                    />
+                    <Checkbox
+                        checked={!newBgmState.isPaused}
+                        onChange={e =>
+                            setNewBgmState(state => {
+                                state.isPaused = !e.target.checked;
+                            })
+                        }
+                    >
+                        すぐに再生を開始する
+                    </Checkbox>
+                </Fieldset>
+            </div>
+        </Modal>
+    );
+};
+
+type BgmPlaylistModalProps = {
+    channelKey: StrIndex5;
+    visible: boolean;
+    onClose: () => void;
+};
+
+/** 複数の曲から構成されるBGMを設定するModal */
+// CONSIDER: 複数の曲から構成されるBGMの機能に需要があるかどうかが疑問視。
+const BgmPlaylistModal: React.FC<BgmPlaylistModalProps> = ({ channelKey, visible, onClose }) => {
+    const setRoomState = useSetRoomStateWithImmer();
+    const currentBgmState = useAtomSelector(bgmsAtom, bgms => bgms?.[channelKey]);
+    const currentBgmStateRef = useLatest(currentBgmState);
+    const [newBgmState, setNewBgmStateCore] = React.useState<BgmState>(
+        currentBgmState ?? initBgmState
+    );
+    const setNewBgmState = setStateWithImmer(setNewBgmStateCore);
+
+    const [modalToAddVisible, setModalToAddVisible] = React.useState(false);
+
+    React.useEffect(() => {
+        setNewBgmStateCore(currentBgmStateRef.current ?? initBgmState);
+    }, [currentBgmStateRef, visible]);
+
+    const files = newBgmState.files.map((file, i) => {
         return (
-            <FilePathView
-                key={toKey(file)}
-                closable
-                onClose={() => {
-                    setFilesInput(oldValue => {
-                        return oldValue.filter(x => !FilePathModule.equals(file, x));
-                    });
-                }}
-                filePath={file}
-            />
+            <div key={toKey(file)} className={classNames(flex, flexRow)}>
+                <FileView
+                    maxWidthOfLink={null}
+                    uploaderFileBrowserHeight={null}
+                    onPathChange={file =>
+                        setNewBgmState(state => {
+                            if (file == null) {
+                                state.files.splice(i, 1);
+                                return;
+                            }
+                            state.files[i] = { ...file, $v: 1, $r: 1 };
+                        })
+                    }
+                    defaultFileTypeFilter={sound}
+                    filePath={file}
+                />
+            </div>
         );
     });
 
     return (
-        <Drawer
-            className={cancelRnd}
-            title={`チャンネル${channelKey}`}
-            width={400}
-            closable
-            onClose={() => onClose()}
+        <Modal
             visible={visible}
+            onCancel={onClose}
             footer={
                 <DialogFooter
-                    close={{ textType: 'cancel', onClick: () => onClose() }}
+                    close={{ textType: 'cancel', onClick: onClose }}
                     ok={{
                         textType: 'ok',
+                        disabled: newBgmState.files.length === 0,
                         onClick: () => {
+                            if (newBgmState.files.length === 0) {
+                                return;
+                            }
                             setRoomState(roomState => {
                                 if (roomState.bgms == null) {
                                     roomState.bgms = {};
                                 }
-                                const bgm = roomState.bgms[channelKey];
-                                if (bgm == null) {
-                                    roomState.bgms[channelKey] = {
-                                        $v: 1,
-                                        $r: 1,
-                                        files: filesInput.map(x => ({
-                                            ...x,
-                                            $v: 1,
-                                            $r: 1,
-                                        })),
-                                        volume: volumeInput,
-                                        isPaused: !isNotPausedInput,
-                                    };
-                                    return;
-                                }
-                                bgm.files = filesInput.map(x => ({
-                                    ...x,
-                                    $v: 1,
-                                    $r: 1,
-                                }));
-                                bgm.volume = volumeInput;
-                                bgm.isPaused = !isNotPausedInput;
+                                roomState.bgms[channelKey] = newBgmState;
                             });
                             onClose();
                         },
@@ -194,64 +209,52 @@ const BgmPlayerDrawer: React.FC<BgmPlayerDrawerProps> = ({
                 />
             }
         >
-            {
-                <FilesManagerDrawer
-                    drawerType={filesManagerDrawerType}
-                    onClose={() => setFilesManagerDrawerType(null)}
-                />
-            }
             <div className={classNames(flex, flexColumn)}>
                 <VolumeBarForSoundPlayer
-                    volumeBarValue={volumeInput}
-                    onVolumeBarValueChange={i => setVolumeInput(i)}
+                    volumeBarValue={newBgmState.volume}
+                    onVolumeBarValueChange={newValue =>
+                        setNewBgmState(state => {
+                            state.volume = newValue;
+                        })
+                    }
                 />
                 <Checkbox
-                    checked={isNotPausedInput}
-                    onChange={e => setIsNotPausedInput(e.target.checked)}
-                >
-                    すぐ再生を開始する
-                </Checkbox>
-                <Divider />
-                <EditorGroupHeader>BGMプレイリスト</EditorGroupHeader>
-                {tags.length === 0 ? 'BGMに指定するファイルが1つも選択されていません。' : tags}
-                <Button
-                    icon={<Icon.PlusOutlined />}
-                    type='dashed'
-                    size='small'
-                    onClick={() =>
-                        setFilesManagerDrawerType({
-                            openFileType: some,
-                            defaultFilteredValue: [sound],
-                            onOpen: file => {
-                                setFilesInput(oldValue => [...oldValue, file]);
-                            },
+                    checked={!newBgmState.isPaused}
+                    onChange={e =>
+                        setNewBgmState(state => {
+                            state.isPaused = !e.target.checked;
                         })
                     }
                 >
-                    ファイルを追加
-                </Button>
+                    すぐに再生を開始する
+                </Checkbox>
+                {files.length === 0 ? <div>BGMが1つも指定されていません。</div> : files}
+                <Button onClick={() => setModalToAddVisible(true)}>BGMを追加</Button>
+                <FileSelectorModal
+                    visible={modalToAddVisible}
+                    uploaderFileBrowserHeight={null}
+                    onClose={() => setModalToAddVisible(false)}
+                    defaultFileTypeFilter={sound}
+                    onSelect={newValue => {
+                        setNewBgmState(state => {
+                            state.files.push({ ...newValue, $v: 1, $r: 1 });
+                        });
+                    }}
+                />
             </div>
-        </Drawer>
+        </Modal>
     );
 };
 
-type SePlayerDrawerProps = {
+type SeModalProps = {
     visible: boolean;
     onClose: () => void;
 };
 
-const roomIdAtom = atom(get => get(roomAtom).roomId);
-
-const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({
-    visible,
-    onClose,
-}: SePlayerDrawerProps) => {
+const SeModal: React.FC<SeModalProps> = ({ visible, onClose }) => {
     const roomId = useAtomValue(roomIdAtom);
-    const [filesManagerDrawerType, setFilesManagerDrawerType] =
-        React.useState<FilesManagerDrawerType | null>(null);
 
     const [, writeRoomSoundEffect] = useMutation(WriteRoomSoundEffectDocument);
-    const [fileInput, setFileInput] = React.useState<FilePathInput>();
     const [volumeInput, setVolumeInput] = React.useState<number>(defaultVolume);
 
     if (roomId == null) {
@@ -259,87 +262,31 @@ const SePlayerDrawer: React.FC<SePlayerDrawerProps> = ({
     }
 
     return (
-        <Drawer
-            className={cancelRnd}
-            title='SE'
-            width={400}
-            closable
-            visible={visible}
-            onClose={() => onClose()}
-            footer={
-                <DialogFooter
-                    close={{
-                        textType: 'cancel',
-                        onClick: () => {
-                            setFileInput(undefined);
-                            onClose();
-                        },
-                    }}
-                    ok={{
-                        textType: 'ok',
-                        disabled: fileInput == null,
-                        onClick: () => {
-                            if (fileInput == null) {
-                                return;
-                            }
-
-                            // Promiseの結果を待たずに処理を続行している
-                            writeRoomSoundEffect({
-                                roomId,
-                                file: fileInput,
-                                volume: volumeInput,
-                            });
-                            setFileInput(undefined);
-                            onClose();
-                        },
-                    }}
-                />
-            }
-        >
-            {
-                <FilesManagerDrawer
-                    drawerType={filesManagerDrawerType}
-                    onClose={() => setFilesManagerDrawerType(null)}
-                />
-            }
+        <Modal visible={visible} onCancel={onClose}>
             <div className={classNames(flex, flexColumn)}>
                 <VolumeBarForSoundPlayer
                     volumeBarValue={volumeInput}
-                    onVolumeBarValueChange={i => setVolumeInput(i)}
+                    onVolumeBarValueChange={newValue => setVolumeInput(newValue)}
                 />
-                <Divider />
-                <EditorGroupHeader>ファイル</EditorGroupHeader>
-                {fileInput && (
-                    <FilePathView
-                        closable
-                        onClose={() => {
-                            setFileInput(undefined);
-                        }}
-                        filePath={fileInput}
-                    />
-                )}
-                {!fileInput && (
-                    <Button
-                        icon={<Icon.PlusOutlined />}
-                        type='dashed'
-                        size='small'
-                        onClick={() =>
-                            setFilesManagerDrawerType({
-                                openFileType: some,
-                                defaultFilteredValue: [sound],
-                                onOpen: file => {
-                                    setFileInput(file);
-                                },
-                            })
-                        }
-                    >
-                        ファイルを選択
-                    </Button>
-                )}
+                <FileSelector
+                    uploaderFileBrowserHeight={null}
+                    onSelect={newValue => {
+                        // Promiseの結果を待たずに処理を続行している
+                        writeRoomSoundEffect({
+                            roomId,
+                            file: FilePathModule.toGraphQL(newValue),
+                            volume: volumeInput,
+                        });
+                        onClose();
+                    }}
+                    defaultFileTypeFilter={sound}
+                />
             </div>
-        </Drawer>
+        </Modal>
     );
 };
+
+const roomIdAtom = atom(get => get(roomAtom).roomId);
 
 type BgmPlayerProps = {
     channelKey: StrIndex5;
@@ -350,7 +297,8 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
     const defaultVolume = 0.5;
 
     const setRoomState = useSetRoomStateWithImmer();
-    const [isDrawerVisible, setIsDrawerVisible] = React.useState(false);
+    const [isSimpleModalVisible, setIsSimpleModalVisible] = React.useState(false);
+    const [isPlaylistModalVisible, setIsPlaylistModalVisible] = React.useState(false);
     const [volumeInput, setVolumeInput] = React.useState<number>();
 
     React.useEffect(() => {
@@ -358,15 +306,28 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
     }, [bgmState?.volume]);
 
     const tags = (bgmState?.files ?? []).map(file => {
-        return <FilePathView key={toKey(file)} filePath={file} />;
+        return (
+            <FileView
+                key={toKey(file)}
+                uploaderFileBrowserHeight={null}
+                filePath={file}
+                onPathChange={null}
+                maxWidthOfLink={maxWidthOfLink}
+            />
+        );
     });
 
     return (
         <div className={classNames(flex, flexColumn)}>
-            <BgmPlayerDrawer
+            <BgmSimpleModal
                 channelKey={channelKey}
-                visible={isDrawerVisible}
-                onClose={() => setIsDrawerVisible(false)}
+                visible={isSimpleModalVisible}
+                onClose={() => setIsSimpleModalVisible(false)}
+            />
+            <BgmPlaylistModal
+                channelKey={channelKey}
+                visible={isPlaylistModalVisible}
+                onClose={() => setIsPlaylistModalVisible(false)}
             />
             <div className={classNames(flex, flexRow, itemsCenter)}>
                 <div style={Styles.Text.larger}>
@@ -422,10 +383,18 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
                 <Button
                     size='small'
                     onClick={() => {
-                        setIsDrawerVisible(true);
+                        setIsSimpleModalVisible(true);
                     }}
                 >
                     編集
+                </Button>
+                <Button
+                    size='small'
+                    onClick={() => {
+                        setIsPlaylistModalVisible(true);
+                    }}
+                >
+                    編集(複数の音声ファイル)
                 </Button>
                 <Button
                     size='small'
@@ -458,27 +427,22 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
     );
 };
 
-const bgmsAtom = atom(get => get(roomAtom).roomState?.state?.bgms);
-
 export const SoundPlayerPanelContent: React.FC = () => {
     const bgmsState = useAtomValue(bgmsAtom);
-    const [isSeDrawerVisible, setIsSeDrawerVisible] = React.useState(false);
+    const [isSeModalVisible, setIsSeModalVisible] = React.useState(false);
 
     const padding = 16;
 
     return (
         <div>
-            <SePlayerDrawer
-                visible={isSeDrawerVisible}
-                onClose={() => setIsSeDrawerVisible(false)}
-            />
+            <SeModal visible={isSeModalVisible} onClose={() => setIsSeModalVisible(false)} />
 
             <div style={Styles.Text.larger}>SE</div>
             <Button
                 size='small'
                 style={{ marginTop: 2 }}
                 onClick={() => {
-                    setIsSeDrawerVisible(true);
+                    setIsSeModalVisible(true);
                 }}
             >
                 流す
