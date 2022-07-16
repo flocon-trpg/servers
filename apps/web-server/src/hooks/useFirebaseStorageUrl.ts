@@ -1,21 +1,19 @@
 import { firebaseStorageAtom } from '@/pages/_app';
 import {
-    queryFunction,
-    queryKey,
     reference as referenceType,
     string,
     toReference,
-} from '@/queries/firebaseUrlQuery';
+    useFirebaseStorageUrlQuery,
+} from '@/hooks/useFirebaseStorageUrlQuery';
 import { StorageReference } from 'firebase/storage';
 import { useAtomValue } from 'jotai';
 import React from 'react';
-import { useQuery } from 'react-query';
 
 type Props = {
     reference: StorageReference | string;
 };
 
-export const useFirebaseUrl = ({ reference }: Props) => {
+export const useFirebaseStorageUrl = ({ reference }: Props) => {
     const storage = useAtomValue(firebaseStorageAtom);
 
     const referenceSource =
@@ -25,12 +23,9 @@ export const useFirebaseUrl = ({ reference }: Props) => {
                   type: referenceType,
                   reference,
               } as const);
-
     const $reference = toReference(referenceSource);
 
-    const queryResult = useQuery(queryKey($reference), () => queryFunction($reference), {
-        retry: true,
-    });
+    const queryResult = useFirebaseStorageUrlQuery($reference);
 
     return React.useMemo(
         () => ({

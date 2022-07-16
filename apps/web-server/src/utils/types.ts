@@ -1,7 +1,5 @@
 import { PixelPosition } from '@/components/models/room/Room/subcomponents/utils/positionAndSizeAndRect';
-import { FilterValue } from 'antd/lib/table/interface';
 import { create, update } from './constants';
-import { FilePath } from './file/filePath';
 
 export type BoardType =
     | { type: 'boardEditor'; boardEditorPanelId: string }
@@ -19,20 +17,6 @@ export type CharacterTagNames = {
     characterTag9Name: string | undefined;
     characterTag10Name: string | undefined;
 };
-
-export const none = 'none';
-export const some = 'some';
-
-export type FilesManagerDrawerType =
-    | {
-          openFileType: typeof none;
-          defaultFilteredValue?: FilterValue | undefined;
-      }
-    | {
-          openFileType: typeof some;
-          onOpen: (path: FilePath) => void;
-          defaultFilteredValue: FilterValue | undefined;
-      };
 
 export type PublicChannelNames = {
     publicChannel1Name: string;

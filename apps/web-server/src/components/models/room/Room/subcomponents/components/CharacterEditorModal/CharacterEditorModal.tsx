@@ -1,9 +1,7 @@
 import { Button, Modal, Tooltip } from 'antd';
 import React from 'react';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
-import { InputFile } from '../../../../../file/InputFile/InputFile';
-import { FilesManagerDrawerType } from '@/utils/types';
-import { FilesManagerDrawer } from '../../../../../file/FilesManagerDrawer/FilesManagerDrawer';
+import { FileView } from '../../../../../file/FileView/FileView';
 import { NumberParameterInput } from '../NumberParameterInput/NumberParameterInput';
 import { BooleanParameterInput } from '../BooleanParameterInput/BooleanParameterInput';
 import { StringParameterInput } from '../StringParameterInput/StringParameterInput';
@@ -41,6 +39,7 @@ import { Table, TableCombinedRow, TableHeader, TableRow } from '@/components/ui/
 import { keyNames } from '@flocon-trpg/utils';
 import { useMemoOne } from 'use-memo-one';
 import { commandEditorModalAtom } from '../CommandEditorModal/CommandEditorModal';
+import { image } from '@/utils/fileType';
 
 type CharacterState = State<typeof characterTemplate>;
 
@@ -278,8 +277,6 @@ export const CharacterEditorModal: React.FC = () => {
         updateState: updateCharacter,
         ok,
     } = useStateEditor({ createMode, updateMode });
-    const [filesManagerDrawerType, setFilesManagerDrawerType] =
-        React.useState<FilesManagerDrawerType | null>(null);
 
     return React.useMemo(() => {
         if (
@@ -480,7 +477,7 @@ export const CharacterEditorModal: React.FC = () => {
                         </TableRow>
 
                         <TableRow label='アイコン画像'>
-                            <InputFile
+                            <FileView
                                 filePath={character.image ?? undefined}
                                 onPathChange={path =>
                                     updateCharacter(character => {
@@ -491,14 +488,15 @@ export const CharacterEditorModal: React.FC = () => {
                                             path == null ? undefined : FilePath.toOt(path);
                                     })
                                 }
-                                openFilesManager={setFilesManagerDrawerType}
                                 showImage
                                 maxWidthOfLink={100}
+                                uploaderFileBrowserHeight={null}
+                                defaultFileTypeFilter={image}
                             />
                         </TableRow>
 
                         <TableRow label='立ち絵画像'>
-                            <InputFile
+                            <FileView
                                 filePath={character.portraitImage ?? undefined}
                                 onPathChange={path =>
                                     updateCharacter(character => {
@@ -509,9 +507,10 @@ export const CharacterEditorModal: React.FC = () => {
                                             path == null ? undefined : FilePath.toOt(path);
                                     })
                                 }
-                                openFilesManager={setFilesManagerDrawerType}
                                 showImage
                                 maxWidthOfLink={100}
+                                defaultFileTypeFilter={image}
+                                uploaderFileBrowserHeight={null}
                             />
                         </TableRow>
 
@@ -778,18 +777,12 @@ export const CharacterEditorModal: React.FC = () => {
                         </div>
                     </div>
                 </div>
-
-                <FilesManagerDrawer
-                    drawerType={filesManagerDrawerType}
-                    onClose={() => setFilesManagerDrawerType(null)}
-                />
             </Modal>
         );
     }, [
         atomValue,
         boolParamNames,
         character,
-        filesManagerDrawerType,
         isMyCharacter,
         myUserUid,
         numParamNames,

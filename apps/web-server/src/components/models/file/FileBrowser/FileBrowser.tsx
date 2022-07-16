@@ -23,6 +23,7 @@ import {
     Menu,
     Modal,
     Select,
+    Tooltip,
     notification,
 } from 'antd';
 import { VirtuosoGrid } from 'react-virtuoso';
@@ -41,6 +42,8 @@ import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { useLatest } from 'react-use';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { Option } from '@kizahasi/option';
+import { sanitizeFoldername } from '@flocon-trpg/core';
+import { mergeStyles } from '@/utils/mergeStyles';
 
 export const image = 'image';
 export const sound = 'sound';
@@ -53,8 +56,12 @@ const none = '__none__';
 
 const columnGap = '4px 0';
 
+const splitter = '/';
+
 type FilePathBase = {
     key: string;
+
+    /** ファイルのフィルター設定で用いる識別子を表します。フィルター設定を使わない場合は undefined を渡してください。*/
     fileType?: string;
 
     /** 画像のサムネイルを表します。省略した場合はiconが代わりに表示されます。 */
@@ -63,31 +70,69 @@ type FilePathBase = {
     /** ファイルのアイコンを表します。thumbが指定されている場合はそちらが優先されます。 */
     icon?: typeof image | typeof sound | typeof others;
 
-    onClick?: () => void;
+    /** ユーザーがファイルを選択したときの動作を示します（ただし、複数選択モードが有効になっているときに選択されたときは除きます）。コンテキストメニューから選択しようとしたときもトリガーされます。undefined の場合は、コンテキストメニューからの選択は非表示になります。 */
+    onSelect?: () => void;
+
+    onOpen: () => void;
+
     onDelete: () => Promise<void>;
+
+    onClipboard: () => void;
 };
 
 export type FilePath = FilePathBase & {
-    // 例: 'foo.png', 'alpha/beta/gamma.mp3'
-    // 半角スラッシュのみをパスの区切りとみなす。半角スラッシュをエスケープすることはできない。
+    /** ファイルのパスを表します。 半角スラッシュがパスの区切りとみなされます。半角スラッシュをエスケープすることはできません。（名前が空のフォルダを意図していないのでない限り）stringの先頭と末尾には半角スラッシュを付けないでください。
+     *
+     * このコンポーネントにおいて、どのようなファイル名で表示されてほしいか、どのようなフォルダに入っていてほしいかを表す値であるため、必ずしも実際のパスと等しくする必要はありません。
+     *
+     * @example 'foo.png', 'alpha/beta/gamma.mp3'
+     */
     path: string;
 };
 
-type FileTypes = {
-    fileTypes: readonly { fileType: string; name: string }[];
+export type FileTypes = {
+    /** 使用可能なフィルターを設定します。 */
+    fileTypes: readonly {
+        /** これとFilePathBase.fileTypeが等しいファイルをフィルターの対象にします。 */
+        fileType: string;
+
+        /** UIに表示されるフィルターの名前です。 */
+        name: string;
+    }[];
+
+    /** null以外の値を渡した場合、デフォルトで選択されるフィルターのfileTypeを指定できます。null以外の値を渡した場合でも、ユーザーはフィルターを変更することができます。 */
     defaultFileTypeFilter: string | null;
 };
 
-type DisableCreate = (absolutePath: readonly string[]) => boolean;
+type IsLocked = (absolutePath: readonly string[]) => boolean;
 
-// VirtuosoGridの仕様により、styleなどでheightを指定しないと表示されない
+type EnsuredFolderPath = {
+    /** 半角スラッシュがパスの区切りとみなされます。（名前が空のフォルダを意図していないのでない限り）stringの先頭と末尾には半角スラッシュを付けないでください。*/
+    path: string;
+
+    /** このフォルダの上部に追加で表示するコンポーネントを指定できます。 */
+    header?: React.ReactNode;
+};
+
+const defaultHeight = 350;
+
 export type Props = {
     files: readonly FilePath[];
+
+    // VirtuosoGridの仕様により、heightを指定しないと表示されない。指定しない場合はdefaultHeightが使われる
+    height: number | null;
+
     style?: React.CSSProperties;
     fileTypes?: FileTypes;
-    onShouldUpdateFilesList?: () => void;
-    disableCreate: DisableCreate;
-    onFileCreate: (absolutePath: readonly string[]) => Promise<boolean>;
+    onDelete?: () => void;
+
+    /** trueが返されたファイルパスでは、ファイルおよびフォルダの作成と削除ができなくなり、複数選択モードが無効化されます。 */
+    isLocked: IsLocked;
+
+    onFileCreate: (absolutePath: readonly string[]) => void;
+
+    /** ファイルの有無にかかわらず、常に表示するフォルダを指定できます。 */
+    ensuredFolderPaths: readonly EnsuredFolderPath[];
 };
 
 type FilePathNode = FilePathBase & {
@@ -117,7 +162,7 @@ type Folder = {
     name: string;
 };
 
-/** 存在しないフォルダにファイルを新規作成するために、ユーザーによって作成された仮のフォルダ。*/
+/** 仮想的なフォルダ。FilePathBase.pathのみでは空のフォルダが扱えないため、これによって表現されます。存在しないフォルダにファイルを新規作成するために、ユーザーによって作成された仮のフォルダなどの用途で利用されます。*/
 type VirtualFolder = {
     type: typeof virtualFolder;
 
@@ -130,6 +175,7 @@ type VirtualFolder = {
 
 type VirtualFolderNode = VirtualFolder & {
     key: string;
+    header: React.ReactNode | undefined;
 };
 
 type Node = FilePathNode | Folder | VirtualFolderNode;
@@ -169,7 +215,7 @@ const useCreateNodes = () => {
             } as const;
         });
         const virtualFolderNodes: VirtualFolderNode[] = [
-            ...virtualFolders.createSubTree(currentDirectory, () => undefined).getChildren(),
+            ...virtualFolders.createSubTree(currentDirectory, () => ({})).getChildren(),
         ].flatMap(([name, $folder]) => {
             const equals = <T,>(x: readonly T[], y: readonly T[]): boolean => {
                 return groupJoinArray(x, y).every(elem => {
@@ -194,6 +240,7 @@ const useCreateNodes = () => {
                     absolutePath: $folder.absolutePath,
                     key,
                     name,
+                    header: $folder.value.value?.header,
                 } as const,
             ];
         });
@@ -207,7 +254,7 @@ const useCreateNodes = () => {
                 return -1;
             }
             if (y.type === folder || y.type === virtualFolder) {
-                return -1;
+                return 1;
             }
 
             return x.name.localeCompare(y.name);
@@ -266,6 +313,7 @@ const useToggleSelectedFolder = () => {
 };
 
 const currentDirectoryAtomCore = atom<readonly string[]>([]);
+/** 現在表示しているディレクトリを表します。 */
 const currentDirectoryAtom = atom(
     get => get(currentDirectoryAtomCore),
     (get, set, update: (oldValue: readonly string[]) => readonly string[]) => {
@@ -278,22 +326,23 @@ const currentDirectoryAtom = atom(
     }
 );
 const propsAtom = atom<Props | null>(null);
-const disableCreateValueAtom = atom(get => {
-    const disableCreate = get(propsAtom)?.disableCreate;
-    if (disableCreate == null) {
+const isLockedValueAtom = atom(get => {
+    const isLocked = get(propsAtom)?.isLocked;
+    if (isLocked == null) {
         return false;
     }
     const currentDirectory = get(currentDirectoryAtom);
-    return disableCreate(currentDirectory);
+    return isLocked(currentDirectory);
 });
 const isMultipleSelectModeAtom = atom(false);
 const rootFolderAtom = atom<FolderMap>(new MultiKeyMap<string, { files: FilePathNode[] }>());
 const deleteStatusAtom = atom<DeleteStatus>({ type: 'none' });
 const fileTypeFilterAtom = atom<string | null>(null);
 const fileNameFilterAtom = atom<string>('');
-const virtualFoldersAtom = atom(new DeletableTree<string, undefined>(Option.some(undefined)));
-const useAddVirtualFolder = () => {
-    const setVirtualFolders = useSetAtom(virtualFoldersAtom);
+/** ユーザーが作成したVirtualFolderの一覧を表します。 */
+const tempVirtualFoldersAtom = atom(new DeletableTree<string, undefined>(Option.some(undefined)));
+const useAddTempVirtualFolder = () => {
+    const setVirtualFolders = useSetAtom(tempVirtualFoldersAtom);
     return React.useCallback(
         (newValue: VirtualFolder) => {
             setVirtualFolders(oldValue => {
@@ -309,6 +358,29 @@ const useAddVirtualFolder = () => {
         [setVirtualFolders]
     );
 };
+const ensuredVirtualFoldersAtom = atom(
+    new DeletableTree<string, Omit<EnsuredFolderPath, 'path'>>(Option.some({}))
+);
+const virtualFoldersAtom = atom(get => {
+    const tempVirtualFolders = get(tempVirtualFoldersAtom);
+    const ensuredVirtualFolders = get(ensuredVirtualFoldersAtom);
+    const result = new DeletableTree<string, Omit<EnsuredFolderPath, 'path'>>();
+    for (const elem of tempVirtualFolders.traverse()) {
+        result.ensure(
+            elem.absolutePath,
+            () => ({}),
+            () => ({})
+        );
+    }
+    for (const elem of ensuredVirtualFolders.traverse()) {
+        result.ensure(
+            elem.absolutePath,
+            () => elem.value,
+            () => ({})
+        );
+    }
+    return result;
+});
 const isDeleteModalVisibleAtom = atom(false);
 
 const useIsSelected = (node: Node): boolean => {
@@ -620,8 +692,8 @@ const ModalToCreateFolder: React.FC<{ visible: boolean; onClose: () => void }> =
 }) => {
     const currentDirectory = useAtomValue(currentDirectoryAtom);
     const [folderName, setFolderName] = React.useState('');
-    const addVirtualFolder = useAddVirtualFolder();
-    const isFolderNameInvalid = folderName.includes('/');
+    const addVirtualFolder = useAddTempVirtualFolder();
+    const isFolderNameInvalid = sanitizeFoldername(folderName) !== folderName;
     const inputRef = React.useRef<InputRef | null>(null);
 
     React.useEffect(() => {
@@ -647,6 +719,7 @@ const ModalToCreateFolder: React.FC<{ visible: boolean; onClose: () => void }> =
         <Modal
             visible={visible}
             title='新しいフォルダの作成'
+            onCancel={onClose}
             footer={
                 <DialogFooter
                     ok={{
@@ -677,7 +750,7 @@ const ModalToCreateFolder: React.FC<{ visible: boolean; onClose: () => void }> =
                     <Alert
                         type='error'
                         showIcon
-                        message='フォルダ名に半角スラッシュを含めることはできません。'
+                        message='無効なフォルダ名です。フォルダ名が長すぎないか、半角スラッシュが含まれていないか確認してください。'
                     />
                 )}
             </div>
@@ -691,12 +764,8 @@ const ActionBar: React.FC = () => {
     const setSelectedFolders = useSetAtom(selectedFoldersAtom);
     const requestDeleteSelectedFiles = useRequestDeleteSelectedFiles();
     const currentDirectory = useAtomValue(currentDirectoryAtom);
-    const disableCreateValue = useAtomValue(disableCreateValueAtom);
+    const isLockedValue = useAtomValue(isLockedValueAtom);
     const onFileCreate = useAtomSelector(propsAtom, props => props?.onFileCreate);
-    const onShouldUpdateFilesList = useAtomSelector(
-        propsAtom,
-        props => props?.onShouldUpdateFilesList
-    );
     const [isModalToCreateFolderVisible, setIsModalToCreateFolderVisible] = React.useState(false);
 
     const rowGap = '0 4px';
@@ -704,33 +773,47 @@ const ActionBar: React.FC = () => {
     return (
         <div className={classNames(flex, flexColumn)} style={{ gap: columnGap }}>
             <div className={classNames(flex, flexRow, itemsCenter)} style={{ gap: rowGap }}>
-                <Button
-                    disabled={disableCreateValue}
-                    onClick={() => {
-                        if (disableCreateValue) {
-                            return;
-                        }
-                        if (onFileCreate == null) {
-                            return;
-                        }
-                        onFileCreate(currentDirectory).then(() => {
-                            onShouldUpdateFilesList && onShouldUpdateFilesList();
-                        });
-                    }}
+                <Tooltip
+                    overlay={
+                        isLockedValue
+                            ? 'このフォルダにおけるファイルの作成は無効化されています。'
+                            : undefined
+                    }
                 >
-                    ファイルを作成
-                </Button>
-                <Button
-                    disabled={disableCreateValue}
-                    onClick={() => {
-                        if (disableCreateValue) {
-                            return;
-                        }
-                        setIsModalToCreateFolderVisible(true);
-                    }}
+                    <Button
+                        disabled={isLockedValue}
+                        onClick={() => {
+                            if (isLockedValue) {
+                                return;
+                            }
+                            if (onFileCreate == null) {
+                                return;
+                            }
+                            onFileCreate(currentDirectory);
+                        }}
+                    >
+                        ファイルを作成
+                    </Button>
+                </Tooltip>
+                <Tooltip
+                    overlay={
+                        isLockedValue
+                            ? 'このフォルダにおけるフォルダの作成は無効化されています。'
+                            : undefined
+                    }
                 >
-                    フォルダを作成
-                </Button>
+                    <Button
+                        disabled={isLockedValue}
+                        onClick={() => {
+                            if (isLockedValue) {
+                                return;
+                            }
+                            setIsModalToCreateFolderVisible(true);
+                        }}
+                    >
+                        フォルダを作成
+                    </Button>
+                </Tooltip>
             </div>
             <div
                 className={classNames(flex, flexRow, itemsCenter)}
@@ -739,12 +822,21 @@ const ActionBar: React.FC = () => {
                     gap: rowGap,
                 }}
             >
-                <Checkbox
-                    checked={isMultipleSelectMode}
-                    onClick={() => setIsMultipleSelectMode(prevValue => !prevValue)}
+                <Tooltip
+                    overlay={
+                        isLockedValue
+                            ? 'このフォルダでは複数選択モードは無効化されています。'
+                            : undefined
+                    }
                 >
-                    複数選択モード
-                </Checkbox>
+                    <Checkbox
+                        disabled={isLockedValue}
+                        checked={isMultipleSelectMode}
+                        onClick={() => setIsMultipleSelectMode(prevValue => !prevValue)}
+                    >
+                        複数選択モード
+                    </Checkbox>
+                </Tooltip>
                 {isMultipleSelectMode && (
                     <Button
                         onClick={() => {
@@ -817,22 +909,12 @@ const NodeView: React.FC<{
     node: Node;
 }> = ({ node }) => {
     const isSelectMode = useAtomValue(isMultipleSelectModeAtom);
-    const fileTypeFilter = useAtomValue(fileTypeFilterAtom);
-    const fileNameFilter = useAtomValue(fileNameFilterAtom);
     const [currentDirectory, setCurrentDirectory] = useAtom(currentDirectoryAtom);
-    const setVirtualFolders = useSetAtom(virtualFoldersAtom);
+    const setVirtualFolders = useSetAtom(tempVirtualFoldersAtom);
     const toggleSelectedFile = useToggleSelectedFile();
     const toggleSelectedFolder = useToggleSelectedFolder();
     const isSelected = useIsSelected(node);
     const requestDeleteFiles = useRequestDeleteFiles();
-
-    if (fileTypeFilter != null && node.type === file && node.fileType !== fileTypeFilter) {
-        return null;
-    }
-
-    if (fileNameFilter !== '' && node.name.indexOf(fileNameFilter) < 0) {
-        return null;
-    }
 
     const size = 40;
     let fileElement: React.ReactNode;
@@ -916,7 +998,10 @@ const NodeView: React.FC<{
                 });
         }
 
-        return node.onClick;
+        if (node.onSelect == null) {
+            return node.onOpen;
+        }
+        return node.onSelect;
     })();
 
     const createMenuKey = (key: string | number) => keyNames('FileBrowser', 'CellElement', key);
@@ -935,9 +1020,17 @@ const NodeView: React.FC<{
                     : {
                           key: createMenuKey(2),
                           label: 'ファイルを開く',
+                          onClick: node.onOpen,
+                      },
+                node.type === folder || node.type === virtualFolder
+                    ? null
+                    : {
+                          key: createMenuKey(3),
+                          label: 'コマンドに使用するリンクとしてクリップボードにコピー',
+                          onClick: node.onClipboard,
                       },
                 {
-                    key: createMenuKey(3),
+                    key: createMenuKey(4),
                     label: '削除',
                     onClick: () => {
                         {
@@ -973,10 +1066,10 @@ const NodeView: React.FC<{
                 className={classNames(flex, flexColumn)}
                 css={cellElementCss}
                 tabIndex={0}
-                onClick={() => onSelect && onSelect()}
+                onClick={() => onSelect()}
                 onKeyDown={e => {
                     if (e.code === 'Space') {
-                        onSelect && onSelect();
+                        onSelect();
                     }
                 }}
             >
@@ -1011,29 +1104,65 @@ const ListContainer = styled.div`
 
 const NodesGrid: React.FC = () => {
     const nodes = useCreateNodes();
+    const ensuredVirtualFolders = useAtomValue(ensuredVirtualFoldersAtom);
+    const currentDirectory = useAtomValue(currentDirectoryAtom);
+    const ensuredVirtualFolder = ensuredVirtualFolders.get(currentDirectory);
+    const fileTypeFilter = useAtomValue(fileTypeFilterAtom);
+    const fileNameFilter = useAtomValue(fileNameFilterAtom);
+    const filteredNodes = React.useMemo(() => {
+        return nodes.filter(node => {
+            if (fileTypeFilter != null && node.type === file && node.fileType !== fileTypeFilter) {
+                return false;
+            }
 
+            if (fileNameFilter !== '' && node.name.indexOf(fileNameFilter) < 0) {
+                return false;
+            }
+            return true;
+        });
+    }, [fileNameFilter, fileTypeFilter, nodes]);
+
+    const header: React.ReactNode = ensuredVirtualFolder.isNone
+        ? undefined
+        : ensuredVirtualFolder.value.header;
+
+    let main: JSX.Element;
     if (nodes.length === 0) {
-        return <div>not found</div>;
+        main = (
+            <div style={{ padding: 4, fontSize: '1.3rem' }}>
+                このフォルダにはフォルダおよびファイルがありません。
+            </div>
+        );
+    } else if (filteredNodes.length === 0) {
+        main = (
+            <div style={{ padding: 4, fontSize: '1.3rem' }}>
+                フォルダおよび条件にマッチするファイルがありません。
+            </div>
+        );
+    } else {
+        main = (
+            <VirtuosoGrid
+                totalCount={filteredNodes.length}
+                components={{
+                    List: ListContainer as any,
+                }}
+                itemContent={index => <NodeView node={filteredNodes[index]!} />}
+                computeItemKey={index => filteredNodes[index]!.key}
+            />
+        );
     }
 
     return (
-        <VirtuosoGrid
-            totalCount={nodes.length}
-            components={{
-                List: ListContainer as any,
-            }}
-            itemContent={index => <NodeView node={nodes[index]!} />}
-            computeItemKey={index => nodes[index]!.key}
-        />
+        <div className={classNames(flex, flexColumn)} style={{ gap: '16px', height: '100%' }}>
+            {header}
+            {main}
+        </div>
     );
 };
 
 const useStartAutoDeleteFiles = () => {
-    const onShouldUpdateFilesList = useAtomSelector(
-        propsAtom,
-        props => props?.onShouldUpdateFilesList
-    );
-    const onShouldUpdateFilesListRef = useLatest(onShouldUpdateFilesList);
+    const onDelete = useAtomSelector(propsAtom, props => props?.onDelete);
+    const onDeleteRef = useLatest(onDelete);
     const [deleteStatus, setDeleteStatus] = useAtom(deleteStatusAtom);
     const [isDeleting, setIsDeleting] = React.useState(false);
     const [hasDeleted, setHasDeleted] = React.useState(false);
@@ -1046,7 +1175,7 @@ const useStartAutoDeleteFiles = () => {
         }
         if (deleteStatus.type !== 'deleting') {
             if (hasDeleted) {
-                onShouldUpdateFilesListRef.current && onShouldUpdateFilesListRef.current();
+                onDeleteRef.current && onDeleteRef.current();
                 setHasDeleted(false);
             }
             return;
@@ -1107,7 +1236,7 @@ const useStartAutoDeleteFiles = () => {
         deleteStatusFilesRef,
         hasDeleted,
         isDeleting,
-        onShouldUpdateFilesListRef,
+        onDeleteRef,
         setDeleteStatus,
     ]);
 };
@@ -1126,6 +1255,20 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
         setFileFilter(defaultFileTypeFilterProp);
     }, [defaultFileTypeFilterProp, setFileFilter]);
 
+    const setEnsuredVirtualFolders = useSetAtom(ensuredVirtualFoldersAtom);
+    React.useEffect(() => {
+        const newState = new DeletableTree<string, Omit<EnsuredFolderPath, 'path'>>();
+        for (const path of props.ensuredFolderPaths) {
+            newState.ensure(
+                path.path.split(splitter),
+                () => path,
+                () => ({})
+            );
+        }
+        setEnsuredVirtualFolders(newState);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [setEnsuredVirtualFolders, ...props.ensuredFolderPaths]);
+
     const setRootFolder = useSetAtom(rootFolderAtom);
     const rootFoler: FolderMap = React.useMemo(() => {
         const folder = new MultiKeyMap<
@@ -1135,7 +1278,7 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
             }
         >();
         for (const filePath of props.files) {
-            const directory = filePath.path.split('/');
+            const directory = filePath.path.split(splitter);
             const absolutePath = [...directory];
             const filename = directory.pop();
             if (filename == null) {
@@ -1159,7 +1302,13 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
     }, [rootFoler, setRootFolder]);
 
     return (
-        <div className={classNames(flex, flexColumn)} style={{ gap: columnGap, ...props.style }}>
+        <div
+            className={classNames(flex, flexColumn)}
+            style={mergeStyles(
+                { gap: columnGap, height: props.height ?? defaultHeight },
+                props.style
+            )}
+        >
             <ActionBar />
             <AddressBar />
             <NodesGrid />

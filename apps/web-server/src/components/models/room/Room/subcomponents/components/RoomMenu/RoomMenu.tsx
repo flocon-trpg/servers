@@ -18,8 +18,6 @@ import { Jdenticon } from '@/components/ui/Jdenticon/Jdenticon';
 import { path } from '@/resources/path';
 import { useRouter } from 'next/router';
 import { recordToArray } from '@flocon-trpg/utils';
-import { FilesManagerDrawer } from '@/components/models/file/FilesManagerDrawer/FilesManagerDrawer';
-import { FilesManagerDrawerType, none } from '@/utils/types';
 import { useMe } from '../../hooks/useMe';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useSignOut } from '@/hooks/useSignOut';
@@ -47,6 +45,7 @@ import {
 import { Styles } from '@/styles';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import { firebaseUserValueAtom } from '@/pages/_app';
+import { FileSelectorModal } from '@/components/models/file/FileSelectorModal/FileSelectorModal';
 
 const panelOpacityAtom = atom(
     get => get(roomConfigAtom)?.panelOpacity,
@@ -1072,8 +1071,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
     );
     const [isResetMessagesModalVisible, setIsResetMessagesModalVisible] = React.useState(false);
     const [isGenerateLogModalVisible, setIsGenerateSimpleLogModalVisible] = React.useState(false);
-    const [filesManagerDrawerType, setFilesManagerDrawerType] =
-        React.useState<FilesManagerDrawerType | null>(null);
+    const [fileSelectorModalVisible, setFileSelectorModalVisible] = React.useState(false);
     const setEditRoomDrawerVisibility = useUpdateAtom(editRoomDrawerVisibilityAtom);
 
     const panelsMenuItem = usePanelsMenuItem();
@@ -1151,7 +1149,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
             {
                 key: 'アップローダー@menu',
                 label: 'アップローダー',
-                onClick: () => setFilesManagerDrawerType({ openFileType: none }),
+                onClick: () => setFileSelectorModalVisible(true),
             },
             {
                 key: '自分のParticipant@menu',
@@ -1221,9 +1219,12 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
                     selectable={false}
                     mode='horizontal'
                 />
-                <FilesManagerDrawer
-                    drawerType={filesManagerDrawerType}
-                    onClose={() => setFilesManagerDrawerType(null)}
+                <FileSelectorModal
+                    visible={fileSelectorModalVisible}
+                    onSelect={null}
+                    defaultFileTypeFilter={null}
+                    onClose={() => setFileSelectorModalVisible(false)}
+                    uploaderFileBrowserHeight={null}
                 />
                 <BecomePlayerModal
                     visible={isBecomePlayerModalVisible}
@@ -1263,25 +1264,25 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
             </>
         );
     }, [
-        createdBy,
-        filesManagerDrawerType,
+        me,
+        myUserUid,
+        firebaseUser,
+        roomId,
+        panelsMenuItem,
+        showBackgroundBoardViewer,
+        fileSelectorModalVisible,
         isBecomePlayerModalVisible,
         isChangeMyParticipantNameModalVisible,
         isDeleteRoomModalVisible,
-        isGenerateLogModalVisible,
+        createdBy,
         isPanelsOpacityModalVisible,
         isResetMessagesModalVisible,
-        leaveRoomMutation,
-        me,
-        firebaseUser,
-        myUserUid,
-        panelsMenuItem,
-        roomId,
+        isGenerateLogModalVisible,
         router,
         setEditRoomDrawerVisibility,
-        setIsPanelsOpacityModalVisible,
         setShowBackgroundBoardViewerAtom,
-        showBackgroundBoardViewer,
+        leaveRoomMutation,
         signOut,
+        setIsPanelsOpacityModalVisible,
     ]);
 });

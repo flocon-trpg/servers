@@ -69,7 +69,7 @@ export function useSrcArrayFromGraphQL(
                   };
                   // FirebaseのURLは自動的にexpireされるのでcacheTimeを指定している。
                   // TODO: 1時間にしているがこの値は適当。
-                  const cacheTime = 60 * 60 * 1;
+                  const cacheTime = 1000 * 60 * 60 * 1;
                   return { queryKey, queryFn, cacheTime };
               });
 

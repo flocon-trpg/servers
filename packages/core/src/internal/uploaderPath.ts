@@ -21,15 +21,16 @@ https://cloud.google.com/storage/docs/naming-objects
 export type UploaderPathSource = string | readonly string[];
 
 type Result = {
+    /** パスを1つの文字列で表します。区切り文字は`/`です。先頭および末尾に`/`は付きません。 `''`の場合はルートフォルダを表します。 */
     string: string;
 
-    /** [] が返されることもあるので注意。その場合はルートフォルダを表します。 */
+    /** `[]`の場合はルートフォルダを表します。 */
     array: readonly string[];
 };
 
 const toPathArray = (source: UploaderPathSource): readonly string[] => {
     if (typeof source === 'string') {
-        return source.split('/');
+        return source.replace(/(^\/)|(\/$)/g, '').split('/');
     }
     return source;
 };
@@ -107,8 +108,10 @@ export const trySanitizePath = (path: UploaderPathSource): Result | null => {
  *
  * @returns Sanitizeされていない値を返します。
  */
-export const joinPath = (left: UploaderPathSource, right: UploaderPathSource): Result => {
-    const leftArray = toPathArray(left);
-    const rightArray = toPathArray(right);
-    return toResult([...leftArray, ...rightArray]);
+export const joinPath = (left: UploaderPathSource, ...right: UploaderPathSource[]): Result => {
+    let source = toPathArray(left);
+    for (const r of right) {
+        source = [...source, ...toPathArray(r)];
+    }
+    return toResult(source);
 };

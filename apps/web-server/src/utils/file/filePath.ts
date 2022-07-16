@@ -13,8 +13,8 @@ export type FilePath = {
 
 export namespace FilePath {
     export const equals = (
-        x: FilePathFragment | null | undefined,
-        y: FilePathFragment | null | undefined
+        x: FilePathFragment | FilePathState | null | undefined,
+        y: FilePathFragment | FilePathState | null | undefined
     ): boolean => {
         if (x == null) {
             return y == null;

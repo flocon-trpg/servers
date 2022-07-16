@@ -4,13 +4,11 @@ import { State, imagePieceTemplate, simpleId } from '@flocon-trpg/core';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { close, ok } from '@/utils/constants';
 import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
-import { FilesManagerDrawerType } from '@/utils/types';
 import { Subscribable } from 'rxjs';
 import { useImagePieces } from '../../hooks/useImagePieces';
 import { useCloneImagePiece } from '../../hooks/useCloneImagePiece';
-import { InputFile } from '@/components/models/file/InputFile/InputFile';
+import { FileView } from '@/components/models/file/FileView/FileView';
 import { FilePath } from '@/utils/file/filePath';
-import { FilesManagerDrawer } from '@/components/models/file/FilesManagerDrawer/FilesManagerDrawer';
 import {
     CompositeRect,
     PixelPosition,
@@ -25,6 +23,7 @@ import { PieceEditorMemoRow } from '../PieceEditorMemoRow/PieceEditorMemoRow';
 import { PieceEditorNameRow } from '../PieceEditorNameRow/PieceEditorNameRow';
 import { PieceEditorCloneButtonRow } from '../PieceEditorCloneButtonRow/PieceEditorCloneButtonRow';
 import { PieceEditorIdRow } from '../PieceEditorIdRow/PieceEditorIdRow';
+import { image } from '@/utils/fileType';
 
 type ImagePieceState = State<typeof imagePieceTemplate>;
 
@@ -155,9 +154,6 @@ export const ImagePieceEditor: React.FC<{
     }, [actionRequest, ok]);
     const labelStyle: React.CSSProperties = React.useMemo(() => ({ minWidth: 100 }), []);
 
-    const [filesManagerDrawerType, setFilesManagerDrawerType] =
-        React.useState<FilesManagerDrawerType | null>(null);
-
     if (myUserUid == null || state == null || boardId == null) {
         return null;
     }
@@ -168,8 +164,11 @@ export const ImagePieceEditor: React.FC<{
                 {/* TODO: isPrivateがまだ未実装 */}
 
                 <TableRow label='画像'>
-                    <InputFile
+                    <FileView
                         style={{ maxWidth: 350 }}
+                        maxWidthOfLink={null}
+                        uploaderFileBrowserHeight={null}
+                        defaultFileTypeFilter={image}
                         filePath={state.image ?? undefined}
                         onPathChange={path =>
                             updateState(pieceValue => {
@@ -179,7 +178,6 @@ export const ImagePieceEditor: React.FC<{
                                 pieceValue.image = path == null ? undefined : FilePath.toOt(path);
                             })
                         }
-                        openFilesManager={setFilesManagerDrawerType}
                         showImage
                     />
                 </TableRow>
@@ -235,11 +233,6 @@ export const ImagePieceEditor: React.FC<{
 
                 <PieceEditorIdRow pieceId={updateMode?.pieceId} />
             </Table>
-
-            <FilesManagerDrawer
-                drawerType={filesManagerDrawerType}
-                onClose={() => setFilesManagerDrawerType(null)}
-            />
         </>
     );
 };

@@ -39,7 +39,13 @@ export { testCommand, execCharacterCommand } from './internal/command/main';
 
 export { Expression, plain, expr1, analyze } from './internal/expression';
 
-export { sanitizeFilename, trySanitizePath, joinPath } from './internal/uploaderPath';
+export {
+    sanitizeFilename,
+    sanitizeFoldername,
+    trySanitizePath,
+    joinPath,
+    UploaderPathSource,
+} from './internal/uploaderPath';
 
 export { fakeFirebaseConfig1, fakeFirebaseConfig2 } from './internal/fake/fakeFirebaseConfig';
 
