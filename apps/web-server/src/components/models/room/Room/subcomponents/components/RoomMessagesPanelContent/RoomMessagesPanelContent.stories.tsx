@@ -1,11 +1,10 @@
 import React from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { RoomMessagesPanelContent } from './RoomMessagesPanelContent';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
 import { CreateMockRoomMessagesParams } from '@/mocks';
 import { getExactlyOneKey } from '@flocon-trpg/utils';
 import { useSetupMocks } from '@/hooks/useSetupMocks';
+import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 
 export const Default: React.FC<
     { height: number; fetchingMessages: boolean } & CreateMockRoomMessagesParams
@@ -17,12 +16,12 @@ export const Default: React.FC<
         },
     });
     return (
-        <DndProvider backend={HTML5Backend}>
+        <StorybookProvider>
             <RoomMessagesPanelContent
                 panelId={getExactlyOneKey(roomConfig.panels.messagePanels)}
                 height={height}
             />
-        </DndProvider>
+        </StorybookProvider>
     );
 };
 
