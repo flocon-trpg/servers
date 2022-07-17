@@ -24,9 +24,8 @@ import { getFloconUploaderFile, thumbs } from '@/utils/file/getFloconUploaderFil
 import { useMutation, useQuery } from 'urql';
 import { useWebConfig } from '@/hooks/useWebConfig';
 import { getHttpUri } from '@/atoms/webConfigAtom/webConfigAtom';
-import { getIdTokenAtom } from '@/pages/_app';
-import { useAtomValue } from 'jotai';
 import { defaultTriggerSubMenuAction } from '@/utils/variables';
+import { useGetIdToken } from '@/hooks/useGetIdToken';
 
 type DataSource = FileItemFragment;
 
@@ -39,7 +38,7 @@ type UploaderProps = {
 
 const Uploader: React.FC<UploaderProps> = ({ unlistedMode, onUploaded }: UploaderProps) => {
     const config = useWebConfig();
-    const getIdToken = useAtomValue(getIdTokenAtom);
+    const { getIdToken } = useGetIdToken();
 
     if (config?.value == null || getIdToken == null) {
         return null;
@@ -112,10 +111,10 @@ type ThumbProps = {
 
 const Thumb: React.FC<ThumbProps> = ({ thumbFilePath, size }: ThumbProps) => {
     const config = useWebConfig();
-    const getIdToken = useAtomValue(getIdTokenAtom);
+    const { getIdToken } = useGetIdToken();
     const loadingIcon = <Icons.LoadingOutlined style={{ fontSize: size }} />;
     const src = useAsync(async () => {
-        if (config?.value == null || thumbFilePath == null || getIdToken == null) {
+        if (config?.value == null || thumbFilePath == null) {
             return null;
         }
         const idToken = await getIdToken();

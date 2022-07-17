@@ -6,7 +6,8 @@ import { FilePathFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { FilePath as FilePathModule } from '../utils/file/filePath';
 import { useWebConfig } from './useWebConfig';
 import { useAtomValue } from 'jotai/utils';
-import { firebaseStorageAtom, getIdTokenAtom } from '../pages/_app';
+import { firebaseStorageAtom } from '../pages/_app';
+import { useGetIdToken } from './useGetIdToken';
 
 type FilePath = State<typeof filePathTemplate>;
 
@@ -41,7 +42,7 @@ export function useSrcArrayFromGraphQL(
     const storage = useAtomValue(firebaseStorageAtom);
     const [result, setResult] = React.useState<SrcArrayResult>({ type: loading });
     const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
-    const getIdToken = useAtomValue(getIdTokenAtom);
+    const { getIdToken } = useGetIdToken();
 
     // deep equalityでチェックされるため、余計なプロパティを取り除いている
     const cleanPathArray = pathArray?.map(path => ({

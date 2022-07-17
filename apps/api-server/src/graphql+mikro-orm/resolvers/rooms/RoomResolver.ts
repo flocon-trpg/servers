@@ -818,6 +818,19 @@ const createRoomPrivateMessageUpdate = (msg: RoomPrvMsg): RoomPrivateMessageUpda
     };
 };
 
+const deleteSecretValues = (
+    message:
+        | RoomPublicMessage
+        | RoomPrivateMessage
+        | RoomPublicMessageUpdate
+        | RoomPrivateMessageUpdate
+) => {
+    message.initText = undefined;
+    message.initTextSource = undefined;
+    message.updatedText = undefined;
+    message.commandResult = undefined;
+};
+
 const fixTextColor = (color: string) => {
     try {
         return Color(color).hex();
@@ -908,32 +921,31 @@ export class RoomResolver {
             });
             for (const msg of await ch.roomPubMsgs.loadItems()) {
                 const createdBy = msg.createdBy?.userUid;
+                const graphqlMessage = createRoomPublicMessage({ msg, channelKey: ch.key });
                 if (mode === 'default' && msg.isSecret && createdBy !== userUid) {
-                    continue;
+                    deleteSecretValues(graphqlMessage);
                 }
-                publicMessages.push(createRoomPublicMessage({ msg, channelKey: ch.key }));
+                publicMessages.push(graphqlMessage);
             }
         }
 
         const privateMessages: RoomPrivateMessage[] = [];
         for (const msg of await room.roomPrvMsgs.loadItems()) {
-            const createdBy = msg.createdBy?.userUid;
-            if (mode === 'default') {
-                if (msg.isSecret && createdBy !== userUid) {
-                    continue;
-                }
-            }
             const visibleTo = await msg.visibleTo.loadItems();
             if (mode === 'default') {
                 if (visibleTo.every(v => v.userUid !== userUid)) {
                     continue;
                 }
             }
-            const graphQLValue = await createRoomPrivateMessage({
+            const createdBy = msg.createdBy?.userUid;
+            const graphqlMessage = createRoomPrivateMessage({
                 msg,
                 visibleTo: visibleTo.map(user => user.userUid),
             });
-            privateMessages.push(graphQLValue);
+            if (mode === 'default' && msg.isSecret && createdBy !== userUid) {
+                deleteSecretValues(graphqlMessage);
+            }
+            privateMessages.push(graphqlMessage);
         }
 
         const pieceLogs: PieceLog[] = [];
@@ -2315,21 +2327,7 @@ export class RoomResolver {
                 room.completeUpdatedAt = new Date();
                 await em.flush();
 
-                const payloadValue: RoomPublicMessageUpdate = {
-                    __tstype: RoomPublicMessageUpdateType,
-                    messageId: publicMsg.id,
-                    isSecret: publicMsg.isSecret,
-                    updatedText: createUpdatedText(publicMsg),
-                    commandResult:
-                        publicMsg.commandResult == null
-                            ? undefined
-                            : {
-                                  text: publicMsg.commandResult,
-                                  isSuccess: publicMsg.commandIsSuccess,
-                              },
-                    altTextToSecret: publicMsg.altTextToSecret,
-                    updatedAt: publicMsg.textUpdatedAtValue,
-                };
+                const payloadValue = createRoomPublicMessageUpdate(publicMsg);
                 return Result.ok({
                     result: {},
                     payload: {
@@ -2362,21 +2360,7 @@ export class RoomResolver {
                 room.completeUpdatedAt = new Date();
                 await em.flush();
 
-                const payloadValue: RoomPrivateMessageUpdate = {
-                    __tstype: RoomPrivateMessageUpdateType,
-                    messageId: privateMsg.id,
-                    isSecret: privateMsg.isSecret,
-                    updatedText: createUpdatedText(privateMsg),
-                    commandResult:
-                        privateMsg.commandResult == null
-                            ? undefined
-                            : {
-                                  text: privateMsg.commandResult,
-                                  isSuccess: privateMsg.commandIsSuccess,
-                              },
-                    altTextToSecret: privateMsg.altTextToSecret,
-                    updatedAt: privateMsg.textUpdatedAtValue,
-                };
+                const payloadValue = createRoomPrivateMessageUpdate(privateMsg);
                 return Result.ok({
                     result: {},
                     payload: {
@@ -2461,7 +2445,7 @@ export class RoomResolver {
                     });
                 }
                 publicMsg.updatedText = undefined;
-                publicMsg.textUpdatedAt2 = new Date();
+                publicMsg.textUpdatedAt3 = new Date();
                 room.completeUpdatedAt = new Date();
                 await em.flush();
 
@@ -2496,7 +2480,7 @@ export class RoomResolver {
                     });
                 }
                 privateMsg.updatedText = undefined;
-                privateMsg.textUpdatedAt2 = new Date();
+                privateMsg.textUpdatedAt3 = new Date();
                 room.completeUpdatedAt = new Date();
                 await em.flush();
 
@@ -2587,7 +2571,7 @@ export class RoomResolver {
                     });
                 }
                 publicMsg.updatedText = args.text;
-                publicMsg.textUpdatedAt2 = new Date();
+                publicMsg.textUpdatedAt3 = new Date();
                 room.completeUpdatedAt = new Date();
                 await em.flush();
 
@@ -2622,7 +2606,7 @@ export class RoomResolver {
                     });
                 }
                 privateMsg.updatedText = args.text;
-                privateMsg.textUpdatedAt2 = new Date();
+                privateMsg.textUpdatedAt3 = new Date();
                 room.completeUpdatedAt = new Date();
                 await em.flush();
 
@@ -2848,7 +2832,7 @@ export class RoomResolver {
                     isRoomMessagesResetEvent: true,
                 };
             case 'messageUpdatePayload': {
-                // userUidが同じでも例えば異なるタブで同じRoomを開いているケースがある。そのため、Mutationを行ったuserUidにだけSubscriptionを送信しないことで通信量を節約、ということはできない。
+                // userUidが同じでも例えば異なるタブで同じRoomを開いているケースがある。そのため、「Mutationを行ったuserUidにだけSubscriptionを送信せず、代わりにMutationの戻り値で処理してもらうことで通信量を節約する」ということはできない。
 
                 if (payload.value.__tstype === RoomPrivateMessageType) {
                     if (payload.value.visibleTo.every(vt => vt !== userUid)) {
@@ -2868,14 +2852,27 @@ export class RoomResolver {
                     case RoomPrivateMessageType:
                     case RoomPublicMessageType: {
                         if (payload.value.isSecret && payload.value.createdBy !== userUid) {
-                            return undefined;
+                            const roomMessageEvent = { ...payload.value };
+                            deleteSecretValues(roomMessageEvent);
+                            return {
+                                roomMessageEvent,
+                                isRoomMessagesResetEvent: false,
+                            };
                         }
                         break;
                     }
                     case RoomPrivateMessageUpdateType:
                     case RoomPublicMessageUpdateType:
                         if (payload.value.isSecret && payload.createdBy !== userUid) {
-                            return undefined;
+                            const roomMessageEvent = { ...payload.value };
+                            deleteSecretValues(roomMessageEvent);
+                            return {
+                                roomMessageEvent: {
+                                    ...payload.value,
+                                    commandResult: undefined,
+                                },
+                                isRoomMessagesResetEvent: false,
+                            };
                         }
                         break;
                 }

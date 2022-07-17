@@ -29,10 +29,10 @@ import { RateLimiterAbstract, RateLimiterMemory } from 'rate-limiter-flexible';
 import { consume } from './rateLimit/consume';
 import { EMBUPLOADER_PATH } from './env';
 import { Html } from './html/Html';
-import gql from 'graphql-tag';
+import { parse } from 'graphql';
 
 const isRoomEventSubscription = (query: string) => {
-    const parsedQuery = gql(query);
+    const parsedQuery = parse(query);
     return parsedQuery.definitions.some(t => {
         if (t.kind !== 'OperationDefinition') {
             return false;
@@ -394,7 +394,8 @@ export const createServer = async ({
                         serverConfig,
                         promiseQueue,
                         connectionManager,
-                        // subscriptionsのcontextは、websocketの接続が確立されるたびに作成される。そのため、接続IDが同じならば、（ここでfork()を読んでいるにも関わらず）同じemが使い回されることになるので注意。Subscriptionのコード内でデータベースにアクセスするならば、メソッド内に毎回forkするコードを書いておくほうが無難かもしれない。
+                        // contextは、graphql-wsのJSDocにも書かれている通り、websocketの接続が確立されたときにのみ実行される。WebSocketを通して何らかの通信が行われても、clientが再接続するまではcontextの値は変わらない。
+                        // そのため、接続IDが同じならば、（ここでfork()を呼んでいるにも関わらず）同じemが使い回されることになるので注意。Subscriptionのコード内でデータベースにアクセスするならば、そちらでも毎回emはfork()してから使用するほうが無難。
                         em: em.fork(),
                         authorizedUser: null,
                     };

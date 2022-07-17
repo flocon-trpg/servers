@@ -19,20 +19,17 @@ import { useMyUserUid } from '../hooks/useMyUserUid';
 import { AllContextProvider } from '../components/behaviors/AllContextProvider';
 import { simpleId } from '@flocon-trpg/core';
 import { userConfigAtom } from '../atoms/userConfigAtom/userConfigAtom';
-import { roomNotificationsAtom, text } from '../atoms/roomAtom/roomAtom';
 import { useAsync, useDebounce } from 'react-use';
 import { roomConfigAtom } from '../atoms/roomConfigAtom/roomConfigAtom';
 import { setRoomConfig } from '../utils/localStorage/roomConfig';
 import { UserConfig } from '../atoms/userConfigAtom/types';
 import { RoomConfig } from '../atoms/roomConfigAtom/types/roomConfig';
-import { useAtomValue, useUpdateAtom } from 'jotai/utils';
 import { getHttpUri, getWsUri, publicEnvTxtAtom } from '../atoms/webConfigAtom/webConfigAtom';
 import { useWebConfig } from '../hooks/useWebConfig';
-import { atom, useAtom, useSetAtom } from 'jotai';
+import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { FirebaseApp, initializeApp } from 'firebase/app';
 import { Auth, getAuth } from 'firebase/auth';
 import { FirebaseStorage, getStorage } from 'firebase/storage';
-import { Ref } from '../utils/types';
 import { storybookAtom } from '../atoms/storybookAtom/storybookAtom';
 import {
     FirebaseUserState,
@@ -40,6 +37,7 @@ import {
     loading,
     notSignIn,
 } from '../utils/firebase/firebaseUserState';
+import { useGetIdTokenResult } from '@/hooks/useGetIdTokenResult';
 
 enableMapSet();
 
@@ -64,17 +62,6 @@ export const firebaseStorageAtom = atom(get => {
     return get(firebaseStorageCoreAtom);
 });
 
-// この値がnull ⇔ UrqlClientにおけるAuthorizationヘッダーなどが空（= API serverにおいて、Firebase Authenticationでログインしていないと判断される）
-// 値がfunctionだとjotaiが勝手にfunctionを実行してその結果をatomに保持してしまうため、必ずfunctionの状態で保持されるようにRefで包んでいる
-const getIdTokenCoreAtom = atom<Ref<(() => Promise<string | null>) | null>>({ value: null });
-export const getIdTokenAtom = atom(get => {
-    const mockUser = get(storybookAtom).mock?.user;
-    if (mockUser != null && typeof mockUser !== 'string') {
-        return mockUser.getIdToken;
-    }
-    return get(getIdTokenCoreAtom).value;
-});
-
 const firebaseUserCoreAtom = atom<FirebaseUserState>(loading);
 export const firebaseUserAtom = atom(get => {
     const mock = get(storybookAtom).mock?.user;
@@ -83,11 +70,18 @@ export const firebaseUserAtom = atom(get => {
     }
     return get(firebaseUserCoreAtom);
 });
+export const firebaseUserValueAtom = atom(get => {
+    const user = get(firebaseUserCoreAtom);
+    if (typeof user === 'string') {
+        return null;
+    }
+    return user;
+});
 
 // localForageを用いてRoomConfigを読み込み、ReduxのStateと紐付ける。
 // Userが変わるたびに、useUserConfigが更新される必要がある。_app.tsxなどどこか一箇所でuseUserConfigを呼び出すだけでよい。
 const useUserConfig = (userUid: string | null): void => {
-    const setUserConfig = useUpdateAtom(userConfigAtom);
+    const setUserConfig = useSetAtom(userConfigAtom);
 
     React.useEffect(() => {
         let unmounted = false;
@@ -163,7 +157,7 @@ const useAutoSaveRoomConfig = () => {
 // _app.tsxで1回のみ呼ばれることを想定。
 const useSubscribeFirebaseUser = (): void => {
     const auth = useAtomValue(firebaseAuthAtom);
-    const setUser = useUpdateAtom(firebaseUserCoreAtom);
+    const setUser = useSetAtom(firebaseUserCoreAtom);
     React.useEffect(() => {
         if (auth == null) {
             setUser(authNotFound);
@@ -171,10 +165,10 @@ const useSubscribeFirebaseUser = (): void => {
         }
 
         // authは最初はnullで、その後非同期でenv.txtが読み込まれてからnon-nullになるため、サイトを開いたときは正常の場合でも上のコードによりまずauthNotFoundがセットされる。
-        // そのためこのようにloadingをセットしないと、onIdTokenChangedでuserを受信するまでauthNotFoundエラーがブラウザ画面に表示されてしまう。
+        // そのためこのようにloadingをセットしないと、onAuthStateChangedでuserを受信するまでauthNotFoundエラーがブラウザ画面に表示されてしまう。
         setUser(loading);
 
-        const unsubscribe = auth.onIdTokenChanged(user => {
+        const unsubscribe = auth.onAuthStateChanged(user => {
             setUser(user == null ? notSignIn : user);
         });
         return () => {
@@ -184,7 +178,7 @@ const useSubscribeFirebaseUser = (): void => {
 };
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
-    const setPublicEnvTxt = useUpdateAtom(publicEnvTxtAtom);
+    const setPublicEnvTxt = useSetAtom(publicEnvTxtAtom);
     React.useEffect(() => {
         const main = async () => {
             // chromeなどではfetchできないと `http://localhost:3000/env.txt 404 (Not Found)` などといったエラーメッセージが表示されるが、実際は問題ない
@@ -215,14 +209,12 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         });
     }, [config, setFirebaseApp]);
 
-    const setFirebaseAuth = useUpdateAtom(firebaseAuthCoreAtom);
-    const setFirebaseStorage = useUpdateAtom(firebaseStorageCoreAtom);
+    const setFirebaseAuth = useSetAtom(firebaseAuthCoreAtom);
+    const setFirebaseStorage = useSetAtom(firebaseStorageCoreAtom);
     React.useEffect(() => {
         setFirebaseAuth(firebaseApp == null ? undefined : getAuth(firebaseApp));
         setFirebaseStorage(firebaseApp == null ? undefined : getStorage(firebaseApp));
     }, [firebaseApp, setFirebaseAuth, setFirebaseStorage]);
-
-    const setRoomNotification = useUpdateAtom(roomNotificationsAtom);
 
     const [httpUri, setHttpUri] = React.useState<string>();
     const [wsUri, setWsUri] = React.useState<string>();
@@ -255,43 +247,55 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
 
     useSubscribeFirebaseUser();
     const user = useAtomValue(firebaseUserAtom);
+    const userValue = useAtomValue(firebaseUserValueAtom);
     const myUserUid = useMyUserUid();
+    const { getIdTokenResult, canGetIdTokenResult } = useGetIdTokenResult();
 
     useUserConfig(myUserUid ?? null);
     useAutoSaveRoomConfig();
     useAutoSaveUserConfig();
 
-    const setGetIdTokenState = useSetAtom(getIdTokenCoreAtom);
-    const getIdToken = React.useMemo(() => {
-        if (typeof user === 'string') {
-            return null;
-        }
-        return async () => {
-            return await user.getIdToken().catch(err => {
-                console.error('failed at getIdToken', err);
-                setRoomNotification({
-                    type: text,
-                    notification: {
-                        type: 'error',
-                        message:
-                            'Firebase AuthenticationでIdTokenの取得に失敗しました。ブラウザのコンソールにエラーの内容を出力しました。',
-                        createdAt: new Date().getTime(),
-                    },
-                });
-                return null;
-            });
-        };
-    }, [setRoomNotification, user]);
     const [urqlClient, setUrqlClient] = React.useState<ReturnType<typeof createUrqlClient>>();
     React.useEffect(() => {
         if (httpUri == null || wsUri == null) {
             return;
         }
-        setUrqlClient(
-            createUrqlClient({ httpUrl: httpUri, wsUrl: wsUri, getUserIdToken: getIdToken })
-        );
-        setGetIdTokenState({ value: getIdToken });
-    }, [httpUri, wsUri, getIdToken, setGetIdTokenState]);
+        if (canGetIdTokenResult) {
+            setUrqlClient(
+                createUrqlClient({
+                    httpUrl: httpUri,
+                    wsUrl: wsUri,
+                    useIdToken: true,
+                    getUserIdTokenResult: getIdTokenResult,
+                })
+            );
+        } else {
+            setUrqlClient(
+                createUrqlClient({
+                    httpUrl: httpUri,
+                    wsUrl: wsUri,
+                    useIdToken: false,
+                })
+            );
+        }
+    }, [
+        httpUri,
+        wsUri,
+        getIdTokenResult,
+        canGetIdTokenResult,
+        /*
+        # userValueをdepsに加えている理由
+        
+        ## 理由1
+        コンポーネントが最初にrenderされる時点では、ログインしていてもuserValueはnullishである。userValueがnullishのときは、getIdTokenを実行してもnullishな値が返される。その直後にonAuthStateChangedによってuserValueがnon-nullishとなる。
+        useQueryなどといったurqlのhooksは即時実行されるため、もしuserValueがないと、idTokenを取得できない状態でhooksが実行されPermission errorが起こって終わりになってしまう。
+        そこで、userValueが変化したときにUrqlClientのインスタンスを更新することで、urqlのhooksが今度はidTokenありの状態で再度実行されるため、正常に動作するようになるというのが理由。
+
+        ## 理由2
+        ユーザーが変わったときにUrqlのキャッシュを破棄させるため。
+        */
+        userValue,
+    ]);
     const [authNotFoundState, setAuthNotFoundState] = React.useState(false);
     React.useEffect(() => {
         setAuthNotFoundState(user === 'authNotFound');

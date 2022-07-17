@@ -72,8 +72,7 @@ import { WritableDraft } from 'immer/dist/internal';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import { defaultTriggerSubMenuAction } from '@/utils/variables';
-import { firebaseUserAtom } from '@/pages/_app';
-import { getUserUid } from '@/utils/firebase/firebaseUserState';
+import { firebaseUserValueAtom } from '@/pages/_app';
 import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 import { Styles } from '@/styles';
 import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
@@ -104,7 +103,7 @@ type TabEditorDrawerProps = {
 const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerProps) => {
     const { config, onChange: onChangeCore, onClose } = props;
 
-    const firebaseUser = useAtomValue(firebaseUserAtom);
+    const firebaseUser = useAtomValue(firebaseUserValueAtom);
     const publicChannelNames = usePublicChannelNames();
     const participantsMap = useParticipants();
 
@@ -301,7 +300,7 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
                     {hiwaSelectValue === custom &&
                         participantsMap.size <= 1 &&
                         [...participantsMap]
-                            .filter(([userUid]) => getUserUid(firebaseUser) !== userUid)
+                            .filter(([userUid]) => firebaseUser?.uid !== userUid)
                             .sort(([, x], [, y]) => (x.name ?? '').localeCompare(y.name ?? ''))
                             .map(([userUid, participant]) => {
                                 return (
@@ -417,7 +416,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
 
     const { message, showPrivateMessageMembers, publicChannelNames } = props;
 
-    const firebaseUser = useAtomValue(firebaseUserAtom);
+    const firebaseUser = useAtomValue(firebaseUserValueAtom);
     const [, editMessageMutation] = useMutation(EditMessageDocument);
     const [, deleteMessageMutation] = useMutation(DeleteMessageDocument);
     const [, makeMessageNotSecret] = useMutation(MakeMessageNotSecretDocument);
@@ -436,7 +435,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
         message.type === privateMessage || message.type === publicMessage ? message.value : null;
 
     let createdByMe: boolean | null;
-    if (typeof firebaseUser === 'string' || userMessage == null) {
+    if (firebaseUser == null || userMessage == null) {
         createdByMe = null;
     } else {
         createdByMe = firebaseUser.uid === userMessage.createdBy;
@@ -516,7 +515,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
     const notSecretMenuItem: ItemType =
         userMessage?.isSecret === true &&
         userMessage.createdBy != null &&
-        userMessage.createdBy === getUserUid(firebaseUser)
+        userMessage.createdBy === firebaseUser?.uid
             ? {
                   key: '公開@RoomMessageComponent',
                   label: '公開',
@@ -692,7 +691,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
 
     const writingStatusHeight = 16;
 
-    const firebaseUser = useAtomValue(firebaseUserAtom);
+    const firebaseUser = useAtomValue(firebaseUserValueAtom);
     const writingMessageStatusResult = useWritingMessageStatus();
     const publicChannelNames = usePublicChannelNames();
     const participants = useAtomValue(participantsAtom);
@@ -733,8 +732,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
     const writingUsers = [...writingMessageStatusResult]
         .filter(
             ([key, value]) =>
-                key !== getUserUid(firebaseUser) &&
-                value.current === WritingMessageStatusType.Writing
+                key !== firebaseUser?.uid && value.current === WritingMessageStatusType.Writing
         )
         .map(([key]) => key)
         .map(userUid => participantsMap?.get(userUid)?.name ?? '')

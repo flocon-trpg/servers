@@ -725,6 +725,17 @@
                     "default": "null",
                     "mappedType": "date"
                 },
+                "text_updated_at3": {
+                    "name": "text_updated_at3",
+                    "type": "datetime",
+                    "unsigned": false,
+                    "autoincrement": false,
+                    "primary": false,
+                    "nullable": true,
+                    "length": 0,
+                    "default": "null",
+                    "mappedType": "datetime"
+                },
                 "text_color": {
                     "name": "text_color",
                     "type": "text",
@@ -1389,6 +1400,17 @@
                     "nullable": true,
                     "default": "null",
                     "mappedType": "date"
+                },
+                "text_updated_at3": {
+                    "name": "text_updated_at3",
+                    "type": "datetime",
+                    "unsigned": false,
+                    "autoincrement": false,
+                    "primary": false,
+                    "nullable": true,
+                    "length": 0,
+                    "default": "null",
+                    "mappedType": "datetime"
                 },
                 "text_color": {
                     "name": "text_color",

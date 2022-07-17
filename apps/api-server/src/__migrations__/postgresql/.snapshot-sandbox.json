@@ -697,6 +697,17 @@
                     "default": "null",
                     "mappedType": "date"
                 },
+                "text_updated_at3": {
+                    "name": "text_updated_at3",
+                    "type": "timestamptz(0)",
+                    "unsigned": false,
+                    "autoincrement": false,
+                    "primary": false,
+                    "nullable": true,
+                    "length": 6,
+                    "default": "null",
+                    "mappedType": "datetime"
+                },
                 "text_color": {
                     "name": "text_color",
                     "type": "varchar(255)",
@@ -1317,6 +1328,17 @@
                     "nullable": true,
                     "default": "null",
                     "mappedType": "date"
+                },
+                "text_updated_at3": {
+                    "name": "text_updated_at3",
+                    "type": "timestamptz(0)",
+                    "unsigned": false,
+                    "autoincrement": false,
+                    "primary": false,
+                    "nullable": true,
+                    "length": 6,
+                    "default": "null",
+                    "mappedType": "datetime"
                 },
                 "text_color": {
                     "name": "text_color",

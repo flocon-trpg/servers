@@ -18,9 +18,10 @@ import { State as S, StateManager, UpOperation as U, roomTemplate } from '@floco
 import { Room } from '../stateManagers/states/room';
 import { error, roomNotificationsAtom, text } from '../atoms/roomAtom/roomAtom';
 import { useAtomValue, useUpdateAtom } from 'jotai/utils';
-import { firebaseUserAtom, getIdTokenAtom } from '../pages/_app';
+import { firebaseUserAtom } from '../pages/_app';
 import { authNotFound, notSignIn } from '../utils/firebase/firebaseUserState';
 import { SetAction } from '../utils/types';
+import { useGetIdToken } from './useGetIdToken';
 
 type State = S<typeof roomTemplate>;
 type UpOperation = U<typeof roomTemplate>;
@@ -110,7 +111,7 @@ export const useRoomState = (
     roomEventSubscription: Observable<RoomEventSubscription> | null
 ): RoomStateResult => {
     const firebaseUser = useAtomValue(firebaseUserAtom);
-    const hasIdToken = useAtomValue(getIdTokenAtom) != null;
+    const { canGetIdToken } = useGetIdToken();
     const clientId = useClientId();
     const urqlClient = useClient();
     const [, operateMutation] = useMutation(OperateDocument);
@@ -137,7 +138,7 @@ export const useRoomState = (
         if (userUid == null) {
             return; // This should not happen
         }
-        if (!hasIdToken) {
+        if (!canGetIdToken) {
             // queryの実行で失敗することが確定しているため、実行を中止している
             return;
         }
@@ -442,7 +443,7 @@ export const useRoomState = (
         addRoomNotification,
         clientId,
         roomEventSubscription,
-        hasIdToken,
+        canGetIdToken,
     ]);
 
     return { refetch, state };
