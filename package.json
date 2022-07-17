@@ -19,8 +19,8 @@
         "husky": "^8.0.0"
     },
     "devDependencies": {
-        "@commitlint/cli": "17.0.2",
-        "@commitlint/config-conventional": "17.0.2",
+        "@commitlint/cli": "17.0.3",
+        "@commitlint/config-conventional": "17.0.3",
         "@typescript-eslint/eslint-plugin": "5.22.0",
         "@typescript-eslint/parser": "5.22.0",
         "eslint": "8.14.0",
