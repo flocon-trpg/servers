@@ -74,7 +74,6 @@ export const ActiveBoardSelectorModal: React.FC<Props> = ({ visible, onComplete 
 
     return (
         <Modal
-            className={cancelRnd}
             visible={visible}
             title='ボードビュアーに表示させるボードの変更'
             onOk={onOk}

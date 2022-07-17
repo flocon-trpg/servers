@@ -92,7 +92,7 @@ export const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) 
 
     return (
         <Rnd
-            cancel={`.${cancelRnd}`}
+            cancel={`.${cancelRnd}, .ant-modal`}
             position={props.position}
             size={props.size}
             minHeight={props.minHeight}

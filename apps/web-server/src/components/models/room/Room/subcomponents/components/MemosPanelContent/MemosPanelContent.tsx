@@ -277,7 +277,6 @@ const DirSelect = ({ memoId }: DirSelectProps) => {
             </Dropdown>
             <Modal
                 width={600}
-                className={cancelRnd}
                 title='グループの新規作成と移動'
                 visible={newGroupModalState}
                 onCancel={() => {
