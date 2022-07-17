@@ -3,11 +3,16 @@ import React from 'react';
 import { useSetupMocks } from '@/hooks/useSetupMocks';
 import { defaultBoardId, imagePieceKey1 } from '@/mocks';
 import { ImagePieceEditor } from './ImagePieceEditor';
+import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 
 export const Update: React.FC = () => {
     useSetupMocks();
 
-    return <ImagePieceEditor updateMode={{ boardId: defaultBoardId, pieceId: imagePieceKey1 }} />;
+    return (
+        <StorybookProvider>
+            <ImagePieceEditor updateMode={{ boardId: defaultBoardId, pieceId: imagePieceKey1 }} />
+        </StorybookProvider>
+    );
 };
 
 export default {
