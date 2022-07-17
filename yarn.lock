@@ -1719,16 +1719,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.10.1, @babel/runtime@npm:^7.10.2, @babel/runtime@npm:^7.10.4, @babel/runtime@npm:^7.11.1, @babel/runtime@npm:^7.11.2, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.13.10, @babel/runtime@npm:^7.17.8, @babel/runtime@npm:^7.18.0, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.3.1, @babel/runtime@npm:^7.5.0, @babel/runtime@npm:^7.7.2, @babel/runtime@npm:^7.7.6, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.9.2":
-  version: 7.18.3
-  resolution: "@babel/runtime@npm:7.18.3"
-  dependencies:
-    regenerator-runtime: ^0.13.4
-  checksum: db8526226aa02cfa35a5a7ac1a34b5f303c62a1f000c7db48cb06c6290e616483e5036ab3c4e7a84d0f3be6d4e2148d5fe5cec9564bf955f505c3e764b83d7f1
-  languageName: node
-  linkType: hard
-
-"@babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.6.2":
+"@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.10.1, @babel/runtime@npm:^7.10.2, @babel/runtime@npm:^7.10.4, @babel/runtime@npm:^7.11.1, @babel/runtime@npm:^7.11.2, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.13.10, @babel/runtime@npm:^7.17.8, @babel/runtime@npm:^7.18.0, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.3.1, @babel/runtime@npm:^7.5.0, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.6.2, @babel/runtime@npm:^7.7.2, @babel/runtime@npm:^7.7.6, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.9.2":
   version: 7.18.6
   resolution: "@babel/runtime@npm:7.18.6"
   dependencies:
@@ -2880,7 +2871,7 @@ __metadata:
     ts-node: ^10.7.0
     type-fest: ^2.12.0
     type-graphql: ^1.1.1
-    typescript: 4.4.4
+    typescript: 4.7.4
     url-join: 4.0.1
     uuid: ^8.3.2
     ws: 8.7.0
@@ -2900,7 +2891,7 @@ __metadata:
     node-cache: ^5.1.2
     rimraf: 3.0.2
     ts-jest: 27.1.5
-    typescript: 4.4.4
+    typescript: 4.7.4
   languageName: unknown
   linkType: soft
 
@@ -2927,7 +2918,7 @@ __metadata:
     sanitize-filename: ^1.6.3
     truncate-utf8-bytes: ^1.0.2
     ts-jest: 27.1.5
-    typescript: 4.4.4
+    typescript: 4.7.4
   languageName: unknown
   linkType: soft
 
@@ -2943,7 +2934,7 @@ __metadata:
     jest: 27.5.1
     rimraf: 3.0.2
     ts-jest: 27.1.5
-    typescript: 4.4.4
+    typescript: 4.7.4
   languageName: unknown
   linkType: soft
 
@@ -2971,7 +2962,7 @@ __metadata:
     "@graphql-typed-document-node/core": ^3.1.0
     graphql: ^15.6.0
     rimraf: 3.0.2
-    typescript: 4.4.4
+    typescript: 4.7.4
   languageName: unknown
   linkType: soft
 
@@ -2982,7 +2973,7 @@ __metadata:
     "@graphql-typed-document-node/core": ^3.1.0
     graphql: ^15.6.0
     rimraf: 3.0.2
-    typescript: 4.4.4
+    typescript: 4.7.4
   languageName: unknown
   linkType: soft
 
@@ -2993,7 +2984,7 @@ __metadata:
     "@graphql-typed-document-node/core": ^3.1.0
     graphql: ^15.6.0
     rimraf: 3.0.2
-    typescript: 4.4.4
+    typescript: 4.7.4
   languageName: unknown
   linkType: soft
 
@@ -3009,7 +3000,7 @@ __metadata:
     lodash: 4.17.21
     rimraf: 3.0.2
     ts-jest: 27.1.5
-    typescript: 4.4.4
+    typescript: 4.7.4
   languageName: unknown
   linkType: soft
 
@@ -3027,7 +3018,7 @@ __metadata:
     rimraf: 3.0.2
     rxjs: ^7.5.5
     ts-jest: 27.1.5
-    typescript: 4.4.4
+    typescript: 4.7.4
   languageName: unknown
   linkType: soft
 
@@ -3131,7 +3122,7 @@ __metadata:
     serve: ^13.0.0
     sucrase: ^3.20.1
     tsconfig-paths-webpack-plugin: 3.5.2
-    typescript: 4.4.4
+    typescript: 4.7.4
     url-join: ^4.0.1
     urql: ^2.2.0
     use-constant: ^1.1.0
@@ -24360,17 +24351,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:4.4.4":
-  version: 4.4.4
-  resolution: "typescript@npm:4.4.4"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 89ecb8436bb48ef5594d49289f5f89103071716b6e4844278f4fb3362856e31203e187a9c76d205c3f0b674d221a058fd28310dbcbcf5d95e9a57229bb5203f1
-  languageName: node
-  linkType: hard
-
-"typescript@npm:^4.6.4":
+"typescript@npm:4.7.4, typescript@npm:^4.6.4":
   version: 4.7.4
   resolution: "typescript@npm:4.7.4"
   bin:
@@ -24380,17 +24361,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@4.4.4#~builtin<compat/typescript>":
-  version: 4.4.4
-  resolution: "typescript@patch:typescript@npm%3A4.4.4#~builtin<compat/typescript>::version=4.4.4&hash=7ad353"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 3d1b04449662193544b81d055479d03b4c5dca95f1a82f8922596f089d894c9fefbe16639d1d9dfe26a7054419645530cef44001bc17aed1fe1eb3c237e9b3c7
-  languageName: node
-  linkType: hard
-
-"typescript@patch:typescript@^4.6.4#~builtin<compat/typescript>":
+"typescript@patch:typescript@4.7.4#~builtin<compat/typescript>, typescript@patch:typescript@^4.6.4#~builtin<compat/typescript>":
   version: 4.7.4
   resolution: "typescript@patch:typescript@npm%3A4.7.4#~builtin<compat/typescript>::version=4.7.4&hash=7ad353"
   bin:
