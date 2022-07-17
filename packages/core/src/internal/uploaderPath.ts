@@ -14,13 +14,13 @@ https://cloud.google.com/storage/docs/naming-objects
 
 /** ファイルもしくはフォルダのパスを表します。
  *
- * stringの場合は、半角スラッシュでパスの区切りを表します。半角スラッシュをエスケープすることはできません。`''`でルートフォルダを表します。
+ * stringの場合は、半角スラッシュでパスの区切りを表します。半角スラッシュをエスケープすることはできません。2つ以上続く半角スラッシュは1つとして扱われます。
  *
- * 配列の場合は、各要素のstringは、`''`にすることおよび、半角スラッシュを含めることはできません。 `[]`でルートフォルダを表します。
+ * 配列の場合は、各要素のstringは、半角スラッシュを含めることはできません。`''`の要素は存在しないものとして扱われます。
  */
 export type UploaderPathSource = string | readonly string[];
 
-type Result = {
+type PathResult = {
     /** パスを1つの文字列で表します。区切り文字は`/`です。先頭および末尾に`/`は付きません。 `''`の場合はルートフォルダを表します。 */
     string: string;
 
@@ -29,10 +29,13 @@ type Result = {
 };
 
 const toPathArray = (source: UploaderPathSource): readonly string[] => {
+    let result: readonly string[];
     if (typeof source === 'string') {
-        return source.replace(/(^\/)|(\/$)/g, '').split('/');
+        result = source.replace(/(^\/)|(\/$)/g, '').split('/');
+    } else {
+        result = source;
     }
-    return source;
+    return result.filter(name => name !== '');
 };
 
 const replacement = '_';
@@ -56,13 +59,15 @@ const sanitizeCore = (input: string) => {
         .replace(reservedRe, replacement);
 };
 
-export const sanitizeFoldername = (input: string) => {
+export const sanitizeFoldername = (input: string): string => {
     const sanitized = sanitizeCore(input);
+    // 255という数値は、実用的な長さの中で最大値だとこちらで判断した値
     return truncate(sanitized, 255);
 };
 
-export const sanitizeFilename = (input: string) => {
+export const sanitizeFilename = (input: string): string | null => {
     const sanitized = sanitizeCore(input);
+    // 255という数値は、実用的な長さの中で最大値だとこちらで判断した値
     const result = truncate(sanitized, 255);
     if (sanitized !== result) {
         // truncateが発生したファイル名をそのまま返すと、拡張子が消えて混乱を招くおそれがあるため代わりにnullを返している。
@@ -71,34 +76,32 @@ export const sanitizeFilename = (input: string) => {
     return result;
 };
 
-const toResult = (path: UploaderPathSource): Result => {
+const toResult = (path: UploaderPathSource): PathResult => {
     const arrayResult = toPathArray(path);
-    const stringResult = arrayResult.join('/');
     return {
-        string: stringResult,
+        string: arrayResult.join('/'),
         array: arrayResult,
     };
 };
 
-export const trySanitizePath = (path: UploaderPathSource): Result | null => {
+export const trySanitizePath = (path: UploaderPathSource): PathResult | null => {
     const pathArray = toPathArray(path);
     const sanitizedArray: string[] = [];
     for (const elem of pathArray) {
-        const next = sanitizeFilename(elem);
-        if (next == null) {
-            return null;
-        }
+        const next = sanitizeCore(elem);
         sanitizedArray.push(next);
     }
 
     const result = toResult(sanitizedArray);
 
-    // Firebase および Cloud Storage には length 1-1024 bytes when UTF-8 encoded という制限があるので1024を指定している
-    const truncated = truncate(result.string, 1024);
+    if (result.string != null) {
+        // Firebase および Cloud Storage には length 1-1024 bytes when UTF-8 encoded という制限があるので1024を指定している
+        const truncated = truncate(result.string, 1024);
 
-    if (result.string !== truncated) {
-        // truncateが発生したファイルパスをそのまま返すと、末尾のほうのフォルダがなくなったり、拡張子が消えて混乱を招くおそれがあるため代わりにnullを返している。
-        return null;
+        if (result.string !== truncated) {
+            // truncateが発生したファイルパスをそのまま返すと、末尾のほうのフォルダがなくなったり、拡張子が消えて混乱を招くおそれがあるため代わりにnullを返している。
+            return null;
+        }
     }
 
     return result;
@@ -108,10 +111,11 @@ export const trySanitizePath = (path: UploaderPathSource): Result | null => {
  *
  * @returns Sanitizeされていない値を返します。
  */
-export const joinPath = (left: UploaderPathSource, ...right: UploaderPathSource[]): Result => {
+export const joinPath = (left: UploaderPathSource, ...right: UploaderPathSource[]): PathResult => {
     let source = toPathArray(left);
     for (const r of right) {
-        source = [...source, ...toPathArray(r)];
+        const next = toPathArray(r);
+        source = [...source, ...next];
     }
     return toResult(source);
 };
