@@ -69,8 +69,14 @@ type ArgNullState = {
 
 type State = LoadingState | SuccessState | FailedState | ArgNullState;
 
-export function useImage(src: string | null, size?: Size, crossOrigin?: string): State {
+export function useImage(
+    src: string | null,
+    options?: { skipAnalyzeUrl?: boolean; size?: Size; crossOrigin?: string }
+): State {
     const [state, setState] = React.useState(null as State | null);
+    const skipAnalyzeUrl = options?.skipAnalyzeUrl ?? false;
+    const size = options?.size;
+    const crossOrigin = options?.crossOrigin;
 
     React.useEffect(
         function () {
@@ -98,8 +104,14 @@ export function useImage(src: string | null, size?: Size, crossOrigin?: string):
             img.addEventListener('load', onload);
             img.addEventListener('error', onerror);
             crossOrigin && (img.crossOrigin = crossOrigin);
-            const url = analyzeUrl(src);
-            if (url != null) img.src = url.directLink;
+            if (skipAnalyzeUrl) {
+                img.src = src;
+            } else {
+                const url = analyzeUrl(src);
+                if (url != null) {
+                    img.src = url.directLink;
+                }
+            }
 
             return function cleanup() {
                 img.removeEventListener('load', onload);
@@ -107,7 +119,7 @@ export function useImage(src: string | null, size?: Size, crossOrigin?: string):
                 setState(null);
             };
         },
-        [src, crossOrigin, size?.w, size?.h]
+        [src, crossOrigin, size?.w, size?.h, skipAnalyzeUrl]
     );
 
     return state ?? { type: loading };
@@ -119,5 +131,5 @@ export function useImageFromGraphQL(
 ): State {
     const { src } = useSrcFromGraphQL(filePath);
 
-    return useImage(src ?? null, undefined, crossOrigin);
+    return useImage(src ?? null, { crossOrigin });
 }
