@@ -419,7 +419,6 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                                 storageType: $public,
                                 folderPath: folderAbsolutePath,
                             });
-                            $public;
                             break;
                         case uploaderTypeFolderName.unlistedApiServer:
                             setFirebaseStorageUploaderModalState(undefined);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Client, Provider } from 'urql';
+import { Client } from 'urql';
 import { IndexPage } from './IndexPage';
 import { fromValue, never } from 'wonka';
 import * as Doc071 from '@flocon-trpg/typed-document-node-v0.7.1';
