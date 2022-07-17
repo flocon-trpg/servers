@@ -6,8 +6,7 @@ import { ParticipantRole } from '@flocon-trpg/core';
 import { CharacterEditorModal, characterEditorModalAtom } from './CharacterEditorModal';
 import { useSetupMocks } from '@/hooks/useSetupMocks';
 import { QueryClient, QueryClientProvider } from 'react-query';
-
-const queryClient = new QueryClient();
+import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole; characterStateId: string }> = ({
     myParticipantRole,
@@ -27,11 +26,11 @@ export const Player: React.FC<{ myParticipantRole: ParticipantRole; characterSta
     }, [characterStateId, setModalState]);
 
     return (
-        <QueryClientProvider client={queryClient}>
+        <StorybookProvider>
             <div>
                 <CharacterEditorModal />
             </div>
-        </QueryClientProvider>
+        </StorybookProvider>
     );
 };
 

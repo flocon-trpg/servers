@@ -6,6 +6,7 @@ import * as Doc071 from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Doc072 from '@flocon-trpg/typed-document-node-v0.7.2';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { createMockUrqlClient, dummyUrqlOperation } from '@/mocks';
+import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 
 type Version = Doc071.GetServerInfoQuery['result']['version'];
 
@@ -53,10 +54,11 @@ const createMockClient = (version: Version | 'never'): Client => {
 };
 
 export const Default: React.FC<{ version: Version | 'never' }> = ({ version }) => {
+    const urqlClient = React.useMemo(() => createMockClient(version), [version]);
     return (
-        <Provider value={createMockClient(version)}>
+        <StorybookProvider urqlClient={urqlClient}>
             <IndexPage />
-        </Provider>
+        </StorybookProvider>
     );
 };
 
