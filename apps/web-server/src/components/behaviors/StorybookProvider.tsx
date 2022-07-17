@@ -4,6 +4,7 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
+/** Storybookに表示するコンポーネント用のProviderです。Storybookやデバッグ以外で用いることは避けてください。 */
 export const StorybookProvider: React.FC<{ children: React.ReactNode; urqlClient?: Client }> = ({
     children,
     urqlClient,

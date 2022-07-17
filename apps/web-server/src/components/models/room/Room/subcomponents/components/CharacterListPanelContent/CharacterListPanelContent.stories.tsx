@@ -1,10 +1,9 @@
 import { ParticipantRole, State as S, roomTemplate } from '@flocon-trpg/core';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useSetupMocks } from '@/hooks/useSetupMocks';
 import { CharacterListPanelContent } from './CharacterListPanelContent';
+import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 
 type RoomState = S<typeof roomTemplate>;
 
@@ -33,9 +32,9 @@ export const Default: React.FC<{ stateType: StateType; myParticipantRole: Partic
     });
 
     return (
-        <DndProvider backend={HTML5Backend}>
+        <StorybookProvider>
             <CharacterListPanelContent />
-        </DndProvider>
+        </StorybookProvider>
     );
 };
 
