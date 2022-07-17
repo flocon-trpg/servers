@@ -5,7 +5,6 @@ import { anotherPlayerCharacterId1, myRichCharacterId, mySimpleCharacterId } fro
 import { ParticipantRole } from '@flocon-trpg/core';
 import { CharacterEditorModal, characterEditorModalAtom } from './CharacterEditorModal';
 import { useSetupMocks } from '@/hooks/useSetupMocks';
-import { QueryClient, QueryClientProvider } from 'react-query';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole; characterStateId: string }> = ({

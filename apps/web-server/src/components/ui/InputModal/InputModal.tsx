@@ -1,7 +1,6 @@
 import { Input } from 'antd';
 import Modal from 'antd/lib/modal/Modal';
 import React from 'react';
-import { cancelRnd } from '@/styles/className';
 
 type Props = {
     title?: string;

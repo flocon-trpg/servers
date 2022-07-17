@@ -3,7 +3,6 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 import { SoundPlayerPanelContent } from './SoundPlayerPanelContent';
 import { useSetupMocks } from '@/hooks/useSetupMocks';
-import { QueryClient } from 'react-query';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
