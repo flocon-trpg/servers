@@ -64,13 +64,12 @@ const useFirebaseStorageFiles = (onSelect: OnSelect | null) => {
             (file: File): FilePath => {
                 const name = fileName(file.uploaderFilePath);
                 const fileType = guessFileType(name);
-                const fileBrowserPath =
+                const fileBrowserPath = joinPath(
                     type === $public
                         ? uploaderTypeFolderName.publicFirebaseStorage
-                        : joinPath(
-                              uploaderTypeFolderName.unlistedFirebaseStorage,
-                              file.uploaderFilePath
-                          ).string;
+                        : uploaderTypeFolderName.unlistedFirebaseStorage,
+                    file.uploaderFilePath
+                );
                 const onClick = isOnSelectNullish
                     ? undefined
                     : () => {
@@ -85,8 +84,8 @@ const useFirebaseStorageFiles = (onSelect: OnSelect | null) => {
                           });
                       };
                 const result: FilePath = {
-                    key: fileBrowserPath,
-                    path: fileBrowserPath,
+                    key: fileBrowserPath.string,
+                    path: fileBrowserPath.array,
                     icon: fileType,
                     fileType,
                     onDelete: async () => {
@@ -156,7 +155,7 @@ const useFloconUploaderFiles = (onSelect: OnSelect | null, pause: boolean) => {
                   };
             const result: FilePath = {
                 key: fileBrowserPath.string,
-                path: fileBrowserPath.string,
+                path: fileBrowserPath.array,
                 icon: fileType,
                 fileType,
                 onDelete: async () => {
@@ -434,16 +433,16 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                 }}
                 ensuredFolderPaths={[
                     {
-                        path: uploaderTypeFolderName.publicFirebaseStorage,
+                        path: [uploaderTypeFolderName.publicFirebaseStorage],
                     },
                     {
-                        path: uploaderTypeFolderName.unlistedFirebaseStorage,
+                        path: [uploaderTypeFolderName.unlistedFirebaseStorage],
                     },
                     {
-                        path: uploaderTypeFolderName.publicApiServer,
+                        path: [uploaderTypeFolderName.publicApiServer],
                     },
                     {
-                        path: uploaderTypeFolderName.unlistedApiServer,
+                        path: [uploaderTypeFolderName.unlistedApiServer],
                     },
                 ]}
             />

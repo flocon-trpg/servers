@@ -1,4 +1,5 @@
-import { delay } from '@flocon-trpg/utils';
+import { joinPath } from '@flocon-trpg/core';
+import { both, delay, groupJoinArray } from '@flocon-trpg/utils';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 import {
@@ -8,18 +9,31 @@ import {
     image,
     others,
     sound,
+    text,
 } from './FileBrowser';
 
 type FileSource =
     | {
           type: typeof sound | typeof others;
-          path: string;
+          path: readonly string[];
       }
     | {
           type: typeof image;
-          path: string;
+          path: readonly string[];
           thumb?: React.ReactNode;
       };
+
+const arrayEquals = (x: readonly string[], y: readonly string[]): boolean => {
+    for (const group of groupJoinArray(x, y)) {
+        if (group.type !== both) {
+            return false;
+        }
+        if (group.left !== group.right) {
+            return false;
+        }
+    }
+    return true;
+};
 
 type PracticalProps = {
     filesSource: FileSource[];
@@ -34,7 +48,9 @@ const toFilePath = (filesSourceRef: { current: FileSource[] }): FilePath[] => {
             if (file.type !== others) {
                 return Promise.reject(new Error('fake error'));
             }
-            filesSourceRef.current = filesSourceRef.current.filter(x => x.path !== file.path);
+            filesSourceRef.current = filesSourceRef.current.filter(x =>
+                arrayEquals(x.path, file.path)
+            );
         };
         const onOpen = () => console.log('open', file.path);
         const onClipboard = () => console.log('clipboard', file.path);
@@ -42,7 +58,7 @@ const toFilePath = (filesSourceRef: { current: FileSource[] }): FilePath[] => {
             return {
                 fileType: file.type,
                 path: file.path,
-                key: file.path,
+                key: joinPath(file.path).string,
                 onSelect: onClick,
                 onDelete,
                 onOpen,
@@ -53,7 +69,7 @@ const toFilePath = (filesSourceRef: { current: FileSource[] }): FilePath[] => {
         return {
             fileType: file.type,
             path: file.path,
-            key: file.path,
+            key: joinPath(file.path).string,
             onSelect: onClick,
             onDelete,
             onOpen,
@@ -149,11 +165,11 @@ export default {
         filesSource: [
             {
                 type: image,
-                path: 'image1.png',
+                path: ['image1.png'],
             },
             {
                 type: image,
-                path: 'image2.png',
+                path: ['image2.png'],
                 thumb: (
                     <img
                         style={{ maxWidth: '100%', maxHeight: '100%' }}
@@ -163,7 +179,7 @@ export default {
             },
             {
                 type: image,
-                path: 'image3.png',
+                path: ['image3.png'],
                 thumb: (
                     <img
                         style={{ maxWidth: '100%', maxHeight: '100%' }}
@@ -173,7 +189,7 @@ export default {
             },
             {
                 type: image,
-                path: 'image4.png',
+                path: ['image4.png'],
                 thumb: (
                     <img
                         style={{ maxWidth: '100%', maxHeight: '100%' }}
@@ -183,31 +199,31 @@ export default {
             },
             {
                 type: sound,
-                path: 'sound.mp3',
+                path: ['sound.mp3'],
             },
             {
                 type: others,
-                path: 'others.dll',
+                path: ['others.dll'],
             },
             {
                 type: others,
-                path: 'long-filename-123456.dll',
+                path: ['long-filename-123456.dll'],
             },
             {
                 type: others,
-                path: 'very-long-filename12345678901234567890.dll',
+                path: ['very-long-filename12345678901234567890.dll'],
             },
             {
                 type: others,
-                path: 'dir1/file.dll',
+                path: ['dir1', 'file.dll'],
             },
             {
                 type: others,
-                path: 'dir1/dir2/file1.dll',
+                path: ['dir1', 'dir2', 'file1.dll'],
             },
             {
                 type: others,
-                path: 'dir1/dir2/file2.dll',
+                path: ['dir1', 'dir2', 'file2.dll'],
             },
         ],
     },
@@ -233,15 +249,47 @@ export const ManyFiles = Template.bind({});
 ManyFiles.args = {
     filesSource: undefined,
     files: [...Array(200)].map((_, i) => {
-        const path = `file${(i + 1).toString().padStart(3, '0')}.dll`;
+        const filename = `file${(i + 1).toString().padStart(3, '0')}.dll`;
         return {
-            key: path,
+            key: filename,
             type: others,
-            onClick: () => undefined,
             onDelete: i % 2 === 0 ? deleteSuccess : deleteFail,
-            onOpen: () => undefined,
-            onClipboard: () => undefined,
-            path,
+            path: [filename],
         };
     }),
+};
+
+export const DuplicatedName = Template.bind({});
+DuplicatedName.args = {
+    filesSource: undefined,
+    files: [
+        {
+            key: 'file.txt(1)',
+            path: ['file.txt'],
+            icon: text,
+            onDelete: deleteSuccess,
+            onSelect: () => console.log('file.txt(1)'),
+        },
+        {
+            key: 'file.txt(2)',
+            path: ['file.txt'],
+            icon: text,
+            onDelete: deleteSuccess,
+            onSelect: () => console.log('file.txt(2)'),
+        },
+        {
+            key: 'folder/image.png(1)',
+            path: ['folder/image.png'],
+            icon: image,
+            onDelete: deleteSuccess,
+            onSelect: () => console.log('folder/image.png(1)'),
+        },
+        {
+            key: 'folder/image.png(2)',
+            path: ['folder/image.png'],
+            icon: image,
+            onDelete: deleteSuccess,
+            onSelect: () => console.log('folder/image.png(2)'),
+        },
+    ],
 };

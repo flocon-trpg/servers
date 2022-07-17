@@ -35,6 +35,8 @@ import {
     both,
     groupJoinArray,
     keyNames,
+    left,
+    right,
 } from '@flocon-trpg/utils';
 import { Provider, atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import produce from 'immer';
@@ -42,11 +44,12 @@ import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { useLatest } from 'react-use';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { Option } from '@kizahasi/option';
-import { sanitizeFoldername } from '@flocon-trpg/core';
+import { joinPath, sanitizeFoldername } from '@flocon-trpg/core';
 import { mergeStyles } from '@/utils/mergeStyles';
 
 export const image = 'image';
 export const sound = 'sound';
+export const text = 'text';
 export const others = 'others';
 const file = 'file';
 const folder = 'folder';
@@ -55,8 +58,6 @@ const virtualFolder = 'virtualFolder';
 const none = '__none__';
 
 const columnGap = '4px 0';
-
-const splitter = '/';
 
 type FilePathBase = {
     key: string;
@@ -68,26 +69,27 @@ type FilePathBase = {
     thumb?: React.ReactNode;
 
     /** ファイルのアイコンを表します。thumbが指定されている場合はそちらが優先されます。 */
-    icon?: typeof image | typeof sound | typeof others;
+    icon?: typeof image | typeof sound | typeof text | typeof others;
 
     /** ユーザーがファイルを選択したときの動作を示します（ただし、複数選択モードが有効になっているときに選択されたときは除きます）。コンテキストメニューから選択しようとしたときもトリガーされます。undefined の場合は、コンテキストメニューからの選択は非表示になります。 */
     onSelect?: () => void;
 
-    onOpen: () => void;
+    /** ユーザーがファイルそのものを閲覧しようとしたときの動作を示します。 */
+    onOpen?: () => void;
 
-    onDelete: () => Promise<void>;
+    onDelete?: () => Promise<void>;
 
-    onClipboard: () => void;
+    onClipboard?: () => void;
 };
 
 export type FilePath = FilePathBase & {
-    /** ファイルのパスを表します。 半角スラッシュがパスの区切りとみなされます。半角スラッシュをエスケープすることはできません。（名前が空のフォルダを意図していないのでない限り）stringの先頭と末尾には半角スラッシュを付けないでください。
+    /** ファイルのパスを表します。`''`である要素は存在しないものとして扱われます。
      *
      * このコンポーネントにおいて、どのようなファイル名で表示されてほしいか、どのようなフォルダに入っていてほしいかを表す値であるため、必ずしも実際のパスと等しくする必要はありません。
      *
-     * @example 'foo.png', 'alpha/beta/gamma.mp3'
+     * @example ['foo.png'], ['alpha', 'beta', 'gamma.mp3']
      */
-    path: string;
+    path: readonly string[];
 };
 
 export type FileTypes = {
@@ -107,8 +109,8 @@ export type FileTypes = {
 type IsLocked = (absolutePath: readonly string[]) => boolean;
 
 type EnsuredFolderPath = {
-    /** 半角スラッシュがパスの区切りとみなされます。（名前が空のフォルダを意図していないのでない限り）stringの先頭と末尾には半角スラッシュを付けないでください。*/
-    path: string;
+    /** ファイルのパスを表します。`''`である要素は存在しないものとして扱われます。 */
+    path: readonly string[];
 
     /** このフォルダの上部に追加で表示するコンポーネントを指定できます。 */
     header?: React.ReactNode;
@@ -124,6 +126,8 @@ export type Props = {
 
     style?: React.CSSProperties;
     fileTypes?: FileTypes;
+
+    /** ファイルの削除処理が完了したときにトリガーされます。複数のファイルが削除されるときは、最後のファイルが削除されたときにトリガーされます。 */
     onDelete?: () => void;
 
     /** trueが返されたファイルパスでは、ファイルおよびフォルダの作成と削除ができなくなり、複数選択モードが無効化されます。 */
@@ -138,8 +142,8 @@ export type Props = {
 type FilePathNode = FilePathBase & {
     type: typeof file;
 
-    /** FilePath.path と等しい。*/
-    absolutePathSource: string;
+    /** FilePath.path から `''` の要素を取り除いたものと等しい。*/
+    absolutePathSource: readonly string[];
 
     /** ファイルがあるパス。ファイル名の部分は含まない。*/
     absolutePath: readonly string[];
@@ -556,7 +560,26 @@ type FileToDelete = {
 const toFilesToDelete = (source: readonly FilePathNode[]): readonly FileToDelete[] => {
     return source
         .map(file => ({ status: 'waiting', file } as const))
-        .sort((x, y) => x.file.absolutePathSource.localeCompare(y.file.absolutePathSource));
+        .sort((x, y) => {
+            for (const group of groupJoinArray(
+                x.file.absolutePathSource,
+                y.file.absolutePathSource
+            )) {
+                switch (group.type) {
+                    case left:
+                        return 1;
+                    case right:
+                        return -1;
+                    case both: {
+                        const compareResult = group.left.localeCompare(group.right);
+                        if (compareResult !== 0) {
+                            return compareResult;
+                        }
+                    }
+                }
+            }
+            return 0;
+        });
 };
 
 const FilesToDeleteTable: React.FC<{
@@ -576,7 +599,7 @@ const FilesToDeleteTable: React.FC<{
                             <Icons.WarningOutlined />
                         ) : null}
                     </div>
-                    <div>{item.file.absolutePathSource}</div>
+                    <div>{joinPath(item.file.absolutePathSource).string}</div>
                 </div>
             ))}
         </div>
@@ -967,6 +990,13 @@ const NodeView: React.FC<{
                         </CellFile>
                     );
                     break;
+                case text:
+                    fileElement = (
+                        <CellFile>
+                            <Icons.FileTextOutlined style={{ fontSize: size }} />
+                        </CellFile>
+                    );
+                    break;
                 default:
                     fileElement = (
                         <CellFile>
@@ -1015,14 +1045,14 @@ const NodeView: React.FC<{
                           label: '選択',
                           onClick: onSelect,
                       },
-                node.type === folder || node.type === virtualFolder
+                node.type === folder || node.type === virtualFolder || node.onOpen == null
                     ? null
                     : {
                           key: createMenuKey(2),
                           label: 'ファイルを開く',
                           onClick: node.onOpen,
                       },
-                node.type === folder || node.type === virtualFolder
+                node.type === folder || node.type === virtualFolder || node.onClipboard == null
                     ? null
                     : {
                           key: createMenuKey(3),
@@ -1066,10 +1096,10 @@ const NodeView: React.FC<{
                 className={classNames(flex, flexColumn)}
                 css={cellElementCss}
                 tabIndex={0}
-                onClick={() => onSelect()}
+                onClick={() => onSelect && onSelect()}
                 onKeyDown={e => {
                     if (e.code === 'Space') {
-                        onSelect();
+                        onSelect && onSelect();
                     }
                 }}
             >
@@ -1214,8 +1244,13 @@ const useStartAutoDeleteFiles = () => {
 
         setIsDeleting(true);
         setFileStatus(fileToDelete, 'deleting');
-        fileToDelete.file
-            .onDelete()
+        const onDelete = () => {
+            if (fileToDelete.file.onDelete == null) {
+                return Promise.resolve(undefined);
+            }
+            return fileToDelete.file.onDelete();
+        };
+        onDelete()
             .then(() => {
                 setFileStatus(fileToDelete, 'deleted');
                 setHasDeleted(true);
@@ -1225,7 +1260,7 @@ const useStartAutoDeleteFiles = () => {
                 notification.error({
                     placement: 'bottomRight',
                     message: 'ファイルの削除に失敗しました。',
-                    description: fileToDelete.file.absolutePathSource,
+                    description: joinPath(fileToDelete.file.absolutePathSource).string,
                 });
                 console.error('ファイルの削除に失敗しました。', e);
                 setFileStatus(fileToDelete, 'error');
@@ -1260,7 +1295,7 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
         const newState = new DeletableTree<string, Omit<EnsuredFolderPath, 'path'>>();
         for (const path of props.ensuredFolderPaths) {
             newState.ensure(
-                path.path.split(splitter),
+                joinPath(path.path).array,
                 () => path,
                 () => ({})
             );
@@ -1278,8 +1313,7 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
             }
         >();
         for (const filePath of props.files) {
-            const directory = filePath.path.split(splitter);
-            const absolutePath = [...directory];
+            const directory = [...filePath.path];
             const filename = directory.pop();
             if (filename == null) {
                 throw new Error('This should not happen.');
@@ -1291,8 +1325,8 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
                 ...filePath,
                 type: file,
                 name: filename,
-                absolutePath,
-                absolutePathSource: filePath.path,
+                absolutePath: directory,
+                absolutePathSource: joinPath(filePath.path).array,
             });
         }
         return folder;
