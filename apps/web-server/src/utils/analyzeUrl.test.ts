@@ -32,6 +32,7 @@ describe('analyzeUrl', () => {
         ' ',
         'foo',
         '/',
+        '/foo',
         './foo',
         'file:./foo',
         'file:///',

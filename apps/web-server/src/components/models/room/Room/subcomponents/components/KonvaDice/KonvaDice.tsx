@@ -35,7 +35,7 @@ export const KonvaD6: React.FC<KonvaD6Props> = ({
     } else {
         src = isD6Value(value) ? `/assets/dice/${value}-6.png` : '/assets/dice/0-6.png';
     }
-    const image = useImage(src);
+    const image = useImage(src, { skipAnalyzeUrl: true });
 
     const transitions = useTransition(value, {
         from: { opacity: 0 },
