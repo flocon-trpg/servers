@@ -586,7 +586,6 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
 
     return (
         <Modal
-            className={cancelRnd}
             visible={config != null}
             title='タブの編集'
             closable
