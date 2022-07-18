@@ -1113,7 +1113,9 @@ const NodeView: React.FC<{
                         textOverflow: 'ellipsis',
                     }}
                 >
-                    {node.name}
+                    <Tooltip title={node.name} placement='bottom'>
+                        {node.name}
+                    </Tooltip>
                 </div>
             </div>
         </Dropdown>
