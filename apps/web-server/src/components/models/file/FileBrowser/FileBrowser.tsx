@@ -60,8 +60,6 @@ const none = '__none__';
 const columnGap = '4px 0';
 
 type FilePathBase = {
-    key: string;
-
     /** ファイルのフィルター設定で用いる識別子を表します。フィルター設定を使わない場合は undefined を渡してください。*/
     fileType?: string;
 
@@ -83,7 +81,7 @@ type FilePathBase = {
 };
 
 export type FilePath = FilePathBase & {
-    /** ファイルのパスを表します。`''`である要素は存在しないものとして扱われます。
+    /** ファイルのパスを表します。`''`である要素は存在しないものとして扱われます。パスが重複するファイルが複数あってはなりません。
      *
      * このコンポーネントにおいて、どのようなファイル名で表示されてほしいか、どのようなフォルダに入っていてほしいかを表す値であるため、必ずしも実際のパスと等しくする必要はありません。
      *
@@ -142,11 +140,13 @@ export type Props = {
 type FilePathNode = FilePathBase & {
     type: typeof file;
 
+    key: string;
+
     /** FilePath.path から `''` の要素を取り除いたものと等しい。*/
-    absolutePathSource: readonly string[];
+    absolutePath: readonly string[];
 
     /** ファイルがあるパス。ファイル名の部分は含まない。*/
-    absolutePath: readonly string[];
+    absoluteFolderPath: readonly string[];
 
     /** ファイル名。 */
     name: string;
@@ -205,15 +205,11 @@ const useCreateNodes = () => {
 
         const fileNodes = currentFolderMap.get([])?.files ?? [];
         const folderNodes = [...currentFolderMap.getChildren()].map(([, $folder]) => {
-            const key = $folder.absolutePath.reduce(
-                (seed, elem) => `${seed}/${elem}`,
-                'FileBrowser@Folder/'
-            );
             const name = $folder.absolutePath[$folder.absolutePath.length - 1] ?? '';
             return {
                 type: folder,
                 multiKeyMap: $folder,
-                key,
+                key: joinPath($folder.absolutePath).string + '@FileBrowser@Folder',
                 name,
                 absolutePath: $folder.absolutePath,
             } as const;
@@ -561,10 +557,7 @@ const toFilesToDelete = (source: readonly FilePathNode[]): readonly FileToDelete
     return source
         .map(file => ({ status: 'waiting', file } as const))
         .sort((x, y) => {
-            for (const group of groupJoinArray(
-                x.file.absolutePathSource,
-                y.file.absolutePathSource
-            )) {
+            for (const group of groupJoinArray(x.file.absolutePath, y.file.absolutePath)) {
                 switch (group.type) {
                     case left:
                         return 1;
@@ -599,7 +592,7 @@ const FilesToDeleteTable: React.FC<{
                             <Icons.WarningOutlined />
                         ) : null}
                     </div>
-                    <div>{joinPath(item.file.absolutePathSource).string}</div>
+                    <div>{joinPath(item.file.absolutePath).string}</div>
                 </div>
             ))}
         </div>
@@ -1260,7 +1253,7 @@ const useStartAutoDeleteFiles = () => {
                 notification.error({
                     placement: 'bottomRight',
                     message: 'ファイルの削除に失敗しました。',
-                    description: joinPath(fileToDelete.file.absolutePathSource).string,
+                    description: joinPath(fileToDelete.file.absolutePath).string,
                 });
                 console.error('ファイルの削除に失敗しました。', e);
                 setFileStatus(fileToDelete, 'error');
@@ -1324,9 +1317,10 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
             folderNode.files.push({
                 ...filePath,
                 type: file,
+                key: joinPath(filePath.path).string + '@FileBrowser@File',
                 name: filename,
-                absolutePath: directory,
-                absolutePathSource: joinPath(filePath.path).array,
+                absoluteFolderPath: directory,
+                absolutePath: joinPath(filePath.path).array,
             });
         }
         return folder;

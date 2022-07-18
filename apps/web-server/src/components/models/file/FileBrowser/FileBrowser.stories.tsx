@@ -1,4 +1,3 @@
-import { joinPath } from '@flocon-trpg/core';
 import { both, delay, groupJoinArray } from '@flocon-trpg/utils';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
@@ -9,7 +8,6 @@ import {
     image,
     others,
     sound,
-    text,
 } from './FileBrowser';
 
 type FileSource =
@@ -58,7 +56,6 @@ const toFilePath = (filesSourceRef: { current: FileSource[] }): FilePath[] => {
             return {
                 fileType: file.type,
                 path: file.path,
-                key: joinPath(file.path).string,
                 onSelect: onClick,
                 onDelete,
                 onOpen,
@@ -69,7 +66,6 @@ const toFilePath = (filesSourceRef: { current: FileSource[] }): FilePath[] => {
         return {
             fileType: file.type,
             path: file.path,
-            key: joinPath(file.path).string,
             onSelect: onClick,
             onDelete,
             onOpen,
@@ -257,39 +253,4 @@ ManyFiles.args = {
             path: [filename],
         };
     }),
-};
-
-export const DuplicatedName = Template.bind({});
-DuplicatedName.args = {
-    filesSource: undefined,
-    files: [
-        {
-            key: 'file.txt(1)',
-            path: ['file.txt'],
-            icon: text,
-            onDelete: deleteSuccess,
-            onSelect: () => console.log('file.txt(1)'),
-        },
-        {
-            key: 'file.txt(2)',
-            path: ['file.txt'],
-            icon: text,
-            onDelete: deleteSuccess,
-            onSelect: () => console.log('file.txt(2)'),
-        },
-        {
-            key: 'folder/image.png(1)',
-            path: ['folder/image.png'],
-            icon: image,
-            onDelete: deleteSuccess,
-            onSelect: () => console.log('folder/image.png(1)'),
-        },
-        {
-            key: 'folder/image.png(2)',
-            path: ['folder/image.png'],
-            icon: image,
-            onDelete: deleteSuccess,
-            onSelect: () => console.log('folder/image.png(2)'),
-        },
-    ],
 };

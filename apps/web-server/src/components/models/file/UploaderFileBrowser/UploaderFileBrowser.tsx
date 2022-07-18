@@ -84,7 +84,6 @@ const useFirebaseStorageFiles = (onSelect: OnSelect | null) => {
                           });
                       };
                 const result: FilePath = {
-                    key: fileBrowserPath.string,
                     path: fileBrowserPath.array,
                     icon: fileType,
                     fileType,
@@ -154,7 +153,6 @@ const useFloconUploaderFiles = (onSelect: OnSelect | null, pause: boolean) => {
                       });
                   };
             const result: FilePath = {
-                key: fileBrowserPath.string,
                 path: fileBrowserPath.array,
                 icon: fileType,
                 fileType,
