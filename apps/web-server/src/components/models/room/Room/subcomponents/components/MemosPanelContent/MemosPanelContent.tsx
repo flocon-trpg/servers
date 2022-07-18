@@ -37,7 +37,7 @@ const MemoBrowserModal: React.FC<{
             return [];
         }
         return [...memos].map(([memoId, memo]): FilePath => {
-            const path = joinPath(memo.dir, `${memo.name}(${memoId})`).array;
+            const path = joinPath(memo.dir, [`${memo.name}(ID:${memoId})`]).array;
             return {
                 path,
                 icon: text,

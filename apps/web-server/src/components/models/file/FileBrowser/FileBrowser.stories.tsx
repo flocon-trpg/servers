@@ -211,15 +211,19 @@ export default {
             },
             {
                 type: others,
-                path: ['dir1', 'file.dll'],
+                path: ['dir1-1', 'file.dll'],
             },
             {
                 type: others,
-                path: ['dir1', 'dir2', 'file1.dll'],
+                path: ['dir1-1', 'dir1-2', 'file1.dll'],
             },
             {
                 type: others,
-                path: ['dir1', 'dir2', 'file2.dll'],
+                path: ['dir1-1', 'dir1-2', 'file2.dll'],
+            },
+            {
+                type: others,
+                path: ['dir2-1', 'dir2-2', 'file3.dll'],
             },
         ],
     },

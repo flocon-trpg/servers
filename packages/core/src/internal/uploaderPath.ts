@@ -16,7 +16,7 @@ https://cloud.google.com/storage/docs/naming-objects
  *
  * stringの場合は、半角スラッシュでパスの区切りを表します。半角スラッシュをエスケープすることはできません。2つ以上続く半角スラッシュは1つとして扱われます。
  *
- * 配列の場合は、各要素のstringは、半角スラッシュを含めることはできません。`''`の要素は存在しないものとして扱われます。
+ * 配列の場合は、要素のstringに半角スラッシュが含まれていた場合、それらは区切りとしてみなされず保持されます。`''`の要素は存在しないものとして扱われます。
  */
 export type UploaderPathSource = string | readonly string[];
 

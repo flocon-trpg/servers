@@ -161,6 +161,12 @@ describe('joinPath', () => {
         expect(actual?.string).toBe('');
     });
 
+    it('should preserve / in arrays', () => {
+        const actual = joinPath(['a/b']);
+        expect(actual?.array).toEqual(['a/b']);
+        expect(actual?.string).toBe('a/b');
+    });
+
     it.each(['foo.txt', ['foo.txt']])('tests %o', source => {
         const actual = joinPath(source);
         expect(actual?.array).toEqual(['foo.txt']);

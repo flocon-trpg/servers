@@ -192,27 +192,32 @@ const useCreateNodes = () => {
     return React.useMemo(() => {
         let currentFolderMap: FolderMap = rootFolder;
         for (const dir of currentDirectory) {
-            // これがないと、vitrualFolderを開いたときにFolderMapにもvirtualFolderと同じフォルダが追加されてしまう。
-            if (currentFolderMap.get([dir]) === undefined) {
-                return [];
-            }
-
             currentFolderMap = currentFolderMap.createSubMap([dir]);
-        }
-        if (currentFolderMap == null) {
-            return [];
         }
 
         const fileNodes = currentFolderMap.get([])?.files ?? [];
-        const folderNodes = [...currentFolderMap.getChildren()].map(([, $folder]) => {
+        const folderNodes = [...currentFolderMap.getChildren()].flatMap(([, $folder]) => {
+            let hasFile = false;
+            for (const node of $folder.traverse()) {
+                if (node.value.files.length >= 1) {
+                    hasFile = true;
+                    break;
+                }
+            }
+            // これがないと、vitrualFolderを開いたときにFolderMapにもvirtualFolderと同じフォルダが追加されてしまう。
+            if (!hasFile) {
+                return [];
+            }
             const name = $folder.absolutePath[$folder.absolutePath.length - 1] ?? '';
-            return {
-                type: folder,
-                multiKeyMap: $folder,
-                key: joinPath($folder.absolutePath).string + '@FileBrowser@Folder',
-                name,
-                absolutePath: $folder.absolutePath,
-            } as const;
+            return [
+                {
+                    type: folder,
+                    multiKeyMap: $folder,
+                    key: joinPath($folder.absolutePath).string + '@FileBrowser@Folder',
+                    name,
+                    absolutePath: $folder.absolutePath,
+                } as const,
+            ];
         });
         const virtualFolderNodes: VirtualFolderNode[] = [
             ...virtualFolders.createSubTree(currentDirectory, () => ({})).getChildren(),
@@ -1308,7 +1313,7 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
             }
         >();
         for (const filePath of props.files) {
-            const directory = [...filePath.path];
+            const directory = [...joinPath(filePath.path).array];
             const filename = directory.pop();
             if (filename == null) {
                 throw new Error('This should not happen.');
