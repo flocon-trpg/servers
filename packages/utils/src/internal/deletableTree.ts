@@ -1,5 +1,5 @@
 import { Option } from '@kizahasi/option';
-import { reduce } from './iterable';
+import { choose } from './iterable';
 import { Tree } from './tree';
 
 /** 仮想的にnodeをdeleteできる機能を持ったTreeを表します。内部でnodeにdeleteフラグを立てることでdeleteされたことを表すため、deleteしてもメモリの空き容量は増えません。 */
@@ -107,7 +107,7 @@ export class DeletableTree<TKey, TValue> {
     }
 
     public traverse(): Iterable<{ absolutePath: readonly TKey[]; value: TValue }> {
-        return reduce(this.#source.traverse(), elem => {
+        return choose(this.#source.traverse(), elem => {
             if (elem.value.isNone) {
                 return Option.none();
             }

@@ -1,5 +1,5 @@
 import { Option, Some } from '@kizahasi/option';
-import { reduce } from './iterable';
+import { choose } from './iterable';
 import { Tree } from './tree';
 
 /** 複数のkeyを使用できるMap */
@@ -74,7 +74,7 @@ export class MultiKeyMap<TKey, TValue> {
     }
 
     public traverse(): Iterable<{ absolutePath: readonly TKey[]; value: TValue }> {
-        return reduce(this.#source.traverse(), element => {
+        return choose(this.#source.traverse(), element => {
             if (element.value.isNone) {
                 return Option.none();
             }
