@@ -134,4 +134,8 @@ export class DeletableTree<TKey, TValue> {
         result.#source = newTree;
         return result;
     }
+
+    public clone() {
+        return this.map(({ value }) => value);
+    }
 }
