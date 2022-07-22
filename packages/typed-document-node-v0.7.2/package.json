@@ -21,6 +21,6 @@
     },
     "dependencies": {
         "@graphql-typed-document-node/core": "^3.1.0",
-        "graphql": "^15.6.0"
+        "graphql": "^16.0.0"
     }
 }
