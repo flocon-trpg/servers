@@ -1,4 +1,5 @@
 import { both, delay, groupJoinArray } from '@flocon-trpg/utils';
+import { Result } from '@kizahasi/result';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 import {
@@ -46,12 +47,27 @@ const toFilePath = (filesSourceRef: { current: FileSource[] }): FilePath[] => {
             if (file.type !== others) {
                 return Promise.reject(new Error('fake error'));
             }
-            filesSourceRef.current = filesSourceRef.current.filter(x =>
-                arrayEquals(x.path, file.path)
+            filesSourceRef.current = filesSourceRef.current.filter(elem =>
+                arrayEquals(elem.path, file.path)
             );
         };
         const onOpen = () => console.log('open', file.path);
         const onClipboard = () => console.log('clipboard', file.path);
+        const onMoveOrRename: FilePath['onMoveOrRename'] = async params => {
+            await delay(1000);
+            if (file.type !== others) {
+                return Promise.reject(new Error('fake error'));
+            }
+            filesSourceRef.current = filesSourceRef.current.map(elem => {
+                if (arrayEquals(elem.path, params.currentPath)) {
+                    return {
+                        ...elem,
+                        path: params.newPath,
+                    };
+                }
+                return elem;
+            });
+        };
         if (file.type === image) {
             return {
                 fileType: file.type,
@@ -60,7 +76,9 @@ const toFilePath = (filesSourceRef: { current: FileSource[] }): FilePath[] => {
                 onDelete,
                 onOpen,
                 onClipboard,
+                onMoveOrRename,
                 thumb: file.thumb,
+                id: undefined,
             };
         }
         return {
@@ -70,7 +88,9 @@ const toFilePath = (filesSourceRef: { current: FileSource[] }): FilePath[] => {
             onDelete,
             onOpen,
             onClipboard,
+            onMoveOrRename,
             icon: file.type,
+            id: undefined,
         };
     });
 };
@@ -92,8 +112,26 @@ const Practical: React.FC<PracticalProps> = ({
         <FileBrowser
             height={null}
             files={filesState}
+            fileCreateLabel='😀ファイルを作成🤖'
+            searchPlaceholder='😀検索🤖'
             onDelete={() => {
                 setFilesState(toFilePath(filesSourceRef));
+            }}
+            onRename={() => {
+                setFilesState(toFilePath(filesSourceRef));
+            }}
+            // TODO: canMoveを用いたstoryも作成する
+            canMove={() => Result.ok(undefined)}
+            // TODO: canRenameを用いたstoryも作成する
+            canRename={() => Result.ok(undefined)}
+            canCreateTempVirtualFolder={({ foldername }) => {
+                if (foldername === '') {
+                    return Result.error('empty foldername');
+                }
+                if (foldername.includes('/')) {
+                    return Result.error('includes /');
+                }
+                return Result.ok(undefined);
             }}
             fileTypes={{
                 defaultFileTypeFilter,
@@ -112,10 +150,10 @@ const Practical: React.FC<PracticalProps> = ({
                     },
                 ],
             }}
-            isLocked={() => false}
+            isProtected={() => false}
             onFileCreate={() => Promise.resolve(true)}
             // TODO: ensuredFolderPathsを用いたstoryも作成する
-            ensuredFolderPaths={[]}
+            ensuredVirtualFolderPaths={[]}
         />
     );
 };
@@ -146,10 +184,15 @@ export const Default: React.FC<Props> = ({ files, filesSource, defaultFileTypeFi
     return (
         <FileBrowser
             height={null}
+            fileCreateLabel='😀ファイルを作成🤖'
+            searchPlaceholder='😀検索🤖'
             files={files}
-            isLocked={() => false}
+            isProtected={() => false}
             onFileCreate={() => Promise.resolve(true)}
-            ensuredFolderPaths={[]}
+            ensuredVirtualFolderPaths={[]}
+            canMove={() => Result.error('fake error')}
+            canRename={() => Result.error('fake error')}
+            canCreateTempVirtualFolder={() => Result.error('fake error')}
         />
     );
 };
@@ -236,11 +279,11 @@ Filtered.args = {
     defaultFileTypeFilter: others,
 };
 
-const deleteSuccess = async () => {
+const success = async () => {
     await delay(1000);
 };
 
-const deleteFail = async () => {
+const fail = async () => {
     await delay(1000);
     return Promise.reject();
 };
@@ -253,8 +296,16 @@ ManyFiles.args = {
         return {
             key: filename,
             type: others,
-            onDelete: i % 2 === 0 ? deleteSuccess : deleteFail,
+            onDelete: i % 2 === 0 ? success : fail,
+            onMoveOrRename: i % 2 === 0 ? success : fail,
             path: [filename],
+            id: undefined,
         };
     }),
+};
+
+export const NoItem = Template.bind({});
+NoItem.args = {
+    filesSource: undefined,
+    files: [],
 };

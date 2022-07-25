@@ -19,7 +19,13 @@ import { File, useFirebaseStorageListAllQuery } from '@/hooks/useFirebaseStorage
 import { useGetIdToken } from '@/hooks/useGetIdToken';
 import { $public, Path, StorageType, unlisted } from '@/utils/file/firebaseStorage';
 import { accept } from './utils/helper';
-import { State, filePathTemplate, joinPath } from '@flocon-trpg/core';
+import {
+    State,
+    filePathTemplate,
+    joinPath,
+    sanitizeFilename,
+    sanitizeFoldername,
+} from '@flocon-trpg/core';
 import urljoin from 'url-join';
 import { getHttpUri } from '@/atoms/webConfigAtom/webConfigAtom';
 import axios from 'axios';
@@ -28,6 +34,7 @@ import copy from 'clipboard-copy';
 import { useOpenFirebaseStorageFile } from '@/hooks/useOpenFirebaseStorageFile';
 import { useOpenFloconUploaderFile } from '@/hooks/useOpenFloconUploaderFile';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
+import { Result } from '@kizahasi/result';
 
 type FilePathState = State<typeof filePathTemplate>;
 
@@ -85,6 +92,7 @@ const useFirebaseStorageFiles = (onSelect: OnSelect | null) => {
                       };
                 const result: FilePath = {
                     path: fileBrowserPath.array,
+                    id: undefined,
                     icon: fileType,
                     fileType,
                     onDelete: async () => {
@@ -100,6 +108,7 @@ const useFirebaseStorageFiles = (onSelect: OnSelect | null) => {
                             });
                         });
                     },
+                    onMoveOrRename: () => Promise.reject('not supported'),
                 };
                 return result;
             };
@@ -154,6 +163,7 @@ const useFloconUploaderFiles = (onSelect: OnSelect | null, pause: boolean) => {
                   };
             const result: FilePath = {
                 path: fileBrowserPath.array,
+                id: undefined,
                 icon: fileType,
                 fileType,
                 onDelete: async () => {
@@ -169,6 +179,10 @@ const useFloconUploaderFiles = (onSelect: OnSelect | null, pause: boolean) => {
                             placement: 'bottomRight',
                         });
                     });
+                },
+                onMoveOrRename: async () => {
+                    // TODO: 実装する
+                    notification.warn({ message: '移動とリネームは未実装です。' });
                 },
             };
             return result;
@@ -381,6 +395,8 @@ export const UploaderFileBrowser: React.FC<Props> = ({
         <>
             <FileBrowser
                 height={height}
+                fileCreateLabel='ファイルをアップロード'
+                searchPlaceholder='ファイル名で検索'
                 files={files}
                 fileTypes={{
                     fileTypes: [
@@ -390,11 +406,85 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                     ],
                     defaultFileTypeFilter,
                 }}
-                isLocked={absolutePath => absolutePath.length === 0}
+                canMove={({ currentDirectoryPath, newDirectoryPath }) => {
+                    switch (currentDirectoryPath[0]) {
+                        case undefined:
+                            return Result.error(
+                                'このフォルダでは、フォルダの移動は無効化されています。'
+                            );
+                        case uploaderTypeFolderName.publicFirebaseStorage:
+                        case uploaderTypeFolderName.unlistedFirebaseStorage:
+                            return Result.error(
+                                'Firebase Storage版アップローダーでは、ファイルの移動はサポートされていません。'
+                            );
+                        default:
+                            break;
+                    }
+                    if (newDirectoryPath == null) {
+                        return Result.ok(undefined);
+                    }
+                    if (newDirectoryPath.length === 0) {
+                        return Result.error(
+                            'このフォルダにファイル等を移動させることはできません。'
+                        );
+                    }
+                    if (currentDirectoryPath[0] !== newDirectoryPath[0]) {
+                        // 内蔵アップローダーのpublic↔unlisted間の移動は技術的には可能。ただし問題が起こらないかどうかについてはまだ未検証。
+                        return Result.error(
+                            '異なるアップローダー間の移動はサポートされていません。'
+                        );
+                    }
+                    return Result.ok(undefined);
+                }}
+                canRename={({ directoryPath, newName, nodeType }) => {
+                    switch (directoryPath[0]) {
+                        case undefined:
+                            return Result.error('このフォルダでは、リネームは無効化されています。');
+                        case uploaderTypeFolderName.publicFirebaseStorage:
+                        case uploaderTypeFolderName.unlistedFirebaseStorage:
+                            return Result.error(
+                                'Firebase Storage版アップローダーでは、ファイルやフォルダのリネームはサポートされていません。'
+                            );
+                        default:
+                            break;
+                    }
+                    if (newName == null) {
+                        return Result.ok(undefined);
+                    }
+                    if (newName === '') {
+                        return Result.error('名前を空にすることはできません。');
+                    }
+                    if (nodeType === 'file') {
+                        if (newName !== sanitizeFilename(newName)) {
+                            return Result.error(
+                                '名前が長すぎるか、使用できない文字が含まれています。'
+                            );
+                        }
+                    } else {
+                        if (newName !== sanitizeFoldername(newName)) {
+                            return Result.error(
+                                '名前が長すぎるか、使用できない文字が含まれています。'
+                            );
+                        }
+                    }
+                    if (newName.includes('/')) {
+                        return Result.error('/ を含めることはできません。');
+                    }
+                    return Result.ok(undefined);
+                }}
+                canCreateTempVirtualFolder={({ foldername }) => {
+                    if (foldername === '') {
+                        return Result.error('フォルダ名を空白にすることはできません。');
+                    }
+                    if (foldername !== sanitizeFoldername(foldername)) {
+                        return Result.error('名前が長すぎるか、使用できない文字が含まれています。');
+                    }
+                    return Result.ok(undefined);
+                }}
+                isProtected={absolutePath => absolutePath.length === 0}
                 onFileCreate={absolutePath => {
                     const folderAbsolutePath = [...absolutePath];
                     const uploaderType = folderAbsolutePath.shift();
-                    console.info(absolutePath, folderAbsolutePath, uploaderType);
                     switch (uploaderType) {
                         case uploaderTypeFolderName.publicFirebaseStorage:
                             setFirebaseStorageUploaderModalState({
@@ -429,7 +519,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                             break;
                     }
                 }}
-                ensuredFolderPaths={[
+                ensuredVirtualFolderPaths={[
                     {
                         path: [uploaderTypeFolderName.publicFirebaseStorage],
                     },

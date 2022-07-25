@@ -30,13 +30,16 @@ import { VirtuosoGrid } from 'react-virtuoso';
 import styled from '@emotion/styled';
 import {
     DeletableTree,
+    DualKeyMap,
     MultiKeyMap,
     MultiValueSet,
+    arrayEquals,
     both,
     groupJoinArray,
     keyNames,
     left,
     right,
+    toBeNever,
 } from '@flocon-trpg/utils';
 import { Provider, atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import produce from 'immer';
@@ -44,8 +47,10 @@ import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { useLatest } from 'react-use';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { Option } from '@kizahasi/option';
-import { joinPath, sanitizeFoldername } from '@flocon-trpg/core';
+import { joinPath } from '@flocon-trpg/core';
 import { mergeStyles } from '@/utils/mergeStyles';
+import { ItemType } from 'antd/lib/menu/hooks/useItems';
+import { Result } from '@kizahasi/result';
 
 export const image = 'image';
 export const sound = 'sound';
@@ -58,6 +63,19 @@ const virtualFolder = 'virtualFolder';
 const none = '__none__';
 
 const columnGap = '4px 0';
+
+type Path = {
+    path: readonly string[];
+
+    /** ファイルの場合は`FilePathBase.id`と等しい値です。ファイル以外の場合は常にundefinedとなります。 */
+    id: string | undefined;
+};
+
+type NameIdPair = {
+    name: string;
+
+    id: string | undefined;
+};
 
 type FilePathBase = {
     /** ファイルのフィルター設定で用いる識別子を表します。フィルター設定を使わない場合は undefined を渡してください。*/
@@ -78,6 +96,14 @@ type FilePathBase = {
     onDelete?: () => Promise<void>;
 
     onClipboard?: () => void;
+
+    onMoveOrRename: (params: {
+        currentPath: readonly string[];
+        newPath: readonly string[];
+    }) => Promise<void>;
+
+    /** パスが完全に重複するファイルが存在する場合は、これで区別する必要があります。*/
+    id: string | undefined;
 };
 
 export type FilePath = FilePathBase & {
@@ -104,9 +130,9 @@ export type FileTypes = {
     defaultFileTypeFilter: string | null;
 };
 
-type IsLocked = (absolutePath: readonly string[]) => boolean;
+type IsProtected = (absolutePath: readonly string[]) => boolean;
 
-type EnsuredFolderPath = {
+type EnsuredVirtualFolderPath = {
     /** ファイルのパスを表します。`''`である要素は存在しないものとして扱われます。 */
     path: readonly string[];
 
@@ -123,18 +149,66 @@ export type Props = {
     height: number | null;
 
     style?: React.CSSProperties;
+
     fileTypes?: FileTypes;
 
     /** ファイルの削除処理が完了したときにトリガーされます。複数のファイルが削除されるときは、最後のファイルが削除されたときにトリガーされます。 */
     onDelete?: () => void;
 
-    /** trueが返されたファイルパスでは、ファイルおよびフォルダの作成と削除ができなくなり、複数選択モードが無効化されます。 */
-    isLocked: IsLocked;
+    /** ファイルのリネーム処理が完了したときにトリガーされます。複数のファイルがリネームされるときは、最後のファイルがリネームされたときにトリガーされます。 */
+    onRename?: () => void;
+
+    canMove: (
+        /** 例えば`folder1`というフォルダに`a.png`と`b.png`と`c.png`というファイルがあってこれらのうち`a.png`と`b.png`のみを`folder2`フォルダに移動しようとした場合、`currentDirectoryPath`は`['folder1']`、newDirectoryPathは`['folder2']`となります。ファイル名が`a.png`と`b.png`であるという情報の取得は、現時点では必要とされていないためサポートしていません。 */ params: {
+            currentDirectoryPath: readonly string[];
+
+            /** cutの際はnullに、pasteの際はnon-nullになります。 */
+            newDirectoryPath: readonly string[] | null;
+        }
+    ) => Result<void>;
+
+    canRename: (params: {
+        directoryPath: readonly string[];
+
+        oldName: string;
+
+        /** ユーザーがrenameを開始しようとした際はnullに、新しい名前を決めた際はnon-nullになります。 */
+        newName: string | null;
+
+        nodeType: Node['type'];
+    }) => Result<void>;
+
+    canCreateTempVirtualFolder: (params: {
+        directoryPath: readonly string[];
+
+        foldername: string;
+    }) => Result<void>;
+
+    /** trueが返されたファイルパスでは、ファイルおよびフォルダの作成とリネームと移動と削除などが無効化されます。 */
+    isProtected: IsProtected;
 
     onFileCreate: (absolutePath: readonly string[]) => void;
 
+    fileCreateLabel: string;
+
+    /** 検索バーのplaceholderを設定します。 */
+    searchPlaceholder: string;
+
     /** ファイルの有無にかかわらず、常に表示するフォルダを指定できます。 */
-    ensuredFolderPaths: readonly EnsuredFolderPath[];
+    ensuredVirtualFolderPaths: readonly EnsuredVirtualFolderPath[];
+};
+
+const defaultProps: Props = {
+    files: [],
+    height: null,
+    isProtected: () => false,
+    onFileCreate: () => undefined,
+    ensuredVirtualFolderPaths: [],
+    fileCreateLabel: '(fileCreateLabel)',
+    searchPlaceholder: '(searchPlaceholder)',
+    canMove: () => Result.error('(defaultProps)'),
+    canRename: () => Result.error('(defaultProps)'),
+    canCreateTempVirtualFolder: () => Result.error('(canCreateTempVirtualFolder)'),
 };
 
 type FilePathNode = FilePathBase & {
@@ -142,11 +216,11 @@ type FilePathNode = FilePathBase & {
 
     key: string;
 
-    /** FilePath.path から `''` の要素を取り除いたものと等しい。*/
-    absolutePath: readonly string[];
+    /** FilePath.path から `''` の要素を取り除いたものと等しいです。*/
+    path: readonly string[];
 
-    /** ファイルがあるパス。ファイル名の部分は含まない。*/
-    absoluteFolderPath: readonly string[];
+    /** ファイルがあるパス。ファイル名の部分は含みません。*/
+    folderPath: readonly string[];
 
     /** ファイル名。 */
     name: string;
@@ -155,7 +229,8 @@ type FilePathNode = FilePathBase & {
 type FolderMap = MultiKeyMap<
     string,
     {
-        files: readonly FilePathNode[];
+        /** 1つ目のkeyはnameと等しく、2つ目はidと等しくなります。 */
+        files: DualKeyMap<string, string | undefined, FilePathNode>;
     }
 >;
 
@@ -166,40 +241,276 @@ type Folder = {
     name: string;
 };
 
-/** 仮想的なフォルダ。FilePathBase.pathのみでは空のフォルダが扱えないため、これによって表現されます。存在しないフォルダにファイルを新規作成するために、ユーザーによって作成された仮のフォルダなどの用途で利用されます。*/
-type VirtualFolder = {
+/** ユーザーによって作成された仮想フォルダ。FilePathBase.pathのみでは空のフォルダが表現できないため、代わりにこれを用います。*/
+// 一時的な仮想フォルダであり、また通常のファイルやフォルダと比べて消えたときの悪影響が小さいため、コンポーネントのunmountなどのタイミングで自動的に消えることがあります。
+type TempVirtualFolder = {
     type: typeof virtualFolder;
 
-    /** フォルダがあるパス。フォルダ名の部分は含まない。*/
-    absolutePath: readonly string[];
+    /** フォルダがあるパス。フォルダ名の部分は含みません。*/
+    folderPath: readonly string[];
 
     /** フォルダ名。*/
     name: string;
 };
 
-type VirtualFolderNode = VirtualFolder & {
+type VirtualFolderNode = TempVirtualFolder & {
     key: string;
-    header: React.ReactNode | undefined;
+
+    // TempVirtualFolder由来の場合は常にundefinedになる
+    header: React.ReactNode;
 };
 
-type Node = FilePathNode | Folder | VirtualFolderNode;
+class Node {
+    constructor(readonly source: FilePathNode | Folder | VirtualFolderNode) {}
 
-const useCreateNodes = () => {
-    const virtualFolders = useAtomValue(virtualFoldersAtom);
-    const rootFolder = useAtomValue(rootFolderAtom);
-    const currentDirectory = useAtomValue(currentDirectoryAtom);
+    get key() {
+        return this.source.key;
+    }
 
-    return React.useMemo(() => {
-        let currentFolderMap: FolderMap = rootFolder;
-        for (const dir of currentDirectory) {
+    get type() {
+        return this.source.type;
+    }
+
+    get name() {
+        return this.source.name;
+    }
+
+    get id() {
+        if (this.source.type === file) {
+            return this.source.id;
+        }
+        return undefined;
+    }
+
+    get folderPath(): readonly string[] {
+        switch (this.source.type) {
+            case virtualFolder:
+                return this.source.folderPath;
+            case folder:
+                return this.source.multiKeyMap.absolutePath;
+            case file:
+                return this.source.folderPath;
+        }
+    }
+
+    get path(): readonly string[] {
+        return [...this.folderPath, this.name];
+    }
+}
+
+type FileToDelete = {
+    status: 'waiting' | 'deleting' | 'deleted' | 'error';
+    file: FilePathNode;
+};
+
+type AskingDeleteStatus = {
+    type: 'asking';
+
+    files: readonly FileToDelete[];
+
+    /** temp virtual folderのrenameに用いられます。temp virtual folderでないfolderの場合は無視されます。 */
+    tempVirtualFolders: readonly { path: readonly string[] }[];
+};
+
+type DeleteStatus =
+    | {
+          type: 'none';
+      }
+    | {
+          type: 'deleting' | 'aborted' | 'finished';
+          files: readonly FileToDelete[];
+      }
+    | AskingDeleteStatus;
+
+type FileToRename = {
+    status: 'waiting' | 'renaming' | 'renamed' | 'error';
+    file: FilePathNode;
+    newPath: readonly string[];
+};
+
+type AskingRenameStatus = {
+    type: 'asking';
+
+    files: readonly FileToRename[];
+
+    /** temp virtual folderのrenameに用いられます。temp virtual folderでないfolderの場合は無視されます。 */
+    tempVirtualFolders: readonly { currentPath: readonly string[]; newPath: readonly string[] }[];
+};
+
+type RenameStatus =
+    | {
+          type: 'none';
+      }
+    | {
+          type: 'renaming' | 'aborted' | 'finished';
+          files: readonly FileToRename[];
+      }
+    | AskingRenameStatus;
+
+type PathStateBase = {
+    rootFolder: FolderMap;
+
+    // 要素はabsolute path
+    currentDirectory: readonly string[];
+
+    isMultipleSelectMode: boolean;
+
+    // 要素はabsolute path
+    tempVirtualFolders: DeletableTree<string, undefined>;
+
+    ensuredVirtualFolders: DeletableTree<string, Omit<EnsuredVirtualFolderPath, 'path'>>;
+
+    // 現在のcurrentDirectoryにおいて選択されているファイルおよびフォルダの名前。virtual folderにも対応している。
+    // selectedFilesは、first keyがnameでsecond keyがid。
+    selectedFiles: DualKeyMap<string, string | undefined, undefined>;
+    selectedFolders: ReadonlySet<string>;
+
+    // cutされたファイルおよびフォルダの名前。virtual folderにも対応している。
+    // cutFilesは、first keyがnameでsecond keyがid。
+    cutFiles: DualKeyMap<string, string | undefined, undefined>;
+    cutFolders: ReadonlySet<string>;
+    /** cutされたファイルやフォルダが属するフォルダ。 */
+    cutAt: readonly string[];
+};
+
+/** ファイルパスを移動した際の新しいパスを返します。この関数はpureです。
+ *
+ * 例えば`a/b/f1.png`と`a/b/f2.png`と`c/f3.png`がある状態で、`a`のフォルダ内で、`b`を切り取ってから`c`フォルダ内に貼り付けて`c/b/f1.png`と`c/b/f2.png`と`c/f3.png`の状態にする場合、`nodePath`は`['a', 'b']`、`cutAt`は`['a']`、`newPath`は`['c']`になります。`cutAt`は必ず`nodePath.slice(0,n)`(nは0以上の整数)で取得できる値となります。*/
+const movePath = ({
+    nodePath,
+    cutAt,
+    destFolderPath,
+}: {
+    nodePath: readonly string[];
+    cutAt: readonly string[];
+    destFolderPath: readonly string[];
+}) => {
+    const result = [...nodePath];
+    // a/b/f1.pngをb/f1.pngに変換。
+    result.splice(0, cutAt.length);
+    // b/f1.pngをc/b/f1.pngに変換。
+    return [...destFolderPath, ...result];
+};
+
+type PathList = {
+    readonly files: readonly Path[];
+    readonly folders: readonly { path: readonly string[] }[];
+};
+
+// メソッドはすべてimmutable
+class PathState {
+    private constructor(private readonly members: PathStateBase) {
+        const newTempVirtualFolders = members.tempVirtualFolders.clone();
+        // 通常のフォルダが存在するため、必要なくなったtemp virtual folderをすべて削除する処理
+        for (const { absolutePath } of members.tempVirtualFolders.traverse()) {
+            if (members.rootFolder.get(absolutePath) == null) {
+                newTempVirtualFolders.ensure(
+                    absolutePath,
+                    () => undefined,
+                    () => undefined
+                );
+            }
+        }
+        members.tempVirtualFolders = newTempVirtualFolders;
+
+        Object.freeze(members);
+    }
+
+    static init(): PathState {
+        return new PathState({
+            rootFolder: new MultiKeyMap(),
+            currentDirectory: [],
+            isMultipleSelectMode: false,
+            tempVirtualFolders: new DeletableTree(),
+            ensuredVirtualFolders: new DeletableTree(Option.some({})),
+            selectedFiles: new DualKeyMap(),
+            selectedFolders: new Set(),
+            cutFiles: new DualKeyMap(),
+            cutFolders: new Set(),
+            cutAt: [],
+        });
+    }
+
+    deleteTempVirtualFolderRecursively(path: readonly string[]) {
+        const newValue = this.members.tempVirtualFolders.clone();
+        newValue.delete(path);
+        return new PathState({ ...this.members, tempVirtualFolders: newValue });
+    }
+
+    renameTempVirtualFolderRecursively(currentPath: readonly string[], newPath: readonly string[]) {
+        const newValue = this.members.tempVirtualFolders.clone();
+        for (const tempVirtualFolder of this.members.tempVirtualFolders
+            .createSubTree(currentPath, () => undefined)
+            .traverse()) {
+            newValue.delete(tempVirtualFolder.absolutePath);
+            newValue.ensure(
+                newPath,
+                () => undefined,
+                () => undefined
+            );
+        }
+        return new PathState({ ...this.members, tempVirtualFolders: newValue });
+    }
+
+    updateRootFolder(files: readonly FilePath[]) {
+        const rootFolder = new MultiKeyMap<
+            string,
+            {
+                files: DualKeyMap<string, string | undefined, FilePathNode>;
+            }
+        >();
+        for (const filePath of files) {
+            const directory = [...joinPath(filePath.path).array];
+            const filename = directory.pop();
+            if (filename == null) {
+                throw new Error('This should not happen.');
+            }
+            const folderNode = rootFolder.ensure(directory, () => ({
+                files: new DualKeyMap(),
+            }));
+            folderNode.files.set(
+                { first: filename, second: filePath.id },
+                {
+                    ...filePath,
+                    type: file,
+                    key:
+                        joinPath(filePath.path).string +
+                        (filePath.id == null ? '' : '@' + filePath.id) +
+                        '@FileBrowser@File',
+                    name: filename,
+                    folderPath: directory,
+                    path: joinPath(filePath.path).array,
+                }
+            );
+        }
+        return new PathState({ ...this.members, rootFolder });
+    }
+
+    updateEnsuredVirtualFolders(
+        ensuredVirtualFolders: readonly EnsuredVirtualFolderPath[]
+    ): PathState {
+        const newValue = new DeletableTree<string, Omit<EnsuredVirtualFolderPath, 'path'>>();
+        for (const path of ensuredVirtualFolders) {
+            newValue.ensure(
+                joinPath(path.path).array,
+                () => path,
+                () => ({})
+            );
+        }
+        return new PathState({ ...this.members, ensuredVirtualFolders: newValue });
+    }
+
+    createNodes() {
+        let currentFolderMap: FolderMap = this.members.rootFolder;
+        for (const dir of this.members.currentDirectory) {
             currentFolderMap = currentFolderMap.createSubMap([dir]);
         }
 
-        const fileNodes = currentFolderMap.get([])?.files ?? [];
+        const fileNodes = currentFolderMap.get([])?.files ?? new DualKeyMap();
         const folderNodes = [...currentFolderMap.getChildren()].flatMap(([, $folder]) => {
             let hasFile = false;
             for (const node of $folder.traverse()) {
-                if (node.value.files.length >= 1) {
+                if (node.value.files.size >= 1) {
                     hasFile = true;
                     break;
                 }
@@ -219,38 +530,61 @@ const useCreateNodes = () => {
                 } as const,
             ];
         });
-        const virtualFolderNodes: VirtualFolderNode[] = [
-            ...virtualFolders.createSubTree(currentDirectory, () => ({})).getChildren(),
-        ].flatMap(([name, $folder]) => {
-            const equals = <T,>(x: readonly T[], y: readonly T[]): boolean => {
-                return groupJoinArray(x, y).every(elem => {
-                    if (elem.type !== both) {
-                        return false;
-                    }
-                    return elem.left === elem.right;
-                });
-            };
 
-            if (folderNodes.some(f => equals(f.absolutePath, $folder.absolutePath))) {
-                return [];
+        const virtualFolderNodes = new MultiKeyMap<string, VirtualFolderNode>();
+        for (const [name, $folder] of this.members.tempVirtualFolders
+            .createSubTree(this.members.currentDirectory, () => undefined)
+            .getChildren()) {
+            if (folderNodes.some(f => arrayEquals(f.absolutePath, $folder.absolutePath))) {
+                continue;
             }
 
             const key = $folder.absolutePath.reduce(
                 (seed, elem) => `${seed}/${elem}`,
                 'FileBrowser@VirtualFolder/'
             );
-            return [
-                {
-                    type: virtualFolder,
-                    absolutePath: $folder.absolutePath,
-                    key,
-                    name,
-                    header: $folder.value.value?.header,
-                } as const,
-            ];
-        });
 
-        const nodes: Node[] = [...fileNodes, ...folderNodes, ...virtualFolderNodes];
+            const folderPath = [...$folder.absolutePath];
+            folderPath.pop();
+
+            virtualFolderNodes.set($folder.absolutePath, {
+                type: virtualFolder,
+                folderPath: folderPath,
+                key,
+                name,
+                header: undefined,
+            } as const);
+        }
+        for (const [name, $folder] of this.members.ensuredVirtualFolders
+            .createSubTree(this.members.currentDirectory, () => ({}))
+            .getChildren()) {
+            if (folderNodes.some(f => arrayEquals(f.absolutePath, $folder.absolutePath))) {
+                continue;
+            }
+
+            const key = $folder.absolutePath.reduce(
+                (seed, elem) => `${seed}/${elem}`,
+                'FileBrowser@VirtualFolder/'
+            );
+
+            const folderPath = [...$folder.absolutePath];
+            folderPath.pop();
+
+            // tempVirtualFolders→ensuredVirtualFolders の順に処理することによって、tempVirtualFoldersとensuredVirtualFoldersで重複しているフォルダは後者が優先されるようにしている。
+            virtualFolderNodes.set($folder.absolutePath, {
+                type: virtualFolder,
+                folderPath,
+                key,
+                name,
+                header: $folder.value.value?.header,
+            } as const);
+        }
+
+        const nodes: Node[] = [
+            ...fileNodes.toArray().map(([, value]) => new Node(value)),
+            ...folderNodes.map(value => new Node(value)),
+            ...[...virtualFolderNodes.traverse()].map(({ value }) => new Node(value)),
+        ];
         nodes.sort((x, y) => {
             if (x.type === folder || x.type === virtualFolder) {
                 if (y.type === folder || y.type === virtualFolder) {
@@ -265,153 +599,534 @@ const useCreateNodes = () => {
             return x.name.localeCompare(y.name);
         });
         return nodes;
-    }, [currentDirectory, rootFolder, virtualFolders]);
-};
+    }
 
-type DeleteStatus =
-    | {
-          type: 'none';
-      }
-    | {
-          type: 'asking' | 'deleting' | 'aborted' | 'finished';
-          files: readonly FileToDelete[];
-      };
+    tryGetEnsuredVirtualFolder(path: readonly string[]) {
+        return this.members.ensuredVirtualFolders.get(path);
+    }
 
-// 要素はabsolute path
-const selectedFilesAtom = atom(new MultiValueSet<string>());
-const useToggleSelectedFile = () => {
-    const setSelectedFiles = useSetAtom(selectedFilesAtom);
-    return React.useCallback(
-        (absolutePath: readonly string[]) => {
-            setSelectedFiles(oldValue => {
-                const newValue = oldValue.clone();
-                if (oldValue.has(absolutePath)) {
-                    newValue.delete(absolutePath);
-                } else {
-                    newValue.add(absolutePath);
-                }
+    #setFileSelected(filename: NameIdPair) {
+        const newValue = this.members.selectedFiles.clone();
+        newValue.set({ first: filename.name, second: filename.id }, undefined);
+        return new PathState({
+            ...this.members,
+            selectedFiles: newValue,
+        });
+    }
+
+    #toggleSelectedFile(filename: NameIdPair) {
+        const oldValue = this.members.selectedFiles;
+        const newValue = this.members.selectedFiles.clone();
+        const mapKey = { first: filename.name, second: filename.id };
+        if (oldValue.has(mapKey)) {
+            newValue.delete(mapKey);
+        } else {
+            newValue.set(mapKey, undefined);
+        }
+        return new PathState({ ...this.members, selectedFiles: newValue });
+    }
+
+    #setFolderSelected(foldername: string) {
+        const newValue = new Set(this.members.selectedFolders);
+        newValue.add(foldername);
+        return new PathState({
+            ...this.members,
+            selectedFolders: newValue,
+        });
+    }
+
+    #toggleSelectedFolder(foldername: string) {
+        const oldValue = this.members.selectedFolders;
+        const newValue = new Set(this.members.selectedFolders);
+        if (oldValue.has(foldername)) {
+            newValue.delete(foldername);
+        } else {
+            newValue.add(foldername);
+        }
+        return new PathState({ ...this.members, selectedFolders: newValue });
+    }
+
+    get currentDirectory() {
+        return this.members.currentDirectory;
+    }
+
+    cd(update: (oldValue: readonly string[]) => readonly string[]) {
+        return new PathState({
+            ...this.members,
+            currentDirectory: update(this.members.currentDirectory),
+            isMultipleSelectMode: false,
+            selectedFiles: new DualKeyMap(),
+            selectedFolders: new Set(),
+        });
+    }
+
+    addTempVirtualFolder(newValue: TempVirtualFolder) {
+        const tempVirtualFolders = this.members.tempVirtualFolders.clone();
+        tempVirtualFolders.ensure(
+            [...newValue.folderPath, newValue.name],
+            () => undefined,
+            () => undefined
+        );
+        return new PathState({ ...this.members, tempVirtualFolders });
+    }
+
+    #virtualFoldersCache: DeletableTree<string, Omit<EnsuredVirtualFolderPath, 'path'>> | null =
+        null;
+    get virtualFolders() {
+        if (this.#virtualFoldersCache == null) {
+            const newValue = new DeletableTree<string, Omit<EnsuredVirtualFolderPath, 'path'>>();
+            for (const elem of this.members.tempVirtualFolders.traverse()) {
+                newValue.ensure(
+                    elem.absolutePath,
+                    () => ({}),
+                    () => ({})
+                );
+            }
+            for (const elem of this.members.ensuredVirtualFolders.traverse()) {
+                newValue.ensure(
+                    elem.absolutePath,
+                    () => elem.value,
+                    () => ({})
+                );
+            }
+            this.#virtualFoldersCache = newValue;
+        }
+        return this.#virtualFoldersCache;
+    }
+
+    /** 実行すると、FilePathNodeのonSelectやonOpenが実行されることがあります。 */
+    select(props: Props, node: Node): PathState {
+        const nodeSource = node.source;
+        if (this.members.isMultipleSelectMode) {
+            if (nodeSource.type === file) {
+                return this.#toggleSelectedFile(nodeSource);
+            }
+            return this.#toggleSelectedFolder(nodeSource.name);
+        }
+
+        if (nodeSource.type === folder || nodeSource.type === virtualFolder) {
+            return this.cd(oldValue => {
+                const newValue = [...oldValue];
+                newValue.push(nodeSource.name);
                 return newValue;
             });
-        },
-        [setSelectedFiles]
-    );
-};
+        }
 
-// 要素はabsolute path
-const selectedFoldersAtom = atom(new MultiValueSet<string>());
-const useToggleSelectedFolder = () => {
-    const setSelectedFolders = useSetAtom(selectedFoldersAtom);
-    return React.useCallback(
-        (absolutePath: readonly string[]) => {
-            setSelectedFolders(oldValue => {
-                const newValue = oldValue.clone();
-                if (oldValue.has(absolutePath)) {
-                    newValue.delete(absolutePath);
-                } else {
-                    newValue.add(absolutePath);
-                }
-                return newValue;
+        if (nodeSource.onSelect == null) {
+            nodeSource.onOpen && nodeSource.onOpen();
+        } else {
+            nodeSource.onSelect();
+        }
+        return this;
+    }
+
+    setAsSelected(node: Node) {
+        if (node.source.type === file) {
+            return this.#setFileSelected(node.source);
+        }
+        return this.#setFolderSelected(node.source.name);
+    }
+
+    isSelected(node: Node) {
+        if (node.source.type === file) {
+            return this.members.selectedFiles.has({
+                first: node.source.name,
+                second: node.source.id,
             });
-        },
-        [setSelectedFolders]
-    );
-};
+        }
+        return this.members.selectedFolders.has(node.source.name);
+    }
 
-const currentDirectoryAtomCore = atom<readonly string[]>([]);
-/** 現在表示しているディレクトリを表します。 */
-const currentDirectoryAtom = atom(
-    get => get(currentDirectoryAtomCore),
-    (get, set, update: (oldValue: readonly string[]) => readonly string[]) => {
-        const oldValue = get(currentDirectoryAtomCore);
-        const newValue = update(oldValue);
-        set(currentDirectoryAtomCore, newValue);
-        set(isMultipleSelectModeAtom, false);
-        set(selectedFilesAtom, new MultiValueSet());
-        set(selectedFoldersAtom, new MultiValueSet());
+    #isSelectedAnyCache: boolean | null = null;
+    get isSelectedAny() {
+        if (this.#isSelectedAnyCache == null) {
+            this.#isSelectedAnyCache =
+                this.members.selectedFiles.size !== 0 || this.members.selectedFolders.size !== 0;
+        }
+        return this.#isSelectedAnyCache;
     }
-);
-const propsAtom = atom<Props | null>(null);
-const isLockedValueAtom = atom(get => {
-    const isLocked = get(propsAtom)?.isLocked;
-    if (isLocked == null) {
-        return false;
+
+    toPathList(nodes: readonly Node[]): PathList {
+        // 実際は最後のkey以外はundefinedにならない
+        const files = new MultiKeyMap<string | undefined, FilePathNode>();
+        const folders = new MultiValueSet<string>();
+        for (const node of nodes) {
+            switch (node.source.type) {
+                case virtualFolder:
+                    folders.add(node.path);
+                    continue;
+                case folder:
+                    folders.add(node.path);
+                    continue;
+                case file:
+                    files.set([...node.source.path, node.id], node.source);
+                    continue;
+                default:
+                    toBeNever(node.source);
+            }
+        }
+        return {
+            files: [...files.traverse()].map(({ value }) => ({
+                path: value.path,
+                id: value.id,
+            })),
+            folders: [...folders.toIterator()].map(path => ({ path })),
+        };
     }
-    const currentDirectory = get(currentDirectoryAtom);
-    return isLocked(currentDirectory);
-});
-const isMultipleSelectModeAtom = atom(false);
-const rootFolderAtom = atom<FolderMap>(new MultiKeyMap<string, { files: FilePathNode[] }>());
+
+    #selectedPathsCache: PathList | null = null;
+    get selectedPaths(): PathList {
+        if (this.#selectedPathsCache == null) {
+            this.#selectedPathsCache = {
+                files: [...this.members.selectedFiles].map(([key]) => ({
+                    path: [...this.members.currentDirectory, key.first],
+                    id: key.second,
+                })),
+                folders: [...this.members.selectedFolders].map(foldername => ({
+                    path: [...this.members.currentDirectory, foldername],
+                })),
+            };
+        }
+        return this.#selectedPathsCache;
+    }
+
+    listFiles({ files, folders }: PathList) {
+        const result = new Set<FilePathNode>();
+
+        for (const file of files) {
+            const directoryPath = [...file.path];
+            const filename = directoryPath.pop();
+            this.members.rootFolder.get(directoryPath)?.files.forEach(elem => {
+                if (elem.name === filename && elem.id === file.id) {
+                    result.add(elem);
+                }
+            });
+        }
+
+        for (const folder of folders) {
+            for (const { value } of this.members.rootFolder.createSubMap(folder.path).traverse()) {
+                value.files.forEach(file => result.add(file));
+            }
+        }
+
+        return [...result];
+    }
+
+    listSelectedTempFolders() {
+        const result: { path: readonly string[] }[] = [];
+        for (const selectedFoldername of this.members.selectedFolders) {
+            const selectedFolderPath = [...this.members.currentDirectory, selectedFoldername];
+            const selectedTempFolder = this.members.tempVirtualFolders.get(selectedFolderPath);
+            if (selectedTempFolder.isNone) {
+                continue;
+            }
+            if (this.members.rootFolder.get(selectedFolderPath) != null) {
+                continue;
+            }
+            result.push({ path: selectedFolderPath });
+        }
+        return result;
+    }
+
+    isCut(node: Node) {
+        if (!arrayEquals(this.members.cutAt, this.currentDirectory)) {
+            return false;
+        }
+        switch (node.type) {
+            case virtualFolder:
+            case folder:
+                return this.members.cutFolders.has(node.name);
+            case file:
+                return this.members.cutFiles.has({ first: node.name, second: node.id });
+            default:
+                toBeNever(node.type);
+        }
+    }
+
+    #isCutAnyCache: boolean | null = null;
+    get isCutAny() {
+        if (this.#isCutAnyCache == null) {
+            this.#isCutAnyCache =
+                this.members.cutFiles.size !== 0 || this.members.cutFolders.size !== 0;
+        }
+        return this.#isCutAnyCache;
+    }
+
+    isCurrentDirectoryProtected(props: Props) {
+        return props.isProtected(this.members.currentDirectory);
+    }
+
+    unselect(): PathState {
+        return new PathState({
+            ...this.members,
+            selectedFiles: new DualKeyMap(),
+            selectedFolders: new Set(),
+        });
+    }
+
+    get isMultipleSelectMode() {
+        return this.members.isMultipleSelectMode;
+    }
+
+    canToggleMultipleSelectMode(props: Props) {
+        return !this.isCurrentDirectoryProtected(props);
+    }
+
+    toggleMultipleSelectMode(): PathState {
+        return new PathState({
+            ...this.members,
+            isMultipleSelectMode: !this.members.isMultipleSelectMode,
+        });
+    }
+
+    canCut(props: Props) {
+        return (
+            !this.isCurrentDirectoryProtected(props) &&
+            props.canMove({ currentDirectoryPath: this.currentDirectory, newDirectoryPath: null })
+        );
+    }
+
+    cutOne(props: Props, node: Node): PathState {
+        if (!this.canCut(props)) {
+            return this;
+        }
+
+        const newCutFiles = new DualKeyMap<string, string | undefined, undefined>();
+        const newCutFolders = new Set<string>();
+        switch (node.type) {
+            case file: {
+                newCutFiles.set({ first: node.name, second: node.id }, undefined);
+                break;
+            }
+            default: {
+                newCutFolders.add(node.name);
+                break;
+            }
+        }
+        return new PathState({
+            ...this.members,
+            cutFiles: newCutFiles,
+            cutFolders: newCutFolders,
+            cutAt: this.currentDirectory,
+        });
+    }
+
+    cutSelected(props: Props) {
+        if (!this.canCut(props)) {
+            return this;
+        }
+
+        return new PathState({
+            ...this.members,
+            cutFiles: this.members.selectedFiles,
+            cutFolders: this.members.selectedFolders,
+            cutAt: this.currentDirectory,
+            selectedFiles: new DualKeyMap(),
+            selectedFolders: new Set(),
+        });
+    }
+
+    resetCutState() {
+        return new PathState({
+            ...this.members,
+            cutFiles: new DualKeyMap(),
+            cutFolders: new Set(),
+            cutAt: [],
+        });
+    }
+
+    canCreateFile(props: Props) {
+        return !this.isCurrentDirectoryProtected(props);
+    }
+
+    createFile(props: Props) {
+        if (!this.canCreateFile(props)) {
+            return;
+        }
+        props.onFileCreate && props.onFileCreate(this.members.currentDirectory);
+    }
+
+    #requestDeleting(source: readonly FilePathNode[]): FileToDelete[] {
+        return source
+            .map(file => ({ status: 'waiting', file } as const))
+            .sort((x, y) => {
+                for (const group of groupJoinArray(x.file.path, y.file.path)) {
+                    switch (group.type) {
+                        case left:
+                            return 1;
+                        case right:
+                            return -1;
+                        case both: {
+                            const compareResult = group.left.localeCompare(group.right);
+                            if (compareResult !== 0) {
+                                return compareResult;
+                            }
+                        }
+                    }
+                }
+                return 0;
+            });
+    }
+
+    canRequestDeleting(props: Props, node: Node) {
+        return !props.isProtected(node.folderPath);
+    }
+
+    requestDeleting(props: Props, node: Node): AskingDeleteStatus | null {
+        if (!this.canRequestDeleting(props, node)) {
+            return null;
+        }
+        const source = this.listFiles(this.toPathList([node]));
+        return {
+            type: 'asking',
+            files: this.#requestDeleting(source),
+            tempVirtualFolders: node.type === virtualFolder ? [{ path: node.path }] : [],
+        };
+    }
+
+    canRequestDeletingSelectedNodes(props: Props) {
+        return !props.isProtected(this.currentDirectory);
+    }
+
+    requestDeletingSelectedNodes(props: Props): AskingDeleteStatus | null {
+        if (!this.canRequestDeletingSelectedNodes(props)) {
+            return null;
+        }
+        const source = this.listFiles(this.selectedPaths);
+        const files = this.#requestDeleting(source);
+        return {
+            type: 'asking',
+            files,
+            tempVirtualFolders: this.selectedPaths.folders,
+        };
+    }
+
+    canRequestPasting(props: Props, destDirectoryPath: readonly string[]) {
+        return props.canMove({
+            currentDirectoryPath: this.members.cutAt,
+            newDirectoryPath: destDirectoryPath,
+        });
+    }
+
+    requestPasting(props: Props, destFolderPath: readonly string[]): AskingRenameStatus | null {
+        if (!this.canRequestPasting(props, destFolderPath)) {
+            return null;
+        }
+        const files: FileToRename[] = this.listFiles({
+            files: [...this.members.cutFiles].map(([key]) => ({
+                path: [...this.members.cutAt, key.first],
+                id: key.second,
+            })),
+            folders: [...this.members.cutFolders].map(foldername => ({
+                path: [...this.members.cutAt, foldername],
+            })),
+        }).map(file => {
+            return {
+                status: 'waiting',
+                file,
+                newPath: movePath({
+                    nodePath: file.path,
+                    cutAt: this.members.cutAt,
+                    destFolderPath,
+                }),
+            };
+        });
+        return {
+            type: 'asking',
+            files,
+            tempVirtualFolders: [...this.members.cutFolders].map(foldername => {
+                const currentPath = [...this.members.cutAt, foldername];
+                return {
+                    currentPath,
+                    newPath: movePath({
+                        nodePath: currentPath,
+                        cutAt: this.members.cutAt,
+                        destFolderPath,
+                    }),
+                };
+            }),
+        };
+    }
+
+    canRequestRenaming(props: Props, node: Node, newName: string | null) {
+        return props.canRename({
+            directoryPath: node.folderPath,
+            oldName: node.name,
+            newName,
+            nodeType: node.type,
+        });
+    }
+
+    requestRenaming(
+        props: Props,
+        node: Node,
+        newName: string
+    ): AskingRenameStatus | { type: 'executed'; newState: PathState } | null {
+        if (!this.canRequestRenaming(props, node, newName)) {
+            return null;
+        }
+        const destPath = [...node.folderPath, newName];
+        if (node.source.type === virtualFolder) {
+            const newState = this.renameTempVirtualFolderRecursively(node.path, destPath);
+            return { type: 'executed', newState };
+        }
+        const files: FileToRename[] = this.listFiles(this.toPathList([node])).map(file => ({
+            status: 'waiting',
+            file,
+            newPath: destPath,
+        }));
+        return {
+            type: 'asking',
+            files,
+
+            // この関数を実行した際、tempVirtualFolderは全てリネーム済みのため、[]を渡している。
+            tempVirtualFolders: [],
+        };
+    }
+}
+
+const pathStateAtom = atom(PathState.init());
+const propsAtom = atom<Props>(defaultProps);
 const deleteStatusAtom = atom<DeleteStatus>({ type: 'none' });
+const renameStatusAtom = atom<RenameStatus>({ type: 'none' });
 const fileTypeFilterAtom = atom<string | null>(null);
 const fileNameFilterAtom = atom<string>('');
-/** ユーザーが作成したVirtualFolderの一覧を表します。 */
-const tempVirtualFoldersAtom = atom(new DeletableTree<string, undefined>(Option.some(undefined)));
-const useAddTempVirtualFolder = () => {
-    const setVirtualFolders = useSetAtom(tempVirtualFoldersAtom);
-    return React.useCallback(
-        (newValue: VirtualFolder) => {
-            setVirtualFolders(oldValue => {
-                const result = oldValue.map(x => x.value);
-                result.ensure(
-                    [...newValue.absolutePath, newValue.name],
-                    () => undefined,
-                    () => undefined
-                );
-                return result;
-            });
-        },
-        [setVirtualFolders]
+
+const isDeleteConfirmModalVisibleAtom = atom(false);
+const isRenameConfirmModalVisibleAtom = atom(false);
+const isModalToCreateFolderVisibleAtom = atom(false);
+type RenameInputModalState = {
+    currentName: string;
+    onOk: (newName: string) => void;
+    canOk: (newName: string) => boolean;
+};
+const renameInputModalStateAtom = atom<RenameInputModalState | null>(null);
+
+const isProtectedAtom = atom(get => {
+    const pathState = get(pathStateAtom);
+    const props = get(propsAtom);
+    return pathState.isCurrentDirectoryProtected(props);
+});
+
+const useCreateFolderAction = () => {
+    const isLocked = useAtomValue(isProtectedAtom);
+    const setVisible = useSetAtom(isModalToCreateFolderVisibleAtom);
+
+    return React.useMemo(
+        () => ({
+            disabled: isLocked,
+            showModal: () => setVisible(true),
+        }),
+        [isLocked, setVisible]
     );
 };
-const ensuredVirtualFoldersAtom = atom(
-    new DeletableTree<string, Omit<EnsuredFolderPath, 'path'>>(Option.some({}))
-);
-const virtualFoldersAtom = atom(get => {
-    const tempVirtualFolders = get(tempVirtualFoldersAtom);
-    const ensuredVirtualFolders = get(ensuredVirtualFoldersAtom);
-    const result = new DeletableTree<string, Omit<EnsuredFolderPath, 'path'>>();
-    for (const elem of tempVirtualFolders.traverse()) {
-        result.ensure(
-            elem.absolutePath,
-            () => ({}),
-            () => ({})
-        );
-    }
-    for (const elem of ensuredVirtualFolders.traverse()) {
-        result.ensure(
-            elem.absolutePath,
-            () => elem.value,
-            () => ({})
-        );
-    }
-    return result;
-});
-const isDeleteModalVisibleAtom = atom(false);
 
-const useIsSelected = (node: Node): boolean => {
-    const selectedFiles = useAtomValue(selectedFilesAtom);
-    const selectedFolders = useAtomValue(selectedFoldersAtom);
-    return React.useMemo(() => {
-        if (node.type === folder) {
-            return selectedFolders.has(node.multiKeyMap.absolutePath);
-        }
-        return selectedFiles.has(node.absolutePath);
-    }, [node, selectedFiles, selectedFolders]);
-};
-
-const useRequestDeleteFiles = () => {
-    const rootFolder = useAtomValue(rootFolderAtom);
+const useTrySetDeleteStatusAsAsking = () => {
     const [deleteStatus, setDeleteStatus] = useAtom(deleteStatusAtom);
-    const setIsModalVisible = useSetAtom(isDeleteModalVisibleAtom);
+    const setIsModalVisible = useSetAtom(isDeleteConfirmModalVisibleAtom);
 
     return React.useCallback(
-        ({
-            files: selectedFiles,
-            folders: selectedFolders,
-        }: {
-            files: readonly { absolutePath: readonly string[] }[];
-            folders: readonly { absolutePath: readonly string[] }[];
-        }) => {
+        (askingDeleteStatus: AskingDeleteStatus) => {
             if (deleteStatus.type === 'deleting') {
                 notification.warn({
                     placement: 'bottomRight',
@@ -421,62 +1136,172 @@ const useRequestDeleteFiles = () => {
                 setIsModalVisible(true);
                 return;
             }
-
-            const files = new Set<FilePathNode>();
-
-            for (const selectedFile of selectedFiles) {
-                const directoryPath = [...selectedFile.absolutePath];
-                const filename = directoryPath.pop();
-                if (filename == null) {
-                    continue;
-                }
-                rootFolder.get(directoryPath)?.files.forEach(file => {
-                    if (file.name === filename) {
-                        files.add(file);
-                    }
-                });
-            }
-
-            for (const selectedFolder of selectedFolders) {
-                for (const { value } of rootFolder
-                    .createSubMap(selectedFolder.absolutePath)
-                    .traverse()) {
-                    value.files.forEach(file => files.add(file));
-                }
-            }
-
-            if (files.size === 0) {
-                notification.info({
-                    placement: 'bottomRight',
-                    message: 'ファイルが選択されていないか、全て存在しません。',
-                });
-                return;
-            }
-            const filesToDelete = toFilesToDelete([...files]);
-            setDeleteStatus(() => ({ type: 'asking', files: filesToDelete }));
+            setDeleteStatus(() => askingDeleteStatus);
             setIsModalVisible(true);
         },
-        [deleteStatus.type, rootFolder, setDeleteStatus, setIsModalVisible]
+        [deleteStatus.type, setDeleteStatus, setIsModalVisible]
     );
 };
 
-const useRequestDeleteSelectedFiles = () => {
-    const selectedFiles = useAtomValue(selectedFilesAtom);
-    const selectedFolders = useAtomValue(selectedFoldersAtom);
-    const confirmDelete = useRequestDeleteFiles();
+const useRequestDeletingSelectedNodesAction = () => {
+    const props = useAtomValue(propsAtom);
+    const setAsAsking = useTrySetDeleteStatusAsAsking();
+    const [pathState, setPathState] = useAtom(pathStateAtom);
 
-    return React.useCallback(() => {
-        const $selectedFiles = [...selectedFiles.toIterator()].map(absolutePath => ({
-            absolutePath,
-        }));
-        const $selectedFolders = [...selectedFolders.toIterator()].map(absolutePath => ({
-            absolutePath,
-        }));
-        return confirmDelete({
-            files: $selectedFiles,
-            folders: $selectedFolders,
-        });
-    }, [confirmDelete, selectedFiles, selectedFolders]);
+    const execute = React.useCallback(() => {
+        const newStatus = pathState.requestDeletingSelectedNodes(props);
+        setPathState(pathState => pathState.unselect());
+        if (newStatus == null) {
+            return;
+        }
+        setAsAsking(newStatus);
+    }, [pathState, props, setAsAsking, setPathState]);
+
+    return React.useMemo(() => {
+        const canExecute = pathState.canRequestDeletingSelectedNodes(props);
+        return {
+            execute,
+            canExecute,
+        };
+    }, [execute, pathState, props]);
+};
+
+const useRequestDeletingNodeAction = () => {
+    const props = useAtomValue(propsAtom);
+    const setAsAsking = useTrySetDeleteStatusAsAsking();
+    const pathState = useAtomValue(pathStateAtom);
+
+    const canExecute = React.useCallback(
+        (node: Node) => {
+            return pathState.canRequestDeleting(props, node);
+        },
+        [pathState, props]
+    );
+
+    const execute = React.useCallback(
+        (node: Node) => {
+            const newStatus = pathState.requestDeleting(props, node);
+            if (newStatus == null) {
+                return;
+            }
+            setAsAsking(newStatus);
+        },
+        [pathState, props, setAsAsking]
+    );
+
+    return React.useMemo(
+        () => ({
+            execute,
+            canExecute,
+        }),
+        [execute, canExecute]
+    );
+};
+
+const useTrySetRenameStatusAsAsking = () => {
+    const [renameStatus, setRenameStatus] = useAtom(renameStatusAtom);
+    const setIsModalVisible = useSetAtom(isRenameConfirmModalVisibleAtom);
+
+    return React.useCallback(
+        (askingRenameStatus: AskingRenameStatus) => {
+            if (renameStatus.type === 'renaming') {
+                notification.warn({
+                    placement: 'bottomRight',
+                    message:
+                        '現在行われているリネームが全て完了するまで、他のファイルをリネームすることはできません。',
+                });
+                setIsModalVisible(true);
+                return;
+            }
+            setRenameStatus(() => askingRenameStatus);
+            setIsModalVisible(true);
+        },
+        [renameStatus.type, setRenameStatus, setIsModalVisible]
+    );
+};
+
+const useRequestPastingAction = () => {
+    const props = useAtomValue(propsAtom);
+    const setAsAsking = useTrySetRenameStatusAsAsking();
+    const [pathState, setPathState] = useAtom(pathStateAtom);
+
+    const canExecute = React.useCallback(
+        (
+            /** 貼り付け先のフォルダを指定できます。指定せず、current directoryに貼り付ける場合はnullを渡します。virtual folderにも対応しています。 */
+            targetFolder: string | null
+        ) => {
+            const destPath =
+                targetFolder == null
+                    ? pathState.currentDirectory
+                    : [...pathState.currentDirectory, targetFolder];
+            return pathState.canRequestPasting(props, destPath);
+        },
+        [pathState, props]
+    );
+
+    const execute = React.useCallback(
+        (
+            /** 貼り付け先のフォルダを指定できます。指定せず、current directoryに貼り付ける場合はnullを渡します。virtual folderにも対応しています。 */
+            targetFolder: string | null
+        ) => {
+            const destPath =
+                targetFolder == null
+                    ? pathState.currentDirectory
+                    : [...pathState.currentDirectory, targetFolder];
+            const newStatus = pathState.requestPasting(props, destPath);
+            setPathState(pathState => pathState.unselect());
+            if (newStatus == null) {
+                return;
+            }
+            setAsAsking(newStatus);
+        },
+        [pathState, props, setAsAsking, setPathState]
+    );
+
+    return React.useMemo(
+        () => ({
+            execute,
+            canExecute,
+        }),
+        [execute, canExecute]
+    );
+};
+
+const useRequestRenamingAction = () => {
+    const props = useAtomValue(propsAtom);
+    const setAsAsking = useTrySetRenameStatusAsAsking();
+    const [pathState, setPathState] = useAtom(pathStateAtom);
+
+    const canExecute = React.useCallback(
+        (node: Node, newName: string | null) => {
+            return pathState.canRequestRenaming(props, node, newName);
+        },
+        [pathState, props]
+    );
+
+    const execute = React.useCallback(
+        (node: Node, newName: string) => {
+            const newStatus = pathState.requestRenaming(props, node, newName);
+            setPathState(pathState => pathState.unselect());
+            if (newStatus == null) {
+                return;
+            }
+            if (newStatus.type === 'executed') {
+                setPathState(newStatus.newState);
+                return;
+            }
+            setAsAsking(newStatus);
+        },
+        [pathState, props, setAsAsking, setPathState]
+    );
+
+    return React.useMemo(
+        () => ({
+            execute,
+            canExecute,
+        }),
+        [execute, canExecute]
+    );
 };
 
 const FileTypeFilterSelect = () => {
@@ -513,7 +1338,12 @@ const FileTypeFilterSelect = () => {
 };
 
 const AddressBar: React.FC = () => {
-    const [currentDirectory, setCurrentDirectory] = useAtom(currentDirectoryAtom);
+    const [pathState, setPathState] = useAtom(pathStateAtom);
+    const searchPlaceholder = useAtomSelector(propsAtom, props => props.searchPlaceholder);
+    const currentDirectory = React.useMemo(
+        () => pathState.currentDirectory,
+        [pathState.currentDirectory]
+    );
     const [fileNameFilter, setFileNameFilter] = useAtom(fileNameFilterAtom);
 
     const breadcrumbItems = currentDirectory.map(dir => (
@@ -528,10 +1358,12 @@ const AddressBar: React.FC = () => {
                 size='small'
                 disabled={currentDirectory.length === 0}
                 onClick={() =>
-                    setCurrentDirectory(oldValue => {
-                        const newValue = [...oldValue];
-                        newValue.pop();
-                        return newValue;
+                    setPathState(pathState => {
+                        return pathState.cd(oldValue => {
+                            const newValue = [...oldValue];
+                            newValue.pop();
+                            return newValue;
+                        });
                     })
                 }
             >
@@ -546,38 +1378,11 @@ const AddressBar: React.FC = () => {
             <Input
                 style={{ width: 240 }}
                 value={fileNameFilter}
-                placeholder='ファイル名で検索'
+                placeholder={searchPlaceholder}
                 onChange={e => setFileNameFilter(e.target.value)}
             />
         </div>
     );
-};
-
-type FileToDelete = {
-    status: 'waiting' | 'deleting' | 'deleted' | 'error';
-    file: FilePathNode;
-};
-
-const toFilesToDelete = (source: readonly FilePathNode[]): readonly FileToDelete[] => {
-    return source
-        .map(file => ({ status: 'waiting', file } as const))
-        .sort((x, y) => {
-            for (const group of groupJoinArray(x.file.absolutePath, y.file.absolutePath)) {
-                switch (group.type) {
-                    case left:
-                        return 1;
-                    case right:
-                        return -1;
-                    case both: {
-                        const compareResult = group.left.localeCompare(group.right);
-                        if (compareResult !== 0) {
-                            return compareResult;
-                        }
-                    }
-                }
-            }
-            return 0;
-        });
 };
 
 const FilesToDeleteTable: React.FC<{
@@ -597,16 +1402,17 @@ const FilesToDeleteTable: React.FC<{
                             <Icons.WarningOutlined />
                         ) : null}
                     </div>
-                    <div>{joinPath(item.file.absolutePath).string}</div>
+                    <div>{joinPath(item.file.path).string}</div>
                 </div>
             ))}
         </div>
     );
 };
 
-const DeleteConfirmModal = () => {
-    const [isModalVisible, setIsModalVisible] = useAtom(isDeleteModalVisibleAtom);
+const DeleteConfirmModal: React.FC = () => {
+    const [isModalVisible, setIsModalVisible] = useAtom(isDeleteConfirmModalVisibleAtom);
     const [deleteStatus, setDeleteStatus] = useAtom(deleteStatusAtom);
+    const setPathState = useSetAtom(pathStateAtom);
 
     let message: string;
     let button: JSX.Element;
@@ -616,10 +1422,13 @@ const DeleteConfirmModal = () => {
             message = '削除が完了しました。';
             break;
         case 'asking':
-            message =
-                deleteStatus.files.length === 0
-                    ? 'ファイルが選択されていません。'
-                    : `次の${deleteStatus.files.length}個のファイルを削除しますか？`;
+            {
+                if (deleteStatus.files.length === 0) {
+                    message = '削除するファイルやフォルダが見つかりませんでした。';
+                } else {
+                    message = `次の${deleteStatus.files.length}個のファイルを削除しますか？(空のフォルダはリストに表示されませんが、あわせて削除されます)`;
+                }
+            }
             break;
         case 'deleting':
             message = 'ファイルを削除中です…';
@@ -649,10 +1458,22 @@ const DeleteConfirmModal = () => {
                     danger
                     disabled={deleteStatus.files.length === 0}
                     onClick={() => {
-                        setDeleteStatus(() => ({
-                            type: 'deleting',
-                            files: deleteStatus.files,
-                        }));
+                        if (deleteStatus.type === 'asking') {
+                            setPathState(pathState => {
+                                let newPathState = pathState;
+                                for (const { path } of deleteStatus.tempVirtualFolders) {
+                                    newPathState =
+                                        pathState.deleteTempVirtualFolderRecursively(path);
+                                }
+                                return newPathState;
+                            });
+                        }
+                        setDeleteStatus(() => {
+                            return {
+                                type: 'deleting',
+                                files: deleteStatus.files,
+                            };
+                        });
                     }}
                 >
                     {deleteStatus.type === 'aborted' ? '削除を再開' : '削除'}
@@ -675,11 +1496,8 @@ const DeleteConfirmModal = () => {
 
     const canClose = deleteStatus.type !== 'deleting';
     const onClose = () => {
-        switch (deleteStatus.type) {
-            case 'deleting':
-                return;
-            default:
-                break;
+        if (!canClose) {
+            return;
         }
         setDeleteStatus(() => ({ type: 'none' }));
         setIsModalVisible(false);
@@ -687,6 +1505,7 @@ const DeleteConfirmModal = () => {
     return (
         <Modal
             visible={isModalVisible}
+            title='削除の確認'
             footer={
                 <DialogFooter
                     close={{ textType: 'close', onClick: onClose, disabled: !canClose }}
@@ -707,15 +1526,212 @@ const DeleteConfirmModal = () => {
     );
 };
 
-const ModalToCreateFolder: React.FC<{ visible: boolean; onClose: () => void }> = ({
-    visible,
-    onClose,
-}) => {
-    const currentDirectory = useAtomValue(currentDirectoryAtom);
-    const [folderName, setFolderName] = React.useState('');
-    const addVirtualFolder = useAddTempVirtualFolder();
-    const isFolderNameInvalid = sanitizeFoldername(folderName) !== folderName;
+const FilesToRenameTable: React.FC<{
+    items: readonly FileToRename[];
+    style?: React.CSSProperties;
+}> = ({ items, style }) => {
+    return (
+        <div className={classNames(flex, flexColumn)} style={style}>
+            {items.map(item => (
+                <div key={item.file.key} className={classNames(flex, flexRow)}>
+                    <div style={{ width: 20 }}>
+                        {item.status === 'renamed' ? (
+                            <Icons.CheckOutlined />
+                        ) : item.status === 'renaming' ? (
+                            <Icons.LoadingOutlined />
+                        ) : item.status === 'error' ? (
+                            <Icons.WarningOutlined />
+                        ) : null}
+                    </div>
+                    <div>
+                        {joinPath(item.file.path).string} → {joinPath(item.newPath).string}
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+};
+
+const RenameConfirmModal: React.FC = () => {
+    const [isModalVisible, setIsModalVisible] = useAtom(isRenameConfirmModalVisibleAtom);
+    const [renameStatus, setRenameStatus] = useAtom(renameStatusAtom);
+    const setPathState = useSetAtom(pathStateAtom);
+
+    let message: string;
+    let button: JSX.Element;
+    switch (renameStatus.type) {
+        case 'none':
+        case 'finished':
+            message = '移動もしくはリネームが完了しました。';
+            break;
+        case 'asking':
+            {
+                if (renameStatus.files.length === 0) {
+                    message = '選択した空のフォルダを移動もしくはリネームしますか？';
+                } else {
+                    message = `次の${renameStatus.files.length}個のファイルを移動もしくはリネームしますか？（空のフォルダは表示されませんが、あわせて移動もしくはリネームされます）`;
+                }
+            }
+            break;
+        case 'renaming':
+            message = 'ファイルを移動もしくはリネーム中です…';
+            break;
+        case 'aborted':
+            message = '移動もしくはリネームがキャンセルされました。';
+            break;
+    }
+    const buttonStyle: React.CSSProperties = {
+        width: 100,
+    };
+    switch (renameStatus.type) {
+        case 'none':
+        case 'finished':
+            button = (
+                <Button style={buttonStyle} type='primary' danger disabled>
+                    移動/リネーム
+                </Button>
+            );
+            break;
+        case 'asking':
+        case 'aborted':
+            button = (
+                <Button
+                    style={buttonStyle}
+                    type='primary'
+                    disabled={renameStatus.files.length === 0}
+                    onClick={() => {
+                        if (renameStatus.type === 'asking') {
+                            setPathState(pathState => {
+                                let newPathState = pathState;
+                                for (const {
+                                    currentPath,
+                                    newPath,
+                                } of renameStatus.tempVirtualFolders) {
+                                    newPathState = pathState.renameTempVirtualFolderRecursively(
+                                        currentPath,
+                                        newPath
+                                    );
+                                }
+                                return newPathState;
+                            });
+                        }
+                        setRenameStatus(() => {
+                            return {
+                                type: 'renaming',
+                                files: renameStatus.files,
+                            };
+                        });
+                    }}
+                >
+                    {renameStatus.type === 'aborted' ? 'リネームを再開' : 'リネーム'}
+                </Button>
+            );
+            break;
+        case 'renaming':
+            button = (
+                <Button
+                    style={buttonStyle}
+                    onClick={() => {
+                        setRenameStatus(() => ({ type: 'aborted', files: renameStatus.files }));
+                    }}
+                >
+                    キャンセル
+                </Button>
+            );
+            break;
+    }
+
+    const canClose = renameStatus.type !== 'renaming';
+    const onClose = () => {
+        if (!canClose) {
+            return;
+        }
+        setRenameStatus(() => ({ type: 'none' }));
+        setIsModalVisible(false);
+    };
+    return (
+        <Modal
+            visible={isModalVisible}
+            title='移動、リネームの確認'
+            footer={
+                <DialogFooter
+                    close={{ textType: 'close', onClick: onClose, disabled: !canClose }}
+                    custom={button}
+                />
+            }
+            onCancel={onClose}
+            closable={canClose}
+        >
+            <div className={classNames(flex, flexColumn)} style={{ gap: '4px 0' }}>
+                <div>{message}</div>
+                <FilesToRenameTable
+                    items={renameStatus.type === 'none' ? [] : renameStatus.files}
+                    style={{ height: 200, overflowY: 'auto' }}
+                />
+            </div>
+        </Modal>
+    );
+};
+
+const RenameInputModal: React.FC = () => {
+    const [state, setState] = useAtom(renameInputModalStateAtom);
+    const [name, setName] = React.useState('');
+    React.useEffect(() => {
+        if (state?.currentName == null) {
+            return;
+        }
+        setName(state?.currentName);
+    }, [state?.currentName]);
+
+    const onClose = () => {
+        setState(null);
+    };
+    return (
+        <Modal
+            visible={state != null}
+            title='リネーム'
+            onCancel={onClose}
+            footer={
+                <DialogFooter
+                    ok={{
+                        onClick: () => {
+                            if (state == null) {
+                                return;
+                            }
+                            if (!state.canOk(name)) {
+                                return;
+                            }
+                            state.onOk(name);
+                            setName('');
+                            onClose();
+                        },
+                        disabled: state == null ? true : !state.canOk(name),
+                        textType: 'ok',
+                    }}
+                    close={{ onClick: onClose, textType: 'cancel' }}
+                />
+            }
+        >
+            <Input value={name} onChange={e => setName(e.target.value)} />
+        </Modal>
+    );
+};
+
+const CreateFolderModal: React.FC = () => {
+    const [pathState, setPathState] = useAtom(pathStateAtom);
+    const [foldername, setFoldername] = React.useState('');
     const inputRef = React.useRef<InputRef | null>(null);
+    const props = useAtomValue(propsAtom);
+    const foldernameError = React.useMemo(
+        () =>
+            props.canCreateTempVirtualFolder({
+                directoryPath: pathState.currentDirectory,
+                foldername,
+            }).error,
+        [foldername, pathState.currentDirectory, props]
+    );
+
+    const [visible, setVisible] = useAtom(isModalToCreateFolderVisibleAtom);
 
     React.useEffect(() => {
         if (visible) {
@@ -724,161 +1740,60 @@ const ModalToCreateFolder: React.FC<{ visible: boolean; onClose: () => void }> =
     }, [visible]);
 
     const onOk = () => {
-        if (isFolderNameInvalid) {
+        if (foldernameError != null) {
             return;
         }
-        addVirtualFolder({
-            type: virtualFolder,
-            absolutePath: currentDirectory,
-            name: folderName,
-        });
-        setFolderName('');
-        onClose();
+        setPathState(pathState =>
+            pathState.addTempVirtualFolder({
+                type: virtualFolder,
+                folderPath: pathState.currentDirectory,
+                name: foldername,
+            })
+        );
+        setFoldername('');
+        setVisible(false);
     };
 
     return (
         <Modal
             visible={visible}
             title='新しいフォルダの作成'
-            onCancel={onClose}
+            onCancel={() => setVisible(false)}
             footer={
                 <DialogFooter
                     ok={{
                         textType: 'create',
-                        disabled: isFolderNameInvalid,
+                        disabled: foldernameError != null,
                         onClick: () => {
                             onOk();
                         },
                     }}
-                    close={{ textType: 'cancel', onClick: onClose }}
+                    close={{ textType: 'cancel', onClick: () => setVisible(false) }}
                 />
             }
         >
             <div className={classNames(flex, flexColumn)} style={{ gap: 4 }}>
+                <div>
+                    新しく作るフォルダの名前を入力してください。
+                    <br />
+                    ファイルが1つもない空のフォルダは、ブラウザを閉じた際などに自動的に消去されます。ファイルおよびファイルにアクセスするために必要なフォルダが自動的に消去されることはありません。
+                </div>
                 <Input
                     ref={inputRef}
                     placeholder='フォルダ名'
-                    value={folderName}
-                    onChange={e => setFolderName(e.target.value)}
+                    value={foldername}
+                    onChange={e => setFoldername(e.target.value)}
                     onKeyDown={e => {
                         if (e.key === 'Enter') {
                             onOk();
                         }
                     }}
                 />
-                <div>空のフォルダは後で自動的に消去されます。</div>
-                {isFolderNameInvalid && (
-                    <Alert
-                        type='error'
-                        showIcon
-                        message='無効なフォルダ名です。フォルダ名が長すぎないか、半角スラッシュが含まれていないか確認してください。'
-                    />
+                {foldernameError != null && (
+                    <Alert type='error' showIcon message={foldernameError} />
                 )}
             </div>
         </Modal>
-    );
-};
-
-const ActionBar: React.FC = () => {
-    const [isMultipleSelectMode, setIsMultipleSelectMode] = useAtom(isMultipleSelectModeAtom);
-    const setSelectedFiles = useSetAtom(selectedFilesAtom);
-    const setSelectedFolders = useSetAtom(selectedFoldersAtom);
-    const requestDeleteSelectedFiles = useRequestDeleteSelectedFiles();
-    const currentDirectory = useAtomValue(currentDirectoryAtom);
-    const isLockedValue = useAtomValue(isLockedValueAtom);
-    const onFileCreate = useAtomSelector(propsAtom, props => props?.onFileCreate);
-    const [isModalToCreateFolderVisible, setIsModalToCreateFolderVisible] = React.useState(false);
-
-    const rowGap = '0 4px';
-
-    return (
-        <div className={classNames(flex, flexColumn)} style={{ gap: columnGap }}>
-            <div className={classNames(flex, flexRow, itemsCenter)} style={{ gap: rowGap }}>
-                <Tooltip
-                    overlay={
-                        isLockedValue
-                            ? 'このフォルダにおけるファイルの作成は無効化されています。'
-                            : undefined
-                    }
-                >
-                    <Button
-                        disabled={isLockedValue}
-                        onClick={() => {
-                            if (isLockedValue) {
-                                return;
-                            }
-                            if (onFileCreate == null) {
-                                return;
-                            }
-                            onFileCreate(currentDirectory);
-                        }}
-                    >
-                        ファイルを作成
-                    </Button>
-                </Tooltip>
-                <Tooltip
-                    overlay={
-                        isLockedValue
-                            ? 'このフォルダにおけるフォルダの作成は無効化されています。'
-                            : undefined
-                    }
-                >
-                    <Button
-                        disabled={isLockedValue}
-                        onClick={() => {
-                            if (isLockedValue) {
-                                return;
-                            }
-                            setIsModalToCreateFolderVisible(true);
-                        }}
-                    >
-                        フォルダを作成
-                    </Button>
-                </Tooltip>
-            </div>
-            <div
-                className={classNames(flex, flexRow, itemsCenter)}
-                style={{
-                    height: 32,
-                    gap: rowGap,
-                }}
-            >
-                <Tooltip
-                    overlay={
-                        isLockedValue
-                            ? 'このフォルダでは複数選択モードは無効化されています。'
-                            : undefined
-                    }
-                >
-                    <Checkbox
-                        disabled={isLockedValue}
-                        checked={isMultipleSelectMode}
-                        onClick={() => setIsMultipleSelectMode(prevValue => !prevValue)}
-                    >
-                        複数選択モード
-                    </Checkbox>
-                </Tooltip>
-                {isMultipleSelectMode && (
-                    <Button
-                        onClick={() => {
-                            setSelectedFiles(new MultiValueSet());
-                            setSelectedFolders(new MultiValueSet());
-                        }}
-                    >
-                        選択を全て解除
-                    </Button>
-                )}
-                {isMultipleSelectMode && (
-                    <Button onClick={() => requestDeleteSelectedFiles()}>
-                        選択されたファイルを全て削除
-                    </Button>
-                )}
-                <ModalToCreateFolder
-                    visible={isModalToCreateFolderVisible}
-                    onClose={() => setIsModalToCreateFolderVisible(false)}
-                />
-            </div>
-        </div>
     );
 };
 
@@ -889,7 +1804,10 @@ const cellFileStyle: React.CSSProperties = {
     padding: 6,
 };
 
-const CellFile: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const CellFile: React.FC<{ children: React.ReactNode; opacity: number | undefined }> = ({
+    children,
+    opacity,
+}) => {
     return (
         <div
             className={classNames(
@@ -899,14 +1817,153 @@ const CellFile: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 itemsCenter,
                 justifyItemsCenter
             )}
-            style={cellFileStyle}
+            style={{ ...cellFileStyle, opacity }}
         >
             {children}
         </div>
     );
 };
 
+const ContextMenu: React.FC<{
+    /** Node上で右クリックした場合はそのNodeを渡します。何もない場所を右クリックした場合はnullを渡します。 */
+    node: Node | null;
+}> = ({ node }) => {
+    const props = useAtomValue(propsAtom);
+    const [pathState, setPathState] = useAtom(pathStateAtom);
+    const requestDeletingNodeAction = useRequestDeletingNodeAction();
+    const requestDeletingSelectedNodesAction = useRequestDeletingSelectedNodesAction();
+    const requestPastingAction = useRequestPastingAction();
+    const requestRenamingAction = useRequestRenamingAction();
+    const createFolderAction = useCreateFolderAction();
+    const setRenameInputModal = useSetAtom(renameInputModalStateAtom);
+
+    const createMenuKey = (key: string | number) => keyNames('FileBrowser', 'ContextMenu', key);
+
+    let menuItems: ItemType[];
+    if (node == null) {
+        const selectedItemsMenu: ItemType[] = pathState.isSelectedAny
+            ? [
+                  {
+                      key: createMenuKey('選択されているファイルを切り取り'),
+                      label: '選択されているファイルを切り取り',
+                      disabled: !pathState.canCut(props),
+                      onClick: () => {
+                          setPathState(pathState => pathState.cutSelected(props));
+                      },
+                  },
+                  {
+                      key: createMenuKey('選択されているファイルをすべて削除'),
+                      label: '選択されているファイルをすべて削除',
+                      disabled: !requestDeletingSelectedNodesAction.canExecute,
+                      onClick: () => {
+                          requestDeletingSelectedNodesAction.execute();
+                      },
+                  },
+                  { type: 'divider' },
+              ]
+            : [];
+        menuItems = [
+            ...selectedItemsMenu,
+            {
+                key: createMenuKey('fileCreateLabel'),
+                label: props.fileCreateLabel,
+                disabled: !pathState.canCreateFile(props),
+                onClick: () => {
+                    props.onFileCreate(pathState.currentDirectory);
+                },
+            },
+            {
+                key: createMenuKey('フォルダを作成'),
+                label: 'フォルダを作成',
+                disabled: createFolderAction.disabled,
+                onClick: () => {
+                    createFolderAction.showModal();
+                },
+            },
+            pathState.isCutAny
+                ? {
+                      key: createMenuKey('貼り付け'),
+                      label: '貼り付け',
+                      disabled: requestPastingAction.canExecute(null).isError,
+                      onClick: () => {
+                          requestPastingAction.execute(null);
+                      },
+                  }
+                : null,
+        ];
+    } else {
+        menuItems = [
+            {
+                key: createMenuKey('選択'),
+                label: '選択',
+                onClick: () => setPathState(pathState.select(props, node)),
+            },
+            node.source.type === folder ||
+            node.source.type === virtualFolder ||
+            node.source.onOpen == null
+                ? null
+                : {
+                      key: createMenuKey('開く'),
+                      label: '開く',
+                      onClick: node.source.onOpen,
+                  },
+            node.source.type === folder ||
+            node.source.type === virtualFolder ||
+            node.source.onClipboard == null
+                ? null
+                : {
+                      key: createMenuKey('コマンドに使用するリンクとしてクリップボードにコピー'),
+                      label: 'コマンドに使用するリンクとしてクリップボードにコピー',
+                      onClick: node.source.onClipboard,
+                  },
+            {
+                key: createMenuKey('切り取り'),
+                label: '切り取り',
+                disabled: !pathState.canCut(props),
+                onClick: () => {
+                    setPathState(pathState => pathState.cutOne(props, node).unselect());
+                },
+            },
+            pathState.isCutAny && node.type !== file
+                ? {
+                      key: createMenuKey('貼り付け'),
+                      label: '貼り付け',
+                      disabled: requestPastingAction.canExecute(node.name).isError,
+                      onClick: () => {
+                          requestPastingAction.execute(node.name);
+                      },
+                  }
+                : null,
+            {
+                key: createMenuKey('リネーム'),
+                label: 'リネーム',
+                disabled: requestRenamingAction.canExecute(node, null).isError,
+                onClick: () => {
+                    setRenameInputModal({
+                        currentName: node.name,
+                        onOk: newName => requestRenamingAction.execute(node, newName),
+                        canOk: newName => !requestRenamingAction.canExecute(node, newName).isError,
+                    });
+                },
+            },
+            {
+                key: createMenuKey('削除'),
+                label: '削除',
+                disabled: !requestDeletingNodeAction.canExecute(node),
+                onClick: () => {
+                    {
+                        requestDeletingNodeAction.execute(node);
+                    }
+                },
+            },
+        ];
+    }
+
+    return <Menu items={menuItems} />;
+};
+
 // :hoverのborder-colorはantdのチェックボックスの青色と同じ
+// 画面がファイルやフォルダでいっぱいのときでも、何もないところを右クリックしてMenuを出しやすいように、marginはやや大きめにとっている
 const cellElementCss = css`
     position: relative;
     width: 100px;
@@ -914,7 +1971,7 @@ const cellElementCss = css`
     color: white;
     cursor: pointer;
     user-select: none;
-    margin: 2px;
+    margin: 6px;
     padding: 2px;
     border-style: solid;
     border-color: rgba(122, 122, 122, 0.5);
@@ -929,42 +1986,36 @@ const cellElementCss = css`
 const NodeView: React.FC<{
     node: Node;
 }> = ({ node }) => {
-    const isSelectMode = useAtomValue(isMultipleSelectModeAtom);
-    const [currentDirectory, setCurrentDirectory] = useAtom(currentDirectoryAtom);
-    const setVirtualFolders = useSetAtom(tempVirtualFoldersAtom);
-    const toggleSelectedFile = useToggleSelectedFile();
-    const toggleSelectedFolder = useToggleSelectedFolder();
-    const isSelected = useIsSelected(node);
-    const requestDeleteFiles = useRequestDeleteFiles();
+    const props = useAtomValue(propsAtom);
+    const [pathState, setPathState] = useAtom(pathStateAtom);
+    const isCut = React.useMemo(() => pathState.isCut(node), [node, pathState]);
 
     const size = 40;
+    const opacity = isCut ? 0.5 : undefined;
     let fileElement: React.ReactNode;
-    switch (node.type) {
-        case virtualFolder:
-            // TODO: アイコンを点線にするとよりわかりやすい
+    switch (node.source.type) {
+        case folder:
+        case virtualFolder: {
             fileElement = (
-                <CellFile>
-                    <Icons.FolderOutlined style={{ fontSize: size, opacity: 0.5 }} />
-                </CellFile>
-            );
-            break;
-        case folder: {
-            fileElement = (
-                <CellFile>
+                <CellFile opacity={opacity}>
                     <Icons.FolderOutlined style={{ fontSize: size }} />
                 </CellFile>
             );
             break;
         }
         case file: {
-            if (node.thumb != null && node.thumb !== true && node.thumb !== false) {
-                fileElement = <CellFile>{node.thumb}</CellFile>;
+            if (
+                node.source.thumb != null &&
+                node.source.thumb !== true &&
+                node.source.thumb !== false
+            ) {
+                fileElement = <CellFile opacity={opacity}>{node.source.thumb}</CellFile>;
                 break;
             }
-            switch (node.icon) {
+            switch (node.source.icon) {
                 case sound:
                     fileElement = (
-                        <CellFile>
+                        <CellFile opacity={opacity}>
                             <div style={{ position: 'relative', width: 40, height: 40 }}>
                                 <Icons.FileOutlined
                                     style={{ fontSize: size, position: 'absolute' }}
@@ -983,21 +2034,21 @@ const NodeView: React.FC<{
                     break;
                 case image:
                     fileElement = (
-                        <CellFile>
+                        <CellFile opacity={opacity}>
                             <Icons.FileImageOutlined style={{ fontSize: size }} />
                         </CellFile>
                     );
                     break;
                 case text:
                     fileElement = (
-                        <CellFile>
+                        <CellFile opacity={opacity}>
                             <Icons.FileTextOutlined style={{ fontSize: size }} />
                         </CellFile>
                     );
                     break;
                 default:
                     fileElement = (
-                        <CellFile>
+                        <CellFile opacity={opacity}>
                             <Icons.FileUnknownOutlined style={{ fontSize: size }} />
                         </CellFile>
                     );
@@ -1006,106 +2057,28 @@ const NodeView: React.FC<{
         }
     }
 
-    const onSelect = (() => {
-        if (isSelectMode) {
-            if (node.type === virtualFolder) {
-                return () => toggleSelectedFolder(node.absolutePath);
-            }
-            if (node.type === folder) {
-                return () => toggleSelectedFolder(node.multiKeyMap.absolutePath);
-            }
-            return () => toggleSelectedFile(node.absolutePath);
-        }
-
-        if (node.type === folder || node.type === virtualFolder) {
-            return () =>
-                setCurrentDirectory(oldValue => {
-                    const newValue = [...oldValue];
-                    newValue.push(node.name);
-                    return newValue;
-                });
-        }
-
-        if (node.onSelect == null) {
-            return node.onOpen;
-        }
-        return node.onSelect;
-    })();
-
-    const createMenuKey = (key: string | number) => keyNames('FileBrowser', 'CellElement', key);
-    const menu = (
-        <Menu
-            items={[
-                onSelect == null
-                    ? null
-                    : {
-                          key: createMenuKey(1),
-                          label: '選択',
-                          onClick: onSelect,
-                      },
-                node.type === folder || node.type === virtualFolder || node.onOpen == null
-                    ? null
-                    : {
-                          key: createMenuKey(2),
-                          label: 'ファイルを開く',
-                          onClick: node.onOpen,
-                      },
-                node.type === folder || node.type === virtualFolder || node.onClipboard == null
-                    ? null
-                    : {
-                          key: createMenuKey(3),
-                          label: 'コマンドに使用するリンクとしてクリップボードにコピー',
-                          onClick: node.onClipboard,
-                      },
-                {
-                    key: createMenuKey(4),
-                    label: '削除',
-                    onClick: () => {
-                        {
-                            if (node.type === virtualFolder) {
-                                setVirtualFolders(oldValue => {
-                                    const newValue = oldValue.map(x => x.value);
-                                    newValue.delete(currentDirectory);
-                                    return newValue;
-                                });
-                                return;
-                            }
-                            if (node.type === folder) {
-                                requestDeleteFiles({
-                                    files: [],
-                                    folders: [{ absolutePath: node.multiKeyMap.absolutePath }],
-                                });
-                                return;
-                            }
-                            requestDeleteFiles({
-                                files: [{ absolutePath: node.absolutePath }],
-                                folders: [],
-                            });
-                        }
-                    },
-                },
-            ]}
-        />
-    );
-
     return (
-        <Dropdown overlay={menu} trigger={['contextMenu']}>
+        <Dropdown overlay={<ContextMenu node={node} />} trigger={['contextMenu']}>
             <div
                 className={classNames(flex, flexColumn)}
                 css={cellElementCss}
                 tabIndex={0}
-                onClick={() => onSelect && onSelect()}
+                onClick={() => setPathState(pathState => pathState.select(props, node))}
                 onKeyDown={e => {
                     if (e.code === 'Space') {
-                        onSelect && onSelect();
+                        setPathState(pathState => pathState.select(props, node));
                     }
                 }}
+                onContextMenu={e =>
+                    // これがないと、Nodeを右クリックしてMenuを出したとき、本来は何もないところを右クリックしたときに出るはずのMenuも同時に表示されてしまう
+                    e.stopPropagation()
+                }
             >
-                {isSelectMode && node.type !== virtualFolder && (
+                {pathState.isMultipleSelectMode && (
                     <Checkbox
                         style={{ position: 'absolute', left: 2, top: 0 }}
                         tabIndex={-1}
-                        checked={isSelected}
+                        checked={pathState.isSelected(node)}
                     />
                 )}
                 {fileElement}
@@ -1133,15 +2106,20 @@ const ListContainer = styled.div`
 `;
 
 const NodesGrid: React.FC = () => {
-    const nodes = useCreateNodes();
-    const ensuredVirtualFolders = useAtomValue(ensuredVirtualFoldersAtom);
-    const currentDirectory = useAtomValue(currentDirectoryAtom);
-    const ensuredVirtualFolder = ensuredVirtualFolders.get(currentDirectory);
+    // 右クリックでコンテキストメニューが出せる領域がわかりやすいように、背景色を少し変えている
+    const backgroundColor = 'rgba(0,0,0,0.3)';
+
+    const pathState = useAtomValue(pathStateAtom);
     const fileTypeFilter = useAtomValue(fileTypeFilterAtom);
     const fileNameFilter = useAtomValue(fileNameFilterAtom);
+    const nodes = React.useMemo(() => pathState.createNodes(), [pathState]);
     const filteredNodes = React.useMemo(() => {
         return nodes.filter(node => {
-            if (fileTypeFilter != null && node.type === file && node.fileType !== fileTypeFilter) {
+            if (
+                fileTypeFilter != null &&
+                node.source.type === file &&
+                node.source.fileType !== fileTypeFilter
+            ) {
                 return false;
             }
 
@@ -1152,6 +2130,10 @@ const NodesGrid: React.FC = () => {
         });
     }, [fileNameFilter, fileTypeFilter, nodes]);
 
+    const ensuredVirtualFolder = React.useMemo(() => {
+        return pathState.tryGetEnsuredVirtualFolder(pathState.currentDirectory);
+    }, [pathState]);
+
     const header: React.ReactNode = ensuredVirtualFolder.isNone
         ? undefined
         : ensuredVirtualFolder.value.header;
@@ -1159,19 +2141,20 @@ const NodesGrid: React.FC = () => {
     let main: JSX.Element;
     if (nodes.length === 0) {
         main = (
-            <div style={{ padding: 4, fontSize: '1.3rem' }}>
-                このフォルダにはフォルダおよびファイルがありません。
+            <div style={{ padding: 4, fontSize: '1.3rem', height: '100%', backgroundColor }}>
+                このフォルダには、フォルダおよびファイルがありません。
             </div>
         );
     } else if (filteredNodes.length === 0) {
         main = (
-            <div style={{ padding: 4, fontSize: '1.3rem' }}>
+            <div style={{ padding: 4, fontSize: '1.3rem', height: '100%', backgroundColor }}>
                 フォルダおよび条件にマッチするファイルがありません。
             </div>
         );
     } else {
         main = (
             <VirtuosoGrid
+                style={{ backgroundColor }}
                 totalCount={filteredNodes.length}
                 components={{
                     List: ListContainer as any,
@@ -1183,9 +2166,17 @@ const NodesGrid: React.FC = () => {
     }
 
     return (
-        <div className={classNames(flex, flexColumn)} style={{ gap: '16px', height: '100%' }}>
+        <div
+            className={classNames(flex, flexColumn)}
+            style={{
+                gap: '16px',
+                height: '100%',
+            }}
+        >
             {header}
-            {main}
+            <Dropdown overlay={<ContextMenu node={null} />} trigger={['contextMenu']}>
+                {main}
+            </Dropdown>
         </div>
     );
 };
@@ -1196,8 +2187,8 @@ const useStartAutoDeleteFiles = () => {
     const [deleteStatus, setDeleteStatus] = useAtom(deleteStatusAtom);
     const [isDeleting, setIsDeleting] = React.useState(false);
     const [hasDeleted, setHasDeleted] = React.useState(false);
-    const deleteStatusFiles = deleteStatus.type === 'none' ? undefined : deleteStatus.files;
-    const deleteStatusFilesRef = useLatest(deleteStatusFiles);
+    const deleteStatusValue = deleteStatus.type === 'none' ? undefined : deleteStatus.files;
+    const deleteStatusValueRef = useLatest(deleteStatusValue);
 
     React.useEffect(() => {
         if (isDeleting) {
@@ -1210,7 +2201,7 @@ const useStartAutoDeleteFiles = () => {
             }
             return;
         }
-        const fileToDelete = deleteStatusFilesRef.current?.find(file => file.status === 'waiting');
+        const fileToDelete = deleteStatusValueRef.current?.find(file => file.status === 'waiting');
         if (fileToDelete == null) {
             setDeleteStatus(oldValue => {
                 return {
@@ -1260,7 +2251,7 @@ const useStartAutoDeleteFiles = () => {
                 notification.error({
                     placement: 'bottomRight',
                     message: 'ファイルの削除に失敗しました。',
-                    description: joinPath(fileToDelete.file.absolutePath).string,
+                    description: joinPath(fileToDelete.file.path).string,
                 });
                 console.error('ファイルの削除に失敗しました。', e);
                 setFileStatus(fileToDelete, 'error');
@@ -1268,7 +2259,7 @@ const useStartAutoDeleteFiles = () => {
             });
     }, [
         deleteStatus.type,
-        deleteStatusFilesRef,
+        deleteStatusValueRef,
         hasDeleted,
         isDeleting,
         onDeleteRef,
@@ -1276,8 +2267,101 @@ const useStartAutoDeleteFiles = () => {
     ]);
 };
 
+const useStartAutoRenameFiles = () => {
+    const onRename = useAtomSelector(propsAtom, props => props?.onRename);
+    const onRenameRef = useLatest(onRename);
+    const [renameStatus, setRenameStatus] = useAtom(renameStatusAtom);
+    const [isRenaming, setIsRenaming] = React.useState(false);
+    const [hasRenamed, setHasRenamed] = React.useState(false);
+    const renameStatusValue = renameStatus.type === 'none' ? undefined : renameStatus.files;
+    const renameStatusValueRef = useLatest(renameStatusValue);
+    const setPathState = useSetAtom(pathStateAtom);
+
+    React.useEffect(() => {
+        if (isRenaming) {
+            return;
+        }
+        if (renameStatus.type !== 'renaming') {
+            if (hasRenamed) {
+                onRenameRef.current && onRenameRef.current();
+                setPathState(pathState => pathState.resetCutState());
+                setHasRenamed(false);
+            }
+            return;
+        }
+        const fileToDelete = renameStatusValueRef.current?.find(file => file.status === 'waiting');
+        if (fileToDelete == null) {
+            setRenameStatus(oldValue => {
+                return {
+                    type: 'finished',
+                    files: oldValue.type === 'none' ? [] : oldValue.files,
+                };
+            });
+            notification.info({
+                placement: 'bottomRight',
+                message: 'ファイルの移動もしくはリネームが完了しました。',
+            });
+            return;
+        }
+
+        const setFileStatus = (file: FileToRename, newValue: FileToRename['status']) => {
+            setRenameStatus(oldValue => {
+                if (oldValue.type === 'none') {
+                    return oldValue;
+                }
+                const index = oldValue.files.findIndex(
+                    oldFile => oldFile.file.key === file.file.key
+                );
+                if (index < 0) {
+                    return oldValue;
+                }
+                return produce(oldValue, oldValue => {
+                    oldValue.files[index]!.status = newValue;
+                });
+            });
+        };
+
+        setIsRenaming(true);
+        setFileStatus(fileToDelete, 'renaming');
+        const onRename = () => {
+            if (fileToDelete.file.onMoveOrRename == null) {
+                return Promise.resolve(undefined);
+            }
+            return fileToDelete.file.onMoveOrRename({
+                currentPath: fileToDelete.file.path,
+                newPath: fileToDelete.newPath,
+            });
+        };
+        onRename()
+            .then(() => {
+                setFileStatus(fileToDelete, 'renamed');
+                setHasRenamed(true);
+                setIsRenaming(false);
+            })
+            .catch(e => {
+                notification.error({
+                    placement: 'bottomRight',
+                    message: 'ファイルのリネームに失敗しました。',
+                    description: joinPath(fileToDelete.file.path).string,
+                });
+                console.error('ファイルのリネームに失敗しました。', e);
+                setFileStatus(fileToDelete, 'error');
+                setIsRenaming(false);
+            });
+    }, [
+        renameStatus.type,
+        renameStatusValueRef,
+        hasRenamed,
+        isRenaming,
+        onRenameRef,
+        setRenameStatus,
+        setPathState,
+    ]);
+};
+
 const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
     useStartAutoDeleteFiles();
+    useStartAutoRenameFiles();
 
     const setProps = useSetAtom(propsAtom);
     React.useEffect(() => {
@@ -1290,51 +2374,18 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
         setFileFilter(defaultFileTypeFilterProp);
     }, [defaultFileTypeFilterProp, setFileFilter]);
 
-    const setEnsuredVirtualFolders = useSetAtom(ensuredVirtualFoldersAtom);
-    React.useEffect(() => {
-        const newState = new DeletableTree<string, Omit<EnsuredFolderPath, 'path'>>();
-        for (const path of props.ensuredFolderPaths) {
-            newState.ensure(
-                joinPath(path.path).array,
-                () => path,
-                () => ({})
-            );
-        }
-        setEnsuredVirtualFolders(newState);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [setEnsuredVirtualFolders, ...props.ensuredFolderPaths]);
+    const setPathState = useSetAtom(pathStateAtom);
 
-    const setRootFolder = useSetAtom(rootFolderAtom);
-    const rootFoler: FolderMap = React.useMemo(() => {
-        const folder = new MultiKeyMap<
-            string,
-            {
-                files: FilePathNode[];
-            }
-        >();
-        for (const filePath of props.files) {
-            const directory = [...joinPath(filePath.path).array];
-            const filename = directory.pop();
-            if (filename == null) {
-                throw new Error('This should not happen.');
-            }
-            const folderNode = folder.ensure(directory, () => ({
-                files: [],
-            }));
-            folderNode.files.push({
-                ...filePath,
-                type: file,
-                key: joinPath(filePath.path).string + '@FileBrowser@File',
-                name: filename,
-                absoluteFolderPath: directory,
-                absolutePath: joinPath(filePath.path).array,
-            });
-        }
-        return folder;
-    }, [props.files]);
     React.useEffect(() => {
-        setRootFolder(rootFoler);
-    }, [rootFoler, setRootFolder]);
+        setPathState(pathState =>
+            pathState.updateEnsuredVirtualFolders(props.ensuredVirtualFolderPaths)
+        );
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [setPathState, ...props.ensuredVirtualFolderPaths]);
+
+    React.useEffect(() => {
+        setPathState(pathState => pathState.updateRootFolder(props.files));
+    }, [props.files, setPathState]);
 
     return (
         <div
@@ -1344,10 +2395,12 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
                 props.style
             )}
         >
-            <ActionBar />
             <AddressBar />
             <NodesGrid />
             <DeleteConfirmModal />
+            <RenameConfirmModal />
+            <RenameInputModal />
+            <CreateFolderModal />
         </div>
     );
 };

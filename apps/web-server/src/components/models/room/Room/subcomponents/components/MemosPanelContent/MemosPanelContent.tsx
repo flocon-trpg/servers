@@ -18,6 +18,7 @@ import { CollaborativeInput } from '@/components/ui/CollaborativeInput/Collabora
 import { FileBrowser, FilePath, text } from '@/components/models/file/FileBrowser/FileBrowser';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { stretchedModalWidth } from '@/utils/variables';
+import { Result } from '@kizahasi/result';
 
 type MemoState = State<typeof memoTemplate>;
 
@@ -37,9 +38,10 @@ const MemoBrowserModal: React.FC<{
             return [];
         }
         return [...memos].map(([memoId, memo]): FilePath => {
-            const path = joinPath(memo.dir, [`${memo.name}(ID:${memoId})`]).array;
+            const path = joinPath(memo.dir, [memo.name]).array;
             return {
                 path,
+                id: memoId,
                 icon: text,
                 onDelete: () => {
                     setRoomState(roomState => {
@@ -53,6 +55,20 @@ const MemoBrowserModal: React.FC<{
                 onOpen: () => {
                     onClose(memoId);
                 },
+                onMoveOrRename: async ({ newPath }) =>
+                    setRoomState(roomState => {
+                        const memo = roomState.memos?.[memoId];
+                        if (memo == null) {
+                            return;
+                        }
+                        const dir = [...newPath];
+                        const filename = dir.pop();
+                        if (filename == null) {
+                            return;
+                        }
+                        memo.dir = dir;
+                        memo.name = filename;
+                    }),
             };
         });
     }, [memos, onClose, setRoomState]);
@@ -66,31 +82,31 @@ const MemoBrowserModal: React.FC<{
         >
             <FileBrowser
                 files={files}
+                fileCreateLabel='メモを作成'
+                searchPlaceholder='メモの名前で検索'
                 height={null}
-                isLocked={() => false}
-                ensuredFolderPaths={[]}
+                isProtected={() => false}
+                ensuredVirtualFolderPaths={[]}
                 onFileCreate={absolutePath => {
-                    const newMemoId = simpleId();
+                    const id = simpleId();
                     setRoomState(roomState => {
-                        const dir = [...absolutePath];
-                        const name = dir.pop();
-                        if (name == null) {
-                            return;
-                        }
                         if (roomState.memos == null) {
                             roomState.memos = {};
                         }
-                        roomState.memos[newMemoId] = {
+                        roomState.memos[id] = {
                             $v: 1,
                             $r: 1,
-                            dir,
-                            name,
                             text: '',
                             textType: 'Plain',
+                            name: `新規メモ@${moment(new Date()).format('YYYY/MM/DD HH:mm:ss')}`,
+                            dir: [...absolutePath],
                         };
                     });
-                    onClose(newMemoId);
+                    onClose(id);
                 }}
+                canMove={() => Result.ok(undefined)}
+                canRename={() => Result.ok(undefined)}
+                canCreateTempVirtualFolder={() => Result.ok(undefined)}
             />
         </Modal>
     );
@@ -180,7 +196,6 @@ export const MemosPanelContent: React.FC<Props> = ({
     selectedMemoId,
     onSelectedMemoIdChange,
 }: Props) => {
-    const setRoomState = useSetRoomStateWithImmer();
     const memos = useMemos();
     const memo = selectedMemoId == null ? undefined : memos?.get(selectedMemoId);
     const [modalVisible, setModalVisible] = React.useState(false);
@@ -199,30 +214,7 @@ export const MemosPanelContent: React.FC<Props> = ({
                     padding: `${padding}px ${padding}px ${splitterPadding}px ${padding}px`,
                 }}
             >
-                <Button onClick={() => setModalVisible(true)}>他のメモを開く</Button>
-                <Button
-                    onClick={() => {
-                        const id = simpleId();
-                        setRoomState(roomState => {
-                            if (roomState.memos == null) {
-                                roomState.memos = {};
-                            }
-                            roomState.memos[id] = {
-                                $v: 1,
-                                $r: 1,
-                                text: '',
-                                textType: 'Plain',
-                                name: `新規メモ@${moment(new Date()).format(
-                                    'YYYY/MM/DD HH:mm:ss'
-                                )}`,
-                                dir: memo == null ? [] : memo.dir,
-                            };
-                        });
-                        onSelectedMemoIdChange(id);
-                    }}
-                >
-                    新規作成
-                </Button>
+                <Button onClick={() => setModalVisible(true)}>メモの管理</Button>
             </div>
             <Memo memoId={selectedMemoId} memo={memo} />
             <MemoBrowserModal

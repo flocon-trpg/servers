@@ -3054,6 +3054,7 @@ __metadata:
     "@react-spring/konva": ^9.2.4
     "@sinonjs/fake-timers": 9.1.2
     "@storybook/addon-actions": 6.5.9
+    "@storybook/addon-console": ^1.2.3
     "@storybook/addon-docs": 6.5.9
     "@storybook/addon-essentials": 6.5.9
     "@storybook/addon-interactions": 6.5.9
@@ -4877,6 +4878,17 @@ __metadata:
     react-dom:
       optional: true
   checksum: 1b8d78da701a5aa2d7169818c4cfedc9374acf7f2feb07b6453c4a5362e6184d827e0c41dc11b6d97a35e38fafee721e4aa9d9f7b211fd151c093f9fca05dd5d
+  languageName: node
+  linkType: hard
+
+"@storybook/addon-console@npm:^1.2.3":
+  version: 1.2.3
+  resolution: "@storybook/addon-console@npm:1.2.3"
+  dependencies:
+    global: ^4.3.2
+  peerDependencies:
+    "@storybook/addon-actions": "*"
+  checksum: 6c899dcb52185da526d8b98d0b7e7aaaeaeb053d4c805b499b73fa4f5a74b410da294970448a26880447f1a21f5b0563a1cd87e640200a3d714639675dccb382
   languageName: node
   linkType: hard
 
@@ -13310,7 +13322,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"global@npm:^4.4.0":
+"global@npm:^4.3.2, global@npm:^4.4.0":
   version: 4.4.0
   resolution: "global@npm:4.4.0"
   dependencies:

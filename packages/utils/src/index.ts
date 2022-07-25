@@ -1,3 +1,4 @@
+export { arrayEquals } from './internal/arrayEquals';
 export {
     CompositeKey,
     stringToCompositeKey,
