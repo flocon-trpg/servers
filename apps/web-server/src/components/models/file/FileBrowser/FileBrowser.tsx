@@ -71,6 +71,15 @@ type Path = {
     id: string | undefined;
 };
 
+type RenameResult = {
+    oldPath: readonly string[];
+
+    currentPath: readonly string[];
+
+    /** ファイルの場合は`FilePathBase.id`と等しい値です。ファイル以外の場合は常にundefinedとなります。 */
+    id: string | undefined;
+};
+
 type NameIdPair = {
     name: string;
 
@@ -153,10 +162,10 @@ export type Props = {
     fileTypes?: FileTypes;
 
     /** ファイルの削除処理が完了したときにトリガーされます。複数のファイルが削除されるときは、最後のファイルが削除されたときにトリガーされます。 */
-    onDelete?: () => void;
+    onDelete?: (deletedFiles: readonly Path[]) => void;
 
     /** ファイルのリネーム処理が完了したときにトリガーされます。複数のファイルがリネームされるときは、最後のファイルがリネームされたときにトリガーされます。 */
-    onRename?: () => void;
+    onRename?: (renamedFiles: readonly RenameResult[]) => void;
 
     canMove: (
         /** 例えば`folder1`というフォルダに`a.png`と`b.png`と`c.png`というファイルがあってこれらのうち`a.png`と`b.png`のみを`folder2`フォルダに移動しようとした場合、`currentDirectoryPath`は`['folder1']`、newDirectoryPathは`['folder2']`となります。ファイル名が`a.png`と`b.png`であるという情報の取得は、現時点では必要とされていないためサポートしていません。 */ params: {
@@ -2196,7 +2205,6 @@ const useStartAutoDeleteFiles = () => {
         }
         if (deleteStatus.type !== 'deleting') {
             if (hasDeleted) {
-                onDeleteRef.current && onDeleteRef.current();
                 setHasDeleted(false);
             }
             return;
@@ -2213,6 +2221,13 @@ const useStartAutoDeleteFiles = () => {
                 placement: 'bottomRight',
                 message: 'ファイルの削除が完了しました。',
             });
+            onDeleteRef.current &&
+                onDeleteRef.current(
+                    deleteStatusValueRef.current?.map(file => ({
+                        path: file.file.path,
+                        id: file.file.id,
+                    })) ?? []
+                );
             return;
         }
 
@@ -2283,8 +2298,6 @@ const useStartAutoRenameFiles = () => {
         }
         if (renameStatus.type !== 'renaming') {
             if (hasRenamed) {
-                onRenameRef.current && onRenameRef.current();
-                setPathState(pathState => pathState.resetCutState());
                 setHasRenamed(false);
             }
             return;
@@ -2301,6 +2314,15 @@ const useStartAutoRenameFiles = () => {
                 placement: 'bottomRight',
                 message: 'ファイルの移動もしくはリネームが完了しました。',
             });
+            onRenameRef.current &&
+                onRenameRef.current(
+                    renameStatusValueRef.current?.map(file => ({
+                        id: file.file.id,
+                        oldPath: file.file.path,
+                        currentPath: file.newPath,
+                    })) ?? []
+                );
+            setPathState(pathState => pathState.resetCutState());
             return;
         }
 

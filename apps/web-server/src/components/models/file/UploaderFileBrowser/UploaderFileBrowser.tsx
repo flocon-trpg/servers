@@ -369,6 +369,12 @@ export const UploaderFileBrowser: React.FC<Props> = ({
         storageType: StorageType;
         folderPath: readonly string[];
     }>();
+    const { refetch: refetchFirebaseStorage } = useFirebaseStorageListAllQuery();
+    const [, refetchFloconUploader] = useQuery({
+        query: GetFilesDocument,
+        variables: { input: { fileTagIds: [] } },
+        pause: true,
+    });
 
     const files = React.useMemo(() => {
         const result: FilePath[] = [];
@@ -519,6 +525,48 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                             break;
                     }
                 }}
+                onDelete={deletedFiles => {
+                    if (
+                        deletedFiles.some(
+                            file =>
+                                file.path[0] === uploaderTypeFolderName.publicFirebaseStorage ||
+                                file.path[0] === uploaderTypeFolderName.unlistedFirebaseStorage
+                        )
+                    ) {
+                        refetchFirebaseStorage();
+                    }
+                    if (
+                        deletedFiles.some(
+                            file =>
+                                file.path[0] === uploaderTypeFolderName.publicApiServer ||
+                                file.path[0] === uploaderTypeFolderName.unlistedApiServer
+                        )
+                    ) {
+                        refetchFloconUploader({ requestPolicy: 'network-only' });
+                    }
+                }}
+                onRename={renamedFiles => {
+                    if (
+                        renamedFiles.some(
+                            file =>
+                                file.currentPath[0] ===
+                                    uploaderTypeFolderName.publicFirebaseStorage ||
+                                file.currentPath[0] ===
+                                    uploaderTypeFolderName.unlistedFirebaseStorage
+                        )
+                    ) {
+                        refetchFirebaseStorage();
+                    }
+                    if (
+                        renamedFiles.some(
+                            file =>
+                                file.currentPath[0] === uploaderTypeFolderName.publicApiServer ||
+                                file.currentPath[0] === uploaderTypeFolderName.unlistedApiServer
+                        )
+                    ) {
+                        refetchFloconUploader({ requestPolicy: 'network-only' });
+                    }
+                }}
                 ensuredVirtualFolderPaths={[
                     {
                         path: [uploaderTypeFolderName.publicFirebaseStorage],
@@ -550,7 +598,10 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                 >
                     <FirebaseStorageUploader
                         storageType={firebaseStorageUploaderModalState.storageType}
-                        onUploaded={() => setFirebaseStorageUploaderModalState(undefined)}
+                        onUploaded={() => {
+                            setFirebaseStorageUploaderModalState(undefined);
+                            refetchFirebaseStorage();
+                        }}
                         folderPath={firebaseStorageUploaderModalState.folderPath}
                     />
                 </Modal>
@@ -571,7 +622,10 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                 >
                     <FloconUploader
                         storageType={floconUploaderModalState.storageType}
-                        onUploaded={() => setFloconUploaderModalState(undefined)}
+                        onUploaded={() => {
+                            setFloconUploaderModalState(undefined);
+                            refetchFloconUploader({ requestPolicy: 'network-only' });
+                        }}
                         folderPath={floconUploaderModalState.folderPath}
                     />
                 </Modal>

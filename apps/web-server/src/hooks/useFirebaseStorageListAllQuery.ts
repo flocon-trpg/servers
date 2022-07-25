@@ -127,15 +127,20 @@ export const useFirebaseStorageListAllQuery = () => {
         }
     );
 
-    return React.useMemo(
-        () =>
-            ({
-                /** publicがWebConfigで無効にされているときはnull。 */
-                public: publicFiles.data,
+    return React.useMemo(() => {
+        const refetchPublicFiles = publicFiles.refetch;
+        const refetchUnlistedFiles = unlistedFiles.refetch;
+        return {
+            /** publicがWebConfigで無効にされているときはnull。 */
+            public: publicFiles.data,
 
-                /** unlistedがWebConfigで無効にされているときはnull。 */
-                unlisted: unlistedFiles.data,
-            } as const),
-        [publicFiles.data, unlistedFiles.data]
-    );
+            /** unlistedがWebConfigで無効にされているときはnull。 */
+            unlisted: unlistedFiles.data,
+
+            refetch: async () => {
+                await refetchPublicFiles();
+                await refetchUnlistedFiles();
+            },
+        } as const;
+    }, [publicFiles.data, unlistedFiles.data, publicFiles.refetch, unlistedFiles.refetch]);
 };
