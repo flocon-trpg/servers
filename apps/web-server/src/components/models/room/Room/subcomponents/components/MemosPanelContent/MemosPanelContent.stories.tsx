@@ -5,7 +5,7 @@ import { useMockRoom } from '@/hooks/useMockRoom';
 import { storybookAtom } from '@/atoms/storybookAtom/storybookAtom';
 import { useSetAtom } from 'jotai';
 import { createMockRoom } from '@/mocks';
-import { screen, userEvent } from '@storybook/testing-library';
+import { screen, userEvent, within } from '@storybook/testing-library';
 import { delay } from '@flocon-trpg/utils';
 import FakeTimers from '@sinonjs/fake-timers';
 
@@ -42,38 +42,3 @@ export default {
     title: 'models/room/Room/MemosPanelContent',
     component: Default,
 } as ComponentMeta<typeof Default>;
-
-const Template: ComponentStory<typeof Default> = args => <Default {...args} />;
-
-const fakeNow = new Date(2020, 9, 11, 12, 13, 14);
-
-export const Create = Template.bind({});
-Create.play = async () => {
-    // すぐボタンをクリックしても反応しないようなので待っている。
-    await delay(500);
-
-    const installedClock = FakeTimers.install();
-    installedClock.setSystemTime(fakeNow);
-
-    const button = screen.getByRole('button', { name: '新規作成' });
-    userEvent.click(button);
-
-    installedClock.uninstall();
-};
-
-export const Width400Create = Template.bind({});
-Width400Create.args = {
-    width: 400,
-};
-Width400Create.play = async () => {
-    // すぐボタンをクリックしても反応しないようなので待っている。
-    await delay(500);
-
-    const installedClock = FakeTimers.install();
-    installedClock.setSystemTime(fakeNow);
-
-    const button = screen.getByRole('button', { name: '新規作成' });
-    userEvent.click(button);
-
-    installedClock.uninstall();
-};
