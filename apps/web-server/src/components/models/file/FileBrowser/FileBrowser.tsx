@@ -58,7 +58,6 @@ export const text = 'text';
 export const others = 'others';
 const file = 'file';
 const folder = 'folder';
-const virtualFolder = 'virtualFolder';
 
 const none = '__none__';
 
@@ -225,17 +224,16 @@ type FilePathNode = FilePathBase & {
 
     key: string;
 
-    /** FilePath.path から `''` の要素を取り除いたものと等しいです。*/
-    path: readonly string[];
+    path: undefined;
 
-    /** ファイルがあるパス。ファイル名の部分は含みません。*/
+    /** ファイルがあるパス。ファイル名の部分は含みません。FilePath.path から `''` の要素とファイル名の要素を取り除いたものと等しいです。*/
     folderPath: readonly string[];
 
     /** ファイル名。 */
     name: string;
 };
 
-type FolderMap = MultiKeyMap<
+type FolderTree = DeletableTree<
     string,
     {
         /** 1つ目のkeyはnameと等しく、2つ目はidと等しくなります。 */
@@ -245,32 +243,16 @@ type FolderMap = MultiKeyMap<
 
 type Folder = {
     type: typeof folder;
-    multiKeyMap: FolderMap;
     key: string;
-    name: string;
-};
-
-/** ユーザーによって作成された仮想フォルダ。FilePathBase.pathのみでは空のフォルダが表現できないため、代わりにこれを用います。*/
-// 一時的な仮想フォルダであり、また通常のファイルやフォルダと比べて消えたときの悪影響が小さいため、コンポーネントのunmountなどのタイミングで自動的に消えることがあります。
-type TempVirtualFolder = {
-    type: typeof virtualFolder;
-
-    /** フォルダがあるパス。フォルダ名の部分は含みません。*/
     folderPath: readonly string[];
-
-    /** フォルダ名。*/
     name: string;
-};
 
-type VirtualFolderNode = TempVirtualFolder & {
-    key: string;
-
-    // TempVirtualFolder由来の場合は常にundefinedになる
+    // ensured folderのheaderで指定された値。ensured folder由来でない場合は常にundefinedになる
     header: React.ReactNode;
 };
 
 class Node {
-    constructor(readonly source: FilePathNode | Folder | VirtualFolderNode) {}
+    constructor(readonly source: FilePathNode | Folder) {}
 
     get key() {
         return this.source.key;
@@ -292,14 +274,7 @@ class Node {
     }
 
     get folderPath(): readonly string[] {
-        switch (this.source.type) {
-            case virtualFolder:
-                return this.source.folderPath;
-            case folder:
-                return this.source.multiKeyMap.absolutePath;
-            case file:
-                return this.source.folderPath;
-        }
+        return this.source.folderPath;
     }
 
     get path(): readonly string[] {
@@ -317,8 +292,8 @@ type AskingDeleteStatus = {
 
     files: readonly FileToDelete[];
 
-    /** temp virtual folderのrenameに用いられます。temp virtual folderでないfolderの場合は無視されます。 */
-    tempVirtualFolders: readonly { path: readonly string[] }[];
+    /** 削除するフォルダを指定します。これらの中にファイルが含まれる場合はfilesに含める必要があります。 */
+    folders: readonly { path: readonly string[] }[];
 };
 
 type DeleteStatus =
@@ -328,6 +303,8 @@ type DeleteStatus =
     | {
           type: 'deleting' | 'aborted' | 'finished';
           files: readonly FileToDelete[];
+          /** 削除するフォルダを指定します。これらの中にファイルが含まれる場合はfilesに含める必要があります。 */
+          folders: readonly { path: readonly string[] }[];
       }
     | AskingDeleteStatus;
 
@@ -342,8 +319,8 @@ type AskingRenameStatus = {
 
     files: readonly FileToRename[];
 
-    /** temp virtual folderのrenameに用いられます。temp virtual folderでないfolderの場合は無視されます。 */
-    tempVirtualFolders: readonly { currentPath: readonly string[]; newPath: readonly string[] }[];
+    /** リネームするフォルダを指定します。これらの中にファイルが含まれる場合はfilesに含める必要があります。 */
+    folders: readonly { currentPath: readonly string[]; newPath: readonly string[] }[];
 };
 
 type RenameStatus =
@@ -353,30 +330,29 @@ type RenameStatus =
     | {
           type: 'renaming' | 'aborted' | 'finished';
           files: readonly FileToRename[];
+          /** リネームするフォルダを指定します。これらの中にファイルが含まれる場合はfilesに含める必要があります。 */
+          folders: readonly { currentPath: readonly string[]; newPath: readonly string[] }[];
       }
     | AskingRenameStatus;
 
 type PathStateBase = {
-    rootFolder: FolderMap;
+    rootFolder: FolderTree;
 
     // 要素はabsolute path
     currentDirectory: readonly string[];
 
     isMultipleSelectMode: boolean;
 
-    // 要素はabsolute path
-    tempVirtualFolders: DeletableTree<string, undefined>;
-
     ensuredVirtualFolders: DeletableTree<string, Omit<EnsuredVirtualFolderPath, 'path'>>;
 
-    // 現在のcurrentDirectoryにおいて選択されているファイルおよびフォルダの名前。virtual folderにも対応している。
-    // selectedFilesは、first keyがnameでsecond keyがid。
-    selectedFiles: DualKeyMap<string, string | undefined, undefined>;
+    // 現在のcurrentDirectoryにおいて選択されているファイルおよびフォルダの名前。
+    // selectedFilesは、first keyがnameでsecond keyがid。DualKeyMapの仕様の都合上、valueはundefinedではなくnullとしている。
+    selectedFiles: DualKeyMap<string, string | undefined, null>;
     selectedFolders: ReadonlySet<string>;
 
-    // cutされたファイルおよびフォルダの名前。virtual folderにも対応している。
-    // cutFilesは、first keyがnameでsecond keyがid。
-    cutFiles: DualKeyMap<string, string | undefined, undefined>;
+    // cutされたファイルおよびフォルダの名前。
+    // cutFilesは、first keyがnameでsecond keyがid。DualKeyMapの仕様の都合上、valueはundefinedではなくnullとしている。
+    cutFiles: DualKeyMap<string, string | undefined, null>;
     cutFolders: ReadonlySet<string>;
     /** cutされたファイルやフォルダが属するフォルダ。 */
     cutAt: readonly string[];
@@ -409,28 +385,14 @@ type PathList = {
 // メソッドはすべてimmutable
 class PathState {
     private constructor(private readonly members: PathStateBase) {
-        const newTempVirtualFolders = members.tempVirtualFolders.clone();
-        // 通常のフォルダが存在するため、必要なくなったtemp virtual folderをすべて削除する処理
-        for (const { absolutePath } of members.tempVirtualFolders.traverse()) {
-            if (members.rootFolder.get(absolutePath) == null) {
-                newTempVirtualFolders.ensure(
-                    absolutePath,
-                    () => undefined,
-                    () => undefined
-                );
-            }
-        }
-        members.tempVirtualFolders = newTempVirtualFolders;
-
         Object.freeze(members);
     }
 
     static init(): PathState {
         return new PathState({
-            rootFolder: new MultiKeyMap(),
+            rootFolder: new DeletableTree(),
             currentDirectory: [],
             isMultipleSelectMode: false,
-            tempVirtualFolders: new DeletableTree(),
             ensuredVirtualFolders: new DeletableTree(Option.some({})),
             selectedFiles: new DualKeyMap(),
             selectedFolders: new Set(),
@@ -440,43 +402,80 @@ class PathState {
         });
     }
 
-    deleteTempVirtualFolderRecursively(path: readonly string[]) {
-        const newValue = this.members.tempVirtualFolders.clone();
+    deleteFolderIfEmpty(path: readonly string[]): PathState | null {
+        if (this.members.rootFolder.get(path).isNone) {
+            return null;
+        }
+
+        const newValue = this.members.rootFolder.clone();
+        const subtree = this.members.rootFolder
+            .createSubTree(path, () => ({ files: new DualKeyMap() }))
+            .traverse();
+        for (const { value } of subtree) {
+            if (value.files.size !== 0) {
+                return null;
+            }
+        }
         newValue.delete(path);
-        return new PathState({ ...this.members, tempVirtualFolders: newValue });
+        return new PathState({ ...this.members, rootFolder: newValue });
     }
 
-    renameTempVirtualFolderRecursively(currentPath: readonly string[], newPath: readonly string[]) {
-        const newValue = this.members.tempVirtualFolders.clone();
-        for (const tempVirtualFolder of this.members.tempVirtualFolders
-            .createSubTree(currentPath, () => undefined)
-            .traverse()) {
-            newValue.delete(tempVirtualFolder.absolutePath);
+    renameFolderIfEmpty(
+        currentPath: readonly string[],
+        newPath: readonly string[]
+    ): PathState | null {
+        if (this.members.rootFolder.get(currentPath).isNone) {
+            return null;
+        }
+
+        const newValue = this.members.rootFolder.clone();
+        const subtree = this.members.rootFolder
+            .createSubTree(currentPath, () => ({ files: new DualKeyMap() }))
+            .traverse();
+        for (const { value, absolutePath } of subtree) {
+            if (value.files.size !== 0) {
+                return null;
+            }
             newValue.ensure(
-                newPath,
-                () => undefined,
-                () => undefined
+                movePath({ nodePath: absolutePath, cutAt: currentPath, destFolderPath: newPath }),
+                oldValue => {
+                    if (oldValue.isNone) {
+                        return { files: new DualKeyMap() };
+                    }
+                    return oldValue.value;
+                },
+                () => ({ files: new DualKeyMap() })
             );
         }
-        return new PathState({ ...this.members, tempVirtualFolders: newValue });
+        return new PathState({ ...this.members, rootFolder: newValue });
     }
 
     updateRootFolder(files: readonly FilePath[]) {
-        const rootFolder = new MultiKeyMap<
+        const newRootFolder = new DeletableTree<
             string,
             {
                 files: DualKeyMap<string, string | undefined, FilePathNode>;
             }
         >();
+
         for (const filePath of files) {
-            const directory = [...joinPath(filePath.path).array];
-            const filename = directory.pop();
+            const folderPath = [...joinPath(filePath.path).array];
+            const filename = folderPath.pop();
             if (filename == null) {
                 throw new Error('This should not happen.');
             }
-            const folderNode = rootFolder.ensure(directory, () => ({
-                files: new DualKeyMap(),
-            }));
+            const folderNode = newRootFolder.ensure(
+                folderPath,
+                oldValue => {
+                    if (oldValue.isNone) {
+                        return {
+                            files: new DualKeyMap(),
+                        };
+                    }
+                    return oldValue.value;
+                },
+                () => ({ files: new DualKeyMap() })
+            );
             folderNode.files.set(
                 { first: filename, second: filePath.id },
                 {
@@ -487,12 +486,29 @@ class PathState {
                         (filePath.id == null ? '' : '@' + filePath.id) +
                         '@FileBrowser@File',
                     name: filename,
-                    folderPath: directory,
-                    path: joinPath(filePath.path).array,
+                    folderPath,
+                    path: undefined,
                 }
             );
         }
-        return new PathState({ ...this.members, rootFolder });
+
+        // 空のフォルダを以前の状態に戻す処理
+        for (const { absolutePath } of this.members.rootFolder.traverse()) {
+            newRootFolder.ensure(
+                absolutePath,
+                oldValue => {
+                    if (oldValue.isNone) {
+                        return {
+                            files: new DualKeyMap(),
+                        };
+                    }
+                    return oldValue.value;
+                },
+                () => ({ files: new DualKeyMap() })
+            );
+        }
+
+        return new PathState({ ...this.members, rootFolder: newRootFolder });
     }
 
     updateEnsuredVirtualFolders(
@@ -510,78 +526,44 @@ class PathState {
     }
 
     createNodes() {
-        let currentFolderMap: FolderMap = this.members.rootFolder;
-        for (const dir of this.members.currentDirectory) {
-            currentFolderMap = currentFolderMap.createSubMap([dir]);
+        if (!this.members.rootFolder.get(this.members.currentDirectory)) {
+            return [];
         }
-
-        const fileNodes = currentFolderMap.get([])?.files ?? new DualKeyMap();
-        const folderNodes = [...currentFolderMap.getChildren()].flatMap(([, $folder]) => {
-            let hasFile = false;
-            for (const node of $folder.traverse()) {
-                if (node.value.files.size >= 1) {
-                    hasFile = true;
-                    break;
-                }
+        const currentFolderMap: FolderTree = this.members.rootFolder.createSubTree(
+            this.members.currentDirectory,
+            key => {
+                console.warn('invoked unexpected initValue at createNodes.', key);
+                return { files: new DualKeyMap() };
             }
-            // これがないと、vitrualFolderを開いたときにFolderMapにもvirtualFolderと同じフォルダが追加されてしまう。
-            if (!hasFile) {
-                return [];
-            }
-            const name = $folder.absolutePath[$folder.absolutePath.length - 1] ?? '';
-            return [
-                {
-                    type: folder,
-                    multiKeyMap: $folder,
-                    key: joinPath($folder.absolutePath).string + '@FileBrowser@Folder',
-                    name,
-                    absolutePath: $folder.absolutePath,
-                } as const,
-            ];
-        });
+        );
 
-        const virtualFolderNodes = new MultiKeyMap<string, VirtualFolderNode>();
-        for (const [name, $folder] of this.members.tempVirtualFolders
-            .createSubTree(this.members.currentDirectory, () => undefined)
-            .getChildren()) {
-            if (folderNodes.some(f => arrayEquals(f.absolutePath, $folder.absolutePath))) {
-                continue;
-            }
-
-            const key = $folder.absolutePath.reduce(
-                (seed, elem) => `${seed}/${elem}`,
-                'FileBrowser@VirtualFolder/'
-            );
-
+        const fileNodes = currentFolderMap.get([]).value?.files ?? new DualKeyMap();
+        const folderNodes = new Map<string, Folder>();
+        for (const [name, $folder] of currentFolderMap.getChildren()) {
             const folderPath = [...$folder.absolutePath];
             folderPath.pop();
 
-            virtualFolderNodes.set($folder.absolutePath, {
-                type: virtualFolder,
-                folderPath: folderPath,
-                key,
+            folderNodes.set(name, {
+                type: folder,
+                key: joinPath($folder.absolutePath).string + '@FileBrowser@Folder',
+                folderPath,
                 name,
                 header: undefined,
-            } as const);
+            });
         }
         for (const [name, $folder] of this.members.ensuredVirtualFolders
             .createSubTree(this.members.currentDirectory, () => ({}))
             .getChildren()) {
-            if (folderNodes.some(f => arrayEquals(f.absolutePath, $folder.absolutePath))) {
-                continue;
-            }
-
             const key = $folder.absolutePath.reduce(
                 (seed, elem) => `${seed}/${elem}`,
-                'FileBrowser@VirtualFolder/'
+                'FileBrowser@EnsuredFolder/'
             );
 
             const folderPath = [...$folder.absolutePath];
             folderPath.pop();
 
-            // tempVirtualFolders→ensuredVirtualFolders の順に処理することによって、tempVirtualFoldersとensuredVirtualFoldersで重複しているフォルダは後者が優先されるようにしている。
-            virtualFolderNodes.set($folder.absolutePath, {
-                type: virtualFolder,
+            folderNodes.set(name, {
+                type: folder,
                 folderPath,
                 key,
                 name,
@@ -591,17 +573,16 @@ class PathState {
 
         const nodes: Node[] = [
             ...fileNodes.toArray().map(([, value]) => new Node(value)),
-            ...folderNodes.map(value => new Node(value)),
-            ...[...virtualFolderNodes.traverse()].map(({ value }) => new Node(value)),
+            ...[...folderNodes].map(([, value]) => new Node(value)),
         ];
         nodes.sort((x, y) => {
-            if (x.type === folder || x.type === virtualFolder) {
-                if (y.type === folder || y.type === virtualFolder) {
+            if (x.type === folder) {
+                if (y.type === folder) {
                     return x.name.localeCompare(y.name);
                 }
                 return -1;
             }
-            if (y.type === folder || y.type === virtualFolder) {
+            if (y.type === folder) {
                 return 1;
             }
 
@@ -616,7 +597,7 @@ class PathState {
 
     #setFileSelected(filename: NameIdPair) {
         const newValue = this.members.selectedFiles.clone();
-        newValue.set({ first: filename.name, second: filename.id }, undefined);
+        newValue.set({ first: filename.name, second: filename.id }, null);
         return new PathState({
             ...this.members,
             selectedFiles: newValue,
@@ -630,7 +611,7 @@ class PathState {
         if (oldValue.has(mapKey)) {
             newValue.delete(mapKey);
         } else {
-            newValue.set(mapKey, undefined);
+            newValue.set(mapKey, null);
         }
         return new PathState({ ...this.members, selectedFiles: newValue });
     }
@@ -669,38 +650,19 @@ class PathState {
         });
     }
 
-    addTempVirtualFolder(newValue: TempVirtualFolder) {
-        const tempVirtualFolders = this.members.tempVirtualFolders.clone();
-        tempVirtualFolders.ensure(
-            [...newValue.folderPath, newValue.name],
-            () => undefined,
-            () => undefined
+    createFolder(path: readonly string[]) {
+        const rootFolder = this.members.rootFolder.clone();
+        rootFolder.ensure(
+            path,
+            oldValue => {
+                if (oldValue.isNone) {
+                    return { files: new DualKeyMap() };
+                }
+                return oldValue.value;
+            },
+            () => ({ files: new DualKeyMap() })
         );
-        return new PathState({ ...this.members, tempVirtualFolders });
-    }
-
-    #virtualFoldersCache: DeletableTree<string, Omit<EnsuredVirtualFolderPath, 'path'>> | null =
-        null;
-    get virtualFolders() {
-        if (this.#virtualFoldersCache == null) {
-            const newValue = new DeletableTree<string, Omit<EnsuredVirtualFolderPath, 'path'>>();
-            for (const elem of this.members.tempVirtualFolders.traverse()) {
-                newValue.ensure(
-                    elem.absolutePath,
-                    () => ({}),
-                    () => ({})
-                );
-            }
-            for (const elem of this.members.ensuredVirtualFolders.traverse()) {
-                newValue.ensure(
-                    elem.absolutePath,
-                    () => elem.value,
-                    () => ({})
-                );
-            }
-            this.#virtualFoldersCache = newValue;
-        }
-        return this.#virtualFoldersCache;
+        return new PathState({ ...this.members, rootFolder });
     }
 
     /** 実行すると、FilePathNodeのonSelectやonOpenが実行されることがあります。 */
@@ -713,7 +675,7 @@ class PathState {
             return this.#toggleSelectedFolder(nodeSource.name);
         }
 
-        if (nodeSource.type === folder || nodeSource.type === virtualFolder) {
+        if (nodeSource.type === folder) {
             return this.cd(oldValue => {
                 const newValue = [...oldValue];
                 newValue.push(nodeSource.name);
@@ -761,14 +723,11 @@ class PathState {
         const folders = new MultiValueSet<string>();
         for (const node of nodes) {
             switch (node.source.type) {
-                case virtualFolder:
-                    folders.add(node.path);
-                    continue;
                 case folder:
                     folders.add(node.path);
                     continue;
                 case file:
-                    files.set([...node.source.path, node.id], node.source);
+                    files.set([...node.path, node.id], node.source);
                     continue;
                 default:
                     toBeNever(node.source);
@@ -776,7 +735,7 @@ class PathState {
         }
         return {
             files: [...files.traverse()].map(({ value }) => ({
-                path: value.path,
+                path: new Node(value).path,
                 id: value.id,
             })),
             folders: [...folders.toIterator()].map(path => ({ path })),
@@ -805,7 +764,7 @@ class PathState {
         for (const file of files) {
             const directoryPath = [...file.path];
             const filename = directoryPath.pop();
-            this.members.rootFolder.get(directoryPath)?.files.forEach(elem => {
+            this.members.rootFolder.get(directoryPath).value?.files.forEach(elem => {
                 if (elem.name === filename && elem.id === file.id) {
                     result.add(elem);
                 }
@@ -813,7 +772,15 @@ class PathState {
         }
 
         for (const folder of folders) {
-            for (const { value } of this.members.rootFolder.createSubMap(folder.path).traverse()) {
+            if (this.members.rootFolder.get(folder.path) == null) {
+                continue;
+            }
+            for (const { value } of this.members.rootFolder
+                .createSubTree(folder.path, key => {
+                    console.warn('invoked unexpected initValue at listFiles.', key);
+                    return { files: new DualKeyMap() };
+                })
+                .traverse()) {
                 value.files.forEach(file => result.add(file));
             }
         }
@@ -821,28 +788,11 @@ class PathState {
         return [...result];
     }
 
-    listSelectedTempFolders() {
-        const result: { path: readonly string[] }[] = [];
-        for (const selectedFoldername of this.members.selectedFolders) {
-            const selectedFolderPath = [...this.members.currentDirectory, selectedFoldername];
-            const selectedTempFolder = this.members.tempVirtualFolders.get(selectedFolderPath);
-            if (selectedTempFolder.isNone) {
-                continue;
-            }
-            if (this.members.rootFolder.get(selectedFolderPath) != null) {
-                continue;
-            }
-            result.push({ path: selectedFolderPath });
-        }
-        return result;
-    }
-
     isCut(node: Node) {
         if (!arrayEquals(this.members.cutAt, this.currentDirectory)) {
             return false;
         }
         switch (node.type) {
-            case virtualFolder:
             case folder:
                 return this.members.cutFolders.has(node.name);
             case file:
@@ -900,11 +850,11 @@ class PathState {
             return this;
         }
 
-        const newCutFiles = new DualKeyMap<string, string | undefined, undefined>();
+        const newCutFiles = new DualKeyMap<string, string | undefined, null>();
         const newCutFolders = new Set<string>();
         switch (node.type) {
             case file: {
-                newCutFiles.set({ first: node.name, second: node.id }, undefined);
+                newCutFiles.set({ first: node.name, second: node.id }, null);
                 break;
             }
             default: {
@@ -959,7 +909,7 @@ class PathState {
         return source
             .map(file => ({ status: 'waiting', file } as const))
             .sort((x, y) => {
-                for (const group of groupJoinArray(x.file.path, y.file.path)) {
+                for (const group of groupJoinArray(new Node(x.file).path, new Node(y.file).path)) {
                     switch (group.type) {
                         case left:
                             return 1;
@@ -981,15 +931,24 @@ class PathState {
         return !props.isProtected(node.folderPath);
     }
 
-    requestDeleting(props: Props, node: Node): AskingDeleteStatus | null {
+    requestDeleting(
+        props: Props,
+        node: Node
+    ): AskingDeleteStatus | { type: 'executed'; newState: PathState } | null {
         if (!this.canRequestDeleting(props, node)) {
             return null;
+        }
+        if (node.source.type === folder) {
+            const newState = this.deleteFolderIfEmpty(node.path);
+            if (newState != null) {
+                return { type: 'executed', newState };
+            }
         }
         const source = this.listFiles(this.toPathList([node]));
         return {
             type: 'asking',
             files: this.#requestDeleting(source),
-            tempVirtualFolders: node.type === virtualFolder ? [{ path: node.path }] : [],
+            folders: node.type === folder ? [{ path: node.path }] : [],
         };
     }
 
@@ -1006,7 +965,7 @@ class PathState {
         return {
             type: 'asking',
             files,
-            tempVirtualFolders: this.selectedPaths.folders,
+            folders: this.selectedPaths.folders,
         };
     }
 
@@ -1034,7 +993,7 @@ class PathState {
                 status: 'waiting',
                 file,
                 newPath: movePath({
-                    nodePath: file.path,
+                    nodePath: new Node(file).path,
                     cutAt: this.members.cutAt,
                     destFolderPath,
                 }),
@@ -1043,7 +1002,7 @@ class PathState {
         return {
             type: 'asking',
             files,
-            tempVirtualFolders: [...this.members.cutFolders].map(foldername => {
+            folders: [...this.members.cutFolders].map(foldername => {
                 const currentPath = [...this.members.cutAt, foldername];
                 return {
                     currentPath,
@@ -1075,9 +1034,11 @@ class PathState {
             return null;
         }
         const destPath = [...node.folderPath, newName];
-        if (node.source.type === virtualFolder) {
-            const newState = this.renameTempVirtualFolderRecursively(node.path, destPath);
-            return { type: 'executed', newState };
+        if (node.source.type === folder) {
+            const newState = this.renameFolderIfEmpty(node.path, destPath);
+            if (newState != null) {
+                return { type: 'executed', newState };
+            }
         }
         const files: FileToRename[] = this.listFiles(this.toPathList([node])).map(file => ({
             status: 'waiting',
@@ -1088,8 +1049,8 @@ class PathState {
             type: 'asking',
             files,
 
-            // この関数を実行した際、tempVirtualFolderは全てリネーム済みのため、[]を渡している。
-            tempVirtualFolders: [],
+            // この関数を実行した際、空のフォルダであれば全てリネーム済みのため、[]を渡している。
+            folders: [],
         };
     }
 }
@@ -1100,6 +1061,10 @@ const deleteStatusAtom = atom<DeleteStatus>({ type: 'none' });
 const renameStatusAtom = atom<RenameStatus>({ type: 'none' });
 const fileTypeFilterAtom = atom<string | null>(null);
 const fileNameFilterAtom = atom<string>('');
+
+/** ここにセットされたフォルダは、次回のrootFolder更新時にフォルダが空であれば削除されます。 */
+// Props.onRenameやProps.onDeleteの実行後にセットされる。このときにpathStateから直接空のフォルダを削除しようとしても、取得できるpathStateはProps.onRenameやProps.onDeleteの結果がまだ反映されていない状態であるため、削除する場合はフォルダが空かどうかに関わらず削除することになる。これはProps.onRenameやProps.onDeleteでProps.filesの更新が行われるならば空でないフォルダは自動的に修復されるが、そうでないときは削除されたままとなるため、混乱が生じる可能性がある。そこで、削除をリクエストするフォルダをここにためておいて、次のrootFolder更新時で空のフォルダのみ削除するという方針をとっている。
+const foldersDeletingOnNextRootFolderUpdateAtom = atom<readonly { path: readonly string[] }[]>([]);
 
 const isDeleteConfirmModalVisibleAtom = atom(false);
 const isRenameConfirmModalVisibleAtom = atom(false);
@@ -1178,7 +1143,7 @@ const useRequestDeletingSelectedNodesAction = () => {
 const useRequestDeletingNodeAction = () => {
     const props = useAtomValue(propsAtom);
     const setAsAsking = useTrySetDeleteStatusAsAsking();
-    const pathState = useAtomValue(pathStateAtom);
+    const [pathState, setPathState] = useAtom(pathStateAtom);
 
     const canExecute = React.useCallback(
         (node: Node) => {
@@ -1193,9 +1158,13 @@ const useRequestDeletingNodeAction = () => {
             if (newStatus == null) {
                 return;
             }
+            if (newStatus.type === 'executed') {
+                setPathState(newStatus.newState);
+                return;
+            }
             setAsAsking(newStatus);
         },
-        [pathState, props, setAsAsking]
+        [pathState, props, setAsAsking, setPathState]
     );
 
     return React.useMemo(
@@ -1236,7 +1205,7 @@ const useRequestPastingAction = () => {
 
     const canExecute = React.useCallback(
         (
-            /** 貼り付け先のフォルダを指定できます。指定せず、current directoryに貼り付ける場合はnullを渡します。virtual folderにも対応しています。 */
+            /** 貼り付け先のフォルダを指定できます。指定せず、current directoryに貼り付ける場合はnullを渡します。 */
             targetFolder: string | null
         ) => {
             const destPath =
@@ -1250,7 +1219,7 @@ const useRequestPastingAction = () => {
 
     const execute = React.useCallback(
         (
-            /** 貼り付け先のフォルダを指定できます。指定せず、current directoryに貼り付ける場合はnullを渡します。virtual folderにも対応しています。 */
+            /** 貼り付け先のフォルダを指定できます。指定せず、current directoryに貼り付ける場合はnullを渡します。 */
             targetFolder: string | null
         ) => {
             const destPath =
@@ -1411,7 +1380,7 @@ const FilesToDeleteTable: React.FC<{
                             <Icons.WarningOutlined />
                         ) : null}
                     </div>
-                    <div>{joinPath(item.file.path).string}</div>
+                    <div>{joinPath(new Node(item.file).path).string}</div>
                 </div>
             ))}
         </div>
@@ -1433,9 +1402,9 @@ const DeleteConfirmModal: React.FC = () => {
         case 'asking':
             {
                 if (deleteStatus.files.length === 0) {
-                    message = '削除するファイルやフォルダが見つかりませんでした。';
+                    message = '選択した空のフォルダを削除しますか？';
                 } else {
-                    message = `次の${deleteStatus.files.length}個のファイルを削除しますか？(空のフォルダはリストに表示されませんが、あわせて削除されます)`;
+                    message = `次の${deleteStatus.files.length}個のファイルを削除しますか？(空のフォルダは一覧に表示されていませんが、あわせて削除されます)`;
                 }
             }
             break;
@@ -1470,9 +1439,9 @@ const DeleteConfirmModal: React.FC = () => {
                         if (deleteStatus.type === 'asking') {
                             setPathState(pathState => {
                                 let newPathState = pathState;
-                                for (const { path } of deleteStatus.tempVirtualFolders) {
+                                for (const { path } of deleteStatus.folders) {
                                     newPathState =
-                                        pathState.deleteTempVirtualFolderRecursively(path);
+                                        newPathState.deleteFolderIfEmpty(path) ?? newPathState;
                                 }
                                 return newPathState;
                             });
@@ -1481,6 +1450,7 @@ const DeleteConfirmModal: React.FC = () => {
                             return {
                                 type: 'deleting',
                                 files: deleteStatus.files,
+                                folders: deleteStatus.folders,
                             };
                         });
                     }}
@@ -1494,7 +1464,11 @@ const DeleteConfirmModal: React.FC = () => {
                 <Button
                     style={buttonStyle}
                     onClick={() => {
-                        setDeleteStatus(() => ({ type: 'aborted', files: deleteStatus.files }));
+                        setDeleteStatus(() => ({
+                            type: 'aborted',
+                            files: deleteStatus.files,
+                            folders: deleteStatus.folders,
+                        }));
                     }}
                 >
                     キャンセル
@@ -1553,7 +1527,8 @@ const FilesToRenameTable: React.FC<{
                         ) : null}
                     </div>
                     <div>
-                        {joinPath(item.file.path).string} → {joinPath(item.newPath).string}
+                        {joinPath(new Node(item.file).path).string} →{' '}
+                        {joinPath(item.newPath).string}
                     </div>
                 </div>
             ))}
@@ -1578,7 +1553,7 @@ const RenameConfirmModal: React.FC = () => {
                 if (renameStatus.files.length === 0) {
                     message = '選択した空のフォルダを移動もしくはリネームしますか？';
                 } else {
-                    message = `次の${renameStatus.files.length}個のファイルを移動もしくはリネームしますか？（空のフォルダは表示されませんが、あわせて移動もしくはリネームされます）`;
+                    message = `次の${renameStatus.files.length}個のファイルを移動もしくはリネームしますか？（空のフォルダは一覧に表示されていませんが、あわせて移動もしくはリネームされます）`;
                 }
             }
             break;
@@ -1612,14 +1587,10 @@ const RenameConfirmModal: React.FC = () => {
                         if (renameStatus.type === 'asking') {
                             setPathState(pathState => {
                                 let newPathState = pathState;
-                                for (const {
-                                    currentPath,
-                                    newPath,
-                                } of renameStatus.tempVirtualFolders) {
-                                    newPathState = pathState.renameTempVirtualFolderRecursively(
-                                        currentPath,
-                                        newPath
-                                    );
+                                for (const { currentPath, newPath } of renameStatus.folders) {
+                                    newPathState =
+                                        newPathState.renameFolderIfEmpty(currentPath, newPath) ??
+                                        newPathState;
                                 }
                                 return newPathState;
                             });
@@ -1628,6 +1599,7 @@ const RenameConfirmModal: React.FC = () => {
                             return {
                                 type: 'renaming',
                                 files: renameStatus.files,
+                                folders: renameStatus.folders,
                             };
                         });
                     }}
@@ -1641,7 +1613,11 @@ const RenameConfirmModal: React.FC = () => {
                 <Button
                     style={buttonStyle}
                     onClick={() => {
-                        setRenameStatus(() => ({ type: 'aborted', files: renameStatus.files }));
+                        setRenameStatus(() => ({
+                            type: 'aborted',
+                            files: renameStatus.files,
+                            folders: renameStatus.folders,
+                        }));
                     }}
                 >
                     キャンセル
@@ -1753,11 +1729,7 @@ const CreateFolderModal: React.FC = () => {
             return;
         }
         setPathState(pathState =>
-            pathState.addTempVirtualFolder({
-                type: virtualFolder,
-                folderPath: pathState.currentDirectory,
-                name: foldername,
-            })
+            pathState.createFolder([...pathState.currentDirectory, foldername])
         );
         setFoldername('');
         setVisible(false);
@@ -1907,18 +1879,14 @@ const ContextMenu: React.FC<{
                 label: '選択',
                 onClick: () => setPathState(pathState.select(props, node)),
             },
-            node.source.type === folder ||
-            node.source.type === virtualFolder ||
-            node.source.onOpen == null
+            node.source.type === folder || node.source.onOpen == null
                 ? null
                 : {
                       key: createMenuKey('開く'),
                       label: '開く',
                       onClick: node.source.onOpen,
                   },
-            node.source.type === folder ||
-            node.source.type === virtualFolder ||
-            node.source.onClipboard == null
+            node.source.type === folder || node.source.onClipboard == null
                 ? null
                 : {
                       key: createMenuKey('コマンドに使用するリンクとしてクリップボードにコピー'),
@@ -2003,8 +1971,7 @@ const NodeView: React.FC<{
     const opacity = isCut ? 0.5 : undefined;
     let fileElement: React.ReactNode;
     switch (node.source.type) {
-        case folder:
-        case virtualFolder: {
+        case folder: {
             fileElement = (
                 <CellFile opacity={opacity}>
                     <Icons.FolderOutlined style={{ fontSize: size }} />
@@ -2194,10 +2161,15 @@ const useStartAutoDeleteFiles = () => {
     const onDelete = useAtomSelector(propsAtom, props => props?.onDelete);
     const onDeleteRef = useLatest(onDelete);
     const [deleteStatus, setDeleteStatus] = useAtom(deleteStatusAtom);
+    const deleteStatusRef = useLatest(deleteStatus);
     const [isDeleting, setIsDeleting] = React.useState(false);
     const [hasDeleted, setHasDeleted] = React.useState(false);
     const deleteStatusValue = deleteStatus.type === 'none' ? undefined : deleteStatus.files;
     const deleteStatusValueRef = useLatest(deleteStatusValue);
+    const setPathState = useSetAtom(pathStateAtom);
+    const foldersDeletingOnNextRootFolderUpdate = useSetAtom(
+        foldersDeletingOnNextRootFolderUpdateAtom
+    );
 
     React.useEffect(() => {
         if (isDeleting) {
@@ -2215,6 +2187,7 @@ const useStartAutoDeleteFiles = () => {
                 return {
                     type: 'finished',
                     files: oldValue.type === 'none' ? [] : oldValue.files,
+                    folders: oldValue.type === 'none' ? [] : oldValue.folders,
                 };
             });
             notification.info({
@@ -2224,10 +2197,16 @@ const useStartAutoDeleteFiles = () => {
             onDeleteRef.current &&
                 onDeleteRef.current(
                     deleteStatusValueRef.current?.map(file => ({
-                        path: file.file.path,
+                        path: new Node(file.file).path,
                         id: file.file.id,
                     })) ?? []
                 );
+            foldersDeletingOnNextRootFolderUpdate(oldState => {
+                if (deleteStatusRef.current.type === 'none') {
+                    return oldState;
+                }
+                return [...oldState, ...deleteStatusRef.current.folders];
+            });
             return;
         }
 
@@ -2266,7 +2245,7 @@ const useStartAutoDeleteFiles = () => {
                 notification.error({
                     placement: 'bottomRight',
                     message: 'ファイルの削除に失敗しました。',
-                    description: joinPath(fileToDelete.file.path).string,
+                    description: joinPath(new Node(fileToDelete.file).path).string,
                 });
                 console.error('ファイルの削除に失敗しました。', e);
                 setFileStatus(fileToDelete, 'error');
@@ -2274,11 +2253,14 @@ const useStartAutoDeleteFiles = () => {
             });
     }, [
         deleteStatus.type,
+        deleteStatusRef,
         deleteStatusValueRef,
         hasDeleted,
         isDeleting,
         onDeleteRef,
         setDeleteStatus,
+        foldersDeletingOnNextRootFolderUpdate,
+        setPathState,
     ]);
 };
 
@@ -2286,11 +2268,15 @@ const useStartAutoRenameFiles = () => {
     const onRename = useAtomSelector(propsAtom, props => props?.onRename);
     const onRenameRef = useLatest(onRename);
     const [renameStatus, setRenameStatus] = useAtom(renameStatusAtom);
+    const renameStatusRef = useLatest(renameStatus);
     const [isRenaming, setIsRenaming] = React.useState(false);
     const [hasRenamed, setHasRenamed] = React.useState(false);
     const renameStatusValue = renameStatus.type === 'none' ? undefined : renameStatus.files;
     const renameStatusValueRef = useLatest(renameStatusValue);
     const setPathState = useSetAtom(pathStateAtom);
+    const setDeletingFoldersOnNextRootFolderUpdate = useSetAtom(
+        foldersDeletingOnNextRootFolderUpdateAtom
+    );
 
     React.useEffect(() => {
         if (isRenaming) {
@@ -2302,27 +2288,40 @@ const useStartAutoRenameFiles = () => {
             }
             return;
         }
-        const fileToDelete = renameStatusValueRef.current?.find(file => file.status === 'waiting');
-        if (fileToDelete == null) {
+        const fileToRename = renameStatusValueRef.current?.find(file => file.status === 'waiting');
+        if (fileToRename == null) {
             setRenameStatus(oldValue => {
                 return {
                     type: 'finished',
                     files: oldValue.type === 'none' ? [] : oldValue.files,
+                    folders: oldValue.type === 'none' ? [] : oldValue.folders,
                 };
             });
             notification.info({
                 placement: 'bottomRight',
                 message: 'ファイルの移動もしくはリネームが完了しました。',
             });
+
             onRenameRef.current &&
                 onRenameRef.current(
                     renameStatusValueRef.current?.map(file => ({
                         id: file.file.id,
-                        oldPath: file.file.path,
+                        oldPath: new Node(file.file).path,
                         currentPath: file.newPath,
                     })) ?? []
                 );
-            setPathState(pathState => pathState.resetCutState());
+            setPathState(pathState => {
+                return pathState.resetCutState();
+            });
+            setDeletingFoldersOnNextRootFolderUpdate(oldState => {
+                if (renameStatusRef.current.type === 'none') {
+                    return oldState;
+                }
+                return [
+                    ...oldState,
+                    ...renameStatusRef.current.folders.map(x => ({ path: x.currentPath })),
+                ];
+            });
             return;
         }
 
@@ -2344,19 +2343,19 @@ const useStartAutoRenameFiles = () => {
         };
 
         setIsRenaming(true);
-        setFileStatus(fileToDelete, 'renaming');
+        setFileStatus(fileToRename, 'renaming');
         const onRename = () => {
-            if (fileToDelete.file.onMoveOrRename == null) {
+            if (fileToRename.file.onMoveOrRename == null) {
                 return Promise.resolve(undefined);
             }
-            return fileToDelete.file.onMoveOrRename({
-                currentPath: fileToDelete.file.path,
-                newPath: fileToDelete.newPath,
+            return fileToRename.file.onMoveOrRename({
+                currentPath: new Node(fileToRename.file).path,
+                newPath: fileToRename.newPath,
             });
         };
         onRename()
             .then(() => {
-                setFileStatus(fileToDelete, 'renamed');
+                setFileStatus(fileToRename, 'renamed');
                 setHasRenamed(true);
                 setIsRenaming(false);
             })
@@ -2364,10 +2363,10 @@ const useStartAutoRenameFiles = () => {
                 notification.error({
                     placement: 'bottomRight',
                     message: 'ファイルのリネームに失敗しました。',
-                    description: joinPath(fileToDelete.file.path).string,
+                    description: joinPath(new Node(fileToRename.file).path).string,
                 });
                 console.error('ファイルのリネームに失敗しました。', e);
-                setFileStatus(fileToDelete, 'error');
+                setFileStatus(fileToRename, 'error');
                 setIsRenaming(false);
             });
     }, [
@@ -2378,12 +2377,21 @@ const useStartAutoRenameFiles = () => {
         onRenameRef,
         setRenameStatus,
         setPathState,
+        renameStatusRef,
+        setDeletingFoldersOnNextRootFolderUpdate,
     ]);
 };
 
 const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
     useStartAutoDeleteFiles();
     useStartAutoRenameFiles();
+
+    const foldersDeletingOnNextRootFolderUpdate = useAtomValue(
+        foldersDeletingOnNextRootFolderUpdateAtom
+    );
+    const foldersDeletingOnNextRootFolderUpdateRef = useLatest(
+        foldersDeletingOnNextRootFolderUpdate
+    );
 
     const setProps = useSetAtom(propsAtom);
     React.useEffect(() => {
@@ -2406,8 +2414,14 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
     }, [setPathState, ...props.ensuredVirtualFolderPaths]);
 
     React.useEffect(() => {
-        setPathState(pathState => pathState.updateRootFolder(props.files));
-    }, [props.files, setPathState]);
+        setPathState(pathState => {
+            let newPathState = pathState.updateRootFolder(props.files);
+            for (const folder of foldersDeletingOnNextRootFolderUpdateRef.current) {
+                newPathState = newPathState.deleteFolderIfEmpty(folder.path) ?? newPathState;
+            }
+            return newPathState;
+        });
+    }, [foldersDeletingOnNextRootFolderUpdateRef, props.files, setPathState]);
 
     return (
         <div
