@@ -424,18 +424,16 @@ class PathState {
         currentPath: readonly string[],
         newPath: readonly string[]
     ): PathState | null {
-        if (this.members.rootFolder.get(currentPath).isNone) {
+        const subtree = this.members.rootFolder.createSubTreeIfExists(currentPath)?.traverse();
+        if (subtree == null) {
             return null;
         }
-
         const newValue = this.members.rootFolder.clone();
-        const subtree = this.members.rootFolder
-            .createSubTree(currentPath, () => ({ files: new DualKeyMap() }))
-            .traverse();
         for (const { value, absolutePath } of subtree) {
             if (value.files.size !== 0) {
                 return null;
             }
+            newValue.delete(absolutePath);
             newValue.ensure(
                 movePath({ nodePath: absolutePath, cutAt: currentPath, destFolderPath: newPath }),
                 oldValue => {
@@ -526,16 +524,12 @@ class PathState {
     }
 
     createNodes() {
-        if (!this.members.rootFolder.get(this.members.currentDirectory)) {
+        const currentFolderMap = this.members.rootFolder.createSubTreeIfExists(
+            this.members.currentDirectory
+        );
+        if (currentFolderMap == null) {
             return [];
         }
-        const currentFolderMap: FolderTree = this.members.rootFolder.createSubTree(
-            this.members.currentDirectory,
-            key => {
-                console.warn('invoked unexpected initValue at createNodes.', key);
-                return { files: new DualKeyMap() };
-            }
-        );
 
         const fileNodes = currentFolderMap.get([]).value?.files ?? new DualKeyMap();
         const folderNodes = new Map<string, Folder>();
@@ -552,8 +546,8 @@ class PathState {
             });
         }
         for (const [name, $folder] of this.members.ensuredVirtualFolders
-            .createSubTree(this.members.currentDirectory, () => ({}))
-            .getChildren()) {
+            .createSubTreeIfExists(this.members.currentDirectory)
+            ?.getChildren() ?? []) {
             const key = $folder.absolutePath.reduce(
                 (seed, elem) => `${seed}/${elem}`,
                 'FileBrowser@EnsuredFolder/'
@@ -592,7 +586,8 @@ class PathState {
     }
 
     tryGetEnsuredVirtualFolder(path: readonly string[]) {
-        return this.members.ensuredVirtualFolders.get(path);
+        const result = this.members.ensuredVirtualFolders.get(path);
+        return result;
     }
 
     #setFileSelected(filename: NameIdPair) {
@@ -772,15 +767,9 @@ class PathState {
         }
 
         for (const folder of folders) {
-            if (this.members.rootFolder.get(folder.path) == null) {
-                continue;
-            }
             for (const { value } of this.members.rootFolder
-                .createSubTree(folder.path, key => {
-                    console.warn('invoked unexpected initValue at listFiles.', key);
-                    return { files: new DualKeyMap() };
-                })
-                .traverse()) {
+                .createSubTreeIfExists(folder.path)
+                ?.traverse() ?? []) {
                 value.files.forEach(file => result.add(file));
             }
         }
@@ -931,18 +920,9 @@ class PathState {
         return !props.isProtected(node.folderPath);
     }
 
-    requestDeleting(
-        props: Props,
-        node: Node
-    ): AskingDeleteStatus | { type: 'executed'; newState: PathState } | null {
+    requestDeleting(props: Props, node: Node): AskingDeleteStatus | null {
         if (!this.canRequestDeleting(props, node)) {
             return null;
-        }
-        if (node.source.type === folder) {
-            const newState = this.deleteFolderIfEmpty(node.path);
-            if (newState != null) {
-                return { type: 'executed', newState };
-            }
         }
         const source = this.listFiles(this.toPathList([node]));
         return {
@@ -1025,32 +1005,24 @@ class PathState {
         });
     }
 
-    requestRenaming(
-        props: Props,
-        node: Node,
-        newName: string
-    ): AskingRenameStatus | { type: 'executed'; newState: PathState } | null {
+    requestRenaming(props: Props, node: Node, newName: string): AskingRenameStatus | null {
         if (!this.canRequestRenaming(props, node, newName)) {
             return null;
         }
         const destPath = [...node.folderPath, newName];
-        if (node.source.type === folder) {
-            const newState = this.renameFolderIfEmpty(node.path, destPath);
-            if (newState != null) {
-                return { type: 'executed', newState };
-            }
-        }
         const files: FileToRename[] = this.listFiles(this.toPathList([node])).map(file => ({
             status: 'waiting',
             file,
-            newPath: destPath,
+            newPath: movePath({
+                nodePath: new Node(file).path,
+                cutAt: node.path,
+                destFolderPath: destPath,
+            }),
         }));
         return {
             type: 'asking',
             files,
-
-            // この関数を実行した際、空のフォルダであれば全てリネーム済みのため、[]を渡している。
-            folders: [],
+            folders: node.type === folder ? [{ currentPath: node.path, newPath: destPath }] : [],
         };
     }
 }
@@ -1143,7 +1115,7 @@ const useRequestDeletingSelectedNodesAction = () => {
 const useRequestDeletingNodeAction = () => {
     const props = useAtomValue(propsAtom);
     const setAsAsking = useTrySetDeleteStatusAsAsking();
-    const [pathState, setPathState] = useAtom(pathStateAtom);
+    const pathState = useAtomValue(pathStateAtom);
 
     const canExecute = React.useCallback(
         (node: Node) => {
@@ -1158,13 +1130,9 @@ const useRequestDeletingNodeAction = () => {
             if (newStatus == null) {
                 return;
             }
-            if (newStatus.type === 'executed') {
-                setPathState(newStatus.newState);
-                return;
-            }
             setAsAsking(newStatus);
         },
-        [pathState, props, setAsAsking, setPathState]
+        [pathState, props, setAsAsking]
     );
 
     return React.useMemo(
@@ -1262,10 +1230,6 @@ const useRequestRenamingAction = () => {
             const newStatus = pathState.requestRenaming(props, node, newName);
             setPathState(pathState => pathState.unselect());
             if (newStatus == null) {
-                return;
-            }
-            if (newStatus.type === 'executed') {
-                setPathState(newStatus.newState);
                 return;
             }
             setAsAsking(newStatus);
@@ -1434,7 +1398,6 @@ const DeleteConfirmModal: React.FC = () => {
                     style={buttonStyle}
                     type='primary'
                     danger
-                    disabled={deleteStatus.files.length === 0}
                     onClick={() => {
                         if (deleteStatus.type === 'asking') {
                             setPathState(pathState => {
@@ -1582,7 +1545,6 @@ const RenameConfirmModal: React.FC = () => {
                 <Button
                     style={buttonStyle}
                     type='primary'
-                    disabled={renameStatus.files.length === 0}
                     onClick={() => {
                         if (renameStatus.type === 'asking') {
                             setPathState(pathState => {
@@ -2389,9 +2351,6 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
     const foldersDeletingOnNextRootFolderUpdate = useAtomValue(
         foldersDeletingOnNextRootFolderUpdateAtom
     );
-    const foldersDeletingOnNextRootFolderUpdateRef = useLatest(
-        foldersDeletingOnNextRootFolderUpdate
-    );
 
     const setProps = useSetAtom(propsAtom);
     React.useEffect(() => {
@@ -2416,12 +2375,12 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
     React.useEffect(() => {
         setPathState(pathState => {
             let newPathState = pathState.updateRootFolder(props.files);
-            for (const folder of foldersDeletingOnNextRootFolderUpdateRef.current) {
+            for (const folder of foldersDeletingOnNextRootFolderUpdate) {
                 newPathState = newPathState.deleteFolderIfEmpty(folder.path) ?? newPathState;
             }
             return newPathState;
         });
-    }, [foldersDeletingOnNextRootFolderUpdateRef, props.files, setPathState]);
+    }, [foldersDeletingOnNextRootFolderUpdate, props.files, setPathState]);
 
     return (
         <div

@@ -32,6 +32,15 @@ export class DeletableTree<TKey, TValue> {
         return result;
     }
 
+    public createSubTreeIfExists(key: readonly TKey[]) {
+        if (this.get(key).isNone) {
+            return null;
+        }
+        return this.createSubTree(key, () => {
+            throw new Error('this should not happen');
+        });
+    }
+
     /** 直接の子の要素を全て取得します。 */
     public getChildren() {
         const result = new Map<TKey, DeletableTree<TKey, TValue>>();
