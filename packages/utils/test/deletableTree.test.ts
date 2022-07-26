@@ -263,4 +263,31 @@ describe('DeletableTree', () => {
             ].sort(sortByAbsolutePath)
         );
     });
+
+    it('tests delete', () => {
+        const source = new DeletableTree<string, number>(Option.some(0));
+        source.ensure(
+            ['1'],
+            () => 1,
+            () => -1
+        );
+        source.ensure(
+            ['1', '2'],
+            () => 12,
+            () => -1
+        );
+        source.ensure(
+            ['2'],
+            () => 2,
+            () => -1
+        );
+        source.delete(['1']);
+
+        expect([...source.traverse()].sort(sortByAbsolutePath)).toEqual(
+            [
+                { absolutePath: [], value: 0 },
+                { absolutePath: ['2'], value: 2 },
+            ].sort(sortByAbsolutePath)
+        );
+    });
 });
