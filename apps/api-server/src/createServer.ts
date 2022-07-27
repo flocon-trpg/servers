@@ -341,6 +341,10 @@ export const createServer = async ({
             }
 
             const filename = sanitize(req.params.file_name);
+            if (filename !== req.params.file_name) {
+                res.status(400).send('file_name is invalid');
+                return;
+            }
 
             let filepath: string;
             if (typeParam === 'files') {
