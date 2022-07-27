@@ -94,24 +94,21 @@ export class MainResolver {
                     },
                 } as const)
         );
-        const files = await context.em.find(
-            File,
-            {
-                $and: [
-                    ...fileTagsFilter,
-                    {
-                        $or: [
-                            { listPermission: FilePermissionType.Entry },
-                            { createdBy: { userUid: user.userUid } },
-                        ],
-                    },
-                ],
-            },
-            { orderBy: { screenname: QueryOrder.ASC } }
-        );
+        const files = await context.em.find(File, {
+            $and: [
+                ...fileTagsFilter,
+                {
+                    $or: [
+                        { listPermission: FilePermissionType.Entry },
+                        { createdBy: { userUid: user.userUid } },
+                    ],
+                },
+            ],
+        });
         return {
             files: files.map(file => ({
                 ...file,
+                screenname: file.screenname ?? 'null',
                 createdBy: file.createdBy.userUid,
                 createdAt: file.createdAt?.getTime(),
                 listType:

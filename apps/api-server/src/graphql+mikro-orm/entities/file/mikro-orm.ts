@@ -7,6 +7,7 @@ import {
     ManyToOne,
     PrimaryKey,
     Property,
+    TextType,
 } from '@mikro-orm/core';
 import { FilePermissionType } from '../../../enums/FilePermissionType';
 import { FileTag } from '../fileTag/mikro-orm';
@@ -57,10 +58,10 @@ export class File {
     @PrimaryKey()
     public filename: string;
 
-    // ユーザーに表示するファイル名。変更（リネーム）可能。
-    @Property()
-    @Index()
-    public screenname: string;
+    // ユーザーに表示するファイル名。変更（リネーム）可能。フォルダに入れることも可能で、その場合は / でパスの区切りを表す。
+    // MySQLではtextにdefault値を設定できないのでnullable: trueにしているが、通常はnullishになることはない。
+    @Property({ nullable: true, type: TextType })
+    public screenname?: string;
 
     @Property({ type: Date, nullable: true, onCreate: () => new Date() })
     @Index()
