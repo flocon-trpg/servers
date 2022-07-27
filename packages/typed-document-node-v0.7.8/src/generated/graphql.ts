@@ -342,14 +342,18 @@ export type MakeMessageNotSecretResult = {
 export type Mutation = {
     __typename?: 'Mutation';
     changeParticipantName: ChangeParticipantNameResult;
+    /** @deprecated Use screenname to group files by folders instead. */
     createFileTag?: Maybe<FileTag>;
     createRoom: CreateRoomResult;
+    /** @deprecated Use screenname to group files by folders instead. */
     deleteFileTag: Scalars['Boolean'];
+    /** since v0.7.8 */
     deleteFiles: Array<Scalars['String']>;
     deleteMessage: DeleteMessageResult;
     deleteRoom: DeleteRoomResult;
     /** since v0.7.2 */
     deleteRoomAsAdmin: DeleteRoomAsAdminResult;
+    /** @deprecated Use screenname to group files by folders instead. */
     editFileTags: Scalars['Boolean'];
     editMessage: EditMessageResult;
     entryToServer: EntryToServerResult;
@@ -361,6 +365,7 @@ export type Mutation = {
     /** for test */
     ping: Pong;
     promoteToPlayer: PromoteResult;
+    renameFiles: Array<Scalars['String']>;
     resetMessages: ResetRoomMessagesResult;
     updateBookmark: UpdateBookmarkResult;
     updateWritingMessageStatus: Scalars['Boolean'];
@@ -452,6 +457,10 @@ export type MutationPingArgs = {
 export type MutationPromoteToPlayerArgs = {
     password?: InputMaybe<Scalars['String']>;
     roomId: Scalars['String'];
+};
+
+export type MutationRenameFilesArgs = {
+    input: Array<RenameFileInput>;
 };
 
 export type MutationResetMessagesArgs = {
@@ -623,6 +632,11 @@ export type QueryGetRoomAsListItemArgs = {
 
 export type QueryGetRoomConnectionsArgs = {
     roomId: Scalars['String'];
+};
+
+export type RenameFileInput = {
+    filename: Scalars['String'];
+    newScreenname: Scalars['String'];
 };
 
 export enum ResetRoomMessagesFailureType {
@@ -2012,6 +2026,12 @@ export type PromoteToPlayerMutation = {
     __typename?: 'Mutation';
     result: { __typename?: 'PromoteResult'; failureType?: PromoteFailureType | null };
 };
+
+export type RenameFilesMutationVariables = Exact<{
+    input: Array<RenameFileInput> | RenameFileInput;
+}>;
+
+export type RenameFilesMutation = { __typename?: 'Mutation'; result: Array<string> };
 
 export type ResetMessagesMutationVariables = Exact<{
     roomId: Scalars['String'];
@@ -5132,6 +5152,52 @@ export const PromoteToPlayerDocument = {
         },
     ],
 } as unknown as DocumentNode<PromoteToPlayerMutation, PromoteToPlayerMutationVariables>;
+export const RenameFilesDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'RenameFiles' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'ListType',
+                            type: {
+                                kind: 'NonNullType',
+                                type: {
+                                    kind: 'NamedType',
+                                    name: { kind: 'Name', value: 'RenameFileInput' },
+                                },
+                            },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        alias: { kind: 'Name', value: 'result' },
+                        name: { kind: 'Name', value: 'renameFiles' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'input' },
+                                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
+                            },
+                        ],
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<RenameFilesMutation, RenameFilesMutationVariables>;
 export const ResetMessagesDocument = {
     kind: 'Document',
     definitions: [

@@ -530,6 +530,10 @@ mutation PromoteToPlayer($roomId: String!, $password: String) {
     }
 }
 
+mutation RenameFiles($input: [RenameFileInput!]!) {
+    result: renameFiles(input: $input)
+}
+
 mutation ResetMessages($roomId: String!) {
     result: resetMessages(roomId: $roomId) {
         failureType

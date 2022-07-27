@@ -9,6 +9,15 @@ export class GetFilesInput {
     public fileTagIds!: string[];
 }
 
+@InputType()
+export class RenameFileInput {
+    @Field()
+    public filename!: string;
+
+    @Field()
+    public newScreenname!: string;
+}
+
 // addとremoveは、fileTagのidを指定することでそのタグが追加/削除される。
 @InputType()
 export class EditFileTagActionInput {
