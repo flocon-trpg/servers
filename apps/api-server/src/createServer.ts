@@ -31,6 +31,10 @@ import { EMBUPLOADER_PATH } from './env';
 import { Html } from './html/Html';
 import { parse } from 'graphql';
 
+const set401Status = (res: express.Response) => {
+    return res.status(401).setHeader('WWW-Authenticate', 'Bearer');
+};
+
 const isRoomEventSubscription = (query: string) => {
     const parsedQuery = parse(query);
     return parsedQuery.definitions.some(t => {
@@ -191,7 +195,7 @@ export const createServer = async ({
             async (req, res, next) => {
                 const decodedIdToken = await getDecodedIdTokenFromExpressRequest(req);
                 if (decodedIdToken == null || decodedIdToken.isError) {
-                    res.status(403).send('Invalid Authorization header');
+                    set401Status(res).send('Invalid Authorization header');
                     return;
                 }
 
@@ -210,7 +214,7 @@ export const createServer = async ({
                     serverConfig,
                 });
                 if (user == null) {
-                    res.status(403).send('Requires entry');
+                    set401Status(res).send('Requires entry');
                     return;
                 }
                 res.locals.user = user;
@@ -323,7 +327,7 @@ export const createServer = async ({
 
             const decodedIdToken = await getDecodedIdTokenFromExpressRequest(req);
             if (decodedIdToken == null || decodedIdToken.isError) {
-                res.status(403).send('Invalid Authorization header');
+                set401Status(res).send('Invalid Authorization header');
                 return;
             }
 
@@ -336,7 +340,7 @@ export const createServer = async ({
             const forkedEm = em.fork();
             const user = await forkedEm.findOne(User, { userUid: decodedIdToken.value.uid });
             if (user?.isEntry !== true) {
-                res.status(403).send('Requires entry');
+                set401Status(res).send('Requires entry');
                 return;
             }
 
