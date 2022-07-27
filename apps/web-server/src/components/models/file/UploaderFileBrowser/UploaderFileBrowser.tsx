@@ -5,6 +5,7 @@ import {
     FileListType,
     GetFilesDocument,
     GetServerInfoDocument,
+    RenameFilesDocument,
 } from '@flocon-trpg/typed-document-node-v0.7.8';
 import { useMutation, useQuery } from 'urql';
 import { useAtomValue } from 'jotai';
@@ -130,6 +131,7 @@ const useFloconUploaderFiles = (onSelect: OnSelect | null, pause: boolean) => {
         pause,
     });
     const [, deleteFilesMutation] = useMutation(DeleteFilesDocument);
+    const [, renameFilesMutation] = useMutation(RenameFilesDocument);
     const data = getFilesQueryResult.data?.result;
     const { open } = useOpenFloconUploaderFile();
     const onSelectRef = useLatest(onSelect);
@@ -180,14 +182,20 @@ const useFloconUploaderFiles = (onSelect: OnSelect | null, pause: boolean) => {
                         });
                     });
                 },
-                onMoveOrRename: async () => {
-                    // TODO: 実装する
-                    notification.warn({ message: '移動とリネームは未実装です。' });
+                onMoveOrRename: async params => {
+                    const newPath = [...params.newPath];
+                    newPath.unshift();
+                    const newScreenname = joinPath(newPath).string;
+
+                    // CONSIDER: 複数のファイルをrenameする場合、その数だけrenameFilesMutationが実行されるので、API制限に引っかかる可能性がある。このコードかAPIサーバーのコードを見直す必要があるかもしれない。
+                    await renameFilesMutation({
+                        input: { filename: file.filename, newScreenname },
+                    });
                 },
             };
             return result;
         });
-    }, [data, deleteFilesMutation, isOnSelectNullish, onSelectRef, open]);
+    }, [data, deleteFilesMutation, isOnSelectNullish, onSelectRef, open, renameFilesMutation]);
 };
 
 type UploaderProps = {

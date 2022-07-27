@@ -85,6 +85,20 @@ type NameIdPair = {
     id: string | undefined;
 };
 
+/*
+# onDeleteとonMoveOrRenameの実装に関して
+
+ファイルの削除およびリネームの処理はPropsではなくFilePathに書く仕様としている。
+
+メリット:
+- Propsで書く場合は、FilePathにmetadataなどといった形でFirebaseのStorageReferenceなどを渡し、それを取得する必要がある。このようなmetadataは、atomで管理する都合上、ジェネリックス化することは困難でanyかunknownで管理せざるを得ない(atomを使わずpropsで渡せば回避できるが)。これらの手間が省ける。
+- 処理を途中で中断できる。
+
+デメリット:
+- 例えば100個のファイルを削除もしくはリネームする場合、1個のファイルを変更するリクエストを100回実行する必要がある。これは特にAPIサーバー内蔵アップローダーにおける懸念点。
+
+デメリットに関しては、大量のファイルを削除もしくはリネームする頻度が比較的少ないと思われることを考えると、operateよりは負荷が小さいと思われるため、許容範囲であると判断した。
+*/
 type FilePathBase = {
     /** ファイルのフィルター設定で用いる識別子を表します。フィルター設定を使わない場合は undefined を渡してください。*/
     fileType?: string;
