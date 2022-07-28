@@ -3009,7 +3009,7 @@ __metadata:
     "@react-spring/konva": ^9.2.4
     "@sinonjs/fake-timers": 9.1.2
     "@storybook/addon-actions": 6.5.9
-    "@storybook/addon-console": ^1.2.3
+    "@storybook/addon-console": 1.2.3
     "@storybook/addon-docs": 6.5.9
     "@storybook/addon-essentials": 6.5.9
     "@storybook/addon-interactions": 6.5.9
@@ -4792,7 +4792,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/addon-console@npm:^1.2.3":
+"@storybook/addon-console@npm:1.2.3":
   version: 1.2.3
   resolution: "@storybook/addon-console@npm:1.2.3"
   dependencies:
