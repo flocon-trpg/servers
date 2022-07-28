@@ -490,7 +490,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                     }
                     return Result.ok(undefined);
                 }}
-                canCreateTempVirtualFolder={({ foldername }) => {
+                canCreateFolder={({ foldername }) => {
                     if (foldername === '') {
                         return Result.error('フォルダ名を空白にすることはできません。');
                     }
@@ -579,7 +579,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                         refetchFloconUploader({ requestPolicy: 'network-only' });
                     }
                 }}
-                ensuredVirtualFolderPaths={[
+                ensuredFolderPaths={[
                     {
                         path: [uploaderTypeFolderName.publicFirebaseStorage],
                     },

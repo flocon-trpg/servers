@@ -124,7 +124,7 @@ const Practical: React.FC<PracticalProps> = ({
             canMove={() => Result.ok(undefined)}
             // TODO: canRenameを用いたstoryも作成する
             canRename={() => Result.ok(undefined)}
-            canCreateTempVirtualFolder={({ foldername }) => {
+            canCreateFolder={({ foldername }) => {
                 if (foldername === '') {
                     return Result.error('empty foldername');
                 }
@@ -153,7 +153,7 @@ const Practical: React.FC<PracticalProps> = ({
             isProtected={() => false}
             onFileCreate={() => Promise.resolve(true)}
             // TODO: ensuredFolderPathsを用いたstoryも作成する
-            ensuredVirtualFolderPaths={[]}
+            ensuredFolderPaths={[]}
         />
     );
 };
@@ -189,10 +189,10 @@ export const Default: React.FC<Props> = ({ files, filesSource, defaultFileTypeFi
             files={files}
             isProtected={() => false}
             onFileCreate={() => Promise.resolve(true)}
-            ensuredVirtualFolderPaths={[]}
+            ensuredFolderPaths={[]}
             canMove={() => Result.error('fake error')}
             canRename={() => Result.error('fake error')}
-            canCreateTempVirtualFolder={() => Result.error('fake error')}
+            canCreateFolder={() => Result.error('fake error')}
         />
     );
 };

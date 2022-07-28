@@ -86,7 +86,7 @@ const MemoBrowserModal: React.FC<{
                 searchPlaceholder='メモの名前で検索'
                 height={null}
                 isProtected={() => false}
-                ensuredVirtualFolderPaths={[]}
+                ensuredFolderPaths={[]}
                 onFileCreate={absolutePath => {
                     const id = simpleId();
                     setRoomState(roomState => {
@@ -106,7 +106,7 @@ const MemoBrowserModal: React.FC<{
                 }}
                 canMove={() => Result.ok(undefined)}
                 canRename={() => Result.ok(undefined)}
-                canCreateTempVirtualFolder={() => Result.ok(undefined)}
+                canCreateFolder={() => Result.ok(undefined)}
             />
         </Modal>
     );

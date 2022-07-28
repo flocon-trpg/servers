@@ -154,7 +154,7 @@ export type FileTypes = {
 
 type IsProtected = (absolutePath: readonly string[]) => boolean;
 
-type EnsuredVirtualFolderPath = {
+type EnsuredFolderPath = {
     /** ファイルのパスを表します。`''`である要素は存在しないものとして扱われます。 */
     path: readonly string[];
 
@@ -200,7 +200,7 @@ export type Props = {
         nodeType: Node['type'];
     }) => Result<void>;
 
-    canCreateTempVirtualFolder: (params: {
+    canCreateFolder: (params: {
         directoryPath: readonly string[];
 
         foldername: string;
@@ -217,7 +217,7 @@ export type Props = {
     searchPlaceholder: string;
 
     /** ファイルの有無にかかわらず、常に表示するフォルダを指定できます。 */
-    ensuredVirtualFolderPaths: readonly EnsuredVirtualFolderPath[];
+    ensuredFolderPaths: readonly EnsuredFolderPath[];
 };
 
 const defaultProps: Props = {
@@ -225,12 +225,12 @@ const defaultProps: Props = {
     height: null,
     isProtected: () => false,
     onFileCreate: () => undefined,
-    ensuredVirtualFolderPaths: [],
+    ensuredFolderPaths: [],
     fileCreateLabel: '(fileCreateLabel)',
     searchPlaceholder: '(searchPlaceholder)',
     canMove: () => Result.error('(defaultProps)'),
     canRename: () => Result.error('(defaultProps)'),
-    canCreateTempVirtualFolder: () => Result.error('(canCreateFolder)'),
+    canCreateFolder: () => Result.error('(canCreateFolder)'),
 };
 
 type FilePathNode = FilePathBase & {
@@ -357,7 +357,7 @@ type PathStateBase = {
 
     isMultipleSelectMode: boolean;
 
-    ensuredVirtualFolders: DeletableTree<string, Omit<EnsuredVirtualFolderPath, 'path'>>;
+    ensuredFolders: DeletableTree<string, Omit<EnsuredFolderPath, 'path'>>;
 
     // 現在のcurrentDirectoryにおいて選択されているファイルおよびフォルダの名前。
     // selectedFilesは、first keyがnameでsecond keyがid。DualKeyMapの仕様の都合上、valueはundefinedではなくnullとしている。
@@ -407,7 +407,7 @@ class PathState {
             rootFolder: new DeletableTree(),
             currentDirectory: [],
             isMultipleSelectMode: false,
-            ensuredVirtualFolders: new DeletableTree(Option.some({})),
+            ensuredFolders: new DeletableTree(Option.some({})),
             selectedFiles: new DualKeyMap(),
             selectedFolders: new Set(),
             cutFiles: new DualKeyMap(),
@@ -523,18 +523,16 @@ class PathState {
         return new PathState({ ...this.members, rootFolder: newRootFolder });
     }
 
-    updateEnsuredVirtualFolders(
-        ensuredVirtualFolders: readonly EnsuredVirtualFolderPath[]
-    ): PathState {
-        const newValue = new DeletableTree<string, Omit<EnsuredVirtualFolderPath, 'path'>>();
-        for (const path of ensuredVirtualFolders) {
+    updateEnsuredFolders(ensuredFolders: readonly EnsuredFolderPath[]): PathState {
+        const newValue = new DeletableTree<string, Omit<EnsuredFolderPath, 'path'>>();
+        for (const path of ensuredFolders) {
             newValue.ensure(
                 joinPath(path.path).array,
                 () => path,
                 () => ({})
             );
         }
-        return new PathState({ ...this.members, ensuredVirtualFolders: newValue });
+        return new PathState({ ...this.members, ensuredFolders: newValue });
     }
 
     createNodes() {
@@ -559,7 +557,7 @@ class PathState {
                 header: undefined,
             });
         }
-        for (const [name, $folder] of this.members.ensuredVirtualFolders
+        for (const [name, $folder] of this.members.ensuredFolders
             .createSubTreeIfExists(this.members.currentDirectory)
             ?.getChildren() ?? []) {
             const key = $folder.absolutePath.reduce(
@@ -599,9 +597,8 @@ class PathState {
         return nodes;
     }
 
-    tryGetEnsuredVirtualFolder(path: readonly string[]) {
-        const result = this.members.ensuredVirtualFolders.get(path);
-        return result;
+    tryGetEnsuredFolder(path: readonly string[]) {
+        return this.members.ensuredFolders.get(path);
     }
 
     #setFileSelected(filename: NameIdPair) {
@@ -1685,7 +1682,7 @@ const CreateFolderModal: React.FC = () => {
     const props = useAtomValue(propsAtom);
     const foldernameError = React.useMemo(
         () =>
-            props.canCreateTempVirtualFolder({
+            props.canCreateFolder({
                 directoryPath: pathState.currentDirectory,
                 foldername,
             }).error,
@@ -2082,13 +2079,11 @@ const NodesGrid: React.FC = () => {
         });
     }, [fileNameFilter, fileTypeFilter, nodes]);
 
-    const ensuredVirtualFolder = React.useMemo(() => {
-        return pathState.tryGetEnsuredVirtualFolder(pathState.currentDirectory);
+    const ensuredFolder = React.useMemo(() => {
+        return pathState.tryGetEnsuredFolder(pathState.currentDirectory);
     }, [pathState]);
 
-    const header: React.ReactNode = ensuredVirtualFolder.isNone
-        ? undefined
-        : ensuredVirtualFolder.value.header;
+    const header: React.ReactNode = ensuredFolder.isNone ? undefined : ensuredFolder.value.header;
 
     let main: JSX.Element;
     if (nodes.length === 0) {
@@ -2380,11 +2375,9 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
     const setPathState = useSetAtom(pathStateAtom);
 
     React.useEffect(() => {
-        setPathState(pathState =>
-            pathState.updateEnsuredVirtualFolders(props.ensuredVirtualFolderPaths)
-        );
+        setPathState(pathState => pathState.updateEnsuredFolders(props.ensuredFolderPaths));
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [setPathState, ...props.ensuredVirtualFolderPaths]);
+    }, [setPathState, ...props.ensuredFolderPaths]);
 
     React.useEffect(() => {
         setPathState(pathState => {
