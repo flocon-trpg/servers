@@ -188,7 +188,7 @@ const useFloconUploaderFiles = (onSelect: OnSelect | null, pause: boolean) => {
                 },
                 onMoveOrRename: async params => {
                     const newPath = [...params.newPath];
-                    newPath.unshift();
+                    newPath.shift();
                     const newScreenname = joinPath(newPath).string;
 
                     // CONSIDER: 複数のファイルをrenameする場合、その数だけrenameFilesMutationが実行されるので、API制限に引っかかる可能性がある。このコードかAPIサーバーのコードを見直す必要があるかもしれない。
