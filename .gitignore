@@ -8,6 +8,7 @@ coverage/
 /apps/web-server/out/
 /apps/web-server/src/styles/css/antd.css
 *.sqlite3
+.eslintcache
 
 .pnp.*
 .yarn/*

@@ -11,7 +11,7 @@
         "build-ci": "yarn workspaces foreach -ptv run build-ci",
         "test": "yarn workspaces foreach -pv run test",
         "test-node14": "yarn workspaces foreach -pv --exclude '{@flocon-trpg/servers,@flocon-trpg/web-server}' run test",
-        "lint": "eslint \"{apps,packages}/**/*.{ts,tsx}\"",
+        "lint": "eslint \"{apps,packages}/**/*.{ts,tsx}\" --cache",
         "prettier": "yarn prettier:base --write --cache",
         "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\""
     },
