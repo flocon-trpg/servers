@@ -21,7 +21,7 @@
     "author": "kizahasi",
     "devDependencies": {
         "@types/jest": "27.5.2",
-        "fast-check": "2.25.0",
+        "fast-check": "3.1.1",
         "immer": "9.0.15",
         "jest": "27.5.1",
         "rimraf": "3.0.2",
