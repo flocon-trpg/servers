@@ -2819,7 +2819,7 @@ __metadata:
     io-ts: ^2.2.16
     io-ts-reporters: ^2.0.0
     isomorphic-fetch: 3.0.0
-    isomorphic-ws: 4.0.1
+    isomorphic-ws: 5.0.0
     jest: 27.5.1
     lodash: ^4.17.21
     multer: ^1.4.3
@@ -14928,16 +14928,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"isomorphic-ws@npm:4.0.1":
-  version: 4.0.1
-  resolution: "isomorphic-ws@npm:4.0.1"
-  peerDependencies:
-    ws: "*"
-  checksum: d7190eadefdc28bdb93d67b5f0c603385aaf87724fa2974abb382ac1ec9756ed2cfb27065cbe76122879c2d452e2982bc4314317f3d6c737ddda6c047328771a
-  languageName: node
-  linkType: hard
-
-"isomorphic-ws@npm:^5.0.0":
+"isomorphic-ws@npm:5.0.0, isomorphic-ws@npm:^5.0.0":
   version: 5.0.0
   resolution: "isomorphic-ws@npm:5.0.0"
   peerDependencies:
