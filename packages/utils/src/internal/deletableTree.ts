@@ -74,7 +74,7 @@ export class DeletableTree<TKey, TValue> {
         replacer: (oldValue: Option<TValue>) => TReplaced,
         initValue: (absolutePath: readonly TKey[]) => TValue
     ): TReplaced {
-        const result = this.#source.ensureAndReplace(
+        const result = this.#source.ensure(
             key,
             oldValue => Option.some(replacer(oldValue)),
             () => Option.none()
@@ -82,7 +82,7 @@ export class DeletableTree<TKey, TValue> {
 
         const absolutePath: TKey[] = [];
         const ensure = () => {
-            this.#source.ensureAndReplace(
+            this.#source.ensure(
                 absolutePath,
                 oldValue => {
                     if (oldValue.isNone) {

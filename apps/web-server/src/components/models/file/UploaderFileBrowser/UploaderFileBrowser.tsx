@@ -9,7 +9,7 @@ import {
 } from '@flocon-trpg/typed-document-node-v0.7.8';
 import { useMutation, useQuery } from 'urql';
 import { useAtomValue } from 'jotai';
-import { firebaseStorageAtom } from '@/pages/_app';
+import { firebaseStorageAtom, firebaseUserAtom } from '@/pages/_app';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { StorageReference, deleteObject, ref, uploadBytes } from 'firebase/storage';
 import { FileType, guessFileType, image, others, sound } from '@/utils/fileType';
@@ -387,6 +387,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
         variables: { input: { fileTagIds: [] } },
         pause: true,
     });
+    const firebaseUser = useAtomValue(firebaseUserAtom);
 
     const files = React.useMemo(() => {
         const result: FilePath[] = [];
@@ -408,6 +409,76 @@ export const UploaderFileBrowser: React.FC<Props> = ({
         result.push(...(floconUploaderFiles ?? []));
         return result;
     }, [firebaseStorageFiles.public, firebaseStorageFiles.unlisted, floconUploaderFiles]);
+
+    const overridingElements = React.useMemo(() => {
+        const result: { path: string[]; element: JSX.Element }[] = [];
+
+        const style: React.CSSProperties = { padding: 8 };
+
+        if (typeof firebaseUser === 'string') {
+            result.push({
+                path: [],
+                element: <div style={style}>アップローダーを使うにはログインが必要です。</div>,
+            });
+            return result;
+        }
+
+        if (firebaseStorageFiles.public === disabledByConfig) {
+            result.push({
+                path: [uploaderTypeFolderName.publicFirebaseStorage],
+                element: <div style={style}>管理者の設定によって無効化されています。</div>,
+            });
+        } else if (!Array.isArray(firebaseStorageFiles.public)) {
+            result.push({
+                path: [uploaderTypeFolderName.publicFirebaseStorage],
+                element: <div style={style}>読み込み中です…</div>,
+            });
+        }
+
+        if (firebaseStorageFiles.unlisted === disabledByConfig) {
+            result.push({
+                path: [uploaderTypeFolderName.unlistedFirebaseStorage],
+                element: <div style={style}>設定によって無効化されています。</div>,
+            });
+        } else if (!Array.isArray(firebaseStorageFiles.unlisted)) {
+            result.push({
+                path: [uploaderTypeFolderName.unlistedFirebaseStorage],
+                element: <div style={style}>読み込み中です…</div>,
+            });
+        }
+
+        if (isEmbeddedUploaderDisabled) {
+            result.push(
+                {
+                    path: [uploaderTypeFolderName.publicApiServer],
+                    element: <div style={style}>設定によって無効化されています。</div>,
+                },
+                {
+                    path: [uploaderTypeFolderName.unlistedApiServer],
+                    element: <div style={style}>設定によって無効化されています。</div>,
+                }
+            );
+        } else if (floconUploaderFiles == null) {
+            result.push(
+                {
+                    path: [uploaderTypeFolderName.publicApiServer],
+                    element: <div style={style}>読み込み中です…</div>,
+                },
+                {
+                    path: [uploaderTypeFolderName.unlistedApiServer],
+                    element: <div style={style}>読み込み中です…</div>,
+                }
+            );
+        }
+
+        return result;
+    }, [
+        firebaseStorageFiles.public,
+        firebaseStorageFiles.unlisted,
+        firebaseUser,
+        floconUploaderFiles,
+        isEmbeddedUploaderDisabled,
+    ]);
 
     return (
         <>
@@ -593,6 +664,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                         path: [uploaderTypeFolderName.unlistedApiServer],
                     },
                 ]}
+                overridingElements={overridingElements}
             />
             {firebaseStorageUploaderModalState && (
                 <Modal

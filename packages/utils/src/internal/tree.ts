@@ -72,6 +72,15 @@ export class Tree<TKey, TValue> {
         return Tree.createTree(node);
     }
 
+    public createSubTreeIfExists(key: readonly TKey[]) {
+        if (this.get(key).isNone) {
+            return null;
+        }
+        return this.createSubTree(key, () => {
+            throw new Error('This should not happen');
+        });
+    }
+
     /** 直接の子の要素を全て取得します。 */
     public getChildren() {
         const result = new Map<TKey, Tree<TKey, TValue>>();
@@ -89,7 +98,7 @@ export class Tree<TKey, TValue> {
         return Option.some(node.value);
     }
 
-    public ensureAndReplace<TReplaced extends TValue>(
+    public ensure<TReplaced extends TValue>(
         key: readonly TKey[],
         replacer: (oldValue: TValue) => TReplaced,
         initValue: (absolutePath: readonly TKey[]) => TValue

@@ -47,7 +47,7 @@ export class MultiKeyMap<TKey, TValue> {
         key: readonly TKey[],
         replacer: (oldValue: TValue | undefined) => TReplaced
     ): TReplaced {
-        const result = this.#source.ensureAndReplace(
+        const result = this.#source.ensure(
             key,
             oldValue => {
                 const newValue = replacer(oldValue.value);

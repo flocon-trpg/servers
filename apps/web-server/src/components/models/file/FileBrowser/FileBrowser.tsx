@@ -33,6 +33,7 @@ import {
     DualKeyMap,
     MultiKeyMap,
     MultiValueSet,
+    Tree,
     arrayEquals,
     both,
     groupJoinArray,
@@ -46,7 +47,6 @@ import produce from 'immer';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { useLatest } from 'react-use';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { Option } from '@kizahasi/option';
 import { joinPath } from '@flocon-trpg/core';
 import { mergeStyles } from '@/utils/mergeStyles';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
@@ -154,14 +154,6 @@ export type FileTypes = {
 
 type IsProtected = (absolutePath: readonly string[]) => boolean;
 
-type EnsuredFolderPath = {
-    /** ファイルのパスを表します。`''`である要素は存在しないものとして扱われます。 */
-    path: readonly string[];
-
-    /** このフォルダの上部に追加で表示するコンポーネントを指定できます。 */
-    header?: React.ReactNode;
-};
-
 const defaultHeight = 350;
 
 export type Props = {
@@ -217,7 +209,15 @@ export type Props = {
     searchPlaceholder: string;
 
     /** ファイルの有無にかかわらず、常に表示するフォルダを指定できます。 */
-    ensuredFolderPaths: readonly EnsuredFolderPath[];
+    ensuredFolderPaths: readonly {
+        path: readonly string[];
+    }[];
+
+    /** 指定されたパスで他のコンポーネントを表示させるようにします。現時点ではpathが完全一致したときにのみ置き換えられますが、子孫もすべて置き換えの対象とするかもしれません。 */
+    overridingElements: readonly {
+        path: readonly string[];
+        element: JSX.Element;
+    }[];
 };
 
 const defaultProps: Props = {
@@ -226,6 +226,7 @@ const defaultProps: Props = {
     isProtected: () => false,
     onFileCreate: () => undefined,
     ensuredFolderPaths: [],
+    overridingElements: [],
     fileCreateLabel: '(fileCreateLabel)',
     searchPlaceholder: '(searchPlaceholder)',
     canMove: () => Result.error('(defaultProps)'),
@@ -260,9 +261,6 @@ type Folder = {
     key: string;
     folderPath: readonly string[];
     name: string;
-
-    // ensured folderのheaderで指定された値。ensured folder由来でない場合は常にundefinedになる
-    header: React.ReactNode;
 };
 
 class Node {
@@ -357,7 +355,9 @@ type PathStateBase = {
 
     isMultipleSelectMode: boolean;
 
-    ensuredFolders: DeletableTree<string, Omit<EnsuredFolderPath, 'path'>>;
+    ensuredFolders: Tree<string, null>;
+
+    overridingElements: Tree<string, JSX.Element | null>;
 
     // 現在のcurrentDirectoryにおいて選択されているファイルおよびフォルダの名前。
     // selectedFilesは、first keyがnameでsecond keyがid。DualKeyMapの仕様の都合上、valueはundefinedではなくnullとしている。
@@ -407,7 +407,8 @@ class PathState {
             rootFolder: new DeletableTree(),
             currentDirectory: [],
             isMultipleSelectMode: false,
-            ensuredFolders: new DeletableTree(Option.some({})),
+            ensuredFolders: new Tree(null),
+            overridingElements: new Tree(null),
             selectedFiles: new DualKeyMap(),
             selectedFolders: new Set(),
             cutFiles: new DualKeyMap(),
@@ -523,16 +524,28 @@ class PathState {
         return new PathState({ ...this.members, rootFolder: newRootFolder });
     }
 
-    updateEnsuredFolders(ensuredFolders: readonly EnsuredFolderPath[]): PathState {
-        const newValue = new DeletableTree<string, Omit<EnsuredFolderPath, 'path'>>();
+    updateEnsuredFolders(ensuredFolders: readonly { path: readonly string[] }[]): PathState {
+        const newValue = new Tree<string, null>(null);
         for (const path of ensuredFolders) {
             newValue.ensure(
                 joinPath(path.path).array,
-                () => path,
-                () => ({})
+                () => null,
+                () => null
             );
         }
         return new PathState({ ...this.members, ensuredFolders: newValue });
+    }
+
+    updateOverridingElements(overridingElements: Props['overridingElements']): PathState {
+        const newValue = new Tree<string, JSX.Element | null>(null);
+        for (const elem of overridingElements) {
+            newValue.ensure(
+                joinPath(elem.path).array,
+                () => elem.element,
+                () => null
+            );
+        }
+        return new PathState({ ...this.members, overridingElements: newValue });
     }
 
     createNodes() {
@@ -554,7 +567,6 @@ class PathState {
                 key: joinPath($folder.absolutePath).string + '@FileBrowser@Folder',
                 folderPath,
                 name,
-                header: undefined,
             });
         }
         for (const [name, $folder] of this.members.ensuredFolders
@@ -573,7 +585,6 @@ class PathState {
                 folderPath,
                 key,
                 name,
-                header: $folder.value.value?.header,
             } as const);
         }
 
@@ -599,6 +610,10 @@ class PathState {
 
     tryGetEnsuredFolder(path: readonly string[]) {
         return this.members.ensuredFolders.get(path);
+    }
+
+    tryGetOverridingElement(path: readonly string[]) {
+        return this.members.overridingElements.get(path).value ?? null;
     }
 
     #setFileSelected(filename: NameIdPair) {
@@ -2079,22 +2094,25 @@ const NodesGrid: React.FC = () => {
         });
     }, [fileNameFilter, fileTypeFilter, nodes]);
 
-    const ensuredFolder = React.useMemo(() => {
-        return pathState.tryGetEnsuredFolder(pathState.currentDirectory);
+    const overridingElement = React.useMemo(() => {
+        return pathState.tryGetOverridingElement(pathState.currentDirectory);
     }, [pathState]);
 
-    const header: React.ReactNode = ensuredFolder.isNone ? undefined : ensuredFolder.value.header;
+    if (overridingElement != null) {
+        return overridingElement;
+    }
 
     let main: JSX.Element;
     if (nodes.length === 0) {
         main = (
-            <div style={{ padding: 4, fontSize: '1.3rem', height: '100%', backgroundColor }}>
-                このフォルダには、フォルダおよびファイルがありません。
+            <div style={{ padding: 4, height: '100%', backgroundColor }}>
+                <p>このフォルダには、フォルダおよびファイルがありません。</p>
+                <p>右クリックで開くメニューからフォルダおよびファイルを作成することができます。</p>
             </div>
         );
     } else if (filteredNodes.length === 0) {
         main = (
-            <div style={{ padding: 4, fontSize: '1.3rem', height: '100%', backgroundColor }}>
+            <div style={{ padding: 4, height: '100%', backgroundColor }}>
                 フォルダおよび条件にマッチするファイルがありません。
             </div>
         );
@@ -2113,18 +2131,9 @@ const NodesGrid: React.FC = () => {
     }
 
     return (
-        <div
-            className={classNames(flex, flexColumn)}
-            style={{
-                gap: '16px',
-                height: '100%',
-            }}
-        >
-            {header}
-            <Dropdown overlay={<ContextMenu node={null} />} trigger={['contextMenu']}>
-                {main}
-            </Dropdown>
-        </div>
+        <Dropdown overlay={<ContextMenu node={null} />} trigger={['contextMenu']}>
+            {main}
+        </Dropdown>
     );
 };
 
@@ -2378,6 +2387,11 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
         setPathState(pathState => pathState.updateEnsuredFolders(props.ensuredFolderPaths));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setPathState, ...props.ensuredFolderPaths]);
+
+    React.useEffect(() => {
+        setPathState(pathState => pathState.updateOverridingElements(props.overridingElements));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [setPathState, ...props.overridingElements]);
 
     React.useEffect(() => {
         setPathState(pathState => {

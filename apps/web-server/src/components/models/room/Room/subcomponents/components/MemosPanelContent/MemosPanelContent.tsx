@@ -87,6 +87,7 @@ const MemoBrowserModal: React.FC<{
                 height={null}
                 isProtected={() => false}
                 ensuredFolderPaths={[]}
+                overridingElements={[]}
                 onFileCreate={absolutePath => {
                     const id = simpleId();
                     setRoomState(roomState => {

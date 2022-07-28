@@ -33,14 +33,14 @@ describe('tree', () => {
         expect([...actual.traverse()]).toEqual([{ absolutePath: [], value: 'root' }]);
     });
 
-    it('tests ensureAndReplace', () => {
+    it('tests ensure', () => {
         const actual = new Tree<string, string>('init root');
 
         {
             const replacer = jest.fn(() => 'root');
             const initValue = jest.fn();
 
-            const root = actual.ensureAndReplace([], replacer, initValue);
+            const root = actual.ensure([], replacer, initValue);
 
             expect(root).toBe('root');
             expect(initValue).not.toHaveBeenCalled();
@@ -57,7 +57,7 @@ describe('tree', () => {
             const initValue = jest.fn();
             initValue.mockReturnValue('init1');
 
-            const ab = actual.ensureAndReplace(['a', 'b'], replacer, initValue);
+            const ab = actual.ensure(['a', 'b'], replacer, initValue);
 
             expect(ab).toBe('a/b');
             expect(initValue).toHaveBeenCalledTimes(2);
@@ -79,7 +79,7 @@ describe('tree', () => {
             const replacer = jest.fn(() => 'a');
             const initValue = jest.fn();
 
-            const a = actual.ensureAndReplace(['a'], replacer, initValue);
+            const a = actual.ensure(['a'], replacer, initValue);
 
             expect(a).toBe('a');
             expect(initValue).not.toHaveBeenCalled();
@@ -101,7 +101,7 @@ describe('tree', () => {
             const initValue = jest.fn();
             initValue.mockReturnValue('init2');
 
-            const a2 = actual.ensureAndReplace(['a2'], replacer, initValue);
+            const a2 = actual.ensure(['a2'], replacer, initValue);
 
             expect(a2).toBe('a2');
             expect(initValue).toHaveBeenCalledTimes(1);
@@ -125,7 +125,7 @@ describe('tree', () => {
             const initValue = jest.fn();
             initValue.mockReturnValue('init3');
 
-            const abcde = actual.ensureAndReplace(['a', 'b', 'c', 'd', 'e'], replacer, initValue);
+            const abcde = actual.ensure(['a', 'b', 'c', 'd', 'e'], replacer, initValue);
 
             expect(abcde).toBe('a/b/c/d/e');
             expect(initValue).toHaveBeenCalledTimes(3);
@@ -154,7 +154,7 @@ describe('tree', () => {
             const initValue = jest.fn();
             initValue.mockReturnValue('init4');
 
-            const abcde2 = actual.ensureAndReplace(['a', 'b', 'c', 'd', 'e2'], replacer, initValue);
+            const abcde2 = actual.ensure(['a', 'b', 'c', 'd', 'e2'], replacer, initValue);
 
             expect(abcde2).toBe('a/b/c/d/e2');
             expect(initValue).toHaveBeenCalledTimes(1);
@@ -178,17 +178,17 @@ describe('tree', () => {
     it('tests getChildren', () => {
         const source = new Tree<string, string>('root');
 
-        source.ensureAndReplace(
+        source.ensure(
             ['a'],
             () => 'a',
             () => 'init'
         );
-        source.ensureAndReplace(
+        source.ensure(
             ['a', 'b'],
             () => 'a/b',
             () => 'init'
         );
-        source.ensureAndReplace(
+        source.ensure(
             ['b'],
             () => 'b/c',
             () => 'init'
@@ -220,28 +220,28 @@ describe('tree', () => {
 
         const initValue = jest.fn();
 
-        source.ensureAndReplace(['a', 'b'], () => 'a/b', initValue);
+        source.ensure(['a', 'b'], () => 'a/b', initValue);
         expect(a.get(['b'])).toEqual(Option.some('a/b'));
         expect(ab.value).toBe('a/b');
 
-        ab.ensureAndReplace([], () => 'A/B', initValue);
+        ab.ensure([], () => 'A/B', initValue);
         expect(source.get(['a', 'b'])).toEqual(Option.some('A/B'));
         expect(a.get(['b'])).toEqual(Option.some('A/B'));
     });
 
     it('tests map', () => {
         const source = new Tree<string, number>(0);
-        source.ensureAndReplace(
+        source.ensure(
             ['1'],
             () => 1,
             () => -1
         );
-        source.ensureAndReplace(
+        source.ensure(
             ['1', '2'],
             () => 12,
             () => -1
         );
-        source.ensureAndReplace(
+        source.ensure(
             ['2'],
             () => 2,
             () => -1
@@ -267,17 +267,17 @@ describe('tree', () => {
 
     it('tests replaceAllValues', () => {
         const source = new Tree<string, number>(0);
-        source.ensureAndReplace(
+        source.ensure(
             ['1'],
             () => 1,
             () => -1
         );
-        source.ensureAndReplace(
+        source.ensure(
             ['1', '2'],
             () => 12,
             () => -1
         );
-        source.ensureAndReplace(
+        source.ensure(
             ['2'],
             () => 2,
             () => -1

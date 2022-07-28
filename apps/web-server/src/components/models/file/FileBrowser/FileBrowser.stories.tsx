@@ -154,6 +154,8 @@ const Practical: React.FC<PracticalProps> = ({
             onFileCreate={() => Promise.resolve(true)}
             // TODO: ensuredFolderPathsを用いたstoryも作成する
             ensuredFolderPaths={[]}
+            // TODO: overridingElementsを用いたstoryも作成する
+            overridingElements={[]}
         />
     );
 };
@@ -190,6 +192,7 @@ export const Default: React.FC<Props> = ({ files, filesSource, defaultFileTypeFi
             isProtected={() => false}
             onFileCreate={() => Promise.resolve(true)}
             ensuredFolderPaths={[]}
+            overridingElements={[]}
             canMove={() => Result.error('fake error')}
             canRename={() => Result.error('fake error')}
             canCreateFolder={() => Result.error('fake error')}
