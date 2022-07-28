@@ -32,6 +32,7 @@ const ofUnlistedUploaderFile =
 export const fetching = 'fetching';
 export const storageIsNullish = 'storageIsNullish';
 export const myUserUidIsNullish = 'myUserUidIsNullish';
+export const disabledByConfig = 'disabledByConfig';
 
 const queryKeyRoot = 'useFirebaseStorageListAllQuery@2f01ed80-361e-47fc-bda1-6877999c4372';
 
@@ -82,7 +83,7 @@ export const useFirebaseStorageListAllQuery = () => {
                 return myUserUidIsNullish;
             }
             if (!isPublicFirebaseStorageEnabled) {
-                return null;
+                return disabledByConfig;
             }
 
             const result: File[] = [];
@@ -112,7 +113,7 @@ export const useFirebaseStorageListAllQuery = () => {
                 return myUserUidIsNullish;
             }
             if (!isUnlistedFirebaseStorageEnabled) {
-                return null;
+                return disabledByConfig;
             }
 
             const result: File[] = [];
@@ -131,10 +132,8 @@ export const useFirebaseStorageListAllQuery = () => {
         const refetchPublicFiles = publicFiles.refetch;
         const refetchUnlistedFiles = unlistedFiles.refetch;
         return {
-            /** publicがWebConfigで無効にされているときはnull。 */
             public: publicFiles.data,
 
-            /** unlistedがWebConfigで無効にされているときはnull。 */
             unlisted: unlistedFiles.data,
 
             refetch: async () => {

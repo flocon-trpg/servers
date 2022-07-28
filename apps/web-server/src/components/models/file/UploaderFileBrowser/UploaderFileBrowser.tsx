@@ -16,7 +16,11 @@ import { FileType, guessFileType, image, others, sound } from '@/utils/fileType'
 import { useWebConfig } from '@/hooks/useWebConfig';
 import { FileBrowser, FilePath } from '../FileBrowser/FileBrowser';
 import { fileName } from '@/utils/filename';
-import { File, useFirebaseStorageListAllQuery } from '@/hooks/useFirebaseStorageListAllQuery';
+import {
+    File,
+    disabledByConfig,
+    useFirebaseStorageListAllQuery,
+} from '@/hooks/useFirebaseStorageListAllQuery';
 import { useGetIdToken } from '@/hooks/useGetIdToken';
 import { $public, Path, StorageType, unlisted } from '@/utils/file/firebaseStorage';
 import { accept } from './utils/helper';

@@ -230,7 +230,7 @@ const defaultProps: Props = {
     searchPlaceholder: '(searchPlaceholder)',
     canMove: () => Result.error('(defaultProps)'),
     canRename: () => Result.error('(defaultProps)'),
-    canCreateTempVirtualFolder: () => Result.error('(canCreateTempVirtualFolder)'),
+    canCreateTempVirtualFolder: () => Result.error('(canCreateFolder)'),
 };
 
 type FilePathNode = FilePathBase & {
