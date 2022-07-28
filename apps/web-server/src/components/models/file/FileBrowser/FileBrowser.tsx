@@ -40,7 +40,6 @@ import {
     keyNames,
     left,
     right,
-    toBeNever,
 } from '@flocon-trpg/utils';
 import { Provider, atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import produce from 'immer';
@@ -750,8 +749,6 @@ class PathState {
                 case file:
                     files.set([...node.path, node.id], node.source);
                     continue;
-                default:
-                    toBeNever(node.source);
             }
         }
         return {
@@ -812,8 +809,6 @@ class PathState {
                 return this.members.cutFolders.has(node.name);
             case file:
                 return this.members.cutFiles.has({ first: node.name, second: node.id });
-            default:
-                toBeNever(node.type);
         }
     }
 

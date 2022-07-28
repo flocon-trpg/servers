@@ -63,8 +63,10 @@ export const RoomCreatePage: React.FC = () => {
                             setIsSubmitting(false);
                             return;
                         }
+                        default:
+                            setIsSubmitting(false);
+                            return;
                     }
-                    setIsSubmitting(false);
                 });
             }}
         >

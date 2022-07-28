@@ -252,6 +252,9 @@ export namespace RoomMessage {
             case 'error':
             case pieceLog:
                 return <IconView image='Message' size={size} />;
+            case privateMessage:
+            case publicMessage:
+                break;
         }
         if (message.value.createdBy == null) {
             return <IconView image='Message' size={size} />;

@@ -45,7 +45,7 @@ import { useWritingMessageStatus } from '../../hooks/useWritingMessageStatus';
 import { isDeleted, toText } from '../../utils/message';
 import { usePublicChannelNames } from '../../hooks/usePublicChannelNames';
 import { useParticipants } from '../../hooks/useParticipants';
-import { keyNames, recordToMap, toBeNever } from '@flocon-trpg/utils';
+import { keyNames, recordToMap } from '@flocon-trpg/utils';
 import * as Icons from '@ant-design/icons';
 import { InputModal } from '@/components/ui/InputModal/InputModal';
 import { JumpToBottomVirtuoso } from '@/components/ui/JumpToBottomVirtuoso/JumpToBottomVirtuoso';
@@ -781,8 +781,6 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
                         />
                     );
                     break;
-                default:
-                    toBeNever(messages.error);
             }
         } else {
             content = (

@@ -22,7 +22,6 @@ import { Result } from '@kizahasi/result';
 import { atom, useAtom, useAtomValue } from 'jotai';
 import { appConsole } from '../utils/appConsole';
 import { useUpdateAtom } from 'jotai/utils';
-import { toBeNever } from '@flocon-trpg/utils';
 
 export const graphqlError = 'graphqlError';
 export const failure = 'failure';
@@ -220,8 +219,6 @@ export const useRoomMessages = ({
                     setResult(Result.ok({ type: reset, current: msg.current }));
                     return;
                 }
-                default:
-                    toBeNever(msg);
             }
         });
         return () => subscription.unsubscribe();

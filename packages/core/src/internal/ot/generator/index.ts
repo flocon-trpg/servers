@@ -21,7 +21,6 @@ import {
     recordToArray,
     recordToMap,
     right,
-    toBeNever,
 } from '@flocon-trpg/utils';
 import { isIdRecord } from '../util/record';
 
@@ -202,9 +201,8 @@ export const state = <T extends AnyTemplate>(source: T, options: IoTsOptions): t
                     return source.value;
                 case ot:
                     return source.nullable ? t.union([t.string, t.undefined]) : (t.string as any);
-                default:
-                    return toBeNever(source);
             }
+            break;
         }
         case record:
         case paramRecord: {
@@ -223,8 +221,6 @@ export const state = <T extends AnyTemplate>(source: T, options: IoTsOptions): t
             }
             return base;
         }
-        default:
-            return toBeNever(source);
     }
 };
 
@@ -260,9 +256,8 @@ export const upOperation = <T extends AnyTemplate>(
                     return source.nullable
                         ? NullableTextOperation.upOperation
                         : (TextOperation.upOperation as any);
-                default:
-                    return toBeNever(source);
             }
+            break;
         }
         case record: {
             return trecord(
@@ -288,8 +283,6 @@ export const upOperation = <T extends AnyTemplate>(
             }
             return base;
         }
-        default:
-            return toBeNever(source);
     }
 };
 
@@ -325,9 +318,8 @@ export const downOperation = <T extends AnyTemplate>(
                     return source.nullable
                         ? NullableTextOperation.downOperation
                         : (TextOperation.downOperation as any);
-                default:
-                    return toBeNever(source);
             }
+            break;
         }
         case record: {
             return trecord(
@@ -354,8 +346,6 @@ export const downOperation = <T extends AnyTemplate>(
             }
             return base;
         }
-        default:
-            return toBeNever(source);
     }
 };
 
@@ -431,8 +421,6 @@ export const toUpOperation =
                     }
                 ) as any;
             }
-            default:
-                return toBeNever(template);
         }
     };
 
@@ -486,8 +474,6 @@ export const toDownOperation =
                     }
                 ) as any;
             }
-            default:
-                return toBeNever(template);
         }
     };
 
@@ -558,8 +544,6 @@ export const apply =
                 }
                 return Result.ok(result);
             }
-            default:
-                return toBeNever(template);
         }
     };
 
@@ -630,8 +614,6 @@ export const applyBack =
                 }
                 return Result.ok(result);
             }
-            default:
-                return toBeNever(template);
         }
     };
 
@@ -716,8 +698,6 @@ export const composeDownOperation =
                 }
                 return Result.ok(result);
             }
-            default:
-                return toBeNever(template);
         }
     };
 
@@ -809,8 +789,6 @@ export const restore =
                 }
                 return Result.ok({ prevState, twoWayOperation });
             }
-            default:
-                return toBeNever(template);
         }
     };
 
@@ -885,8 +863,6 @@ export const diff =
                 }
                 return result;
             }
-            default:
-                return toBeNever(template);
         }
     };
 
@@ -1001,7 +977,5 @@ export const clientTransform =
                     secondPrime: isIdRecord(secondPrime) ? undefined : secondPrime,
                 });
             }
-            default:
-                return toBeNever(template);
         }
     };

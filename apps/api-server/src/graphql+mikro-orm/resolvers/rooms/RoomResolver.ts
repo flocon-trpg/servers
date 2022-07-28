@@ -179,7 +179,6 @@ import { DeleteRoomAsAdminResult } from '../../results/DeleteRoomAsAdminResult';
 import { DeleteRoomAsAdminFailureType } from '../../../enums/DeleteRoomAsAdminFailureType';
 import { UpdateBookmarkResult } from '../../results/UpdateBookmarkResult';
 import { UpdateBookmarkFailureType } from '../../../enums/UpdateBookmarkFailureType';
-import { toBeNever } from '@flocon-trpg/utils';
 
 type RoomState = State<typeof roomTemplate>;
 type RoomUpOperation = UpOperation<typeof roomTemplate>;
@@ -2898,8 +2897,6 @@ export class RoomResolver {
                     roomOperation: payload.generateOperation(userUid),
                     isRoomMessagesResetEvent: false,
                 };
-            default:
-                toBeNever(payload);
         }
     }
 }

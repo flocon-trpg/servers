@@ -1,4 +1,3 @@
-import { toBeNever } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import * as t from 'io-ts';
 import { ReadonlyDeep } from 'type-fest';
@@ -391,8 +390,6 @@ export namespace ServerConfigForMigration {
                     debug
                 );
             }
-            default:
-                toBeNever(databaseArg);
         }
     };
 

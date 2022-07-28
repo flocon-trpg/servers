@@ -424,6 +424,8 @@ export const useRoomState = (
                         });
                         break;
                     }
+                    case undefined:
+                        break;
                 }
             });
 

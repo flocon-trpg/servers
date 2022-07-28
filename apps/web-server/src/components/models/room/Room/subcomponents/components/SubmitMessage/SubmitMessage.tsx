@@ -188,6 +188,8 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
                             },
                         });
                         return;
+                    case undefined:
+                        return;
                 }
             })
             .finally(() => {
@@ -363,6 +365,8 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
                                 createdAt: new Date().getTime(),
                             },
                         });
+                        return;
+                    case undefined:
                         return;
                 }
             })

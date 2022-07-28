@@ -28,7 +28,6 @@ import { toTypeName } from './scriptValue/toTypeName';
 import { toJObject } from './utils/toJObject';
 import { FObjectBase } from './scriptValue/types';
 import { FPattern } from './fPattern';
-import { toBeNever } from '@flocon-trpg/utils';
 import { getRestValues } from './getRestValues';
 
 function ofFLiteral(literal: FLiteral): FBoolean | FNumber | FString | null {
@@ -237,9 +236,6 @@ function ofFPattern(
             }
             ofFPattern(pattern.argument, context, kind, value, 'object');
             return;
-        default: {
-            toBeNever(pattern);
-        }
     }
 }
 
@@ -375,8 +371,6 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                 case '|=':
                     newValue = compareToNumber(oldValue, right, 'number', (l, r) => l | r);
                     break;
-                default:
-                    toBeNever(expression.operator);
             }
             if (expression.left.type === 'Identifier') {
                 context.assign(expression.left.name, newValue, toRange(expression));
@@ -758,8 +752,6 @@ function ofFStatement(statement: FStatement, context: Context): FStatementResult
             ofFVariableDeclaration(statement, context);
             return { type: 'end', value: undefined };
         }
-        default:
-            return toBeNever(statement);
     }
 }
 

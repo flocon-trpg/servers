@@ -1,7 +1,6 @@
 import { prompt } from 'inquirer';
 import { existsSync } from 'fs';
 import { writeFile } from 'fs/promises';
-import { toBeNever } from '@flocon-trpg/utils';
 import bcrypt from 'bcrypt';
 
 const ja = 'ja';
@@ -52,8 +51,6 @@ const startApp = async () => {
             case ja:
                 message = `\`${filename}\` はすでに存在します。上書きしますか？`;
                 break;
-            default:
-                toBeNever(lang);
         }
 
         const name = 'overwriteConfirm';
@@ -80,8 +77,6 @@ const startApp = async () => {
             case ja:
                 message = `ハッシュを生成するパスワードを入力してください`;
                 break;
-            default:
-                toBeNever(lang);
         }
 
         const name = 'password';
@@ -106,8 +101,6 @@ const startApp = async () => {
             case en:
                 console.info(`Started writing to \`${filename}\`...`);
                 break;
-            default:
-                toBeNever(lang);
         }
 
         await writeFile(filename, hash);
@@ -119,8 +112,6 @@ const startApp = async () => {
             case en:
                 console.info('Successfully finished');
                 break;
-            default:
-                toBeNever(lang);
         }
     }
 };

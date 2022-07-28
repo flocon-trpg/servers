@@ -147,6 +147,8 @@ export const ImagePieceEditor: React.FC<{
                     case 'ok':
                         ok();
                         break;
+                    case 'close':
+                        break;
                 }
             },
         });

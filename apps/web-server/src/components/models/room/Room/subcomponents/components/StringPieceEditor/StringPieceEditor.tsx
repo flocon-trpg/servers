@@ -150,6 +150,8 @@ export const StringPieceEditor: React.FC<{
                     case 'ok':
                         ok();
                         break;
+                    case 'close':
+                        break;
                 }
             },
         });

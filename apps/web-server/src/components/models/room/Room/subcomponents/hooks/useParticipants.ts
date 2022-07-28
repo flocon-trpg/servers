@@ -43,6 +43,8 @@ export const useParticipants = (
                         result.set(key, value);
                     }
                     return;
+                case undefined:
+                    return;
             }
         });
         return result;

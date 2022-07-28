@@ -8,7 +8,6 @@ import { PubSub } from 'graphql-subscriptions';
 import { createServer } from '../../../src/createServer';
 import { Result } from '@kizahasi/result';
 import { Resources } from './resources';
-import { toBeNever } from '@flocon-trpg/utils';
 import { mySQLClientUrl, postgresClientUrl } from './databaseConfig';
 
 const PostgreSQLConfig = {
@@ -56,8 +55,6 @@ export const createOrm = async (dbConfig: DbConfig) => {
             return await createPostgreSQL(PostgreSQLConfig);
         case 'SQLite':
             return await createSQLite(createSQLiteConfig(dbConfig.dbName));
-        default:
-            toBeNever(dbConfig);
     }
 };
 
@@ -83,8 +80,6 @@ const setDatabaseConfig = (target: WritableServerConfig, dbConfig: DbConfig): vo
                 driverOptions: undefined,
             };
             return;
-        default:
-            toBeNever(dbConfig);
     }
 };
 
