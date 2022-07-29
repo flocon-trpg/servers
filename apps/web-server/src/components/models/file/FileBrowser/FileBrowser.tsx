@@ -837,14 +837,14 @@ class PathState {
         return this.members.isMultipleSelectMode;
     }
 
-    canToggleMultipleSelectMode(props: Props) {
+    canChangeMultipleSelectMode(props: Props) {
         return !this.isCurrentDirectoryProtected(props);
     }
 
-    toggleMultipleSelectMode(): PathState {
+    changeIsMultipleSelectMode(newValue: boolean): PathState {
         return new PathState({
             ...this.members,
-            isMultipleSelectMode: !this.members.isMultipleSelectMode,
+            isMultipleSelectMode: newValue,
         });
     }
 
@@ -1300,6 +1300,35 @@ const FileTypeFilterSelect = () => {
     );
 };
 
+const ActionBar: React.FC = () => {
+    const [pathState, setPathState] = useAtom(pathStateAtom);
+    const props = useAtomValue(propsAtom);
+
+    return (
+        <div className={classNames(flex, flexRow, itemsCenter)}>
+            <Checkbox
+                disabled={!pathState.canChangeMultipleSelectMode(props)}
+                onChange={e =>
+                    setPathState(pathState =>
+                        pathState.changeIsMultipleSelectMode(e.target.checked)
+                    )
+                }
+                checked={pathState.isMultipleSelectMode}
+            >
+                複数選択モード
+            </Checkbox>
+            <Button
+                onClick={() => {
+                    setPathState(pathState => pathState.resetCutState());
+                }}
+                disabled={!pathState.isCutAny}
+            >
+                切り取りをキャンセル
+            </Button>
+        </div>
+    );
+};
+
 const AddressBar: React.FC = () => {
     const [pathState, setPathState] = useAtom(pathStateAtom);
     const searchPlaceholder = useAtomSelector(propsAtom, props => props.searchPlaceholder);
@@ -1389,7 +1418,7 @@ const DeleteConfirmModal: React.FC = () => {
                 if (deleteStatus.files.length === 0) {
                     message = '選択した空のフォルダを削除しますか？';
                 } else {
-                    message = `次の${deleteStatus.files.length}個のファイルを削除しますか？(空のフォルダは一覧に表示されていませんが、あわせて削除されます)`;
+                    message = `次の${deleteStatus.files.length}個のファイルを削除しますか？(フォルダは一覧に表示されませんが、あわせて削除されます)`;
                 }
             }
             break;
@@ -1537,7 +1566,7 @@ const RenameConfirmModal: React.FC = () => {
                 if (renameStatus.files.length === 0) {
                     message = '選択した空のフォルダを移動もしくはリネームしますか？';
                 } else {
-                    message = `次の${renameStatus.files.length}個のファイルを移動もしくはリネームしますか？（空のフォルダは一覧に表示されていませんが、あわせて移動もしくはリネームされます）`;
+                    message = `次の${renameStatus.files.length}個のファイルを移動もしくはリネームしますか？（フォルダは一覧に表示されませんが、あわせて移動もしくはリネームされます）`;
                 }
             }
             break;
@@ -1737,11 +1766,12 @@ const CreateFolderModal: React.FC = () => {
             }
         >
             <div className={classNames(flex, flexColumn)} style={{ gap: 4 }}>
-                <div>
-                    新しく作るフォルダの名前を入力してください。
-                    <br />
-                    ファイルが1つもない空のフォルダは、ブラウザを閉じた際などに自動的に消去されます。ファイルおよびファイルにアクセスするために必要なフォルダが自動的に消去されることはありません。
-                </div>
+                <div>新しく作るフォルダの名前を入力してください。</div>
+                <Alert
+                    type='info'
+                    showIcon
+                    message='ファイルが1つもない空のフォルダは、サーバーに保存されません。空のフォルダは、ファイル操作を行いやすくするためにブラウザの画面上でのみ存在する一時的なフォルダであり、ブラウザを閉じた際などに自動的に消去されます。'
+                />
                 <Input
                     ref={inputRef}
                     placeholder='フォルダ名'
@@ -1803,29 +1833,30 @@ const ContextMenu: React.FC<{
 
     const createMenuKey = (key: string | number) => keyNames('FileBrowser', 'ContextMenu', key);
 
+    const selectedItemsMenu: ItemType[] = pathState.isSelectedAny
+        ? [
+              {
+                  key: createMenuKey('選択されているファイルを切り取り'),
+                  label: '選択されているファイルを切り取り',
+                  disabled: !pathState.canCut(props),
+                  onClick: () => {
+                      setPathState(pathState => pathState.cutSelected(props));
+                  },
+              },
+              {
+                  key: createMenuKey('選択されているファイルをすべて削除'),
+                  label: '選択されているファイルをすべて削除',
+                  disabled: !requestDeletingSelectedNodesAction.canExecute,
+                  onClick: () => {
+                      requestDeletingSelectedNodesAction.execute();
+                  },
+              },
+              { type: 'divider' },
+          ]
+        : [];
+
     let menuItems: ItemType[];
     if (node == null) {
-        const selectedItemsMenu: ItemType[] = pathState.isSelectedAny
-            ? [
-                  {
-                      key: createMenuKey('選択されているファイルを切り取り'),
-                      label: '選択されているファイルを切り取り',
-                      disabled: !pathState.canCut(props),
-                      onClick: () => {
-                          setPathState(pathState => pathState.cutSelected(props));
-                      },
-                  },
-                  {
-                      key: createMenuKey('選択されているファイルをすべて削除'),
-                      label: '選択されているファイルをすべて削除',
-                      disabled: !requestDeletingSelectedNodesAction.canExecute,
-                      onClick: () => {
-                          requestDeletingSelectedNodesAction.execute();
-                      },
-                  },
-                  { type: 'divider' },
-              ]
-            : [];
         menuItems = [
             ...selectedItemsMenu,
             {
@@ -1857,6 +1888,7 @@ const ContextMenu: React.FC<{
         ];
     } else {
         menuItems = [
+            ...selectedItemsMenu,
             {
                 key: createMenuKey('選択'),
                 label: '選択',
@@ -2406,6 +2438,7 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
                 props.style
             )}
         >
+            <ActionBar />
             <AddressBar />
             <NodesGrid />
             <DeleteConfirmModal />
@@ -2416,6 +2449,7 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
     );
 };
 
+/** 汎用的なファイルブラウザー（ファイルマネージャ）です。 */
 export const FileBrowser: React.FC<Props> = props => {
     return (
         <Provider>
