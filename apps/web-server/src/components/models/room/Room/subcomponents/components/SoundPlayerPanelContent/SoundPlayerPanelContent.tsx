@@ -263,7 +263,7 @@ const SeModal: React.FC<SeModalProps> = ({ visible, onClose }) => {
     }
 
     return (
-        <Modal visible={visible} onCancel={onClose}>
+        <Modal visible={visible} onCancel={onClose} style={{ width: stretchedModalWidth }}>
             <div className={classNames(flex, flexColumn)}>
                 <VolumeBarForSoundPlayer
                     volumeBarValue={volumeInput}
