@@ -163,7 +163,10 @@ export const FileView: React.FC<Props> = props => {
                     <FileSelectorModal
                         visible={modalVisible}
                         onClose={() => setModalVisible(false)}
-                        onSelect={newValue => onPathChange && onPathChange(newValue)}
+                        onSelect={newValue => {
+                            onPathChange && onPathChange(newValue);
+                            setModalVisible(false);
+                        }}
                         defaultFileTypeFilter={defaultFileTypeFilter}
                         uploaderFileBrowserHeight={props.uploaderFileBrowserHeight}
                     />

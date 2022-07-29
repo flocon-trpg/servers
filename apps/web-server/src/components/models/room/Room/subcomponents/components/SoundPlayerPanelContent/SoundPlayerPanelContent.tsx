@@ -239,6 +239,7 @@ const BgmPlaylistModal: React.FC<BgmPlaylistModalProps> = ({ channelKey, visible
                         setNewBgmState(state => {
                             state.files.push({ ...newValue, $v: 1, $r: 1 });
                         });
+                        setModalToAddVisible(false);
                     }}
                 />
             </div>
