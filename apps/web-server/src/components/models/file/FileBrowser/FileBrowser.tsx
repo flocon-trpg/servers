@@ -1842,7 +1842,7 @@ const CreateFolderModal: React.FC = () => {
 const cellFileStyle: React.CSSProperties = {
     maxWidth: 80,
     height: 60,
-    maxHeight: 70,
+    maxHeight: 60,
     padding: 6,
 };
 
@@ -2157,7 +2157,7 @@ const NodeView: React.FC<{
                         textAlign: 'center',
                         lineHeight: '1.333333',
                         overflow: 'hidden',
-                        height: 30,
+                        height: 36,
                         textOverflow: 'ellipsis',
                     }}
                 >
