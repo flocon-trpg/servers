@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
-import { success, useImageFromGraphQL } from '@/hooks/imageHooks';
+import { success, useImageFromFilePath } from '@/hooks/imageHooks';
 import * as ReactKonva from 'react-konva';
 import { Button, Dropdown, InputNumber, Menu, Popover } from 'antd';
 import * as Icons from '@ant-design/icons';
@@ -211,7 +211,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     }, [setBoardTooltip, stoppedCursor]);
     const [selectedPieceId, setSelectedPieceId] = React.useState<SelectedPieceId>();
     const [isBackgroundDragging, setIsBackgroundDragging] = React.useState(false); // これがないと、pieceをドラッグでリサイズする際に背景が少し動いてしまう。
-    const backgroundImage = useImageFromGraphQL(board.backgroundImage);
+    const backgroundImage = useImageFromFilePath(board.backgroundImage);
     const backgroundImageResult =
         backgroundImage.type === success ? backgroundImage.image : undefined;
     const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);

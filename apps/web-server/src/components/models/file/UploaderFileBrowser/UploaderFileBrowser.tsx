@@ -40,6 +40,8 @@ import { useOpenFirebaseStorageFile } from '@/hooks/useOpenFirebaseStorageFile';
 import { useOpenFloconUploaderFile } from '@/hooks/useOpenFloconUploaderFile';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { Result } from '@kizahasi/result';
+import { ImageView } from '../ImageView/ImageView';
+import { thumbs } from '@/utils/file/getFloconUploaderFile';
 
 type FilePathState = State<typeof filePathTemplate>;
 
@@ -171,6 +173,13 @@ const useFloconUploaderFiles = (onSelect: OnSelect | null, pause: boolean) => {
                 path: fileBrowserPath.array,
                 id: undefined,
                 icon: fileType,
+                thumb:
+                    fileType === image && file.thumbFilename != null ? (
+                        <ImageView
+                            size={60}
+                            filePath={{ type: thumbs, thumbFilename: file.thumbFilename }}
+                        />
+                    ) : undefined,
                 fileType,
                 onDelete: async () => {
                     // CONSIDER: 複数のファイルを削除する場合、その数だけdeleteFilesMutationが実行されるので、API制限に引っかかる可能性がある。このコードかAPIサーバーのコードを見直す必要があるかもしれない。
@@ -483,6 +492,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
     return (
         <>
             <FileBrowser
+                jotaiScope='UploaderFileBrowser'
                 height={height}
                 fileCreateLabel='ファイルをアップロード'
                 searchPlaceholder='ファイル名で検索'

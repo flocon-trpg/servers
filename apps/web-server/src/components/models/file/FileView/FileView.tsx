@@ -2,7 +2,7 @@ import { Alert, Button, Tooltip } from 'antd';
 import * as React from 'react';
 import { FileSourceType, GetFilesDocument } from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Core from '@flocon-trpg/core';
-import { FilePath } from '@/utils/file/filePath';
+import { FilePath, FilePathLike } from '@/utils/file/filePath';
 import classNames from 'classnames';
 import { flex, flexRow, itemsCenter } from '@/styles/className';
 import { ImageView } from '../ImageView/ImageView';
@@ -63,7 +63,7 @@ const FloconUploaderLink: React.FC<{
 type OnPathChange = (newValue: FilePath | FilePathState | null) => void;
 
 type PropsBase = {
-    filePath?: FilePath | FilePathState;
+    filePath?: FilePathLike;
     showImage?: boolean;
     maxWidthOfLink: number | null;
     uploaderFileBrowserHeight: number | null;

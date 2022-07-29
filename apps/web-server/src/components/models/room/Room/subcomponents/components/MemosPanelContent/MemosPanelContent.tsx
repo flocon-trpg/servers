@@ -81,6 +81,7 @@ const MemoBrowserModal: React.FC<{
             width={stretchedModalWidth}
         >
             <FileBrowser
+                jotaiScope='MemosPanelContent'
                 files={files}
                 fileCreateLabel='メモを作成'
                 searchPlaceholder='メモの名前で検索'

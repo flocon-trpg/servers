@@ -7,7 +7,7 @@ import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/
 import { useBoards } from '../../hooks/useBoards';
 import { State, boardTemplate, simpleId } from '@flocon-trpg/core';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { FilePath } from '@/utils/file/filePath';
+import { FilePathModule } from '@/utils/file/filePath';
 import { atom, useAtom } from 'jotai';
 import { create, update } from '@/utils/constants';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
@@ -210,7 +210,7 @@ export const BoardEditorModal: React.FC = () => {
                                         return;
                                     }
                                     board.backgroundImage =
-                                        path == null ? undefined : FilePath.toOt(path);
+                                        path == null ? undefined : FilePathModule.toOtState(path);
                                 })
                             }
                             defaultFileTypeFilter={image}

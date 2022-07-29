@@ -19,7 +19,7 @@ import {
     participantTemplate,
     simpleId,
 } from '@flocon-trpg/core';
-import { FilePath } from '@/utils/file/filePath';
+import { FilePath, FilePathModule } from '@/utils/file/filePath';
 import axios from 'axios';
 import JSZip from 'jszip';
 import { analyzeUrl } from '@/utils/analyzeUrl';
@@ -514,6 +514,7 @@ type ImageResult = {
     filename: string;
 };
 
+// TODO: react queryに置き換える
 class ImageDownloader {
     // keyはgetDownloadURL()する前のpath
     // valueがnullの場合はnot foundなどを表し、二度とダウンロードを試みない
@@ -572,7 +573,7 @@ class ImageDownloader {
         if (cache !== undefined) {
             return cache;
         }
-        const srcResult = await FilePath.getSrc({
+        const srcResult = await FilePathModule.getSrc({
             path: filePath,
             config: this.config,
             storage: this.storage,

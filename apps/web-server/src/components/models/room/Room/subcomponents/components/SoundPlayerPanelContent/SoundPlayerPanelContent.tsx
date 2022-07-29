@@ -1,18 +1,15 @@
 import React from 'react';
 import { Button, Checkbox, Modal, Tooltip } from 'antd';
-import {
-    FilePathInput,
-    WriteRoomSoundEffectDocument,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
+import { WriteRoomSoundEffectDocument } from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Icon from '@ant-design/icons';
 import { VolumeBar } from '@/components/ui/VolumeBar/VolumeBar';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { Styles } from '@/styles';
-import { State, StrIndex5, bgmTemplate, filePathTemplate } from '@flocon-trpg/core';
+import { State, StrIndex5, bgmTemplate } from '@flocon-trpg/core';
 import { flex, flexColumn, flexRow, itemsCenter } from '@/styles/className';
 import classNames from 'classnames';
 import { sound } from '@/utils/fileType';
-import { FilePath as FilePathModule } from '@/utils/file/filePath';
+import { FilePathLike, FilePathModule } from '@/utils/file/filePath';
 import { useMutation } from 'urql';
 import { atom } from 'jotai';
 import { roomAtom } from '@/atoms/roomAtom/roomAtom';
@@ -28,7 +25,6 @@ import { useLatest } from 'react-use';
 import { stretchedModalWidth } from '@/utils/variables';
 import { Fieldset } from '@/components/ui/Fieldset/Fieldset';
 
-type FilePath = State<typeof filePathTemplate>;
 type BgmState = State<typeof bgmTemplate>;
 
 const maxWidthOfLink = 300;
@@ -37,7 +33,7 @@ const initBgmState: BgmState = { $v: 1, $r: 1, isPaused: true, files: [], volume
 
 const bgmsAtom = atom(get => get(roomAtom).roomState?.state?.bgms);
 
-const toKey = (source: FilePathInput | FilePath): string => {
+const toKey = (source: FilePathLike): string => {
     return keyNames('SoundPlayer', source.sourceType, source.path);
 };
 

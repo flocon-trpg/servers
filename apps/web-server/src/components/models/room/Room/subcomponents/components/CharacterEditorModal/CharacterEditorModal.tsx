@@ -18,7 +18,7 @@ import { useParticipants } from '../../hooks/useParticipants';
 import { useBoolParamNames, useNumParamNames, useStrParamNames } from '../../hooks/useParamNames';
 import { State, characterTemplate, simpleId, strIndex20Array } from '@flocon-trpg/core';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { FilePath } from '@/utils/file/filePath';
+import { FilePathModule } from '@/utils/file/filePath';
 import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
 import { atom } from 'jotai';
 import { create, update } from '@/utils/constants';
@@ -485,7 +485,9 @@ export const CharacterEditorModal: React.FC = () => {
                                             return;
                                         }
                                         character.image =
-                                            path == null ? undefined : FilePath.toOt(path);
+                                            path == null
+                                                ? undefined
+                                                : FilePathModule.toOtState(path);
                                     })
                                 }
                                 showImage
@@ -504,7 +506,9 @@ export const CharacterEditorModal: React.FC = () => {
                                             return;
                                         }
                                         character.portraitImage =
-                                            path == null ? undefined : FilePath.toOt(path);
+                                            path == null
+                                                ? undefined
+                                                : FilePathModule.toOtState(path);
                                     })
                                 }
                                 showImage

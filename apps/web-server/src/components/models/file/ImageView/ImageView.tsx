@@ -1,14 +1,11 @@
 import React from 'react';
-import { State, filePathTemplate } from '@flocon-trpg/core';
-import { loaded, loading, nullishArg, useSrcFromGraphQL } from '@/hooks/srcHooks';
-import { FilePathFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { loaded, loading, nullishArg, useSrcFromFilePath } from '@/hooks/srcHooks';
 import * as Icons from '@ant-design/icons';
 import { LazyAndPreloadImage } from '@/components/ui/LazyAndPreloadImage/LazyAndPreloadImage';
-
-type FilePath = State<typeof filePathTemplate>;
+import { FilePathLikeOrThumb } from '@/utils/file/filePath';
 
 type Props = {
-    filePath: FilePathFragment | FilePath | 'Message' | 'Person';
+    filePath: FilePathLikeOrThumb | 'Message' | 'Person';
     size: number | 'Popover';
     link?: boolean;
 };
@@ -20,7 +17,7 @@ export const ImageView: React.FC<Props> = ({
 }: Props) => {
     const size: number = sizeProp === 'Popover' ? 150 : sizeProp;
     const filePath = typeof filePathProp === 'string' ? undefined : filePathProp;
-    const { queryResult } = useSrcFromGraphQL(filePath);
+    const { queryResult } = useSrcFromFilePath(filePath);
 
     const loadingIcon = <Icons.LoadingOutlined style={{ fontSize: size }} />;
     const errorIcon = <Icons.FileExclamationOutlined style={{ fontSize: size }} />;

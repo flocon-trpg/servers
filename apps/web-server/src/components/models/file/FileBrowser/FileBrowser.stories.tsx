@@ -110,6 +110,7 @@ const Practical: React.FC<PracticalProps> = ({
 
     return (
         <FileBrowser
+            jotaiScope='Pratical'
             height={null}
             files={filesState}
             fileCreateLabel='😀ファイルを作成🤖'
@@ -185,6 +186,7 @@ export const Default: React.FC<Props> = ({ files, filesSource, defaultFileTypeFi
 
     return (
         <FileBrowser
+            jotaiScope='Default'
             height={null}
             fileCreateLabel='😀ファイルを作成🤖'
             searchPlaceholder='😀検索🤖'

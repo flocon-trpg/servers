@@ -3,7 +3,7 @@ import React from 'react';
 import { FilePathFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { analyzeUrl } from '@/utils/analyzeUrl';
 import { volumeCap } from '@/utils/variables';
-import { useSrcFromGraphQL } from '@/hooks/srcHooks';
+import { useSrcFromFilePath } from '@/hooks/srcHooks';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { useLatest } from 'react-use';
@@ -35,7 +35,7 @@ function usePlaySoundEffectCore(value?: SoundEffect): void {
         volumeConfigRef.current = volumeConfig;
     }, [volumeConfig]);
 
-    const url = useSrcFromGraphQL(value?.filePath);
+    const url = useSrcFromFilePath(value?.filePath);
 
     // value?.messageIdが変わったときに音声を流すuseEffectの処理をトリガーさせるための処理。
     // url.srcが同じでも、新しいsrcObjectオブジェクトを作成することで、srcObjectへの参照を変えることでトリガーさせている。

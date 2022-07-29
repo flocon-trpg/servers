@@ -33,11 +33,10 @@ SOFTWARE.
 // どうもFirefoxではCSSにwidthとheightが指定されていないとSVG画像が表示されないバグがある模様なので要注意!
 // 普通に<img/>から表示するぶんには問題ないが、useImageの関数内のような呼び方だと表示されない。
 
-import { State as S, filePathTemplate } from '@flocon-trpg/core';
 import React from 'react';
-import { FilePathFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { analyzeUrl } from '../utils/analyzeUrl';
-import { useSrcFromGraphQL } from './srcHooks';
+import { useSrcFromFilePath } from './srcHooks';
+import { FilePathLikeOrThumb } from '@/utils/file/filePath';
 
 type Size = {
     w: number;
@@ -125,11 +124,13 @@ export function useImage(
     return state ?? { type: loading };
 }
 
-export function useImageFromGraphQL(
-    filePath: FilePathFragment | S<typeof filePathTemplate> | null | undefined,
-    crossOrigin?: string
+export function useImageFromFilePath(
+    filePath: FilePathLikeOrThumb | null | undefined,
+    options?: {
+        crossOrigin?: string;
+    }
 ): State {
-    const { src } = useSrcFromGraphQL(filePath);
+    const { src } = useSrcFromFilePath(filePath);
 
-    return useImage(src ?? null, { crossOrigin });
+    return useImage(src ?? null, { crossOrigin: options?.crossOrigin });
 }

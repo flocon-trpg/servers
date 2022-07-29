@@ -41,15 +41,24 @@ import {
     left,
     right,
 } from '@flocon-trpg/utils';
-import { Provider, atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
+import {
+    Atom,
+    PrimitiveAtom,
+    Provider,
+    atom,
+    useAtom as useAtomCore,
+    useAtomValue as useAtomValueCore,
+    useSetAtom as useSetAtomCore,
+} from 'jotai';
 import produce from 'immer';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { useLatest } from 'react-use';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { useAtomSelector as useAtomSelectorCore } from '@/hooks/useAtomSelector';
 import { joinPath } from '@flocon-trpg/core';
 import { mergeStyles } from '@/utils/mergeStyles';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import { Result } from '@kizahasi/result';
+import { Scope } from 'jotai/core/atom';
 
 export const image = 'image';
 export const sound = 'sound';
@@ -104,7 +113,7 @@ type FilePathBase = {
     /** ファイルのフィルター設定で用いる識別子を表します。フィルター設定を使わない場合は undefined を渡してください。*/
     fileType?: string;
 
-    /** 画像のサムネイルを表します。省略した場合はiconが代わりに表示されます。 */
+    /** 画像のサムネイルを表します。nullishの場合はiconが代わりに表示されます。 */
     thumb?: React.ReactNode;
 
     /** ファイルのアイコンを表します。thumbが指定されている場合はそちらが優先されます。 */
@@ -158,6 +167,8 @@ type IsProtected = (absolutePath: readonly string[]) => boolean;
 const defaultHeight = 350;
 
 export type Props = {
+    jotaiScope: Scope;
+
     files: readonly FilePath[];
 
     // VirtuosoGridの仕様により、heightを指定しないと表示されない。指定しない場合はdefaultHeightが使われる
@@ -222,6 +233,7 @@ export type Props = {
 };
 
 const defaultProps: Props = {
+    jotaiScope: 'defaultProps - 061dd7e3-35fa-4d44-9225-99a67a16f238',
     files: [],
     height: null,
     isProtected: () => false,
@@ -1061,6 +1073,28 @@ class PathState {
         };
     }
 }
+
+const JotaiScopeContext = React.createContext<Scope>(defaultProps.jotaiScope);
+
+const useJotaiScope = () => {
+    return React.useContext(JotaiScopeContext);
+};
+
+const useAtomValue = <T,>(atom: Atom<T>) => {
+    return useAtomValueCore(atom, useJotaiScope());
+};
+
+const useSetAtom = <T,>(atom: PrimitiveAtom<T>) => {
+    return useSetAtomCore(atom, useJotaiScope());
+};
+
+const useAtom = <T,>(atom: PrimitiveAtom<T>) => {
+    return useAtomCore(atom, useJotaiScope());
+};
+
+const useAtomSelector = <T1, T2>(atom: Atom<T1>, mapping: (value: T1) => T2) => {
+    return useAtomSelectorCore(atom, mapping, undefined, { scope: useJotaiScope() });
+};
 
 const pathStateAtom = atom(PathState.init());
 const propsAtom = atom<Props>(defaultProps);
@@ -2496,9 +2530,12 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
 
 /** 汎用的なファイルブラウザー（ファイルマネージャ）です。 */
 export const FileBrowser: React.FC<Props> = props => {
+    // もしProvider.scopeがない場合、jotaiは最も近いProviderにアクセスするため、useWebConfigなどが常にnullishとなってしまう。それを防ぐため、scopeを用いている。
     return (
-        <Provider>
-            <FileBrowserWithoutJotaiProvider {...props} />
-        </Provider>
+        <JotaiScopeContext.Provider value={props.jotaiScope}>
+            <Provider scope={props.jotaiScope}>
+                <FileBrowserWithoutJotaiProvider {...props} />
+            </Provider>
+        </JotaiScopeContext.Provider>
     );
 };

@@ -1,16 +1,12 @@
-import { State, filePathTemplate } from '@flocon-trpg/core';
 import React from 'react';
-import { FilePathFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
-import { FilePath as FilePathModule } from '../utils/file/filePath';
+import { FilePathLikeOrThumb, FilePathModule } from '../utils/file/filePath';
 import { useWebConfig } from './useWebConfig';
 import { useAtomValue } from 'jotai/utils';
 import { firebaseStorageAtom } from '../pages/_app';
 import { useGetIdToken } from './useGetIdToken';
 import { UseQueryResult, useQueries } from 'react-query';
 import { useMemoOne } from 'use-memo-one';
-import { idTokenIsNull } from '@/utils/file/getFloconUploaderFile';
-
-type FilePath = State<typeof filePathTemplate>;
+import { idTokenIsNull, thumbs } from '@/utils/file/getFloconUploaderFile';
 
 export const loaded = 'loaded';
 export const loading = 'loading';
@@ -32,8 +28,8 @@ type SrcArrayResult =
 
 // PathArrayがnullish ⇔ 戻り値がnullishArg
 // pathArray.length = queriesResult.length = srcDataArray.length
-export function useSrcArrayFromGraphQL(
-    pathArray: ReadonlyArray<FilePathFragment | FilePath> | null | undefined
+export function useSrcArrayFromFilePath(
+    pathArray: ReadonlyArray<FilePathLikeOrThumb> | null | undefined
 ): SrcArrayResult {
     const config = useWebConfig();
     const storage = useAtomValue(firebaseStorageAtom);
@@ -43,13 +39,19 @@ export function useSrcArrayFromGraphQL(
         pathArray == null || config?.value == null || storage == null
             ? []
             : pathArray.map(path => {
-                  // deep equalityでチェックされるため、余計なプロパティを取り除いている
+                  const $path = FilePathModule.ensureType(path);
+
+                  // deep equalityでチェックされるため、pathからは必要なプロパティのみ抽出している。
                   const queryKey = [
                       'firebase storage url',
-                      {
-                          path: path.path,
-                          sourceType: path.sourceType,
-                      },
+                      $path.type === thumbs
+                          ? {
+                                thumbFilename: $path.thumbFilename,
+                            }
+                          : {
+                                path: $path.value.path,
+                                sourceType: $path.value.sourceType,
+                            },
                   ];
                   const queryFn = async () => {
                       const result = await FilePathModule.getSrc({
@@ -105,7 +107,7 @@ type SrcResult =
           type: typeof loading | typeof nullishArg | typeof invalidWebConfig;
       };
 
-const toSrcResult = (srcArray: ReturnType<typeof useSrcArrayFromGraphQL>): SrcResult => {
+const toSrcResult = (srcArray: ReturnType<typeof useSrcArrayFromFilePath>): SrcResult => {
     if (srcArray.type !== loaded) {
         return srcArray;
     }
@@ -118,12 +120,12 @@ const toSrcResult = (srcArray: ReturnType<typeof useSrcArrayFromGraphQL>): SrcRe
     return { type: loaded, value: result };
 };
 
-export function useSrcFromGraphQL(path: FilePathFragment | FilePath | null | undefined): {
+export function useSrcFromFilePath(path: FilePathLikeOrThumb | null | undefined): {
     src: string | undefined;
     queryResult: SrcResult;
 } {
     const pathArray = React.useMemo(() => (path == null ? null : [path]), [path]);
-    const resultArray = useSrcArrayFromGraphQL(pathArray);
+    const resultArray = useSrcArrayFromFilePath(pathArray);
     const queryResult = useMemoOne(() => {
         return toSrcResult(resultArray);
     }, [resultArray]);

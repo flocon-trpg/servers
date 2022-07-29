@@ -1,13 +1,10 @@
 import React from 'react';
 import { Popover } from 'antd';
-import { State, filePathTemplate } from '@flocon-trpg/core';
-import { FilePathFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { ImageView } from '../ImageView/ImageView';
-
-type FilePath = State<typeof filePathTemplate>;
+import { FilePathLikeOrThumb } from '@/utils/file/filePath';
 
 type Props = {
-    image: FilePathFragment | FilePath | 'Message' | 'Person';
+    image: FilePathLikeOrThumb | 'Message' | 'Person';
     size: number;
 };
 

@@ -8,7 +8,7 @@ import { Subscribable } from 'rxjs';
 import { useImagePieces } from '../../hooks/useImagePieces';
 import { useCloneImagePiece } from '../../hooks/useCloneImagePiece';
 import { FileView } from '@/components/models/file/FileView/FileView';
-import { FilePath } from '@/utils/file/filePath';
+import { FilePathModule } from '@/utils/file/filePath';
 import {
     CompositeRect,
     PixelPosition,
@@ -177,7 +177,8 @@ export const ImagePieceEditor: React.FC<{
                                 if (pieceValue == null) {
                                     return;
                                 }
-                                pieceValue.image = path == null ? undefined : FilePath.toOt(path);
+                                pieceValue.image =
+                                    path == null ? undefined : FilePathModule.toOtState(path);
                             })
                         }
                         showImage
