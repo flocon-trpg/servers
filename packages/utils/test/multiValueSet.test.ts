@@ -45,8 +45,14 @@ describe('multiValueSet', () => {
         actual.add(['a', 'b']);
         actual.add(['b']);
         expect(actual.size).toBe(4);
-        expect(_([...actual.toIterator()]).sortBy(x => JSON.stringify(x))).toEqual(
-            _([[], ['a'], ['a', 'b'], ['b']]).sortBy(x => JSON.stringify(x))
+        expect(
+            _([...actual.toIterator()])
+                .sortBy(x => JSON.stringify(x))
+                .value()
+        ).toEqual(
+            _([[], ['a'], ['a', 'b'], ['b']])
+                .sortBy(x => JSON.stringify(x))
+                .value()
         );
     });
 
