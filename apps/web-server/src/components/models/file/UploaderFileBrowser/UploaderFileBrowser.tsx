@@ -146,7 +146,7 @@ const useFloconUploaderFiles = (onSelect: OnSelect | null, pause: boolean) => {
             return null;
         }
         return data.files.map(file => {
-            const name = fileName(file.screenname);
+            const name = fileName(file.filename);
             const fileType = guessFileType(name);
             const fileBrowserPath = joinPath(
                 file.listType === FileListType.Public

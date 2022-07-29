@@ -39,8 +39,9 @@ export const useOpenFloconUploaderFile = () => {
                 return;
             }
             const blob = new Blob([axiosResponse.data]);
+            // screennameは拡張子などが変わっている可能性があるためfilenameを用いている
             // CONSIDER: 画像などであれば、ダウンロードするのではなく、新しいタブで開いたほうがいい
-            fileDownload(blob, file.screenname);
+            fileDownload(blob, file.filename);
         },
         [getIdToken, isFetching, webConfig?.value]
     );
