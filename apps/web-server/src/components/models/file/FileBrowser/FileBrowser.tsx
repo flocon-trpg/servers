@@ -62,6 +62,8 @@ const none = '__none__';
 
 const columnGap = '4px 0';
 
+const protectedErrorMessage = 'このフォルダでは無効化されています。';
+
 type Path = {
     path: readonly string[];
 
@@ -178,7 +180,7 @@ export type Props = {
             /** cutの際はnullに、pasteの際はnon-nullになります。 */
             newDirectoryPath: readonly string[] | null;
         }
-    ) => Result<void>;
+    ) => Result<undefined>;
 
     canRename: (params: {
         directoryPath: readonly string[];
@@ -189,13 +191,13 @@ export type Props = {
         newName: string | null;
 
         nodeType: Node['type'];
-    }) => Result<void>;
+    }) => Result<undefined>;
 
     canCreateFolder: (params: {
         directoryPath: readonly string[];
 
         foldername: string;
-    }) => Result<void>;
+    }) => Result<undefined>;
 
     /** trueが返されたファイルパスでは、ファイルおよびフォルダの作成とリネームと移動と削除などが無効化されます。 */
     isProtected: IsProtected;
@@ -848,15 +850,18 @@ class PathState {
         });
     }
 
-    canCut(props: Props) {
-        return (
-            !this.isCurrentDirectoryProtected(props) &&
-            props.canMove({ currentDirectoryPath: this.currentDirectory, newDirectoryPath: null })
-        );
+    canCut(props: Props): Result<undefined> {
+        if (this.isCurrentDirectoryProtected(props)) {
+            return Result.error(protectedErrorMessage);
+        }
+        return props.canMove({
+            currentDirectoryPath: this.currentDirectory,
+            newDirectoryPath: null,
+        });
     }
 
     cutOne(props: Props, node: Node): PathState {
-        if (!this.canCut(props)) {
+        if (this.canCut(props).isError) {
             return this;
         }
 
@@ -881,7 +886,7 @@ class PathState {
     }
 
     cutSelected(props: Props) {
-        if (!this.canCut(props)) {
+        if (this.canCut(props).isError) {
             return this;
         }
 
@@ -904,12 +909,15 @@ class PathState {
         });
     }
 
-    canCreateFile(props: Props) {
-        return !this.isCurrentDirectoryProtected(props);
+    canCreateFile(props: Props): Result<undefined> {
+        if (this.isCurrentDirectoryProtected(props)) {
+            return Result.error(protectedErrorMessage);
+        }
+        return Result.ok(undefined);
     }
 
     createFile(props: Props) {
-        if (!this.canCreateFile(props)) {
+        if (this.canCreateFile(props).isError) {
             return;
         }
         props.onFileCreate && props.onFileCreate(this.members.currentDirectory);
@@ -937,12 +945,15 @@ class PathState {
             });
     }
 
-    canRequestDeleting(props: Props, node: Node) {
-        return !props.isProtected(node.folderPath);
+    canRequestDeleting(props: Props, node: Node): Result<undefined> {
+        if (props.isProtected(node.folderPath)) {
+            return Result.error(protectedErrorMessage);
+        }
+        return Result.ok(undefined);
     }
 
     requestDeleting(props: Props, node: Node): AskingDeleteStatus | null {
-        if (!this.canRequestDeleting(props, node)) {
+        if (this.canRequestDeleting(props, node).isError) {
             return null;
         }
         const source = this.listFiles(this.toPathList([node]));
@@ -953,12 +964,15 @@ class PathState {
         };
     }
 
-    canRequestDeletingSelectedNodes(props: Props) {
-        return !props.isProtected(this.currentDirectory);
+    canRequestDeletingSelectedNodes(props: Props): Result<undefined> {
+        if (props.isProtected(this.currentDirectory)) {
+            return Result.error(protectedErrorMessage);
+        }
+        return Result.ok(undefined);
     }
 
     requestDeletingSelectedNodes(props: Props): AskingDeleteStatus | null {
-        if (!this.canRequestDeletingSelectedNodes(props)) {
+        if (this.canRequestDeletingSelectedNodes(props).isError) {
             return null;
         }
         const source = this.listFiles(this.selectedPaths);
@@ -970,7 +984,7 @@ class PathState {
         };
     }
 
-    canRequestPasting(props: Props, destDirectoryPath: readonly string[]) {
+    canRequestPasting(props: Props, destDirectoryPath: readonly string[]): Result<undefined> {
         return props.canMove({
             currentDirectoryPath: this.members.cutAt,
             newDirectoryPath: destDirectoryPath,
@@ -978,7 +992,7 @@ class PathState {
     }
 
     requestPasting(props: Props, destFolderPath: readonly string[]): AskingRenameStatus | null {
-        if (!this.canRequestPasting(props, destFolderPath)) {
+        if (this.canRequestPasting(props, destFolderPath).isError) {
             return null;
         }
         const files: FileToRename[] = this.listFiles({
@@ -1017,7 +1031,7 @@ class PathState {
         };
     }
 
-    canRequestRenaming(props: Props, node: Node, newName: string | null) {
+    canRequestRenaming(props: Props, node: Node, newName: string | null): Result<undefined> {
         return props.canRename({
             directoryPath: node.folderPath,
             oldName: node.name,
@@ -1027,7 +1041,7 @@ class PathState {
     }
 
     requestRenaming(props: Props, node: Node, newName: string): AskingRenameStatus | null {
-        if (!this.canRequestRenaming(props, node, newName)) {
+        if (this.canRequestRenaming(props, node, newName).isError) {
             return null;
         }
         const destPath = [...node.folderPath, newName];
@@ -1076,15 +1090,15 @@ const isProtectedAtom = atom(get => {
 });
 
 const useCreateFolderAction = () => {
-    const isLocked = useAtomValue(isProtectedAtom);
+    const isProtected = useAtomValue(isProtectedAtom);
     const setVisible = useSetAtom(isModalToCreateFolderVisibleAtom);
 
     return React.useMemo(
         () => ({
-            disabled: isLocked,
+            canExecute: isProtected ? Result.error(protectedErrorMessage) : Result.ok(undefined),
             showModal: () => setVisible(true),
         }),
-        [isLocked, setVisible]
+        [isProtected, setVisible]
     );
 };
 
@@ -1832,21 +1846,37 @@ const ContextMenu: React.FC<{
     const setRenameInputModal = useSetAtom(renameInputModalStateAtom);
 
     const createMenuKey = (key: string | number) => keyNames('FileBrowser', 'ContextMenu', key);
+    const createLabelBaseWithTooltip = ({
+        label,
+        result,
+    }: {
+        label: string;
+        result: Result<undefined>;
+    }) => {
+        return {
+            label: <Tooltip overlay={result.isError ? result.error : undefined}>{label}</Tooltip>,
+            disabled: result.isError,
+        };
+    };
 
     const selectedItemsMenu: ItemType[] = pathState.isSelectedAny
         ? [
               {
+                  ...createLabelBaseWithTooltip({
+                      label: '選択されているファイルを切り取り',
+                      result: pathState.canCut(props),
+                  }),
                   key: createMenuKey('選択されているファイルを切り取り'),
-                  label: '選択されているファイルを切り取り',
-                  disabled: !pathState.canCut(props),
                   onClick: () => {
                       setPathState(pathState => pathState.cutSelected(props));
                   },
               },
               {
+                  ...createLabelBaseWithTooltip({
+                      label: '選択されているファイルをすべて削除',
+                      result: requestDeletingSelectedNodesAction.canExecute,
+                  }),
                   key: createMenuKey('選択されているファイルをすべて削除'),
-                  label: '選択されているファイルをすべて削除',
-                  disabled: !requestDeletingSelectedNodesAction.canExecute,
                   onClick: () => {
                       requestDeletingSelectedNodesAction.execute();
                   },
@@ -1860,26 +1890,33 @@ const ContextMenu: React.FC<{
         menuItems = [
             ...selectedItemsMenu,
             {
+                ...createLabelBaseWithTooltip({
+                    label: props.fileCreateLabel,
+                    result: pathState.canCreateFile(props),
+                }),
                 key: createMenuKey('fileCreateLabel'),
-                label: props.fileCreateLabel,
-                disabled: !pathState.canCreateFile(props),
                 onClick: () => {
                     props.onFileCreate(pathState.currentDirectory);
                 },
             },
             {
+                ...createLabelBaseWithTooltip({
+                    label: 'フォルダを作成',
+                    result: createFolderAction.canExecute,
+                }),
                 key: createMenuKey('フォルダを作成'),
-                label: 'フォルダを作成',
-                disabled: createFolderAction.disabled,
                 onClick: () => {
                     createFolderAction.showModal();
                 },
             },
             pathState.isCutAny
                 ? {
+                      ...createLabelBaseWithTooltip({
+                          label: '貼り付け',
+                          result: requestPastingAction.canExecute(null),
+                      }),
                       key: createMenuKey('貼り付け'),
                       label: '貼り付け',
-                      disabled: requestPastingAction.canExecute(null).isError,
                       onClick: () => {
                           requestPastingAction.execute(null);
                       },
@@ -1909,27 +1946,33 @@ const ContextMenu: React.FC<{
                       onClick: node.source.onClipboard,
                   },
             {
+                ...createLabelBaseWithTooltip({
+                    label: '切り取り',
+                    result: pathState.canCut(props),
+                }),
                 key: createMenuKey('切り取り'),
-                label: '切り取り',
-                disabled: !pathState.canCut(props),
                 onClick: () => {
                     setPathState(pathState => pathState.cutOne(props, node).unselect());
                 },
             },
             pathState.isCutAny && node.type !== file
                 ? {
+                      ...createLabelBaseWithTooltip({
+                          label: '貼り付け',
+                          result: requestPastingAction.canExecute(node.name),
+                      }),
                       key: createMenuKey('貼り付け'),
-                      label: '貼り付け',
-                      disabled: requestPastingAction.canExecute(node.name).isError,
                       onClick: () => {
                           requestPastingAction.execute(node.name);
                       },
                   }
                 : null,
             {
+                ...createLabelBaseWithTooltip({
+                    label: 'リネーム',
+                    result: requestRenamingAction.canExecute(node, null),
+                }),
                 key: createMenuKey('リネーム'),
-                label: 'リネーム',
-                disabled: requestRenamingAction.canExecute(node, null).isError,
                 onClick: () => {
                     setRenameInputModal({
                         currentName: node.name,
@@ -1939,9 +1982,11 @@ const ContextMenu: React.FC<{
                 },
             },
             {
+                ...createLabelBaseWithTooltip({
+                    label: '削除',
+                    result: requestDeletingNodeAction.canExecute(node),
+                }),
                 key: createMenuKey('削除'),
-                label: '削除',
-                disabled: !requestDeletingNodeAction.canExecute(node),
                 onClick: () => {
                     {
                         requestDeletingNodeAction.execute(node);
