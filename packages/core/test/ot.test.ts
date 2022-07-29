@@ -234,7 +234,7 @@ describe.each`
     ${'-1'}     | ${false}
     ${''}       | ${false}
     ${'STRING'} | ${false}
-`('tests bgm', ({ id, isValidId }: { id: string; isValidId: boolean }) => {
+`('tests bgms', ({ id, isValidId }: { id: string; isValidId: boolean }) => {
     const newValue = {
         $v: 1 as const,
         $r: 1 as const,

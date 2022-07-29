@@ -68,9 +68,5 @@ export const decodeDownOperation = (source: unknown): RoomDownOperation => {
 };
 
 export const exactDownOperation = (source: RoomDownOperation): RoomDownOperation => {
-    const result = downOperation(Room.template, { exact: true }).decode(source);
-    if (result._tag === 'Left') {
-        throw new Error('decode failed');
-    }
-    return result.right;
+    return downOperation(Room.template, { exact: true }).encode(source);
 };

@@ -5,6 +5,7 @@ import {
     boardTemplate,
     characterTemplate,
     forceMaxLength100String,
+    roomDbTemplate,
     roomTemplate,
 } from '../src';
 
@@ -154,12 +155,10 @@ export namespace Resources {
         publicChannel10Name: '',
     };
 
-    export const complexState: State<typeof roomTemplate> = {
+    export const complexDbState: State<typeof roomDbTemplate> = {
         $v: 2,
         $r: 1,
         activeBoardId: undefined,
-        createdBy: 'CREATED_BY',
-        name: 'ROOM_NAME',
         bgms: {
             '1': {
                 $v: 1,
@@ -399,6 +398,22 @@ export namespace Resources {
                 textType: 'Plain',
             },
         },
+        publicChannel1Name: '',
+        publicChannel2Name: '',
+        publicChannel3Name: '',
+        publicChannel4Name: '',
+        publicChannel5Name: '',
+        publicChannel6Name: '',
+        publicChannel7Name: '',
+        publicChannel8Name: '',
+        publicChannel9Name: '',
+        publicChannel10Name: '',
+    };
+
+    export const complexState: State<typeof roomTemplate> = {
+        ...complexDbState,
+        createdBy: 'CREATED_BY',
+        name: 'ROOM_NAME',
         participants: {
             ...minimumState.participants,
             [Participant.Player1.userUid]: {
@@ -414,15 +429,5 @@ export namespace Resources {
                 role: 'Player',
             },
         },
-        publicChannel1Name: '',
-        publicChannel2Name: '',
-        publicChannel3Name: '',
-        publicChannel4Name: '',
-        publicChannel5Name: '',
-        publicChannel6Name: '',
-        publicChannel7Name: '',
-        publicChannel8Name: '',
-        publicChannel9Name: '',
-        publicChannel10Name: '',
     };
 }
