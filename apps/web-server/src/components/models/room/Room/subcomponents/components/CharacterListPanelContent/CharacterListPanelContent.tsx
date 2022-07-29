@@ -416,7 +416,7 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                                     )}
                                     <div style={{ width: 4 }} />
                                     <CollaborativeInput
-                                        style={{ minWidth: 100 }}
+                                        style={{ minWidth: 100, width: '100%' }}
                                         bufferDuration='default'
                                         size='small'
                                         value={character.state.name}
