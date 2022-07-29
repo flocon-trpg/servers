@@ -17,6 +17,7 @@ import {
     JoinRoomAsPlayerMutation,
     JoinRoomAsSpectatorMutation,
     LeaveRoomMutation,
+    MakeMessageNotSecretMutation,
     OperateMutation,
     ParticipantRole,
     RoomPublicMessageFragment,
@@ -28,7 +29,6 @@ import {
     GetRoomFailureType,
     GetRoomQuery,
     GetRoomsListQuery,
-    UpdateBookmarkFailureType,
     UpdateBookmarkMutation,
 } from '@flocon-trpg/typed-document-node-v0.7.2';
 import { EntryToServerResultType } from '../../src/enums/EntryToServerResultType';
@@ -42,12 +42,11 @@ import { diff, serializeUpOperation, toUpOperation } from '@kizahasi/ot-string';
 import { OperationResult } from '@urql/core';
 import { maskKeys, maskTypeNames } from './utils/maskKeys';
 import { TestClients } from './utils/testClients';
-import { delay, parseStringToBoolean, recordToArray } from '@flocon-trpg/utils';
+import { parseStringToBoolean, recordToArray } from '@flocon-trpg/utils';
 import { TestClient } from './utils/testClient';
 import produce from 'immer';
 import { doAutoMigrationBeforeStart } from '../../src/migrate';
 import { sqlite1DbName, sqlite2DbName } from './utils/databaseConfig';
-import { MakeMessageNotSecretMutation } from '@flocon-trpg/typed-document-node-v0.7.1/src/generated/graphql';
 
 type UpOperation = U<typeof roomTemplate>;
 
@@ -738,7 +737,6 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                     const filesResult = Assert.GetFilesQuery.toBeSuccess(
                         await clientToUploadFiles.getFilesQuery({ input: { fileTagIds: [] } })
                     );
-                    console.log('GetFilesQuery result: %o', filesResult);
                     expect(filesResult).toHaveLength(1);
                     filename = filesResult[0]!.filename;
                     thumbFilename = filesResult[0]!.thumbFilename;
@@ -821,6 +819,35 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                         );
                         expect(filesResult).toHaveLength(0);
                     }
+                }
+
+                const newScreenname = 'new-screenname.png';
+                {
+                    const actual = await clientToUploadFiles.renameFilesMutation({
+                        input: [
+                            {
+                                filename,
+                                newScreenname,
+                            },
+                        ],
+                    });
+                    expect(actual.data?.result).toEqual([filename]);
+                }
+
+                {
+                    const filesResult = Assert.GetFilesQuery.toBeSuccess(
+                        await clientToUploadFiles.getFilesQuery({ input: { fileTagIds: [] } })
+                    );
+                    expect(filesResult).toHaveLength(1);
+                    expect(filesResult[0]?.filename).toBe(filename);
+                    expect(filesResult[0]?.screenname).toBe(newScreenname);
+                }
+
+                {
+                    const filesResult = Assert.GetFilesQuery.toBeSuccess(
+                        await anotherClient.getFilesQuery({ input: { fileTagIds: [] } })
+                    );
+                    expect(filesResult).toHaveLength(publicOrUnlisted === 'public' ? 1 : 0);
                 }
 
                 {
