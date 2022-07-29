@@ -2071,7 +2071,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@discoveryjs/json-ext@npm:^0.5.3":
+"@discoveryjs/json-ext@npm:^0.5.3, @discoveryjs/json-ext@npm:^0.5.7":
   version: 0.5.7
   resolution: "@discoveryjs/json-ext@npm:0.5.7"
   checksum: 2176d301cc258ea5c2324402997cf8134ebb212469c0d397591636cea8d3c02f2b3cf9fd58dcb748c7a0dade77ebdc1b10284fa63e608c033a1db52fddc69918
@@ -3036,7 +3036,7 @@ __metadata:
     antd: ^4.20.6
     axios: ^0.27.0
     babel-loader: 8.2.5
-    chromatic: 6.6.3
+    chromatic: 6.7.2
     classnames: ^2.3.1
     clipboard-copy: ^4.0.1
     color: 4.2.3
@@ -9549,16 +9549,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chromatic@npm:6.6.3":
-  version: 6.6.3
-  resolution: "chromatic@npm:6.6.3"
+"chromatic@npm:6.7.2":
+  version: 6.7.2
+  resolution: "chromatic@npm:6.7.2"
   dependencies:
+    "@discoveryjs/json-ext": ^0.5.7
     "@types/webpack-env": ^1.17.0
   bin:
     chroma: bin/main.cjs
     chromatic: bin/main.cjs
     chromatic-cli: bin/main.cjs
-  checksum: 24eb091427ffaebe95bbed39363a613cea14798c8399e5328612fea3ee1aa77be37969f473e72fad8ee3d47fd6f27c663f973ec9cff701bafc1e5b09fc177629
+  checksum: 437424b9ed87123784e085bf36cc624c975361eec602870acf3369fce2d45989f30675fddeb69880045bdd2cc470a67f68299db46eb332cf6e711297ec01cb3c
   languageName: node
   linkType: hard
 
