@@ -52,7 +52,7 @@ import {
 } from 'jotai';
 import produce from 'immer';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
-import { useLatest } from 'react-use';
+import { useDeepCompareEffect, useLatest } from 'react-use';
 import { useAtomSelector as useAtomSelectorCore } from '@/hooks/useAtomSelector';
 import { joinPath } from '@flocon-trpg/core';
 import { mergeStyles } from '@/utils/mergeStyles';
@@ -2489,15 +2489,13 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
 
     const setPathState = useSetAtom(pathStateAtom);
 
-    React.useEffect(() => {
+    useDeepCompareEffect(() => {
         setPathState(pathState => pathState.updateEnsuredFolders(props.ensuredFolderPaths));
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [setPathState, ...props.ensuredFolderPaths]);
+    }, [setPathState, props.ensuredFolderPaths]);
 
-    React.useEffect(() => {
+    useDeepCompareEffect(() => {
         setPathState(pathState => pathState.updateOverridingElements(props.overridingElements));
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [setPathState, ...props.overridingElements]);
+    }, [setPathState, props.overridingElements]);
 
     React.useEffect(() => {
         setPathState(pathState => {

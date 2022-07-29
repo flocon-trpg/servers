@@ -36,7 +36,7 @@ module.exports = {
         'react-hooks/exhaustive-deps': [
             'error',
             {
-                additionalHooks: '^use(Memo|Callback)One$',
+                additionalHooks: '^use((Memo|Callback)One|DeepCompareEffect)$',
             },
         ],
         '@typescript-eslint/no-namespace': 'off',

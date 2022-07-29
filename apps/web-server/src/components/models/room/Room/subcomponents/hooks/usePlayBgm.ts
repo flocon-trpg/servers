@@ -62,6 +62,7 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmCoreProps): void {
             howl.fade(howl.volume(), 0, 1000);
             setTimeout(() => howl.stop(), 1000);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [urlArray]);
 
     React.useEffect(() => {
