@@ -3042,7 +3042,6 @@ __metadata:
     clipboard-copy: ^4.0.1
     color: 4.2.3
     color-name: 1.1.4
-    envfile: ^6.17.0
     firebase: ^9.6.6
     fp-ts: ^2.11.8
     graphql: ^15.6.0
@@ -11403,15 +11402,6 @@ __metadata:
   version: 2.2.1
   resolution: "env-paths@npm:2.2.1"
   checksum: 65b5df55a8bab92229ab2b40dad3b387fad24613263d103a97f91c9fe43ceb21965cd3392b1ccb5d77088021e525c4e0481adb309625d0cb94ade1d1fb8dc17e
-  languageName: node
-  linkType: hard
-
-"envfile@npm:^6.17.0":
-  version: 6.17.0
-  resolution: "envfile@npm:6.17.0"
-  bin:
-    envfile: bin.cjs
-  checksum: e7e9a2bb38daecdc7801153de60cb7a0640d2166577fec561fa268cef7ebd84a6c2cafe312f0a62f560e7e96cf59445c8bbb55a00e249010e90b2fe5c501be66
   languageName: node
   linkType: hard
 
