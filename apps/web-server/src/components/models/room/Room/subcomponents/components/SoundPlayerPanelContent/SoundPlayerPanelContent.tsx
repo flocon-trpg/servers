@@ -49,7 +49,7 @@ const VolumeBarForSoundPlayer: React.FC<VolumeBarForSoundPlayerProps> = ({
     hasMarginLeft,
 }: VolumeBarForSoundPlayerProps) => {
     return (
-        <Tooltip title='ボリューム補正の値は、自分だけでなく部屋にいる全員に反映されます'>
+        <Tooltip title='ボリューム補正の値は、自分だけでなく部屋にいる全員に反映されます。'>
             <div className={classNames(flex, flexRow, itemsCenter)}>
                 <Icon.SoundOutlined style={{ marginLeft: hasMarginLeft ? 16 : undefined }} />
                 <span>ボリューム補正</span>
@@ -183,6 +183,7 @@ const BgmPlaylistModal: React.FC<BgmPlaylistModalProps> = ({ channelKey, visible
         <Modal
             visible={visible}
             onCancel={onClose}
+            width={stretchedModalWidth}
             footer={
                 <DialogFooter
                     close={{ textType: 'cancel', onClick: onClose }}
@@ -206,26 +207,32 @@ const BgmPlaylistModal: React.FC<BgmPlaylistModalProps> = ({ channelKey, visible
             }
         >
             <div className={classNames(flex, flexColumn)}>
-                <VolumeBarForSoundPlayer
-                    volumeBarValue={newBgmState.volume}
-                    onVolumeBarValueChange={newValue =>
-                        setNewBgmState(state => {
-                            state.volume = newValue;
-                        })
-                    }
-                />
-                <Checkbox
-                    checked={!newBgmState.isPaused}
-                    onChange={e =>
-                        setNewBgmState(state => {
-                            state.isPaused = !e.target.checked;
-                        })
-                    }
-                >
-                    すぐに再生を開始する
-                </Checkbox>
-                {files.length === 0 ? <div>BGMが1つも指定されていません。</div> : files}
-                <Button onClick={() => setModalToAddVisible(true)}>BGMを追加</Button>
+                <Fieldset legend='プレイリスト'>
+                    {files.length === 0 ? <div>BGMが1つも指定されていません。</div> : files}
+                    <Button style={{ marginTop: 12 }} onClick={() => setModalToAddVisible(true)}>
+                        BGMを追加
+                    </Button>
+                </Fieldset>
+                <Fieldset legend='オプション'>
+                    <VolumeBarForSoundPlayer
+                        volumeBarValue={newBgmState.volume}
+                        onVolumeBarValueChange={newValue =>
+                            setNewBgmState(state => {
+                                state.volume = newValue;
+                            })
+                        }
+                    />
+                    <Checkbox
+                        checked={!newBgmState.isPaused}
+                        onChange={e =>
+                            setNewBgmState(state => {
+                                state.isPaused = !e.target.checked;
+                            })
+                        }
+                    >
+                        すぐに再生を開始する
+                    </Checkbox>
+                </Fieldset>
                 <FileSelectorModal
                     visible={modalToAddVisible}
                     uploaderFileBrowserHeight={null}
@@ -259,7 +266,7 @@ const SeModal: React.FC<SeModalProps> = ({ visible, onClose }) => {
     }
 
     return (
-        <Modal visible={visible} onCancel={onClose} style={{ width: stretchedModalWidth }}>
+        <Modal visible={visible} onCancel={onClose} width={stretchedModalWidth}>
             <div className={classNames(flex, flexColumn)}>
                 <VolumeBarForSoundPlayer
                     volumeBarValue={volumeInput}
@@ -377,22 +384,26 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
             </div>
             {tags.length === 0 ? '(再生中のBGMはありません)' : tags}
             <div style={{ display: 'flex', flexDirection: 'row', marginTop: 2 }}>
-                <Button
-                    size='small'
-                    onClick={() => {
-                        setIsSimpleModalVisible(true);
-                    }}
-                >
-                    編集
-                </Button>
-                <Button
-                    size='small'
-                    onClick={() => {
-                        setIsPlaylistModalVisible(true);
-                    }}
-                >
-                    編集(複数の音声ファイル)
-                </Button>
+                <Tooltip overlay='1つの音声ファイルをBGMとして設定します。'>
+                    <Button
+                        size='small'
+                        onClick={() => {
+                            setIsSimpleModalVisible(true);
+                        }}
+                    >
+                        変更(通常)
+                    </Button>
+                </Tooltip>
+                <Tooltip overlay='複数の音声ファイルをBGMとして設定します。再生は順に行われます。'>
+                    <Button
+                        size='small'
+                        onClick={() => {
+                            setIsPlaylistModalVisible(true);
+                        }}
+                    >
+                        変更(プレイリスト)
+                    </Button>
+                </Tooltip>
                 <Button
                     size='small'
                     disabled={(bgmState?.files ?? []).length === 0}
