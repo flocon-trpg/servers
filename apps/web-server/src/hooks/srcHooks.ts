@@ -17,17 +17,13 @@ type SrcArrayResult =
     | {
           type: typeof loaded;
           queriesResult: readonly UseQueryResult<FilePathModule.SrcResult, unknown>[];
-
-          /** queriesResultの要素がすべてSuccessのとき、各要素のsrcを抽出した結果を表します。 */
-          // もしすべてSuccessになる前にnon-undefinedな値を返してしまうと、すべてSuccessになるまでにsrcDataの値が頻繁に変わる。これは音声ファイルを再生する場面で問題になってしまうので避けている。
-          srcData: (string | undefined)[] | undefined;
       }
     | {
           type: typeof loading | typeof nullishArg | typeof invalidWebConfig;
       };
 
 // PathArrayがnullish ⇔ 戻り値がnullishArg
-// pathArray.length = queriesResult.length = srcDataArray.length
+// pathArray.length = queriesResult.length
 export function useSrcArrayFromFilePath(
     pathArray: ReadonlyArray<FilePathLikeOrThumb> | null | undefined
 ): SrcArrayResult {
@@ -77,11 +73,6 @@ export function useSrcArrayFromFilePath(
 
     const queriesResult = useQueries(cleanPathArray);
 
-    const srcDataSource = queriesResult.map(r => r.data?.src);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const srcData = useMemoOne(() => srcDataSource, srcDataSource);
-    const allSrcDataSuccess = queriesResult.every(r => r.isSuccess);
-
     const isPathArrayNullish = pathArray == null;
 
     return useMemoOne(() => {
@@ -94,8 +85,8 @@ export function useSrcArrayFromFilePath(
         if (config == null || storage == null) {
             return { type: loading };
         }
-        return { type: loaded, queriesResult, srcData: allSrcDataSuccess ? srcData : undefined };
-    }, [config, isPathArrayNullish, queriesResult, srcData, allSrcDataSuccess, storage]);
+        return { type: loaded, queriesResult };
+    }, [config, isPathArrayNullish, queriesResult, storage]);
 }
 
 type SrcResult =

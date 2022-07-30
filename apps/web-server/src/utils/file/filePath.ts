@@ -121,6 +121,7 @@ export namespace FilePathModule {
               isThumb: boolean;
               src: string;
               blob: Blob;
+              filename: string;
           }
         | {
               type: typeof Core.FirebaseStorage | typeof Core.Uploader;
@@ -171,6 +172,7 @@ export namespace FilePathModule {
                 isThumb: floconUploaderMode === thumbs,
                 src: URL.createObjectURL(blob),
                 blob,
+                filename,
             } as const;
         };
 

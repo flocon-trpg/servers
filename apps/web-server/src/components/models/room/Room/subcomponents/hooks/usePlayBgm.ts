@@ -2,8 +2,7 @@ import React from 'react';
 import { Howl } from 'howler';
 import { loaded, useSrcArrayFromFilePath } from '@/hooks/srcHooks';
 import { volumeCap } from '@/utils/variables';
-import { State, bgmTemplate } from '@flocon-trpg/core';
-import { compact } from 'lodash';
+import { Default, State, Uploader, bgmTemplate } from '@flocon-trpg/core';
 import { analyzeUrl } from '@/utils/analyzeUrl';
 import { useDeepCompareEffect, useLatest } from 'react-use';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
@@ -13,6 +12,8 @@ import {
     defaultChannelVolume,
     defaultMasterVolume,
 } from '@/atoms/roomConfigAtom/types/roomConfig/resources';
+import { useMemoOne } from 'use-memo-one';
+import { extname } from '@/utils/extname';
 
 type BgmState = State<typeof bgmTemplate>;
 
@@ -35,23 +36,50 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmCoreProps): void {
     const isPausedRef = useLatest(bgm?.isPaused);
 
     const urlArray = useSrcArrayFromFilePath(bgm?.files);
+    const srcAndFormat = useMemoOne(() => {
+        if (urlArray.type !== loaded) {
+            return null;
+        }
+        const result: { src: string; format: string | undefined }[] = [];
+        for (const q of urlArray.queriesResult) {
+            if (q.data?.src == null || !q.isSuccess) {
+                return null;
+            }
+            const src = q.data.type === Default ? analyzeUrl(q.data.src)?.directLink : q.data.src;
+            if (src == null) {
+                continue;
+            }
+
+            result.push({
+                src,
+                format:
+                    q.data.type === Uploader
+                        ? extname(q.data.filename).fileExtension ?? undefined
+                        : undefined,
+            });
+        }
+        return result;
+    }, [urlArray]);
+
     const howlRef = React.useRef<Howl>();
 
     useDeepCompareEffect(() => {
-        if (urlArray.type !== loaded || volumeRef.current == null) {
+        if (srcAndFormat == null || volumeRef.current == null) {
             return;
         }
 
-        const src = compact(urlArray.srcData);
-        const urls = compact(src.map(s => analyzeUrl(s)));
-        if (urls.length === 0) {
+        // howlerではsrcに[]を渡すとエラーになるため、ここで弾いている
+        if (srcAndFormat.length === 0) {
             return;
         }
 
         const howl = new Howl({
-            src: urls.map(url => url.directLink),
+            src: srcAndFormat.map(x => x.src),
             loop: true,
             volume: Math.min(volumeRef.current, volumeCap),
+            // 内蔵アップローダーの場合、srcはBlob URLであるがこれには拡張子がなくhowlerが「No file extension was found. Consider using the "format" property or specify an extension.」というエラーを出すためformatに拡張子などを渡す必要がある。
+            // ソースコード https://github.com/goldfire/howler.js/blob/143ae442386c7b42d91a007d0b1f1695528abe64/src/howler.core.js#L675 を見る限り、formatの要素はundefinedでも問題ない。
+            format: srcAndFormat.map(x => x.format) as string[],
         });
         howlRef.current = howl;
         if ((isPausedRef.current ?? true) === false) {
@@ -62,8 +90,7 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmCoreProps): void {
             howl.fade(howl.volume(), 0, 1000);
             setTimeout(() => howl.stop(), 1000);
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [urlArray]);
+    }, [isPausedRef, srcAndFormat, volumeRef]);
 
     React.useEffect(() => {
         if (volume == null) {
