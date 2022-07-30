@@ -689,7 +689,7 @@ type MessageTabPaneProps = {
 const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProps) => {
     const { contentHeight, config } = props;
 
-    const writingStatusHeight = 16;
+    const writingStatusHeight = 20;
 
     const firebaseUser = useAtomValue(firebaseUserValueAtom);
     const writingMessageStatusResult = useWritingMessageStatus();
