@@ -18,6 +18,9 @@ jobs:
             matrix:
                 node: ['14.x', '16.x']
                 os: [ubuntu-20.04, windows-2019, macOS-11]
+                include:
+                    - node: '18.x'
+                      os: 'ubuntu-20.04'
 
         runs-on: ${{ matrix.os }}
 
@@ -60,7 +63,7 @@ jobs:
 
         strategy:
             matrix:
-                container: ['node:14-buster', 'node:16-buster']
+                container: ['node:14-buster', 'node:16-buster', 'node:18-buster']
 
         runs-on: ubuntu-20.04
         container: ${{ matrix.container }}
