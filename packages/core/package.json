@@ -19,7 +19,7 @@
     },
     "name": "@flocon-trpg/core",
     "author": "kizahasi",
-    "description": "Core library for Flocon project(not released yet).",
+    "description": "Core library for Flocon project.",
     "devDependencies": {
         "@types/estree": "1.0.0",
         "@types/jest": "28.1.6",

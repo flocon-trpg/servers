@@ -19,7 +19,7 @@
     },
     "name": "@flocon-trpg/cache",
     "author": "kizahasi",
-    "description": "Core library for Flocon project(not released yet).",
+    "description": "Cache library for Flocon project.",
     "devDependencies": {
         "@types/ioredis": "4.28.10",
         "@types/jest": "28.1.6",
