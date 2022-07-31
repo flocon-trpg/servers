@@ -449,5 +449,18 @@ export const createServer = async ({
         !quiet &&
             console.log(`🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`);
     });
-    return server;
+    const close = async () => {
+        await new Promise((resolve, reject) => {
+            server.close(err => {
+                if (err == null) {
+                    resolve(undefined);
+                    return;
+                }
+                reject(err);
+            });
+        });
+        await apolloServer.stop();
+    };
+
+    return { close };
 };

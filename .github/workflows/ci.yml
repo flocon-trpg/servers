@@ -40,7 +40,7 @@ jobs:
 
             - name: Test for Node 16 or higher
               if: ${{ matrix.node != '14.x' }}
-              run: yarn test --ci --coverage --runInBand --forceExit
+              run: yarn test --ci --coverage --runInBand
               env:
                   REDIS_TEST: 0
                   MYSQL_TEST: 0
@@ -48,7 +48,7 @@ jobs:
 
             - name: Test for Node 14
               if: ${{ matrix.node == '14.x' }}
-              run: yarn test-node14 --ci --coverage --runInBand --forceExit
+              run: yarn test-node14 --ci --coverage --runInBand
               env:
                   REDIS_TEST: 0
                   MYSQL_TEST: 0
@@ -134,11 +134,11 @@ jobs:
 
             - name: Test for Node 16 or higher
               if: ${{ matrix.container != 'node:14-buster' }}
-              run: yarn test --ci --coverage --runInBand --forceExit
+              run: yarn test --ci --coverage --runInBand
 
             - name: Test for Node 14
               if: ${{ matrix.container == 'node:14-buster' }}
-              run: yarn test-node14 --ci --coverage --runInBand --forceExit
+              run: yarn test-node14 --ci --coverage --runInBand
 
             - name: Upload coverages to Codecov
               if: ${{ matrix.container == 'node:16-buster' }}

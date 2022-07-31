@@ -166,7 +166,7 @@ export const createTestServer = async ({
 
     return {
         close: async () => {
-            result.close();
+            await result.close();
             await $orm.close();
         },
     };
