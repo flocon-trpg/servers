@@ -528,6 +528,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
         }
         const orm = await createOrm(dbType);
         await doAutoMigrationBeforeStart(orm);
+        await orm.close();
     }, timeout_beforeAll);
 
     // もし前回実行したテストが失敗している場合はゴミが残っているため、afterEachではなくbeforeEachを用いている。
