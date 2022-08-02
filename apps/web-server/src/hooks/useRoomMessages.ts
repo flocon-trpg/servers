@@ -1,4 +1,4 @@
-import { CombinedError, useQuery } from 'urql';
+import { CombinedError, useClient } from 'urql';
 import React from 'react';
 import {
     GetMessagesDocument,
@@ -22,6 +22,7 @@ import { Result } from '@kizahasi/result';
 import { atom, useAtom, useAtomValue } from 'jotai';
 import { appConsole } from '../utils/appConsole';
 import { useUpdateAtom } from 'jotai/utils';
+import { useQuery } from 'react-query';
 
 export const graphqlError = 'graphqlError';
 export const failure = 'failure';
@@ -61,11 +62,17 @@ export const useStartFetchingRoomMessages = ({
     const messagesClient = React.useRef(new RoomMessagesClient());
     const [result, setResult] = useAtom(changeEventAtom);
     const resultRef = useLatest(result);
-    const [messages, getMessages] = useQuery({
-        query: GetMessagesDocument,
-        variables: { roomId },
-        requestPolicy: 'network-only',
-        pause: true,
+    const client = useClient();
+    // HACK: urqlのuseQueryでpauseを使う方法だと https://stackoverflow.com/questions/63035058/urql-usequerys-pause-option-doesnt-freezes-the-request-temporarily のようなバグ？が発生し、他の無関係のmutationなどを実行するたびにGetMessagesDocumentが実行されてしまう。これにより、通信量が多くなるといった問題が発生した。加えて、APIサーバーに大きな負荷がかかる懸念がある。そのため、とりあえずこのQueryに関してはurqlのuseQueryを使うことは避けている。
+    // バグの原因を自分なりに調査してみたが、想定外のGetMessagesDocumentQueryが実行される際に次のことがわかっている。
+    // - Client.executeQueryメソッドは呼び出されていない。
+    // - exchangeには渡っている。
+    // このことから、おそらくwonkaのshareあたりが怪しい気がする。stackoverflowの正常なサンプルとFloconのコードの違いを見るに、もしかしたらContextのclientインスタンスが途中で置き換わるのが発生要因の1つかも？ただ、完全な原因の特定はできていない。
+    const messages = useQuery(['GetMessagesDocument', roomId, beginFetch], () => {
+        if (!beginFetch) {
+            return null;
+        }
+        return client.query(GetMessagesDocument, { roomId }).toPromise();
     });
     const refCount = React.useRef(0);
 
@@ -84,14 +91,10 @@ export const useStartFetchingRoomMessages = ({
     }, [roomId, myUserUid, setResult, resultRef]);
 
     React.useEffect(() => {
-        if (myUserUid == null || !beginFetch) {
+        if (messages.data == null) {
             return;
         }
-        getMessages();
-    }, [roomId, myUserUid, beginFetch, getMessages]);
-
-    React.useEffect(() => {
-        const messagesData = messages.data;
+        const messagesData = messages.data.data;
         if (messagesData != null) {
             switch (messagesData.result.__typename) {
                 case 'GetRoomMessagesFailureResult':
@@ -110,11 +113,11 @@ export const useStartFetchingRoomMessages = ({
                     return;
             }
         }
-        const messagesError = messages.error;
+        const messagesError = messages.data.error;
         if (messagesError != null) {
             setResult(Result.error({ type: graphqlError, error: messagesError }));
         }
-    }, [messages.data, messages.error, setResult]);
+    }, [messages.data, setResult]);
 
     React.useEffect(() => {
         const messageEvent: RoomMessageEventFragment | null | undefined =
