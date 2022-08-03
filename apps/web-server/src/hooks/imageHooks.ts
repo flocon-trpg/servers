@@ -36,8 +36,9 @@ SOFTWARE.
 
 import React from 'react';
 import { analyzeUrl } from '../utils/analyzeUrl';
-import { useSrcFromFilePath } from './srcHooks';
-import { FilePathLikeOrThumb } from '@/utils/file/filePath';
+import { loaded, useSrcFromFilePath } from './srcHooks';
+import { FilePathLikeOrThumb, FilePathModule } from '@/utils/file/filePath';
+import { Uploader } from '@flocon-trpg/core';
 
 type Size = {
     w: number;
@@ -131,7 +132,10 @@ export function useImageFromFilePath(
         crossOrigin?: string;
     }
 ): State {
-    const { src } = useSrcFromFilePath(filePath);
+    const { src, queryResult } = useSrcFromFilePath(filePath);
 
-    return useImage(src ?? null, { crossOrigin: options?.crossOrigin });
+    return useImage(src ?? null, {
+        crossOrigin: options?.crossOrigin,
+        skipAnalyzeUrl: queryResult.type === loaded && queryResult.value.data?.type === Uploader,
+    });
 }
