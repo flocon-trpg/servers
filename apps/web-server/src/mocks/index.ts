@@ -499,7 +499,7 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
                                     type: path,
                                     data: 'M 10 10 H 90 V 90 Z',
                                 },
-                                fill: 'yellow',
+                                fill: 'rgb(255, 255, 0)',
                                 stroke: undefined,
                                 strokeWidth: undefined,
                             },
