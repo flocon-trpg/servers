@@ -1,7 +1,7 @@
 import React from 'react';
 import { CharacterSelector } from './subcomponents/components/CharacterSelector/CharacterSelector';
 import { GameSelector } from '../GameSelector/GameSelector';
-import { TextColorSelector } from './TextColorSelector';
+import { TextColorPicker } from '../../../../../../ui/TextColorPicker/TextColorPicker';
 import { SelectedChannelType, SubmitMessage, publicChannel } from '../SubmitMessage/SubmitMessage';
 import { getSelectedCharacterType } from './getSelectedCharacterType';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
@@ -65,7 +65,7 @@ export const ChatInput: React.FC<Props> = ({
         />
     );
     const textColorSelector = (
-        <TextColorSelector
+        <TextColorPicker
             config={config}
             onConfigUpdate={onConfigUpdate}
             descriptionStyle={desciptionStyle}

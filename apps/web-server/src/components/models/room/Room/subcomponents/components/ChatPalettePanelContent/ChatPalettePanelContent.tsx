@@ -3,7 +3,7 @@ import { Select } from 'antd';
 import { useBufferValue } from '@/hooks/useBufferValue';
 import { useMyCharacters } from '../../hooks/useMyCharacters';
 import { GameSelector } from '../GameSelector/GameSelector';
-import { TextColorSelector } from '../ChatInput/TextColorSelector';
+import { TextColorPicker } from '../../../../../../ui/TextColorPicker/TextColorPicker';
 import { SelectedChannelType, SubmitMessage, publicChannel } from '../SubmitMessage/SubmitMessage';
 import { Subject } from 'rxjs';
 import classNames from 'classnames';
@@ -203,7 +203,7 @@ export const ChatPalettePanelContent: React.FC<ChatPalettePanelContentProps> = (
                 descriptionStyle={descriptionStyle}
                 inputMaxWidth={miniInputMaxWidth}
             />
-            <TextColorSelector
+            <TextColorPicker
                 config={config}
                 onConfigUpdate={onConfigUpdate}
                 descriptionStyle={descriptionStyle}

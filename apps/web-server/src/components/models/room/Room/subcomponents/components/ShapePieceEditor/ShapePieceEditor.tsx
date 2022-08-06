@@ -1,14 +1,12 @@
 import React from 'react';
+import * as t from 'io-ts';
 import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
-import { State, imagePieceTemplate, simpleId } from '@flocon-trpg/core';
+import { State, path, shape, shapePieceTemplate, simpleId } from '@flocon-trpg/core';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { close, ok } from '@/utils/constants';
 import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
 import { Subscribable } from 'rxjs';
-import { useImagePieces } from '../../hooks/useImagePieces';
 import { useCloneImagePiece } from '../../hooks/useCloneImagePiece';
-import { FileView } from '@/components/models/file/FileView/FileView';
-import { FilePathModule } from '@/utils/file/filePath';
 import {
     CompositeRect,
     PixelPosition,
@@ -23,28 +21,38 @@ import { PieceEditorMemoRow } from '../PieceEditorMemoRow/PieceEditorMemoRow';
 import { PieceEditorNameRow } from '../PieceEditorNameRow/PieceEditorNameRow';
 import { PieceEditorCloneButtonRow } from '../PieceEditorCloneButtonRow/PieceEditorCloneButtonRow';
 import { PieceEditorIdRow } from '../PieceEditorIdRow/PieceEditorIdRow';
-import { image } from '@/utils/fileType';
+import { useShapePieces } from '../../hooks/useShapePieces';
+import { rgb } from '@/utils/rgb';
+import { ColorPickerButton } from '@/components/ui/ColorPickerButton/ColorPickerButton';
 
-type ImagePieceState = State<typeof imagePieceTemplate>;
+type Shape = t.TypeOf<typeof shape>;
+type ShapePieceState = State<typeof shapePieceTemplate>;
 
-const defaultImagePiece = (
+const shapeKey = '1';
+
+const defaultShape: Shape = {
+    type: path,
+    data: 'M 0 0 H 100 V 100 H 0 Z',
+};
+
+const defaultShapePiece = (
     piecePosition: CompositeRect,
     isCellMode: boolean,
     ownerParticipantId: string | undefined
-): ImagePieceState => ({
+): ShapePieceState => ({
     ...piecePosition,
 
     ownerParticipantId,
     isCellMode,
 
-    image: undefined,
+    shapes: {},
     isPrivate: false,
     memo: undefined,
     name: undefined,
     opacity: undefined,
     isPositionLocked: false,
 
-    $v: 2,
+    $v: 1,
     $r: 1,
 });
 
@@ -62,7 +70,7 @@ export type UpdateMode = {
     pieceId: string;
 };
 
-export const ImagePieceEditor: React.FC<{
+export const ShapePieceEditor: React.FC<{
     actionRequest?: ActionRequest;
     createMode?: CreateMode;
     updateMode?: UpdateMode;
@@ -70,7 +78,7 @@ export const ImagePieceEditor: React.FC<{
     const setRoomState = useSetRoomStateWithImmer();
     const myUserUid = useMyUserUid();
     const boardId = updateMode?.boardId ?? createMode?.boardId;
-    const imagePieces = useImagePieces(boardId);
+    const shapePieces = useShapePieces(boardId);
     const clone = useCloneImagePiece();
     const compositeRect = usePixelRectToCompositeRect({
         boardId: updateMode?.boardId ?? createMode?.boardId,
@@ -79,13 +87,13 @@ export const ImagePieceEditor: React.FC<{
                 ? undefined
                 : { ...createMode.piecePosition, ...pieceSize },
     });
-    const createModeParams: CreateModeParams<ImagePieceState | undefined> | undefined =
+    const createModeParams: CreateModeParams<ShapePieceState | undefined> | undefined =
         useMemoOne(() => {
             if (createMode == null || myUserUid == null || compositeRect == null) {
                 return undefined;
             }
             return {
-                createInitState: () => defaultImagePiece(compositeRect, true, undefined),
+                createInitState: () => defaultShapePiece(compositeRect, true, undefined),
                 updateInitState: prevState => {
                     if (prevState == null) {
                         return;
@@ -101,22 +109,22 @@ export const ImagePieceEditor: React.FC<{
                     }
                     const id = simpleId();
                     setRoomState(roomState => {
-                        const imagePieces = roomState.boards?.[createMode.boardId]?.imagePieces;
-                        if (imagePieces == null) {
+                        const shapePieces = roomState.boards?.[createMode.boardId]?.shapePieces;
+                        if (shapePieces == null) {
                             return;
                         }
-                        imagePieces[id] = { ...newState, ownerParticipantId: myUserUid };
+                        shapePieces[id] = { ...newState, ownerParticipantId: myUserUid };
                     });
                 },
             };
         }, [compositeRect, createMode, myUserUid, setRoomState]);
-    const updateModeParams: UpdateModeParams<ImagePieceState | undefined> | undefined =
+    const updateModeParams: UpdateModeParams<ShapePieceState | undefined> | undefined =
         useMemoOne(() => {
             if (updateMode == null) {
                 return undefined;
             }
             return {
-                state: imagePieces?.get(updateMode.pieceId),
+                state: shapePieces?.get(updateMode.pieceId),
                 onUpdate: newState => {
                     if (myUserUid == null) {
                         return;
@@ -124,15 +132,15 @@ export const ImagePieceEditor: React.FC<{
                     const boardId = updateMode.boardId;
                     const pieceId = updateMode.pieceId;
                     setRoomState(roomState => {
-                        const imagePieces = roomState.boards?.[boardId]?.imagePieces;
-                        if (imagePieces == null) {
+                        const shapePieces = roomState.boards?.[boardId]?.shapePieces;
+                        if (shapePieces == null) {
                             return;
                         }
-                        imagePieces[pieceId] = newState;
+                        shapePieces[pieceId] = newState;
                     });
                 },
             };
-        }, [imagePieces, myUserUid, setRoomState, updateMode]);
+        }, [shapePieces, myUserUid, setRoomState, updateMode]);
     const { state, updateState, ok } = useStateEditor({
         createMode: createModeParams,
         updateMode: updateModeParams,
@@ -165,23 +173,35 @@ export const ImagePieceEditor: React.FC<{
             <Table labelStyle={labelStyle}>
                 {/* TODO: isPrivateがまだ未実装 */}
 
-                <TableRow label='画像'>
-                    <FileView
-                        style={{ maxWidth: 350 }}
-                        maxWidthOfLink={null}
-                        uploaderFileBrowserHeight={null}
-                        defaultFileTypeFilter={image}
-                        filePath={state.image ?? undefined}
-                        onPathChange={path =>
+                <TableRow label='色'>
+                    <ColorPickerButton
+                        trigger='click'
+                        color={state.shapes?.[shapeKey]?.fill}
+                        buttonContent={state.shapes?.[shapeKey]?.fill ?? '(未指定)'}
+                        onChange={e =>
                             updateState(pieceValue => {
                                 if (pieceValue == null) {
                                     return;
                                 }
-                                pieceValue.image =
-                                    path == null ? undefined : FilePathModule.toOtState(path);
+                                if (pieceValue.shapes == null) {
+                                    pieceValue.shapes = {};
+                                }
+                                const newColor = rgb(e.rgb);
+                                const targetShape = pieceValue.shapes[shapeKey];
+                                if (targetShape == null) {
+                                    pieceValue.shapes[shapeKey] = {
+                                        $v: 1,
+                                        $r: 1,
+                                        shape: { ...defaultShape },
+                                        fill: newColor,
+                                        stroke: undefined,
+                                        strokeWidth: undefined,
+                                    };
+                                } else {
+                                    targetShape.fill = newColor;
+                                }
                             })
                         }
-                        showImage
                     />
                 </TableRow>
 

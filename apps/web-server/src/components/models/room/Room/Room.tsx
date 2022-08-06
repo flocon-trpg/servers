@@ -51,6 +51,7 @@ import { MemoPanelConfig } from '@/atoms/roomConfigAtom/types/memoPanelConfig';
 import { ControlPosition } from 'react-draggable';
 import { NumberSize, ResizeDirection } from 're-resizable';
 import dynamic from 'next/dynamic';
+import { ShapePieceEditorModal } from './subcomponents/components/ShapePieceEditorModal/ShapePieceEditorModal';
 
 /*
 Boardをdynamicを使わず直接importすると、next exportのときに次のエラーが出る（next export以外は問題なしの模様）。
@@ -992,6 +993,7 @@ export const Room: React.FC<Props> = ({ debug }) => {
                 <CharacterTagNamesEditorModal />
                 <DicePieceEditorModal />
                 <ImagePieceModal />
+                <ShapePieceEditorModal />
                 <StringPieceEditorModal />
                 <CharacterParameterNamesEditorModal />
                 <EditRoomDrawer />

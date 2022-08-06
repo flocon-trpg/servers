@@ -19,7 +19,7 @@ type Props = {
     descriptionStyle?: React.CSSProperties;
 };
 
-export const TextColorSelector: React.FC<Props> = ({
+export const TextColorPicker: React.FC<Props> = ({
     config,
     onConfigUpdate,
     descriptionStyle: descriptionStyle,

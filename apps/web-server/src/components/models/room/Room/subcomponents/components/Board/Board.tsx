@@ -34,8 +34,6 @@ import { AllContextProvider } from '@/components/behaviors/AllContextProvider';
 import { range } from '@/utils/range';
 import classNames from 'classnames';
 import { cancelRnd, flex, flexColumn, flexRow, itemsCenter, itemsEnd } from '@/styles/className';
-import { SketchPicker } from 'react-color';
-import { css } from '@emotion/react';
 import { rgba } from '@/utils/rgba';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { roomAtom } from '@/atoms/roomAtom/roomAtom';
@@ -73,6 +71,7 @@ import {
 import { KonvaEventObject } from 'konva/lib/Node';
 import { Vector2d } from 'konva/lib/types';
 import { useShapePieces } from '../../hooks/useShapePieces';
+import { ColorPickerButton } from '@/components/ui/ColorPickerButton/ColorPickerButton';
 
 type BoardState = OmitVersion<State<typeof boardTemplate>>;
 type PieceState = OmitVersion<State<typeof pieceTemplate>>;
@@ -837,6 +836,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
     })();
 
     const dicePieces = useDicePieces(boardIdToShow);
+    const shapePieces = useShapePieces(boardIdToShow);
     const stringPieces = useStringPieces(boardIdToShow);
     const imagePieces = useImagePieces(boardIdToShow);
 
@@ -979,6 +979,19 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                 piece,
                             })),
                         dicePiecesOnCursor: [...(dicePieces ?? [])]
+                            .filter(([, piece]) => {
+                                return isCursorOnState({
+                                    cellConfig: board,
+                                    state: piece,
+                                    cursorPosition: stateOffset,
+                                });
+                            })
+                            .map(([pieceId, piece]) => ({
+                                boardId: boardIdToShow,
+                                pieceId,
+                                piece,
+                            })),
+                        shapePiecesOnCursor: [...(shapePieces ?? [])]
                             .filter(([, piece]) => {
                                 return isCursorOnState({
                                     cellConfig: board,
@@ -1174,40 +1187,29 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                     <div className={classNames(flex, flexRow, itemsCenter)}>
                                         <div style={descriptionStyle}>色</div>
                                         {/* ↓ trigger='click' にすると、SketchPickerを開いている状態でPopover全体を閉じたときに次にSketchPickerが開かず（開き直したら直る）操作性が悪いため、'click'は用いていない */}
-                                        <Popover
-                                            content={
-                                                <SketchPicker
-                                                    className={cancelRnd}
-                                                    css={css`
-                                                        color: black;
-                                                    `}
-                                                    color={boardConfig.gridLineColor}
-                                                    onChange={e => {
-                                                        if (boardIdToShow == null) {
-                                                            return;
+                                        <ColorPickerButton
+                                            buttonStyle={NonTransparentStyle}
+                                            buttonContent={boardConfig.gridLineColor}
+                                            color={boardConfig.gridLineColor}
+                                            onChange={e => {
+                                                if (boardIdToShow == null) {
+                                                    return;
+                                                }
+                                                setRoomConfig(roomConfig => {
+                                                    if (roomConfig == null) {
+                                                        return;
+                                                    }
+                                                    RoomConfigUtils.editBoard(
+                                                        roomConfig,
+                                                        boardIdToShow,
+                                                        boardType,
+                                                        boardConfig => {
+                                                            boardConfig.gridLineColor = rgba(e.rgb);
                                                         }
-                                                        setRoomConfig(roomConfig => {
-                                                            if (roomConfig == null) {
-                                                                return;
-                                                            }
-                                                            RoomConfigUtils.editBoard(
-                                                                roomConfig,
-                                                                boardIdToShow,
-                                                                boardType,
-                                                                boardConfig => {
-                                                                    boardConfig.gridLineColor =
-                                                                        rgba(e.rgb);
-                                                                }
-                                                            );
-                                                        });
-                                                    }}
-                                                />
-                                            }
-                                        >
-                                            <Button style={NonTransparentStyle}>
-                                                {boardConfig.gridLineColor}
-                                            </Button>
-                                        </Popover>
+                                                    );
+                                                });
+                                            }}
+                                        />
                                     </div>
                                 </div>
                             }
