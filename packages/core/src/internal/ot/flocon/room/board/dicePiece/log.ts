@@ -5,13 +5,13 @@ import {
     update as updateKey,
 } from '../../../../util/recordOperationElement';
 import * as DicePieceValueTypes from './types';
-import * as PieceBaseTypes from '../../../pieceBase/types';
+import * as PieceBaseTypes from '../../../piece/types';
 import * as DieValue from './dieValue/functions';
 import * as DieValueTypes from './dieValue/types';
 import { chooseRecord } from '@flocon-trpg/utils';
 import { createOperation } from '../../../../util/createOperation';
 import { record } from '../../../../util/record';
-import { createType, deleteType, updateType } from '../../../pieceBase/log';
+import { createType, deleteType, updateType } from '../../../piece/log';
 import { maybe } from '../../../../../maybe';
 import {
     IoTsOptions,

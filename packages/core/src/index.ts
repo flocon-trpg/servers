@@ -111,9 +111,9 @@ export {
     exactDownOperation,
 } from './internal/ot/flocon/room/converter';
 
-export { template as boardPositionTemplate } from './internal/ot/flocon/boardPositionBase/types';
+export { template as boardPositionTemplate } from './internal/ot/flocon/boardPosition/types';
 
-export { template as pieceTemplate } from './internal/ot/flocon/pieceBase/types';
+export { template as pieceTemplate } from './internal/ot/flocon/piece/types';
 
 export {
     Master,
@@ -138,6 +138,10 @@ export { template as numParamTemplate } from './internal/ot/flocon/room/characte
 export { template as strParamTemplate } from './internal/ot/flocon/room/character/strParam/types';
 
 export { template as portraitPieceTemplate } from './internal/ot/flocon/room/character/portraitPiece/types';
+
+export { template as shapeTemplate } from './internal/ot/flocon/shape/types';
+
+export { template as shapePieceTemplate } from './internal/ot/flocon/room/board/shapePiece/types';
 
 export {
     template as dicePieceTemplate,
@@ -222,7 +226,9 @@ export {
     isOwner,
 } from './internal/ot/util/requestedBy';
 
-export { updateType, createType, deleteType } from './internal/ot/flocon/pieceBase/log';
+export { path, shape } from './internal/ot/util/shape';
+
+export { updateType, createType, deleteType } from './internal/ot/flocon/piece/log';
 
 export { createLogs } from './internal/ot/flocon/room/log';
 

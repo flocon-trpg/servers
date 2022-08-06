@@ -1,6 +1,7 @@
 import * as t from 'io-ts';
 import { filePathValue } from '../../filePath/types';
 import { maybe } from '../../../../maybe';
+import * as ShapePiece from './shapePiece/types';
 import * as DicePiece from './dicePiece/types';
 import * as ImagePiece from './imagePiece/types';
 import * as StringPiece from './stringPiece/types';
@@ -26,6 +27,7 @@ export const template = createObjectValueTemplate(
 
         dicePieces: createRecordValueTemplate(DicePiece.template),
         imagePieces: createRecordValueTemplate(ImagePiece.template),
+        shapePieces: createRecordValueTemplate(ShapePiece.template),
         stringPieces: createRecordValueTemplate(StringPiece.template),
     },
     2,

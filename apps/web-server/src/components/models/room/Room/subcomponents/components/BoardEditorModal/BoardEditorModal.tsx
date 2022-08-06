@@ -62,6 +62,7 @@ const defaultBoard: BoardState = {
 
     dicePieces: {},
     imagePieces: {},
+    shapePieces: {},
     stringPieces: {},
 };
 

@@ -6,6 +6,7 @@ import {
     dicePieceStrIndexes,
     dicePieceTemplate,
     dieValueTemplate,
+    shapePieceTemplate,
     stringPieceTemplate,
 } from '@flocon-trpg/core';
 import { StringPieceValue } from '../../../../../utils/stringPieceValue';
@@ -14,27 +15,36 @@ import { DicePieceValue } from '../../../../../utils/dicePieceValue';
 import { usePrevious } from 'react-use';
 import { PieceGroup, PieceGroupProps } from '../../../../PieceGroup/PieceGroup';
 import { PixelSize } from '../../../../../utils/positionAndSizeAndRect';
+import { keyNames, recordToArray } from '@flocon-trpg/utils';
 
 type DieValueState = State<typeof dieValueTemplate>;
 type DicePieceState = State<typeof dicePieceTemplate>;
+type ShapePieceState = State<typeof shapePieceTemplate>;
 type StringPieceState = State<typeof stringPieceTemplate>;
 
-export const stringPiece = 'stringPiece';
 export const dicePiece = 'dicePiece';
+export const shapePiece = 'shapePiece';
+export const stringPiece = 'stringPiece';
 
-export type DiceOrStringPieceState =
-    | {
-          type: typeof stringPiece;
-          state: StringPieceState;
-      }
+export type CanvasOrDiceOrStringPieceState =
     | {
           type: typeof dicePiece;
           state: DicePieceState;
+      }
+    | {
+          type: typeof shapePiece;
+          state: ShapePieceState;
+          stateId: string;
+      }
+    | {
+          type: typeof stringPiece;
+          state: StringPieceState;
+          createdByMe: boolean;
       };
 
 type StringPieceContentProps = {
-    createdByMe: boolean;
     state: StringPieceState;
+    createdByMe: boolean;
 } & PixelSize;
 
 const StringPieceContent: React.FC<StringPieceContentProps> = (props: StringPieceContentProps) => {
@@ -129,8 +139,39 @@ const StringPieceContent: React.FC<StringPieceContentProps> = (props: StringPiec
     );
 };
 
+type ShapePieceContentProps = {
+    state: ShapePieceState;
+    stateId: string;
+    opacity: number;
+} & PixelSize;
+
+const ShapePieceContent: React.FC<ShapePieceContentProps> = ({
+    state,
+    stateId,
+    w,
+    h,
+    opacity,
+}: ShapePieceContentProps) => {
+    const shapes = recordToArray(state.shapes ?? {}).map(shape => {
+        return (
+            <ReactKonva.Path
+                key={keyNames('shapePiece', stateId, shape.key)}
+                width={100}
+                height={100}
+                scaleX={w / 100}
+                scaleY={h / 100}
+                data={shape.value.shape.data}
+                stroke={shape.value.stroke}
+                strokeWidth={shape.value.strokeWidth}
+                fill={shape.value.fill}
+                opacity={opacity}
+            />
+        );
+    });
+    return <>{shapes}</>;
+};
+
 type DicePieceContentProps = {
-    createdByMe: boolean;
     state: DicePieceState;
     opacity: number;
 } & PixelSize;
@@ -306,30 +347,43 @@ const DicePieceContent: React.FC<DicePieceContentProps> = ({
 };
 
 type ValueContentProps = {
-    createdByMe: boolean;
-    state: DiceOrStringPieceState;
+    state: CanvasOrDiceOrStringPieceState;
     opacity: number;
 } & PixelSize;
 
 const ValueContent: React.FC<ValueContentProps> = (props: ValueContentProps) => {
     switch (props.state.type) {
+        case shapePiece: {
+            return (
+                <ShapePieceContent
+                    {...props}
+                    state={props.state.state}
+                    stateId={props.state.stateId}
+                />
+            );
+        }
         case dicePiece: {
             return <DicePieceContent {...props} state={props.state.state} />;
         }
         case stringPiece: {
-            return <StringPieceContent {...props} state={props.state.state} />;
+            return (
+                <StringPieceContent
+                    {...props}
+                    state={props.state.state}
+                    createdByMe={props.state.createdByMe}
+                />
+            );
         }
     }
 };
 
 type Props = {
-    state: DiceOrStringPieceState;
-    createdByMe: boolean;
+    state: CanvasOrDiceOrStringPieceState;
     opacity: number;
 } & PieceGroupProps;
 
-// ImagePieceはCharacterなどと表示方法が近いので、ここでは実装していない
-export const DiceOrStringPiece: React.FC<Props> = (props: Props) => {
+// DicePieceとShapePieceとStringPieceを表示するコンポーネント。これらのPieceはどれもアニメーションがなくコードが単純なため共通化している。
+export const DiceOrShapeOrStringPiece: React.FC<Props> = (props: Props) => {
     return (
         <PieceGroup {...props}>
             <ValueContent {...props} />

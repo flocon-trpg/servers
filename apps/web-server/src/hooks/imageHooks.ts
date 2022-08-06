@@ -37,7 +37,7 @@ SOFTWARE.
 import React from 'react';
 import { analyzeUrl } from '../utils/analyzeUrl';
 import { loaded, useSrcFromFilePath } from './srcHooks';
-import { FilePathLikeOrThumb, FilePathModule } from '@/utils/file/filePath';
+import { FilePathLikeOrThumb } from '@/utils/file/filePath';
 import { Uploader } from '@flocon-trpg/core';
 
 type Size = {

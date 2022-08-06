@@ -10,7 +10,7 @@ import {
     canChangeOwnerCharacterId,
     isCharacterOwner,
 } from '../../../../util/requestedBy';
-import * as Piece from '../../../pieceBase/functions';
+import * as Piece from '../../../piece/functions';
 import { template } from './types';
 import { State, TwoWayOperation, UpOperation } from '../../../../generator';
 

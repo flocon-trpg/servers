@@ -19,7 +19,10 @@ import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { FilePath, FileSourceType } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { ImagePiece } from './subcomponents/components/ImagePiece/ImagePiece';
-import { DiceOrStringPiece } from './subcomponents/components/DiceOrStringPiece/DiceOrStringPiece';
+import {
+    DiceOrShapeOrStringPiece,
+    shapePiece,
+} from './subcomponents/components/CanvasOrDiceOrStringPiece/CanvasOrDiceOrStringPiece';
 import { animated, useTransition } from '@react-spring/konva';
 import { useCharacterPieces } from '../../hooks/useCharacterPieces';
 import { usePortraitPieces } from '../../hooks/usePortraitPieces';
@@ -69,6 +72,7 @@ import {
 } from '../../utils/positionAndSizeAndRect';
 import { KonvaEventObject } from 'konva/lib/Node';
 import { Vector2d } from 'konva/lib/types';
+import { useShapePieces } from '../../hooks/useShapePieces';
 
 type BoardState = OmitVersion<State<typeof boardTemplate>>;
 type PieceState = OmitVersion<State<typeof pieceTemplate>>;
@@ -124,11 +128,7 @@ type SelectedPieceId =
           pieceId: string;
       }
     | {
-          type: typeof dicePiece | typeof stringPiece;
-          pieceId: string;
-      }
-    | {
-          type: typeof imagePiece;
+          type: typeof shapePiece | typeof dicePiece | typeof imagePiece | typeof stringPiece;
           pieceId: string;
       };
 
@@ -183,6 +183,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
 
     const roomId = useAtomSelector(roomAtom, state => state.roomId);
     const participants = useParticipants();
+    const shapePieces = useShapePieces(boardId);
     const dicePieces = useDicePieces(boardId);
     const numberPieces = useStringPieces(boardId);
     const imagePieces = useImagePieces(boardId);
@@ -516,12 +517,11 @@ const BoardCore: React.FC<BoardCoreProps> = ({
 
         const dicePieceElements = [...(dicePieces ?? [])].map(([pieceId, piece]) => {
             return (
-                <DiceOrStringPiece
+                <DiceOrShapeOrStringPiece
                     {...stateToPixelRect({ cellConfig: board, state: piece })}
                     key={pieceId}
                     opacity={1}
                     state={{ type: dicePiece, state: piece }}
-                    createdByMe={isMyCharacter(piece.ownerCharacterId)}
                     draggable={!piece.isPositionLocked}
                     resizable={!piece.isPositionLocked}
                     listening
@@ -559,14 +559,59 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             );
         });
 
+        const shapePieceElements = [...(shapePieces ?? [])].map(([pieceId, piece]) => (
+            <DiceOrShapeOrStringPiece
+                {...stateToPixelRect({ cellConfig: board, state: piece })}
+                key={pieceId}
+                opacity={1}
+                state={{ type: shapePiece, state: piece, stateId: pieceId }}
+                draggable={!piece.isPositionLocked}
+                resizable={!piece.isPositionLocked}
+                listening
+                isSelected={
+                    selectedPieceId?.type === 'shapePiece' && selectedPieceId.pieceId === pieceId
+                }
+                onClick={() => {
+                    unsetPopoverEditor();
+                    setSelectedPieceId({
+                        type: 'shapePiece',
+                        pieceId,
+                    });
+                }}
+                onDblClick={e => {
+                    setBoardPopoverEditor({
+                        pageX: e.evt.pageX,
+                        pageY: e.evt.pageY,
+                        clickOn: { type: 'shapePiece', piece, pieceId, boardId },
+                    });
+                }}
+                onMouseEnter={() =>
+                    (mouseOverOnRef.current = { type: 'shapePiece', piece, pieceId, boardId })
+                }
+                onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
+                onDragEnd={e => {
+                    setRoomState(roomState => {
+                        const shapePiece = roomState.boards?.[boardId]?.shapePieces?.[pieceId];
+                        if (shapePiece == null) {
+                            return;
+                        }
+                        setDragEndResultToPieceState({ e, piece: shapePiece, board });
+                    });
+                }}
+            />
+        ));
+
         const stringPieceElements = [...(numberPieces ?? [])].map(([pieceId, piece]) => {
             return (
-                <DiceOrStringPiece
+                <DiceOrShapeOrStringPiece
                     {...stateToPixelRect({ cellConfig: board, state: piece })}
                     key={pieceId}
                     opacity={1}
-                    state={{ type: 'stringPiece', state: piece }}
-                    createdByMe={isMyCharacter(piece.ownerCharacterId)}
+                    state={{
+                        type: 'stringPiece',
+                        state: piece,
+                        createdByMe: isMyCharacter(piece.ownerCharacterId),
+                    }}
                     draggable={!piece.isPositionLocked}
                     resizable={!piece.isPositionLocked}
                     listening
@@ -610,6 +655,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             <AllContextProvider {...allContext}>
                 <ReactKonva.Layer>
                     {imagePieceElements}
+                    {shapePieceElements}
                     {dicePieceElements}
                     {stringPieceElements}
                     {portraitPositionElements}

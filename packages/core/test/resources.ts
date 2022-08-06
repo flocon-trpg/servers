@@ -56,6 +56,7 @@ export namespace Resources {
             imagePieces: {},
             name: '',
             ownerParticipantId,
+            shapePieces: {},
             stringPieces: {},
         });
     }
@@ -224,6 +225,7 @@ export namespace Resources {
                 imagePieces: {},
                 name: 'BOARD_NAME',
                 ownerParticipantId: Participant.Player1.userUid,
+                shapePieces: {},
                 stringPieces: {
                     STR_PIECE_KEY: {
                         $v: 2,
