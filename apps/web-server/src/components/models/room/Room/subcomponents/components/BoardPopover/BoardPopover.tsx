@@ -32,7 +32,14 @@ import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { BoardConfig } from '@/atoms/roomConfigAtom/types/boardConfig';
 import { boardTooltipAtom } from '../../atoms/boardTooltipAtom/boardTooltipAtom';
 import { useAtomValue, useUpdateAtom } from 'jotai/utils';
-import { character, dicePiece, imagePiece, portrait, stringPiece } from '../../utils/types';
+import {
+    character,
+    dicePiece,
+    imagePiece,
+    portrait,
+    shapePiece,
+    stringPiece,
+} from '../../utils/types';
 import { boardPopoverEditorAtom } from '../../atoms/boardPopoverEditorAtom/boardPopoverEditorAtom';
 import {
     ContextMenuState,
@@ -50,12 +57,12 @@ import { imagePieceModalAtom } from '../ImagePieceModal/ImagePieceModal';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import { defaultTriggerSubMenuAction } from '@/utils/variables';
 import {
-    UpdateMode as DicePiceUpdateMode,
     DicePieceEditor,
+    UpdateMode as DicePieceUpdateMode,
 } from '../DicePieceEditor/DicePieceEditor';
 import {
-    UpdateMode as StringPiceUpdateMode,
     StringPieceEditor,
+    UpdateMode as StringPieceUpdateMode,
 } from '../StringPieceEditor/StringPieceEditor';
 import { CellConfig, CompositeRect, toCellPosition } from '../../utils/positionAndSizeAndRect';
 import {
@@ -64,6 +71,11 @@ import {
 } from '../ImagePieceEditor/ImagePieceEditor';
 import { stringPieceModalAtom } from '../StringPieceEditorModal/StringPieceEditorModal';
 import { dicePieceModalAtom } from '../DicePieceEditorModal/DicePieceEditorModal';
+import { shapePieceModalAtom } from '../ShapePieceEditorModal/ShapePieceEditorModal';
+import {
+    ShapePieceEditor,
+    UpdateMode as ShapePieceUpdateMode,
+} from '../ShapePieceEditor/ShapePieceEditor';
 
 type BoardPositionState = State<typeof boardPositionTemplate>;
 type CharacterState = State<typeof characterTemplate>;
@@ -157,7 +169,7 @@ type PieceProps = {
 };
 
 const DicePieceContent: React.FC<PieceProps> = ({ boardId, pieceId }: PieceProps) => {
-    const updateMode: DicePiceUpdateMode = React.useMemo(() => {
+    const updateMode: DicePieceUpdateMode = React.useMemo(() => {
         return {
             boardId,
             pieceId,
@@ -178,8 +190,19 @@ const ImagePieceContent: React.FC<PieceProps> = ({ boardId, pieceId }: PieceProp
     return <ImagePieceEditor updateMode={updateMode} />;
 };
 
+const ShapePieceContent: React.FC<PieceProps> = ({ boardId, pieceId }: PieceProps) => {
+    const updateMode: ShapePieceUpdateMode = React.useMemo(() => {
+        return {
+            boardId,
+            pieceId,
+        };
+    }, [boardId, pieceId]);
+
+    return <ShapePieceEditor updateMode={updateMode} />;
+};
+
 const StringPieceContent: React.FC<PieceProps> = ({ boardId, pieceId }: PieceProps) => {
-    const updateMode: StringPiceUpdateMode = React.useMemo(() => {
+    const updateMode: StringPieceUpdateMode = React.useMemo(() => {
         return {
             boardId,
             pieceId,
@@ -247,6 +270,17 @@ export const PopoverEditor: React.FC = () => {
                     width: 500,
                 });
                 break;
+            case shapePiece:
+                setChildrenState({
+                    children: (
+                        <ShapePieceContent
+                            boardId={popoverEditor.clickOn.boardId}
+                            pieceId={popoverEditor.clickOn.pieceId}
+                        />
+                    ),
+                    width: 400,
+                });
+                break;
             case stringPiece:
                 setChildrenState({
                     children: (
@@ -306,6 +340,7 @@ const toBoardPosition = ({
 const useHooks = () => {
     const setCharacterModal = useUpdateAtom(characterEditorModalAtom);
     const setDicePieceModal = useUpdateAtom(dicePieceModalAtom);
+    const setShapePieceModal = useUpdateAtom(shapePieceModalAtom);
     const setStringPieceModal = useUpdateAtom(stringPieceModalAtom);
     const setImagePieceModal = useUpdateAtom(imagePieceModalAtom);
     const setPopoverEditor = useUpdateAtom(boardPopoverEditorAtom);
@@ -314,6 +349,7 @@ const useHooks = () => {
         () => ({
             setCharacterModal,
             setDicePieceModal,
+            setShapePieceModal,
             setStringPieceModal,
             setImagePieceModal,
             setPopoverEditor,
@@ -322,6 +358,7 @@ const useHooks = () => {
         [
             setCharacterModal,
             setDicePieceModal,
+            setShapePieceModal,
             setStringPieceModal,
             setImagePieceModal,
             setPopoverEditor,
@@ -618,7 +655,71 @@ namespace ContextMenuModule {
         };
     };
 
-    type SelectedNumberPiecesMenuProps = {
+    type SelectedShapePiecesMenuProps = {
+        pageX: number;
+        pageY: number;
+        shapePiecesOnCursor: ContextMenuState['shapePiecesOnCursor'];
+        onContextMenuClear: () => void;
+        hooks: ReturnType<typeof useHooks>;
+        setRoomState: ReturnType<typeof useSetRoomStateWithImmer>;
+    };
+
+    const selectedShapePiecesMenu = ({
+        pageX,
+        pageY,
+        shapePiecesOnCursor,
+        onContextMenuClear,
+        hooks,
+        setRoomState,
+    }: SelectedShapePiecesMenuProps): ItemType => {
+        if (shapePiecesOnCursor.length === 0) {
+            return null;
+        }
+        return {
+            key: keyNames('図形コマ', 'boardPopover'),
+            label: '図形コマ',
+            children: [
+                ...shapePiecesOnCursor.map(
+                    ({ pieceId, piece, boardId }): ItemType => ({
+                        key: keyNames('図形コマ', 'boardPopover', 'selected', pieceId),
+                        label: `ID: ${pieceId}`,
+                        children: [
+                            {
+                                key: '編集@boardPopover',
+                                label: '編集',
+                                onClick: () => {
+                                    hooks.setPopoverEditor({
+                                        pageX,
+                                        pageY,
+                                        clickOn: {
+                                            type: 'shapePiece',
+                                            boardId,
+                                            pieceId,
+                                            piece,
+                                        },
+                                    });
+                                    onContextMenuClear();
+                                },
+                            },
+                            {
+                                key: '削除@boardPopover',
+                                label: '削除',
+                                onClick: () => {
+                                    setRoomState(roomState => {
+                                        delete roomState.boards?.[boardId]?.shapePieces?.[pieceId];
+                                    });
+                                    onContextMenuClear();
+                                },
+                            },
+                        ],
+                    })
+                ),
+                { type: 'divider' },
+            ],
+        };
+    };
+
+    type SelectedStringPiecesMenuProps = {
         pageX: number;
         pageY: number;
         stringPiecesOnCursor: ContextMenuState['stringPiecesOnCursor'];
@@ -636,18 +737,17 @@ namespace ContextMenuModule {
         hooks,
         isMyCharacter,
         setRoomState,
-    }: SelectedNumberPiecesMenuProps): ItemType => {
+    }: SelectedStringPiecesMenuProps): ItemType => {
         if (stringPiecesOnCursor.length === 0) {
             return null;
         }
         return {
-            key: '文字列コマ@boardPopover',
+            key: keyNames('文字列コマ', 'boardPopover'),
             label: '文字列コマ',
             children: [
                 ...stringPiecesOnCursor.map(
                     ({ pieceId, piece, boardId }): ItemType => ({
-                        // CharacterKeyをcompositeKeyToStringしてkeyにしている場所が下にもあるため、キーを互いに異なるものにするように文字列を付加している。
-                        key: pieceId + '@selected',
+                        key: keyNames('文字列コマ', 'boardPopover', 'selected', pieceId),
                         label: StringPieceValue.stringify(piece),
                         children: [
                             isMyCharacter(piece.ownerCharacterId)
@@ -715,12 +815,12 @@ namespace ContextMenuModule {
             return null;
         }
         return {
-            key: '画像コマ@boardPopover',
+            key: keyNames('画像コマ', 'boardPopover'),
             label: '画像コマ',
             children: [
                 ...imagePiecesOnCursor.map(
                     ({ pieceId, piece, boardId }): ItemType => ({
-                        key: pieceId + '@selected',
+                        key: keyNames('画像コマ', 'boardPopover', 'selected', pieceId),
                         label: (
                             <div className={classNames(flex, flexRow, itemsCenter)}>
                                 {piece.image == null ? null : (
@@ -986,6 +1086,18 @@ namespace ContextMenuModule {
                         onContextMenuClear();
                     },
                 },
+                {
+                    key: '図形コマ@新規作成@boardPopover',
+                    label: '図形コマ',
+                    onClick: () => {
+                        hooks.setShapePieceModal({
+                            type: create,
+                            boardId,
+                            piecePosition,
+                        });
+                        onContextMenuClear();
+                    },
+                },
             ],
         };
     };
@@ -1053,6 +1165,12 @@ namespace ContextMenuModule {
                 ...contextMenuState,
                 onContextMenuClear,
                 boardId,
+                hooks,
+                setRoomState,
+            }),
+            selectedShapePiecesMenu({
+                ...contextMenuState,
+                onContextMenuClear,
                 hooks,
                 setRoomState,
             }),
