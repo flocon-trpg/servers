@@ -3,11 +3,13 @@ import {
     characterTemplate,
     dicePieceTemplate,
     imagePieceTemplate,
+    shapePieceTemplate,
     stringPieceTemplate,
 } from '@flocon-trpg/core';
 
 type CharacterState = State<typeof characterTemplate>;
 type DicePieceState = State<typeof dicePieceTemplate>;
+type ShapePieceState = State<typeof shapePieceTemplate>;
 type StringPieceState = State<typeof stringPieceTemplate>;
 type ImagePieceState = State<typeof imagePieceTemplate>;
 
@@ -15,6 +17,7 @@ export const background = 'background';
 export const character = 'character';
 export const portrait = 'portrait';
 export const dicePiece = 'dicePiece';
+export const shapePiece = 'shapePiece';
 export const stringPiece = 'stringPiece';
 export const imagePiece = 'imagePiece';
 
@@ -26,16 +29,22 @@ export type ClickOn =
           piece: DicePieceState;
       }
     | {
-          type: typeof stringPiece;
-          boardId: string;
-          pieceId: string;
-          piece: StringPieceState;
-      }
-    | {
           type: typeof imagePiece;
           boardId: string;
           pieceId: string;
           piece: ImagePieceState;
+      }
+    | {
+          type: typeof shapePiece;
+          boardId: string;
+          pieceId: string;
+          piece: ShapePieceState;
+      }
+    | {
+          type: typeof stringPiece;
+          boardId: string;
+          pieceId: string;
+          piece: StringPieceState;
       }
     | {
           type: typeof character | typeof portrait;

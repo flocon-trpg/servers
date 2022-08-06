@@ -1,6 +1,6 @@
 import * as DieValue from './dieValue/functions';
 import * as DieValueTypes from './dieValue/types';
-import * as Piece from '../../../pieceBase/functions';
+import * as Piece from '../../../piece/functions';
 import { ServerTransform, TwoWayError } from '../../../../util/type';
 import { isIdRecord } from '../../../../util/record';
 import { Result } from '@kizahasi/result';

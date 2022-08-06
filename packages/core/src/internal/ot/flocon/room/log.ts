@@ -7,7 +7,7 @@ import * as DicePiece from './board/dicePiece/functions';
 import * as DicePieceLog from './board/dicePiece/log';
 import * as StringPiece from './board/stringPiece/functions';
 import * as StringPieceLog from './board/stringPiece/log';
-import { createType, deleteType } from '../pieceBase/log';
+import { createType, deleteType } from '../piece/log';
 import { restrict } from '../../util/requestedBy';
 import { State, TwoWayOperation, diff } from '../../generator';
 
