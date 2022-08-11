@@ -99,7 +99,7 @@
         "@types/jest": "28.1.6",
         "@types/sinonjs__fake-timers": "8.1.2",
         "babel-loader": "8.2.5",
-        "chromatic": "6.7.2",
+        "chromatic": "6.7.4",
         "color": "4.2.3",
         "color-name": "1.1.4",
         "jest": "28.1.3",
