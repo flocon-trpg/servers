@@ -9555,9 +9555,9 @@ __metadata:
   linkType: hard
 
 "check-disk-space@npm:^3.0.1":
-  version: 3.3.0
-  resolution: "check-disk-space@npm:3.3.0"
-  checksum: a4f5e06ed1b5b949b8a96c87263102b73683afd3da29434c11395d51ec73502455c32fdf62970fe981e72b933f7bfc47df596ed0375171295239487ea714a8b7
+  version: 3.3.1
+  resolution: "check-disk-space@npm:3.3.1"
+  checksum: 90b7b77ab932be0c0a24c5f68778d3c0e9179686282b04d84b1272a511a1c55b9f184c98f12b1a1628b832934971d66e63acaa9e3c82f14d9d221a4848b4cf8b
   languageName: node
   linkType: hard
 
