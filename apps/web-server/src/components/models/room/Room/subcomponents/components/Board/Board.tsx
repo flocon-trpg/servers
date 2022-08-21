@@ -5,7 +5,6 @@ import * as ReactKonva from 'react-konva';
 import { Button, Dropdown, InputNumber, Menu, Popover } from 'antd';
 import * as Icons from '@ant-design/icons';
 import { update } from '@/stateManagers/states/types';
-import * as Icon from '@ant-design/icons';
 import { useMe } from '../../hooks/useMe';
 import { useCharacters } from '../../hooks/useCharacters';
 import { useParticipants } from '../../hooks/useParticipants';
@@ -1241,7 +1240,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                             });
                         }}
                     >
-                        <Icon.ZoomInOutlined />
+                        <Icons.ZoomInOutlined />
                     </Button>
                     <Button
                         style={NonTransparentStyle}
@@ -1264,7 +1263,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                             });
                         }}
                     >
-                        <Icon.ZoomOutOutlined />
+                        <Icons.ZoomOutOutlined />
                     </Button>
                     <div style={{ height: 6 }} />
                     <Button
