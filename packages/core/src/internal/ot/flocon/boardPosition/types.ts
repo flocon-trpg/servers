@@ -2,8 +2,8 @@ import * as t from 'io-ts';
 import { maybe } from '../../../maybe';
 import {
     createObjectValueTemplate,
-    createOtValueTemplate,
     createReplaceValueTemplate,
+    createTextValueTemplate,
 } from '../../generator';
 
 export const templateValue = {
@@ -13,12 +13,12 @@ export const templateValue = {
     /**
      * @description To 3rd-party developers: Please always set undefined to this if it is CharacterPiece or PortraitPiece.
      */
-    memo: createOtValueTemplate(true),
+    memo: createTextValueTemplate(true),
 
     /**
      * @description To 3rd-party developers: Please always set undefined to this if it is CharacterPiece or PortraitPiece.
      */
-    name: createOtValueTemplate(true),
+    name: createTextValueTemplate(true),
 
     /**
      * @description To 3rd-party developers: Please always set undefined to this because it is not implemented yet in the official web-server.

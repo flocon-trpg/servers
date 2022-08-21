@@ -76,7 +76,7 @@ export type OtValueTemplate = {
     value?: undefined;
 };
 
-export const createOtValueTemplate = <T extends boolean>(nullable: T) =>
+export const createTextValueTemplate = <T extends boolean>(nullable: T) =>
     ({
         type: atomic,
         mode: ot,

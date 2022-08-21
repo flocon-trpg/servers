@@ -2,8 +2,8 @@ import * as t from 'io-ts';
 import { maybe } from '../../../../../maybe';
 import {
     createObjectValueTemplate,
-    createOtValueTemplate,
     createReplaceValueTemplate,
+    createTextValueTemplate,
 } from '../../../../generator';
 
 export const template = createObjectValueTemplate(
@@ -14,7 +14,7 @@ export const template = createObjectValueTemplate(
         /**
          * @description Do not use this value for numMaxParam.
          */
-        overriddenParameterName: createOtValueTemplate(true),
+        overriddenParameterName: createTextValueTemplate(true),
     },
     2,
     1

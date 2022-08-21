@@ -11,7 +11,7 @@ import {
     diff,
     downOperation,
     createObjectValueTemplate as obj,
-    createOtValueTemplate as otString,
+    createTextValueTemplate as otString,
     createParamRecordValueTemplate as prec,
     createRecordValueTemplate as rec,
     createReplaceValueTemplate as rep,

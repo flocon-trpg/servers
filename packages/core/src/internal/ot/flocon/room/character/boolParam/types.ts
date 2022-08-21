@@ -2,15 +2,15 @@ import * as t from 'io-ts';
 import { maybe } from '../../../../../maybe';
 import {
     createObjectValueTemplate,
-    createOtValueTemplate,
     createReplaceValueTemplate,
+    createTextValueTemplate,
 } from '../../../../generator';
 
 export const template = createObjectValueTemplate(
     {
         isValuePrivate: createReplaceValueTemplate(t.boolean),
         value: createReplaceValueTemplate(maybe(t.boolean)),
-        overriddenParameterName: createOtValueTemplate(true),
+        overriddenParameterName: createTextValueTemplate(true),
     },
     2,
     1

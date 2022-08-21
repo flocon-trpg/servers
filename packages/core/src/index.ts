@@ -81,7 +81,7 @@ export {
     diff,
     clientTransform,
     createObjectValueTemplate,
-    createOtValueTemplate,
+    createTextValueTemplate as createOtValueTemplate,
     createParamRecordValueTemplate,
     createRecordValueTemplate,
     createReplaceValueTemplate,

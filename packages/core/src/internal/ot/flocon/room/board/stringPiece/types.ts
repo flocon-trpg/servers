@@ -3,8 +3,8 @@ import * as Piece from '../../../piece/types';
 import { maybe } from '../../../../../maybe';
 import {
     createObjectValueTemplate,
-    createOtValueTemplate,
     createReplaceValueTemplate,
+    createTextValueTemplate,
 } from '../../../../generator';
 
 export const String = 'String';
@@ -17,7 +17,7 @@ export const template = createObjectValueTemplate(
         ...Piece.templateValue,
         ownerCharacterId: createReplaceValueTemplate(maybe(t.string)),
         isValuePrivate: createReplaceValueTemplate(t.boolean),
-        value: createOtValueTemplate(false),
+        value: createTextValueTemplate(false),
         valueInputType: createReplaceValueTemplate(maybe(valueInputType)),
     },
     2,
