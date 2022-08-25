@@ -96,12 +96,6 @@ export const serverTransform =
                     characterId: newState.ownerCharacterId ?? none,
                     currentRoomState,
                 }),
-            cancelUpdate: ({ nextState }) =>
-                !isCharacterOwner({
-                    requestedBy,
-                    characterId: nextState.ownerCharacterId ?? anyValue,
-                    currentRoomState,
-                }),
             cancelRemove: ({ state }) =>
                 !isCharacterOwner({
                     requestedBy,
@@ -114,22 +108,14 @@ export const serverTransform =
             { ownerParticipantId: string | undefined }
         > = {
             cancelCreate: ({ newState }) =>
-                !isCharacterOwner({
+                !isOwner({
                     requestedBy,
-                    characterId: newState.ownerParticipantId ?? none,
-                    currentRoomState,
-                }),
-            cancelUpdate: ({ nextState }) =>
-                !isCharacterOwner({
-                    requestedBy,
-                    characterId: nextState.ownerParticipantId ?? anyValue,
-                    currentRoomState,
+                    ownerParticipantId: newState.ownerParticipantId ?? none,
                 }),
             cancelRemove: ({ state }) =>
-                !isCharacterOwner({
+                !isOwner({
                     requestedBy,
-                    characterId: state.ownerParticipantId ?? anyValue,
-                    currentRoomState,
+                    ownerParticipantId: state.ownerParticipantId ?? anyValue,
                 }),
         };
 
