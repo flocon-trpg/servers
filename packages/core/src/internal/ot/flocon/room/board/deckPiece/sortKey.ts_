@@ -1,0 +1,229 @@
+import { Operator, compare, groupJoinArray, left } from '@flocon-trpg/utils';
+
+const minChar = '0';
+const meanChar = 'i';
+
+    /**
+[0-9a-z] のうち1文字を表します。これらには、下の表のように独自の code が与えられます。    
+
+```markdown
+| char | Char.code | String.prototype.charCodeAt(0) |
+|------|-----------|--------------------------------|
+| '0'  | 0         | 48                             |
+| '1'  | 1         | 49                             |
+| '9'  | 9         | 57                             |
+| 'a'  | 10        | 97                             |
+| 'b'  | 11        | 98                             |
+| 'z'  | 35        | 122                            |
+```
+    */
+class Char {
+
+    static MAX_NUMBER = 35;
+
+    readonly code: number;
+
+    constructor(readonly char: string) {
+        if (!(char.length === 1 && /^[0-9a-z]$/.test(char))) {
+            throw new Error(`${char} is an invalid argument. Valid chars are /^[0-9a-z]$/`);
+        }
+        const charCode = char.charCodeAt(0);
+        if (charCode <= 47) {
+            throw new Error('This should not happen.');
+        } else if (charCode <= 57) {
+            this.code = charCode - 48;
+        } else if (charCode <= 122) {
+            this.code = charCode - 87;
+        } else {
+            throw new Error('This should not happen.');
+        }
+    }
+
+    static #toChar(code: number) {
+        if (!Number.isInteger(code)) {
+            throw new Error(`Expected to be integer, but actually ${code}.`);
+        }
+        if (code <= -1) {
+            throw new Error(`${code} is out of range.`);
+        }
+        if (code <= 9) {
+            return String.fromCharCode(code + 48);
+        }
+        if (code <= 35) {
+            return String.fromCharCode(code + 87);
+        }
+        throw new Error(`${code} is out of range.`);
+    }
+
+    static ofNumber(code: number) {
+        return new Char(Char.#toChar(code));
+    }
+
+    distance(another: Char): number {
+        return Math.abs(this.code - another.code);
+    }
+
+    mean(another: Char) {
+        const newCode = Math.round((this.code - another.code) / 2);
+        return Char.ofNumber(newCode);
+    }
+
+    compare(operator: Operator, right: Char) {
+        return compare(this.code, operator, right.code);
+    }
+}
+
+/** `0` ～ `0z` を表します。 */
+class Char_1or2digits {
+    #hitoketame;
+    #plus00;
+
+    constructor(hitoketame: Char | string, plus00: boolean) {
+        this.#hitoketame =
+            typeof hitoketame === 'string' ? new Char(hitoketame) : hitoketame;
+        this.#plus00 = plus00;
+    }
+
+    #toNumber() {
+        let result = this.#hitoketame.code;
+        if (this.#plus00) {
+            result += Char.MAX_NUMBER;
+        }
+        return result;
+    }
+
+    mean(another: Char_1or2digits): Char_1or2digits {
+        const mean = Math.round((this.#toNumber() + another.#toNumber()) / 2);
+        if (mean > Char.MAX_NUMBER) {
+            return new Char_1or2digits(Char.ofNumber(mean - Char.MAX_NUMBER), true);
+        }
+        return new Char_1or2digits(Char.ofNumber(mean), false);
+    }
+
+    distance(another: Char_1or2digits) {
+        return Math.abs(this.#toNumber() - another.#toNumber());
+    }
+}
+
+/*
+SortKey で使える文字列は、上で定義されている Char になります。0文字の文字列も使用可能です。
+
+SortKey の大小比較は、JavaScript の文字列比較と同様の方法を用います。例えば 'a' < 'a0' < 'aa' < 'b' です。
+
+# SortKey における加法および減法の方法
+
+x, y という2つの string があるとして、これらに使われている文字が [a-z0-9] とします。
+
+x と y の文字数が等しいときは、36 進数の小数として扱うことで、加法や減法が利用できます。
+
+x と y の文字数が異なるときは、末尾に0を付けて文字数を等しく(例えば x='aa', y='bbbb' のときは x='aa00' とみなす)することで加法や減法を適用することにしています。これは、例えば  x='aa', y='bbbb' とすると、この文字数を等しくする処理によって 'aa' と 'aa0' のちょうど2個の文字列が無視されることになりますが、'aa00' と 'bbbb' の間には無限個の string がある('aa000'、'aa0000' などを考えると、無限個存在するのは明らか)ため、 'aa' と 'aa0' を無視しても実用上は影響ないという考えです。
+*/
+
+class SortKey {
+    constructor(readonly source: string) {
+        // ここで throw 文を書かなくても他のクラスで throw されるためこのチェックは理論上は必要ないが、エラーメッセージをわかりやすくする目的で書いている。
+        if(/[^0-9a-z]/.test(source)) {
+            throw new Error(`${source} has invalid characters. Valid characters are [0-9a-z]`);
+        }
+    }
+
+    compare(operator: Operator, right: SortKey): boolean {
+        function compareCore(
+            left: SortKey,
+            operator: Operator,
+            right: SortKey,
+            cursor = 0
+        ): boolean {
+            const leftChar = left.source[cursor];
+            const rightChar = right.source[cursor];
+
+            if (leftChar == null) {
+                if (rightChar == null) {
+                    return compare(0, operator, 0);
+                }
+                return compare(1, operator, 0);
+            }
+            if (rightChar == null) {
+                return compare(0, operator, 1);
+            }
+
+            const leftCharCode = new Char(leftChar);
+            const rightCharCode = new Char(rightChar);
+            if (leftCharCode.compare('=', rightCharCode)) {
+                return compareCore(left, operator, right, cursor + 1);
+            }
+            return leftCharCode.compare(operator, rightCharCode);
+        }
+
+        return compareCore(this, operator, right);
+    }
+
+    /** a, b という2つのSortKeyが与えられたとき、a < b であれば a < x < b を、b < a であれば b < x < a を満たす x: SortKey を string の形で返します。ただし、a = b のときは x = a となります。
+     * 
+     * x は、「a と b からともにある程度離れている」と「x の文字数を少なくする」の2つをなるべく両立して計算されます。そのため x は必ずしも a と b のちょうど中間の値になるとは限りません。
+     */
+    mean(another: SortKey): string {
+        /**
+         * @param cursor - `thisSource[cursor]` と `anotherSource[cursor]` の文字のみが比較に用いられます。これで比較が終わらない場合は、cursor=cursor+1 として処理が続行されます。
+         */
+        const meanCore = (smaller: string, bigger: string, cursor = 0): string => {
+            const smallerChar = smaller[cursor];
+            const biggerChar = bigger[cursor];
+
+            if (smallerChar == null && biggerChar == null) {
+                return '';
+            }
+            const smallerCharCode = new Char(smallerChar ?? minChar);
+            const biggerCharCode = new Char(biggerChar ?? minChar);
+            const distance = smallerCharCode.distance(biggerCharCode);
+            switch (distance) {
+                case 0:
+                    return smallerChar + meanCore(smaller, bigger, cursor + 1);
+                // 繰り下がりの処理。例えば smaller='azy', bigger='b' は、'a' と 'b' の distance が 1 なのでこの処理を行う。case 1 のコメントではこの例を用いて説明している。
+                case 1: {
+                    const kurisagariShori = (smaller: string, bigger: string, cursor: number): string => {
+                        const smallerChar = smaller[cursor];
+                        const biggerChar = bigger[cursor];
+                        if (smallerChar == null && biggerChar == null) {
+                            return smaller + meanChar;
+                        }
+                        const s = new Char_1or2digits(smallerChar ?? minChar, false);
+                        const b = new Char_1or2digits(biggerChar ?? minChar, true);
+                        // 1週目では、|'b0' - 'az'| を求めることになる。これは |'00' - 'z'| と等しい。戻り値は最大で2桁までという制限を設けているので、結果は 1 となるため、2週目に入る。
+                        // 2週目では、| '00' - 'y' | を考えればよい。この結果は 1 ではないので、3週目には入らない。
+                        const distance = s.distance(b);
+                        if (distance === 1) {
+                            return (smallerChar ?? minChar) + kurisagariShori(smaller, bigger, cursor + 1);
+                        }
+                        return (smallerChar ?? minChar) + s.mean(b);
+                    };
+                    return smallerCharCode.char + kurisagariShori(smaller, bigger, cursor + 1);
+                }
+                // distance が 2 なので、間の文字が必ず存在する(例えば smaller='a', bigger='c' ならば 'b' という間の文字が存在する)ため、単純にそれを返してもいいが、例えば smaller='azzzzz', bigger='c' のようなケースでは 'b' は 'azzzzz' に近いので、代わりに 'bi' などを返すようにしている。
+                case 2: {
+                    const firstCharToReturn = smallerCharCode.mean(biggerCharCode).char
+                    const nextSmallerChar = smaller[cursor + 1];
+                    const nextBiggerChar = bigger[cursor + 1];
+                    if (nextSmallerChar == null && nextBiggerChar == null) {
+                        return firstCharToReturn;
+                    }
+                    const nextSmallerCharCode = new Char(nextSmallerChar ?? minChar);
+                    const nextBiggerCharCode = new Char(nextBiggerChar ?? minChar);
+                    return firstCharToReturn + nextSmallerCharCode.distance(nextBiggerCharCode);
+                }
+                default:
+                    return smallerCharCode.mean(biggerCharCode).char
+            }
+        };
+
+        if (this.compare('>', another)) {
+        return meanCore(another.source, this.source);
+        } else {
+        return meanCore(this.source, another.source);
+        }
+    }
+}
+
+export const mean = (x: string, y: string) : string=> {
+    return new SortKey(x).mean(new SortKey(y))
+}

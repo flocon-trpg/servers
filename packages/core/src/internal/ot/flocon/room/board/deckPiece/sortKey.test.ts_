@@ -1,0 +1,31 @@
+import { fc, itProp, testProp} from '@fast-check/jest';
+import { compareStringGlobal } from './compareStringGlobal';
+import { mean } from './sortKey';
+
+const one = fc.string().filter((str) => !/[^0-9a-Z]/.test(str));
+const tuple = fc.tuple(fc.string(), fc.string()).filter(([left, right]) => left !== right && !/[^0-9a-Z]/.test(left) && !/[^0-9a-Z]/.test(right));
+
+itProp('tests equality', [one], (str) => {
+    const actual = mean(str, str);
+    return actual === str;
+});
+
+testProp('left < actual', [tuple], ([left, right]) => {
+    const actual = mean(left, right);
+    return compareStringGlobal(left, actual) > 0;
+});
+
+testProp('actual < right', [tuple], ([left, right]) => {
+    const actual = mean(left, right);
+    return compareStringGlobal(actual, right) > 0;
+});
+
+testProp('actual.length - left.length <= 1', [tuple], ([left, right]) => {
+    const actual = mean(left, right);
+    return actual.length - left.length <= 1 
+});
+
+testProp('actual.length - right.length <= 1', [tuple], ([left, right]) => {
+    const actual = mean(left, right);
+    return actual.length - right.length <= 1 
+});

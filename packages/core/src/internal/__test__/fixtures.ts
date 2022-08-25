@@ -9,7 +9,7 @@ import {
     roomTemplate,
 } from '../..';
 
-export namespace Fixture {
+export namespace Fixtures {
     const boardId = 'BOARD_ID';
 
     export namespace Participant {
@@ -52,6 +52,7 @@ export namespace Fixture {
             cellOffsetY: 0,
             cellRowCount: 0,
             cellWidth: 0,
+            deckPieces: {},
             dicePieces: {},
             imagePieces: {},
             name: '',
@@ -154,6 +155,7 @@ export namespace Fixture {
         publicChannel8Name: '',
         publicChannel9Name: '',
         publicChannel10Name: '',
+        stats: { $v: 1, $r: 1, boards: {} },
     };
 
     export const complexDbState: State<typeof roomDbTemplate> = {
@@ -193,6 +195,8 @@ export namespace Fixture {
                 cellOffsetY: 10,
                 cellRowCount: 10,
                 cellWidth: 10,
+                // TODO: 適当な値を入れる
+                deckPieces: {},
                 dicePieces: {
                     DICE_PIECE_KEY: {
                         $v: 2,
@@ -431,5 +435,7 @@ export namespace Fixture {
                 role: 'Player',
             },
         },
+        // 適当な値を入れる
+        stats: { $v: 1, $r: 1, boards: {} },
     };
 }

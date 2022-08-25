@@ -29,10 +29,13 @@
         "@kizahasi/result": "^1.0.1",
         "@ltd/j-toml": "^1.23.0",
         "fp-ts": "^2.11.8",
+        "immer": "^9.0.15",
         "io-ts": "^2.2.16",
         "lodash.clonedeep": "^4.5.0",
+        "lodash.shuffle": "^4.2.0",
         "sanitize-filename": "^1.6.3",
-        "truncate-utf8-bytes": "^1.0.2"
+        "truncate-utf8-bytes": "^1.0.2",
+        "type-fest": "^3.0.0"
     },
     "devDependencies": {
         "@flocon-trpg/eslint-config": "workspace:^",
@@ -42,6 +45,7 @@
         "@types/estree": "1.0.0",
         "@types/jest": "29.1.2",
         "@types/lodash.clonedeep": "4.5.7",
+        "@types/lodash.shuffle": "^4.2.7",
         "@types/sanitize-filename": "1.6.3",
         "@types/truncate-utf8-bytes": "1.0.0",
         "@typescript-eslint/eslint-plugin": "5.39.0",

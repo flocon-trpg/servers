@@ -1,4 +1,5 @@
 // NOT cryptographically secure
+// CONSIDER: cuid などに移行する
 export const simpleId = (): string => {
     const idLength = 9;
     let result = Math.random().toString(36).substr(2, idLength);
