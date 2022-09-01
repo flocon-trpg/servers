@@ -27,16 +27,12 @@ import { useAtomValue } from 'jotai/utils';
 import { firebaseAuthAtom } from '@/pages/_app';
 import { atom, useAtom, useSetAtom } from 'jotai';
 import { storybookAtom } from '@/atoms/storybookAtom/storybookAtom';
+import { FirebaseError } from '@firebase/util';
 
 const displayName = 'new user';
 const formWidth = 400;
 
-type Error = {
-    code: string;
-    message: string;
-};
-
-const errorAtom = atom<Error | string | undefined>(undefined);
+const errorAtom = atom<FirebaseError | string | undefined>(undefined);
 const isSubmittingAtom = atom(false);
 const emailModeAtom = atom(false);
 
@@ -56,7 +52,7 @@ const useLoginWithAuthProvider = (): ((provider: AuthProvider) => Promise<void>)
                         setError(undefined);
                         router.push('/');
                     })
-                    .catch((error: Error) => {
+                    .catch((error: FirebaseError) => {
                         setError(error);
                     });
                 return;
@@ -69,7 +65,7 @@ const useLoginWithAuthProvider = (): ((provider: AuthProvider) => Promise<void>)
                     setError(undefined);
                     await router.push('/');
                 })
-                .catch((error: Error) => {
+                .catch((error: FirebaseError) => {
                     setError(error);
                 });
         },
@@ -142,7 +138,7 @@ const Email: React.FC = () => {
                                     .then(async () => {
                                         await onSuccess();
                                     })
-                                    .catch((err: Error) => setError(err))
+                                    .catch((err: FirebaseError) => setError(err))
                                     .finally(() => {
                                         setPassword('');
                                         setIsSubmitting(false);
@@ -167,7 +163,7 @@ const Email: React.FC = () => {
                                             });
                                             await onSuccess();
                                         })
-                                        .catch((err: Error) => setError(err))
+                                        .catch((err: FirebaseError) => setError(err))
                                         .finally(() => {
                                             setPassword('');
                                             setIsSubmitting(false);
@@ -185,7 +181,7 @@ const Email: React.FC = () => {
                                         const signInMethods = await fetchSignInMethodsForEmail(
                                             auth,
                                             email
-                                        ).catch((err: Error) => {
+                                        ).catch((err: FirebaseError) => {
                                             console.error('fetchSignInMethodsForEmail', err);
                                             return null;
                                         });
@@ -194,7 +190,7 @@ const Email: React.FC = () => {
                                             .then(async () => {
                                                 await onSuccess();
                                             })
-                                            .catch(async (err: Error) => {
+                                            .catch(async (err: FirebaseError) => {
                                                 setError(err);
 
                                                 if (signInMethods == null) {
@@ -395,7 +391,7 @@ export const SignIn: React.FC = () => {
                                         setError(undefined);
                                         await router.push('/');
                                     })
-                                    .catch((error: Error) => {
+                                    .catch((error: FirebaseError) => {
                                         if (error.code === 'auth/admin-restricted-operation') {
                                             setError(
                                                 '匿名認証は有効化されていないため、利用できません。'
@@ -414,7 +410,7 @@ export const SignIn: React.FC = () => {
         );
     }
 
-    const authErrorToString = (error: Error | string) => {
+    const authErrorToString = (error: FirebaseError | string) => {
         if (typeof error === 'string') {
             return error;
         }
