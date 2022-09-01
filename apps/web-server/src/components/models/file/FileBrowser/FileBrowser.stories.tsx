@@ -37,6 +37,7 @@ const arrayEquals = (x: readonly string[], y: readonly string[]): boolean => {
 type PracticalProps = {
     filesSource: FileSource[];
     defaultFileTypeFilter: string | null;
+    ensuredFolderPaths: FileBrowserProps['ensuredFolderPaths'];
 };
 
 const toFilePath = (filesSourceRef: { current: FileSource[] }): FilePath[] => {
@@ -98,6 +99,7 @@ const toFilePath = (filesSourceRef: { current: FileSource[] }): FilePath[] => {
 const Practical: React.FC<PracticalProps> = ({
     filesSource,
     defaultFileTypeFilter,
+    ensuredFolderPaths,
 }: PracticalProps) => {
     const filesSourceRef = React.useRef(filesSource);
     React.useEffect(() => {
@@ -153,8 +155,7 @@ const Practical: React.FC<PracticalProps> = ({
             }}
             isProtected={() => false}
             onFileCreate={() => Promise.resolve(true)}
-            // TODO: ensuredFolderPathsを用いたstoryも作成する
-            ensuredFolderPaths={[]}
+            ensuredFolderPaths={ensuredFolderPaths}
             // TODO: overridingElementsを用いたstoryも作成する
             overridingElements={[]}
         />
@@ -165,9 +166,15 @@ type Props = {
     files?: FileBrowserProps['files'] | undefined;
     filesSource?: FileSource[];
     defaultFileTypeFilter?: string | null;
+    ensuredFolderPaths: FileBrowserProps['ensuredFolderPaths'];
 };
 
-export const Default: React.FC<Props> = ({ files, filesSource, defaultFileTypeFilter }) => {
+export const Default: React.FC<Props> = ({
+    files,
+    filesSource,
+    defaultFileTypeFilter,
+    ensuredFolderPaths,
+}) => {
     if (files == null) {
         if (filesSource == null) {
             throw new Error();
@@ -176,6 +183,7 @@ export const Default: React.FC<Props> = ({ files, filesSource, defaultFileTypeFi
             <Practical
                 filesSource={filesSource}
                 defaultFileTypeFilter={defaultFileTypeFilter ?? null}
+                ensuredFolderPaths={ensuredFolderPaths}
             />
         );
     }
@@ -193,7 +201,7 @@ export const Default: React.FC<Props> = ({ files, filesSource, defaultFileTypeFi
             files={files}
             isProtected={() => false}
             onFileCreate={() => Promise.resolve(true)}
-            ensuredFolderPaths={[]}
+            ensuredFolderPaths={ensuredFolderPaths}
             overridingElements={[]}
             canMove={() => Result.error('fake error')}
             canRename={() => Result.error('fake error')}
@@ -274,6 +282,15 @@ export default {
                 path: ['dir2-1', 'dir2-2', 'file3.dll'],
             },
         ],
+        ensuredFolderPaths: [
+            { path: ['ensured-folder-1'] },
+            {
+                path: ['ensured-folder-2', 'ensured-folder-2_1'],
+            },
+            {
+                path: ['ensured-folder-2', 'ensured-folder-2_2'],
+            },
+        ],
     },
 } as ComponentMeta<typeof Default>;
 
@@ -282,6 +299,11 @@ const Template: ComponentStory<typeof Default> = args => <Default {...args} />;
 export const Filtered = Template.bind({});
 Filtered.args = {
     defaultFileTypeFilter: others,
+};
+
+export const EmptyButEnsured = Template.bind({});
+EmptyButEnsured.args = {
+    filesSource: [],
 };
 
 const success = async () => {

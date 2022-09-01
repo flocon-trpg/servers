@@ -562,16 +562,13 @@ class PathState {
     }
 
     createNodes() {
-        const currentFolderMap = this.members.rootFolder.createSubTreeIfExists(
-            this.members.currentDirectory
-        );
-        if (currentFolderMap == null) {
-            return [];
-        }
+        const readonlyCurrentFolderMap =
+            this.members.rootFolder.createSubTreeIfExists(this.members.currentDirectory) ??
+            new DeletableTree();
 
-        const fileNodes = currentFolderMap.get([]).value?.files ?? new DualKeyMap();
+        const fileNodes = readonlyCurrentFolderMap.get([]).value?.files ?? new DualKeyMap();
         const folderNodes = new Map<string, Folder>();
-        for (const [name, $folder] of currentFolderMap.getChildren()) {
+        for (const [name, $folder] of readonlyCurrentFolderMap.getChildren()) {
             const folderPath = [...$folder.absolutePath];
             folderPath.pop();
 
