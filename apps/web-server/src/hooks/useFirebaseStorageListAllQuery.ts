@@ -1,6 +1,7 @@
 import { firebaseStorageAtom } from '@/pages/_app';
 import { Path } from '@/utils/file/firebaseStorage';
 import { FirebaseStorage, StorageReference, ref } from '@firebase/storage';
+import { FirebaseError } from '@firebase/util';
 import { listAll } from 'firebase/storage';
 import { useAtomValue } from 'jotai';
 import React from 'react';
@@ -29,7 +30,10 @@ const ofUnlistedUploaderFile =
         };
     };
 
+export const success = 'success';
 export const fetching = 'fetching';
+export const appError = 'appError';
+export const fetchError = 'fetchError';
 export const storageIsNullish = 'storageIsNullish';
 export const myUserUidIsNullish = 'myUserUidIsNullish';
 export const disabledByConfig = 'disabledByConfig';
@@ -60,6 +64,57 @@ const queryKey = ({
     ];
 };
 
+type FetchResultSourceData =
+    | {
+          type: typeof success;
+          value: File[];
+      }
+    | {
+          type: typeof appError;
+          error: typeof storageIsNullish | typeof myUserUidIsNullish | typeof disabledByConfig;
+      }
+    | undefined;
+
+export type FetchResult<T> =
+    | {
+          type: typeof success;
+          value: T;
+      }
+    | {
+          type: typeof fetching;
+      }
+    | {
+          type: typeof appError;
+          error: typeof storageIsNullish | typeof myUserUidIsNullish | typeof disabledByConfig;
+      }
+    | {
+          type: typeof fetchError;
+          error: FirebaseError;
+      };
+
+const toFetchResult = (
+    data: FetchResultSourceData,
+    error: FirebaseError | null | undefined
+): FetchResult<File[]> => {
+    if (error != null) {
+        return { type: fetchError, error };
+    }
+    if (data == null) {
+        return { type: fetching };
+    }
+    return data;
+};
+
+export const mapFetchResult = <T1, T2>(
+    source: FetchResult<T1>,
+    mapping: (x: T1) => T2
+): FetchResult<T2> => {
+    if (source.type === success) {
+        return { type: success, value: mapping(source.value) };
+    }
+    return source;
+};
+
 export const useFirebaseStorageListAllQuery = () => {
     const storage = useAtomValue(firebaseStorageAtom);
     const myUserUid = useMyUserUid();
@@ -77,13 +132,13 @@ export const useFirebaseStorageListAllQuery = () => {
         }),
         async () => {
             if (storage == null) {
-                return storageIsNullish;
+                return { type: appError, error: storageIsNullish } as const;
             }
             if (myUserUid == null) {
-                return myUserUidIsNullish;
+                return { type: appError, error: myUserUidIsNullish } as const;
             }
             if (!isPublicFirebaseStorageEnabled) {
-                return disabledByConfig;
+                return { type: appError, error: disabledByConfig } as const;
             }
 
             const result: File[] = [];
@@ -95,7 +150,7 @@ export const useFirebaseStorageListAllQuery = () => {
                 result.push(...prefixListResult.items.map(ofPublicUploaderFile));
             }
 
-            return result;
+            return { type: success, value: result } as const;
         }
     );
 
@@ -107,13 +162,13 @@ export const useFirebaseStorageListAllQuery = () => {
         }),
         async () => {
             if (storage == null) {
-                return storageIsNullish;
+                return { type: appError, error: storageIsNullish } as const;
             }
             if (myUserUid == null) {
-                return myUserUidIsNullish;
+                return { type: appError, error: myUserUidIsNullish } as const;
             }
             if (!isUnlistedFirebaseStorageEnabled) {
-                return disabledByConfig;
+                return { type: appError, error: disabledByConfig } as const;
             }
 
             const result: File[] = [];
@@ -124,7 +179,7 @@ export const useFirebaseStorageListAllQuery = () => {
                 const prefixListResult = await listAll(prefix);
                 result.push(...prefixListResult.items.map(ofUnlistedUploaderFile(myUserUid)));
             }
-            return result;
+            return { type: success, value: result } as const;
         }
     );
 
@@ -132,14 +187,26 @@ export const useFirebaseStorageListAllQuery = () => {
         const refetchPublicFiles = publicFiles.refetch;
         const refetchUnlistedFiles = unlistedFiles.refetch;
         return {
-            public: publicFiles.data,
-
-            unlisted: unlistedFiles.data,
+            public: toFetchResult(
+                publicFiles.data,
+                publicFiles.error as FirebaseError | null | undefined
+            ),
+            unlisted: toFetchResult(
+                unlistedFiles.data,
+                unlistedFiles.error as FirebaseError | null | undefined
+            ),
 
             refetch: async () => {
                 await refetchPublicFiles();
                 await refetchUnlistedFiles();
             },
         } as const;
-    }, [publicFiles.data, unlistedFiles.data, publicFiles.refetch, unlistedFiles.refetch]);
+    }, [
+        publicFiles.data,
+        publicFiles.error,
+        unlistedFiles.data,
+        unlistedFiles.error,
+        publicFiles.refetch,
+        unlistedFiles.refetch,
+    ]);
 };

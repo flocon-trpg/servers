@@ -17,8 +17,14 @@ import { useWebConfig } from '@/hooks/useWebConfig';
 import { FileBrowser, FilePath } from '../FileBrowser/FileBrowser';
 import { fileName } from '@/utils/filename';
 import {
+    FetchResult,
     File,
+    appError,
     disabledByConfig,
+    fetchError,
+    fetching,
+    mapFetchResult,
+    success,
     useFirebaseStorageListAllQuery,
 } from '@/hooks/useFirebaseStorageListAllQuery';
 import { useGetIdToken } from '@/hooks/useGetIdToken';
@@ -120,12 +126,8 @@ const useFirebaseStorageFiles = (onSelect: OnSelect | null) => {
                 return result;
             };
 
-        const publicFiles = Array.isArray(files.public)
-            ? files.public.map(toFilePath($public))
-            : files.public;
-        const unlistedFiles = Array.isArray(files.unlisted)
-            ? files.unlisted.map(toFilePath(unlisted))
-            : files.unlisted;
+        const publicFiles = mapFetchResult(files.public, x => x.map(toFilePath($public)));
+        const unlistedFiles = mapFetchResult(files.unlisted, x => x.map(toFilePath(unlisted)));
         return { public: publicFiles, unlisted: unlistedFiles };
     }, [files, isOnSelectNullish, onSelectRef, open]);
 };
@@ -401,18 +403,11 @@ export const UploaderFileBrowser: React.FC<Props> = ({
     const files = React.useMemo(() => {
         const result: FilePath[] = [];
 
-        // CONSIDER: firebaseStorageFiles.(public|unlisted) がエラーだった時にFileBrowserなどで通知されたほうがわかりやすい
-        if (
-            firebaseStorageFiles.public != null &&
-            typeof firebaseStorageFiles.public !== 'string'
-        ) {
-            result.push(...(firebaseStorageFiles.public ?? []));
+        if (firebaseStorageFiles.public.type === success) {
+            result.push(...firebaseStorageFiles.public.value);
         }
-        if (
-            firebaseStorageFiles.unlisted != null &&
-            typeof firebaseStorageFiles.unlisted !== 'string'
-        ) {
-            result.push(...(firebaseStorageFiles.unlisted ?? []));
+        if (firebaseStorageFiles.unlisted.type === success) {
+            result.push(...firebaseStorageFiles.unlisted.value);
         }
 
         result.push(...(floconUploaderFiles ?? []));
@@ -432,29 +427,42 @@ export const UploaderFileBrowser: React.FC<Props> = ({
             return result;
         }
 
-        if (firebaseStorageFiles.public === disabledByConfig) {
-            result.push({
-                path: [uploaderTypeFolderName.publicFirebaseStorage],
-                element: <div style={style}>管理者の設定によって無効化されています。</div>,
-            });
-        } else if (!Array.isArray(firebaseStorageFiles.public)) {
-            result.push({
-                path: [uploaderTypeFolderName.publicFirebaseStorage],
-                element: <div style={style}>読み込み中です…</div>,
-            });
-        }
+        const push = (source: FetchResult<FilePath[]>, path: string[]): void => {
+            switch (source.type) {
+                case appError: {
+                    switch (source.error) {
+                        case disabledByConfig:
+                            result.push({
+                                path,
+                                element: (
+                                    <div style={style}>
+                                        管理者の設定によって無効化されています。
+                                    </div>
+                                ),
+                            });
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                }
+                case fetching:
+                    result.push({
+                        path,
+                        element: <div style={style}>読み込み中です…</div>,
+                    });
+                    break;
+                case fetchError:
+                    result.push({
+                        path,
+                        element: <div style={style}>エラー: {source.error.message}</div>,
+                    });
+                    break;
+            }
+        };
 
-        if (firebaseStorageFiles.unlisted === disabledByConfig) {
-            result.push({
-                path: [uploaderTypeFolderName.unlistedFirebaseStorage],
-                element: <div style={style}>設定によって無効化されています。</div>,
-            });
-        } else if (!Array.isArray(firebaseStorageFiles.unlisted)) {
-            result.push({
-                path: [uploaderTypeFolderName.unlistedFirebaseStorage],
-                element: <div style={style}>読み込み中です…</div>,
-            });
-        }
+        push(firebaseStorageFiles.public, [uploaderTypeFolderName.publicFirebaseStorage]);
+        push(firebaseStorageFiles.unlisted, [uploaderTypeFolderName.unlistedFirebaseStorage]);
 
         if (isEmbeddedUploaderDisabled) {
             result.push(
