@@ -458,6 +458,8 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                         element: <div style={style}>エラー: {source.error.message}</div>,
                     });
                     break;
+                case success:
+                    break;
             }
         };
 
