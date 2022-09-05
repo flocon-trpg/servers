@@ -1,4 +1,5 @@
 /.env.local
 /bcrypt-hash.txt
+/flyio.Dockerfile
 # テストを実行するとuploaderディレクトリに画像ファイルが生成される。もしアップローダーのテストが失敗するとこれらが残ることがあるため、除外している。
 /uploader 
