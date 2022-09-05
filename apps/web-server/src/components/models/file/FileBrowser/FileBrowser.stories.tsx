@@ -301,9 +301,17 @@ Filtered.args = {
     defaultFileTypeFilter: others,
 };
 
+export const Empty = Template.bind({});
+Empty.args = {
+    filesSource: undefined,
+    files: [],
+    ensuredFolderPaths: [],
+};
+
 export const EmptyButEnsured = Template.bind({});
 EmptyButEnsured.args = {
-    filesSource: [],
+    filesSource: undefined,
+    files: [],
 };
 
 const success = async () => {
@@ -329,10 +337,4 @@ ManyFiles.args = {
             id: undefined,
         };
     }),
-};
-
-export const NoItem = Template.bind({});
-NoItem.args = {
-    filesSource: undefined,
-    files: [],
 };
