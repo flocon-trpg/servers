@@ -19,7 +19,7 @@ import { AppConsole } from './utils/appConsole';
 import { ensureDir } from 'fs-extra';
 import { FilePermissionType } from './enums/FilePermissionType';
 import { easyFlake } from './utils/easyFlake';
-import { ServerConfig } from './configType';
+import { ServerConfig } from './config/types';
 import { InMemoryConnectionManager } from './connection/main';
 import { EM } from './utils/types';
 import { Result } from '@kizahasi/result';

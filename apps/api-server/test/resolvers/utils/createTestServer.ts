@@ -2,7 +2,7 @@ import { createMySQL, createPostgreSQL, createSQLite } from '../../../src/mikro-
 import { PromiseQueue } from '../../../src/utils/promiseQueue';
 import { InMemoryConnectionManager } from '../../../src/connection/main';
 import { BaasType } from '../../../src/enums/BaasType';
-import { ServerConfig, WritableServerConfig } from '../../../src/configType';
+import { ServerConfig, WritableServerConfig } from '../../../src/config/types';
 import { buildSchema } from '../../../src/buildSchema';
 import { PubSub } from 'graphql-subscriptions';
 import { createServer } from '../../../src/createServer';

@@ -1,6 +1,6 @@
 import { Result } from '@kizahasi/result';
 import { RateLimiterAbstract } from 'rate-limiter-flexible';
-import { ServerConfig } from '../../configType';
+import { ServerConfig } from '../../config/types';
 import { InMemoryConnectionManager } from '../../connection/main';
 import { BaasType } from '../../enums/BaasType';
 import { PromiseQueue } from '../../utils/promiseQueue';

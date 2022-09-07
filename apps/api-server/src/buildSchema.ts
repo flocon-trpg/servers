@@ -15,7 +15,7 @@ import { PubSubOptions } from 'graphql-subscriptions';
 import { ResolverContext } from './graphql+mikro-orm/utils/Contexts';
 import { NotSignIn } from './graphql+mikro-orm/resolvers/utils/helpers';
 import { getRolesAndCheckEntry } from './roles';
-import { ServerConfig } from './configType';
+import { ServerConfig } from './config/types';
 
 export const noAuthCheck = 'noAuthCheck';
 

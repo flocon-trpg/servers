@@ -32,7 +32,7 @@ import {
     UpdateBookmarkMutation,
 } from '@flocon-trpg/typed-document-node-v0.7.2';
 import { EntryToServerResultType } from '../../src/enums/EntryToServerResultType';
-import { ServerConfig } from '../../src/configType';
+import { ServerConfig } from '../../src/config/types';
 import { $free, UpOperation as U, parseState, roomTemplate } from '@flocon-trpg/core';
 import axios from 'axios';
 import FormData from 'form-data';

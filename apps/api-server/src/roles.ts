@@ -1,4 +1,4 @@
-import { ServerConfig } from './configType';
+import { ServerConfig } from './config/types';
 import { BaasType } from './enums/BaasType';
 import {
     NotSignIn,

@@ -6,7 +6,7 @@ import { GlobalRoom } from '../../entities/room/global';
 import { State as S, anonymous, participantTemplate, roomTemplate } from '@flocon-trpg/core';
 import { recordToArray } from '@flocon-trpg/utils';
 import { BaasType } from '../../../enums/BaasType';
-import { EntryPasswordConfig, ServerConfig, plain } from '../../../configType';
+import { EntryPasswordConfig, ServerConfig, plain } from '../../../config/types';
 import safeCompare from 'safe-compare';
 import bcrypt from 'bcrypt';
 

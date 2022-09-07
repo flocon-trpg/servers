@@ -8,11 +8,12 @@ import { authToken } from '@flocon-trpg/core';
 import { Context } from 'graphql-ws/lib/server';
 import { BaasType } from './enums/BaasType';
 import { AppConsole } from './utils/appConsole';
-import { ServerConfig } from './configType';
+import { ServerConfig } from './config/types';
 import { createServer, createServerAsError } from './createServer';
 import { VERSION } from './VERSION';
-import { ServerConfigBuilder } from './config';
+import { ServerConfigBuilder } from './config/serverConfigBuilder';
 import { loadAsMain } from './utils/commandLineArgs';
+import { createORM } from './config/createORM';
 
 const logEntryPasswordConfig = (serverConfig: ServerConfig) => {
     if (serverConfig.entryPassword == null) {
@@ -51,12 +52,7 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
     }
 
     const serverConfig = serverConfigResult.value;
-    const orm = await ServerConfig.createORM(
-        serverConfig,
-        commandLineArgs.db,
-        'dist',
-        commandLineArgs.debug
-    );
+    const orm = await createORM(serverConfig, commandLineArgs.db, 'dist', commandLineArgs.debug);
 
     if (orm.isError) {
         console.error(orm.error);

@@ -13,9 +13,9 @@ import {
     none,
     postgresqlDatabase,
     sqliteDatabase,
-} from './configType';
+} from './types';
 import * as E from 'fp-ts/Either';
-import { formatValidationErrors } from './utils/io-ts-reporters';
+import { formatValidationErrors } from '../utils/io-ts-reporters';
 import {
     ACCESS_CONTROL_ALLOW_ORIGIN,
     AUTO_MIGRATION,
@@ -36,7 +36,7 @@ import {
     ROOMHIST_COUNT,
     SQLITE,
     loadDotenv,
-} from './env';
+} from '../env';
 import { filterInt, parseStringToBoolean } from '@flocon-trpg/utils';
 import { Error, Result } from '@kizahasi/result';
 
