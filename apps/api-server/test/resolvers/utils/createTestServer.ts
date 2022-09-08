@@ -1,4 +1,8 @@
-import { createMySQL, createPostgreSQL, createSQLite } from '../../../src/mikro-orm';
+import {
+    createMySQLOptions,
+    createPostgreSQLOptions,
+    createSQLiteOptions,
+} from '../../../src/mikro-orm';
 import { PromiseQueue } from '../../../src/utils/promiseQueue';
 import { InMemoryConnectionManager } from '../../../src/connection/main';
 import { BaasType } from '../../../src/enums/BaasType';
@@ -9,6 +13,7 @@ import { createServer } from '../../../src/createServer';
 import { Result } from '@kizahasi/result';
 import { Resources } from './resources';
 import { mySQLClientUrl, postgresClientUrl } from './databaseConfig';
+import { MikroORM } from '@mikro-orm/core';
 
 const PostgreSQLConfig = {
     dbName: 'test',
@@ -38,7 +43,7 @@ export type DbConfig =
       }
     | { type: 'MySQL' };
 
-const createSQLiteConfig = (dbName: string): Parameters<typeof createSQLite>[0] => {
+const createSQLiteConfig = (dbName: string): Parameters<typeof createSQLiteOptions>[0] => {
     return {
         dbName,
         dirName: 'src',
@@ -47,15 +52,19 @@ const createSQLiteConfig = (dbName: string): Parameters<typeof createSQLite>[0] 
     } as const;
 };
 
-export const createOrm = async (dbConfig: DbConfig) => {
+const createOrmOpts = (dbConfig: DbConfig) => {
     switch (dbConfig.type) {
         case 'MySQL':
-            return await createMySQL(MySQLConfig);
+            return createMySQLOptions(MySQLConfig);
         case 'PostgreSQL':
-            return await createPostgreSQL(PostgreSQLConfig);
+            return createPostgreSQLOptions(PostgreSQLConfig);
         case 'SQLite':
-            return await createSQLite(createSQLiteConfig(dbConfig.dbName));
+            return createSQLiteOptions(createSQLiteConfig(dbConfig.dbName));
     }
+};
+
+export const createOrm = async (dbConfig: DbConfig) => {
+    return await MikroORM.init(createOrmOpts(dbConfig));
 };
 
 const setDatabaseConfig = (target: WritableServerConfig, dbConfig: DbConfig): void => {

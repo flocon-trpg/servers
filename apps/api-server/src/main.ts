@@ -11,9 +11,10 @@ import { AppConsole } from './utils/appConsole';
 import { ServerConfig } from './config/types';
 import { createServer, createServerAsError } from './createServer';
 import { VERSION } from './VERSION';
-import { ServerConfigBuilder } from './config/serverConfigBuilder';
+import { ServerConfigParser } from './config/serverConfigParser';
 import { loadAsMain } from './utils/commandLineArgs';
-import { createORM } from './config/createORM';
+import { createORM, createORMOptions } from './config/createORM';
+import { FIREBASE_PROJECTID } from './env';
 
 const logEntryPasswordConfig = (serverConfig: ServerConfig) => {
     if (serverConfig.entryPassword == null) {
@@ -38,40 +39,50 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
 
     const port = process.env.PORT ?? 4000;
 
-    const commandLineArgs = await loadAsMain();
-
-    const serverConfigBuilder = new ServerConfigBuilder(process.env);
-    const serverConfigResult = serverConfigBuilder.serverConfig;
-
-    if (serverConfigResult.isError) {
-        console.error(serverConfigResult.error);
+    const onError = async (message: string) => {
+        console.error(message);
         await createServerAsError({
             port,
         });
+    };
+
+    const commandLineArgs = await loadAsMain();
+
+    const serverConfigParser = new ServerConfigParser(process.env);
+    const serverConfigResult = serverConfigParser.serverConfig;
+
+    if (serverConfigResult.isError) {
+        await onError(serverConfigResult.error);
         return;
     }
 
     const serverConfig = serverConfigResult.value;
-    const orm = await createORM(serverConfig, commandLineArgs.db, 'dist', commandLineArgs.debug);
+    const orm = await createORM(
+        createORMOptions(serverConfig, commandLineArgs.db, 'dist', commandLineArgs.debug)
+    );
 
     if (orm.isError) {
-        console.error(orm.error);
-        await createServerAsError({
-            port,
-        });
+        await onError(orm.error);
         return;
     }
 
     // credentialにundefinedを渡すと`Invalid Firebase app options passed as the first argument to initializeApp() for the app named "[DEFAULT]". The "credential" property must be an object which implements the Credential interface.`というエラーが出るので回避している
     if (serverConfig.firebaseAdminSecret == null) {
+        if (serverConfig.firebaseProjectId == null) {
+            await onError(
+                `FirebaseのプロジェクトIDを取得できませんでした。${FIREBASE_PROJECTID} にプロジェクトIDをセットしてください。`
+            );
+            return;
+        }
+
         admin.initializeApp({
             projectId: serverConfig.firebaseProjectId,
         });
     } else {
         admin.initializeApp({
-            projectId: serverConfig.firebaseProjectId,
+            projectId: serverConfig.firebaseAdminSecret.project_id,
             credential: admin.credential.cert({
-                projectId: serverConfig.firebaseProjectId,
+                projectId: serverConfig.firebaseAdminSecret.project_id,
                 clientEmail: serverConfig.firebaseAdminSecret.client_email,
                 privateKey: serverConfig.firebaseAdminSecret.private_key,
             }),

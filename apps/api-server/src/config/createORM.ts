@@ -1,6 +1,12 @@
-import { Result } from '@kizahasi/result';
+import { Ok, Result } from '@kizahasi/result';
+import { Options as $Options, Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
 import { DATABASE_URL, HEROKU, MYSQL, POSTGRESQL, SQLITE } from '../env';
-import { DirName, createMySQL, createPostgreSQL, createSQLite } from '../mikro-orm';
+import {
+    DirName,
+    createMySQLOptions,
+    createPostgreSQLOptions,
+    createSQLiteOptions,
+} from '../mikro-orm';
 import { AppConsole } from '../utils/appConsole';
 import { ORM } from '../utils/types';
 import {
@@ -14,12 +20,14 @@ import {
     sqlite,
 } from './types';
 
-const createMySQLORM = async (
+type Options = $Options<IDatabaseDriver<Connection>>;
+
+const createMySQLORM = (
     mysqlConfig: MysqlDatabaseConfig | undefined,
     databaseArg: typeof mysql | null,
     dirName: DirName,
     debug: boolean
-): Promise<Result<ORM>> => {
+): Result<Options> => {
     if (mysqlConfig == null) {
         if (databaseArg === mysql) {
             return Result.error(
@@ -30,7 +38,7 @@ const createMySQLORM = async (
             `使用するデータベースとしてPostgreSQLが指定されましたが、${MYSQL}の値が設定されていません。`
         );
     }
-    const result = await createMySQL({
+    const result = createMySQLOptions({
         dbName: mysqlConfig.dbName,
         dirName,
         clientUrl: mysqlConfig.clientUrl,
@@ -40,25 +48,25 @@ const createMySQLORM = async (
     return Result.ok(result);
 };
 
-const createSQLiteORM = async (
+const createSQLiteORM = (
     sqliteConfig: SqliteDatabaseConfig,
     dirName: DirName,
     debug: boolean
-): Promise<Result<ORM>> => {
-    const result = await createSQLite({ dbName: sqliteConfig.dbName, dirName, debug });
+): Ok<Options> => {
+    const result = createSQLiteOptions({ dbName: sqliteConfig.dbName, dirName, debug });
     return Result.ok(result);
 };
 
-const createPostgresORM = async (
+const createPostgresORM = (
     postgresConfig: PostgresqlDatabaseConfig | undefined,
     serverConfig: ServerConfigForMigration,
     databaseArg: typeof postgresql | null,
     dirName: DirName,
     debug: boolean
-): Promise<Result<ORM>> => {
+): Result<Options> => {
     if (serverConfig.heroku) {
         if (serverConfig.herokuDatabaseUrl != null) {
-            const result = await createPostgreSQL({
+            const result = createPostgreSQLOptions({
                 clientUrl: serverConfig.herokuDatabaseUrl,
                 dbName: undefined,
                 driverOptions: {
@@ -83,7 +91,7 @@ const createPostgresORM = async (
             `使用するデータベースとしてPostgreSQLが指定されましたが、${POSTGRESQL}の値が設定されていません。`
         );
     }
-    const result = await createPostgreSQL({
+    const result = createPostgreSQLOptions({
         dbName: postgresConfig.dbName,
         dirName,
         clientUrl: postgresConfig.clientUrl,
@@ -205,16 +213,22 @@ const isExactlyOneServerConfig = (
     }
 };
 
-const createORMCore = async (
+/**
+ * @example
+ * ```typescript
+ * const orm = await createORM(createORMOptions(serverConfig, databaseArg, dirName, debug));
+ * ```
+ */
+export const createORMOptions = (
     serverConfig: ServerConfigForMigration,
     databaseArg: typeof postgresql | typeof sqlite | typeof mysql | null,
     dirName: DirName,
     debug: boolean
-): Promise<Result<ORM>> => {
+): Result<Options> => {
     switch (databaseArg) {
         case null: {
             if (serverConfig.heroku) {
-                return await createPostgresORM(
+                return createPostgresORM(
                     serverConfig.postgresql,
                     serverConfig,
                     databaseArg,
@@ -225,14 +239,14 @@ const createORMCore = async (
             const exactlyOneServerConfigResult = isExactlyOneServerConfig(serverConfig);
             switch (exactlyOneServerConfigResult.type) {
                 case mysql:
-                    return await createMySQLORM(
+                    return createMySQLORM(
                         exactlyOneServerConfigResult.mysql,
                         databaseArg,
                         dirName,
                         debug
                     );
                 case postgresql:
-                    return await createPostgresORM(
+                    return createPostgresORM(
                         exactlyOneServerConfigResult.postgresql,
                         serverConfig,
                         databaseArg,
@@ -240,11 +254,7 @@ const createORMCore = async (
                         debug
                     );
                 case sqlite:
-                    return await createSQLiteORM(
-                        exactlyOneServerConfigResult.sqlite,
-                        dirName,
-                        debug
-                    );
+                    return createSQLiteORM(exactlyOneServerConfigResult.sqlite, dirName, debug);
                 default: {
                     if (exactlyOneServerConfigResult.mysql == null) {
                         if (exactlyOneServerConfigResult.postgresql == null) {
@@ -276,7 +286,7 @@ const createORMCore = async (
                     `使用するデータベースとしてMySQLが指定されましたが、${MYSQL}の値が設定されていません。`
                 );
             }
-            return await createMySQLORM(serverConfig.mysql, databaseArg, dirName, debug);
+            return createMySQLORM(serverConfig.mysql, databaseArg, dirName, debug);
         }
         case sqlite: {
             if (serverConfig.sqlite == null) {
@@ -284,10 +294,10 @@ const createORMCore = async (
                     `使用するデータベースとしてSQLiteが指定されましたが、${SQLITE}の値が設定されていません。`
                 );
             }
-            return await createSQLiteORM(serverConfig.sqlite, dirName, debug);
+            return createSQLiteORM(serverConfig.sqlite, dirName, debug);
         }
         case postgresql: {
-            return await createPostgresORM(
+            return createPostgresORM(
                 serverConfig.postgresql,
                 serverConfig,
                 databaseArg,
@@ -298,14 +308,13 @@ const createORMCore = async (
     }
 };
 
-export async function createORM(
-    serverConfig: ServerConfigForMigration,
-    databaseArg: typeof postgresql | typeof sqlite | typeof mysql | null,
-    dirName: DirName,
-    debug: boolean
-) {
+export const createORM = async (options: Result<Options>): Promise<Result<ORM>> => {
+    if (options.isError) {
+        return options;
+    }
     try {
-        return await createORMCore(serverConfig, databaseArg, dirName, debug);
+        const result = await MikroORM.init(options.value);
+        return Result.ok(result);
     } catch (e) {
         AppConsole.error({
             en: 'Could not connect to the database!',
@@ -314,4 +323,4 @@ export async function createORM(
         // TODO: 適度にcatchする
         throw e;
     }
-}
+};

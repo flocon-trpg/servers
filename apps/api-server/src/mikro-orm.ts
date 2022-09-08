@@ -1,9 +1,9 @@
 import {
+    Options as $Options,
     Connection,
     Dictionary,
     IDatabaseDriver,
     LoggerNamespace,
-    MikroORM,
 } from '@mikro-orm/core';
 import { File } from './graphql+mikro-orm/entities/file/mikro-orm';
 import { FileTag } from './graphql+mikro-orm/entities/fileTag/mikro-orm';
@@ -49,7 +49,9 @@ const migrations = ({
     };
 };
 
-export const createSQLite = async ({
+type Options = $Options<IDatabaseDriver<Connection>>;
+
+export const createSQLiteOptions = ({
     dbName,
     dirName,
     debug,
@@ -57,18 +59,18 @@ export const createSQLite = async ({
     dbName: string;
     dirName: DirName;
     debug?: Debug;
-}): Promise<MikroORM<IDatabaseDriver<Connection>>> => {
-    return await MikroORM.init({
+}): Options => {
+    return {
         entities,
         dbName,
         migrations: migrations({ dbType: 'sqlite', dirName }),
         type: 'sqlite',
         forceUndefined: true,
         debug,
-    });
+    };
 };
 
-export const createPostgreSQL = async ({
+export const createPostgreSQLOptions = ({
     dbName,
     dirName,
     clientUrl,
@@ -80,9 +82,8 @@ export const createPostgreSQL = async ({
     clientUrl: string;
     debug?: Debug;
     driverOptions: Dictionary<unknown> | undefined;
-}): Promise<MikroORM<IDatabaseDriver<Connection>>> => {
-    // HACK: driverOptionsにundefinedをセットするとmikro-ormでエラーが出るため、undefinedを渡さないようにしている。
-    const opts: Parameters<typeof MikroORM.init>[0] = {
+}): Options => {
+    const opts: Options = {
         entities,
         dbName,
         migrations: {
@@ -99,10 +100,10 @@ export const createPostgreSQL = async ({
     if (driverOptions != null) {
         opts.driverOptions = driverOptions;
     }
-    return await MikroORM.init(opts);
+    return opts;
 };
 
-export const createMySQL = async ({
+export const createMySQLOptions = ({
     dbName,
     dirName,
     clientUrl,
@@ -114,9 +115,9 @@ export const createMySQL = async ({
     clientUrl: string;
     debug?: Debug;
     driverOptions: Dictionary<unknown> | undefined;
-}): Promise<MikroORM<IDatabaseDriver<Connection>>> => {
+}): Options => {
     // HACK: driverOptionsにundefinedをセットするとmikro-ormでエラーが出るため、undefinedを渡さないようにしている。
-    const opts: Parameters<typeof MikroORM.init>[0] = {
+    const opts: Options = {
         entities,
         dbName,
         migrations: migrations({ dbType: 'mysql', dirName }),
@@ -128,5 +129,5 @@ export const createMySQL = async ({
     if (driverOptions != null) {
         opts.driverOptions = driverOptions;
     }
-    return await MikroORM.init(opts);
+    return opts;
 };

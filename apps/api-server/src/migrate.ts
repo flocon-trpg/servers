@@ -1,8 +1,7 @@
 import { Result } from '@kizahasi/result';
 import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
-import { createORM } from './config/createORM';
-import { ServerConfigBuilder } from './config/serverConfigBuilder';
-import { ServerConfigForMigration } from './config/types';
+import { createORM as createORMCore, createORMOptions } from './config/createORM';
+import { ServerConfigParser } from './config/serverConfigParser';
 import { AppConsole } from './utils/appConsole';
 import {
     loadMigrationCreate,
@@ -82,11 +81,17 @@ export const migrateByNpmScript = async (
         | typeof down
         | typeof autoMigrationAlways
 ) => {
-    const serverConfigBuilder = new ServerConfigBuilder(process.env);
-    const serverConfig = serverConfigBuilder.serverConfigForMigration;
+    const serverConfigParser = new ServerConfigParser(process.env);
+    const serverConfig = serverConfigParser.serverConfigForMigration;
     if (serverConfig.isError) {
         throw new Error(serverConfig.error);
     }
+
+    const createORM = (
+        ...[serverConfig, databaseArg, dirName, debug]: Parameters<typeof createORMOptions>
+    ) => {
+        return createORMCore(createORMOptions(serverConfig, databaseArg, dirName, debug));
+    };
 
     let orm: Result<ORM> | undefined = undefined;
     try {

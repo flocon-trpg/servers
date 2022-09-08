@@ -105,8 +105,8 @@ export type ServerConfigForMigration = ReadonlyDeep<WritableServerConfigForMigra
 export type WritableServerConfig = {
     admins: string[];
     entryPassword: EntryPasswordConfig | undefined;
-    firebaseAdminSecret: Omit<FirebaseAdminSecretConfig, 'project_id'> | undefined;
-    firebaseProjectId: string;
+    firebaseAdminSecret: FirebaseAdminSecretConfig | undefined;
+    firebaseProjectId: string | undefined;
     uploader: UploaderConfig | undefined;
     autoMigration: boolean;
     accessControlAllowOrigin: string | undefined;

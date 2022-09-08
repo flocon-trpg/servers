@@ -38,7 +38,7 @@ import {
     loadDotenv,
 } from '../env';
 import { filterInt, parseStringToBoolean } from '@flocon-trpg/utils';
-import { Error, Result } from '@kizahasi/result';
+import { Error, Ok, Result } from '@kizahasi/result';
 
 loadDotenv();
 
@@ -53,19 +53,14 @@ const tryParseJSON = (json: string): Result<unknown> => {
     }
 };
 
-// パースなどに失敗したかどうかは確認できるようにしたいがエラーメッセージを表示するとミスで重要な情報が漏れる可能性があるため、エラーメッセージだけ除去している
+// パースなどに失敗したかどうかは確認できるようにしたいがエラーメッセージを表示するとミスで重要な情報が漏れる可能性がある。それを防ぐための型。
 type EmptyErrorResult<T> = Result<T, undefined>;
 
-// 環境変数の値に記述ミスがあった場合は続行ではなく停止すべきであるため、ガードとしてこの関数を定義している。
-// コードに問題がなければ、この関数でthrowされることはない。
-const ensureOk = <T, U>(source: Result<T, U> | undefined): T | undefined => {
-    if (source?.isError === true) {
-        throw new Error('Assertion failed: Expected ok, but actually error');
-    }
+const ensureOk = <T>(source: Ok<T> | undefined): T | undefined => {
     return source?.value;
 };
 
-export class ServerConfigBuilder {
+export class ServerConfigParser {
     public readonly [FLOCON_ADMIN]: Result<ReadonlyArray<string>> | undefined;
     public get admins() {
         return this[FLOCON_ADMIN];
@@ -209,12 +204,12 @@ export class ServerConfigBuilder {
             this[prop] = propValue.value;
         }
 
-        this[FLOCON_ADMIN] = ServerConfigBuilder.admin(env);
-        this[FIREBASE_ADMIN_SECRET] = ServerConfigBuilder.firebaseAdminSecretProp(env);
-        this[ENTRY_PASSWORD] = ServerConfigBuilder.entryPasswordProp(env);
-        this[MYSQL] = ServerConfigBuilder.mysqlProp(env);
-        this[POSTGRESQL] = ServerConfigBuilder.postgresqlProp(env);
-        this[SQLITE] = ServerConfigBuilder.sqliteProp(env);
+        this[FLOCON_ADMIN] = ServerConfigParser.admin(env);
+        this[FIREBASE_ADMIN_SECRET] = ServerConfigParser.firebaseAdminSecretProp(env);
+        this[ENTRY_PASSWORD] = ServerConfigParser.entryPasswordProp(env);
+        this[MYSQL] = ServerConfigParser.mysqlProp(env);
+        this[POSTGRESQL] = ServerConfigParser.postgresqlProp(env);
+        this[SQLITE] = ServerConfigParser.sqliteProp(env);
     }
 
     private static admin(env: typeof process.env): Result<ReadonlyArray<string>> {
@@ -397,19 +392,6 @@ export class ServerConfigBuilder {
             return this.parseError(EMBUPLOADER_MAX_SIZE);
         }
 
-        let firebaseProjectId: string | undefined = undefined;
-        if (this.firebaseProjectId == null) {
-            firebaseProjectId = this.firebaseAdminSecret?.value?.project_id;
-        } else {
-            firebaseProjectId = this.firebaseProjectId;
-        }
-
-        if (firebaseProjectId == null) {
-            return Result.error(
-                `FirebaseのプロジェクトIDを取得できませんでした。${FIREBASE_PROJECTID} にプロジェクトIDをセットしてください。`
-            );
-        }
-
         const uploaderConfig: UploaderConfig = {
             enabled: this.uploaderEnabled ?? false,
             directory: this.uploaderPath,
@@ -424,7 +406,7 @@ export class ServerConfigBuilder {
             herokuDatabaseUrl: this.databaseUrl,
             entryPassword: ensureOk(this.entryPassword),
             firebaseAdminSecret: ensureOk(this.firebaseAdminSecret),
-            firebaseProjectId,
+            firebaseProjectId: this.firebaseProjectId,
             heroku: this.heroku ?? false,
             mysql: ensureOk(this.mysql),
             roomHistCount: ensureOk(this.roomHistCount),
