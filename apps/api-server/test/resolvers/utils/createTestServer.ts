@@ -111,7 +111,7 @@ export const createTestServer = async ({
         firebaseAdminSecret: undefined,
         firebaseProjectId: 'FAKE_FIREBASE_PROJECTID',
         heroku: false,
-        herokuDatabaseUrl: undefined,
+        databaseUrl: undefined,
         mysql: undefined,
         postgresql: undefined,
         sqlite: undefined,

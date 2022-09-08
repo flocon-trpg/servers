@@ -93,8 +93,8 @@ export type UploaderConfig = {
 export type WritableServerConfigForMigration = {
     heroku: boolean;
 
-    // HerokuでHeroku Postgresを使うと自動的にセットされる DATABASE_URL を表す。
-    herokuDatabaseUrl: string | undefined;
+    // DATABASE_URL を表す。Herokuやfly.ioなどではDATABASE_URLに値が自動的にセットされることがある。
+    databaseUrl: string | undefined;
 
     mysql: MysqlDatabaseConfig | undefined;
     postgresql: PostgresqlDatabaseConfig | undefined;

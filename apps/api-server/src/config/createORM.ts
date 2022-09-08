@@ -65,9 +65,9 @@ const createPostgresORM = (
     debug: boolean
 ): Result<Options> => {
     if (serverConfig.heroku) {
-        if (serverConfig.herokuDatabaseUrl != null) {
+        if (serverConfig.databaseUrl != null) {
             const result = createPostgreSQLOptions({
-                clientUrl: serverConfig.herokuDatabaseUrl,
+                clientUrl: serverConfig.databaseUrl,
                 dbName: undefined,
                 driverOptions: {
                     connection: { ssl: { rejectUnauthorized: false } },

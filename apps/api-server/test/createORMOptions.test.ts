@@ -30,7 +30,7 @@ const toBeError = (params: Params) => {
 
 const defaultServerConfig: ServerConfigForMigration = {
     heroku: false,
-    herokuDatabaseUrl: undefined,
+    databaseUrl: undefined,
     mysql: undefined,
     postgresql: undefined,
     sqlite: undefined,
@@ -84,7 +84,7 @@ describe('createORMOptions', () => {
             serverConfig: {
                 ...defaultServerConfig,
                 heroku: true,
-                herokuDatabaseUrl: 'postgresql://localhost',
+                databaseUrl: 'postgresql://localhost',
             },
         });
         expect(actual.type).toBe('postgresql');

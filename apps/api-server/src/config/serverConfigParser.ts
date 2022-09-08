@@ -342,7 +342,7 @@ export class ServerConfigParser {
         }
 
         const result: ServerConfigForMigration = {
-            herokuDatabaseUrl: this.databaseUrl,
+            databaseUrl: this.databaseUrl,
             heroku: this.heroku ?? false,
             mysql: ensureOk(this.mysql),
             postgresql: ensureOk(this.postgresql),
@@ -403,7 +403,7 @@ export class ServerConfigParser {
             accessControlAllowOrigin: this.accessControlAllowOrigin,
             admins: ensureOk(this.admins) ?? [],
             autoMigration: this.autoMigration ?? false,
-            herokuDatabaseUrl: this.databaseUrl,
+            databaseUrl: this.databaseUrl,
             entryPassword: ensureOk(this.entryPassword),
             firebaseAdminSecret: ensureOk(this.firebaseAdminSecret),
             firebaseProjectId: this.firebaseProjectId,
