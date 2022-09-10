@@ -16,36 +16,42 @@ const driverOptionsConfig = t.partial({
     driverOptions: t.record(t.string, t.unknown),
 });
 
-const partialDbName = t.partial({
+const clientUrlType = t.type({
+    clientUrl: t.string,
+});
+
+const dbNamePartial = t.partial({
     dbName: t.string,
 });
 
-export const mysqlDatabase = t.intersection([
-    driverOptionsConfig,
-    partialDbName,
-    t.type({
-        clientUrl: t.string,
-    }),
-]);
+export const mysqlDatabase = t.intersection([driverOptionsConfig, dbNamePartial, clientUrlType]);
 
 export type MysqlDatabaseConfig = t.TypeOf<typeof mysqlDatabase>;
 
 export const postgresqlDatabase = t.intersection([
     driverOptionsConfig,
-    partialDbName,
-    t.type({
-        clientUrl: t.string,
-    }),
+    dbNamePartial,
+    clientUrlType,
 ]);
 
 export type PostgresqlDatabaseConfig = t.TypeOf<typeof postgresqlDatabase>;
 
-export const sqliteDatabase = t.intersection([
-    driverOptionsConfig,
+const sqliteDatabaseCore = t.union([
     t.type({
         dbName: t.string,
+        clientUrl: t.undefined,
+    }),
+    t.type({
+        dbName: t.undefined,
+        clientUrl: t.string,
+    }),
+    t.type({
+        dbName: t.string,
+        clientUrl: t.string,
     }),
 ]);
+
+export const sqliteDatabase = t.intersection([driverOptionsConfig, sqliteDatabaseCore]);
 
 export type SqliteDatabaseConfig = t.TypeOf<typeof sqliteDatabase>;
 

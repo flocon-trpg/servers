@@ -18,6 +18,8 @@ import {
     StringPieceLog,
 } from './graphql+mikro-orm/entities/roomMessage/mikro-orm';
 import { User } from './graphql+mikro-orm/entities/user/mikro-orm';
+import * as t from 'io-ts';
+import { sqliteDatabase } from './config/types';
 
 const entities = [
     Room,
@@ -52,17 +54,18 @@ const migrations = ({
 type Options = $Options<IDatabaseDriver<Connection>>;
 
 export const createSQLiteOptions = ({
-    dbName,
+    sqliteConfig,
     dirName,
     debug,
 }: {
-    dbName: string;
+    sqliteConfig: t.TypeOf<typeof sqliteDatabase>;
     dirName: DirName;
     debug?: Debug;
 }): Options => {
     return {
         entities,
-        dbName,
+        dbName: sqliteConfig.dbName,
+        clientUrl: sqliteConfig.clientUrl,
         migrations: migrations({ dbType: 'sqlite', dirName }),
         type: 'sqlite',
         forceUndefined: true,

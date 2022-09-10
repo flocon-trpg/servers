@@ -9,6 +9,7 @@ import {
 } from '../mikro-orm';
 import { AppConsole } from '../utils/appConsole';
 import { ORM } from '../utils/types';
+import { determineDatabaseUrl } from './determineDatabaseUrl';
 import {
     MysqlDatabaseConfig,
     PostgresqlDatabaseConfig,
@@ -22,7 +23,7 @@ import {
 
 type Options = $Options<IDatabaseDriver<Connection>>;
 
-const createMySQLORM = (
+const createMySQLOptionsResult = (
     mysqlConfig: MysqlDatabaseConfig | undefined,
     databaseArg: typeof mysql | null,
     dirName: DirName,
@@ -48,16 +49,16 @@ const createMySQLORM = (
     return Result.ok(result);
 };
 
-const createSQLiteORM = (
+const createSQLiteOptionsResult = (
     sqliteConfig: SqliteDatabaseConfig,
     dirName: DirName,
     debug: boolean
 ): Ok<Options> => {
-    const result = createSQLiteOptions({ dbName: sqliteConfig.dbName, dirName, debug });
+    const result = createSQLiteOptions({ sqliteConfig, dirName, debug });
     return Result.ok(result);
 };
 
-const createPostgresORM = (
+const createPostgresOptionsResult = (
     postgresConfig: PostgresqlDatabaseConfig | undefined,
     serverConfig: ServerConfigForMigration,
     databaseArg: typeof postgresql | null,
@@ -101,6 +102,8 @@ const createPostgresORM = (
     return Result.ok(result);
 };
 
+const notOne = 'notOne';
+
 type ExactlyOneServerConfig =
     | {
           type: typeof mysql;
@@ -121,31 +124,31 @@ type ExactlyOneServerConfig =
           sqlite: NonNullable<ServerConfigForMigration['sqlite']>;
       }
     | {
-          type: 'notOne';
+          type: typeof notOne;
           mysql?: undefined;
           postgresql?: undefined;
           sqlite?: undefined;
       }
     | {
-          type: 'notOne';
+          type: typeof notOne;
           mysql?: undefined;
           postgresql: NonNullable<ServerConfig['postgresql']>;
           sqlite: ServerConfigForMigration['sqlite'];
       }
     | {
-          type: 'notOne';
+          type: typeof notOne;
           mysql: NonNullable<ServerConfigForMigration['mysql']>;
           postgresql?: undefined;
           sqlite: NonNullable<ServerConfigForMigration['sqlite']>;
       }
     | {
-          type: 'notOne';
+          type: typeof notOne;
           mysql: NonNullable<ServerConfigForMigration['mysql']>;
           postgresql: NonNullable<ServerConfig['postgresql']>;
           sqlite?: undefined;
       }
     | {
-          type: 'notOne';
+          type: typeof notOne;
           mysql: NonNullable<ServerConfigForMigration['mysql']>;
           postgresql: NonNullable<ServerConfig['postgresql']>;
           sqlite: NonNullable<ServerConfigForMigration['sqlite']>;
@@ -158,7 +161,7 @@ const isExactlyOneServerConfig = (
         if (serverConfig.postgresql == null) {
             if (serverConfig.sqlite == null) {
                 return {
-                    type: 'notOne',
+                    type: notOne,
                     mysql: undefined,
                     postgresql: undefined,
                     sqlite: undefined,
@@ -171,7 +174,7 @@ const isExactlyOneServerConfig = (
                 return { type: postgresql, postgresql: serverConfig.postgresql };
             } else {
                 return {
-                    type: 'notOne',
+                    type: notOne,
                     mysql: undefined,
                     postgresql: serverConfig.postgresql,
                     sqlite: serverConfig.sqlite,
@@ -189,7 +192,7 @@ const isExactlyOneServerConfig = (
                 };
             } else {
                 return {
-                    type: 'notOne',
+                    type: notOne,
                     mysql: serverConfig.mysql,
                     sqlite: serverConfig.sqlite,
                 };
@@ -197,13 +200,13 @@ const isExactlyOneServerConfig = (
         } else {
             if (serverConfig.sqlite == null) {
                 return {
-                    type: 'notOne',
+                    type: notOne,
                     mysql: serverConfig.mysql,
                     postgresql: serverConfig.postgresql,
                 };
             } else {
                 return {
-                    type: 'notOne',
+                    type: notOne,
                     mysql: serverConfig.mysql,
                     postgresql: serverConfig.postgresql,
                     sqlite: serverConfig.sqlite,
@@ -213,40 +216,27 @@ const isExactlyOneServerConfig = (
     }
 };
 
-/**
- * @example
- * ```typescript
- * const orm = await createORM(createORMOptions(serverConfig, databaseArg, dirName, debug));
- * ```
- */
-export const createORMOptions = (
+const seeDatabaseUrl = 'seeDatabaseUrl';
+
+const createORMOptionsWithoutDatabaseUrl = (
     serverConfig: ServerConfigForMigration,
     databaseArg: typeof postgresql | typeof sqlite | typeof mysql | null,
     dirName: DirName,
     debug: boolean
-): Result<Options> => {
+): Result<Options | typeof seeDatabaseUrl> => {
     switch (databaseArg) {
         case null: {
-            if (serverConfig.heroku) {
-                return createPostgresORM(
-                    serverConfig.postgresql,
-                    serverConfig,
-                    databaseArg,
-                    dirName,
-                    debug
-                );
-            }
             const exactlyOneServerConfigResult = isExactlyOneServerConfig(serverConfig);
             switch (exactlyOneServerConfigResult.type) {
                 case mysql:
-                    return createMySQLORM(
+                    return createMySQLOptionsResult(
                         exactlyOneServerConfigResult.mysql,
                         databaseArg,
                         dirName,
                         debug
                     );
                 case postgresql:
-                    return createPostgresORM(
+                    return createPostgresOptionsResult(
                         exactlyOneServerConfigResult.postgresql,
                         serverConfig,
                         databaseArg,
@@ -254,11 +244,15 @@ export const createORMOptions = (
                         debug
                     );
                 case sqlite:
-                    return createSQLiteORM(exactlyOneServerConfigResult.sqlite, dirName, debug);
+                    return createSQLiteOptionsResult(
+                        exactlyOneServerConfigResult.sqlite,
+                        dirName,
+                        debug
+                    );
                 default: {
                     if (exactlyOneServerConfigResult.mysql == null) {
                         if (exactlyOneServerConfigResult.postgresql == null) {
-                            return Result.error('Database config not found.');
+                            return Result.ok(seeDatabaseUrl);
                         }
                         return Result.error(
                             `Because ${POSTGRESQL} and ${SQLITE} are set in config, you must use --db parameter to specify a database to use.`
@@ -286,7 +280,7 @@ export const createORMOptions = (
                     `使用するデータベースとしてMySQLが指定されましたが、${MYSQL}の値が設定されていません。`
                 );
             }
-            return createMySQLORM(serverConfig.mysql, databaseArg, dirName, debug);
+            return createMySQLOptionsResult(serverConfig.mysql, databaseArg, dirName, debug);
         }
         case sqlite: {
             if (serverConfig.sqlite == null) {
@@ -294,10 +288,10 @@ export const createORMOptions = (
                     `使用するデータベースとしてSQLiteが指定されましたが、${SQLITE}の値が設定されていません。`
                 );
             }
-            return createSQLiteORM(serverConfig.sqlite, dirName, debug);
+            return createSQLiteOptionsResult(serverConfig.sqlite, dirName, debug);
         }
         case postgresql: {
-            return createPostgresORM(
+            return createPostgresOptionsResult(
                 serverConfig.postgresql,
                 serverConfig,
                 databaseArg,
@@ -306,6 +300,86 @@ export const createORMOptions = (
             );
         }
     }
+};
+
+/**
+ * @example
+ * ```typescript
+ * const orm = await createORM(createORMOptions(serverConfig, databaseArg, dirName, debug));
+ * ```
+ */
+export const createORMOptions = (
+    serverConfig: ServerConfigForMigration,
+    databaseArg: typeof postgresql | typeof sqlite | typeof mysql | null,
+    dirName: DirName,
+    debug: boolean
+): Result<Options> => {
+    const ormOptionsBaseResult = createORMOptionsWithoutDatabaseUrl(
+        serverConfig,
+        databaseArg,
+        dirName,
+        debug
+    );
+    if (ormOptionsBaseResult.isError) {
+        return ormOptionsBaseResult;
+    }
+    const ormOptionsBase = ormOptionsBaseResult.value;
+
+    if (ormOptionsBase === seeDatabaseUrl) {
+        if (serverConfig.databaseUrl == null) {
+            return Result.error('Database config not found.');
+        }
+        const databaseUrlResult = determineDatabaseUrl(serverConfig.databaseUrl);
+        if (databaseUrlResult.isError) {
+            // TODO: jaの文字列も返す
+            return Result.error(databaseUrlResult.error.en);
+        }
+        switch (databaseUrlResult.value.type) {
+            case mysql:
+                return Result.ok(
+                    createMySQLOptions({
+                        clientUrl: databaseUrlResult.value.mysql.clientUrl,
+                        dirName,
+                        debug,
+                        dbName: undefined,
+                        driverOptions: undefined,
+                    })
+                );
+            case postgresql:
+                return Result.ok(
+                    createPostgreSQLOptions({
+                        clientUrl: databaseUrlResult.value.postgresql.clientUrl,
+                        dirName,
+                        debug,
+                        dbName: undefined,
+                        driverOptions: serverConfig.heroku
+                            ? {
+                                  connection: { ssl: { rejectUnauthorized: false } },
+                              }
+                            : undefined,
+                    })
+                );
+            case sqlite:
+                return Result.ok(
+                    createSQLiteOptions({
+                        sqliteConfig: {
+                            clientUrl: databaseUrlResult.value.sqlite.clientUrl,
+                            dbName: undefined,
+                        },
+                        dirName,
+                        debug,
+                    })
+                );
+        }
+    }
+
+    if (serverConfig.databaseUrl != null) {
+        AppConsole.logJa(
+            `${MYSQL}, ${POSTGRESQL}, ${SQLITE} においてデータベースが設定されているため、${DATABASE_URL} の値は無視されました。`
+        );
+    }
+
+    return Result.ok(ormOptionsBase);
 };
 
 export const createORM = async (options: Result<Options>): Promise<Result<ORM>> => {

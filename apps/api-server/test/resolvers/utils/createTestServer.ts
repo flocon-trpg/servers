@@ -45,7 +45,10 @@ export type DbConfig =
 
 const createSQLiteConfig = (dbName: string): Parameters<typeof createSQLiteOptions>[0] => {
     return {
-        dbName,
+        sqliteConfig: {
+            dbName,
+            clientUrl: undefined,
+        },
         dirName: 'src',
         // debug: trueだとGitHub Actionsのログのサイズが巨大（10MB以上）になるのでfalseにしている
         debug: false,
@@ -86,6 +89,7 @@ const setDatabaseConfig = (target: WritableServerConfig, dbConfig: DbConfig): vo
         case 'SQLite':
             target.sqlite = {
                 dbName: dbConfig.dbName,
+                clientUrl: undefined,
                 driverOptions: undefined,
             };
             return;
