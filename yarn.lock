@@ -2983,7 +2983,7 @@ __metadata:
     "@kizahasi/option": ^1.0.0
     "@kizahasi/result": ^1.0.1
     "@types/jest": 28.1.6
-    "@types/lodash": 4.14.182
+    "@types/lodash": 4.14.185
     jest: 28.1.3
     lodash: 4.17.21
     rimraf: 3.0.2
@@ -6573,10 +6573,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:*, @types/lodash@npm:4.14.182, @types/lodash@npm:^4.14.167, @types/lodash@npm:^4.14.181":
-  version: 4.14.182
-  resolution: "@types/lodash@npm:4.14.182"
-  checksum: 7dd137aa9dbabd632408bd37009d984655164fa1ecc3f2b6eb94afe35bf0a5852cbab6183148d883e9c73a958b7fec9a9bcf7c8e45d41195add6a18c34958209
+"@types/lodash@npm:*, @types/lodash@npm:4.14.185, @types/lodash@npm:^4.14.167, @types/lodash@npm:^4.14.181":
+  version: 4.14.185
+  resolution: "@types/lodash@npm:4.14.185"
+  checksum: f81d13da5ecab110ca9c5c7cc2bedc3c9802a6acf668576aecd1b8f4b134ed81d06c15f1e600fb08f05975098280a0d97d30cddfc2cb39ec1c6b56e971ca53b3
   languageName: node
   linkType: hard
 
