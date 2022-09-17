@@ -2908,7 +2908,7 @@ __metadata:
     rate-limiter-flexible: ^2.3.0
     reflect-metadata: ^0.1.13
     rimraf: 3.0.2
-    rxjs: ^7.3.0
+    rxjs: ^7.5.6
     safe-compare: ^1.1.4
     sanitize-filename: ^1.6.3
     sharp: ^0.30.0
@@ -3061,7 +3061,7 @@ __metadata:
     immer: 9.0.15
     jest: 28.1.3
     rimraf: 3.0.2
-    rxjs: ^7.5.5
+    rxjs: ^7.5.6
     ts-jest: 28.0.7
     typescript: 4.4.4
   languageName: unknown
@@ -3162,7 +3162,7 @@ __metadata:
     react-rnd: ^10.3.7
     react-use: ^17.3.1
     react-virtuoso: ^2.2.1
-    rxjs: ^7.3.0
+    rxjs: ^7.5.6
     sass: ^1.42.1
     sass-loader: 13.0.0
     serve: ^13.0.0
@@ -21610,12 +21610,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rxjs@npm:^7.3.0, rxjs@npm:^7.5.5":
-  version: 7.5.5
-  resolution: "rxjs@npm:7.5.5"
+"rxjs@npm:^7.5.5, rxjs@npm:^7.5.6":
+  version: 7.5.6
+  resolution: "rxjs@npm:7.5.6"
   dependencies:
     tslib: ^2.1.0
-  checksum: e034f60805210cce756dd2f49664a8108780b117cf5d0e2281506e9e6387f7b4f1532d974a8c8b09314fa7a16dd2f6cff3462072a5789672b5dcb45c4173f3c6
+  checksum: fc05f01364a74dac57490fb3e07ea63b422af04017fae1db641a009073f902ef69f285c5daac31359620dc8d9aee7d81e42b370ca2a8573d1feae0b04329383b
   languageName: node
   linkType: hard
 
