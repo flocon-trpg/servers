@@ -2819,7 +2819,7 @@ __metadata:
     "@types/express": ^4.17.13
     "@types/fs-extra": ^9.0.13
     "@types/inquirer": 8.2.3
-    "@types/jest": 28.1.6
+    "@types/jest": 28.1.8
     "@types/lodash": ^4.14.181
     "@types/multer": ^1.4.7
     "@types/node": ^14.18.12
@@ -2881,7 +2881,7 @@ __metadata:
   dependencies:
     "@flocon-trpg/utils": "workspace:^"
     "@types/ioredis": 4.28.10
-    "@types/jest": 28.1.6
+    "@types/jest": 28.1.8
     ioredis: ^4.28.0
     jest: 28.1.3
     node-cache: ^5.1.2
@@ -2902,7 +2902,7 @@ __metadata:
     "@kizahasi/result": ^1.0.1
     "@ltd/j-toml": ^1.23.0
     "@types/estree": 1.0.0
-    "@types/jest": 28.1.6
+    "@types/jest": 28.1.8
     "@types/lodash.clonedeep": 4.5.7
     "@types/sanitize-filename": 1.6.3
     "@types/truncate-utf8-bytes": 1.0.0
@@ -2925,7 +2925,7 @@ __metadata:
     "@flocon-trpg/utils": "workspace:^"
     "@kizahasi/option": ^1.0.0
     "@types/estree": 1.0.0
-    "@types/jest": 28.1.6
+    "@types/jest": 28.1.8
     acorn: ^8.5.0
     jest: 28.1.3
     rimraf: 3.0.2
@@ -2990,7 +2990,7 @@ __metadata:
   dependencies:
     "@kizahasi/option": ^1.0.0
     "@kizahasi/result": ^1.0.1
-    "@types/jest": 28.1.6
+    "@types/jest": 28.1.8
     "@types/lodash": 4.14.185
     jest: 28.1.3
     lodash: 4.17.21
@@ -3007,7 +3007,7 @@ __metadata:
     "@flocon-trpg/core": "workspace:^"
     "@flocon-trpg/typed-document-node-v0.7.1": "workspace:^"
     "@flocon-trpg/utils": "workspace:^"
-    "@types/jest": 28.1.6
+    "@types/jest": 28.1.8
     fast-check: 3.1.1
     immer: 9.0.15
     jest: 28.1.3
@@ -3056,7 +3056,7 @@ __metadata:
     "@types/color-name": 1.1.1
     "@types/howler": ^2.2.4
     "@types/html-escaper": ^3.0.0
-    "@types/jest": 28.1.6
+    "@types/jest": 28.1.8
     "@types/lodash": ^4.14.181
     "@types/quill": ^2.0.9
     "@types/react": ^17.0.24
@@ -6576,13 +6576,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jest@npm:*, @types/jest@npm:28.1.6":
-  version: 28.1.6
-  resolution: "@types/jest@npm:28.1.6"
+"@types/jest@npm:*, @types/jest@npm:28.1.8":
+  version: 28.1.8
+  resolution: "@types/jest@npm:28.1.8"
   dependencies:
-    jest-matcher-utils: ^28.0.0
+    expect: ^28.0.0
     pretty-format: ^28.0.0
-  checksum: f2ba5fbefc8f44d1c16ee19d8d2811bca75754a2846e222287f2788d96062801c568215e6b81eb532a48e8cb2a7282729da1d4f6fb496831da8269c5abaad4c5
+  checksum: d4cd36158a3ae1d4b42cc48a77c95de74bc56b84cf81e09af3ee0399c34f4a7da8ab9e787570f10004bd642f9e781b0033c37327fbbf4a8e4b6e37e8ee3693a7
   languageName: node
   linkType: hard
 
@@ -12082,7 +12082,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expect@npm:^28.1.3":
+"expect@npm:^28.0.0, expect@npm:^28.1.3":
   version: 28.1.3
   resolution: "expect@npm:28.1.3"
   dependencies:
@@ -15383,7 +15383,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-matcher-utils@npm:^28.0.0, jest-matcher-utils@npm:^28.1.3":
+"jest-matcher-utils@npm:^28.1.3":
   version: 28.1.3
   resolution: "jest-matcher-utils@npm:28.1.3"
   dependencies:

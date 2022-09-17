@@ -24,7 +24,7 @@
         "@kizahasi/result": "^1.0.1"
     },
     "devDependencies": {
-        "@types/jest": "28.1.6",
+        "@types/jest": "28.1.8",
         "@types/lodash": "4.14.185",
         "jest": "28.1.3",
         "lodash": "4.17.21",

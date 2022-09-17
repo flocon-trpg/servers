@@ -20,7 +20,7 @@
     "name": "@flocon-trpg/web-server-utils",
     "author": "kizahasi",
     "devDependencies": {
-        "@types/jest": "28.1.6",
+        "@types/jest": "28.1.8",
         "fast-check": "3.1.1",
         "immer": "9.0.15",
         "jest": "28.1.3",
