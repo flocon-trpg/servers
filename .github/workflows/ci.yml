@@ -27,6 +27,8 @@ jobs:
         steps:
             - uses: actions/checkout@v3
 
+            - run: node --version
+
             - name: Use Node ${{ matrix.node }}
               uses: actions/setup-node@v3
               with:
@@ -107,6 +109,8 @@ jobs:
         steps:
             - name: Checkout repo
               uses: actions/checkout@v3
+
+            - run: node --version
 
             - name: Install
               run: yarn
