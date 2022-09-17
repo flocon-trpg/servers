@@ -78,7 +78,7 @@
         "use-memo-one": "^1.1.2"
     },
     "devDependencies": {
-        "@babel/core": "7.18.2",
+        "@babel/core": "7.19.1",
         "@mdx-js/react": "1.6.22",
         "@next/eslint-plugin-next": "12.1.6",
         "@sinonjs/fake-timers": "9.1.2",
