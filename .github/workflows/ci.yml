@@ -27,13 +27,13 @@ jobs:
         steps:
             - uses: actions/checkout@v3
 
-            - run: node --version
-
             - name: Use Node ${{ matrix.node }}
               uses: actions/setup-node@v3
               with:
                   node-version: ${{ matrix.node }}
                   cache: yarn
+
+            - run: node --version
 
             - run: yarn install
 
