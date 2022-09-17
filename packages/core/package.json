@@ -22,7 +22,7 @@
     "description": "Core library for Flocon project.",
     "devDependencies": {
         "@types/estree": "1.0.0",
-        "@types/jest": "28.1.6",
+        "@types/jest": "28.1.8",
         "@types/lodash.clonedeep": "4.5.7",
         "@types/sanitize-filename": "1.6.3",
         "@types/truncate-utf8-bytes": "1.0.0",
