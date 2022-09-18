@@ -30,6 +30,7 @@ import { consume } from './rateLimit/consume';
 import { EMBUPLOADER_PATH } from './env';
 import { Html } from './html/Html';
 import { parse } from 'graphql';
+import { createServer as createHttpServer } from 'http';
 
 const set401Status = (res: express.Response) => {
     return res.status(401).setHeader('WWW-Authenticate', 'Bearer');
@@ -379,70 +380,67 @@ export const createServer = async ({
 
     setupIndexAsSuccess(app);
 
-    // https://github.com/enisdenjo/graphql-ws のコードを使用
-    const server = app.listen(port, () => {
-        const subscriptionsPath = '/graphql';
-
-        // create and use the websocket server
-        const wsServer = new ws.Server({
-            server,
-            path: subscriptionsPath,
-        });
-
-        useServer(
-            {
-                schema,
-                execute,
-                subscribe,
-                context: async ctx => {
-                    const decodedIdToken = await getDecodedIdTokenFromWsContext(ctx);
-                    const result: ResolverContext = {
-                        decodedIdToken,
-                        rateLimiter,
-                        serverConfig,
-                        promiseQueue,
-                        connectionManager,
-                        // contextは、graphql-wsのJSDocにも書かれている通り、websocketの接続が確立されたときにのみ実行される。WebSocketを通して何らかの通信が行われても、clientが再接続するまではcontextの値は変わらない。
-                        // そのため、接続IDが同じならば、（ここでfork()を呼んでいるにも関わらず）同じemが使い回されることになるので注意。Subscriptionのコード内でデータベースにアクセスするならば、そちらでも毎回emはfork()してから使用するほうが無難。
-                        em: em.fork(),
-                        authorizedUser: null,
-                    };
-                    return result;
-                },
-                onSubscribe: async (ctx, message) => {
-                    message.payload.query;
-                    // Apollo Clientなどではmessage.payload.operationNameが使えるがurqlではnullishなので、queryを代わりに使っている
-                    if (!isRoomEventSubscription(message.payload.query)) {
-                        return;
-                    }
-                    const decodedIdToken = await getDecodedIdTokenFromWsContext(ctx);
-                    if (decodedIdToken?.isError !== false) {
-                        return;
-                    }
-
-                    const roomId = message.payload.variables?.id;
-                    if (typeof roomId === 'string') {
-                        await connectionManager.onConnectToRoom({
-                            connectionId: message.id,
-                            userUid: decodedIdToken.value.uid,
-                            roomId,
-                        });
-                    } else {
-                        console.warn('(typeof RoomEvent.id) should be string');
-                    }
-                },
-                onComplete: (ctx, message) => {
-                    connectionManager.onLeaveRoom({ connectionId: message.id });
-                },
-                onClose: async ctx => {
-                    for (const key in ctx.subscriptions) {
-                        await connectionManager.onLeaveRoom({ connectionId: key });
-                    }
-                },
+    // https://github.com/enisdenjo/graphql-ws のコードを参考にした
+    const httpServer = createHttpServer(app);
+    const subscriptionsPath = '/graphql';
+    const wsServer = new ws.Server({
+        server: httpServer,
+        path: subscriptionsPath,
+    });
+    useServer(
+        {
+            schema,
+            execute,
+            subscribe,
+            context: async ctx => {
+                const decodedIdToken = await getDecodedIdTokenFromWsContext(ctx);
+                const result: ResolverContext = {
+                    decodedIdToken,
+                    rateLimiter,
+                    serverConfig,
+                    promiseQueue,
+                    connectionManager,
+                    // contextは、graphql-wsのJSDocにも書かれている通り、websocketの接続が確立されたときにのみ実行される。WebSocketを通して何らかの通信が行われても、clientが再接続するまではcontextの値は変わらない。
+                    // そのため、接続IDが同じならば、（ここでfork()を呼んでいるにも関わらず）同じemが使い回されることになるので注意。Subscriptionのコード内でデータベースにアクセスするならば、そちらでも毎回emはfork()してから使用するほうが無難。
+                    em: em.fork(),
+                    authorizedUser: null,
+                };
+                return result;
             },
-            wsServer
-        );
+            onSubscribe: async (ctx, message) => {
+                message.payload.query;
+                // Apollo Clientなどではmessage.payload.operationNameが使えるがurqlではnullishなので、queryを代わりに使っている
+                if (!isRoomEventSubscription(message.payload.query)) {
+                    return;
+                }
+                const decodedIdToken = await getDecodedIdTokenFromWsContext(ctx);
+                if (decodedIdToken?.isError !== false) {
+                    return;
+                }
 
+                const roomId = message.payload.variables?.id;
+                if (typeof roomId === 'string') {
+                    await connectionManager.onConnectToRoom({
+                        connectionId: message.id,
+                        userUid: decodedIdToken.value.uid,
+                        roomId,
+                    });
+                } else {
+                    console.warn('(typeof RoomEvent.id) should be string');
+                }
+            },
+            onComplete: (ctx, message) => {
+                connectionManager.onLeaveRoom({ connectionId: message.id });
+            },
+            onClose: async ctx => {
+                for (const key in ctx.subscriptions) {
+                    await connectionManager.onLeaveRoom({ connectionId: key });
+                }
+            },
+        },
+        wsServer
+    );
+    const server = httpServer.listen(port, () => {
         // TODO: /graphqlが含まれているとAPI_HTTPなどの設定にも/graphqlの部分も入力してしまいそうなので、対処したほうがいいと思われる。また、createServerAsErrorとの統一性も取れていない
         !quiet &&
             console.log(`🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`);
