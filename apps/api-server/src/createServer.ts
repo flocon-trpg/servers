@@ -81,6 +81,7 @@ export const createServer = async ({
     getDecodedIdTokenFromWsContext,
     port,
     quiet,
+    httpServerOptions,
 }: {
     serverConfig: ServerConfig;
     promiseQueue: PromiseQueue;
@@ -96,6 +97,9 @@ export const createServer = async ({
     ) => Promise<Result<Readonly<DecodedIdToken>, unknown> | undefined>;
     port: string | number;
     quiet?: boolean;
+    httpServerOptions?: {
+        keepAliveTimeout?: number;
+    };
 }) => {
     let rateLimiter: RateLimiterAbstract | null = null;
     if (!serverConfig.disableRateLimitExperimental) {
@@ -387,6 +391,7 @@ export const createServer = async ({
         server: httpServer,
         path: subscriptionsPath,
     });
+    // useServerの戻り値をdisposeするとフリーズするためdisposeしていない。原因は不明。
     useServer(
         {
             schema,
@@ -440,6 +445,9 @@ export const createServer = async ({
         },
         wsServer
     );
+    if (httpServerOptions?.keepAliveTimeout != null) {
+        httpServer.keepAliveTimeout = httpServerOptions.keepAliveTimeout;
+    }
     const server = httpServer.listen(port, () => {
         // TODO: /graphqlが含まれているとAPI_HTTPなどの設定にも/graphqlの部分も入力してしまいそうなので、対処したほうがいいと思われる。また、createServerAsErrorとの統一性も取れていない
         !quiet &&

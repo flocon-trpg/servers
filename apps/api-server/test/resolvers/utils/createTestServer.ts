@@ -175,6 +175,11 @@ export const createTestServer = async ({
             });
         },
         port: 4000,
+        httpServerOptions: {
+            // Node.js v18 (v18.9.0 で確認)ではhttpServerをcloseするときに何故か keepAliveTimeout - 1000 ms 程度の時間がかかる。keepAliveTimeout のデフォルト値は 5000 ms であるため、テスト時間が長くなってしまう。これを軽減させるために、keepAliveTimeout を小さい値に設定している。
+            // Node.js v14, v16. v17 ではこの現象は確認されていない。
+            keepAliveTimeout: 1000,
+        },
     });
 
     return {
