@@ -219,7 +219,7 @@ export const createServer = async ({
                     serverConfig,
                 });
                 if (user == null) {
-                    set401Status(res).send('Requires entry');
+                    res.status(403).send('Requires entry');
                     return;
                 }
                 res.locals.user = user;
@@ -345,7 +345,7 @@ export const createServer = async ({
             const forkedEm = em.fork();
             const user = await forkedEm.findOne(User, { userUid: decodedIdToken.value.uid });
             if (user?.isEntry !== true) {
-                set401Status(res).send('Requires entry');
+                res.status(403).send('Requires entry');
                 return;
             }
 
