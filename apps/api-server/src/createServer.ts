@@ -63,7 +63,7 @@ export const createServerAsError = async ({ port }: { port: string | number }) =
     setupIndexAsError(app);
 
     const server = app.listen(port, () => {
-        console.log(
+        console.warn(
             `⚠️ Server ready at http://localhost:${port}, but API is not working. Please see error messages.`
         );
     });
@@ -289,7 +289,7 @@ export const createServer = async ({
                     .catch(err => {
                         // 画像かどうかに関わらず全てのファイルをsharpに渡すため、mp3などといった画像でないファイルの場合はほぼ確実にこの関数が実行される
 
-                        console.log(err);
+                        console.warn(err);
                         return false;
                     });
                 const permission =
