@@ -1,6 +1,7 @@
 import { Result } from '@kizahasi/result';
 import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
-import { createORM as createORMCore, createORMOptions } from './config/createORM';
+import { createORM as createORMCore } from './config/createORM';
+import { createORMOptions } from './config/createORMOptions';
 import { ServerConfigParser } from './config/serverConfigParser';
 import { AppConsole } from './utils/appConsole';
 import {

@@ -13,7 +13,8 @@ import { createServer, createServerAsError } from './createServer';
 import { VERSION } from './VERSION';
 import { ServerConfigParser } from './config/serverConfigParser';
 import { loadAsMain } from './utils/commandLineArgs';
-import { createORM, createORMOptions } from './config/createORM';
+import { createORM } from './config/createORM';
+import { createORMOptions } from './config/createORMOptions';
 import { FIREBASE_PROJECTID } from './env';
 
 const logEntryPasswordConfig = (serverConfig: ServerConfig) => {
