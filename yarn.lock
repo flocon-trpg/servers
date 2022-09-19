@@ -2993,7 +2993,7 @@ __metadata:
     "@flocon-trpg/typed-document-node-v0.7.1": "workspace:^"
     "@flocon-trpg/utils": "workspace:^"
     "@types/jest": 28.1.8
-    fast-check: 3.1.1
+    fast-check: 3.1.3
     immer: 9.0.15
     jest: 28.1.3
     rimraf: 3.0.2
@@ -12185,12 +12185,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-check@npm:3.1.1":
-  version: 3.1.1
-  resolution: "fast-check@npm:3.1.1"
+"fast-check@npm:3.1.3":
+  version: 3.1.3
+  resolution: "fast-check@npm:3.1.3"
   dependencies:
     pure-rand: ^5.0.1
-  checksum: 6f0aa2c6b88e91cd90bcad3bf32b5e674ea25117ecff22e5c26ec886dae51e9219d7f5863f4a9379b3d43862fcd9725e53254be04dfe284654736f53137ce224
+  checksum: 71aa5d6b3d8d9e0810bd43440255d7a48469367385698a883267bf16a3a6e125e3cc1cc3adf3bd2a35d14b6e9bcad9d398b97253a10ad512b9ae5d2ba644626f
   languageName: node
   linkType: hard
 
