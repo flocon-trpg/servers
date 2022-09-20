@@ -5,6 +5,7 @@ export {
     compositeKeyToJsonString,
     compositeKeyEquals,
 } from './internal/compositeKey';
+export { deepFreeze } from './internal/deepFreeze';
 export { delay } from './internal/delay';
 export {
     DualKey,
