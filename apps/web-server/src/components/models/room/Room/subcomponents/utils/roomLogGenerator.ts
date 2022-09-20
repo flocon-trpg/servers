@@ -601,17 +601,17 @@ class ImageDownloader {
                 break;
             }
         }
-        const url = this.analyzeUrl(srcResult.src);
-        if (url == null) {
-            return null;
-        }
         if (srcResult.type === Uploader) {
             const result: ImageResult = {
-                filename: url.filename,
+                filename: srcResult.filename,
                 blob: srcResult.blob,
             };
             this.uploaderImages.set(filePath.path, result);
             return result;
+        }
+        const url = this.analyzeUrl(srcResult.src);
+        if (url == null) {
+            return null;
         }
         const { directLink, filename } = url;
         const image = await axios.get(directLink, { responseType: 'blob' }).catch(() => null);
