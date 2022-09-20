@@ -75,8 +75,8 @@ jobs:
                 image: mysql:8.0
                 env:
                     MYSQL_ROOT_PASSWORD: root_password
-                    MYSQL_USER: mysql
-                    MYSQL_PASSWORD: mysql
+                    MYSQL_USER: test
+                    MYSQL_PASSWORD: test
                     MYSQL_DATABASE: test
                 options: >-
                     --health-cmd "mysqladmin ping"
@@ -88,8 +88,8 @@ jobs:
             postgres:
                 image: postgres
                 env:
-                    POSTGRES_USER: postgres
-                    POSTGRES_PASSWORD: postgres
+                    POSTGRES_USER: test
+                    POSTGRES_PASSWORD: test
                     POSTGRES_DB: test
                 options: >-
                     --health-cmd pg_isready
@@ -124,7 +124,7 @@ jobs:
               env:
                   MYSQL: >
                       {
-                          "clientUrl": "mysql://mysql:mysql@mysql:3306/test"
+                          "clientUrl": "mysql://test:test@mysql:3306/test"
                       }
 
             - name: Migration-up PostgreSQL
@@ -133,7 +133,7 @@ jobs:
               env:
                   POSTGRESQL: >
                       {
-                          "clientUrl": "postgresql://postgres:postgres@postgres:5432/test"
+                          "clientUrl": "postgresql://test:test@postgres:5432/test"
                       }
 
             - name: Test for Node 16 or higher
