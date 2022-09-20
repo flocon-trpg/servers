@@ -39,6 +39,7 @@ import {
 } from '../env';
 import { filterInt, parseStringToBoolean } from '@flocon-trpg/utils';
 import { Error, Ok, Result } from '@kizahasi/result';
+import { ReadonlyDeep } from 'type-fest/source/readonly-deep';
 
 loadDotenv();
 
@@ -359,7 +360,7 @@ export class ServerConfigParser {
         return this.serverConfigForMigrationCache;
     }
 
-    private createServerConfig(): Result<ServerConfig> {
+    private createServerConfig(): Result<ReadonlyDeep<ServerConfig>> {
         if (this.admins?.isError === true) {
             return this.admins;
         }
@@ -399,7 +400,7 @@ export class ServerConfigParser {
             sizeQuota: ensureOk(this.uploaderSizeQuota),
             maxFileSize: ensureOk(this.uploaderMaxSize),
         };
-        const nonFrozenResult: ServerConfig = {
+        const result: ServerConfig = {
             accessControlAllowOrigin: this.accessControlAllowOrigin,
             admins: ensureOk(this.admins) ?? [],
             autoMigration: this.autoMigration ?? false,
@@ -415,7 +416,6 @@ export class ServerConfigParser {
             uploader: uploaderConfig,
             disableRateLimitExperimental: this.disableRateLimit ?? false,
         };
-        const result = Object.freeze(nonFrozenResult);
         return Result.ok(result);
     }
 
