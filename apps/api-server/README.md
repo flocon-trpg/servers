@@ -1,13 +1,8 @@
 # api-server
 
-**一般的な API サーバーの設置方法に関しては、このドキュメントではなく <flocon.app> をお読みください。**
+Flocon の API サーバです。
 
-## 開発者向けドキュメント
+## ドキュメント
 
-Node.js と yarn のインストールが必要です。
-
-外部パッケージをインストールしていない場合は、`yarn install` 等でインストールします。
-
-apt-server パッケージに依存するワークスペースのパッケージをビルドしていない場合は、`yarn run build` でビルドします。
-
-環境変数の設定等を行った後、`yarn run start` を実行することで API サーバーが起動します。
+-   <https://flocon.app>
+-   [../../README_developer.md](../../README_developer.md)

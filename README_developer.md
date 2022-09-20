@@ -1,8 +1,8 @@
 # 開発者向け Readme
 
-ローカルで動かす場合、yarn のインストールが必須となります。npm や pnpm には対応していません。
+ローカル環境で動かす場合、yarn のインストールが必須となります。npm や pnpm には対応していません。
 
-Flocon は yarn v3[^1] のワークスペースを採用しています。📦 パッケージの一覧は次のとおりです。
+Flocon は yarn v3[^1] のワークスペースを採用しています。パッケージ 📦 の一覧は次のとおりです。
 
 ```
 Flocon
@@ -15,6 +15,7 @@ Flocon
 ┃ ┣ 📦 flocon-script
 ┃ ┣ 📦 typed-document-node-v0.7.1
 ┃ ┣ 📦 typed-document-node-v0.7.2
+┃ ┣ 📦 typed-document-node-v0.7.8
 ┃ ┣ 📦 utils
 ┃ ┗ 📦 web-server-utils
 ┣ 📄 README_developer.md (このファイル)
@@ -49,7 +50,14 @@ cd ./apps/web-server
 yarn run dev
 ```
 
-静的ファイルを出力して動かす場合:
+静的ファイルを利用せずに本番サーバーを動かす場合:
+
+```console
+cd ./apps/web-server
+yarn run start
+```
+
+静的ファイルを利用して本番サーバーを動かす場合:
 
 ```console
 cd ./apps/web-server
@@ -81,7 +89,7 @@ yarn run build:deps && yarn run storybook
 
 ### クイックスタート
 
-次のようにすることで、全てのパッケージをテストできます。
+Node.js v16 以降をインストールし、次のコマンドを実行することで、全てのパッケージをテストできます。
 
 #### Linux
 
