@@ -60,6 +60,7 @@ const booleanlikeValueCases: EnvValueCase<boolean | typeof error>[] = [
 const numberValueCases: EnvValueCase<number | typeof error>[] = [
     { stringValue: '0', expected: 0 },
     { stringValue: '1', expected: 1 },
+    { stringValue: ' 1 ', expected: 1 },
     { stringValue: '', expected: error },
     { stringValue: 'invalidvalue', expected: error },
 ];
