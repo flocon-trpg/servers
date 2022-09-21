@@ -181,7 +181,7 @@ export class ServerConfigParser {
                 this[prop] = undefined;
                 continue;
             }
-            const intValue = filterInt(value);
+            const intValue = filterInt(value.trim());
             if (intValue == null) {
                 this[prop] = Result.error(undefined);
             } else {
