@@ -19,7 +19,7 @@ export {
 export { DeletableTree } from './internal/deletableTree';
 export { filterInt } from './internal/filterInt';
 export { getExactlyOneKey } from './internal/getExactlyOneKey';
-export { parseStringToBoolean } from './internal/parseStringToBoolean';
+export { parseStringToBoolean, parseStringToBooleanError } from './internal/parseStringToBoolean';
 export { keyNames } from './internal/keyNames';
 export { MultiKeyMap } from './internal/multiKeyMap';
 export { MultiValueSet } from './internal/multiValueSet';
