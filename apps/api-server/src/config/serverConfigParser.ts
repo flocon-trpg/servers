@@ -37,7 +37,7 @@ import {
     SQLITE,
     loadDotenv,
 } from '../env';
-import { filterInt, parseStringToBoolean } from '@flocon-trpg/utils';
+import { filterInt, parseStringToBoolean, parseStringToBooleanError } from '@flocon-trpg/utils';
 import { Error, Ok, Result } from '@kizahasi/result';
 import { ReadonlyDeep } from 'type-fest/source/readonly-deep';
 
@@ -57,6 +57,7 @@ const tryParseJSON = (json: string): Result<unknown> => {
 // パースなどに失敗したかどうかは確認できるようにしたいがエラーメッセージを表示するとミスで重要な情報が漏れる可能性がある。それを防ぐための型。
 type EmptyErrorResult<T> = Result<T, undefined>;
 
+// 誤って source の型が Result<T, TError> になっているときに、型エラーを出すための関数。
 const ensureOk = <T>(source: Ok<T> | undefined): T | undefined => {
     return source?.value;
 };
@@ -72,7 +73,7 @@ export class ServerConfigParser {
         return this[ACCESS_CONTROL_ALLOW_ORIGIN];
     }
 
-    public readonly [AUTO_MIGRATION]: boolean | undefined;
+    public readonly [AUTO_MIGRATION]: EmptyErrorResult<boolean> | undefined;
     public get autoMigration() {
         return this[AUTO_MIGRATION];
     }
@@ -87,7 +88,7 @@ export class ServerConfigParser {
         return this[EMBUPLOADER_COUNT_QUOTA];
     }
 
-    public readonly [EMBUPLOADER_ENABLED]: boolean | undefined;
+    public readonly [EMBUPLOADER_ENABLED]: EmptyErrorResult<boolean> | undefined;
     public get uploaderEnabled() {
         return this[EMBUPLOADER_ENABLED];
     }
@@ -125,12 +126,14 @@ export class ServerConfigParser {
         return this[FIREBASE_PROJECTID];
     }
 
-    public readonly [FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL]: boolean | undefined;
+    public readonly [FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL]:
+        | EmptyErrorResult<boolean>
+        | undefined;
     public get disableRateLimit() {
         return this[FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL];
     }
 
-    public readonly [HEROKU]: boolean | undefined;
+    public readonly [HEROKU]: EmptyErrorResult<boolean> | undefined;
     public get heroku() {
         return this[HEROKU];
     }
@@ -200,9 +203,10 @@ export class ServerConfigParser {
             }
             const propValue = parseStringToBoolean(value);
             if (propValue.isError) {
-                console.warn(propValue.error.ja);
+                this[prop] = Result.error(undefined);
+            } else {
+                this[prop] = propValue;
             }
-            this[prop] = propValue.value;
         }
 
         this[FLOCON_ADMIN] = ServerConfigParser.admin(env);
@@ -331,7 +335,22 @@ export class ServerConfigParser {
         return Result.error(`${envKey} の値の記入方法が誤っています。`);
     }
 
+    private parseErrorFromBoolean(envKey: string): Error<string> {
+        // TODO: 英語でも出力する（ADMINのエラーメッセージは英語なため整合性が取れていない）
+        return Result.error(
+            `${envKey} で、次のエラーが発生しました: ` + parseStringToBooleanError.ja
+        );
+    }
+
+    private parseErrorFromInteger(envKey: string): Error<string> {
+        // TODO: 英語でも出力する（ADMINのエラーメッセージは英語なため整合性が取れていない）
+        return Result.error(`${envKey} の値を整数値に変換できませんでした。`);
+    }
+
     private createServerConfigForMigration(): Result<ServerConfigForMigration> {
+        if (this.heroku?.isError === true) {
+            return this.parseErrorFromBoolean(HEROKU);
+        }
         if (this.mysql?.isError === true) {
             return this.parseError(MYSQL);
         }
@@ -344,7 +363,7 @@ export class ServerConfigParser {
 
         const result: ServerConfigForMigration = {
             databaseUrl: this.databaseUrl,
-            heroku: this.heroku ?? false,
+            heroku: ensureOk(this.heroku) ?? false,
             mysql: ensureOk(this.mysql),
             postgresql: ensureOk(this.postgresql),
             sqlite: ensureOk(this.sqlite),
@@ -364,11 +383,20 @@ export class ServerConfigParser {
         if (this.admins?.isError === true) {
             return this.admins;
         }
+        if (this.autoMigration?.isError === true) {
+            return this.parseErrorFromBoolean(AUTO_MIGRATION);
+        }
+        if (this.disableRateLimit?.isError === true) {
+            return this.parseErrorFromBoolean(FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL);
+        }
         if (this.entryPassword?.isError === true) {
             return this.parseError(ENTRY_PASSWORD);
         }
         if (this.firebaseAdminSecret?.isError === true) {
             return this.parseError(FIREBASE_ADMIN_SECRET);
+        }
+        if (this.heroku?.isError === true) {
+            return this.parseErrorFromBoolean(HEROKU);
         }
         if (this.mysql?.isError === true) {
             return this.parseError(MYSQL);
@@ -384,17 +412,20 @@ export class ServerConfigParser {
         }
 
         if (this.uploaderCountQuota?.isError === true) {
-            return this.parseError(EMBUPLOADER_COUNT_QUOTA);
+            return this.parseErrorFromInteger(EMBUPLOADER_COUNT_QUOTA);
+        }
+        if (this.uploaderEnabled?.isError === true) {
+            return this.parseErrorFromBoolean(EMBUPLOADER_ENABLED);
         }
         if (this.uploaderSizeQuota?.isError === true) {
-            return this.parseError(EMBUPLOADER_SIZE_QUOTA);
+            return this.parseErrorFromInteger(EMBUPLOADER_SIZE_QUOTA);
         }
         if (this.uploaderMaxSize?.isError === true) {
-            return this.parseError(EMBUPLOADER_MAX_SIZE);
+            return this.parseErrorFromInteger(EMBUPLOADER_MAX_SIZE);
         }
 
         const uploaderConfig: UploaderConfig = {
-            enabled: this.uploaderEnabled ?? false,
+            enabled: ensureOk(this.uploaderEnabled) ?? false,
             directory: this.uploaderPath,
             countQuota: ensureOk(this.uploaderCountQuota),
             sizeQuota: ensureOk(this.uploaderSizeQuota),
@@ -403,18 +434,18 @@ export class ServerConfigParser {
         const result: ServerConfig = {
             accessControlAllowOrigin: this.accessControlAllowOrigin,
             admins: ensureOk(this.admins) ?? [],
-            autoMigration: this.autoMigration ?? false,
+            autoMigration: ensureOk(this.autoMigration) ?? false,
             databaseUrl: this.databaseUrl,
             entryPassword: ensureOk(this.entryPassword),
             firebaseAdminSecret: ensureOk(this.firebaseAdminSecret),
             firebaseProjectId: this.firebaseProjectId,
-            heroku: this.heroku ?? false,
+            heroku: ensureOk(this.heroku) ?? false,
             mysql: ensureOk(this.mysql),
             roomHistCount: ensureOk(this.roomHistCount),
             postgresql: ensureOk(this.postgresql),
             sqlite: ensureOk(this.sqlite),
             uploader: uploaderConfig,
-            disableRateLimitExperimental: this.disableRateLimit ?? false,
+            disableRateLimitExperimental: ensureOk(this.disableRateLimit) ?? false,
         };
         return Result.ok(result);
     }

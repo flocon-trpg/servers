@@ -56,7 +56,10 @@ const parseConfig = (env: DotenvParseOutput | undefined): Result<Env> => {
             : env.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED
     );
     if (isUnlistedFirebaseStorageEnabled.error) {
-        console.warn(isUnlistedFirebaseStorageEnabled.error.ja);
+        console.warn(
+            'NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED において、次のエラーが発生したため、false とみなされます:' +
+                isUnlistedFirebaseStorageEnabled.error.ja
+        );
     }
     const result: Env = {
         http: env == null ? process.env.NEXT_PUBLIC_API_HTTP : env.NEXT_PUBLIC_API_HTTP,

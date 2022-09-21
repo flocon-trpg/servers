@@ -4,6 +4,10 @@ export type ParseError = {
     ja: string;
 };
 
+export const parseStringToBooleanError: ParseError = {
+    ja: `真偽値に変換できませんでした。真として使用できる値は true, 1, yes, on で、偽として使用できる値は false, 0, no, off です。`,
+};
+
 const parseStringToBooleanCore = (source: string): Result<boolean, ParseError> => {
     switch (source.trim().toLowerCase()) {
         case 'true':
@@ -17,9 +21,7 @@ const parseStringToBooleanCore = (source: string): Result<boolean, ParseError> =
         case 'off':
             return Result.ok(false);
         default:
-            return Result.error({
-                ja: `"${source}" を真偽値に変換できませんでした。真として使用できる値は true, 1, yes, on で、偽として使用できる値は false, 0, no, off です。`,
-            });
+            return Result.error(parseStringToBooleanError);
     }
 };
 
