@@ -24505,11 +24505,11 @@ __metadata:
   linkType: hard
 
 "use-constant@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "use-constant@npm:1.1.0"
+  version: 1.1.1
+  resolution: "use-constant@npm:1.1.1"
   peerDependencies:
-    react: ^16.8.0 || ^17.0.0
-  checksum: 51026866a8552237ff3958f365953f1b1f1e1c2f9edd1909e0ffd35e27efebe70f94bc14d63c6a839b4d4fe40382f084983ccbb87f48de932e7cc44f61f09891
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: cbff28ec85e10a17adc889482752006cf49e7d2f8c38cce7bcab82b42b5c31b0e42a07310995d140265956aa5f7c641edc1111a8647d01980a822760df2648dc
   languageName: node
   linkType: hard
 
