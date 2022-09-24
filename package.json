@@ -9,6 +9,7 @@
         "postinstall": "husky install",
         "build": "yarn workspaces foreach -ptv run build:self",
         "build-ci": "yarn workspaces foreach -ptv run build-ci",
+        "generate-disclaimer": "yarn licenses generate-disclaimer --production --recursive --exclude='@types/*,husky,less,npm-run-all,sass,serve' > ./apps/web-server/public/licenses-npm-package.txt",
         "test": "yarn workspaces foreach -pv run test",
         "test-node14": "yarn workspaces foreach -pv --exclude '{@flocon-trpg/servers,@flocon-trpg/web-server}' run test",
         "lint": "eslint \"{apps,packages}/**/*.{ts,tsx}\" --cache",

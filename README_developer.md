@@ -128,6 +128,12 @@ Redis を使用したテストは`./packages/cache`パッケージにのみ存�
 
 `web-server` のコードには String.prototype.replaceAll メソッドが含まれています。このメソッドは多くのブラウザや Node.js 16 などでは対応していますが、Node.js 14 などでは未対応です。このため、Node.js 14 では web-server パッケージの一部のテストに失敗します。なお、Node.js 14 で問題が生じるのはテストのみであり、`yarn run dev`、`yarn run build`、`yarn run export` などは正常に動作すると思われます。
 
+## licenses-npm-package.txt の生成に関して
+
+[licenses-npm-package.txt](./apps/web-server/public/licenses-npm-package.txt) は `yarn run generate-disclaimer` で生成できます。
+
+これに使われている yarn プラグインの [plugin-licenses.cjs](./.yarn/plugins/@yarnpkg/plugin-licenses.cjs) は、[yarn-plugin-licenses](https://github.com/mhassan1/yarn-plugin-licenses) から fork した独自のプラグインです。ソースコードは [https://github.com/flocon-trpg/yarn-plugin-licenses](https://github.com/flocon-trpg/yarn-plugin-licenses) にあります。
+
 ## ブランチ名について
 
 ※ 現在採用しているフローおよびブランチ名は暫定です。
