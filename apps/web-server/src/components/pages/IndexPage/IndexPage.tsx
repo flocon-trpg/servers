@@ -149,12 +149,28 @@ export const IndexPage: React.FC = () => {
                     </li>
                     <li>
                         <a
+                            href='https://github.com/flocon-trpg/servers'
+                            target='_blank'
+                            rel='noopener noreferrer'
+                        >
+                            ソースコード
+                        </a>
+                    </li>
+                    <li>
+                        <a
                             href='https://github.com/flocon-trpg/servers/releases'
                             target='_blank'
                             rel='noopener noreferrer'
                         >
                             更新履歴
                         </a>
+                    </li>
+                </ul>
+                <div style={{ height: spacing }} />
+                <Typography.Title level={3}>その他</Typography.Title>
+                <ul>
+                    <li>
+                        <Link href='/licenses'>使用している素材とライブラリのライセンス</Link>
                     </li>
                 </ul>
             </div>
