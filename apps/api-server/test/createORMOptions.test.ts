@@ -141,7 +141,7 @@ describe('createORMOptions', () => {
         });
     });
 
-    it.each([undefined, 'https://invalid.example.com'])(
+    it.each([undefined, 'https://invalid.example.com', 'mysql://database-url:passw0rd@localhost'])(
         'tests multiple databases with databaseArg=postgresql',
         databaseUrl => {
             const actual = toBeOk({
@@ -160,7 +160,7 @@ describe('createORMOptions', () => {
         }
     );
 
-    it.each([undefined, 'https://invalid.example.com'])(
+    it.each([undefined, 'https://invalid.example.com', 'mysql://database-url:passw0rd@localhost'])(
         'tests multiple databases with databaseArg=mysql',
         databaseUrl => {
             const actual = toBeOk({
@@ -179,7 +179,7 @@ describe('createORMOptions', () => {
         }
     );
 
-    it.each([undefined, 'https://invalid.example.com'])(
+    it.each([undefined, 'https://invalid.example.com', 'mysql://database-url:passw0rd@localhost'])(
         'tests multiple databases with databaseArg=sqlite',
         databaseUrl => {
             const actual = toBeOk({
