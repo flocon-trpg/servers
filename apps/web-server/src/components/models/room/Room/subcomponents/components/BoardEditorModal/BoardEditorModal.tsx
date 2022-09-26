@@ -1,15 +1,13 @@
 import { Divider, InputNumber, Modal } from 'antd';
 import React from 'react';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
-import { InputFile } from '@/components/models/file/InputFile/InputFile';
+import { FileView } from '@/components/models/file/FileView/FileView';
 import { DrawerProps } from 'antd/lib/drawer';
-import { FilesManagerDrawer } from '@/components/models/file/FilesManagerDrawer/FilesManagerDrawer';
-import { FilesManagerDrawerType } from '@/utils/types';
 import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
 import { useBoards } from '../../hooks/useBoards';
 import { State, boardTemplate, simpleId } from '@flocon-trpg/core';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { FilePath } from '@/utils/file/filePath';
+import { FilePathModule } from '@/utils/file/filePath';
 import { atom, useAtom } from 'jotai';
 import { create, update } from '@/utils/constants';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
@@ -19,6 +17,7 @@ import { CopyToClipboardButton } from '@/components/ui/CopyToClipboardButton/Cop
 import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 import { useMemoOne } from 'use-memo-one';
 import { Table, TableRow } from '@/components/ui/Table/Table';
+import { image } from '@/utils/fileType';
 
 type BoardState = State<typeof boardTemplate>;
 
@@ -63,6 +62,7 @@ const defaultBoard: BoardState = {
 
     dicePieces: {},
     imagePieces: {},
+    shapePieces: {},
     stringPieces: {},
 };
 
@@ -127,8 +127,6 @@ export const BoardEditorModal: React.FC = () => {
         updateState: updateBoard,
         ok,
     } = useStateEditor({ createMode, updateMode });
-    const [filesManagerDrawerType, setFilesManagerDrawerType] =
-        React.useState<FilesManagerDrawerType | null>(null);
 
     if (myUserUid == null || board == null) {
         return null;
@@ -203,8 +201,9 @@ export const BoardEditorModal: React.FC = () => {
                         />
                     </TableRow>
                     <TableRow label='背景画像'>
-                        <InputFile
+                        <FileView
                             style={{ maxWidth: 450 }}
+                            maxWidthOfLink={null}
                             filePath={board.backgroundImage ?? undefined}
                             onPathChange={path =>
                                 updateBoard(board => {
@@ -212,10 +211,11 @@ export const BoardEditorModal: React.FC = () => {
                                         return;
                                     }
                                     board.backgroundImage =
-                                        path == null ? undefined : FilePath.toOt(path);
+                                        path == null ? undefined : FilePathModule.toOtState(path);
                                 })
                             }
-                            openFilesManager={setFilesManagerDrawerType}
+                            defaultFileTypeFilter={image}
+                            uploaderFileBrowserHeight={null}
                         />
                     </TableRow>
                     <TableRow label='背景画像の拡大率'>
@@ -313,10 +313,6 @@ export const BoardEditorModal: React.FC = () => {
                     }
                 </p>
             </div>
-            <FilesManagerDrawer
-                drawerType={filesManagerDrawerType}
-                onClose={() => setFilesManagerDrawerType(null)}
-            />
         </Modal>
     );
 };

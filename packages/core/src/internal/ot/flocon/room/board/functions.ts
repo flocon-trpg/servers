@@ -16,6 +16,8 @@ import * as DicePieceTypes from './dicePiece/types';
 import * as DicePiece from './dicePiece/functions';
 import * as ImagePieceTypes from './imagePiece/types';
 import * as ImagePiece from './imagePiece/functions';
+import * as ShapePiece from './shapePiece/functions';
+import * as ShapePieceTypes from './shapePiece/types';
 import * as StringPieceTypes from './stringPiece/types';
 import * as StringPiece from './stringPiece/functions';
 import * as Room from '../types';
@@ -49,6 +51,19 @@ export const toClientState =
                     }),
                 toClientState: ({ state }) => ImagePiece.toClientState(state),
             }),
+            shapePieces: RecordOperation.toClientState<
+                State<typeof ShapePieceTypes.template>,
+                State<typeof ShapePieceTypes.template>
+            >({
+                serverState: source.shapePieces,
+                isPrivate: state =>
+                    state.isPrivate &&
+                    !isOwner({
+                        requestedBy,
+                        ownerParticipantId: state.ownerParticipantId ?? anyValue,
+                    }),
+                toClientState: ({ state }) => ShapePiece.toClientState(state),
+            }),
             stringPieces: RecordOperation.toClientState<
                 State<typeof StringPieceTypes.template>,
                 State<typeof StringPieceTypes.template>
@@ -71,6 +86,39 @@ export const serverTransform =
         UpOperation<typeof template>
     > =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
+        const cancellationPolicyOfCharacterPieces: RecordOperation.CancellationPolicy<
+            string,
+            { ownerCharacterId: string | undefined }
+        > = {
+            cancelCreate: ({ newState }) =>
+                !isCharacterOwner({
+                    requestedBy,
+                    characterId: newState.ownerCharacterId ?? none,
+                    currentRoomState,
+                }),
+            cancelRemove: ({ state }) =>
+                !isCharacterOwner({
+                    requestedBy,
+                    characterId: state.ownerCharacterId ?? anyValue,
+                    currentRoomState,
+                }),
+        };
+        const cancellationPolicyOfParticipantPieces: RecordOperation.CancellationPolicy<
+            string,
+            { ownerParticipantId: string | undefined }
+        > = {
+            cancelCreate: ({ newState }) =>
+                !isOwner({
+                    requestedBy,
+                    ownerParticipantId: newState.ownerParticipantId ?? none,
+                }),
+            cancelRemove: ({ state }) =>
+                !isOwner({
+                    requestedBy,
+                    ownerParticipantId: state.ownerParticipantId ?? anyValue,
+                }),
+        };
+
         const dicePieces = RecordOperation.serverTransform<
             State<typeof DicePieceTypes.template>,
             State<typeof DicePieceTypes.template>,
@@ -93,26 +141,7 @@ export const serverTransform =
                     clientOperation: second,
                 }),
             toServerState: state => state,
-            cancellationPolicy: {
-                cancelCreate: ({ newState }) =>
-                    !isCharacterOwner({
-                        requestedBy,
-                        characterId: newState.ownerCharacterId ?? none,
-                        currentRoomState,
-                    }),
-                cancelUpdate: ({ nextState }) =>
-                    !isCharacterOwner({
-                        requestedBy,
-                        characterId: nextState.ownerCharacterId ?? anyValue,
-                        currentRoomState,
-                    }),
-                cancelRemove: ({ state }) =>
-                    !isCharacterOwner({
-                        requestedBy,
-                        characterId: state.ownerCharacterId ?? anyValue,
-                        currentRoomState,
-                    }),
-            },
+            cancellationPolicy: cancellationPolicyOfCharacterPieces,
         });
         if (dicePieces.isError) {
             return dicePieces;
@@ -137,26 +166,35 @@ export const serverTransform =
                     clientOperation: second,
                 }),
             toServerState: state => state,
-            cancellationPolicy: {
-                cancelCreate: ({ newState }) =>
-                    !isOwner({
-                        requestedBy,
-                        ownerParticipantId: newState.ownerParticipantId ?? none,
-                    }),
-                cancelUpdate: ({ nextState }) =>
-                    !isOwner({
-                        requestedBy,
-                        ownerParticipantId: nextState.ownerParticipantId ?? anyValue,
-                    }) && nextState.isPrivate,
-                cancelRemove: ({ state }) =>
-                    !isOwner({
-                        requestedBy,
-                        ownerParticipantId: state.ownerParticipantId ?? anyValue,
-                    }) && state.isPrivate,
-            },
+            cancellationPolicy: cancellationPolicyOfParticipantPieces,
         });
         if (imagePieces.isError) {
             return imagePieces;
+        }
+
+        const shapePieces = RecordOperation.serverTransform<
+            State<typeof ShapePieceTypes.template>,
+            State<typeof ShapePieceTypes.template>,
+            TwoWayOperation<typeof ShapePieceTypes.template>,
+            UpOperation<typeof ShapePieceTypes.template>,
+            TwoWayError
+        >({
+            first: serverOperation?.shapePieces,
+            second: clientOperation.shapePieces,
+            prevState: prevState.shapePieces,
+            nextState: currentState.shapePieces,
+            innerTransform: ({ first, second, prevState, nextState }) =>
+                ShapePiece.serverTransform(requestedBy)({
+                    prevState,
+                    currentState: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: cancellationPolicyOfParticipantPieces,
+        });
+        if (shapePieces.isError) {
+            return shapePieces;
         }
 
         const stringPieces = RecordOperation.serverTransform<
@@ -181,26 +219,7 @@ export const serverTransform =
                     clientOperation: second,
                 }),
             toServerState: state => state,
-            cancellationPolicy: {
-                cancelCreate: ({ newState }) =>
-                    !isCharacterOwner({
-                        requestedBy,
-                        characterId: newState.ownerCharacterId ?? none,
-                        currentRoomState,
-                    }),
-                cancelUpdate: ({ nextState }) =>
-                    !isCharacterOwner({
-                        requestedBy,
-                        characterId: nextState.ownerCharacterId ?? anyValue,
-                        currentRoomState,
-                    }),
-                cancelRemove: ({ state }) =>
-                    !isCharacterOwner({
-                        requestedBy,
-                        characterId: state.ownerCharacterId ?? anyValue,
-                        currentRoomState,
-                    }),
-            },
+            cancellationPolicy: cancellationPolicyOfCharacterPieces,
         });
         if (stringPieces.isError) {
             return stringPieces;
@@ -211,6 +230,7 @@ export const serverTransform =
             $r: 1,
             dicePieces: dicePieces.value,
             imagePieces: imagePieces.value,
+            shapePieces: shapePieces.value,
             stringPieces: stringPieces.value,
         };
 

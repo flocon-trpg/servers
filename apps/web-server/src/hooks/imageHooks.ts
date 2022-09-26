@@ -24,6 +24,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
 */
 
 // https://github.com/konvajs/use-image からsizeが欲しかったので改変。
@@ -33,11 +34,11 @@ SOFTWARE.
 // どうもFirefoxではCSSにwidthとheightが指定されていないとSVG画像が表示されないバグがある模様なので要注意!
 // 普通に<img/>から表示するぶんには問題ないが、useImageの関数内のような呼び方だと表示されない。
 
-import { State as S, filePathTemplate } from '@flocon-trpg/core';
 import React from 'react';
-import { FilePathFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { analyzeUrl } from '../utils/analyzeUrl';
-import { useSrcFromGraphQL } from './srcHooks';
+import { loaded, useSrcFromFilePath } from './srcHooks';
+import { FilePathLikeOrThumb } from '@/utils/file/filePath';
+import { Uploader } from '@flocon-trpg/core';
 
 type Size = {
     w: number;
@@ -69,8 +70,14 @@ type ArgNullState = {
 
 type State = LoadingState | SuccessState | FailedState | ArgNullState;
 
-export function useImage(src: string | null, size?: Size, crossOrigin?: string): State {
+export function useImage(
+    src: string | null,
+    options?: { skipAnalyzeUrl?: boolean; size?: Size; crossOrigin?: string }
+): State {
     const [state, setState] = React.useState(null as State | null);
+    const skipAnalyzeUrl = options?.skipAnalyzeUrl ?? false;
+    const size = options?.size;
+    const crossOrigin = options?.crossOrigin;
 
     React.useEffect(
         function () {
@@ -98,7 +105,14 @@ export function useImage(src: string | null, size?: Size, crossOrigin?: string):
             img.addEventListener('load', onload);
             img.addEventListener('error', onerror);
             crossOrigin && (img.crossOrigin = crossOrigin);
-            img.src = analyzeUrl(src).directLink;
+            if (skipAnalyzeUrl) {
+                img.src = src;
+            } else {
+                const url = analyzeUrl(src);
+                if (url != null) {
+                    img.src = url.directLink;
+                }
+            }
 
             return function cleanup() {
                 img.removeEventListener('load', onload);
@@ -106,17 +120,22 @@ export function useImage(src: string | null, size?: Size, crossOrigin?: string):
                 setState(null);
             };
         },
-        [src, crossOrigin, size?.w, size?.h]
+        [src, crossOrigin, size?.w, size?.h, skipAnalyzeUrl]
     );
 
     return state ?? { type: loading };
 }
 
-export function useImageFromGraphQL(
-    filePath: FilePathFragment | S<typeof filePathTemplate> | null | undefined,
-    crossOrigin?: string
+export function useImageFromFilePath(
+    filePath: FilePathLikeOrThumb | null | undefined,
+    options?: {
+        crossOrigin?: string;
+    }
 ): State {
-    const src = useSrcFromGraphQL(filePath);
+    const { src, queryResult } = useSrcFromFilePath(filePath);
 
-    return useImage(src.type === success ? src.value : null, undefined, crossOrigin);
+    return useImage(src ?? null, {
+        crossOrigin: options?.crossOrigin,
+        skipAnalyzeUrl: queryResult.type === loaded && queryResult.value.data?.type === Uploader,
+    });
 }

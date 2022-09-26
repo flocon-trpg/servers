@@ -26,6 +26,6 @@ export type StateManagerParameters<TState, TOperation> = {
     transform: Transform<TOperation, TOperation>;
     diff: Diff<TState, TOperation>;
 
-    // if true, debugging gets easier but makes it slower
+    // if true, debugging gets easier but makes StateManager slower
     enableHistory?: boolean;
 };

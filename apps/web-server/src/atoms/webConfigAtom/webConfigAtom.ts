@@ -1,6 +1,5 @@
 import { atom } from 'jotai';
 import { WebConfig } from '../../configType';
-import { Data, parse } from 'envfile';
 import { Result } from '@kizahasi/result';
 import { FirebaseConfig, firebaseConfig } from '@flocon-trpg/core';
 import { parseEnvListValue, parseStringToBoolean } from '@flocon-trpg/utils';
@@ -9,6 +8,7 @@ import { formatValidationErrors } from '../../utils/io-ts/io-ts-reporters';
 import { NEXT_PUBLIC_FIREBASE_CONFIG } from '../../env';
 import { FetchTextState } from '../../utils/types';
 import { storybookAtom } from '../storybookAtom/storybookAtom';
+import { DotenvParseOutput, parse } from '@/utils/dotEnvParse';
 
 type Env = {
     firebaseConfig?: FirebaseConfig;
@@ -23,7 +23,7 @@ type Envs = {
     publicEnvTxt: Env | undefined;
 };
 
-const parseConfig = (env: Data | undefined): Result<Env> => {
+const parseConfig = (env: DotenvParseOutput | undefined): Result<Env> => {
     /* 
     Because of Next.js restrictions, we cannot do like these:
     
@@ -56,7 +56,10 @@ const parseConfig = (env: Data | undefined): Result<Env> => {
             : env.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED
     );
     if (isUnlistedFirebaseStorageEnabled.error) {
-        console.warn(isUnlistedFirebaseStorageEnabled.error.ja);
+        console.warn(
+            'NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED において、次のエラーが発生したため、false とみなされます:' +
+                isUnlistedFirebaseStorageEnabled.error.ja
+        );
     }
     const result: Env = {
         http: env == null ? process.env.NEXT_PUBLIC_API_HTTP : env.NEXT_PUBLIC_API_HTTP,
@@ -90,7 +93,7 @@ const parseConfig = (env: Data | undefined): Result<Env> => {
 
 const processEnv = parseConfig(undefined);
 
-export const mockProcessEnvAtom = atom<Data | null>(null);
+export const mockProcessEnvAtom = atom<DotenvParseOutput | null>(null);
 
 export const publicEnvTxtAtom = atom<FetchTextState>({ fetched: false });
 

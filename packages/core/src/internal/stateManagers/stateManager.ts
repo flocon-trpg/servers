@@ -1,4 +1,4 @@
-import { StateManagerHistoryQueue } from './stateManagerHistory';
+import { StateManagerHistoryQueue } from './stateManagerHistoryQueue';
 import { StateManagerCore } from './stateManagerCore';
 import { StateManagerParameters } from './types';
 

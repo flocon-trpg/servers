@@ -31,6 +31,7 @@ fragment FileItem on FileItem {
     screenname
     createdBy
     createdAt
+    listType
 }
 
 fragment FilePath on FilePath {
@@ -527,6 +528,10 @@ mutation PromoteToPlayer($roomId: String!, $password: String) {
     result: promoteToPlayer(roomId: $roomId, password: $password) {
         failureType
     }
+}
+
+mutation RenameFiles($input: [RenameFileInput!]!) {
+    result: renameFiles(input: $input)
 }
 
 mutation ResetMessages($roomId: String!) {

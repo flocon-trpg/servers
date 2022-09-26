@@ -1,7 +1,8 @@
 import { Result } from '@kizahasi/result';
 import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
-import { ServerConfigBuilder } from './config';
-import { ServerConfigForMigration } from './configType';
+import { createORM as createORMCore } from './config/createORM';
+import { createORMOptions } from './config/createORMOptions';
+import { ServerConfigParser } from './config/serverConfigParser';
 import { AppConsole } from './utils/appConsole';
 import {
     loadMigrationCreate,
@@ -81,11 +82,17 @@ export const migrateByNpmScript = async (
         | typeof down
         | typeof autoMigrationAlways
 ) => {
-    const serverConfigBuilder = new ServerConfigBuilder(process.env);
-    const serverConfig = serverConfigBuilder.serverConfigForMigration;
+    const serverConfigParser = new ServerConfigParser(process.env);
+    const serverConfig = serverConfigParser.serverConfigForMigration;
     if (serverConfig.isError) {
         throw new Error(serverConfig.error);
     }
+
+    const createORM = (
+        ...[serverConfig, databaseArg, dirName, debug]: Parameters<typeof createORMOptions>
+    ) => {
+        return createORMCore(createORMOptions(serverConfig, databaseArg, dirName, debug));
+    };
 
     let orm: Result<ORM> | undefined = undefined;
     try {
@@ -96,12 +103,7 @@ export const migrateByNpmScript = async (
                     ja: `マイグレーションの作成を開始します。`,
                 });
                 const commandLineArgs = await loadMigrationCreate();
-                orm = await ServerConfigForMigration.createORM(
-                    serverConfig.value,
-                    commandLineArgs.db,
-                    'src',
-                    true
-                );
+                orm = await createORM(serverConfig.value, commandLineArgs.db, 'src', true);
                 if (orm.isError) {
                     throw new Error(orm.error);
                 }
@@ -120,12 +122,7 @@ export const migrateByNpmScript = async (
                     ja: `マイグレーションの新規作成を開始します。`,
                 });
                 const commandLineArgs = await loadMigrationCreate();
-                orm = await ServerConfigForMigration.createORM(
-                    serverConfig.value,
-                    commandLineArgs.db,
-                    'src',
-                    true
-                );
+                orm = await createORM(serverConfig.value, commandLineArgs.db, 'src', true);
                 if (orm.isError) {
                     throw new Error(orm.error);
                 }
@@ -141,12 +138,7 @@ export const migrateByNpmScript = async (
             case up:
             case autoMigrationAlways: {
                 const commandLineArgs = await loadMigrationUpOrCheck();
-                orm = await ServerConfigForMigration.createORM(
-                    serverConfig.value,
-                    commandLineArgs.db,
-                    'dist',
-                    true
-                );
+                orm = await createORM(serverConfig.value, commandLineArgs.db, 'dist', true);
                 if (orm.isError) {
                     throw new Error(orm.error);
                 }
@@ -163,12 +155,7 @@ export const migrateByNpmScript = async (
                 });
 
                 const commandLineArgs = await loadMigrationDown();
-                orm = await ServerConfigForMigration.createORM(
-                    serverConfig.value,
-                    commandLineArgs.db,
-                    'dist',
-                    true
-                );
+                orm = await createORM(serverConfig.value, commandLineArgs.db, 'dist', true);
                 if (orm.isError) {
                     throw new Error(orm.error);
                 }
@@ -196,12 +183,7 @@ export const migrateByNpmScript = async (
             }
             case check: {
                 const commandLineArgs = await loadMigrationUpOrCheck();
-                orm = await ServerConfigForMigration.createORM(
-                    serverConfig.value,
-                    commandLineArgs.db,
-                    'dist',
-                    true
-                );
+                orm = await createORM(serverConfig.value, commandLineArgs.db, 'dist', true);
                 if (orm.isError) {
                     throw new Error(orm.error);
                 }

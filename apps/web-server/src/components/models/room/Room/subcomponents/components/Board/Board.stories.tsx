@@ -4,6 +4,7 @@ import React from 'react';
 import { useSetupMocks } from '@/hooks/useSetupMocks';
 import { defaultBoardId } from '@/mocks';
 import { Board, Props } from './Board';
+import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 
 type RoomState = S<typeof roomTemplate>;
 
@@ -26,7 +27,11 @@ export const Default: React.FC<{
             update: updateRoom,
         },
     });
-    return <Board {...boardProps} />;
+    return (
+        <StorybookProvider>
+            <Board {...boardProps} />
+        </StorybookProvider>
+    );
 };
 
 const boardEditorProps: Props = {

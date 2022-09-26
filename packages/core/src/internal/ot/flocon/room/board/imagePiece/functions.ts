@@ -2,7 +2,7 @@ import * as ReplaceOperation from '../../../../util/replaceOperation';
 import { ServerTransform } from '../../../../util/type';
 import { isIdRecord } from '../../../../util/record';
 import { Result } from '@kizahasi/result';
-import * as Piece from '../../../pieceBase/functions';
+import * as Piece from '../../../piece/functions';
 import {
     RequestedBy,
     anyValue,

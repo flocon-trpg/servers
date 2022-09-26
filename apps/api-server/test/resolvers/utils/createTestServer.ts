@@ -1,15 +1,19 @@
-import { createMySQL, createPostgreSQL, createSQLite } from '../../../src/mikro-orm';
+import {
+    createMySQLOptions,
+    createPostgreSQLOptions,
+    createSQLiteOptions,
+} from '../../../src/mikro-orm';
 import { PromiseQueue } from '../../../src/utils/promiseQueue';
 import { InMemoryConnectionManager } from '../../../src/connection/main';
 import { BaasType } from '../../../src/enums/BaasType';
-import { ServerConfig, WritableServerConfig } from '../../../src/configType';
+import { ServerConfig, WritableServerConfig } from '../../../src/config/types';
 import { buildSchema } from '../../../src/buildSchema';
 import { PubSub } from 'graphql-subscriptions';
 import { createServer } from '../../../src/createServer';
 import { Result } from '@kizahasi/result';
 import { Resources } from './resources';
-import { toBeNever } from '@flocon-trpg/utils';
 import { mySQLClientUrl, postgresClientUrl } from './databaseConfig';
+import { MikroORM } from '@mikro-orm/core';
 
 const PostgreSQLConfig = {
     dbName: 'test',
@@ -39,26 +43,31 @@ export type DbConfig =
       }
     | { type: 'MySQL' };
 
-const createSQLiteConfig = (dbName: string): Parameters<typeof createSQLite>[0] => {
+const createSQLiteConfig = (dbName: string): Parameters<typeof createSQLiteOptions>[0] => {
     return {
-        dbName,
+        sqliteConfig: {
+            dbName,
+            clientUrl: undefined,
+        },
         dirName: 'src',
         // debug: trueだとGitHub Actionsのログのサイズが巨大（10MB以上）になるのでfalseにしている
         debug: false,
     } as const;
 };
 
-export const createOrm = async (dbConfig: DbConfig) => {
+const createOrmOpts = (dbConfig: DbConfig) => {
     switch (dbConfig.type) {
         case 'MySQL':
-            return await createMySQL(MySQLConfig);
+            return createMySQLOptions(MySQLConfig);
         case 'PostgreSQL':
-            return await createPostgreSQL(PostgreSQLConfig);
+            return createPostgreSQLOptions(PostgreSQLConfig);
         case 'SQLite':
-            return await createSQLite(createSQLiteConfig(dbConfig.dbName));
-        default:
-            toBeNever(dbConfig);
+            return createSQLiteOptions(createSQLiteConfig(dbConfig.dbName));
     }
+};
+
+export const createOrm = async (dbConfig: DbConfig) => {
+    return await MikroORM.init(createOrmOpts(dbConfig));
 };
 
 const setDatabaseConfig = (target: WritableServerConfig, dbConfig: DbConfig): void => {
@@ -80,11 +89,10 @@ const setDatabaseConfig = (target: WritableServerConfig, dbConfig: DbConfig): vo
         case 'SQLite':
             target.sqlite = {
                 dbName: dbConfig.dbName,
+                clientUrl: undefined,
                 driverOptions: undefined,
             };
             return;
-        default:
-            toBeNever(dbConfig);
     }
 };
 
@@ -107,7 +115,7 @@ export const createTestServer = async ({
         firebaseAdminSecret: undefined,
         firebaseProjectId: 'FAKE_FIREBASE_PROJECTID',
         heroku: false,
-        herokuDatabaseUrl: undefined,
+        databaseUrl: undefined,
         mysql: undefined,
         postgresql: undefined,
         sqlite: undefined,
@@ -167,11 +175,16 @@ export const createTestServer = async ({
             });
         },
         port: 4000,
+        httpServerOptions: {
+            // Node.js v18 (v18.9.0 で確認)ではhttpServerをcloseするときに何故か keepAliveTimeout - 1000 ms 程度の時間がかかる。keepAliveTimeout のデフォルト値は 5000 ms であるため、テスト時間が長くなってしまう。これを軽減させるために、keepAliveTimeout を小さい値に設定している。
+            // Node.js v14, v16. v17 ではこの現象は確認されていない。
+            keepAliveTimeout: 1000,
+        },
     });
 
     return {
         close: async () => {
-            result.close();
+            await result.close();
             await $orm.close();
         },
     };

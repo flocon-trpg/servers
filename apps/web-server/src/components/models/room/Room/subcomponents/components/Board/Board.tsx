@@ -1,11 +1,10 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
-import { success, useImageFromGraphQL } from '@/hooks/imageHooks';
+import { success, useImageFromFilePath } from '@/hooks/imageHooks';
 import * as ReactKonva from 'react-konva';
 import { Button, Dropdown, InputNumber, Menu, Popover } from 'antd';
 import * as Icons from '@ant-design/icons';
 import { update } from '@/stateManagers/states/types';
-import * as Icon from '@ant-design/icons';
 import { useMe } from '../../hooks/useMe';
 import { useCharacters } from '../../hooks/useCharacters';
 import { useParticipants } from '../../hooks/useParticipants';
@@ -19,7 +18,10 @@ import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { FilePath, FileSourceType } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { ImagePiece } from './subcomponents/components/ImagePiece/ImagePiece';
-import { DiceOrStringPiece } from './subcomponents/components/DiceOrStringPiece/DiceOrStringPiece';
+import {
+    DiceOrShapeOrStringPiece,
+    shapePiece,
+} from './subcomponents/components/CanvasOrDiceOrStringPiece/CanvasOrDiceOrStringPiece';
 import { animated, useTransition } from '@react-spring/konva';
 import { useCharacterPieces } from '../../hooks/useCharacterPieces';
 import { usePortraitPieces } from '../../hooks/usePortraitPieces';
@@ -31,8 +33,6 @@ import { AllContextProvider } from '@/components/behaviors/AllContextProvider';
 import { range } from '@/utils/range';
 import classNames from 'classnames';
 import { cancelRnd, flex, flexColumn, flexRow, itemsCenter, itemsEnd } from '@/styles/className';
-import { SketchPicker } from 'react-color';
-import { css } from '@emotion/react';
 import { rgba } from '@/utils/rgba';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { roomAtom } from '@/atoms/roomAtom/roomAtom';
@@ -69,6 +69,8 @@ import {
 } from '../../utils/positionAndSizeAndRect';
 import { KonvaEventObject } from 'konva/lib/Node';
 import { Vector2d } from 'konva/lib/types';
+import { useShapePieces } from '../../hooks/useShapePieces';
+import { ColorPickerButton } from '@/components/ui/ColorPickerButton/ColorPickerButton';
 
 type BoardState = OmitVersion<State<typeof boardTemplate>>;
 type PieceState = OmitVersion<State<typeof pieceTemplate>>;
@@ -124,11 +126,7 @@ type SelectedPieceId =
           pieceId: string;
       }
     | {
-          type: typeof dicePiece | typeof stringPiece;
-          pieceId: string;
-      }
-    | {
-          type: typeof imagePiece;
+          type: typeof shapePiece | typeof dicePiece | typeof imagePiece | typeof stringPiece;
           pieceId: string;
       };
 
@@ -183,6 +181,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
 
     const roomId = useAtomSelector(roomAtom, state => state.roomId);
     const participants = useParticipants();
+    const shapePieces = useShapePieces(boardId);
     const dicePieces = useDicePieces(boardId);
     const numberPieces = useStringPieces(boardId);
     const imagePieces = useImagePieces(boardId);
@@ -211,7 +210,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     }, [setBoardTooltip, stoppedCursor]);
     const [selectedPieceId, setSelectedPieceId] = React.useState<SelectedPieceId>();
     const [isBackgroundDragging, setIsBackgroundDragging] = React.useState(false); // これがないと、pieceをドラッグでリサイズする際に背景が少し動いてしまう。
-    const backgroundImage = useImageFromGraphQL(board.backgroundImage);
+    const backgroundImage = useImageFromFilePath(board.backgroundImage);
     const backgroundImageResult =
         backgroundImage.type === success ? backgroundImage.image : undefined;
     const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
@@ -516,12 +515,11 @@ const BoardCore: React.FC<BoardCoreProps> = ({
 
         const dicePieceElements = [...(dicePieces ?? [])].map(([pieceId, piece]) => {
             return (
-                <DiceOrStringPiece
+                <DiceOrShapeOrStringPiece
                     {...stateToPixelRect({ cellConfig: board, state: piece })}
                     key={pieceId}
                     opacity={1}
                     state={{ type: dicePiece, state: piece }}
-                    createdByMe={isMyCharacter(piece.ownerCharacterId)}
                     draggable={!piece.isPositionLocked}
                     resizable={!piece.isPositionLocked}
                     listening
@@ -559,14 +557,59 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             );
         });
 
+        const shapePieceElements = [...(shapePieces ?? [])].map(([pieceId, piece]) => (
+            <DiceOrShapeOrStringPiece
+                {...stateToPixelRect({ cellConfig: board, state: piece })}
+                key={pieceId}
+                opacity={1}
+                state={{ type: shapePiece, state: piece, stateId: pieceId }}
+                draggable={!piece.isPositionLocked}
+                resizable={!piece.isPositionLocked}
+                listening
+                isSelected={
+                    selectedPieceId?.type === 'shapePiece' && selectedPieceId.pieceId === pieceId
+                }
+                onClick={() => {
+                    unsetPopoverEditor();
+                    setSelectedPieceId({
+                        type: 'shapePiece',
+                        pieceId,
+                    });
+                }}
+                onDblClick={e => {
+                    setBoardPopoverEditor({
+                        pageX: e.evt.pageX,
+                        pageY: e.evt.pageY,
+                        clickOn: { type: 'shapePiece', piece, pieceId, boardId },
+                    });
+                }}
+                onMouseEnter={() =>
+                    (mouseOverOnRef.current = { type: 'shapePiece', piece, pieceId, boardId })
+                }
+                onMouseLeave={() => (mouseOverOnRef.current = { type: 'background' })}
+                onDragEnd={e => {
+                    setRoomState(roomState => {
+                        const shapePiece = roomState.boards?.[boardId]?.shapePieces?.[pieceId];
+                        if (shapePiece == null) {
+                            return;
+                        }
+                        setDragEndResultToPieceState({ e, piece: shapePiece, board });
+                    });
+                }}
+            />
+        ));
+
         const stringPieceElements = [...(numberPieces ?? [])].map(([pieceId, piece]) => {
             return (
-                <DiceOrStringPiece
+                <DiceOrShapeOrStringPiece
                     {...stateToPixelRect({ cellConfig: board, state: piece })}
                     key={pieceId}
                     opacity={1}
-                    state={{ type: 'stringPiece', state: piece }}
-                    createdByMe={isMyCharacter(piece.ownerCharacterId)}
+                    state={{
+                        type: 'stringPiece',
+                        state: piece,
+                        createdByMe: isMyCharacter(piece.ownerCharacterId),
+                    }}
                     draggable={!piece.isPositionLocked}
                     resizable={!piece.isPositionLocked}
                     listening
@@ -610,6 +653,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             <AllContextProvider {...allContext}>
                 <ReactKonva.Layer>
                     {imagePieceElements}
+                    {shapePieceElements}
                     {dicePieceElements}
                     {stringPieceElements}
                     {portraitPositionElements}
@@ -791,6 +835,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
     })();
 
     const dicePieces = useDicePieces(boardIdToShow);
+    const shapePieces = useShapePieces(boardIdToShow);
     const stringPieces = useStringPieces(boardIdToShow);
     const imagePieces = useImagePieces(boardIdToShow);
 
@@ -933,6 +978,19 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                 piece,
                             })),
                         dicePiecesOnCursor: [...(dicePieces ?? [])]
+                            .filter(([, piece]) => {
+                                return isCursorOnState({
+                                    cellConfig: board,
+                                    state: piece,
+                                    cursorPosition: stateOffset,
+                                });
+                            })
+                            .map(([pieceId, piece]) => ({
+                                boardId: boardIdToShow,
+                                pieceId,
+                                piece,
+                            })),
+                        shapePiecesOnCursor: [...(shapePieces ?? [])]
                             .filter(([, piece]) => {
                                 return isCursorOnState({
                                     cellConfig: board,
@@ -1128,40 +1186,29 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                     <div className={classNames(flex, flexRow, itemsCenter)}>
                                         <div style={descriptionStyle}>色</div>
                                         {/* ↓ trigger='click' にすると、SketchPickerを開いている状態でPopover全体を閉じたときに次にSketchPickerが開かず（開き直したら直る）操作性が悪いため、'click'は用いていない */}
-                                        <Popover
-                                            content={
-                                                <SketchPicker
-                                                    className={cancelRnd}
-                                                    css={css`
-                                                        color: black;
-                                                    `}
-                                                    color={boardConfig.gridLineColor}
-                                                    onChange={e => {
-                                                        if (boardIdToShow == null) {
-                                                            return;
+                                        <ColorPickerButton
+                                            buttonStyle={NonTransparentStyle}
+                                            buttonContent={boardConfig.gridLineColor}
+                                            color={boardConfig.gridLineColor}
+                                            onChange={e => {
+                                                if (boardIdToShow == null) {
+                                                    return;
+                                                }
+                                                setRoomConfig(roomConfig => {
+                                                    if (roomConfig == null) {
+                                                        return;
+                                                    }
+                                                    RoomConfigUtils.editBoard(
+                                                        roomConfig,
+                                                        boardIdToShow,
+                                                        boardType,
+                                                        boardConfig => {
+                                                            boardConfig.gridLineColor = rgba(e.rgb);
                                                         }
-                                                        setRoomConfig(roomConfig => {
-                                                            if (roomConfig == null) {
-                                                                return;
-                                                            }
-                                                            RoomConfigUtils.editBoard(
-                                                                roomConfig,
-                                                                boardIdToShow,
-                                                                boardType,
-                                                                boardConfig => {
-                                                                    boardConfig.gridLineColor =
-                                                                        rgba(e.rgb);
-                                                                }
-                                                            );
-                                                        });
-                                                    }}
-                                                />
-                                            }
-                                        >
-                                            <Button style={NonTransparentStyle}>
-                                                {boardConfig.gridLineColor}
-                                            </Button>
-                                        </Popover>
+                                                    );
+                                                });
+                                            }}
+                                        />
                                     </div>
                                 </div>
                             }
@@ -1193,7 +1240,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                             });
                         }}
                     >
-                        <Icon.ZoomInOutlined />
+                        <Icons.ZoomInOutlined />
                     </Button>
                     <Button
                         style={NonTransparentStyle}
@@ -1216,7 +1263,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                             });
                         }}
                     >
-                        <Icon.ZoomOutOutlined />
+                        <Icons.ZoomOutOutlined />
                     </Button>
                     <div style={{ height: 6 }} />
                     <Button

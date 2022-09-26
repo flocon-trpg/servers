@@ -19,7 +19,7 @@ import { AppConsole } from './utils/appConsole';
 import { ensureDir } from 'fs-extra';
 import { FilePermissionType } from './enums/FilePermissionType';
 import { easyFlake } from './utils/easyFlake';
-import { ServerConfig } from './configType';
+import { ServerConfig } from './config/types';
 import { InMemoryConnectionManager } from './connection/main';
 import { EM } from './utils/types';
 import { Result } from '@kizahasi/result';
@@ -30,6 +30,11 @@ import { consume } from './rateLimit/consume';
 import { EMBUPLOADER_PATH } from './env';
 import { Html } from './html/Html';
 import { parse } from 'graphql';
+import { createServer as createHttpServer } from 'http';
+
+const set401Status = (res: express.Response) => {
+    return res.status(401).setHeader('WWW-Authenticate', 'Bearer');
+};
 
 const isRoomEventSubscription = (query: string) => {
     const parsedQuery = parse(query);
@@ -58,7 +63,7 @@ export const createServerAsError = async ({ port }: { port: string | number }) =
     setupIndexAsError(app);
 
     const server = app.listen(port, () => {
-        console.log(
+        console.warn(
             `⚠️ Server ready at http://localhost:${port}, but API is not working. Please see error messages.`
         );
     });
@@ -76,6 +81,7 @@ export const createServer = async ({
     getDecodedIdTokenFromWsContext,
     port,
     quiet,
+    httpServerOptions,
 }: {
     serverConfig: ServerConfig;
     promiseQueue: PromiseQueue;
@@ -91,6 +97,9 @@ export const createServer = async ({
     ) => Promise<Result<Readonly<DecodedIdToken>, unknown> | undefined>;
     port: string | number;
     quiet?: boolean;
+    httpServerOptions?: {
+        keepAliveTimeout?: number;
+    };
 }) => {
     let rateLimiter: RateLimiterAbstract | null = null;
     if (!serverConfig.disableRateLimitExperimental) {
@@ -186,12 +195,25 @@ export const createServer = async ({
             },
         });
 
+        const permission = {
+            unlisted: 'unlisted',
+            public: 'public',
+        };
         app.post(
             '/uploader/upload/:permission',
             async (req, res, next) => {
+                switch (req.params.permission) {
+                    case permission.unlisted:
+                    case permission.public:
+                        break;
+                    default:
+                        res.sendStatus(404);
+                        return;
+                }
+
                 const decodedIdToken = await getDecodedIdTokenFromExpressRequest(req);
                 if (decodedIdToken == null || decodedIdToken.isError) {
-                    res.status(403).send('Invalid Authorization header');
+                    set401Status(res).send('Invalid Authorization header');
                     return;
                 }
 
@@ -251,40 +273,27 @@ export const createServer = async ({
                 const forkedEm: EM = res.locals.forkedEm;
                 const user: User = res.locals.user;
 
-                let permissionParam: 'unlisted' | 'public';
-                switch (req.params.permission) {
-                    case 'unlisted':
-                        permissionParam = 'unlisted';
-                        break;
-                    case 'public':
-                        permissionParam = 'public';
-                        break;
-                    default:
-                        res.sendStatus(404);
-                        return;
-                }
                 const file = req.file;
                 if (file == null) {
                     res.sendStatus(400);
                     return;
                 }
                 const thumbFileName = `${file.filename}.webp`;
-                const thumbDir = path.join(path.dirname(file.path), thumbsDir);
-                await ensureDir(thumbDir);
-                const thumbPath = path.join(thumbDir, thumbFileName);
+                const thumbsDirPath = path.join(path.dirname(file.path), thumbsDir);
+                await ensureDir(thumbsDirPath);
+                const thumbPath = path.join(thumbsDirPath, thumbFileName);
                 const thumbnailSaved = await sharp(file.path)
                     .resize(80)
                     .webp()
                     .toFile(thumbPath)
                     .then(() => true)
                     .catch(err => {
-                        // 画像かどうかに関わらず全てのファイルをsharpに渡すため、mp3などといった画像でないファイルの場合はほぼ確実にこの関数が実行される
-
+                        // 画像かどうかに関わらず全てのファイルをsharpに渡すため、mp3などといった画像でないファイルの場合はほぼ確実にここに来る。そのため、console.warnなどではなくconsole.logを使っている。
                         console.log(err);
                         return false;
                     });
-                const permission =
-                    permissionParam === 'public'
+                const permissionType =
+                    req.params.permission === permission.public
                         ? FilePermissionType.Entry
                         : FilePermissionType.Private;
                 const entity = new File({
@@ -293,9 +302,9 @@ export const createServer = async ({
                     createdBy: Reference.create<User, 'userUid'>(user),
                     thumbFilename: thumbnailSaved ? thumbFileName : undefined,
                     filesize: file.size,
-                    deletePermission: permission,
-                    listPermission: permission,
-                    renamePermission: permission,
+                    deletePermission: permissionType,
+                    listPermission: permissionType,
+                    renamePermission: permissionType,
                 });
                 await forkedEm.persistAndFlush(entity);
                 res.sendStatus(200);
@@ -323,7 +332,7 @@ export const createServer = async ({
 
             const decodedIdToken = await getDecodedIdTokenFromExpressRequest(req);
             if (decodedIdToken == null || decodedIdToken.isError) {
-                res.status(403).send('Invalid Authorization header');
+                set401Status(res).send('Invalid Authorization header');
                 return;
             }
 
@@ -341,6 +350,10 @@ export const createServer = async ({
             }
 
             const filename = sanitize(req.params.file_name);
+            if (filename !== req.params.file_name) {
+                res.status(400).send('file_name is invalid');
+                return;
+            }
 
             let filepath: string;
             if (typeParam === 'files') {
@@ -371,75 +384,89 @@ export const createServer = async ({
 
     setupIndexAsSuccess(app);
 
-    // https://github.com/enisdenjo/graphql-ws のコードを使用
-    const server = app.listen(port, () => {
-        const subscriptionsPath = '/graphql';
-
-        // create and use the websocket server
-        const wsServer = new ws.Server({
-            server,
-            path: subscriptionsPath,
-        });
-
-        useServer(
-            {
-                schema,
-                execute,
-                subscribe,
-                context: async ctx => {
-                    const decodedIdToken = await getDecodedIdTokenFromWsContext(ctx);
-                    const result: ResolverContext = {
-                        decodedIdToken,
-                        rateLimiter,
-                        serverConfig,
-                        promiseQueue,
-                        connectionManager,
-                        // contextは、graphql-wsのJSDocにも書かれている通り、websocketの接続が確立されたときにのみ実行される。WebSocketを通して何らかの通信が行われても、clientが再接続するまではcontextの値は変わらない。
-                        // そのため、接続IDが同じならば、（ここでfork()を呼んでいるにも関わらず）同じemが使い回されることになるので注意。Subscriptionのコード内でデータベースにアクセスするならば、そちらでも毎回emはfork()してから使用するほうが無難。
-                        em: em.fork(),
-                        authorizedUser: null,
-                    };
-                    return result;
-                },
-                onSubscribe: async (ctx, message) => {
-                    message.payload.query;
-                    // Apollo Clientなどではmessage.payload.operationNameが使えるがurqlではnullishなので、queryを代わりに使っている
-                    if (!isRoomEventSubscription(message.payload.query)) {
-                        return;
-                    }
-                    const decodedIdToken = await getDecodedIdTokenFromWsContext(ctx);
-                    if (decodedIdToken?.isError !== false) {
-                        return;
-                    }
-
-                    const roomId = message.payload.variables?.id;
-                    if (typeof roomId === 'string') {
-                        await connectionManager.onConnectToRoom({
-                            connectionId: message.id,
-                            userUid: decodedIdToken.value.uid,
-                            roomId,
-                        });
-                    } else {
-                        console.warn('(typeof RoomEvent.id) should be string');
-                    }
-                },
-                onComplete: (ctx, message) => {
-                    connectionManager.onLeaveRoom({ connectionId: message.id });
-                },
-                onClose: async ctx => {
-                    for (const key in ctx.subscriptions) {
-                        await connectionManager.onLeaveRoom({ connectionId: key });
-                    }
-                },
+    // https://github.com/enisdenjo/graphql-ws のコードを参考にした
+    const httpServer = createHttpServer(app);
+    const subscriptionsPath = '/graphql';
+    const wsServer = new ws.Server({
+        server: httpServer,
+        path: subscriptionsPath,
+    });
+    // useServerの戻り値をdisposeするとフリーズするためdisposeしていない。原因は不明。
+    useServer(
+        {
+            schema,
+            execute,
+            subscribe,
+            context: async ctx => {
+                const decodedIdToken = await getDecodedIdTokenFromWsContext(ctx);
+                const result: ResolverContext = {
+                    decodedIdToken,
+                    rateLimiter,
+                    serverConfig,
+                    promiseQueue,
+                    connectionManager,
+                    // contextは、graphql-wsのJSDocにも書かれている通り、websocketの接続が確立されたときにのみ実行される。WebSocketを通して何らかの通信が行われても、clientが再接続するまではcontextの値は変わらない。
+                    // そのため、接続IDが同じならば、（ここでfork()を呼んでいるにも関わらず）同じemが使い回されることになるので注意。Subscriptionのコード内でデータベースにアクセスするならば、そちらでも毎回emはfork()してから使用するほうが無難。
+                    em: em.fork(),
+                    authorizedUser: null,
+                };
+                return result;
             },
-            wsServer
-        );
+            onSubscribe: async (ctx, message) => {
+                message.payload.query;
+                // Apollo Clientなどではmessage.payload.operationNameが使えるがurqlではnullishなので、queryを代わりに使っている
+                if (!isRoomEventSubscription(message.payload.query)) {
+                    return;
+                }
+                const decodedIdToken = await getDecodedIdTokenFromWsContext(ctx);
+                if (decodedIdToken?.isError !== false) {
+                    return;
+                }
 
+                const roomId = message.payload.variables?.id;
+                if (typeof roomId === 'string') {
+                    await connectionManager.onConnectToRoom({
+                        connectionId: message.id,
+                        userUid: decodedIdToken.value.uid,
+                        roomId,
+                    });
+                } else {
+                    console.warn('(typeof RoomEvent.id) should be string');
+                }
+            },
+            onComplete: (ctx, message) => {
+                connectionManager.onLeaveRoom({ connectionId: message.id });
+            },
+            onClose: async ctx => {
+                for (const key in ctx.subscriptions) {
+                    await connectionManager.onLeaveRoom({ connectionId: key });
+                }
+            },
+        },
+        wsServer
+    );
+    if (httpServerOptions?.keepAliveTimeout != null) {
+        httpServer.keepAliveTimeout = httpServerOptions.keepAliveTimeout;
+    }
+    const server = httpServer.listen(port, () => {
         // TODO: /graphqlが含まれているとAPI_HTTPなどの設定にも/graphqlの部分も入力してしまいそうなので、対処したほうがいいと思われる。また、createServerAsErrorとの統一性も取れていない
         !quiet &&
             console.log(`🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`);
         !quiet &&
             console.log(`🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`);
     });
-    return server;
+    const close = async () => {
+        await new Promise((resolve, reject) => {
+            server.close(err => {
+                if (err == null) {
+                    resolve(undefined);
+                    return;
+                }
+                reject(err);
+            });
+        });
+        await apolloServer.stop();
+    };
+
+    return { close };
 };

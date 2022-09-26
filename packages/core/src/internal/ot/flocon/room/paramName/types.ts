@@ -1,8 +1,8 @@
-import { createObjectValueTemplate, createOtValueTemplate } from '../../../generator';
+import { createObjectValueTemplate, createTextValueTemplate } from '../../../generator';
 
 export const template = createObjectValueTemplate(
     {
-        name: createOtValueTemplate(false),
+        name: createTextValueTemplate(false),
     },
     1,
     1

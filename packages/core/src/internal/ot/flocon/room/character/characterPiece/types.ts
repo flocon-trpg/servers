@@ -1,11 +1,9 @@
 import * as t from 'io-ts';
-import * as BoardPosition from '../../../boardPositionBase/types';
 import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../../generator';
-import * as Piece from '../../../pieceBase/types';
+import * as Piece from '../../../piece/types';
 
 export const template = createObjectValueTemplate(
     {
-        ...BoardPosition.templateValue,
         ...Piece.templateValue,
         boardId: createReplaceValueTemplate(t.string),
         isPrivate: createReplaceValueTemplate(t.boolean),

@@ -79,6 +79,11 @@ import {
     UpdateBookmarkMutation,
     UpdateBookmarkMutationVariables,
 } from '@flocon-trpg/typed-document-node-v0.7.2';
+import {
+    RenameFilesDocument,
+    RenameFilesMutation,
+    RenameFilesMutationVariables,
+} from '@flocon-trpg/typed-document-node-v0.7.8';
 
 const wsClient = (wsUrl: string, testAuthorizationHeaderValue: string | undefined) =>
     createWsClient({
@@ -335,6 +340,18 @@ export class TestClient {
             .mutation<OperateMutation, OperateMutationVariables>(OperateDocument, variables, {
                 requestPolicy: 'network-only',
             })
+            .toPromise();
+    }
+
+    public renameFilesMutation(variables: RenameFilesMutationVariables) {
+        return this.#core
+            .mutation<RenameFilesMutation, RenameFilesMutationVariables>(
+                RenameFilesDocument,
+                variables,
+                {
+                    requestPolicy: 'network-only',
+                }
+            )
             .toPromise();
     }
 

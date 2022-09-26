@@ -9,25 +9,26 @@
         "postinstall": "husky install",
         "build": "yarn workspaces foreach -ptv run build:self",
         "build-ci": "yarn workspaces foreach -ptv run build-ci",
+        "generate-disclaimer": "yarn licenses generate-disclaimer --production --recursive --exclude='@types/*,husky,less,npm-run-all,sass,serve' > ./apps/web-server/public/licenses-npm-package.txt",
         "test": "yarn workspaces foreach -pv run test",
         "test-node14": "yarn workspaces foreach -pv --exclude '{@flocon-trpg/servers,@flocon-trpg/web-server}' run test",
-        "lint": "eslint \"{apps,packages}/**/*.{ts,tsx}\"",
-        "prettier": "yarn prettier:base --write",
+        "lint": "eslint \"{apps,packages}/**/*.{ts,tsx}\" --cache",
+        "prettier": "yarn prettier:base --write --cache",
         "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\""
     },
     "dependencies": {
         "husky": "^8.0.0"
     },
     "devDependencies": {
-        "@commitlint/cli": "17.0.2",
-        "@commitlint/config-conventional": "17.0.2",
+        "@commitlint/cli": "17.0.3",
+        "@commitlint/config-conventional": "17.0.3",
         "@typescript-eslint/eslint-plugin": "5.22.0",
         "@typescript-eslint/parser": "5.22.0",
-        "eslint": "8.14.0",
+        "eslint": "8.20.0",
         "eslint-config-prettier": "8.5.0",
-        "eslint-plugin-react": "7.29.4",
+        "eslint-plugin-react": "7.30.1",
         "eslint-plugin-react-hooks": "next",
-        "prettier": "2.6.2"
+        "prettier": "2.7.1"
     },
-    "packageManager": "yarn@3.2.1"
+    "packageManager": "yarn@3.2.3"
 }

@@ -40,16 +40,18 @@ import {
     EditFileTagsInput,
     FileTag as FileTagGraphQL,
     GetFilesInput,
+    RenameFileInput,
     Roles,
 } from './object+args+input';
 import { File } from '../entities/file/mikro-orm';
-import { QueryOrder, Reference } from '@mikro-orm/core';
+import { Reference } from '@mikro-orm/core';
 import { FileTag as FileTagEntity } from '../entities/fileTag/mikro-orm';
 import { remove, stat } from 'fs-extra';
 import path from 'path';
 import { thumbsDir } from '../../utils/thumbsDir';
 import { RateLimitMiddleware } from '../middlewares/RateLimitMiddleware';
 import { FilePermissionType } from '../../enums/FilePermissionType';
+import { FileListType } from '../../enums/FileListType';
 
 export type PongPayload = {
     value: number;
@@ -93,26 +95,27 @@ export class MainResolver {
                     },
                 } as const)
         );
-        const files = await context.em.find(
-            File,
-            {
-                $and: [
-                    ...fileTagsFilter,
-                    {
-                        $or: [
-                            { listPermission: FilePermissionType.Entry },
-                            { createdBy: { userUid: user.userUid } },
-                        ],
-                    },
-                ],
-            },
-            { orderBy: { screenname: QueryOrder.ASC } }
-        );
+        const files = await context.em.find(File, {
+            $and: [
+                ...fileTagsFilter,
+                {
+                    $or: [
+                        { listPermission: FilePermissionType.Entry },
+                        { createdBy: { userUid: user.userUid } },
+                    ],
+                },
+            ],
+        });
         return {
             files: files.map(file => ({
                 ...file,
+                screenname: file.screenname ?? 'null',
                 createdBy: file.createdBy.userUid,
                 createdAt: file.createdAt?.getTime(),
+                listType:
+                    file.listPermission === FilePermissionType.Private
+                        ? FileListType.Unlisted
+                        : FileListType.Public,
             })),
         };
     }
@@ -132,6 +135,33 @@ export class MainResolver {
     }
 
     @Mutation(() => [String])
+    @Authorized(ENTRY)
+    @UseMiddleware(RateLimitMiddleware(2))
+    public async renameFiles(
+        @Arg('input', () => [RenameFileInput]) input: RenameFileInput[],
+        @Ctx() context: ResolverContext
+    ): Promise<string[]> {
+        const result: string[] = [];
+        const user = ensureAuthorizedUser(context);
+        for (const elem of input) {
+            const file = await context.em.findOne(File, { filename: elem.filename });
+            if (file == null) {
+                continue;
+            }
+            if (
+                file.createdBy.userUid !== user.userUid &&
+                file.renamePermission !== FilePermissionType.Entry
+            ) {
+                continue;
+            }
+            file.screenname = elem.newScreenname;
+            result.push(elem.filename);
+        }
+        await context.em.flush();
+        return result;
+    }
+
+    @Mutation(() => [String], { description: 'since v0.7.8' })
     @Authorized(ENTRY)
     @UseMiddleware(RateLimitMiddleware(2))
     public async deleteFiles(
@@ -207,7 +237,9 @@ export class MainResolver {
         return filenamesToDelete;
     }
 
-    @Mutation(() => Boolean)
+    @Mutation(() => Boolean, {
+        deprecationReason: 'Use screenname to group files by folders instead.',
+    })
     @Authorized(ENTRY)
     @UseMiddleware(RateLimitMiddleware(2))
     public async editFileTags(
@@ -258,7 +290,10 @@ export class MainResolver {
         return true;
     }
 
-    @Mutation(() => FileTagGraphQL, { nullable: true })
+    @Mutation(() => FileTagGraphQL, {
+        nullable: true,
+        deprecationReason: 'Use screenname to group files by folders instead.',
+    })
     @Authorized(ENTRY)
     @UseMiddleware(RateLimitMiddleware(2))
     public async createFileTag(
@@ -282,7 +317,9 @@ export class MainResolver {
         };
     }
 
-    @Mutation(() => Boolean)
+    @Mutation(() => Boolean, {
+        deprecationReason: 'Use screenname to group files by folders instead.',
+    })
     @Authorized(ENTRY)
     @UseMiddleware(RateLimitMiddleware(2))
     public async deleteFileTag(

@@ -1,9 +1,7 @@
 import { Alert, Button, Collapse, Typography } from 'antd';
 import React from 'react';
-import { FilesManagerDrawer } from '../../models/file/FilesManagerDrawer/FilesManagerDrawer';
 import { QueryResultViewer } from '../../ui/QueryResultViewer/QueryResultViewer';
 import { Layout } from '../../ui/Layout/Layout';
-import { FilesManagerDrawerType, none } from '@/utils/types';
 import { SupportedApiServers, VERSION } from '@/VERSION';
 import * as Icon from '@ant-design/icons';
 import { useRouter } from 'next/router';
@@ -13,9 +11,10 @@ import { apiServerSatisfies } from '@/versioning/apiServerSatisfies';
 import { semVerRangeToString } from '@/versioning/semVerRange';
 import { useGetApiSemVer } from '@/hooks/useGetApiSemVer';
 import Link from 'next/link';
+import { FileSelectorModal } from '@/components/models/file/FileSelectorModal/FileSelectorModal';
 
 export const IndexPage: React.FC = () => {
-    const [drawerType, setDrawerType] = React.useState<FilesManagerDrawerType | null>(null);
+    const [fileSelectorModalVisible, setFileSelectorModalVisible] = React.useState(false);
     const router = useRouter();
     const apiServerSemVer = useGetApiSemVer();
 
@@ -77,13 +76,16 @@ export const IndexPage: React.FC = () => {
                     </Button>
                     <Button
                         style={{ margin: '0 0 8px 0' }}
-                        onClick={() => setDrawerType({ openFileType: none })}
+                        onClick={() => setFileSelectorModalVisible(true)}
                     >
                         アップローダー
                     </Button>
-                    <FilesManagerDrawer
-                        drawerType={drawerType}
-                        onClose={() => setDrawerType(null)}
+                    <FileSelectorModal
+                        visible={fileSelectorModalVisible}
+                        onClose={() => setFileSelectorModalVisible(false)}
+                        onSelect={null}
+                        defaultFileTypeFilter={null}
+                        uploaderFileBrowserHeight={null}
                     />
                 </div>
                 <div style={{ height: spacing }} />
@@ -147,12 +149,28 @@ export const IndexPage: React.FC = () => {
                     </li>
                     <li>
                         <a
+                            href='https://github.com/flocon-trpg/servers'
+                            target='_blank'
+                            rel='noopener noreferrer'
+                        >
+                            ソースコード
+                        </a>
+                    </li>
+                    <li>
+                        <a
                             href='https://github.com/flocon-trpg/servers/releases'
                             target='_blank'
                             rel='noopener noreferrer'
                         >
                             更新履歴
                         </a>
+                    </li>
+                </ul>
+                <div style={{ height: spacing }} />
+                <Typography.Title level={3}>その他</Typography.Title>
+                <ul>
+                    <li>
+                        <Link href='/licenses'>使用している素材とライブラリのライセンス</Link>
                     </li>
                 </ul>
             </div>

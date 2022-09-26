@@ -78,9 +78,12 @@ export const ParticipantListPanelContent: React.FC = () => {
                 render: (_: unknown, { participant }: DataSource) => {
                     switch (participant.state.role) {
                         case ParticipantRole.Master:
+                        case 'Master':
                         case ParticipantRole.Player:
+                        case 'Player':
                             return '参加者';
                         case ParticipantRole.Spectator:
+                        case 'Spectator':
                             return '観戦者';
                         case undefined:
                             return '退室済み';

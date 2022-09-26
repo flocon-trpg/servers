@@ -30,6 +30,7 @@ import { GetRoomsListFailureType } from '../enums/GetRoomsListFailureType';
 import { ResetRoomMessagesFailureType } from '../enums/ResetRoomMessagesFailureType';
 import { DeleteRoomAsAdminFailureType } from '../enums/DeleteRoomAsAdminFailureType';
 import { UpdateBookmarkFailureType } from '../enums/UpdateBookmarkFailureType';
+import { FileListType } from '../enums/FileListType';
 
 let hasRegistered = false;
 export const registerEnumTypes = (): void => {
@@ -60,6 +61,9 @@ export const registerEnumTypes = (): void => {
     });
     registerEnumType(EntryToServerResultType, {
         name: 'EntryToServerResultType',
+    });
+    registerEnumType(FileListType, {
+        name: 'FileListType',
     });
     registerEnumType(FileSourceType, {
         name: 'FileSourceType',

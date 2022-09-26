@@ -179,7 +179,6 @@ import { DeleteRoomAsAdminResult } from '../../results/DeleteRoomAsAdminResult';
 import { DeleteRoomAsAdminFailureType } from '../../../enums/DeleteRoomAsAdminFailureType';
 import { UpdateBookmarkResult } from '../../results/UpdateBookmarkResult';
 import { UpdateBookmarkFailureType } from '../../../enums/UpdateBookmarkFailureType';
-import { toBeNever } from '@flocon-trpg/utils';
 
 type RoomState = State<typeof roomTemplate>;
 type RoomUpOperation = UpOperation<typeof roomTemplate>;
@@ -276,96 +275,39 @@ type OperateCoreResult =
           result: OperateRoomFailureResult;
       };
 
-const operateParticipantAndFlush = async ({
-    myUserUid,
+const operateAsAdminAndFlush = async ({
+    operation: operationSource,
     em,
     room,
     roomHistCount,
-    participantUserUids,
-    create,
-    update,
 }: {
-    myUserUid: string;
+    operation:
+        | RoomUpOperation
+        | undefined
+        | ((roomState: RoomState) => RoomUpOperation | undefined);
     em: EM;
     room: Room$MikroORM.Room;
     roomHistCount: number | undefined;
-    participantUserUids: ReadonlySet<string>;
-    create?: {
-        role: ParticipantRole | undefined;
-        name: MaxLength100String;
-    };
-    update?: {
-        role?: { newValue: ParticipantRole | undefined };
-        name?: { newValue: MaxLength100String };
-    };
-}): Promise<{ result: typeof JoinRoomResult; payload: RoomEventPayload | undefined }> => {
+}) => {
     const prevRevision = room.revision;
     const roomState = await GlobalRoom.MikroORM.ToGlobal.state(room, em);
-    const me = roomState.participants?.[myUserUid];
-    let participantOperation:
-        | RecordUpOperationElement<ParticipantState, ParticipantUpOperation>
-        | undefined = undefined;
-    if (me == null) {
-        if (create != null) {
-            participantOperation = {
-                type: replace,
-                replace: {
-                    newValue: {
-                        $v: 2,
-                        $r: 1,
-                        name: create.name,
-                        role: create.role,
-                    },
-                },
-            };
-        }
-    } else {
-        if (update != null) {
-            participantOperation = {
-                type: 'update',
-                update: {
-                    $v: 2,
-                    $r: 1,
-                    role: update.role,
-                    name: update.name,
-                },
-            };
-        }
+    const operation =
+        typeof operationSource === 'function' ? operationSource(roomState) : operationSource;
+    if (operation == null) {
+        return Result.ok(undefined);
     }
-
-    if (participantOperation == null) {
-        return {
-            result: {},
-            payload: undefined,
-        };
-    }
-
-    const roomUpOperation: RoomUpOperation = {
-        $v: 2,
-        $r: 1,
-        participants: {
-            [myUserUid]: participantOperation,
-        },
-    };
-
     const transformed = serverTransform({ type: admin })({
         prevState: roomState,
         currentState: roomState,
-        clientOperation: roomUpOperation,
+        clientOperation: operation,
         serverOperation: undefined,
     });
     if (transformed.isError) {
-        return {
-            result: { failureType: JoinRoomFailureType.TransformError },
-            payload: undefined,
-        };
+        return transformed;
     }
     const transformedValue = transformed.value;
     if (transformedValue == null) {
-        return {
-            result: {},
-            payload: undefined,
-        };
+        return Result.ok(undefined);
     }
 
     const nextRoomState = await GlobalRoom.Global.applyToEntity({
@@ -395,6 +337,102 @@ const operateParticipantAndFlush = async ({
             }),
         };
     };
+
+    return Result.ok(generateOperation);
+};
+
+const operateParticipantAndFlush = async ({
+    myUserUid,
+    em,
+    room,
+    roomHistCount,
+    participantUserUids,
+    create,
+    update,
+}: {
+    myUserUid: string;
+    em: EM;
+    room: Room$MikroORM.Room;
+    roomHistCount: number | undefined;
+    participantUserUids: ReadonlySet<string>;
+    create?: {
+        role: ParticipantRole | undefined;
+        name: MaxLength100String;
+    };
+    update?: {
+        role?: { newValue: ParticipantRole | undefined };
+        name?: { newValue: MaxLength100String };
+    };
+}): Promise<{ result: typeof JoinRoomResult; payload: RoomEventPayload | undefined }> => {
+    const operation = (roomState: RoomState) => {
+        const me = roomState.participants?.[myUserUid];
+        let participantOperation:
+            | RecordUpOperationElement<ParticipantState, ParticipantUpOperation>
+            | undefined = undefined;
+        if (me == null) {
+            if (create != null) {
+                participantOperation = {
+                    type: replace,
+                    replace: {
+                        newValue: {
+                            $v: 2,
+                            $r: 1,
+                            name: create.name,
+                            role: create.role,
+                        },
+                    },
+                };
+            }
+        } else {
+            if (update != null) {
+                participantOperation = {
+                    type: 'update',
+                    update: {
+                        $v: 2,
+                        $r: 1,
+                        role: update.role,
+                        name: update.name,
+                    },
+                };
+            }
+        }
+
+        if (participantOperation == null) {
+            return undefined;
+        }
+
+        const roomUpOperation: RoomUpOperation = {
+            $v: 2,
+            $r: 1,
+            participants: {
+                [myUserUid]: participantOperation,
+            },
+        };
+
+        return roomUpOperation;
+    };
+
+    const generateOperationResult = await operateAsAdminAndFlush({
+        operation,
+        em,
+        room,
+        roomHistCount,
+    });
+    if (generateOperationResult.isError) {
+        return {
+            result: { failureType: JoinRoomFailureType.TransformError },
+            payload: undefined,
+        };
+    }
+    if (generateOperationResult.value == null) {
+        return {
+            result: {},
+            payload: undefined,
+        };
+    }
+
+    const generateOperation = generateOperationResult.value;
+
     return {
         result: {
             operation: generateOperation(myUserUid),
@@ -2898,8 +2936,6 @@ export class RoomResolver {
                     roomOperation: payload.generateOperation(userUid),
                     isRoomMessagesResetEvent: false,
                 };
-            default:
-                toBeNever(payload);
         }
     }
 }

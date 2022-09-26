@@ -1,5 +1,11 @@
 import { Auth, Config, IdTokenResult, Unsubscribe, User } from 'firebase/auth';
-import { $free, ParticipantRole, boardTemplate, forceMaxLength100String } from '@flocon-trpg/core';
+import {
+    $free,
+    ParticipantRole,
+    boardTemplate,
+    forceMaxLength100String,
+    path,
+} from '@flocon-trpg/core';
 import {
     RoomMessages,
     RoomPrivateMessage,
@@ -39,6 +45,8 @@ export const dicePieceKey2 = 'dice-piece-2';
 
 export const imagePieceKey1 = 'image-piece-1';
 export const imagePieceKey2 = 'image-piece-2';
+
+export const shapePieceKey1 = 'canvas-piece-1';
 
 export const stringPieceKey1 = 'string-piece-1';
 export const stringPieceKey2 = 'string-piece-2';
@@ -126,6 +134,7 @@ const boardBase: BoardState = {
     cellOffsetY: 0,
     dicePieces: undefined,
     imagePieces: undefined,
+    shapePieces: undefined,
     stringPieces: undefined,
 };
 
@@ -473,6 +482,40 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
                                 bgColor: ColorName.cyan,
                             }),
                         },
+                        isPrivate: false,
+                        opacity: 0.7,
+                    },
+                },
+                shapePieces: {
+                    [shapePieceKey1]: {
+                        $v: 1,
+                        $r: 1,
+                        ownerParticipantId: myUserUid,
+                        shapes: {
+                            1: {
+                                $v: 1,
+                                $r: 1,
+                                shape: {
+                                    type: path,
+                                    data: 'M 10 10 H 90 V 90 Z',
+                                },
+                                fill: 'rgb(255, 255, 0)',
+                                stroke: undefined,
+                                strokeWidth: undefined,
+                            },
+                        },
+                        cellX: 0,
+                        cellY: 0,
+                        cellW: 1,
+                        cellH: 1,
+                        x: 160,
+                        y: 110,
+                        w: 50,
+                        h: 100,
+                        isCellMode: false,
+                        isPositionLocked: false,
+                        memo: 'canvas-memo-1',
+                        name: 'canvas-name-1',
                         isPrivate: false,
                         opacity: 0.7,
                     },

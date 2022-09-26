@@ -7,7 +7,6 @@ import {
     RoomPublicMessageFragment,
     RoomSoundEffectFragment,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
-import { toBeNever } from '@flocon-trpg/utils';
 import produce from 'immer';
 import { Observable, Subject, mergeMap } from 'rxjs';
 import { FilteredSortedArray, SortedArray } from './filteredArray';
@@ -307,8 +306,6 @@ class MessageSet {
             case soundEffect:
                 this.#soundEffects.set(message.value.messageId, message.value);
                 break;
-            default:
-                toBeNever(message);
         }
     }
 
@@ -382,8 +379,6 @@ class MessageSet {
                     value,
                 };
             }
-            default:
-                toBeNever(message);
         }
     }
 
@@ -647,8 +642,6 @@ export class RoomMessagesClient {
                     messagesSet.clear();
                     break;
                 }
-                default:
-                    toBeNever(event);
             }
         }
 

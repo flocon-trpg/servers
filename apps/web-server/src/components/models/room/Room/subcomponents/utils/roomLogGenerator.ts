@@ -19,17 +19,17 @@ import {
     participantTemplate,
     simpleId,
 } from '@flocon-trpg/core';
-import { FilePath } from '@/utils/file/filePath';
+import { FilePath, FilePathModule } from '@/utils/file/filePath';
 import axios from 'axios';
 import JSZip from 'jszip';
 import { analyzeUrl } from '@/utils/analyzeUrl';
-import { ExpiryMap } from '@/utils/file/expiryMap';
 import { RoomMessageFilter } from '../components/RoomMenu/subcomponents/components/GenerageLogModal/subcomponents/components/ChannelsFilter/ChannelsFilter';
 import { WebConfig } from '@/configType';
 import { FirebaseStorage as FirebaseStorageType } from '@firebase/storage';
 import { HtmlObject, div, generateHtml, span } from './generateHtml';
 import { PrivateChannelSet } from '@flocon-trpg/web-server-utils';
 import { Styles } from '@/styles';
+import { idTokenIsNull } from '@/utils/file/getFloconUploaderFile';
 
 const logHtml = (messageDivs: string[]) => `
 <!DOCTYPE html>
@@ -514,6 +514,7 @@ type ImageResult = {
     filename: string;
 };
 
+// TODO: react queryに置き換える
 class ImageDownloader {
     // keyはgetDownloadURL()する前のpath
     // valueがnullの場合はnot foundなどを表し、二度とダウンロードを試みない
@@ -529,14 +530,17 @@ class ImageDownloader {
 
     public constructor(
         private readonly config: WebConfig,
-        private readonly storage: FirebaseStorageType,
-        private readonly firebaseStorageUrlCache: ExpiryMap<string, string>
+        private readonly storage: FirebaseStorageType
     ) {}
 
     private findCache(filePath: FilePath) {
         switch (filePath.sourceType) {
             case FileSourceType.Default: {
-                return this.defaultImages.get(analyzeUrl(filePath.path).directLink);
+                const url = analyzeUrl(filePath.path);
+                if (url == null) {
+                    return undefined;
+                }
+                return this.defaultImages.get(url.directLink);
             }
             case FileSourceType.FirebaseStorage: {
                 return this.firebaseImages.get(filePath.path);
@@ -548,7 +552,11 @@ class ImageDownloader {
     }
 
     private analyzeUrl(url: string) {
-        const { directLink, fileExtension } = analyzeUrl(url);
+        const analyzed = analyzeUrl(url);
+        if (analyzed == null) {
+            return analyzed;
+        }
+        const { directLink, fileExtension } = analyzed;
         return {
             directLink,
             // Firebase Storageのファイル名は長すぎる上に%などの文字が含まれており、imgのsrcに渡すと正常に動作しない、messages.jsのファイルサイズが大きくなるという2つの問題点があるため、ランダムな文字列に置き換えている。
@@ -557,18 +565,23 @@ class ImageDownloader {
         };
     }
 
-    public async download(filePath: FilePath, idToken: string): Promise<ImageResult | null> {
+    public async download(
+        filePath: FilePath,
+        getIdToken: () => Promise<string | null>
+    ): Promise<ImageResult | null> {
         const cache = this.findCache(filePath);
         if (cache !== undefined) {
             return cache;
         }
-        const srcResult = await FilePath.getSrc(
-            filePath,
-            this.config,
-            this.storage,
-            idToken,
-            this.firebaseStorageUrlCache
-        );
+        const srcResult = await FilePathModule.getSrc({
+            path: filePath,
+            config: this.config,
+            storage: this.storage,
+            getIdToken,
+        });
+        if (srcResult === idTokenIsNull) {
+            return null;
+        }
         switch (srcResult.type) {
             case Default:
                 break;
@@ -590,13 +603,17 @@ class ImageDownloader {
         }
         if (srcResult.type === Uploader) {
             const result: ImageResult = {
-                filename: this.analyzeUrl(srcResult.src).filename,
+                filename: srcResult.filename,
                 blob: srcResult.blob,
             };
             this.uploaderImages.set(filePath.path, result);
             return result;
         }
-        const { directLink, filename } = this.analyzeUrl(srcResult.src);
+        const url = this.analyzeUrl(srcResult.src);
+        if (url == null) {
+            return null;
+        }
+        const { directLink, filename } = url;
         const image = await axios.get(directLink, { responseType: 'blob' }).catch(() => null);
         if (image == null) {
             if (filePath.sourceType === FileSourceType.FirebaseStorage) {
@@ -657,18 +674,16 @@ export const generateAsRichLog = async ({
     params,
     config,
     storage,
-    idToken,
-    firebaseStorageUrlCache,
+    getIdToken,
     onProgressChange,
 }: {
     params: GenerateLogParams;
     config: WebConfig;
     storage: FirebaseStorageType;
-    idToken: string;
-    firebaseStorageUrlCache: ExpiryMap<string, string>;
+    getIdToken: () => Promise<string | null>;
     onProgressChange: (p: RichLogProgress) => void;
 }): Promise<Blob> => {
-    const imageDownloader = new ImageDownloader(config, storage, firebaseStorageUrlCache);
+    const imageDownloader = new ImageDownloader(config, storage);
     const zip = new JSZip();
 
     const cssFolder = zip.folder('css');
@@ -715,7 +730,7 @@ export const generateAsRichLog = async ({
         if (msg.value.createdBy?.characterImage != null) {
             const image = await imageDownloader.download(
                 msg.value.createdBy.characterImage,
-                idToken
+                getIdToken
             );
             if (image != null) {
                 imgAvatarFolder.file(image.filename, image.blob);

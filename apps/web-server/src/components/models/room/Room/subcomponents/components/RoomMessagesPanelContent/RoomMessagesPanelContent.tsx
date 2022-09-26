@@ -45,7 +45,7 @@ import { useWritingMessageStatus } from '../../hooks/useWritingMessageStatus';
 import { isDeleted, toText } from '../../utils/message';
 import { usePublicChannelNames } from '../../hooks/usePublicChannelNames';
 import { useParticipants } from '../../hooks/useParticipants';
-import { keyNames, recordToMap, toBeNever } from '@flocon-trpg/utils';
+import { keyNames, recordToMap } from '@flocon-trpg/utils';
 import * as Icons from '@ant-design/icons';
 import { InputModal } from '@/components/ui/InputModal/InputModal';
 import { JumpToBottomVirtuoso } from '@/components/ui/JumpToBottomVirtuoso/JumpToBottomVirtuoso';
@@ -689,7 +689,7 @@ type MessageTabPaneProps = {
 const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProps) => {
     const { contentHeight, config } = props;
 
-    const writingStatusHeight = 16;
+    const writingStatusHeight = 20;
 
     const firebaseUser = useAtomValue(firebaseUserValueAtom);
     const writingMessageStatusResult = useWritingMessageStatus();
@@ -781,8 +781,6 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
                         />
                     );
                     break;
-                default:
-                    toBeNever(messages.error);
             }
         } else {
             content = (

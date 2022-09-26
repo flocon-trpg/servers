@@ -5,6 +5,7 @@ import {
     dicePieceTemplate,
     imagePieceTemplate,
     portraitPieceTemplate,
+    shapePieceTemplate,
     stringPieceTemplate,
 } from '@flocon-trpg/core';
 import { atom } from 'jotai';
@@ -13,6 +14,7 @@ import { BoardConfig } from '@/atoms/roomConfigAtom/types/boardConfig';
 type CharacterState = State<typeof characterTemplate>;
 type CharacterPieceState = State<typeof characterPieceTemplate>;
 type DicePieceState = State<typeof dicePieceTemplate>;
+type ShapePieceState = State<typeof shapePieceTemplate>;
 type StringPieceState = State<typeof stringPieceTemplate>;
 type ImagePieceState = State<typeof imagePieceTemplate>;
 type PortraitPieceState = State<typeof portraitPieceTemplate>;
@@ -40,6 +42,11 @@ export type ContextMenuState = {
         boardId: string;
         pieceId: string;
         piece: DicePieceState;
+    }>;
+    shapePiecesOnCursor: ReadonlyArray<{
+        boardId: string;
+        pieceId: string;
+        piece: ShapePieceState;
     }>;
     stringPiecesOnCursor: ReadonlyArray<{
         boardId: string;

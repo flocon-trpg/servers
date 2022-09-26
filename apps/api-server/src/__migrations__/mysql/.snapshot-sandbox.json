@@ -71,12 +71,12 @@
                 },
                 "screenname": {
                     "name": "screenname",
-                    "type": "varchar(255)",
+                    "type": "text",
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
-                    "nullable": false,
-                    "mappedType": "string"
+                    "nullable": true,
+                    "mappedType": "text"
                 },
                 "created_at": {
                     "name": "created_at",
@@ -172,13 +172,6 @@
             },
             "name": "file",
             "indexes": [
-                {
-                    "columnNames": ["screenname"],
-                    "composite": false,
-                    "keyName": "file_screenname_index",
-                    "primary": false,
-                    "unique": false
-                },
                 {
                     "columnNames": ["created_at"],
                     "composite": false,

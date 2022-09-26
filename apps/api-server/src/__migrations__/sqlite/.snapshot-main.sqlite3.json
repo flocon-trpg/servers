@@ -75,7 +75,7 @@
                     "unsigned": false,
                     "autoincrement": false,
                     "primary": false,
-                    "nullable": false,
+                    "nullable": true,
                     "mappedType": "text"
                 },
                 "created_at": {
@@ -172,13 +172,6 @@
             },
             "name": "file",
             "indexes": [
-                {
-                    "columnNames": ["screenname"],
-                    "composite": false,
-                    "keyName": "file_screenname_index",
-                    "primary": false,
-                    "unique": false
-                },
                 {
                     "columnNames": ["created_at"],
                     "composite": false,

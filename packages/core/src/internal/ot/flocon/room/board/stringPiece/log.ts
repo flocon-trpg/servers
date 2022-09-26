@@ -1,7 +1,7 @@
 import * as t from 'io-ts';
 import * as StringPieceValueTypes from './types';
-import * as PieceBaseTypes from '../../../pieceBase/types';
-import { createType, deleteType, updateType } from '../../../pieceBase/log';
+import * as PieceBaseTypes from '../../../piece/types';
+import { createType, deleteType, updateType } from '../../../piece/log';
 import { maybe } from '../../../../../maybe';
 import {
     IoTsOptions,

@@ -12,8 +12,8 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v3
-            - name: Install
-              run: yarn
+            - run: yarn
+
             - name: Build web-server
               run: yarn run export
               working-directory: ./apps/web-server
@@ -21,8 +21,19 @@ jobs:
               run: mv ./apps/web-server/out ./out
             - name: Create flocon_web_server.zip
               run: zip -r ${GITHUB_WORKSPACE}/flocon_web_server.zip ./out
+
+            - name: Generate Dockerfile
+              run: yarn run gen-flyio-dockerfile
+              working-directory: ./apps/api-server
+            - name: mv Dockerfile
+              run: mv ./apps/api-server/flyio.Dockerfile ./Dockerfile
+            - name: Create flocon_api_server_flyio.zip
+              run: zip ${GITHUB_WORKSPACE}/flocon_api_server_flyio.zip ./Dockerfile
+
             - name: Release
               uses: softprops/action-gh-release@v1
               with:
-                  files: flocon_web_server.zip
+                  files: |
+                      flocon_web_server.zip
+                      flocon_api_server_flyio.zip
                   draft: true

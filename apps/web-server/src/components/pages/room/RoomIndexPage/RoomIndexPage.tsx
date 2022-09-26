@@ -10,7 +10,6 @@ import { Layout, loginAndEntry } from '@/components/ui/Layout/Layout';
 import { QueryResultViewer } from '@/components/ui/QueryResultViewer/QueryResultViewer';
 import * as Icons from '@ant-design/icons';
 import { Styles } from '@/styles';
-import { toBeNever } from '@flocon-trpg/utils';
 import moment from 'moment';
 import { ToggleButton } from '@/components/ui/ToggleButton/ToggleButton';
 import { useGetMyRoles } from '@/hooks/useGetMyRoles';
@@ -57,8 +56,6 @@ const BookmarkButton: React.FC<{ data: Data072 }> = ({ data }) => {
                         case 'UpdateBookmarkSuccessResult':
                             setChecked(updateBookmarkResult.data.result.currentValue);
                             break;
-                        default:
-                            return toBeNever(updateBookmarkResult.data.result);
                     }
                 }
                 setLoading(false);
@@ -199,8 +196,6 @@ const roleColumn = {
                     return 2;
                 case DocNode072.ParticipantRole.Spectator:
                     return 1;
-                default:
-                    toBeNever(source);
             }
         };
         return toNumber(x.role) - toNumber(y.role);
@@ -216,8 +211,6 @@ const roleColumn = {
                 return '参加者';
             case DocNode072.ParticipantRole.Spectator:
                 return '観戦者';
-            default:
-                toBeNever(record.role);
         }
     },
 };

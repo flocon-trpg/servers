@@ -8,9 +8,9 @@ import * as Board from './board/types';
 import * as Character from './character/types';
 import {
     createObjectValueTemplate,
-    createOtValueTemplate,
     createRecordValueTemplate,
     createReplaceValueTemplate,
+    createTextValueTemplate,
 } from '../../generator';
 
 const templateBase = {
@@ -19,28 +19,28 @@ const templateBase = {
     boolParamNames: createRecordValueTemplate(ParamNames.template), //keyはStrIndex20
     boards: createRecordValueTemplate(Board.template), // keyはランダムなID
     characters: createRecordValueTemplate(Character.template), // keyはランダムなID
-    characterTag1Name: createOtValueTemplate(true),
-    characterTag2Name: createOtValueTemplate(true),
-    characterTag3Name: createOtValueTemplate(true),
-    characterTag4Name: createOtValueTemplate(true),
-    characterTag5Name: createOtValueTemplate(true),
-    characterTag6Name: createOtValueTemplate(true),
-    characterTag7Name: createOtValueTemplate(true),
-    characterTag8Name: createOtValueTemplate(true),
-    characterTag9Name: createOtValueTemplate(true),
-    characterTag10Name: createOtValueTemplate(true),
+    characterTag1Name: createTextValueTemplate(true),
+    characterTag2Name: createTextValueTemplate(true),
+    characterTag3Name: createTextValueTemplate(true),
+    characterTag4Name: createTextValueTemplate(true),
+    characterTag5Name: createTextValueTemplate(true),
+    characterTag6Name: createTextValueTemplate(true),
+    characterTag7Name: createTextValueTemplate(true),
+    characterTag8Name: createTextValueTemplate(true),
+    characterTag9Name: createTextValueTemplate(true),
+    characterTag10Name: createTextValueTemplate(true),
     memos: createRecordValueTemplate(Memo.template), // keyはランダムなID
     numParamNames: createRecordValueTemplate(ParamNames.template), //keyはStrIndex20
-    publicChannel1Name: createOtValueTemplate(false),
-    publicChannel2Name: createOtValueTemplate(false),
-    publicChannel3Name: createOtValueTemplate(false),
-    publicChannel4Name: createOtValueTemplate(false),
-    publicChannel5Name: createOtValueTemplate(false),
-    publicChannel6Name: createOtValueTemplate(false),
-    publicChannel7Name: createOtValueTemplate(false),
-    publicChannel8Name: createOtValueTemplate(false),
-    publicChannel9Name: createOtValueTemplate(false),
-    publicChannel10Name: createOtValueTemplate(false),
+    publicChannel1Name: createTextValueTemplate(false),
+    publicChannel2Name: createTextValueTemplate(false),
+    publicChannel3Name: createTextValueTemplate(false),
+    publicChannel4Name: createTextValueTemplate(false),
+    publicChannel5Name: createTextValueTemplate(false),
+    publicChannel6Name: createTextValueTemplate(false),
+    publicChannel7Name: createTextValueTemplate(false),
+    publicChannel8Name: createTextValueTemplate(false),
+    publicChannel9Name: createTextValueTemplate(false),
+    publicChannel10Name: createTextValueTemplate(false),
     strParamNames: createRecordValueTemplate(ParamNames.template), //keyはStrIndex20
 };
 
@@ -51,7 +51,7 @@ export const template = createObjectValueTemplate(
     {
         ...templateBase,
         createdBy: createReplaceValueTemplate(t.string),
-        name: createOtValueTemplate(false),
+        name: createTextValueTemplate(false),
         participants: createRecordValueTemplate(Participant.template),
     },
     2,

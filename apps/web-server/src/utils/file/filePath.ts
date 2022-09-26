@@ -1,21 +1,46 @@
-import { FilePathFragment, FileSourceType } from '@flocon-trpg/typed-document-node-v0.7.1';
+import {
+    FilePathFragment,
+    FilePathInput,
+    FileSourceType,
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Core from '@flocon-trpg/core';
-import { ExpiryMap } from './expiryMap';
-import { files, getFloconUploaderFile } from './getFloconUploaderFile';
+import {
+    files,
+    getFloconUploaderFile as getFloconUploaderFileCore,
+    idTokenIsNull,
+    thumbs,
+} from './getFloconUploaderFile';
 import { WebConfig } from '../../configType';
 import { FirebaseStorage, getDownloadURL, ref } from 'firebase/storage';
 
 type FilePathState = Core.State<typeof Core.filePathTemplate>;
+
+export const filePath = 'filePath';
 
 export type FilePath = {
     path: string;
     sourceType: FileSourceType;
 };
 
-export namespace FilePath {
+export type FilePathLike =
+    | Core.OmitVersion<FilePathState>
+    | FilePathFragment
+    | FilePathInput
+    | FilePath;
+
+export type FilePathLikeOrThumb =
+    | FilePathLike
+    | {
+          // 内蔵アップローダーのサムネイル
+
+          type: typeof thumbs;
+          thumbFilename: string;
+      };
+
+export namespace FilePathModule {
     export const equals = (
-        x: FilePathFragment | null | undefined,
-        y: FilePathFragment | null | undefined
+        x: FilePathLike | null | undefined,
+        y: FilePathLike | null | undefined
     ): boolean => {
         if (x == null) {
             return y == null;
@@ -26,7 +51,20 @@ export namespace FilePath {
         return x.path === y.path && x.sourceType === y.sourceType;
     };
 
-    export const toGraphQL = (source: FilePath | FilePathState): FilePath => {
+    export const ensureType = (source: FilePathLikeOrThumb) => {
+        if ('type' in source) {
+            if (source.type === 'thumbs') {
+                return source;
+            }
+        }
+
+        return {
+            type: filePath,
+            value: source as FilePathLike,
+        } as const;
+    };
+
+    export const toGraphQL = (source: FilePathLike): FilePath => {
         let sourceType: FileSourceType;
         switch (source.sourceType) {
             case Core.Default:
@@ -48,7 +86,7 @@ export namespace FilePath {
         };
     };
 
-    export const toOt = (source: FilePath | FilePathState): FilePathState => {
+    export const toOtState = (source: FilePathLike): FilePathState => {
         let sourceType: typeof Core.Default | typeof Core.FirebaseStorage | typeof Core.Uploader;
         switch (source.sourceType) {
             case FileSourceType.Default:
@@ -72,7 +110,7 @@ export namespace FilePath {
         };
     };
 
-    type SrcResult =
+    export type SrcResult =
         | {
               type: typeof Core.Default | typeof Core.FirebaseStorage;
               src: string;
@@ -80,8 +118,10 @@ export namespace FilePath {
           }
         | {
               type: typeof Core.Uploader;
+              isThumb: boolean;
               src: string;
               blob: Blob;
+              filename: string;
           }
         | {
               type: typeof Core.FirebaseStorage | typeof Core.Uploader;
@@ -89,47 +129,71 @@ export namespace FilePath {
               blob: undefined;
           };
 
-    export const getSrc = async (
-        path: FilePath | Core.OmitVersion<FilePathState>,
-        config: WebConfig,
-        storage: FirebaseStorage,
-        idToken: string,
-        cache: ExpiryMap<string, string> | null,
-        autoRedirect = false
-    ): Promise<SrcResult> => {
-        switch (path.sourceType) {
-            case FileSourceType.Uploader: {
-                const axiosResponse = await getFloconUploaderFile({
-                    filename: path.path,
-                    config,
-                    idToken,
-                    mode: files,
-                });
-                if (axiosResponse.data == null) {
-                    return {
-                        type: Core.Uploader,
-                        src: undefined,
-                        blob: undefined,
-                    };
-                }
-                const blob = new Blob([axiosResponse.data]);
-                // 現在の仕様では、内蔵アップローダーのダウンロードにはAuthorizationヘッダーが必要なため、axiosなどでなければダウンロードできない。そのため、URL.createObjectURLを経由して渡している。
+    export const getSrc = async ({
+        path,
+        config,
+        storage,
+        getIdToken,
+        autoRedirect,
+    }: {
+        path: FilePathLikeOrThumb;
+        config: WebConfig;
+        storage: FirebaseStorage;
+        getIdToken: () => Promise<string | null>;
+        autoRedirect?: boolean;
+    }): Promise<SrcResult | typeof idTokenIsNull> => {
+        const getFloconUploaderFile = async ({
+            filename,
+            floconUploaderMode,
+        }: {
+            filename: string;
+            floconUploaderMode: typeof files | typeof thumbs;
+        }) => {
+            const axiosResponse = await getFloconUploaderFileCore({
+                filename,
+                config,
+                getIdToken,
+                mode: floconUploaderMode,
+            });
+            if (axiosResponse === idTokenIsNull) {
+                return idTokenIsNull;
+            }
+            if (axiosResponse.data == null) {
                 return {
                     type: Core.Uploader,
-                    src: URL.createObjectURL(blob),
-                    blob,
-                };
+                    src: undefined,
+                    blob: undefined,
+                } as const;
+            }
+            const blob = new Blob([axiosResponse.data]);
+            // 現在の仕様では、内蔵アップローダーのダウンロードにはAuthorizationヘッダーが必要なため、axiosなどでなければダウンロードできない。そのため、URL.createObjectURLを経由して渡している。
+            return {
+                type: Core.Uploader,
+                isThumb: floconUploaderMode === thumbs,
+                src: URL.createObjectURL(blob),
+                blob,
+                filename,
+            } as const;
+        };
+
+        const $path = ensureType(path);
+
+        if ($path.type === 'thumbs') {
+            return await getFloconUploaderFile({
+                filename: $path.thumbFilename,
+                floconUploaderMode: thumbs,
+            });
+        }
+
+        switch ($path.value.sourceType) {
+            case FileSourceType.Uploader: {
+                return await getFloconUploaderFile({
+                    filename: $path.value.path,
+                    floconUploaderMode: files,
+                });
             }
             case FileSourceType.FirebaseStorage: {
-                const cachedUrl = cache?.get(path.path);
-                if (cachedUrl != null) {
-                    return {
-                        type: Core.FirebaseStorage,
-                        src: cachedUrl,
-                        blob: undefined,
-                    };
-                }
-                const storageRef = ref(storage, path.path);
+                const storageRef = ref(storage, $path.value.path);
                 const url = await getDownloadURL(storageRef).catch(() => null);
                 if (typeof url !== 'string') {
                     return {
@@ -138,7 +202,6 @@ export namespace FilePath {
                         blob: undefined,
                     };
                 }
-                cache?.set(path.path, url, 1000 * 60 * 10);
                 return {
                     type: Core.FirebaseStorage,
                     src: url,
@@ -146,8 +209,8 @@ export namespace FilePath {
                 };
             }
             default: {
-                if (autoRedirect) {
-                    const redirected = await fetch(path.path);
+                if (autoRedirect === true) {
+                    const redirected = await fetch($path.value.path);
                     if (redirected.ok) {
                         return {
                             type: Core.Default,
@@ -158,7 +221,7 @@ export namespace FilePath {
                 }
                 return {
                     type: Core.Default,
-                    src: path.path,
+                    src: $path.value.path,
                     blob: undefined,
                 };
             }

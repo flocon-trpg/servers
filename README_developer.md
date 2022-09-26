@@ -1,8 +1,8 @@
 # 開発者向け Readme
 
-ローカルで動かす場合、yarn のインストールが必須となります。npm や pnpm には対応していません。
+ローカル環境で動かす場合、yarn のインストールが必須となります。npm や pnpm には対応していません。
 
-Flocon は yarn v3[^1] のワークスペースを採用しています。📦 パッケージの一覧は次のとおりです。
+Flocon は yarn v3[^1] のワークスペースを採用しています。パッケージ 📦 の一覧は次のとおりです。
 
 ```
 Flocon
@@ -15,6 +15,7 @@ Flocon
 ┃ ┣ 📦 flocon-script
 ┃ ┣ 📦 typed-document-node-v0.7.1
 ┃ ┣ 📦 typed-document-node-v0.7.2
+┃ ┣ 📦 typed-document-node-v0.7.8
 ┃ ┣ 📦 utils
 ┃ ┗ 📦 web-server-utils
 ┣ 📄 README_developer.md (このファイル)
@@ -49,7 +50,14 @@ cd ./apps/web-server
 yarn run dev
 ```
 
-静的ファイルを出力して動かす場合:
+静的ファイルを利用せずに本番サーバーを動かす場合:
+
+```console
+cd ./apps/web-server
+yarn run start
+```
+
+静的ファイルを利用して本番サーバーを動かす場合:
 
 ```console
 cd ./apps/web-server
@@ -81,7 +89,7 @@ yarn run build:deps && yarn run storybook
 
 ### クイックスタート
 
-次のようにすることで、全てのパッケージをテストできます。
+Node.js v16 以降をインストールし、次のコマンドを実行することで、全てのパッケージをテストできます。
 
 #### Linux
 
@@ -112,13 +120,19 @@ Redis を使用したテストは`./packages/cache`パッケージにのみ存�
 
 `MYSQL_TEST`、`POSTGRESQL_TEST`、`SQLITE_TEST`に falsy な値をセットすることで、それぞれのリレーショナルデータベースを使用したテストをスキップできます。MySQL や PostgreSQL を使用したテストを実行する場合は、それぞれのデータベースを準備しておく必要があります。SQLite は事前の準備は必要ありません。
 
-テストに使われるデータベースの接続方法は [./apps/api-server/test/utils/databaseConfig.ts](./apps/api-server/test/utils/databaseConfig.ts) にあります。
+テストに使われるデータベースの URL は [./apps/api-server/test/utils/databaseConfig.ts](./apps/api-server/test/utils/databaseConfig.ts) に記述されています。databaseConfig.ts を編集してテストしても構いません。
 
 リレーショナルデータベースを使用したテストは [api-server](./apps/api-server) パッケージにのみ存在します。このパッケージをテストしない場合は`MYSQL_TEST`、`POSTGRESQL_TEST`、`SQLITE_TEST`の値は利用されません。
 
 #### Node.js 14 以前における web-server パッケージのテスト
 
 `web-server` のコードには String.prototype.replaceAll メソッドが含まれています。このメソッドは多くのブラウザや Node.js 16 などでは対応していますが、Node.js 14 などでは未対応です。このため、Node.js 14 では web-server パッケージの一部のテストに失敗します。なお、Node.js 14 で問題が生じるのはテストのみであり、`yarn run dev`、`yarn run build`、`yarn run export` などは正常に動作すると思われます。
+
+## licenses-npm-package.txt の生成に関して
+
+[licenses-npm-package.txt](./apps/web-server/public/licenses-npm-package.txt) は `yarn run generate-disclaimer` で生成できます。
+
+これに使われている yarn プラグインの [plugin-licenses.cjs](./.yarn/plugins/@yarnpkg/plugin-licenses.cjs) は、[yarn-plugin-licenses](https://github.com/mhassan1/yarn-plugin-licenses) から fork した独自のプラグインです。ソースコードは [https://github.com/flocon-trpg/yarn-plugin-licenses](https://github.com/flocon-trpg/yarn-plugin-licenses) にあります。
 
 ## ブランチ名について
 

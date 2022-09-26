@@ -1,5 +1,5 @@
 import React from 'react';
-import { success, useImageFromGraphQL } from '@/hooks/imageHooks';
+import { success, useImageFromFilePath } from '@/hooks/imageHooks';
 import * as ReactKonva from 'react-konva';
 import { animated, useSpring, useTransition } from '@react-spring/konva';
 import { RoomPublicMessageFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
@@ -250,7 +250,7 @@ export const ImagePiece: React.FC<Props> = (props: Props) => {
         https://konvajs.org/docs/react/Transformer.html
         */
 
-    const image = useImageFromGraphQL(props.filePath);
+    const image = useImageFromFilePath(props.filePath);
     const [opacitySpringProps, setOpacitySpringProps] = useSpring(
         () => ({
             to: {

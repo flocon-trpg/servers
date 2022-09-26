@@ -21,7 +21,6 @@ import {
     recordToArray,
     recordToMap,
     right,
-    toBeNever,
 } from '@flocon-trpg/utils';
 import { isIdRecord } from '../util/record';
 
@@ -62,6 +61,7 @@ export type ReplaceValueTemplate<T extends Any> = {
     value: T;
 };
 
+/** Stateならば`T`に、TwoWayOperationならば`{ oldValue:T; newValue:T }`に変換されるtemplateを作成します。*/
 export const createReplaceValueTemplate = <T extends Any>(value: T) => {
     return {
         type: atomic,
@@ -77,7 +77,8 @@ export type OtValueTemplate = {
     value?: undefined;
 };
 
-export const createOtValueTemplate = <T extends boolean>(nullable: T) =>
+/** Stateならば`string`(ただし`nullable === true`のときは代わりに`string | undefined`となます。`undefined`は`''`と同一として扱われます)に、TwoWayOperationならば変化のある部分のみを抽出したOperationに変換されるtemplateを作成します。*/
+export const createTextValueTemplate = <T extends boolean>(nullable: T) =>
     ({
         type: atomic,
         mode: ot,
@@ -89,6 +90,7 @@ export type RecordValueTemplate<TValue extends AnyTemplate> = {
     value: TValue;
 };
 
+/** `Record<string, T>`を表すtemplateを作成します。*/
 export const createRecordValueTemplate = <TValue extends AnyTemplate>(value: TValue) => {
     return {
         type: record,
@@ -102,6 +104,7 @@ export type ParamRecordValueTemplate<TValue extends AnyTemplate> = {
     defaultState: State<TValue>;
 };
 
+/** `Record<string, T>`を表すtemplateを作成します。存在しない要素はdefaultStateがセットされているとみなされます。 */
 export const createParamRecordValueTemplate = <TValue extends AnyTemplate>(
     value: TValue,
     defaultState: State<TValue>
@@ -126,6 +129,7 @@ export type ObjectValueTemplate<
     };
 };
 
+/** 複数のtemplateから構成される新たなtemplateを作成します。 */
 export const createObjectValueTemplate = <
     T extends ReadonlyRecord<string, AnyTemplate>,
     V extends number | undefined,
@@ -202,9 +206,8 @@ export const state = <T extends AnyTemplate>(source: T, options: IoTsOptions): t
                     return source.value;
                 case ot:
                     return source.nullable ? t.union([t.string, t.undefined]) : (t.string as any);
-                default:
-                    return toBeNever(source);
             }
+            break;
         }
         case record:
         case paramRecord: {
@@ -223,8 +226,6 @@ export const state = <T extends AnyTemplate>(source: T, options: IoTsOptions): t
             }
             return base;
         }
-        default:
-            return toBeNever(source);
     }
 };
 
@@ -260,9 +261,8 @@ export const upOperation = <T extends AnyTemplate>(
                     return source.nullable
                         ? NullableTextOperation.upOperation
                         : (TextOperation.upOperation as any);
-                default:
-                    return toBeNever(source);
             }
+            break;
         }
         case record: {
             return trecord(
@@ -288,8 +288,6 @@ export const upOperation = <T extends AnyTemplate>(
             }
             return base;
         }
-        default:
-            return toBeNever(source);
     }
 };
 
@@ -325,9 +323,8 @@ export const downOperation = <T extends AnyTemplate>(
                     return source.nullable
                         ? NullableTextOperation.downOperation
                         : (TextOperation.downOperation as any);
-                default:
-                    return toBeNever(source);
             }
+            break;
         }
         case record: {
             return trecord(
@@ -354,8 +351,6 @@ export const downOperation = <T extends AnyTemplate>(
             }
             return base;
         }
-        default:
-            return toBeNever(source);
     }
 };
 
@@ -381,6 +376,7 @@ export type TwoWayOperation<T extends AnyTemplate> = T extends OtValueTemplate
       } & { [P in keyof U4]?: TwoWayOperation<U4[P]> }
     : unknown;
 
+/** TwoWayOperationをUpOperationに変換します。 */
 export const toUpOperation =
     <T extends AnyTemplate>(template: T) =>
     (twoWayOperation: TwoWayOperation<T>): UpOperation<T> => {
@@ -431,11 +427,10 @@ export const toUpOperation =
                     }
                 ) as any;
             }
-            default:
-                return toBeNever(template);
         }
     };
 
+/** TwoWayOperationをDownOperationに変換します。 */
 export const toDownOperation =
     <T extends AnyTemplate>(template: T) =>
     (twoWayOperation: TwoWayOperation<T>): DownOperation<T> => {
@@ -486,12 +481,10 @@ export const toDownOperation =
                     }
                 ) as any;
             }
-            default:
-                return toBeNever(template);
         }
     };
 
-/** StateにUpOperationを適用する。 */
+/** StateにUpOperationを適用します。破壊的な処理は行われません。 */
 export const apply =
     <T extends AnyTemplate>(template: T): Apply<State<T>, UpOperation<T>> =>
     ({ state, operation }) => {
@@ -558,12 +551,10 @@ export const apply =
                 }
                 return Result.ok(result);
             }
-            default:
-                return toBeNever(template);
         }
     };
 
-/** StateにDownOperationを適用する。 */
+/** StateにDownOperationを適用します。破壊的な処理は行われません。 */
 export const applyBack =
     <T extends AnyTemplate>(template: T): Apply<State<T>, DownOperation<T>> =>
     ({ state, operation }) => {
@@ -630,12 +621,10 @@ export const applyBack =
                 }
                 return Result.ok(result);
             }
-            default:
-                return toBeNever(template);
         }
     };
 
-/** 連続する2つのDownOperationを合成する。*/
+/** 連続する2つのDownOperationを合成します。破壊的な処理は行われません。 */
 export const composeDownOperation =
     <T extends AnyTemplate>(template: T): Compose<DownOperation<T>, DownError> =>
     ({ first, second }) => {
@@ -716,13 +705,11 @@ export const composeDownOperation =
                 }
                 return Result.ok(result);
             }
-            default:
-                return toBeNever(template);
         }
     };
 
 /**
- * Stateを用いて、DownOperationからTwoWayOperationを復元する。
+ * Stateの情報を用いて、DownOperationをTwoWayOperationに変換します。破壊的な処理は行われません。
  * @param nextState - DownOperationが適用される前の状態のState。
  */
 export const restore =
@@ -809,12 +796,12 @@ export const restore =
                 }
                 return Result.ok({ prevState, twoWayOperation });
             }
-            default:
-                return toBeNever(template);
         }
     };
 
-/** 2つのStateオブジェクトの差分を取る。*/
+/** 2つのStateオブジェクトの差分を取ります。
+ * @returns 2つのオブジェクトが意味上で同一であればundefinedを返します。
+ */
 export const diff =
     <T extends AnyTemplate>(template: T): Diff<State<T>, TwoWayOperation<T>> =>
     ({ prevState, nextState }) => {
@@ -885,15 +872,15 @@ export const diff =
                 }
                 return result;
             }
-            default:
-                return toBeNever(template);
         }
     };
 
 /**
- * ユーザーの権限を考慮せずに、通常のOperational Transformを行う。主にクライアント側で使われる。
+ * ユーザーの権限を考慮せずに、通常のOperational Transformを行います。主にクライアント側で使われます。破壊的な処理は行われません。
  *
- * この関数は次の2つの制約がある。`first`適用前のStateと`second`適用前のStateは等しい。このStateに対して`first`と`secondPrime`を順に適用したStateと、`second`と`firstPrime`を順に適用したStateは等しい。
+ * この関数は次の2つの制約があります。
+ * - `first`適用前のStateと`second`適用前のStateは等しい。
+ * - このStateに対して`first`と`secondPrime`を順に適用したStateと、`second`と`firstPrime`を順に適用したStateは等しい。
  */
 export const clientTransform =
     <T extends AnyTemplate>(template: T): ClientTransform<UpOperation<T>> =>
@@ -1001,7 +988,5 @@ export const clientTransform =
                     secondPrime: isIdRecord(secondPrime) ? undefined : secondPrime,
                 });
             }
-            default:
-                return toBeNever(template);
         }
     };

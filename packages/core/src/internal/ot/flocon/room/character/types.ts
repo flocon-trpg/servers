@@ -10,10 +10,10 @@ import { maybe } from '../../../../maybe';
 import {
     State,
     createObjectValueTemplate,
-    createOtValueTemplate,
     createParamRecordValueTemplate,
     createRecordValueTemplate,
     createReplaceValueTemplate,
+    createTextValueTemplate,
 } from '../../../generator';
 
 // boolParams, numParams, numMaxParams, strParams: keyはstrIndex20などの固定キーを想定。
@@ -51,10 +51,10 @@ export const template = createObjectValueTemplate(
 
         image: createReplaceValueTemplate(maybe(filePathValue)),
         isPrivate: createReplaceValueTemplate(t.boolean),
-        memo: createOtValueTemplate(false),
-        name: createOtValueTemplate(false),
-        chatPalette: createOtValueTemplate(false),
-        privateVarToml: createOtValueTemplate(false),
+        memo: createTextValueTemplate(false),
+        name: createTextValueTemplate(false),
+        chatPalette: createTextValueTemplate(false),
+        privateVarToml: createTextValueTemplate(false),
         portraitImage: createReplaceValueTemplate(maybe(filePathValue)),
 
         hasTag1: createReplaceValueTemplate(t.boolean),

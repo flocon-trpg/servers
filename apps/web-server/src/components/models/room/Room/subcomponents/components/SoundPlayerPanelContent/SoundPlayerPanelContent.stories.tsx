@@ -3,6 +3,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 import { SoundPlayerPanelContent } from './SoundPlayerPanelContent';
 import { useSetupMocks } from '@/hooks/useSetupMocks';
+import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
     useSetupMocks({
@@ -10,7 +11,11 @@ export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myPar
             myParticipantRole,
         },
     });
-    return <SoundPlayerPanelContent />;
+    return (
+        <StorybookProvider>
+            <SoundPlayerPanelContent />
+        </StorybookProvider>
+    );
 };
 
 export default {

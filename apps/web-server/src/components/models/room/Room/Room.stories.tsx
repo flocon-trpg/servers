@@ -3,11 +3,10 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { Result } from '@kizahasi/result';
 import { Room } from './Room';
 import { WebConfig } from '@/configType';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
 import { mockWebConfig } from '@/mocks';
 import { ParticipantRole } from '@flocon-trpg/core';
 import { useSetupMocks } from '@/hooks/useSetupMocks';
+import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 
 export const Player: React.FC<WebConfig & { myParticipantRole: ParticipantRole }> = ({
     isUnlistedFirebaseStorageEnabled,
@@ -31,9 +30,9 @@ export const Player: React.FC<WebConfig & { myParticipantRole: ParticipantRole }
     });
 
     return (
-        <DndProvider backend={HTML5Backend}>
+        <StorybookProvider>
             <Room debug={{ window: { innerHeight: 600, innerWidth: 500 } }} />
-        </DndProvider>
+        </StorybookProvider>
     );
 };
 

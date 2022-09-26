@@ -1,141 +1,132 @@
-import { State, filePathTemplate } from '@flocon-trpg/core';
 import React from 'react';
-import { useDeepCompareEffect } from 'react-use';
-import { FirebaseStorageUrlCacheContext } from '../contexts/FirebaseStorageUrlCacheContext';
-import { FilePathFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
-import { FilePath as FilePathModule } from '../utils/file/filePath';
+import { FilePathLikeOrThumb, FilePathModule } from '../utils/file/filePath';
 import { useWebConfig } from './useWebConfig';
 import { useAtomValue } from 'jotai/utils';
 import { firebaseStorageAtom } from '../pages/_app';
 import { useGetIdToken } from './useGetIdToken';
+import { UseQueryResult, useQueries } from 'react-query';
+import { useMemoOne } from 'use-memo-one';
+import { idTokenIsNull, thumbs } from '@/utils/file/getFloconUploaderFile';
 
-type FilePath = State<typeof filePathTemplate>;
-
-export const done = 'done';
-export const success = 'success';
+export const loaded = 'loaded';
 export const loading = 'loading';
 export const nullishArg = 'nullishArg';
 export const invalidWebConfig = 'invalidWebConfig';
-export const error = 'error';
 
 type SrcArrayResult =
     | {
-          // 一部が成功して残りが失敗というケースがあるため、successではなくdoneという名前にしている。
-          type: typeof done;
-          value: (string | null)[];
-      }
-    | {
-          type: typeof error;
-          error: unknown;
+          type: typeof loaded;
+          queriesResult: readonly UseQueryResult<FilePathModule.SrcResult, unknown>[];
       }
     | {
           type: typeof loading | typeof nullishArg | typeof invalidWebConfig;
       };
 
 // PathArrayがnullish ⇔ 戻り値がnullishArg
-// pathArray.length = 戻り値.length
-export function useSrcArrayFromGraphQL(
-    pathArray: ReadonlyArray<FilePathFragment | FilePath> | null | undefined,
-    additionalDeps?: React.DependencyList
+// pathArray.length = queriesResult.length
+export function useSrcArrayFromFilePath(
+    pathArray: ReadonlyArray<FilePathLikeOrThumb> | null | undefined
 ): SrcArrayResult {
     const config = useWebConfig();
     const storage = useAtomValue(firebaseStorageAtom);
-    const [result, setResult] = React.useState<SrcArrayResult>({ type: loading });
-    const firebaseStorageUrlCacheContext = React.useContext(FirebaseStorageUrlCacheContext);
     const { getIdToken } = useGetIdToken();
 
-    // deep equalityでチェックされるため、余計なプロパティを取り除いている
-    const cleanPathArray = pathArray?.map(path => ({
-        path: path.path,
-        sourceType: path.sourceType,
-    }));
+    const cleanPathArray =
+        pathArray == null || config?.value == null || storage == null
+            ? []
+            : pathArray.map(path => {
+                  const $path = FilePathModule.ensureType(path);
 
-    useDeepCompareEffect(() => {
-        if (cleanPathArray == null) {
-            setResult({ type: nullishArg });
-            return;
+                  // deep equalityでチェックされるため、pathからは必要なプロパティのみ抽出している。
+                  const queryKey = [
+                      'firebase storage url',
+                      $path.type === thumbs
+                          ? {
+                                thumbFilename: $path.thumbFilename,
+                            }
+                          : {
+                                path: $path.value.path,
+                                sourceType: $path.value.sourceType,
+                            },
+                  ];
+                  const queryFn = async () => {
+                      const result = await FilePathModule.getSrc({
+                          path,
+                          config: config.value,
+                          storage,
+                          getIdToken,
+                      });
+                      if (result === idTokenIsNull) {
+                          return Promise.reject(
+                              new Error(
+                                  'Firebase Authentication の IdToken を取得できませんでした。'
+                              )
+                          );
+                      }
+                      return result;
+                  };
+                  // FirebaseのURLは自動的にexpireされるのでcacheTimeを指定している。
+                  // TODO: 1時間にしているがこの値は適当。
+                  const cacheTime = 1000 * 60 * 60 * 1;
+                  return { queryKey, queryFn, cacheTime };
+              });
+
+    const queriesResult = useQueries(cleanPathArray);
+
+    const isPathArrayNullish = pathArray == null;
+
+    return useMemoOne(() => {
+        if (isPathArrayNullish) {
+            return { type: nullishArg };
         }
-        if (getIdToken == null || config == null || storage == null) {
-            setResult({ type: loading });
-            return;
+        if (config?.isError) {
+            return { type: invalidWebConfig };
         }
-        if (config.isError) {
-            setResult({ type: invalidWebConfig });
-            return;
+        if (config == null || storage == null) {
+            return { type: loading };
         }
-        let isDisposed = false;
-        const main = async () => {
-            const idToken = await getIdToken();
-            if (idToken == null) {
-                return null;
-            }
-            Promise.all(
-                cleanPathArray.map(async path => {
-                    // firebaseStorageUrlCacheContextはDeepCompareしてほしくないしされる必要もないインスタンスであるため、depsに加えてはいけない。
-                    return FilePathModule.getSrc(
-                        path,
-                        config.value,
-                        storage,
-                        idToken,
-                        firebaseStorageUrlCacheContext
-                    );
-                })
-            )
-                .then(all => {
-                    if (isDisposed) {
-                        return;
-                    }
-                    setResult({
-                        type: done,
-                        value: all.flatMap(x => (x == null ? [] : [x.src ?? null])),
-                    });
-                })
-                .catch(e => {
-                    console.log('error', e);
-
-                    setResult({ type: error, error: e });
-                });
-        };
-
-        main();
-
-        return () => {
-            isDisposed = true;
-        };
-    }, [cleanPathArray, config, storage, getIdToken, ...(additionalDeps ?? [])]);
-
-    return result;
+        return { type: loaded, queriesResult };
+    }, [config, isPathArrayNullish, queriesResult, storage]);
 }
 
 type SrcResult =
     | {
-          type: typeof success;
-          value: string;
+          type: typeof loaded;
+          value: UseQueryResult<FilePathModule.SrcResult, unknown>;
       }
     | {
-          type: typeof loading | typeof error | typeof nullishArg | typeof invalidWebConfig;
+          type: typeof loading | typeof nullishArg | typeof invalidWebConfig;
       };
 
-const toSrcResult = (srcArray: ReturnType<typeof useSrcArrayFromGraphQL>): SrcResult => {
-    if (srcArray.type !== done) {
+const toSrcResult = (srcArray: ReturnType<typeof useSrcArrayFromFilePath>): SrcResult => {
+    if (srcArray.type !== loaded) {
         return srcArray;
     }
-    const result = srcArray.value[0];
+    const result = srcArray.queriesResult[0];
     if (result == null) {
-        return { type: error };
+        throw new Error(
+            'This should not happen. pathArray.length might be 0, which is not expected.'
+        );
     }
-    return { type: success, value: result };
+    return { type: loaded, value: result };
 };
 
-export function useSrcFromGraphQL(
-    path: FilePathFragment | FilePath | null | undefined,
-    additionalDeps?: React.DependencyList
-): SrcResult {
+export function useSrcFromFilePath(path: FilePathLikeOrThumb | null | undefined): {
+    src: string | undefined;
+    queryResult: SrcResult;
+} {
     const pathArray = React.useMemo(() => (path == null ? null : [path]), [path]);
-    const resultArray = useSrcArrayFromGraphQL(pathArray, additionalDeps);
-    const [result, setResult] = React.useState<SrcResult>(toSrcResult(resultArray));
-    React.useEffect(() => {
-        setResult(toSrcResult(resultArray));
+    const resultArray = useSrcArrayFromFilePath(pathArray);
+    const queryResult = useMemoOne(() => {
+        return toSrcResult(resultArray);
     }, [resultArray]);
-    return result;
+    const src = queryResult.type === loaded ? queryResult.value.data?.src : undefined;
+
+    return React.useMemo(
+        () => ({
+            src,
+            queryResult,
+        }),
+        [queryResult, src]
+    );
 }

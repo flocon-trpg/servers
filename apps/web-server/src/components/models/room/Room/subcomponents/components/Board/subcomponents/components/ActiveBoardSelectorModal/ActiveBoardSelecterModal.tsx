@@ -3,7 +3,6 @@ import Modal from 'antd/lib/modal/Modal';
 import React from 'react';
 import { useMyBoards } from '../../../../../hooks/useMyBoards';
 import { useSetRoomStateByApply } from '@/hooks/useSetRoomStateByApply';
-import { cancelRnd } from '@/styles/className';
 
 type Props = {
     visible: boolean;
@@ -74,7 +73,6 @@ export const ActiveBoardSelectorModal: React.FC<Props> = ({ visible, onComplete 
 
     return (
         <Modal
-            className={cancelRnd}
             visible={visible}
             title='ボードビュアーに表示させるボードの変更'
             onOk={onOk}

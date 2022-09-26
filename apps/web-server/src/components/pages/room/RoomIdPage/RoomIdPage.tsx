@@ -133,11 +133,19 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
             case 'JoinRoomFailureResult':
                 switch (result.data.result.failureType) {
                     case JoinRoomFailureType.WrongPassword: {
-                        setErrorMessage('Wrong password');
+                        setErrorMessage('パスワードが誤っています。');
                         return;
                     }
                     case JoinRoomFailureType.NotFound: {
-                        setErrorMessage('Not found. Deleted?');
+                        setErrorMessage('部屋が見つかりませんでした。削除された可能性があります。');
+                        return;
+                    }
+                    case JoinRoomFailureType.AlreadyParticipant: {
+                        setErrorMessage('すでに入室済みです。ブラウザを更新してください。');
+                        return;
+                    }
+                    case JoinRoomFailureType.TransformError: {
+                        setErrorMessage('TransformError');
                         return;
                     }
                 }

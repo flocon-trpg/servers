@@ -62,6 +62,7 @@ import { DraggableTabs } from '@/components/ui/DraggableTabs/DraggableTabs';
 import { moveElement } from '@/utils/moveElement';
 import { defaultTriggerSubMenuAction } from '@/utils/variables';
 import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
+import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 
 type CharacterState = State<typeof characterTemplate>;
 type ParamNameState = State<typeof paramNameTemplate>;
@@ -414,18 +415,22 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                                         <IconView size={20} image={character.state.image} />
                                     )}
                                     <div style={{ width: 4 }} />
-                                    <Input
-                                        style={{ minWidth: 100 }}
-                                        value={character.state.name}
+                                    <CollaborativeInput
+                                        style={{ minWidth: 100, width: '100%' }}
+                                        bufferDuration='default'
                                         size='small'
-                                        onChange={newValue => {
+                                        value={character.state.name}
+                                        onChange={e => {
+                                            if (e.previousValue === e.currentValue) {
+                                                return;
+                                            }
                                             setRoomState(state => {
                                                 const targetCharacter =
                                                     state.characters?.[character.stateId];
                                                 if (targetCharacter == null) {
                                                     return;
                                                 }
-                                                targetCharacter.name = newValue.target.value;
+                                                targetCharacter.name = e.currentValue;
                                             });
                                         }}
                                     />
@@ -586,7 +591,6 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
 
     return (
         <Modal
-            className={cancelRnd}
             visible={config != null}
             title='タブの編集'
             closable

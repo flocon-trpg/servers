@@ -6,6 +6,7 @@ module.exports = {
             'always',
             [
                 'deps',
+                'docker',
                 'api-server',
                 'web-server',
                 'cache',

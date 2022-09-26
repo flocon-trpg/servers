@@ -1,7 +1,6 @@
 import { Input } from 'antd';
 import Modal from 'antd/lib/modal/Modal';
 import React from 'react';
-import { cancelRnd } from '@/styles/className';
 
 type Props = {
     title?: string;
@@ -64,7 +63,6 @@ export const InputModal: React.FC<Props> = ({
     // className='cancel-rnd'がないと、RoomMessageComponent内でInputModalを表示した際に、ドラッグするとカーソルの位置に関わらずメッセージウィンドウが動いてしまう。
     return (
         <Modal
-            className={cancelRnd}
             visible={visible}
             title={title}
             onOk={onOk}
