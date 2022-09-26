@@ -195,9 +195,22 @@ export const createServer = async ({
             },
         });
 
+        const permission = {
+            unlisted: 'unlisted',
+            public: 'public',
+        };
         app.post(
             '/uploader/upload/:permission',
             async (req, res, next) => {
+                switch (req.params.permission) {
+                    case permission.unlisted:
+                    case permission.public:
+                        break;
+                    default:
+                        res.sendStatus(404);
+                        return;
+                }
+
                 const decodedIdToken = await getDecodedIdTokenFromExpressRequest(req);
                 if (decodedIdToken == null || decodedIdToken.isError) {
                     set401Status(res).send('Invalid Authorization header');
@@ -260,40 +273,27 @@ export const createServer = async ({
                 const forkedEm: EM = res.locals.forkedEm;
                 const user: User = res.locals.user;
 
-                let permissionParam: 'unlisted' | 'public';
-                switch (req.params.permission) {
-                    case 'unlisted':
-                        permissionParam = 'unlisted';
-                        break;
-                    case 'public':
-                        permissionParam = 'public';
-                        break;
-                    default:
-                        res.sendStatus(404);
-                        return;
-                }
                 const file = req.file;
                 if (file == null) {
                     res.sendStatus(400);
                     return;
                 }
                 const thumbFileName = `${file.filename}.webp`;
-                const thumbDir = path.join(path.dirname(file.path), thumbsDir);
-                await ensureDir(thumbDir);
-                const thumbPath = path.join(thumbDir, thumbFileName);
+                const thumbsDirPath = path.join(path.dirname(file.path), thumbsDir);
+                await ensureDir(thumbsDirPath);
+                const thumbPath = path.join(thumbsDirPath, thumbFileName);
                 const thumbnailSaved = await sharp(file.path)
                     .resize(80)
                     .webp()
                     .toFile(thumbPath)
                     .then(() => true)
                     .catch(err => {
-                        // 画像かどうかに関わらず全てのファイルをsharpに渡すため、mp3などといった画像でないファイルの場合はほぼ確実にこの関数が実行される
-
-                        console.warn(err);
+                        // 画像かどうかに関わらず全てのファイルをsharpに渡すため、mp3などといった画像でないファイルの場合はほぼ確実にここに来る。そのため、console.warnなどではなくconsole.logを使っている。
+                        console.log(err);
                         return false;
                     });
-                const permission =
-                    permissionParam === 'public'
+                const permissionType =
+                    req.params.permission === permission.public
                         ? FilePermissionType.Entry
                         : FilePermissionType.Private;
                 const entity = new File({
@@ -302,9 +302,9 @@ export const createServer = async ({
                     createdBy: Reference.create<User, 'userUid'>(user),
                     thumbFilename: thumbnailSaved ? thumbFileName : undefined,
                     filesize: file.size,
-                    deletePermission: permission,
-                    listPermission: permission,
-                    renamePermission: permission,
+                    deletePermission: permissionType,
+                    listPermission: permissionType,
+                    renamePermission: permissionType,
                 });
                 await forkedEm.persistAndFlush(entity);
                 res.sendStatus(200);
