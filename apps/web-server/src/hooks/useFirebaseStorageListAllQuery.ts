@@ -1,6 +1,6 @@
 import { firebaseStorageAtom } from '@/pages/_app';
 import { Path } from '@/utils/file/firebaseStorage';
-import { FirebaseStorage, StorageReference, ref } from '@firebase/storage';
+import { FirebaseStorage, ListResult, StorageReference, ref } from '@firebase/storage';
 import { FirebaseError } from '@firebase/util';
 import { listAll } from 'firebase/storage';
 import { useAtomValue } from 'jotai';
@@ -8,6 +8,21 @@ import React from 'react';
 import { QueryKey, useQuery } from 'react-query';
 import { useMyUserUid } from './useMyUserUid';
 import { useWebConfig } from './useWebConfig';
+
+/** 再帰的に Firebase Storage の listAll 関数を実行します。
+ * @param storageRef listAll 関数を再帰的に実行する対象。
+ * @param next 新しい ListResult が見つかるたびに実行される関数。
+ */
+const listAllRecursive = async (
+    storageRef: StorageReference,
+    next: (listResult: ListResult) => void
+): Promise<void> => {
+    const list = await listAll(storageRef);
+    next(list);
+    for (const prefix of list.prefixes) {
+        await listAllRecursive(prefix, next);
+    }
+};
 
 export type File = {
     storageReference: StorageReference;
@@ -143,13 +158,11 @@ export const useFirebaseStorageListAllQuery = () => {
 
             const result: File[] = [];
             const storageRef = ref(storage, Path.public.list.string);
-            const rootListResult = await listAll(storageRef);
-            result.push(...rootListResult.items.map(ofPublicUploaderFile));
-            for (const prefix of rootListResult.prefixes) {
-                const prefixListResult = await listAll(prefix);
-                result.push(...prefixListResult.items.map(ofPublicUploaderFile));
-            }
-
+            await listAllRecursive(storageRef, listResult => {
+                for (const item of listResult.items) {
+                    result.push(ofPublicUploaderFile(item));
+                }
+            });
             return { type: success, value: result } as const;
         }
     );
@@ -173,12 +186,11 @@ export const useFirebaseStorageListAllQuery = () => {
 
             const result: File[] = [];
             const storageRef = ref(storage, Path.unlisted.list(myUserUid).string);
-            const rootListResult = await listAll(storageRef);
-            result.push(...rootListResult.items.map(ofUnlistedUploaderFile(myUserUid)));
-            for (const prefix of rootListResult.prefixes) {
-                const prefixListResult = await listAll(prefix);
-                result.push(...prefixListResult.items.map(ofUnlistedUploaderFile(myUserUid)));
-            }
+            await listAllRecursive(storageRef, listResult => {
+                for (const item of listResult.items) {
+                    result.push(ofUnlistedUploaderFile(myUserUid)(item));
+                }
+            });
             return { type: success, value: result } as const;
         }
     );

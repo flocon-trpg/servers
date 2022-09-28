@@ -3065,6 +3065,7 @@ __metadata:
     clipboard-copy: ^4.0.1
     color: 4.2.3
     color-name: 1.1.4
+    dotenv: 16.0.2
     firebase: ^9.6.6
     fp-ts: ^2.11.8
     graphql: ^15.6.0
@@ -3115,6 +3116,7 @@ __metadata:
     url-join: ^4.0.1
     urql: ^2.2.0
     use-constant: ^1.1.0
+    use-image: 1.1.0
     use-memo-one: ^1.1.2
   languageName: unknown
   linkType: soft
@@ -11349,6 +11351,13 @@ __metadata:
   version: 16.0.1
   resolution: "dotenv@npm:16.0.1"
   checksum: f459ffce07b977b7f15d8cc4ee69cdff77d4dd8c5dc8c85d2d485ee84655352c2415f9dd09d42b5b5985ced3be186130871b34e2f3e2569ebc72fbc2e8096792
+  languageName: node
+  linkType: hard
+
+"dotenv@npm:16.0.2":
+  version: 16.0.2
+  resolution: "dotenv@npm:16.0.2"
+  checksum: ca8f9ca2d67929c7771069f4c31b4e46b9932621009e658e5afd655dde2d69b77642bf36dbc9e72bc170523dfd908a9ee41c26f034c1fdc605ace3b1b4b10faf
   languageName: node
   linkType: hard
 
@@ -24510,6 +24519,16 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
   checksum: cbff28ec85e10a17adc889482752006cf49e7d2f8c38cce7bcab82b42b5c31b0e42a07310995d140265956aa5f7c641edc1111a8647d01980a822760df2648dc
+  languageName: node
+  linkType: hard
+
+"use-image@npm:1.1.0":
+  version: 1.1.0
+  resolution: "use-image@npm:1.1.0"
+  peerDependencies:
+    react: ">=16.8.0"
+    react-dom: ">=16.8.0"
+  checksum: ed0a6fe4976c18f72a379c69b06b4032d331bcdca9b3c149c27b5f88c4947ff3d4d73d53ab638bd2293ee83ae23adfab9ba2d0ce9b64efc9721ca28c4aa3f3bc
   languageName: node
   linkType: hard
 
