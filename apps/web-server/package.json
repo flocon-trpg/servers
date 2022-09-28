@@ -30,6 +30,7 @@
         "axios": "^0.27.0",
         "classnames": "^2.3.1",
         "clipboard-copy": "^4.0.1",
+        "dotenv": "16.0.2",
         "firebase": "^9.6.6",
         "fp-ts": "^2.11.8",
         "graphql": "^15.6.0",
@@ -75,6 +76,7 @@
         "url-join": "^4.0.1",
         "urql": "^2.2.0",
         "use-constant": "^1.1.0",
+        "use-image": "1.1.0",
         "use-memo-one": "^1.1.2"
     },
     "devDependencies": {
