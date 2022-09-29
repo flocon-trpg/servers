@@ -3079,7 +3079,7 @@ __metadata:
     jdenticon: ^3.1.1
     jest: 28.1.3
     jest-environment-jsdom: 28.1.3
-    jotai: ^1.4.3
+    jotai: ^1.8.4
     js-file-download: ^0.4.12
     jszip: ^3.9.1
     konva: ^8.3.9
@@ -15709,17 +15709,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jotai@npm:^1.4.3":
-  version: 1.7.4
-  resolution: "jotai@npm:1.7.4"
+"jotai@npm:^1.8.4":
+  version: 1.8.4
+  resolution: "jotai@npm:1.8.4"
   peerDependencies:
     "@babel/core": "*"
     "@babel/template": "*"
+    "@tanstack/query-core": "*"
     "@urql/core": "*"
     immer: "*"
     optics-ts: "*"
     react: ">=16.8"
-    react-query: "*"
     valtio: "*"
     wonka: "*"
     xstate: "*"
@@ -15728,13 +15728,13 @@ __metadata:
       optional: true
     "@babel/template":
       optional: true
+    "@tanstack/query-core":
+      optional: true
     "@urql/core":
       optional: true
     immer:
       optional: true
     optics-ts:
-      optional: true
-    react-query:
       optional: true
     valtio:
       optional: true
@@ -15742,7 +15742,7 @@ __metadata:
       optional: true
     xstate:
       optional: true
-  checksum: 9ce3a02a72163dbe12aeed54a293353bbf59a385a6418f27787b9707edf83189827cfdaeeec9353bc0cfd4af18444e8e89ac1f13b5e171e9b4e1e5e72a4100ce
+  checksum: a3e9ffe9d1dad088bc965702fb2ae6f14162282d950bcb149f423ca7e8738466892b8b8652b65dda11d26e481056105170b961e4b19caa34400c3402d4e16157
   languageName: node
   linkType: hard
 

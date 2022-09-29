@@ -42,7 +42,7 @@
         "io-ts": "^2.2.16",
         "io-ts-reporters": "^2.0.0",
         "jdenticon": "^3.1.1",
-        "jotai": "^1.4.3",
+        "jotai": "^1.8.4",
         "js-file-download": "^0.4.12",
         "jszip": "^3.9.1",
         "konva": "^8.3.9",
