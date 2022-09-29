@@ -13,7 +13,7 @@ if (skipRedis) {
     console.info('Skips Redis tests because `REDIS_TEST` is falsy.');
 }
 
-const createEach = (redis: Redis.Redis): Cache[] => {
+const createEach = (redis: Redis): Cache[] => {
     const result: Cache[] = [];
     result.push(createNodeCache({}));
     if (!skipRedis) {

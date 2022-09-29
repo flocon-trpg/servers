@@ -21,7 +21,6 @@
     "author": "kizahasi",
     "description": "Cache library for Flocon project.",
     "devDependencies": {
-        "@types/ioredis": "4.28.10",
         "@types/jest": "28.1.8",
         "jest": "28.1.3",
         "rimraf": "3.0.2",
@@ -30,7 +29,7 @@
     },
     "dependencies": {
         "@flocon-trpg/utils": "workspace:^",
-        "ioredis": "^4.28.0",
+        "ioredis": "^5.2.3",
         "node-cache": "^5.1.2"
     }
 }
