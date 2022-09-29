@@ -11347,14 +11347,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv@npm:16.0.1, dotenv@npm:^16.0.0":
+"dotenv@npm:16.0.1":
   version: 16.0.1
   resolution: "dotenv@npm:16.0.1"
   checksum: f459ffce07b977b7f15d8cc4ee69cdff77d4dd8c5dc8c85d2d485ee84655352c2415f9dd09d42b5b5985ced3be186130871b34e2f3e2569ebc72fbc2e8096792
   languageName: node
   linkType: hard
 
-"dotenv@npm:16.0.2":
+"dotenv@npm:16.0.2, dotenv@npm:^16.0.0":
   version: 16.0.2
   resolution: "dotenv@npm:16.0.2"
   checksum: ca8f9ca2d67929c7771069f4c31b4e46b9932621009e658e5afd655dde2d69b77642bf36dbc9e72bc170523dfd908a9ee41c26f034c1fdc605ace3b1b4b10faf
@@ -15694,16 +15694,16 @@ __metadata:
   linkType: hard
 
 "jotai@npm:^1.4.3":
-  version: 1.7.4
-  resolution: "jotai@npm:1.7.4"
+  version: 1.8.4
+  resolution: "jotai@npm:1.8.4"
   peerDependencies:
     "@babel/core": "*"
     "@babel/template": "*"
+    "@tanstack/query-core": "*"
     "@urql/core": "*"
     immer: "*"
     optics-ts: "*"
     react: ">=16.8"
-    react-query: "*"
     valtio: "*"
     wonka: "*"
     xstate: "*"
@@ -15712,13 +15712,13 @@ __metadata:
       optional: true
     "@babel/template":
       optional: true
+    "@tanstack/query-core":
+      optional: true
     "@urql/core":
       optional: true
     immer:
       optional: true
     optics-ts:
-      optional: true
-    react-query:
       optional: true
     valtio:
       optional: true
@@ -15726,7 +15726,7 @@ __metadata:
       optional: true
     xstate:
       optional: true
-  checksum: 9ce3a02a72163dbe12aeed54a293353bbf59a385a6418f27787b9707edf83189827cfdaeeec9353bc0cfd4af18444e8e89ac1f13b5e171e9b4e1e5e72a4100ce
+  checksum: a3e9ffe9d1dad088bc965702fb2ae6f14162282d950bcb149f423ca7e8738466892b8b8652b65dda11d26e481056105170b961e4b19caa34400c3402d4e16157
   languageName: node
   linkType: hard
 
