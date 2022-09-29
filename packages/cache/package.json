@@ -30,7 +30,7 @@
     },
     "dependencies": {
         "@flocon-trpg/utils": "workspace:^",
-        "ioredis": "^4.28.0",
+        "ioredis": "^5.0.0",
         "node-cache": "^5.1.2"
     }
 }
