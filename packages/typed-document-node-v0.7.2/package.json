@@ -7,6 +7,9 @@
     "files": [
         "dist"
     ],
+    "engines": {
+        "node": ">=14 <19"
+    },
     "scripts": {
         "build": "yarn run build:self",
         "build-ci": "yarn run build:self",

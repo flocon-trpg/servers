@@ -8,7 +8,7 @@
         "dist"
     ],
     "engines": {
-        "node": ">=14"
+        "node": ">=14 <19"
     },
     "scripts": {
         "build": "yarn run build:self",

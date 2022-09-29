@@ -82,7 +82,7 @@
         "ws": "8.8.1"
     },
     "engines": {
-        "node": ">=14"
+        "node": ">=14 <19"
     },
     "scripts": {
         "dev": "node dist/index.js",
