@@ -249,9 +249,13 @@ export class TestClient {
 
     public getRoomsListQuery() {
         return this.#core
-            .query<GetRoomsListQuery, GetRoomsListQueryVariables>(GetRoomsListDocument, undefined, {
-                requestPolicy: 'network-only',
-            })
+            .query<GetRoomsListQuery, GetRoomsListQueryVariables>(
+                GetRoomsListDocument,
+                {},
+                {
+                    requestPolicy: 'network-only',
+                }
+            )
             .toPromise();
     }
 

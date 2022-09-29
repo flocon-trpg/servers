@@ -32,7 +32,7 @@ const PingPongCore: React.FC = () => {
 
     React.useEffect(() => {
         const subscription = pipe(
-            urqlClient.subscription<PongSubscription, PongSubscriptionVariables>(PongDocument),
+            urqlClient.subscription<PongSubscription, PongSubscriptionVariables>(PongDocument, {}),
             subscribe(pong => {
                 if (pong.data != null) {
                     setPongObservableResult({ type: 'success', value: pong.data.pong });
