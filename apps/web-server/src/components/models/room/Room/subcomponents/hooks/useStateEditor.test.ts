@@ -95,7 +95,7 @@ describe('useStateEditor', () => {
         });
         expect(result.current.state).toBe('init1');
         expect(onCreate).toHaveBeenCalledTimes(1);
-        expect(onCreate.mock.lastCall[0]).toBe('init1');
+        expect(onCreate.mock.lastCall?.[0]).toBe('init1');
     });
 
     it.each([

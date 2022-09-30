@@ -2,6 +2,7 @@ import React from 'react';
 import * as ReactKonva from 'react-konva';
 import { animated, useTransition } from '@react-spring/konva';
 import { success, useImage } from '@/hooks/imageHooks';
+import { AnimatedImageAsAnyProps } from '@/components/ui/AnimatedKonvaAsAnyProps/AnimatedKonvaAsAnyProps';
 
 export const question = 'question';
 
@@ -49,7 +50,7 @@ export const KonvaD6: React.FC<KonvaD6Props> = ({
         <ReactKonva.Group opacity={opacity ?? 1}>
             {transitions(style => {
                 return (
-                    <animated.Image
+                    <AnimatedImageAsAnyProps
                         {...style}
                         x={x ?? 0}
                         y={y ?? 0}
