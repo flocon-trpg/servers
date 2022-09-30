@@ -2859,7 +2859,7 @@ __metadata:
     ts-node: ^10.7.0
     type-fest: ^2.12.0
     type-graphql: ^1.1.1
-    typescript: 4.4.4
+    typescript: 4.8.4
     url-join: 4.0.1
     uuid: ^8.3.2
     ws: 8.8.1
@@ -2878,7 +2878,7 @@ __metadata:
     node-cache: ^5.1.2
     rimraf: 3.0.2
     ts-jest: 29.0.3
-    typescript: 4.4.4
+    typescript: 4.8.4
   languageName: unknown
   linkType: soft
 
@@ -2905,7 +2905,7 @@ __metadata:
     sanitize-filename: ^1.6.3
     truncate-utf8-bytes: ^1.0.2
     ts-jest: 29.0.3
-    typescript: 4.4.4
+    typescript: 4.8.4
   languageName: unknown
   linkType: soft
 
@@ -2921,7 +2921,7 @@ __metadata:
     jest: 29.1.1
     rimraf: 3.0.2
     ts-jest: 29.0.3
-    typescript: 4.4.4
+    typescript: 4.8.4
   languageName: unknown
   linkType: soft
 
@@ -2949,7 +2949,7 @@ __metadata:
     "@graphql-typed-document-node/core": ^3.1.0
     graphql: ^15.6.0
     rimraf: 3.0.2
-    typescript: 4.4.4
+    typescript: 4.8.4
   languageName: unknown
   linkType: soft
 
@@ -2960,7 +2960,7 @@ __metadata:
     "@graphql-typed-document-node/core": ^3.1.0
     graphql: ^15.6.0
     rimraf: 3.0.2
-    typescript: 4.4.4
+    typescript: 4.8.4
   languageName: unknown
   linkType: soft
 
@@ -2971,7 +2971,7 @@ __metadata:
     "@graphql-typed-document-node/core": ^3.1.0
     graphql: ^15.6.0
     rimraf: 3.0.2
-    typescript: 4.4.4
+    typescript: 4.8.4
   languageName: unknown
   linkType: soft
 
@@ -2987,7 +2987,7 @@ __metadata:
     lodash: 4.17.21
     rimraf: 3.0.2
     ts-jest: 29.0.3
-    typescript: 4.4.4
+    typescript: 4.8.4
   languageName: unknown
   linkType: soft
 
@@ -3005,7 +3005,7 @@ __metadata:
     rimraf: 3.0.2
     rxjs: ^7.5.6
     ts-jest: 29.0.3
-    typescript: 4.4.4
+    typescript: 4.8.4
   languageName: unknown
   linkType: soft
 
@@ -3111,7 +3111,7 @@ __metadata:
     serve: ^14.0.0
     sucrase: ^3.20.1
     tsconfig-paths-webpack-plugin: 3.5.2
-    typescript: 4.4.4
+    typescript: 4.8.4
     url-join: ^4.0.1
     urql: ^3.0.3
     use-constant: ^1.1.0
@@ -24046,43 +24046,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:4.4.4":
-  version: 4.4.4
-  resolution: "typescript@npm:4.4.4"
+"typescript@npm:4.8.4, typescript@npm:^4.6.4":
+  version: 4.8.4
+  resolution: "typescript@npm:4.8.4"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 89ecb8436bb48ef5594d49289f5f89103071716b6e4844278f4fb3362856e31203e187a9c76d205c3f0b674d221a058fd28310dbcbcf5d95e9a57229bb5203f1
+  checksum: 3e4f061658e0c8f36c820802fa809e0fd812b85687a9a2f5430bc3d0368e37d1c9605c3ce9b39df9a05af2ece67b1d844f9f6ea8ff42819f13bcb80f85629af0
   languageName: node
   linkType: hard
 
-"typescript@npm:^4.6.4":
-  version: 4.7.4
-  resolution: "typescript@npm:4.7.4"
+"typescript@patch:typescript@4.8.4#~builtin<compat/typescript>, typescript@patch:typescript@^4.6.4#~builtin<compat/typescript>":
+  version: 4.8.4
+  resolution: "typescript@patch:typescript@npm%3A4.8.4#~builtin<compat/typescript>::version=4.8.4&hash=a1c5e5"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 5750181b1cd7e6482c4195825547e70f944114fb47e58e4aa7553e62f11b3f3173766aef9c281783edfd881f7b8299cf35e3ca8caebe73d8464528c907a164df
-  languageName: node
-  linkType: hard
-
-"typescript@patch:typescript@4.4.4#~builtin<compat/typescript>":
-  version: 4.4.4
-  resolution: "typescript@patch:typescript@npm%3A4.4.4#~builtin<compat/typescript>::version=4.4.4&hash=a1c5e5"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 3d1b04449662193544b81d055479d03b4c5dca95f1a82f8922596f089d894c9fefbe16639d1d9dfe26a7054419645530cef44001bc17aed1fe1eb3c237e9b3c7
-  languageName: node
-  linkType: hard
-
-"typescript@patch:typescript@^4.6.4#~builtin<compat/typescript>":
-  version: 4.7.4
-  resolution: "typescript@patch:typescript@npm%3A4.7.4#~builtin<compat/typescript>::version=4.7.4&hash=a1c5e5"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 9096d8f6c16cb80ef3bf96fcbbd055bf1c4a43bd14f3b7be45a9fbe7ada46ec977f604d5feed3263b4f2aa7d4c7477ce5f9cd87de0d6feedec69a983f3a4f93e
+  checksum: 563a0ef47abae6df27a9a3ab38f75fc681f633ccf1a3502b1108e252e187787893de689220f4544aaf95a371a4eb3141e4a337deb9895de5ac3c1ca76430e5f0
   languageName: node
   linkType: hard
 
