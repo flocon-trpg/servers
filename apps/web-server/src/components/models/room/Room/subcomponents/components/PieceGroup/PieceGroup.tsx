@@ -5,6 +5,7 @@ import { animated, useSpring } from '@react-spring/konva';
 import { KonvaNodeEvents } from 'react-konva';
 import { DragEndResult, PixelPosition, PixelSize } from '../../utils/positionAndSizeAndRect';
 import { KonvaEventObject, NodeConfig } from 'konva/lib/Node';
+import { AnimatedGroupAsAnyProps } from '@/components/ui/AnimatedKonvaAsAnyProps/AnimatedKonvaAsAnyProps';
 
 const minimalImageSize = 10;
 
@@ -160,9 +161,9 @@ export const PieceGroup: React.FC<PropsWithChildren<PieceGroupProps>> = ({
 
     return (
         <>
-            <animated.Group {...springStyle} {...konvaGroupStyle} ref={groupRef}>
+            <AnimatedGroupAsAnyProps {...springStyle} {...konvaGroupStyle} ref={groupRef}>
                 {children}
-            </animated.Group>
+            </AnimatedGroupAsAnyProps>
             {isSelected && (
                 <ReactKonva.Transformer
                     ref={transformerRef}

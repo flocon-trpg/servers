@@ -71,6 +71,7 @@ import { KonvaEventObject } from 'konva/lib/Node';
 import { Vector2d } from 'konva/lib/types';
 import { useShapePieces } from '../../hooks/useShapePieces';
 import { ColorPickerButton } from '@/components/ui/ColorPickerButton/ColorPickerButton';
+import { AnimatedImageAsAnyProps } from '@/components/ui/AnimatedKonvaAsAnyProps/AnimatedKonvaAsAnyProps';
 
 type BoardState = OmitVersion<State<typeof boardTemplate>>;
 type PieceState = OmitVersion<State<typeof pieceTemplate>>;
@@ -664,7 +665,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     }
 
     const backgroundImageKonva = backgroundImageTransition(({ opacity, image }) => (
-        <animated.Image
+        <AnimatedImageAsAnyProps
             opacity={opacity}
             image={image}
             scaleX={Math.max(board.backgroundImageZoom, 0)}
