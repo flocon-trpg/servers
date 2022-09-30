@@ -1,7 +1,7 @@
 import React from 'react';
 import { success, useImageFromFilePath } from '@/hooks/imageHooks';
 import * as ReactKonva from 'react-konva';
-import { animated, useSpring, useTransition } from '@react-spring/konva';
+import { useSpring, useTransition } from '@react-spring/konva';
 import { RoomPublicMessageFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { interval } from 'rxjs';
 import { isDeleted, toText as toTextCore } from '../../../../../utils/message';

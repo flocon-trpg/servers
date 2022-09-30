@@ -1,6 +1,6 @@
 import React from 'react';
 import * as ReactKonva from 'react-konva';
-import { animated, useSpring } from '@react-spring/konva';
+import { useSpring } from '@react-spring/konva';
 import {
     State,
     dicePieceStrIndexes,

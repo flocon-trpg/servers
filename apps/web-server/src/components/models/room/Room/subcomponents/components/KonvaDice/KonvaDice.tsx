@@ -1,6 +1,6 @@
 import React from 'react';
 import * as ReactKonva from 'react-konva';
-import { animated, useTransition } from '@react-spring/konva';
+import { useTransition } from '@react-spring/konva';
 import { success, useImage } from '@/hooks/imageHooks';
 import { AnimatedImageAsAnyProps } from '@/components/ui/AnimatedKonvaAsAnyProps/AnimatedKonvaAsAnyProps';
 

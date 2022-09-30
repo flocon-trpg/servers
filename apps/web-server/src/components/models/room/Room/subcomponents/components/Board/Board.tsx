@@ -22,7 +22,7 @@ import {
     DiceOrShapeOrStringPiece,
     shapePiece,
 } from './subcomponents/components/CanvasOrDiceOrStringPiece/CanvasOrDiceOrStringPiece';
-import { animated, useTransition } from '@react-spring/konva';
+import { useTransition } from '@react-spring/konva';
 import { useCharacterPieces } from '../../hooks/useCharacterPieces';
 import { usePortraitPieces } from '../../hooks/usePortraitPieces';
 import { useDicePieces } from '../../hooks/useDicePieces';
@@ -1165,6 +1165,9 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                         <InputNumber
                                             value={boardConfig.gridLineTension}
                                             onChange={e => {
+                                                if (e == null) {
+                                                    return;
+                                                }
                                                 if (boardIdToShow == null) {
                                                     return;
                                                 }
