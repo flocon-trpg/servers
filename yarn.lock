@@ -16231,9 +16231,9 @@ __metadata:
   linkType: hard
 
 "konva@npm:^8.3.9":
-  version: 8.3.11
-  resolution: "konva@npm:8.3.11"
-  checksum: 82b881d699455c077eb99a606845b7ed20aec4e31d4cb73163b5bb37b2b937e54b78c1bff55fe1a34e9cd10b38d8f3c0787faac47c211cad40a0e4c71630f7e7
+  version: 8.3.12
+  resolution: "konva@npm:8.3.12"
+  checksum: 2c794232571252e34da411a265d0d2018f2ba4c863c16eddf29aadb2ec694a2bcb342127a527928c96bb6a0355b4b1a430ef9f16448a1865fc7941dc628bde39
   languageName: node
   linkType: hard
 
