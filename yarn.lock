@@ -14388,11 +14388,11 @@ __metadata:
   linkType: hard
 
 "io-ts@npm:^2.2.16":
-  version: 2.2.17
-  resolution: "io-ts@npm:2.2.17"
+  version: 2.2.18
+  resolution: "io-ts@npm:2.2.18"
   peerDependencies:
     fp-ts: ^2.5.0
-  checksum: 51e8f2f3487a41e5f327be1529e63e6da042317a9153a7bfa4f799dc6a7332938b656ea9ca02ccdda391dc4e43571d44f9899dba0ef32e2c19bc6a6153dc5cac
+  checksum: 8b5a22b0ccc0dd24a2520d9dc27095e144b86426c7cc5ce7a406d1f9cbbde2aa450632e6f3fb435817b6b56ecebea434b049feb2c6752fce0b810787295bf15f
   languageName: node
   linkType: hard
 
