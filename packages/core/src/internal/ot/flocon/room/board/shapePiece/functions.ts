@@ -3,7 +3,7 @@ import * as RecordOperation from '../../../../util/recordOperation';
 import { ServerTransform } from '../../../../util/type';
 import { isIdRecord } from '../../../../util/record';
 import { Result } from '@kizahasi/result';
-import * as BoardPosition from '../../../boardPosition/functions';
+import * as Piece from '../../../piece/functions';
 import {
     RequestedBy,
     anyValue,
@@ -42,7 +42,7 @@ export const serverTransform =
             return Result.ok(undefined);
         }
 
-        const piece = BoardPosition.serverTransform({
+        const piece = Piece.serverTransform({
             prevState: { ...prevState, $v: undefined, $r: undefined },
             currentState: { ...currentState, $v: undefined, $r: undefined },
             clientOperation: { ...clientOperation, $v: undefined, $r: undefined },
