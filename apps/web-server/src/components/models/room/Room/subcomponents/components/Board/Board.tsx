@@ -22,7 +22,7 @@ import {
     DiceOrShapeOrStringPiece,
     shapePiece,
 } from './subcomponents/components/CanvasOrDiceOrStringPiece/CanvasOrDiceOrStringPiece';
-import { animated, useTransition } from '@react-spring/konva';
+import { useTransition } from '@react-spring/konva';
 import { useCharacterPieces } from '../../hooks/useCharacterPieces';
 import { usePortraitPieces } from '../../hooks/usePortraitPieces';
 import { useDicePieces } from '../../hooks/useDicePieces';
@@ -71,6 +71,7 @@ import { KonvaEventObject } from 'konva/lib/Node';
 import { Vector2d } from 'konva/lib/types';
 import { useShapePieces } from '../../hooks/useShapePieces';
 import { ColorPickerButton } from '@/components/ui/ColorPickerButton/ColorPickerButton';
+import { AnimatedImageAsAnyProps } from '@/components/ui/AnimatedKonvaAsAnyProps/AnimatedKonvaAsAnyProps';
 
 type BoardState = OmitVersion<State<typeof boardTemplate>>;
 type PieceState = OmitVersion<State<typeof pieceTemplate>>;
@@ -664,7 +665,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     }
 
     const backgroundImageKonva = backgroundImageTransition(({ opacity, image }) => (
-        <animated.Image
+        <AnimatedImageAsAnyProps
             opacity={opacity}
             image={image}
             scaleX={Math.max(board.backgroundImageZoom, 0)}
@@ -1164,6 +1165,9 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                         <InputNumber
                                             value={boardConfig.gridLineTension}
                                             onChange={e => {
+                                                if (e == null) {
+                                                    return;
+                                                }
                                                 if (boardIdToShow == null) {
                                                     return;
                                                 }

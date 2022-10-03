@@ -1,6 +1,6 @@
 import React from 'react';
 import * as ReactKonva from 'react-konva';
-import { animated, useSpring } from '@react-spring/konva';
+import { useSpring } from '@react-spring/konva';
 import {
     State,
     dicePieceStrIndexes,
@@ -16,6 +16,10 @@ import { usePrevious } from 'react-use';
 import { PieceGroup, PieceGroupProps } from '../../../../PieceGroup/PieceGroup';
 import { PixelSize } from '../../../../../utils/positionAndSizeAndRect';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
+import {
+    AnimatedRectAsAnyProps,
+    AnimatedTextAsAnyProps,
+} from '@/components/ui/AnimatedKonvaAsAnyProps/AnimatedKonvaAsAnyProps';
 
 type DieValueState = State<typeof dieValueTemplate>;
 type DicePieceState = State<typeof dicePieceTemplate>;
@@ -113,7 +117,7 @@ const StringPieceContent: React.FC<StringPieceContentProps> = (props: StringPiec
 
     return (
         <>
-            <animated.Rect
+            <AnimatedRectAsAnyProps
                 {...rectSpringProps}
                 y={0}
                 width={props.w}
@@ -123,7 +127,7 @@ const StringPieceContent: React.FC<StringPieceContentProps> = (props: StringPiec
                 cornerRadius={5}
             />
             {/* TODO: fontSizeの決め方が適当。fontSizeはユーザーが自由に変更できるようにするべき */}
-            <animated.Text
+            <AnimatedTextAsAnyProps
                 {...textSpringProps}
                 text={text ?? '?'}
                 y={0}

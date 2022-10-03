@@ -1,8 +1,9 @@
 import { Atom, atom } from 'jotai';
-import { Scope } from 'jotai/core/atom';
 import { useAtomValue } from 'jotai/utils';
 import React from 'react';
 import { useLatest } from 'react-use';
+
+type Scope = symbol | string | number;
 
 type Options = {
     scope?: Scope;

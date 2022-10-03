@@ -35,7 +35,7 @@ describe('multiKeyMap', () => {
             replacer.mockReturnValueOnce('value1');
             const replaced = actual.replace(key, replacer);
             expect(replaced).toBe('value1');
-            expect(replacer.mock.lastCall[0]).toBeUndefined();
+            expect(replacer.mock.lastCall?.[0]).toBeUndefined();
             expect(actual.get(key)).toBe('value1');
         }
 
@@ -44,7 +44,7 @@ describe('multiKeyMap', () => {
             replacer.mockReturnValueOnce('value2');
             const replaced = actual.replace(key, replacer);
             expect(replaced).toBe('value2');
-            expect(replacer.mock.lastCall[0]).toBe('value1');
+            expect(replacer.mock.lastCall?.[0]).toBe('value1');
             expect(actual.get(key)).toBe('value2');
         }
 
@@ -53,7 +53,7 @@ describe('multiKeyMap', () => {
             replacer.mockReturnValueOnce(undefined);
             const replaced = actual.replace(key, replacer);
             expect(replaced).toBeUndefined();
-            expect(replacer.mock.lastCall[0]).toBe('value2');
+            expect(replacer.mock.lastCall?.[0]).toBe('value2');
             expect(actual.get(key)).toBeUndefined();
         }
     });
@@ -193,7 +193,7 @@ describe('multiKeyMap', () => {
         const replacer = jest.fn<string | undefined, [string | undefined]>();
         replacer.mockReturnValueOnce('/a/b/c(2)');
         cloned.replace(keyToReplace, replacer);
-        expect(replacer.mock.lastCall[0]).toBe('/a/b/c(1)');
+        expect(replacer.mock.lastCall?.[0]).toBe('/a/b/c(1)');
         expect(source.get(keyToReplace)).toBe('/a/b/c');
         expect(cloned.get(keyToReplace)).toBe('/a/b/c(2)');
         expect(cloned.size).toBe(4);

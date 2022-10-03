@@ -58,7 +58,8 @@ import { joinPath } from '@flocon-trpg/core';
 import { mergeStyles } from '@/utils/mergeStyles';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import { Result } from '@kizahasi/result';
-import { Scope } from 'jotai/core/atom';
+
+type Scope = symbol | string | number;
 
 export const image = 'image';
 export const sound = 'sound';

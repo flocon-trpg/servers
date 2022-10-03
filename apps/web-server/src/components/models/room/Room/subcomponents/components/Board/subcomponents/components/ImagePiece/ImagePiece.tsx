@@ -1,7 +1,7 @@
 import React from 'react';
 import { success, useImageFromFilePath } from '@/hooks/imageHooks';
 import * as ReactKonva from 'react-konva';
-import { animated, useSpring, useTransition } from '@react-spring/konva';
+import { useSpring, useTransition } from '@react-spring/konva';
 import { RoomPublicMessageFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { interval } from 'rxjs';
 import { isDeleted, toText as toTextCore } from '../../../../../utils/message';
@@ -9,6 +9,10 @@ import { State, filePathTemplate } from '@flocon-trpg/core';
 import { FilePath } from '@/utils/file/filePath';
 import { PieceGroup, PieceGroupProps } from '../../../../PieceGroup/PieceGroup';
 import { NameLabel } from './subcomponents/NameLabel';
+import {
+    AnimatedGroupAsAnyProps,
+    AnimatedImageAsAnyProps,
+} from '@/components/ui/AnimatedKonvaAsAnyProps/AnimatedKonvaAsAnyProps';
 
 type CoreFilePath = State<typeof filePathTemplate>;
 
@@ -73,7 +77,7 @@ const BalloonCore: React.FC<BalloonCoreProps> = ({
         }
         return transitions((style, item) => {
             return (
-                <animated.Group {...style}>
+                <AnimatedGroupAsAnyProps {...style}>
                     {
                         <ReactKonva.Label
                             x={width / 2}
@@ -108,19 +112,19 @@ const BalloonCore: React.FC<BalloonCoreProps> = ({
                             />
                         </ReactKonva.Label>
                     }
-                </animated.Group>
+                </AnimatedGroupAsAnyProps>
             );
         });
     };
 
     return (
-        <animated.Group x={x} y={y} width={width} height={balloonCoreTextHeight * 5}>
+        <AnimatedGroupAsAnyProps x={x} y={y} width={width} height={balloonCoreTextHeight * 5}>
             {createLabel(0)}
             {createLabel(1)}
             {createLabel(2)}
             {createLabel(3)}
             {createLabel(4)}
-        </animated.Group>
+        </AnimatedGroupAsAnyProps>
     );
 };
 
@@ -269,7 +273,7 @@ export const ImagePiece: React.FC<Props> = (props: Props) => {
     return (
         <>
             <PieceGroup {...props}>
-                <animated.Image
+                <AnimatedImageAsAnyProps
                     {...opacitySpringProps}
                     image={imageElement}
                     x={0}
