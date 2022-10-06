@@ -13,7 +13,6 @@ import sanitize from 'sanitize-filename';
 import multer from 'multer';
 import sharp from 'sharp';
 import { File } from './graphql+mikro-orm/entities/file/mikro-orm';
-import { getUserIfEntry } from './graphql+mikro-orm/resolvers/utils/helpers';
 import { Reference } from '@mikro-orm/core';
 import { AppConsole } from './utils/appConsole';
 import { ensureDir } from 'fs-extra';
@@ -31,6 +30,7 @@ import { EMBUPLOADER_PATH } from './env';
 import { Html } from './html/Html';
 import { parse } from 'graphql';
 import { createServer as createHttpServer } from 'http';
+import { getUserIfEntry } from './graphql+mikro-orm/getUserIfEntry';
 
 const set401Status = (res: express.Response) => {
     return res.status(401).setHeader('WWW-Authenticate', 'Bearer');

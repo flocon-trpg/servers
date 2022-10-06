@@ -1,10 +1,7 @@
 import { ServerConfig } from './config/types';
 import { BaasType } from './enums/BaasType';
-import {
-    NotSignIn,
-    checkSignIn,
-    getUserIfEntry,
-} from './graphql+mikro-orm/resolvers/utils/helpers';
+import { getUserIfEntry } from './graphql+mikro-orm/getUserIfEntry';
+import { NotSignIn, checkSignIn } from './graphql+mikro-orm/resolvers/utils';
 import { DecodedIdToken, ResolverContext } from './graphql+mikro-orm/utils/Contexts';
 
 // configでadminに指定されているユーザー。現状ではentryも必要としているが、しなくてもOKという仕様に変更するかもしれない。

@@ -24,7 +24,6 @@ import { WritingMessageStatusInputType } from '../enums/WritingMessageStatusInpu
 import { WritingMessageStatusType } from '../enums/WritingMessageStatusType';
 import { PieceLogType } from '../enums/PieceLogType';
 import { BaasType } from '../enums/BaasType';
-import { GetFileItemsFailureType } from '../enums/GetFileItemsFailureType';
 import { CreateRoomFailureType } from '../enums/CreateRoomFailureType';
 import { GetRoomsListFailureType } from '../enums/GetRoomsListFailureType';
 import { ResetRoomMessagesFailureType } from '../enums/ResetRoomMessagesFailureType';
@@ -67,9 +66,6 @@ export const registerEnumTypes = (): void => {
     });
     registerEnumType(FileSourceType, {
         name: 'FileSourceType',
-    });
-    registerEnumType(GetFileItemsFailureType, {
-        name: 'GetFileItemsFailureType',
     });
     registerEnumType(GetRoomConnectionFailureType, {
         name: 'GetRoomConnectionFailureType',

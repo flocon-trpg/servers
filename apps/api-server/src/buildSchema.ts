@@ -9,13 +9,12 @@ import {
 import path from 'path';
 import { GraphQLSchema } from 'graphql';
 import { registerEnumTypes } from './graphql+mikro-orm/registerEnumTypes';
-import { RoomResolver } from './graphql+mikro-orm/resolvers/rooms/RoomResolver';
-import { MainResolver } from './graphql+mikro-orm/resolvers/MainResolver';
 import { PubSubOptions } from 'graphql-subscriptions';
 import { ResolverContext } from './graphql+mikro-orm/utils/Contexts';
-import { NotSignIn } from './graphql+mikro-orm/resolvers/utils/helpers';
 import { getRolesAndCheckEntry } from './roles';
 import { ServerConfig } from './config/types';
+import { allResolvers } from './graphql+mikro-orm/resolvers/allResolvers';
+import { NotSignIn } from './graphql+mikro-orm/resolvers/utils';
 
 export const noAuthCheck = 'noAuthCheck';
 
@@ -48,9 +47,8 @@ interface EmitSchemaFileOptions extends Partial<PrintSchemaOptions> {
     path?: string;
 }
 
-const resolvers = [RoomResolver, MainResolver] as const;
 const optionBase: BuildSchemaOptions = {
-    resolvers,
+    resolvers: allResolvers,
 };
 
 const emitSchemaFileOptions: EmitSchemaFileOptions = {
