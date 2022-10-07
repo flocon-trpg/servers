@@ -8,13 +8,13 @@ import {
 } from 'type-graphql';
 import path from 'path';
 import { GraphQLSchema } from 'graphql';
-import { registerEnumTypes } from './graphql+mikro-orm/registerEnumTypes';
+import { registerEnumTypes } from './graphql/registerEnumTypes';
 import { PubSubOptions } from 'graphql-subscriptions';
-import { ResolverContext } from './graphql+mikro-orm/utils/Contexts';
-import { getRolesAndCheckEntry } from './roles';
+import { getRolesAndCheckEntry } from './utils/roles';
 import { ServerConfig } from './config/types';
-import { allResolvers } from './graphql+mikro-orm/resolvers/allResolvers';
-import { NotSignIn } from './graphql+mikro-orm/resolvers/utils';
+import { allResolvers } from './graphql/resolvers/allResolvers';
+import { NotSignIn } from './graphql/resolvers/utils/utils';
+import { ResolverContext } from './types';
 
 export const noAuthCheck = 'noAuthCheck';
 

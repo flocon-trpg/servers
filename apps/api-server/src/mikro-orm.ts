@@ -5,10 +5,10 @@ import {
     IDatabaseDriver,
     LoggerNamespace,
 } from '@mikro-orm/core';
-import { File } from './graphql+mikro-orm/entities/file/mikro-orm';
-import { FileTag } from './graphql+mikro-orm/entities/fileTag/mikro-orm';
-import { Participant } from './graphql+mikro-orm/entities/participant/mikro-orm';
-import { Room, RoomOp } from './graphql+mikro-orm/entities/room/mikro-orm';
+import { File } from './entities/file/entity';
+import { FileTag } from './entities/fileTag/entity';
+import { Participant } from './entities/participant/entity';
+import { Room, RoomOp } from './entities/room/entity';
 import {
     DicePieceLog,
     RoomPrvMsg,
@@ -16,8 +16,8 @@ import {
     RoomPubMsg,
     RoomSe,
     StringPieceLog,
-} from './graphql+mikro-orm/entities/roomMessage/mikro-orm';
-import { User } from './graphql+mikro-orm/entities/user/mikro-orm';
+} from './entities/roomMessage/entity';
+import { User } from './entities/user/entity';
 import * as t from 'io-ts';
 import { sqliteDatabase } from './config/types';
 

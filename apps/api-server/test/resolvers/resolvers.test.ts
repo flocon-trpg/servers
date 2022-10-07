@@ -1,7 +1,7 @@
-import * as $MikroORM from '../../src/graphql+mikro-orm/entities/room/mikro-orm';
-import { EM } from '../../src/utils/types';
-import { User as User$MikroORM } from '../../src/graphql+mikro-orm/entities/user/mikro-orm';
-import { File as File$MikroORM } from '../../src/graphql+mikro-orm/entities/file/mikro-orm';
+import * as $MikroORM from '../../src/entities/room/entity';
+import { EM } from '../../src/types';
+import { User as User$MikroORM } from '../../src/entities/user/entity';
+import { File as File$MikroORM } from '../../src/entities/file/entity';
 import { DbConfig, createOrm, createTestServer } from './utils/createTestServer';
 import { Resources } from './utils/resources';
 import {
