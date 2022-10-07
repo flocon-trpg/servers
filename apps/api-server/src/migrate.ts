@@ -9,7 +9,7 @@ import {
     loadMigrationDown,
     loadMigrationUpOrCheck,
 } from './utils/commandLineArgs';
-import { ORM } from './utils/types';
+import { ORM } from './types';
 
 const check = 'check';
 const create = 'create';
