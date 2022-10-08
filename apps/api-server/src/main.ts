@@ -80,10 +80,12 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
             projectId: serverConfig.firebaseProjectId,
         });
     } else {
+        const projectId =
+            serverConfig.firebaseAdminSecret.project_id ?? serverConfig.firebaseProjectId;
         admin.initializeApp({
-            projectId: serverConfig.firebaseAdminSecret.project_id,
+            projectId,
             credential: admin.credential.cert({
-                projectId: serverConfig.firebaseAdminSecret.project_id,
+                projectId,
                 clientEmail: serverConfig.firebaseAdminSecret.client_email,
                 privateKey: serverConfig.firebaseAdminSecret.private_key,
             }),
