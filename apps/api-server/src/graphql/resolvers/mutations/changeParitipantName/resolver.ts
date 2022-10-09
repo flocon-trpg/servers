@@ -12,10 +12,7 @@ import {
     UseMiddleware,
 } from 'type-graphql';
 import { ENTRY } from '../../../../utils/roles';
-import { queueLimitReached } from '../../../../utils/promiseQueue';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import { serverTooBusyMessage } from '../../messages';
-import { RoomEventPayload } from '../../subsciptions/roomEvent/payload';
 import {
     ensureAuthorizedUser,
     findRoomAndMyParticipant,
@@ -25,6 +22,7 @@ import {
 import { convertToMaxLength100String } from '../../../../utils/convertToMaxLength100String';
 import { ChangeParticipantNameFailureType } from '../../../../enums/ChangeParticipantNameFailureType';
 import { ResolverContext } from '../../../../types';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 @ArgsType()
 class ChangeParticipantNameArgs {
@@ -45,69 +43,49 @@ class ChangeParticipantNameResult {
 export class ChangeParticipantNameResolver {
     @Mutation(() => ChangeParticipantNameResult)
     @Authorized(ENTRY)
-    @UseMiddleware(RateLimitMiddleware(2))
+    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async changeParticipantName(
         @Args() args: ChangeParticipantNameArgs,
         @Ctx() context: ResolverContext,
         @PubSub() pubSub: PubSubEngine
     ): Promise<ChangeParticipantNameResult> {
-        const queue = async (): Promise<{
-            result: ChangeParticipantNameResult;
-            payload: RoomEventPayload | undefined;
-        }> => {
-            const em = context.em;
-            const authorizedUserUid = ensureAuthorizedUser(context).userUid;
-            const findResult = await findRoomAndMyParticipant({
-                em,
-                userUid: authorizedUserUid,
-                roomId: args.roomId,
-            });
-            if (findResult == null) {
-                return {
-                    result: {
-                        failureType: ChangeParticipantNameFailureType.NotFound,
-                    },
-                    payload: undefined,
-                };
-            }
-            const { room, me } = findResult;
-            const participantUserUids = findResult.participantIds();
-            // me.role == nullのときは弾かないようにしてもいいかも？
-            if (me == null || me.role == null) {
-                return {
-                    result: {
-                        failureType: ChangeParticipantNameFailureType.NotParticipant,
-                    },
-                    payload: undefined,
-                };
-            }
-
-            const { payload } = await operateParticipantAndFlush({
-                em,
-                myUserUid: authorizedUserUid,
-                update: {
-                    name: { newValue: convertToMaxLength100String(args.newName) },
-                },
-                room,
-                roomHistCount: context.serverConfig.roomHistCount,
-                participantUserUids,
-            });
-
+        const em = context.em;
+        const authorizedUserUid = ensureAuthorizedUser(context).userUid;
+        const findResult = await findRoomAndMyParticipant({
+            em,
+            userUid: authorizedUserUid,
+            roomId: args.roomId,
+        });
+        if (findResult == null) {
             return {
-                result: {
-                    failureType: undefined,
-                },
-                payload: payload,
+                failureType: ChangeParticipantNameFailureType.NotFound,
             };
-        };
+        }
+        const { room, me } = findResult;
+        const participantUserUids = findResult.participantIds();
+        // me.role == nullのときは弾かないようにしてもいいかも？
+        if (me == null || me.role == null) {
+            return {
+                failureType: ChangeParticipantNameFailureType.NotParticipant,
+            };
+        }
 
-        const result = await context.promiseQueue.next(queue);
-        if (result.type === queueLimitReached) {
-            throw serverTooBusyMessage;
+        const { payload } = await operateParticipantAndFlush({
+            em,
+            myUserUid: authorizedUserUid,
+            update: {
+                name: { newValue: convertToMaxLength100String(args.newName) },
+            },
+            room,
+            roomHistCount: context.serverConfig.roomHistCount,
+            participantUserUids,
+        });
+
+        if (payload != null) {
+            await publishRoomEvent(pubSub, payload);
         }
-        if (result.value.payload != null) {
-            await publishRoomEvent(pubSub, result.value.payload);
-        }
-        return result.value.result;
+        return {
+            failureType: undefined,
+        };
     }
 }

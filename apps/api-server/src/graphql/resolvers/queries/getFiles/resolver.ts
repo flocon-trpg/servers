@@ -17,6 +17,7 @@ import { File } from '../../../../entities/file/entity';
 import { FileListType } from '../../../../enums/FileListType';
 import { ensureAuthorizedUser } from '../../utils/utils';
 import { ResolverContext } from '../../../../types';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 @InputType()
 class GetFilesInput {
@@ -37,7 +38,7 @@ class GetFilesResult {
 export class GetFilesResolver {
     @Query(() => GetFilesResult)
     @Authorized(ENTRY)
-    @UseMiddleware(RateLimitMiddleware(2))
+    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async getFiles(
         @Arg('input') input: GetFilesInput,
         @Ctx() context: ResolverContext

@@ -1,4 +1,3 @@
-import { Result } from '@kizahasi/result';
 import {
     Args,
     ArgsType,
@@ -16,9 +15,7 @@ import {
     createUnionType,
 } from 'type-graphql';
 import { ENTRY } from '../../../../utils/roles';
-import { queueLimitReached } from '../../../../utils/promiseQueue';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import { serverTooBusyMessage } from '../../messages';
 import * as RoomAsListItemGlobal from '../../../../entities-graphql/roomAsListItem';
 import { RoomAsListItem, RoomOperation } from '../../../objects/room';
 import { GlobalRoom } from '../../../../entities-graphql/room';
@@ -42,12 +39,6 @@ import { MaxLength } from 'class-validator';
 import { SendTo } from '../../types';
 import { OperateRoomFailureType } from '../../../../enums/OperateRoomFailureType';
 import {
-    ApplyError,
-    ComposeAndTransformError,
-    NonEmptyString,
-    PositiveInt,
-} from '@kizahasi/ot-string';
-import {
     DicePieceLog as DicePieceLog$MikroORM,
     StringPieceLog as StringPieceLog$MikroORM,
 } from '../../../../entities/roomMessage/entity';
@@ -56,6 +47,7 @@ import {
     StringPieceLog as StringPieceLogNameSpace,
 } from '../../../../entities-graphql/roomMessage';
 import { ResolverContext } from '../../../../types';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 type RoomState = State<typeof roomTemplate>;
 type RoomTwoWayOperation = TwoWayOperation<typeof roomTemplate>;
@@ -168,190 +160,169 @@ async function operateCore({
 }): Promise<OperateCoreResult> {
     // Spectatorであっても自分の名前などはoperateで変更する必要があるため、Spectatorならば無条件で弾くという手法は使えない
 
-    const queue = async (): Promise<
-        Result<
-            OperateCoreResult,
-            | string
-            | ApplyError<PositiveInt>
-            | ComposeAndTransformError<NonEmptyString, PositiveInt>
-            | ComposeAndTransformError<PositiveInt, NonEmptyString>
-            | ComposeAndTransformError<NonEmptyString, NonEmptyString>
-        >
-    > => {
-        const em = context.em;
-        const authorizedUserUid = ensureAuthorizedUser(context).userUid;
-        const findResult = await findRoomAndMyParticipant({
-            em,
-            userUid: authorizedUserUid,
-            roomId: args.id,
-        });
-        if (findResult == null) {
-            return Result.ok({
-                type: 'failure',
-                result: { failureType: OperateRoomFailureType.NotFound },
-            });
-        }
-        const { room, me, roomState } = findResult;
-        if (me === undefined) {
-            return Result.ok({
-                type: 'nonJoined',
-                result: {
-                    roomAsListItem: await RoomAsListItemGlobal.stateToGraphQL({
-                        roomEntity: room,
-                        myUserUid: authorizedUserUid,
-                    }),
-                },
-            });
-        }
-        const participantUserUids = findResult.participantIds();
-        const clientOperation = parseUpOperation(args.operation.valueJson);
-
-        const downOperation = await GlobalRoom.MikroORM.ToGlobal.downOperationMany({
-            em,
-            roomId: room.id,
-            revisionRange: { from: args.prevRevision, expectedTo: room.revision },
-        });
-        if (downOperation.isError) {
-            return downOperation;
-        }
-
-        let prevState: RoomState = roomState;
-        let twoWayOperation: RoomTwoWayOperation | undefined = undefined;
-        if (downOperation.value !== undefined) {
-            const restoredRoom = restore(roomTemplate)({
-                nextState: roomState,
-                downOperation: downOperation.value,
-            });
-            if (restoredRoom.isError) {
-                return restoredRoom;
-            }
-            prevState = restoredRoom.value.prevState;
-            twoWayOperation = restoredRoom.value.twoWayOperation;
-        }
-
-        const transformed = serverTransform({ type: client, userUid: authorizedUserUid })({
-            prevState,
-            currentState: roomState,
-            clientOperation: clientOperation,
-            serverOperation: twoWayOperation,
-        });
-        if (transformed.isError) {
-            return transformed;
-        }
-        if (transformed.value === undefined) {
-            return Result.ok({ type: 'id', result: { requestId: args.requestId } });
-        }
-
-        const operation = transformed.value;
-        const prevRevision = room.revision;
-
-        const nextRoomState = await GlobalRoom.Global.applyToEntity({
-            em,
-            target: room,
-            prevState: roomState,
-            operation,
-        });
-
-        const logs = createLogs({ prevState: roomState, nextState: nextRoomState });
-        const dicePieceLogEntities: DicePieceLog$MikroORM[] = [];
-        logs?.dicePieceLogs.forEach(log => {
-            const entity = new DicePieceLog$MikroORM({
-                stateId: log.stateId,
-                room,
-                value: log.value,
-            });
-            dicePieceLogEntities.push(entity);
-            em.persist(entity);
-        });
-        const stringPieceLogEntities: StringPieceLog$MikroORM[] = [];
-        logs?.stringPieceLogs.forEach(log => {
-            const entity = new StringPieceLog$MikroORM({
-                stateId: log.stateId,
-                room,
-                value: log.value,
-            });
-            stringPieceLogEntities.push(entity);
-            em.persist(entity);
-        });
-
-        // GlobalRoom.Global.applyToEntityでcompleteUpdatedAtの更新は行っているため、ここで更新する必要はない
-        await em.flush();
-
-        await GlobalRoom.Global.cleanOldRoomOp({
-            em: em.fork(),
-            room,
-            roomHistCount: context.serverConfig.roomHistCount,
-        });
-        await em.flush();
-
-        const generateOperation = (deliverTo: string): RoomOperation => {
-            return {
-                __tstype: 'RoomOperation',
-                revisionTo: prevRevision + 1,
-                operatedBy: {
-                    userUid: authorizedUserUid,
-                    clientId: args.operation.clientId,
-                },
-                valueJson: GlobalRoom.Global.ToGraphQL.operation({
-                    prevState: roomState,
-                    nextState: nextRoomState,
-                    requestedBy: { type: client, userUid: deliverTo },
-                }),
-            };
+    const em = context.em;
+    const authorizedUserUid = ensureAuthorizedUser(context).userUid;
+    const findResult = await findRoomAndMyParticipant({
+        em,
+        userUid: authorizedUserUid,
+        roomId: args.id,
+    });
+    if (findResult == null) {
+        return {
+            type: 'failure',
+            result: { failureType: OperateRoomFailureType.NotFound },
         };
-        const roomOperationPayload: RoomOperationPayload = {
-            type: 'roomOperationPayload',
-            roomId: args.id,
-            generateOperation,
-        };
-        const result: OperateCoreResult = {
-            type: 'success',
-            sendTo: participantUserUids,
-            roomOperationPayload,
-            messageUpdatePayload: [
-                ...dicePieceLogEntities.map(
-                    log =>
-                        ({
-                            type: 'messageUpdatePayload',
-                            roomId: room.id,
-                            createdBy: undefined,
-                            visibleTo: undefined,
-                            value: DicePieceLogNameSpace.MikroORM.ToGraphQL.state(log),
-                        } as const)
-                ),
-                ...stringPieceLogEntities.map(
-                    log =>
-                        ({
-                            type: 'messageUpdatePayload',
-                            roomId: room.id,
-                            createdBy: undefined,
-                            visibleTo: undefined,
-                            value: StringPieceLogNameSpace.MikroORM.ToGraphQL.state(log),
-                        } as const)
-                ),
-            ],
+    }
+    const { room, me, roomState } = findResult;
+    if (me === undefined) {
+        return {
+            type: 'nonJoined',
             result: {
-                operation: generateOperation(authorizedUserUid),
+                roomAsListItem: await RoomAsListItemGlobal.stateToGraphQL({
+                    roomEntity: room,
+                    myUserUid: authorizedUserUid,
+                }),
             },
         };
+    }
+    const participantUserUids = findResult.participantIds();
+    const clientOperation = parseUpOperation(args.operation.valueJson);
 
-        return Result.ok(result);
+    const downOperation = await GlobalRoom.MikroORM.ToGlobal.downOperationMany({
+        em,
+        roomId: room.id,
+        revisionRange: { from: args.prevRevision, expectedTo: room.revision },
+    });
+    if (downOperation.isError) {
+        throw downOperation.error;
+    }
+
+    let prevState: RoomState = roomState;
+    let twoWayOperation: RoomTwoWayOperation | undefined = undefined;
+    if (downOperation.value !== undefined) {
+        const restoredRoom = restore(roomTemplate)({
+            nextState: roomState,
+            downOperation: downOperation.value,
+        });
+        if (restoredRoom.isError) {
+            throw restoredRoom.error;
+        }
+        prevState = restoredRoom.value.prevState;
+        twoWayOperation = restoredRoom.value.twoWayOperation;
+    }
+
+    const transformed = serverTransform({ type: client, userUid: authorizedUserUid })({
+        prevState,
+        currentState: roomState,
+        clientOperation: clientOperation,
+        serverOperation: twoWayOperation,
+    });
+    if (transformed.isError) {
+        throw transformed.error;
+    }
+    if (transformed.value === undefined) {
+        return { type: 'id', result: { requestId: args.requestId } };
+    }
+
+    const operation = transformed.value;
+    const prevRevision = room.revision;
+
+    const nextRoomState = await GlobalRoom.Global.applyToEntity({
+        em,
+        target: room,
+        prevState: roomState,
+        operation,
+    });
+
+    const logs = createLogs({ prevState: roomState, nextState: nextRoomState });
+    const dicePieceLogEntities: DicePieceLog$MikroORM[] = [];
+    logs?.dicePieceLogs.forEach(log => {
+        const entity = new DicePieceLog$MikroORM({
+            stateId: log.stateId,
+            room,
+            value: log.value,
+        });
+        dicePieceLogEntities.push(entity);
+        em.persist(entity);
+    });
+    const stringPieceLogEntities: StringPieceLog$MikroORM[] = [];
+    logs?.stringPieceLogs.forEach(log => {
+        const entity = new StringPieceLog$MikroORM({
+            stateId: log.stateId,
+            room,
+            value: log.value,
+        });
+        stringPieceLogEntities.push(entity);
+        em.persist(entity);
+    });
+
+    // GlobalRoom.Global.applyToEntityでcompleteUpdatedAtの更新は行っているため、ここで更新する必要はない
+    await em.flush();
+
+    await GlobalRoom.Global.cleanOldRoomOp({
+        em: em.fork(),
+        room,
+        roomHistCount: context.serverConfig.roomHistCount,
+    });
+    await em.flush();
+
+    const generateOperation = (deliverTo: string): RoomOperation => {
+        return {
+            __tstype: 'RoomOperation',
+            revisionTo: prevRevision + 1,
+            operatedBy: {
+                userUid: authorizedUserUid,
+                clientId: args.operation.clientId,
+            },
+            valueJson: GlobalRoom.Global.ToGraphQL.operation({
+                prevState: roomState,
+                nextState: nextRoomState,
+                requestedBy: { type: client, userUid: deliverTo },
+            }),
+        };
     };
-    const result = await context.promiseQueue.next(queue);
-    if (result.type === queueLimitReached) {
-        throw serverTooBusyMessage;
-    }
-    if (result.value.isError) {
-        throw result.value.error;
-    }
-    return result.value.value;
+    const roomOperationPayload: RoomOperationPayload = {
+        type: 'roomOperationPayload',
+        roomId: args.id,
+        generateOperation,
+    };
+    return {
+        type: 'success',
+        sendTo: participantUserUids,
+        roomOperationPayload,
+        messageUpdatePayload: [
+            ...dicePieceLogEntities.map(
+                log =>
+                    ({
+                        type: 'messageUpdatePayload',
+                        roomId: room.id,
+                        createdBy: undefined,
+                        visibleTo: undefined,
+                        value: DicePieceLogNameSpace.MikroORM.ToGraphQL.state(log),
+                    } as const)
+            ),
+            ...stringPieceLogEntities.map(
+                log =>
+                    ({
+                        type: 'messageUpdatePayload',
+                        roomId: room.id,
+                        createdBy: undefined,
+                        visibleTo: undefined,
+                        value: StringPieceLogNameSpace.MikroORM.ToGraphQL.state(log),
+                    } as const)
+            ),
+        ],
+        result: {
+            operation: generateOperation(authorizedUserUid),
+        },
+    };
 }
 
 @Resolver()
 export class OperateResolver {
     @Mutation(() => OperateRoomResult)
     @Authorized(ENTRY)
-    @UseMiddleware(RateLimitMiddleware(3))
+    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(3))
     public async operate(
         @Args() args: OperateArgs,
         @Ctx() context: ResolverContext,

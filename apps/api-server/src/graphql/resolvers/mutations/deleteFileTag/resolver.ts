@@ -4,6 +4,7 @@ import { FileTag } from '../../../../entities/fileTag/entity';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import { ensureAuthorizedUser } from '../../utils/utils';
 import { ResolverContext } from '../../../../types';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 @Resolver()
 export class DeleteFileTagResolver {
@@ -11,7 +12,7 @@ export class DeleteFileTagResolver {
         deprecationReason: 'Use screenname to group files by folders instead.',
     })
     @Authorized(ENTRY)
-    @UseMiddleware(RateLimitMiddleware(2))
+    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async deleteFileTag(
         @Ctx() context: ResolverContext,
         @Arg('tagId') tagId: string

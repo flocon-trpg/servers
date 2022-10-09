@@ -11,13 +11,12 @@ import {
     createUnionType,
 } from 'type-graphql';
 import { ENTRY } from '../../../../utils/roles';
-import { queueLimitReached } from '../../../../utils/promiseQueue';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import { serverTooBusyMessage } from '../../messages';
 import * as Room$MikroORM from '../../../../entities/room/entity';
 import { UpdateBookmarkFailureType } from '../../../../enums/UpdateBookmarkFailureType';
 import { ensureAuthorizedUser } from '../../utils/utils';
 import { ResolverContext } from '../../../../types';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 @ArgsType()
 class UpdateBookmarkArgs {
@@ -61,46 +60,38 @@ export const UpdateBookmarkResult = createUnionType({
 export class UpdateBookmarkResolver {
     @Mutation(() => UpdateBookmarkResult)
     @Authorized(ENTRY)
-    @UseMiddleware(RateLimitMiddleware(2))
+    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async updateBookmark(
         @Args() args: UpdateBookmarkArgs,
         @Ctx() context: ResolverContext
     ): Promise<typeof UpdateBookmarkResult> {
-        const queue = async (): Promise<typeof UpdateBookmarkResult> => {
-            const em = context.em;
-            const authorizedUser = ensureAuthorizedUser(context);
-            const room = await em.findOne(Room$MikroORM.Room, { id: args.roomId });
-            if (room == null) {
-                return {
-                    failureType: UpdateBookmarkFailureType.NotFound,
-                };
-            }
-            await authorizedUser.bookmarkedRooms.init();
-            const isBookmarked = authorizedUser.bookmarkedRooms.contains(room);
-            if (args.newValue) {
-                if (isBookmarked) {
-                    return { prevValue: isBookmarked, currentValue: isBookmarked };
-                }
-            } else {
-                if (!isBookmarked) {
-                    return { prevValue: isBookmarked, currentValue: isBookmarked };
-                }
-            }
-
-            if (args.newValue) {
-                authorizedUser.bookmarkedRooms.add(room);
-            } else {
-                authorizedUser.bookmarkedRooms.remove(room);
-            }
-
-            await em.flush();
-            return { prevValue: isBookmarked, currentValue: args.newValue };
-        };
-
-        const result = await context.promiseQueue.next(queue);
-        if (result.type === queueLimitReached) {
-            throw serverTooBusyMessage;
+        const em = context.em;
+        const authorizedUser = ensureAuthorizedUser(context);
+        const room = await em.findOne(Room$MikroORM.Room, { id: args.roomId });
+        if (room == null) {
+            return {
+                failureType: UpdateBookmarkFailureType.NotFound,
+            };
         }
-        return result.value;
+        await authorizedUser.bookmarkedRooms.init();
+        const isBookmarked = authorizedUser.bookmarkedRooms.contains(room);
+        if (args.newValue) {
+            if (isBookmarked) {
+                return { prevValue: isBookmarked, currentValue: isBookmarked };
+            }
+        } else {
+            if (!isBookmarked) {
+                return { prevValue: isBookmarked, currentValue: isBookmarked };
+            }
+        }
+
+        if (args.newValue) {
+            authorizedUser.bookmarkedRooms.add(room);
+        } else {
+            authorizedUser.bookmarkedRooms.remove(room);
+        }
+
+        await em.flush();
+        return { prevValue: isBookmarked, currentValue: args.newValue };
     }
 }

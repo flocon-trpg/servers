@@ -13,14 +13,11 @@ import {
 import { GetRoomFailureType } from '../../../../enums/GetRoomFailureType';
 import { ENTRY } from '../../../../utils/roles';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import { queueLimitReached } from '../../../../utils/promiseQueue';
-import { serverTooBusyMessage } from '../../messages';
 import {
     ParticipantRoleType,
     stringToParticipantRoleType,
 } from '../../../../enums/ParticipantRoleType';
 import { RoomAsListItem, RoomGetState } from '../../../objects/room';
-import { Result } from '@kizahasi/result';
 import { GlobalRoom } from '../../../../entities-graphql/room';
 import { client } from '@flocon-trpg/core';
 import { ensureAuthorizedUser, findRoomAndMyParticipant } from '../../utils/utils';
@@ -28,6 +25,7 @@ import { stateToGraphQL } from '../../../../entities-graphql/roomAsListItem';
 import { ResolverContext } from '../../../../types';
 import { isBookmarked } from '../../../../entities/room/isBookmarked';
 import { role } from '../../../../entities/room/role';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 @ArgsType()
 class GetRoomArgs {
@@ -79,64 +77,54 @@ const GetRoomResult = createUnionType({
 export class GetRoomResolver {
     @Query(() => GetRoomResult)
     @Authorized(ENTRY)
-    @UseMiddleware(RateLimitMiddleware(2))
+    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async getRoom(
         @Args() args: GetRoomArgs,
         @Ctx() context: ResolverContext
     ): Promise<typeof GetRoomResult> {
-        const queue = async (): Promise<Result<typeof GetRoomResult>> => {
-            const em = context.em;
-            const authorizedUserUid = ensureAuthorizedUser(context).userUid;
-            const findResult = await findRoomAndMyParticipant({
-                em,
-                userUid: authorizedUserUid,
-                roomId: args.id,
-            });
-            if (findResult == null) {
-                return Result.ok({
-                    failureType: GetRoomFailureType.NotFound,
-                });
-            }
-            const { room, me } = findResult;
-            if (me?.role == null) {
-                return Result.ok({
-                    roomAsListItem: await stateToGraphQL({
-                        roomEntity: room,
-                        myUserUid: authorizedUserUid,
-                    }),
-                });
-            }
+        const em = context.em;
+        const authorizedUserUid = ensureAuthorizedUser(context).userUid;
+        const findResult = await findRoomAndMyParticipant({
+            em,
+            userUid: authorizedUserUid,
+            roomId: args.id,
+        });
+        if (findResult == null) {
+            return {
+                failureType: GetRoomFailureType.NotFound,
+            };
+        }
+        const { room, me } = findResult;
+        if (me?.role == null) {
+            return {
+                roomAsListItem: await stateToGraphQL({
+                    roomEntity: room,
+                    myUserUid: authorizedUserUid,
+                }),
+            };
+        }
 
-            const roomState = await GlobalRoom.MikroORM.ToGlobal.state(room, em);
-            return Result.ok({
-                role: stringToParticipantRoleType(me.role),
-                room: {
-                    ...GlobalRoom.Global.ToGraphQL.state({
-                        source: roomState,
-                        requestedBy: { type: client, userUid: authorizedUserUid },
-                    }),
-                    revision: room.revision,
-                    createdBy: room.createdBy,
-                    createdAt: room.createdAt?.getTime(),
-                    updatedAt: room.completeUpdatedAt?.getTime(),
-                    role: await role({
-                        roomEntity: room,
-                        myUserUid: authorizedUserUid,
-                    }),
-                    isBookmarked: await isBookmarked({
-                        roomEntity: room,
-                        myUserUid: authorizedUserUid,
-                    }),
-                },
-            });
+        const roomState = await GlobalRoom.MikroORM.ToGlobal.state(room, em);
+        return {
+            role: stringToParticipantRoleType(me.role),
+            room: {
+                ...GlobalRoom.Global.ToGraphQL.state({
+                    source: roomState,
+                    requestedBy: { type: client, userUid: authorizedUserUid },
+                }),
+                revision: room.revision,
+                createdBy: room.createdBy,
+                createdAt: room.createdAt?.getTime(),
+                updatedAt: room.completeUpdatedAt?.getTime(),
+                role: await role({
+                    roomEntity: room,
+                    myUserUid: authorizedUserUid,
+                }),
+                isBookmarked: await isBookmarked({
+                    roomEntity: room,
+                    myUserUid: authorizedUserUid,
+                }),
+            },
         };
-        const result = await context.promiseQueue.next(queue);
-        if (result.type === queueLimitReached) {
-            throw serverTooBusyMessage;
-        }
-        if (result.value.isError) {
-            throw result.value.error;
-        }
-        return result.value.value;
     }
 }

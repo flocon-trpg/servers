@@ -15,10 +15,9 @@ import { RoomAsListItem } from '../../../objects/room';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import * as Room$MikroORM from '../../../../entities/room/entity';
 import * as RoomAsListItemGlobal from '../../../../entities-graphql/roomAsListItem';
-import { queueLimitReached } from '../../../../utils/promiseQueue';
-import { serverTooBusyMessage } from '../../messages';
 import { ensureAuthorizedUser } from '../../utils/utils';
 import { ResolverContext } from '../../../../types';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 @ObjectType()
 class GetRoomAsListItemSuccessResult {
@@ -50,31 +49,23 @@ const GetRoomAsListItemResult = createUnionType({
 export class GetRoomAsListItemResolver {
     @Query(() => GetRoomAsListItemResult)
     @Authorized(ENTRY)
-    @UseMiddleware(RateLimitMiddleware(1))
+    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(1))
     public async getRoomAsListItem(
         @Arg('roomId') roomId: string,
         @Ctx() context: ResolverContext
     ): Promise<typeof GetRoomAsListItemResult> {
-        const queue = async () => {
-            const em = context.em;
-            const authorizedUserUid = ensureAuthorizedUser(context).userUid;
-            const roomEntity = await em.findOne(Room$MikroORM.Room, { id: roomId });
-            if (roomEntity == null) {
-                return {
-                    failureType: GetRoomFailureType.NotFound,
-                };
-            }
-            const room = await RoomAsListItemGlobal.stateToGraphQL({
-                roomEntity: roomEntity,
-                myUserUid: authorizedUserUid,
-            });
-            return { room };
-        };
-
-        const result = await context.promiseQueue.next(queue);
-        if (result.type === queueLimitReached) {
-            throw serverTooBusyMessage;
+        const em = context.em;
+        const authorizedUserUid = ensureAuthorizedUser(context).userUid;
+        const roomEntity = await em.findOne(Room$MikroORM.Room, { id: roomId });
+        if (roomEntity == null) {
+            return {
+                failureType: GetRoomFailureType.NotFound,
+            };
         }
-        return result.value;
+        const room = await RoomAsListItemGlobal.stateToGraphQL({
+            roomEntity: roomEntity,
+            myUserUid: authorizedUserUid,
+        });
+        return { room };
     }
 }

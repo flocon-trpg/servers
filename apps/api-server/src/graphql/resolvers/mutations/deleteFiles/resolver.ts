@@ -7,12 +7,13 @@ import { remove, stat } from 'fs-extra';
 import { thumbsDir } from '../../../../utils/thumbsDir';
 import { ensureAuthorizedUser } from '../../utils/utils';
 import { ResolverContext } from '../../../../types';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 @Resolver()
 export class DeleteFilesResolver {
     @Mutation(() => [String], { description: 'since v0.7.8' })
     @Authorized(ENTRY)
-    @UseMiddleware(RateLimitMiddleware(2))
+    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async deleteFiles(
         @Arg('filenames', () => [String]) filenames: string[],
         @Ctx() context: ResolverContext

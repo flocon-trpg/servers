@@ -13,11 +13,10 @@ import { RoomAsListItem } from '../../../objects/room';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import * as Room$MikroORM from '../../../../entities/room/entity';
 import * as RoomAsListItemGlobal from '../../../../entities-graphql/roomAsListItem';
-import { queueLimitReached } from '../../../../utils/promiseQueue';
-import { serverTooBusyMessage } from '../../messages';
 import { GetRoomFailureType } from '../../../../enums/GetRoomFailureType';
 import { ensureAuthorizedUser } from '../../utils/utils';
 import { ResolverContext } from '../../../../types';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 @ObjectType()
 class GetRoomsListSuccessResult {
@@ -49,32 +48,24 @@ const GetRoomsListResult = createUnionType({
 export class GetRoomsListResolver {
     @Query(() => GetRoomsListResult)
     @Authorized(ENTRY)
-    @UseMiddleware(RateLimitMiddleware(2))
+    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async getRoomsList(@Ctx() context: ResolverContext): Promise<typeof GetRoomsListResult> {
-        const queue = async () => {
-            const em = context.em;
-            const authorizedUserUid = ensureAuthorizedUser(context).userUid;
+        const em = context.em;
+        const authorizedUserUid = ensureAuthorizedUser(context).userUid;
 
-            // TODO: すべてを取得しているので重い
-            const roomModels = await em.find(Room$MikroORM.Room, {});
-            const rooms = [];
-            for (const model of roomModels) {
-                rooms.push(
-                    await RoomAsListItemGlobal.stateToGraphQL({
-                        roomEntity: model,
-                        myUserUid: authorizedUserUid,
-                    })
-                );
-            }
-            return {
-                rooms,
-            };
-        };
-
-        const result = await context.promiseQueue.next(queue);
-        if (result.type === queueLimitReached) {
-            throw serverTooBusyMessage;
+        // TODO: すべてを取得しているので重い
+        const roomModels = await em.find(Room$MikroORM.Room, {});
+        const rooms = [];
+        for (const model of roomModels) {
+            rooms.push(
+                await RoomAsListItemGlobal.stateToGraphQL({
+                    roomEntity: model,
+                    myUserUid: authorizedUserUid,
+                })
+            );
         }
-        return result.value;
+        return {
+            rooms,
+        };
     }
 }

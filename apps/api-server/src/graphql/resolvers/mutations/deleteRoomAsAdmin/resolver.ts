@@ -12,15 +12,13 @@ import {
     UseMiddleware,
 } from 'type-graphql';
 import { ADMIN } from '../../../../utils/roles';
-import { queueLimitReached } from '../../../../utils/promiseQueue';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import { serverTooBusyMessage } from '../../messages';
 import * as Room$MikroORM from '../../../../entities/room/entity';
-import { RoomEventPayload } from '../../subsciptions/roomEvent/payload';
-import { SendTo, all } from '../../types';
+import { all } from '../../types';
 import { ensureAuthorizedUser, publishRoomEvent } from '../../utils/utils';
 import { DeleteRoomAsAdminFailureType } from '../../../../enums/DeleteRoomAsAdminFailureType';
 import { ResolverContext } from '../../../../types';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 @ArgsType()
 class DeleteRoomAsAdminInput {
@@ -38,48 +36,31 @@ class DeleteRoomAsAdminResult {
 export class DeleteRoomAsAdminResolver {
     @Mutation(() => DeleteRoomAsAdminResult, { description: 'since v0.7.2' })
     @Authorized(ADMIN)
-    @UseMiddleware(RateLimitMiddleware(2))
+    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async deleteRoomAsAdmin(
         @Args() args: DeleteRoomAsAdminInput,
         @Ctx() context: ResolverContext,
         @PubSub() pubSub: PubSubEngine
     ): Promise<DeleteRoomAsAdminResult> {
-        const queue = async (): Promise<{
-            result: DeleteRoomAsAdminResult;
-            payload: (RoomEventPayload & SendTo) | undefined;
-        }> => {
-            const em = context.em;
-            const authorizedUserUid = ensureAuthorizedUser(context).userUid;
+        const em = context.em;
+        const authorizedUserUid = ensureAuthorizedUser(context).userUid;
 
-            const room = await em.findOne(Room$MikroORM.Room, { id: args.id });
-            if (room == null) {
-                return {
-                    result: { failureType: DeleteRoomAsAdminFailureType.NotFound },
-                    payload: undefined,
-                };
-            }
-            const roomId = room.id;
-            await Room$MikroORM.deleteRoom(em, room);
-            await em.flush();
+        const room = await em.findOne(Room$MikroORM.Room, { id: args.id });
+        if (room == null) {
             return {
-                result: { failureType: undefined },
-                payload: {
-                    type: 'deleteRoomPayload',
-                    sendTo: all,
-                    roomId,
-                    deletedBy: authorizedUserUid,
-                    deletedByAdmin: true,
-                },
+                failureType: DeleteRoomAsAdminFailureType.NotFound,
             };
-        };
-
-        const result = await context.promiseQueue.next(queue);
-        if (result.type === queueLimitReached) {
-            throw serverTooBusyMessage;
         }
-        if (result.value.payload != null) {
-            await publishRoomEvent(pubSub, result.value.payload);
-        }
-        return result.value.result;
+        const roomId = room.id;
+        await Room$MikroORM.deleteRoom(em, room);
+        await em.flush();
+        await publishRoomEvent(pubSub, {
+            type: 'deleteRoomPayload',
+            sendTo: all,
+            roomId,
+            deletedBy: authorizedUserUid,
+            deletedByAdmin: true,
+        });
+        return {};
     }
 }

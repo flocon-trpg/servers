@@ -1,5 +1,4 @@
 import { $system, Spectator } from '@flocon-trpg/core';
-import { Result } from '@kizahasi/result';
 import {
     Args,
     ArgsType,
@@ -14,10 +13,8 @@ import {
 } from 'type-graphql';
 import { GetRoomLogFailureType } from '../../../../enums/GetRoomLogFailureType';
 import { ENTRY } from '../../../../utils/roles';
-import { queueLimitReached } from '../../../../utils/promiseQueue';
 import { GetRoomLogFailureResultType, GetRoomLogResult } from '../../../objects/roomMessage';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import { MessageUpdatePayload } from '../../subsciptions/roomEvent/payload';
 import {
     createRoomPublicMessage,
     ensureAuthorizedUser,
@@ -25,12 +22,11 @@ import {
     getRoomMessagesFromDb,
     publishRoomEvent,
 } from '../../utils/utils';
-import { SendTo } from '../../types';
 import { EM, ResolverContext } from '../../../../types';
 import { Room } from '../../../../entities/room/entity';
 import { RoomPubCh, RoomPubMsg } from '../../../../entities/roomMessage/entity';
 import { Reference } from '@mikro-orm/core';
-import { serverTooBusyMessage } from '../../messages';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 @ArgsType()
 class GetLogArgs {
@@ -65,85 +61,62 @@ export const writeSystemMessage = async ({
 export class GetLogResolver {
     @Query(() => GetRoomLogResult)
     @Authorized(ENTRY)
-    @UseMiddleware(RateLimitMiddleware(10))
+    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(10))
     public async getLog(
         @Args() args: GetLogArgs,
         @Ctx() context: ResolverContext,
         @PubSub() pubSub: PubSubEngine
     ): Promise<typeof GetRoomLogResult> {
-        const queue = async (): Promise<
-            Result<{ result: typeof GetRoomLogResult; payload?: MessageUpdatePayload & SendTo }>
-        > => {
-            const em = context.em;
-            const authorizedUserUid = ensureAuthorizedUser(context).userUid;
-            const findResult = await findRoomAndMyParticipant({
-                em,
-                userUid: authorizedUserUid,
-                roomId: args.roomId,
-            });
-            if (findResult == null) {
-                return Result.ok({
-                    result: {
-                        __tstype: GetRoomLogFailureResultType,
-                        failureType: GetRoomLogFailureType.RoomNotFound,
-                    },
-                });
-            }
-            const { room, me } = findResult;
-            if (me?.role === undefined) {
-                return Result.ok({
-                    result: {
-                        __tstype: GetRoomLogFailureResultType,
-                        failureType: GetRoomLogFailureType.NotParticipant,
-                    },
-                });
-            }
-            if (me.role === Spectator) {
-                return Result.ok({
-                    result: {
-                        __tstype: GetRoomLogFailureResultType,
-                        failureType: GetRoomLogFailureType.NotAuthorized,
-                    },
-                });
-            }
-
-            const messages = await getRoomMessagesFromDb(room, authorizedUserUid, 'log');
-
-            // em.clear() しないと下にあるem.flush()で非常に重くなり、ログサイズが大きいときに大きな問題となる。
-            // おそらく大量のエンティティ取得でem内部に大量のエンティティが保持され、flushされるときにこれら全てに変更がないかチェックされるため、異常な重さになる。そのため、clear()することで高速化できていると思われる。
-            em.clear();
-            const systemMessageEntity = await writeSystemMessage({
-                em,
-                text: `${me.name}(${authorizedUserUid}) が全てのログを出力しました。`,
-                room: room,
-            });
-            await em.flush();
-
-            return Result.ok({
-                result: messages,
-                payload: {
-                    type: 'messageUpdatePayload',
-                    sendTo: findResult.participantIds(),
-                    roomId: room.id,
-                    value: createRoomPublicMessage({
-                        msg: systemMessageEntity,
-                        channelKey: $system,
-                    }),
-                    createdBy: undefined,
-                    visibleTo: undefined,
-                },
-            });
-        };
-        const coreResult = await context.promiseQueue.next(queue);
-        if (coreResult.type === queueLimitReached) {
-            throw serverTooBusyMessage;
+        const em = context.em;
+        const authorizedUserUid = ensureAuthorizedUser(context).userUid;
+        const findResult = await findRoomAndMyParticipant({
+            em,
+            userUid: authorizedUserUid,
+            roomId: args.roomId,
+        });
+        if (findResult == null) {
+            return {
+                __tstype: GetRoomLogFailureResultType,
+                failureType: GetRoomLogFailureType.RoomNotFound,
+            };
         }
-        if (coreResult.value.isError) {
-            throw coreResult.value.error;
+        const { room, me } = findResult;
+        if (me?.role === undefined) {
+            return {
+                __tstype: GetRoomLogFailureResultType,
+                failureType: GetRoomLogFailureType.NotParticipant,
+            };
         }
-        if (coreResult.value.value.payload != null) {
-            await publishRoomEvent(pubSub, coreResult.value.value.payload);
+        if (me.role === Spectator) {
+            return {
+                __tstype: GetRoomLogFailureResultType,
+                failureType: GetRoomLogFailureType.NotAuthorized,
+            };
         }
-        return coreResult.value.value.result;
+
+        const messages = await getRoomMessagesFromDb(room, authorizedUserUid, 'log');
+
+        // em.clear() しないと下にあるem.flush()で非常に重くなり、ログサイズが大きいときに大きな問題となる。
+        // おそらく大量のエンティティ取得でem内部に大量のエンティティが保持され、flushされるときにこれら全てに変更がないかチェックされるため、異常な重さになる。そのため、clear()することで高速化できていると思われる。
+        em.clear();
+        const systemMessageEntity = await writeSystemMessage({
+            em,
+            text: `${me.name}(${authorizedUserUid}) が全てのログを出力しました。`,
+            room: room,
+        });
+        await em.flush();
+
+        await publishRoomEvent(pubSub, {
+            type: 'messageUpdatePayload',
+            sendTo: findResult.participantIds(),
+            roomId: room.id,
+            value: createRoomPublicMessage({
+                msg: systemMessageEntity,
+                channelKey: $system,
+            }),
+            createdBy: undefined,
+            visibleTo: undefined,
+        });
+        return messages;
     }
 }

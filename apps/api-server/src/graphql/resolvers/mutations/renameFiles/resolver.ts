@@ -14,6 +14,7 @@ import { File } from '../../../../entities/file/entity';
 import { FilePermissionType } from '../../../../enums/FilePermissionType';
 import { ensureAuthorizedUser } from '../../utils/utils';
 import { ResolverContext } from '../../../../types';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 @InputType()
 class RenameFileInput {
@@ -28,7 +29,7 @@ class RenameFileInput {
 export class RenameFilesResolver {
     @Mutation(() => [String])
     @Authorized(ENTRY)
-    @UseMiddleware(RateLimitMiddleware(2))
+    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async renameFiles(
         @Arg('input', () => [RenameFileInput]) input: RenameFileInput[],
         @Ctx() context: ResolverContext
