@@ -3,6 +3,7 @@ import { consume as consumeFunction } from '../../rateLimit/consume';
 import { ResolverContext } from '../../types';
 import { NotSignIn, checkSignIn } from '../resolvers/utils/utils';
 
+// TODO: エラーが発生したときはログを記録する。
 export const RateLimitMiddleware =
     (consume: number): MiddlewareFn<ResolverContext> =>
     async ({ context }, next) => {
