@@ -35,7 +35,7 @@ export type PromiseQueueResult<T> =
           type: typeof queueLimitReached;
       };
 
-type ResultWithTimeout<T> =
+export type PromiseQueueResultWithTimeout<T> =
     | PromiseQueueResult<T>
     | {
           type: typeof timeout;
@@ -115,10 +115,10 @@ export class PromiseQueue {
     private nextCore<T>(
         execute: () => Promise<T>,
         timeout: number | null | undefined
-    ): Promise<ResultWithTimeout<T>> {
+    ): Promise<PromiseQueueResultWithTimeout<T>> {
         const id = v4();
         this._pendingPromises.add(id);
-        const result = new Promise<ResultWithTimeout<T>>((resolver, reject) => {
+        const result = new Promise<PromiseQueueResultWithTimeout<T>>((resolver, reject) => {
             this._result.pipe(Rx.first(x => x.id === id)).subscribe({
                 next: r => {
                     switch (r.result.type) {
@@ -151,7 +151,7 @@ export class PromiseQueue {
     public nextWithTimeout<T>(
         execute: () => Promise<T>,
         timeout: number
-    ): Promise<ResultWithTimeout<T>> {
+    ): Promise<PromiseQueueResultWithTimeout<T>> {
         return this.nextCore(execute, timeout);
     }
 
