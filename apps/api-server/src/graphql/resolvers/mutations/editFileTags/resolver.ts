@@ -15,6 +15,7 @@ import { File } from '../../../../entities/file/entity';
 import { FileTag } from '../../../../entities/fileTag/entity';
 import { ensureAuthorizedUser } from '../../utils/utils';
 import { ResolverContext } from '../../../../types';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 // addとremoveは、fileTagのidを指定することでそのタグが追加/削除される。
 @InputType()
@@ -41,7 +42,7 @@ export class EditFileTagsResolver {
         deprecationReason: 'Use screenname to group files by folders instead.',
     })
     @Authorized(ENTRY)
-    @UseMiddleware(RateLimitMiddleware(2))
+    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async editFileTags(
         @Arg('input') input: EditFileTagsInput,
         @Ctx() context: ResolverContext

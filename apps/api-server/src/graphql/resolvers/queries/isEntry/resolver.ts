@@ -1,6 +1,7 @@
 import { Authorized, Ctx, Query, Resolver, UseMiddleware } from 'type-graphql';
 import { BaasType } from '../../../../enums/BaasType';
 import { ResolverContext } from '../../../../types';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import { checkEntry, ensureUserUid } from '../../utils/utils';
 
@@ -8,7 +9,7 @@ import { checkEntry, ensureUserUid } from '../../utils/utils';
 export class IsEntryResolver {
     @Query(() => Boolean)
     @Authorized()
-    @UseMiddleware(RateLimitMiddleware(1))
+    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(1))
     public async isEntry(@Ctx() context: ResolverContext): Promise<boolean> {
         const userUid = ensureUserUid(context);
         return await checkEntry({

@@ -1,4 +1,3 @@
-import { Result } from '@kizahasi/result';
 import {
     Args,
     ArgsType,
@@ -12,9 +11,7 @@ import {
     UseMiddleware,
 } from 'type-graphql';
 import { ENTRY } from '../../../../utils/roles';
-import { queueLimitReached } from '../../../../utils/promiseQueue';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import { serverTooBusyMessage } from '../../messages';
 import {
     $free,
     $system,
@@ -46,6 +43,7 @@ import { Reference } from '@mikro-orm/core';
 import { RoomPubCh, RoomPubMsg } from '../../../../entities/roomMessage/entity';
 import { FileSourceTypeModule } from '../../../../enums/FileSourceType';
 import { ResolverContext } from '../../../../types';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 type CharacterState = State<typeof characterTemplate>;
 
@@ -105,131 +103,106 @@ const checkChannelKey = (channelKey: string, isSpectator: boolean) => {
 export class WritePublicMessageResolver {
     @Mutation(() => WriteRoomPublicMessageResult)
     @Authorized(ENTRY)
-    @UseMiddleware(RateLimitMiddleware(3))
+    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(3))
     public async writePublicMessage(
         @Args() args: WritePublicMessageArgs,
         @Ctx() context: ResolverContext,
         @PubSub() pubSub: PubSubEngine
     ): Promise<typeof WriteRoomPublicMessageResult> {
         const channelKey = args.channelKey;
-        const queue = async (): Promise<
-            Result<{
-                result: typeof WriteRoomPublicMessageResult;
-                payload?: MessageUpdatePayload & SendTo;
-            }>
-        > => {
-            const em = context.em;
-            const authorizedUser = ensureAuthorizedUser(context);
-            const findResult = await findRoomAndMyParticipant({
-                em,
-                userUid: authorizedUser.userUid,
-                roomId: args.roomId,
-            });
-            if (findResult == null) {
-                return Result.ok({
-                    result: {
-                        __tstype: WriteRoomPublicMessageFailureResultType,
-                        failureType: WriteRoomPublicMessageFailureType.RoomNotFound,
-                    },
-                });
-            }
-            const { room, me, roomState } = findResult;
-            if (me === undefined) {
-                return Result.ok({
-                    result: {
-                        __tstype: WriteRoomPublicMessageFailureResultType,
-                        failureType: WriteRoomPublicMessageFailureType.NotParticipant,
-                    },
-                });
-            }
-            const channelKeyFailureType = checkChannelKey(channelKey, me.role === Spectator);
-            if (channelKeyFailureType != null) {
-                return Result.ok({
-                    result: {
-                        __tstype: WriteRoomPublicMessageFailureResultType,
-                        failureType: WriteRoomPublicMessageFailureType.NotAuthorized,
-                    },
-                });
-            }
-
-            let chara: CharacterState | undefined = undefined;
-            if (args.characterId != null) {
-                if (
-                    isCharacterOwner({
-                        requestedBy: { type: client, userUid: authorizedUser.userUid },
-                        characterId: args.characterId,
-                        currentRoomState: roomState,
-                    })
-                )
-                    chara = roomState.characters?.[args.characterId];
-            }
-            const entityResult = await analyzeTextAndSetToEntity({
-                type: 'RoomPubMsg',
-                textSource: args.text,
-                context: chara == null ? null : { type: 'chara', value: chara },
-                createdBy: authorizedUser,
-                room: roomState,
-                gameType: args.gameType,
-            });
-            if (entityResult.isError) {
-                return Result.ok({
-                    result: {
-                        __tstype: RoomMessageSyntaxErrorType,
-                        errorMessage: entityResult.error,
-                    },
-                });
-            }
-            const entity = entityResult.value as RoomPubMsg;
-            entity.textColor = args.textColor == null ? undefined : fixTextColor(args.textColor);
-            let ch = await em.findOne(RoomPubCh, { key: channelKey, room: room.id });
-            if (ch == null) {
-                ch = new RoomPubCh({ key: channelKey });
-                ch.room = Reference.create(room);
-                em.persist(ch);
-            }
-            entity.customName = args.customName;
-
-            if (chara != null) {
-                entity.charaStateId = args.characterId;
-                entity.charaName = chara.name;
-                entity.charaIsPrivate = chara.isPrivate;
-                entity.charaImagePath = chara.image?.path;
-                entity.charaImageSourceType = FileSourceTypeModule.ofNullishString(
-                    chara.image?.sourceType
-                );
-                entity.charaPortraitImagePath = chara.portraitImage?.path;
-                entity.charaPortraitImageSourceType = FileSourceTypeModule.ofNullishString(
-                    chara.portraitImage?.sourceType
-                );
-            }
-
-            entity.roomPubCh = Reference.create(ch);
-            room.completeUpdatedAt = new Date();
-            await em.persistAndFlush(entity);
-
-            const result: RoomPublicMessage = createRoomPublicMessage({ msg: entity, channelKey });
-
-            const payload: MessageUpdatePayload & SendTo = {
-                type: 'messageUpdatePayload',
-                sendTo: findResult.participantIds(),
-                roomId: args.roomId,
-                createdBy: authorizedUser.userUid,
-                visibleTo: undefined,
-                value: result,
+        const em = context.em;
+        const authorizedUser = ensureAuthorizedUser(context);
+        const findResult = await findRoomAndMyParticipant({
+            em,
+            userUid: authorizedUser.userUid,
+            roomId: args.roomId,
+        });
+        if (findResult == null) {
+            return {
+                __tstype: WriteRoomPublicMessageFailureResultType,
+                failureType: WriteRoomPublicMessageFailureType.RoomNotFound,
             };
+        }
+        const { room, me, roomState } = findResult;
+        if (me === undefined) {
+            return {
+                __tstype: WriteRoomPublicMessageFailureResultType,
+                failureType: WriteRoomPublicMessageFailureType.NotParticipant,
+            };
+        }
+        const channelKeyFailureType = checkChannelKey(channelKey, me.role === Spectator);
+        if (channelKeyFailureType != null) {
+            return {
+                __tstype: WriteRoomPublicMessageFailureResultType,
+                failureType: WriteRoomPublicMessageFailureType.NotAuthorized,
+            };
+        }
 
-            return Result.ok({ result, payload });
+        let chara: CharacterState | undefined = undefined;
+        if (args.characterId != null) {
+            if (
+                isCharacterOwner({
+                    requestedBy: { type: client, userUid: authorizedUser.userUid },
+                    characterId: args.characterId,
+                    currentRoomState: roomState,
+                })
+            )
+                chara = roomState.characters?.[args.characterId];
+        }
+        const entityResult = await analyzeTextAndSetToEntity({
+            type: 'RoomPubMsg',
+            textSource: args.text,
+            context: chara == null ? null : { type: 'chara', value: chara },
+            createdBy: authorizedUser,
+            room: roomState,
+            gameType: args.gameType,
+        });
+        if (entityResult.isError) {
+            return {
+                __tstype: RoomMessageSyntaxErrorType,
+                errorMessage: entityResult.error,
+            };
+        }
+        const entity = entityResult.value as RoomPubMsg;
+        entity.textColor = args.textColor == null ? undefined : fixTextColor(args.textColor);
+        let ch = await em.findOne(RoomPubCh, { key: channelKey, room: room.id });
+        if (ch == null) {
+            ch = new RoomPubCh({ key: channelKey });
+            ch.room = Reference.create(room);
+            em.persist(ch);
+        }
+        entity.customName = args.customName;
+
+        if (chara != null) {
+            entity.charaStateId = args.characterId;
+            entity.charaName = chara.name;
+            entity.charaIsPrivate = chara.isPrivate;
+            entity.charaImagePath = chara.image?.path;
+            entity.charaImageSourceType = FileSourceTypeModule.ofNullishString(
+                chara.image?.sourceType
+            );
+            entity.charaPortraitImagePath = chara.portraitImage?.path;
+            entity.charaPortraitImageSourceType = FileSourceTypeModule.ofNullishString(
+                chara.portraitImage?.sourceType
+            );
+        }
+
+        entity.roomPubCh = Reference.create(ch);
+        room.completeUpdatedAt = new Date();
+        await em.persistAndFlush(entity);
+
+        const result: RoomPublicMessage = createRoomPublicMessage({ msg: entity, channelKey });
+
+        const payload: MessageUpdatePayload & SendTo = {
+            type: 'messageUpdatePayload',
+            sendTo: findResult.participantIds(),
+            roomId: args.roomId,
+            createdBy: authorizedUser.userUid,
+            visibleTo: undefined,
+            value: result,
         };
-        const result = await context.promiseQueue.next(queue);
-        if (result.type === queueLimitReached) {
-            throw serverTooBusyMessage;
-        }
-        if (result.value.isError) {
-            throw result.value.error;
-        }
-        if (result.value.value.payload != null) {
-            await publishRoomEvent(pubSub, result.value.value.payload);
-        }
-        return result.value.value.result;
+
+        await publishRoomEvent(pubSub, payload);
+        return result;
     }
 }

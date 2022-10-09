@@ -12,9 +12,7 @@ import {
     UseMiddleware,
 } from 'type-graphql';
 import { ENTRY } from '../../../../utils/roles';
-import { queueLimitReached } from '../../../../utils/promiseQueue';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import { serverTooBusyMessage } from '../../messages';
 import * as Room$MikroORM from '../../../../entities/room/entity';
 import {
     Master,
@@ -34,6 +32,7 @@ import {
 } from '../../utils/utils';
 import { PromoteFailureType } from '../../../../enums/PromoteFailureType';
 import { ResolverContext } from '../../../../types';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 type ParticipantState = State<typeof participantTemplate>;
 
@@ -69,28 +68,50 @@ const promoteMeCore = async ({
         | PromoteFailureType.NotParticipant
     >;
 }): Promise<{ result: PromoteResult; payload: RoomEventPayload | undefined }> => {
-    const queue = async (): Promise<{
-        result: PromoteResult;
-        payload: RoomEventPayload | undefined;
-    }> => {
-        const em = context.em;
-        const authorizedUser = ensureAuthorizedUser(context);
-        const findResult = await findRoomAndMyParticipant({
-            em,
-            userUid: authorizedUser.userUid,
-            roomId,
-        });
-        if (findResult == null) {
+    const em = context.em;
+    const authorizedUser = ensureAuthorizedUser(context);
+    const findResult = await findRoomAndMyParticipant({
+        em,
+        userUid: authorizedUser.userUid,
+        roomId,
+    });
+    if (findResult == null) {
+        return {
+            result: {
+                failureType: PromoteFailureType.NotFound,
+            },
+            payload: undefined,
+        };
+    }
+    const { room, me } = findResult;
+    const participantUserUids = findResult.participantIds();
+    if (me == null) {
+        return {
+            result: {
+                failureType: PromoteFailureType.NotParticipant,
+            },
+            payload: undefined,
+        };
+    }
+    const strategyResult = await strategy({ me, room });
+    switch (strategyResult) {
+        case PromoteFailureType.NoNeedToPromote: {
             return {
                 result: {
-                    failureType: PromoteFailureType.NotFound,
+                    failureType: PromoteFailureType.NoNeedToPromote,
                 },
                 payload: undefined,
             };
         }
-        const { room, me } = findResult;
-        const participantUserUids = findResult.participantIds();
-        if (me == null) {
+        case PromoteFailureType.WrongPassword: {
+            return {
+                result: {
+                    failureType: PromoteFailureType.WrongPassword,
+                },
+                payload: undefined,
+            };
+        }
+        case PromoteFailureType.NotParticipant: {
             return {
                 result: {
                     failureType: PromoteFailureType.NotParticipant,
@@ -98,66 +119,33 @@ const promoteMeCore = async ({
                 payload: undefined,
             };
         }
-        const strategyResult = await strategy({ me, room });
-        switch (strategyResult) {
-            case PromoteFailureType.NoNeedToPromote: {
-                return {
-                    result: {
-                        failureType: PromoteFailureType.NoNeedToPromote,
-                    },
-                    payload: undefined,
-                };
-            }
-            case PromoteFailureType.WrongPassword: {
-                return {
-                    result: {
-                        failureType: PromoteFailureType.WrongPassword,
-                    },
-                    payload: undefined,
-                };
-            }
-            case PromoteFailureType.NotParticipant: {
-                return {
-                    result: {
-                        failureType: PromoteFailureType.NotParticipant,
-                    },
-                    payload: undefined,
-                };
-            }
-            default: {
-                return {
-                    result: {
-                        failureType: undefined,
-                    },
-                    payload: (
-                        await operateParticipantAndFlush({
-                            em,
-                            room,
-                            roomHistCount: context.serverConfig.roomHistCount,
-                            participantUserUids,
-                            myUserUid: authorizedUser.userUid,
-                            update: {
-                                role: { newValue: strategyResult },
-                            },
-                        })
-                    )?.payload,
-                };
-            }
+        default: {
+            return {
+                result: {
+                    failureType: undefined,
+                },
+                payload: (
+                    await operateParticipantAndFlush({
+                        em,
+                        room,
+                        roomHistCount: context.serverConfig.roomHistCount,
+                        participantUserUids,
+                        myUserUid: authorizedUser.userUid,
+                        update: {
+                            role: { newValue: strategyResult },
+                        },
+                    })
+                )?.payload,
+            };
         }
-    };
-
-    const result = await context.promiseQueue.next(queue);
-    if (result.type === queueLimitReached) {
-        throw serverTooBusyMessage;
     }
-    return result.value;
 };
 
 @Resolver()
 export class PromoteToPlayerResolver {
     @Mutation(() => PromoteResult)
     @Authorized(ENTRY)
-    @UseMiddleware(RateLimitMiddleware(2))
+    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async promoteToPlayer(
         @Args() args: PromoteArgs,
         @Ctx() context: ResolverContext,

@@ -15,6 +15,7 @@ import { User } from '../../../../entities/user/entity';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import { ensureAuthorizedUser } from '../../utils/utils';
 import { ResolverContext } from '../../../../types';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 @ObjectType()
 export class FileTag {
@@ -32,7 +33,7 @@ export class CreateFileTagResolver {
         deprecationReason: 'Use screenname to group files by folders instead.',
     })
     @Authorized(ENTRY)
-    @UseMiddleware(RateLimitMiddleware(2))
+    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async createFileTag(
         @Ctx() context: ResolverContext,
         @Arg('tagName') tagName: string

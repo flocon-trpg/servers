@@ -13,9 +13,7 @@ import {
     createUnionType,
 } from 'type-graphql';
 import { ENTRY } from '../../../../utils/roles';
-import { queueLimitReached } from '../../../../utils/promiseQueue';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import { serverTooBusyMessage } from '../../messages';
 import * as Room$MikroORM from '../../../../entities/room/entity';
 import { RoomOperation } from '../../../objects/room';
 import { ParticipantRole, Player, Spectator, State, participantTemplate } from '@flocon-trpg/core';
@@ -30,6 +28,7 @@ import {
 import { JoinRoomFailureType } from '../../../../enums/JoinRoomFailureType';
 import { convertToMaxLength100String } from '../../../../utils/convertToMaxLength100String';
 import { ResolverContext } from '../../../../types';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 type ParticipantState = State<typeof participantTemplate>;
 
@@ -90,84 +89,73 @@ const joinRoomCore = async ({
         | 'id'
     >;
 }): Promise<{ result: typeof JoinRoomResult; payload: RoomEventPayload | undefined }> => {
-    const queue = async (): Promise<{
-        result: typeof JoinRoomResult;
-        payload: RoomEventPayload | undefined;
-    }> => {
-        const em = context.em;
-        const authorizedUser = ensureAuthorizedUser(context);
-        const findResult = await findRoomAndMyParticipant({
-            em,
-            userUid: authorizedUser.userUid,
-            roomId: args.id,
-        });
-        if (findResult == null) {
+    const em = context.em;
+    const authorizedUser = ensureAuthorizedUser(context);
+    const findResult = await findRoomAndMyParticipant({
+        em,
+        userUid: authorizedUser.userUid,
+        roomId: args.id,
+    });
+    if (findResult == null) {
+        return {
+            result: {
+                failureType: JoinRoomFailureType.NotFound,
+            },
+            payload: undefined,
+        };
+    }
+    const { room, me } = findResult;
+    const participantUserUids = findResult.participantIds();
+    const strategyResult = await strategy({ me, room, args });
+    switch (strategyResult) {
+        case 'id': {
             return {
                 result: {
-                    failureType: JoinRoomFailureType.NotFound,
+                    operation: undefined,
                 },
                 payload: undefined,
             };
         }
-        const { room, me } = findResult;
-        const participantUserUids = findResult.participantIds();
-        const strategyResult = await strategy({ me, room, args });
-        switch (strategyResult) {
-            case 'id': {
-                return {
-                    result: {
-                        operation: undefined,
-                    },
-                    payload: undefined,
-                };
-            }
-            case JoinRoomFailureType.WrongPassword: {
-                return {
-                    result: {
-                        failureType: JoinRoomFailureType.WrongPassword,
-                    },
-                    payload: undefined,
-                };
-            }
-            case JoinRoomFailureType.AlreadyParticipant: {
-                return {
-                    result: {
-                        failureType: JoinRoomFailureType.AlreadyParticipant,
-                    },
-                    payload: undefined,
-                };
-            }
-            default: {
-                return await operateParticipantAndFlush({
-                    em,
-                    room,
-                    roomHistCount: context.serverConfig.roomHistCount,
-                    participantUserUids,
-                    myUserUid: authorizedUser.userUid,
-                    create: {
-                        name: convertToMaxLength100String(args.name),
-                        role: strategyResult,
-                    },
-                    update: {
-                        role: { newValue: strategyResult },
-                    },
-                });
-            }
+        case JoinRoomFailureType.WrongPassword: {
+            return {
+                result: {
+                    failureType: JoinRoomFailureType.WrongPassword,
+                },
+                payload: undefined,
+            };
         }
-    };
-
-    const result = await context.promiseQueue.next(queue);
-    if (result.type === queueLimitReached) {
-        throw serverTooBusyMessage;
+        case JoinRoomFailureType.AlreadyParticipant: {
+            return {
+                result: {
+                    failureType: JoinRoomFailureType.AlreadyParticipant,
+                },
+                payload: undefined,
+            };
+        }
+        default: {
+            return await operateParticipantAndFlush({
+                em,
+                room,
+                roomHistCount: context.serverConfig.roomHistCount,
+                participantUserUids,
+                myUserUid: authorizedUser.userUid,
+                create: {
+                    name: convertToMaxLength100String(args.name),
+                    role: strategyResult,
+                },
+                update: {
+                    role: { newValue: strategyResult },
+                },
+            });
+        }
     }
-    return result.value;
 };
 
 @Resolver()
 export class JoinRoomResolver {
     @Mutation(() => JoinRoomResult)
     @Authorized(ENTRY)
-    @UseMiddleware(RateLimitMiddleware(2))
+    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async joinRoomAsPlayer(
         @Args() args: JoinRoomArgs,
         @Ctx() context: ResolverContext,
@@ -199,7 +187,7 @@ export class JoinRoomResolver {
 
     @Mutation(() => JoinRoomResult)
     @Authorized(ENTRY)
-    @UseMiddleware(RateLimitMiddleware(2))
+    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async joinRoomAsSpectator(
         @Args() args: JoinRoomArgs,
         @Ctx() context: ResolverContext,

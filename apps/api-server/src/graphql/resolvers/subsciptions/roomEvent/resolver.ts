@@ -78,6 +78,7 @@ class RoomEvent {
 export class RoomEventResolver {
     // graphql-wsでRoomOperatedのConnectionを検知しているので、もしこれのメソッドやArgsがリネームもしくは削除されるときはそちらも変える。
     // CONSIDER: return undefined; とすると、{ roomEvent: null } というオブジェクトが全員に通知される。そのため、それを見るとイベントの内容を予想できてしまう可能性がある。例えばサイト全体で1セッションしか進行していない場合、何らかの秘話が送られた可能性が高い、など。この問題はおそらくfilterプロパティで解決できるかもしれない。
+    // CONSIDER: QueueMiddlewareを適用すべきか？
     @Subscription(() => RoomEvent, {
         topics: ROOM_EVENT,
         nullable: true,

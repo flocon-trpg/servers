@@ -1,4 +1,3 @@
-import { Result } from '@kizahasi/result';
 import {
     Arg,
     Authorized,
@@ -12,11 +11,8 @@ import {
     UseMiddleware,
 } from 'type-graphql';
 import { ENTRY } from '../../../../utils/roles';
-import { queueLimitReached } from '../../../../utils/promiseQueue';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import { serverTooBusyMessage } from '../../messages';
 import { LeaveRoomFailureType } from '../../../../enums/LeaveRoomFailureType';
-import { RoomEventPayload } from '../../subsciptions/roomEvent/payload';
 import {
     ensureAuthorizedUser,
     findRoomAndMyParticipant,
@@ -24,6 +20,7 @@ import {
     publishRoomEvent,
 } from '../../utils/utils';
 import { ResolverContext } from '../../../../types';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 @ObjectType()
 class LeaveRoomResult {
@@ -35,62 +32,45 @@ class LeaveRoomResult {
 export class LeaveRoomResolver {
     @Mutation(() => LeaveRoomResult)
     @Authorized(ENTRY)
-    @UseMiddleware(RateLimitMiddleware(2))
+    @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async leaveRoom(
         @Arg('id') id: string,
         @Ctx() context: ResolverContext,
         @PubSub() pubSub: PubSubEngine
     ): Promise<LeaveRoomResult> {
-        const queue = async (): Promise<
-            Result<{ result: LeaveRoomResult; payload: RoomEventPayload | undefined }>
-        > => {
-            const em = context.em;
-            const authorizedUserUid = ensureAuthorizedUser(context).userUid;
-            // entryしていなくても呼べる
-            const findResult = await findRoomAndMyParticipant({
-                em,
-                userUid: authorizedUserUid,
-                roomId: id,
-            });
-            if (findResult == null) {
-                return Result.ok({
-                    result: { failureType: LeaveRoomFailureType.NotFound },
-                    payload: undefined,
-                });
-            }
-            const { me, room } = findResult;
-            const participantUserUids = findResult.participantIds();
-            if (me === undefined || me.role == null) {
-                return Result.ok({
-                    result: { failureType: LeaveRoomFailureType.NotParticipant },
-                    payload: undefined,
-                });
-            }
-            const { payload } = await operateParticipantAndFlush({
-                em,
-                myUserUid: authorizedUserUid,
-                update: {
-                    role: { newValue: undefined },
-                },
-                room,
-                roomHistCount: context.serverConfig.roomHistCount,
-                participantUserUids,
-            });
-            return Result.ok({
-                result: {},
-                payload: payload,
-            });
-        };
-        const result = await context.promiseQueue.next(queue);
-        if (result.type === queueLimitReached) {
-            throw serverTooBusyMessage;
+        const em = context.em;
+        const authorizedUserUid = ensureAuthorizedUser(context).userUid;
+        // entryしていなくても呼べる
+        const findResult = await findRoomAndMyParticipant({
+            em,
+            userUid: authorizedUserUid,
+            roomId: id,
+        });
+        if (findResult == null) {
+            return {
+                failureType: LeaveRoomFailureType.NotFound,
+            };
         }
-        if (result.value.isError) {
-            throw result.value.error;
+        const { me, room } = findResult;
+        const participantUserUids = findResult.participantIds();
+        if (me === undefined || me.role == null) {
+            return {
+                failureType: LeaveRoomFailureType.NotParticipant,
+            };
         }
-        if (result.value.value.payload != null) {
-            await publishRoomEvent(pubSub, result.value.value.payload);
+        const { payload } = await operateParticipantAndFlush({
+            em,
+            myUserUid: authorizedUserUid,
+            update: {
+                role: { newValue: undefined },
+            },
+            room,
+            roomHistCount: context.serverConfig.roomHistCount,
+            participantUserUids,
+        });
+        if (payload != null) {
+            await publishRoomEvent(pubSub, payload);
         }
-        return result.value.value.result;
+        return {};
     }
 }
