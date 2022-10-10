@@ -2999,7 +2999,7 @@ __metadata:
     "@flocon-trpg/typed-document-node-v0.7.1": "workspace:^"
     "@flocon-trpg/utils": "workspace:^"
     "@types/jest": 29.1.2
-    fast-check: 3.1.3
+    fast-check: 3.1.4
     immer: 9.0.15
     jest: 29.1.2
     rimraf: 3.0.2
@@ -12269,12 +12269,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-check@npm:3.1.3":
-  version: 3.1.3
-  resolution: "fast-check@npm:3.1.3"
+"fast-check@npm:3.1.4":
+  version: 3.1.4
+  resolution: "fast-check@npm:3.1.4"
   dependencies:
-    pure-rand: ^5.0.1
-  checksum: 71aa5d6b3d8d9e0810bd43440255d7a48469367385698a883267bf16a3a6e125e3cc1cc3adf3bd2a35d14b6e9bcad9d398b97253a10ad512b9ae5d2ba644626f
+    pure-rand: ^5.0.2
+  checksum: 145dbb2708bb1ac16b237fd147a9899e7da005b52d69af7947054ef673ee420ad493750dee8a4e25011f1365fe9ddb345fa689cc3f4b00c24dcf473dbc06aa36
   languageName: node
   linkType: hard
 
@@ -19914,10 +19914,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pure-rand@npm:^5.0.1":
-  version: 5.0.1
-  resolution: "pure-rand@npm:5.0.1"
-  checksum: 2b05a6d80163308583a013fab8d7f7f2958a6f77895680c99d8c3ea1f3e49ac273716a59cb1777cfc370540df53e6dc017e46c70a869da81fe490b2e6703d77d
+"pure-rand@npm:^5.0.2":
+  version: 5.0.3
+  resolution: "pure-rand@npm:5.0.3"
+  checksum: a898ab8a40a8eebc641123dab19308044d8bd979efeaba1d8a45e9977593b25b00c3bd9681e2a558a7daec96c6fb8709995b8f10c55475e892b96f381bb6c6d2
   languageName: node
   linkType: hard
 
