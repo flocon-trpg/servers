@@ -62,6 +62,7 @@ const ensureOk = <T>(source: Ok<T> | undefined): T | undefined => {
     return source?.value;
 };
 
+/** `process.env` から Flocon で利用される環境変数を取得してパースします。ただし、ログに関する環境変数は対象外です。 */
 export class ServerConfigParser {
     public readonly [FLOCON_ADMIN]: Result<ReadonlyArray<string>> | undefined;
     public get admins() {

@@ -16,16 +16,18 @@ import { loadAsMain } from './utils/commandLineArgs';
 import { createORM } from './config/createORM';
 import { createORMOptions } from './config/createORMOptions';
 import { FIREBASE_PROJECTID } from './env';
+import { LogConfigParser } from './config/logConfigParser';
+import { initializeLogger, logger } from './logger';
 
 const logEntryPasswordConfig = (serverConfig: ServerConfig) => {
     if (serverConfig.entryPassword == null) {
-        AppConsole.log({
+        AppConsole.notice({
             icon: '🔓',
             en: 'Entry password is disabled.',
             ja: 'エントリーパスワードは無効化されています。',
         });
     } else {
-        AppConsole.log({
+        AppConsole.notice({
             icon: '🔐',
             en: 'Entry password is enabled.',
             ja: 'エントリーパスワードは有効化されています。',
@@ -34,14 +36,17 @@ const logEntryPasswordConfig = (serverConfig: ServerConfig) => {
 };
 
 export const main = async (params: { debug: boolean }): Promise<void> => {
-    AppConsole.log({
+    const logConfigResult = new LogConfigParser(process.env).logConfig;
+    initializeLogger(logConfigResult);
+
+    AppConsole.notice({
         en: `Flocon API Server v${VERSION.toString()}`,
     });
 
     const port = process.env.PORT ?? 4000;
 
     const onError = async (message: string) => {
-        console.error(message);
+        logger.error(message);
         await createServerAsError({
             port,
         });

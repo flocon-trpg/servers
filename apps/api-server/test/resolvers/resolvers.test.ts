@@ -47,6 +47,8 @@ import { TestClient } from './utils/testClient';
 import produce from 'immer';
 import { doAutoMigrationBeforeStart } from '../../src/migrate';
 import { sqlite1DbName, sqlite2DbName } from './utils/databaseConfig';
+import { initializeLogger, logger } from '../../src/logger';
+import { Result } from '@kizahasi/result';
 
 type UpOperation = U<typeof roomTemplate>;
 
@@ -423,21 +425,21 @@ const createCases = (): [DbConfig, ServerConfig['entryPassword'] | undefined][] 
 
     const SQLITE_TEST = process.env.SQLITE_TEST;
     if (parseStringToBoolean(SQLITE_TEST).value === false) {
-        console.info('Skips SQLite tests because SQLITE_TEST env is falsy.');
+        logger.info('Skips SQLite tests because SQLITE_TEST env is falsy.');
     } else {
         result.push([sqlite1Type, undefined], [sqlite2Type, plainEntryPassword]);
     }
 
     const POSTGRESQL_TEST = process.env.POSTGRESQL_TEST;
     if (parseStringToBoolean(POSTGRESQL_TEST).value === false) {
-        console.info('Skips PostgreSQL tests because POSTGRESQL_TEST env is falsy.');
+        logger.info('Skips PostgreSQL tests because POSTGRESQL_TEST env is falsy.');
     } else {
         result.push([postgresqlType, plainEntryPassword]);
     }
 
     const MYSQL_TEST = process.env.MYSQL_TEST;
     if (parseStringToBoolean(MYSQL_TEST).value === false) {
-        console.info('Skips MySQL tests because MYSQL_TEST env is falsy.');
+        logger.info('Skips MySQL tests because MYSQL_TEST env is falsy.');
     } else {
         result.push([mysqlType, plainEntryPassword]);
     }
@@ -523,6 +525,8 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
     const systemTimeManager = new SystemTimeManager(dbType.type !== 'MySQL');
 
     beforeAll(async () => {
+        initializeLogger(Result.ok({ logFormat: 'json', logLevel: 'error' }));
+
         if (dbType.type !== 'SQLite') {
             return;
         }
@@ -906,7 +910,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
             const roomMasterResult = Assert.GetRoomsListQuery.toBeSuccess(
                 await clients[Resources.UserUid.master].getRoomsListQuery()
             );
-            console.log('getRoomsList query result: %o', roomMasterResult);
+            logger.trace('getRoomsList query result: %o', roomMasterResult);
             expect(roomMasterResult.rooms).toHaveLength(1);
             expect(roomMasterResult.rooms[0]!.id).toBe(roomId);
             expect(roomMasterResult.rooms[0]!.name).toBe(roomName);

@@ -77,7 +77,7 @@ const createPostgresOptionsResult = (
             });
             return Result.ok(result);
         }
-        AppConsole.logJa(
+        AppConsole.noticeJa(
             `${HEROKU}の値がtrueですが、${DATABASE_URL}の値が見つかりませんでした。Heroku以外で動かしている可能性があります。${DATABASE_URL}によるデータベースの参照はスキップされます。`
         );
     }
@@ -373,7 +373,7 @@ export const createORMOptions = (
     }
 
     if (serverConfig.databaseUrl != null) {
-        AppConsole.logJa(
+        AppConsole.noticeJa(
             `${MYSQL}, ${POSTGRESQL}, ${SQLITE} においてデータベースが設定されているため、${DATABASE_URL} の値は無視されました。`
         );
     }

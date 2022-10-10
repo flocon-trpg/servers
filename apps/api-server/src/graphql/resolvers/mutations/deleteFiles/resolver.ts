@@ -8,6 +8,7 @@ import { thumbsDir } from '../../../../utils/thumbsDir';
 import { ensureAuthorizedUser } from '../../utils/utils';
 import { ResolverContext } from '../../../../types';
 import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
+import { logger } from '../../../../logger';
 
 @Resolver()
 export class DeleteFilesResolver {
@@ -47,7 +48,7 @@ export class DeleteFilesResolver {
         for (const filename of filenamesToDelete) {
             const filePath = path.resolve(directory, filename);
             const statResult = await stat(filePath).catch(err => {
-                console.warn(
+                logger.warn(
                     'stat(%s) threw an error. Maybe the file was not found?: %o',
                     filePath,
                     err
@@ -61,13 +62,13 @@ export class DeleteFilesResolver {
             if (statResult.isFile()) {
                 await remove(filePath);
             } else {
-                console.warn('%s is not a file', filePath);
+                logger.warn('%s is not a file', filePath);
             }
         }
         for (const filename of thumbFilenamesToDelete) {
             const filePath = path.resolve(directory, thumbsDir, filename);
             const statResult = await stat(filePath).catch(err => {
-                console.warn(
+                logger.warn(
                     'stat(%s) threw an error. Maybe the file was not found?: %o',
                     filePath,
                     err
@@ -81,7 +82,7 @@ export class DeleteFilesResolver {
             if (statResult.isFile()) {
                 await remove(filePath);
             } else {
-                console.warn('%s is not a file', filePath);
+                logger.warn('%s is not a file', filePath);
             }
         }
         return filenamesToDelete;
