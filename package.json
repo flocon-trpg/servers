@@ -24,7 +24,7 @@
         "@commitlint/config-conventional": "17.0.3",
         "@typescript-eslint/eslint-plugin": "5.39.0",
         "@typescript-eslint/parser": "5.39.0",
-        "eslint": "8.20.0",
+        "eslint": "8.25.0",
         "eslint-config-prettier": "8.5.0",
         "eslint-plugin-react": "7.30.1",
         "eslint-plugin-react-hooks": "next",
