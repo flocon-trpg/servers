@@ -1,3 +1,4 @@
+import '../beforeAllGlobal';
 import * as $MikroORM from '../../src/entities/room/entity';
 import { EM } from '../../src/types';
 import { User as User$MikroORM } from '../../src/entities/user/entity';
@@ -47,8 +48,7 @@ import { TestClient } from './utils/testClient';
 import produce from 'immer';
 import { doAutoMigrationBeforeStart } from '../../src/migrate';
 import { sqlite1DbName, sqlite2DbName } from './utils/databaseConfig';
-import { initializeLogger, logger } from '../../src/logger';
-import { Result } from '@kizahasi/result';
+import { logger } from '../../src/logger';
 
 type UpOperation = U<typeof roomTemplate>;
 
@@ -525,8 +525,6 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
     const systemTimeManager = new SystemTimeManager(dbType.type !== 'MySQL');
 
     beforeAll(async () => {
-        initializeLogger(Result.ok({ logFormat: 'json', logLevel: 'error' }));
-
         if (dbType.type !== 'SQLite') {
             return;
         }
