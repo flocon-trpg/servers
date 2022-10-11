@@ -1,3 +1,4 @@
+import './beforeAllGlobal';
 import { createORMOptions } from '../src/config/createORMOptions';
 import { ServerConfigForMigration, mysql, postgresql, sqlite } from '../src/config/types';
 
