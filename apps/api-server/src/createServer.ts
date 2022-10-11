@@ -449,6 +449,8 @@ export const createServer = async ({
                 return result;
             },
             onSubscribe: async (ctx, message) => {
+                logger.info({ message }, 'graphql-ws onSubscribe');
+
                 message.payload.query;
                 // Apollo Clientなどではmessage.payload.operationNameが使えるがurqlではnullishなので、queryを代わりに使っている
                 if (!isRoomEventSubscription(message.payload.query)) {
@@ -470,10 +472,15 @@ export const createServer = async ({
                     logger.warn('(typeof RoomEvent.id) should be string');
                 }
             },
+            onNext(ctx, message, args, result) {
+                logger.info({ message, result }, 'graphql-ws onNext');
+            },
             onComplete: (ctx, message) => {
+                logger.info({ message }, 'graphql-ws onComplete');
                 return connectionManager.onLeaveRoom({ connectionId: message.id });
             },
-            onClose: async ctx => {
+            onClose: async (ctx, code, reason) => {
+                logger.info({ code, reason }, 'graphql-ws onClose');
                 for (const key in ctx.subscriptions) {
                     await connectionManager.onLeaveRoom({ connectionId: key });
                 }
