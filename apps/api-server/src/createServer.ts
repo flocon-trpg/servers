@@ -434,7 +434,7 @@ export const createServer = async ({
                 }
             },
             onComplete: (ctx, message) => {
-                connectionManager.onLeaveRoom({ connectionId: message.id });
+                return connectionManager.onLeaveRoom({ connectionId: message.id });
             },
             onClose: async ctx => {
                 for (const key in ctx.subscriptions) {
