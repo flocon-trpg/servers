@@ -29,7 +29,6 @@ WORKDIR /app/servers
 RUN rm -rf ./.git
 RUN rm -rf ./.github
 RUN rm -rf ./.husky
-RUN rm -rf ./.yarn/cache
 RUN rm -rf ./apps/web-server
 
 
