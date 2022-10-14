@@ -24,6 +24,7 @@
         "@types/estree": "1.0.0",
         "@types/jest": "29.1.2",
         "@types/lodash.clonedeep": "4.5.7",
+        "@types/node": "14.18.21",
         "@types/sanitize-filename": "1.6.3",
         "@types/truncate-utf8-bytes": "1.0.0",
         "jest": "29.1.2",
