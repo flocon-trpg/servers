@@ -25,8 +25,7 @@ type Options = $Options<IDatabaseDriver<Connection>>;
 const createMySQLOptionsResult = (
     mysqlConfig: MysqlDatabaseConfig | undefined,
     databaseArg: typeof mysql | null,
-    dirName: DirName,
-    debug: boolean
+    dirName: DirName
 ): Result<Options> => {
     if (mysqlConfig == null) {
         if (databaseArg === mysql) {
@@ -43,17 +42,15 @@ const createMySQLOptionsResult = (
         dirName,
         clientUrl: mysqlConfig.clientUrl,
         driverOptions: mysqlConfig.driverOptions,
-        debug,
     });
     return Result.ok(result);
 };
 
 const createSQLiteOptionsResult = (
     sqliteConfig: SqliteDatabaseConfig,
-    dirName: DirName,
-    debug: boolean
+    dirName: DirName
 ): Ok<Options> => {
-    const result = createSQLiteOptions({ sqliteConfig, dirName, debug });
+    const result = createSQLiteOptions({ sqliteConfig, dirName });
     return Result.ok(result);
 };
 
@@ -61,8 +58,7 @@ const createPostgresOptionsResult = (
     postgresConfig: PostgresqlDatabaseConfig | undefined,
     serverConfig: ServerConfigForMigration,
     databaseArg: typeof postgresql | null,
-    dirName: DirName,
-    debug: boolean
+    dirName: DirName
 ): Result<Options> => {
     if (serverConfig.heroku) {
         if (serverConfig.databaseUrl != null) {
@@ -73,7 +69,6 @@ const createPostgresOptionsResult = (
                     connection: { ssl: { rejectUnauthorized: false } },
                 },
                 dirName,
-                debug,
             });
             return Result.ok(result);
         }
@@ -96,7 +91,6 @@ const createPostgresOptionsResult = (
         dirName,
         clientUrl: postgresConfig.clientUrl,
         driverOptions: postgresConfig.driverOptions,
-        debug,
     });
     return Result.ok(result);
 };
@@ -220,8 +214,7 @@ const seeDatabaseUrl = 'seeDatabaseUrl';
 const createORMOptionsWithoutDatabaseUrl = (
     serverConfig: ServerConfigForMigration,
     databaseArg: typeof postgresql | typeof sqlite | typeof mysql | null,
-    dirName: DirName,
-    debug: boolean
+    dirName: DirName
 ): Result<Options | typeof seeDatabaseUrl> => {
     switch (databaseArg) {
         case null: {
@@ -231,23 +224,17 @@ const createORMOptionsWithoutDatabaseUrl = (
                     return createMySQLOptionsResult(
                         exactlyOneServerConfigResult.mysql,
                         databaseArg,
-                        dirName,
-                        debug
+                        dirName
                     );
                 case postgresql:
                     return createPostgresOptionsResult(
                         exactlyOneServerConfigResult.postgresql,
                         serverConfig,
                         databaseArg,
-                        dirName,
-                        debug
+                        dirName
                     );
                 case sqlite:
-                    return createSQLiteOptionsResult(
-                        exactlyOneServerConfigResult.sqlite,
-                        dirName,
-                        debug
-                    );
+                    return createSQLiteOptionsResult(exactlyOneServerConfigResult.sqlite, dirName);
                 default: {
                     if (exactlyOneServerConfigResult.mysql == null) {
                         if (exactlyOneServerConfigResult.postgresql == null) {
@@ -279,7 +266,7 @@ const createORMOptionsWithoutDatabaseUrl = (
                     `使用するデータベースとしてMySQLが指定されましたが、${MYSQL}の値が設定されていません。`
                 );
             }
-            return createMySQLOptionsResult(serverConfig.mysql, databaseArg, dirName, debug);
+            return createMySQLOptionsResult(serverConfig.mysql, databaseArg, dirName);
         }
         case sqlite: {
             if (serverConfig.sqlite == null) {
@@ -287,15 +274,14 @@ const createORMOptionsWithoutDatabaseUrl = (
                     `使用するデータベースとしてSQLiteが指定されましたが、${SQLITE}の値が設定されていません。`
                 );
             }
-            return createSQLiteOptionsResult(serverConfig.sqlite, dirName, debug);
+            return createSQLiteOptionsResult(serverConfig.sqlite, dirName);
         }
         case postgresql: {
             return createPostgresOptionsResult(
                 serverConfig.postgresql,
                 serverConfig,
                 databaseArg,
-                dirName,
-                debug
+                dirName
             );
         }
     }
@@ -310,14 +296,12 @@ const createORMOptionsWithoutDatabaseUrl = (
 export const createORMOptions = (
     serverConfig: ServerConfigForMigration,
     databaseArg: typeof postgresql | typeof sqlite | typeof mysql | null,
-    dirName: DirName,
-    debug: boolean
+    dirName: DirName
 ): Result<Options> => {
     const ormOptionsBaseResult = createORMOptionsWithoutDatabaseUrl(
         serverConfig,
         databaseArg,
-        dirName,
-        debug
+        dirName
     );
     if (ormOptionsBaseResult.isError) {
         return ormOptionsBaseResult;
@@ -339,7 +323,6 @@ export const createORMOptions = (
                     createMySQLOptions({
                         clientUrl: databaseUrlResult.value.mysql.clientUrl,
                         dirName,
-                        debug,
                         dbName: undefined,
                         driverOptions: undefined,
                     })
@@ -349,7 +332,6 @@ export const createORMOptions = (
                     createPostgreSQLOptions({
                         clientUrl: databaseUrlResult.value.postgresql.clientUrl,
                         dirName,
-                        debug,
                         dbName: undefined,
                         driverOptions: serverConfig.heroku
                             ? {
@@ -366,7 +348,6 @@ export const createORMOptions = (
                             dbName: undefined,
                         },
                         dirName,
-                        debug,
                     })
                 );
         }

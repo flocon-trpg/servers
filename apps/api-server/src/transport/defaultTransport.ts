@@ -41,9 +41,12 @@ const transport = () => {
                     break;
             }
 
-            // pino-http のログのmsgには"request completed"しかなく、reqやresなどに詳細なデータがある。Apollo も同様であり、requestなどに詳細なデータがある。それらを表示する方法の案内となるメッセージ。
+            // pino-http のログのmsgには"request completed"しかなく、reqやresなどに詳細なデータがある。Apolloとmikro-ormも同様であり、それぞれrequestなどとqueryなどに詳細なデータがある。それらを表示する方法の案内となるメッセージ。
             const pinoHttpInfo =
-                obj.res !== undefined || obj.req !== undefined || obj.request !== undefined
+                obj.res !== undefined ||
+                obj.req !== undefined ||
+                obj.request !== undefined ||
+                obj.query !== undefined
                     ? ` (To get detailed data, set ${LOG_FORMAT} to "json")`
                     : '';
             const message = `${level} ${obj.msg}${pinoHttpInfo}`;

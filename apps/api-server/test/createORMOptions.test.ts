@@ -8,7 +8,7 @@ type Params = {
 };
 
 const createORMOptionsResult = ({ serverConfig, databaseArg }: Params) => {
-    return createORMOptions(serverConfig, databaseArg ?? null, 'src', false);
+    return createORMOptions(serverConfig, databaseArg ?? null, 'src');
 };
 
 const toBeOk = (params: Params) => {

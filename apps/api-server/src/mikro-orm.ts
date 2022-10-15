@@ -3,6 +3,7 @@ import {
     Connection,
     Dictionary,
     IDatabaseDriver,
+    LogContext,
     LoggerNamespace,
 } from '@mikro-orm/core';
 import { File } from './entities/file/entity';
@@ -20,6 +21,7 @@ import {
 import { User } from './entities/user/entity';
 import * as t from 'io-ts';
 import { sqliteDatabase } from './config/types';
+import { logger } from './logger';
 
 const entities = [
     Room,
@@ -36,7 +38,6 @@ const entities = [
     FileTag,
 ];
 
-type Debug = boolean | LoggerNamespace[];
 export type DirName = 'src' | 'dist';
 
 const migrations = ({
@@ -53,23 +54,101 @@ const migrations = ({
 
 type Options = $Options<IDatabaseDriver<Connection>>;
 
+/*
+# mikro-ormのログレベルに関して
+
+mikro-ormから出力されるログは、ログレベルをinfoとしている。
+
+mikro-ormのログには実行されたSQLが含まれる。これらは、複数行に渡ること、Room.value のように巨大な文字列が含まれるため、ログレベルをdebug以下にすることも考えられる。だが、SQLiteではDBに行われた操作を確認する手段がおそらく他にないことと、pino-httpやGraphQLによるログも比較的巨大(例: getAvailableGameSystems query)なことと、pino-filterでフィルタリングすることもできるため、infoとした。
+*/
+const loggerFactory: Options['loggerFactory'] = () => {
+    const logBase = (
+        methodName: 'info' | 'warn' | 'error',
+        namespace: LoggerNamespace,
+        message: string,
+        context?: LogContext
+    ): void => {
+        const text = message;
+        if (context == null) {
+            logger[methodName]({ namespace }, text);
+        } else {
+            logger[methodName](
+                {
+                    context: {
+                        ...context,
+                        // pinoのlevelと重複して出力されるのを防ぐため、mikro-ormのログのlevelは取り除いている。
+                        level: undefined,
+                    },
+                    namespace,
+                },
+                text
+            );
+        }
+    };
+    return {
+        log(namespace, message, context?) {
+            logBase('info', namespace, message, context);
+        },
+        error(namespace, message, context?) {
+            logBase('error', namespace, message, context);
+        },
+        warn(namespace, message, context?) {
+            logBase('warn', namespace, message, context);
+        },
+        logQuery(context) {
+            let methodName: 'error' | 'info' | 'warn';
+            switch (context.level) {
+                case 'error':
+                    methodName = 'error';
+                    break;
+                case 'info':
+                case undefined:
+                    methodName = 'info';
+                    break;
+                case 'warning':
+                    methodName = 'warn';
+                    break;
+            }
+            logger[methodName](
+                {
+                    ...context,
+                    // pinoのlevelと重複して出力されるのを防ぐため、mikro-ormのログのlevelは取り除いている。
+                    level: undefined,
+                },
+                'MikroORM logQuery'
+            );
+        },
+        setDebugMode() {
+            // pinoのログレベルで管理する方針のため、debug modeの値は無視している。
+            return;
+        },
+        isEnabled() {
+            return true;
+        },
+    };
+};
+
+const optionsBase: Options = {
+    loggerFactory,
+    // デバッグ向けのログもすべて出力している。管理はログレベルで行う。
+    debug: true,
+};
+
 export const createSQLiteOptions = ({
     sqliteConfig,
     dirName,
-    debug,
 }: {
     sqliteConfig: t.TypeOf<typeof sqliteDatabase>;
     dirName: DirName;
-    debug?: Debug;
 }): Options => {
     return {
+        ...optionsBase,
         entities,
         dbName: sqliteConfig.dbName,
         clientUrl: sqliteConfig.clientUrl,
         migrations: migrations({ dbType: 'sqlite', dirName }),
         type: 'sqlite',
         forceUndefined: true,
-        debug,
     };
 };
 
@@ -77,16 +156,15 @@ export const createPostgreSQLOptions = ({
     dbName,
     dirName,
     clientUrl,
-    debug,
     driverOptions,
 }: {
     dbName: string | undefined;
     dirName: DirName;
     clientUrl: string;
-    debug?: Debug;
     driverOptions: Dictionary<unknown> | undefined;
 }): Options => {
     const opts: Options = {
+        ...optionsBase,
         entities,
         dbName,
         migrations: {
@@ -96,7 +174,6 @@ export const createPostgreSQLOptions = ({
             disableForeignKeys: false,
         },
         type: 'postgresql',
-        debug,
         forceUndefined: true,
         clientUrl,
     };
@@ -110,22 +187,20 @@ export const createMySQLOptions = ({
     dbName,
     dirName,
     clientUrl,
-    debug,
     driverOptions,
 }: {
     dbName: string | undefined;
     dirName: DirName;
     clientUrl: string;
-    debug?: Debug;
     driverOptions: Dictionary<unknown> | undefined;
 }): Options => {
     // HACK: driverOptionsにundefinedをセットするとmikro-ormでエラーが出るため、undefinedを渡さないようにしている。
     const opts: Options = {
+        ...optionsBase,
         entities,
         dbName,
         migrations: migrations({ dbType: 'mysql', dirName }),
         type: 'mysql',
-        debug,
         forceUndefined: true,
         clientUrl,
     };

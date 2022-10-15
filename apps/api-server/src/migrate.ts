@@ -94,9 +94,9 @@ export const migrateByNpmScript = async (
     }
 
     const createORM = (
-        ...[serverConfig, databaseArg, dirName, debug]: Parameters<typeof createORMOptions>
+        ...[serverConfig, databaseArg, dirName]: Parameters<typeof createORMOptions>
     ) => {
-        return createORMCore(createORMOptions(serverConfig, databaseArg, dirName, debug));
+        return createORMCore(createORMOptions(serverConfig, databaseArg, dirName));
     };
 
     let orm: Result<ORM> | undefined = undefined;
@@ -108,7 +108,7 @@ export const migrateByNpmScript = async (
                     ja: `マイグレーションの作成を開始します。`,
                 });
                 const commandLineArgs = await loadMigrationCreate();
-                orm = await createORM(serverConfig.value, commandLineArgs.db, 'src', true);
+                orm = await createORM(serverConfig.value, commandLineArgs.db, 'src');
                 if (orm.isError) {
                     throw new Error(orm.error);
                 }
@@ -127,7 +127,7 @@ export const migrateByNpmScript = async (
                     ja: `マイグレーションの新規作成を開始します。`,
                 });
                 const commandLineArgs = await loadMigrationCreate();
-                orm = await createORM(serverConfig.value, commandLineArgs.db, 'src', true);
+                orm = await createORM(serverConfig.value, commandLineArgs.db, 'src');
                 if (orm.isError) {
                     throw new Error(orm.error);
                 }
@@ -143,7 +143,7 @@ export const migrateByNpmScript = async (
             case up:
             case autoMigrationAlways: {
                 const commandLineArgs = await loadMigrationUpOrCheck();
-                orm = await createORM(serverConfig.value, commandLineArgs.db, 'dist', true);
+                orm = await createORM(serverConfig.value, commandLineArgs.db, 'dist');
                 if (orm.isError) {
                     throw new Error(orm.error);
                 }
@@ -160,7 +160,7 @@ export const migrateByNpmScript = async (
                 });
 
                 const commandLineArgs = await loadMigrationDown();
-                orm = await createORM(serverConfig.value, commandLineArgs.db, 'dist', true);
+                orm = await createORM(serverConfig.value, commandLineArgs.db, 'dist');
                 if (orm.isError) {
                     throw new Error(orm.error);
                 }
@@ -188,7 +188,7 @@ export const migrateByNpmScript = async (
             }
             case check: {
                 const commandLineArgs = await loadMigrationUpOrCheck();
-                orm = await createORM(serverConfig.value, commandLineArgs.db, 'dist', true);
+                orm = await createORM(serverConfig.value, commandLineArgs.db, 'dist');
                 if (orm.isError) {
                     throw new Error(orm.error);
                 }
