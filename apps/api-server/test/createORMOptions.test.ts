@@ -1,3 +1,4 @@
+import './beforeAllGlobal';
 import { createORMOptions } from '../src/config/createORMOptions';
 import { ServerConfigForMigration, mysql, postgresql, sqlite } from '../src/config/types';
 
@@ -7,7 +8,7 @@ type Params = {
 };
 
 const createORMOptionsResult = ({ serverConfig, databaseArg }: Params) => {
-    return createORMOptions(serverConfig, databaseArg ?? null, 'src', false);
+    return createORMOptions(serverConfig, databaseArg ?? null, 'src');
 };
 
 const toBeOk = (params: Params) => {

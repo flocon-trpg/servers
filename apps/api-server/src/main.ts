@@ -16,16 +16,18 @@ import { loadAsMain } from './utils/commandLineArgs';
 import { createORM } from './config/createORM';
 import { createORMOptions } from './config/createORMOptions';
 import { FIREBASE_PROJECTID } from './env';
+import { LogConfigParser } from './config/logConfigParser';
+import { initializeLogger, logger } from './logger';
 
 const logEntryPasswordConfig = (serverConfig: ServerConfig) => {
     if (serverConfig.entryPassword == null) {
-        AppConsole.log({
+        AppConsole.infoAsNotice({
             icon: '🔓',
             en: 'Entry password is disabled.',
             ja: 'エントリーパスワードは無効化されています。',
         });
     } else {
-        AppConsole.log({
+        AppConsole.infoAsNotice({
             icon: '🔐',
             en: 'Entry password is enabled.',
             ja: 'エントリーパスワードは有効化されています。',
@@ -34,14 +36,17 @@ const logEntryPasswordConfig = (serverConfig: ServerConfig) => {
 };
 
 export const main = async (params: { debug: boolean }): Promise<void> => {
-    AppConsole.log({
+    const logConfigResult = new LogConfigParser(process.env).logConfig;
+    initializeLogger(logConfigResult);
+
+    AppConsole.infoAsNotice({
         en: `Flocon API Server v${VERSION.toString()}`,
     });
 
     const port = process.env.PORT ?? 4000;
 
     const onError = async (message: string) => {
-        console.error(message);
+        logger.error(message);
         await createServerAsError({
             port,
         });
@@ -58,9 +63,7 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
     }
 
     const serverConfig = serverConfigResult.value;
-    const orm = await createORM(
-        createORMOptions(serverConfig, commandLineArgs.db, 'dist', commandLineArgs.debug)
-    );
+    const orm = await createORM(createORMOptions(serverConfig, commandLineArgs.db, 'dist'));
 
     if (orm.isError) {
         await onError(orm.error);
@@ -80,10 +83,12 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
             projectId: serverConfig.firebaseProjectId,
         });
     } else {
+        const projectId =
+            serverConfig.firebaseAdminSecret.project_id ?? serverConfig.firebaseProjectId;
         admin.initializeApp({
-            projectId: serverConfig.firebaseAdminSecret.project_id,
+            projectId,
             credential: admin.credential.cert({
-                projectId: serverConfig.firebaseAdminSecret.project_id,
+                projectId,
                 clientEmail: serverConfig.firebaseAdminSecret.client_email,
                 privateKey: serverConfig.firebaseAdminSecret.private_key,
             }),

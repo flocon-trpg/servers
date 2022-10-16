@@ -2,9 +2,9 @@ import { migrateByNpmScript } from './migrate';
 import { AppConsole } from './utils/appConsole';
 
 migrateByNpmScript('down').catch(err => {
-    console.error(err);
-    AppConsole.error({
-        en: '❌ migration-down failed. ',
+    AppConsole.fatal({
+        en: 'migration-down failed. ',
+        errorObject: err,
     });
     process.exit(1);
 });

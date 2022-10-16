@@ -9,7 +9,9 @@ import {
     loadMigrationDown,
     loadMigrationUpOrCheck,
 } from './utils/commandLineArgs';
-import { ORM } from './utils/types';
+import { ORM } from './types';
+import { LogConfigParser } from './config/logConfigParser';
+import { initializeLogger } from './logger';
 
 const check = 'check';
 const create = 'create';
@@ -43,7 +45,7 @@ const migrateUpCore = async ({
     type: typeof up | typeof autoMigrationAlways;
     orm: ORM;
 }) => {
-    AppConsole.log({
+    AppConsole.infoAsNotice({
         en: `Migration-up is started${
             type === autoMigrationAlways ? '(reason: AUTO_MIGRATION is enabled)' : ''
         }.`,
@@ -54,19 +56,19 @@ const migrateUpCore = async ({
     const migrator = orm.getMigrator();
     const migrations = await migrator.getPendingMigrations();
     if (migrations && migrations.length > 0) {
-        AppConsole.log({
+        AppConsole.infoAsNotice({
             en: 'Pending migrations were found. Migrating...',
             ja: '適用すべきマイグレーションが見つかりました。マイグレーションを行います…',
         });
         await migrator.up();
     } else {
-        AppConsole.log({
+        AppConsole.infoAsNotice({
             icon: '✔️',
             en: 'No migration found.',
             ja: '適用すべきマイグレーションはありません。',
         });
     }
-    AppConsole.log({
+    AppConsole.infoAsNotice({
         icon: '😊',
         en: `Migration-up has been successfully finished.`,
         ja: `マイグレーションのupが正常に完了しました。`,
@@ -82,6 +84,9 @@ export const migrateByNpmScript = async (
         | typeof down
         | typeof autoMigrationAlways
 ) => {
+    const logConfigResult = new LogConfigParser(process.env).logConfig;
+    initializeLogger(logConfigResult);
+
     const serverConfigParser = new ServerConfigParser(process.env);
     const serverConfig = serverConfigParser.serverConfigForMigration;
     if (serverConfig.isError) {
@@ -89,27 +94,27 @@ export const migrateByNpmScript = async (
     }
 
     const createORM = (
-        ...[serverConfig, databaseArg, dirName, debug]: Parameters<typeof createORMOptions>
+        ...[serverConfig, databaseArg, dirName]: Parameters<typeof createORMOptions>
     ) => {
-        return createORMCore(createORMOptions(serverConfig, databaseArg, dirName, debug));
+        return createORMCore(createORMOptions(serverConfig, databaseArg, dirName));
     };
 
     let orm: Result<ORM> | undefined = undefined;
     try {
         switch (type) {
             case create: {
-                AppConsole.log({
+                AppConsole.infoAsNotice({
                     en: `Migration-create is started.`,
                     ja: `マイグレーションの作成を開始します。`,
                 });
                 const commandLineArgs = await loadMigrationCreate();
-                orm = await createORM(serverConfig.value, commandLineArgs.db, 'src', true);
+                orm = await createORM(serverConfig.value, commandLineArgs.db, 'src');
                 if (orm.isError) {
                     throw new Error(orm.error);
                 }
                 const migrator = orm.value.getMigrator();
                 await migrator.createMigration();
-                AppConsole.log({
+                AppConsole.infoAsNotice({
                     icon: '😊',
                     en: `Migration-create has been successfully finished.`,
                     ja: `マイグレーションの作成が正常に完了しました。`,
@@ -117,18 +122,18 @@ export const migrateByNpmScript = async (
                 return;
             }
             case createInitial: {
-                AppConsole.log({
+                AppConsole.infoAsNotice({
                     en: `Migration-create-init is started. `,
                     ja: `マイグレーションの新規作成を開始します。`,
                 });
                 const commandLineArgs = await loadMigrationCreate();
-                orm = await createORM(serverConfig.value, commandLineArgs.db, 'src', true);
+                orm = await createORM(serverConfig.value, commandLineArgs.db, 'src');
                 if (orm.isError) {
                     throw new Error(orm.error);
                 }
                 const migrator = orm.value.getMigrator();
                 await migrator.createInitialMigration();
-                AppConsole.log({
+                AppConsole.infoAsNotice({
                     icon: '😊',
                     en: `Migration-create-init has been successfully finished.`,
                     ja: `マイグレーションの新規作成が正常に完了しました。`,
@@ -138,7 +143,7 @@ export const migrateByNpmScript = async (
             case up:
             case autoMigrationAlways: {
                 const commandLineArgs = await loadMigrationUpOrCheck();
-                orm = await createORM(serverConfig.value, commandLineArgs.db, 'dist', true);
+                orm = await createORM(serverConfig.value, commandLineArgs.db, 'dist');
                 if (orm.isError) {
                     throw new Error(orm.error);
                 }
@@ -149,32 +154,32 @@ export const migrateByNpmScript = async (
                 return;
             }
             case down: {
-                AppConsole.log({
+                AppConsole.infoAsNotice({
                     en: `Migration-down is started. `,
                     ja: `マイグレーションのdownを開始します。`,
                 });
 
                 const commandLineArgs = await loadMigrationDown();
-                orm = await createORM(serverConfig.value, commandLineArgs.db, 'dist', true);
+                orm = await createORM(serverConfig.value, commandLineArgs.db, 'dist');
                 if (orm.isError) {
                     throw new Error(orm.error);
                 }
 
                 if (!Number.isInteger(commandLineArgs.count)) {
-                    AppConsole.log({ icon: '❌', en: '"--count" must be integer' });
+                    AppConsole.fatal({ en: '"--count" must be integer' });
                     return;
                 }
                 if (commandLineArgs.count < 0) {
-                    AppConsole.log({ icon: '❌', en: '"--count" must not be negative' });
+                    AppConsole.fatal({ en: '"--count" must not be negative' });
                     return;
                 }
 
                 const migrator = orm.value.getMigrator();
                 for (const _ of new Array(commandLineArgs.count).fill('')) {
                     await migrator.down();
-                    AppConsole.log({ en: 'A migration-down is finished.' });
+                    AppConsole.infoAsNotice({ en: 'A migration-down is finished.' });
                 }
-                AppConsole.log({
+                AppConsole.infoAsNotice({
                     icon: '😊',
                     en: `Migration-down has been successfully finished.`,
                     ja: `マイグレーションのdownが正常に完了しました。`,
@@ -183,14 +188,14 @@ export const migrateByNpmScript = async (
             }
             case check: {
                 const commandLineArgs = await loadMigrationUpOrCheck();
-                orm = await createORM(serverConfig.value, commandLineArgs.db, 'dist', true);
+                orm = await createORM(serverConfig.value, commandLineArgs.db, 'dist');
                 if (orm.isError) {
                     throw new Error(orm.error);
                 }
                 if (await hasMigrations(orm.value)) {
-                    AppConsole.log(migrationCheckErrorMessage);
+                    AppConsole.infoAsNotice(migrationCheckErrorMessage);
                 } else {
-                    AppConsole.log(migrationCheckOkMessage);
+                    AppConsole.infoAsNotice(migrationCheckOkMessage);
                 }
                 return;
             }
@@ -206,7 +211,7 @@ export const checkMigrationsBeforeStart = async (orm: MikroORM<IDatabaseDriver<C
         await orm.close();
         throw new Error(AppConsole.messageToString(migrationCheckErrorMessage));
     }
-    AppConsole.log(migrationCheckOkMessage);
+    AppConsole.infoAsNotice(migrationCheckOkMessage);
 };
 
 export const doAutoMigrationBeforeStart = async (orm: MikroORM<IDatabaseDriver<Connection>>) => {

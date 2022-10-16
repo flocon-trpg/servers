@@ -1,4 +1,5 @@
 import * as t from 'io-ts';
+import { LevelWithSilent } from 'pino';
 import { ReadonlyDeep } from 'type-fest';
 
 // これらを変更したら、あわせて.env.localのテンプレートも変更する必要がある
@@ -123,3 +124,14 @@ export type WritableServerConfig = {
 } & WritableServerConfigForMigration;
 
 export type ServerConfig = ReadonlyDeep<WritableServerConfig>;
+
+export const json = 'json';
+export const $default = 'default';
+export type LogFormat = typeof json | typeof $default;
+
+export type WritableLogConfig = {
+    logFormat: LogFormat | undefined;
+    logLevel: LevelWithSilent | undefined;
+};
+
+export type LogConfig = ReadonlyDeep<WritableLogConfig>;

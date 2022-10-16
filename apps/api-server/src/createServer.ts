@@ -2,18 +2,16 @@ import { ApolloServer } from 'apollo-server-express';
 import express from 'express';
 import path from 'path';
 import { ExpressContext } from 'apollo-server-express/dist/ApolloServer';
-import { DecodedIdToken, ResolverContext } from './graphql+mikro-orm/utils/Contexts';
 import { PromiseQueue } from './utils/promiseQueue';
 import ws from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import { GraphQLSchema, execute, subscribe } from 'graphql';
 import { BaasType } from './enums/BaasType';
-import { User } from './graphql+mikro-orm/entities/user/mikro-orm';
+import { User } from './entities/user/entity';
 import sanitize from 'sanitize-filename';
 import multer from 'multer';
 import sharp from 'sharp';
-import { File } from './graphql+mikro-orm/entities/file/mikro-orm';
-import { getUserIfEntry } from './graphql+mikro-orm/resolvers/utils/helpers';
+import { File } from './entities/file/entity';
 import { Reference } from '@mikro-orm/core';
 import { AppConsole } from './utils/appConsole';
 import { ensureDir } from 'fs-extra';
@@ -21,7 +19,7 @@ import { FilePermissionType } from './enums/FilePermissionType';
 import { easyFlake } from './utils/easyFlake';
 import { ServerConfig } from './config/types';
 import { InMemoryConnectionManager } from './connection/main';
-import { EM } from './utils/types';
+import { DecodedIdToken, EM, ResolverContext } from './types';
 import { Result } from '@kizahasi/result';
 import { Context } from 'graphql-ws';
 import { thumbsDir } from './utils/thumbsDir';
@@ -31,6 +29,10 @@ import { EMBUPLOADER_PATH } from './env';
 import { Html } from './html/Html';
 import { parse } from 'graphql';
 import { createServer as createHttpServer } from 'http';
+import { getUserIfEntry } from './entities/user/getUserIfEntry';
+import { logger } from './logger';
+import pinoHttp from 'pino-http';
+import { PluginDefinition } from 'apollo-server-core';
 
 const set401Status = (res: express.Response) => {
     return res.status(401).setHeader('WWW-Authenticate', 'Bearer');
@@ -58,12 +60,39 @@ const setupIndexAsError = (app: ReturnType<typeof express>) => {
     });
 };
 
+const loggingPlugin: PluginDefinition = {
+    async requestDidStart() {
+        return {
+            async didEncounterErrors(requestContext) {
+                logger.info(
+                    {
+                        request: requestContext.request,
+                        response: requestContext.response,
+                        errors: requestContext.errors,
+                    },
+                    'GraphQL error encountered'
+                );
+            },
+            async willSendResponse(requestContext) {
+                logger.info(
+                    {
+                        request: requestContext.request,
+                        response: requestContext.response,
+                        errors: requestContext.errors,
+                    },
+                    'GraphQL request completed'
+                );
+            },
+        };
+    },
+};
+
 export const createServerAsError = async ({ port }: { port: string | number }) => {
     const app = express();
     setupIndexAsError(app);
 
     const server = app.listen(port, () => {
-        console.warn(
+        logger.warn(
             `⚠️ Server ready at http://localhost:${port}, but API is not working. Please see error messages.`
         );
     });
@@ -128,23 +157,30 @@ export const createServer = async ({
         debug,
         csrfPrevention: true,
         cache: 'bounded',
+        plugins: [loggingPlugin],
     });
     await apolloServer.start();
 
     const app = express();
+
+    app.use(
+        pinoHttp({
+            logger: logger.get(),
+        })
+    );
 
     // 先に書くほど優先度が高いようなので、applyMiddlewareを先に書くと、/graphqlが上書きされない。
     apolloServer.applyMiddleware({ app });
 
     if (serverConfig.accessControlAllowOrigin == null) {
         !quiet &&
-            AppConsole.log({
+            AppConsole.infoAsNotice({
                 en: '"accessControlAllowOrigin" config was not found. "Access-Control-Allow-Origin" header will be empty.',
                 ja: '"accessControlAllowOrigin" のコンフィグが見つかりませんでした。"Access-Control-Allow-Origin" ヘッダーは空になります。',
             });
     } else {
         !quiet &&
-            AppConsole.log({
+            AppConsole.infoAsNotice({
                 en: `"accessControlAllowOrigin" config was found. "Access-Control-Allow-Origin" header will be "${serverConfig.accessControlAllowOrigin}".`,
                 ja: `"accessControlAllowOrigin" のコンフィグが見つかりました。"Access-Control-Allow-Origin" ヘッダーは "${serverConfig.accessControlAllowOrigin}" になります。`,
             });
@@ -163,7 +199,7 @@ export const createServer = async ({
         const uploaderConfig = serverConfig.uploader;
         if (uploaderConfig == null || !uploaderConfig.enabled) {
             !quiet &&
-                AppConsole.log({
+                AppConsole.infoAsNotice({
                     en: `The uploader of API server is disabled.`,
                     ja: `APIサーバーのアップローダーは無効化されています。`,
                 });
@@ -180,7 +216,7 @@ export const createServer = async ({
         }
 
         !quiet &&
-            AppConsole.log({
+            AppConsole.infoAsNotice({
                 en: `The uploader of API server is enabled.`,
                 ja: `APIサーバーのアップローダーは有効化されています。`,
             });
@@ -288,8 +324,8 @@ export const createServer = async ({
                     .toFile(thumbPath)
                     .then(() => true)
                     .catch(err => {
-                        // 画像かどうかに関わらず全てのファイルをsharpに渡すため、mp3などといった画像でないファイルの場合はほぼ確実にここに来る。そのため、console.warnなどではなくconsole.logを使っている。
-                        console.log(err);
+                        // 画像かどうかに関わらず全てのファイルをsharpに渡すため、mp3などといった画像でないファイルの場合はほぼ確実にここに来る。そのため、warnなどではなくそれよりlevelの低いdebugを使っている。
+                        logger.debug(err);
                         return false;
                     });
                 const permissionType =
@@ -413,6 +449,8 @@ export const createServer = async ({
                 return result;
             },
             onSubscribe: async (ctx, message) => {
+                logger.info({ message }, 'graphql-ws onSubscribe');
+
                 message.payload.query;
                 // Apollo Clientなどではmessage.payload.operationNameが使えるがurqlではnullishなので、queryを代わりに使っている
                 if (!isRoomEventSubscription(message.payload.query)) {
@@ -431,13 +469,18 @@ export const createServer = async ({
                         roomId,
                     });
                 } else {
-                    console.warn('(typeof RoomEvent.id) should be string');
+                    logger.warn('(typeof RoomEvent.id) should be string');
                 }
             },
-            onComplete: (ctx, message) => {
-                connectionManager.onLeaveRoom({ connectionId: message.id });
+            onNext(ctx, message, args, result) {
+                logger.info({ message, result }, 'graphql-ws onNext');
             },
-            onClose: async ctx => {
+            onComplete: (ctx, message) => {
+                logger.info({ message }, 'graphql-ws onComplete');
+                return connectionManager.onLeaveRoom({ connectionId: message.id });
+            },
+            onClose: async (ctx, code, reason) => {
+                logger.info({ code, reason }, 'graphql-ws onClose');
                 for (const key in ctx.subscriptions) {
                     await connectionManager.onLeaveRoom({ connectionId: key });
                 }
@@ -451,9 +494,13 @@ export const createServer = async ({
     const server = httpServer.listen(port, () => {
         // TODO: /graphqlが含まれているとAPI_HTTPなどの設定にも/graphqlの部分も入力してしまいそうなので、対処したほうがいいと思われる。また、createServerAsErrorとの統一性も取れていない
         !quiet &&
-            console.log(`🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`);
+            logger.infoAsNotice(
+                `🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`
+            );
         !quiet &&
-            console.log(`🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`);
+            logger.infoAsNotice(
+                `🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`
+            );
     });
     const close = async () => {
         await new Promise((resolve, reject) => {

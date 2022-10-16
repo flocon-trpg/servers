@@ -19,8 +19,6 @@ const PostgreSQLConfig = {
     dbName: 'test',
     dirName: 'src',
     clientUrl: postgresClientUrl,
-    // debug: trueだとGitHub Actionsのログのサイズが巨大（10MB以上）になるのでfalseにしている
-    debug: false,
     driverOptions: undefined,
 } as const;
 
@@ -28,8 +26,6 @@ const MySQLConfig = {
     dbName: 'test',
     dirName: 'src',
     clientUrl: mySQLClientUrl,
-    // debug: trueだとGitHub Actionsのログのサイズが巨大（10MB以上）になるのでfalseにしている
-    debug: false,
     driverOptions: undefined,
 } as const;
 
@@ -50,8 +46,6 @@ const createSQLiteConfig = (dbName: string): Parameters<typeof createSQLiteOptio
             clientUrl: undefined,
         },
         dirName: 'src',
-        // debug: trueだとGitHub Actionsのログのサイズが巨大（10MB以上）になるのでfalseにしている
-        debug: false,
     } as const;
 };
 

@@ -3,8 +3,9 @@
 import { createNodeCache } from '@flocon-trpg/cache';
 import { PubSub } from 'graphql-subscriptions';
 import { WritingMessageStatusType } from '../enums/WritingMessageStatusType';
-import { RoomEventPayload, all } from '../graphql+mikro-orm/resolvers/rooms/RoomResolver';
-import { ROOM_EVENT } from '../graphql+mikro-orm/utils/Topics';
+import { RoomEventPayload } from '../graphql/resolvers/subsciptions/roomEvent/payload';
+import { ROOM_EVENT } from '../graphql/resolvers/subsciptions/roomEvent/topics';
+import { all } from '../graphql/resolvers/types';
 
 export const pubSub = new PubSub();
 
