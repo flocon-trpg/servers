@@ -189,6 +189,10 @@ jobs:
                   node-version: 16.x
                   cache: yarn
 
+            # HACK: Storybookはpnpだとエラーが出るため、node-modulesを用いている
+            - name: Set nodeLinker as node-modules
+              run: 'echo "nodeLinker: node-modules" >> ./.yarnrc.yml'
+
             - run: yarn
 
             - name: Build web-server deps
