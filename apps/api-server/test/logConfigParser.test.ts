@@ -26,7 +26,7 @@ describe('logConfigParser', () => {
         expect(actual.logConfig.error).toBeTruthy();
     });
 
-    it.each(['silent', 'trace', 'debug', 'info', 'notice', 'warn', 'error', 'fatal'])(
+    it.each(['silent', 'trace', 'debug', 'info', 'warn', 'error', 'fatal'])(
         'tests LOG_LEVEL=%s',
         LOG_LEVEL => {
             const actual = new LogConfigParser({ LOG_LEVEL });
@@ -36,7 +36,7 @@ describe('logConfigParser', () => {
         }
     );
 
-    it('tests LOG_LEVEL=" Silent  " to be "silent"', () => {
+    it('tests LOG_LEVEL to be trimmed and be lowercase', () => {
         const actual = new LogConfigParser({ LOG_LEVEL: ' Silent  ' });
         expect(actual.logConfig).toEqual(Result.ok({ ...defaultLogConfig, logLevel: 'silent' }));
     });
