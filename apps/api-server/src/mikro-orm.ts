@@ -63,7 +63,7 @@ mikro-ormのログには実行されたSQLが含まれる。これらは、複�
 */
 const loggerFactory: Options['loggerFactory'] = () => {
     const logBase = (
-        methodName: 'info' | 'warn' | 'error',
+        methodName: 'debug' | 'info' | 'warn' | 'error',
         namespace: LoggerNamespace,
         message: string,
         context?: LogContext
@@ -87,7 +87,7 @@ const loggerFactory: Options['loggerFactory'] = () => {
     };
     return {
         log(namespace, message, context?) {
-            logBase('info', namespace, message, context);
+            logBase('debug', namespace, message, context);
         },
         error(namespace, message, context?) {
             logBase('error', namespace, message, context);
