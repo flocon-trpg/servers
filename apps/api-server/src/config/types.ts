@@ -1,7 +1,6 @@
 import * as t from 'io-ts';
 import { LevelWithSilent } from 'pino';
 import { ReadonlyDeep } from 'type-fest';
-import { notice } from '../logger';
 
 // これらを変更したら、あわせて.env.localのテンプレートも変更する必要がある
 
@@ -132,7 +131,7 @@ export type LogFormat = typeof json | typeof $default;
 
 export type WritableLogConfig = {
     logFormat: LogFormat | undefined;
-    logLevel: LevelWithSilent | typeof notice | undefined;
+    logLevel: LevelWithSilent | undefined;
 };
 
 export type LogConfig = ReadonlyDeep<WritableLogConfig>;

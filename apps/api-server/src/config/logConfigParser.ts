@@ -1,7 +1,6 @@
 import { Ok, Result } from '@kizahasi/result';
 import { LevelWithSilent } from 'pino';
 import { LOG_FORMAT, LOG_LEVEL } from '../env';
-import { notice } from '../logger';
 import { $default, LogConfig, LogFormat, json } from './types';
 
 // 誤って source の型が Result<T, TError> になっているときに、型エラーを出すための関数。
@@ -16,7 +15,7 @@ export class LogConfigParser {
         return this[LOG_FORMAT];
     }
 
-    public readonly [LOG_LEVEL]: Result<LevelWithSilent | typeof notice> | undefined;
+    public readonly [LOG_LEVEL]: Result<LevelWithSilent> | undefined;
     public get logLevel() {
         return this[LOG_LEVEL];
     }
@@ -43,9 +42,7 @@ export class LogConfigParser {
         return Result.error(`${LOG_FORMAT} is invalid. Supported values: "json", "default".`);
     }
 
-    private static logLevel(
-        env: typeof process.env
-    ): Result<LevelWithSilent | typeof notice> | undefined {
+    private static logLevel(env: typeof process.env): Result<LevelWithSilent> | undefined {
         const logLevel = env[LOG_LEVEL];
         if (logLevel == null) {
             return undefined;
@@ -57,7 +54,6 @@ export class LogConfigParser {
             case 'error':
             case 'warn':
             case 'info':
-            case notice:
             case 'debug':
             case 'trace':
             case 'silent': {

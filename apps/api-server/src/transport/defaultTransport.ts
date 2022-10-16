@@ -1,5 +1,17 @@
 import build from 'pino-abstract-transport';
 import { LOG_FORMAT } from '../env';
+import { notice } from '../logger';
+
+let notified = false;
+const notifyLogIsSkippedOnce = () => {
+    if (notified) {
+        return;
+    }
+    console.info(
+        `Because ${LOG_FORMAT} is default or not set, some logs will be skipped. Set ${LOG_FORMAT} as json to output skipped logs. / ${LOG_FORMAT} が default であるかセットされていないため、一部のログの出力はスキップされます。${LOG_FORMAT} を json にすることで、スキップせずに出力されます。`
+    );
+    notified = true;
+};
 
 const transport = () => {
     return build(source => {
@@ -17,10 +29,6 @@ const transport = () => {
                     break;
                 case 30:
                     level = '[INFO]';
-                    consoleMethodName = 'log';
-                    break;
-                case 35:
-                    level = '[NOTICE]';
                     consoleMethodName = 'info';
                     break;
                 case 40:
@@ -41,15 +49,11 @@ const transport = () => {
                     break;
             }
 
-            // pino-http のログのmsgには"request completed"しかなく、reqやresなどに詳細なデータがある。Apolloとmikro-ormも同様であり、それぞれrequestなどとqueryなどに詳細なデータがある。それらを表示する方法の案内となるメッセージ。
-            const pinoHttpInfo =
-                obj.res !== undefined ||
-                obj.req !== undefined ||
-                obj.request !== undefined ||
-                obj.query !== undefined
-                    ? ` (To get detailed data, set ${LOG_FORMAT} to "json")`
-                    : '';
-            const message = `${level} ${obj.msg}${pinoHttpInfo}`;
+            if (obj[notice] !== true && obj.level <= 30) {
+                notifyLogIsSkippedOnce();
+                return;
+            }
+            const message = `${level} ${obj.msg}`;
             if (obj.err === undefined) {
                 console[consoleMethodName](message);
             } else {

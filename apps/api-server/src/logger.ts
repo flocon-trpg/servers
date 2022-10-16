@@ -4,13 +4,7 @@ import { LogConfig } from './config/types';
 
 export const notice = 'notice';
 
-// pinoのデフォルトのログレベルでは、「Flocon API Server v*.*.*」や環境変数の情報などといった多くのユーザーに伝えるべきデータと、pino-httpのログのようにオンプレミスサーバーの管理者など以外に必要なさそうなデータは両方とも'info'に属するしかない。
-// これらを区別するために、'notice'という独自のレベルを定義して前者のデータは'notice'を用いている。
-const customLevels = {
-    [notice]: 35,
-} as const;
-
-export type Pino = Logger<{ customLevels: typeof customLevels }>;
+export type Pino = Logger;
 
 const defaultTransport = './transport/defaultTransport.js';
 
@@ -23,7 +17,6 @@ let uninitializedLoggerCache: Pino | null = null;
 const getUninitializeLogger = () => {
     if (uninitializedLoggerCache == null) {
         uninitializedLoggerCache = pino({
-            customLevels,
             transport: { target: defaultTransport },
         });
     }
@@ -60,10 +53,10 @@ export const logger = {
         const logger = this.get();
         return logger.info.bind(logger);
     },
-    /** `get().notice` と同じです。 */
-    get notice() {
+    /** ログレベルを info としてログを出力しますが、LOG_FORMAT が default などのときでも出力します。 */
+    infoAsNotice(message: string) {
         const logger = this.get();
-        return logger.notice.bind(logger);
+        return logger.info({ [notice]: true }, message);
     },
     /** `get().warn` と同じです。 */
     get warn() {
@@ -92,10 +85,10 @@ export const initializeLogger = (logConfigResult: Result<LogConfig>) => {
         throw new Error(logConfigResult.error);
     }
 
-    const logLevel = logConfigResult.value.logLevel ?? notice;
+    const logLevel = logConfigResult.value.logLevel ?? 'info';
     switch (logConfigResult.value.logFormat) {
         case 'json': {
-            const logger = pino({ customLevels, level: logLevel });
+            const logger = pino({ level: logLevel });
             loggerRef = {
                 isInitialized: true,
                 get() {
@@ -107,7 +100,6 @@ export const initializeLogger = (logConfigResult: Result<LogConfig>) => {
         case 'default':
         case undefined: {
             const logger = pino({
-                customLevels,
                 level: logLevel,
                 transport: { target: defaultTransport },
             });

@@ -17,7 +17,7 @@ export namespace AppConsole {
     };
 
     const logCore = (
-        consoleMethodName: 'info' | 'notice' | 'warn' | 'error' | 'fatal',
+        consoleMethodName: 'info' | 'warn' | 'error' | 'fatal',
         message: Message
     ): void => {
         const messageStr = messageToString(message);
@@ -32,12 +32,12 @@ export namespace AppConsole {
         logCore('info', message);
     };
 
-    export const notice = (message: Message): void => {
-        logCore('notice', message);
+    export const infoAsNotice = (message: Omit<Message, 'errorObject'>): void => {
+        logger.infoAsNotice(messageToString(message));
     };
 
-    export const noticeJa = (message: string): void => {
-        logger.notice(message);
+    export const infoAsNoticeJa = (message: string): void => {
+        logger.infoAsNotice(message);
     };
 
     export const warn = (message: Message): void => {

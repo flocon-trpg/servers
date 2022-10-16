@@ -21,13 +21,13 @@ import { initializeLogger, logger } from './logger';
 
 const logEntryPasswordConfig = (serverConfig: ServerConfig) => {
     if (serverConfig.entryPassword == null) {
-        AppConsole.notice({
+        AppConsole.infoAsNotice({
             icon: '🔓',
             en: 'Entry password is disabled.',
             ja: 'エントリーパスワードは無効化されています。',
         });
     } else {
-        AppConsole.notice({
+        AppConsole.infoAsNotice({
             icon: '🔐',
             en: 'Entry password is enabled.',
             ja: 'エントリーパスワードは有効化されています。',
@@ -39,7 +39,7 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
     const logConfigResult = new LogConfigParser(process.env).logConfig;
     initializeLogger(logConfigResult);
 
-    AppConsole.notice({
+    AppConsole.infoAsNotice({
         en: `Flocon API Server v${VERSION.toString()}`,
     });
 

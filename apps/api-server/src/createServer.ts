@@ -174,13 +174,13 @@ export const createServer = async ({
 
     if (serverConfig.accessControlAllowOrigin == null) {
         !quiet &&
-            AppConsole.notice({
+            AppConsole.infoAsNotice({
                 en: '"accessControlAllowOrigin" config was not found. "Access-Control-Allow-Origin" header will be empty.',
                 ja: '"accessControlAllowOrigin" のコンフィグが見つかりませんでした。"Access-Control-Allow-Origin" ヘッダーは空になります。',
             });
     } else {
         !quiet &&
-            AppConsole.notice({
+            AppConsole.infoAsNotice({
                 en: `"accessControlAllowOrigin" config was found. "Access-Control-Allow-Origin" header will be "${serverConfig.accessControlAllowOrigin}".`,
                 ja: `"accessControlAllowOrigin" のコンフィグが見つかりました。"Access-Control-Allow-Origin" ヘッダーは "${serverConfig.accessControlAllowOrigin}" になります。`,
             });
@@ -199,7 +199,7 @@ export const createServer = async ({
         const uploaderConfig = serverConfig.uploader;
         if (uploaderConfig == null || !uploaderConfig.enabled) {
             !quiet &&
-                AppConsole.notice({
+                AppConsole.infoAsNotice({
                     en: `The uploader of API server is disabled.`,
                     ja: `APIサーバーのアップローダーは無効化されています。`,
                 });
@@ -216,7 +216,7 @@ export const createServer = async ({
         }
 
         !quiet &&
-            AppConsole.notice({
+            AppConsole.infoAsNotice({
                 en: `The uploader of API server is enabled.`,
                 ja: `APIサーバーのアップローダーは有効化されています。`,
             });
@@ -494,9 +494,13 @@ export const createServer = async ({
     const server = httpServer.listen(port, () => {
         // TODO: /graphqlが含まれているとAPI_HTTPなどの設定にも/graphqlの部分も入力してしまいそうなので、対処したほうがいいと思われる。また、createServerAsErrorとの統一性も取れていない
         !quiet &&
-            logger.notice(`🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`);
+            logger.infoAsNotice(
+                `🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`
+            );
         !quiet &&
-            logger.notice(`🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`);
+            logger.infoAsNotice(
+                `🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`
+            );
     });
     const close = async () => {
         await new Promise((resolve, reject) => {

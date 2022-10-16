@@ -45,7 +45,7 @@ const migrateUpCore = async ({
     type: typeof up | typeof autoMigrationAlways;
     orm: ORM;
 }) => {
-    AppConsole.notice({
+    AppConsole.infoAsNotice({
         en: `Migration-up is started${
             type === autoMigrationAlways ? '(reason: AUTO_MIGRATION is enabled)' : ''
         }.`,
@@ -56,19 +56,19 @@ const migrateUpCore = async ({
     const migrator = orm.getMigrator();
     const migrations = await migrator.getPendingMigrations();
     if (migrations && migrations.length > 0) {
-        AppConsole.notice({
+        AppConsole.infoAsNotice({
             en: 'Pending migrations were found. Migrating...',
             ja: '適用すべきマイグレーションが見つかりました。マイグレーションを行います…',
         });
         await migrator.up();
     } else {
-        AppConsole.notice({
+        AppConsole.infoAsNotice({
             icon: '✔️',
             en: 'No migration found.',
             ja: '適用すべきマイグレーションはありません。',
         });
     }
-    AppConsole.notice({
+    AppConsole.infoAsNotice({
         icon: '😊',
         en: `Migration-up has been successfully finished.`,
         ja: `マイグレーションのupが正常に完了しました。`,
@@ -103,7 +103,7 @@ export const migrateByNpmScript = async (
     try {
         switch (type) {
             case create: {
-                AppConsole.notice({
+                AppConsole.infoAsNotice({
                     en: `Migration-create is started.`,
                     ja: `マイグレーションの作成を開始します。`,
                 });
@@ -114,7 +114,7 @@ export const migrateByNpmScript = async (
                 }
                 const migrator = orm.value.getMigrator();
                 await migrator.createMigration();
-                AppConsole.notice({
+                AppConsole.infoAsNotice({
                     icon: '😊',
                     en: `Migration-create has been successfully finished.`,
                     ja: `マイグレーションの作成が正常に完了しました。`,
@@ -122,7 +122,7 @@ export const migrateByNpmScript = async (
                 return;
             }
             case createInitial: {
-                AppConsole.notice({
+                AppConsole.infoAsNotice({
                     en: `Migration-create-init is started. `,
                     ja: `マイグレーションの新規作成を開始します。`,
                 });
@@ -133,7 +133,7 @@ export const migrateByNpmScript = async (
                 }
                 const migrator = orm.value.getMigrator();
                 await migrator.createInitialMigration();
-                AppConsole.notice({
+                AppConsole.infoAsNotice({
                     icon: '😊',
                     en: `Migration-create-init has been successfully finished.`,
                     ja: `マイグレーションの新規作成が正常に完了しました。`,
@@ -154,7 +154,7 @@ export const migrateByNpmScript = async (
                 return;
             }
             case down: {
-                AppConsole.notice({
+                AppConsole.infoAsNotice({
                     en: `Migration-down is started. `,
                     ja: `マイグレーションのdownを開始します。`,
                 });
@@ -177,9 +177,9 @@ export const migrateByNpmScript = async (
                 const migrator = orm.value.getMigrator();
                 for (const _ of new Array(commandLineArgs.count).fill('')) {
                     await migrator.down();
-                    AppConsole.notice({ en: 'A migration-down is finished.' });
+                    AppConsole.infoAsNotice({ en: 'A migration-down is finished.' });
                 }
-                AppConsole.notice({
+                AppConsole.infoAsNotice({
                     icon: '😊',
                     en: `Migration-down has been successfully finished.`,
                     ja: `マイグレーションのdownが正常に完了しました。`,
@@ -193,9 +193,9 @@ export const migrateByNpmScript = async (
                     throw new Error(orm.error);
                 }
                 if (await hasMigrations(orm.value)) {
-                    AppConsole.notice(migrationCheckErrorMessage);
+                    AppConsole.infoAsNotice(migrationCheckErrorMessage);
                 } else {
-                    AppConsole.notice(migrationCheckOkMessage);
+                    AppConsole.infoAsNotice(migrationCheckOkMessage);
                 }
                 return;
             }
@@ -211,7 +211,7 @@ export const checkMigrationsBeforeStart = async (orm: MikroORM<IDatabaseDriver<C
         await orm.close();
         throw new Error(AppConsole.messageToString(migrationCheckErrorMessage));
     }
-    AppConsole.notice(migrationCheckOkMessage);
+    AppConsole.infoAsNotice(migrationCheckOkMessage);
 };
 
 export const doAutoMigrationBeforeStart = async (orm: MikroORM<IDatabaseDriver<Connection>>) => {
