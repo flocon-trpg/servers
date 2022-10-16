@@ -33,14 +33,14 @@ const getUninitializeLogger = () => {
 const uninitializedLoggerRef: LoggerRefInternal = {
     isInitialized: false,
     get() {
-        // LOG_LEVELがパースできなかった場合などはinitializeせずにエラーを通知する必要がある。その際にuninitializedLoggerが使われる。
+        // LOG_LEVELがパースできなかった場合などはinitializeLoggerが実行されていない状態でエラーを通知する必要がある。その際にuninitializedLoggerが使われる。
         return getUninitializeLogger();
     },
 };
 
 let loggerRef: LoggerRefInternal = uninitializedLoggerRef;
 
-/** `get()`を実行することでloggerを取得できます。事前に`initializeLogger`を実行しておく必要があります。 */
+/** `get()`を実行することでloggerを取得できます。 */
 export const logger = {
     get() {
         return loggerRef.get();
@@ -82,10 +82,10 @@ export const logger = {
     },
 };
 
-/** loggerを準備します。`logget.get()`などを呼び出す前に必ず実行しておく必要があります。複数回実行すると例外が投げられます。 */
+/** loggerを準備します。この関数を実行せずにロギングが行われる場合、デフォルトのロガーが使われます。複数回実行するとwanrのログが出力されます。 */
 export const initializeLogger = (logConfigResult: Result<LogConfig>) => {
     if (loggerRef.isInitialized) {
-        throw new Error('Logger is already initialized.');
+        logger.warn('initializeLogger was called multiple times.');
     }
 
     if (logConfigResult.isError) {
@@ -97,7 +97,7 @@ export const initializeLogger = (logConfigResult: Result<LogConfig>) => {
         case 'json': {
             const logger = pino({ customLevels, level: logLevel });
             loggerRef = {
-                isInitialized: false,
+                isInitialized: true,
                 get() {
                     return logger;
                 },
@@ -112,7 +112,7 @@ export const initializeLogger = (logConfigResult: Result<LogConfig>) => {
                 transport: { target: defaultTransport },
             });
             loggerRef = {
-                isInitialized: false,
+                isInitialized: true,
                 get() {
                     return logger;
                 },
