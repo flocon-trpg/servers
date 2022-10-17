@@ -13,13 +13,15 @@
     "scripts": {
         "build": "yarn run build:self",
         "build-ci": "yarn run build:self",
-        "build:self": "rimraf ./dist && yarn build:tsc",
-        "build:tsc": "tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-types.json"
+        "build:self": "rimraf ./dist && yarn build:rollup",
+        "build:rollup": "rollup --config"
     },
     "name": "@flocon-trpg/typed-document-node-v0.7.2",
     "author": "kizahasi",
     "devDependencies": {
+        "@rollup/plugin-typescript": "9.0.1",
         "rimraf": "3.0.2",
+        "rollup": "3.2.2",
         "typescript": "4.8.4"
     },
     "dependencies": {
