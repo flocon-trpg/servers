@@ -2806,6 +2806,7 @@ __metadata:
     "@mikro-orm/mysql": ^5.1.1
     "@mikro-orm/postgresql": ^5.1.1
     "@mikro-orm/sqlite": ^5.1.1
+    "@rollup/plugin-typescript": 9.0.1
     "@types/bcrypt": ^5.0.0
     "@types/color": ^3.0.2
     "@types/express": ^4.17.13
@@ -2853,6 +2854,8 @@ __metadata:
     rate-limiter-flexible: ^2.3.0
     reflect-metadata: ^0.1.13
     rimraf: 3.0.2
+    rollup: 3.2.2
+    rollup-plugin-multi-input: ^1.3.1
     rxjs: ^7.5.6
     safe-compare: ^1.1.4
     sanitize-filename: ^1.6.3
@@ -10548,6 +10551,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"core-js@npm:^3.1.3":
+  version: 3.25.5
+  resolution: "core-js@npm:3.25.5"
+  checksum: 208b308c49bc022f90d4349d4c99802a73c9d55053976b3c529f10014c1e37845926defad8c519f2c7f71ea0acf18d2b323ab6aaee34dc85b4c4b3ced0623f3f
+  languageName: node
+  linkType: hard
+
 "core-util-is@npm:~1.0.0":
   version: 1.0.3
   resolution: "core-util-is@npm:1.0.3"
@@ -12392,6 +12402,19 @@ __metadata:
     merge2: ^1.2.3
     micromatch: ^3.1.10
   checksum: 304ccff1d437fcc44ae0168b0c3899054b92e0fd6af6ad7c3ccc82ab4ddd210b99c7c739d60ee3686da2aa165cd1a31810b31fd91f7c2a575d297342a9fc0534
+  languageName: node
+  linkType: hard
+
+"fast-glob@npm:^3.0.0":
+  version: 3.2.12
+  resolution: "fast-glob@npm:3.2.12"
+  dependencies:
+    "@nodelib/fs.stat": ^2.0.2
+    "@nodelib/fs.walk": ^1.2.3
+    glob-parent: ^5.1.2
+    merge2: ^1.3.0
+    micromatch: ^4.0.4
+  checksum: 0b1990f6ce831c7e28c4d505edcdaad8e27e88ab9fa65eedadb730438cfc7cde4910d6c975d6b7b8dc8a73da4773702ebcfcd6e3518e73938bb1383badfe01c2
   languageName: node
   linkType: hard
 
@@ -16761,7 +16784,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:4.17.21, lodash@npm:^4.0.1, lodash@npm:^4.17.15, lodash@npm:^4.17.19, lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:~4.17.0":
+"lodash@npm:4.17.21, lodash@npm:^4.0.1, lodash@npm:^4.17.11, lodash@npm:^4.17.15, lodash@npm:^4.17.19, lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:~4.17.0":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
   checksum: eb835a2e51d381e561e508ce932ea50a8e5a68f4ebdd771ea240d3048244a8d13658acbd502cd4829768c56f2e16bdd4340b9ea141297d472517b83868e677f7
@@ -21956,6 +21979,17 @@ __metadata:
     hash-base: ^3.0.0
     inherits: ^2.0.1
   checksum: 006accc40578ee2beae382757c4ce2908a826b27e2b079efdcd2959ee544ddf210b7b5d7d5e80467807604244e7388427330f5c6d4cd61e6edaddc5773ccc393
+  languageName: node
+  linkType: hard
+
+"rollup-plugin-multi-input@npm:^1.3.1":
+  version: 1.3.1
+  resolution: "rollup-plugin-multi-input@npm:1.3.1"
+  dependencies:
+    core-js: ^3.1.3
+    fast-glob: ^3.0.0
+    lodash: ^4.17.11
+  checksum: b4e3288ac5173b8e7ec236a8ae6fd20110d90a22b51ea7eb89034e7011615edd3d55e018ba684af1fbb04bcaa469398b4913b21a18517417e40895e14ff8a503
   languageName: node
   linkType: hard
 
