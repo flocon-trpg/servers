@@ -1,4 +1,3 @@
-import { GetRoomMessagesFailureType } from '@flocon-trpg/typed-document-node-v0.7.8';
 import {
     Args,
     ArgsType,
@@ -22,6 +21,7 @@ import {
 } from '../../utils/utils';
 import { ResolverContext } from '../../../../types';
 import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
+import { GetRoomMessagesFailureType } from '../../../../enums/GetRoomMessagesFailureType';
 
 @ArgsType()
 class GetMessagesArgs {
