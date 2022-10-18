@@ -1,5 +1,5 @@
-dist/
 .yarn/
 .yarnrc.yml
-/apps/web-server/.next/
-/apps/web-server/out/
+/.husky/
+/apps/
+/packages/

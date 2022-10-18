@@ -168,7 +168,7 @@ jobs:
               run: yarn lint
 
             - name: Prettier(check)
-              run: yarn prettier:base --check
+              run: yarn prettier-check
 
     publish-storybook:
         name: Publish Storybook to Chromatic

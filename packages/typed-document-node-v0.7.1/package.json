@@ -14,12 +14,24 @@
         "build": "yarn run build:self",
         "build-ci": "yarn run build:self",
         "build:self": "rimraf ./dist && yarn build:rollup",
-        "build:rollup": "rollup --config"
+        "build:rollup": "rollup --config",
+        "lint": "eslint \"**/*.ts\" --cache",
+        "prettier": "yarn prettier:base --write --cache",
+        "prettier-check": "yarn prettier:base --check",
+        "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\""
     },
     "name": "@flocon-trpg/typed-document-node-v0.7.1",
     "author": "kizahasi",
     "devDependencies": {
+        "@flocon-trpg/eslint-config": "workspace:^",
+        "@flocon-trpg/prettier-config": "workspace:^",
+        "@flocon-trpg/tsconfig": "workspace:^",
         "@rollup/plugin-typescript": "9.0.1",
+        "@typescript-eslint/eslint-plugin": "5.39.0",
+        "@typescript-eslint/parser": "5.39.0",
+        "eslint": "8.25.0",
+        "eslint-config-prettier": "8.5.0",
+        "prettier": "2.7.1",
         "rimraf": "3.0.2",
         "rollup": "3.2.2",
         "typescript": "4.8.4"

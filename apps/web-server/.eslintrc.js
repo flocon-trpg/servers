@@ -3,6 +3,7 @@ module.exports = {
         browser: true,
         es6: true,
     },
+    ignorePatterns: ['.eslintrc.js'],
     settings: {
         react: { version: 'detect' },
     },
@@ -21,6 +22,8 @@ module.exports = {
     parser: '@typescript-eslint/parser',
     parserOptions: {
         project: './tsconfig.json',
+        // vscodeのeslintが正常に動くようにtsconfigRootDirを設定している
+        tsconfigRootDir: __dirname,
         ecmaFeatures: {
             jsx: true,
         },
@@ -46,7 +49,5 @@ module.exports = {
         'space-before-blocks': 'warn',
         'react/prop-types': 'off',
         '@next/next/no-img-element': 'off',
-        // monorepoのルートでlintを実行する場合、下のようにパスを設定しないと「Pages directory cannot be found at D:\Users\Owner\Documents\repos\@flocon-trpg\server\pages or D:\Users\Owner\Documents\repos\@flocon-trpg\server\src\pages. If using a custom path, please configure with the no-html-link-for-pages rule in your eslint config file」というエラーが出る
-        '@next/next/no-html-link-for-pages': ['warn', 'apps/web-server/src/pages'],
     },
 };

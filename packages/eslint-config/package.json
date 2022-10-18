@@ -1,0 +1,12 @@
+{
+    "version": "1.0.0",
+    "license": "MIT",
+    "name": "@flocon-trpg/eslint-config",
+    "author": "kizahasi",
+    "peerDependencies": {
+        "@typescript-eslint/eslint-plugin": "^5.39.0",
+        "@typescript-eslint/parser": "^5.39.0",
+        "eslint": "^8.25.0",
+        "eslint-config-prettier": "^8.5.0"
+    }
+}
