@@ -1,5 +1,5 @@
-import { VERSION } from './src/VERSION';
 import fs from 'fs-extra';
+import { VERSION } from './VERSION';
 
 const main = (): void => {
     const version = VERSION.toString();
