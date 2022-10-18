@@ -12,7 +12,10 @@ Flocon
 ┣ 📂 packages
 ┃ ┣ 📦 cache
 ┃ ┣ 📦 core
+┃ ┣ 📦 eslint-config
 ┃ ┣ 📦 flocon-script
+┃ ┣ 📦 prettier-config
+┃ ┣ 📦 tsconfig
 ┃ ┣ 📦 typed-document-node-v0.7.1
 ┃ ┣ 📦 typed-document-node-v0.7.2
 ┃ ┣ 📦 typed-document-node-v0.7.8
