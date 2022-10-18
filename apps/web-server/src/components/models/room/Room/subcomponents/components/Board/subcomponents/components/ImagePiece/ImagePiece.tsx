@@ -1,18 +1,18 @@
-import React from 'react';
-import { success, useImageFromFilePath } from '@/hooks/imageHooks';
-import * as ReactKonva from 'react-konva';
-import { useSpring, useTransition } from '@react-spring/konva';
+import { State, filePathTemplate } from '@flocon-trpg/core';
 import { RoomPublicMessageFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { useSpring, useTransition } from '@react-spring/konva';
+import React from 'react';
+import * as ReactKonva from 'react-konva';
 import { interval } from 'rxjs';
 import { isDeleted, toText as toTextCore } from '../../../../../utils/message';
-import { State, filePathTemplate } from '@flocon-trpg/core';
-import { FilePath } from '@/utils/file/filePath';
 import { PieceGroup, PieceGroupProps } from '../../../../PieceGroup/PieceGroup';
 import { NameLabel } from './subcomponents/NameLabel';
 import {
     AnimatedGroupAsAnyProps,
     AnimatedImageAsAnyProps,
 } from '@/components/ui/AnimatedKonvaAsAnyProps/AnimatedKonvaAsAnyProps';
+import { success, useImageFromFilePath } from '@/hooks/imageHooks';
+import { FilePath } from '@/utils/file/filePath';
 
 type CoreFilePath = State<typeof filePathTemplate>;
 

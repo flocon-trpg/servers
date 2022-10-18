@@ -13,8 +13,8 @@ import {
     serverTransform,
     update,
 } from '../src';
-import { Resources } from './resources';
 import * as TextOperation from '../src/internal/ot/util/textOperation';
+import { Resources } from './resources';
 
 type RoomState = State<typeof roomTemplate>;
 type RoomUpOperation = UpOperation<typeof roomTemplate>;

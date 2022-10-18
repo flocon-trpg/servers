@@ -1,17 +1,17 @@
+import * as Core from '@flocon-trpg/core';
 import {
     FilePathFragment,
     FilePathInput,
     FileSourceType,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
-import * as Core from '@flocon-trpg/core';
+import { FirebaseStorage, getDownloadURL, ref } from 'firebase/storage';
+import { WebConfig } from '../../configType';
 import {
     files,
     getFloconUploaderFile as getFloconUploaderFileCore,
     idTokenIsNull,
     thumbs,
 } from './getFloconUploaderFile';
-import { WebConfig } from '../../configType';
-import { FirebaseStorage, getDownloadURL, ref } from 'firebase/storage';
 
 type FilePathState = Core.State<typeof Core.filePathTemplate>;
 

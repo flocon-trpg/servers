@@ -1,23 +1,23 @@
-import admin from 'firebase-admin';
-import { buildSchema } from './buildSchema';
-import { PromiseQueue } from './utils/promiseQueue';
-import { checkMigrationsBeforeStart, doAutoMigrationBeforeStart } from './migrate';
-import { InMemoryConnectionManager, pubSub } from './connection/main';
-import { Result } from '@kizahasi/result';
 import { authToken } from '@flocon-trpg/core';
+import { Result } from '@kizahasi/result';
+import admin from 'firebase-admin';
 import { Context } from 'graphql-ws/lib/server';
-import { BaasType } from './enums/BaasType';
-import { AppConsole } from './utils/appConsole';
-import { ServerConfig } from './config/types';
-import { createServer, createServerAsError } from './createServer';
 import { VERSION } from './VERSION';
-import { ServerConfigParser } from './config/serverConfigParser';
-import { loadAsMain } from './utils/commandLineArgs';
+import { buildSchema } from './buildSchema';
 import { createORM } from './config/createORM';
 import { createORMOptions } from './config/createORMOptions';
-import { FIREBASE_PROJECTID } from './env';
 import { LogConfigParser } from './config/logConfigParser';
+import { ServerConfigParser } from './config/serverConfigParser';
+import { ServerConfig } from './config/types';
+import { InMemoryConnectionManager, pubSub } from './connection/main';
+import { createServer, createServerAsError } from './createServer';
+import { BaasType } from './enums/BaasType';
+import { FIREBASE_PROJECTID } from './env';
 import { initializeLogger, logger } from './logger';
+import { checkMigrationsBeforeStart, doAutoMigrationBeforeStart } from './migrate';
+import { AppConsole } from './utils/appConsole';
+import { loadAsMain } from './utils/commandLineArgs';
+import { PromiseQueue } from './utils/promiseQueue';
 
 const logEntryPasswordConfig = (serverConfig: ServerConfig) => {
     if (serverConfig.entryPassword == null) {

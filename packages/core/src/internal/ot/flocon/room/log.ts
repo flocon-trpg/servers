@@ -1,15 +1,15 @@
-import * as RoomTypes from './types';
+import { recordForEach } from '@flocon-trpg/utils';
+import { State, TwoWayOperation, diff } from '../../generator';
 import * as RecordOperation from '../../util/recordOperation';
 import { replace } from '../../util/recordOperationElement';
-import { recordForEach } from '@flocon-trpg/utils';
-import * as BoardTypes from './board/types';
+import { restrict } from '../../util/requestedBy';
+import { createType, deleteType } from '../piece/log';
 import * as DicePiece from './board/dicePiece/functions';
 import * as DicePieceLog from './board/dicePiece/log';
 import * as StringPiece from './board/stringPiece/functions';
 import * as StringPieceLog from './board/stringPiece/log';
-import { createType, deleteType } from '../piece/log';
-import { restrict } from '../../util/requestedBy';
-import { State, TwoWayOperation, diff } from '../../generator';
+import * as BoardTypes from './board/types';
+import * as RoomTypes from './types';
 
 type DicePieceLogType = {
     boardId: string;

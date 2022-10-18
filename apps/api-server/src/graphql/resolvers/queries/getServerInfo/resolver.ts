@@ -1,8 +1,8 @@
 import { alpha, beta, rc } from '@flocon-trpg/utils';
 import { Ctx, Query, Resolver } from 'type-graphql';
+import { VERSION } from '../../../../VERSION';
 import { PrereleaseType } from '../../../../enums/PrereleaseType';
 import { ResolverContext } from '../../../../types';
-import { VERSION } from '../../../../VERSION';
 import { ServerInfo } from '../../../objects/serverInfo';
 
 @Resolver()

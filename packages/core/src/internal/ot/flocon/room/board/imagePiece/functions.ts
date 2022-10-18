@@ -1,16 +1,16 @@
-import * as ReplaceOperation from '../../../../util/replaceOperation';
-import { ServerTransform } from '../../../../util/type';
-import { isIdRecord } from '../../../../util/record';
 import { Result } from '@kizahasi/result';
-import * as Piece from '../../../piece/functions';
+import { State, TwoWayOperation, UpOperation } from '../../../../generator';
+import { isIdRecord } from '../../../../util/record';
+import * as ReplaceOperation from '../../../../util/replaceOperation';
 import {
     RequestedBy,
     anyValue,
     canChangeOwnerParticipantId,
     isOwner,
 } from '../../../../util/requestedBy';
+import { ServerTransform } from '../../../../util/type';
+import * as Piece from '../../../piece/functions';
 import { template } from './types';
-import { State, TwoWayOperation, UpOperation } from '../../../../generator';
 
 export const toClientState = (source: State<typeof template>): State<typeof template> => {
     return source;

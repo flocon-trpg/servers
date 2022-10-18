@@ -1,7 +1,7 @@
-import { RoomConfig } from '.';
-import { ResizeDirection } from 're-resizable';
 import { recordToArray } from '@flocon-trpg/utils';
+import { ResizeDirection } from 're-resizable';
 import { BoardConfig, defaultBoardConfig } from '../boardConfig';
+import { RoomConfig } from '.';
 import { BoardType } from '@/utils/types';
 
 export namespace RoomConfigUtils {

@@ -1,5 +1,3 @@
-import { Result } from '@kizahasi/result';
-import * as t from 'io-ts';
 import {
     ComposeAndTransformError,
     NonEmptyString,
@@ -22,6 +20,8 @@ import {
     transformTwoWayOperation,
     transformUpOperation,
 } from '@kizahasi/ot-string';
+import { Result } from '@kizahasi/result';
+import * as t from 'io-ts';
 
 const r = 'r';
 const i = 'i';

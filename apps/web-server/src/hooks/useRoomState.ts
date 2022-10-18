@@ -1,5 +1,4 @@
-import React from 'react';
-import { Observable, Subject } from 'rxjs';
+import { State as S, StateManager, UpOperation as U, roomTemplate } from '@flocon-trpg/core';
 import {
     GetRoomDocument,
     GetRoomFailureType,
@@ -10,17 +9,18 @@ import {
     RoomEventSubscription,
     RoomOperationFragment,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { useAtomValue, useUpdateAtom } from 'jotai/utils';
+import React from 'react';
+import { Observable, Subject } from 'rxjs';
 import * as Rx from 'rxjs/operators';
 import { CombinedError, useClient, useMutation } from 'urql';
-import { create as createStateManager } from '../stateManagers/main';
-import { useClientId } from './useClientId';
-import { State as S, StateManager, UpOperation as U, roomTemplate } from '@flocon-trpg/core';
-import { Room } from '../stateManagers/states/room';
 import { error, roomNotificationsAtom, text } from '../atoms/roomAtom/roomAtom';
-import { useAtomValue, useUpdateAtom } from 'jotai/utils';
 import { firebaseUserAtom } from '../pages/_app';
+import { create as createStateManager } from '../stateManagers/main';
+import { Room } from '../stateManagers/states/room';
 import { authNotFound, notSignIn } from '../utils/firebase/firebaseUserState';
 import { SetAction } from '../utils/types';
+import { useClientId } from './useClientId';
 import { useGetIdToken } from './useGetIdToken';
 
 type State = S<typeof roomTemplate>;

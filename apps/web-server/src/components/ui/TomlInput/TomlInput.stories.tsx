@@ -1,10 +1,10 @@
-import React from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
-import { OnChangeParams } from '../CollaborativeInput/CollaborativeInput';
-import { interval } from 'rxjs';
 import classNames from 'classnames';
-import { flex, flex1, flexColumn, flexInitial } from '@/styles/className';
+import React from 'react';
+import { interval } from 'rxjs';
+import { OnChangeParams } from '../CollaborativeInput/CollaborativeInput';
 import { TomlInput } from './Tomllnput';
+import { flex, flex1, flexColumn, flexInitial } from '@/styles/className';
 
 const Main: React.FC<{
     bufferDuration: number | 'default' | 'short' | null;

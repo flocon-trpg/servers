@@ -1,13 +1,13 @@
-import { FSymbol } from './FSymbol';
-import { toFRecord } from './toFRecord';
 import { FArray } from './FArray';
 import { FBoolean } from './FBoolean';
 import { FFunction } from './FFunction';
+import { FMap } from './FMap';
 import { FNumber } from './FNumber';
 import { FObject } from './FObject';
 import { FString } from './FString';
+import { FSymbol } from './FSymbol';
 import { FValue } from './FValue';
-import { FMap } from './FMap';
+import { toFRecord } from './toFRecord';
 
 export function toFValue(source: unknown): FValue {
     if (source === null) {

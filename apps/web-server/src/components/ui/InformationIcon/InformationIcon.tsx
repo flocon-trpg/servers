@@ -1,7 +1,7 @@
-import React from 'react';
-import { Tooltip } from 'antd';
 import * as Icons from '@ant-design/icons';
+import { Tooltip } from 'antd';
 import { RenderFunction } from 'antd/lib/tooltip';
+import React from 'react';
 
 type Props = {
     title?: React.ReactNode | RenderFunction;

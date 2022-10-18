@@ -1,20 +1,9 @@
-import * as TextOperation from '../../../util/textOperation';
-import * as CharacterPiece from './characterPiece/functions';
-import * as CharacterPieceTypes from './characterPiece/types';
-import * as PortraitPiece from './portraitPiece/functions';
-import * as PortraitPieceTypes from './portraitPiece/types';
-import * as ReplaceOperation from '../../../util/replaceOperation';
-import * as RecordOperation from '../../../util/recordOperation';
-import * as ParamRecordOperation from '../../../util/paramRecordOperation';
-import { ServerTransform, TwoWayError } from '../../../util/type';
-import * as BoolParam from './boolParam/functions';
-import * as Command from './command/functions';
-import * as CommandTypes from './command/types';
-import * as NumParam from './numParam/functions';
-import * as StrParam from './strParam/functions';
-import { isIdRecord } from '../../../util/record';
 import { Result } from '@kizahasi/result';
-import * as Room from '../types';
+import { State, TwoWayOperation, UpOperation } from '../../../generator';
+import * as ParamRecordOperation from '../../../util/paramRecordOperation';
+import { isIdRecord } from '../../../util/record';
+import * as RecordOperation from '../../../util/recordOperation';
+import * as ReplaceOperation from '../../../util/replaceOperation';
 import {
     RequestedBy,
     canChangeOwnerParticipantId,
@@ -22,7 +11,18 @@ import {
     isOwner,
     none,
 } from '../../../util/requestedBy';
-import { State, TwoWayOperation, UpOperation } from '../../../generator';
+import * as TextOperation from '../../../util/textOperation';
+import { ServerTransform, TwoWayError } from '../../../util/type';
+import * as Room from '../types';
+import * as BoolParam from './boolParam/functions';
+import * as CharacterPiece from './characterPiece/functions';
+import * as CharacterPieceTypes from './characterPiece/types';
+import * as Command from './command/functions';
+import * as CommandTypes from './command/types';
+import * as NumParam from './numParam/functions';
+import * as PortraitPiece from './portraitPiece/functions';
+import * as PortraitPieceTypes from './portraitPiece/types';
+import * as StrParam from './strParam/functions';
 import {
     defaultBoolParamState,
     defaultNumParamState,

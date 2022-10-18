@@ -1,8 +1,8 @@
-import { AstInfo, GetCoreParams } from '../scriptValue/types';
 import { Option } from '@kizahasi/option';
 import { ScriptError } from '../ScriptError';
 import { FFunction } from '../scriptValue/FFunction';
 import { FValue } from '../scriptValue/FValue';
+import { AstInfo, GetCoreParams } from '../scriptValue/types';
 import { toJObject } from '../utils/toJObject';
 
 class FConsoleClass extends FFunction {

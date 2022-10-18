@@ -1,17 +1,17 @@
+import { StrIndex20, strIndex20Array } from '@flocon-trpg/core';
 import * as t from 'io-ts';
 import {
     CharacterTabConfig,
     deserializeCharacterTabConfig,
     partialCharacterTabConfig,
 } from '../characterTabConfig';
+import { CharacterTabConfigUtils } from '../characterTabConfig/utils';
 import { defaultCharactersPanelPosition } from '../defaultPanelPositions';
 import {
     DraggablePanelConfigBase,
     deserializeDraggablePanelConfigBase,
     serializedDraggablePanelConfigBase,
 } from '../draggablePanelConfig';
-import { CharacterTabConfigUtils } from '../characterTabConfig/utils';
-import { StrIndex20, strIndex20Array } from '@flocon-trpg/core';
 
 export namespace RowKeys {
     export const EditButton = 'EditButton';

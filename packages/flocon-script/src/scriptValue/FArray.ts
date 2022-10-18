@@ -1,11 +1,11 @@
 import { ScriptError } from '../ScriptError';
 import { mapIterator } from '../utils/mapIterator';
-import { beginCast } from './cast';
 import { FFunction } from './FFunction';
 import { FIterator } from './FIterator';
 import { FNumber } from './FNumber';
 import { FType } from './FType';
 import { FValue } from './FValue';
+import { beginCast } from './cast';
 import { toPropertyName } from './toPropertyName';
 import { tryToPropertyName } from './tryToPropertyName';
 import { AstInfo, FObjectBase, GetParams, SetParams } from './types';

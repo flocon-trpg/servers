@@ -1,11 +1,11 @@
 import * as t from 'io-ts';
-import * as Piece from '../../../piece/types';
 import { maybe } from '../../../../../maybe';
 import {
     createObjectValueTemplate,
     createReplaceValueTemplate,
     createTextValueTemplate,
 } from '../../../../generator';
+import * as Piece from '../../../piece/types';
 
 export const String = 'String';
 export const Number = 'Number';

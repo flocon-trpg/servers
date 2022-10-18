@@ -1,8 +1,8 @@
 import { ComponentMeta } from '@storybook/react';
 import React from 'react';
+import { DicePieceEditor } from './DicePieceEditor';
 import { useSetupMocks } from '@/hooks/useSetupMocks';
 import { defaultBoardId, dicePieceKey1 } from '@/mocks';
-import { DicePieceEditor } from './DicePieceEditor';
 
 export const Update: React.FC = () => {
     useSetupMocks();

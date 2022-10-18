@@ -1,19 +1,3 @@
-import { Result } from '@kizahasi/result';
-import { Any } from 'io-ts';
-import { Apply, ClientTransform, Compose, Diff, DownError, Restore } from '../util/type';
-import * as t from 'io-ts';
-import * as TextOperation from '../util/textOperation';
-import * as NullableTextOperation from '../util/nullableTextOperation';
-import * as RecordOperation from '../util/recordOperation';
-import * as ParamRecordOperation from '../util/paramRecordOperation';
-import { record as trecord } from '../util/record';
-import {
-    RecordDownOperationElement,
-    RecordTwoWayOperationElement,
-    RecordUpOperationElement,
-    recordDownOperationElementFactory,
-    recordUpOperationElementFactory,
-} from '../util/recordOperationElement';
 import {
     groupJoinMap,
     left,
@@ -22,7 +6,23 @@ import {
     recordToMap,
     right,
 } from '@flocon-trpg/utils';
+import { Result } from '@kizahasi/result';
+import * as t from 'io-ts';
+import { Any } from 'io-ts';
+import * as NullableTextOperation from '../util/nullableTextOperation';
+import * as ParamRecordOperation from '../util/paramRecordOperation';
+import { record as trecord } from '../util/record';
 import { isIdRecord } from '../util/record';
+import * as RecordOperation from '../util/recordOperation';
+import {
+    RecordDownOperationElement,
+    RecordTwoWayOperationElement,
+    RecordUpOperationElement,
+    recordDownOperationElementFactory,
+    recordUpOperationElementFactory,
+} from '../util/recordOperationElement';
+import * as TextOperation from '../util/textOperation';
+import { Apply, ClientTransform, Compose, Diff, DownError, Restore } from '../util/type';
 
 type ReadonlyRecord<TKey extends keyof any, TValue> = { readonly [P in TKey]: TValue };
 

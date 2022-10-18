@@ -1,11 +1,11 @@
-import { Connection, EntityManager, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
 import { Result } from '@kizahasi/result';
+import { Connection, EntityManager, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
 import { RateLimiterAbstract } from 'rate-limiter-flexible';
 import { ServerConfig } from './config/types';
 import { InMemoryConnectionManager } from './connection/main';
+import { User } from './entities/user/entity';
 import { BaasType } from './enums/BaasType';
 import { PromiseQueue } from './utils/promiseQueue';
-import { User } from './entities/user/entity';
 
 export type EM = EntityManager<IDatabaseDriver<Connection>>;
 export type ORM = MikroORM<IDatabaseDriver<Connection>>;

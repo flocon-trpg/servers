@@ -1,10 +1,10 @@
-import React from 'react';
+import { ParticipantRole } from '@flocon-trpg/core';
 import { ComponentMeta } from '@storybook/react';
 import { useSetAtom } from 'jotai';
-import { defaultBoardId, myRichCharacterId } from '@/mocks';
-import { ParticipantRole } from '@flocon-trpg/core';
-import { useSetupMocks } from '@/hooks/useSetupMocks';
+import React from 'react';
 import { BoardEditorModal, boardEditorModalAtom } from './BoardEditorModal';
+import { useSetupMocks } from '@/hooks/useSetupMocks';
+import { defaultBoardId, myRichCharacterId } from '@/mocks';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
     useSetupMocks({

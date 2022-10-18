@@ -10,13 +10,13 @@ import {
     UseMiddleware,
     createUnionType,
 } from 'type-graphql';
-import { ENTRY } from '../../../../utils/roles';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import * as Room$MikroORM from '../../../../entities/room/entity';
 import { UpdateBookmarkFailureType } from '../../../../enums/UpdateBookmarkFailureType';
-import { ensureAuthorizedUser } from '../../utils/utils';
 import { ResolverContext } from '../../../../types';
+import { ENTRY } from '../../../../utils/roles';
 import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
+import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
+import { ensureAuthorizedUser } from '../../utils/utils';
 
 @ArgsType()
 class UpdateBookmarkArgs {

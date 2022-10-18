@@ -1,6 +1,6 @@
+import * as TextOperationCore from '@kizahasi/ot-string';
 import { Result } from '@kizahasi/result';
 import * as t from 'io-ts';
-import * as TextOperationCore from '@kizahasi/ot-string';
 import { replace, update } from './recordOperationElement';
 import * as TextOperation from './textOperation';
 

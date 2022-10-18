@@ -1,17 +1,17 @@
-import { Alert, Button, Collapse, Typography } from 'antd';
-import React from 'react';
-import { QueryResultViewer } from '../../ui/QueryResultViewer/QueryResultViewer';
-import { Layout } from '../../ui/Layout/Layout';
-import { SupportedApiServers, VERSION } from '@/VERSION';
 import * as Icon from '@ant-design/icons';
-import { useRouter } from 'next/router';
+import { Alert, Button, Collapse, Typography } from 'antd';
 import classNames from 'classnames';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import React from 'react';
+import { Layout } from '../../ui/Layout/Layout';
+import { QueryResultViewer } from '../../ui/QueryResultViewer/QueryResultViewer';
+import { SupportedApiServers, VERSION } from '@/VERSION';
+import { FileSelectorModal } from '@/components/models/file/FileSelectorModal/FileSelectorModal';
+import { useGetApiSemVer } from '@/hooks/useGetApiSemVer';
 import { flex, flexColumn } from '@/styles/className';
 import { apiServerSatisfies } from '@/versioning/apiServerSatisfies';
 import { semVerRangeToString } from '@/versioning/semVerRange';
-import { useGetApiSemVer } from '@/hooks/useGetApiSemVer';
-import Link from 'next/link';
-import { FileSelectorModal } from '@/components/models/file/FileSelectorModal/FileSelectorModal';
 
 export const IndexPage: React.FC = () => {
     const [fileSelectorModalVisible, setFileSelectorModalVisible] = React.useState(false);

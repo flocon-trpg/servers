@@ -1,17 +1,17 @@
-import * as t from 'io-ts';
 import { simpleId } from '@flocon-trpg/core';
-import {
-    MessageTabConfig,
-    deserializeMessageTabConfig,
-    partialMessageTabConfig,
-} from '../messageTabConfig';
+import * as t from 'io-ts';
+import { defaultMessagePanelPosition } from '../defaultPanelPositions';
 import {
     DraggablePanelConfigBase,
     deserializeDraggablePanelConfigBase,
     serializedDraggablePanelConfigBase,
 } from '../draggablePanelConfig';
+import {
+    MessageTabConfig,
+    deserializeMessageTabConfig,
+    partialMessageTabConfig,
+} from '../messageTabConfig';
 import { MessageTabConfigUtils } from '../messageTabConfig/utils';
-import { defaultMessagePanelPosition } from '../defaultPanelPositions';
 
 export type MessagePanelConfig = {
     isMinimized: boolean;

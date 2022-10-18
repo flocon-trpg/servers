@@ -1,23 +1,10 @@
-import * as Bgm from './bgm/functions';
-import * as BgmTypes from './bgm/types';
-import * as Board from './board/functions';
-import * as BoardTypes from './board/types';
-import * as Character from './character/functions';
-import * as CharacterTypes from './character/types';
-import * as Memo from './memo/functions';
-import * as MemoTypes from './memo/types';
-import * as NullableTextOperation from '../../util/nullableTextOperation';
-import * as ParamNames from './paramName/functions';
-import * as ParamNamesTypes from './paramName/types';
-import * as Participant from './participant/functions';
-import * as ParticipantTypes from './participant/types';
-import * as RecordOperation from '../../util/recordOperation';
-import * as ReplaceOperation from '../../util/replaceOperation';
-import * as TextOperation from '../../util/textOperation';
-import { ServerTransform, TwoWayError } from '../../util/type';
-import { isIdRecord } from '../../util/record';
 import { Result } from '@kizahasi/result';
 import { isStrIndex20, isStrIndex5 } from '../../../indexes';
+import { State, TwoWayOperation, UpOperation } from '../../generator';
+import * as NullableTextOperation from '../../util/nullableTextOperation';
+import { isIdRecord } from '../../util/record';
+import * as RecordOperation from '../../util/recordOperation';
+import * as ReplaceOperation from '../../util/replaceOperation';
 import {
     RequestedBy,
     anyValue,
@@ -27,8 +14,21 @@ import {
     isOwner,
     none,
 } from '../../util/requestedBy';
+import * as TextOperation from '../../util/textOperation';
+import { ServerTransform, TwoWayError } from '../../util/type';
+import * as Bgm from './bgm/functions';
+import * as BgmTypes from './bgm/types';
+import * as Board from './board/functions';
+import * as BoardTypes from './board/types';
+import * as Character from './character/functions';
+import * as CharacterTypes from './character/types';
+import * as Memo from './memo/functions';
+import * as MemoTypes from './memo/types';
+import * as ParamNames from './paramName/functions';
+import * as ParamNamesTypes from './paramName/types';
+import * as Participant from './participant/functions';
+import * as ParticipantTypes from './participant/types';
 import { template } from './types';
-import { State, TwoWayOperation, UpOperation } from '../../generator';
 
 const oneToTenArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 

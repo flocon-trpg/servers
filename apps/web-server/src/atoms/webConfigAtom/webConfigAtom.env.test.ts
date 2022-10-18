@@ -1,3 +1,6 @@
+import { fakeFirebaseConfig1 } from '@flocon-trpg/core';
+import { act, renderHook } from '@testing-library/react';
+import { useAtom, useSetAtom } from 'jotai';
 import {
     NEXT_PUBLIC_API_HTTP,
     NEXT_PUBLIC_API_WS,
@@ -7,10 +10,7 @@ import {
     email,
     google,
 } from '../../env';
-import { fakeFirebaseConfig1 } from '@flocon-trpg/core';
-import { useAtom, useSetAtom } from 'jotai';
 import { fakeEnvText } from './fakeEnvText';
-import { act, renderHook } from '@testing-library/react';
 
 const fakeEnvFile = {
     [NEXT_PUBLIC_API_HTTP]: 'https://processenv.example.com/',

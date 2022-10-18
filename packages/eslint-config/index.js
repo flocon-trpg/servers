@@ -1,8 +1,8 @@
 module.exports = {
     root: true,
-    "ignorePatterns": ["**/*.d.ts", ".eslintrc.js"],
+    ignorePatterns: ['**/*.d.ts', '.eslintrc.js'],
     parser: '@typescript-eslint/parser',
-    plugins: ['@typescript-eslint'],
+    plugins: ['@typescript-eslint', 'import'],
     extends: [
         'eslint:recommended',
         'plugin:@typescript-eslint/eslint-recommended',
@@ -19,12 +19,17 @@ module.exports = {
         'sort-imports': [
             'error',
             {
-                /*
-                https://github.com/eslint/eslint/issues/11542 によると、declarationの順序の変更は副作用の可能性がある。
-                また、declartionの順序をauto-fixするには他のプラグインを用いる必要があり、一手間かかる。
-                そのため、ignoreDeclarationDortはtrueにしている。
-                */
+                // sort-importsはimportしたmemberのsortに利用している。
+                // declarationのsortはauto-fixできないため、その部分は代わりにimport/orderを使っている。 https://github.com/eslint/eslint/issues/11542#issuecomment-498215828
                 ignoreDeclarationSort: true,
+            },
+        ],
+        'import/order': [
+            'error',
+            {
+                alphabetize: {
+                    order: 'asc',
+                },
             },
         ],
     },

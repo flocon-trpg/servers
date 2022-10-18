@@ -1,19 +1,19 @@
+import { Result } from '@kizahasi/result';
+import { MikroORM } from '@mikro-orm/core';
+import { PubSub } from 'graphql-subscriptions';
+import { buildSchema } from '../../../src/buildSchema';
+import { ServerConfig, WritableServerConfig } from '../../../src/config/types';
+import { InMemoryConnectionManager } from '../../../src/connection/main';
+import { createServer } from '../../../src/createServer';
+import { BaasType } from '../../../src/enums/BaasType';
 import {
     createMySQLOptions,
     createPostgreSQLOptions,
     createSQLiteOptions,
 } from '../../../src/mikro-orm';
 import { PromiseQueue } from '../../../src/utils/promiseQueue';
-import { InMemoryConnectionManager } from '../../../src/connection/main';
-import { BaasType } from '../../../src/enums/BaasType';
-import { ServerConfig, WritableServerConfig } from '../../../src/config/types';
-import { buildSchema } from '../../../src/buildSchema';
-import { PubSub } from 'graphql-subscriptions';
-import { createServer } from '../../../src/createServer';
-import { Result } from '@kizahasi/result';
-import { Resources } from './resources';
 import { mySQLClientUrl, postgresClientUrl } from './databaseConfig';
-import { MikroORM } from '@mikro-orm/core';
+import { Resources } from './resources';
 
 const PostgreSQLConfig = {
     dbName: 'test',

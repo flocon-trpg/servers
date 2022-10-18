@@ -10,8 +10,17 @@ import {
     Resolver,
     UseMiddleware,
 } from 'type-graphql';
+import { RoomPrvMsg, RoomPubMsg } from '../../../../entities/roomMessage/entity';
+import { EditMessageFailureType } from '../../../../enums/EditMessageFailureType';
+import { ResolverContext } from '../../../../types';
 import { ENTRY } from '../../../../utils/roles';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
+import {
+    EditMessageResult,
+    RoomPrivateMessageUpdate,
+    RoomPublicMessageUpdate,
+} from '../../../objects/roomMessage';
 import {
     createRoomPrivateMessageUpdate,
     createRoomPublicMessageUpdate,
@@ -19,15 +28,6 @@ import {
     findRoomAndMyParticipant,
     publishRoomEvent,
 } from '../../utils/utils';
-import {
-    EditMessageResult,
-    RoomPrivateMessageUpdate,
-    RoomPublicMessageUpdate,
-} from '../../../objects/roomMessage';
-import { RoomPrvMsg, RoomPubMsg } from '../../../../entities/roomMessage/entity';
-import { EditMessageFailureType } from '../../../../enums/EditMessageFailureType';
-import { ResolverContext } from '../../../../types';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 @ArgsType()
 class EditMessageArgs {

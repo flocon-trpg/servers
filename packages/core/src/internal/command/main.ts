@@ -1,4 +1,3 @@
-import * as Room from '../ot/flocon/room/types';
 import {
     ScriptError,
     arrayClass,
@@ -6,10 +5,11 @@ import {
     exec,
     test,
 } from '@flocon-trpg/flocon-script';
-import { FRoom } from './room';
 import { keyNames } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
+import * as Room from '../ot/flocon/room/types';
 import { State } from '../ot/generator';
+import { FRoom } from './room';
 
 type RoomState = State<typeof Room.template>;
 

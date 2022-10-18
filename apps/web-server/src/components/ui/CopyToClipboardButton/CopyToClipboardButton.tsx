@@ -1,7 +1,7 @@
-import React, { PropsWithChildren } from 'react';
-import copy from 'clipboard-copy';
-import { Button, ButtonProps, Tooltip } from 'antd';
 import { simpleId } from '@flocon-trpg/core';
+import { Button, ButtonProps, Tooltip } from 'antd';
+import copy from 'clipboard-copy';
+import React, { PropsWithChildren } from 'react';
 
 type Props = Omit<ButtonProps, 'onClick'> & {
     clipboardText: () => Promise<string>;

@@ -1,29 +1,29 @@
-import React from 'react';
-import * as t from 'io-ts';
-import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
 import { State, path, shape, shapePieceTemplate, simpleId } from '@flocon-trpg/core';
-import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { close, ok } from '@/utils/constants';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
+import * as t from 'io-ts';
+import React from 'react';
 import { Subscribable } from 'rxjs';
+import { useMemoOne } from 'use-memo-one';
 import { useCloneImagePiece } from '../../hooks/useCloneImagePiece';
+import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
+import { useShapePieces } from '../../hooks/useShapePieces';
+import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
 import {
     CompositeRect,
     PixelPosition,
     PixelSize,
     applyCompositeRect,
 } from '../../utils/positionAndSizeAndRect';
-import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
-import { PieceRectEditor } from '../RectEditor/RectEditor';
-import { useMemoOne } from 'use-memo-one';
-import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
-import { PieceEditorMemoRow } from '../PieceEditorMemoRow/PieceEditorMemoRow';
-import { PieceEditorNameRow } from '../PieceEditorNameRow/PieceEditorNameRow';
 import { PieceEditorCloneButtonRow } from '../PieceEditorCloneButtonRow/PieceEditorCloneButtonRow';
 import { PieceEditorIdRow } from '../PieceEditorIdRow/PieceEditorIdRow';
-import { useShapePieces } from '../../hooks/useShapePieces';
-import { rgb } from '@/utils/rgb';
+import { PieceEditorMemoRow } from '../PieceEditorMemoRow/PieceEditorMemoRow';
+import { PieceEditorNameRow } from '../PieceEditorNameRow/PieceEditorNameRow';
+import { PieceRectEditor } from '../RectEditor/RectEditor';
 import { ColorPickerButton } from '@/components/ui/ColorPickerButton/ColorPickerButton';
+import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
+import { close, ok } from '@/utils/constants';
+import { rgb } from '@/utils/rgb';
 
 type Shape = t.TypeOf<typeof shape>;
 type ShapePieceState = State<typeof shapePieceTemplate>;

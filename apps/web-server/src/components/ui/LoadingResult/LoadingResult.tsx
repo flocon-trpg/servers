@@ -1,6 +1,6 @@
+import * as Icon from '@ant-design/icons';
 import { Result } from 'antd';
 import React from 'react';
-import * as Icon from '@ant-design/icons';
 
 type Props = {
     title?: string;

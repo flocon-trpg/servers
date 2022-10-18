@@ -1,4 +1,3 @@
-import { Result } from '@kizahasi/result';
 import {
     DualKey,
     DualKeyMap,
@@ -11,6 +10,7 @@ import {
     left,
     right,
 } from '@flocon-trpg/utils';
+import { Result } from '@kizahasi/result';
 import * as t from 'io-ts';
 import { isValidKey } from './isValidKey';
 import { DualStringKeyRecord, record } from './record';

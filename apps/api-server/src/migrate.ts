@@ -2,16 +2,16 @@ import { Result } from '@kizahasi/result';
 import { Connection, IDatabaseDriver, MikroORM } from '@mikro-orm/core';
 import { createORM as createORMCore } from './config/createORM';
 import { createORMOptions } from './config/createORMOptions';
+import { LogConfigParser } from './config/logConfigParser';
 import { ServerConfigParser } from './config/serverConfigParser';
+import { initializeLogger } from './logger';
+import { ORM } from './types';
 import { AppConsole } from './utils/appConsole';
 import {
     loadMigrationCreate,
     loadMigrationDown,
     loadMigrationUpOrCheck,
 } from './utils/commandLineArgs';
-import { ORM } from './types';
-import { LogConfigParser } from './config/logConfigParser';
-import { initializeLogger } from './logger';
 
 const check = 'check';
 const create = 'create';

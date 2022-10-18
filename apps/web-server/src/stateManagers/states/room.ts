@@ -1,9 +1,4 @@
 import {
-    RoomGetStateFragment,
-    RoomOperationFragment,
-    RoomOperationInput,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
-import {
     State as S,
     UpOperation as U,
     parseState,
@@ -11,6 +6,11 @@ import {
     roomTemplate,
     stringifyUpOperation,
 } from '@flocon-trpg/core';
+import {
+    RoomGetStateFragment,
+    RoomOperationFragment,
+    RoomOperationInput,
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 
 type State = S<typeof roomTemplate>;
 type UpOperation = U<typeof roomTemplate>;

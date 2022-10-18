@@ -1,5 +1,5 @@
-import React from 'react';
 import { recordToArray } from '@flocon-trpg/utils';
+import React from 'react';
 import { useCharacters } from './useCharacters';
 
 export const usePortraitPieces = (boardId: string) => {

@@ -1,4 +1,6 @@
-import { Auth, Config, IdTokenResult, Unsubscribe, User } from 'firebase/auth';
+import { FirebaseApp } from '@firebase/app';
+import { FirebaseStorage } from '@firebase/storage';
+import { State as S, characterTemplate, roomTemplate } from '@flocon-trpg/core';
 import {
     $free,
     ParticipantRole,
@@ -11,15 +13,13 @@ import {
     RoomPrivateMessage,
     RoomPublicMessage,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
-import { State as S, characterTemplate, roomTemplate } from '@flocon-trpg/core';
-import { WebConfig } from '../configType';
-import { UserConfig, defaultUserConfig } from '../atoms/userConfigAtom/types';
-import { FirebaseStorage } from '@firebase/storage';
-import { FirebaseApp } from '@firebase/app';
 import { Client, createClient } from '@urql/core';
-import ColorName from 'color-name';
 import Color from 'color';
+import ColorName from 'color-name';
+import { Auth, Config, IdTokenResult, Unsubscribe, User } from 'firebase/auth';
 import moment from 'moment';
+import { UserConfig, defaultUserConfig } from '../atoms/userConfigAtom/types';
+import { WebConfig } from '../configType';
 
 type State = S<typeof roomTemplate>;
 type BoardState = S<typeof boardTemplate>;

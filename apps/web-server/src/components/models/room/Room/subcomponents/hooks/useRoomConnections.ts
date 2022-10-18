@@ -1,13 +1,13 @@
-import { useQuery } from 'urql';
-import produce from 'immer';
-import React from 'react';
 import { GetRoomConnectionsDocument } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { Notification } from '@flocon-trpg/web-server-utils';
-import { useParticipants } from './useParticipants';
+import produce from 'immer';
+import { useUpdateAtom } from 'jotai/utils';
+import React from 'react';
 import { useLatest } from 'react-use';
+import { useQuery } from 'urql';
+import { useParticipants } from './useParticipants';
 import { roomAtom, roomNotificationsAtom, text } from '@/atoms/roomAtom/roomAtom';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { useUpdateAtom } from 'jotai/utils';
 
 export type RoomConnectionsResult = {
     readonly [userUid: string]: { readonly isConnected: boolean; readonly fetchedAt: number };

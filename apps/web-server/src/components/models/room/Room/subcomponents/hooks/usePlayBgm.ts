@@ -1,19 +1,19 @@
-import React from 'react';
-import { Howl } from 'howler';
-import { loaded, useSrcArrayFromFilePath } from '@/hooks/srcHooks';
-import { volumeCap } from '@/utils/variables';
 import { Default, State, Uploader, bgmTemplate } from '@flocon-trpg/core';
-import { analyzeUrl } from '@/utils/analyzeUrl';
+import { Howl } from 'howler';
+import React from 'react';
 import { useDeepCompareEffect, useLatest } from 'react-use';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { useMemoOne } from 'use-memo-one';
 import { roomAtom } from '@/atoms/roomAtom/roomAtom';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import {
     defaultChannelVolume,
     defaultMasterVolume,
 } from '@/atoms/roomConfigAtom/types/roomConfig/resources';
-import { useMemoOne } from 'use-memo-one';
+import { loaded, useSrcArrayFromFilePath } from '@/hooks/srcHooks';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { analyzeUrl } from '@/utils/analyzeUrl';
 import { extname } from '@/utils/extname';
+import { volumeCap } from '@/utils/variables';
 
 type BgmState = State<typeof bgmTemplate>;
 

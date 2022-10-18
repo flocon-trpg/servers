@@ -1,22 +1,3 @@
-import { Popover, Tooltip } from 'antd';
-import React from 'react';
-import {
-    PieceLogFragment,
-    PieceLogType,
-    RoomPrivateMessageFragment,
-    RoomPublicMessageFragment,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
-import {
-    Notification,
-    PrivateChannelSet,
-    pieceLog,
-    privateMessage,
-    publicMessage,
-} from '@flocon-trpg/web-server-utils';
-import { PublicChannelNames } from '@/utils/types';
-import { Jdenticon } from '@/components/ui/Jdenticon/Jdenticon';
-import { isDeleted, toText } from '../../../../../utils/message';
-import { NewTabLinkify } from '@/components/ui/NewTabLinkify/NewTabLinkify';
 import {
     $free,
     State,
@@ -25,10 +6,29 @@ import {
     participantTemplate,
     replace,
 } from '@flocon-trpg/core';
+import {
+    PieceLogFragment,
+    PieceLogType,
+    RoomPrivateMessageFragment,
+    RoomPublicMessageFragment,
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import { recordToMap } from '@flocon-trpg/utils';
+import {
+    Notification,
+    PrivateChannelSet,
+    pieceLog,
+    privateMessage,
+    publicMessage,
+} from '@flocon-trpg/web-server-utils';
+import { Popover, Tooltip } from 'antd';
 import classNames from 'classnames';
-import { flex, flexRow, itemsCenter } from '@/styles/className';
+import React from 'react';
+import { isDeleted, toText } from '../../../../../utils/message';
 import { IconView } from '@/components/models/file/IconView/IconView';
+import { Jdenticon } from '@/components/ui/Jdenticon/Jdenticon';
+import { NewTabLinkify } from '@/components/ui/NewTabLinkify/NewTabLinkify';
+import { flex, flexRow, itemsCenter } from '@/styles/className';
+import { PublicChannelNames } from '@/utils/types';
 
 type ParticipantState = State<typeof participantTemplate>;
 

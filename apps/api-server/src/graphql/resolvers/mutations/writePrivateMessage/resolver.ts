@@ -1,3 +1,6 @@
+import { State, characterTemplate, client, isCharacterOwner } from '@flocon-trpg/core';
+import { Reference } from '@mikro-orm/core';
+import { MaxLength } from 'class-validator';
 import {
     Args,
     ArgsType,
@@ -10,9 +13,19 @@ import {
     Resolver,
     UseMiddleware,
 } from 'type-graphql';
+import { RoomPrvMsg } from '../../../../entities/roomMessage/entity';
+import { User } from '../../../../entities/user/entity';
+import { FileSourceTypeModule } from '../../../../enums/FileSourceType';
+import { WriteRoomPrivateMessageFailureType } from '../../../../enums/WriteRoomPrivateMessageFailureType';
+import { ResolverContext } from '../../../../types';
 import { ENTRY } from '../../../../utils/roles';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import { State, characterTemplate, client, isCharacterOwner } from '@flocon-trpg/core';
+import {
+    RoomMessageSyntaxErrorType,
+    WriteRoomPrivateMessageFailureResultType,
+    WriteRoomPrivateMessageResult,
+} from '../../../objects/roomMessage';
 import { MessageUpdatePayload } from '../../subsciptions/roomEvent/payload';
 import { SendTo } from '../../types';
 import {
@@ -23,19 +36,6 @@ import {
     fixTextColor,
     publishRoomEvent,
 } from '../../utils/utils';
-import {
-    RoomMessageSyntaxErrorType,
-    WriteRoomPrivateMessageFailureResultType,
-    WriteRoomPrivateMessageResult,
-} from '../../../objects/roomMessage';
-import { MaxLength } from 'class-validator';
-import { Reference } from '@mikro-orm/core';
-import { RoomPrvMsg } from '../../../../entities/roomMessage/entity';
-import { FileSourceTypeModule } from '../../../../enums/FileSourceType';
-import { WriteRoomPrivateMessageFailureType } from '../../../../enums/WriteRoomPrivateMessageFailureType';
-import { User } from '../../../../entities/user/entity';
-import { ResolverContext } from '../../../../types';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 type CharacterState = State<typeof characterTemplate>;
 

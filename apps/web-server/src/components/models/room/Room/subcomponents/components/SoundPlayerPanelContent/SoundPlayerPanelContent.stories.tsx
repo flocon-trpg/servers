@@ -2,8 +2,8 @@ import { ParticipantRole } from '@flocon-trpg/core';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 import { SoundPlayerPanelContent } from './SoundPlayerPanelContent';
-import { useSetupMocks } from '@/hooks/useSetupMocks';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
+import { useSetupMocks } from '@/hooks/useSetupMocks';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
     useSetupMocks({

@@ -1,5 +1,6 @@
 import { parse } from 'acorn';
 import { Program } from 'estree';
+import { ScriptError } from './ScriptError';
 import { Context } from './context';
 import {
     FExpression,
@@ -8,13 +9,10 @@ import {
     FNewExpression,
     FSimpleCallExpression,
 } from './fExpression';
+import { FPattern } from './fPattern';
 import { FStatement, FVariableDeclaration, fStatement } from './fStatement';
+import { getRestValues } from './getRestValues';
 import { toRange } from './range';
-import { ScriptError } from './ScriptError';
-import { compareToBoolean, compareToNumber, compareToNumberOrString } from './scriptValue/compare';
-import { toFGlobalRecord } from './scriptValue/toFGlobalRecord';
-import { eqeq } from './scriptValue/eqeq';
-import { eqeqeq } from './scriptValue/eqeqeq';
 import { FArray } from './scriptValue/FArray';
 import { FBoolean } from './scriptValue/FBoolean';
 import { FFunction } from './scriptValue/FFunction';
@@ -23,12 +21,14 @@ import { FRecord } from './scriptValue/FRecord';
 import { FString } from './scriptValue/FString';
 import { FType } from './scriptValue/FType';
 import { FValue } from './scriptValue/FValue';
+import { compareToBoolean, compareToNumber, compareToNumberOrString } from './scriptValue/compare';
+import { eqeq } from './scriptValue/eqeq';
+import { eqeqeq } from './scriptValue/eqeqeq';
 import { isTruthy } from './scriptValue/isTruthy';
+import { toFGlobalRecord } from './scriptValue/toFGlobalRecord';
 import { toTypeName } from './scriptValue/toTypeName';
-import { toJObject } from './utils/toJObject';
 import { FObjectBase } from './scriptValue/types';
-import { FPattern } from './fPattern';
-import { getRestValues } from './getRestValues';
+import { toJObject } from './utils/toJObject';
 
 function ofFLiteral(literal: FLiteral): FBoolean | FNumber | FString | null {
     if (literal.value == null) {

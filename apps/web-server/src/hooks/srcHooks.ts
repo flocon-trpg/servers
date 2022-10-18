@@ -1,11 +1,11 @@
-import React from 'react';
-import { FilePathLikeOrThumb, FilePathModule } from '../utils/file/filePath';
-import { useWebConfig } from './useWebConfig';
 import { useAtomValue } from 'jotai/utils';
-import { firebaseStorageAtom } from '../pages/_app';
-import { useGetIdToken } from './useGetIdToken';
+import React from 'react';
 import { UseQueryResult, useQueries } from 'react-query';
 import { useMemoOne } from 'use-memo-one';
+import { firebaseStorageAtom } from '../pages/_app';
+import { FilePathLikeOrThumb, FilePathModule } from '../utils/file/filePath';
+import { useGetIdToken } from './useGetIdToken';
+import { useWebConfig } from './useWebConfig';
 import { idTokenIsNull, thumbs } from '@/utils/file/getFloconUploaderFile';
 
 export const loaded = 'loaded';

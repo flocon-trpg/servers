@@ -1,7 +1,7 @@
-import { useAtom } from 'jotai';
-import { publicEnvTxtAtom, webConfigAtom } from './webConfigAtom';
-import { fakeEnvText, fakeEnvTextSource } from './fakeEnvText';
 import { act, renderHook } from '@testing-library/react';
+import { useAtom } from 'jotai';
+import { fakeEnvText, fakeEnvTextSource } from './fakeEnvText';
+import { publicEnvTxtAtom, webConfigAtom } from './webConfigAtom';
 
 describe('webConfigAtom (process.env does not exist)', () => {
     it('tests env.txt is not fetched', () => {

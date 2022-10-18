@@ -1,6 +1,6 @@
+import { existsSync } from 'fs';
 import { config } from 'dotenv';
 import { expand } from 'dotenv-expand';
-import { existsSync } from 'fs';
 
 export const loadDotenv = (): void => {
     // web-server(next.js)と近い仕様にするように、.env.localもサポートしている。

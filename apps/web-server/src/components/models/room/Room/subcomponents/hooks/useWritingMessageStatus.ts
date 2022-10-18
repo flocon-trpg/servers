@@ -1,9 +1,9 @@
+import { WritingMessageStatusType } from '@flocon-trpg/typed-document-node-v0.7.1';
 import produce from 'immer';
 import React from 'react';
 import { interval } from 'rxjs';
-import { WritingMessageStatusType } from '@flocon-trpg/typed-document-node-v0.7.1';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { roomAtom } from '@/atoms/roomAtom/roomAtom';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
 
 export type WritingMessageStatusResult = ReadonlyMap<
     string,

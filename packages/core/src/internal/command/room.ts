@@ -7,14 +7,14 @@ import {
     SetCoreParams,
     beginCast,
 } from '@flocon-trpg/flocon-script';
-import * as Room from '../ot/flocon/room/types';
-import { FCharacter } from './character';
 import cloneDeep from 'lodash.clonedeep';
-import { FParamNames } from './paramNames';
-import { FStateRecord } from './stateRecord';
-import { FParticipant } from './participant';
 import * as Character from '../ot/flocon/room/character/types';
+import * as Room from '../ot/flocon/room/types';
 import { State } from '../ot/generator';
+import { FCharacter } from './character';
+import { FParamNames } from './paramNames';
+import { FParticipant } from './participant';
+import { FStateRecord } from './stateRecord';
 
 const name = 'name';
 const characters = 'characters';

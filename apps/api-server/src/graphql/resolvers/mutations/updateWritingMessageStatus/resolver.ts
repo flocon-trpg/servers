@@ -10,13 +10,13 @@ import {
     Resolver,
     UseMiddleware,
 } from 'type-graphql';
+import { WritingMessageStatusInputType } from '../../../../enums/WritingMessageStatusInputType';
+import { WritingMessageStatusType } from '../../../../enums/WritingMessageStatusType';
+import { ResolverContext } from '../../../../types';
 import { ENTRY } from '../../../../utils/roles';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import { all } from '../../types';
 import { ensureAuthorizedUser, publishRoomEvent } from '../../utils/utils';
-import { WritingMessageStatusInputType } from '../../../../enums/WritingMessageStatusInputType';
-import { WritingMessageStatusType } from '../../../../enums/WritingMessageStatusType';
-import { ResolverContext } from '../../../../types';
 
 @ArgsType()
 class UpdateWritingMessageStateArgs {

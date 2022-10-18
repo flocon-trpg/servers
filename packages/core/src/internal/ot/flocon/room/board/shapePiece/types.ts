@@ -1,11 +1,11 @@
 import * as t from 'io-ts';
-import * as Piece from '../../../piece/types';
 import { maybe } from '../../../../../maybe';
 import {
     createObjectValueTemplate,
     createRecordValueTemplate,
     createReplaceValueTemplate,
 } from '../../../../generator';
+import * as Piece from '../../../piece/types';
 import * as Shape from '../../../shape/types';
 
 export const template = createObjectValueTemplate(

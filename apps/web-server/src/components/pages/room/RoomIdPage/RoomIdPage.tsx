@@ -1,4 +1,3 @@
-import { useMutation } from 'urql';
 import {
     GetRoomFailureType,
     JoinRoomAsPlayerDocument,
@@ -16,12 +15,17 @@ import { useRouter } from 'next/router';
 import React from 'react';
 import { useDebounce, useLatest, usePrevious } from 'react-use';
 import { Subject, bufferTime } from 'rxjs';
-import { roomPrivateMessageInputAtom } from '@/components/models/room/Room/subcomponents/atoms/roomPrivateMessageInputAtom/roomPrivateMessageInputAtom';
-import { roomPublicMessageInputAtom } from '@/components/models/room/Room/subcomponents/atoms/roomPublicMessageInputAtom/roomPublicMessageInputAtom';
+import { useMutation } from 'urql';
 import { hideAllOverlayActionAtom } from '@/atoms/hideAllOverlayActionAtom/hideAllOverlayActionAtom';
 import { roomAtom } from '@/atoms/roomAtom/roomAtom';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
+import { Room } from '@/components/models/room/Room/Room';
+import { roomPrivateMessageInputAtom } from '@/components/models/room/Room/subcomponents/atoms/roomPrivateMessageInputAtom/roomPrivateMessageInputAtom';
+import { roomPublicMessageInputAtom } from '@/components/models/room/Room/subcomponents/atoms/roomPublicMessageInputAtom/roomPublicMessageInputAtom';
+import { Center } from '@/components/ui/Center/Center';
+import { Layout, loginAndEntry, success } from '@/components/ui/Layout/Layout';
+import { LoadingResult } from '@/components/ui/LoadingResult/LoadingResult';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { usePublishRoomEventSubscription } from '@/hooks/usePublishRoomEventSubscription';
 import { useStartFetchingRoomMessages } from '@/hooks/useRoomMessages';
@@ -35,13 +39,9 @@ import {
     nonJoined,
     useRoomState,
 } from '@/hooks/useRoomState';
+import { firebaseUserValueAtom } from '@/pages/_app';
 import { getRoomConfig } from '@/utils/localStorage/roomConfig';
 import { Ref } from '@/utils/types';
-import { Room } from '@/components/models/room/Room/Room';
-import { Center } from '@/components/ui/Center/Center';
-import { Layout, loginAndEntry, success } from '@/components/ui/Layout/Layout';
-import { LoadingResult } from '@/components/ui/LoadingResult/LoadingResult';
-import { firebaseUserValueAtom } from '@/pages/_app';
 
 type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
 

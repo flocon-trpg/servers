@@ -1,10 +1,10 @@
 import { Select } from 'antd';
 import classNames from 'classnames';
 import React from 'react';
-import { useParticipants } from '../../../../../../../../hooks/useParticipants';
 import { useMyUserUid } from '../../../../../../../../../../../../../hooks/useMyUserUid';
 import { flex, itemsCenter } from '../../../../../../../../../../../../../styles/className';
 import { Jdenticon } from '../../../../../../../../../../../../ui/Jdenticon/Jdenticon';
+import { useParticipants } from '../../../../../../../../hooks/useParticipants';
 
 type Props = {
     selectedParticipantIds: ReadonlySet<string>;

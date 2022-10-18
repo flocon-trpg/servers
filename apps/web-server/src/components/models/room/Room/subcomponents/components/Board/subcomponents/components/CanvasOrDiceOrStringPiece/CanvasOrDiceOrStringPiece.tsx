@@ -1,6 +1,3 @@
-import React from 'react';
-import * as ReactKonva from 'react-konva';
-import { useSpring } from '@react-spring/konva';
 import {
     State,
     dicePieceStrIndexes,
@@ -9,13 +6,16 @@ import {
     shapePieceTemplate,
     stringPieceTemplate,
 } from '@flocon-trpg/core';
+import { keyNames, recordToArray } from '@flocon-trpg/utils';
+import { useSpring } from '@react-spring/konva';
+import React from 'react';
+import * as ReactKonva from 'react-konva';
+import { usePrevious } from 'react-use';
+import { DicePieceValue } from '../../../../../utils/dicePieceValue';
+import { PixelSize } from '../../../../../utils/positionAndSizeAndRect';
 import { StringPieceValue } from '../../../../../utils/stringPieceValue';
 import { KonvaD6 } from '../../../../KonvaDice/KonvaDice';
-import { DicePieceValue } from '../../../../../utils/dicePieceValue';
-import { usePrevious } from 'react-use';
 import { PieceGroup, PieceGroupProps } from '../../../../PieceGroup/PieceGroup';
-import { PixelSize } from '../../../../../utils/positionAndSizeAndRect';
-import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import {
     AnimatedRectAsAnyProps,
     AnimatedTextAsAnyProps,

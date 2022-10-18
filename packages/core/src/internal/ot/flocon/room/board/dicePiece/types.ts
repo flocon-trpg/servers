@@ -1,12 +1,12 @@
 import * as t from 'io-ts';
-import * as DieValueTypes from './dieValue/types';
 import { maybe } from '../../../../../maybe';
-import * as Piece from '../../../piece/types';
 import {
     createObjectValueTemplate,
     createRecordValueTemplate,
     createReplaceValueTemplate,
 } from '../../../../generator';
+import * as Piece from '../../../piece/types';
+import * as DieValueTypes from './dieValue/types';
 
 export const dicePieceStrIndexes = ['1', '2', '3', '4'] as const;
 

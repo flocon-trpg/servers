@@ -1,4 +1,12 @@
 import {
+    Master,
+    ParticipantRole,
+    Player,
+    Spectator,
+    State,
+    participantTemplate,
+} from '@flocon-trpg/core';
+import {
     Args,
     ArgsType,
     Authorized,
@@ -11,17 +19,12 @@ import {
     Resolver,
     UseMiddleware,
 } from 'type-graphql';
-import { ENTRY } from '../../../../utils/roles';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import * as Room$MikroORM from '../../../../entities/room/entity';
-import {
-    Master,
-    ParticipantRole,
-    Player,
-    Spectator,
-    State,
-    participantTemplate,
-} from '@flocon-trpg/core';
+import { PromoteFailureType } from '../../../../enums/PromoteFailureType';
+import { ResolverContext } from '../../../../types';
+import { ENTRY } from '../../../../utils/roles';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
+import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import { RoomEventPayload } from '../../subsciptions/roomEvent/payload';
 import {
     bcryptCompareNullable,
@@ -30,9 +33,6 @@ import {
     operateParticipantAndFlush,
     publishRoomEvent,
 } from '../../utils/utils';
-import { PromoteFailureType } from '../../../../enums/PromoteFailureType';
-import { ResolverContext } from '../../../../types';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 type ParticipantState = State<typeof participantTemplate>;
 

@@ -1,15 +1,15 @@
 import { atom } from 'jotai';
-import { boardEditorModalAtom } from '@/components/models/room/Room/subcomponents/components/BoardEditorModal/BoardEditorModal';
-import { imagePieceModalAtom } from '@/components/models/room/Room/subcomponents/components/ImagePieceModal/ImagePieceModal';
-import { characterEditorModalAtom } from '@/components/models/room/Room/subcomponents/components/CharacterEditorModal/CharacterEditorModal';
-import { characterParameterNamesEditorVisibilityAtom } from '@/components/models/room/Room/subcomponents/components/CharacterParameterNamesEditorModal/CharacterParameterNamesEditorModal';
 import { boardContextMenuAtom } from '@/components/models/room/Room/subcomponents/atoms/boardContextMenuAtom/boardContextMenuAtom';
 import { boardPopoverEditorAtom } from '@/components/models/room/Room/subcomponents/atoms/boardPopoverEditorAtom/boardPopoverEditorAtom';
 import { boardTooltipAtom } from '@/components/models/room/Room/subcomponents/atoms/boardTooltipAtom/boardTooltipAtom';
 import { editRoomDrawerVisibilityAtom } from '@/components/models/room/Room/subcomponents/atoms/editRoomDrawerVisibilityAtom/editRoomDrawerVisibilityAtom';
-import { stringPieceModalAtom } from '@/components/models/room/Room/subcomponents/components/StringPieceEditorModal/StringPieceEditorModal';
-import { dicePieceModalAtom } from '@/components/models/room/Room/subcomponents/components/DicePieceEditorModal/DicePieceEditorModal';
+import { boardEditorModalAtom } from '@/components/models/room/Room/subcomponents/components/BoardEditorModal/BoardEditorModal';
+import { characterEditorModalAtom } from '@/components/models/room/Room/subcomponents/components/CharacterEditorModal/CharacterEditorModal';
+import { characterParameterNamesEditorVisibilityAtom } from '@/components/models/room/Room/subcomponents/components/CharacterParameterNamesEditorModal/CharacterParameterNamesEditorModal';
 import { commandEditorModalAtom } from '@/components/models/room/Room/subcomponents/components/CommandEditorModal/CommandEditorModal';
+import { dicePieceModalAtom } from '@/components/models/room/Room/subcomponents/components/DicePieceEditorModal/DicePieceEditorModal';
+import { imagePieceModalAtom } from '@/components/models/room/Room/subcomponents/components/ImagePieceModal/ImagePieceModal';
+import { stringPieceModalAtom } from '@/components/models/room/Room/subcomponents/components/StringPieceEditorModal/StringPieceEditorModal';
 
 export const hideAllOverlayActionAtom = atom<null, void>(null, (get, set) => {
     set(boardEditorModalAtom, null);

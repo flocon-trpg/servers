@@ -1,7 +1,6 @@
 import { maybe, simpleId } from '@flocon-trpg/core';
 import { chooseRecord } from '@flocon-trpg/utils';
 import * as t from 'io-ts';
-import { record } from '@/utils/io-ts/record';
 import { BoardConfig, deserializeBoardConfig, serializedBoardConfig } from '../boardConfig';
 import { defaultBoardEditorPanelPosition } from '../defaultPanelPositions';
 import {
@@ -9,6 +8,7 @@ import {
     deserializeDraggablePanelConfigBase,
     serializedDraggablePanelConfigBase,
 } from '../draggablePanelConfig';
+import { record } from '@/utils/io-ts/record';
 
 export type BoardEditorPanelConfig = {
     activeBoardId: string | undefined;

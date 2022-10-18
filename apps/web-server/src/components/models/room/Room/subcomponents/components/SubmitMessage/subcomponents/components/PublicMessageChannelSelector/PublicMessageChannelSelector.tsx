@@ -1,13 +1,13 @@
-import React from 'react';
-import { Select } from 'antd';
-import { usePublicChannelNames } from '../../../../../hooks/usePublicChannelNames';
 import { $free, PublicChannelKey } from '@flocon-trpg/core';
+import { Select } from 'antd';
 import classNames from 'classnames';
-import { flex, flexNone, flexRow, itemsCenter } from '@/styles/className';
+import { Draft } from 'immer';
+import React from 'react';
+import { usePublicChannelNames } from '../../../../../hooks/usePublicChannelNames';
 import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
-import { Draft } from 'immer';
 import { InputDescription } from '@/components/ui/InputDescription/InputDescription';
+import { flex, flexNone, flexRow, itemsCenter } from '@/styles/className';
 
 type Props = {
     config: ChatPalettePanelConfig | MessagePanelConfig;

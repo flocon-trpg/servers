@@ -1,11 +1,11 @@
-import React from 'react';
-import { flex, flexColumn, flexRow } from '@/styles/className';
 import { State, filePathTemplate } from '@flocon-trpg/core';
-import classNames from 'classnames';
-import { UploaderFileBrowser } from '../UploaderFileBrowser/UploaderFileBrowser';
 import { Alert, Button, Input } from 'antd';
-import { analyzeUrl } from '@/utils/analyzeUrl';
+import classNames from 'classnames';
+import React from 'react';
+import { UploaderFileBrowser } from '../UploaderFileBrowser/UploaderFileBrowser';
 import { Fieldset } from '@/components/ui/Fieldset/Fieldset';
+import { flex, flexColumn, flexRow } from '@/styles/className';
+import { analyzeUrl } from '@/utils/analyzeUrl';
 import { FileType } from '@/utils/fileType';
 
 type FilePathState = State<typeof filePathTemplate>;

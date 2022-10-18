@@ -1,17 +1,17 @@
 import * as t from 'io-ts';
-import * as Bgm from './bgm/types';
-import * as Memo from './memo/types';
-import * as ParamNames from './paramName/types';
-import * as Participant from './participant/types';
 import { maybe } from '../../../maybe';
-import * as Board from './board/types';
-import * as Character from './character/types';
 import {
     createObjectValueTemplate,
     createRecordValueTemplate,
     createReplaceValueTemplate,
     createTextValueTemplate,
 } from '../../generator';
+import * as Bgm from './bgm/types';
+import * as Board from './board/types';
+import * as Character from './character/types';
+import * as Memo from './memo/types';
+import * as ParamNames from './paramName/types';
+import * as Participant from './participant/types';
 
 const templateBase = {
     activeBoardId: createReplaceValueTemplate(maybe(t.string)),

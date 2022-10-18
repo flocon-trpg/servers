@@ -1,28 +1,28 @@
-import React from 'react';
-import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
 import { State, imagePieceTemplate, simpleId } from '@flocon-trpg/core';
-import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { close, ok } from '@/utils/constants';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
+import React from 'react';
 import { Subscribable } from 'rxjs';
-import { useImagePieces } from '../../hooks/useImagePieces';
+import { useMemoOne } from 'use-memo-one';
 import { useCloneImagePiece } from '../../hooks/useCloneImagePiece';
-import { FileView } from '@/components/models/file/FileView/FileView';
-import { FilePathModule } from '@/utils/file/filePath';
+import { useImagePieces } from '../../hooks/useImagePieces';
+import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
+import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
 import {
     CompositeRect,
     PixelPosition,
     PixelSize,
     applyCompositeRect,
 } from '../../utils/positionAndSizeAndRect';
-import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
-import { PieceRectEditor } from '../RectEditor/RectEditor';
-import { useMemoOne } from 'use-memo-one';
-import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
-import { PieceEditorMemoRow } from '../PieceEditorMemoRow/PieceEditorMemoRow';
-import { PieceEditorNameRow } from '../PieceEditorNameRow/PieceEditorNameRow';
 import { PieceEditorCloneButtonRow } from '../PieceEditorCloneButtonRow/PieceEditorCloneButtonRow';
 import { PieceEditorIdRow } from '../PieceEditorIdRow/PieceEditorIdRow';
+import { PieceEditorMemoRow } from '../PieceEditorMemoRow/PieceEditorMemoRow';
+import { PieceEditorNameRow } from '../PieceEditorNameRow/PieceEditorNameRow';
+import { PieceRectEditor } from '../RectEditor/RectEditor';
+import { FileView } from '@/components/models/file/FileView/FileView';
+import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
+import { close, ok } from '@/utils/constants';
+import { FilePathModule } from '@/utils/file/filePath';
 import { image } from '@/utils/fileType';
 
 type ImagePieceState = State<typeof imagePieceTemplate>;

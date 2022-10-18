@@ -1,9 +1,9 @@
 import { ScriptError } from '../ScriptError';
-import { beginCast } from './cast';
 import { FFunction } from './FFunction';
 import { FString } from './FString';
 import { FType } from './FType';
 import { FValue } from './FValue';
+import { beginCast } from './cast';
 import { tryToPropertyName } from './tryToPropertyName';
 import { AstInfo, FObjectBase, GetParams, SetParams } from './types';
 

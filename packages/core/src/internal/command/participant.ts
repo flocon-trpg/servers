@@ -8,8 +8,8 @@ import {
     beginCast,
 } from '@flocon-trpg/flocon-script';
 import { maxLength100String } from '../maxLengthString';
-import { State } from '../ot/generator';
 import * as Participant from '../ot/flocon/room/participant/types';
+import { State } from '../ot/generator';
 
 const name = 'name';
 

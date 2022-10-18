@@ -1,11 +1,4 @@
 import * as t from 'io-ts';
-import { filePathValue } from '../../filePath/types';
-import * as CharacterPiece from './characterPiece/types';
-import * as PortraitPiece from './portraitPiece/types';
-import * as BoolParam from './boolParam/types';
-import * as Command from './command/types';
-import * as NumParam from './numParam/types';
-import * as StrParam from './strParam/types';
 import { maybe } from '../../../../maybe';
 import {
     State,
@@ -15,6 +8,13 @@ import {
     createReplaceValueTemplate,
     createTextValueTemplate,
 } from '../../../generator';
+import { filePathValue } from '../../filePath/types';
+import * as BoolParam from './boolParam/types';
+import * as CharacterPiece from './characterPiece/types';
+import * as Command from './command/types';
+import * as NumParam from './numParam/types';
+import * as PortraitPiece from './portraitPiece/types';
+import * as StrParam from './strParam/types';
 
 // boolParams, numParams, numMaxParams, strParams: keyはstrIndex20などの固定キーを想定。
 // pieces, portraitPositions: 誰でも作成できる値。keyはboardのkey。

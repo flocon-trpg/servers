@@ -1,17 +1,17 @@
-import React from 'react';
-import { Button, Table, Tooltip } from 'antd';
-import { update } from '@/stateManagers/states/types';
 import * as Icon from '@ant-design/icons';
-import { useStringPieces } from '../../hooks/useStringPieces';
+import { State, dicePieceTemplate, stringPieceTemplate } from '@flocon-trpg/core';
+import { keyNames } from '@flocon-trpg/utils';
+import { Button, Table, Tooltip } from 'antd';
+import { useUpdateAtom } from 'jotai/utils';
+import React from 'react';
+import { useCharacters } from '../../hooks/useCharacters';
 import { useDicePieces } from '../../hooks/useDicePieces';
+import { useStringPieces } from '../../hooks/useStringPieces';
 import { DicePieceValue } from '../../utils/dicePieceValue';
 import { StringPieceValue } from '../../utils/stringPieceValue';
-import { keyNames } from '@flocon-trpg/utils';
-import { useUpdateAtom } from 'jotai/utils';
-import { useCharacters } from '../../hooks/useCharacters';
-import { State, dicePieceTemplate, stringPieceTemplate } from '@flocon-trpg/core';
-import { stringPieceModalAtom } from '../StringPieceEditorModal/StringPieceEditorModal';
 import { dicePieceModalAtom } from '../DicePieceEditorModal/DicePieceEditorModal';
+import { stringPieceModalAtom } from '../StringPieceEditorModal/StringPieceEditorModal';
+import { update } from '@/stateManagers/states/types';
 
 type DicePieceState = State<typeof dicePieceTemplate>;
 type StringPieceState = State<typeof stringPieceTemplate>;

@@ -1,11 +1,11 @@
+import { State as S, apply as a, roomTemplate } from '@flocon-trpg/core';
+import { useAtomValue } from 'jotai';
 import React from 'react';
+import { useLatest } from 'react-use';
 import { roomAtom } from '../atoms/roomAtom/roomAtom';
+import { storybookAtom } from '../atoms/storybookAtom/storybookAtom';
 import { useImmerUpdateAtom } from './useImmerUpdateAtom';
 import { joined } from './useRoomState';
-import { useAtomValue } from 'jotai';
-import { storybookAtom } from '../atoms/storybookAtom/storybookAtom';
-import { useLatest } from 'react-use';
-import { State as S, apply as a, roomTemplate } from '@flocon-trpg/core';
 
 type State = S<typeof roomTemplate>;
 const apply = a(roomTemplate);
