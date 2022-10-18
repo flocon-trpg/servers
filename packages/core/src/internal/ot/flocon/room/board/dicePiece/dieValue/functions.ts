@@ -1,9 +1,9 @@
+import { Result } from '@kizahasi/result';
+import { State, TwoWayOperation, UpOperation } from '../../../../../generator';
+import { isIdRecord } from '../../../../../util/record';
 import * as ReplaceOperation from '../../../../../util/replaceOperation';
 import { ServerTransform } from '../../../../../util/type';
-import { isIdRecord } from '../../../../../util/record';
-import { Result } from '@kizahasi/result';
 import { template } from './types';
-import { State, TwoWayOperation, UpOperation } from '../../../../../generator';
 
 export const toClientState =
     (isAuthorized: boolean) =>

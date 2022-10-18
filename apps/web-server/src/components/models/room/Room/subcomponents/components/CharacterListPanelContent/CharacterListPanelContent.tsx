@@ -1,5 +1,12 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
+import * as Icon from '@ant-design/icons';
+import {
+    State,
+    StrIndex20,
+    characterTemplate,
+    paramNameTemplate,
+    strIndex10Array,
+} from '@flocon-trpg/core';
 import {
     Alert,
     Table as AntdTable,
@@ -12,57 +19,50 @@ import {
     Tabs,
     Tooltip,
 } from 'antd';
-import { update } from '@/stateManagers/states/types';
-import { NumberParameterInput } from '../NumberParameterInput/NumberParameterInput';
+import { ColumnType } from 'antd/lib/table';
+import { SortOrder } from 'antd/lib/table/interface';
+import classNames from 'classnames';
+import produce from 'immer';
+import { useUpdateAtom } from 'jotai/utils';
+import React from 'react';
+import { useDrag, useDrop } from 'react-dnd';
+import { IconView } from '../../../../../file/IconView/IconView';
+import { useCharacterTagNames } from '../../hooks/useCharacterTagNames';
+import { useCharacters } from '../../hooks/useCharacters';
+import { useBoolParamNames, useNumParamNames, useStrParamNames } from '../../hooks/useParamNames';
 import { BooleanParameterInput } from '../BooleanParameterInput/BooleanParameterInput';
+import { characterEditorModalAtom } from '../CharacterEditorModal/CharacterEditorModal';
+import { characterParameterNamesEditorVisibilityAtom } from '../CharacterParameterNamesEditorModal/CharacterParameterNamesEditorModal';
+import { characterTagNamesEditorVisibilityAtom } from '../CharacterTagNamesEditorModal/CharacterTagNamesEditorModal';
+import { importCharacterModalVisibilityAtom } from '../ImportCharacterModal/ImportCharacterModal';
+import { NumberParameterInput } from '../NumberParameterInput/NumberParameterInput';
+import { OverriddenParameterNameEditor } from '../OverriddenParameterNameEditor/OverriddenParameterNameEditor';
 import { StringParameterInput } from '../StringParameterInput/StringParameterInput';
-import * as Icon from '@ant-design/icons';
+import { CharacterTabName } from './subcomponents/components/CharacterTabName/CharacterTabName';
+import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { CharacterTabConfig } from '@/atoms/roomConfigAtom/types/characterTabConfig';
+import { CharacterTabConfigUtils } from '@/atoms/roomConfigAtom/types/characterTabConfig/utils';
+import { RowKeys } from '@/atoms/roomConfigAtom/types/charactersPanelConfig';
+import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
+import { DraggableTabs } from '@/components/ui/DraggableTabs/DraggableTabs';
+import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
 import { ToggleButton } from '@/components/ui/ToggleButton/ToggleButton';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
 import {
     characterIsNotPrivate,
     characterIsNotPrivateAndNotCreatedByMe,
     characterIsPrivate,
 } from '@/resources/text/main';
-import { useCharacters } from '../../hooks/useCharacters';
-import { useBoolParamNames, useNumParamNames, useStrParamNames } from '../../hooks/useParamNames';
-import {
-    State,
-    StrIndex20,
-    characterTemplate,
-    paramNameTemplate,
-    strIndex10Array,
-} from '@flocon-trpg/core';
-import classNames from 'classnames';
+import { update } from '@/stateManagers/states/types';
 import { cancelRnd, flex, flexRow, itemsCenter } from '@/styles/className';
-import { ColumnType } from 'antd/lib/table';
-import { SortOrder } from 'antd/lib/table/interface';
-import { IconView } from '../../../../../file/IconView/IconView';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
 import { create } from '@/utils/constants';
-import { useUpdateAtom } from 'jotai/utils';
-import { characterEditorModalAtom } from '../CharacterEditorModal/CharacterEditorModal';
-import { OverriddenParameterNameEditor } from '../OverriddenParameterNameEditor/OverriddenParameterNameEditor';
-import produce from 'immer';
-import { characterParameterNamesEditorVisibilityAtom } from '../CharacterParameterNamesEditorModal/CharacterParameterNamesEditorModal';
-import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { characterTagNamesEditorVisibilityAtom } from '../CharacterTagNamesEditorModal/CharacterTagNamesEditorModal';
-import { CharacterTabConfig } from '@/atoms/roomConfigAtom/types/characterTabConfig';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
-import { CharacterTabName } from './subcomponents/components/CharacterTabName/CharacterTabName';
-import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
-import { CharacterTabConfigUtils } from '@/atoms/roomConfigAtom/types/characterTabConfig/utils';
-import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
-import { useCharacterTagNames } from '../../hooks/useCharacterTagNames';
-import { importCharacterModalVisibilityAtom } from '../ImportCharacterModal/ImportCharacterModal';
-import { useDrag, useDrop } from 'react-dnd';
 import { KeySorter } from '@/utils/keySorter';
-import { RowKeys } from '@/atoms/roomConfigAtom/types/charactersPanelConfig';
-import { DraggableTabs } from '@/components/ui/DraggableTabs/DraggableTabs';
 import { moveElement } from '@/utils/moveElement';
 import { defaultTriggerSubMenuAction } from '@/utils/variables';
-import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
-import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 
 type CharacterState = State<typeof characterTemplate>;
 type ParamNameState = State<typeof paramNameTemplate>;

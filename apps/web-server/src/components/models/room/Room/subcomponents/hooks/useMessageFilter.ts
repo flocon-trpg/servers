@@ -1,6 +1,4 @@
 import { $free, $system } from '@flocon-trpg/core';
-import React from 'react';
-import { MessageFilter } from '@/atoms/roomConfigAtom/types/messageFilter';
 import {
     Message,
     PrivateChannelSets,
@@ -10,6 +8,8 @@ import {
     publicMessage,
     soundEffect,
 } from '@flocon-trpg/web-server-utils';
+import React from 'react';
+import { MessageFilter } from '@/atoms/roomConfigAtom/types/messageFilter';
 
 export function useMessageFilter(config: MessageFilter): (message: Message) => boolean {
     const {

@@ -1,3 +1,7 @@
+import { IdTokenResult } from '@firebase/auth';
+import { authToken } from '@flocon-trpg/core';
+import { authExchange } from '@urql/exchange-auth';
+import { createClient as createWsClient } from 'graphql-ws';
 import {
     Exchange,
     cacheExchange,
@@ -7,10 +11,6 @@ import {
     makeOperation,
     subscriptionExchange,
 } from 'urql';
-import { createClient as createWsClient } from 'graphql-ws';
-import { authExchange } from '@urql/exchange-auth';
-import { authToken } from '@flocon-trpg/core';
-import { IdTokenResult } from '@firebase/auth';
 
 type GetUserIdTokenResult = (() => Promise<IdTokenResult | null>) | null;
 

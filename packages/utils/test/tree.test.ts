@@ -1,5 +1,5 @@
-import { Tree, groupJoinArray, left, right } from '../src';
 import { Option } from '@kizahasi/option';
+import { Tree, groupJoinArray, left, right } from '../src';
 
 const sortByAbsolutePath = (
     x: { absolutePath: readonly string[] },

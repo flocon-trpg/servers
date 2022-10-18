@@ -1,20 +1,20 @@
-import React from 'react';
-import { Button, Popover, Select } from 'antd';
-import classNames from 'classnames';
-import { flex, flexNone, flexRow, itemsCenter } from '@/styles/className';
 import * as Icons from '@ant-design/icons';
-import { NewTabLinkify } from '@/components/ui/NewTabLinkify/NewTabLinkify';
 import {
     GetAvailableGameSystemsDocument,
     GetDiceHelpMessagesDocument,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
-import { useQuery } from 'urql';
-import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
-import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
-import { error, roomNotificationsAtom } from '@/atoms/roomAtom/roomAtom';
+import { Button, Popover, Select } from 'antd';
+import classNames from 'classnames';
 import { Draft } from 'immer';
 import { useUpdateAtom } from 'jotai/utils';
+import React from 'react';
+import { useQuery } from 'urql';
+import { error, roomNotificationsAtom } from '@/atoms/roomAtom/roomAtom';
+import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
+import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import { InputDescription } from '@/components/ui/InputDescription/InputDescription';
+import { NewTabLinkify } from '@/components/ui/NewTabLinkify/NewTabLinkify';
+import { flex, flexNone, flexRow, itemsCenter } from '@/styles/className';
 
 type HelpMessageProps = {
     gameSystemId: string;

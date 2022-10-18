@@ -1,12 +1,12 @@
-import { CombinedError, useClient, useMutation, useSubscription } from 'urql';
-import { Button, InputNumber } from 'antd';
-import React from 'react';
 import {
     PingDocument,
     PongDocument,
     PongSubscription,
     PongSubscriptionVariables,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { Button, InputNumber } from 'antd';
+import React from 'react';
+import { CombinedError, useClient, useMutation, useSubscription } from 'urql';
 import { pipe, subscribe } from 'wonka';
 
 type PongObservableResultState =

@@ -1,9 +1,9 @@
-import React from 'react';
-import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { flex, flexNone, flexRow, itemsCenter } from '@/styles/className';
 import classNames from 'classnames';
+import React from 'react';
 import { ParticipantsSelect } from './subcomponents/components/ParticipantsSelect/ParticipantsSelect';
 import { InputDescription } from '@/components/ui/InputDescription/InputDescription';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { flex, flexNone, flexRow, itemsCenter } from '@/styles/className';
 
 // TODO: playerの場合、characterの情報も一緒に載せたほうがわかりやすい
 

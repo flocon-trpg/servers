@@ -1,8 +1,8 @@
-import React from 'react';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
-import { ChatPalettePanelContent } from './ChatPalettePanelContent';
-import { getExactlyOneKey } from '@flocon-trpg/utils';
 import { ParticipantRole } from '@flocon-trpg/core';
+import { getExactlyOneKey } from '@flocon-trpg/utils';
+import { ComponentMeta, ComponentStory } from '@storybook/react';
+import React from 'react';
+import { ChatPalettePanelContent } from './ChatPalettePanelContent';
 import { useSetupMocks } from '@/hooks/useSetupMocks';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {

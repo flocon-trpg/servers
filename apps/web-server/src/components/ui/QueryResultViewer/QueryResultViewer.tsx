@@ -1,8 +1,8 @@
-import React, { PropsWithChildren } from 'react';
-import { Alert, Result } from 'antd';
 import * as Icon from '@ant-design/icons';
-import { LoadingResult } from '../LoadingResult/LoadingResult';
+import { Alert, Result } from 'antd';
+import React, { PropsWithChildren } from 'react';
 import { CombinedError } from 'urql';
+import { LoadingResult } from '../LoadingResult/LoadingResult';
 
 type Props = {
     error?: CombinedError;

@@ -1,5 +1,5 @@
-import { StateManagerHistoryQueue } from './stateManagerHistoryQueue';
 import { StateManagerCore } from './stateManagerCore';
+import { StateManagerHistoryQueue } from './stateManagerHistoryQueue';
 import { StateManagerParameters } from './types';
 
 type OnPosted<T> =

@@ -1,22 +1,22 @@
-import * as DieValue from './dieValue/functions';
-import * as DieValueTypes from './dieValue/types';
-import * as Piece from '../../../piece/functions';
-import { ServerTransform, TwoWayError } from '../../../../util/type';
-import { isIdRecord } from '../../../../util/record';
-import { Result } from '@kizahasi/result';
 import { chooseRecord } from '@flocon-trpg/utils';
+import { Result } from '@kizahasi/result';
+import { State, TwoWayOperation, UpOperation } from '../../../../generator';
+import * as NullableTextOperation from '../../../../util/nullableTextOperation';
+import { isIdRecord } from '../../../../util/record';
 import * as RecordOperation from '../../../../util/recordOperation';
 import * as ReplaceOperation from '../../../../util/replaceOperation';
-import { dicePieceStrIndexes, template } from './types';
-import * as Room from '../../types';
 import {
     RequestedBy,
     anyValue,
     canChangeOwnerCharacterId,
     isCharacterOwner,
 } from '../../../../util/requestedBy';
-import * as NullableTextOperation from '../../../../util/nullableTextOperation';
-import { State, TwoWayOperation, UpOperation } from '../../../../generator';
+import { ServerTransform, TwoWayError } from '../../../../util/type';
+import * as Piece from '../../../piece/functions';
+import * as Room from '../../types';
+import * as DieValue from './dieValue/functions';
+import * as DieValueTypes from './dieValue/types';
+import { dicePieceStrIndexes, template } from './types';
 
 export const toClientState =
     (requestedBy: RequestedBy, currentRoomState: State<typeof Room.template>) =>

@@ -1,10 +1,10 @@
-import { beginCast } from '../scriptValue/cast';
+import { Option } from '@kizahasi/option';
 import { ScriptError } from '../ScriptError';
 import { FFunction } from '../scriptValue/FFunction';
 import { FSymbol } from '../scriptValue/FSymbol';
-import { GetCoreParams } from '../scriptValue/types';
-import { Option } from '@kizahasi/option';
 import { FValue } from '../scriptValue/FValue';
+import { beginCast } from '../scriptValue/cast';
+import { GetCoreParams } from '../scriptValue/types';
 
 class FSymbolClass extends FFunction {
     public constructor() {

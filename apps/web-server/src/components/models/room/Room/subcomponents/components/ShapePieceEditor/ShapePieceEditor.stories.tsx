@@ -1,9 +1,9 @@
 import { ComponentMeta } from '@storybook/react';
 import React from 'react';
-import { useSetupMocks } from '@/hooks/useSetupMocks';
-import { defaultBoardId, shapePieceKey1 } from '@/mocks';
 import { ShapePieceEditor } from './ShapePieceEditor';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
+import { useSetupMocks } from '@/hooks/useSetupMocks';
+import { defaultBoardId, shapePieceKey1 } from '@/mocks';
 
 export const Update: React.FC = () => {
     useSetupMocks();

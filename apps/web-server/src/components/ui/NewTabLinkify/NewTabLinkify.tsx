@@ -1,5 +1,5 @@
-import React from 'react';
 import Linkify from 'linkify-react';
+import React from 'react';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 type Props = {};

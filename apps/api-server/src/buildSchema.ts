@@ -1,3 +1,6 @@
+import path from 'path';
+import { GraphQLSchema } from 'graphql';
+import { PubSubOptions } from 'graphql-subscriptions';
 import {
     AuthChecker,
     BuildSchemaOptions,
@@ -6,15 +9,12 @@ import {
     buildSchema as buildSchemaCore,
     buildSchemaSync as buildSchemaSyncCore,
 } from 'type-graphql';
-import path from 'path';
-import { GraphQLSchema } from 'graphql';
-import { registerEnumTypes } from './graphql/registerEnumTypes';
-import { PubSubOptions } from 'graphql-subscriptions';
-import { getRolesAndCheckEntry } from './utils/roles';
 import { ServerConfig } from './config/types';
+import { registerEnumTypes } from './graphql/registerEnumTypes';
 import { allResolvers } from './graphql/resolvers/allResolvers';
 import { NotSignIn } from './graphql/resolvers/utils/utils';
 import { ResolverContext } from './types';
+import { getRolesAndCheckEntry } from './utils/roles';
 
 export const noAuthCheck = 'noAuthCheck';
 

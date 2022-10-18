@@ -1,10 +1,10 @@
-import { Button, Tooltip } from 'antd';
-import React from 'react';
 import * as Icons from '@ant-design/icons';
+import { Button, Tooltip } from 'antd';
 import classNames from 'classnames';
-import { flex, flexRow } from '@/styles/className';
-import { InputDescription } from '@/components/ui/InputDescription/InputDescription';
+import React from 'react';
 import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
+import { InputDescription } from '@/components/ui/InputDescription/InputDescription';
+import { flex, flexRow } from '@/styles/className';
 
 type PropsBase = {
     style?: React.CSSProperties;

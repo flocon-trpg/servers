@@ -1,5 +1,11 @@
-import React, { PropsWithChildren } from 'react';
-import { useRouter } from 'next/router';
+import * as Icon from '@ant-design/icons';
+import {
+    EntryToServerDocument,
+    EntryToServerResultType,
+    IsEntryDocument,
+    IsEntryQuery,
+    IsEntryQueryVariables,
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import {
     Alert,
     Layout as AntdLayout,
@@ -13,25 +19,19 @@ import {
     Space,
     Spin,
 } from 'antd';
-import {
-    EntryToServerDocument,
-    EntryToServerResultType,
-    IsEntryDocument,
-    IsEntryQuery,
-    IsEntryQueryVariables,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
-import { Center } from '../Center/Center';
-import Link from 'next/link';
-import { NotSignInResult } from '../NotSignInResult/NotSignInResult';
-import { LoadingResult } from '../LoadingResult/LoadingResult';
-import * as Icon from '@ant-design/icons';
-import { useSignOut } from '@/hooks/useSignOut';
-import { useClient, useMutation } from 'urql';
-import { useGetMyRoles } from '@/hooks/useGetMyRoles';
 import { useAtomValue } from 'jotai';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import React, { PropsWithChildren } from 'react';
+import { useClient, useMutation } from 'urql';
+import { Center } from '../Center/Center';
+import { LoadingResult } from '../LoadingResult/LoadingResult';
+import { NotSignInResult } from '../NotSignInResult/NotSignInResult';
+import { useGetIdToken } from '@/hooks/useGetIdToken';
+import { useGetMyRoles } from '@/hooks/useGetMyRoles';
+import { useSignOut } from '@/hooks/useSignOut';
 import { firebaseUserAtom } from '@/pages/_app';
 import { authNotFound, loading, notSignIn } from '@/utils/firebase/firebaseUserState';
-import { useGetIdToken } from '@/hooks/useGetIdToken';
 
 const { Header, Content } = AntdLayout;
 

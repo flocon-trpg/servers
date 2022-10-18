@@ -1,16 +1,16 @@
 import { State, boardTemplate, simpleId, state } from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
 import { Alert, Modal } from 'antd';
+import classNames from 'classnames';
+import * as E from 'fp-ts/Either';
 import { atom, useAtom } from 'jotai';
 import React from 'react';
-import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
-import * as E from 'fp-ts/Either';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
-import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { formatValidationErrors } from '@/utils/io-ts/io-ts-reporters';
-import classNames from 'classnames';
-import { flex, flexColumn } from '@/styles/className';
 import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
+import { flex, flexColumn } from '@/styles/className';
+import { formatValidationErrors } from '@/utils/io-ts/io-ts-reporters';
 
 const boardState = state(boardTemplate, { exact: true });
 type BoardState = State<typeof boardTemplate>;

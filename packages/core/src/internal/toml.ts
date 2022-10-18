@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import { Result } from '@kizahasi/result';
 import {
     LocalDate as TomlLocalDate,
     LocalDateTime as TomlLocalDateTime,
@@ -6,7 +6,7 @@ import {
     OffsetDateTime as TomlOffsetDateTime,
     parse as parseCore,
 } from '@ltd/j-toml';
-import { Result } from '@kizahasi/result';
+import * as t from 'io-ts';
 import { analyze, expr1 } from './expression';
 import { maybe } from './maybe';
 

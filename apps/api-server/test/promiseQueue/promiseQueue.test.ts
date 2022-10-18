@@ -1,7 +1,6 @@
 import { delay } from '@flocon-trpg/utils';
 import {
     PromiseQueue,
-    PromiseQueueResult,
     PromiseQueueResultWithTimeout,
     executed,
     timeout,

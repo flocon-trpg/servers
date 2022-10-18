@@ -1,4 +1,6 @@
-import React from 'react';
+import { FirebaseError } from '@firebase/util';
+import { Alert, Button, Form, Input, Tooltip } from 'antd';
+import classNames from 'classnames';
 import {
     AuthProvider,
     EmailAuthProvider,
@@ -16,18 +18,16 @@ import {
     signInWithPopup,
     updateProfile,
 } from 'firebase/auth';
+import { atom, useAtom, useSetAtom } from 'jotai';
+import { useAtomValue } from 'jotai/utils';
+import { useRouter } from 'next/router';
+import React from 'react';
+import { storybookAtom } from '@/atoms/storybookAtom/storybookAtom';
+import { Center } from '@/components/ui/Center/Center';
 import { anonymous, email, facebook, github, google, phone, twitter } from '@/env';
 import { useWebConfig } from '@/hooks/useWebConfig';
-import { Alert, Button, Form, Input, Tooltip } from 'antd';
-import { Center } from '@/components/ui/Center/Center';
-import { useRouter } from 'next/router';
-import classNames from 'classnames';
-import { flex, flexColumn, flexRow } from '@/styles/className';
-import { useAtomValue } from 'jotai/utils';
 import { firebaseAuthAtom } from '@/pages/_app';
-import { atom, useAtom, useSetAtom } from 'jotai';
-import { storybookAtom } from '@/atoms/storybookAtom/storybookAtom';
-import { FirebaseError } from '@firebase/util';
+import { flex, flexColumn, flexRow } from '@/styles/className';
 
 const displayName = 'new user';
 const formWidth = 400;

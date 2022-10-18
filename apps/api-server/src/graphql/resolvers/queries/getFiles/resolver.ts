@@ -9,15 +9,15 @@ import {
     Resolver,
     UseMiddleware,
 } from 'type-graphql';
-import { FilePermissionType } from '../../../../enums/FilePermissionType';
-import { ENTRY } from '../../../../utils/roles';
-import { FileItem } from '../../../objects/fileItem';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import { File } from '../../../../entities/file/entity';
 import { FileListType } from '../../../../enums/FileListType';
-import { ensureAuthorizedUser } from '../../utils/utils';
+import { FilePermissionType } from '../../../../enums/FilePermissionType';
 import { ResolverContext } from '../../../../types';
+import { ENTRY } from '../../../../utils/roles';
 import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
+import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
+import { FileItem } from '../../../objects/fileItem';
+import { ensureAuthorizedUser } from '../../utils/utils';
 
 @InputType()
 class GetFilesInput {

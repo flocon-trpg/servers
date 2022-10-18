@@ -1,9 +1,8 @@
-import * as ReplaceOperation from '../../../util/replaceOperation';
-import * as RecordOperation from '../../../util/recordOperation';
-import * as TextOperation from '../../../util/textOperation';
-import { ServerTransform, TwoWayError } from '../../../util/type';
-import { isIdRecord } from '../../../util/record';
 import { Result } from '@kizahasi/result';
+import { State, TwoWayOperation, UpOperation } from '../../../generator';
+import { isIdRecord } from '../../../util/record';
+import * as RecordOperation from '../../../util/recordOperation';
+import * as ReplaceOperation from '../../../util/replaceOperation';
 import {
     RequestedBy,
     anyValue,
@@ -12,17 +11,18 @@ import {
     isOwner,
     none,
 } from '../../../util/requestedBy';
-import * as DicePieceTypes from './dicePiece/types';
+import * as TextOperation from '../../../util/textOperation';
+import { ServerTransform, TwoWayError } from '../../../util/type';
+import * as Room from '../types';
 import * as DicePiece from './dicePiece/functions';
-import * as ImagePieceTypes from './imagePiece/types';
+import * as DicePieceTypes from './dicePiece/types';
 import * as ImagePiece from './imagePiece/functions';
+import * as ImagePieceTypes from './imagePiece/types';
 import * as ShapePiece from './shapePiece/functions';
 import * as ShapePieceTypes from './shapePiece/types';
-import * as StringPieceTypes from './stringPiece/types';
 import * as StringPiece from './stringPiece/functions';
-import * as Room from '../types';
+import * as StringPieceTypes from './stringPiece/types';
 import { template } from './types';
-import { State, TwoWayOperation, UpOperation } from '../../../generator';
 
 export const toClientState =
     (requestedBy: RequestedBy, currentRoomState: State<typeof Room.template>) =>

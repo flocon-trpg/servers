@@ -1,8 +1,8 @@
 import * as t from 'io-ts';
-import { filePathValue } from '../../../filePath/types';
-import * as Piece from '../../../piece/types';
 import { maybe } from '../../../../../maybe';
 import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../../generator';
+import { filePathValue } from '../../../filePath/types';
+import * as Piece from '../../../piece/types';
 
 export const template = createObjectValueTemplate(
     {

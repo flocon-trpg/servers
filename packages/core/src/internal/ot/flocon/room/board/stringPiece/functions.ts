@@ -1,18 +1,18 @@
-import * as ReplaceOperation from '../../../../util/replaceOperation';
-import { ServerTransform } from '../../../../util/type';
-import { isIdRecord } from '../../../../util/record';
 import { Result } from '@kizahasi/result';
-import * as TextOperation from '../../../../util/textOperation';
-import * as Room from '../../types';
+import { State, TwoWayOperation, UpOperation } from '../../../../generator';
+import { isIdRecord } from '../../../../util/record';
+import * as ReplaceOperation from '../../../../util/replaceOperation';
 import {
     RequestedBy,
     anyValue,
     canChangeOwnerCharacterId,
     isCharacterOwner,
 } from '../../../../util/requestedBy';
+import * as TextOperation from '../../../../util/textOperation';
+import { ServerTransform } from '../../../../util/type';
 import * as Piece from '../../../piece/functions';
+import * as Room from '../../types';
 import { template } from './types';
-import { State, TwoWayOperation, UpOperation } from '../../../../generator';
 
 export const toClientState =
     (requestedBy: RequestedBy, currentRoomState: State<typeof Room.template>) =>

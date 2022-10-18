@@ -1,7 +1,7 @@
-import { CombinedError, useSubscription } from 'urql';
+import { RoomEventDocument, RoomEventSubscription } from '@flocon-trpg/typed-document-node-v0.7.1';
 import React from 'react';
 import { Observable, Subject } from 'rxjs';
-import { RoomEventDocument, RoomEventSubscription } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { CombinedError, useSubscription } from 'urql';
 
 type Result = {
     observable: Observable<RoomEventSubscription>;

@@ -1,6 +1,6 @@
 import { simpleId } from '@flocon-trpg/core';
-import { CharacterTabConfig } from '.';
 import { CharacterTagFilterUtils } from '../characterTagFilter/utils';
+import { CharacterTabConfig } from '.';
 
 export namespace CharacterTabConfigUtils {
     export const createEmpty = ({ tabName }: { tabName?: string }): CharacterTabConfig => {

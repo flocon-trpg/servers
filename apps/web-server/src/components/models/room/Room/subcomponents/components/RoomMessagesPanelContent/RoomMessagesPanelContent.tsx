@@ -1,6 +1,24 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
+import * as Icon from '@ant-design/icons';
+import * as Icons from '@ant-design/icons';
 import { css } from '@emotion/react';
+import {
+    DeleteMessageDocument,
+    EditMessageDocument,
+    MakeMessageNotSecretDocument,
+    WritingMessageStatusType,
+} from '@flocon-trpg/typed-document-node-v0.7.1';
+import { keyNames, recordToMap } from '@flocon-trpg/utils';
+import {
+    Message,
+    Notification,
+    PrivateChannelSet,
+    PrivateChannelSets,
+    pieceLog,
+    privateMessage,
+    publicMessage,
+    soundEffect,
+} from '@flocon-trpg/web-server-utils';
 import {
     Alert,
     Button,
@@ -17,65 +35,47 @@ import {
     Tabs,
     Tooltip,
 } from 'antd';
+import { ItemType } from 'antd/lib/menu/hooks/useItems';
+import classNames from 'classnames';
+import { WritableDraft } from 'immer/dist/internal';
+import { atom } from 'jotai';
+import { useAtomValue } from 'jotai/utils';
 import moment from 'moment';
-import { failure, graphqlError, notFetch, useRoomMessages } from '@/hooks/useRoomMessages';
-import {
-    Message,
-    Notification,
-    PrivateChannelSet,
-    PrivateChannelSets,
-    pieceLog,
-    privateMessage,
-    publicMessage,
-    soundEffect,
-} from '@flocon-trpg/web-server-utils';
-import { ChatInput } from '../ChatInput';
-import {
-    DeleteMessageDocument,
-    EditMessageDocument,
-    MakeMessageNotSecretDocument,
-    WritingMessageStatusType,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
-import * as Icon from '@ant-design/icons';
-import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
-import { QueryResultViewer } from '@/components/ui/QueryResultViewer/QueryResultViewer';
+import React from 'react';
+import { useMutation } from 'urql';
 import { useMessageFilter } from '../../hooks/useMessageFilter';
-import { RoomMessage as RoomMessageNameSpace } from './subcomponents/components/RoomMessage/RoomMessage';
+import { useParticipants } from '../../hooks/useParticipants';
+import { usePublicChannelNames } from '../../hooks/usePublicChannelNames';
 import { useWritingMessageStatus } from '../../hooks/useWritingMessageStatus';
 import { isDeleted, toText } from '../../utils/message';
-import { usePublicChannelNames } from '../../hooks/usePublicChannelNames';
-import { useParticipants } from '../../hooks/useParticipants';
-import { keyNames, recordToMap } from '@flocon-trpg/utils';
-import * as Icons from '@ant-design/icons';
-import { InputModal } from '@/components/ui/InputModal/InputModal';
-import { JumpToBottomVirtuoso } from '@/components/ui/JumpToBottomVirtuoso/JumpToBottomVirtuoso';
-import { cancelRnd, flex, flexColumn, flexNone, flexRow, itemsCenter } from '@/styles/className';
-import classNames from 'classnames';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
-import { useMutation } from 'urql';
-import { MessageTabConfig } from '@/atoms/roomConfigAtom/types/messageTabConfig';
-import { atom } from 'jotai';
+import { ChatInput } from '../ChatInput';
+import { MessageTabName } from './subcomponents/components/MessageTabName/MessageTabName';
+import { RoomMessage as RoomMessageNameSpace } from './subcomponents/components/RoomMessage/RoomMessage';
 import { roomAtom } from '@/atoms/roomAtom/roomAtom';
+import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { MessageFilter } from '@/atoms/roomConfigAtom/types/messageFilter';
+import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
+import { MessageTabConfig } from '@/atoms/roomConfigAtom/types/messageTabConfig';
+import { MessageTabConfigUtils } from '@/atoms/roomConfigAtom/types/messageTabConfig/utils';
+import { column, row } from '@/atoms/userConfigAtom/types';
 import { userConfigAtom } from '@/atoms/userConfigAtom/userConfigAtom';
 import { UserConfigUtils } from '@/atoms/userConfigAtom/utils';
-import { MessageFilter } from '@/atoms/roomConfigAtom/types/messageFilter';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
-import { MessageTabConfigUtils } from '@/atoms/roomConfigAtom/types/messageTabConfig/utils';
-import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
-import { useAtomValue } from 'jotai/utils';
-import { MessageTabName } from './subcomponents/components/MessageTabName/MessageTabName';
-import { DraggableTabs } from '@/components/ui/DraggableTabs/DraggableTabs';
-import { moveElement } from '@/utils/moveElement';
-import { column, row } from '@/atoms/userConfigAtom/types';
-import { InputDescription } from '@/components/ui/InputDescription/InputDescription';
-import { WritableDraft } from 'immer/dist/internal';
-import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
-import { ItemType } from 'antd/lib/menu/hooks/useItems';
-import { defaultTriggerSubMenuAction } from '@/utils/variables';
-import { firebaseUserValueAtom } from '@/pages/_app';
 import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
-import { Styles } from '@/styles';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
+import { DraggableTabs } from '@/components/ui/DraggableTabs/DraggableTabs';
+import { InputDescription } from '@/components/ui/InputDescription/InputDescription';
+import { InputModal } from '@/components/ui/InputModal/InputModal';
+import { JumpToBottomVirtuoso } from '@/components/ui/JumpToBottomVirtuoso/JumpToBottomVirtuoso';
+import { QueryResultViewer } from '@/components/ui/QueryResultViewer/QueryResultViewer';
 import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
+import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
+import { failure, graphqlError, notFetch, useRoomMessages } from '@/hooks/useRoomMessages';
+import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
+import { firebaseUserValueAtom } from '@/pages/_app';
+import { Styles } from '@/styles';
+import { cancelRnd, flex, flexColumn, flexNone, flexRow, itemsCenter } from '@/styles/className';
+import { moveElement } from '@/utils/moveElement';
+import { defaultTriggerSubMenuAction } from '@/utils/variables';
 
 const headerHeight = 20;
 const contentMinHeight = 22;

@@ -1,6 +1,6 @@
 import { Observable, Subject } from 'rxjs';
-import * as Rx from 'rxjs/operators';
 import { defer, of } from 'rxjs';
+import * as Rx from 'rxjs/operators';
 import { v4 } from 'uuid';
 
 // promise-queueはtimeoutがなく、またqueueLimitReachedを判定するにはエラーメッセージから求める必要がある。promise-queue-plusが求めているものに近いが、こちらもエラーメッセージからqueueLimitReachedやtimeoutを求める必要があるのと、d.tsファイルが見当たらなかった。そのため自作した。

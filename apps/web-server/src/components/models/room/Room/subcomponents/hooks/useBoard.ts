@@ -1,6 +1,6 @@
 import { State, boardTemplate } from '@flocon-trpg/core';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { roomAtom } from '@/atoms/roomAtom/roomAtom';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
 
 type BoardState = State<typeof boardTemplate>;
 

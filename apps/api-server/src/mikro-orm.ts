@@ -6,6 +6,8 @@ import {
     LogContext,
     LoggerNamespace,
 } from '@mikro-orm/core';
+import * as t from 'io-ts';
+import { sqliteDatabase } from './config/types';
 import { File } from './entities/file/entity';
 import { FileTag } from './entities/fileTag/entity';
 import { Participant } from './entities/participant/entity';
@@ -19,8 +21,6 @@ import {
     StringPieceLog,
 } from './entities/roomMessage/entity';
 import { User } from './entities/user/entity';
-import * as t from 'io-ts';
-import { sqliteDatabase } from './config/types';
 import { logger } from './logger';
 
 const entities = [

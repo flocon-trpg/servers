@@ -1,7 +1,4 @@
 import * as t from 'io-ts';
-import * as StringPieceValueTypes from './types';
-import * as PieceBaseTypes from '../../../piece/types';
-import { createType, deleteType, updateType } from '../../../piece/log';
 import { maybe } from '../../../../../maybe';
 import {
     IoTsOptions,
@@ -12,6 +9,9 @@ import {
     toUpOperation,
     upOperation,
 } from '../../../../generator';
+import { createType, deleteType, updateType } from '../../../piece/log';
+import * as PieceBaseTypes from '../../../piece/types';
+import * as StringPieceValueTypes from './types';
 
 const update = (options: IoTsOptions) =>
     t.intersection([

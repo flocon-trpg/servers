@@ -1,7 +1,7 @@
-import React from 'react';
 import { InputNumber, Slider, Typography } from 'antd';
-import { flex, flexRow, itemsCenter } from '@/styles/className';
 import classNames from 'classnames';
+import React from 'react';
+import { flex, flexRow, itemsCenter } from '@/styles/className';
 
 // '0-1'の場合、Props.valueの値の範囲が0～1だとみなされる。VolumeBarではProps.valueの値を100倍した値が表示される。onChangeの引数には0～1の範囲に変換されてから渡される。
 // '0-100'の場合、Props.valueの値の範囲が0～100だとみなされる。VolumeBarはProps.valueの値をそのまま表示する。

@@ -1,9 +1,9 @@
-import { ServerTransform } from '../../../../util/type';
-import * as ReplaceValueOperation from '../../../../util/replaceOperation';
-import { isIdRecord } from '../../../../util/record';
 import { Result } from '@kizahasi/result';
-import * as NullableTextOperation from '../../../../util/nullableTextOperation';
 import { State, TwoWayOperation, UpOperation } from '../../../../generator';
+import * as NullableTextOperation from '../../../../util/nullableTextOperation';
+import { isIdRecord } from '../../../../util/record';
+import * as ReplaceValueOperation from '../../../../util/replaceOperation';
+import { ServerTransform } from '../../../../util/type';
 import { template } from './types';
 
 export const toClientState =

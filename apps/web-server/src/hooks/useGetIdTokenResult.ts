@@ -1,9 +1,9 @@
-import { roomNotificationsAtom, text } from '@/atoms/roomAtom/roomAtom';
-import { firebaseAuthAtom, firebaseUserAtom } from '@/pages/_app';
 import { useAtomValue, useSetAtom } from 'jotai';
 import React from 'react';
 import { useLatest } from 'react-use';
 import { useCallbackOne } from 'use-memo-one';
+import { roomNotificationsAtom, text } from '@/atoms/roomAtom/roomAtom';
+import { firebaseAuthAtom, firebaseUserAtom } from '@/pages/_app';
 
 /** @returns getIdTokenResultを実行したときにnon-nullishな値が返ってくると予想される場合は、canGetIdTokenResultはtrueとなる。 */
 export const useGetIdTokenResult = () => {

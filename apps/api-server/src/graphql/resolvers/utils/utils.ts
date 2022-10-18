@@ -1,4 +1,39 @@
 import {
+    MaxLength100String,
+    ParticipantRole,
+    RecordUpOperationElement,
+    State,
+    UpOperation,
+    admin,
+    anonymous,
+    client,
+    participantTemplate,
+    replace,
+    roomTemplate,
+    serverTransform,
+} from '@flocon-trpg/core';
+import { recordToArray } from '@flocon-trpg/utils';
+import { Result } from '@kizahasi/result';
+import { Reference } from '@mikro-orm/core';
+import bcrypt from 'bcrypt';
+import Color from 'color';
+import safeCompare from 'safe-compare';
+import { PubSubEngine } from 'type-graphql';
+import { EntryPasswordConfig, ServerConfig, plain } from '../../../config/types';
+import { GlobalRoom } from '../../../entities-graphql/room';
+import {
+    DicePieceLog as DicePieceLogNameSpace,
+    StringPieceLog as StringPieceLogNameSpace,
+} from '../../../entities-graphql/roomMessage';
+import * as Room$MikroORM from '../../../entities/room/entity';
+import { RoomPrvMsg, RoomPubMsg } from '../../../entities/roomMessage/entity';
+import { User } from '../../../entities/user/entity';
+import { getUserIfEntry } from '../../../entities/user/getUserIfEntry';
+import { BaasType } from '../../../enums/BaasType';
+import { JoinRoomFailureType } from '../../../enums/JoinRoomFailureType';
+import { DecodedIdToken, EM, ResolverContext } from '../../../types';
+import { RoomOperation } from '../../objects/room';
+import {
     CharacterValueForMessage,
     PieceLog,
     RoomMessages,
@@ -17,45 +52,10 @@ import {
     RoomSoundEffectType,
     UpdatedText,
 } from '../../objects/roomMessage';
-import { RoomPrvMsg, RoomPubMsg } from '../../../entities/roomMessage/entity';
-import * as Room$MikroORM from '../../../entities/room/entity';
-import {
-    DicePieceLog as DicePieceLogNameSpace,
-    StringPieceLog as StringPieceLogNameSpace,
-} from '../../../entities-graphql/roomMessage';
-import { ROOM_EVENT } from '../subsciptions/roomEvent/topics';
-import { PubSubEngine } from 'type-graphql';
-import { RoomEventPayload } from '../subsciptions/roomEvent/payload';
-import {
-    MaxLength100String,
-    ParticipantRole,
-    RecordUpOperationElement,
-    State,
-    UpOperation,
-    admin,
-    anonymous,
-    client,
-    participantTemplate,
-    replace,
-    roomTemplate,
-    serverTransform,
-} from '@flocon-trpg/core';
-import { DecodedIdToken, EM, ResolverContext } from '../../../types';
 import { JoinRoomResult } from '../mutations/joinRoom/resolver';
-import { JoinRoomFailureType } from '../../../enums/JoinRoomFailureType';
-import { GlobalRoom } from '../../../entities-graphql/room';
-import { Result } from '@kizahasi/result';
-import { RoomOperation } from '../../objects/room';
+import { RoomEventPayload } from '../subsciptions/roomEvent/payload';
+import { ROOM_EVENT } from '../subsciptions/roomEvent/topics';
 import { Context, analyze } from './messageAnalyzer';
-import { User } from '../../../entities/user/entity';
-import { Reference } from '@mikro-orm/core';
-import Color from 'color';
-import { BaasType } from '../../../enums/BaasType';
-import { EntryPasswordConfig, ServerConfig, plain } from '../../../config/types';
-import safeCompare from 'safe-compare';
-import bcrypt from 'bcrypt';
-import { recordToArray } from '@flocon-trpg/utils';
-import { getUserIfEntry } from '../../../entities/user/getUserIfEntry';
 
 type RoomState = State<typeof roomTemplate>;
 type RoomUpOperation = UpOperation<typeof roomTemplate>;

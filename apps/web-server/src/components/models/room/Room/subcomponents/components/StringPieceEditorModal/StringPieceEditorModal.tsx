@@ -1,12 +1,12 @@
 import { DrawerProps, Modal } from 'antd';
+import { atom, useAtom } from 'jotai';
 import React from 'react';
+import { Subject } from 'rxjs';
+import useConstant from 'use-constant';
+import { useMemoOne } from 'use-memo-one';
+import { CreateMode, StringPieceEditor, UpdateMode } from '../StringPieceEditor/StringPieceEditor';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { close, create, ok, update } from '@/utils/constants';
-import { atom, useAtom } from 'jotai';
-import { Subject } from 'rxjs';
-import { CreateMode, StringPieceEditor, UpdateMode } from '../StringPieceEditor/StringPieceEditor';
-import { useMemoOne } from 'use-memo-one';
-import useConstant from 'use-constant';
 import { PieceModalState } from '@/utils/types';
 
 export const stringPieceModalAtom = atom<PieceModalState | null>(null);

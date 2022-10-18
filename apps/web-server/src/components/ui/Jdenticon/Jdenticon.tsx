@@ -1,7 +1,7 @@
-import React from 'react';
-import * as jdenticon from 'jdenticon';
 import { Popover } from 'antd';
 import classNames from 'classnames';
+import * as jdenticon from 'jdenticon';
+import React from 'react';
 import { flex, flexColumn } from '@/styles/className';
 
 const userUid = 'userUid';

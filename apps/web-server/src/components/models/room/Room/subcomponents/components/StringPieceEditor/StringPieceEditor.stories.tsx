@@ -1,8 +1,8 @@
 import { ComponentMeta } from '@storybook/react';
 import React from 'react';
+import { StringPieceEditor } from './StringPieceEditor';
 import { useSetupMocks } from '@/hooks/useSetupMocks';
 import { defaultBoardId, stringPieceKey1 } from '@/mocks';
-import { StringPieceEditor } from './StringPieceEditor';
 
 export const Update: React.FC = () => {
     useSetupMocks();

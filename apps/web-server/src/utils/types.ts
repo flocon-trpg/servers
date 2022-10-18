@@ -1,5 +1,5 @@
-import { PixelPosition } from '@/components/models/room/Room/subcomponents/utils/positionAndSizeAndRect';
 import { create, update } from './constants';
+import { PixelPosition } from '@/components/models/room/Room/subcomponents/utils/positionAndSizeAndRect';
 
 export type BoardType =
     | { type: 'boardEditor'; boardEditorPanelId: string }

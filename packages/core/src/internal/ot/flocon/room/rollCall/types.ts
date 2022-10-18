@@ -1,10 +1,10 @@
 import * as t from 'io-ts';
-import * as RollCallParticipant from './rollCallParticipant/types';
 import {
     createObjectValueTemplate,
     createRecordValueTemplate,
     createReplaceValueTemplate,
 } from '../../../generator';
+import * as RollCallParticipant from './rollCallParticipant/types';
 
 export const template = createObjectValueTemplate(
     {

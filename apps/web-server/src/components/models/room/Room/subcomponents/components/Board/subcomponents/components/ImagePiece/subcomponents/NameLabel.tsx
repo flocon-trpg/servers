@@ -1,6 +1,6 @@
+import Konva from 'konva';
 import React from 'react';
 import * as ReactKonva from 'react-konva';
-import Konva from 'konva';
 import {
     PixelPosition,
     PixelSize,

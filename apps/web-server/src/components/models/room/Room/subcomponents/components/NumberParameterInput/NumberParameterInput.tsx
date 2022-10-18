@@ -1,6 +1,14 @@
-import React from 'react';
-import { Button, Input, InputNumber, Tooltip } from 'antd';
 import { DeleteOutlined, EyeInvisibleOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+    State,
+    StrIndex20,
+    UpOperation,
+    apply,
+    characterTemplate,
+    numParamTemplate,
+} from '@flocon-trpg/core';
+import { Button, Input, InputNumber, Tooltip } from 'antd';
+import React from 'react';
 import { ToggleButton } from '@/components/ui/ToggleButton/ToggleButton';
 import {
     addParameter,
@@ -10,14 +18,6 @@ import {
     parameterIsPrivate,
     parameterIsPrivateAndNotCreatedByMe,
 } from '@/resources/text/main';
-import {
-    State,
-    StrIndex20,
-    UpOperation,
-    apply,
-    characterTemplate,
-    numParamTemplate,
-} from '@flocon-trpg/core';
 
 const applyCharacter = apply(characterTemplate);
 type CharacterState = State<typeof characterTemplate>;

@@ -1,13 +1,13 @@
 import { Modal } from 'antd';
-import React from 'react';
-import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { DrawerProps } from 'antd/lib/drawer';
-import { close, create, ok, update } from '@/utils/constants';
 import { atom, useAtom } from 'jotai';
+import React from 'react';
 import { Subject } from 'rxjs';
-import { CreateMode, ShapePieceEditor, UpdateMode } from '../ShapePieceEditor/ShapePieceEditor';
-import { useMemoOne } from 'use-memo-one';
 import useConstant from 'use-constant';
+import { useMemoOne } from 'use-memo-one';
+import { CreateMode, ShapePieceEditor, UpdateMode } from '../ShapePieceEditor/ShapePieceEditor';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
+import { close, create, ok, update } from '@/utils/constants';
 import { PieceModalState } from '@/utils/types';
 
 export const shapePieceModalAtom = atom<PieceModalState | null>(null);

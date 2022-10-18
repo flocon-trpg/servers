@@ -1,7 +1,7 @@
-import React from 'react';
 import { act, render } from '@testing-library/react';
-import { CollaborativeInput, OnChangeParams } from './CollaborativeInput';
 import Quill from 'quill';
+import React from 'react';
+import { CollaborativeInput, OnChangeParams } from './CollaborativeInput';
 
 const delayTime = 1100;
 

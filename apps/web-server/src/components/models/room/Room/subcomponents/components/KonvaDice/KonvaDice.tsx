@@ -1,8 +1,8 @@
+import { useTransition } from '@react-spring/konva';
 import React from 'react';
 import * as ReactKonva from 'react-konva';
-import { useTransition } from '@react-spring/konva';
-import { success, useImage } from '@/hooks/imageHooks';
 import { AnimatedImageAsAnyProps } from '@/components/ui/AnimatedKonvaAsAnyProps/AnimatedKonvaAsAnyProps';
+import { success, useImage } from '@/hooks/imageHooks';
 
 export const question = 'question';
 

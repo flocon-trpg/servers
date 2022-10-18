@@ -1,6 +1,5 @@
 import { chooseRecord } from '@flocon-trpg/utils';
 import * as t from 'io-ts';
-import { record } from '@/utils/io-ts/record';
 import {
     ActiveBoardPanelConfig,
     defaultActiveBoardPanelConfig,
@@ -55,6 +54,7 @@ import {
     deserializePieceValuePanelConfig,
     serializedPieceValuePanelConfig,
 } from '../pieceValuePanelConfig';
+import { record } from '@/utils/io-ts/record';
 
 export type PanelsConfig = {
     // DraggablePanelConfigBaseのプロパティは使われていない

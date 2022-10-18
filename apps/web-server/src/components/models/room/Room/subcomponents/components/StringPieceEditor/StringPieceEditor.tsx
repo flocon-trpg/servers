@@ -1,27 +1,27 @@
-import React from 'react';
-import { Checkbox } from 'antd';
-import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
 import { State, String, characterTemplate, simpleId, stringPieceTemplate } from '@flocon-trpg/core';
-import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { close, ok } from '@/utils/constants';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
-import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
+import { Checkbox } from 'antd';
+import React from 'react';
 import { Subscribable } from 'rxjs';
+import { useMemoOne } from 'use-memo-one';
+import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
+import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
 import { useStringPieces } from '../../hooks/useStringPieces';
-import { MyCharactersSelect } from '../MyCharactersSelect/MyCharactersSelect';
 import {
     CompositeRect,
     PixelPosition,
     PixelSize,
     applyCompositeRect,
 } from '../../utils/positionAndSizeAndRect';
-import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
-import { PieceRectEditor } from '../RectEditor/RectEditor';
-import { useMemoOne } from 'use-memo-one';
-import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
-import { PieceEditorNameRow } from '../PieceEditorNameRow/PieceEditorNameRow';
-import { PieceEditorMemoRow } from '../PieceEditorMemoRow/PieceEditorMemoRow';
+import { MyCharactersSelect } from '../MyCharactersSelect/MyCharactersSelect';
 import { PieceEditorIdRow } from '../PieceEditorIdRow/PieceEditorIdRow';
+import { PieceEditorMemoRow } from '../PieceEditorMemoRow/PieceEditorMemoRow';
+import { PieceEditorNameRow } from '../PieceEditorNameRow/PieceEditorNameRow';
+import { PieceRectEditor } from '../RectEditor/RectEditor';
+import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
+import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
+import { close, ok } from '@/utils/constants';
 
 type CharacterState = State<typeof characterTemplate>;
 type StringPieceState = State<typeof stringPieceTemplate>;

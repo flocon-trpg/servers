@@ -1,5 +1,4 @@
 import * as t from 'io-ts';
-import { record } from '@/utils/io-ts/record';
 import { MessageFilter, deserializeMessageFilter, serializedMessageFilter } from '../messageFilter';
 import { MessageFilterUtils } from '../messageFilter/utils';
 import {
@@ -9,6 +8,7 @@ import {
     serializedPanelsConfig,
 } from '../panelsConfig';
 import { defaultMasterVolume, defaultPanelOpacity, defaultSeVolume } from './resources';
+import { record } from '@/utils/io-ts/record';
 
 export type RoomConfig = {
     roomId: string;

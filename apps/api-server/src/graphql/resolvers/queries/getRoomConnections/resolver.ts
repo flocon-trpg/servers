@@ -10,11 +10,11 @@ import {
     createUnionType,
 } from 'type-graphql';
 import { GetRoomConnectionFailureType } from '../../../../enums/GetRoomConnectionFailureType';
-import { ENTRY } from '../../../../utils/roles';
 import { ResolverContext } from '../../../../types';
+import { ENTRY } from '../../../../utils/roles';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import { ensureAuthorizedUser, findRoomAndMyParticipant } from '../../utils/utils';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 const GetRoomConnectionSuccessResultType = 'GetRoomConnectionSuccessResultType';
 

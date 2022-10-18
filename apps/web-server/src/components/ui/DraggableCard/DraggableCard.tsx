@@ -1,16 +1,16 @@
-import React, { PropsWithChildren } from 'react';
-import { NumberSize, ResizeDirection } from 're-resizable';
 import { CloseOutlined } from '@ant-design/icons';
-import { cancelRnd } from '@/styles/className';
+import { NumberSize, ResizeDirection } from 're-resizable';
+import React, { PropsWithChildren } from 'react';
 import { ControlPosition } from 'react-draggable';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { Rnd, Props as RndProps } from 'react-rnd';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import {
     defaultPanelOpacity,
     minPanelOpacity,
 } from '@/atoms/roomConfigAtom/types/roomConfig/resources';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { Styles } from '@/styles';
-import { Rnd, Props as RndProps } from 'react-rnd';
+import { cancelRnd } from '@/styles/className';
 
 // 上からheader、topElement、children、bottomElementの順で描画される。children以外はheightが固定されている。
 // それぞれの要素は、styleにheightやpaddingなどが自動的に設定されたdivに包まれる。このdivのstyleは、自動的に設定されていない値であれば、*ContainerStyleというプロパティに渡すことで好きな値をセットすることができる。

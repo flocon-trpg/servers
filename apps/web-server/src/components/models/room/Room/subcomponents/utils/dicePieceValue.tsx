@@ -1,5 +1,5 @@
-import React from 'react';
 import { State, dicePieceTemplate, dieValueTemplate } from '@flocon-trpg/core';
+import React from 'react';
 
 type DieValueState = State<typeof dieValueTemplate>;
 type DicePieceState = State<typeof dicePieceTemplate>;

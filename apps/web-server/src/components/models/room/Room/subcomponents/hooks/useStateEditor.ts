@@ -1,7 +1,7 @@
+import { Option } from '@kizahasi/option';
 import produce from 'immer';
 import React from 'react';
 import { useLatest } from 'react-use';
-import { Option } from '@kizahasi/option';
 import { Recipe } from '@/utils/types';
 
 // Symbol() でなくとも {} などでもいい

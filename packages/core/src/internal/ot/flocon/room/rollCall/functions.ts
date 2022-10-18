@@ -1,12 +1,12 @@
-import * as Participant from './rollCallParticipant/functions';
-import * as ParticipantTypes from './rollCallParticipant/types';
+import { Result } from '@kizahasi/result';
+import { State, TwoWayOperation, UpOperation } from '../../../generator';
+import { isIdRecord } from '../../../util/record';
 import * as RecordOperation from '../../../util/recordOperation';
 import * as ReplaceOperation from '../../../util/replaceOperation';
 import { ServerTransform, TwoWayError } from '../../../util/type';
-import { isIdRecord } from '../../../util/record';
-import { Result } from '@kizahasi/result';
+import * as Participant from './rollCallParticipant/functions';
+import * as ParticipantTypes from './rollCallParticipant/types';
 import { template } from './types';
-import { State, TwoWayOperation, UpOperation } from '../../../generator';
 
 export const toClientState = (source: State<typeof template>): State<typeof template> => {
     return {

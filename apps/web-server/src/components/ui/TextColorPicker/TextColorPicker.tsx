@@ -1,13 +1,13 @@
-import React from 'react';
 import { Button } from 'antd';
 import classNames from 'classnames';
-import { flex, flexNone, flexRow, itemsCenter } from '@/styles/className';
-import { rgb } from '@/utils/rgb';
 import { Draft } from 'immer';
+import React from 'react';
+import { ColorPickerButton } from '../ColorPickerButton/ColorPickerButton';
 import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import { InputDescription } from '@/components/ui/InputDescription/InputDescription';
-import { ColorPickerButton } from '../ColorPickerButton/ColorPickerButton';
+import { flex, flexNone, flexRow, itemsCenter } from '@/styles/className';
+import { rgb } from '@/utils/rgb';
 
 type Props = {
     config: ChatPalettePanelConfig | MessagePanelConfig;

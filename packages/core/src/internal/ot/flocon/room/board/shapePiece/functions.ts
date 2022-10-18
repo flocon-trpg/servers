@@ -1,18 +1,18 @@
-import * as ReplaceOperation from '../../../../util/replaceOperation';
-import * as RecordOperation from '../../../../util/recordOperation';
-import { ServerTransform } from '../../../../util/type';
-import { isIdRecord } from '../../../../util/record';
 import { Result } from '@kizahasi/result';
-import * as Piece from '../../../piece/functions';
+import { State, TwoWayOperation, UpOperation } from '../../../../generator';
+import { isIdRecord } from '../../../../util/record';
+import * as RecordOperation from '../../../../util/recordOperation';
+import * as ReplaceOperation from '../../../../util/replaceOperation';
 import {
     RequestedBy,
     anyValue,
     canChangeOwnerParticipantId,
     isOwner,
 } from '../../../../util/requestedBy';
-import { template } from './types';
-import { State, TwoWayOperation, UpOperation } from '../../../../generator';
+import { ServerTransform } from '../../../../util/type';
+import * as Piece from '../../../piece/functions';
 import * as Shape from '../../../shape/functions';
+import { template } from './types';
 
 // 現時点では、Webサーバー側ではshapeを最大でも1個までしかセットしていないため、1～9の9個のkeyだけ許可している。
 const validateShapeKey = (key: string) => {

@@ -1,6 +1,6 @@
 import * as t from 'io-ts';
-import * as BoardPositionBase from '../../../boardPosition/types';
 import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../../generator';
+import * as BoardPositionBase from '../../../boardPosition/types';
 
 export const template = createObjectValueTemplate(
     {

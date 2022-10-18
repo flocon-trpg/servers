@@ -1,12 +1,12 @@
-import { FObject } from './FObject';
 import { ScriptError } from '../ScriptError';
-import { beginCast } from './cast';
+import { FBoolean } from './FBoolean';
 import { FFunction } from './FFunction';
+import { FObject } from './FObject';
 import { FType } from './FType';
 import { FValue } from './FValue';
-import { AstInfo, GetCoreParams, SetCoreParams } from './types';
-import { FBoolean } from './FBoolean';
+import { beginCast } from './cast';
 import { toFValue } from './toFValue';
+import { AstInfo, GetCoreParams, SetCoreParams } from './types';
 
 // Recordのkeyのジェネリック化は、convertKeyBackの処理の場合分けが難しいと思われるため不採用。
 export class FRecordRef<TValue> extends FObject {

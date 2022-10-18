@@ -1,37 +1,37 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
-import { Button, Input } from 'antd';
-import { TextAreaRef } from 'antd/lib/input/TextArea';
 import * as Icon from '@ant-design/icons';
-import { usePublicChannelNames } from '../../hooks/usePublicChannelNames';
-import { SelectedCharacterType, custom, some } from '../ChatInput/getSelectedCharacterType';
-import _ from 'lodash';
-import { useParticipants } from '../../hooks/useParticipants';
+import { $free, PublicChannelKey } from '@flocon-trpg/core';
 import {
     WritePrivateMessageDocument,
     WritePublicMessageDocument,
     WriteRoomPublicMessageFailureType,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
-import { UISelector } from '@/components/ui/UISelector/UISelector';
+import { Button, Input } from 'antd';
+import { TextAreaRef } from 'antd/lib/input/TextArea';
+import classNames from 'classnames';
+import { Draft } from 'immer';
+import { useAtom } from 'jotai';
+import { useUpdateAtom } from 'jotai/utils';
+import _ from 'lodash';
+import React from 'react';
+import { useLatest } from 'react-use';
+import { Observable } from 'rxjs';
+import { useMutation } from 'urql';
+import { roomPrivateMessageInputAtom } from '../../atoms/roomPrivateMessageInputAtom/roomPrivateMessageInputAtom';
+import { roomPublicMessageInputAtom } from '../../atoms/roomPublicMessageInputAtom/roomPublicMessageInputAtom';
+import { useParticipants } from '../../hooks/useParticipants';
+import { usePublicChannelNames } from '../../hooks/usePublicChannelNames';
+import { SelectedCharacterType, custom, some } from '../ChatInput/getSelectedCharacterType';
 import { PrivateMessageChannelSelector } from './subcomponents/components/PrivateMessageChannelSelector/PrivateMessageChannelSelector';
 import { PublicMessageChannelSelector } from './subcomponents/components/PublicMessageChannelSelector/PublicMessageChannelSelector';
-import { Observable } from 'rxjs';
-import classNames from 'classnames';
-import { flex, flexColumn, flexNone } from '@/styles/className';
-import { $free, PublicChannelKey } from '@flocon-trpg/core';
-import { useMutation } from 'urql';
+import { roomNotificationsAtom } from '@/atoms/roomAtom/roomAtom';
 import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import { userConfigAtom } from '@/atoms/userConfigAtom/userConfigAtom';
 import { UserConfigUtils } from '@/atoms/userConfigAtom/utils';
+import { UISelector } from '@/components/ui/UISelector/UISelector';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { useAtom } from 'jotai';
-import { roomNotificationsAtom } from '@/atoms/roomAtom/roomAtom';
-import { Draft } from 'immer';
-import { roomPrivateMessageInputAtom } from '../../atoms/roomPrivateMessageInputAtom/roomPrivateMessageInputAtom';
-import { roomPublicMessageInputAtom } from '../../atoms/roomPublicMessageInputAtom/roomPublicMessageInputAtom';
-import { useUpdateAtom } from 'jotai/utils';
-import { useLatest } from 'react-use';
+import { flex, flexColumn, flexNone } from '@/styles/className';
 
 /* react-virtuosoはおそらくheightを指定しなければ正常に動作しないため、もしこれが可変だとheightの指定が無理とは言わないまでも面倒になる。そのため、70pxという適当な値で固定している */
 const height = 70;

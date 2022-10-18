@@ -1,7 +1,7 @@
-import React from 'react';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
-import { useCharacters } from './useCharacters';
 import _ from 'lodash';
+import React from 'react';
+import { useCharacters } from './useCharacters';
 
 export const useCharacterPieces = (boardId: string) => {
     const characters = useCharacters();

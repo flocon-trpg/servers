@@ -1,11 +1,11 @@
-import { atom } from 'jotai';
-import { WebConfig } from '../../configType';
-import { Result } from '@kizahasi/result';
 import { FirebaseConfig, firebaseConfig } from '@flocon-trpg/core';
 import { parseEnvListValue, parseStringToBoolean } from '@flocon-trpg/utils';
+import { Result } from '@kizahasi/result';
 import * as E from 'fp-ts/Either';
-import { formatValidationErrors } from '../../utils/io-ts/io-ts-reporters';
+import { atom } from 'jotai';
+import { WebConfig } from '../../configType';
 import { NEXT_PUBLIC_FIREBASE_CONFIG } from '../../env';
+import { formatValidationErrors } from '../../utils/io-ts/io-ts-reporters';
 import { FetchTextState } from '../../utils/types';
 import { storybookAtom } from '../storybookAtom/storybookAtom';
 import { DotenvParseOutput, parse } from '@/utils/dotEnvParse';

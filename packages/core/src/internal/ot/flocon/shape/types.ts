@@ -1,7 +1,7 @@
+import * as t from 'io-ts';
 import { maybe } from '../../../maybe';
 import { createObjectValueTemplate, createReplaceValueTemplate } from '../../generator';
 import { shape } from '../../util/shape';
-import * as t from 'io-ts';
 
 export const template = createObjectValueTemplate(
     {

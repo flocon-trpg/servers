@@ -1,17 +1,5 @@
-import * as t from 'io-ts';
-import {
-    recordUpOperationElementFactory,
-    replace as replaceKey,
-    update as updateKey,
-} from '../../../../util/recordOperationElement';
-import * as DicePieceValueTypes from './types';
-import * as PieceBaseTypes from '../../../piece/types';
-import * as DieValue from './dieValue/functions';
-import * as DieValueTypes from './dieValue/types';
 import { chooseRecord } from '@flocon-trpg/utils';
-import { createOperation } from '../../../../util/createOperation';
-import { record } from '../../../../util/record';
-import { createType, deleteType, updateType } from '../../../piece/log';
+import * as t from 'io-ts';
 import { maybe } from '../../../../../maybe';
 import {
     IoTsOptions,
@@ -22,6 +10,18 @@ import {
     toUpOperation,
     upOperation,
 } from '../../../../generator';
+import { createOperation } from '../../../../util/createOperation';
+import { record } from '../../../../util/record';
+import {
+    recordUpOperationElementFactory,
+    replace as replaceKey,
+    update as updateKey,
+} from '../../../../util/recordOperationElement';
+import { createType, deleteType, updateType } from '../../../piece/log';
+import * as PieceBaseTypes from '../../../piece/types';
+import * as DieValue from './dieValue/functions';
+import * as DieValueTypes from './dieValue/types';
+import * as DicePieceValueTypes from './types';
 
 const dieValueUpOperation = createOperation(1, 1, {
     dieType: t.type({ newValue: DieValueTypes.dieType }),

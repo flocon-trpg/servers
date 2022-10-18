@@ -1,16 +1,16 @@
 import * as t from 'io-ts';
-import { filePathValue } from '../../filePath/types';
 import { maybe } from '../../../../maybe';
-import * as ShapePiece from './shapePiece/types';
-import * as DicePiece from './dicePiece/types';
-import * as ImagePiece from './imagePiece/types';
-import * as StringPiece from './stringPiece/types';
 import {
     createObjectValueTemplate,
     createRecordValueTemplate,
     createReplaceValueTemplate,
     createTextValueTemplate,
 } from '../../../generator';
+import { filePathValue } from '../../filePath/types';
+import * as DicePiece from './dicePiece/types';
+import * as ImagePiece from './imagePiece/types';
+import * as ShapePiece from './shapePiece/types';
+import * as StringPiece from './stringPiece/types';
 
 export const template = createObjectValueTemplate(
     {

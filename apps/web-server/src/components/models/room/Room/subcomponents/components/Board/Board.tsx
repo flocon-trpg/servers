@@ -1,63 +1,35 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
-import { success, useImageFromFilePath } from '@/hooks/imageHooks';
-import * as ReactKonva from 'react-konva';
-import { Button, Dropdown, InputNumber, Menu, Popover } from 'antd';
 import * as Icons from '@ant-design/icons';
-import { update } from '@/stateManagers/states/types';
-import { useMe } from '../../hooks/useMe';
-import { useCharacters } from '../../hooks/useCharacters';
-import { useParticipants } from '../../hooks/useParticipants';
-import { useBoards } from '../../hooks/useBoards';
-import { ActiveBoardSelectorModal } from './subcomponents/components/ActiveBoardSelectorModal/ActiveBoardSelecterModal';
-import useConstant from 'use-constant';
-import { debounceTime } from 'rxjs/operators';
-import { Subject } from 'rxjs';
 import { $free, OmitVersion, State, boardTemplate, pieceTemplate } from '@flocon-trpg/core';
-import { keyNames, recordToArray } from '@flocon-trpg/utils';
-import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { FilePath, FileSourceType } from '@flocon-trpg/typed-document-node-v0.7.1';
-import { ImagePiece } from './subcomponents/components/ImagePiece/ImagePiece';
-import {
-    DiceOrShapeOrStringPiece,
-    shapePiece,
-} from './subcomponents/components/CanvasOrDiceOrStringPiece/CanvasOrDiceOrStringPiece';
-import { useTransition } from '@react-spring/konva';
-import { useCharacterPieces } from '../../hooks/useCharacterPieces';
-import { usePortraitPieces } from '../../hooks/usePortraitPieces';
-import { useDicePieces } from '../../hooks/useDicePieces';
-import { useStringPieces } from '../../hooks/useStringPieces';
-import { useImagePieces } from '../../hooks/useImagePieces';
-import { useAllContext } from '@/hooks/useAllContext';
-import { AllContextProvider } from '@/components/behaviors/AllContextProvider';
-import { range } from '@/utils/range';
-import classNames from 'classnames';
-import { cancelRnd, flex, flexColumn, flexRow, itemsCenter, itemsEnd } from '@/styles/className';
-import { rgba } from '@/utils/rgba';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
-import { roomAtom } from '@/atoms/roomAtom/roomAtom';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { BoardConfig, defaultBoardConfig } from '@/atoms/roomConfigAtom/types/boardConfig';
-import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
-import { ActiveBoardPanelConfig } from '@/atoms/roomConfigAtom/types/activeBoardPanelConfig';
-import { BoardEditorPanelConfig } from '@/atoms/roomConfigAtom/types/boardEditorPanelConfig';
-import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
-import { boardTooltipAtom } from '../../atoms/boardTooltipAtom/boardTooltipAtom';
-import { boardPopoverEditorAtom } from '../../atoms/boardPopoverEditorAtom/boardPopoverEditorAtom';
-import { MouseOverOn } from '../../utils/types';
-import { useUpdateAtom } from 'jotai/utils';
-import { boardContextMenuAtom } from '../../atoms/boardContextMenuAtom/boardContextMenuAtom';
-import { create } from '@/utils/constants';
-import { boardEditorModalAtom } from '../BoardEditorModal/BoardEditorModal';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
-import { importBoardModalVisibilityAtom } from '../ImportBoardModal/ImportBoardModal';
-import { BoardType } from '@/utils/types';
-import { useIsMyCharacter } from '../../hooks/useIsMyCharacter';
-import { Styles } from '@/styles';
+import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { Message, publicMessage } from '@flocon-trpg/web-server-utils';
-import { notFetch, useRoomMessages } from '@/hooks/useRoomMessages';
+import { useTransition } from '@react-spring/konva';
+import { Button, Dropdown, InputNumber, Menu, Popover } from 'antd';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
-import { defaultTriggerSubMenuAction } from '@/utils/variables';
+import classNames from 'classnames';
+import { useUpdateAtom } from 'jotai/utils';
+import { KonvaEventObject } from 'konva/lib/Node';
+import { Vector2d } from 'konva/lib/types';
+import React from 'react';
+import * as ReactKonva from 'react-konva';
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
+import useConstant from 'use-constant';
+import { boardContextMenuAtom } from '../../atoms/boardContextMenuAtom/boardContextMenuAtom';
+import { boardPopoverEditorAtom } from '../../atoms/boardPopoverEditorAtom/boardPopoverEditorAtom';
+import { boardTooltipAtom } from '../../atoms/boardTooltipAtom/boardTooltipAtom';
+import { useBoards } from '../../hooks/useBoards';
+import { useCharacterPieces } from '../../hooks/useCharacterPieces';
+import { useCharacters } from '../../hooks/useCharacters';
+import { useDicePieces } from '../../hooks/useDicePieces';
+import { useImagePieces } from '../../hooks/useImagePieces';
+import { useIsMyCharacter } from '../../hooks/useIsMyCharacter';
+import { useMe } from '../../hooks/useMe';
+import { useParticipants } from '../../hooks/useParticipants';
+import { usePortraitPieces } from '../../hooks/usePortraitPieces';
+import { useShapePieces } from '../../hooks/useShapePieces';
+import { useStringPieces } from '../../hooks/useStringPieces';
 import {
     DragEndResult,
     PixelPosition,
@@ -67,11 +39,39 @@ import {
     toCellPosition,
     toCellSize,
 } from '../../utils/positionAndSizeAndRect';
-import { KonvaEventObject } from 'konva/lib/Node';
-import { Vector2d } from 'konva/lib/types';
-import { useShapePieces } from '../../hooks/useShapePieces';
-import { ColorPickerButton } from '@/components/ui/ColorPickerButton/ColorPickerButton';
+import { MouseOverOn } from '../../utils/types';
+import { boardEditorModalAtom } from '../BoardEditorModal/BoardEditorModal';
+import { importBoardModalVisibilityAtom } from '../ImportBoardModal/ImportBoardModal';
+import { ActiveBoardSelectorModal } from './subcomponents/components/ActiveBoardSelectorModal/ActiveBoardSelecterModal';
+import {
+    DiceOrShapeOrStringPiece,
+    shapePiece,
+} from './subcomponents/components/CanvasOrDiceOrStringPiece/CanvasOrDiceOrStringPiece';
+import { ImagePiece } from './subcomponents/components/ImagePiece/ImagePiece';
+import { roomAtom } from '@/atoms/roomAtom/roomAtom';
+import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { ActiveBoardPanelConfig } from '@/atoms/roomConfigAtom/types/activeBoardPanelConfig';
+import { BoardConfig, defaultBoardConfig } from '@/atoms/roomConfigAtom/types/boardConfig';
+import { BoardEditorPanelConfig } from '@/atoms/roomConfigAtom/types/boardEditorPanelConfig';
+import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
+import { AllContextProvider } from '@/components/behaviors/AllContextProvider';
 import { AnimatedImageAsAnyProps } from '@/components/ui/AnimatedKonvaAsAnyProps/AnimatedKonvaAsAnyProps';
+import { ColorPickerButton } from '@/components/ui/ColorPickerButton/ColorPickerButton';
+import { success, useImageFromFilePath } from '@/hooks/imageHooks';
+import { useAllContext } from '@/hooks/useAllContext';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { notFetch, useRoomMessages } from '@/hooks/useRoomMessages';
+import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
+import { update } from '@/stateManagers/states/types';
+import { Styles } from '@/styles';
+import { cancelRnd, flex, flexColumn, flexRow, itemsCenter, itemsEnd } from '@/styles/className';
+import { create } from '@/utils/constants';
+import { range } from '@/utils/range';
+import { rgba } from '@/utils/rgba';
+import { BoardType } from '@/utils/types';
+import { defaultTriggerSubMenuAction } from '@/utils/variables';
 
 type BoardState = OmitVersion<State<typeof boardTemplate>>;
 type PieceState = OmitVersion<State<typeof pieceTemplate>>;

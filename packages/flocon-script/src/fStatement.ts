@@ -14,10 +14,10 @@ import {
     SwitchStatement,
     VariableDeclaration,
 } from 'estree';
+import { ScriptError } from './ScriptError';
 import { FExpression, fExpression } from './fExpression';
 import { FPattern, fPattern } from './fPattern';
 import { toRange } from './range';
-import { ScriptError } from './ScriptError';
 
 /*
 classやvarなど、対応していないものはここで弾いている。スクリプト実行のコードと分離しているため、エディターで「基本的にはjavascriptの文法でチェックするが、サポート外のキーワードなどが見つかった場合はエラーを返す」という処理をさせるのが簡単になる。

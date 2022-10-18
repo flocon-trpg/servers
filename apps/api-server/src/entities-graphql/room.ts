@@ -1,8 +1,3 @@
-import { RoomGetState } from '../graphql/objects/room';
-import { Room, RoomOp } from '../entities/room/entity';
-import { EM } from '../types';
-import { Reference } from '@mikro-orm/core';
-import { Result } from '@kizahasi/result';
 import {
     DownOperation,
     RequestedBy,
@@ -23,14 +18,19 @@ import {
     toUpOperation,
     update,
 } from '@flocon-trpg/core';
-import { Participant } from '../entities/participant/entity';
 import {
     ReadonlyNonEmptyArray,
     isReadonlyNonEmptyArray,
     recordForEachAsync,
 } from '@flocon-trpg/utils';
+import { Result } from '@kizahasi/result';
+import { Reference } from '@mikro-orm/core';
+import { Participant } from '../entities/participant/entity';
+import { Room, RoomOp } from '../entities/room/entity';
 import { User } from '../entities/user/entity';
 import { nullableStringToParticipantRoleType } from '../enums/ParticipantRoleType';
+import { RoomGetState } from '../graphql/objects/room';
+import { EM } from '../types';
 import { convertToMaxLength100String } from '../utils/convertToMaxLength100String';
 
 type RoomState = State<typeof roomTemplate>;

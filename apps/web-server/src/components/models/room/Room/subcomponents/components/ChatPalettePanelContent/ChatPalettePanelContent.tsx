@@ -1,26 +1,26 @@
-import React from 'react';
 import { Select } from 'antd';
-import { useBufferValue } from '@/hooks/useBufferValue';
-import { useMyCharacters } from '../../hooks/useMyCharacters';
-import { GameSelector } from '../GameSelector/GameSelector';
-import { TextColorPicker } from '../../../../../../ui/TextColorPicker/TextColorPicker';
-import { SelectedChannelType, SubmitMessage, publicChannel } from '../SubmitMessage/SubmitMessage';
-import { Subject } from 'rxjs';
 import classNames from 'classnames';
-import { flex, flex1, flexColumn, flexNone, flexRow, itemsCenter } from '@/styles/className';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
-import { UISelector } from '@/components/ui/UISelector/UISelector';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { Draft } from 'immer';
+import { useUpdateAtom } from 'jotai/utils';
+import React from 'react';
+import { Subject } from 'rxjs';
+import { TextColorPicker } from '../../../../../../ui/TextColorPicker/TextColorPicker';
+import { roomPrivateMessageInputAtom } from '../../atoms/roomPrivateMessageInputAtom/roomPrivateMessageInputAtom';
+import { roomPublicMessageInputAtom } from '../../atoms/roomPublicMessageInputAtom/roomPublicMessageInputAtom';
+import { useMyCharacters } from '../../hooks/useMyCharacters';
+import { CharacterVarInput } from '../CharacterVarInput/CharacterVarInput';
+import { GameSelector } from '../GameSelector/GameSelector';
+import { SelectedChannelType, SubmitMessage, publicChannel } from '../SubmitMessage/SubmitMessage';
+import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
-import { useUpdateAtom } from 'jotai/utils';
-import { roomPublicMessageInputAtom } from '../../atoms/roomPublicMessageInputAtom/roomPublicMessageInputAtom';
-import { roomPrivateMessageInputAtom } from '../../atoms/roomPrivateMessageInputAtom/roomPrivateMessageInputAtom';
-import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
-import { CharacterVarInput } from '../CharacterVarInput/CharacterVarInput';
 import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
+import { UISelector } from '@/components/ui/UISelector/UISelector';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { useBufferValue } from '@/hooks/useBufferValue';
+import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
+import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
+import { flex, flex1, flexColumn, flexNone, flexRow, itemsCenter } from '@/styles/className';
 
 const descriptionStyle: React.CSSProperties = {
     flexBasis: '80px',
