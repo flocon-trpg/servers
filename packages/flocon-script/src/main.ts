@@ -41,6 +41,8 @@ function ofFLiteral(literal: FLiteral): FBoolean | FNumber | FString | null {
             return new FString(literal.value);
         case 'number':
             return new FNumber(literal.value);
+        default:
+            throw new Error('This should not happen.');
     }
 }
 
@@ -668,6 +670,11 @@ function ofFStatement(statement: FStatement, context: Context): FStatementResult
                     case 'VariableDeclaration':
                         ofFVariableDeclaration(statement.left, context, elem);
                         break;
+                    default:
+                        throw new ScriptError(
+                            `${statement.left.type} is not supported yet.`,
+                            toRange(statement.left)
+                        );
                 }
                 ofFStatement(statement.body, context);
                 context.scopeOut();
