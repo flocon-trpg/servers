@@ -451,6 +451,8 @@ export const composeDownOperation = <TState, TDownOperation, TCustomError = stri
                                 });
                                 continue;
                             }
+                            case 'update':
+                                break;
                         }
                         result.set(key, {
                             type: 'replace',

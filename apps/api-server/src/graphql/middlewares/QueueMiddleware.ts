@@ -15,6 +15,8 @@ export const QueueMiddleware: MiddlewareFn<ResolverContext> = async ({ context }
             throw new Error(
                 'PromiseQueue timeout. Requested operation is too heavy or there is a bug. / リクエストされた処理がタイムアウトしました。処理が非常に重いか、ソースコードにバグがあります。'
             );
+        default:
+            break;
     }
     return result.value;
 };

@@ -133,6 +133,8 @@ export class FArray implements FObjectBase {
                     const source = this.source[Symbol.iterator]();
                     return FIterator.create(mapIterator(source, x => this.convert(x)));
                 });
+            default:
+                break;
         }
         return undefined;
     }
