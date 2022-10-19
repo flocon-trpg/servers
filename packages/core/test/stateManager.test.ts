@@ -1,4 +1,4 @@
-import { StateManager } from '../src';
+import { StateManager, toOtError } from '../src';
 
 type Operation = {
     oldValue: number;
@@ -14,13 +14,13 @@ const createStateManager = () =>
         state: initState,
         apply: ({ state, operation }) => {
             if (state !== operation.oldValue) {
-                throw 'Failure at apply: state !== operation.oldValue';
+                throw toOtError('Failure at apply: state !== operation.oldValue');
             }
             return operation.newValue;
         },
         transform: ({ first, second }) => {
             if (first.oldValue !== second.oldValue) {
-                throw 'Failure at transform: first.oldValue !== second.oldValue';
+                throw new Error('Failure at transform: first.oldValue !== second.oldValue');
             }
             return {
                 firstPrime: { oldValue: second.newValue, newValue: first.newValue },

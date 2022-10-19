@@ -13,25 +13,22 @@ import { FRoom } from './room';
 
 type RoomState = State<typeof Room.template>;
 
-type CommandError = {
-    message: string;
-    range?: readonly [number, number];
-};
+class CommandError extends Error {
+    constructor(message: string, public readonly range?: readonly [number, number]) {
+        super(message);
+        this.name = 'CommandError';
+    }
+}
 
 export const testCommand = (script: string): Result<undefined, CommandError> => {
     try {
         test(script);
     } catch (e: unknown) {
         if (e instanceof ScriptError) {
-            return Result.error({
-                message: e.message,
-                range: e.range,
-            });
+            return Result.error(new CommandError(e.message, e.range));
         }
         if (e instanceof Error) {
-            return Result.error({
-                message: e.message,
-            });
+            return Result.error(new CommandError(e.message));
         }
         throw e;
     }
@@ -68,15 +65,10 @@ export const execCharacterCommand = ({
         exec(script, globalThis);
     } catch (e: unknown) {
         if (e instanceof ScriptError) {
-            return Result.error({
-                message: e.message,
-                range: e.range,
-            });
+            return Result.error(new CommandError(e.message, e.range));
         }
         if (e instanceof Error) {
-            return Result.error({
-                message: e.message,
-            });
+            return Result.error(new CommandError(e.message));
         }
         throw e;
     }

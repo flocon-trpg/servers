@@ -5,6 +5,7 @@ import {
     clientTransform,
     diff,
     roomTemplate,
+    toOtError,
     toUpOperation,
 } from '@flocon-trpg/core';
 import { StateManager, StateManagerParameters } from '@flocon-trpg/core';
@@ -21,14 +22,14 @@ const createParameters = (state: State, revision: number): Parameters => {
         apply: params => {
             const result = apply(roomTemplate)(params);
             if (result.isError) {
-                throw result.error;
+                throw toOtError(result.error);
             }
             return result.value;
         },
         transform: params => {
             const result = clientTransform(roomTemplate)(params);
             if (result.isError) {
-                throw result.error;
+                throw toOtError(result.error);
             }
             return {
                 firstPrime: result.value.firstPrime ?? { $v: 2, $r: 1 },

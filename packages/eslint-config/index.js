@@ -16,6 +16,7 @@ module.exports = {
         '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/switch-exhaustiveness-check': 'error',
+        '@typescript-eslint/no-throw-literal': 'error',
         'prefer-promise-reject-errors': 'error',
         'space-before-blocks': 'warn',
         'sort-imports': [

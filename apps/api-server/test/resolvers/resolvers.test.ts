@@ -230,7 +230,7 @@ namespace Assert {
     export namespace GetFilesQuery {
         export const toBeSuccess = (source: OperationResult<GetFilesQuery>) => {
             if (source.data == null) {
-                throw source.error;
+                throw new Error(source.error?.message);
             }
             return source.data.result.files;
         };

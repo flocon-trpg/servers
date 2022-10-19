@@ -182,6 +182,8 @@ export {
 
 export { template as memoTemplate, Plain, Markdown } from './internal/ot/flocon/room/memo/types';
 
+export { OtError, toOtError } from './internal/ot/otError';
+
 export {
     DownOperation as NullableTextDownOperation,
     UpOperation as NullableTextUpOperation,

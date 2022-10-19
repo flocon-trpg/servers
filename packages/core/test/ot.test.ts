@@ -11,6 +11,7 @@ import {
     replace,
     roomTemplate,
     serverTransform,
+    toOtError,
     update,
 } from '../src';
 import * as TextOperation from '../src/internal/ot/util/textOperation';
@@ -93,7 +94,7 @@ namespace Test {
                         if (expected === undefinedOrError) {
                             return;
                         }
-                        throw actualOperation.error;
+                        throw toOtError(actualOperation.error);
                     }
                     expect(actualOperation.value).toEqual(
                         expected === undefinedOrError ? undefined : expected

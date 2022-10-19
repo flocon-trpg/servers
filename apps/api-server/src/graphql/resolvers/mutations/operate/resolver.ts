@@ -7,6 +7,7 @@ import {
     restore,
     roomTemplate,
     serverTransform,
+    toOtError,
 } from '@flocon-trpg/core';
 import { MaxLength } from 'class-validator';
 import {
@@ -194,7 +195,7 @@ async function operateCore({
         revisionRange: { from: args.prevRevision, expectedTo: room.revision },
     });
     if (downOperation.isError) {
-        throw downOperation.error;
+        throw toOtError(downOperation.error);
     }
 
     let prevState: RoomState = roomState;
@@ -205,7 +206,7 @@ async function operateCore({
             downOperation: downOperation.value,
         });
         if (restoredRoom.isError) {
-            throw restoredRoom.error;
+            throw toOtError(restoredRoom.error);
         }
         prevState = restoredRoom.value.prevState;
         twoWayOperation = restoredRoom.value.twoWayOperation;
@@ -218,7 +219,7 @@ async function operateCore({
         serverOperation: twoWayOperation,
     });
     if (transformed.isError) {
-        throw transformed.error;
+        throw toOtError(transformed.error);
     }
     if (transformed.value === undefined) {
         return { type: 'id', result: { requestId: args.requestId } };

@@ -38,7 +38,7 @@ describe('chooseRecord', () => {
         const source = {};
         expect(
             chooseRecord(source, () => {
-                throw 'this should not be called';
+                throw new Error('this should not be called');
             })
         ).toEqual({});
     });
@@ -73,7 +73,7 @@ describe('chooseDualKeyRecord', () => {
         const source = {};
         expect(
             chooseDualKeyRecord(source, () => {
-                throw 'this should not be called';
+                throw new Error('this should not be called');
             })
         ).toEqual({});
     });
@@ -119,7 +119,7 @@ describe('mapRecord', () => {
         const source = {};
         expect(
             mapRecord(source, () => {
-                throw 'this should not be called';
+                throw new Error('this should not be called');
             })
         ).toEqual({});
     });
@@ -154,7 +154,7 @@ describe('mapDualKeyRecord', () => {
         const source = {};
         expect(
             mapDualKeyRecord(source, () => {
-                throw 'this should not be called';
+                throw new Error('this should not be called');
             })
         ).toEqual({});
     });

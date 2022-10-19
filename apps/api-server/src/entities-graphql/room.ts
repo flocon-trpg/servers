@@ -15,6 +15,7 @@ import {
     stringifyUpOperation,
     toClientState,
     toDownOperation,
+    toOtError,
     toUpOperation,
     update,
 } from '@flocon-trpg/core';
@@ -294,7 +295,7 @@ export namespace GlobalRoom {
                 operation: toUpOperation(roomTemplate)(operation),
             });
             if (nextState.isError) {
-                throw nextState.error;
+                throw toOtError(nextState.error);
             }
 
             // CONSIDER: サイズの大きいオブジェクトに対してJSON.stringifyするのは重い可能性。そもそももしJSON.stringifyが重いのであればio-tsのdecodeはより重くなりそうだが。
