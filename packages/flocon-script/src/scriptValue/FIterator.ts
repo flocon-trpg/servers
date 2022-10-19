@@ -52,6 +52,8 @@ export class FIterator extends FObject {
                     });
                     return result;
                 });
+            default:
+                break;
         }
         return undefined;
     }

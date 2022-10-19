@@ -104,6 +104,8 @@ export class FRecordRef<TValue> extends FObject {
                     this.source[key] = value;
                     return undefined;
                 });
+            default:
+                break;
         }
         return undefined;
     }

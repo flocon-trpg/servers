@@ -171,6 +171,8 @@ export class RoomEventResolver {
                             };
                         }
                         break;
+                    default:
+                        break;
                 }
 
                 return {

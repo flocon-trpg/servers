@@ -100,6 +100,8 @@ export class FMap extends FObject {
                     this.source.set(key, value);
                     return undefined;
                 });
+            default:
+                break;
         }
         return undefined;
     }
