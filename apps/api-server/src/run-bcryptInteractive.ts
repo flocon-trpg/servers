@@ -3,6 +3,8 @@ import { writeFile } from 'fs/promises';
 import bcrypt from 'bcrypt';
 import { prompt } from 'inquirer';
 
+// このコードはts-nodeで実行されるが、Rollup等は使われないため、TypeScriptのpathsを解決できない。そのため、./src内の他のコードをimportすると実行時にエラーが出る可能性があるので注意。
+
 const ja = 'ja';
 const en = 'en';
 type Lang = typeof ja | typeof en;
