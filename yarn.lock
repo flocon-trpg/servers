@@ -2888,9 +2888,9 @@ __metadata:
   dependencies:
     "@flocon-trpg/eslint-config": "workspace:^"
     "@flocon-trpg/prettier-config": "workspace:^"
+    "@flocon-trpg/rollup-config": "workspace:^"
     "@flocon-trpg/tsconfig": "workspace:^"
     "@flocon-trpg/utils": "workspace:^"
-    "@rollup/plugin-typescript": 9.0.1
     "@types/jest": 29.1.2
     "@typescript-eslint/eslint-plugin": 5.39.0
     "@typescript-eslint/parser": 5.39.0
@@ -2916,13 +2916,13 @@ __metadata:
     "@flocon-trpg/eslint-config": "workspace:^"
     "@flocon-trpg/flocon-script": "workspace:^"
     "@flocon-trpg/prettier-config": "workspace:^"
+    "@flocon-trpg/rollup-config": "workspace:^"
     "@flocon-trpg/tsconfig": "workspace:^"
     "@flocon-trpg/utils": "workspace:^"
     "@kizahasi/option": ^1.0.0
     "@kizahasi/ot-string": ^0.4.1
     "@kizahasi/result": ^1.0.1
     "@ltd/j-toml": ^1.23.0
-    "@rollup/plugin-typescript": 9.0.1
     "@types/estree": 1.0.0
     "@types/jest": 29.1.2
     "@types/lodash.clonedeep": 4.5.7
@@ -2970,10 +2970,10 @@ __metadata:
   dependencies:
     "@flocon-trpg/eslint-config": "workspace:^"
     "@flocon-trpg/prettier-config": "workspace:^"
+    "@flocon-trpg/rollup-config": "workspace:^"
     "@flocon-trpg/tsconfig": "workspace:^"
     "@flocon-trpg/utils": "workspace:^"
     "@kizahasi/option": ^1.0.0
-    "@rollup/plugin-typescript": 9.0.1
     "@types/estree": 1.0.0
     "@types/jest": 29.1.2
     "@typescript-eslint/eslint-plugin": 5.39.0
@@ -2997,6 +2997,24 @@ __metadata:
   resolution: "@flocon-trpg/prettier-config@workspace:packages/prettier-config"
   peerDependencies:
     prettier: ^2.7.1
+  languageName: unknown
+  linkType: soft
+
+"@flocon-trpg/rollup-config@workspace:^, @flocon-trpg/rollup-config@workspace:packages/rollup-config":
+  version: 0.0.0-use.local
+  resolution: "@flocon-trpg/rollup-config@workspace:packages/rollup-config"
+  dependencies:
+    "@flocon-trpg/prettier-config": "workspace:^"
+    "@rollup/plugin-typescript": 9.0.1
+    prettier: 2.7.1
+  peerDependencies:
+    "@typescript-eslint/eslint-plugin": ^5.39.0
+    "@typescript-eslint/parser": ^5.39.0
+    eslint: ^8.25.0
+    eslint-config-prettier: ^8.5.0
+    eslint-import-resolver-typescript: ^3.5.1
+    eslint-plugin-import: ^2.26.0
+    rollup: ^3.2.2
   languageName: unknown
   linkType: soft
 
@@ -3024,9 +3042,9 @@ __metadata:
   dependencies:
     "@flocon-trpg/eslint-config": "workspace:^"
     "@flocon-trpg/prettier-config": "workspace:^"
+    "@flocon-trpg/rollup-config": "workspace:^"
     "@flocon-trpg/tsconfig": "workspace:^"
     "@graphql-typed-document-node/core": ^3.1.0
-    "@rollup/plugin-typescript": 9.0.1
     "@typescript-eslint/eslint-plugin": 5.39.0
     "@typescript-eslint/parser": 5.39.0
     eslint: 8.25.0
@@ -3047,9 +3065,9 @@ __metadata:
   dependencies:
     "@flocon-trpg/eslint-config": "workspace:^"
     "@flocon-trpg/prettier-config": "workspace:^"
+    "@flocon-trpg/rollup-config": "workspace:^"
     "@flocon-trpg/tsconfig": "workspace:^"
     "@graphql-typed-document-node/core": ^3.1.0
-    "@rollup/plugin-typescript": 9.0.1
     "@typescript-eslint/eslint-plugin": 5.39.0
     "@typescript-eslint/parser": 5.39.0
     eslint: 8.25.0
@@ -3070,9 +3088,9 @@ __metadata:
   dependencies:
     "@flocon-trpg/eslint-config": "workspace:^"
     "@flocon-trpg/prettier-config": "workspace:^"
+    "@flocon-trpg/rollup-config": "workspace:^"
     "@flocon-trpg/tsconfig": "workspace:^"
     "@graphql-typed-document-node/core": ^3.1.0
-    "@rollup/plugin-typescript": 9.0.1
     "@typescript-eslint/eslint-plugin": 5.39.0
     "@typescript-eslint/parser": 5.39.0
     eslint: 8.25.0
@@ -3093,10 +3111,10 @@ __metadata:
   dependencies:
     "@flocon-trpg/eslint-config": "workspace:^"
     "@flocon-trpg/prettier-config": "workspace:^"
+    "@flocon-trpg/rollup-config": "workspace:^"
     "@flocon-trpg/tsconfig": "workspace:^"
     "@kizahasi/option": ^1.0.0
     "@kizahasi/result": ^1.0.1
-    "@rollup/plugin-typescript": 9.0.1
     "@types/jest": 29.1.2
     "@types/lodash": 4.14.186
     "@typescript-eslint/eslint-plugin": 5.39.0
@@ -3122,10 +3140,10 @@ __metadata:
     "@flocon-trpg/core": "workspace:^"
     "@flocon-trpg/eslint-config": "workspace:^"
     "@flocon-trpg/prettier-config": "workspace:^"
+    "@flocon-trpg/rollup-config": "workspace:^"
     "@flocon-trpg/tsconfig": "workspace:^"
     "@flocon-trpg/typed-document-node-v0.7.1": "workspace:^"
     "@flocon-trpg/utils": "workspace:^"
-    "@rollup/plugin-typescript": 9.0.1
     "@types/jest": 29.1.2
     "@typescript-eslint/eslint-plugin": 5.39.0
     "@typescript-eslint/parser": 5.39.0
