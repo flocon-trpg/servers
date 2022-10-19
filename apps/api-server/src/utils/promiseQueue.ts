@@ -20,9 +20,6 @@ type RawResult = {
           }
         | {
               type: typeof timeout;
-          }
-        | {
-              type: typeof queueLimitReached;
           };
 };
 
@@ -49,19 +46,14 @@ export class PromiseQueue {
     }>();
     // _resultはerrorやcompleteが流されない仕様にしている。もしerrorが流されてきたら、コンストラクタ内でsubscribeしているところで例外がthrowされる。
     private readonly _result: Observable<RawResult>;
-    private readonly _pendingPromises = new Set<string>(); // 値は_coreのid
+    private readonly _pendingPromises = new Set<string>(); // 値は_promisesのid
+    private readonly _queueLimit: number | null;
 
     public constructor({ queueLimit }: { queueLimit?: number | null }) {
+        this._queueLimit = queueLimit ?? null;
         this._result = this._promises.pipe(
             Rx.map(({ id, execute, timeout }) => {
                 const rawObservable = new Observable<RawResult>(observer => {
-                    if (queueLimit != null && queueLimit < this._pendingPromises.size) {
-                        this._pendingPromises.delete(id);
-                        observer.next({ id, result: { type: queueLimitReached } });
-                        observer.complete();
-                        return;
-                    }
-
                     execute()
                         .then(result =>
                             observer.next({
@@ -116,6 +108,9 @@ export class PromiseQueue {
         execute: () => Promise<T>,
         timeout: number | null | undefined
     ): Promise<PromiseQueueResultWithTimeout<T>> {
+        if (this._queueLimit != null && this._queueLimit <= this._pendingPromises.size) {
+            return Promise.resolve({ type: queueLimitReached });
+        }
         const id = v4();
         this._pendingPromises.add(id);
         const result = new Promise<PromiseQueueResultWithTimeout<T>>((resolver, reject) => {
