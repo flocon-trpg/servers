@@ -5,7 +5,7 @@ type OtErrorParam = Exclude<ScalarError | UpError | DownError | TwoWayError, str
 export class OtError extends Error {
     public readonly otError: OtErrorParam;
     constructor(content: OtErrorParam) {
-        // TODO: string以外のときのメッセージを詳しくする
+        // TODO: よりわかりやすいメッセージを表示する
         const message: string = content.type;
         super(message);
         this.otError = content;
