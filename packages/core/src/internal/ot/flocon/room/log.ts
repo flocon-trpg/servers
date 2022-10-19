@@ -1,8 +1,8 @@
 import { recordForEach } from '@flocon-trpg/utils';
 import { State, TwoWayOperation, diff } from '../../generator';
-import * as RecordOperation from '../../util/recordOperation';
-import { replace } from '../../util/recordOperationElement';
-import { restrict } from '../../util/requestedBy';
+import * as RecordOperation from '../../recordOperation';
+import { replace } from '../../recordOperationElement';
+import { restrict } from '../../requestedBy';
 import { createType, deleteType } from '../piece/log';
 import * as DicePiece from './board/dicePiece/functions';
 import * as DicePieceLog from './board/dicePiece/log';

@@ -191,9 +191,9 @@ export {
     apply as applyNullableText,
     diff as nullableTextDiff,
     toUpOperation as toNullableTextUpOperation,
-} from './internal/ot/util/nullableTextOperation';
+} from './internal/ot/nullableTextOperation';
 
-export { isIdRecord } from './internal/ot/util/record';
+export { isIdRecord } from './internal/ot/record';
 
 export {
     replace,
@@ -201,13 +201,13 @@ export {
     RecordDownOperationElement,
     RecordTwoWayOperationElement,
     RecordUpOperationElement,
-} from './internal/ot/util/recordOperationElement';
+} from './internal/ot/recordOperationElement';
 
 export {
     RecordDownOperation,
     RecordUpOperation,
     RecordTwoWayOperation,
-} from './internal/ot/util/recordOperation';
+} from './internal/ot/recordOperation';
 
 export {
     DownOperation as TextDownOperation,
@@ -216,7 +216,7 @@ export {
     apply as applyText,
     diff as textDiff,
     toUpOperation as toTextUpOperation,
-} from './internal/ot/util/textOperation';
+} from './internal/ot/textOperation';
 
 export {
     client,
@@ -226,9 +226,9 @@ export {
     isCharacterOwner,
     isBoardOwner,
     isOwner,
-} from './internal/ot/util/requestedBy';
+} from './internal/ot/requestedBy';
 
-export { path, shape } from './internal/ot/util/shape';
+export { path, shape } from './internal/ot/shape';
 
 export { updateType, createType, deleteType } from './internal/ot/flocon/piece/log';
 

@@ -1,16 +1,16 @@
 import { chooseRecord } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import { State, TwoWayOperation, UpOperation } from '../../../../generator';
-import * as NullableTextOperation from '../../../../util/nullableTextOperation';
-import { isIdRecord } from '../../../../util/record';
-import * as RecordOperation from '../../../../util/recordOperation';
-import * as ReplaceOperation from '../../../../util/replaceOperation';
+import * as NullableTextOperation from '../../../../nullableTextOperation';
+import { isIdRecord } from '../../../../record';
+import * as RecordOperation from '../../../../recordOperation';
 import {
     RequestedBy,
     anyValue,
     canChangeOwnerCharacterId,
     isCharacterOwner,
-} from '../../../../util/requestedBy';
+} from '../../../../requestedBy';
+import * as ReplaceOperation from '../../../../util/replaceOperation';
 import { ServerTransform, TwoWayError } from '../../../../util/type';
 import * as Piece from '../../../piece/functions';
 import * as Room from '../../types';

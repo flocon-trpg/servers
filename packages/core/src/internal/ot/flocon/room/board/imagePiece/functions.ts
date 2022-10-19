@@ -1,13 +1,13 @@
 import { Result } from '@kizahasi/result';
 import { State, TwoWayOperation, UpOperation } from '../../../../generator';
-import { isIdRecord } from '../../../../util/record';
-import * as ReplaceOperation from '../../../../util/replaceOperation';
+import { isIdRecord } from '../../../../record';
 import {
     RequestedBy,
     anyValue,
     canChangeOwnerParticipantId,
     isOwner,
-} from '../../../../util/requestedBy';
+} from '../../../../requestedBy';
+import * as ReplaceOperation from '../../../../util/replaceOperation';
 import { ServerTransform } from '../../../../util/type';
 import * as Piece from '../../../piece/functions';
 import { template } from './types';

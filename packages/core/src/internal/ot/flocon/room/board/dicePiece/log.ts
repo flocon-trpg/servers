@@ -10,13 +10,13 @@ import {
     toUpOperation,
     upOperation,
 } from '../../../../generator';
-import { createOperation } from '../../../../util/createOperation';
-import { record } from '../../../../util/record';
+import { record } from '../../../../record';
 import {
     recordUpOperationElementFactory,
     replace as replaceKey,
     update as updateKey,
-} from '../../../../util/recordOperationElement';
+} from '../../../../recordOperationElement';
+import { createOperation } from '../../../../util/createOperation';
 import { createType, deleteType, updateType } from '../../../piece/log';
 import * as PieceBaseTypes from '../../../piece/types';
 import * as DieValue from './dieValue/functions';

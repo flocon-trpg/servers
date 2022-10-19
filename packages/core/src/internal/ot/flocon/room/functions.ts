@@ -1,10 +1,9 @@
 import { Result } from '@kizahasi/result';
 import { isStrIndex20, isStrIndex5 } from '../../../indexes';
 import { State, TwoWayOperation, UpOperation } from '../../generator';
-import * as NullableTextOperation from '../../util/nullableTextOperation';
-import { isIdRecord } from '../../util/record';
-import * as RecordOperation from '../../util/recordOperation';
-import * as ReplaceOperation from '../../util/replaceOperation';
+import * as NullableTextOperation from '../../nullableTextOperation';
+import { isIdRecord } from '../../record';
+import * as RecordOperation from '../../recordOperation';
 import {
     RequestedBy,
     anyValue,
@@ -13,8 +12,9 @@ import {
     isBoardVisible,
     isOwner,
     none,
-} from '../../util/requestedBy';
-import * as TextOperation from '../../util/textOperation';
+} from '../../requestedBy';
+import * as TextOperation from '../../textOperation';
+import * as ReplaceOperation from '../../util/replaceOperation';
 import { ServerTransform, TwoWayError } from '../../util/type';
 import * as Bgm from './bgm/functions';
 import * as BgmTypes from './bgm/types';

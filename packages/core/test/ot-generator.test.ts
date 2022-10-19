@@ -24,9 +24,9 @@ import {
     toUpOperation,
     upOperation,
 } from '../src/internal/ot/generator';
-import * as NullableTextOperation from '../src/internal/ot/util/nullableTextOperation';
-import { replace, update } from '../src/internal/ot/util/recordOperationElement';
-import * as TextOperation from '../src/internal/ot/util/textOperation';
+import * as NullableTextOperation from '../src/internal/ot/nullableTextOperation';
+import { replace, update } from '../src/internal/ot/recordOperationElement';
+import * as TextOperation from '../src/internal/ot/textOperation';
 
 namespace ReplaceValue {
     export const template = rep(t.union([t.number, t.undefined]));

@@ -9,19 +9,19 @@ import {
 import { Result } from '@kizahasi/result';
 import * as t from 'io-ts';
 import { Any } from 'io-ts';
-import * as NullableTextOperation from '../util/nullableTextOperation';
-import * as ParamRecordOperation from '../util/paramRecordOperation';
-import { record as trecord } from '../util/record';
-import { isIdRecord } from '../util/record';
-import * as RecordOperation from '../util/recordOperation';
+import * as NullableTextOperation from '../nullableTextOperation';
+import { record as trecord } from '../record';
+import { isIdRecord } from '../record';
+import * as RecordOperation from '../recordOperation';
 import {
     RecordDownOperationElement,
     RecordTwoWayOperationElement,
     RecordUpOperationElement,
     recordDownOperationElementFactory,
     recordUpOperationElementFactory,
-} from '../util/recordOperationElement';
-import * as TextOperation from '../util/textOperation';
+} from '../recordOperationElement';
+import * as TextOperation from '../textOperation';
+import * as ParamRecordOperation from '../util/paramRecordOperation';
 import { Apply, ClientTransform, Compose, Diff, DownError, Restore } from '../util/type';
 
 type ReadonlyRecord<TKey extends keyof any, TValue> = { readonly [P in TKey]: TValue };

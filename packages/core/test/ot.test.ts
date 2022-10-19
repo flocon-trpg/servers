@@ -14,7 +14,7 @@ import {
     toOtError,
     update,
 } from '../src';
-import * as TextOperation from '../src/internal/ot/util/textOperation';
+import * as TextOperation from '../src/internal/ot/textOperation';
 import { Resources } from './resources';
 
 type RoomState = State<typeof roomTemplate>;

@@ -1,6 +1,5 @@
 import { Result } from '@kizahasi/result';
 import * as t from 'io-ts';
-import * as DualKeyRecordOperation from './dualKeyRecordOperation';
 import { StringKeyRecord, record } from './record';
 import {
     RecordDownOperationElement,
@@ -11,6 +10,7 @@ import {
     replace,
     update,
 } from './recordOperationElement';
+import * as DualKeyRecordOperation from './util/dualKeyRecordOperation';
 
 export type RecordDownOperation<TState, TOperation> = StringKeyRecord<
     RecordDownOperationElement<TState, TOperation>

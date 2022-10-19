@@ -12,8 +12,7 @@ import {
 } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import * as t from 'io-ts';
-import { isValidKey } from './isValidKey';
-import { DualStringKeyRecord, record } from './record';
+import { DualStringKeyRecord, record } from '../record';
 import {
     RecordDownOperationElement,
     RecordTwoWayOperationElement,
@@ -23,7 +22,8 @@ import {
     recordUpOperationElementFactory,
     replace,
     update,
-} from './recordOperationElement';
+} from '../recordOperationElement';
+import { isValidKey } from './isValidKey';
 
 export type DualKeyRecordDownOperation<TState, TOperation> = DualStringKeyRecord<
     RecordDownOperationElement<TState, TOperation>

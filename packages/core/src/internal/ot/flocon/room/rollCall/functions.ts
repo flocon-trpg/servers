@@ -1,7 +1,7 @@
 import { Result } from '@kizahasi/result';
 import { State, TwoWayOperation, UpOperation } from '../../../generator';
-import { isIdRecord } from '../../../util/record';
-import * as RecordOperation from '../../../util/recordOperation';
+import { isIdRecord } from '../../../record';
+import * as RecordOperation from '../../../recordOperation';
 import * as ReplaceOperation from '../../../util/replaceOperation';
 import { ServerTransform, TwoWayError } from '../../../util/type';
 import * as Participant from './rollCallParticipant/functions';

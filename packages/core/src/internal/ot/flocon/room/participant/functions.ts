@@ -1,8 +1,8 @@
 import { Result } from '@kizahasi/result';
 import { State, TwoWayOperation, UpOperation } from '../../../generator';
-import { isIdRecord } from '../../../util/record';
+import { isIdRecord } from '../../../record';
+import { RequestedBy, admin, isOwner } from '../../../requestedBy';
 import * as ReplaceOperation from '../../../util/replaceOperation';
-import { RequestedBy, admin, isOwner } from '../../../util/requestedBy';
 import { ServerTransform } from '../../../util/type';
 import { template } from './types';
 

@@ -1,8 +1,8 @@
 import { both, groupJoinMap, left, mapToRecord, recordToMap, right } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
+import { StringKeyRecord } from '../record';
 import * as DualKeyRecordOperation from './dualKeyRecordOperation';
 import { isValidKey } from './isValidKey';
-import { StringKeyRecord } from './record';
 
 type RestoreResult<TState, TTwoWayOperation> = {
     prevState: TState;

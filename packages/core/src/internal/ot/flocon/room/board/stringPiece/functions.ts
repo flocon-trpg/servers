@@ -1,14 +1,14 @@
 import { Result } from '@kizahasi/result';
 import { State, TwoWayOperation, UpOperation } from '../../../../generator';
-import { isIdRecord } from '../../../../util/record';
-import * as ReplaceOperation from '../../../../util/replaceOperation';
+import { isIdRecord } from '../../../../record';
 import {
     RequestedBy,
     anyValue,
     canChangeOwnerCharacterId,
     isCharacterOwner,
-} from '../../../../util/requestedBy';
-import * as TextOperation from '../../../../util/textOperation';
+} from '../../../../requestedBy';
+import * as TextOperation from '../../../../textOperation';
+import * as ReplaceOperation from '../../../../util/replaceOperation';
 import { ServerTransform } from '../../../../util/type';
 import * as Piece from '../../../piece/functions';
 import * as Room from '../../types';
