@@ -3,6 +3,7 @@ import {
     PromiseQueue,
     PromiseQueueResultWithTimeout,
     executed,
+    queueLimitReached,
     timeout,
 } from '../../src/utils/promiseQueue';
 
@@ -37,6 +38,14 @@ class ExpectPromiseQueueResult<T> {
 
     public expectToBeTimeout(): void {
         expect(this.value?.type).toBe(timeout);
+    }
+
+    public expectToBeQueueLimitReached(): void {
+        expect(this.value?.type).toBe(queueLimitReached);
+    }
+
+    public expectNotToBeQueueLimitReached(): void {
+        expect(this.value?.type).not.toBe(queueLimitReached);
     }
 }
 
@@ -252,5 +261,43 @@ describe('promiseQueue', () => {
         await delay(1000);
 
         actual2.expectToBe(2);
+    });
+
+    it('tests queueLimit', async () => {
+        const queue = new PromiseQueue({ queueLimit: 2 });
+        queue.next(async () => {
+            await delay(500);
+            return 1;
+        });
+        const actual2 = $expect(
+            queue.next(async () => {
+                await delay(1500);
+                return 2;
+            })
+        );
+        const actual3 = $expect(
+            queue.next(async () => {
+                await delay(500);
+                return 3;
+            })
+        );
+
+        await delay(100);
+
+        actual2.expectNotToBeQueueLimitReached();
+        actual3.expectToBeQueueLimitReached();
+
+        await delay(900);
+
+        const actual4 = $expect(
+            queue.next(async () => {
+                await delay(500);
+                return 4;
+            })
+        );
+
+        await delay(100);
+
+        actual4.expectNotToBeQueueLimitReached();
     });
 });
