@@ -320,7 +320,7 @@ const success = async () => {
 
 const fail = async () => {
     await delay(1000);
-    return Promise.reject();
+    return Promise.reject(new Error('(Fake error)'));
 };
 
 export const ManyFiles = Template.bind({});

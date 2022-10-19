@@ -133,9 +133,15 @@ export class PromiseQueue {
                 // _resultにcompleteはおそらく流されないが、何らかの理由でerrorが流されることはあるかもしれない。そのとき、コンストラクタ内での_result.subscribeでエラーがthrowされるが、これがcatchされて握りつぶされてしまったケースに備えている。
                 // publish=>refCountの仕様についての補足: Observableがpublish=>refCountされていて、常にそれをsubscribeしている場合、nextは当然キャッシュされないが、errorやcompleteはキャッシュされる。
                 error: () =>
-                    reject('PromiseQueue observable has thrown an error for an unknown reason.'),
+                    reject(
+                        new Error(
+                            'PromiseQueue observable has thrown an error for an unknown reason.'
+                        )
+                    ),
                 complete: () =>
-                    reject('PromiseQueue observable has completed for an unknown reason.'),
+                    reject(
+                        new Error('PromiseQueue observable has completed for an unknown reason.')
+                    ),
             });
         });
         this._promises.next({ id, execute, timeout });

@@ -121,7 +121,8 @@ const useFirebaseStorageFiles = (onSelect: OnSelect | null) => {
                             });
                         });
                     },
-                    onMoveOrRename: () => Promise.reject('not supported'),
+                    onMoveOrRename: () =>
+                        Promise.reject(new Error('Not supported for Firebase Storage')),
                 };
                 return result;
             };
