@@ -148,7 +148,7 @@ jobs:
                   token: ${{ secrets.CODECOV_TOKEN }}
 
     # fails on windows because it uses crlf
-    lint-and-prettier:
+    lint-prettier-sortpackagejson:
         name: Lint and prettier
 
         runs-on: ubuntu-20.04
@@ -169,6 +169,9 @@ jobs:
 
             - name: Prettier(check)
               run: yarn prettier-check
+
+            - name: sort-package-json(check)
+              run: yarn sort-package-json --check
 
     publish-storybook:
         name: Publish Storybook to Chromatic

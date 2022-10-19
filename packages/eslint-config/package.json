@@ -1,7 +1,7 @@
 {
+    "name": "@flocon-trpg/eslint-config",
     "version": "1.0.0",
     "license": "MIT",
-    "name": "@flocon-trpg/eslint-config",
     "author": "kizahasi",
     "scripts": {
         "prettier": "yarn prettier:base --write --cache",
