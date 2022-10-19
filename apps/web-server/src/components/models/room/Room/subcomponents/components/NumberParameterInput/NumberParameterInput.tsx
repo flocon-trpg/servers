@@ -6,6 +6,7 @@ import {
     apply,
     characterTemplate,
     numParamTemplate,
+    toOtError,
 } from '@flocon-trpg/core';
 import { Button, Input, InputNumber, Tooltip } from 'antd';
 import React from 'react';
@@ -54,7 +55,7 @@ export const NumberParameterInput: React.FC<Props> = ({
         (state: CharacterState): CharacterState => {
             const result = applyCharacter({ state, operation });
             if (result.isError) {
-                throw result.error;
+                throw toOtError(result.error);
             }
             return result.value;
         };

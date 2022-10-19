@@ -1,4 +1,4 @@
-import { State as S, apply as a, roomTemplate } from '@flocon-trpg/core';
+import { State as S, apply as a, roomTemplate, toOtError } from '@flocon-trpg/core';
 import { useAtomValue } from 'jotai';
 import React from 'react';
 import { useLatest } from 'react-use';
@@ -49,7 +49,7 @@ export const useMockRoom = ({ roomId, room }: { roomId?: string; room: State }) 
                         }
                         const newRoom = apply({ state: prevRoom.roomState.state, operation });
                         if (newRoom.isError) {
-                            throw newRoom.error;
+                            throw toOtError(newRoom.error);
                         }
                         prevRoom.roomState.state = newRoom.value;
                     });

@@ -8,6 +8,7 @@ import {
     nullableTextDiff,
     strParamTemplate,
     toNullableTextUpOperation,
+    toOtError,
 } from '@flocon-trpg/core';
 import { Tooltip } from 'antd';
 import classNames from 'classnames';
@@ -53,7 +54,7 @@ export const StringParameterInput: React.FC<Props> = ({
         (state: CharacterState): CharacterState => {
             const result = applyCharacter({ state, operation });
             if (result.isError) {
-                throw result.error;
+                throw toOtError(result.error);
             }
             return result.value;
         };

@@ -37,7 +37,8 @@ describe('characterCommand', () => {
             myUserUid: participantId,
         });
         if (actual.isError) {
-            throw actual.error;
+            const error: Error = actual.error;
+            throw error;
         }
         expect(actual.value).not.toBe(room);
         expect(actual.value).toEqual({

@@ -6,6 +6,7 @@ import {
     apply,
     boolParamTemplate,
     characterTemplate,
+    toOtError,
 } from '@flocon-trpg/core';
 import { Button, Checkbox, Tooltip } from 'antd';
 import React from 'react';
@@ -48,7 +49,7 @@ export const BooleanParameterInput: React.FC<Props> = ({
         (state: CharacterState): CharacterState => {
             const result = applyCharacter({ state, operation });
             if (result.isError) {
-                throw result.error;
+                throw toOtError(result.error);
             }
             return result.value;
         };
