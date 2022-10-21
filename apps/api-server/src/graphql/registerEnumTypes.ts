@@ -95,7 +95,8 @@ export const registerEnumTypes = (): void => {
         name: 'OperateRoomFailureType',
     });
     registerEnumType(ParticipantRoleType, {
-        // 互換性のため'ParticipantRoleType'ではなく'ParticipantRole'としている。だが、'ParticipantRoleType'に変更することで問題が生じるかどうかは確認していない。
+        // 'ParticipantRoleType'とすべきところを誤って 'ParticipantRole' としたため、互換性を保持するためにそのままにしている。だが、'ParticipantRoleType'に変更することで問題が生じるかどうかは確認していない。
+        // TODO: 破壊的変更のあるアップデートの際にあわせて、'ParticipantRoleType' に変更する
         name: 'ParticipantRole',
     });
     registerEnumType(PieceLogType, {
