@@ -550,8 +550,6 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
 
     const entryPassword = entryPasswordConfig == null ? undefined : Resources.entryPassword;
 
-    type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
-
     const useTestServer = async (
         {
             admins,

@@ -43,8 +43,6 @@ import { firebaseUserValueAtom } from '@/pages/_app';
 import { getRoomConfig } from '@/utils/localStorage/roomConfig';
 import { Ref } from '@/utils/types';
 
-type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
-
 const debouncedWindowInnerWidthAtomCore = atom(0);
 const debouncedWindowInnerHeightAtomCore = atom(0);
 
