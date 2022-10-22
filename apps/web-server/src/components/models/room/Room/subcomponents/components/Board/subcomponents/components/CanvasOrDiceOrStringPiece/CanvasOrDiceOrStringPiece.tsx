@@ -51,7 +51,7 @@ type StringPieceContentProps = {
     createdByMe: boolean;
 } & PixelSize;
 
-const StringPieceContent: React.FC<StringPieceContentProps> = (props: StringPieceContentProps) => {
+const StringPieceContent: React.FC<StringPieceContentProps> = props => {
     const text = StringPieceValue.toKonvaText(props.state, props.createdByMe, undefined);
 
     const prevText = usePrevious(text);
@@ -149,13 +149,7 @@ type ShapePieceContentProps = {
     opacity: number;
 } & PixelSize;
 
-const ShapePieceContent: React.FC<ShapePieceContentProps> = ({
-    state,
-    stateId,
-    w,
-    h,
-    opacity,
-}: ShapePieceContentProps) => {
+const ShapePieceContent: React.FC<ShapePieceContentProps> = ({ state, stateId, w, h, opacity }) => {
     const shapes = recordToArray(state.shapes ?? {}).map(shape => {
         return (
             <ReactKonva.Path
@@ -180,12 +174,7 @@ type DicePieceContentProps = {
     opacity: number;
 } & PixelSize;
 
-const DicePieceContent: React.FC<DicePieceContentProps> = ({
-    state,
-    w,
-    h,
-    opacity,
-}: DicePieceContentProps) => {
+const DicePieceContent: React.FC<DicePieceContentProps> = ({ state, w, h, opacity }) => {
     const largeDieWidth = (w * 2) / 3;
     const largeDieHeight = (h * 2) / 3;
     const dieWidth = w / 2 - w / 20;
@@ -355,7 +344,7 @@ type ValueContentProps = {
     opacity: number;
 } & PixelSize;
 
-const ValueContent: React.FC<ValueContentProps> = (props: ValueContentProps) => {
+const ValueContent: React.FC<ValueContentProps> = props => {
     switch (props.state.type) {
         case shapePiece: {
             return (
@@ -387,7 +376,7 @@ type Props = {
 } & PieceGroupProps;
 
 // DicePieceとShapePieceとStringPieceを表示するコンポーネント。これらのPieceはどれもアニメーションがなくコードが単純なため共通化している。
-export const DiceOrShapeOrStringPiece: React.FC<Props> = (props: Props) => {
+export const DiceOrShapeOrStringPiece: React.FC<Props> = props => {
     return (
         <PieceGroup {...props}>
             <ValueContent {...props} />

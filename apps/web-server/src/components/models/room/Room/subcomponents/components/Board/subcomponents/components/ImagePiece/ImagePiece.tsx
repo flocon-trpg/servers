@@ -39,7 +39,7 @@ const BalloonCore: React.FC<BalloonCoreProps> = ({
     x,
     y,
     width,
-}: BalloonCoreProps) => {
+}) => {
     const labelOpacity = 0.8;
 
     const transitions0 = useTransition(text0, {
@@ -137,13 +137,7 @@ type BalloonProps = {
 };
 
 // 💬を表すコンポーネント。
-const Balloon: React.FC<BalloonProps> = ({
-    message,
-    x,
-    y,
-    width,
-    onBalloonChange,
-}: BalloonProps) => {
+const Balloon: React.FC<BalloonProps> = ({ message, x, y, width, onBalloonChange }) => {
     const onTextsChangeRef = React.useRef(onBalloonChange);
     React.useEffect(() => {
         onTextsChangeRef.current = onBalloonChange;
@@ -248,7 +242,7 @@ type Props = {
     messageFilter?: (message: RoomPublicMessageFragment) => boolean;
 } & PieceGroupProps;
 
-export const ImagePiece: React.FC<Props> = (props: Props) => {
+export const ImagePiece: React.FC<Props> = props => {
     /*
         リサイズや移動の実装方法についてはこちらを参照
         https://konvajs.org/docs/react/Transformer.html
