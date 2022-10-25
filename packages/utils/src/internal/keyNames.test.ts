@@ -1,4 +1,4 @@
-import { keyNames } from '../src';
+import { keyNames } from '..';
 
 describe('keyNames', () => {
     it('tests ""', () => {

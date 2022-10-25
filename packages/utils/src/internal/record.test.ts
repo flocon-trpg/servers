@@ -3,6 +3,7 @@ import {
     chooseRecord,
     dualKeyRecordForEach,
     dualKeyRecordToDualKeyMap,
+    getExactlyOneKey,
     isRecordEmpty,
     mapDualKeyRecord,
     mapRecord,
@@ -11,7 +12,7 @@ import {
     recordForEachAsync,
     recordToArray,
     recordToMap,
-} from '../src';
+} from '..';
 
 describe('mapToRecord', () => {
     it('tests empty Map', () => {
@@ -193,6 +194,23 @@ describe('mapDualKeyRecord', () => {
             '{ "a": { "__proto__": 17 } }'
         );
         expect(() => mapDualKeyRecord(source, x => x)).toThrow();
+    });
+});
+
+describe('getExactlyOneKey', () => {
+    it('tests record which length is 0', () => {
+        const source = {};
+        expect(() => getExactlyOneKey(source)).toThrow();
+    });
+
+    it('tests record which length is 1', () => {
+        const source = { x: 'foo' };
+        expect(getExactlyOneKey(source)).toBe('x');
+    });
+
+    it('tests record which length is more than 1', () => {
+        const source = { x: 'foo', y: 'bar' };
+        expect(() => getExactlyOneKey(source)).toThrow('x');
     });
 });
 

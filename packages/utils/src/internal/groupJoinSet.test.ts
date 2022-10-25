@@ -1,4 +1,4 @@
-import { both, groupJoinSet, left, right } from '../src';
+import { both, groupJoinSet, left, right } from '..';
 
 describe('groupJoinSet', () => {
     it('tests empty Set vs empty Set', () => {

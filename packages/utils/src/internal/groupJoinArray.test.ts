@@ -1,12 +1,12 @@
-import { both, groupJoinArray, left, right } from '../src';
-import { GroupJoinResult } from '../src/internal/types';
+import { both, groupJoinArray, left, right } from '..';
+import { GroupJoinResult } from './types';
 
 describe('groupJoinArray', () => {
     it('tests empty vs empty', () => {
         const leftArray: never[] = [];
         const rightArray: never[] = [];
         const actual = groupJoinArray(leftArray, rightArray);
-        expect(actual).toEqual([]);
+        expect([...actual]).toEqual([]);
     });
 
     it('tests non-empty vs empty', () => {
@@ -14,7 +14,7 @@ describe('groupJoinArray', () => {
         const rightArray: never[] = [];
         const actual = groupJoinArray(leftArray, rightArray);
         const expected: GroupJoinResult<number, never>[] = [{ type: left, left: 1 }];
-        expect(actual).toEqual(expected);
+        expect([...actual]).toEqual(expected);
     });
 
     it('tests empty vs non-empty', () => {
@@ -22,7 +22,7 @@ describe('groupJoinArray', () => {
         const rightArray = [1];
         const actual = groupJoinArray(leftArray, rightArray);
         const expected: GroupJoinResult<never, number>[] = [{ type: right, right: 1 }];
-        expect(actual).toEqual(expected);
+        expect([...actual]).toEqual(expected);
     });
 
     it('tests length=2 vs length=2', () => {
@@ -33,7 +33,7 @@ describe('groupJoinArray', () => {
             { type: both, left: 1, right: '1' },
             { type: both, left: 2, right: '2' },
         ];
-        expect(actual).toEqual(expected);
+        expect([...actual]).toEqual(expected);
     });
 
     it('tests length=3 vs length=2', () => {
@@ -45,7 +45,7 @@ describe('groupJoinArray', () => {
             { type: both, left: 2, right: '2' },
             { type: left, left: 3 },
         ];
-        expect(actual).toEqual(expected);
+        expect([...actual]).toEqual(expected);
     });
 
     it('tests length=2 vs length=3', () => {
@@ -57,6 +57,6 @@ describe('groupJoinArray', () => {
             { type: both, left: 2, right: '2' },
             { type: right, right: '3' },
         ];
-        expect(actual).toEqual(expected);
+        expect([...actual]).toEqual(expected);
     });
 });

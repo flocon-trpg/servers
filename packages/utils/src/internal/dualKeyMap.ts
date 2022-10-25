@@ -1,6 +1,6 @@
 import { Option } from '@kizahasi/option';
+import { mapToRecord } from './record';
 import { GroupJoinResult, both, left, right } from './types';
-import { mapToRecord } from './utils';
 
 export type DualKey<T1, T2> = {
     readonly first: T1;

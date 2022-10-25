@@ -1,6 +1,6 @@
-import { DualKey, DualKeyMap } from './dualKeyMap';
-
 // Recordのkeyは、numberはstringとして解釈され、symbolはfor in文で列挙されないため、stringのみの対応としている。
+
+import { DualKey, DualKeyMap } from './dualKeyMap';
 
 export const mapToRecord = <TValue>(source: Map<string, TValue>): Record<string, TValue> => {
     const result: Record<string, TValue> = {};
@@ -78,6 +78,20 @@ export function* recordToIterator<T>(
         }
     }
 }
+
+export const getExactlyOneKey = (record: Record<string, unknown>): string => {
+    let lastKey: string | null = null;
+    for (const pair of recordToIterator(record)) {
+        if (lastKey != null) {
+            throw new Error('Expected length to be 1, but actually more than 1.');
+        }
+        lastKey = pair.key;
+    }
+    if (lastKey == null) {
+        throw new Error('Expected length to be 1, but actually 0.');
+    }
+    return lastKey;
+};
 
 export const recordToArray = <T>(
     source: Record<string, T | undefined>

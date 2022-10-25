@@ -1,4 +1,4 @@
-import { SemVer, SemverOption, alpha, beta } from '../src';
+import { SemVer, SemverOption, alpha, beta } from '..';
 
 it.each`
     left                                                                                         | operator | right

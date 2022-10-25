@@ -1,7 +1,13 @@
 import { Option } from '@kizahasi/option';
-import { DualKeyMap, both, groupJoinDualKeyMap, left, right } from '../src';
+import { DualKeyMap, both, groupJoinDualKeyMap, left, right } from '..';
 
 describe('dualKeyMap', () => {
+    it('tests spread operator', () => {
+        const actual = new DualKeyMap<string, string, number>();
+        actual.set({ first: '0-0', second: '0-1' }, 0);
+        expect([...actual]).toHaveLength(1);
+    });
+
     it.each([undefined, new Map(), new Map([['a', new Map()]])])(
         'tests constructor with empty object',
         source => {

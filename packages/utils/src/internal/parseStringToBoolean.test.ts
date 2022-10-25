@@ -1,6 +1,6 @@
 import { Result } from '@kizahasi/result';
-import { parseStringToBoolean } from '../src';
-import { ParseError } from '../src/internal/parseStringToBoolean';
+import { parseStringToBoolean } from '..';
+import { ParseError } from './parseStringToBoolean';
 
 namespace ExpectedResult {
     export const ok = <T>(value: T) => Result.ok(value);

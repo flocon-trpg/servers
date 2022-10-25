@@ -1,4 +1,4 @@
-import { MultiKeyMap } from '../src';
+import { MultiKeyMap } from '..';
 
 describe('multiKeyMap', () => {
     it('tests empty instance', () => {

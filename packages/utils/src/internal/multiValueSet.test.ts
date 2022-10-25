@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { MultiValueSet } from '../src';
+import { MultiValueSet } from '..';
 
 describe('multiValueSet', () => {
     it.each([

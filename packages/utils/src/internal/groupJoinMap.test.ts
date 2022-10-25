@@ -1,4 +1,4 @@
-import { both, groupJoinMap, left, right } from '../src';
+import { both, groupJoinMap, left, right } from '..';
 
 describe('groupJoinMap', () => {
     it('tests empty Map vs empty Map', () => {

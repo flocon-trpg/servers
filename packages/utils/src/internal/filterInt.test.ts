@@ -1,4 +1,4 @@
-import { filterInt } from '../src';
+import { filterInt } from '..';
 
 it('tests filterInt', () => {
     expect(filterInt('421')).toBe(421);
