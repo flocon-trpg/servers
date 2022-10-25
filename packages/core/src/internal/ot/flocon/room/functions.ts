@@ -6,12 +6,14 @@ import { isIdRecord } from '../../record';
 import * as RecordOperation from '../../recordOperation';
 import {
     RequestedBy,
+    admin,
     anyValue,
     client,
     isBoardOwner,
     isBoardVisible,
     isOwner,
     none,
+    restrict,
 } from '../../requestedBy';
 import * as TextOperation from '../../textOperation';
 import * as ReplaceOperation from '../../util/replaceOperation';
@@ -124,12 +126,20 @@ export const serverTransform =
         UpOperation<typeof template>
     > =>
     ({ prevState, currentState, clientOperation, serverOperation }) => {
-        if (requestedBy.type === client) {
-            const me = (currentState.participants ?? {})[requestedBy.userUid];
-            if (me == null || me.role == null || me.role === ParticipantTypes.Spectator) {
+        switch (requestedBy.type) {
+            case restrict:
                 // エラーを返すべきかもしれない
                 return Result.ok(undefined);
+            case client: {
+                const me = (currentState.participants ?? {})[requestedBy.userUid];
+                if (me == null || me.role == null || me.role === ParticipantTypes.Spectator) {
+                    // エラーを返すべきかもしれない
+                    return Result.ok(undefined);
+                }
+                break;
             }
+            case admin:
+                break;
         }
 
         const bgms = RecordOperation.serverTransform<
