@@ -68,17 +68,21 @@ export const mapDualKeyRecord = <TSource, TResult>(
     );
 };
 
-export const recordToArray = <T>(
+export function* recordToIterator<T>(
     source: Record<string, T | undefined>
-): { key: string; value: T }[] => {
-    const result: { key: string; value: T }[] = [];
+): IterableIterator<{ key: string; value: T }> {
     for (const key in source) {
         const value = source[key];
         if (value !== undefined) {
-            result.push({ key, value });
+            yield { key, value };
         }
     }
-    return result;
+}
+
+export const recordToArray = <T>(
+    source: Record<string, T | undefined>
+): { key: string; value: T }[] => {
+    return [...recordToIterator(source)];
 };
 
 export const recordToMap = <T>(source: Record<string, T | undefined>): Map<string, T> => {
@@ -114,12 +118,8 @@ export const recordForEach = <T>(
     source: Record<string, T | undefined>,
     action: (value: T, key: string) => void
 ): void => {
-    for (const key in source) {
-        const value = source[key];
-        if (value === undefined) {
-            continue;
-        }
-        action(value, key);
+    for (const pair of recordToIterator(source)) {
+        action(pair.value, pair.key);
     }
 };
 
@@ -127,12 +127,8 @@ export const recordForEachAsync = async <T>(
     source: Record<string, T | undefined>,
     action: (value: T, key: string) => Promise<void>
 ): Promise<void> => {
-    for (const key in source) {
-        const value = source[key];
-        if (value === undefined) {
-            continue;
-        }
-        await action(value, key);
+    for (const pair of recordToIterator(source)) {
+        await action(pair.value, pair.key);
     }
 };
 

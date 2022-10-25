@@ -45,6 +45,7 @@ export {
     mapToRecord,
     recordForEach,
     recordForEachAsync,
+    recordToIterator,
     recordToArray,
     dualKeyRecordToDualKeyMap,
     recordToMap,
