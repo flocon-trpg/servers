@@ -1,4 +1,5 @@
 export { arrayEquals } from './internal/arrayEquals';
+export { compare, Operator } from './internal/compare';
 export {
     CompositeKey,
     stringToCompositeKey,
@@ -47,6 +48,6 @@ export {
     dualKeyRecordToDualKeyMap,
     recordToMap,
 } from './internal/record';
-export { SemVer, alpha, beta, rc, Operator, SemverOption } from './internal/semver';
+export { SemVer, alpha, beta, rc, SemverOption } from './internal/semver';
 export { Tree } from './internal/tree';
 export { left, right, both, GroupJoinResult } from './internal/types';
