@@ -1,5 +1,6 @@
 import { Result } from '@kizahasi/result';
 import { State, TwoWayOperation, UpOperation } from '../../../generator';
+import * as ParamRecordOperation from '../../../paramRecordOperation';
 import { isIdRecord } from '../../../record';
 import * as RecordOperation from '../../../recordOperation';
 import {
@@ -10,7 +11,6 @@ import {
     none,
 } from '../../../requestedBy';
 import * as TextOperation from '../../../textOperation';
-import * as ParamRecordOperation from '../../../util/paramRecordOperation';
 import * as ReplaceOperation from '../../../util/replaceOperation';
 import { ServerTransform, TwoWayError } from '../../../util/type';
 import * as Room from '../types';

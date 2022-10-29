@@ -19,5 +19,3 @@ export const record = <TDomain extends t.Mixed, TCodomain extends t.Mixed>(
 ) => t.record(domain, t.union([codomain, t.undefined]));
 
 export type StringKeyRecord<T> = Record<string, T | undefined>;
-
-export type DualStringKeyRecord<T> = Record<string, Record<string, T | undefined> | undefined>;

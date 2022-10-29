@@ -1,19 +1,15 @@
 import { both, groupJoinMap, left, mapToRecord, recordToMap, right } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
-import { StringKeyRecord } from '../record';
-import * as DualKeyRecordOperation from './dualKeyRecordOperation';
-import { isValidKey } from './isValidKey';
+import { StringKeyRecord } from './record';
+import * as RecordOperation from './recordOperation';
+import { isValidKey } from './util/isValidKey';
 
 type RestoreResult<TState, TTwoWayOperation> = {
     prevState: TState;
     twoWayOperation: TTwoWayOperation | undefined;
 };
 export type ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> =
-    DualKeyRecordOperation.ProtectedTransformParameters<
-        TServerState,
-        TFirstOperation,
-        TSecondOperation
-    >;
+    RecordOperation.ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation>;
 
 export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError = string>({
     nextState: unsafeNextState,
