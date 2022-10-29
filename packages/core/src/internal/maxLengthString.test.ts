@@ -1,5 +1,5 @@
 import * as t from 'io-ts';
-import { maxLengthString } from '../src/internal/maxLengthString';
+import { maxLengthString } from './maxLengthString';
 
 const obj = t.type({
     str5: maxLengthString(5),

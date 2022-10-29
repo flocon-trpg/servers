@@ -1,4 +1,4 @@
-import { analyze, expr1, plain } from '../src';
+import { analyze, expr1, plain } from '..';
 
 it('tests {HP}', () => {
     const actual = analyze('{HP}');

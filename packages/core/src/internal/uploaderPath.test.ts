@@ -1,4 +1,4 @@
-import { joinPath, sanitizeFilename, sanitizeFoldername, trySanitizePath } from '../src';
+import { joinPath, sanitizeFilename, sanitizeFoldername, trySanitizePath } from '..';
 
 describe('sanitizeFoldername', () => {
     it.each([

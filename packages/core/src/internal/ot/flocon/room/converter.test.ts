@@ -1,43 +1,41 @@
 import {
     decodeDbState,
     decodeDownOperation,
-    diff,
     exactDbState,
     exactDownOperation,
     parseState,
     parseUpOperation,
-    roomTemplate,
     stringifyState,
     stringifyUpOperation,
-    toDownOperation,
-    toUpOperation,
-} from '../src';
-import { Resources } from './resources';
+} from './converter';
+import { template } from './types';
+import { Fixture } from '@/__test__/fixture';
+import { diff, toDownOperation, toUpOperation } from '@/ot/generator';
 
 const getUpOperation = () => {
-    const twoWayOperation = diff(roomTemplate)({
-        prevState: Resources.minimumState,
-        nextState: Resources.complexState,
+    const twoWayOperation = diff(template)({
+        prevState: Fixture.minimumState,
+        nextState: Fixture.complexState,
     });
     if (twoWayOperation == null) {
         throw new Error('prevState and nextState must not be same');
     }
-    return toUpOperation(roomTemplate)(twoWayOperation);
+    return toUpOperation(template)(twoWayOperation);
 };
 
 const getDownOperation = () => {
-    const twoWayOperation = diff(roomTemplate)({
-        prevState: Resources.minimumState,
-        nextState: Resources.complexState,
+    const twoWayOperation = diff(template)({
+        prevState: Fixture.minimumState,
+        nextState: Fixture.complexState,
     });
     if (twoWayOperation == null) {
         throw new Error('prevState and nextState must not be same');
     }
-    return toDownOperation(roomTemplate)(twoWayOperation);
+    return toDownOperation(template)(twoWayOperation);
 };
 
 test('decodeDbState to be success', () => {
-    const expected = Resources.complexDbState;
+    const expected = Fixture.complexDbState;
     expect(decodeDbState(expected)).toEqual(expected);
 });
 
@@ -47,12 +45,12 @@ test('decodeDbState to fail', () => {
 });
 
 test('exactDbState', () => {
-    const source = { ...Resources.complexDbState, foo: 1 };
-    expect(exactDbState(source)).toEqual(Resources.complexDbState);
+    const source = { ...Fixture.complexDbState, foo: 1 };
+    expect(exactDbState(source)).toEqual(Fixture.complexDbState);
 });
 
 test('stringifyState -> parseState', () => {
-    const expected = Resources.complexState;
+    const expected = Fixture.complexState;
     const actual = parseState(stringifyState(expected));
     expect(actual).toEqual(expected);
 });
@@ -69,7 +67,7 @@ test('decodeDownOperation', () => {
 });
 
 test('decodeDownOperation to fail', () => {
-    const expected = Resources.complexDbState;
+    const expected = Fixture.complexDbState;
     expect(() => decodeDownOperation(expected)).toThrow();
 });
 

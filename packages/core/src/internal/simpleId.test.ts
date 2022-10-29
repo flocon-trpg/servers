@@ -1,4 +1,4 @@
-import { simpleId } from '../src';
+import { simpleId } from '..';
 
 describe('simpleId', () => {
     it('tests length', () => {

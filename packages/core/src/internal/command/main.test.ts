@@ -1,6 +1,6 @@
 import { recordToMap } from '@flocon-trpg/utils';
-import { State as S, execCharacterCommand, roomTemplate } from '../src';
-import { Resources } from './resources';
+import { State as S, execCharacterCommand, roomTemplate } from '../..';
+import { Fixture } from '../__test__/fixture';
 
 type State = S<typeof roomTemplate>;
 
@@ -8,23 +8,23 @@ describe('characterCommand', () => {
     const characterId = 'CHARA_ID';
 
     it('tests room.name', () => {
-        const participantId = Resources.Participant.Player1.userUid;
+        const participantId = Fixture.Participant.Player1.userUid;
         const prevRoomName = 'NAME_0';
         const nextRoomName = 'NAME_1';
 
         const room: State = {
-            ...Resources.minimumState,
+            ...Fixture.minimumState,
             name: prevRoomName,
             characters: {
                 [characterId]: {
-                    ...Resources.Character.emptyState(participantId),
+                    ...Fixture.Character.emptyState(participantId),
                 },
             },
             participants: {
                 [participantId]: {
                     $v: 2,
                     $r: 1,
-                    name: Resources.Participant.Player1.name,
+                    name: Fixture.Participant.Player1.name,
                     role: 'Player',
                 },
             },
@@ -48,15 +48,15 @@ describe('characterCommand', () => {
     });
 
     it('tests character.name', () => {
-        const participantId = Resources.Participant.Player1.userUid;
+        const participantId = Fixture.Participant.Player1.userUid;
         const prevCharacterName = 'NAME_0';
         const nextCharacterName = 'NAME_1';
 
         const room: State = {
-            ...Resources.minimumState,
+            ...Fixture.minimumState,
             characters: {
                 [characterId]: {
-                    ...Resources.Character.emptyState(participantId),
+                    ...Fixture.Character.emptyState(participantId),
                     name: prevCharacterName,
                 },
             },
@@ -64,7 +64,7 @@ describe('characterCommand', () => {
                 [participantId]: {
                     $v: 2,
                     $r: 1,
-                    name: Resources.Participant.Player1.name,
+                    name: Fixture.Participant.Player1.name,
                     role: 'Player',
                 },
             },
@@ -85,7 +85,7 @@ describe('characterCommand', () => {
             ...room,
             characters: {
                 [characterId]: {
-                    ...Resources.Character.emptyState(participantId),
+                    ...Fixture.Character.emptyState(participantId),
                     name: nextCharacterName,
                 },
             },
@@ -93,7 +93,7 @@ describe('characterCommand', () => {
                 [participantId]: {
                     $v: 2,
                     $r: 1,
-                    name: Resources.Participant.Player1.name,
+                    name: Fixture.Participant.Player1.name,
                     role: 'Player',
                 },
             },
@@ -102,15 +102,15 @@ describe('characterCommand', () => {
     });
 
     it('tests finding participant and character', () => {
-        const participantId = Resources.Participant.Player1.userUid;
+        const participantId = Fixture.Participant.Player1.userUid;
         const prevCharacterName = 'NAME_0';
         const nextCharacterName = 'NAME_1';
 
         const room: State = {
-            ...Resources.minimumState,
+            ...Fixture.minimumState,
             characters: {
                 [characterId]: {
-                    ...Resources.Character.emptyState(participantId),
+                    ...Fixture.Character.emptyState(participantId),
                     name: prevCharacterName,
                 },
             },
@@ -118,7 +118,7 @@ describe('characterCommand', () => {
                 [participantId]: {
                     $v: 2,
                     $r: 1,
-                    name: Resources.Participant.Player1.name,
+                    name: Fixture.Participant.Player1.name,
                     role: 'Player',
                 },
             },
@@ -141,7 +141,7 @@ myCharacter.name = '${nextCharacterName}';
             ...room,
             characters: {
                 [characterId]: {
-                    ...Resources.Character.emptyState(participantId),
+                    ...Fixture.Character.emptyState(participantId),
                     name: nextCharacterName,
                 },
             },
@@ -149,7 +149,7 @@ myCharacter.name = '${nextCharacterName}';
                 [participantId]: {
                     $v: 2,
                     $r: 1,
-                    name: Resources.Participant.Player1.name,
+                    name: Fixture.Participant.Player1.name,
                     role: 'Player',
                 },
             },
@@ -158,14 +158,14 @@ myCharacter.name = '${nextCharacterName}';
     });
 
     it('tests creating character', () => {
-        const participantId = Resources.Participant.Player1.userUid;
+        const participantId = Fixture.Participant.Player1.userUid;
         const characterName = 'CHARA_NAME';
 
         const room: State = {
-            ...Resources.minimumState,
+            ...Fixture.minimumState,
             characters: {
                 [characterId]: {
-                    ...Resources.Character.emptyState(participantId),
+                    ...Fixture.Character.emptyState(participantId),
                     name: characterName,
                 },
             },
@@ -173,7 +173,7 @@ myCharacter.name = '${nextCharacterName}';
                 [participantId]: {
                     $v: 2,
                     $r: 1,
-                    name: Resources.Participant.Player1.name,
+                    name: Fixture.Participant.Player1.name,
                     role: 'Player',
                 },
             },
@@ -202,20 +202,20 @@ newCharacter.value.name = newCharacterById.name + '!!';
     });
 
     it('tests deleting character', () => {
-        const participantId = Resources.Participant.Player1.userUid;
+        const participantId = Fixture.Participant.Player1.userUid;
         const characterName = 'CHARA_NAME';
         const anotherCharacterName = 'CHARA_NAME2';
         const anotherCharacterId = 'CHARA_ID2';
 
         const room: State = {
-            ...Resources.minimumState,
+            ...Fixture.minimumState,
             characters: {
                 [characterId]: {
-                    ...Resources.Character.emptyState(participantId),
+                    ...Fixture.Character.emptyState(participantId),
                     name: characterName,
                 },
                 [anotherCharacterId]: {
-                    ...Resources.Character.emptyState(participantId),
+                    ...Fixture.Character.emptyState(participantId),
                     name: anotherCharacterName,
                 },
             },
@@ -223,7 +223,7 @@ newCharacter.value.name = newCharacterById.name + '!!';
                 [participantId]: {
                     $v: 2,
                     $r: 1,
-                    name: Resources.Participant.Player1.name,
+                    name: Fixture.Participant.Player1.name,
                     role: 'Player',
                 },
             },
@@ -245,7 +245,7 @@ this.room.characters.delete('${characterId}');
             ...room,
             characters: {
                 [anotherCharacterId]: {
-                    ...Resources.Character.emptyState(participantId),
+                    ...Fixture.Character.emptyState(participantId),
                     name: anotherCharacterName,
                 },
             },
@@ -253,7 +253,7 @@ this.room.characters.delete('${characterId}');
                 [participantId]: {
                     $v: 2,
                     $r: 1,
-                    name: Resources.Participant.Player1.name,
+                    name: Fixture.Participant.Player1.name,
                     role: 'Player',
                 },
             },

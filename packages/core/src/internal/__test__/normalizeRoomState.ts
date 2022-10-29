@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { State, strParamTemplate } from '../src';
+import { State, strParamTemplate } from '../..';
 
 const isEmpty = (source: Record<string, unknown>): boolean => {
     for (const key in source) {

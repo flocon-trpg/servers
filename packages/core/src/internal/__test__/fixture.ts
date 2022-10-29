@@ -7,9 +7,9 @@ import {
     forceMaxLength100String,
     roomDbTemplate,
     roomTemplate,
-} from '../src';
+} from '../..';
 
-export namespace Resources {
+export namespace Fixture {
     const boardId = 'BOARD_ID';
 
     export namespace Participant {

@@ -13,9 +13,9 @@ import {
     serverTransform,
     toOtError,
     update,
-} from '../src';
-import * as TextOperation from '../src/internal/ot/textOperation';
-import { Resources } from './resources';
+} from '../..';
+import { Fixture } from '../__test__/fixture';
+import * as TextOperation from './textOperation';
 
 type RoomState = State<typeof roomTemplate>;
 type RoomUpOperation = UpOperation<typeof roomTemplate>;
@@ -46,9 +46,9 @@ namespace Test {
         }): void => {
             it.each`
                 userUid
-                ${Resources.Participant.None.userUid}
-                ${Resources.Participant.Null.userUid}
-                ${Resources.Participant.Spectator.userUid}
+                ${Fixture.Participant.None.userUid}
+                ${Fixture.Participant.Null.userUid}
+                ${Fixture.Participant.Spectator.userUid}
             `('tests $userUid', ({ userUid }: { userUid: string }) => {
                 const actualOperation = serverTransform({
                     type: client,
@@ -104,7 +104,7 @@ namespace Test {
     }
 }
 
-describe.each([Resources.minimumState, Resources.complexState])('tests id', state => {
+describe.each([Fixture.minimumState, Fixture.complexState])('tests id', state => {
     const clientOperation: RoomUpOperation = {
         $v: 2,
         $r: 1,
@@ -127,12 +127,12 @@ describe.each([Resources.minimumState, Resources.complexState])('tests id', stat
     tester({ testName: 'tests server', requestedBy: { type: admin }, expected: undefined });
     tester({
         testName: 'tests Player',
-        requestedBy: { type: client, userUid: Resources.Participant.Player1.userUid },
+        requestedBy: { type: client, userUid: Fixture.Participant.Player1.userUid },
         expected: undefined,
     });
 });
 
-describe.each([Resources.minimumState, Resources.complexState])('tests name', state => {
+describe.each([Fixture.minimumState, Fixture.complexState])('tests name', state => {
     const newName = 'NEW_NAME';
 
     const clientOperation: RoomUpOperation = {
@@ -164,7 +164,7 @@ describe.each([Resources.minimumState, Resources.complexState])('tests name', st
     tester({ testName: 'tests server', requestedBy: { type: admin }, expected });
     tester({
         testName: 'tests Player',
-        requestedBy: { type: client, userUid: Resources.Participant.Player1.userUid },
+        requestedBy: { type: client, userUid: Fixture.Participant.Player1.userUid },
         expected,
     });
 });
@@ -189,19 +189,19 @@ describe.each`
     const clientOperation: RoomUpOperation = {
         $v: 2,
         $r: 1,
-        [key]: textUpDiff({ prev: Resources.minimumState[key], next: newName }),
+        [key]: textUpDiff({ prev: Fixture.minimumState[key], next: newName }),
     };
 
     Test.Basic.testServerTransformToReject({
-        prevState: Resources.minimumState,
-        currentState: Resources.minimumState,
+        prevState: Fixture.minimumState,
+        currentState: Fixture.minimumState,
         serverOperation: undefined,
         clientOperation,
     });
 
     const tester = Test.Basic.setupTestServerTransform({
-        prevState: Resources.minimumState,
-        currentState: Resources.minimumState,
+        prevState: Fixture.minimumState,
+        currentState: Fixture.minimumState,
         serverOperation: undefined,
         clientOperation,
     });
@@ -210,7 +210,7 @@ describe.each`
         $v: 2,
         $r: 1,
         [key]: TextOperation.diff({
-            prev: Resources.minimumState[key],
+            prev: Fixture.minimumState[key],
             next: newName,
         }),
     };
@@ -218,7 +218,7 @@ describe.each`
     tester({ testName: 'tests server', requestedBy: { type: admin }, expected });
     tester({
         testName: 'tests Player',
-        requestedBy: { type: client, userUid: Resources.Participant.Player1.userUid },
+        requestedBy: { type: client, userUid: Fixture.Participant.Player1.userUid },
         expected,
     });
 });
@@ -265,15 +265,15 @@ describe.each`
     };
 
     Test.Basic.testServerTransformToReject({
-        prevState: Resources.minimumState,
-        currentState: Resources.minimumState,
+        prevState: Fixture.minimumState,
+        currentState: Fixture.minimumState,
         serverOperation: undefined,
         clientOperation,
     });
 
     const tester = Test.Basic.setupTestServerTransform({
-        prevState: Resources.minimumState,
-        currentState: Resources.minimumState,
+        prevState: Fixture.minimumState,
+        currentState: Fixture.minimumState,
         serverOperation: undefined,
         clientOperation,
     });
@@ -296,27 +296,27 @@ describe.each`
     tester({ testName: 'tests server', requestedBy: { type: admin }, expected });
     tester({
         testName: 'tests Player',
-        requestedBy: { type: client, userUid: Resources.Participant.Player1.userUid },
+        requestedBy: { type: client, userUid: Fixture.Participant.Player1.userUid },
         expected,
     });
 });
 
 describe('tests creating DicePieceValue', () => {
-    const participantId = Resources.Participant.Player1.userUid;
+    const participantId = Fixture.Participant.Player1.userUid;
     const boardId = 'BOARD_ID';
     const characterId = 'CHARACTER_ID';
     const dicePieceId = 'DICE_ID';
 
     const state: RoomState = {
-        ...Resources.minimumState,
+        ...Fixture.minimumState,
         boards: {
-            [boardId]: Resources.Board.emptyState(participantId),
+            [boardId]: Fixture.Board.emptyState(participantId),
         },
         characters: {
-            [characterId]: Resources.Character.emptyState(participantId),
+            [characterId]: Fixture.Character.emptyState(participantId),
         },
         participants: {
-            ...Resources.minimumState.participants,
+            ...Fixture.minimumState.participants,
             [participantId]: {
                 $v: 2,
                 $r: 1,
@@ -415,21 +415,21 @@ describe('tests creating DicePieceValue', () => {
     tester({ testName: 'tests server', requestedBy: { type: admin }, expected });
     tester({
         testName: 'tests Owner Player',
-        requestedBy: { type: client, userUid: Resources.Participant.Player1.userUid },
+        requestedBy: { type: client, userUid: Fixture.Participant.Player1.userUid },
         expected,
     });
     tester({
         testName: 'tests Non-owner Player',
-        requestedBy: { type: client, userUid: Resources.Participant.Player2.userUid },
+        requestedBy: { type: client, userUid: Fixture.Participant.Player2.userUid },
         expected: undefined,
     });
 });
 
 describe('tests creating Character', () => {
-    const ownerParticipantId = Resources.Participant.Player1.userUid;
+    const ownerParticipantId = Fixture.Participant.Player1.userUid;
     const characterId = 'CHARACTER_ID';
 
-    const state: RoomState = Resources.minimumState;
+    const state: RoomState = Fixture.minimumState;
 
     const clientOperation: RoomUpOperation = {
         $v: 2,
@@ -438,7 +438,7 @@ describe('tests creating Character', () => {
             [characterId]: {
                 type: replace,
                 replace: {
-                    newValue: Resources.Character.emptyState(ownerParticipantId),
+                    newValue: Fixture.Character.emptyState(ownerParticipantId),
                 },
             },
         },
@@ -465,7 +465,7 @@ describe('tests creating Character', () => {
             [characterId]: {
                 type: replace,
                 replace: {
-                    newValue: Resources.Character.emptyState(ownerParticipantId),
+                    newValue: Fixture.Character.emptyState(ownerParticipantId),
                 },
             },
         },
@@ -474,12 +474,12 @@ describe('tests creating Character', () => {
     tester({ testName: 'tests server', requestedBy: { type: admin }, expected });
     tester({
         testName: 'tests Owner Player',
-        requestedBy: { type: client, userUid: Resources.Participant.Player1.userUid },
+        requestedBy: { type: client, userUid: Fixture.Participant.Player1.userUid },
         expected,
     });
     tester({
         testName: 'tests Non-owner Player',
-        requestedBy: { type: client, userUid: Resources.Participant.Player2.userUid },
+        requestedBy: { type: client, userUid: Fixture.Participant.Player2.userUid },
         expected: undefined,
     });
 });
@@ -487,20 +487,20 @@ describe('tests creating Character', () => {
 describe.each([[true], [false]])(
     'tests updating Character when isPrivate === %o',
     (isPrivate: boolean) => {
-        const ownerParticipantId = Resources.Participant.Player1.userUid;
+        const ownerParticipantId = Fixture.Participant.Player1.userUid;
         const characterId = 'CHARACTER_ID';
         const newName = 'NEW_NAME';
 
         const state: RoomState = {
-            ...Resources.minimumState,
+            ...Fixture.minimumState,
             characters: {
                 [characterId]: {
-                    ...Resources.Character.emptyState(ownerParticipantId),
+                    ...Fixture.Character.emptyState(ownerParticipantId),
                     isPrivate,
                 },
             },
             participants: {
-                ...Resources.minimumState.participants,
+                ...Fixture.minimumState.participants,
                 [ownerParticipantId]: {
                     $v: 2,
                     $r: 1,
@@ -520,7 +520,7 @@ describe.each([[true], [false]])(
                         $v: 2,
                         $r: 1,
                         name: textUpDiff({
-                            prev: Resources.Character.emptyState(ownerParticipantId).name,
+                            prev: Fixture.Character.emptyState(ownerParticipantId).name,
                             next: newName,
                         }),
                     },
@@ -552,7 +552,7 @@ describe.each([[true], [false]])(
                         $v: 2,
                         $r: 1,
                         name: TextOperation.diff({
-                            prev: Resources.Character.emptyState(ownerParticipantId).name,
+                            prev: Fixture.Character.emptyState(ownerParticipantId).name,
                             next: newName,
                         }),
                     },
@@ -563,12 +563,12 @@ describe.each([[true], [false]])(
         tester({ testName: 'tests server', requestedBy: { type: admin }, expected });
         tester({
             testName: 'tests Owner Player',
-            requestedBy: { type: client, userUid: Resources.Participant.Player1.userUid },
+            requestedBy: { type: client, userUid: Fixture.Participant.Player1.userUid },
             expected,
         });
         tester({
             testName: 'tests Non-owner Player',
-            requestedBy: { type: client, userUid: Resources.Participant.Player2.userUid },
+            requestedBy: { type: client, userUid: Fixture.Participant.Player2.userUid },
             expected: isPrivate ? undefined : expected,
         });
     }
@@ -577,23 +577,23 @@ describe.each([[true], [false]])(
 describe.each([[true], [false]])(
     'tests deleting Character when isPrivate === %o',
     (isPrivate: boolean) => {
-        const ownerParticipantId = Resources.Participant.Player1.userUid;
+        const ownerParticipantId = Fixture.Participant.Player1.userUid;
         const characterId = 'CHARACTER_ID';
 
         const state: RoomState = {
-            ...Resources.minimumState,
+            ...Fixture.minimumState,
             characters: {
                 [characterId]: {
-                    ...Resources.Character.emptyState(ownerParticipantId),
+                    ...Fixture.Character.emptyState(ownerParticipantId),
                     isPrivate,
                 },
             },
             participants: {
-                ...Resources.minimumState.participants,
-                [Resources.Participant.Player1.userUid]: {
+                ...Fixture.minimumState.participants,
+                [Fixture.Participant.Player1.userUid]: {
                     $v: 2,
                     $r: 1,
-                    name: Resources.Participant.Player1.name,
+                    name: Fixture.Participant.Player1.name,
                     role: 'Player',
                 },
             },
@@ -634,7 +634,7 @@ describe.each([[true], [false]])(
                     type: replace,
                     replace: {
                         oldValue: {
-                            ...Resources.Character.emptyState(ownerParticipantId),
+                            ...Fixture.Character.emptyState(ownerParticipantId),
                             isPrivate,
                         },
                         newValue: undefined,
@@ -646,12 +646,12 @@ describe.each([[true], [false]])(
         tester({ testName: 'tests server', requestedBy: { type: admin }, expected });
         tester({
             testName: 'tests Owner Player',
-            requestedBy: { type: client, userUid: Resources.Participant.Player1.userUid },
+            requestedBy: { type: client, userUid: Fixture.Participant.Player1.userUid },
             expected,
         });
         tester({
             testName: 'tests Non-owner Player',
-            requestedBy: { type: client, userUid: Resources.Participant.Player2.userUid },
+            requestedBy: { type: client, userUid: Fixture.Participant.Player2.userUid },
             expected: isPrivate ? undefined : expected,
         });
     }

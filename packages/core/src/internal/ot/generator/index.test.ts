@@ -1,6 +1,9 @@
 import { Option } from '@kizahasi/option';
 import { Result } from '@kizahasi/result';
 import * as t from 'io-ts';
+import * as NullableTextOperation from '../nullableTextOperation';
+import { replace, update } from '../recordOperationElement';
+import * as TextOperation from '../textOperation';
 import {
     DownOperation as DownOperationType,
     IoTsOptions,
@@ -23,10 +26,7 @@ import {
     toDownOperation,
     toUpOperation,
     upOperation,
-} from '../src/internal/ot/generator';
-import * as NullableTextOperation from '../src/internal/ot/nullableTextOperation';
-import { replace, update } from '../src/internal/ot/recordOperationElement';
-import * as TextOperation from '../src/internal/ot/textOperation';
+} from '.';
 
 namespace ReplaceValue {
     export const template = rep(t.union([t.number, t.undefined]));
