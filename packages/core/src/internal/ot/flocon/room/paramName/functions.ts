@@ -11,13 +11,13 @@ export const serverTransform: ServerTransform<
     State<typeof template>,
     TwoWayOperation<typeof template>,
     UpOperation<typeof template>
-> = ({ prevState, clientOperation, serverOperation }) => {
+> = ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
     const twoWayOperation: TwoWayOperation<typeof template> = { $v: 1, $r: 1 };
 
     const name = TextOperation.serverTransform({
         first: serverOperation?.name,
         second: clientOperation.name,
-        prevState: prevState.name,
+        prevState: stateBeforeServerOperation.name,
     });
     if (name.isError) {
         return name;

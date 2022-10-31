@@ -43,10 +43,15 @@ export const serverTransform =
         TwoWayOperation<typeof template>,
         UpOperation<typeof template>
     > =>
-    ({ prevState, currentState, clientOperation, serverOperation }) => {
+    ({
+        stateBeforeServerOperation,
+        stateAfterServerOperation,
+        clientOperation,
+        serverOperation,
+    }) => {
         const isAuthorized = isCharacterOwner({
             requestedBy,
-            characterId: currentState.ownerCharacterId ?? anyValue,
+            characterId: stateAfterServerOperation.ownerCharacterId ?? anyValue,
             currentRoomState,
         });
         if (!isAuthorized) {
@@ -61,14 +66,14 @@ export const serverTransform =
             UpOperation<typeof DieValueTypes.template>,
             TwoWayError
         >({
-            prevState: prevState.dice ?? {},
-            nextState: currentState.dice ?? {},
+            stateBeforeFirst: stateBeforeServerOperation.dice ?? {},
+            stateAfterFirst: stateAfterServerOperation.dice ?? {},
             first: serverOperation?.dice,
             second: clientOperation.dice,
             innerTransform: ({ prevState, nextState, first, second }) =>
                 DieValue.serverTransform(true)({
-                    prevState,
-                    currentState: nextState,
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
                     serverOperation: first,
                     clientOperation: second,
                 }),
@@ -85,8 +90,16 @@ export const serverTransform =
         }
 
         const piece = Piece.serverTransform({
-            prevState: { ...prevState, $v: undefined, $r: undefined },
-            currentState: { ...currentState, $v: undefined, $r: undefined },
+            stateBeforeServerOperation: {
+                ...stateBeforeServerOperation,
+                $v: undefined,
+                $r: undefined,
+            },
+            stateAfterServerOperation: {
+                ...stateAfterServerOperation,
+                $v: undefined,
+                $r: undefined,
+            },
             clientOperation: { ...clientOperation, $v: undefined, $r: undefined },
             serverOperation: { ...serverOperation, $v: undefined, $r: undefined },
         });
@@ -104,21 +117,21 @@ export const serverTransform =
         if (
             canChangeOwnerCharacterId({
                 requestedBy,
-                currentOwnerCharacter: currentState,
+                currentOwnerCharacter: stateAfterServerOperation,
                 currentRoomState,
             })
         ) {
             twoWayOperation.ownerCharacterId = ReplaceOperation.serverTransform({
                 first: serverOperation?.ownerCharacterId,
                 second: clientOperation.ownerCharacterId,
-                prevState: prevState.ownerCharacterId,
+                prevState: stateBeforeServerOperation.ownerCharacterId,
             });
         }
 
         const transformedMemo = NullableTextOperation.serverTransform({
             first: serverOperation?.memo,
             second: clientOperation.memo,
-            prevState: prevState.memo,
+            prevState: stateBeforeServerOperation.memo,
         });
         if (transformedMemo.isError) {
             return transformedMemo;
@@ -128,7 +141,7 @@ export const serverTransform =
         const transformedName = NullableTextOperation.serverTransform({
             first: serverOperation?.name,
             second: clientOperation.name,
-            prevState: prevState.name,
+            prevState: stateBeforeServerOperation.name,
         });
         if (transformedName.isError) {
             return transformedName;

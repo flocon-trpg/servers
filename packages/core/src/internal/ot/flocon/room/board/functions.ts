@@ -85,7 +85,12 @@ export const serverTransform =
         TwoWayOperation<typeof template>,
         UpOperation<typeof template>
     > =>
-    ({ prevState, currentState, clientOperation, serverOperation }) => {
+    ({
+        stateBeforeServerOperation,
+        stateAfterServerOperation,
+        clientOperation,
+        serverOperation,
+    }) => {
         const cancellationPolicyOfCharacterPieces: RecordOperation.CancellationPolicy<
             string,
             { ownerCharacterId: string | undefined }
@@ -128,15 +133,15 @@ export const serverTransform =
         >({
             first: serverOperation?.dicePieces,
             second: clientOperation.dicePieces,
-            prevState: prevState.dicePieces ?? {},
-            nextState: currentState.dicePieces ?? {},
+            stateBeforeFirst: stateBeforeServerOperation.dicePieces ?? {},
+            stateAfterFirst: stateAfterServerOperation.dicePieces ?? {},
             innerTransform: ({ first, second, prevState, nextState }) =>
                 DicePiece.serverTransform(
                     requestedBy,
                     currentRoomState
                 )({
-                    prevState,
-                    currentState: nextState,
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
                     serverOperation: first,
                     clientOperation: second,
                 }),
@@ -156,12 +161,12 @@ export const serverTransform =
         >({
             first: serverOperation?.imagePieces,
             second: clientOperation.imagePieces,
-            prevState: prevState.imagePieces ?? {},
-            nextState: currentState.imagePieces ?? {},
+            stateBeforeFirst: stateBeforeServerOperation.imagePieces ?? {},
+            stateAfterFirst: stateAfterServerOperation.imagePieces ?? {},
             innerTransform: ({ first, second, prevState, nextState }) =>
                 ImagePiece.serverTransform(requestedBy)({
-                    prevState,
-                    currentState: nextState,
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
                     serverOperation: first,
                     clientOperation: second,
                 }),
@@ -181,12 +186,12 @@ export const serverTransform =
         >({
             first: serverOperation?.shapePieces,
             second: clientOperation.shapePieces,
-            prevState: prevState.shapePieces ?? {},
-            nextState: currentState.shapePieces ?? {},
+            stateBeforeFirst: stateBeforeServerOperation.shapePieces ?? {},
+            stateAfterFirst: stateAfterServerOperation.shapePieces ?? {},
             innerTransform: ({ first, second, prevState, nextState }) =>
                 ShapePiece.serverTransform(requestedBy)({
-                    prevState,
-                    currentState: nextState,
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
                     serverOperation: first,
                     clientOperation: second,
                 }),
@@ -206,15 +211,15 @@ export const serverTransform =
         >({
             first: serverOperation?.stringPieces,
             second: clientOperation.stringPieces,
-            prevState: prevState.stringPieces ?? {},
-            nextState: currentState.stringPieces ?? {},
+            stateBeforeFirst: stateBeforeServerOperation.stringPieces ?? {},
+            stateAfterFirst: stateAfterServerOperation.stringPieces ?? {},
             innerTransform: ({ first, second, prevState, nextState }) =>
                 StringPiece.serverTransform(
                     requestedBy,
                     currentRoomState
                 )({
-                    prevState,
-                    currentState: nextState,
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
                     serverOperation: first,
                     clientOperation: second,
                 }),
@@ -237,47 +242,47 @@ export const serverTransform =
         twoWayOperation.backgroundImage = ReplaceOperation.serverTransform({
             first: serverOperation?.backgroundImage,
             second: clientOperation.backgroundImage,
-            prevState: prevState.backgroundImage,
+            prevState: stateBeforeServerOperation.backgroundImage,
         });
         twoWayOperation.backgroundImageZoom = ReplaceOperation.serverTransform({
             first: serverOperation?.backgroundImageZoom,
             second: clientOperation.backgroundImageZoom,
-            prevState: prevState.backgroundImageZoom,
+            prevState: stateBeforeServerOperation.backgroundImageZoom,
         });
         twoWayOperation.cellColumnCount = ReplaceOperation.serverTransform({
             first: serverOperation?.cellColumnCount,
             second: clientOperation.cellColumnCount,
-            prevState: prevState.cellColumnCount,
+            prevState: stateBeforeServerOperation.cellColumnCount,
         });
         twoWayOperation.cellHeight = ReplaceOperation.serverTransform({
             first: serverOperation?.cellHeight,
             second: clientOperation.cellHeight,
-            prevState: prevState.cellHeight,
+            prevState: stateBeforeServerOperation.cellHeight,
         });
         twoWayOperation.cellOffsetX = ReplaceOperation.serverTransform({
             first: serverOperation?.cellOffsetX,
             second: clientOperation.cellOffsetX,
-            prevState: prevState.cellOffsetX,
+            prevState: stateBeforeServerOperation.cellOffsetX,
         });
         twoWayOperation.cellOffsetY = ReplaceOperation.serverTransform({
             first: serverOperation?.cellOffsetY,
             second: clientOperation.cellOffsetY,
-            prevState: prevState.cellOffsetY,
+            prevState: stateBeforeServerOperation.cellOffsetY,
         });
         twoWayOperation.cellRowCount = ReplaceOperation.serverTransform({
             first: serverOperation?.cellRowCount,
             second: clientOperation.cellRowCount,
-            prevState: prevState.cellRowCount,
+            prevState: stateBeforeServerOperation.cellRowCount,
         });
         twoWayOperation.cellWidth = ReplaceOperation.serverTransform({
             first: serverOperation?.cellWidth,
             second: clientOperation.cellWidth,
-            prevState: prevState.cellWidth,
+            prevState: stateBeforeServerOperation.cellWidth,
         });
         const name = TextOperation.serverTransform({
             first: serverOperation?.name,
             second: clientOperation.name,
-            prevState: prevState.name,
+            prevState: stateBeforeServerOperation.name,
         });
         if (name.isError) {
             return name;
@@ -287,13 +292,13 @@ export const serverTransform =
         if (
             canChangeOwnerParticipantId({
                 requestedBy,
-                currentOwnerParticipant: currentState,
+                currentOwnerParticipant: stateAfterServerOperation,
             })
         ) {
             twoWayOperation.ownerParticipantId = ReplaceOperation.serverTransform({
                 first: serverOperation?.ownerParticipantId,
                 second: clientOperation.ownerParticipantId,
-                prevState: prevState.ownerParticipantId,
+                prevState: stateBeforeServerOperation.ownerParticipantId,
             });
         }
 

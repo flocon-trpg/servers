@@ -53,7 +53,12 @@ namespace Test {
                 const actualOperation = serverTransform({
                     type: client,
                     userUid,
-                })({ prevState, currentState, serverOperation, clientOperation });
+                })({
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: currentState,
+                    serverOperation,
+                    clientOperation,
+                });
                 if (actualOperation.isError) {
                     // OK
                     return;
@@ -85,8 +90,8 @@ namespace Test {
             }) => {
                 it(testName, () => {
                     const actualOperation = serverTransform(requestedBy)({
-                        prevState,
-                        currentState,
+                        stateBeforeServerOperation: prevState,
+                        stateAfterServerOperation: currentState,
                         serverOperation,
                         clientOperation,
                     });

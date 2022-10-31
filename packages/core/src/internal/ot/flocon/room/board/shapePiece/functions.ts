@@ -32,10 +32,15 @@ export const serverTransform =
         TwoWayOperation<typeof template>,
         UpOperation<typeof template>
     > =>
-    ({ prevState, currentState, clientOperation, serverOperation }) => {
+    ({
+        stateBeforeServerOperation,
+        stateAfterServerOperation,
+        clientOperation,
+        serverOperation,
+    }) => {
         const isAuthorized = isOwner({
             requestedBy,
-            ownerParticipantId: currentState.ownerParticipantId ?? anyValue,
+            ownerParticipantId: stateAfterServerOperation.ownerParticipantId ?? anyValue,
         });
         if (!isAuthorized) {
             // 自分以外はどのプロパティも編集できない。
@@ -43,8 +48,16 @@ export const serverTransform =
         }
 
         const piece = Piece.serverTransform({
-            prevState: { ...prevState, $v: undefined, $r: undefined },
-            currentState: { ...currentState, $v: undefined, $r: undefined },
+            stateBeforeServerOperation: {
+                ...stateBeforeServerOperation,
+                $v: undefined,
+                $r: undefined,
+            },
+            stateAfterServerOperation: {
+                ...stateAfterServerOperation,
+                $v: undefined,
+                $r: undefined,
+            },
             clientOperation: { ...clientOperation, $v: undefined, $r: undefined },
             serverOperation: { ...serverOperation, $v: undefined, $r: undefined },
         });
@@ -61,31 +74,31 @@ export const serverTransform =
         if (
             canChangeOwnerParticipantId({
                 requestedBy,
-                currentOwnerParticipant: currentState,
+                currentOwnerParticipant: stateAfterServerOperation,
             })
         ) {
             twoWayOperation.ownerParticipantId = ReplaceOperation.serverTransform({
                 first: serverOperation?.ownerParticipantId,
                 second: clientOperation.ownerParticipantId,
-                prevState: prevState.ownerParticipantId,
+                prevState: stateBeforeServerOperation.ownerParticipantId,
             });
         }
 
         twoWayOperation.isPrivate = ReplaceOperation.serverTransform({
             first: serverOperation?.isPrivate,
             second: clientOperation.isPrivate,
-            prevState: prevState.isPrivate,
+            prevState: stateBeforeServerOperation.isPrivate,
         });
 
         const shapes = RecordOperation.serverTransform({
             first: serverOperation?.shapes,
             second: clientOperation.shapes,
-            prevState: prevState.shapes ?? {},
-            nextState: currentState.shapes ?? {},
+            stateBeforeFirst: stateBeforeServerOperation.shapes ?? {},
+            stateAfterFirst: stateAfterServerOperation.shapes ?? {},
             innerTransform: ({ prevState, nextState, first, second }) =>
                 Shape.serverTransform({
-                    prevState,
-                    currentState: nextState,
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
                     serverOperation: first,
                     clientOperation: second,
                 }),

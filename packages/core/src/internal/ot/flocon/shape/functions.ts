@@ -13,7 +13,7 @@ export const serverTransform: ServerTransform<
     State<typeof template>,
     TwoWayOperation<typeof template>,
     UpOperation<typeof template>
-> = ({ prevState, clientOperation, serverOperation }) => {
+> = ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
     const twoWayOperation: TwoWayOperation<typeof template> = {
         $v: 1,
         $r: 1,
@@ -22,7 +22,7 @@ export const serverTransform: ServerTransform<
     twoWayOperation.shape = ReplaceOperation.serverTransform({
         first: serverOperation?.shape,
         second: clientOperation.shape,
-        prevState: prevState.shape,
+        prevState: stateBeforeServerOperation.shape,
     });
 
     if (isIdRecord(twoWayOperation)) {

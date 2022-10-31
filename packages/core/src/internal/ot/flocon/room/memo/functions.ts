@@ -12,7 +12,7 @@ export const serverTransform: ServerTransform<
     State<typeof template>,
     TwoWayOperation<typeof template>,
     UpOperation<typeof template>
-> = ({ prevState, clientOperation, serverOperation }) => {
+> = ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
     const twoWayOperation: TwoWayOperation<typeof template> = { $v: 1, $r: 1 };
 
     // 暫定的にディレクトリの深さは1までとしている
@@ -20,14 +20,14 @@ export const serverTransform: ServerTransform<
         twoWayOperation.dir = ReplaceOperation.serverTransform({
             first: serverOperation?.dir,
             second: clientOperation.dir,
-            prevState: prevState.dir,
+            prevState: stateBeforeServerOperation.dir,
         });
     }
 
     const name = TextOperation.serverTransform({
         first: serverOperation?.name,
         second: clientOperation.name,
-        prevState: prevState.name,
+        prevState: stateBeforeServerOperation.name,
     });
     if (name.isError) {
         return name;
@@ -37,7 +37,7 @@ export const serverTransform: ServerTransform<
     const text = TextOperation.serverTransform({
         first: serverOperation?.text,
         second: clientOperation.text,
-        prevState: prevState.text,
+        prevState: stateBeforeServerOperation.text,
     });
     if (text.isError) {
         return text;
@@ -47,7 +47,7 @@ export const serverTransform: ServerTransform<
     twoWayOperation.textType = ReplaceOperation.serverTransform({
         first: serverOperation?.textType,
         second: clientOperation.textType,
-        prevState: prevState.textType,
+        prevState: stateBeforeServerOperation.textType,
     });
 
     if (isIdRecord(twoWayOperation)) {

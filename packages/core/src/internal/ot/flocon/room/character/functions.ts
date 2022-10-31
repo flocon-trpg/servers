@@ -113,20 +113,25 @@ export const serverTransform =
         TwoWayOperation<typeof template>,
         UpOperation<typeof template>
     > =>
-    ({ prevState, currentState, clientOperation, serverOperation }) => {
-        if (!isAuthorized && currentState.isPrivate) {
+    ({
+        stateBeforeServerOperation,
+        stateAfterServerOperation,
+        clientOperation,
+        serverOperation,
+    }) => {
+        if (!isAuthorized && stateAfterServerOperation.isPrivate) {
             return Result.ok(undefined);
         }
 
         const boolParams = ParamRecordOperation.serverTransform({
-            prevState: prevState.boolParams ?? {},
-            nextState: currentState.boolParams ?? {},
+            stateBeforeFirst: stateBeforeServerOperation.boolParams ?? {},
+            stateAfterFirst: stateAfterServerOperation.boolParams ?? {},
             first: serverOperation?.boolParams,
             second: clientOperation.boolParams,
             innerTransform: ({ prevState, nextState, first, second }) =>
                 BoolParam.serverTransform(isAuthorized)({
-                    prevState,
-                    currentState: nextState,
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
                     serverOperation: { ...first, $v: 2, $r: 1 },
                     clientOperation: { ...second, $v: 2, $r: 1 },
                 }),
@@ -137,14 +142,14 @@ export const serverTransform =
         }
 
         const numParams = ParamRecordOperation.serverTransform({
-            prevState: prevState.numParams ?? {},
-            nextState: currentState.numParams ?? {},
+            stateBeforeFirst: stateBeforeServerOperation.numParams ?? {},
+            stateAfterFirst: stateAfterServerOperation.numParams ?? {},
             first: serverOperation?.numParams,
             second: clientOperation.numParams,
             innerTransform: ({ prevState, nextState, first, second }) =>
                 NumParam.serverTransform(isAuthorized)({
-                    prevState,
-                    currentState: nextState,
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
                     serverOperation: first,
                     clientOperation: second,
                 }),
@@ -155,14 +160,14 @@ export const serverTransform =
         }
 
         const numMaxParams = ParamRecordOperation.serverTransform({
-            prevState: prevState.numMaxParams ?? {},
-            nextState: currentState.numMaxParams ?? {},
+            stateBeforeFirst: stateBeforeServerOperation.numMaxParams ?? {},
+            stateAfterFirst: stateAfterServerOperation.numMaxParams ?? {},
             first: serverOperation?.numMaxParams,
             second: clientOperation.numMaxParams,
             innerTransform: ({ prevState, nextState, first, second }) =>
                 NumParam.serverTransform(isAuthorized)({
-                    prevState,
-                    currentState: nextState,
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
                     serverOperation: first,
                     clientOperation: second,
                 }),
@@ -173,14 +178,14 @@ export const serverTransform =
         }
 
         const strParams = ParamRecordOperation.serverTransform({
-            prevState: prevState.strParams ?? {},
-            nextState: currentState.strParams ?? {},
+            stateBeforeFirst: stateBeforeServerOperation.strParams ?? {},
+            stateAfterFirst: stateAfterServerOperation.strParams ?? {},
             first: serverOperation?.strParams,
             second: clientOperation.strParams,
             innerTransform: ({ prevState, nextState, first, second }) =>
                 StrParam.serverTransform(isAuthorized)({
-                    prevState,
-                    currentState: nextState,
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
                     serverOperation: first,
                     clientOperation: second,
                 }),
@@ -197,14 +202,14 @@ export const serverTransform =
             UpOperation<typeof CharacterPieceTypes.template>,
             TwoWayError
         >({
-            prevState: prevState.pieces ?? {},
-            nextState: currentState.pieces ?? {},
+            stateBeforeFirst: stateBeforeServerOperation.pieces ?? {},
+            stateAfterFirst: stateAfterServerOperation.pieces ?? {},
             first: serverOperation?.pieces,
             second: clientOperation.pieces,
             innerTransform: ({ prevState, nextState, first, second }) =>
                 CharacterPiece.serverTransform({
-                    prevState,
-                    currentState: nextState,
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
                     serverOperation: first,
                     clientOperation: second,
                 }),
@@ -218,7 +223,7 @@ export const serverTransform =
                     }) ||
                     !isOwner({
                         requestedBy,
-                        ownerParticipantId: currentState.ownerParticipantId ?? none,
+                        ownerParticipantId: stateAfterServerOperation.ownerParticipantId ?? none,
                     }),
                 cancelRemove: params => {
                     if (
@@ -257,14 +262,14 @@ export const serverTransform =
             UpOperation<typeof CommandTypes.template>,
             TwoWayError
         >({
-            prevState: prevState.privateCommands ?? {},
-            nextState: currentState.privateCommands ?? {},
+            stateBeforeFirst: stateBeforeServerOperation.privateCommands ?? {},
+            stateAfterFirst: stateAfterServerOperation.privateCommands ?? {},
             first: serverOperation?.privateCommands,
             second: clientOperation.privateCommands,
             innerTransform: ({ prevState, nextState, first, second }) =>
                 Command.serverTransform({
-                    prevState,
-                    currentState: nextState,
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
                     serverOperation: first,
                     clientOperation: second,
                 }),
@@ -286,14 +291,14 @@ export const serverTransform =
             UpOperation<typeof PortraitPieceTypes.template>,
             TwoWayError
         >({
-            prevState: prevState.portraitPieces ?? {},
-            nextState: currentState.portraitPieces ?? {},
+            stateBeforeFirst: stateBeforeServerOperation.portraitPieces ?? {},
+            stateAfterFirst: stateAfterServerOperation.portraitPieces ?? {},
             first: serverOperation?.portraitPieces,
             second: clientOperation.portraitPieces,
             innerTransform: ({ prevState, nextState, first, second }) =>
                 PortraitPiece.serverTransform({
-                    prevState,
-                    currentState: nextState,
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
                     serverOperation: first,
                     clientOperation: second,
                 }),
@@ -307,7 +312,7 @@ export const serverTransform =
                     }) ||
                     !isOwner({
                         requestedBy,
-                        ownerParticipantId: currentState.ownerParticipantId ?? none,
+                        ownerParticipantId: stateAfterServerOperation.ownerParticipantId ?? none,
                     }),
                 cancelRemove: params => {
                     if (
@@ -351,40 +356,45 @@ export const serverTransform =
             portraitPieces: portraitPositions.value,
         };
 
-        if (canChangeOwnerParticipantId({ requestedBy, currentOwnerParticipant: currentState })) {
+        if (
+            canChangeOwnerParticipantId({
+                requestedBy,
+                currentOwnerParticipant: stateAfterServerOperation,
+            })
+        ) {
             twoWayOperation.ownerParticipantId = ReplaceOperation.serverTransform({
                 first: serverOperation?.ownerParticipantId,
                 second: clientOperation.ownerParticipantId,
-                prevState: prevState.ownerParticipantId,
+                prevState: stateBeforeServerOperation.ownerParticipantId,
             });
         }
         twoWayOperation.image = ReplaceOperation.serverTransform({
             first: serverOperation?.image,
             second: clientOperation.image,
-            prevState: prevState.image,
+            prevState: stateBeforeServerOperation.image,
         });
         twoWayOperation.portraitImage = ReplaceOperation.serverTransform({
             first: serverOperation?.portraitImage,
             second: clientOperation.portraitImage,
-            prevState: prevState.portraitImage,
+            prevState: stateBeforeServerOperation.portraitImage,
         });
         twoWayOperation.isPrivate = ReplaceOperation.serverTransform({
             first: serverOperation?.isPrivate,
             second: clientOperation.isPrivate,
-            prevState: prevState.isPrivate,
+            prevState: stateBeforeServerOperation.isPrivate,
         });
         for (const index of oneToTenArray) {
             const key = `hasTag${index}` as const;
             twoWayOperation[key] = ReplaceOperation.serverTransform({
                 first: serverOperation?.[key],
                 second: clientOperation[key],
-                prevState: prevState[key],
+                prevState: stateBeforeServerOperation[key],
             });
         }
         const transformedMemo = TextOperation.serverTransform({
             first: serverOperation?.memo,
             second: clientOperation.memo,
-            prevState: prevState.memo,
+            prevState: stateBeforeServerOperation.memo,
         });
         if (transformedMemo.isError) {
             return transformedMemo;
@@ -393,7 +403,7 @@ export const serverTransform =
         const transformedName = TextOperation.serverTransform({
             first: serverOperation?.name,
             second: clientOperation.name,
-            prevState: prevState.name,
+            prevState: stateBeforeServerOperation.name,
         });
         if (transformedName.isError) {
             return transformedName;
@@ -403,7 +413,7 @@ export const serverTransform =
             const transformedChatPalette = TextOperation.serverTransform({
                 first: serverOperation?.chatPalette,
                 second: clientOperation.chatPalette,
-                prevState: prevState.chatPalette,
+                prevState: stateBeforeServerOperation.chatPalette,
             });
             if (transformedChatPalette.isError) {
                 return transformedChatPalette;
@@ -414,7 +424,7 @@ export const serverTransform =
             const transformed = TextOperation.serverTransform({
                 first: serverOperation?.privateVarToml,
                 second: clientOperation.privateVarToml,
-                prevState: prevState.privateVarToml,
+                prevState: stateBeforeServerOperation.privateVarToml,
             });
             if (transformed.isError) {
                 return transformed;

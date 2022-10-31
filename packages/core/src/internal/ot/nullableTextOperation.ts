@@ -321,7 +321,7 @@ export const serverTransform = ({
     const xformResult = TextOperation.serverTransform({
         first: first?.update,
         second: second.update,
-        prevState,
+        prevState: prevState,
     });
     if (xformResult.isError) {
         return xformResult;

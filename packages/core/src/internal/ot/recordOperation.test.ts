@@ -500,8 +500,8 @@ describe('recordOperation.serverTransform', () => {
         const toServerState = jest.fn();
         const innerTransform = jest.fn();
         const actual = serverTransform({
-            prevState: { a: 1 },
-            nextState: { a: 1 },
+            stateBeforeFirst: { a: 1 },
+            stateAfterFirst: { a: 1 },
             first,
             second,
             toServerState,
@@ -517,8 +517,8 @@ describe('recordOperation.serverTransform', () => {
         const toServerState = jest.fn();
         const innerTransform = jest.fn(() => Result.ok('2,3'));
         serverTransform({
-            prevState: { noChange: 0, target: 1 },
-            nextState: { noChange: 0, target: 2 },
+            stateBeforeFirst: { noChange: 0, target: 1 },
+            stateAfterFirst: { noChange: 0, target: 2 },
             first: {
                 target: { type: update, update: '1,2' },
             },
@@ -540,8 +540,8 @@ describe('recordOperation.serverTransform', () => {
         const toServerState = jest.fn(() => 2);
         const innerTransform = jest.fn();
         serverTransform({
-            prevState: { noChange: 0 },
-            nextState: { noChange: 0, another: 1 },
+            stateBeforeFirst: { noChange: 0 },
+            stateAfterFirst: { noChange: 0, another: 1 },
             first: {
                 another: { type: replace, replace: { newValue: 1 } },
             },
@@ -560,8 +560,8 @@ describe('recordOperation.serverTransform', () => {
     it('tests first=id and second=update(ok)', () => {
         const innerTransform = () => Result.ok(3);
         const actual = serverTransform({
-            prevState: { noChange: 0, target: 1 },
-            nextState: { noChange: 0, target: 1 },
+            stateBeforeFirst: { noChange: 0, target: 1 },
+            stateAfterFirst: { noChange: 0, target: 1 },
             second: {
                 target: { type: update, update: 2 },
             },
@@ -579,8 +579,8 @@ describe('recordOperation.serverTransform', () => {
     it('tests first=id and second=update(error)', () => {
         const innerTransform = () => Result.error('fake error');
         const actual = serverTransform({
-            prevState: { noChange: 0, target: 1 },
-            nextState: { noChange: 0, target: 1 },
+            stateBeforeFirst: { noChange: 0, target: 1 },
+            stateAfterFirst: { noChange: 0, target: 1 },
             second: {
                 target: { type: update, update: 2 },
             },
@@ -594,8 +594,8 @@ describe('recordOperation.serverTransform', () => {
     it('tests first=id and second=replace(add)', () => {
         const toServerState = () => 1;
         const actual = serverTransform({
-            prevState: { noChange: 0 },
-            nextState: { noChange: 0 },
+            stateBeforeFirst: { noChange: 0 },
+            stateAfterFirst: { noChange: 0 },
             second: {
                 target: { type: replace, replace: { newValue: '1' } },
             },
@@ -613,8 +613,8 @@ describe('recordOperation.serverTransform', () => {
     it('tests first=id and second=replace(remove)', () => {
         const toServerState = () => undefined;
         const actual = serverTransform({
-            prevState: { noChange: 0 },
-            nextState: { noChange: 0 },
+            stateBeforeFirst: { noChange: 0 },
+            stateAfterFirst: { noChange: 0 },
             second: {
                 target: { type: replace, replace: { newValue: 1 } },
             },
@@ -632,8 +632,8 @@ describe('recordOperation.serverTransform', () => {
     it('tests first=update and second=update(ok)', () => {
         const innerTransform = () => Result.ok('2,3');
         const actual = serverTransform({
-            prevState: { noChange: 0, target: 1 },
-            nextState: { noChange: 0, target: 2 },
+            stateBeforeFirst: { noChange: 0, target: 1 },
+            stateAfterFirst: { noChange: 0, target: 2 },
             first: {
                 target: { type: update, update: '1,2' },
             },
@@ -654,8 +654,8 @@ describe('recordOperation.serverTransform', () => {
     it('tests first=update and second=update(error)', () => {
         const innerTransform = () => Result.error('fake error');
         const actual = serverTransform({
-            prevState: { noChange: 0, target: 1 },
-            nextState: { noChange: 0, target: 2 },
+            stateBeforeFirst: { noChange: 0, target: 1 },
+            stateAfterFirst: { noChange: 0, target: 2 },
             first: {
                 target: { type: update, update: '1,2' },
             },
@@ -671,8 +671,8 @@ describe('recordOperation.serverTransform', () => {
 
     it('tests first=update and second=replace(add)', () => {
         const actual = serverTransform({
-            prevState: { noChange: 0, target: 1 },
-            nextState: { noChange: 0, target: 2 },
+            stateBeforeFirst: { noChange: 0, target: 1 },
+            stateAfterFirst: { noChange: 0, target: 2 },
             first: {
                 target: { type: update, update: '1,2' },
             },
@@ -688,8 +688,8 @@ describe('recordOperation.serverTransform', () => {
 
     it('tests first=update and second=replace(remove)', () => {
         const actual = serverTransform({
-            prevState: { noChange: 0, target: 1 },
-            nextState: { noChange: 0, target: 2 },
+            stateBeforeFirst: { noChange: 0, target: 1 },
+            stateAfterFirst: { noChange: 0, target: 2 },
             first: {
                 target: { type: update, update: '1,2' },
             },
@@ -709,8 +709,8 @@ describe('recordOperation.serverTransform', () => {
 
     it('tests first=replace(add) and second=update', () => {
         const actual = serverTransform({
-            prevState: { noChange: 0 },
-            nextState: { noChange: 0, target: 1 },
+            stateBeforeFirst: { noChange: 0 },
+            stateAfterFirst: { noChange: 0, target: 1 },
             first: {
                 target: { type: replace, replace: { newValue: 1 } },
             },
@@ -726,8 +726,8 @@ describe('recordOperation.serverTransform', () => {
 
     it('tests first=replace(add) and second=replace(add)', () => {
         const actual = serverTransform({
-            prevState: { noChange: 0 },
-            nextState: { noChange: 0, target: 1 },
+            stateBeforeFirst: { noChange: 0 },
+            stateAfterFirst: { noChange: 0, target: 1 },
             first: {
                 target: { type: replace, replace: { newValue: 1 } },
             },
@@ -743,8 +743,8 @@ describe('recordOperation.serverTransform', () => {
 
     it('tests first=replace(add) and second=replace(remove)', () => {
         const actual = serverTransform({
-            prevState: { noChange: 0 },
-            nextState: { noChange: 0, target: 1 },
+            stateBeforeFirst: { noChange: 0 },
+            stateAfterFirst: { noChange: 0, target: 1 },
             first: {
                 target: { type: replace, replace: { newValue: 1 } },
             },
@@ -760,8 +760,8 @@ describe('recordOperation.serverTransform', () => {
 
     it('tests first=replace(remove) and second=update', () => {
         const actual = serverTransform({
-            prevState: { noChange: 0, target: 1 },
-            nextState: { noChange: 0 },
+            stateBeforeFirst: { noChange: 0, target: 1 },
+            stateAfterFirst: { noChange: 0 },
             first: {
                 target: { type: replace, replace: { newValue: undefined } },
             },
@@ -777,8 +777,8 @@ describe('recordOperation.serverTransform', () => {
 
     it('tests first=replace(remove) and second=replace(add)', () => {
         const actual = serverTransform({
-            prevState: { noChange: 0, target: 1 },
-            nextState: { noChange: 0 },
+            stateBeforeFirst: { noChange: 0, target: 1 },
+            stateAfterFirst: { noChange: 0 },
             first: {
                 target: { type: replace, replace: { newValue: undefined } },
             },
@@ -794,8 +794,8 @@ describe('recordOperation.serverTransform', () => {
 
     it('tests first=replace(remove) and second=replace(remove)', () => {
         const actual = serverTransform({
-            prevState: { noChange: 0, target: 1 },
-            nextState: { noChange: 0 },
+            stateBeforeFirst: { noChange: 0, target: 1 },
+            stateAfterFirst: { noChange: 0 },
             first: {
                 target: { type: replace, replace: { newValue: undefined } },
             },
@@ -813,8 +813,8 @@ describe('recordOperation.serverTransform', () => {
         const cancelRemove = jest.fn();
         const cancelUpdate = jest.fn();
         const actual = serverTransform({
-            prevState: { noChange: 0 },
-            nextState: { noChange: 0 },
+            stateBeforeFirst: { noChange: 0 },
+            stateAfterFirst: { noChange: 0 },
             second: {
                 cancel: { type: replace, replace: { newValue: 1 } },
                 noCancel: { type: replace, replace: { newValue: 2 } },
@@ -850,8 +850,8 @@ describe('recordOperation.serverTransform', () => {
         const cancelCreate = jest.fn();
         const cancelUpdate = jest.fn();
         const actual = serverTransform({
-            prevState: { noChange: 0, cancel: 1, noCancel: 2 },
-            nextState: { noChange: 0, cancel: 1, noCancel: 2 },
+            stateBeforeFirst: { noChange: 0, cancel: 1, noCancel: 2 },
+            stateAfterFirst: { noChange: 0, cancel: 1, noCancel: 2 },
             second: {
                 cancel: { type: replace, replace: { newValue: undefined } },
                 noCancel: { type: replace, replace: { newValue: undefined } },
@@ -887,8 +887,8 @@ describe('recordOperation.serverTransform', () => {
         const cancelCreate = jest.fn();
         const cancelRemove = jest.fn();
         const actual = serverTransform({
-            prevState: { noChange: 0, cancel: 1, noCancel: 2 },
-            nextState: { noChange: 0, cancel: 10, noCancel: 20 },
+            stateBeforeFirst: { noChange: 0, cancel: 1, noCancel: 2 },
+            stateAfterFirst: { noChange: 0, cancel: 10, noCancel: 20 },
             first: {
                 cancel: { type: update, update: '1,10' },
                 noCancel: { type: update, update: '2,20' },

@@ -22,7 +22,7 @@ export const serverTransform =
         TwoWayOperation<typeof template>,
         UpOperation<typeof template>
     > =>
-    ({ prevState, clientOperation, serverOperation }) => {
+    ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
         if (!isAuthorized) {
             // 自分以外はどのプロパティも編集できない。
             return Result.ok(undefined);
@@ -36,18 +36,18 @@ export const serverTransform =
         twoWayOperation.dieType = ReplaceOperation.serverTransform({
             first: serverOperation?.dieType ?? undefined,
             second: clientOperation.dieType ?? undefined,
-            prevState: prevState.dieType,
+            prevState: stateBeforeServerOperation.dieType,
         });
         twoWayOperation.isValuePrivate = ReplaceOperation.serverTransform({
             first: serverOperation?.isValuePrivate ?? undefined,
             second: clientOperation.isValuePrivate ?? undefined,
-            prevState: prevState.isValuePrivate,
+            prevState: stateBeforeServerOperation.isValuePrivate,
         });
         // !isAuthorized の場合は最初の方ですべて弾いているため、isValuePrivateのチェックをする必要はない。
         twoWayOperation.value = ReplaceOperation.serverTransform({
             first: serverOperation?.value ?? undefined,
             second: clientOperation.value ?? undefined,
-            prevState: prevState.value,
+            prevState: stateBeforeServerOperation.value,
         });
 
         if (isIdRecord(twoWayOperation)) {

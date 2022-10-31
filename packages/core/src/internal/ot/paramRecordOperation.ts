@@ -192,8 +192,7 @@ export const compose = <TOperation, TCustomError = string>({
     return Result.ok(mapToRecord(result));
 };
 
-// Make sure these:
-// - apply(prevState, first) = nextState
+/** Make sure `apply(stateBeforeFirst, first) = stateAfterFirst` */
 export const serverTransform = <
     TServerState,
     TFirstOperation,
@@ -202,13 +201,13 @@ export const serverTransform = <
 >({
     first: unsafeFirst,
     second: unsafeSecond,
-    prevState: unsafePrevState,
-    nextState: unsafeNextState,
+    stateBeforeFirst: unsafeStateBeforeFirst,
+    stateAfterFirst: unsafeStateAfterFirst,
     innerTransform,
     defaultState,
 }: {
-    prevState: StringKeyRecord<TServerState>;
-    nextState: StringKeyRecord<TServerState>;
+    stateBeforeFirst: StringKeyRecord<TServerState>;
+    stateAfterFirst: StringKeyRecord<TServerState>;
     first?: StringKeyRecord<TFirstOperation>;
     second?: StringKeyRecord<TSecondOperation>;
     innerTransform: (
@@ -223,8 +222,8 @@ export const serverTransform = <
     }
 
     const result = new Map<string, TFirstOperation>();
-    const prevState = recordToMap(unsafePrevState);
-    const nextState = recordToMap(unsafeNextState);
+    const prevState = recordToMap(unsafeStateBeforeFirst);
+    const nextState = recordToMap(unsafeStateAfterFirst);
     const first = unsafeFirst == null ? undefined : recordToMap(unsafeFirst);
 
     for (const [key, operation] of recordToMap(unsafeSecond)) {

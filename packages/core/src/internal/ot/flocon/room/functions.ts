@@ -125,13 +125,18 @@ export const serverTransform =
         TwoWayOperation<typeof template>,
         UpOperation<typeof template>
     > =>
-    ({ prevState, currentState, clientOperation, serverOperation }) => {
+    ({
+        stateBeforeServerOperation,
+        stateAfterServerOperation,
+        clientOperation,
+        serverOperation,
+    }) => {
         switch (requestedBy.type) {
             case restrict:
                 // エラーを返すべきかもしれない
                 return Result.ok(undefined);
             case client: {
-                const me = (currentState.participants ?? {})[requestedBy.userUid];
+                const me = (stateAfterServerOperation.participants ?? {})[requestedBy.userUid];
                 if (me == null || me.role == null || me.role === ParticipantTypes.Spectator) {
                     // エラーを返すべきかもしれない
                     return Result.ok(undefined);
@@ -149,14 +154,14 @@ export const serverTransform =
             UpOperation<typeof BgmTypes.template>,
             TwoWayError
         >({
-            prevState: prevState.bgms ?? {},
-            nextState: currentState.bgms ?? {},
+            stateBeforeFirst: stateBeforeServerOperation.bgms ?? {},
+            stateAfterFirst: stateAfterServerOperation.bgms ?? {},
             first: serverOperation?.bgms,
             second: clientOperation.bgms,
             innerTransform: ({ prevState, nextState, first, second }) =>
                 Bgm.serverTransform({
-                    prevState,
-                    currentState: nextState,
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
                     serverOperation: first,
                     clientOperation: second,
                 }),
@@ -176,14 +181,14 @@ export const serverTransform =
             UpOperation<typeof ParamNamesTypes.template>,
             TwoWayError
         >({
-            prevState: prevState.boolParamNames ?? {},
-            nextState: currentState.boolParamNames ?? {},
+            stateBeforeFirst: stateBeforeServerOperation.boolParamNames ?? {},
+            stateAfterFirst: stateAfterServerOperation.boolParamNames ?? {},
             first: serverOperation?.boolParamNames,
             second: clientOperation.boolParamNames,
             innerTransform: ({ prevState, nextState, first, second }) =>
                 ParamNames.serverTransform({
-                    prevState,
-                    currentState: nextState,
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
                     serverOperation: first,
                     clientOperation: second,
                 }),
@@ -205,15 +210,15 @@ export const serverTransform =
         >({
             first: serverOperation?.boards,
             second: clientOperation.boards,
-            prevState: prevState.boards ?? {},
-            nextState: currentState.boards ?? {},
+            stateBeforeFirst: stateBeforeServerOperation.boards ?? {},
+            stateAfterFirst: stateAfterServerOperation.boards ?? {},
             innerTransform: ({ first, second, prevState, nextState }) =>
                 Board.serverTransform(
                     requestedBy,
-                    currentState
+                    stateAfterServerOperation
                 )({
-                    prevState,
-                    currentState: nextState,
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
                     serverOperation: first,
                     clientOperation: second,
                 }),
@@ -227,7 +232,7 @@ export const serverTransform =
                 cancelUpdate: ({ key }) => {
                     return !isBoardVisible({
                         boardId: key,
-                        currentRoomState: currentState,
+                        currentRoomState: stateAfterServerOperation,
                         requestedBy,
                     });
                 },
@@ -251,8 +256,8 @@ export const serverTransform =
         >({
             first: serverOperation?.characters,
             second: clientOperation.characters,
-            prevState: prevState.characters ?? {},
-            nextState: currentState.characters ?? {},
+            stateBeforeFirst: stateBeforeServerOperation.characters ?? {},
+            stateAfterFirst: stateAfterServerOperation.characters ?? {},
             innerTransform: ({ first, second, prevState, nextState }) =>
                 Character.serverTransform(
                     isOwner({
@@ -260,10 +265,10 @@ export const serverTransform =
                         ownerParticipantId: nextState.ownerParticipantId ?? anyValue,
                     }),
                     requestedBy,
-                    currentState
+                    stateAfterServerOperation
                 )({
-                    prevState,
-                    currentState: nextState,
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
                     serverOperation: first,
                     clientOperation: second,
                 }),
@@ -298,14 +303,14 @@ export const serverTransform =
             UpOperation<typeof MemoTypes.template>,
             TwoWayError
         >({
-            prevState: prevState.memos ?? {},
-            nextState: currentState.memos ?? {},
+            stateBeforeFirst: stateBeforeServerOperation.memos ?? {},
+            stateAfterFirst: stateAfterServerOperation.memos ?? {},
             first: serverOperation?.memos,
             second: clientOperation.memos,
             innerTransform: ({ prevState, nextState, first, second }) =>
                 Memo.serverTransform({
-                    prevState,
-                    currentState: nextState,
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
                     serverOperation: first,
                     clientOperation: second,
                 }),
@@ -323,14 +328,14 @@ export const serverTransform =
             UpOperation<typeof ParamNamesTypes.template>,
             TwoWayError
         >({
-            prevState: prevState.numParamNames ?? {},
-            nextState: currentState.numParamNames ?? {},
+            stateBeforeFirst: stateBeforeServerOperation.numParamNames ?? {},
+            stateAfterFirst: stateAfterServerOperation.numParamNames ?? {},
             first: serverOperation?.numParamNames,
             second: clientOperation.numParamNames,
             innerTransform: ({ prevState, nextState, first, second }) =>
                 ParamNames.serverTransform({
-                    prevState,
-                    currentState: nextState,
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
                     serverOperation: first,
                     clientOperation: second,
                 }),
@@ -350,14 +355,14 @@ export const serverTransform =
             UpOperation<typeof ParamNamesTypes.template>,
             TwoWayError
         >({
-            prevState: prevState.strParamNames ?? {},
-            nextState: currentState.strParamNames ?? {},
+            stateBeforeFirst: stateBeforeServerOperation.strParamNames ?? {},
+            stateAfterFirst: stateAfterServerOperation.strParamNames ?? {},
             first: serverOperation?.strParamNames,
             second: clientOperation.strParamNames,
             innerTransform: ({ prevState, nextState, first, second }) =>
                 ParamNames.serverTransform({
-                    prevState,
-                    currentState: nextState,
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
                     serverOperation: first,
                     clientOperation: second,
                 }),
@@ -377,8 +382,8 @@ export const serverTransform =
             UpOperation<typeof ParticipantTypes.template>,
             TwoWayError
         >({
-            prevState: prevState.participants ?? {},
-            nextState: currentState.participants ?? {},
+            stateBeforeFirst: stateBeforeServerOperation.participants ?? {},
+            stateAfterFirst: stateAfterServerOperation.participants ?? {},
             first: serverOperation?.participants,
             second: clientOperation.participants,
             innerTransform: ({ prevState, nextState, first, second, key }) =>
@@ -386,8 +391,8 @@ export const serverTransform =
                     requestedBy,
                     participantKey: key,
                 })({
-                    prevState,
-                    currentState: nextState,
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
                     serverOperation: first,
                     clientOperation: second,
                 }),
@@ -418,13 +423,13 @@ export const serverTransform =
                 isBoardOwner({
                     requestedBy,
                     boardId: clientOperation.activeBoardId.newValue,
-                    currentRoomState: currentState,
+                    currentRoomState: stateAfterServerOperation,
                 }) === true
             ) {
                 twoWayOperation.activeBoardId = ReplaceOperation.serverTransform({
                     first: serverOperation?.activeBoardId,
                     second: clientOperation.activeBoardId,
-                    prevState: prevState.activeBoardId,
+                    prevState: stateBeforeServerOperation.activeBoardId,
                 });
             }
         }
@@ -432,7 +437,7 @@ export const serverTransform =
         const name = TextOperation.serverTransform({
             first: serverOperation?.name,
             second: clientOperation.name,
-            prevState: prevState.name,
+            prevState: stateBeforeServerOperation.name,
         });
         if (name.isError) {
             return name;
@@ -444,7 +449,7 @@ export const serverTransform =
             const transformed = NullableTextOperation.serverTransform({
                 first: serverOperation?.[key],
                 second: clientOperation[key],
-                prevState: prevState[key],
+                prevState: stateBeforeServerOperation[key],
             });
             if (transformed.isError) {
                 return transformed;
@@ -457,7 +462,7 @@ export const serverTransform =
             const transformed = TextOperation.serverTransform({
                 first: serverOperation?.[key],
                 second: clientOperation[key],
-                prevState: prevState[key],
+                prevState: stateBeforeServerOperation[key],
             });
             if (transformed.isError) {
                 return transformed;

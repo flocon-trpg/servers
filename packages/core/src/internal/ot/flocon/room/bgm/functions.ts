@@ -11,23 +11,23 @@ export const serverTransform: ServerTransform<
     State<typeof template>,
     TwoWayOperation<typeof template>,
     UpOperation<typeof template>
-> = ({ prevState, clientOperation, serverOperation }) => {
+> = ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
     const twoWayOperation: TwoWayOperation<typeof template> = { $v: 1, $r: 1 };
 
     twoWayOperation.isPaused = ReplaceOperation.serverTransform({
         first: serverOperation?.isPaused,
         second: clientOperation.isPaused,
-        prevState: prevState.isPaused,
+        prevState: stateBeforeServerOperation.isPaused,
     });
     twoWayOperation.files = ReplaceOperation.serverTransform({
         first: serverOperation?.files,
         second: clientOperation.files,
-        prevState: prevState.files,
+        prevState: stateBeforeServerOperation.files,
     });
     twoWayOperation.volume = ReplaceOperation.serverTransform({
         first: serverOperation?.volume,
         second: clientOperation.volume,
-        prevState: prevState.volume,
+        prevState: stateBeforeServerOperation.volume,
     });
 
     if (isIdRecord(twoWayOperation)) {

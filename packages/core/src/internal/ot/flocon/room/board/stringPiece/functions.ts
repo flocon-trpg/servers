@@ -37,10 +37,15 @@ export const serverTransform =
         TwoWayOperation<typeof template>,
         UpOperation<typeof template>
     > =>
-    ({ prevState, currentState, clientOperation, serverOperation }) => {
+    ({
+        stateBeforeServerOperation,
+        stateAfterServerOperation,
+        clientOperation,
+        serverOperation,
+    }) => {
         const isAuthorized = isCharacterOwner({
             requestedBy,
-            characterId: currentState.ownerCharacterId ?? anyValue,
+            characterId: stateAfterServerOperation.ownerCharacterId ?? anyValue,
             currentRoomState,
         });
         if (!isAuthorized) {
@@ -49,8 +54,16 @@ export const serverTransform =
         }
 
         const piece = Piece.serverTransform({
-            prevState: { ...prevState, $v: undefined, $r: undefined },
-            currentState: { ...currentState, $v: undefined, $r: undefined },
+            stateBeforeServerOperation: {
+                ...stateBeforeServerOperation,
+                $v: undefined,
+                $r: undefined,
+            },
+            stateAfterServerOperation: {
+                ...stateAfterServerOperation,
+                $v: undefined,
+                $r: undefined,
+            },
             clientOperation: { ...clientOperation, $v: undefined, $r: undefined },
             serverOperation: { ...serverOperation, $v: undefined, $r: undefined },
         });
@@ -67,28 +80,28 @@ export const serverTransform =
         if (
             canChangeOwnerCharacterId({
                 requestedBy,
-                currentOwnerCharacter: currentState,
+                currentOwnerCharacter: stateAfterServerOperation,
                 currentRoomState,
             })
         ) {
             twoWayOperation.ownerCharacterId = ReplaceOperation.serverTransform({
                 first: serverOperation?.ownerCharacterId,
                 second: clientOperation.ownerCharacterId,
-                prevState: prevState.ownerCharacterId,
+                prevState: stateBeforeServerOperation.ownerCharacterId,
             });
         }
 
         twoWayOperation.isValuePrivate = ReplaceOperation.serverTransform({
             first: serverOperation?.isValuePrivate ?? undefined,
             second: clientOperation.isValuePrivate ?? undefined,
-            prevState: prevState.isValuePrivate,
+            prevState: stateBeforeServerOperation.isValuePrivate,
         });
 
         // !isAuthorized の場合は最初の方ですべて弾いているため、isValuePrivateのチェックをする必要はない。
         const valueResult = TextOperation.serverTransform({
             first: serverOperation?.value ?? undefined,
             second: clientOperation.value ?? undefined,
-            prevState: prevState.value,
+            prevState: stateBeforeServerOperation.value,
         });
         if (valueResult.isError) {
             return valueResult;
@@ -98,7 +111,7 @@ export const serverTransform =
         twoWayOperation.valueInputType = ReplaceOperation.serverTransform({
             first: serverOperation?.valueInputType ?? undefined,
             second: clientOperation.valueInputType ?? undefined,
-            prevState: prevState.valueInputType,
+            prevState: stateBeforeServerOperation.valueInputType,
         });
 
         if (isIdRecord(twoWayOperation)) {

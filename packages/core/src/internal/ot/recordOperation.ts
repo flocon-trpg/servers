@@ -440,7 +440,7 @@ export const composeDownOperation = <TState, TDownOperation, TCustomError = stri
     return Result.ok(result.size === 0 ? undefined : mapToRecord(result));
 };
 
-/** Make sure `apply(prevState, first) = nextState` */
+/** Make sure `apply(stateBeforeFirst, first) = stateAfterFirst` */
 export const serverTransform = <
     TServerState,
     TClientState,
@@ -450,14 +450,14 @@ export const serverTransform = <
 >({
     first,
     second,
-    prevState,
-    nextState,
+    stateBeforeFirst,
+    stateAfterFirst,
     innerTransform,
     toServerState,
     cancellationPolicy,
 }: {
-    prevState: StringKeyRecord<TServerState>;
-    nextState: StringKeyRecord<TServerState>;
+    stateBeforeFirst: StringKeyRecord<TServerState>;
+    stateAfterFirst: StringKeyRecord<TServerState>;
     first?: RecordUpOperation<TServerState, TFirstOperation>;
     second?: RecordUpOperation<TClientState, TSecondOperation>;
     toServerState: (state: TClientState, key: string) => TServerState;
@@ -486,8 +486,8 @@ export const serverTransform = <
 
         switch (operation.type) {
             case replace: {
-                const innerPrevState = prevState?.[key];
-                const innerNextState = nextState?.[key];
+                const innerPrevState = stateBeforeFirst?.[key];
+                const innerNextState = stateAfterFirst?.[key];
 
                 /**** requested to remove ****/
 
@@ -553,8 +553,8 @@ export const serverTransform = <
                 break;
             }
             case update: {
-                const innerPrevState = prevState?.[key];
-                const innerNextState = nextState?.[key];
+                const innerPrevState = stateBeforeFirst?.[key];
+                const innerNextState = stateAfterFirst?.[key];
                 const innerFirst = first?.[key];
                 if (innerPrevState === undefined) {
                     return Result.error(`tried to update "${key}", but not found.`);

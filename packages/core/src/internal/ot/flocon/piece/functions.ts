@@ -14,10 +14,15 @@ export const serverTransform: ServerTransform<
     State<typeof template>,
     TwoWayOperation<typeof template>,
     UpOperation<typeof template>
-> = ({ prevState, currentState, clientOperation, serverOperation }) => {
+> = ({
+    stateBeforeServerOperation,
+    stateAfterServerOperation,
+    clientOperation,
+    serverOperation,
+}) => {
     const boardPosition = BoardPosition.serverTransform({
-        prevState,
-        currentState,
+        stateBeforeServerOperation: stateBeforeServerOperation,
+        stateAfterServerOperation: stateAfterServerOperation,
         clientOperation,
         serverOperation,
     });
@@ -34,27 +39,27 @@ export const serverTransform: ServerTransform<
     twoWayOperation.cellH = ReplaceOperation.serverTransform({
         first: serverOperation?.cellH,
         second: clientOperation.cellH,
-        prevState: prevState.cellH,
+        prevState: stateBeforeServerOperation.cellH,
     });
     twoWayOperation.cellW = ReplaceOperation.serverTransform({
         first: serverOperation?.cellW,
         second: clientOperation.cellW,
-        prevState: prevState.cellW,
+        prevState: stateBeforeServerOperation.cellW,
     });
     twoWayOperation.cellX = ReplaceOperation.serverTransform({
         first: serverOperation?.cellX,
         second: clientOperation.cellX,
-        prevState: prevState.cellX,
+        prevState: stateBeforeServerOperation.cellX,
     });
     twoWayOperation.cellY = ReplaceOperation.serverTransform({
         first: serverOperation?.cellY,
         second: clientOperation.cellY,
-        prevState: prevState.cellY,
+        prevState: stateBeforeServerOperation.cellY,
     });
     twoWayOperation.isCellMode = ReplaceOperation.serverTransform({
         first: serverOperation?.isCellMode,
         second: clientOperation.isCellMode,
-        prevState: prevState.isCellMode,
+        prevState: stateBeforeServerOperation.isCellMode,
     });
 
     if (isIdRecord(twoWayOperation)) {
