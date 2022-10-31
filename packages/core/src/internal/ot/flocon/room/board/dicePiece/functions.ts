@@ -61,8 +61,8 @@ export const serverTransform =
             UpOperation<typeof DieValueTypes.template>,
             TwoWayError
         >({
-            prevState: prevState.dice,
-            nextState: currentState.dice,
+            prevState: prevState.dice ?? {},
+            nextState: currentState.dice ?? {},
             first: serverOperation?.dice,
             second: clientOperation.dice,
             innerTransform: ({ prevState, nextState, first, second }) =>

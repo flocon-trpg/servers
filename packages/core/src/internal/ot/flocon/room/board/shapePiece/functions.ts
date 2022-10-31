@@ -80,8 +80,8 @@ export const serverTransform =
         const shapes = RecordOperation.serverTransform({
             first: serverOperation?.shapes,
             second: clientOperation.shapes,
-            prevState: prevState.shapes,
-            nextState: currentState.shapes,
+            prevState: prevState.shapes ?? {},
+            nextState: currentState.shapes ?? {},
             innerTransform: ({ prevState, nextState, first, second }) =>
                 Shape.serverTransform({
                     prevState,

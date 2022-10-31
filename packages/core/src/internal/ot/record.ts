@@ -1,5 +1,15 @@
 import * as t from 'io-ts';
 
+export const isEmptyRecord = (source: Record<string, unknown>): boolean => {
+    for (const key in source) {
+        const value = source[key];
+        if (value !== undefined) {
+            return false;
+        }
+    }
+    return true;
+};
+
 export const isIdRecord = (source: Record<string, unknown>): boolean => {
     for (const key in source) {
         if (key === '$v' || key === '$r') {

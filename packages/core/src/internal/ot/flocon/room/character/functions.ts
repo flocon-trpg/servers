@@ -197,8 +197,8 @@ export const serverTransform =
             UpOperation<typeof CharacterPieceTypes.template>,
             TwoWayError
         >({
-            prevState: prevState.pieces,
-            nextState: currentState.pieces,
+            prevState: prevState.pieces ?? {},
+            nextState: currentState.pieces ?? {},
             first: serverOperation?.pieces,
             second: clientOperation.pieces,
             innerTransform: ({ prevState, nextState, first, second }) =>
@@ -257,8 +257,8 @@ export const serverTransform =
             UpOperation<typeof CommandTypes.template>,
             TwoWayError
         >({
-            prevState: prevState.privateCommands,
-            nextState: currentState.privateCommands,
+            prevState: prevState.privateCommands ?? {},
+            nextState: currentState.privateCommands ?? {},
             first: serverOperation?.privateCommands,
             second: clientOperation.privateCommands,
             innerTransform: ({ prevState, nextState, first, second }) =>
@@ -286,8 +286,8 @@ export const serverTransform =
             UpOperation<typeof PortraitPieceTypes.template>,
             TwoWayError
         >({
-            prevState: prevState.portraitPieces,
-            nextState: currentState.portraitPieces,
+            prevState: prevState.portraitPieces ?? {},
+            nextState: currentState.portraitPieces ?? {},
             first: serverOperation?.portraitPieces,
             second: clientOperation.portraitPieces,
             innerTransform: ({ prevState, nextState, first, second }) =>

@@ -49,6 +49,7 @@ export type Restore<TState, TDownOperation, TTwoWayOperation> = (params: {
     ScalarError
 >;
 
+/** `apply(prevState, serverOperation) = currentState` という関係が成り立ちます。 */
 export type ServerTransform<TServerState, TTwoWayOperation, TUpOperation> = (params: {
     prevState: TServerState;
     currentState: TServerState;

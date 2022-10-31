@@ -31,8 +31,8 @@ export const serverTransform: ServerTransform<
         UpOperation<typeof ParticipantTypes.template>,
         TwoWayError
     >({
-        prevState: prevState.participants,
-        nextState: currentState.participants,
+        prevState: prevState.participants ?? {},
+        nextState: currentState.participants ?? {},
         first: serverOperation?.participants,
         second: clientOperation.participants,
         innerTransform: ({ prevState, nextState, first, second }) =>

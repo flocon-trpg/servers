@@ -9,7 +9,7 @@ import {
     right,
 } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
-import { StringKeyRecord } from './record';
+import { StringKeyRecord, isEmptyRecord } from './record';
 import {
     RecordDownOperationElement,
     RecordTwoWayOperationElement,
@@ -45,11 +45,14 @@ export type ProtectedTransformParameters<TServerState, TFirstOperation, TSecondO
     nextState: TServerState;
 };
 
+/**
+ * trueを返すと、「TServerState全体がprivateであり編集不可能」とみなしてスキップします。ただし制限されるのはtransformのみであるため、読み取りなどは制限されません。
+ *
+ * 「ユーザーがprivateだと思っていたらその後すぐ変更があってprivateになった」というケースがあるので、trueでもエラーは返さず処理が続行されます。
+ *
+ *  関数ではなくundefinedを渡した場合、常にfalseを返す関数が渡されたときと同等の処理が行われます。
+ */
 export type CancellationPolicy<TKey, TServerState> = {
-    // trueを返すと、「TServerState全体がprivateであり編集不可能」とみなしてスキップする。ただし制限されるのはtransformのみであるため、読み取りなどは制限されない。
-    // 「ユーザーがprivateだと思っていたらその後すぐ変更があってprivateになった」というケースがあるので、trueでもエラーは返さず処理が続行される。
-    // 関数ではなくundefinedを渡した場合、常にfalseを返す関数が渡されたときと同等の処理が行われる。
-
     cancelRemove?: (params: { key: TKey; state: TServerState }) => boolean;
 
     // cancelUpdateなしでもinnerTransformのほうで同等のことはできるが、プロテクト忘れを防ぎやくするために設けている。
@@ -62,8 +65,7 @@ export type CancellationPolicy<TKey, TServerState> = {
     cancelCreate?: (params: { key: TKey; newState: TServerState }) => boolean;
 };
 
-// Make sure this:
-// - apply(prevState, source) = nextState
+/** Make sure `apply(prevState, source) = nextState` */
 export const toClientState = <TSourceState, TClientState>({
     serverState,
     isPrivate,
@@ -195,10 +197,11 @@ export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError =
 
     return Result.ok({
         prevState: mapToRecord(prevState),
-        twoWayOperation: mapToRecord(twoWayOperation),
+        twoWayOperation: twoWayOperation.size === 0 ? undefined : mapToRecord(twoWayOperation),
     });
 };
 
+// replace によって、存在しないキーを削除しようとしたり、すでに存在するキーに上書きするような operation は、現時点では許容している。だが、将来禁止するかもしれない。
 export const apply = <TState, TOperation, TCustomError = string>({
     prevState,
     operation,
@@ -252,6 +255,7 @@ export const apply = <TState, TOperation, TCustomError = string>({
     return Result.ok(mapToRecord(nextState));
 };
 
+// replace によって、存在しないキーを削除しようとしたり、すでに存在するキーに上書きするような operation は、現時点では許容している。だが、将来禁止するかもしれない。
 export const applyBack = <TState, TDownOperation, TCustomError = string>({
     nextState,
     operation,
@@ -326,10 +330,10 @@ export const composeDownOperation = <TState, TDownOperation, TCustomError = stri
     }) => Result<TDownOperation | undefined, string | TCustomError>;
 }): Result<RecordDownOperation<TState, TDownOperation> | undefined, string | TCustomError> => {
     if (first == null) {
-        return Result.ok(second);
+        return Result.ok(second == null || isEmptyRecord(second) ? undefined : second);
     }
     if (second == null) {
-        return Result.ok(first);
+        return Result.ok(first == null || isEmptyRecord(first) ? undefined : first);
     }
 
     const result = new Map<string, RecordDownOperationElement<TState, TDownOperation>>();
@@ -433,11 +437,10 @@ export const composeDownOperation = <TState, TDownOperation, TCustomError = stri
                 break;
         }
     }
-    return Result.ok(mapToRecord(result));
+    return Result.ok(result.size === 0 ? undefined : mapToRecord(result));
 };
 
-// Make sure these:
-// - apply(prevState, first) = nextState
+/** Make sure `apply(prevState, first) = nextState` */
 export const serverTransform = <
     TServerState,
     TClientState,
@@ -453,8 +456,8 @@ export const serverTransform = <
     toServerState,
     cancellationPolicy,
 }: {
-    prevState: StringKeyRecord<TServerState> | undefined;
-    nextState: StringKeyRecord<TServerState> | undefined;
+    prevState: StringKeyRecord<TServerState>;
+    nextState: StringKeyRecord<TServerState>;
     first?: RecordUpOperation<TServerState, TFirstOperation>;
     second?: RecordUpOperation<TClientState, TSecondOperation>;
     toServerState: (state: TClientState, key: string) => TServerState;
@@ -735,8 +738,8 @@ export const clientTransform = <TState, TOperation, TError = string>({
 > => {
     if (first == null || second == null) {
         return Result.ok({
-            firstPrime: first,
-            secondPrime: second,
+            firstPrime: first == null || isEmptyRecord(first) ? undefined : first,
+            secondPrime: second == null || isEmptyRecord(second) ? undefined : second,
         });
     }
 

@@ -149,8 +149,8 @@ export const serverTransform =
             UpOperation<typeof BgmTypes.template>,
             TwoWayError
         >({
-            prevState: prevState.bgms,
-            nextState: currentState.bgms,
+            prevState: prevState.bgms ?? {},
+            nextState: currentState.bgms ?? {},
             first: serverOperation?.bgms,
             second: clientOperation.bgms,
             innerTransform: ({ prevState, nextState, first, second }) =>
@@ -176,8 +176,8 @@ export const serverTransform =
             UpOperation<typeof ParamNamesTypes.template>,
             TwoWayError
         >({
-            prevState: prevState.boolParamNames,
-            nextState: currentState.boolParamNames,
+            prevState: prevState.boolParamNames ?? {},
+            nextState: currentState.boolParamNames ?? {},
             first: serverOperation?.boolParamNames,
             second: clientOperation.boolParamNames,
             innerTransform: ({ prevState, nextState, first, second }) =>
@@ -205,8 +205,8 @@ export const serverTransform =
         >({
             first: serverOperation?.boards,
             second: clientOperation.boards,
-            prevState: prevState.boards,
-            nextState: currentState.boards,
+            prevState: prevState.boards ?? {},
+            nextState: currentState.boards ?? {},
             innerTransform: ({ first, second, prevState, nextState }) =>
                 Board.serverTransform(
                     requestedBy,
@@ -251,8 +251,8 @@ export const serverTransform =
         >({
             first: serverOperation?.characters,
             second: clientOperation.characters,
-            prevState: prevState.characters,
-            nextState: currentState.characters,
+            prevState: prevState.characters ?? {},
+            nextState: currentState.characters ?? {},
             innerTransform: ({ first, second, prevState, nextState }) =>
                 Character.serverTransform(
                     isOwner({
@@ -298,8 +298,8 @@ export const serverTransform =
             UpOperation<typeof MemoTypes.template>,
             TwoWayError
         >({
-            prevState: prevState.memos,
-            nextState: currentState.memos,
+            prevState: prevState.memos ?? {},
+            nextState: currentState.memos ?? {},
             first: serverOperation?.memos,
             second: clientOperation.memos,
             innerTransform: ({ prevState, nextState, first, second }) =>
@@ -323,8 +323,8 @@ export const serverTransform =
             UpOperation<typeof ParamNamesTypes.template>,
             TwoWayError
         >({
-            prevState: prevState.numParamNames,
-            nextState: currentState.numParamNames,
+            prevState: prevState.numParamNames ?? {},
+            nextState: currentState.numParamNames ?? {},
             first: serverOperation?.numParamNames,
             second: clientOperation.numParamNames,
             innerTransform: ({ prevState, nextState, first, second }) =>
@@ -350,8 +350,8 @@ export const serverTransform =
             UpOperation<typeof ParamNamesTypes.template>,
             TwoWayError
         >({
-            prevState: prevState.strParamNames,
-            nextState: currentState.strParamNames,
+            prevState: prevState.strParamNames ?? {},
+            nextState: currentState.strParamNames ?? {},
             first: serverOperation?.strParamNames,
             second: clientOperation.strParamNames,
             innerTransform: ({ prevState, nextState, first, second }) =>
@@ -377,8 +377,8 @@ export const serverTransform =
             UpOperation<typeof ParticipantTypes.template>,
             TwoWayError
         >({
-            prevState: prevState.participants,
-            nextState: currentState.participants,
+            prevState: prevState.participants ?? {},
+            nextState: currentState.participants ?? {},
             first: serverOperation?.participants,
             second: clientOperation.participants,
             innerTransform: ({ prevState, nextState, first, second, key }) =>

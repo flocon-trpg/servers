@@ -128,8 +128,8 @@ export const serverTransform =
         >({
             first: serverOperation?.dicePieces,
             second: clientOperation.dicePieces,
-            prevState: prevState.dicePieces,
-            nextState: currentState.dicePieces,
+            prevState: prevState.dicePieces ?? {},
+            nextState: currentState.dicePieces ?? {},
             innerTransform: ({ first, second, prevState, nextState }) =>
                 DicePiece.serverTransform(
                     requestedBy,
@@ -156,8 +156,8 @@ export const serverTransform =
         >({
             first: serverOperation?.imagePieces,
             second: clientOperation.imagePieces,
-            prevState: prevState.imagePieces,
-            nextState: currentState.imagePieces,
+            prevState: prevState.imagePieces ?? {},
+            nextState: currentState.imagePieces ?? {},
             innerTransform: ({ first, second, prevState, nextState }) =>
                 ImagePiece.serverTransform(requestedBy)({
                     prevState,
@@ -181,8 +181,8 @@ export const serverTransform =
         >({
             first: serverOperation?.shapePieces,
             second: clientOperation.shapePieces,
-            prevState: prevState.shapePieces,
-            nextState: currentState.shapePieces,
+            prevState: prevState.shapePieces ?? {},
+            nextState: currentState.shapePieces ?? {},
             innerTransform: ({ first, second, prevState, nextState }) =>
                 ShapePiece.serverTransform(requestedBy)({
                     prevState,
@@ -206,8 +206,8 @@ export const serverTransform =
         >({
             first: serverOperation?.stringPieces,
             second: clientOperation.stringPieces,
-            prevState: prevState.stringPieces,
-            nextState: currentState.stringPieces,
+            prevState: prevState.stringPieces ?? {},
+            nextState: currentState.stringPieces ?? {},
             innerTransform: ({ first, second, prevState, nextState }) =>
                 StringPiece.serverTransform(
                     requestedBy,
