@@ -5,6 +5,7 @@ import {
     left,
     mapToRecord,
     recordForEach,
+    recordToArray,
     recordToMap,
     right,
 } from '@flocon-trpg/utils';
@@ -440,8 +441,28 @@ export const composeDownOperation = <TState, TDownOperation, TCustomError = stri
     return Result.ok(result.size === 0 ? undefined : mapToRecord(result));
 };
 
+type ServerTransformCoreParams<
+    TServerState,
+    TClientState,
+    TFirstOperation,
+    TSecondOperation,
+    TCustomError
+> = {
+    stateBeforeFirst: StringKeyRecord<TServerState>;
+    stateAfterFirst: StringKeyRecord<TServerState>;
+    first?: RecordUpOperation<TServerState, TFirstOperation>;
+    second?: RecordUpOperation<TClientState, TSecondOperation>;
+    toServerState: (state: TClientState, key: string) => TServerState;
+    innerTransform: (
+        params: ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> & {
+            key: string;
+        }
+    ) => Result<TFirstOperation | undefined, string | TCustomError>;
+    cancellationPolicy: CancellationPolicy<string, TServerState>;
+};
+
 /** Make sure `apply(stateBeforeFirst, first) = stateAfterFirst` */
-export const serverTransform = <
+const serverTransformWithoutValidation = <
     TServerState,
     TClientState,
     TFirstOperation,
@@ -455,19 +476,13 @@ export const serverTransform = <
     innerTransform,
     toServerState,
     cancellationPolicy,
-}: {
-    stateBeforeFirst: StringKeyRecord<TServerState>;
-    stateAfterFirst: StringKeyRecord<TServerState>;
-    first?: RecordUpOperation<TServerState, TFirstOperation>;
-    second?: RecordUpOperation<TClientState, TSecondOperation>;
-    toServerState: (state: TClientState, key: string) => TServerState;
-    innerTransform: (
-        params: ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> & {
-            key: string;
-        }
-    ) => Result<TFirstOperation | undefined, string | TCustomError>;
-    cancellationPolicy: CancellationPolicy<string, TServerState>;
-}): Result<
+}: ServerTransformCoreParams<
+    TServerState,
+    TClientState,
+    TFirstOperation,
+    TSecondOperation,
+    TCustomError
+>): Result<
     RecordTwoWayOperation<TServerState, TFirstOperation> | undefined,
     string | TCustomError
 > => {
@@ -599,6 +614,81 @@ export const serverTransform = <
         }
     }
     return Result.ok(result.size === 0 ? undefined : mapToRecord(result));
+};
+
+type ServerTransformParams<
+    TServerState,
+    TClientState,
+    TFirstOperation,
+    TSecondOperation,
+    TCustomError
+> = ServerTransformCoreParams<
+    TServerState,
+    TClientState,
+    TFirstOperation,
+    TSecondOperation,
+    TCustomError
+> & {
+    /** 制限を設けることができます。指定した制限を満たさない場合は Result.error が返されます。 */
+    validation?: {
+        /** このRecordの名前です。エラーメッセージを生成する際に用いられます。 */
+        recordName: string;
+
+        /** Record の要素の数の最大値。要素の追加後に、要素の数がこれを超える場合はエラーとなります。追加以外の操作では無視されます。 */
+        maxRecordLength?: number;
+    };
+};
+
+/** Make sure `apply(stateBeforeFirst, first) = stateAfterFirst` */
+export const serverTransform = <
+    TServerState,
+    TClientState,
+    TFirstOperation,
+    TSecondOperation,
+    TCustomError = string
+>(
+    params: ServerTransformParams<
+        TServerState,
+        TClientState,
+        TFirstOperation,
+        TSecondOperation,
+        TCustomError
+    >
+): Result<
+    RecordTwoWayOperation<TServerState, TFirstOperation> | undefined,
+    string | TCustomError
+> => {
+    const result = serverTransformWithoutValidation(params);
+    if (result.isError) {
+        return result;
+    }
+    if (result.value == null) {
+        return result;
+    }
+    if (params.validation?.maxRecordLength != null) {
+        const prevStateLength = recordToArray(params.stateAfterFirst).length;
+        let nextStateLength = prevStateLength;
+        recordForEach(result.value, operation => {
+            if (operation.type === update) {
+                return;
+            }
+            if (operation.replace.oldValue != null) {
+                nextStateLength--;
+            }
+            if (operation.replace.newValue != null) {
+                nextStateLength++;
+            }
+        });
+        if (
+            params.validation.maxRecordLength < nextStateLength &&
+            prevStateLength < nextStateLength
+        ) {
+            return Result.error(
+                `${params.validation.recordName} の要素の数が多すぎるため、これ以上追加することはできません。追加するには、不要な要素を削除してください。`
+            );
+        }
+    }
+    return result;
 };
 
 type InnerClientTransform<TFirstOperation, TSecondOperation, TError = string> = (params: {

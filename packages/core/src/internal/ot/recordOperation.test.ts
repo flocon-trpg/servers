@@ -15,6 +15,14 @@ const notToBeCalled = () => {
     throw new Error('This function is not to be called.');
 };
 
+const createRecord = (length: number) => {
+    const result: Record<string, string> = {};
+    for (let i = 0; i < length; i++) {
+        result[`key${i}`] = `value${i}`;
+    }
+    return result;
+};
+
 describe('recordOperation.toClientState', () => {
     it('tests undefined', () => {
         const notToBeCalled = jest.fn();
@@ -96,7 +104,7 @@ describe('recordOperation.restore', () => {
             innerDiff: notToBeCalled,
             innerRestore: notToBeCalled,
         });
-        expect(actual.error).toBeTruthy();
+        expect(actual.isError).toBe(true);
         expect(notToBeCalled).not.toBeCalled();
     });
 
@@ -179,14 +187,14 @@ describe('recordOperation.apply', () => {
 
     it('tests update to return error at innerApply', () => {
         const innerApply = jest.fn(() => {
-            return Result.error('fake error');
+            return Result.error('test error');
         });
         const actual = apply({
             prevState: { one: 1, two: 2 },
             operation: { one: { type: update, update: '1,10' } },
             innerApply,
         });
-        expect(actual).toEqual(Result.error('fake error'));
+        expect(actual).toEqual(Result.error('test error'));
         expect(innerApply).toHaveBeenCalledTimes(1);
         expect(innerApply.mock.lastCall).toEqual([{ key: 'one', prevState: 1, operation: '1,10' }]);
     });
@@ -198,7 +206,7 @@ describe('recordOperation.apply', () => {
             operation: { three: { type: update, update: '3,30' } },
             innerApply,
         });
-        expect(actual.error).toBeTruthy();
+        expect(actual.isError).toBe(true);
         expect(innerApply).not.toBeCalled();
     });
 
@@ -271,14 +279,14 @@ describe('recordOperation.applyBack', () => {
 
     it('tests update to return error at innerApplyBack', () => {
         const innerApplyBack = jest.fn(() => {
-            return Result.error('fake error');
+            return Result.error('test error');
         });
         const actual = applyBack({
             nextState: { one: 1, two: 2 },
             operation: { one: { type: update, update: '1,10' } },
             innerApplyBack,
         });
-        expect(actual).toEqual(Result.error('fake error'));
+        expect(actual).toEqual(Result.error('test error'));
         expect(innerApplyBack).toHaveBeenCalledTimes(1);
         expect(innerApplyBack.mock.lastCall).toEqual([{ key: 'one', state: 1, operation: '1,10' }]);
     });
@@ -290,7 +298,7 @@ describe('recordOperation.applyBack', () => {
             operation: { three: { type: update, update: '3,30' } },
             innerApplyBack,
         });
-        expect(actual.error).toBeTruthy();
+        expect(actual.isError).toBe(true);
         expect(innerApplyBack).not.toBeCalled();
     });
 
@@ -415,6 +423,23 @@ describe('recordOperation.composeDownOperation', () => {
         expect(innerCompose.mock.lastCall).toEqual([{ key: 'oneThenTen', first: 1, second: 10 }]);
     });
 
+    it('tests innerCompose to return error', () => {
+        const first: Parameters<typeof composeDownOperation>[0]['first'] = {
+            oneThenTen: { type: update, update: 1 },
+            two: { type: update, update: 2 },
+        };
+        const second: Parameters<typeof composeDownOperation>[0]['second'] = {
+            oneThenTen: { type: update, update: 10 },
+            three: { type: update, update: 3 },
+        };
+        const innerApplyBack = jest.fn();
+        const innerCompose = jest.fn(() => {
+            return Result.error('test error');
+        });
+        const actual = composeDownOperation({ first, second, innerApplyBack, innerCompose });
+        expect(actual.isError).toBe(true);
+    });
+
     it('tests replace->update', () => {
         const first: Parameters<typeof composeDownOperation>[0]['first'] = {
             oneThenTen: { type: replace, replace: { oldValue: 1 } },
@@ -464,6 +489,23 @@ describe('recordOperation.composeDownOperation', () => {
             { key: 'oneThenTen', state: 10, operation: 1 },
         ]);
         expect(innerCompose).not.toBeCalled();
+    });
+
+    it('tests innerApplyBack to return error', () => {
+        const first: Parameters<typeof composeDownOperation>[0]['first'] = {
+            oneThenTen: { type: update, update: 1 },
+            two: { type: update, update: 2 },
+        };
+        const second: Parameters<typeof composeDownOperation>[0]['second'] = {
+            oneThenTen: { type: replace, replace: { oldValue: 10 } },
+            three: { type: update, update: 3 },
+        };
+        const innerApplyBack = jest.fn(() => {
+            return Result.error('test error');
+        });
+        const innerCompose = jest.fn();
+        const actual = composeDownOperation({ first, second, innerApplyBack, innerCompose });
+        expect(actual.isError).toBe(true);
     });
 
     it('tests replace->replace', () => {
@@ -577,7 +619,7 @@ describe('recordOperation.serverTransform', () => {
     });
 
     it('tests first=id and second=update(error)', () => {
-        const innerTransform = () => Result.error('fake error');
+        const innerTransform = () => Result.error('test error');
         const actual = serverTransform({
             stateBeforeFirst: { noChange: 0, target: 1 },
             stateAfterFirst: { noChange: 0, target: 1 },
@@ -588,7 +630,7 @@ describe('recordOperation.serverTransform', () => {
             innerTransform,
             cancellationPolicy: {},
         });
-        expect(actual.error).toBeTruthy();
+        expect(actual.isError).toBe(true);
     });
 
     it('tests first=id and second=replace(add)', () => {
@@ -652,7 +694,7 @@ describe('recordOperation.serverTransform', () => {
     });
 
     it('tests first=update and second=update(error)', () => {
-        const innerTransform = () => Result.error('fake error');
+        const innerTransform = () => Result.error('test error');
         const actual = serverTransform({
             stateBeforeFirst: { noChange: 0, target: 1 },
             stateAfterFirst: { noChange: 0, target: 2 },
@@ -666,7 +708,7 @@ describe('recordOperation.serverTransform', () => {
             innerTransform,
             cancellationPolicy: {},
         });
-        expect(actual.error).toBeTruthy();
+        expect(actual.isError).toBe(true);
     });
 
     it('tests first=update and second=replace(add)', () => {
@@ -683,7 +725,7 @@ describe('recordOperation.serverTransform', () => {
             innerTransform: notToBeCalled,
             cancellationPolicy: {},
         });
-        expect(actual.error).toBeTruthy();
+        expect(actual.isError).toBe(true);
     });
 
     it('tests first=update and second=replace(remove)', () => {
@@ -721,7 +763,7 @@ describe('recordOperation.serverTransform', () => {
             innerTransform: notToBeCalled,
             cancellationPolicy: {},
         });
-        expect(actual.error).toBeTruthy();
+        expect(actual.isError).toBe(true);
     });
 
     it('tests first=replace(add) and second=replace(add)', () => {
@@ -755,7 +797,7 @@ describe('recordOperation.serverTransform', () => {
             innerTransform: notToBeCalled,
             cancellationPolicy: {},
         });
-        expect(actual.error).toBeTruthy();
+        expect(actual.isError).toBe(true);
     });
 
     it('tests first=replace(remove) and second=update', () => {
@@ -789,7 +831,7 @@ describe('recordOperation.serverTransform', () => {
             innerTransform: notToBeCalled,
             cancellationPolicy: {},
         });
-        expect(actual.error).toBeTruthy();
+        expect(actual.isError).toBe(true);
     });
 
     it('tests first=replace(remove) and second=replace(remove)', () => {
@@ -927,6 +969,74 @@ describe('recordOperation.serverTransform', () => {
         expect(cancelCreate).not.toBeCalled();
         expect(cancelRemove).not.toBeCalled();
     });
+
+    it('tests validation.maxRecordLength to exceed', () => {
+        const state = createRecord(10);
+        const actual = serverTransform({
+            stateBeforeFirst: state,
+            stateAfterFirst: state,
+            second: { toAdd: { type: replace, replace: { newValue: 'add' } } },
+            toServerState: x => x,
+            innerTransform: notToBeCalled,
+            cancellationPolicy: {},
+            validation: {
+                recordName: 'test name',
+                maxRecordLength: 10,
+            },
+        });
+        expect(actual.isError).toBe(true);
+    });
+
+    it('tests validation.maxRecordLength to not exceed', () => {
+        const state = createRecord(10);
+        const actual = serverTransform({
+            stateBeforeFirst: state,
+            stateAfterFirst: state,
+            second: { toAdd: { type: replace, replace: { newValue: 'add' } } },
+            toServerState: x => x,
+            innerTransform: notToBeCalled,
+            cancellationPolicy: {},
+            validation: {
+                recordName: 'test name',
+                maxRecordLength: 11,
+            },
+        });
+        expect(actual.isError).toBe(false);
+    });
+
+    it('should ignore validation.maxRecordLength if record length is decreased', () => {
+        const state = { ...createRecord(11), toRemove: 'toRemove' };
+        const actual = serverTransform({
+            stateBeforeFirst: state,
+            stateAfterFirst: state,
+            second: { toRemove: { type: replace, replace: { newValue: undefined } } },
+            toServerState: x => x,
+            innerTransform: notToBeCalled,
+            cancellationPolicy: {},
+            validation: {
+                recordName: 'test name',
+                maxRecordLength: 10,
+            },
+        });
+        expect(actual.isError).toBe(false);
+    });
+
+    it('should ignore validation.maxRecordLength if record length is not changed', () => {
+        const state = { ...createRecord(11), toUpdate: 'toUpdate' };
+        const actual = serverTransform({
+            stateBeforeFirst: state,
+            stateAfterFirst: state,
+            second: { toUpdate: { type: update, update: 'update' } },
+            toServerState: notToBeCalled,
+            innerTransform: ({ second }) => Result.ok(second),
+            cancellationPolicy: {},
+            validation: {
+                recordName: 'test name',
+                maxRecordLength: 10,
+            },
+        });
+        expect(actual.isError).toBe(false);
+    });
 });
 
 describe('recordOperation.clientTransform', () => {
@@ -988,7 +1098,7 @@ describe('recordOperation.clientTransform', () => {
     });
 });
 
-describe('tests recordOperation.clientTransform', () => {
+describe('recordOperation.diff', () => {
     it('tests innerDiff callback', () => {
         const innerDiff = jest.fn(() => '1,2');
         diff({ prevState: { target: 1 }, nextState: { target: 2 }, innerDiff });
