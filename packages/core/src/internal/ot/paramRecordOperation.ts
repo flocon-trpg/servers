@@ -1,6 +1,6 @@
 import { both, groupJoinMap, left, mapToRecord, recordToMap, right } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
-import { StringKeyRecord } from './record';
+import { StringKeyRecord, isEmptyRecord } from './record';
 import * as RecordOperation from './recordOperation';
 import { isValidKey } from './util/isValidKey';
 
@@ -63,7 +63,7 @@ export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError =
 
     return Result.ok({
         prevState: mapToRecord(prevState),
-        twoWayOperation: mapToRecord(twoWayOperation),
+        twoWayOperation: twoWayOperation.size === 0 ? undefined : mapToRecord(twoWayOperation),
     });
 };
 
@@ -143,6 +143,7 @@ export const applyBack = <TState, TDownOperation, TCustomError = string>({
     return Result.ok(mapToRecord(prevState));
 };
 
+// UpOperation、DownOperation、TwoWayOperation のいずれにも使用可能なので、composeDownOperationではなくcomposeという汎用的な名前を付けている。
 export const compose = <TOperation, TCustomError = string>({
     first,
     second,
@@ -157,10 +158,10 @@ export const compose = <TOperation, TCustomError = string>({
     }) => Result<TOperation | undefined, string | TCustomError>;
 }): Result<StringKeyRecord<TOperation> | undefined, string | TCustomError> => {
     if (first == null) {
-        return Result.ok(second);
+        return Result.ok(second == null || isEmptyRecord(second) ? undefined : second);
     }
     if (second == null) {
-        return Result.ok(first);
+        return Result.ok(first == null || isEmptyRecord(first) ? undefined : first);
     }
 
     const result = new Map<string, TOperation>();
@@ -189,7 +190,7 @@ export const compose = <TOperation, TCustomError = string>({
             }
         }
     }
-    return Result.ok(mapToRecord(result));
+    return Result.ok(result.size === 0 ? undefined : mapToRecord(result));
 };
 
 /** Make sure `apply(stateBeforeFirst, first) = stateAfterFirst` */
@@ -250,7 +251,7 @@ export const serverTransform = <
             result.set(key, transformedUpdate);
         }
     }
-    return Result.ok(mapToRecord(result));
+    return Result.ok(result.size === 0 ? undefined : mapToRecord(result));
 };
 
 type InnerClientTransform<TOperation, TError = string> = (params: {
@@ -275,8 +276,8 @@ export const clientTransform = <TOperation, TError = string>({
 > => {
     if (first === undefined || second === undefined) {
         return Result.ok({
-            firstPrime: first,
-            secondPrime: second,
+            firstPrime: first === undefined || isEmptyRecord(first) ? undefined : first,
+            secondPrime: second === undefined || isEmptyRecord(second) ? undefined : second,
         });
     }
 
