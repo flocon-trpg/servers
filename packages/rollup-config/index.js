@@ -40,6 +40,7 @@ const main = ({ external }) => {
             external,
             plugins: [
                 typescript({
+                    exclude: '**/*.test.ts',
                     declaration: true,
                     declarationMap: true,
                     emitDeclarationOnly: true,
