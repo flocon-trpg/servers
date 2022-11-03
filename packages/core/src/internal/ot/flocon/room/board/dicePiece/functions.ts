@@ -128,26 +128,6 @@ export const serverTransform =
             });
         }
 
-        const transformedMemo = NullableTextOperation.serverTransform({
-            first: serverOperation?.memo,
-            second: clientOperation.memo,
-            prevState: stateBeforeServerOperation.memo,
-        });
-        if (transformedMemo.isError) {
-            return transformedMemo;
-        }
-        twoWayOperation.memo = transformedMemo.value;
-
-        const transformedName = NullableTextOperation.serverTransform({
-            first: serverOperation?.name,
-            second: clientOperation.name,
-            prevState: stateBeforeServerOperation.name,
-        });
-        if (transformedName.isError) {
-            return transformedName;
-        }
-        twoWayOperation.name = transformedName.value;
-
         if (isIdRecord(twoWayOperation)) {
             return Result.ok(undefined);
         }
