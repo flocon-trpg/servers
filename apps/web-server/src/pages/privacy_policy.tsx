@@ -1,52 +1,27 @@
+import { Typography } from 'antd';
 import React from 'react';
-import ReactMarkdown from 'react-markdown';
-import { FetchTextState } from '../utils/types';
-
-const padding = 20;
-const filename = 'privacy_policy.md';
 
 const PrivacyPolicy: React.FC = () => {
-    const [text, setText] = React.useState<FetchTextState>({ fetched: false });
-    React.useEffect(() => {
-        const main = async () => {
-            // chromeなどではfetchできないと `http://localhost:3000/privacy_policy.md 404 (Not Found)` などといったエラーメッセージが表示されるが、実際は問題ない
-            const envTxtObj = await fetch(`/${filename}`);
-            if (!envTxtObj.ok) {
-                setText({ fetched: true, value: null });
-                return;
-            }
-            const envTxt = await envTxtObj.text();
-            setText({ fetched: true, value: envTxt });
-        };
-        main();
-    }, []);
-    if (!text.fetched) {
-        return <div style={{ padding }}>プライバシーポリシーを取得しています…</div>;
-    }
-    if (text.value == null) {
-        return (
-            <div
-                style={{ padding }}
-            >{`${filename}が見つからなかったため、プライバシーポリシーの文章を生成することができませんでした。`}</div>
-        );
-    }
     return (
-        <div style={{ padding }}>
-            <div style={{ paddingBottom: 16 }}>
-                このページは、
-                <a href={`/${filename}`} target='_blank' rel='noopener noreferrer'>
-                    {filename}
-                </a>
-                ファイルから生成されています。
-            </div>
-            {text.value.trim() === '' ? (
-                <div
-                    style={{ padding }}
-                >{`${filename}の中身が空であるため、プライバシーポリシーの文章を生成することができませんでした。`}</div>
-            ) : (
-                <ReactMarkdown>{text.value}</ReactMarkdown>
-            )}
-        </div>
+        <Typography style={{ padding: 8 }}>
+            <Typography.Title level={1}>プライバシーポリシー</Typography.Title>
+            <Typography.Title level={2}>1. 当サーバーで保存する情報</Typography.Title>
+            <p>
+                当サーバーでは、アカウント登録の際にご入力いただいたメールアドレスや Google
+                アカウント等の情報を保存します。また、サーバーのログに、IP
+                アドレス、情報端末の名前、オペレーティングシステム、実行した API
+                (パラメーターも含む)とその日時等を記録し、一時的に保存することがあります。
+            </p>
+            <Typography.Title level={2}>2. 情報の提供および開示</Typography.Title>
+            <p>
+                当サーバーは、Firebase および fly.io
+                を用いて前項の情報を管理しています。これらのサービスを提供している企業を除く第三者に、前項の情報を提供もしくは開示することはありません。ただし、次の場合は提供もしくは開示に応じる場合がございます。
+            </p>
+            <ul>
+                <li>ご本人の同意がある場合</li>
+                <li>司法・行政機関からの要請</li>
+            </ul>
+        </Typography>
     );
 };
 
