@@ -11,7 +11,6 @@ import { TextAreaRef } from 'antd/lib/input/TextArea';
 import classNames from 'classnames';
 import { Draft } from 'immer';
 import { useAtom } from 'jotai';
-import { useUpdateAtom } from 'jotai/utils';
 import _ from 'lodash';
 import React from 'react';
 import { useLatest } from 'react-use';
@@ -24,12 +23,12 @@ import { usePublicChannelNames } from '../../hooks/usePublicChannelNames';
 import { SelectedCharacterType, custom, some } from '../ChatInput/getSelectedCharacterType';
 import { PrivateMessageChannelSelector } from './subcomponents/components/PrivateMessageChannelSelector/PrivateMessageChannelSelector';
 import { PublicMessageChannelSelector } from './subcomponents/components/PublicMessageChannelSelector/PublicMessageChannelSelector';
-import { roomNotificationsAtom } from '@/atoms/roomAtom/roomAtom';
 import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import { userConfigAtom } from '@/atoms/userConfigAtom/userConfigAtom';
 import { UserConfigUtils } from '@/atoms/userConfigAtom/utils';
 import { UISelector } from '@/components/ui/UISelector/UISelector';
+import { useAddNotification } from '@/hooks/useAddNotification';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { flex, flexColumn, flexNone } from '@/styles/className';
 
@@ -80,7 +79,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
     selectedCharacterType,
     autoSubmitter,
 }: PrivateMessageElementProps) => {
-    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
+    const addRoomNotification = useAddNotification();
     const [text, setText] = useAtom(roomPrivateMessageInputAtom);
     const [, writePrivateMessage] = useMutation(WritePrivateMessageDocument);
     const textAreaRef = React.useRef<TextAreaRef | null>(null);
@@ -160,7 +159,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
                     addRoomNotification({
                         type: 'error',
                         error: res.error,
-                        createdAt: new Date().getTime(),
+                        message: 'WritePrivateMessage Mutation でエラーが発生しました。',
                     });
                 }
 
@@ -170,22 +169,14 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
                         return;
                     case 'WriteRoomPrivateMessageFailureResult':
                         addRoomNotification({
-                            type: 'text',
-                            notification: {
-                                type: 'error',
-                                message: `書き込みの際にエラーが発生しました: ${res.data.result.failureType}`,
-                                createdAt: new Date().getTime(),
-                            },
+                            type: 'error',
+                            message: `書き込みの際にエラーが発生しました: ${res.data.result.failureType}`,
                         });
                         return;
                     case 'RoomMessageSyntaxError':
                         addRoomNotification({
-                            type: 'text',
-                            notification: {
-                                type: 'error',
-                                message: `文法エラーがあります: ${res.data.result.errorMessage}`,
-                                createdAt: new Date().getTime(),
-                            },
+                            type: 'error',
+                            message: `文法エラーがあります: ${res.data.result.errorMessage}`,
                         });
                         return;
                     case undefined:
@@ -255,7 +246,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
     selectedCharacterType,
     autoSubmitter,
 }: PublicMessageElementProps) => {
-    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
+    const addRoomNotification = useAddNotification();
     const [text, setText] = useAtom(roomPublicMessageInputAtom);
     const [, writePublicMessage] = useMutation(WritePublicMessageDocument);
     const textAreaRef = React.useRef<TextAreaRef | null>(null);
@@ -325,7 +316,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
                     addRoomNotification({
                         type: 'error',
                         error: res.error,
-                        createdAt: new Date().getTime(),
+                        message: 'WritePublicMessage Mutation でエラーが発生しました。',
                     });
                 }
 
@@ -337,33 +328,21 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
                         switch (res.data.result.failureType) {
                             case WriteRoomPublicMessageFailureType.NotAuthorized:
                                 addRoomNotification({
-                                    type: 'text',
-                                    notification: {
-                                        type: 'error',
-                                        message: '観戦者は雑談チャンネル以外には投稿できません。',
-                                        createdAt: new Date().getTime(),
-                                    },
+                                    type: 'error',
+                                    message: '観戦者は雑談チャンネル以外には投稿できません。',
                                 });
                                 return;
                             default:
                                 addRoomNotification({
-                                    type: 'text',
-                                    notification: {
-                                        type: 'error',
-                                        message: `書き込みの際にエラーが発生しました: ${res.data.result.failureType}`,
-                                        createdAt: new Date().getTime(),
-                                    },
+                                    type: 'error',
+                                    message: `書き込みの際にエラーが発生しました: ${res.data.result.failureType}`,
                                 });
                                 return;
                         }
                     case 'RoomMessageSyntaxError':
                         addRoomNotification({
-                            type: 'text',
-                            notification: {
-                                type: 'error',
-                                message: `文法エラーがあります: ${res.data.result.errorMessage}`,
-                                createdAt: new Date().getTime(),
-                            },
+                            type: 'error',
+                            message: `文法エラーがあります: ${res.data.result.errorMessage}`,
                         });
                         return;
                     case undefined:

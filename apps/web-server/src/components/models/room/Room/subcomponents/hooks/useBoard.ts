@@ -1,18 +1,18 @@
 import { State, boardTemplate } from '@flocon-trpg/core';
-import { roomAtom } from '@/atoms/roomAtom/roomAtom';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 
 type BoardState = State<typeof boardTemplate>;
 
 export const useBoard = (boardId: string | undefined): BoardState | undefined => {
-    return useAtomSelector(
-        roomAtom,
-        state => {
-            if (boardId == null) {
-                return undefined;
-            }
-            return state.roomState?.state?.boards?.[boardId];
-        },
-        [boardId]
+    return (
+        useRoomStateValueSelector(
+            state => {
+                if (boardId == null) {
+                    return undefined;
+                }
+                return state.boards?.[boardId];
+            },
+            [boardId]
+        ) ?? undefined
     );
 };

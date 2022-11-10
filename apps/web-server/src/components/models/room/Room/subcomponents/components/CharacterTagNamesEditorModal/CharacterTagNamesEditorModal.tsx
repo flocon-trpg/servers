@@ -5,9 +5,9 @@ import classNames from 'classnames';
 import { atom, useAtom } from 'jotai';
 import React from 'react';
 import { useCharacterTagNames } from '../../hooks/useCharacterTagNames';
+import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateWithImmer';
 import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
 import { flex, flexColumn, flexRow } from '@/styles/className';
 
 export const characterTagNamesEditorVisibilityAtom = atom(false);

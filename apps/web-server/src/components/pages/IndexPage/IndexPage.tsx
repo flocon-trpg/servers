@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { Layout } from '../../ui/Layout/Layout';
-import { QueryResultViewer } from '../../ui/QueryResultViewer/QueryResultViewer';
 import { SupportedApiServers, VERSION } from '@/VERSION';
 import { FileSelectorModal } from '@/components/models/file/FileSelectorModal/FileSelectorModal';
+import { GraphQLAlert } from '@/components/ui/GraphQLAlert/GraphQLAlert';
 import { useGetApiSemVer } from '@/hooks/useGetApiSemVer';
 import { flex, flexColumn } from '@/styles/className';
 import { apiServerSatisfies } from '@/versioning/apiServerSatisfies';
@@ -119,13 +119,19 @@ export const IndexPage: React.FC = () => {
                             apiServerSemVer.value.toString()
                         )}
                         <div style={{ maxWidth: 800 }}>
-                            <QueryResultViewer
-                                error={apiServerSemVer?.error}
+                            <GraphQLAlert
+                                error={
+                                    apiServerSemVer?.error == null
+                                        ? undefined
+                                        : {
+                                              mainMessage: 'APIエラー',
+                                              error: apiServerSemVer.error,
+                                          }
+                                }
                                 loading={false}
-                                compact
                             >
                                 {versionInfo}
-                            </QueryResultViewer>
+                            </GraphQLAlert>
                         </div>
                     </li>
                 </ul>

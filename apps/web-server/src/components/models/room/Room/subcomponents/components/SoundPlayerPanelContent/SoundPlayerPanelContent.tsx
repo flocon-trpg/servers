@@ -4,20 +4,18 @@ import { WriteRoomSoundEffectDocument } from '@flocon-trpg/typed-document-node-v
 import { keyNames } from '@flocon-trpg/utils';
 import { Button, Checkbox, Modal, Tooltip } from 'antd';
 import classNames from 'classnames';
-import { atom } from 'jotai';
-import { useAtomValue } from 'jotai/utils';
 import React from 'react';
 import { useLatest } from 'react-use';
 import { useMutation } from 'urql';
-import { roomAtom } from '@/atoms/roomAtom/roomAtom';
+import { useRoomId } from '../../hooks/useRoomId';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { FileSelector } from '@/components/models/file/FileSelector/FileSelector';
 import { FileSelectorModal } from '@/components/models/file/FileSelectorModal/FileSelectorModal';
 import { FileView } from '@/components/models/file/FileView/FileView';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { Fieldset } from '@/components/ui/Fieldset/Fieldset';
 import { VolumeBar } from '@/components/ui/VolumeBar/VolumeBar';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
+import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 import { Styles } from '@/styles';
 import { flex, flexColumn, flexRow, itemsCenter } from '@/styles/className';
 import { FilePathLike, FilePathModule } from '@/utils/file/filePath';
@@ -30,8 +28,6 @@ type BgmState = State<typeof bgmTemplate>;
 const maxWidthOfLink = 300;
 const defaultVolume = 0.5;
 const initBgmState: BgmState = { $v: 1, $r: 1, isPaused: true, files: [], volume: defaultVolume };
-
-const bgmsAtom = atom(get => get(roomAtom).roomState?.state?.bgms);
 
 const toKey = (source: FilePathLike): string => {
     return keyNames('SoundPlayer', source.sourceType, source.path);
@@ -75,7 +71,7 @@ type BgmSimpleModalProps = {
 /** 1曲のみからなるBGMを設定するModal */
 const BgmSimpleModal: React.FC<BgmSimpleModalProps> = ({ channelKey, visible, onClose }) => {
     const setRoomState = useSetRoomStateWithImmer();
-    const currentBgmState = useAtomSelector(bgmsAtom, bgms => bgms?.[channelKey]);
+    const currentBgmState = useRoomStateValueSelector(state => state.bgms?.[channelKey]);
     const currentBgmStateRef = useLatest(currentBgmState);
     const [newBgmState, setNewBgmStateCore] = React.useState<BgmState>(
         currentBgmState ?? initBgmState
@@ -144,7 +140,7 @@ type BgmPlaylistModalProps = {
 // CONSIDER: 複数の曲から構成されるBGMの機能に需要があるかどうかが疑問視。
 const BgmPlaylistModal: React.FC<BgmPlaylistModalProps> = ({ channelKey, visible, onClose }) => {
     const setRoomState = useSetRoomStateWithImmer();
-    const currentBgmState = useAtomSelector(bgmsAtom, bgms => bgms?.[channelKey]);
+    const currentBgmState = useRoomStateValueSelector(state => state.bgms?.[channelKey]);
     const currentBgmStateRef = useLatest(currentBgmState);
     const [newBgmState, setNewBgmStateCore] = React.useState<BgmState>(
         currentBgmState ?? initBgmState
@@ -256,7 +252,7 @@ type SeModalProps = {
 };
 
 const SeModal: React.FC<SeModalProps> = ({ visible, onClose }) => {
-    const roomId = useAtomValue(roomIdAtom);
+    const roomId = useRoomId();
 
     const [, writeRoomSoundEffect] = useMutation(WriteRoomSoundEffectDocument);
     const [volumeInput, setVolumeInput] = React.useState<number>(defaultVolume);
@@ -289,8 +285,6 @@ const SeModal: React.FC<SeModalProps> = ({ visible, onClose }) => {
         </Modal>
     );
 };
-
-const roomIdAtom = atom(get => get(roomAtom).roomId);
 
 type BgmPlayerProps = {
     channelKey: StrIndex5;
@@ -436,7 +430,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
 };
 
 export const SoundPlayerPanelContent: React.FC = () => {
-    const bgmsState = useAtomValue(bgmsAtom);
+    const bgmsState = useRoomStateValueSelector(state => state.bgms);
     const [isSeModalVisible, setIsSeModalVisible] = React.useState(false);
 
     const padding = 16;

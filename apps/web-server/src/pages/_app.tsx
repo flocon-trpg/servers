@@ -5,6 +5,7 @@ import 'firebase/auth';
 import 'firebase/storage';
 
 import { simpleId } from '@flocon-trpg/core';
+import { createUrqlClient } from '@flocon-trpg/sdk-urql';
 import { loader } from '@monaco-editor/react';
 import { FirebaseApp, initializeApp } from 'firebase/app';
 import { Auth, getAuth } from 'firebase/auth';
@@ -28,7 +29,6 @@ import { AllContextProvider } from '../components/behaviors/AllContextProvider';
 import { useMyUserUid } from '../hooks/useMyUserUid';
 import { useWebConfig } from '../hooks/useWebConfig';
 import { appConsole } from '../utils/appConsole';
-import { createUrqlClient } from '../utils/createUrqlClient';
 import {
     FirebaseUserState,
     authNotFound,
@@ -265,7 +265,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
                 createUrqlClient({
                     httpUrl: httpUri,
                     wsUrl: wsUri,
-                    useIdToken: true,
+                    authorization: true,
                     getUserIdTokenResult: getIdTokenResult,
                 })
             );
@@ -274,7 +274,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
                 createUrqlClient({
                     httpUrl: httpUri,
                     wsUrl: wsUri,
-                    useIdToken: false,
+                    authorization: false,
                 })
             );
         }

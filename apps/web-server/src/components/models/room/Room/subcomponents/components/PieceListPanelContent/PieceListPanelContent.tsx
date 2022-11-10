@@ -1,5 +1,5 @@
 import * as Icon from '@ant-design/icons';
-import { State, dicePieceTemplate, stringPieceTemplate } from '@flocon-trpg/core';
+import { State, dicePieceTemplate, stringPieceTemplate, update } from '@flocon-trpg/core';
 import { keyNames } from '@flocon-trpg/utils';
 import { Button, Table, Tooltip } from 'antd';
 import { useUpdateAtom } from 'jotai/utils';
@@ -11,7 +11,6 @@ import { DicePieceValue } from '../../utils/dicePieceValue';
 import { StringPieceValue } from '../../utils/stringPieceValue';
 import { dicePieceModalAtom } from '../DicePieceEditorModal/DicePieceEditorModal';
 import { stringPieceModalAtom } from '../StringPieceEditorModal/StringPieceEditorModal';
-import { update } from '@/stateManagers/states/types';
 
 type DicePieceState = State<typeof dicePieceTemplate>;
 type StringPieceState = State<typeof stringPieceTemplate>;

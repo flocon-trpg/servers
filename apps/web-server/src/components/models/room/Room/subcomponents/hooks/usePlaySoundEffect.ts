@@ -3,10 +3,10 @@ import { soundEffect } from '@flocon-trpg/web-server-utils';
 import { Howl } from 'howler';
 import React from 'react';
 import { useLatest } from 'react-use';
+import { useRoomMessages } from './useRoomMessages';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { useSrcFromFilePath } from '@/hooks/srcHooks';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { useRoomMessageEvent } from '@/hooks/useRoomMessages';
 import { analyzeUrl } from '@/utils/analyzeUrl';
 import { volumeCap } from '@/utils/variables';
 
@@ -85,7 +85,8 @@ function usePlaySoundEffectCore(value?: SoundEffect): void {
 }
 
 export function usePlaySoundEffect(): void {
-    const messageDiff = useRoomMessageEvent();
+    const roomMessages = useRoomMessages({});
+    const messageDiff = roomMessages.diff;
     const [soundEffectState, setSoundEffectState] = React.useState<SoundEffect>();
 
     React.useEffect(() => {

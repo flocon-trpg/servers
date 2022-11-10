@@ -23,6 +23,7 @@ import { OverriddenParameterNameEditor } from '../OverriddenParameterNameEditor/
 import { BoardPositionRectEditor, PieceRectEditor } from '../RectEditor/RectEditor';
 import { StringParameterInput } from '../StringParameterInput/StringParameterInput';
 import { CharacterTagsSelect } from './subcomponent/components/CharacterTagsSelect/CharacterTagsSelect';
+import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateWithImmer';
 import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 import { CopyToClipboardButton } from '@/components/ui/CopyToClipboardButton/CopyToClipboardButton';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
@@ -30,7 +31,6 @@ import { EditorGroupHeader } from '@/components/ui/EditorGroupHeader/EditorGroup
 import { Table, TableCombinedRow, TableHeader, TableRow } from '@/components/ui/Table/Table';
 import { ToggleButton } from '@/components/ui/ToggleButton/ToggleButton';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
 import {
     characterIsNotPrivate,
     characterIsNotPrivateAndNotCreatedByMe,

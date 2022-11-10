@@ -1,7 +1,6 @@
 import { chooseRecord } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import { State, TwoWayOperation, UpOperation } from '../../../../generator';
-import * as NullableTextOperation from '../../../../nullableTextOperation';
 import { isIdRecord } from '../../../../record';
 import * as RecordOperation from '../../../../recordOperation';
 import {

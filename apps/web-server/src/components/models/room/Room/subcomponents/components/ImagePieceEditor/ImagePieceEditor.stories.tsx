@@ -9,7 +9,7 @@ export const Update: React.FC = () => {
     useSetupMocks();
 
     return (
-        <StorybookProvider>
+        <StorybookProvider waitForRoomClient>
             <ImagePieceEditor updateMode={{ boardId: defaultBoardId, pieceId: imagePieceKey1 }} />
         </StorybookProvider>
     );

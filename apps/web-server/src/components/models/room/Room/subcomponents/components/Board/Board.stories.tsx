@@ -28,7 +28,7 @@ export const Default: React.FC<{
         },
     });
     return (
-        <StorybookProvider>
+        <StorybookProvider waitForRoomClient>
             <Board {...boardProps} />
         </StorybookProvider>
     );

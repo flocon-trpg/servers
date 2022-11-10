@@ -1,14 +1,18 @@
 import { State, characterTemplate } from '@flocon-trpg/core';
-import { roomAtom } from '@/atoms/roomAtom/roomAtom';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 
 type CharacterState = State<typeof characterTemplate>;
 
 export const useCharacter = (characterId: string | undefined): CharacterState | undefined => {
-    return useAtomSelector(
-        roomAtom,
-        state =>
-            characterId == null ? undefined : state.roomState?.state?.characters?.[characterId],
-        [characterId]
+    return (
+        useRoomStateValueSelector(
+            state => {
+                if (characterId == null) {
+                    return undefined;
+                }
+                return state.characters?.[characterId];
+            },
+            [characterId]
+        ) ?? undefined
     );
 };

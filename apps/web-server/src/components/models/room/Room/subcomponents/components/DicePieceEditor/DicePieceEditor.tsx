@@ -3,6 +3,7 @@ import {
     characterTemplate,
     dicePieceStrIndexes,
     dicePieceTemplate,
+    replace,
     simpleId,
 } from '@flocon-trpg/core';
 import { keyNames } from '@flocon-trpg/utils';
@@ -11,6 +12,7 @@ import { Subscribable } from 'rxjs';
 import { useMemoOne } from 'use-memo-one';
 import { useDicePieces } from '../../hooks/useDicePieces';
 import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
 import {
     CompositeRect,
@@ -27,8 +29,6 @@ import { PieceEditorNameRow } from '../PieceEditorNameRow/PieceEditorNameRow';
 import { PieceRectEditor } from '../RectEditor/RectEditor';
 import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
-import { replace } from '@/stateManagers/states/types';
 import { close, ok } from '@/utils/constants';
 
 type CharacterState = State<typeof characterTemplate>;

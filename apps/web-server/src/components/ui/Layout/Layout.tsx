@@ -122,7 +122,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
     onEntry,
     requires,
     hideHeader: hideHeaderProp,
-}: PropsWithChildren<Props>) => {
+}) => {
     const router = useRouter();
     const getMyRolesQueryResult = useGetMyRoles();
     const firebaseUser = useAtomValue(firebaseUserAtom);
@@ -171,13 +171,6 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
         setIsEntry('notRequired');
     }, [requiresEntry, myUserUid, urqlClient, canGetIdToken]);
 
-    const getChildren = (): React.ReactNode => {
-        if (typeof children === 'function') {
-            return children();
-        }
-        return children;
-    };
-
     if (firebaseUser === authNotFound) {
         return (
             <Result status='info' title='Firebase Authentication インスタンスが見つかりません。' />
@@ -188,7 +181,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
     const content = (() => {
         if (requires == null) {
             showChildren = true;
-            return getChildren();
+            return children;
         }
         if (firebaseUser === loading) {
             return <LoadingResult title='Firebase Authentication による認証を行っています…' />;
@@ -227,7 +220,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                 return <Result status='error' title='APIエラー' subTitle={isEntry.error.message} />;
         }
         showChildren = true;
-        return getChildren();
+        return children;
     })();
 
     let hideHeader: boolean;

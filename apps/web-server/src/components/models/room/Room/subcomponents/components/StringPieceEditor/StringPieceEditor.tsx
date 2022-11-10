@@ -17,10 +17,10 @@ import { PieceEditorIdRow } from '../PieceEditorIdRow/PieceEditorIdRow';
 import { PieceEditorMemoRow } from '../PieceEditorMemoRow/PieceEditorMemoRow';
 import { PieceEditorNameRow } from '../PieceEditorNameRow/PieceEditorNameRow';
 import { PieceRectEditor } from '../RectEditor/RectEditor';
+import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateWithImmer';
 import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
 import { close, ok } from '@/utils/constants';
 
 type CharacterState = State<typeof characterTemplate>;

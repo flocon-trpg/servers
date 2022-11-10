@@ -60,11 +60,7 @@ export type FetchTextState =
           value: string | null;
       };
 
-export type SetAction<State> = State | ((prevState: State) => State);
-
 export type Recipe<T> = (state: T) => T | void;
-
-export type Ref<T> = { value: T };
 
 export type PieceModalState =
     | {
@@ -77,3 +73,5 @@ export type PieceModalState =
           boardId: string;
           pieceId: string;
       };
+
+export type SetAction<State> = State | ((prevState: State) => State);

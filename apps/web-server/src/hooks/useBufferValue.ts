@@ -1,6 +1,5 @@
 import React from 'react';
-import { Subject, Subscription } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { Subject, Subscription, debounceTime } from 'rxjs';
 import useConstant from 'use-constant';
 
 type Result<T> = {

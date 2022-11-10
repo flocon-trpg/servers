@@ -8,9 +8,8 @@ import {
     RoomSoundEffectFragment,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
 import produce from 'immer';
-import { Observable, Subject, mergeMap } from 'rxjs';
+import { Observable, Subject, map } from 'rxjs';
 import { FilteredSortedArray, SortedArray } from './filteredArray';
-import { Notification } from './notification';
 
 export const privateMessage = 'privateMessage';
 export const publicMessage = 'publicMessage';
@@ -78,14 +77,17 @@ export type RoomMessageEvent =
       }
     | RoomMessage;
 
-export const notification = 'notification';
+export const custom = 'custom';
 
-type NotificationType = {
-    type: typeof notification;
-    value: Notification;
+export type CustomMessage<T> = {
+    type: typeof custom;
+    value: T;
+    createdAt: number;
+    /** CustomMessage ごとに異なる値をセットします。`createdAt` と `key` がともに等しい CustomMessage は同一であるとみなされます。 */
+    key: string | number;
 };
 
-export type Message = NotificationType | RoomMessage;
+export type Message<TCustomMessage> = CustomMessage<TCustomMessage> | RoomMessage;
 
 const compareUpdatedAt = (
     left: number | null | undefined,
@@ -105,6 +107,12 @@ export const noChange = 'noChange';
 
 export const reset = 'reset';
 
+// switch 文で場合分けしやすいように、__typename を用いている 。
+type AddCustomMessageEvent<TCustomMessage> = {
+    __typename: typeof custom;
+    value: CustomMessage<TCustomMessage>;
+};
+
 type DiffBase<T> =
     | {
           prevValue: T;
@@ -119,27 +127,43 @@ type DiffBase<T> =
           nextValue: T;
       };
 
-export type Diff =
+export type Diff<TCustomMessage> =
     | DiffBase<PublicMessageType>
     | DiffBase<PrivateMessageType>
     | DiffBase<PieceLogType>
     | DiffBase<SoundEffectType>
-    | DiffBase<NotificationType>
+    | DiffBase<CustomMessage<TCustomMessage>>
     | {
-          prevValue: { type: typeof reset; value: readonly Message[] };
-          nextValue: { type: typeof reset; value: readonly Message[] };
+          prevValue: { type: typeof reset; value: readonly Message<TCustomMessage>[] };
+          nextValue: { type: typeof reset; value: readonly Message<TCustomMessage>[] };
       };
 
 // 引数のmessagesには変更は加えられない
-const reduceEvent = <T extends SortedArray<Message> | FilteredSortedArray<Message>>({
+const reduceEvent = <
+    TCustomMessage,
+    T extends SortedArray<Message<TCustomMessage>> | FilteredSortedArray<Message<TCustomMessage>>
+>({
     messages: messagesSource,
     event,
 }: {
     messages: T;
-    event: RoomMessageEventFragment;
-}): { messages: T; diff: Diff | null } | typeof noChange => {
+    event: RoomMessageEventFragment | AddCustomMessageEvent<TCustomMessage>;
+}): { messages: T; diff: Diff<TCustomMessage> | null } | typeof noChange => {
     const messages = messagesSource.clone() as T;
     switch (event.__typename) {
+        case custom: {
+            const added = messages.add(event.value);
+            if (added === false) {
+                return { messages, diff: null };
+            }
+            return {
+                messages,
+                diff: {
+                    prevValue: undefined,
+                    nextValue: event.value,
+                },
+            };
+        }
         case 'RoomPrivateMessage':
         case 'RoomPublicMessage':
         case 'PieceLog':
@@ -166,11 +190,7 @@ const reduceEvent = <T extends SortedArray<Message> | FilteredSortedArray<Messag
         case 'RoomPrivateMessageUpdate':
         case 'RoomPublicMessageUpdate': {
             const updateResult = messages.updateLast(msg => {
-                if (
-                    msg.type === notification ||
-                    msg.type === pieceLog ||
-                    msg.type === soundEffect
-                ) {
+                if (msg.type === custom || msg.type === pieceLog || msg.type === soundEffect) {
                     return undefined;
                 }
                 if (msg.value.messageId !== event.messageId) {
@@ -220,79 +240,65 @@ export const event = 'event';
 export const query = 'query';
 export const clear = 'clear';
 
-type MessagesChangeCore =
+type MessagesChangeCore<TCustomMessage> =
     | {
           type: typeof event;
-          isLoaded: true;
-          current: SortedArray<Message>;
+          isQueryFetched: boolean;
+          current: SortedArray<Message<TCustomMessage>>;
           // nullの場合、イベントにより変更されたMessageが無かったことを表す。
-          diff: Diff | null;
-          event: RoomMessageEventFragment;
-      }
-    | {
-          type: typeof event;
-          isLoaded: false;
-          current?: undefined;
-          diff?: undefined;
-          event: RoomMessageEventFragment;
+          diff: Diff<TCustomMessage> | null;
+          event: RoomMessageEventFragment | AddCustomMessageEvent<TCustomMessage>;
       }
     | {
           type: typeof query;
-          isLoaded: true;
-          current: SortedArray<Message>;
+          isQueryFetched: true;
+          current: SortedArray<Message<TCustomMessage>>;
           diff?: undefined;
           event?: undefined;
       }
     | {
           type: typeof clear;
-          isLoaded: false;
-          current?: undefined;
+          isQueryFetched: false;
+          current: SortedArray<Message<TCustomMessage>>;
           diff?: undefined;
           event?: undefined;
       };
 
-export type MessagesChange =
+export type MessagesChange<TCustomMessage> =
     | {
           type: typeof event;
-          current: readonly Message[];
+          current: readonly Message<TCustomMessage>[];
           // nullの場合、イベントにより変更されたMessageが無かったことを表す。
-          diff: Diff | null;
+          diff: Diff<TCustomMessage> | null;
       }
     | {
-          type: typeof query;
-          current: readonly Message[];
-          diff?: undefined;
-      }
-    | {
-          type: typeof clear;
-          current?: undefined;
-          diff?: undefined;
+          type: typeof query | typeof clear;
+          current: readonly Message<TCustomMessage>[];
       };
 
-export type FilteredRoomMessages = Readonly<{
-    getCurrent(): readonly Message[] | null;
-    changed: Observable<MessagesChange>;
+export type FilteredRoomMessages<TCustomMessage> = Readonly<{
+    getCurrent(): readonly Message<TCustomMessage>[];
+    changed: Observable<MessagesChange<TCustomMessage>>;
 }>;
 
-export type AllRoomMessages = FilteredRoomMessages &
+export type AllRoomMessages<TCustomMessage> = FilteredRoomMessages<TCustomMessage> &
     Readonly<{
-        filter(filter: (message: Message) => boolean): FilteredRoomMessages;
+        filter(
+            filter: (message: Message<TCustomMessage>) => boolean
+        ): FilteredRoomMessages<TCustomMessage>;
     }>;
 
-class MessageSet {
-    #notifications = new Map<string, Notification>();
+class MessageSet<TCustomMessage> {
+    #notifications = new Map<string, CustomMessage<TCustomMessage>>();
     #publicMessages = new Map<string, RoomPublicMessageFragment>();
     #privateMessages = new Map<string, RoomPrivateMessageFragment>();
     #pieceLogs = new Map<string, PieceLogFragment>();
     #soundEffects = new Map<string, RoomSoundEffectFragment>();
 
-    public add(message: Message) {
+    add(message: Message<TCustomMessage>) {
         switch (message.type) {
-            case notification:
-                this.#notifications.set(
-                    `${message.value.createdAt};${message.value.message}`,
-                    message.value
-                );
+            case custom:
+                this.#notifications.set(`${message.createdAt};${message.key}`, message);
                 break;
             case pieceLog:
                 this.#pieceLogs.set(message.value.messageId, message.value);
@@ -309,7 +315,7 @@ class MessageSet {
         }
     }
 
-    public clear() {
+    clear() {
         this.#notifications.clear();
         this.#pieceLogs.clear();
         this.#privateMessages.clear();
@@ -317,27 +323,22 @@ class MessageSet {
         this.#soundEffects.clear();
     }
 
-    public getPrivateMessage(messageId: string) {
+    getPrivateMessage(messageId: string) {
         return this.#privateMessages.get(messageId);
     }
 
-    public getPublicMessage(messageId: string) {
+    getPublicMessage(messageId: string) {
         return this.#publicMessages.get(messageId);
     }
 
-    public get(message: Message): Message | undefined {
+    get(message: Message<TCustomMessage>): Message<TCustomMessage> | undefined {
         switch (message.type) {
-            case notification: {
-                const value = this.#notifications.get(
-                    `${message.value.createdAt};${message.value.message}`
-                );
+            case custom: {
+                const value = this.#notifications.get(`${message.createdAt};${message.key}`);
                 if (value == null) {
                     return undefined;
                 }
-                return {
-                    type: notification,
-                    value,
-                };
+                return value;
             }
             case pieceLog: {
                 const value = this.#pieceLogs.get(message.value.messageId);
@@ -382,13 +383,10 @@ class MessageSet {
         }
     }
 
-    public values() {
-        function* main(self: MessageSet): Generator<Message> {
+    values() {
+        function* main(self: MessageSet<TCustomMessage>): Generator<Message<TCustomMessage>> {
             for (const value of self.#notifications.values()) {
-                yield {
-                    type: notification,
-                    value,
-                };
+                yield value;
             }
             for (const value of self.#pieceLogs.values()) {
                 yield {
@@ -419,85 +417,71 @@ class MessageSet {
     }
 }
 
-const createSortKey = (message: Message): number => message.value.createdAt;
+const createSortKey = <T>(message: Message<T>): number =>
+    message.type === custom ? message.createdAt : message.value.createdAt;
 
-const loading = 'loading';
-const loaded = 'loaded';
-
-export class RoomMessagesClient {
+export class RoomMessagesClient<TCustomMessage> {
     #messagesState:
-        | { type: typeof loading; events: RoomMessageEventFragment[] }
-        | { type: typeof loaded; messages: SortedArray<Message> } = {
-        type: loading,
-        events: [],
+        | {
+              isQueryFetched: false;
+              eventsQueue: RoomMessageEventFragment[];
+          }
+        | {
+              isQueryFetched: true;
+          } = {
+        isQueryFetched: false,
+        eventsQueue: [],
     };
 
-    #messagesChanged = new Subject<MessagesChangeCore>();
+    #messagesChanged = new Subject<MessagesChangeCore<TCustomMessage>>();
 
-    public readonly messages: AllRoomMessages;
+    #messages = new SortedArray<Message<TCustomMessage>>(createSortKey);
 
-    public constructor() {
+    readonly messages: AllRoomMessages<TCustomMessage>;
+
+    constructor() {
         this.messages = {
-            getCurrent: () => this.#messages?.toArray(x => x) ?? null,
+            getCurrent: () => this.#messages.toArray(x => x),
             changed: this.#messagesChanged.pipe(
-                mergeMap<MessagesChangeCore, MessagesChange[]>(changeEvent => {
+                map(changeEvent => {
                     switch (changeEvent.type) {
                         case event: {
-                            if (!changeEvent.isLoaded) {
-                                return [];
-                            }
-                            return [
-                                {
-                                    ...changeEvent,
-                                    current: changeEvent.current.toArray(x => x),
-                                    isLoaded: undefined,
-                                },
-                            ];
+                            return {
+                                type: event,
+                                current: changeEvent.current.toArray(x => x),
+                                diff: changeEvent.diff,
+                            };
                         }
                         case query: {
-                            return [
-                                {
-                                    ...changeEvent,
-                                    current: changeEvent.current.toArray(x => x),
-                                    isLoaded: undefined,
-                                },
-                            ];
+                            return {
+                                type: query,
+                                current: changeEvent.current.toArray(x => x),
+                            };
                         }
                         default:
-                            return [
-                                {
-                                    ...changeEvent,
-                                    isLoaded: undefined,
-                                },
-                            ];
+                            return {
+                                type: clear,
+                                current: changeEvent.current.toArray(x => x),
+                            };
                     }
                 })
             ),
             filter: filter => {
                 return {
-                    getCurrent: () =>
-                        this.#messages == null
-                            ? null
-                            : this.#messages.toArray(x => (filter(x) ? x : undefined)),
+                    getCurrent: () => this.#messages.toArray(x => (filter(x) ? x : undefined)),
                     changed: new Observable(observer => {
-                        let messages =
-                            this.#messages == null ? null : this.#messages.createFiltered(filter);
+                        let messages = this.#messages.createFiltered(filter);
 
                         return this.#messagesChanged.subscribe(changeEvent => {
-                            if (changeEvent.type === query) {
+                            if (changeEvent.type !== event) {
                                 messages = changeEvent.current.createFiltered(filter);
-                                observer.next({ type: query, current: messages.toArray(x => x) });
+                                observer.next({
+                                    type: changeEvent.type,
+                                    current: messages.toArray(x => x),
+                                });
                                 return;
                             }
-                            if (changeEvent.type === clear) {
-                                messages = null;
-                                observer.next({ type: clear });
-                                return;
-                            }
-                            if (messages == null) {
-                                return;
-                            }
-                            const reduced = reduceEvent({
+                            const reduced = reduceEvent<TCustomMessage, typeof messages>({
                                 messages,
                                 event: changeEvent.event,
                             });
@@ -522,23 +506,16 @@ export class RoomMessagesClient {
         };
     }
 
-    get #messages() {
-        if (this.#messagesState.type === loading) {
-            return null;
-        }
-        return this.#messagesState.messages;
-    }
-
-    static #reduce({
+    static #reduce<TCustomMessage>({
         state,
         messages,
         events,
     }: {
-        state: readonly Message[];
+        state: readonly Message<TCustomMessage>[];
         messages: RoomMessages;
         events: readonly RoomMessageEventFragment[];
-    }): readonly Message[] {
-        const messagesSet = new MessageSet();
+    }): readonly Message<TCustomMessage>[] {
+        const messagesSet = new MessageSet<TCustomMessage>();
         state.forEach(msg => {
             messagesSet.add(msg);
         });
@@ -645,71 +622,95 @@ export class RoomMessagesClient {
             }
         }
 
-        return [...messagesSet.values()].sort((x, y) => x.value.createdAt - y.value.createdAt);
+        return [...messagesSet.values()].sort((x, y) => createSortKey(x) - createSortKey(y));
     }
 
-    public onQuery(messages: RoomMessages): void {
-        const newMessages =
-            this.#messagesState.type === loading
-                ? RoomMessagesClient.#reduce({
-                      state: [],
-                      messages,
-                      events: this.#messagesState.events,
-                  })
-                : RoomMessagesClient.#reduce({
-                      state: this.#messagesState.messages.toArray(x => x),
-                      messages,
-                      events: [],
-                  });
+    onQuery(messages: RoomMessages): void {
+        const newMessages = RoomMessagesClient.#reduce<TCustomMessage>({
+            state: this.#messages.toArray(x => x),
+            messages,
+            events: [],
+        });
+        this.#messages = new SortedArray(createSortKey, newMessages);
         this.#messagesState = {
-            type: loaded,
-            messages: new SortedArray(createSortKey, newMessages),
+            isQueryFetched: true,
         };
         this.#messagesChanged.next({
             type: query,
-            isLoaded: true,
+            isQueryFetched: true,
             current: new SortedArray(createSortKey, newMessages),
         });
     }
 
-    public onEvent(event: RoomMessageEventFragment): void {
-        if (this.#messagesState.type === loading) {
-            this.#messagesState = { type: loading, events: [...this.#messagesState.events, event] };
-            this.#messagesChanged.next({ type: 'event', isLoaded: false, event });
+    onEvent(event: RoomMessageEventFragment): void {
+        const messages = this.#messages;
+        if (!this.#messagesState.isQueryFetched) {
+            this.#messagesState = {
+                ...this.#messagesState,
+                eventsQueue: [...this.#messagesState.eventsQueue, event],
+            };
+            this.#messagesChanged.next({
+                type: 'event',
+                isQueryFetched: false,
+                event,
+                current: messages.clone(),
+                diff: null,
+            });
             return;
         }
-        const reduced = reduceEvent({
-            messages: this.#messagesState.messages,
+        const reduced = reduceEvent<TCustomMessage, typeof messages>({
+            messages: this.#messages,
             event,
         });
         if (reduced === noChange) {
             this.#messagesChanged.next({
                 type: 'event',
-                isLoaded: true,
-                current: this.#messagesState.messages.clone(),
+                isQueryFetched: true,
+                current: messages.clone(),
                 diff: null,
                 event,
             });
             return;
         }
+        this.#messages = reduced.messages;
         this.#messagesState = {
-            type: loaded,
-            messages: reduced.messages,
+            isQueryFetched: true,
         };
         this.#messagesChanged.next({
             type: 'event',
-            isLoaded: true,
+            isQueryFetched: true,
             current: reduced.messages,
             diff: reduced.diff,
             event,
         });
     }
 
-    public clear(): void {
+    addCustomMessage(message: CustomMessage<TCustomMessage>): void {
+        const customMessages = this.#messages.clone();
+        customMessages.add(message);
+        this.#messages = customMessages;
+        this.#messagesChanged.next({
+            type: event,
+            isQueryFetched: false,
+            event: { __typename: custom, value: message },
+            current: this.#messages.clone(),
+            diff: {
+                prevValue: undefined,
+                nextValue: message,
+            },
+        });
+    }
+
+    clear(): void {
         this.#messagesState = {
-            type: loading,
-            events: [],
+            isQueryFetched: false,
+            eventsQueue: [],
         };
-        this.#messagesChanged.next({ type: clear, isLoaded: false });
+        this.#messages = new SortedArray(createSortKey);
+        this.#messagesChanged.next({
+            type: clear,
+            isQueryFetched: false,
+            current: this.#messages.clone(),
+        });
     }
 }

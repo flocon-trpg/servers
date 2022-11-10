@@ -9,6 +9,7 @@ import {
     roomTemplate,
     simpleId,
     toUpOperation,
+    update,
 } from '@flocon-trpg/core';
 import {
     FileSourceType,
@@ -32,6 +33,9 @@ import { useBoards } from '../../hooks/useBoards';
 import { useCharacters } from '../../hooks/useCharacters';
 import { useCloneImagePiece } from '../../hooks/useCloneImagePiece';
 import { useIsMyCharacter } from '../../hooks/useIsMyCharacter';
+import { useRoomId } from '../../hooks/useRoomId';
+import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { DicePieceValue } from '../../utils/dicePieceValue';
 import { CellConfig, CompositeRect, toCellPosition } from '../../utils/positionAndSizeAndRect';
 import { StringPieceValue } from '../../utils/stringPieceValue';
@@ -64,14 +68,10 @@ import {
     UpdateMode as StringPieceUpdateMode,
 } from '../StringPieceEditor/StringPieceEditor';
 import { stringPieceModalAtom } from '../StringPieceEditorModal/StringPieceEditorModal';
-import { roomAtom } from '@/atoms/roomAtom/roomAtom';
 import { BoardConfig } from '@/atoms/roomConfigAtom/types/boardConfig';
 import { NewTabLinkify } from '@/components/ui/NewTabLinkify/NewTabLinkify';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { useSetRoomStateByApply } from '@/hooks/useSetRoomStateByApply';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
-import { update } from '@/stateManagers/states/types';
+import { useRoomStateValue } from '@/hooks/useRoomStateValue';
 import { flex, flexRow, itemsCenter } from '@/styles/className';
 import { testCommand } from '@/utils/character/command';
 import { create } from '@/utils/constants';
@@ -1105,12 +1105,12 @@ namespace ContextMenuModule {
     export const Main: React.FC = () => {
         const operate = useSetRoomStateByApply();
         const setRoomState = useSetRoomStateWithImmer();
-        const room = useAtomSelector(roomAtom, state => state.roomState?.state);
+        const room = useRoomStateValue();
         const boards = useBoards();
         const characters = useCharacters();
         const myUserUid = useMyUserUid();
         const contextMenuState = useAtomValue(boardContextMenuAtom);
-        const roomId = useAtomSelector(roomAtom, state => state.roomId);
+        const roomId = useRoomId();
         const [, writeSe] = useMutation(WriteRoomSoundEffectDocument);
         const setBoardContextMenu = useUpdateAtom(boardContextMenuAtom);
         const hooks = useHooks();

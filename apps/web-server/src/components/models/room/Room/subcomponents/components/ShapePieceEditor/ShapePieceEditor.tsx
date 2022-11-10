@@ -18,10 +18,10 @@ import { PieceEditorIdRow } from '../PieceEditorIdRow/PieceEditorIdRow';
 import { PieceEditorMemoRow } from '../PieceEditorMemoRow/PieceEditorMemoRow';
 import { PieceEditorNameRow } from '../PieceEditorNameRow/PieceEditorNameRow';
 import { PieceRectEditor } from '../RectEditor/RectEditor';
+import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateWithImmer';
 import { ColorPickerButton } from '@/components/ui/ColorPickerButton/ColorPickerButton';
 import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
 import { close, ok } from '@/utils/constants';
 import { rgb } from '@/utils/rgb';
 

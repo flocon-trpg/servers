@@ -82,6 +82,8 @@ export class RoomEventResolver {
     @Subscription(() => RoomEvent, {
         topics: ROOM_EVENT,
         nullable: true,
+        description:
+            'この Subscription を直接実行することは非推奨です。代わりに @flocon-trpg/sdk を用いてください。',
     })
     public roomEvent(
         @Root() payload: RoomEventPayload | null | undefined,

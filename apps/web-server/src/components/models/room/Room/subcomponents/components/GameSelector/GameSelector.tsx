@@ -6,14 +6,13 @@ import {
 import { Button, Popover, Select } from 'antd';
 import classNames from 'classnames';
 import { Draft } from 'immer';
-import { useUpdateAtom } from 'jotai/utils';
 import React from 'react';
 import { useQuery } from 'urql';
-import { error, roomNotificationsAtom } from '@/atoms/roomAtom/roomAtom';
 import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import { InputDescription } from '@/components/ui/InputDescription/InputDescription';
 import { NewTabLinkify } from '@/components/ui/NewTabLinkify/NewTabLinkify';
+import { useAddNotification } from '@/hooks/useAddNotification';
 import { flex, flexNone, flexRow, itemsCenter } from '@/styles/className';
 
 type HelpMessageProps = {
@@ -61,7 +60,7 @@ export const GameSelector: React.FC<Props> = ({
     onConfigUpdate,
     descriptionStyle,
 }: Props) => {
-    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
+    const addRoomNotification = useAddNotification();
 
     const [availableGameSystems] = useQuery({ query: GetAvailableGameSystemsDocument });
     const sortedAvailableGameSystems = React.useMemo(
@@ -82,9 +81,9 @@ export const GameSelector: React.FC<Props> = ({
             return;
         }
         addRoomNotification({
-            type: error,
+            type: 'error',
             error: availableGameSystems.error,
-            createdAt: new Date().getTime(),
+            message: 'GetAvailableGameSystems Query でエラーが発生しました。',
         });
     }, [addRoomNotification, availableGameSystems.error]);
 

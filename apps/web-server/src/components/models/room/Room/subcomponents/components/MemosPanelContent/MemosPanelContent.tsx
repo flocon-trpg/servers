@@ -6,9 +6,9 @@ import moment from 'moment';
 import React from 'react';
 import { useMemos } from '../../hooks/useMemos';
 import { FileBrowser, FilePath, text } from '@/components/models/file/FileBrowser/FileBrowser';
+import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateWithImmer';
 import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
 import {
     flex,
     flex1,

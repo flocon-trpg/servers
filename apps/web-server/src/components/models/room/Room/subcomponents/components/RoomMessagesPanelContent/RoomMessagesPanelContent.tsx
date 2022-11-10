@@ -10,8 +10,8 @@ import {
 } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { keyNames, recordToMap } from '@flocon-trpg/utils';
 import {
+    CustomMessage,
     Message,
-    Notification,
     PrivateChannelSet,
     PrivateChannelSets,
     pieceLog,
@@ -30,7 +30,6 @@ import {
     Modal,
     Popover,
     Radio,
-    Result,
     Select,
     Tabs,
     Tooltip,
@@ -42,16 +41,15 @@ import { atom } from 'jotai';
 import { useAtomValue } from 'jotai/utils';
 import moment from 'moment';
 import React from 'react';
-import { useMutation } from 'urql';
+import { CombinedError, useMutation } from 'urql';
 import { useMessageFilter } from '../../hooks/useMessageFilter';
-import { useParticipants } from '../../hooks/useParticipants';
 import { usePublicChannelNames } from '../../hooks/usePublicChannelNames';
+import { useRoomId } from '../../hooks/useRoomId';
 import { useWritingMessageStatus } from '../../hooks/useWritingMessageStatus';
 import { isDeleted, toText } from '../../utils/message';
 import { ChatInput } from '../ChatInput';
 import { MessageTabName } from './subcomponents/components/MessageTabName/MessageTabName';
 import { RoomMessage as RoomMessageNameSpace } from './subcomponents/components/RoomMessage/RoomMessage';
-import { roomAtom } from '@/atoms/roomAtom/roomAtom';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { MessageFilter } from '@/atoms/roomConfigAtom/types/messageFilter';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
@@ -60,17 +58,22 @@ import { MessageTabConfigUtils } from '@/atoms/roomConfigAtom/types/messageTabCo
 import { column, row } from '@/atoms/userConfigAtom/types';
 import { userConfigAtom } from '@/atoms/userConfigAtom/userConfigAtom';
 import { UserConfigUtils } from '@/atoms/userConfigAtom/utils';
+import {
+    NotificationMain,
+    NotificationType,
+} from '@/components/models/room/Room/subcomponents/components/Notification/Notification';
+import { useParticipants } from '@/components/models/room/Room/subcomponents/hooks/useParticipants';
+import { useRoomMessages } from '@/components/models/room/Room/subcomponents/hooks/useRoomMessages';
+import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateWithImmer';
 import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { DraggableTabs } from '@/components/ui/DraggableTabs/DraggableTabs';
 import { InputDescription } from '@/components/ui/InputDescription/InputDescription';
 import { InputModal } from '@/components/ui/InputModal/InputModal';
 import { JumpToBottomVirtuoso } from '@/components/ui/JumpToBottomVirtuoso/JumpToBottomVirtuoso';
-import { QueryResultViewer } from '@/components/ui/QueryResultViewer/QueryResultViewer';
 import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
 import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
-import { failure, graphqlError, notFetch, useRoomMessages } from '@/hooks/useRoomMessages';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
+import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 import { firebaseUserValueAtom } from '@/pages/_app';
 import { Styles } from '@/styles';
 import { cancelRnd, flex, flexColumn, flexNone, flexRow, itemsCenter } from '@/styles/className';
@@ -87,8 +90,9 @@ type HiwaSelectValueType = typeof none | typeof some | typeof custom;
 
 const auto = 'auto';
 
-const participantsAtom = atom(get => get(roomAtom).roomState?.state?.participants);
-const roomIdAtom = atom(get => get(roomAtom).roomId);
+const useParticipantsAsRecord = () => {
+    return useRoomStateValueSelector(state => state.participants);
+};
 const roomMessageFontSizeDeltaAtom = atom(get => get(userConfigAtom)?.roomMessagesFontSizeDelta);
 const chatInputDirectionAtom = atom(get => get(userConfigAtom)?.chatInputDirection);
 
@@ -398,7 +402,7 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (
 };
 
 type RoomMessageComponentProps = {
-    message: RoomMessageNameSpace.MessageState | Notification;
+    message: RoomMessageNameSpace.MessageState | CustomMessage<NotificationType<CombinedError>>;
     showPrivateMessageMembers?: boolean;
 
     // もしRoomMessageComponent内でusePublicChannelNamesをそれぞれ呼び出す形にすると、画像が読み込まれた瞬間（スクロールでメッセージ一覧を上下するときに発生しやすい）に一瞬だけpublicChannelNamesが何故かnullになる（react-virtuosoの影響？）ため、チャンネル名が一瞬だけ'?'になるためチラついて見えてしまう。そのため、このように外部からpublicChannelNamesを受け取る形にすることで解決している。
@@ -412,7 +416,7 @@ type RoomMessageComponentProps = {
 const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
     props: RoomMessageComponentProps
 ) => {
-    const participants = useAtomValue(participantsAtom);
+    const participants = useParticipantsAsRecord();
 
     const { message, showPrivateMessageMembers, publicChannelNames } = props;
 
@@ -421,7 +425,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
     const [, deleteMessageMutation] = useMutation(DeleteMessageDocument);
     const [, makeMessageNotSecret] = useMutation(MakeMessageNotSecretDocument);
     const [isEditModalVisible, setIsEditModalVisible] = React.useState(false);
-    const roomId = useAtomValue(roomIdAtom);
+    const roomId = useRoomId();
     const roomMessagesFontSizeDelta = useAtomValue(roomMessageFontSizeDeltaAtom);
 
     const fontSize = UserConfigUtils.getRoomMessagesFontSize(roomMessagesFontSizeDelta ?? 0);
@@ -446,7 +450,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
         message.type === publicMessage ||
         message.type === pieceLog
             ? message.value.createdAt
-            : (message.createdAt as number | undefined);
+            : message.createdAt;
     let datetime: string | null = null;
     if (createdAt != null) {
         datetime = moment(new Date(createdAt)).format('YYYY/MM/DD HH:mm:ss');
@@ -602,9 +606,19 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                 {updatedInfo}
                 <div style={{ flex: 1 }} />
             </div>
-            {message.type === privateMessage ||
-            message.type === publicMessage ||
-            message.type === pieceLog ? (
+            {message.type === custom ? (
+                <div
+                    style={{
+                        fontSize,
+                        overflowWrap: 'break-word',
+                        gridRow: '2 / 3',
+                        gridColumn: '2 / 3',
+                        minHeight: contentMinHeight,
+                    }}
+                >
+                    <NotificationMain notification={message.value} />
+                </div>
+            ) : (
                 <RoomMessageNameSpace.Content
                     style={{
                         fontSize,
@@ -615,18 +629,6 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                     }}
                     message={message}
                 />
-            ) : (
-                <div
-                    style={{
-                        fontSize,
-                        overflowWrap: 'break-word',
-                        gridRow: '2 / 3',
-                        gridColumn: '2 / 3',
-                        minHeight: contentMinHeight,
-                    }}
-                >
-                    {message.message}
-                </div>
             )}
             <div
                 style={{
@@ -694,15 +696,11 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
     const firebaseUser = useAtomValue(firebaseUserValueAtom);
     const writingMessageStatusResult = useWritingMessageStatus();
     const publicChannelNames = usePublicChannelNames();
-    const participants = useAtomValue(participantsAtom);
-    const participantsMap = React.useMemo(
-        () => (participants == null ? null : recordToMap(participants)),
-        [participants]
-    );
+    const participants = useParticipants();
 
     const filter = useMessageFilter(config);
     const thenMap = React.useCallback(
-        (_: unknown, message: Message) => {
+        (_: unknown, message: Message<NotificationType<CombinedError>>) => {
             if (message.type === soundEffect) {
                 // soundEffectはfilterで弾いていなければならない。
                 throw new Error('soundEffect is not supported');
@@ -712,16 +710,12 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
                     key={
                         message.type === privateMessage || message.type === publicMessage
                             ? message.value.messageId
-                            : message.value.createdAt
+                            : message.type === pieceLog
+                            ? message.value.createdAt
+                            : keyNames(message.key, message.createdAt)
                     }
                     publicChannelNames={publicChannelNames}
-                    message={
-                        message.type === publicMessage ||
-                        message.type === privateMessage ||
-                        message.type === pieceLog
-                            ? message
-                            : message.value
-                    }
+                    message={message}
                 />
             );
         },
@@ -729,13 +723,13 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
     );
     const messages = useRoomMessages({ filter });
 
-    const writingUsers = [...writingMessageStatusResult]
+    const writingUsers = (writingMessageStatusResult == null ? [] : [...writingMessageStatusResult])
         .filter(
             ([key, value]) =>
-                key !== firebaseUser?.uid && value.current === WritingMessageStatusType.Writing
+                key !== firebaseUser?.uid && value === WritingMessageStatusType.Writing
         )
         .map(([key]) => key)
-        .map(userUid => participantsMap?.get(userUid)?.name ?? '')
+        .map(userUid => participants?.get(userUid)?.name ?? '')
         .sort();
     let writingStatus: JSX.Element | null = null;
     // TODO: background-colorが適当
@@ -759,39 +753,13 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
         );
     }
 
-    let content: JSX.Element = <QueryResultViewer loading compact={false} />;
-    if (messages !== notFetch) {
-        if (messages.isError) {
-            switch (messages.error.type) {
-                case graphqlError:
-                    content = (
-                        <QueryResultViewer
-                            loading={false}
-                            error={messages.error.error}
-                            compact={false}
-                        />
-                    );
-                    break;
-                case failure:
-                    content = (
-                        <Result
-                            status='error'
-                            title='エラー'
-                            subTitle={messages.error.failureType}
-                        />
-                    );
-                    break;
-            }
-        } else {
-            content = (
-                <JumpToBottomVirtuoso
-                    items={messages.value.current ?? []}
-                    create={thenMap}
-                    height={contentHeight - writingStatusHeight}
-                />
-            );
-        }
-    }
+    const content = (
+        <JumpToBottomVirtuoso
+            items={messages.value ?? []}
+            create={thenMap}
+            height={contentHeight - writingStatusHeight}
+        />
+    );
 
     return (
         <div className={classNames(flex, flexColumn)}>
@@ -824,7 +792,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
 
     const [isChannelNamesEditorVisible, setIsChannelNamesEditorVisible] = React.useState(false);
 
-    const roomId = useAtomValue(roomIdAtom);
+    const roomId = useRoomId();
     const roomMessagesFontSizeDelta = useAtomValue(roomMessageFontSizeDeltaAtom);
     const chatInputDirectionCore = useAtomValue(chatInputDirectionAtom) ?? auto;
 

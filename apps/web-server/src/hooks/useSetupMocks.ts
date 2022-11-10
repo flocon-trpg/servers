@@ -1,10 +1,11 @@
 import { Auth } from '@firebase/auth';
 import { FirebaseStorage } from '@firebase/storage';
-import { State as S, roomTemplate } from '@flocon-trpg/core';
+import { State as S, UpOperation as U, apply, roomTemplate, toOtError } from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
 import produce from 'immer';
 import { useSetAtom } from 'jotai';
 import React from 'react';
+import { useMemoOne } from 'use-memo-one';
 import { roomConfigAtom } from '../atoms/roomConfigAtom/roomConfigAtom';
 import { defaultRoomConfig } from '../atoms/roomConfigAtom/types/roomConfig';
 import { storybookAtom } from '../atoms/storybookAtom/storybookAtom';
@@ -18,12 +19,13 @@ import {
     mockWebConfig,
 } from '../mocks';
 import { FirebaseUserState } from '../utils/firebase/firebaseUserState';
-import { Recipe } from '../utils/types';
-import { useMockRoom } from './useMockRoom';
+import { Recipe, SetAction } from '../utils/types';
+import { useInitializeTestRoomClient } from './roomClientHooks';
 import { useMockUserConfig } from './useMockUserConfig';
-import { useMockRoomMessages } from './useRoomMessages';
 
 type RoomState = S<typeof roomTemplate>;
+type UpOperation = U<typeof roomTemplate>;
+const $apply = apply(roomTemplate);
 
 const roomId = 'dummy-room-id';
 
@@ -65,7 +67,9 @@ export const useSetupMocks = ({
         basicMockProp?.webConfig,
     ]);
 
-    const room = React.useMemo(() => {
+    const { isInitialized, source: testRoomClient } = useInitializeTestRoomClient(roomId);
+
+    const room = useMemoOne(() => {
         const result = createMockRoom({
             myParticipantRole: roomConfigProp?.myParticipantRole ?? 'Player',
             setCharacterTagNames: roomConfigProp?.setCharacterTagNames ?? true,
@@ -88,25 +92,47 @@ export const useSetupMocks = ({
         roomConfigProp?.setPublicChannelNames,
         roomConfigProp?.update,
     ]);
-    useMockRoom({ roomId, room });
+
+    React.useEffect(() => {
+        let roomState = room;
+        function next() {
+            testRoomClient.roomState.next({
+                type: 'joined',
+                state: room,
+                setState,
+                setStateByApply,
+            });
+        }
+        function setState(action: SetAction<RoomState>) {
+            roomState = typeof action === 'function' ? action(roomState) : action;
+            next();
+        }
+        function setStateByApply(operation: UpOperation) {
+            const r = $apply({ state: roomState, operation });
+            if (r.isError) {
+                throw toOtError(r.error);
+            }
+            roomState = r.value;
+            next();
+        }
+        next();
+    }, [room, testRoomClient.roomState]);
 
     useMockUserConfig();
-    const { onQuery, setAsNotFetch } = useMockRoomMessages();
     React.useEffect(() => {
-        setAsNotFetch();
+        testRoomClient.roomMessageClient.clear();
         if (roomMessagesConfigProp?.doNotQuery === true) {
             return;
         }
-        onQuery(
+        testRoomClient.roomMessageClient.onQuery(
             createMockRoomMessages({
                 setGeneralMessages: roomMessagesConfigProp?.setGeneralMessages ?? true,
             })
         );
     }, [
-        onQuery,
-        setAsNotFetch,
         roomMessagesConfigProp?.setGeneralMessages,
         roomMessagesConfigProp?.doNotQuery,
+        testRoomClient.roomMessageClient,
     ]);
     const setRoomConfig = useSetAtom(roomConfigAtom);
     const roomConfig = React.useMemo(() => {
@@ -120,6 +146,7 @@ export const useSetupMocks = ({
         return {
             roomId,
             roomConfig,
+            isInitialized,
         };
-    }, [roomConfig]);
+    }, [isInitialized, roomConfig]);
 };

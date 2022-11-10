@@ -12,7 +12,7 @@ export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myPar
         },
     });
     return (
-        <StorybookProvider>
+        <StorybookProvider waitForRoomClient>
             <SoundPlayerPanelContent />
         </StorybookProvider>
     );

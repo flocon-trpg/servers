@@ -9,7 +9,7 @@ export const Update: React.FC = () => {
     useSetupMocks();
 
     return (
-        <StorybookProvider>
+        <StorybookProvider waitForRoomClient>
             <ShapePieceEditor updateMode={{ boardId: defaultBoardId, pieceId: shapePieceKey1 }} />
         </StorybookProvider>
     );

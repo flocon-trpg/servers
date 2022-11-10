@@ -213,8 +213,8 @@ async function operateCore({
     }
 
     const transformed = serverTransform({ type: client, userUid: authorizedUserUid })({
-        prevState,
-        currentState: roomState,
+        stateBeforeServerOperation: prevState,
+        stateAfterServerOperation: roomState,
         clientOperation: clientOperation,
         serverOperation: twoWayOperation,
     });
@@ -321,7 +321,10 @@ async function operateCore({
 
 @Resolver()
 export class OperateResolver {
-    @Mutation(() => OperateRoomResult)
+    @Mutation(() => OperateRoomResult, {
+        description:
+            'この Mutation を直接実行することは非推奨です。代わりに @flocon-trpg/sdk を用いてください。',
+    })
     @Authorized(ENTRY)
     @UseMiddleware(QueueMiddleware, RateLimitMiddleware(3))
     public async operate(

@@ -26,7 +26,7 @@ export const ParticipantListPanelContent: React.FC = () => {
     const dataSource: DataSource[] = React.useMemo(
         () =>
             [...(participants ?? [])].map(([key, participant]) => {
-                const connection = roomConnections[key];
+                const connection = roomConnections?.current.get(key);
                 return {
                     key, // antdのtableのkeyとして必要
                     participant: {

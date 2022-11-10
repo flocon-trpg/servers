@@ -233,13 +233,3 @@ export { path, shape } from './internal/ot/shape';
 export { updateType, createType, deleteType } from './internal/ot/flocon/piece/log';
 
 export { createLogs } from './internal/ot/flocon/room/log';
-
-export { StateManager } from './internal/stateManagers/stateManager';
-
-export {
-    Apply,
-    Compose,
-    Transform,
-    Diff,
-    StateManagerParameters,
-} from './internal/stateManagers/types';

@@ -2,16 +2,20 @@ import { $free, $system } from '@flocon-trpg/core';
 import {
     Message,
     PrivateChannelSets,
-    notification,
+    custom,
     pieceLog,
     privateMessage,
     publicMessage,
     soundEffect,
 } from '@flocon-trpg/web-server-utils';
 import React from 'react';
+import { CombinedError } from 'urql';
 import { MessageFilter } from '@/atoms/roomConfigAtom/types/messageFilter';
+import { NotificationType } from '@/components/models/room/Room/subcomponents/components/Notification/Notification';
 
-export function useMessageFilter(config: MessageFilter): (message: Message) => boolean {
+export function useMessageFilter(
+    config: MessageFilter
+): (message: Message<NotificationType<CombinedError>>) => boolean {
     const {
         showNotification,
         showSystem,
@@ -29,9 +33,9 @@ export function useMessageFilter(config: MessageFilter): (message: Message) => b
         privateChannels: privateChannelsAsString,
     } = config;
     return React.useCallback(
-        (message: Message) => {
+        (message: Message<NotificationType<CombinedError>>): boolean => {
             switch (message.type) {
-                case notification:
+                case custom:
                     return showNotification;
                 case publicMessage: {
                     if (showSystem && message.value.channelKey === $system) {

@@ -1,5 +1,5 @@
 import { RoomChannels } from '../src';
-import { Resources } from './resources';
+import { Resources } from './fixtures';
 
 describe('RoomChannels', () => {
     it('tests creating an instance', () => {

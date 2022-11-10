@@ -32,7 +32,7 @@ export const Default: React.FC<{ stateType: StateType; myParticipantRole: Partic
     });
 
     return (
-        <StorybookProvider>
+        <StorybookProvider waitForRoomClient>
             <CharacterListPanelContent />
         </StorybookProvider>
     );

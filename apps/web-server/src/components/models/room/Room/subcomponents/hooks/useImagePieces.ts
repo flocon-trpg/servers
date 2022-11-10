@@ -1,15 +1,10 @@
 import { recordToMap } from '@flocon-trpg/utils';
 import React from 'react';
-import { roomAtom } from '@/atoms/roomAtom/roomAtom';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { useRoomStateValue } from '@/hooks/useRoomStateValue';
 
 export const useImagePieces = (boardId: string | undefined) => {
-    const imagePieces = useAtomSelector(
-        roomAtom,
-        state =>
-            boardId == null ? undefined : state.roomState?.state?.boards?.[boardId]?.imagePieces,
-        [boardId]
-    );
+    const roomState = useRoomStateValue();
+    const imagePieces = boardId == null ? undefined : roomState?.boards?.[boardId]?.imagePieces;
     return React.useMemo(() => {
         return imagePieces == null ? undefined : recordToMap(imagePieces);
     }, [imagePieces]);

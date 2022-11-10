@@ -8,8 +8,8 @@ import { useRouter } from 'next/router';
 import React from 'react';
 import { Subscription } from 'rxjs';
 import { useMutation, useQuery } from 'urql';
+import { GraphQLResult } from '@/components/ui/GraphQLResult/GraphQLResult';
 import { Layout, loginAndEntry } from '@/components/ui/Layout/Layout';
-import { QueryResultViewer } from '@/components/ui/QueryResultViewer/QueryResultViewer';
 import { ToggleButton } from '@/components/ui/ToggleButton/ToggleButton';
 import { useGetMyRoles } from '@/hooks/useGetMyRoles';
 import { useIsV072OrLater } from '@/hooks/useIsV072OrLater';
@@ -337,7 +337,10 @@ const Room: React.FC = () => {
     }
 
     return (
-        <QueryResultViewer loading={fetching} error={error} compact={false}>
+        <GraphQLResult
+            loading={fetching}
+            error={error == null ? undefined : { error, title: 'API エラー' }}
+        >
             <RoomsListComponent
                 roomsTable={
                     roomsData072 != null ? (
@@ -356,10 +359,14 @@ const Room: React.FC = () => {
                     }
                 }}
             />
-        </QueryResultViewer>
+        </GraphQLResult>
     );
 };
 
 export const RoomIndexPage: React.FC = () => {
-    return <Layout requires={loginAndEntry}>{() => <Room />}</Layout>;
+    return (
+        <Layout requires={loginAndEntry}>
+            <Room />
+        </Layout>
+    );
 };

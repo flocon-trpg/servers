@@ -32,10 +32,10 @@ import { RoomMessagesPanelContent } from './subcomponents/components/RoomMessage
 import { ShapePieceEditorModal } from './subcomponents/components/ShapePieceEditorModal/ShapePieceEditorModal';
 import { SoundPlayerPanelContent } from './subcomponents/components/SoundPlayerPanelContent/SoundPlayerPanelContent';
 import { StringPieceEditorModal } from './subcomponents/components/StringPieceEditorModal/StringPieceEditorModal';
-import { useMessageNotification } from './subcomponents/hooks/useMessageNotification';
 import { usePlayBgm } from './subcomponents/hooks/usePlayBgm';
 import { usePlaySoundEffect } from './subcomponents/hooks/usePlaySoundEffect';
-import { roomAtom } from '@/atoms/roomAtom/roomAtom';
+import { usePushNotifications } from './subcomponents/hooks/usePushNotifications';
+import { useRoomId } from './subcomponents/hooks/useRoomId';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { BoardEditorPanelConfig } from '@/atoms/roomConfigAtom/types/boardEditorPanelConfig';
 import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
@@ -51,6 +51,7 @@ import { LoadingResult } from '@/components/ui/LoadingResult/LoadingResult';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 import { relative } from '@/styles/className';
 
 /*
@@ -268,7 +269,7 @@ const BoardEditorPanels: React.FC = () => {
 const ChatPalettePanel: React.FC<ConfigAndKeyProps<ChatPalettePanelConfig>> = React.memo(
     function ChatPalettePanel({ keyName, config }) {
         const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
-        const roomId = useAtomSelector(roomAtom, state => state.roomId);
+        const roomId = useRoomId();
 
         const onDragStop = React.useCallback(
             (e: ControlPosition) => {
@@ -323,10 +324,6 @@ const ChatPalettePanel: React.FC<ConfigAndKeyProps<ChatPalettePanelConfig>> = Re
                 roomConfig.panels.chatPalettePanels[keyName] = undefined;
             });
         }, [keyName, setRoomConfig]);
-
-        if (roomId == null) {
-            return null;
-        }
 
         if (config.isMinimized) {
             return null;
@@ -717,7 +714,7 @@ const ParticipantPanel: React.FC = () => {
 const PieceValuePanel: React.FC = () => {
     const config = useAtomSelector(roomConfigAtom, state => state?.panels.pieceValuePanel);
     const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
-    const activeBoardId = useAtomSelector(roomAtom, state => state.roomState?.state?.activeBoardId);
+    const activeBoardId = useRoomStateValueSelector(state => state.activeBoardId);
 
     const onDragStop = React.useCallback(
         (e: ControlPosition) => {
@@ -931,9 +928,9 @@ export const Room: React.FC<Props> = ({ debug }) => {
 
     usePlayBgm();
     usePlaySoundEffect();
-    useMessageNotification();
+    usePushNotifications();
 
-    const roomId = useAtomSelector(roomAtom, state => state.roomId);
+    const roomId = useRoomId();
 
     if (
         roomIdOfRoomConfig == null ||

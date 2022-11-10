@@ -24,9 +24,9 @@ import React from 'react';
 import { useMutation, useQuery } from 'urql';
 import { editRoomDrawerVisibilityAtom } from '../../atoms/editRoomDrawerVisibilityAtom/editRoomDrawerVisibilityAtom';
 import { useMe } from '../../hooks/useMe';
+import { useRoomId } from '../../hooks/useRoomId';
 import { GenerateLogModal } from './subcomponents/components/GenerageLogModal/GenerateLogModal';
 import { RoomVolumeBar } from './subcomponents/components/RoomVolumeBar/RoomVolumeBar';
-import { error, roomAtom, roomNotificationsAtom, text } from '@/atoms/roomAtom/roomAtom';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { defaultMemoPanelConfig } from '@/atoms/roomConfigAtom/types/memoPanelConfig';
 import { defaultMessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
@@ -38,9 +38,11 @@ import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
 import { FileSelectorModal } from '@/components/models/file/FileSelectorModal/FileSelectorModal';
 import { Jdenticon } from '@/components/ui/Jdenticon/Jdenticon';
 import { OpacityBar } from '@/components/ui/VolumeBar/VolumeBar';
+import { useAddNotification } from '@/hooks/useAddNotification';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 import { useSignOut } from '@/hooks/useSignOut';
 import { firebaseUserValueAtom } from '@/pages/_app';
 import { path } from '@/resources/path';
@@ -90,7 +92,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
     onOk,
     onCancel,
 }: BecomePlayerModalProps) => {
-    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
+    const addRoomNotification = useAddNotification();
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
     const [, promoteToPlayer] = useMutation(PromoteToPlayerDocument);
@@ -134,9 +136,9 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                     promoteToPlayer({ roomId, password: inputValue }).then(e => {
                         if (e.error != null) {
                             addRoomNotification({
-                                type: error,
-                                createdAt: new Date().getTime(),
+                                type: 'error',
                                 error: e.error,
+                                message: 'PromoteToPlayer Mutation でエラーが発生しました。',
                             });
                             onOk();
                             return;
@@ -156,13 +158,9 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                                     break;
                             }
                             addRoomNotification({
-                                type: 'text',
-                                notification: {
-                                    type: 'warning',
-                                    message: '参加者への昇格に失敗しました。',
-                                    description: text,
-                                    createdAt: new Date().getTime(),
-                                },
+                                type: 'warning',
+                                message: '参加者への昇格に失敗しました。',
+                                description: text,
                             });
                             onOk();
                             return;
@@ -191,9 +189,9 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                 promoteToPlayer({ roomId }).then(e => {
                     if (e.error != null) {
                         addRoomNotification({
-                            type: error,
-                            createdAt: new Date().getTime(),
+                            type: 'error',
                             error: e.error,
+                            message: 'PromoteToPlayer Mutation でエラーが発生しました。',
                         });
                         onOk();
                         return;
@@ -213,13 +211,9 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                                 break;
                         }
                         addRoomNotification({
-                            type: 'text',
-                            notification: {
-                                type: 'warning',
-                                message: '参加者への昇格に失敗しました。',
-                                description: text,
-                                createdAt: new Date().getTime(),
-                            },
+                            type: 'warning',
+                            message: '参加者への昇格に失敗しました。',
+                            description: text,
                         });
                         onOk();
                         return;
@@ -250,7 +244,7 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
     onCancel,
     roomCreatedByMe,
 }: DeleteRoomModalProps) => {
-    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
+    const addRoomNotification = useAddNotification();
     const [isPosting, setIsPosting] = React.useState(false);
     const [, deleteRoom] = useMutation(DeleteRoomDocument);
     React.useEffect(() => {
@@ -271,9 +265,9 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
                 deleteRoom({ id: roomId }).then(e => {
                     if (e.error != null) {
                         addRoomNotification({
-                            type: error,
-                            createdAt: new Date().getTime(),
+                            type: 'error',
                             error: e.error,
+                            message: 'DeleteRoom Mutation でエラーが発生しました。',
                         });
                         onOk();
                         return;
@@ -293,13 +287,9 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
                                 break;
                         }
                         addRoomNotification({
-                            type: 'text',
-                            notification: {
-                                type: 'warning',
-                                message: '部屋の削除に失敗しました。',
-                                description: text,
-                                createdAt: new Date().getTime(),
-                            },
+                            type: 'warning',
+                            message: '部屋の削除に失敗しました。',
+                            description: text,
                         });
                         onOk();
                         return;
@@ -342,7 +332,7 @@ const ResetMessagesModal: React.FC<ResetMessagesModalProps> = ({
     onCancel,
     roomCreatedByMe,
 }: DeleteRoomModalProps) => {
-    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
+    const addRoomNotification = useAddNotification();
     const [isPosting, setIsPosting] = React.useState(false);
     const [, resetMessages] = useMutation(ResetMessagesDocument);
     React.useEffect(() => {
@@ -363,9 +353,9 @@ const ResetMessagesModal: React.FC<ResetMessagesModalProps> = ({
                 resetMessages({ roomId }).then(e => {
                     if (e.error != null) {
                         addRoomNotification({
-                            type: error,
-                            createdAt: new Date().getTime(),
+                            type: 'error',
                             error: e.error,
+                            message: 'ResetMessages Mutation でエラーが発生しました。',
                         });
                         onOk();
                         return;
@@ -386,13 +376,9 @@ const ResetMessagesModal: React.FC<ResetMessagesModalProps> = ({
                                 break;
                         }
                         addRoomNotification({
-                            type: 'text',
-                            notification: {
-                                type: 'warning',
-                                message: '部屋の削除に失敗しました。',
-                                description: text,
-                                createdAt: new Date().getTime(),
-                            },
+                            type: 'warning',
+                            message: '部屋の削除に失敗しました。',
+                            description: text,
                         });
                         onOk();
                         return;
@@ -465,7 +451,7 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
     onOk: onOkCore,
     onCancel,
 }: ChangeMyParticipantNameModalProps) => {
-    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
+    const addRoomNotification = useAddNotification();
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
     const [, changeParticipantName] = useMutation(ChangeParticipantNameDocument);
@@ -479,9 +465,9 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
         changeParticipantName({ roomId, newName: inputValue }).then(e => {
             if (e.error != null) {
                 addRoomNotification({
-                    type: error,
-                    createdAt: new Date().getTime(),
+                    type: 'error',
                     error: e.error,
+                    message: 'ChangeParticipantName Mutation でエラーが発生しました。',
                 });
                 onOkCore();
                 return;
@@ -489,12 +475,8 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
 
             if (e.data?.result.failureType != null) {
                 addRoomNotification({
-                    type: text,
-                    notification: {
-                        type: 'warning',
-                        message: '名前の変更に失敗しました。',
-                        createdAt: new Date().getTime(),
-                    },
+                    type: 'warning',
+                    message: '名前の変更に失敗しました。',
                 });
                 onOkCore();
                 return;
@@ -1054,8 +1036,8 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
     const firebaseUser = useAtomValue(firebaseUserValueAtom);
     const router = useRouter();
     const signOut = useSignOut();
-    const roomId = useAtomSelector(roomAtom, state => state.roomId);
-    const createdBy = useAtomSelector(roomAtom, state => state.roomState?.state?.createdBy);
+    const roomId = useRoomId();
+    const createdBy = useRoomStateValueSelector(state => state.createdBy);
 
     const [showBackgroundBoardViewer, setShowBackgroundBoardViewerAtom] = useAtom(
         showBackgroundBoardViewerAtom

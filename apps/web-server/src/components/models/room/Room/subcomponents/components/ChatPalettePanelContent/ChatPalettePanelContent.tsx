@@ -14,12 +14,12 @@ import { SelectedChannelType, SubmitMessage, publicChannel } from '../SubmitMess
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
+import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateWithImmer';
 import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 import { UISelector } from '@/components/ui/UISelector/UISelector';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { useBufferValue } from '@/hooks/useBufferValue';
 import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
 import { flex, flex1, flexColumn, flexNone, flexRow, itemsCenter } from '@/styles/className';
 
 const descriptionStyle: React.CSSProperties = {

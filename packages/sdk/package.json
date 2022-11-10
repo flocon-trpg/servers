@@ -1,0 +1,54 @@
+{
+    "name": "@flocon-trpg/sdk",
+    "version": "0.1.0",
+    "license": "MIT",
+    "author": "kizahasi",
+    "main": "dist/cjs/index.js",
+    "module": "dist/esm/index.js",
+    "typings": "dist/types/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "yarn run build:self",
+        "build-ci": "yarn run build:self",
+        "build:rollup": "rollup --config",
+        "build:self": "rimraf ./dist && yarn build:rollup",
+        "lint": "eslint \"**/*.ts\" --cache",
+        "prettier": "yarn prettier:base --write --cache",
+        "prettier-check": "yarn prettier:base --check",
+        "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\"",
+        "test": "jest"
+    },
+    "dependencies": {
+        "@flocon-trpg/core": "workspace:^",
+        "@flocon-trpg/typed-document-node-v0.7.1": "workspace:^",
+        "@flocon-trpg/utils": "workspace:^",
+        "@flocon-trpg/web-server-utils": "workspace:^",
+        "@kizahasi/option": "^1.0.0",
+        "@kizahasi/result": "^1.0.0",
+        "rxjs": "^7.5.6"
+    },
+    "devDependencies": {
+        "@flocon-trpg/eslint-config": "workspace:^",
+        "@flocon-trpg/prettier-config": "workspace:^",
+        "@flocon-trpg/rollup-config": "workspace:^",
+        "@flocon-trpg/tsconfig": "workspace:^",
+        "@types/jest": "29.1.2",
+        "@typescript-eslint/eslint-plugin": "5.39.0",
+        "@typescript-eslint/parser": "5.39.0",
+        "eslint": "8.25.0",
+        "eslint-config-prettier": "8.5.0",
+        "eslint-import-resolver-typescript": "3.5.1",
+        "eslint-plugin-import": "2.26.0",
+        "jest": "29.1.2",
+        "prettier": "2.7.1",
+        "rimraf": "3.0.2",
+        "rollup": "3.2.2",
+        "ts-jest": "29.0.3",
+        "typescript": "4.8.4"
+    },
+    "engines": {
+        "node": ">=14 <19"
+    }
+}

@@ -431,8 +431,8 @@ const operateAsAdminAndFlush = async ({
         return Result.ok(undefined);
     }
     const transformed = serverTransform({ type: admin })({
-        prevState: roomState,
-        currentState: roomState,
+        stateBeforeServerOperation: roomState,
+        stateAfterServerOperation: roomState,
         clientOperation: operation,
         serverOperation: undefined,
     });

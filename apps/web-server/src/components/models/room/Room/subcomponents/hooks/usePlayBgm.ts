@@ -3,7 +3,6 @@ import { Howl } from 'howler';
 import React from 'react';
 import { useDeepCompareEffect, useLatest } from 'react-use';
 import { useMemoOne } from 'use-memo-one';
-import { roomAtom } from '@/atoms/roomAtom/roomAtom';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import {
     defaultChannelVolume,
@@ -11,6 +10,7 @@ import {
 } from '@/atoms/roomConfigAtom/types/roomConfig/resources';
 import { loaded, useSrcArrayFromFilePath } from '@/hooks/srcHooks';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 import { analyzeUrl } from '@/utils/analyzeUrl';
 import { extname } from '@/utils/extname';
 import { volumeCap } from '@/utils/variables';
@@ -124,7 +124,7 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmCoreProps): void {
 }
 
 export function usePlayBgm(): void {
-    const bgms = useAtomSelector(roomAtom, state => state.roomState?.state?.bgms) ?? {};
+    const bgms = useRoomStateValueSelector(state => state.bgms) ?? {};
     const masterVolume =
         useAtomSelector(roomConfigAtom, state => state?.masterVolume) ?? defaultMasterVolume;
     const channelVolumes = useAtomSelector(roomConfigAtom, state => state?.channelVolumes) ?? {};

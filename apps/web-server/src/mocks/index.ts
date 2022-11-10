@@ -18,6 +18,7 @@ import Color from 'color';
 import ColorName from 'color-name';
 import { Auth, Config, IdTokenResult, Unsubscribe, User } from 'firebase/auth';
 import moment from 'moment';
+import { AnyVariables, Operation } from 'urql';
 import { UserConfig, defaultUserConfig } from '../atoms/userConfigAtom/types';
 import { WebConfig } from '../configType';
 
@@ -168,7 +169,10 @@ const characterBase: CharacterState = {
     privateCommands: undefined,
 };
 
-export const dummyUrqlOperation = {
+export const createDummyUrqlOperation = <Data, Variables extends AnyVariables>(): Operation<
+    Data,
+    Variables
+> => ({
     kind: 'query' as const,
     get key(): never {
         throw new Error();
@@ -179,7 +183,10 @@ export const dummyUrqlOperation = {
     get query(): never {
         throw new Error();
     },
-};
+    get variables(): never {
+        throw new Error();
+    },
+});
 
 export type MockUrqlClientParams = {
     mockQuery?: Client['executeQuery'];

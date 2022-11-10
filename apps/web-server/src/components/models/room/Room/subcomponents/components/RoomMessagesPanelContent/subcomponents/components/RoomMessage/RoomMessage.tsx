@@ -14,7 +14,7 @@ import {
 } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { recordToMap } from '@flocon-trpg/utils';
 import {
-    Notification,
+    CustomMessage,
     PrivateChannelSet,
     pieceLog,
     privateMessage,
@@ -23,8 +23,10 @@ import {
 import { Popover, Tooltip } from 'antd';
 import classNames from 'classnames';
 import React from 'react';
+import { CombinedError } from 'urql';
 import { isDeleted, toText } from '../../../../../utils/message';
 import { IconView } from '@/components/models/file/IconView/IconView';
+import { NotificationType } from '@/components/models/room/Room/subcomponents/components/Notification/Notification';
 import { Jdenticon } from '@/components/ui/Jdenticon/Jdenticon';
 import { NewTabLinkify } from '@/components/ui/NewTabLinkify/NewTabLinkify';
 import { flex, flexRow, itemsCenter } from '@/styles/className';
@@ -240,16 +242,13 @@ export namespace RoomMessage {
     };
 
     type IconProps = {
-        message: MessageState | Notification;
+        message: MessageState | CustomMessage<NotificationType<CombinedError>>;
         size: number;
     };
 
     export const Icon: React.FC<IconProps> = ({ message, size }: IconProps) => {
         switch (message.type) {
-            case 'success':
-            case 'warning':
-            case 'info':
-            case 'error':
+            case 'custom':
             case pieceLog:
                 return <IconView image='Message' size={size} />;
             case privateMessage:

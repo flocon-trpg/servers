@@ -6,6 +6,7 @@ import {
     characterTemplate,
     paramNameTemplate,
     strIndex10Array,
+    update,
 } from '@flocon-trpg/core';
 import {
     Alert,
@@ -30,6 +31,7 @@ import { IconView } from '../../../../../file/IconView/IconView';
 import { useCharacterTagNames } from '../../hooks/useCharacterTagNames';
 import { useCharacters } from '../../hooks/useCharacters';
 import { useBoolParamNames, useNumParamNames, useStrParamNames } from '../../hooks/useParamNames';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { BooleanParameterInput } from '../BooleanParameterInput/BooleanParameterInput';
 import { characterEditorModalAtom } from '../CharacterEditorModal/CharacterEditorModal';
 import { characterParameterNamesEditorVisibilityAtom } from '../CharacterParameterNamesEditorModal/CharacterParameterNamesEditorModal';
@@ -51,13 +53,11 @@ import { ToggleButton } from '@/components/ui/ToggleButton/ToggleButton';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
 import {
     characterIsNotPrivate,
     characterIsNotPrivateAndNotCreatedByMe,
     characterIsPrivate,
 } from '@/resources/text/main';
-import { update } from '@/stateManagers/states/types';
 import { cancelRnd, flex, flexRow, itemsCenter } from '@/styles/className';
 import { create } from '@/utils/constants';
 import { KeySorter } from '@/utils/keySorter';

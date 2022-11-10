@@ -1,9 +1,8 @@
 import { State, characterTemplate, strIndex10Array } from '@flocon-trpg/core';
 import { recordToMap } from '@flocon-trpg/utils';
 import React from 'react';
-import { roomAtom } from '@/atoms/roomAtom/roomAtom';
 import { CharacterTagFilter } from '@/atoms/roomConfigAtom/types/characterTagFilter';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 
 type CharacterState = State<typeof characterTemplate>;
 
@@ -23,7 +22,7 @@ const hasAnyTag = (character: CharacterState): boolean => {
 };
 
 export const useCharacters = (filter?: CharacterTagFilter): ReadonlyMap<string, CharacterState> => {
-    const charactersRecord = useAtomSelector(roomAtom, state => state.roomState?.state?.characters);
+    const charactersRecord = useRoomStateValueSelector(state => state.characters);
     return React.useMemo(() => {
         if (charactersRecord == null) {
             return new Map<string, CharacterState>();

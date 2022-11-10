@@ -29,7 +29,10 @@ class UpdateWritingMessageStateArgs {
 
 @Resolver()
 export class UpdateWritingMessageStatusResolver {
-    @Mutation(() => Boolean)
+    @Mutation(() => Boolean, {
+        description:
+            'この Mutation を直接実行することは非推奨です。代わりに @flocon-trpg/sdk を用いてください。',
+    })
     @Authorized(ENTRY)
     @UseMiddleware(RateLimitMiddleware(2))
     public async updateWritingMessageStatus(

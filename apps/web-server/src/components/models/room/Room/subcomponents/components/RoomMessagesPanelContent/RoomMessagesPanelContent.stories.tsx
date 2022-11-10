@@ -5,6 +5,7 @@ import { RoomMessagesPanelContent } from './RoomMessagesPanelContent';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupMocks } from '@/hooks/useSetupMocks';
 import { CreateMockRoomMessagesParams } from '@/mocks';
+import { createMockUrqlClientForRoomMessage } from '@/mocks/mockAvailableGameSystemsQuery';
 
 export const Default: React.FC<
     { height: number; fetchingMessages: boolean } & CreateMockRoomMessagesParams
@@ -15,8 +16,9 @@ export const Default: React.FC<
             doNotQuery: fetchingMessages,
         },
     });
+    const mockUrqlClient = React.useRef(createMockUrqlClientForRoomMessage());
     return (
-        <StorybookProvider>
+        <StorybookProvider waitForRoomClient urqlClient={mockUrqlClient.current}>
             <RoomMessagesPanelContent
                 panelId={getExactlyOneKey(roomConfig.panels.messagePanels)}
                 height={height}

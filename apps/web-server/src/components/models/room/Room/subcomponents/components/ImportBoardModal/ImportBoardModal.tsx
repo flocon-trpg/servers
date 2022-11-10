@@ -5,10 +5,10 @@ import classNames from 'classnames';
 import * as E from 'fp-ts/Either';
 import { atom, useAtom } from 'jotai';
 import React from 'react';
+import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateWithImmer';
 import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
 import { flex, flexColumn } from '@/styles/className';
 import { formatValidationErrors } from '@/utils/io-ts/io-ts-reporters';
 

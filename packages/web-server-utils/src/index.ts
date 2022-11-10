@@ -1,23 +1,23 @@
-export { success, info, warning, error, Notification } from './internal/notification';
 export { PrivateChannelSet } from './internal/privateChannelSet';
 export { PrivateChannelSets } from './internal/privateChannelSets';
 export { RoomChannels } from './internal/roomChannels';
 export {
-    RoomMessagesClient,
-    privateMessage,
-    publicMessage,
-    publicChannel,
-    pieceLog,
-    soundEffect,
-    notification,
-    reset,
-    event,
-    query,
-    clear,
-    noChange,
+    AllRoomMessages,
+    CustomMessage,
     Diff,
+    FilteredRoomMessages,
     Message,
     MessagesChange,
-    AllRoomMessages,
-    FilteredRoomMessages,
+    RoomMessagesClient,
+    clear,
+    custom,
+    event,
+    noChange,
+    pieceLog,
+    privateMessage,
+    publicChannel,
+    publicMessage,
+    query,
+    reset,
+    soundEffect,
 } from './internal/roomMessages';

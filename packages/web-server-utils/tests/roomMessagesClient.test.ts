@@ -1,14 +1,18 @@
 import { RoomMessages } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { Observable, pairwise, startWith } from 'rxjs';
 import {
-    Diff,
-    Message,
-    MessagesChange,
+    Diff as $Diff,
+    Message as $Message,
+    MessagesChange as $MessagesChange,
     RoomMessagesClient,
     privateMessage,
     publicMessage,
 } from '../src';
-import { Resources } from './resources';
+import { Resources, TestCustomMessage } from './fixtures';
+
+type Diff = $Diff<TestCustomMessage>;
+type Message = $Message<TestCustomMessage>;
+type MessagesChange = $MessagesChange<TestCustomMessage>;
 
 type MessageFilter = (message: Message) => boolean;
 
@@ -144,7 +148,7 @@ describe.each(
     const arrayFilter = filter ?? (() => true);
 
     it('tests creating an instance', () => {
-        const baseClient = new RoomMessagesClient();
+        const baseClient = new RoomMessagesClient<TestCustomMessage>();
         const client = filter == null ? baseClient.messages : baseClient.messages.filter(filter);
         const clientChanged = new MessagesChangeTester(client.changed);
 
@@ -154,7 +158,7 @@ describe.each(
 
     describe('onQuery', () => {
         it('an empty instance', () => {
-            const baseClient = new RoomMessagesClient();
+            const baseClient = new RoomMessagesClient<TestCustomMessage>();
             const client =
                 filter == null ? baseClient.messages : baseClient.messages.filter(filter);
             const clientChanged = new MessagesChangeTester(client.changed);
@@ -205,7 +209,7 @@ describe.each(
                 ],
             },
         ])('non-empty instances', ({ init, expected }) => {
-            const baseClient = new RoomMessagesClient();
+            const baseClient = new RoomMessagesClient<TestCustomMessage>();
             const client =
                 filter == null ? baseClient.messages : baseClient.messages.filter(filter);
             const clientChanged = new MessagesChangeTester(client.changed);
@@ -218,7 +222,7 @@ describe.each(
     });
 
     it('onEvent', () => {
-        const baseClient = new RoomMessagesClient();
+        const baseClient = new RoomMessagesClient<TestCustomMessage>();
         const client = filter == null ? baseClient.messages : baseClient.messages.filter(filter);
         const clientChanged = new MessagesChangeTester(client.changed);
 
@@ -230,7 +234,7 @@ describe.each(
     });
 
     it('clear', () => {
-        const baseClient = new RoomMessagesClient();
+        const baseClient = new RoomMessagesClient<TestCustomMessage>();
         const client = filter == null ? baseClient.messages : baseClient.messages.filter(filter);
         const clientChanged = new MessagesChangeTester(client.changed);
 
@@ -434,7 +438,7 @@ describe.each(
                     ],
                 },
             ])('(clear) -> onQuery -> onEvent -> clear', ({ query, event, expected }) => {
-                const baseClient = new RoomMessagesClient();
+                const baseClient = new RoomMessagesClient<TestCustomMessage>();
                 const client =
                     filter == null ? baseClient.messages : baseClient.messages.filter(filter);
                 const clientChanged = new MessagesChangeTester(client.changed);
@@ -479,7 +483,7 @@ describe.each(
             ])(
                 '(clear) -> onQuery -> onEvent -> onEvent -> clear',
                 ({ query, event1, event2, expected }) => {
-                    const baseClient = new RoomMessagesClient();
+                    const baseClient = new RoomMessagesClient<TestCustomMessage>();
                     const client =
                         filter == null ? baseClient.messages : baseClient.messages.filter(filter);
                     const clientChanged = new MessagesChangeTester(client.changed);
@@ -578,7 +582,7 @@ describe.each(
                     ],
                 },
             ])('(clear) -> onEvent -> onQuery -> clear', ({ events, query, expected }) => {
-                const baseClient = new RoomMessagesClient();
+                const baseClient = new RoomMessagesClient<TestCustomMessage>();
                 const client =
                     filter == null ? baseClient.messages : baseClient.messages.filter(filter);
                 const clientChanged = new MessagesChangeTester(client.changed);
@@ -646,7 +650,7 @@ describe.each(
                     ],
                 },
             ])('(clear) -> onQuery -> onQuery -> clear', ({ query1, query2, expected }) => {
-                const baseClient = new RoomMessagesClient();
+                const baseClient = new RoomMessagesClient<TestCustomMessage>();
                 const client =
                     filter == null ? baseClient.messages : baseClient.messages.filter(filter);
                 const clientChanged = new MessagesChangeTester(client.changed);

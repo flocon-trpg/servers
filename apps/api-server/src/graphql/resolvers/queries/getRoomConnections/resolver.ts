@@ -54,7 +54,10 @@ const GetRoomConnectionsResult = createUnionType({
 
 @Resolver()
 export class GetRoomConnectionsResolver {
-    @Query(() => GetRoomConnectionsResult)
+    @Query(() => GetRoomConnectionsResult, {
+        description:
+            '通常はこの Query を直接実行する必要はありません。@flocon-trpg/sdk を用いることで、リアルタイムに値を取得および自動更新できます。',
+    })
     @Authorized(ENTRY)
     @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async getRoomConnections(

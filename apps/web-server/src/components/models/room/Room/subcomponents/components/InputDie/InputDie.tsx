@@ -1,13 +1,12 @@
 /** @jsxImportSource @emotion/react */
 import * as Icons from '@ant-design/icons';
 import { css } from '@emotion/react';
-import { State, dieValueTemplate } from '@flocon-trpg/core';
+import { State, dieValueTemplate, replace, update } from '@flocon-trpg/core';
 import { Button } from 'antd';
 import classNames from 'classnames';
 import React from 'react';
 import { D6Value, noDie, noValue } from '../../utils/types';
 import { ToggleButton } from '@/components/ui/ToggleButton/ToggleButton';
-import { replace, update } from '@/stateManagers/states/types';
 import { flex, flexRow, itemsCenter, justifyItemsCenter } from '@/styles/className';
 
 type DieValueState = State<typeof dieValueTemplate>;

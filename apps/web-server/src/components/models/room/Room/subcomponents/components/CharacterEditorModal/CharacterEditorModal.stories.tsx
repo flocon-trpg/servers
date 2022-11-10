@@ -25,7 +25,7 @@ export const Player: React.FC<{ myParticipantRole: ParticipantRole; characterSta
     }, [characterStateId, setModalState]);
 
     return (
-        <StorybookProvider>
+        <StorybookProvider waitForRoomClient>
             <div>
                 <CharacterEditorModal />
             </div>
