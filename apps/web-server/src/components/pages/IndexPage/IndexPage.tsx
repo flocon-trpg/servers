@@ -89,6 +89,34 @@ export const IndexPage: React.FC = () => {
                     />
                 </div>
                 <div style={{ height: spacing }} />
+                <Typography.Title level={3}>このサーバーについて</Typography.Title>
+                <div>
+                    <p>
+                        このサーバーは、
+                        <a href='https://flocon.app/' target='_blank' rel='noopener noreferrer'>
+                            Flocon
+                        </a>{' '}
+                        の公式サーバーです。Flocon のサーバー設置をせずとも Flocon
+                        を簡単に試せるサーバーという目的で運用しています。
+                    </p>
+
+                    <p>
+                        このサーバーのデータは、
+                        <strong>予告なく削除されることがあります</strong>
+                        。本格的なセッションを行う場合は、Flocon の身内サーバーを設置するか、
+                        <a
+                            href='https://flocon.app/docs/public_servers'
+                            target='_blank'
+                            rel='noopener noreferrer'
+                        >
+                            {'他の公開サーバー'}
+                        </a>
+                        の利用をご検討ください。
+                    </p>
+
+                    <p>必要のなくなった部屋やファイルは、削除していただけると助かります。</p>
+                </div>
+                <div style={{ height: spacing }} />
                 <Typography.Title level={3}>動作環境</Typography.Title>
                 <ul>
                     <li>
