@@ -481,6 +481,15 @@ export class RoomMessagesClient<TCustomMessage> {
                                 });
                                 return;
                             }
+                            if (!this.#messagesState.isQueryFetched) {
+                                observer.next({
+                                    type: changeEvent.type,
+                                    current: changeEvent.current.toArray(x => x).filter(filter),
+                                    diff: null,
+                                });
+                                return;
+                            }
+
                             const reduced = reduceEvent<TCustomMessage, typeof messages>({
                                 messages,
                                 event: changeEvent.event,
@@ -491,14 +500,14 @@ export class RoomMessagesClient<TCustomMessage> {
                                     current: messages.toArray(x => x),
                                     diff: null,
                                 });
-                            } else {
-                                messages = reduced.messages;
-                                observer.next({
-                                    type: event,
-                                    current: reduced.messages.toArray(x => x),
-                                    diff: reduced.diff,
-                                });
+                                return;
                             }
+                            messages = reduced.messages;
+                            observer.next({
+                                type: event,
+                                current: reduced.messages.toArray(x => x),
+                                diff: reduced.diff,
+                            });
                         });
                     }),
                 };
@@ -629,7 +638,7 @@ export class RoomMessagesClient<TCustomMessage> {
         const newMessages = RoomMessagesClient.#reduce<TCustomMessage>({
             state: this.#messages.toArray(x => x),
             messages,
-            events: [],
+            events: this.#messagesState.isQueryFetched ? [] : this.#messagesState.eventsQueue,
         });
         this.#messages = new SortedArray(createSortKey, newMessages);
         this.#messagesState = {

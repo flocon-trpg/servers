@@ -90,13 +90,9 @@ class MessagesChangeTester {
             expect(event.type).toBe('event');
             throw new Error('Guard');
         }
-        if (this.#prevMessages == null) {
-            expect(this.#prevMessages).not.toBeNull();
-            throw new Error('Guard');
-        }
         expect(event.current).toEqual(expected);
         MessagesChangeTester.#testDiff({
-            prevValue: this.#prevMessages,
+            prevValue: this.#prevMessages ?? [],
             nextValue: event.current,
             actualDiff: event.diff,
         });
@@ -141,7 +137,7 @@ const messageFilter =
 
 describe.each(
     // nullはfilterを適用しないことを示す
-    // 'a'は'a:'で始まるメッセージを、'b'は'b:'で始まるメッセージを示す
+    // 'a'は'a:'で始まるメッセージを、'b'は'b:'で始まるメッセージのみを抽出することを示す
     [null, true, false, 'a', 'b'] as const
 )('RoomMessagesClient: filterType=%o', filterType => {
     const filter = filterType == null ? null : messageFilter(filterType);
@@ -152,7 +148,7 @@ describe.each(
         const client = filter == null ? baseClient.messages : baseClient.messages.filter(filter);
         const clientChanged = new MessagesChangeTester(client.changed);
 
-        expect(client.getCurrent()).toBeNull();
+        expect(client.getCurrent()).toEqual([]);
         clientChanged.expectToBeEmpty();
     });
 
@@ -208,7 +204,7 @@ describe.each(
                     Resources.Message.publicMessage3a,
                 ],
             },
-        ])('non-empty instances', ({ init, expected }) => {
+        ])('non-empty instances - %j', ({ init, expected }) => {
             const baseClient = new RoomMessagesClient<TestCustomMessage>();
             const client =
                 filter == null ? baseClient.messages : baseClient.messages.filter(filter);
@@ -229,8 +225,8 @@ describe.each(
         const event = Resources.RoomPublicMessage.message1a;
         baseClient.onEvent(event);
 
-        expect(client.getCurrent()).toBeNull();
-        clientChanged.expectToBeEmpty();
+        expect(client.getCurrent()).toEqual([]);
+        clientChanged.expectToBeOneEvent([]);
     });
 
     it('clear', () => {
@@ -240,7 +236,7 @@ describe.each(
 
         baseClient.clear();
 
-        expect(client.getCurrent()).toBeNull();
+        expect(client.getCurrent()).toEqual([]);
         clientChanged.expectToBeOneClear();
     });
 
@@ -462,7 +458,7 @@ describe.each(
 
                 baseClient.clear();
 
-                expect(client.getCurrent()).toBeNull();
+                expect(client.getCurrent()).toEqual([]);
                 clientChanged.expectToBeOneClear();
             });
 
@@ -511,7 +507,7 @@ describe.each(
 
                     baseClient.clear();
 
-                    expect(client.getCurrent()).toBeNull();
+                    expect(client.getCurrent()).toEqual([]);
                     clientChanged.expectToBeOneClear();
                 }
             );
@@ -608,7 +604,7 @@ describe.each(
 
                 baseClient.clear();
 
-                expect(client.getCurrent()).toBeNull();
+                expect(client.getCurrent()).toEqual([]);
                 clientChanged.expectToBeOneClear();
             });
 
@@ -676,7 +672,7 @@ describe.each(
 
                 baseClient.clear();
 
-                expect(client.getCurrent()).toBeNull();
+                expect(client.getCurrent()).toEqual([]);
                 clientChanged.expectToBeOneClear();
             });
         }
