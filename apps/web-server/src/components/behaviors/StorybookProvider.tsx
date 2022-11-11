@@ -14,7 +14,7 @@ export const StorybookProvider: React.FC<{
     const queryClientRef = React.useRef(new QueryClient());
     const roomClient = useTryRoomClient();
     if (waitForRoomClient && roomClient == null) {
-        return null;
+        return <div>{'Waiting for RoomClient to be initialized...'}</div>;
     }
 
     let result = (

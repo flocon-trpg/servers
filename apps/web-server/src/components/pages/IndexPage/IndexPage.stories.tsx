@@ -64,7 +64,7 @@ const createMockClient = (version: Version | 'error' | 'never'): Client => {
 export const Default: React.FC<{ version: Version | 'error' | 'never' }> = ({ version }) => {
     const urqlClient = React.useMemo(() => createMockClient(version), [version]);
     return (
-        <StorybookProvider waitForRoomClient urqlClient={urqlClient}>
+        <StorybookProvider waitForRoomClient={false} urqlClient={urqlClient}>
             <IndexPage />
         </StorybookProvider>
     );
