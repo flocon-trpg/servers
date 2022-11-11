@@ -8,7 +8,7 @@ export const Master: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myPar
     const { isInitialized } = useSetupMocks({ roomConfig: { myParticipantRole } });
 
     if (!isInitialized) {
-        return null;
+        return <div />;
     }
 
     return <ParticipantListPanelContent />;

@@ -20,7 +20,7 @@ export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myPar
     }, [setModalState]);
 
     if (!isInitialized) {
-        return null;
+        return <div />;
     }
 
     return (

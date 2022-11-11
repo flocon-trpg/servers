@@ -16,7 +16,7 @@ export const Default: React.FC<{ width?: number }> = ({ width }) => {
     });
     const [selectedMemoId, setSelectedMemoId] = React.useState<string>('');
     if (!isInitialized) {
-        return null;
+        return <div />;
     }
     return (
         <div style={{ height: 200, width }}>

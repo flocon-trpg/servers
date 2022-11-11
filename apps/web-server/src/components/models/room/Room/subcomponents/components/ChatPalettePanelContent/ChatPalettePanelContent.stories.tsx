@@ -12,7 +12,7 @@ export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myPar
         },
     });
     if (!isInitialized) {
-        return null;
+        return <div />;
     }
     return (
         <div style={{ height: 400 }}>
