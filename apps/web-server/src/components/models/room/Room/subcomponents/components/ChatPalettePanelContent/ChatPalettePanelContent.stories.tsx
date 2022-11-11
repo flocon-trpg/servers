@@ -6,11 +6,14 @@ import { ChatPalettePanelContent } from './ChatPalettePanelContent';
 import { useSetupMocks } from '@/hooks/useSetupMocks';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
-    const { roomId, roomConfig } = useSetupMocks({
+    const { roomId, roomConfig, isInitialized } = useSetupMocks({
         roomConfig: {
             myParticipantRole,
         },
     });
+    if (!isInitialized) {
+        return null;
+    }
     return (
         <div style={{ height: 400 }}>
             <ChatPalettePanelContent

@@ -7,7 +7,7 @@ import { useSetupMocks } from '@/hooks/useSetupMocks';
 import { defaultBoardId, myRichCharacterId } from '@/mocks';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
-    useSetupMocks({
+    const { isInitialized } = useSetupMocks({
         roomConfig: {
             myParticipantRole,
         },
@@ -18,6 +18,10 @@ export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myPar
         // TODO: createモードのテストも追加する
         setModalState({ type: 'update', stateId: defaultBoardId });
     }, [setModalState]);
+
+    if (!isInitialized) {
+        return null;
+    }
 
     return (
         <div>

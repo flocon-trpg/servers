@@ -5,7 +5,11 @@ import { ParticipantListPanelContent } from './ParticipantListPanelContent';
 import { useSetupMocks } from '@/hooks/useSetupMocks';
 
 export const Master: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
-    useSetupMocks({ roomConfig: { myParticipantRole } });
+    const { isInitialized } = useSetupMocks({ roomConfig: { myParticipantRole } });
+
+    if (!isInitialized) {
+        return null;
+    }
 
     return <ParticipantListPanelContent />;
 };

@@ -5,7 +5,10 @@ import { useSetupMocks } from '@/hooks/useSetupMocks';
 import { defaultBoardId, dicePieceKey1 } from '@/mocks';
 
 export const Update: React.FC = () => {
-    useSetupMocks();
+    const { isInitialized } = useSetupMocks();
+    if (!isInitialized) {
+        return null;
+    }
     return <DicePieceEditor updateMode={{ boardId: defaultBoardId, pieceId: dicePieceKey1 }} />;
 };
 
