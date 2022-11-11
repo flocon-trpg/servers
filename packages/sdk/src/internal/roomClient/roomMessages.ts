@@ -85,8 +85,9 @@ export const createRoomMessagesClient = <TCustomMessage, TGraphQLError>({
         value: {
             messages: roomMessagesClient.messages,
             queryStatus: new ReadonlyBehaviorEvent(writableQueryStatus),
-            addCustomMessage: (message: CustomMessage<TCustomMessage>) =>
-                roomMessagesClient.addCustomMessage(message),
+            addCustomMessage: (
+                message: Parameters<typeof roomMessagesClient.addCustomMessage>[0]
+            ) => roomMessagesClient.addCustomMessage(message),
         },
         // RoomState が joined になってから Query を実行させたいので、executeQuery が実行されるまで Query は実行されないようにしている。
         executeQuery,

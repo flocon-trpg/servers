@@ -1,5 +1,4 @@
 import { simpleId } from '@flocon-trpg/core';
-import { custom } from '@flocon-trpg/web-server-utils';
 import React from 'react';
 import { useLatest } from 'react-use';
 import { CombinedError } from 'urql';
@@ -12,7 +11,6 @@ export const useAddNotification = () => {
     return React.useCallback(
         (message: NotificationType<CombinedError>) => {
             return roomClientRef.current.value.messages.addCustomMessage({
-                type: custom,
                 value: message,
                 createdAt: new Date().getTime(),
                 key: simpleId(),

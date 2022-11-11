@@ -694,18 +694,19 @@ export class RoomMessagesClient<TCustomMessage> {
         });
     }
 
-    addCustomMessage(message: CustomMessage<TCustomMessage>): void {
-        const customMessages = this.#messages.clone();
-        customMessages.add(message);
-        this.#messages = customMessages;
+    addCustomMessage(message: Omit<CustomMessage<TCustomMessage>, 'type'>): void {
+        const customMessage = { ...message, type: custom } as const;
+        const messagesClone = this.#messages.clone();
+        messagesClone.add(customMessage);
+        this.#messages = messagesClone;
         this.#messagesChanged.next({
             type: event,
             isQueryFetched: false,
-            event: { __typename: custom, value: message },
+            event: { __typename: custom, value: customMessage },
             current: this.#messages.clone(),
             diff: {
                 prevValue: undefined,
-                nextValue: message,
+                nextValue: customMessage,
             },
         });
     }
