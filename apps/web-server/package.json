@@ -149,7 +149,7 @@
         "chromatic": "6.7.4",
         "color": "4.2.3",
         "color-name": "1.1.4",
-        "eslint-import-resolver-typescript": "3.5.1",
+        "eslint-import-resolver-typescript": "3.5.2",
         "eslint-plugin-import": "2.26.0",
         "eslint-plugin-react": "7.30.1",
         "eslint-plugin-react-hooks": "4.6.0",
