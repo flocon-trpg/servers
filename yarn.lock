@@ -6536,15 +6536,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/user-event@npm:^14.4.2":
-  version: 14.4.3
-  resolution: "@testing-library/user-event@npm:14.4.3"
-  peerDependencies:
-    "@testing-library/dom": ">=7.21.4"
-  checksum: 852c48ea6db1c9471b18276617c84fec4320771e466cd58339a732ca3fd73ad35e5a43ae14f51af51a8d0a150dcf60fcaab049ef367871207bea8f92c4b8195e
-  languageName: node
-  linkType: hard
-
 "@tootallnate/once@npm:1":
   version: 1.1.2
   resolution: "@tootallnate/once@npm:1.1.2"
@@ -8285,15 +8276,14 @@ __metadata:
   linkType: hard
 
 "antd@npm:^4.20.6":
-  version: 4.23.3
-  resolution: "antd@npm:4.23.3"
+  version: 4.23.4
+  resolution: "antd@npm:4.23.4"
   dependencies:
     "@ant-design/colors": ^6.0.0
     "@ant-design/icons": ^4.7.0
     "@ant-design/react-slick": ~0.29.1
     "@babel/runtime": ^7.18.3
     "@ctrl/tinycolor": ^3.4.0
-    "@testing-library/user-event": ^14.4.2
     classnames: ^2.2.6
     copy-to-clipboard: ^3.2.0
     lodash: ^4.17.21
@@ -8336,7 +8326,7 @@ __metadata:
   peerDependencies:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
-  checksum: e6cc635c54f9cf3736572a2242c7ee0105bab06577c3898e2358c3b3d50b37e853e0e8df327af1a2c6f2db52e1323175307b41a01797480cb18431fc4b9c0877
+  checksum: 32f2fada5314cc0b5231ac1abd72fed2944e18e2efecf30f249913a784795e84e35ea620b7fd491df029d309634b970b82e538ac9e83cc9aae93af5a1d854cf7
   languageName: node
   linkType: hard
 
