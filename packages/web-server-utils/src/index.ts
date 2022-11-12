@@ -3,21 +3,22 @@ export { PrivateChannelSets } from './internal/privateChannelSets';
 export { RoomChannels } from './internal/roomChannels';
 export {
     AllRoomMessages,
-    CustomMessage,
-    Diff,
     FilteredRoomMessages,
-    Message,
     MessagesChange,
     RoomMessagesClient,
     clear,
-    custom,
     event,
-    noChange,
+    query,
+} from './internal/roomMessagesClient';
+export {
+    CustomMessage,
+    Diff,
+    Message,
+    custom,
     pieceLog,
     privateMessage,
     publicChannel,
     publicMessage,
-    query,
     reset,
     soundEffect,
-} from './internal/roomMessages';
+} from './internal/roomMessageTypes';

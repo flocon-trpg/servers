@@ -538,8 +538,10 @@ export class RoomPrivateMessageUpdate {
     public updatedAt?: number;
 }
 
+/** @deprecated This is not used now. */
 export const RoomMessagesResetType = 'RoomMessagesReset';
 
+/** @deprecated This is not used now. */
 @ObjectType()
 export class RoomMessagesReset {
     public __tstype!: typeof RoomMessagesResetType;

@@ -3,12 +3,11 @@ import {
     PieceLogType,
     RoomMessages,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
-import { Message, pieceLog, privateMessage, publicMessage } from '../src';
-import { soundEffect } from '../src/internal/roomMessages';
+import { Message, pieceLog, privateMessage, publicMessage, soundEffect } from '../src';
 
-export type TestCustomMessage = null;
+export type TestCustomMessage = string;
 
-export namespace Resources {
+export namespace Fixtures {
     export namespace RoomMessages {
         export const empty: RoomMessages = {
             __typename: 'RoomMessages',
@@ -167,12 +166,12 @@ export namespace Resources {
     }
 
     export namespace Message {
-        export const publicMessage1: Message<TestCustomMessage> = {
+        export const publicMessage1a: Message<TestCustomMessage> = {
             type: publicMessage,
             value: RoomPublicMessage.message1a,
         };
 
-        export const privateMessage2: Message<TestCustomMessage> = {
+        export const privateMessage2a: Message<TestCustomMessage> = {
             type: privateMessage,
             value: RoomPrivateMessage.message2a,
         };
@@ -207,12 +206,12 @@ export namespace Resources {
             value: PieceLog.message6,
         };
 
-        export const publicMessage7: Message<TestCustomMessage> = {
+        export const publicMessage7b: Message<TestCustomMessage> = {
             type: publicMessage,
             value: RoomPublicMessage.message7b,
         };
 
-        export const privateMessage8: Message<TestCustomMessage> = {
+        export const privateMessage8b: Message<TestCustomMessage> = {
             type: privateMessage,
             value: RoomPrivateMessage.message8b,
         };

@@ -1,5 +1,5 @@
 import { RoomChannels } from '../src';
-import { Resources } from './fixtures';
+import { Fixtures } from './fixtures';
 
 describe('RoomChannels', () => {
     it('tests creating an instance', () => {
@@ -13,7 +13,7 @@ describe('RoomChannels', () => {
         it('an empty instance', () => {
             const client = new RoomChannels();
 
-            client.onQuery(Resources.RoomMessages.empty);
+            client.onQuery(Fixtures.RoomMessages.empty);
 
             expect(client.publicChannels.size).toBe(0);
             expect(client.privateChannels.toArray()).toHaveLength(0);
@@ -22,33 +22,33 @@ describe('RoomChannels', () => {
         it.each([
             {
                 init: {
-                    ...Resources.RoomMessages.empty,
+                    ...Fixtures.RoomMessages.empty,
                     publicMessages: [
-                        Resources.RoomPublicMessage.message1a,
-                        Resources.RoomPublicMessage.message3a,
+                        Fixtures.RoomPublicMessage.message1a,
+                        Fixtures.RoomPublicMessage.message3a,
                     ],
                     publicChannels: [
-                        Resources.RoomPublicChannel.channel1,
-                        Resources.RoomPublicChannel.channel2,
+                        Fixtures.RoomPublicChannel.channel1,
+                        Fixtures.RoomPublicChannel.channel2,
                     ],
                     privateMessages: [
-                        Resources.RoomPrivateMessage.message2a,
-                        Resources.RoomPrivateMessage.message4a,
+                        Fixtures.RoomPrivateMessage.message2a,
+                        Fixtures.RoomPrivateMessage.message4a,
                     ],
                 },
                 expectedPublicChannels: new Map([
                     [
-                        Resources.RoomPublicChannel.channel1.key,
-                        { name: Resources.RoomPublicChannel.channel1.name },
+                        Fixtures.RoomPublicChannel.channel1.key,
+                        { name: Fixtures.RoomPublicChannel.channel1.name },
                     ],
                     [
-                        Resources.RoomPublicChannel.channel2.key,
-                        { name: Resources.RoomPublicChannel.channel2.name },
+                        Fixtures.RoomPublicChannel.channel2.key,
+                        { name: Fixtures.RoomPublicChannel.channel2.name },
                     ],
                 ]),
                 expectedPrivateChannels: [
-                    Resources.RoomPrivateMessage.message2a.visibleTo,
-                    Resources.RoomPrivateMessage.message4a.visibleTo,
+                    Fixtures.RoomPrivateMessage.message2a.visibleTo,
+                    Fixtures.RoomPrivateMessage.message4a.visibleTo,
                 ],
             },
         ])('non-empty instances', ({ init, expectedPublicChannels, expectedPrivateChannels }) => {
@@ -64,21 +64,21 @@ describe('RoomChannels', () => {
 
     it.each([
         {
-            event: Resources.RoomPublicChannel.channel1,
+            event: Fixtures.RoomPublicChannel.channel1,
             expectedPublicChannels: new Map([
                 [
-                    Resources.RoomPublicChannel.channel1.key,
-                    { name: Resources.RoomPublicChannel.channel1.name },
+                    Fixtures.RoomPublicChannel.channel1.key,
+                    { name: Fixtures.RoomPublicChannel.channel1.name },
                 ],
             ]),
             expectedPrivateChannels: [],
         },
         {
-            event: Resources.RoomPublicChannelUpdate.channel1,
+            event: Fixtures.RoomPublicChannelUpdate.channel1,
             expectedPublicChannels: new Map([
                 [
-                    Resources.RoomPublicChannel.channel1.key,
-                    { name: Resources.RoomPublicChannel.channel1.name },
+                    Fixtures.RoomPublicChannel.channel1.key,
+                    { name: Fixtures.RoomPublicChannel.channel1.name },
                 ],
             ]),
             expectedPrivateChannels: [],

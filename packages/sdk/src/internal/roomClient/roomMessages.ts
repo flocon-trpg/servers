@@ -2,7 +2,7 @@ import {
     GetRoomMessagesFailureType,
     RoomEventSubscription,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
-import { CustomMessage, RoomMessagesClient } from '@flocon-trpg/web-server-utils';
+import { RoomMessagesClient } from '@flocon-trpg/web-server-utils';
 import { Observable } from 'rxjs';
 import { BehaviorEvent } from '../rxjs/behaviorEvent';
 import { ReadonlyBehaviorEvent } from '../rxjs/readonlyBehaviorEvent';

@@ -3,39 +3,25 @@ import {
     RoomMessageEventFragment,
     RoomMessages,
     RoomPrivateMessageFragment,
-    RoomPublicChannelFragment,
     RoomPublicMessageFragment,
     RoomSoundEffectFragment,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
 import produce from 'immer';
 import { Observable, Subject, map } from 'rxjs';
 import { FilteredSortedArray, SortedArray } from './filteredArray';
-
-export const privateMessage = 'privateMessage';
-export const publicMessage = 'publicMessage';
-export const pieceLog = 'pieceLog';
-export const publicChannel = 'publicChannel';
-export const soundEffect = 'soundEffect';
-
-type PrivateMessageType = {
-    type: typeof privateMessage;
-    value: RoomPrivateMessageFragment;
-};
-type PublicMessageType = {
-    type: typeof publicMessage;
-    value: RoomPublicMessageFragment;
-};
-type PieceLogType = {
-    type: typeof pieceLog;
-    value: PieceLogFragment;
-};
-
-type SoundEffectType = {
-    type: typeof soundEffect;
-    value: RoomSoundEffectFragment;
-};
-
-type RoomMessage = PrivateMessageType | PublicMessageType | PieceLogType | SoundEffectType;
+import { MessageSet } from './messageSet';
+import {
+    CustomMessage,
+    Diff,
+    Message,
+    RoomMessage,
+    custom,
+    pieceLog,
+    privateMessage,
+    publicMessage,
+    reset,
+    soundEffect,
+} from './roomMessageTypes';
 
 const createRoomMessage = (
     source:
@@ -70,25 +56,6 @@ const createRoomMessage = (
     }
 };
 
-export type RoomMessageEvent =
-    | {
-          type: typeof publicChannel;
-          value: RoomPublicChannelFragment;
-      }
-    | RoomMessage;
-
-export const custom = 'custom';
-
-export type CustomMessage<T> = {
-    type: typeof custom;
-    value: T;
-    createdAt: number;
-    /** CustomMessage ごとに異なる値をセットします。`createdAt` と `key` がともに等しい CustomMessage は同一であるとみなされます。 */
-    key: string | number;
-};
-
-export type Message<TCustomMessage> = CustomMessage<TCustomMessage> | RoomMessage;
-
 const compareUpdatedAt = (
     left: number | null | undefined,
     operator: '<',
@@ -103,40 +70,13 @@ const compareUpdatedAt = (
     return left < right;
 };
 
-export const noChange = 'noChange';
-
-export const reset = 'reset';
+const noChange = 'noChange';
 
 // switch 文で場合分けしやすいように、__typename を用いている 。
 type AddCustomMessageEvent<TCustomMessage> = {
     __typename: typeof custom;
     value: CustomMessage<TCustomMessage>;
 };
-
-type DiffBase<T> =
-    | {
-          prevValue: T;
-          nextValue: T;
-      }
-    | {
-          prevValue: T;
-          nextValue: undefined;
-      }
-    | {
-          prevValue: undefined;
-          nextValue: T;
-      };
-
-export type Diff<TCustomMessage> =
-    | DiffBase<PublicMessageType>
-    | DiffBase<PrivateMessageType>
-    | DiffBase<PieceLogType>
-    | DiffBase<SoundEffectType>
-    | DiffBase<CustomMessage<TCustomMessage>>
-    | {
-          prevValue: { type: typeof reset; value: readonly Message<TCustomMessage>[] };
-          nextValue: { type: typeof reset; value: readonly Message<TCustomMessage>[] };
-      };
 
 // 引数のmessagesには変更は加えられない
 const reduceEvent = <
@@ -288,135 +228,6 @@ export type AllRoomMessages<TCustomMessage> = FilteredRoomMessages<TCustomMessag
         ): FilteredRoomMessages<TCustomMessage>;
     }>;
 
-class MessageSet<TCustomMessage> {
-    #notifications = new Map<string, CustomMessage<TCustomMessage>>();
-    #publicMessages = new Map<string, RoomPublicMessageFragment>();
-    #privateMessages = new Map<string, RoomPrivateMessageFragment>();
-    #pieceLogs = new Map<string, PieceLogFragment>();
-    #soundEffects = new Map<string, RoomSoundEffectFragment>();
-
-    add(message: Message<TCustomMessage>) {
-        switch (message.type) {
-            case custom:
-                this.#notifications.set(`${message.createdAt};${message.key}`, message);
-                break;
-            case pieceLog:
-                this.#pieceLogs.set(message.value.messageId, message.value);
-                break;
-            case privateMessage:
-                this.#privateMessages.set(message.value.messageId, message.value);
-                break;
-            case publicMessage:
-                this.#publicMessages.set(message.value.messageId, message.value);
-                break;
-            case soundEffect:
-                this.#soundEffects.set(message.value.messageId, message.value);
-                break;
-        }
-    }
-
-    clear() {
-        this.#notifications.clear();
-        this.#pieceLogs.clear();
-        this.#privateMessages.clear();
-        this.#publicMessages.clear();
-        this.#soundEffects.clear();
-    }
-
-    getPrivateMessage(messageId: string) {
-        return this.#privateMessages.get(messageId);
-    }
-
-    getPublicMessage(messageId: string) {
-        return this.#publicMessages.get(messageId);
-    }
-
-    get(message: Message<TCustomMessage>): Message<TCustomMessage> | undefined {
-        switch (message.type) {
-            case custom: {
-                const value = this.#notifications.get(`${message.createdAt};${message.key}`);
-                if (value == null) {
-                    return undefined;
-                }
-                return value;
-            }
-            case pieceLog: {
-                const value = this.#pieceLogs.get(message.value.messageId);
-                if (value == null) {
-                    return undefined;
-                }
-                return {
-                    type: pieceLog,
-                    value,
-                };
-            }
-            case privateMessage: {
-                const value = this.getPrivateMessage(message.value.messageId);
-                if (value == null) {
-                    return undefined;
-                }
-                return {
-                    type: privateMessage,
-                    value,
-                };
-            }
-            case publicMessage: {
-                const value = this.getPublicMessage(message.value.messageId);
-                if (value == null) {
-                    return undefined;
-                }
-                return {
-                    type: publicMessage,
-                    value,
-                };
-            }
-            case soundEffect: {
-                const value = this.#soundEffects.get(message.value.messageId);
-                if (value == null) {
-                    return undefined;
-                }
-                return {
-                    type: soundEffect,
-                    value,
-                };
-            }
-        }
-    }
-
-    values() {
-        function* main(self: MessageSet<TCustomMessage>): Generator<Message<TCustomMessage>> {
-            for (const value of self.#notifications.values()) {
-                yield value;
-            }
-            for (const value of self.#pieceLogs.values()) {
-                yield {
-                    type: pieceLog,
-                    value,
-                };
-            }
-            for (const value of self.#privateMessages.values()) {
-                yield {
-                    type: privateMessage,
-                    value,
-                };
-            }
-            for (const value of self.#publicMessages.values()) {
-                yield {
-                    type: publicMessage,
-                    value,
-                };
-            }
-            for (const value of self.#soundEffects.values()) {
-                yield {
-                    type: soundEffect,
-                    value,
-                };
-            }
-        }
-        return main(this);
-    }
-}
-
 const createSortKey = <T>(message: Message<T>): number =>
     message.type === custom ? message.createdAt : message.value.createdAt;
 
@@ -481,7 +292,10 @@ export class RoomMessagesClient<TCustomMessage> {
                                 });
                                 return;
                             }
-                            if (!this.#messagesState.isQueryFetched) {
+                            if (
+                                !this.#messagesState.isQueryFetched &&
+                                changeEvent.event.__typename !== custom
+                            ) {
                                 observer.next({
                                     type: changeEvent.type,
                                     current: changeEvent.current.toArray(x => x).filter(filter),
@@ -515,7 +329,8 @@ export class RoomMessagesClient<TCustomMessage> {
         };
     }
 
-    static #reduce<TCustomMessage>({
+    // 'onEvent' と比べて、重複したメッセージは取り除かれるが、そのぶん処理は重め。
+    static #reduceOnQuery<TCustomMessage>({
         state,
         messages,
         events,
@@ -584,7 +399,6 @@ export class RoomMessagesClient<TCustomMessage> {
                     setMessage({ ...event, __typename: 'RoomSoundEffect' });
                     break;
                 case 'RoomPublicChannel':
-                case 'RoomPublicChannelUpdate':
                     break;
                 case 'RoomPrivateMessageUpdate': {
                     const found = messagesSet.getPrivateMessage(event.messageId);
@@ -624,8 +438,9 @@ export class RoomMessagesClient<TCustomMessage> {
                     }
                     break;
                 }
+                case 'RoomPublicChannelUpdate':
                 case 'RoomMessagesReset': {
-                    messagesSet.clear();
+                    console.warn(`${event.__typename} is deprecated.`);
                     break;
                 }
             }
@@ -635,7 +450,7 @@ export class RoomMessagesClient<TCustomMessage> {
     }
 
     onQuery(messages: RoomMessages): void {
-        const newMessages = RoomMessagesClient.#reduce<TCustomMessage>({
+        const newMessages = RoomMessagesClient.#reduceOnQuery<TCustomMessage>({
             state: this.#messages.toArray(x => x),
             messages,
             events: this.#messagesState.isQueryFetched ? [] : this.#messagesState.eventsQueue,
@@ -651,6 +466,7 @@ export class RoomMessagesClient<TCustomMessage> {
         });
     }
 
+    // `#reduceOnQuery` と比べて、重複したメッセージは取り除かれないが、そのぶん処理は軽め。
     onEvent(event: RoomMessageEventFragment): void {
         const messages = this.#messages;
         if (!this.#messagesState.isQueryFetched) {
@@ -672,13 +488,6 @@ export class RoomMessagesClient<TCustomMessage> {
             event,
         });
         if (reduced === noChange) {
-            this.#messagesChanged.next({
-                type: 'event',
-                isQueryFetched: true,
-                current: messages.clone(),
-                diff: null,
-                event,
-            });
             return;
         }
         this.#messages = reduced.messages;
