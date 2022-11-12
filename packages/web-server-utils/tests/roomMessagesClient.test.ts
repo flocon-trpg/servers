@@ -253,7 +253,6 @@ describe('RoomMessagesClient', () => {
                 type: custom,
                 value: 'TEST_MESSAGE',
                 createdAt: 1_000_000_000,
-                key: 'TEST_KEY',
             },
         ]);
         tester.expectToBeOneEvent([
