@@ -3236,7 +3236,6 @@ __metadata:
     "@flocon-trpg/rollup-config": "workspace:^"
     "@flocon-trpg/tsconfig": "workspace:^"
     "@flocon-trpg/typed-document-node-v0.7.1": "workspace:^"
-    "@flocon-trpg/utils": "workspace:^"
     "@types/jest": 29.1.2
     "@typescript-eslint/eslint-plugin": 5.39.0
     "@typescript-eslint/parser": 5.39.0
