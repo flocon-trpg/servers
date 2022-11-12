@@ -712,7 +712,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
                             ? message.value.messageId
                             : message.type === pieceLog
                             ? message.value.createdAt
-                            : keyNames(message.key, message.createdAt)
+                            : message.createdAt
                     }
                     publicChannelNames={publicChannelNames}
                     message={message}

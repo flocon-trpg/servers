@@ -246,7 +246,6 @@ describe('RoomMessagesClient', () => {
         baseClient.addCustomMessage({
             value: 'TEST_MESSAGE',
             createdAt: 1_000_000_000,
-            key: 'TEST_KEY',
         });
 
         expect(client.getCurrent()).toEqual([
@@ -262,7 +261,6 @@ describe('RoomMessagesClient', () => {
                 type: custom,
                 value: 'TEST_MESSAGE',
                 createdAt: 1_000_000_000,
-                key: 'TEST_KEY',
             },
         ]);
     });
@@ -276,7 +274,6 @@ describe('RoomMessagesClient', () => {
         baseClient.addCustomMessage({
             value: 'TEST_MESSAGE',
             createdAt: 1_000_000_000,
-            key: 'TEST_KEY',
         });
 
         expect(client.getCurrent()).toEqual([]);
@@ -507,7 +504,6 @@ describe('RoomMessagesClient', () => {
         baseClient.addCustomMessage({
             value: 'TEST_MESSAGE',
             createdAt: 1_000_000_000,
-            key: 'TEST_KEY',
         });
 
         tester.clearChanges();

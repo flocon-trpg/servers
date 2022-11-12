@@ -45,8 +45,6 @@ export type CustomMessage<T> = {
     type: typeof custom;
     value: T;
     createdAt: number;
-    /** CustomMessage ごとに異なる値をセットします。`createdAt` と `key` がともに等しい CustomMessage は同一であるとみなされます。 */
-    key: string | number;
 };
 
 export type Message<TCustomMessage> = CustomMessage<TCustomMessage> | RoomMessage;

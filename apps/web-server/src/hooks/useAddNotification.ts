@@ -13,7 +13,6 @@ export const useAddNotification = () => {
             return roomClientRef.current.value.messages.addCustomMessage({
                 value: message,
                 createdAt: new Date().getTime(),
-                key: simpleId(),
             });
         },
         [roomClientRef]
