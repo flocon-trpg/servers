@@ -41,7 +41,7 @@
         "lodash": "4.17.21",
         "prettier": "2.7.1",
         "rimraf": "3.0.2",
-        "rollup": "3.2.2",
+        "rollup": "3.3.0",
         "ts-jest": "29.0.3",
         "typescript": "4.8.4"
     },
