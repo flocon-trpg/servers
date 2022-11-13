@@ -392,12 +392,6 @@ export const SignIn: React.FC = () => {
                                         await router.push('/');
                                     })
                                     .catch((error: FirebaseError) => {
-                                        if (error.code === 'auth/admin-restricted-operation') {
-                                            setError(
-                                                '匿名認証は有効化されていないため、利用できません。'
-                                            );
-                                            return;
-                                        }
                                         setError(error);
                                     });
                             }}
@@ -410,28 +404,112 @@ export const SignIn: React.FC = () => {
         );
     }
 
-    const authErrorToString = (error: FirebaseError | string) => {
+    const authErrorToAlertProps = (
+        error: FirebaseError | string
+    ): {
+        message: React.ReactNode;
+        type: 'error' | 'warning' | 'info';
+        description: string | undefined;
+    } | null => {
         if (typeof error === 'string') {
-            return error;
+            return { message: error, type: 'error', description: undefined };
         }
+        // See https://firebase.google.com/docs/reference/js/v8/firebase.auth.Auth
         switch (error.code) {
             case 'auth/operation-not-allowed':
-                return '選択したログインプロバイダは有効化されていないため、利用できません。';
+                return {
+                    message: (
+                        <div>
+                            <p>選択したログイン方法は有効化されていないため、利用できません。</p>
+                            <p>
+                                サーバー運用者の方へ:
+                                <br />
+                                {
+                                    'このログイン方法を有効化する場合は、Firebase Authentication の管理画面にある「ログイン プロバイダ」から有効化できます。このログイン方法を有効化しない場合は、NEXT_PUBLIC_AUTH_PROVIDERS の設定でボタンを隠すこともできます。'
+                                }
+                            </p>
+                        </div>
+                    ),
+                    type: 'error',
+                    description: error.code,
+                };
+            case 'auth/cancelled-popup-request':
+                return {
+                    message:
+                        'ポップアップが複数開かれました。最後に開かれたポップアップ以外は全て自動的に閉じられます。',
+                    type: 'warning',
+                    description: error.code,
+                };
+            case 'auth/popup-blocked':
+                return {
+                    message:
+                        'ポップアップがブロックされたため、処理を実行できませんでした。ポップアップブロッカーを使っている場合は、一時的に無効化してください。',
+                    type: 'error',
+                    description: error.code,
+                };
+            case 'auth/popup-closed-by-user':
+                return {
+                    message: 'ポップアップが閉じられたため、処理は中断されました。',
+                    type: 'info',
+                    description: error.code,
+                };
+            case 'auth/unauthorized-domain':
+                return {
+                    message: (
+                        <div>
+                            <p>
+                                この Web
+                                サーバーのドメインは承認されていないため、処理を実行できません。
+                            </p>
+                            <p>
+                                サーバー運用者の方へ:
+                                <br />
+                                {
+                                    'Firebase Authentication の管理画面から、この Web サーバーのドメインを承認済みドメインに追加する必要があります。例えばこのページの URL が https://flocon.example.com/signin の場合は、flocon.example.com を承認済みドメインとして追加します。'
+                                }
+                            </p>
+                        </div>
+                    ),
+                    type: 'error',
+                    description: error.code,
+                };
+            case 'auth/wrong-password':
+                return {
+                    message: 'パスワードが誤っています。',
+                    type: 'error',
+                    description: error.code,
+                };
+            case 'auth/invalid-email':
+                return {
+                    message: '無効なメールアドレスです。',
+                    type: 'error',
+                    description: error.code,
+                };
+            case 'auth/user-not-found':
+                return {
+                    message: '該当するユーザーは見つかりませんでした。',
+                    type: 'error',
+                    description: error.code,
+                };
+            case 'auth/admin-restricted-operation':
             default:
-                return error.message;
+                return { message: error.message, type: 'error', description: error.code };
         }
     };
+
+    const alertProps = authError == null ? null : authErrorToAlertProps(authError);
 
     return (
         <Center>
             <div style={{ padding: 24 }} className={classNames(flex, flexColumn)}>
-                {authError != null && (
+                {alertProps != null && (
                     <Center>
                         <Alert
                             style={{ width: formWidth, marginBottom: 16 }}
-                            type='error'
+                            type={alertProps.type}
                             showIcon
-                            message={authErrorToString(authError)}
+                            message={alertProps.message}
+                            description={alertProps.description}
                         />
                     </Center>
                 )}
