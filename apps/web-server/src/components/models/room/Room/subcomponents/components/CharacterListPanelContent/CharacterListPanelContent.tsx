@@ -441,6 +441,9 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                         return {
                             title: <TableHeaderCell title='' rowKey={rowKey} />,
                             key: '全体公開',
+                            sorter: (x, y) =>
+                                (x.character.state.isPrivate ? 1 : 0) -
+                                (y.character.state.isPrivate ? 1 : 0),
                             width: 36,
                             // eslint-disable-next-line react/display-name
                             render: (_: unknown, { character }: DataSource) => (
