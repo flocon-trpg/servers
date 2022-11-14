@@ -43,16 +43,6 @@ export const serverTransform =
         clientOperation,
         serverOperation,
     }) => {
-        const isAuthorized = isCharacterOwner({
-            requestedBy,
-            characterId: stateAfterServerOperation.ownerCharacterId ?? anyValue,
-            currentRoomState,
-        });
-        if (!isAuthorized) {
-            // 自分以外はどのプロパティも編集できない。
-            return Result.ok(undefined);
-        }
-
         const piece = Piece.serverTransform({
             stateBeforeServerOperation: {
                 ...stateBeforeServerOperation,

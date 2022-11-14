@@ -53,10 +53,6 @@ export const serverTransform =
             characterId: stateAfterServerOperation.ownerCharacterId ?? anyValue,
             currentRoomState,
         });
-        if (!isAuthorized) {
-            // 自分以外はどのプロパティも編集できない。
-            return Result.ok(undefined);
-        }
 
         const dice = RecordOperation.serverTransform<
             State<typeof DieValueTypes.template>,

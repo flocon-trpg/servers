@@ -2,12 +2,7 @@ import { Result } from '@kizahasi/result';
 import { State, TwoWayOperation, UpOperation } from '../../../../generator';
 import { isIdRecord } from '../../../../record';
 import * as RecordOperation from '../../../../recordOperation';
-import {
-    RequestedBy,
-    anyValue,
-    canChangeOwnerParticipantId,
-    isOwner,
-} from '../../../../requestedBy';
+import { RequestedBy, canChangeOwnerParticipantId } from '../../../../requestedBy';
 import * as ReplaceOperation from '../../../../util/replaceOperation';
 import { ServerTransform } from '../../../../util/type';
 import * as Piece from '../../../piece/functions';
@@ -38,15 +33,6 @@ export const serverTransform =
         clientOperation,
         serverOperation,
     }) => {
-        const isAuthorized = isOwner({
-            requestedBy,
-            ownerParticipantId: stateAfterServerOperation.ownerParticipantId ?? anyValue,
-        });
-        if (!isAuthorized) {
-            // 自分以外はどのプロパティも編集できない。
-            return Result.ok(undefined);
-        }
-
         const piece = Piece.serverTransform({
             stateBeforeServerOperation: {
                 ...stateBeforeServerOperation,
