@@ -47,7 +47,7 @@ export const ImportBoardModal: React.FC = () => {
         <Modal
             width={800}
             title={'ボードのインポート'}
-            visible={visibility}
+            open={visibility}
             closable
             onCancel={() => setVisibility(false)}
             footer={

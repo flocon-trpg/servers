@@ -591,7 +591,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
 
     return (
         <Modal
-            visible={config != null}
+            open={config != null}
             title='タブの編集'
             closable
             onCancel={() => onClose()}

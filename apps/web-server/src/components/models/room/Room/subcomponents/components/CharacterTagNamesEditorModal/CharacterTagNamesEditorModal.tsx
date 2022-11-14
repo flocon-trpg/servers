@@ -59,7 +59,7 @@ export const CharacterTagNamesEditorModal: React.FC = () => {
             <Modal
                 title='キャラクターのタグの追加・編集・削除'
                 width={600}
-                visible={editorVisibility}
+                open={editorVisibility}
                 closable
                 onCancel={() => setEditorVisibility(false)}
                 footer={

@@ -181,7 +181,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
 
     return (
         <Modal
-            visible={visible}
+            open={visible}
             width={700}
             closable={false}
             maskClosable={!isDownloading}

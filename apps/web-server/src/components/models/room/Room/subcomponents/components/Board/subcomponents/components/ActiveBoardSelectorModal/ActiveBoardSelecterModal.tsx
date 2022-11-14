@@ -73,7 +73,7 @@ export const ActiveBoardSelectorModal: React.FC<Props> = ({ visible, onComplete 
 
     return (
         <Modal
-            visible={visible}
+            open={visible}
             title='ボードビュアーに表示させるボードの変更'
             onOk={onOk}
             okButtonProps={

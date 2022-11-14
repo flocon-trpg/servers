@@ -84,7 +84,7 @@ const BgmSimpleModal: React.FC<BgmSimpleModalProps> = ({ channelKey, visible, on
 
     return (
         <Modal
-            visible={visible}
+            open={visible}
             onCancel={onClose}
             width={stretchedModalWidth}
             footer={<DialogFooter close={{ onClick: onClose, textType: 'cancel' }} />}
@@ -177,7 +177,7 @@ const BgmPlaylistModal: React.FC<BgmPlaylistModalProps> = ({ channelKey, visible
 
     return (
         <Modal
-            visible={visible}
+            open={visible}
             onCancel={onClose}
             width={stretchedModalWidth}
             footer={
@@ -262,7 +262,7 @@ const SeModal: React.FC<SeModalProps> = ({ visible, onClose }) => {
     }
 
     return (
-        <Modal visible={visible} onCancel={onClose} width={stretchedModalWidth}>
+        <Modal open={visible} onCancel={onClose} width={stretchedModalWidth}>
             <div className={classNames(flex, flexColumn)}>
                 <VolumeBarForSoundPlayer
                     volumeBarValue={volumeInput}

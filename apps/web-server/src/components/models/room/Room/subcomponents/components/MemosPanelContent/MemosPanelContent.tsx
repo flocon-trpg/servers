@@ -75,7 +75,7 @@ const MemoBrowserModal: React.FC<{
 
     return (
         <Modal
-            visible={visible}
+            open={visible}
             onCancel={() => onClose(null)}
             footer={<DialogFooter close={{ textType: 'close', onClick: () => onClose(null) }} />}
             width={stretchedModalWidth}

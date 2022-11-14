@@ -33,7 +33,7 @@ export const FileSelectorModal: React.FC<Props> = props => {
     const { visible, onClose, defaultFileTypeFilter } = props;
     return (
         <Modal
-            visible={visible}
+            open={visible}
             width={stretchedModalWidth}
             onCancel={onClose}
             footer={<DialogFooter close={{ textType: 'close', onClick: onClose }} />}

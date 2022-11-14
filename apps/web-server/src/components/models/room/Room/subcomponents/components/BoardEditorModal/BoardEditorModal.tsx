@@ -146,7 +146,7 @@ export const BoardEditorModal: React.FC = () => {
         <Modal
             {...drawerBaseProps}
             title={modalValue?.type === create ? 'ボードの新規作成' : 'ボードの編集'}
-            visible={modalValue != null}
+            open={modalValue != null}
             closable
             onCancel={() => setModalValue(null)}
             footer={

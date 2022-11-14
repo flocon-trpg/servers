@@ -171,7 +171,7 @@ export const CommandEditorModal: React.FC = () => {
     };
 
     if (commandEditorModalType == null) {
-        return <Modal width={modalWidth} visible={false} />;
+        return <Modal width={modalWidth} open={false} />;
     }
 
     const options = () => {
@@ -230,7 +230,7 @@ export const CommandEditorModal: React.FC = () => {
     return (
         <Modal
             width={modalWidth}
-            visible
+            open
             maskClosable={false}
             onOk={() => {
                 if (character == null) {

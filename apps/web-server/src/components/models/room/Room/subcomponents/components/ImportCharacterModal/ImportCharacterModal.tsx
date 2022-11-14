@@ -47,7 +47,7 @@ export const ImportCharacterModal: React.FC = () => {
         <Modal
             width={800}
             title={'キャラクターのインポート'}
-            visible={visibility}
+            open={visibility}
             closable
             onCancel={() => setVisibility(false)}
             footer={

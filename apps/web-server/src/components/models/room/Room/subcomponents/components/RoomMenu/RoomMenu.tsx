@@ -116,7 +116,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
     if (getRoomAsListItemResult.data?.result.__typename !== 'GetRoomAsListItemSuccessResult') {
         return (
             <Modal
-                visible={visible}
+                open={visible}
                 title={title}
                 okButtonProps={{ disabled: true }}
                 onCancel={() => onCancel()}
@@ -128,7 +128,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
     if (getRoomAsListItemResult.data.result.room.requiresPlayerPassword) {
         return (
             <Modal
-                visible={visible}
+                open={visible}
                 title={title}
                 okButtonProps={{ disabled: isPosting }}
                 onOk={() => {
@@ -181,7 +181,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
     }
     return (
         <Modal
-            visible={visible}
+            open={visible}
             title={title}
             okButtonProps={{ disabled: isPosting }}
             onOk={() => {
@@ -254,7 +254,7 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
     const disabled = isPosting || !roomCreatedByMe;
     return (
         <Modal
-            visible={visible}
+            open={visible}
             title='部屋の削除'
             okButtonProps={{ disabled }}
             okType='danger'
@@ -342,7 +342,7 @@ const ResetMessagesModal: React.FC<ResetMessagesModalProps> = ({
     const disabled = isPosting || !roomCreatedByMe;
     return (
         <Modal
-            visible={visible}
+            open={visible}
             title='ログの初期化'
             okButtonProps={{ disabled }}
             okType='danger'
@@ -417,7 +417,7 @@ const PanelsOpacityModal: React.FC<{
     );
     return (
         <Modal
-            visible={visible}
+            open={visible}
             closable
             title='ウィンドウの透過度の設定'
             okButtonProps={{ style: { display: 'none' } }}
@@ -488,7 +488,7 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
 
     return (
         <Modal
-            visible={visible}
+            open={visible}
             title='名前を変更'
             okButtonProps={{ disabled: isPosting }}
             onOk={() => onOk()}

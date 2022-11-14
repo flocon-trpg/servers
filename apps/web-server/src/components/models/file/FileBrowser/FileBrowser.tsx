@@ -1546,7 +1546,7 @@ const DeleteConfirmModal: React.FC = () => {
     };
     return (
         <Modal
-            visible={isModalVisible}
+            open={isModalVisible}
             title='削除の確認'
             footer={
                 <DialogFooter
@@ -1694,7 +1694,7 @@ const RenameConfirmModal: React.FC = () => {
     };
     return (
         <Modal
-            visible={isModalVisible}
+            open={isModalVisible}
             title='移動、リネームの確認'
             footer={
                 <DialogFooter
@@ -1731,7 +1731,7 @@ const RenameInputModal: React.FC = () => {
     };
     return (
         <Modal
-            visible={state != null}
+            open={state != null}
             title='リネーム'
             onCancel={onClose}
             footer={
@@ -1795,7 +1795,7 @@ const CreateFolderModal: React.FC = () => {
 
     return (
         <Modal
-            visible={visible}
+            open={visible}
             title='新しいフォルダの作成'
             onCancel={() => setVisible(false)}
             footer={

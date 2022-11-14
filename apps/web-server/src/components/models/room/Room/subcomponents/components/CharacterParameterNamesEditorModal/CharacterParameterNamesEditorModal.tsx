@@ -249,7 +249,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
         <Modal
             title='キャラクターのパラメーター名の追加・編集・削除'
             width={600}
-            visible={editorVisibility}
+            open={editorVisibility}
             closable
             onCancel={() => setEditorVisibility(false)}
             footer={

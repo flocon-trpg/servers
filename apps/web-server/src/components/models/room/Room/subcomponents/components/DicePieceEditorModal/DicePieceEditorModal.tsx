@@ -48,7 +48,7 @@ export const DicePieceEditorModal: React.FC = () => {
     return (
         <Modal
             title={modalType?.type === update ? 'ダイスコマの編集' : 'ダイスコマの新規作成'}
-            visible={visible}
+            open={visible}
             closable
             onCancel={() => setModalType(null)}
             footer={

@@ -690,7 +690,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
             {firebaseStorageUploaderModalState && (
                 <Modal
                     title='ファイルのアップロード'
-                    visible
+                    open
                     onCancel={() => setFirebaseStorageUploaderModalState(undefined)}
                     footer={
                         <DialogFooter
@@ -714,7 +714,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
             {floconUploaderModalState && (
                 <Modal
                     title='ファイルのアップロード'
-                    visible
+                    open
                     onCancel={() => setFloconUploaderModalState(undefined)}
                     footer={
                         <DialogFooter

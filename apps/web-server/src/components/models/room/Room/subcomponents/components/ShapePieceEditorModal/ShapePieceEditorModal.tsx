@@ -54,7 +54,7 @@ export const ShapePieceEditorModal: React.FC = () => {
         <Modal
             {...drawerBaseProps}
             title={modalType?.type == update ? '図形コマの編集' : '図形コマの新規作成'}
-            visible={visible}
+            open={visible}
             closable
             onCancel={() => setModalType(null)}
             footer={

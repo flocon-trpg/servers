@@ -54,7 +54,7 @@ export const ImagePieceModal: React.FC = () => {
         <Modal
             {...drawerBaseProps}
             title={modalType?.type == update ? '画像コマの編集' : '画像コマの新規作成'}
-            visible={visible}
+            open={visible}
             closable
             onCancel={() => setModalType(null)}
             footer={
