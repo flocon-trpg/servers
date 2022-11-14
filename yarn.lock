@@ -2925,6 +2925,7 @@ __metadata:
     "@types/estree": 1.0.0
     "@types/jest": 29.1.2
     "@types/lodash.clonedeep": 4.5.7
+    "@types/lodash.shuffle": ^4.2.7
     "@types/sanitize-filename": 1.6.3
     "@types/truncate-utf8-bytes": 1.0.0
     "@typescript-eslint/eslint-plugin": 5.39.0
@@ -2934,15 +2935,18 @@ __metadata:
     eslint-import-resolver-typescript: 3.5.1
     eslint-plugin-import: 2.26.0
     fp-ts: ^2.11.8
+    immer: ^9.0.15
     io-ts: ^2.2.16
     jest: 29.1.2
     lodash.clonedeep: ^4.5.0
+    lodash.shuffle: ^4.2.0
     prettier: 2.7.1
     rimraf: 3.0.2
     rollup: 3.3.0
     sanitize-filename: ^1.6.3
     truncate-utf8-bytes: ^1.0.2
     ts-jest: 29.0.3
+    type-fest: ^3.0.0
     typescript: 4.8.4
   languageName: unknown
   linkType: soft
@@ -3125,6 +3129,29 @@ __metadata:
 "@flocon-trpg/tsconfig@workspace:^, @flocon-trpg/tsconfig@workspace:packages/tsconfig":
   version: 0.0.0-use.local
   resolution: "@flocon-trpg/tsconfig@workspace:packages/tsconfig"
+  languageName: unknown
+  linkType: soft
+
+"@flocon-trpg/typed-document-node-v0.7.11@workspace:packages/typed-document-node-v0.7.11":
+  version: 0.0.0-use.local
+  resolution: "@flocon-trpg/typed-document-node-v0.7.11@workspace:packages/typed-document-node-v0.7.11"
+  dependencies:
+    "@flocon-trpg/eslint-config": "workspace:^"
+    "@flocon-trpg/prettier-config": "workspace:^"
+    "@flocon-trpg/rollup-config": "workspace:^"
+    "@flocon-trpg/tsconfig": "workspace:^"
+    "@graphql-typed-document-node/core": ^3.1.0
+    "@typescript-eslint/eslint-plugin": 5.39.0
+    "@typescript-eslint/parser": 5.39.0
+    eslint: 8.25.0
+    eslint-config-prettier: 8.5.0
+    eslint-import-resolver-typescript: 3.5.1
+    eslint-plugin-import: 2.26.0
+    graphql: ^15.6.0
+    prettier: 2.7.1
+    rimraf: 3.0.2
+    rollup: 3.2.2
+    typescript: 4.8.4
   languageName: unknown
   linkType: soft
 
@@ -3369,6 +3396,7 @@ __metadata:
     serve: ^14.0.0
     sucrase: ^3.20.1
     tsconfig-paths-webpack-plugin: 3.5.2
+    type-fest: ^3.0.0
     typescript: 4.8.4
     url-join: ^4.0.1
     urql: ^3.0.3
@@ -6966,6 +6994,15 @@ __metadata:
   dependencies:
     "@types/lodash": "*"
   checksum: 20d6a20970b3b54b3c10cf17ace1cea49c4905d7f7cae2575a98108466e8d4c9bea3b3449d11ccaac4da1fc9bab225f477f4c2dbea8ba877cc47f629455efb69
+  languageName: node
+  linkType: hard
+
+"@types/lodash.shuffle@npm:^4.2.7":
+  version: 4.2.7
+  resolution: "@types/lodash.shuffle@npm:4.2.7"
+  dependencies:
+    "@types/lodash": "*"
+  checksum: b6417a358159982a93273a96ade01801923628bf4f288f686200501cae664d8d04deb492ec072b435a0837e6a2b671e1ae868aeaeb047242ff447fabec53d4a5
   languageName: node
   linkType: hard
 
@@ -17106,6 +17143,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lodash.shuffle@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "lodash.shuffle@npm:4.2.0"
+  checksum: 3d451e16c18cd7e7c4c265199c87f0a1fff2976b8bf14d94de20a445e76f61a5c39b62181e5660e8f3a1602518b15a3d7d54732067cdef9d446e47d1e8f48938
+  languageName: node
+  linkType: hard
+
 "lodash.sortby@npm:^4.7.0":
   version: 4.7.0
   resolution: "lodash.sortby@npm:4.7.0"
@@ -22309,6 +22353,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"rollup@npm:3.2.2":
+  version: 3.2.2
+  resolution: "rollup@npm:3.2.2"
+  dependencies:
+    fsevents: ~2.3.2
+  dependenciesMeta:
+    fsevents:
+      optional: true
+  bin:
+    rollup: dist/bin/rollup
+  checksum: c4de594630348d3dab98262c95df8b3e206abde2f9b885ee703fd33e106988a255c051c2f1ea200403365803be1e097f5ade8e220220a3179f89f4589847c69e
+  languageName: node
+  linkType: hard
+
 "rollup@npm:3.3.0":
   version: 3.3.0
   resolution: "rollup@npm:3.3.0"
@@ -24713,6 +24771,13 @@ __metadata:
   version: 2.19.0
   resolution: "type-fest@npm:2.19.0"
   checksum: a4ef07ece297c9fba78fc1bd6d85dff4472fe043ede98bd4710d2615d15776902b595abf62bd78339ed6278f021235fb28a96361f8be86ed754f778973a0d278
+  languageName: node
+  linkType: hard
+
+"type-fest@npm:^3.0.0":
+  version: 3.2.0
+  resolution: "type-fest@npm:3.2.0"
+  checksum: 2668b62e8df6ae39074c93cb1e2c267c5f8a16d0d1bb693e71f2ea0b80da14eca5442edbcc5609d1099c49a4aaecda960d7fede3d3253b4126d2c6dfeb41b8c3
   languageName: node
   linkType: hard
 

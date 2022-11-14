@@ -1,6 +1,8 @@
 import { ChangeParticipantNameResolver } from './mutations/changeParitipantName/resolver';
+import { CreateDeckTemplateResolver } from './mutations/createDeckTemplate/resolver';
 import { CreateFileTagResolver } from './mutations/createFileTag/resolver';
 import { CreateRoomResolver } from './mutations/createRoom/resolver';
+import { DeleteDeckTemplateResolver } from './mutations/deleteDeckTemplate/resolver';
 import { DeleteFileTagResolver } from './mutations/deleteFileTag/resolver';
 import { DeleteFilesResolver } from './mutations/deleteFiles/resolver';
 import { DeleteMessageResolver } from './mutations/deleteMessage/resolver';
@@ -18,11 +20,14 @@ import { PromoteToPlayerResolver } from './mutations/promoteToPlayer/resolver';
 import { RenameFilesResolver } from './mutations/renameFiles/resolver';
 import { ResetMessagesResolver } from './mutations/resetMessages/resolver';
 import { UpdateBookmarkResolver } from './mutations/updateBookmark/resolver';
+import { UpdateDeckTemplateResolver } from './mutations/updateDeckTemplate/resolver';
 import { UpdateWritingMessageStatusResolver } from './mutations/updateWritingMessageStatus/resolver';
 import { WritePrivateMessageResolver } from './mutations/writePrivateMessage/resolver';
 import { WritePublicMessageResolver } from './mutations/writePublicMessage/resolver';
 import { WriteRoomSoundEffectResolver } from './mutations/writeRoomSoundEffect/resolver';
 import { GetAvailableGameSystemsResolver } from './queries/getAvailableGameSystems/resolver';
+import { GetDeckTemplateResolver } from './queries/getDeckTemplate/resolver';
+import { GetDeckTemplatesListResolver } from './queries/getDeckTemplatesList/resolver';
 import { GetDiceHelpMessageResolver } from './queries/getDiceHelpMessage/resolver';
 import { GetFilesResolver } from './queries/getFiles/resolver';
 import { GetLogResolver } from './queries/getLog/resolver';
@@ -39,8 +44,10 @@ import { RoomEventResolver } from './subsciptions/roomEvent/resolver';
 
 export const allResolvers = [
     ChangeParticipantNameResolver,
+    CreateDeckTemplateResolver,
     CreateFileTagResolver,
     CreateRoomResolver,
+    DeleteDeckTemplateResolver,
     DeleteFilesResolver,
     DeleteFileTagResolver,
     DeleteMessageResolver,
@@ -58,12 +65,15 @@ export const allResolvers = [
     RenameFilesResolver,
     ResetMessagesResolver,
     UpdateBookmarkResolver,
+    UpdateDeckTemplateResolver,
     UpdateWritingMessageStatusResolver,
     WritePrivateMessageResolver,
     WritePublicMessageResolver,
     WriteRoomSoundEffectResolver,
 
     GetAvailableGameSystemsResolver,
+    GetDeckTemplateResolver,
+    GetDeckTemplatesListResolver,
     GetDiceHelpMessageResolver,
     GetFilesResolver,
     GetLogResolver,

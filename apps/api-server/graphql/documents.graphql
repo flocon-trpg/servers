@@ -25,6 +25,15 @@ fragment CreateRoomResult on CreateRoomResult {
     }
 }
 
+fragment DeckTemplate on DeckTemplate {
+    id
+    valueJson
+    createdAt
+    listPermission
+    updatePermission
+    deletePermission
+}
+
 fragment FileItem on FileItem {
     filename
     thumbFilename
@@ -269,6 +278,27 @@ query GetAvailableGameSystems {
     }
 }
 
+query GetDeckTemplate($id: String!) {
+    result: getDeckTemplate(id: $id) {
+        ...DeckTemplate
+    }
+}
+
+query GetDeckTemplatesList {
+    result: getDeckTemplatesList {
+        __typename
+        ... on GetDeckTemplatesListSuccessResult {
+            deckTemplates {
+                id
+                createdAt
+                listPermission
+                updatePermission
+                deletePermission
+            }
+        }
+    }
+}
+
 query GetDiceHelpMessages($id: String!) {
     result: getDiceHelpMessage(id: $id)
 }
@@ -425,6 +455,12 @@ mutation ChangeParticipantName($roomId: String!, $newName: String!) {
     }
 }
 
+mutation CreateDeckTemplate($valueJson: String!) {
+    result: createDeckTemplate(valueJson: $valueJson) {
+        ...DeckTemplate
+    }
+}
+
 mutation CreateRoom($input: CreateRoomInput!) {
     result: createRoom(input: $input) {
         __typename
@@ -435,6 +471,10 @@ mutation CreateRoom($input: CreateRoomInput!) {
             failureType
         }
     }
+}
+
+mutation DeleteDeckTemplate($deckTemplateId: String!) {
+    result: deleteDeckTemplate(deckTemplateId: $deckTemplateId)
 }
 
 mutation DeleteFiles($filenames: [String!]!) {
@@ -548,6 +588,20 @@ mutation UpdateBookmark($roomId: String!, $newValue: Boolean!) {
             currentValue
         }
         ... on UpdateBookmarkFailureResult {
+            failureType
+        }
+    }
+}
+
+mutation UpdateDeckTemplate($valueJson: String!, $deckTemplateId: String!) {
+    result: updateDeckTemplate(valueJson: $valueJson, deckTemplateId: $deckTemplateId) {
+        __typename
+        ... on UpdateDeckTemplateSuccessResult {
+            currentValue {
+                ...DeckTemplate
+            }
+        }
+        ... on UpdateDeckTemplateFailureResult {
             failureType
         }
     }

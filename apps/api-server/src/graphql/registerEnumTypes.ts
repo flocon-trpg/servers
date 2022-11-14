@@ -30,6 +30,8 @@ import { WriteRoomPublicMessageFailureType } from '../enums/WriteRoomPublicMessa
 import { WriteRoomSoundEffectFailureType } from '../enums/WriteRoomSoundEffectFailureType';
 import { WritingMessageStatusInputType } from '../enums/WritingMessageStatusInputType';
 import { WritingMessageStatusType } from '../enums/WritingMessageStatusType';
+import { PermissionType } from '@/enums/PermissionType';
+import { UpdateDeckTemplateFailureType } from '@/enums/UpdateDeckTemplateFailureType';
 
 let hasRegistered = false;
 export const registerEnumTypes = (): void => {
@@ -99,6 +101,9 @@ export const registerEnumTypes = (): void => {
         // TODO: 破壊的変更のあるアップデートの際にあわせて、'ParticipantRoleType' に変更する
         name: 'ParticipantRole',
     });
+    registerEnumType(PermissionType, {
+        name: 'PermissionType',
+    });
     registerEnumType(PieceLogType, {
         name: 'PieceLogType',
     });
@@ -116,6 +121,9 @@ export const registerEnumTypes = (): void => {
     });
     registerEnumType(UpdateBookmarkFailureType, {
         name: 'UpdateBookmarkFailureType',
+    });
+    registerEnumType(UpdateDeckTemplateFailureType, {
+        name: 'UpdateDeckTemplateFailureType',
     });
     registerEnumType(WriteRoomPrivateMessageFailureType, {
         name: 'WriteRoomPrivateMessageFailureType',

@@ -30,6 +30,7 @@ import * as ParamNames from './paramName/functions';
 import * as ParamNamesTypes from './paramName/types';
 import * as Participant from './participant/functions';
 import * as ParticipantTypes from './participant/types';
+import * as Stats from './stats/functions';
 import { template } from './types';
 
 const oneToTenArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
@@ -98,6 +99,7 @@ export const toClientState =
                 isPrivate: () => false,
                 toClientState: ({ state }) => Participant.toClientState(state),
             }),
+            stats: Stats.toClientState(source.stats),
             strParamNames: RecordOperation.toClientState({
                 serverState: source.strParamNames,
                 isPrivate: () => false,
@@ -403,6 +405,19 @@ export const serverTransform =
             return participants;
         }
 
+        const stats =
+            clientOperation.stats == null
+                ? Result.ok(undefined)
+                : Stats.serverTransform({
+                      stateBeforeServerOperation: stateBeforeServerOperation.stats ?? {},
+                      stateAfterServerOperation: stateAfterServerOperation.stats ?? {},
+                      serverOperation: serverOperation?.stats,
+                      clientOperation: clientOperation.stats,
+                  });
+        if (stats.isError) {
+            return stats;
+        }
+
         const twoWayOperation: TwoWayOperation<typeof template> = {
             $v: 2,
             $r: 1,
@@ -414,6 +429,7 @@ export const serverTransform =
             numParamNames: numParamNames.value,
             strParamNames: strParamNames.value,
             participants: participants.value,
+            stats: stats.value,
         };
 
         // activeBoardIdには、自分が作成したBoardしか設定できない。ただし、nullishにするのは誰でもできる。

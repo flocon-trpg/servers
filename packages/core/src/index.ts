@@ -89,7 +89,16 @@ export {
 
 export { OmitVersion } from './internal/ot/generator/omitVersion';
 
+export { FilePath } from './internal/ot/flocon/deckTemplate/card/types';
+
 export { toClientState, serverTransform } from './internal/ot/flocon/room/functions';
+
+export {
+    template as deckTemplateTemplate,
+    FilePath as filePath,
+} from './internal/ot/flocon/deckTemplate/types';
+
+export { serverTransform as serverTransformDeckTemplate } from './internal/ot/flocon/deckTemplate/functions';
 
 export {
     template as roomTemplate,
@@ -161,6 +170,8 @@ export {
     Type as DicePieceLog,
 } from './internal/ot/flocon/room/board/dicePiece/log';
 
+export * from './internal/ot/flocon/room/board/deckPiece/utils';
+
 export { template as imagePieceTemplate } from './internal/ot/flocon/room/board/imagePiece/types';
 
 export {
@@ -183,6 +194,8 @@ export {
 export { template as memoTemplate, Plain, Markdown } from './internal/ot/flocon/room/memo/types';
 
 export { OtError, toOtError } from './internal/ot/otError';
+
+export { create as createRoomStats } from './internal/ot/flocon/room/stats/create';
 
 export {
     DownOperation as NullableTextDownOperation,

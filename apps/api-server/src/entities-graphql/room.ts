@@ -5,6 +5,7 @@ import {
     TwoWayOperation,
     apply,
     composeDownOperation,
+    createRoomStats,
     decodeDbState,
     decodeDownOperation,
     diff,
@@ -108,11 +109,15 @@ export namespace GlobalRoom {
                         role: participantEntity?.role,
                     };
                 }
-                return {
+                const roomWithoutStats: Omit<RoomState, 'stats'> = {
                     ...result,
                     createdBy: roomEntity.createdBy,
                     name: roomEntity.name,
                     participants,
+                };
+                return {
+                    ...roomWithoutStats,
+                    stats: createRoomStats(roomWithoutStats),
                 };
             };
 

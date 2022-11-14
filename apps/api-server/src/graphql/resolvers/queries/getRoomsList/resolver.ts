@@ -10,13 +10,13 @@ import {
 } from 'type-graphql';
 import * as RoomAsListItemGlobal from '../../../../entities-graphql/roomAsListItem';
 import * as Room$MikroORM from '../../../../entities/room/entity';
-import { GetRoomFailureType } from '../../../../enums/GetRoomFailureType';
 import { ResolverContext } from '../../../../types';
 import { ENTRY } from '../../../../utils/roles';
 import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import { RoomAsListItem } from '../../../objects/room';
 import { ensureAuthorizedUser } from '../../utils/utils';
+import { GetRoomsListFailureType } from '@/enums/GetRoomsListFailureType';
 
 @ObjectType()
 class GetRoomsListSuccessResult {
@@ -26,8 +26,8 @@ class GetRoomsListSuccessResult {
 
 @ObjectType()
 class GetRoomsListFailureResult {
-    @Field(() => GetRoomFailureType)
-    public failureType!: GetRoomFailureType;
+    @Field(() => GetRoomsListFailureType)
+    public failureType!: GetRoomsListFailureType;
 }
 
 const GetRoomsListResult = createUnionType({
@@ -53,13 +53,13 @@ export class GetRoomsListResolver {
         const em = context.em;
         const authorizedUserUid = ensureAuthorizedUser(context).userUid;
 
-        // TODO: すべてを取得しているので重い
-        const roomModels = await em.find(Room$MikroORM.Room, {});
+        // TODO: すべてを取得しているので重い。pagingに対応させる。
+        const roomEntities = await em.find(Room$MikroORM.Room, {});
         const rooms = [];
-        for (const model of roomModels) {
+        for (const entity of roomEntities) {
             rooms.push(
                 await RoomAsListItemGlobal.stateToGraphQL({
-                    roomEntity: model,
+                    roomEntity: entity,
                     myUserUid: authorizedUserUid,
                 })
             );
