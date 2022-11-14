@@ -1,4 +1,3 @@
-import { simpleId } from '@flocon-trpg/core';
 import React from 'react';
 import { useLatest } from 'react-use';
 import { CombinedError } from 'urql';

@@ -17,7 +17,6 @@ import {
     Input,
     Menu,
     Modal,
-    Tabs,
     Tooltip,
 } from 'antd';
 import { ColumnType } from 'antd/lib/table';

@@ -1,6 +1,5 @@
 import { State, boardTemplate, simpleId } from '@flocon-trpg/core';
-import { Divider, InputNumber, Modal } from 'antd';
-import { DrawerProps } from 'antd/lib/drawer';
+import { Divider, InputNumber, Modal, ModalProps } from 'antd';
 import { atom, useAtom } from 'jotai';
 import React from 'react';
 import { useMemoOne } from 'use-memo-one';
@@ -36,7 +35,7 @@ export type BoardEditorModalType =
 
 export const boardEditorModalAtom = atom<BoardEditorModalType | null>(null);
 
-const drawerBaseProps: Partial<DrawerProps> = {
+const drawerBaseProps: Partial<ModalProps> = {
     width: 600,
 };
 

@@ -91,7 +91,7 @@ export const SampleModal = () => {
             break;
     }
 
-    return <Modal visible={visible}><SampleUI stateEditorParams={stateEditorParams}></Modal>
+    return <Modal open={visible}><SampleUI stateEditorParams={stateEditorParams}></Modal>
 }
 
 

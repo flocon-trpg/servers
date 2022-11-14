@@ -1,36 +1,35 @@
-import { Drawer, Input } from 'antd';
-import { DrawerProps } from 'antd/lib/drawer';
+import { Input, Modal, ModalProps } from 'antd';
 import { useAtom } from 'jotai';
 import React from 'react';
-import { editRoomDrawerVisibilityAtom } from '../../atoms/editRoomDrawerVisibilityAtom/editRoomDrawerVisibilityAtom';
+import { editRoomModalVisibilityAtom } from '../../atoms/editRoomModalVisibilityAtom/editRoomModalVisibilityAtom';
 import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { Table, TableRow } from '@/components/ui/Table/Table';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 
-const drawerBaseProps: Partial<DrawerProps> = {
+const modalProps: Partial<ModalProps> = {
     width: 600,
 };
 
-export const EditRoomDrawer: React.FC = () => {
-    const [editRoomDrawerVisibility, setEditRoomDrawerVisibility] = useAtom(
-        editRoomDrawerVisibilityAtom
+export const EditRoomModal: React.FC = () => {
+    const [editRoomModalVisibility, setEditRoomModalVisibility] = useAtom(
+        editRoomModalVisibilityAtom
     );
     const operateAsStateWithImmer = useSetRoomStateWithImmer();
     const name = useRoomStateValueSelector(state => state.name);
 
     return (
-        <Drawer
-            {...drawerBaseProps}
+        <Modal
+            {...modalProps}
             title='部屋の設定'
-            visible={editRoomDrawerVisibility}
+            open={editRoomModalVisibility}
             closable
-            onClose={() => setEditRoomDrawerVisibility(false)}
+            onCancel={() => setEditRoomModalVisibility(false)}
             footer={
                 <DialogFooter
                     close={{
                         textType: 'close',
-                        onClick: () => setEditRoomDrawerVisibility(false),
+                        onClick: () => setEditRoomModalVisibility(false),
                     }}
                 />
             }
@@ -48,6 +47,6 @@ export const EditRoomDrawer: React.FC = () => {
                     />
                 </TableRow>
             </Table>
-        </Drawer>
+        </Modal>
     );
 };

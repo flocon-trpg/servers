@@ -1,5 +1,4 @@
-import { Modal } from 'antd';
-import { DrawerProps } from 'antd/lib/drawer';
+import { Modal, ModalProps } from 'antd';
 import { atom, useAtom } from 'jotai';
 import React from 'react';
 import { Subject } from 'rxjs';
@@ -12,7 +11,7 @@ import { PieceModalState } from '@/utils/types';
 
 export const shapePieceModalAtom = atom<PieceModalState | null>(null);
 
-const drawerBaseProps: Partial<DrawerProps> = {
+const modalBaseProps: Partial<ModalProps> = {
     width: 600,
 };
 
@@ -52,7 +51,7 @@ export const ShapePieceEditorModal: React.FC = () => {
 
     return (
         <Modal
-            {...drawerBaseProps}
+            {...modalBaseProps}
             title={modalType?.type == update ? '図形コマの編集' : '図形コマの新規作成'}
             open={visible}
             closable

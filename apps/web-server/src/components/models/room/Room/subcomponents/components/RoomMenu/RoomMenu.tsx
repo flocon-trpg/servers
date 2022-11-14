@@ -22,7 +22,7 @@ import { useUpdateAtom } from 'jotai/utils';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { useMutation, useQuery } from 'urql';
-import { editRoomDrawerVisibilityAtom } from '../../atoms/editRoomDrawerVisibilityAtom/editRoomDrawerVisibilityAtom';
+import { editRoomModalVisibilityAtom } from '../../atoms/editRoomModalVisibilityAtom/editRoomModalVisibilityAtom';
 import { useMe } from '../../hooks/useMe';
 import { useRoomId } from '../../hooks/useRoomId';
 import { GenerateLogModal } from './subcomponents/components/GenerageLogModal/GenerateLogModal';
@@ -1054,7 +1054,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
     const [isResetMessagesModalVisible, setIsResetMessagesModalVisible] = React.useState(false);
     const [isGenerateLogModalVisible, setIsGenerateSimpleLogModalVisible] = React.useState(false);
     const [fileSelectorModalVisible, setFileSelectorModalVisible] = React.useState(false);
-    const setEditRoomDrawerVisibility = useUpdateAtom(editRoomDrawerVisibilityAtom);
+    const setEditRoomModalVisibility = useUpdateAtom(editRoomModalVisibilityAtom);
 
     const panelsMenuItem = usePanelsMenuItem();
 
@@ -1075,7 +1075,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
                     {
                         key: '編集@menu',
                         label: '編集',
-                        onClick: () => setEditRoomDrawerVisibility(true),
+                        onClick: () => setEditRoomModalVisibility(true),
                     },
                     {
                         key: '削除@menu',
@@ -1261,7 +1261,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
         isResetMessagesModalVisible,
         isGenerateLogModalVisible,
         router,
-        setEditRoomDrawerVisibility,
+        setEditRoomModalVisibility,
         setShowBackgroundBoardViewerAtom,
         leaveRoomMutation,
         signOut,

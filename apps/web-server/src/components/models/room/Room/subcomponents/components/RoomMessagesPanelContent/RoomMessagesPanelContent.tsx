@@ -23,7 +23,6 @@ import {
     Alert,
     Button,
     Checkbox,
-    Drawer,
     Dropdown,
     Input,
     Menu,
@@ -96,7 +95,7 @@ const useParticipantsAsRecord = () => {
 const roomMessageFontSizeDeltaAtom = atom(get => get(userConfigAtom)?.roomMessagesFontSizeDelta);
 const chatInputDirectionAtom = atom(get => get(userConfigAtom)?.chatInputDirection);
 
-type TabEditorDrawerProps = {
+type TabEditorModalProps = {
     // これがundefinedの場合、Drawerのvisibleがfalseとみなされる。
     config?: MessageTabConfig;
 
@@ -104,7 +103,7 @@ type TabEditorDrawerProps = {
     onClose: () => void;
 };
 
-const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerProps) => {
+const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProps) => {
     const { config, onChange: onChangeCore, onClose } = props;
 
     const firebaseUser = useAtomValue(firebaseUserValueAtom);
@@ -145,12 +144,12 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
     }
 
     return (
-        <Drawer
+        <Modal
             className={cancelRnd}
-            visible={config != null}
+            open={config != null}
             title='タブの編集'
             closable
-            onClose={() => onClose()}
+            onCancel={() => onClose()}
             width={500}
             footer={
                 <DialogFooter
@@ -339,7 +338,7 @@ const TabEditorDrawer: React.FC<TabEditorDrawerProps> = (props: TabEditorDrawerP
                     )}
                 </TableRow>
             </Table>
-        </Drawer>
+        </Modal>
     );
 };
 
@@ -357,12 +356,12 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (
     const operateAsStateWithImmer = useSetRoomStateWithImmer();
 
     return (
-        <Drawer
+        <Modal
             className={cancelRnd}
-            visible={visible}
+            open={visible}
             title='チャンネル名の編集'
             closable
-            onClose={() => onClose()}
+            onCancel={() => onClose()}
             width={500}
             footer={
                 <DialogFooter
@@ -397,7 +396,7 @@ const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (
                     );
                 })}
             </Table>
-        </Drawer>
+        </Modal>
     );
 };
 
@@ -977,7 +976,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
         <div
             style={{ display: 'flex', flexDirection: 'column', height: '100%', margin: '2px 4px' }}
         >
-            <TabEditorDrawer
+            <TabEditorModal
                 config={editingTabConfig}
                 onClose={() => setEditingTabConfigKey(undefined)}
                 onChange={newValue => {

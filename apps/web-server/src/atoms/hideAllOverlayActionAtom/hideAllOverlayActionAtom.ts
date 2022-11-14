@@ -2,7 +2,7 @@ import { atom } from 'jotai';
 import { boardContextMenuAtom } from '@/components/models/room/Room/subcomponents/atoms/boardContextMenuAtom/boardContextMenuAtom';
 import { boardPopoverEditorAtom } from '@/components/models/room/Room/subcomponents/atoms/boardPopoverEditorAtom/boardPopoverEditorAtom';
 import { boardTooltipAtom } from '@/components/models/room/Room/subcomponents/atoms/boardTooltipAtom/boardTooltipAtom';
-import { editRoomDrawerVisibilityAtom } from '@/components/models/room/Room/subcomponents/atoms/editRoomDrawerVisibilityAtom/editRoomDrawerVisibilityAtom';
+import { editRoomModalVisibilityAtom } from '@/components/models/room/Room/subcomponents/atoms/editRoomModalVisibilityAtom/editRoomModalVisibilityAtom';
 import { boardEditorModalAtom } from '@/components/models/room/Room/subcomponents/components/BoardEditorModal/BoardEditorModal';
 import { characterEditorModalAtom } from '@/components/models/room/Room/subcomponents/components/CharacterEditorModal/CharacterEditorModal';
 import { characterParameterNamesEditorVisibilityAtom } from '@/components/models/room/Room/subcomponents/components/CharacterParameterNamesEditorModal/CharacterParameterNamesEditorModal';
@@ -17,7 +17,7 @@ export const hideAllOverlayActionAtom = atom<null, void>(null, (get, set) => {
     set(characterParameterNamesEditorVisibilityAtom, false);
     set(commandEditorModalAtom, null);
     set(dicePieceModalAtom, null);
-    set(editRoomDrawerVisibilityAtom, false);
+    set(editRoomModalVisibilityAtom, false);
     set(imagePieceModalAtom, null);
     set(stringPieceModalAtom, null);
 

@@ -20,7 +20,7 @@ import { CharacterTagNamesEditorModal } from './subcomponents/components/Charact
 import { ChatPalettePanelContent } from './subcomponents/components/ChatPalettePanelContent/ChatPalettePanelContent';
 import { CommandEditorModal } from './subcomponents/components/CommandEditorModal/CommandEditorModal';
 import { DicePieceEditorModal } from './subcomponents/components/DicePieceEditorModal/DicePieceEditorModal';
-import { EditRoomDrawer } from './subcomponents/components/EditRoomDrawer/EditRoomDrawer';
+import { EditRoomModal } from './subcomponents/components/EditRoomModal/EditRoomModal';
 import { ImagePieceModal } from './subcomponents/components/ImagePieceModal/ImagePieceModal';
 import { ImportBoardModal } from './subcomponents/components/ImportBoardModal/ImportBoardModal';
 import { ImportCharacterModal } from './subcomponents/components/ImportCharacterModal/ImportCharacterModal';
@@ -993,7 +993,7 @@ export const Room: React.FC<Props> = ({ debug }) => {
                 <ShapePieceEditorModal />
                 <StringPieceEditorModal />
                 <CharacterParameterNamesEditorModal />
-                <EditRoomDrawer />
+                <EditRoomModal />
                 <ImportBoardModal />
                 <ImportCharacterModal />
 
