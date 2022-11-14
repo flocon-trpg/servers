@@ -31,7 +31,6 @@ import {
     Popover,
     Radio,
     Select,
-    Tabs,
     Tooltip,
 } from 'antd';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
@@ -78,6 +77,7 @@ import { firebaseUserValueAtom } from '@/pages/_app';
 import { Styles } from '@/styles';
 import { cancelRnd, flex, flexColumn, flexNone, flexRow, itemsCenter } from '@/styles/className';
 import { moveElement } from '@/utils/moveElement';
+import { AntdTab } from '@/utils/types';
 import { defaultTriggerSubMenuAction } from '@/utils/variables';
 
 const headerHeight = 20;
@@ -829,7 +829,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
             return undefined;
         }
 
-        const createTabPane = (tab: MessageTabConfig, tabIndex: number) => {
+        const createTabItem = (tab: MessageTabConfig, tabIndex: number) => {
             const onTabDelete = () => {
                 Modal.warn({
                     onOk: () => {
@@ -851,76 +851,75 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                 });
             };
 
-            return (
-                <Tabs.TabPane
-                    key={tab.key}
-                    tabKey={tab.key}
-                    closable={false}
-                    style={{ backgroundColor: Styles.chatBackgroundColor }}
-                    tab={
-                        <div
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'row',
-                                justifyItems: 'center',
-                            }}
-                        >
-                            <div style={{ flex: '0 0 auto', maxWidth: 100 }}>
-                                <MessageTabName tabConfig={tab} />
-                            </div>
-                            <div style={{ flex: 1 }} />
-                            <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>
-                                <Dropdown
-                                    trigger={['click']}
-                                    overlay={
-                                        <Menu
-                                            items={[
-                                                {
-                                                    key: '編集@RoomMessages',
-                                                    label: '編集',
-                                                    icon: <Icon.SettingOutlined />,
-                                                    onClick: () => setEditingTabConfigKey(tab.key),
-                                                },
-                                                {
-                                                    key: '削除@RoomMessages',
-                                                    label: '削除',
-                                                    icon: <Icon.DeleteOutlined />,
-                                                    onClick: () => onTabDelete(),
-                                                },
-                                            ]}
-                                            triggerSubMenuAction={defaultTriggerSubMenuAction}
-                                        />
-                                    }
-                                >
-                                    <Button
-                                        style={{
-                                            width: 18,
-                                            minWidth: 18,
-
-                                            // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
-                                            padding: '0 2px',
-                                        }}
-                                        type='text'
-                                        size='small'
-                                        onClick={e => e.stopPropagation()}
-                                    >
-                                        <Icon.EllipsisOutlined />
-                                    </Button>
-                                </Dropdown>
-                            </div>
+            const result: AntdTab = {
+                key: tab.key,
+                tabKey: tab.key,
+                closable: false,
+                style: { backgroundColor: Styles.chatBackgroundColor },
+                label: (
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyItems: 'center',
+                        }}
+                    >
+                        <div style={{ flex: '0 0 auto', maxWidth: 100 }}>
+                            <MessageTabName tabConfig={tab} />
                         </div>
-                    }
-                >
-                    <MessageTabPane config={tab} contentHeight={contentHeight} />
-                </Tabs.TabPane>
-            );
+                        <div style={{ flex: 1 }} />
+                        <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>
+                            <Dropdown
+                                trigger={['click']}
+                                overlay={
+                                    <Menu
+                                        items={[
+                                            {
+                                                key: '編集@RoomMessages',
+                                                label: '編集',
+                                                icon: <Icon.SettingOutlined />,
+                                                onClick: () => setEditingTabConfigKey(tab.key),
+                                            },
+                                            {
+                                                key: '削除@RoomMessages',
+                                                label: '削除',
+                                                icon: <Icon.DeleteOutlined />,
+                                                onClick: () => onTabDelete(),
+                                            },
+                                        ]}
+                                        triggerSubMenuAction={defaultTriggerSubMenuAction}
+                                    />
+                                }
+                            >
+                                <Button
+                                    style={{
+                                        width: 18,
+                                        minWidth: 18,
+
+                                        // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
+                                        padding: '0 2px',
+                                    }}
+                                    type='text'
+                                    size='small'
+                                    onClick={e => e.stopPropagation()}
+                                >
+                                    <Icon.EllipsisOutlined />
+                                </Button>
+                            </Dropdown>
+                        </div>
+                    </div>
+                ),
+                children: <MessageTabPane config={tab} contentHeight={contentHeight} />,
+            };
+            return result;
         };
 
-        const tabPanels =
-            contentHeight <= 0 ? null : tabs.map((tab, tabIndex) => createTabPane(tab, tabIndex));
+        const tabItems =
+            contentHeight <= 0 ? [] : tabs.map((tab, tabIndex) => createTabItem(tab, tabIndex));
 
         return (
             <DraggableTabs
+                items={tabItems}
                 style={{ flexBasis: `${tabsHeight}px`, margin: `0 ${marginX}px 4px ${marginX}px` }}
                 dndType={`MessagePanelTab@${panelId}`}
                 type='editable-card'
@@ -966,9 +965,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                         messagePanel.tabs.push(MessageTabConfigUtils.createEmpty({}));
                     });
                 }}
-            >
-                {tabPanels}
-            </DraggableTabs>
+            />
         );
     }, [contentHeight, editingTabConfigKey, panelId, setRoomConfig, tabs, tabsHeight]);
 

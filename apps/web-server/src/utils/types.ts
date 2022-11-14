@@ -1,3 +1,4 @@
+import { TabsProps } from 'antd';
 import { create, update } from './constants';
 import { PixelPosition } from '@/components/models/room/Room/subcomponents/utils/positionAndSizeAndRect';
 
@@ -75,3 +76,7 @@ export type PieceModalState =
       };
 
 export type SetAction<State> = State | ((prevState: State) => State);
+
+type ArrayType<T> = T extends Array<infer U> ? U : never;
+
+export type AntdTab = ArrayType<NonNullable<TabsProps['items']>>;

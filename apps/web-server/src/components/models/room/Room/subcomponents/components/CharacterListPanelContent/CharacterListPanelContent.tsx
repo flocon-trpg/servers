@@ -62,6 +62,7 @@ import { cancelRnd, flex, flexRow, itemsCenter } from '@/styles/className';
 import { create } from '@/utils/constants';
 import { KeySorter } from '@/utils/keySorter';
 import { moveElement } from '@/utils/moveElement';
+import { AntdTab } from '@/utils/types';
 import { defaultTriggerSubMenuAction } from '@/utils/variables';
 
 type CharacterState = State<typeof characterTemplate>;
@@ -666,88 +667,86 @@ const CharacterListPanelWithPanelId: React.FC<{
     const [editingTabConfigKey, setEditingTabConfigKey] = React.useState<string | undefined>();
 
     return React.useMemo(() => {
-        const tabPanes = (tabs ?? []).map((tab, tabIndex) => {
-            return (
-                <Tabs.TabPane
-                    key={tab.key}
-                    tabKey={tab.key}
-                    style={{ overflowY: 'scroll' }}
-                    closable={false}
-                    tab={
-                        <div
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'row',
-                                justifyItems: 'center',
-                            }}
-                        >
-                            <div style={{ flex: '0 0 auto', maxWidth: 100 }}>
-                                <CharacterTabName tabConfig={tab} />
-                            </div>
-                            <div style={{ flex: 1 }} />
-                            <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>
-                                <Dropdown
-                                    trigger={['click']}
-                                    overlay={
-                                        <Menu
-                                            items={[
-                                                {
-                                                    key: `編集@${panelId}@CharacterList`,
-                                                    icon: <Icon.SettingOutlined />,
-                                                    label: '編集',
-                                                    onClick: () => setEditingTabConfigKey(tab.key),
-                                                },
-                                                {
-                                                    key: `削除@${panelId}@CharacterList`,
-                                                    icon: <Icon.DeleteOutlined />,
-                                                    label: '削除',
-                                                    onClick: () =>
-                                                        Modal.warn({
-                                                            onOk: () => {
-                                                                setRoomConfig(roomConfig => {
-                                                                    if (roomConfig == null) {
-                                                                        return;
-                                                                    }
-                                                                    roomConfig.panels.characterPanel.tabs.splice(
-                                                                        tabIndex,
-                                                                        1
-                                                                    );
-                                                                });
-                                                            },
-                                                            okCancel: true,
-                                                            maskClosable: true,
-                                                            closable: true,
-                                                            content:
-                                                                'タブを削除します。よろしいですか？',
-                                                        }),
-                                                },
-                                            ]}
-                                            triggerSubMenuAction={defaultTriggerSubMenuAction}
-                                        />
-                                    }
-                                >
-                                    <Button
-                                        style={{
-                                            width: 18,
-                                            minWidth: 18,
-
-                                            // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
-                                            padding: '0 2px',
-                                        }}
-                                        type='text'
-                                        size='small'
-                                        onClick={e => e.stopPropagation()}
-                                    >
-                                        <Icon.EllipsisOutlined />
-                                    </Button>
-                                </Dropdown>
-                            </div>
+        const tabItems = (tabs ?? []).map((tab, tabIndex) => {
+            const result: AntdTab = {
+                key: tab.key,
+                tabKey: tab.key,
+                style: { overflowY: 'scroll' },
+                closable: false,
+                label: (
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyItems: 'center',
+                        }}
+                    >
+                        <div style={{ flex: '0 0 auto', maxWidth: 100 }}>
+                            <CharacterTabName tabConfig={tab} />
                         </div>
-                    }
-                >
-                    <CharacterListTabPane tabConfig={tab} />
-                </Tabs.TabPane>
-            );
+                        <div style={{ flex: 1 }} />
+                        <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>
+                            <Dropdown
+                                trigger={['click']}
+                                overlay={
+                                    <Menu
+                                        items={[
+                                            {
+                                                key: `編集@${panelId}@CharacterList`,
+                                                icon: <Icon.SettingOutlined />,
+                                                label: '編集',
+                                                onClick: () => setEditingTabConfigKey(tab.key),
+                                            },
+                                            {
+                                                key: `削除@${panelId}@CharacterList`,
+                                                icon: <Icon.DeleteOutlined />,
+                                                label: '削除',
+                                                onClick: () =>
+                                                    Modal.warn({
+                                                        onOk: () => {
+                                                            setRoomConfig(roomConfig => {
+                                                                if (roomConfig == null) {
+                                                                    return;
+                                                                }
+                                                                roomConfig.panels.characterPanel.tabs.splice(
+                                                                    tabIndex,
+                                                                    1
+                                                                );
+                                                            });
+                                                        },
+                                                        okCancel: true,
+                                                        maskClosable: true,
+                                                        closable: true,
+                                                        content:
+                                                            'タブを削除します。よろしいですか？',
+                                                    }),
+                                            },
+                                        ]}
+                                        triggerSubMenuAction={defaultTriggerSubMenuAction}
+                                    />
+                                }
+                            >
+                                <Button
+                                    style={{
+                                        width: 18,
+                                        minWidth: 18,
+
+                                        // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
+                                        padding: '0 2px',
+                                    }}
+                                    type='text'
+                                    size='small'
+                                    onClick={e => e.stopPropagation()}
+                                >
+                                    <Icon.EllipsisOutlined />
+                                </Button>
+                            </Dropdown>
+                        </div>
+                    </div>
+                ),
+                children: <CharacterListTabPane tabConfig={tab} />,
+            };
+            return result;
         });
 
         return (
@@ -798,6 +797,7 @@ const CharacterListPanelWithPanelId: React.FC<{
                     </Button>
                 </div>
                 <DraggableTabs
+                    items={tabItems}
                     // キャラクターウィンドウは最大で1個までしか存在しないため、静的な値で構わない
                     dndType='CharacterListTabs'
                     type='editable-card'
@@ -841,9 +841,7 @@ const CharacterListPanelWithPanelId: React.FC<{
                             );
                         });
                     }}
-                >
-                    {tabPanes}
-                </DraggableTabs>
+                />
             </div>
         );
     }, [
