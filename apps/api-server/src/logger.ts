@@ -6,8 +6,9 @@ import { LogConfig } from './config/types';
 export const notice = 'notice';
 
 export type Pino = Logger;
-
 const defaultTransport = './transport/defaultTransport.js';
+
+let isInitialized = false;
 
 // LOG_LEVELがパースできなかった場合などはinitializeLoggerが実行されていない状態でエラーを通知する必要がある。その際にuninitializedLoggerが使われる。
 const createUninitializeLogger = () => {
@@ -16,12 +17,15 @@ const createUninitializeLogger = () => {
     });
 };
 
-let isInitialized = false;
-loggerRef.value = createUninitializeLogger();
-
 /** `get()`を実行することでloggerを取得できます。 */
 export const logger = {
     get() {
+        if (!isInitialized) {
+            isInitialized = true;
+            // テストでは ts-jest が使われるため、./transport/defaultTransport.js は存在しない。そのため、ここに来るとエラーになる。
+            // テストの場合は事前に initializeLogger を実行しておく必要がある。
+            loggerRef.value = createUninitializeLogger();
+        }
         return loggerRef.value;
     },
     /** `get().trace` と同じです。 */
@@ -61,7 +65,7 @@ export const logger = {
     },
 };
 
-/** loggerを準備します。この関数を実行せずにロギングが行われる場合、デフォルトのロガーが使われます。複数回実行するとwanrのログが出力されます。 */
+/** loggerを準備します。この関数を実行せずにロギングが行われる場合、デフォルトのロガーが使われます。複数回実行するとwarnのログが出力されます。 */
 export const initializeLogger = (logConfigResult: Result<LogConfig>) => {
     if (isInitialized) {
         logger.warn('initializeLogger was called multiple times.');
