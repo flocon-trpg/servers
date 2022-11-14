@@ -1,3 +1,4 @@
+import { loggerRef } from '@flocon-trpg/utils';
 import { StateManagerCore } from './stateManagerCore';
 import { StateManagerHistoryQueue } from './stateManagerHistoryQueue';
 import { StateManagerParameters } from './types';
@@ -67,6 +68,7 @@ export class StateManager<TState, TOperation> {
             throw new Error('this.requiresReload === true');
         }
 
+        loggerRef.value.debug({ operation, revisionTo }, 'StateManager.onOtherClientGet');
         this._history?.beforeOtherClientsGet(this, operation, revisionTo);
         this.core.onGet(operation, revisionTo, false);
         this._history?.afterOtherClientsGet(this);
@@ -77,13 +79,16 @@ export class StateManager<TState, TOperation> {
             throw new Error('this.requiresReload === true');
         }
 
+        loggerRef.value.debug({ state }, 'StateManager.setUiState');
         this._history?.operateAsState(this, state);
         this.core.setUiState(state);
     }
 
     // このメソッドは「setUiStateを使えばよい」と判断して一時削除していたが、Operationを書いて適用させたいという場面が少なくなく、必要なapply関数もStateManager内部で保持しているため復帰させた。
     public setUiStateByApply(operation: TOperation): void {
+        loggerRef.value.debug({ operation }, 'StateManager.setUiStateByApply');
         const newState = this.params.apply({ state: this.uiState, operation });
+        loggerRef.value.debug({ newState }, 'StateManager.setUiStateByApply');
         this.setUiState(newState);
     }
 
@@ -94,8 +99,10 @@ export class StateManager<TState, TOperation> {
 
         this._history?.beforePost(this);
         const toPost = this.core.post();
+        loggerRef.value.debug({ toPost }, 'StateManager.post begin');
         this._history?.beginPost(this, toPost);
         if (toPost === undefined) {
+            loggerRef.value.debug('StateManager.post is finished because toPost is undefined.');
             return undefined;
         }
         let isOnPostedExecuted = false;
@@ -107,11 +114,19 @@ export class StateManager<TState, TOperation> {
             switch (onPosted.isSuccess) {
                 case true:
                     if (onPosted.isId) {
+                        loggerRef.value.debug(
+                            { onPosted },
+                            'StateManager.post is completing as id'
+                        );
                         this._history?.beforeEndPostAsId(this, onPosted.requestId);
                         this.core.endPostAsId(onPosted.requestId);
                         this._history?.afterEndPostAsId(this);
                         return;
                     }
+                    loggerRef.value.debug(
+                        { onPosted },
+                        'StateManager.post is completing as non-id'
+                    );
                     this._history?.beforeEndPostAsSuccess(
                         this,
                         onPosted.result,
@@ -121,11 +136,19 @@ export class StateManager<TState, TOperation> {
                     this._history?.afterEndPostAsSuccess(this);
                     return;
                 case false:
+                    loggerRef.value.debug(
+                        { onPosted },
+                        'StateManager.post is completing as non-success'
+                    );
                     this._history?.beforeEndPostAsNotSuccess(this);
                     this.core.cancelPost();
                     this._history?.afterEndPostAsNotSuccess(this);
                     return;
                 case null:
+                    loggerRef.value.debug(
+                        { onPosted },
+                        'StateManager.post is completing as unknown result'
+                    );
                     this._history?.endPostAsUnknown(this);
                     this._requiresReload = true;
                     return;

@@ -22,7 +22,9 @@
     },
     "dependencies": {
         "@kizahasi/option": "^1.0.0",
-        "@kizahasi/result": "^1.0.1"
+        "@kizahasi/result": "^1.0.1",
+        "browser-or-node": "^2.0.0",
+        "pino": "^8.6.1"
     },
     "devDependencies": {
         "@flocon-trpg/eslint-config": "workspace:^",

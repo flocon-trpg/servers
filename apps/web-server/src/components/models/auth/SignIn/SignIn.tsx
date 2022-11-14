@@ -182,7 +182,7 @@ const Email: React.FC = () => {
                                             auth,
                                             email
                                         ).catch((err: FirebaseError) => {
-                                            console.error('fetchSignInMethodsForEmail', err);
+                                            setError(err);
                                             return null;
                                         });
 

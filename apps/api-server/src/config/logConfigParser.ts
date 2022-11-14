@@ -1,3 +1,4 @@
+import { parsePinoLogLevel } from '@flocon-trpg/utils';
 import { Ok, Result } from '@kizahasi/result';
 import { LevelWithSilent } from 'pino';
 import { LOG_FORMAT, LOG_LEVEL } from '../env';
@@ -48,22 +49,7 @@ export class LogConfigParser {
             return undefined;
         }
 
-        const value = logLevel.toLowerCase().trim();
-        switch (value) {
-            case 'fatal':
-            case 'error':
-            case 'warn':
-            case 'info':
-            case 'debug':
-            case 'trace':
-            case 'silent': {
-                return Result.ok(value);
-            }
-        }
-
-        return Result.error(
-            `${LOG_LEVEL} is invalid. Supported values: "fatal", "error", "warn", "info", "debug", "trace", "silent".`
-        );
+        return parsePinoLogLevel(logLevel, LOG_LEVEL);
     }
 
     private createLogConfig(): Result<LogConfig> {

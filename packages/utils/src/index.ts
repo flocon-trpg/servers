@@ -21,6 +21,7 @@ export { DeletableTree } from './internal/deletableTree';
 export { filterInt } from './internal/filterInt';
 export { parseStringToBoolean, parseStringToBooleanError } from './internal/parseStringToBoolean';
 export { keyNames } from './internal/keyNames';
+export { loggerRef } from './internal/logger';
 export { MultiKeyMap } from './internal/multiKeyMap';
 export { MultiValueSet } from './internal/multiValueSet';
 export {
@@ -32,6 +33,7 @@ export { groupJoinArray } from './internal/groupJoinArray';
 export { groupJoinMap } from './internal/groupJoinMap';
 export { groupJoinSet } from './internal/groupJoinSet';
 export { parseEnvListValue } from './internal/parseEnvListValue';
+export { parsePinoLogLevel, PinoLogLevel } from './internal/parsePinoLogLevel';
 export {
     getExactlyOneKey,
     chooseDualKeyRecord,
