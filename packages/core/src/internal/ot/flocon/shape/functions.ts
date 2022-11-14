@@ -19,10 +19,28 @@ export const serverTransform: ServerTransform<
         $r: 1,
     };
 
+    twoWayOperation.fill = ReplaceOperation.serverTransform({
+        first: serverOperation?.fill,
+        second: clientOperation.fill,
+        prevState: stateBeforeServerOperation.fill,
+    });
+
     twoWayOperation.shape = ReplaceOperation.serverTransform({
         first: serverOperation?.shape,
         second: clientOperation.shape,
         prevState: stateBeforeServerOperation.shape,
+    });
+
+    twoWayOperation.stroke = ReplaceOperation.serverTransform({
+        first: serverOperation?.stroke,
+        second: clientOperation.stroke,
+        prevState: stateBeforeServerOperation.stroke,
+    });
+
+    twoWayOperation.strokeWidth = ReplaceOperation.serverTransform({
+        first: serverOperation?.strokeWidth,
+        second: clientOperation.strokeWidth,
+        prevState: stateBeforeServerOperation.strokeWidth,
     });
 
     if (isIdRecord(twoWayOperation)) {
