@@ -127,11 +127,14 @@ export const StringPieceEditor: React.FC<{
                     const boardId = updateMode.boardId;
                     const pieceId = updateMode.pieceId;
                     setRoomState(roomState => {
-                        const stringPieces = roomState.boards?.[boardId]?.stringPieces;
-                        if (stringPieces == null) {
+                        const board = roomState.boards?.[boardId];
+                        if (board == null) {
                             return;
                         }
-                        stringPieces[pieceId] = newState;
+                        if (board.stringPieces == null) {
+                            board.stringPieces = {};
+                        }
+                        board.stringPieces[pieceId] = newState;
                     });
                 },
             };

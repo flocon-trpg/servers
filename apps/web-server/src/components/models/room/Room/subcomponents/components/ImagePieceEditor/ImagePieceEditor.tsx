@@ -124,11 +124,14 @@ export const ImagePieceEditor: React.FC<{
                     const boardId = updateMode.boardId;
                     const pieceId = updateMode.pieceId;
                     setRoomState(roomState => {
-                        const imagePieces = roomState.boards?.[boardId]?.imagePieces;
-                        if (imagePieces == null) {
+                        const board = roomState.boards?.[boardId];
+                        if (board == null) {
                             return;
                         }
-                        imagePieces[pieceId] = newState;
+                        if (board.imagePieces == null) {
+                            board.imagePieces = {};
+                        }
+                        board.imagePieces[pieceId] = newState;
                     });
                 },
             };

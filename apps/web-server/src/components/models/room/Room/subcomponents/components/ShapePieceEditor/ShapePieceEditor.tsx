@@ -109,11 +109,14 @@ export const ShapePieceEditor: React.FC<{
                     }
                     const id = simpleId();
                     setRoomState(roomState => {
-                        const shapePieces = roomState.boards?.[createMode.boardId]?.shapePieces;
-                        if (shapePieces == null) {
+                        const board = roomState.boards?.[createMode.boardId];
+                        if (board == null) {
                             return;
                         }
-                        shapePieces[id] = { ...newState, ownerParticipantId: myUserUid };
+                        if (board.shapePieces == null) {
+                            board.shapePieces = {};
+                        }
+                        board.shapePieces[id] = { ...newState, ownerParticipantId: myUserUid };
                     });
                 },
             };

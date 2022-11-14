@@ -131,11 +131,14 @@ export const DicePieceEditor: React.FC<{
                 }
                 const { boardId, pieceId } = updateModeProp;
                 setRoomState(roomState => {
-                    const dicePieces = roomState.boards?.[boardId]?.dicePieces;
-                    if (dicePieces == null) {
+                    const board = roomState.boards?.[boardId];
+                    if (board == null) {
                         return;
                     }
-                    dicePieces[pieceId] = newState;
+                    if (board.dicePieces == null) {
+                        board.dicePieces = {};
+                    }
+                    board.dicePieces[pieceId] = newState;
                 });
             },
         };
