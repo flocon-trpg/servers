@@ -18,7 +18,7 @@ import { VolumeBar } from '@/components/ui/VolumeBar/VolumeBar';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 import { Styles } from '@/styles';
 import { flex, flexColumn, flexRow, itemsCenter } from '@/styles/className';
-import { FilePathLike, FilePathModule } from '@/utils/file/filePath';
+import { FilePathModule } from '@/utils/file/filePath';
 import { sound } from '@/utils/fileType';
 import { setStateWithImmer } from '@/utils/setStateWithImmer';
 import { stretchedModalWidth } from '@/utils/variables';
@@ -28,10 +28,6 @@ type BgmState = State<typeof bgmTemplate>;
 const maxWidthOfLink = 300;
 const defaultVolume = 0.5;
 const initBgmState: BgmState = { $v: 1, $r: 1, isPaused: true, files: [], volume: defaultVolume };
-
-const toKey = (source: FilePathLike): string => {
-    return keyNames('SoundPlayer', source.sourceType, source.path);
-};
 
 type VolumeBarForSoundPlayerProps = {
     volumeBarValue: number;
@@ -155,7 +151,11 @@ const BgmPlaylistModal: React.FC<BgmPlaylistModalProps> = ({ channelKey, visible
 
     const files = newBgmState.files.map((file, i) => {
         return (
-            <div key={toKey(file)} className={classNames(flex, flexRow)}>
+            <div
+                // 同一ファイルが複数存在することも可能なため、file のみから key を作ることはできない
+                key={keyNames('BgmPlaylistModal-BGM', i)}
+                className={classNames(flex, flexRow)}
+            >
                 <FileView
                     maxWidthOfLink={null}
                     uploaderFileBrowserHeight={null}
@@ -303,10 +303,11 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
         setVolumeInput(undefined);
     }, [bgmState?.volume]);
 
-    const tags = (bgmState?.files ?? []).map(file => {
+    const tags = (bgmState?.files ?? []).map((file, i) => {
         return (
             <FileView
-                key={toKey(file)}
+                // 同一ファイルが複数存在することも可能なため、file のみから key を作ることはできない
+                key={keyNames('BgmPlayer-BGM', i)}
                 uploaderFileBrowserHeight={null}
                 filePath={file}
                 onPathChange={null}
