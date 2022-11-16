@@ -1,67 +1,52 @@
-import * as t from 'io-ts';
-import { maybe } from '../../../../../maybe';
+import { z } from 'zod';
+import { createType, deleteType, updateType } from '../../../piece/log';
+import * as PieceBaseTypes from '../../../piece/types';
+import * as StringPieceValueTypes from './types';
+import { maybe } from '@/maybe';
 import {
-    IoTsOptions,
     State,
     TwoWayOperation,
     createObjectValueTemplate,
     state,
     toUpOperation,
     upOperation,
-} from '../../../../generator';
-import { createType, deleteType, updateType } from '../../../piece/log';
-import * as PieceBaseTypes from '../../../piece/types';
-import * as StringPieceValueTypes from './types';
+} from '@/ot/generator';
 
-const update = (options: IoTsOptions) =>
-    t.intersection([
-        t.type({
-            $v: t.literal(2),
-            $r: t.literal(1),
+const update = z
+    .object({
+        $v: z.literal(2),
+        $r: z.literal(1),
 
-            type: t.literal(updateType),
-        }),
-        upOperation(createObjectValueTemplate(PieceBaseTypes.templateValue, 2, 1), options),
-        t.partial({
-            ownerCharacterId: t.type({ newValue: maybe(t.string) }),
-            isValuePrivateChanged: t.type({ newValue: maybe(t.string) }),
-            isValueChanged: t.boolean,
-        }),
-    ]);
+        type: z.literal(updateType),
+    })
+    .and(upOperation(createObjectValueTemplate(PieceBaseTypes.templateValue, 2, 1)))
+    .and(
+        z
+            .object({
+                ownerCharacterId: z.object({ newValue: maybe(z.string()) }),
+                isValuePrivateChanged: z.object({ newValue: maybe(z.string()) }),
+                isValueChanged: z.boolean(),
+            })
+            .partial()
+    );
 
-export const type = t.union([
-    t.type({
-        $v: t.literal(2),
-        $r: t.literal(1),
-        type: t.literal(createType),
-        value: state(StringPieceValueTypes.template, { exact: false }),
+export const type = z.union([
+    z.object({
+        $v: z.literal(2),
+        $r: z.literal(1),
+        type: z.literal(createType),
+        value: state(StringPieceValueTypes.template),
     }),
-    t.type({
-        $v: t.literal(2),
-        $r: t.literal(1),
-        type: t.literal(deleteType),
-        value: state(StringPieceValueTypes.template, { exact: false }),
+    z.object({
+        $v: z.literal(2),
+        $r: z.literal(1),
+        type: z.literal(deleteType),
+        value: state(StringPieceValueTypes.template),
     }),
-    update({ exact: false }),
+    update,
 ]);
 
-export const exactType = t.union([
-    t.type({
-        $v: t.literal(2),
-        $r: t.literal(1),
-        type: t.literal(createType),
-        value: state(StringPieceValueTypes.template, { exact: true }),
-    }),
-    t.type({
-        $v: t.literal(2),
-        $r: t.literal(1),
-        type: t.literal(deleteType),
-        value: state(StringPieceValueTypes.template, { exact: true }),
-    }),
-    update({ exact: true }),
-]);
-
-export type Type = t.TypeOf<typeof type>;
+export type Type = z.TypeOf<typeof type>;
 
 export const ofOperation = (
     operation: TwoWayOperation<typeof StringPieceValueTypes.template>,
@@ -82,5 +67,5 @@ export const ofOperation = (
                       newValue: operation.isValuePrivate.newValue ? undefined : currentState.value,
                   },
     } as const;
-    return exactType.encode(result);
+    return type.parse(result);
 };

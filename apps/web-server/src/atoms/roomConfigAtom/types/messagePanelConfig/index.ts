@@ -1,5 +1,5 @@
 import { simpleId } from '@flocon-trpg/core';
-import * as t from 'io-ts';
+import { z } from 'zod';
 import { defaultMessagePanelPosition } from '../defaultPanelPositions';
 import {
     DraggablePanelConfigBase,
@@ -25,22 +25,22 @@ export type MessagePanelConfig = {
     selectedGameSystem?: string;
 } & DraggablePanelConfigBase;
 
-export const serializedMessagePanelConfig = t.intersection([
-    t.partial({
-        isMinimized: t.boolean,
-        tabs: t.array(partialMessageTabConfig),
-        selectedTextColor: t.string,
-        isPrivateMessageMode: t.boolean,
-        selectedPublicChannelKey: t.string,
-        selectedCharacterType: t.string,
-        selectedCharacterId: t.string,
-        customCharacterName: t.string,
-        selectedGameSystem: t.string,
-    }),
-    serializedDraggablePanelConfigBase,
-]);
+export const serializedMessagePanelConfig = z
+    .object({
+        isMinimized: z.boolean(),
+        tabs: z.array(partialMessageTabConfig),
+        selectedTextColor: z.string(),
+        isPrivateMessageMode: z.boolean(),
+        selectedPublicChannelKey: z.string(),
+        selectedCharacterType: z.string(),
+        selectedCharacterId: z.string(),
+        customCharacterName: z.string(),
+        selectedGameSystem: z.string(),
+    })
+    .partial()
+    .merge(serializedDraggablePanelConfigBase);
 
-export type SerializedMessagePanelConfig = t.TypeOf<typeof serializedMessagePanelConfig>;
+export type SerializedMessagePanelConfig = z.TypeOf<typeof serializedMessagePanelConfig>;
 
 export const deserializeMessagePanelConfig = (
     source: SerializedMessagePanelConfig

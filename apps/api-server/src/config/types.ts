@@ -1,6 +1,6 @@
-import * as t from 'io-ts';
 import { LevelWithSilent } from 'pino';
 import { ReadonlyDeep } from 'type-fest';
+import { z } from 'zod';
 
 // これらを変更したら、あわせて.env.localのテンプレートも変更する必要がある
 
@@ -13,66 +13,69 @@ export const always = 'always';
 export const disabled = 'disabled';
 export const none = 'none';
 
-const driverOptionsConfig = t.partial({
-    driverOptions: t.record(t.string, t.unknown),
+const driverOptionsConfig = z
+    .object({
+        driverOptions: z.record(z.unknown()),
+    })
+    .partial();
+
+const clientUrlType = z.object({
+    clientUrl: z.string(),
 });
 
-const clientUrlType = t.type({
-    clientUrl: t.string,
-});
+const dbNamePartial = z
+    .object({
+        dbName: z.string(),
+    })
+    .partial();
 
-const dbNamePartial = t.partial({
-    dbName: t.string,
-});
+export const mysqlDatabase = driverOptionsConfig.merge(dbNamePartial).merge(clientUrlType);
 
-export const mysqlDatabase = t.intersection([driverOptionsConfig, dbNamePartial, clientUrlType]);
+export type MysqlDatabaseConfig = z.TypeOf<typeof mysqlDatabase>;
 
-export type MysqlDatabaseConfig = t.TypeOf<typeof mysqlDatabase>;
+export const postgresqlDatabase = driverOptionsConfig.merge(dbNamePartial).merge(clientUrlType);
 
-export const postgresqlDatabase = t.intersection([
-    driverOptionsConfig,
-    dbNamePartial,
-    clientUrlType,
-]);
+export type PostgresqlDatabaseConfig = z.TypeOf<typeof postgresqlDatabase>;
 
-export type PostgresqlDatabaseConfig = t.TypeOf<typeof postgresqlDatabase>;
-
-const sqliteDatabaseCore = t.union([
-    t.type({
-        dbName: t.string,
-        clientUrl: t.undefined,
+const sqliteDatabaseCore = z.union([
+    z.object({
+        dbName: z.string(),
+        clientUrl: z.undefined(),
     }),
-    t.type({
-        dbName: t.undefined,
-        clientUrl: t.string,
+    z.object({
+        dbName: z.undefined(),
+        clientUrl: z.string(),
     }),
-    t.type({
-        dbName: t.string,
-        clientUrl: t.string,
-    }),
-]);
-
-export const sqliteDatabase = t.intersection([driverOptionsConfig, sqliteDatabaseCore]);
-
-export type SqliteDatabaseConfig = t.TypeOf<typeof sqliteDatabase>;
-
-export const firebaseAdminSecret = t.intersection([
-    t.type({
-        client_email: t.string,
-        private_key: t.string,
-    }),
-    t.partial({
-        project_id: t.string,
+    z.object({
+        dbName: z.string(),
+        clientUrl: z.string(),
     }),
 ]);
 
-export type FirebaseAdminSecretConfig = t.TypeOf<typeof firebaseAdminSecret>;
+export const sqliteDatabase = driverOptionsConfig.and(sqliteDatabaseCore);
 
-export const entryPassword = t.union([
-    t.type({ type: t.literal(none) }),
-    t.type({
-        type: t.union([t.literal(plain), t.literal(bcrypt)]),
-        value: t.string,
+export type SqliteDatabaseConfig = z.TypeOf<typeof sqliteDatabase>;
+
+export const firebaseAdminSecret = z
+    .object({
+        client_email: z.string(),
+        private_key: z.string(),
+    })
+    .merge(
+        z
+            .object({
+                project_id: z.string(),
+            })
+            .partial()
+    );
+
+export type FirebaseAdminSecretConfig = z.TypeOf<typeof firebaseAdminSecret>;
+
+export const entryPassword = z.union([
+    z.object({ type: z.literal(none) }),
+    z.object({
+        type: z.union([z.literal(plain), z.literal(bcrypt)]),
+        value: z.string(),
     }),
 ]);
 

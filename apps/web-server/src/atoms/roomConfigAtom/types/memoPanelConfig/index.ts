@@ -1,5 +1,5 @@
 import { simpleId } from '@flocon-trpg/core';
-import * as t from 'io-ts';
+import { z } from 'zod';
 import { defaultMemoPanelPosition } from '../defaultPanelPositions';
 import {
     DraggablePanelConfigBase,
@@ -12,15 +12,15 @@ export type MemoPanelConfig = {
     selectedMemoId?: string;
 } & DraggablePanelConfigBase;
 
-export const serializedMemoPanelConfig = t.intersection([
-    t.partial({
-        isMinimized: t.boolean,
-        selectedMemoId: t.string,
-    }),
-    serializedDraggablePanelConfigBase,
-]);
+export const serializedMemoPanelConfig = z
+    .object({
+        isMinimized: z.boolean(),
+        selectedMemoId: z.string(),
+    })
+    .partial()
+    .merge(serializedDraggablePanelConfigBase);
 
-export type SerializedMemoPanelConfig = t.TypeOf<typeof serializedMemoPanelConfig>;
+export type SerializedMemoPanelConfig = z.TypeOf<typeof serializedMemoPanelConfig>;
 
 export const deserializeMemoPanelConfig = (source: SerializedMemoPanelConfig): MemoPanelConfig => {
     return {

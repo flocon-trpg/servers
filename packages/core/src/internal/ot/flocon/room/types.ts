@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import { z } from 'zod';
 import { maybe } from '../../../maybe';
 import {
     createObjectValueTemplate,
@@ -14,7 +14,7 @@ import * as ParamNames from './paramName/types';
 import * as Participant from './participant/types';
 
 const templateBase = {
-    activeBoardId: createReplaceValueTemplate(maybe(t.string)),
+    activeBoardId: createReplaceValueTemplate(maybe(z.string())),
     bgms: createRecordValueTemplate(Bgm.template), // keyはStrIndex5
     boolParamNames: createRecordValueTemplate(ParamNames.template), //keyはStrIndex20
     boards: createRecordValueTemplate(Board.template), // keyはランダムなID
@@ -50,7 +50,7 @@ export const dbTemplate = createObjectValueTemplate(templateBase, 2, 1);
 export const template = createObjectValueTemplate(
     {
         ...templateBase,
-        createdBy: createReplaceValueTemplate(t.string),
+        createdBy: createReplaceValueTemplate(z.string()),
         name: createTextValueTemplate(false),
         participants: createRecordValueTemplate(Participant.template),
     },

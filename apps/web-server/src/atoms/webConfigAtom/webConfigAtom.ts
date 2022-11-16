@@ -1,7 +1,6 @@
 import { FirebaseConfig, firebaseConfig } from '@flocon-trpg/core';
 import { parseEnvListValue, parsePinoLogLevel, parseStringToBoolean } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
-import * as E from 'fp-ts/Either';
 import { atom } from 'jotai';
 import { WebConfig } from '../../configType';
 import {
@@ -9,7 +8,6 @@ import {
     NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED,
     NEXT_PUBLIC_LOG_LEVEL,
 } from '../../env';
-import { formatValidationErrors } from '../../utils/io-ts/io-ts-reporters';
 import { FetchTextState } from '../../utils/types';
 import { storybookAtom } from '../storybookAtom/storybookAtom';
 import { DotenvParseOutput, parse } from '@/utils/dotEnvParse';
@@ -84,14 +82,12 @@ const parseConfig = (env: DotenvParseOutput | undefined): Result<Env> => {
 
     if (firebaseFile != null) {
         const firebaseJson = JSON.parse(firebaseFile.toString());
-        // jsonファイルを直接importしても動くが、jsonファイルにミスがあるときに出るエラーメッセージをわかりやすくするため、io-ts&io-ts-reportersを用いて変換している。
-        const firebaseConfigObject = E.mapLeft(formatValidationErrors)(
-            firebaseConfig.decode(firebaseJson)
-        );
-        if (firebaseConfigObject._tag === 'Left') {
-            return Result.error(firebaseConfigObject.left);
+        // jsonファイルを直接importしても動くが、jsonファイルにミスがあるときに出るエラーメッセージをわかりやすくするため、zodを用いている。
+        const firebaseConfigObject = firebaseConfig.safeParse(firebaseJson);
+        if (!firebaseConfigObject.success) {
+            return Result.error(firebaseConfigObject.error.message);
         }
-        result.firebaseConfig = firebaseConfigObject.right;
+        result.firebaseConfig = firebaseConfigObject.data;
     }
 
     return Result.ok(result);

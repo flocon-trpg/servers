@@ -1,18 +1,20 @@
-import * as t from 'io-ts';
+import { z } from 'zod';
 
 export const createOperation = <
     TVersion extends string | number,
     TRevision extends string | number,
-    TProps extends t.Props
+    TProps extends z.ZodRawShape
 >(
     version: TVersion,
     revision: TRevision,
     props: TProps
 ) =>
-    t.intersection([
-        t.type({
-            $v: t.literal(version),
-            $r: t.literal(revision),
-        }),
-        t.partial(props),
-    ]);
+    z
+        .object(props)
+        .partial()
+        .merge(
+            z.object({
+                $v: z.literal(version),
+                $r: z.literal(revision),
+            })
+        );

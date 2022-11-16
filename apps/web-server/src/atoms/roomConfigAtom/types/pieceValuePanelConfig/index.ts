@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import { z } from 'zod';
 import { defaultPieceValuePanelPosition } from '../defaultPanelPositions';
 import {
     DraggablePanelConfigBase,
@@ -10,14 +10,14 @@ export type PieceValuePanelConfig = {
     isMinimized: boolean;
 } & DraggablePanelConfigBase;
 
-export const serializedPieceValuePanelConfig = t.intersection([
-    t.partial({
-        isMinimized: t.boolean,
-    }),
-    serializedDraggablePanelConfigBase,
-]);
+export const serializedPieceValuePanelConfig = z
+    .object({
+        isMinimized: z.boolean(),
+    })
+    .partial()
+    .merge(serializedDraggablePanelConfigBase);
 
-export type SerializedPieceValuePanelConfig = t.TypeOf<typeof serializedPieceValuePanelConfig>;
+export type SerializedPieceValuePanelConfig = z.TypeOf<typeof serializedPieceValuePanelConfig>;
 
 export const deserializePieceValuePanelConfig = (
     source: SerializedPieceValuePanelConfig

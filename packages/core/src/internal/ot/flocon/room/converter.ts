@@ -14,11 +14,7 @@ type RoomUpOperation = UpOperation<typeof Room.dbTemplate>;
 type RoomDownOperation = DownOperation<typeof Room.dbTemplate>;
 
 export const decodeState = (source: unknown): RoomState => {
-    const result = state(Room.template, { exact: true }).decode(source);
-    if (result._tag === 'Right') {
-        return result.right;
-    }
-    throw new Error('decodeState failure');
+    return state(Room.template).parse(source);
 };
 
 export const parseState = (source: string): RoomState => {
@@ -26,28 +22,20 @@ export const parseState = (source: string): RoomState => {
 };
 
 export const stringifyState = (source: RoomState): string => {
-    const result = state(Room.template, { exact: true }).encode(source);
+    const result = state(Room.template).parse(source);
     return JSON.stringify(result);
 };
 
 export const decodeDbState = (source: unknown): RoomDbState => {
-    const result = state(Room.dbTemplate, { exact: true }).decode(source);
-    if (result._tag === 'Right') {
-        return result.right;
-    }
-    throw new Error('decodeDbState failure');
+    return state(Room.dbTemplate).parse(source);
 };
 
 export const exactDbState = (source: RoomDbState): RoomDbState => {
-    return state(Room.dbTemplate, { exact: true }).encode(source);
+    return state(Room.dbTemplate).parse(source);
 };
 
 const decodeUpOperation = (source: unknown): RoomUpOperation => {
-    const result = upOperation(Room.template, { exact: true }).decode(source);
-    if (result._tag === 'Right') {
-        return result.right;
-    }
-    throw new Error('decodeUpOperation failure');
+    return upOperation(Room.template).parse(source);
 };
 
 export const parseUpOperation = (source: string): RoomUpOperation => {
@@ -55,18 +43,14 @@ export const parseUpOperation = (source: string): RoomUpOperation => {
 };
 
 export const stringifyUpOperation = (source: RoomUpOperation): string => {
-    const result = upOperation(Room.template, { exact: true }).encode(source);
+    const result = upOperation(Room.template).parse(source);
     return JSON.stringify(result);
 };
 
 export const decodeDownOperation = (source: unknown): RoomDownOperation => {
-    const result = downOperation(Room.template, { exact: false }).decode(source);
-    if (result._tag === 'Right') {
-        return result.right;
-    }
-    throw new Error('decodeDownOperation failure');
+    return downOperation(Room.template).parse(source);
 };
 
 export const exactDownOperation = (source: RoomDownOperation): RoomDownOperation => {
-    return downOperation(Room.template, { exact: true }).encode(source);
+    return downOperation(Room.template).parse(source);
 };

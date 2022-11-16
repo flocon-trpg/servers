@@ -1,8 +1,8 @@
 import { State, path, shape, shapePieceTemplate, simpleId } from '@flocon-trpg/core';
-import * as t from 'io-ts';
 import React from 'react';
 import { Subscribable } from 'rxjs';
 import { useMemoOne } from 'use-memo-one';
+import { z } from 'zod';
 import { useCloneImagePiece } from '../../hooks/useCloneImagePiece';
 import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
 import { useShapePieces } from '../../hooks/useShapePieces';
@@ -25,7 +25,7 @@ import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { close, ok } from '@/utils/constants';
 import { rgb } from '@/utils/rgb';
 
-type Shape = t.TypeOf<typeof shape>;
+type Shape = z.TypeOf<typeof shape>;
 type ShapePieceState = State<typeof shapePieceTemplate>;
 
 const shapeKey = '1';

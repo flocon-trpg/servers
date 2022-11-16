@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import { z } from 'zod';
 
 export type MessageFilter = {
     showNotification: boolean;
@@ -18,24 +18,26 @@ export type MessageFilter = {
     privateChannels: string | boolean;
 };
 
-export const serializedMessageFilter = t.partial({
-    showNotification: t.boolean,
-    showSystem: t.boolean,
-    showFree: t.boolean,
-    showPublic1: t.boolean,
-    showPublic2: t.boolean,
-    showPublic3: t.boolean,
-    showPublic4: t.boolean,
-    showPublic5: t.boolean,
-    showPublic6: t.boolean,
-    showPublic7: t.boolean,
-    showPublic8: t.boolean,
-    showPublic9: t.boolean,
-    showPublic10: t.boolean,
-    privateChannels: t.union([t.string, t.boolean]),
-});
+export const serializedMessageFilter = z
+    .object({
+        showNotification: z.boolean(),
+        showSystem: z.boolean(),
+        showFree: z.boolean(),
+        showPublic1: z.boolean(),
+        showPublic2: z.boolean(),
+        showPublic3: z.boolean(),
+        showPublic4: z.boolean(),
+        showPublic5: z.boolean(),
+        showPublic6: z.boolean(),
+        showPublic7: z.boolean(),
+        showPublic8: z.boolean(),
+        showPublic9: z.boolean(),
+        showPublic10: z.boolean(),
+        privateChannels: z.union([z.string(), z.boolean()]),
+    })
+    .partial();
 
-export type SerializedMessageFilter = t.TypeOf<typeof serializedMessageFilter>;
+export type SerializedMessageFilter = z.TypeOf<typeof serializedMessageFilter>;
 
 export const deserializeMessageFilter = (source: SerializedMessageFilter): MessageFilter => {
     return {

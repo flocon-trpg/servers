@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import { z } from 'zod';
 import { defaultGameEffectPanelPosition } from '../defaultPanelPositions';
 import {
     DraggablePanelConfigBase,
@@ -10,14 +10,14 @@ export type GameEffectPanelConfig = {
     isMinimized: boolean;
 } & DraggablePanelConfigBase;
 
-export const serializedGameEffectPanelConfig = t.intersection([
-    t.partial({
-        isMinimized: t.boolean,
-    }),
-    serializedDraggablePanelConfigBase,
-]);
+export const serializedGameEffectPanelConfig = z
+    .object({
+        isMinimized: z.boolean(),
+    })
+    .partial()
+    .merge(serializedDraggablePanelConfigBase);
 
-export type SerializedGameEffectPanelConfig = t.TypeOf<typeof serializedGameEffectPanelConfig>;
+export type SerializedGameEffectPanelConfig = z.TypeOf<typeof serializedGameEffectPanelConfig>;
 
 export const deserializeGameEffectPanelConfig = (
     source: SerializedGameEffectPanelConfig

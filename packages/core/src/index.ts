@@ -31,7 +31,6 @@ export {
     isValidVarToml,
     parseToml,
     getVariableFromVarTomlObject,
-    isValidChatPalette,
     generateChatPalette,
 } from './internal/toml';
 
@@ -157,7 +156,6 @@ export { template as dieValueTemplate } from './internal/ot/flocon/room/board/di
 
 export {
     type as dicePieceLog,
-    exactType as exactDicePieceLog,
     Type as DicePieceLog,
 } from './internal/ot/flocon/room/board/dicePiece/log';
 
@@ -176,7 +174,6 @@ export {
 
 export {
     type as stringPieceLog,
-    exactType as exactStringPieceLog,
     Type as StringPieceLog,
 } from './internal/ot/flocon/room/board/stringPiece/log';
 

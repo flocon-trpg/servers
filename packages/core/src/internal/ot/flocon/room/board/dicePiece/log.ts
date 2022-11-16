@@ -1,8 +1,6 @@
 import { chooseRecord } from '@flocon-trpg/utils';
-import * as t from 'io-ts';
-import { maybe } from '../../../../../maybe';
+import { z } from 'zod';
 import {
-    IoTsOptions,
     State,
     TwoWayOperation,
     createObjectValueTemplate,
@@ -22,68 +20,55 @@ import * as PieceBaseTypes from '../../../piece/types';
 import * as DieValue from './dieValue/functions';
 import * as DieValueTypes from './dieValue/types';
 import * as DicePieceValueTypes from './types';
+import { maybe } from '@/maybe';
 
 const dieValueUpOperation = createOperation(1, 1, {
-    dieType: t.type({ newValue: DieValueTypes.dieType }),
-    isValuePrivateChanged: t.type({ newValue: maybe(t.number) }),
-    isValueChanged: t.boolean,
+    dieType: z.object({ newValue: DieValueTypes.dieType }),
+    isValuePrivateChanged: z.object({ newValue: maybe(z.number()) }),
+    isValueChanged: z.boolean(),
 });
 
-type DieValueUpOperation = t.TypeOf<typeof dieValueUpOperation>;
+type DieValueUpOperation = z.TypeOf<typeof dieValueUpOperation>;
 
-const update = (options: IoTsOptions) =>
-    t.intersection([
-        t.type({
-            $v: t.literal(2),
-            $r: t.literal(1),
+const update = z
+    .object({
+        $v: z.literal(2),
+        $r: z.literal(1),
 
-            type: t.literal(updateType),
-        }),
-        upOperation(createObjectValueTemplate(PieceBaseTypes.templateValue, 2, 1), options),
-        t.partial({
-            ownerCharacterId: t.type({ newValue: maybe(t.string) }),
-            dice: record(
-                t.string,
-                recordUpOperationElementFactory(
-                    state(DieValueTypes.template, options),
-                    dieValueUpOperation
-                )
-            ),
-        }),
-    ]);
+        type: z.literal(updateType),
+    })
+    .and(upOperation(createObjectValueTemplate(PieceBaseTypes.templateValue, 2, 1)))
+    .and(
+        z
+            .object({
+                ownerCharacterId: z.object({ newValue: maybe(z.string()) }),
+                dice: record(
+                    recordUpOperationElementFactory(
+                        state(DieValueTypes.template),
+                        dieValueUpOperation
+                    )
+                ),
+            })
+            .partial()
+    );
 
-export const type = t.union([
-    t.type({
-        $v: t.literal(2),
-        $r: t.literal(1),
-        type: t.literal(createType),
-        value: state(DicePieceValueTypes.template, { exact: false }),
+export const type = z.union([
+    z.object({
+        $v: z.literal(2),
+        $r: z.literal(1),
+        type: z.literal(createType),
+        value: state(DicePieceValueTypes.template),
     }),
-    t.type({
-        $v: t.literal(2),
-        $r: t.literal(1),
-        type: t.literal(deleteType),
-        value: state(DicePieceValueTypes.template, { exact: false }),
+    z.object({
+        $v: z.literal(2),
+        $r: z.literal(1),
+        type: z.literal(deleteType),
+        value: state(DicePieceValueTypes.template),
     }),
-    update({ exact: false }),
+    update,
 ]);
 
-export const exactType = t.union([
-    t.strict({
-        $v: t.literal(2),
-        $r: t.literal(1),
-        type: t.literal(createType),
-        value: state(DicePieceValueTypes.template, { exact: true }),
-    }),
-    t.strict({
-        $v: t.literal(2),
-        $r: t.literal(1),
-        type: t.literal(deleteType),
-        value: state(DicePieceValueTypes.template, { exact: true }),
-    }),
-    update({ exact: true }),
-]);
-export type Type = t.TypeOf<typeof type>;
+export type Type = z.TypeOf<typeof type>;
 
 export const ofOperation = (
     operation: TwoWayOperation<typeof DicePieceValueTypes.template>,
@@ -141,5 +126,5 @@ export const ofOperation = (
                       }
                   }),
     } as const;
-    return exactType.encode(result);
+    return type.parse(result);
 };

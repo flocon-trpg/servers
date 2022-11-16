@@ -1,12 +1,11 @@
 import { Option } from '@kizahasi/option';
 import { Result } from '@kizahasi/result';
-import * as t from 'io-ts';
+import { z } from 'zod';
 import * as NullableTextOperation from '../nullableTextOperation';
 import { replace, update } from '../recordOperationElement';
 import * as TextOperation from '../textOperation';
 import {
     DownOperation as DownOperationType,
-    IoTsOptions,
     State as StateType,
     TwoWayOperation as TwoWayOperationType,
     UpOperation as UpOperationType,
@@ -29,7 +28,7 @@ import {
 } from '.';
 
 namespace ReplaceValue {
-    export const template = rep(t.union([t.number, t.undefined]));
+    export const template = rep(z.union([z.number(), z.undefined()]));
     export type UpOperation = UpOperationType<typeof template>;
     export type DownOperation = DownOperationType<typeof template>;
     export type TwoWayOperation = TwoWayOperationType<typeof template>;
@@ -116,506 +115,359 @@ namespace ParamRecordValue {
     export type TwoWayOperation = TwoWayOperationType<typeof template>;
 }
 
+const toOption = <T>(source: z.SafeParseReturnType<any, T>) => {
+    if (source.success) {
+        return Option.some(source.data);
+    }
+    return Option.none();
+};
+
 describe('state', () => {
-    describe.each([true, false])('{exact: %b}', exact => {
-        const options: IoTsOptions = {
-            exact,
-        };
+    it.each`
+        source       | expected
+        ${1}         | ${Option.some(1)}
+        ${undefined} | ${Option.some(undefined)}
+        ${'str'}     | ${Option.none()}
+    `(
+        'tests ReplaceValueTemplate {source: $source, expected: $expected}',
+        ({ source, expected }) => {
+            const actual = state(ReplaceValue.template).safeParse(source);
+            expect(toOption(actual)).toEqual(expected);
+        }
+    );
 
-        it.each`
-            source       | expected
-            ${1}         | ${Option.some(1)}
-            ${undefined} | ${Option.some(undefined)}
-            ${'str'}     | ${Option.none()}
-        `(
-            'tests ReplaceValueTemplate {source: $source, expected: $expected}',
-            ({ source, expected }) => {
-                const actual = state(ReplaceValue.template, options).decode(source);
-                if (actual._tag === 'Left') {
-                    expect(expected.isNone).toBe(true);
-                    return;
-                }
-                expect(actual.right).toEqual(expected.value);
-            }
-        );
-
-        it.each`
-            source       | expected
-            ${1}         | ${Option.none()}
-            ${null}      | ${Option.none()}
-            ${undefined} | ${Option.none()}
-            ${'str'}     | ${Option.some('str')}
-        `(
-            'tests OtStringTemplate {source: $source, expected: $expected}',
-            ({ source, expected }) => {
-                const actual = state(OtString.template, options).decode(source);
-                if (actual._tag === 'Left') {
-                    expect(expected.isNone).toBe(true);
-                    return;
-                }
-                expect(actual.right).toEqual(expected.value);
-            }
-        );
-
-        it.each`
-            source       | expected
-            ${1}         | ${Option.none()}
-            ${null}      | ${Option.none()}
-            ${undefined} | ${Option.some(undefined)}
-            ${'str'}     | ${Option.some('str')}
-        `(
-            'tests NullableOtStringTemplate {source: $source, expected: $expected}',
-            ({ source, expected }) => {
-                const actual = state(NullableOtString.template, options).decode(source);
-                if (actual._tag === 'Left') {
-                    expect(expected.isNone).toBe(true);
-                    return;
-                }
-                expect(actual.right).toEqual(expected.value);
-            }
-        );
-
-        it.each`
-            source                                                                        | expected
-            ${1}                                                                          | ${Option.none()}
-            ${undefined}                                                                  | ${Option.some(undefined)}
-            ${{}}                                                                         | ${Option.some({})}
-            ${{ value1: { $v: 1, $r: 2, value: 1 }, value2: { $v: 1, $r: 2, value: 2 } }} | ${Option.some({ value1: { $v: 1, $r: 2, value: 1 }, value2: { $v: 1, $r: 2, value: 2 } })}
-            ${{ value1: 1, value2: 2 }}                                                   | ${Option.none()}
-            ${{ value1: 1, value2: { $v: 1, $r: 2, value: 2 } }}                          | ${Option.none()}
-        `('tests RecordTemplate {source: $source, expected: $expected}', ({ source, expected }) => {
-            const actual = state(RecordValue.template, options).decode(source);
-            if (actual._tag === 'Left') {
-                expect(expected.isNone).toBe(true);
-                return;
-            }
-            expect(actual.right).toEqual(expected.value);
-        });
-
-        it.each`
-            source                                                                        | expected
-            ${1}                                                                          | ${Option.none()}
-            ${undefined}                                                                  | ${Option.some(undefined)}
-            ${{}}                                                                         | ${Option.some({})}
-            ${{ value1: { $v: 1, $r: 2, value: 1 }, value2: { $v: 1, $r: 2, value: 2 } }} | ${Option.some({ value1: { $v: 1, $r: 2, value: 1 }, value2: { $v: 1, $r: 2, value: 2 } })}
-            ${{ value1: 1, value2: 2 }}                                                   | ${Option.none()}
-            ${{ value1: 1, value2: { $v: 1, $r: 2, value: 2 } }}                          | ${Option.none()}
-        `(
-            'tests ParamRecordTemplate {source: $source, expected: $expected}',
-            ({ source, expected }) => {
-                const actual = state(ParamRecordValue.template, options).decode(source);
-                if (actual._tag === 'Left') {
-                    expect(expected.isNone).toBe(true);
-                    return;
-                }
-                expect(actual.right).toEqual(expected.value);
-            }
-        );
-
-        it.each`
-            source              | expected
-            ${{}}               | ${Option.some({})}
-            ${{ $v: 1 }}        | ${Option.none()}
-            ${{ $r: 2 }}        | ${Option.none()}
-            ${{ $v: 1, $r: 2 }} | ${Option.none()}
-        `(
-            'tests ObjectTemplate(NoVersion) {source: $source, expected: $expected}',
-            ({ source, expected }) => {
-                const actual = state(ObjectValue.NoVersion.template, options).decode(source);
-                if (actual._tag === 'Left') {
-                    expect(expected.isNone).toBe(true);
-                    return;
-                }
-                expect(actual.right).toEqual(expected.value);
-            }
-        );
+    it.each`
+        source       | expected
+        ${1}         | ${Option.none()}
+        ${null}      | ${Option.none()}
+        ${undefined} | ${Option.none()}
+        ${'str'}     | ${Option.some('str')}
+    `('tests OtStringTemplate {source: $source, expected: $expected}', ({ source, expected }) => {
+        const actual = state(OtString.template).safeParse(source);
+        expect(toOption(actual)).toEqual(expected);
     });
 
     it.each`
-        source                                                   | exact    | expected
-        ${1}                                                     | ${false} | ${Option.none()}
-        ${1}                                                     | ${true}  | ${Option.none()}
-        ${undefined}                                             | ${false} | ${Option.none()}
-        ${undefined}                                             | ${true}  | ${Option.none()}
-        ${{}}                                                    | ${false} | ${Option.none()}
-        ${{}}                                                    | ${true}  | ${Option.none()}
-        ${{ $v: 10, $r: 20 }}                                    | ${false} | ${Option.none()}
-        ${{ $v: 10, $r: 20 }}                                    | ${true}  | ${Option.none()}
-        ${{ $v: 1, $r: 2 }}                                      | ${false} | ${Option.some({ $v: 1, $r: 2 })}
-        ${{ $v: 1, $r: 2 }}                                      | ${true}  | ${Option.some({ $v: 1, $r: 2 })}
-        ${{ $v: 1, $r: 2, value1: 1, value2: 2 }}                | ${false} | ${Option.some({ $v: 1, $r: 2, value1: 1, value2: 2 })}
-        ${{ $v: 1, $r: 2, value1: 1, value2: 2 }}                | ${true}  | ${Option.some({ $v: 1, $r: 2, value1: 1, value2: 2 })}
-        ${{ $v: 1, $r: 2, value1: 1, value2: 2, invalidKey: 3 }} | ${false} | ${Option.some({ $v: 1, $r: 2, value1: 1, value2: 2, invalidKey: 3 })}
-        ${{ $v: 1, $r: 2, value1: 1, value2: 2, invalidKey: 3 }} | ${true}  | ${Option.some({ $v: 1, $r: 2, value1: 1, value2: 2 })}
-        ${{ value1: 1, value2: '2' }}                            | ${false} | ${Option.none()}
-        ${{ value1: 1, value2: '2' }}                            | ${true}  | ${Option.none()}
+        source       | expected
+        ${1}         | ${Option.none()}
+        ${null}      | ${Option.none()}
+        ${undefined} | ${Option.some(undefined)}
+        ${'str'}     | ${Option.some('str')}
     `(
-        'tests ObjectTemplate { source: $source, exact: $exact, expected: $expected}',
-        ({ source, exact, expected }) => {
-            const actual = state(ObjectValue.template, { exact }).decode(source);
-            if (actual._tag === 'Left') {
-                expect(expected.isNone).toBe(true);
-                return;
-            }
-            expect(actual.right).toEqual(expected.value);
+        'tests NullableOtStringTemplate {source: $source, expected: $expected}',
+        ({ source, expected }) => {
+            const actual = state(NullableOtString.template).safeParse(source);
+            expect(toOption(actual)).toEqual(expected);
         }
     );
+
+    it.each`
+        source                                                                        | expected
+        ${1}                                                                          | ${Option.none()}
+        ${undefined}                                                                  | ${Option.some(undefined)}
+        ${{}}                                                                         | ${Option.some({})}
+        ${{ value1: { $v: 1, $r: 2, value: 1 }, value2: { $v: 1, $r: 2, value: 2 } }} | ${Option.some({ value1: { $v: 1, $r: 2, value: 1 }, value2: { $v: 1, $r: 2, value: 2 } })}
+        ${{ value1: 1, value2: 2 }}                                                   | ${Option.none()}
+        ${{ value1: 1, value2: { $v: 1, $r: 2, value: 2 } }}                          | ${Option.none()}
+    `('tests RecordTemplate {source: $source, expected: $expected}', ({ source, expected }) => {
+        const actual = state(RecordValue.template).safeParse(source);
+        expect(toOption(actual)).toEqual(expected);
+    });
+
+    it.each`
+        source                                                                        | expected
+        ${1}                                                                          | ${Option.none()}
+        ${undefined}                                                                  | ${Option.some(undefined)}
+        ${{}}                                                                         | ${Option.some({})}
+        ${{ value1: { $v: 1, $r: 2, value: 1 }, value2: { $v: 1, $r: 2, value: 2 } }} | ${Option.some({ value1: { $v: 1, $r: 2, value: 1 }, value2: { $v: 1, $r: 2, value: 2 } })}
+        ${{ value1: 1, value2: 2 }}                                                   | ${Option.none()}
+        ${{ value1: 1, value2: { $v: 1, $r: 2, value: 2 } }}                          | ${Option.none()}
+    `(
+        'tests ParamRecordTemplate {source: $source, expected: $expected}',
+        ({ source, expected }) => {
+            const actual = state(ParamRecordValue.template).safeParse(source);
+            expect(toOption(actual)).toEqual(expected);
+        }
+    );
+
+    it.each`
+        source              | expected
+        ${{}}               | ${Option.some({})}
+        ${{ $v: 1 }}        | ${Option.none()}
+        ${{ $r: 2 }}        | ${Option.none()}
+        ${{ $v: 1, $r: 2 }} | ${Option.none()}
+    `(
+        'tests ObjectTemplate(NoVersion) {source: $source, expected: $expected}',
+        ({ source, expected }) => {
+            const actual = state(ObjectValue.NoVersion.template).safeParse(source);
+            expect(toOption(actual)).toEqual(expected);
+        }
+    );
+
+    it.each`
+        source                                                   | expected
+        ${1}                                                     | ${Option.none()}
+        ${undefined}                                             | ${Option.none()}
+        ${{}}                                                    | ${Option.none()}
+        ${{ $v: 10, $r: 20 }}                                    | ${Option.none()}
+        ${{ $v: 1, $r: 2 }}                                      | ${Option.some({ $v: 1, $r: 2 })}
+        ${{ $v: 1, $r: 2, value1: 1, value2: 2 }}                | ${Option.some({ $v: 1, $r: 2, value1: 1, value2: 2 })}
+        ${{ $v: 1, $r: 2, value1: 1, value2: 2, invalidKey: 3 }} | ${Option.some({ $v: 1, $r: 2, value1: 1, value2: 2 })}
+        ${{ value1: 1, value2: '2' }}                            | ${Option.none()}
+    `('tests ObjectTemplate { source: $source, expected: $expected}', ({ source, expected }) => {
+        const actual = state(ObjectValue.template).safeParse(source);
+        expect(toOption(actual)).toEqual(expected);
+    });
 });
 
 describe('upOperation', () => {
-    describe.each([true, false])('{exact: %b}', exact => {
-        const options: IoTsOptions = {
-            exact,
-        };
+    it.each`
+        source                                                                                | expected
+        ${undefined}                                                                          | ${Option.none()}
+        ${'str'}                                                                              | ${Option.none()}
+        ${{ newValue: 1 }}                                                                    | ${Option.some({ newValue: 1 })}
+        ${{}}                                                                                 | ${Option.some({})}
+        ${{ newValue: 'str' }}                                                                | ${Option.none()}
+        ${TextOperation.toUpOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!)} | ${Option.none()}
+    `(
+        'tests ReplaceValueTemplate {source: $source, expected: $expected}',
+        ({ source, expected }) => {
+            const actual = upOperation(ReplaceValue.template).safeParse(source);
+            expect(toOption(actual)).toEqual(expected);
+        }
+    );
 
-        it.each`
-            source                                                                                | expected
-            ${undefined}                                                                          | ${Option.none()}
-            ${'str'}                                                                              | ${Option.none()}
-            ${{ newValue: 1 }}                                                                    | ${Option.some({ newValue: 1 })}
-            ${{}}                                                                                 | ${Option.some({})}
-            ${{ newValue: 'str' }}                                                                | ${Option.none()}
-            ${TextOperation.toUpOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!)} | ${Option.none()}
-        `(
-            'tests ReplaceValueTemplate {source: $source, expected: $expected}',
-            ({ source, expected }) => {
-                const actual = upOperation(ReplaceValue.template, options).decode(source);
-                if (actual._tag === 'Left') {
-                    expect(expected.isNone).toBe(true);
-                    return;
-                }
-                expect(actual.right).toEqual(expected.value);
-            }
-        );
-
-        it.each`
-            source                                                                                  | expected
-            ${{}}                                                                                   | ${Option.none()}
-            ${undefined}                                                                            | ${Option.none()}
-            ${'str'}                                                                                | ${Option.none()}
-            ${{ newValue: 1 }}                                                                      | ${Option.none()}
-            ${TextOperation.toUpOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!)}   | ${Option.some(TextOperation.toUpOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!))}
-            ${TextOperation.toDownOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!)} | ${Option.none()}
-            ${TextOperation.diff({ prev: 'text1', next: 'text2' })}                                 | ${Option.none()}
-        `(
-            'tests OtStringTemplate {source: $source, expected: $expected}',
-            ({ source, expected }) => {
-                const actual = upOperation(OtString.template, options).decode(source);
-                if (actual._tag === 'Left') {
-                    expect(expected.isNone).toBe(true);
-                    return;
-                }
-                expect(actual.right).toEqual(expected.value);
-            }
-        );
-
-        it.each`
-            source                                                                                                  | expected
-            ${{}}                                                                                                   | ${Option.none()}
-            ${undefined}                                                                                            | ${Option.none()}
-            ${'str'}                                                                                                | ${Option.none()}
-            ${{ newValue: 1 }}                                                                                      | ${Option.none()}
-            ${NullableTextOperation.toUpOperation(NullableTextOperation.diff({ prev: 'text1', next: 'text2' })!)}   | ${Option.some(NullableTextOperation.toUpOperation(NullableTextOperation.diff({ prev: 'text1', next: 'text2' })!))}
-            ${NullableTextOperation.toUpOperation(NullableTextOperation.diff({ prev: undefined, next: 'text2' })!)} | ${Option.some(NullableTextOperation.toUpOperation(NullableTextOperation.diff({ prev: undefined, next: 'text2' })!))}
-            ${NullableTextOperation.toUpOperation(NullableTextOperation.diff({ prev: 'text1', next: undefined })!)} | ${Option.some(NullableTextOperation.toUpOperation(NullableTextOperation.diff({ prev: 'text1', next: undefined })!))}
-            ${NullableTextOperation.toDownOperation(NullableTextOperation.diff({ prev: 'text1', next: 'text2' })!)} | ${Option.none()}
-            ${NullableTextOperation.diff({ prev: 'text1', next: 'text2' })}                                         | ${Option.none()}
-        `(
-            'tests NullableOtStringTemplate {source: $source, expected: $expected}',
-            ({ source, expected }) => {
-                const actual = upOperation(NullableOtString.template, options).decode(source);
-                if (actual._tag === 'Left') {
-                    expect(expected.isNone).toBe(true);
-                    return;
-                }
-                expect(actual.right).toEqual(expected.value);
-            }
-        );
-
-        const validRecordOperation = {
-            value1: { type: update, update: { $v: 1, $r: 2, value: { newValue: 1 } } },
-            value2: { type: replace, replace: { $v: 1, $r: 2, value: 2 } },
-        };
-
-        const validParamRecordOperation = {
-            value1: { $v: 1, $r: 2, value: { newValue: 1 } },
-            value2: { $v: 1, $r: 2, value: { newValue: 2 } },
-        };
-
-        it.each`
-            source                                                             | expected
-            ${1}                                                               | ${Option.none()}
-            ${undefined}                                                       | ${Option.none()}
-            ${{}}                                                              | ${Option.some({})}
-            ${validRecordOperation}                                            | ${Option.some(validRecordOperation)}
-            ${validParamRecordOperation}                                       | ${Option.none()}
-            ${{ value1: 1, value2: 2 }}                                        | ${Option.none()}
-            ${{ value1: 1, value2: { $v: 1, $r: 2, value: { newValue: 2 } } }} | ${Option.none()}
-        `('tests RecordTemplate {source: $source, expected: $expected}', ({ source, expected }) => {
-            const actual = upOperation(RecordValue.template, options).decode(source);
-            if (actual._tag === 'Left') {
-                expect(expected.isNone).toBe(true);
-                return;
-            }
-            expect(actual.right).toEqual(expected.value);
-        });
-
-        it.each`
-            source                                                             | expected
-            ${1}                                                               | ${Option.none()}
-            ${undefined}                                                       | ${Option.none()}
-            ${{}}                                                              | ${Option.some({})}
-            ${validRecordOperation}                                            | ${Option.none()}
-            ${validParamRecordOperation}                                       | ${Option.some(validParamRecordOperation)}
-            ${{ value1: 1, value2: 2 }}                                        | ${Option.none()}
-            ${{ value1: 1, value2: { $v: 1, $r: 2, value: { newValue: 2 } } }} | ${Option.none()}
-        `(
-            'tests ParamRecordTemplate {source: $source, expected: $expected}',
-            ({ source, expected }) => {
-                const actual = upOperation(ParamRecordValue.template, options).decode(source);
-                if (actual._tag === 'Left') {
-                    expect(expected.isNone).toBe(true);
-                    return;
-                }
-                expect(actual.right).toEqual(expected.value);
-            }
-        );
-
-        it.each`
-            source              | expected
-            ${{}}               | ${Option.some({})}
-            ${{ $v: 1 }}        | ${Option.none()}
-            ${{ $r: 2 }}        | ${Option.none()}
-            ${{ $v: 1, $r: 2 }} | ${Option.none()}
-        `(
-            'tests ObjectTemplate(NoVersion) {source: $source, expected: $expected}',
-            ({ source, expected }) => {
-                const actual = upOperation(ObjectValue.NoVersion.template, options).decode(source);
-                if (actual._tag === 'Left') {
-                    expect(expected.isNone).toBe(true);
-                    return;
-                }
-                expect(actual.right).toEqual(expected.value);
-            }
-        );
+    it.each`
+        source                                                                                  | expected
+        ${{}}                                                                                   | ${Option.none()}
+        ${undefined}                                                                            | ${Option.none()}
+        ${'str'}                                                                                | ${Option.none()}
+        ${{ newValue: 1 }}                                                                      | ${Option.none()}
+        ${TextOperation.toUpOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!)}   | ${Option.some(TextOperation.toUpOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!))}
+        ${TextOperation.toDownOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!)} | ${Option.none()}
+        ${TextOperation.diff({ prev: 'text1', next: 'text2' })}                                 | ${Option.none()}
+    `('tests OtStringTemplate {source: $source, expected: $expected}', ({ source, expected }) => {
+        const actual = upOperation(OtString.template).safeParse(source);
+        expect(toOption(actual)).toEqual(expected);
     });
 
     it.each`
-        source                                                                                | exact    | expected
-        ${undefined}                                                                          | ${false} | ${Option.none()}
-        ${undefined}                                                                          | ${true}  | ${Option.none()}
-        ${'str'}                                                                              | ${false} | ${Option.none()}
-        ${'str'}                                                                              | ${true}  | ${Option.none()}
-        ${{ value1: 1 }}                                                                      | ${false} | ${Option.none()}
-        ${{ value1: 1 }}                                                                      | ${true}  | ${Option.none()}
-        ${TextOperation.toUpOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!)} | ${false} | ${Option.none()}
-        ${TextOperation.toUpOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!)} | ${true}  | ${Option.none()}
-        ${{}}                                                                                 | ${false} | ${Option.none()}
-        ${{}}                                                                                 | ${true}  | ${Option.none()}
-        ${{ $v: 10, $r: 20 }}                                                                 | ${false} | ${Option.none()}
-        ${{ $v: 10, $r: 20 }}                                                                 | ${true}  | ${Option.none()}
-        ${{ $v: 1, $r: 2 }}                                                                   | ${false} | ${Option.some({ $v: 1, $r: 2 })}
-        ${{ $v: 1, $r: 2 }}                                                                   | ${true}  | ${Option.some({ $v: 1, $r: 2 })}
-        ${{ $v: 1, $r: 2, x: 1 }}                                                             | ${false} | ${Option.some({ $v: 1, $r: 2, x: 1 })}
-        ${{ $v: 1, $r: 2, x: 1 }}                                                             | ${true}  | ${Option.some({ $v: 1, $r: 2 })}
-        ${{ $v: 1, $r: 2, value1: undefined, value2: undefined }}                             | ${false} | ${Option.some({ $v: 1, $r: 2 })}
-        ${{ $v: 1, $r: 2, value1: undefined, value2: undefined }}                             | ${true}  | ${Option.some({ $v: 1, $r: 2 })}
-        ${{ $v: 1, $r: 2, value1: { newValue: 1 } }}                                          | ${false} | ${Option.some({ $v: 1, $r: 2, value1: { newValue: 1 } })}
-        ${{ $v: 1, $r: 2, value1: { newValue: 1 } }}                                          | ${true}  | ${Option.some({ $v: 1, $r: 2, value1: { newValue: 1 } })}
-        ${{ $v: 1, $r: 2, value1: { newValue: 'str' } }}                                      | ${false} | ${Option.none()}
-        ${{ $v: 1, $r: 2, value1: { newValue: 'str' } }}                                      | ${true}  | ${Option.none()}
-        ${{ $v: 1, $r: 2, value1: { newValue: 1 }, value2: { newValue: 1 } }}                 | ${false} | ${Option.some({ $v: 1, $r: 2, value1: { newValue: 1 }, value2: { newValue: 1 } })}
-        ${{ $v: 1, $r: 2, value1: { newValue: 1 }, value2: { newValue: 1 } }}                 | ${true}  | ${Option.some({ $v: 1, $r: 2, value1: { newValue: 1 }, value2: { newValue: 1 } })}
+        source                                                                                                  | expected
+        ${{}}                                                                                                   | ${Option.none()}
+        ${undefined}                                                                                            | ${Option.none()}
+        ${'str'}                                                                                                | ${Option.none()}
+        ${{ newValue: 1 }}                                                                                      | ${Option.none()}
+        ${NullableTextOperation.toUpOperation(NullableTextOperation.diff({ prev: 'text1', next: 'text2' })!)}   | ${Option.some(NullableTextOperation.toUpOperation(NullableTextOperation.diff({ prev: 'text1', next: 'text2' })!))}
+        ${NullableTextOperation.toUpOperation(NullableTextOperation.diff({ prev: undefined, next: 'text2' })!)} | ${Option.some(NullableTextOperation.toUpOperation(NullableTextOperation.diff({ prev: undefined, next: 'text2' })!))}
+        ${NullableTextOperation.toUpOperation(NullableTextOperation.diff({ prev: 'text1', next: undefined })!)} | ${Option.some(NullableTextOperation.toUpOperation(NullableTextOperation.diff({ prev: 'text1', next: undefined })!))}
+        ${NullableTextOperation.toDownOperation(NullableTextOperation.diff({ prev: 'text1', next: 'text2' })!)} | ${Option.none()}
+        ${NullableTextOperation.diff({ prev: 'text1', next: 'text2' })}                                         | ${Option.none()}
     `(
-        'tests ObjectTemplate {source: $source, exact: $exact, expected: $expected}',
-        ({ source, exact, expected }) => {
-            const actual = upOperation(ObjectValue.template, { exact }).decode(source);
-            if (actual._tag === 'Left') {
-                expect(expected.isNone).toBe(true);
-                return;
-            }
-            expect(actual.right).toEqual(expected.value);
+        'tests NullableOtStringTemplate {source: $source, expected: $expected}',
+        ({ source, expected }) => {
+            const actual = upOperation(NullableOtString.template).safeParse(source);
+            expect(toOption(actual)).toEqual(expected);
         }
     );
+
+    const validRecordOperation = {
+        value1: { type: update, update: { $v: 1, $r: 2, value: { newValue: 1 } } },
+        value2: { type: replace, replace: { newValue: { $v: 1, $r: 2, value: 2 } } },
+    };
+
+    const validParamRecordOperation = {
+        value1: { $v: 1, $r: 2, value: { newValue: 1 } },
+        value2: { $v: 1, $r: 2, value: { newValue: 2 } },
+    };
+
+    it.each`
+        source                                                             | expected
+        ${1}                                                               | ${Option.none()}
+        ${undefined}                                                       | ${Option.none()}
+        ${{}}                                                              | ${Option.some({})}
+        ${validRecordOperation}                                            | ${Option.some(validRecordOperation)}
+        ${validParamRecordOperation}                                       | ${Option.none()}
+        ${{ value1: 1, value2: 2 }}                                        | ${Option.none()}
+        ${{ value1: 1, value2: { $v: 1, $r: 2, value: { newValue: 2 } } }} | ${Option.none()}
+    `('tests RecordTemplate {source: $source, expected: $expected}', ({ source, expected }) => {
+        const actual = upOperation(RecordValue.template).safeParse(source);
+        expect(toOption(actual)).toEqual(expected);
+    });
+
+    it.each`
+        source                                                             | expected
+        ${1}                                                               | ${Option.none()}
+        ${undefined}                                                       | ${Option.none()}
+        ${{}}                                                              | ${Option.some({})}
+        ${validRecordOperation}                                            | ${Option.none()}
+        ${validParamRecordOperation}                                       | ${Option.some(validParamRecordOperation)}
+        ${{ value1: 1, value2: 2 }}                                        | ${Option.none()}
+        ${{ value1: 1, value2: { $v: 1, $r: 2, value: { newValue: 2 } } }} | ${Option.none()}
+    `(
+        'tests ParamRecordTemplate {source: $source, expected: $expected}',
+        ({ source, expected }) => {
+            const actual = upOperation(ParamRecordValue.template).safeParse(source);
+            expect(toOption(actual)).toEqual(expected);
+        }
+    );
+
+    it.each`
+        source              | expected
+        ${{}}               | ${Option.some({})}
+        ${{ $v: 1 }}        | ${Option.none()}
+        ${{ $r: 2 }}        | ${Option.none()}
+        ${{ $v: 1, $r: 2 }} | ${Option.none()}
+    `(
+        'tests ObjectTemplate(NoVersion) {source: $source, expected: $expected}',
+        ({ source, expected }) => {
+            const actual = upOperation(ObjectValue.NoVersion.template).safeParse(source);
+            expect(toOption(actual)).toEqual(expected);
+        }
+    );
+
+    it.each`
+        source                                                                                | expected
+        ${undefined}                                                                          | ${Option.none()}
+        ${'str'}                                                                              | ${Option.none()}
+        ${{ value1: 1 }}                                                                      | ${Option.none()}
+        ${TextOperation.toUpOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!)} | ${Option.none()}
+        ${{}}                                                                                 | ${Option.none()}
+        ${{ $v: 10, $r: 20 }}                                                                 | ${Option.none()}
+        ${{ $v: 1, $r: 2 }}                                                                   | ${Option.some({ $v: 1, $r: 2 })}
+        ${{ $v: 1, $r: 2, x: 1 }}                                                             | ${Option.some({ $v: 1, $r: 2 })}
+        ${{ $v: 1, $r: 2, value1: undefined, value2: undefined }}                             | ${Option.some({ $v: 1, $r: 2 })}
+        ${{ $v: 1, $r: 2, value1: { newValue: 1 } }}                                          | ${Option.some({ $v: 1, $r: 2, value1: { newValue: 1 } })}
+        ${{ $v: 1, $r: 2, value1: { newValue: 'str' } }}                                      | ${Option.none()}
+        ${{ $v: 1, $r: 2, value1: { newValue: 1 }, value2: { newValue: 1 } }}                 | ${Option.some({ $v: 1, $r: 2, value1: { newValue: 1 }, value2: { newValue: 1 } })}
+    `('tests ObjectTemplate {source: $source,expected: $expected}', ({ source, expected }) => {
+        const actual = upOperation(ObjectValue.template).safeParse(source);
+        expect(toOption(actual)).toEqual(expected);
+    });
 });
 
 describe('downOperation', () => {
-    describe.each([true, false])('{exact: %b}', exact => {
-        const options: IoTsOptions = {
-            exact,
-        };
+    it.each`
+        source                                                                                  | expected
+        ${undefined}                                                                            | ${Option.none()}
+        ${'str'}                                                                                | ${Option.none()}
+        ${{ oldValue: 1 }}                                                                      | ${Option.some({ oldValue: 1 })}
+        ${{}}                                                                                   | ${Option.some({})}
+        ${{ oldValue: 'str' }}                                                                  | ${Option.none()}
+        ${TextOperation.toDownOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!)} | ${Option.none()}
+    `(
+        'tests ReplaceValueTemplate {source: $source, expected: $expected}',
+        ({ source, expected }) => {
+            const actual = downOperation(ReplaceValue.template).safeParse(source);
+            expect(toOption(actual)).toEqual(expected);
+        }
+    );
 
-        it.each`
-            source                                                                                  | expected
-            ${undefined}                                                                            | ${Option.none()}
-            ${'str'}                                                                                | ${Option.none()}
-            ${{ oldValue: 1 }}                                                                      | ${Option.some({ oldValue: 1 })}
-            ${{}}                                                                                   | ${Option.some({})}
-            ${{ oldValue: 'str' }}                                                                  | ${Option.none()}
-            ${TextOperation.toDownOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!)} | ${Option.none()}
-        `(
-            'tests ReplaceValueTemplate {source: $source, expected: $expected}',
-            ({ source, expected }) => {
-                const actual = downOperation(ReplaceValue.template, options).decode(source);
-                if (actual._tag === 'Left') {
-                    expect(expected.isNone).toBe(true);
-                    return;
-                }
-                expect(actual.right).toEqual(expected.value);
-            }
-        );
-
-        it.each`
-            source                                                                                  | expected
-            ${{}}                                                                                   | ${Option.none()}
-            ${undefined}                                                                            | ${Option.none()}
-            ${'str'}                                                                                | ${Option.none()}
-            ${{ oldValue: 1 }}                                                                      | ${Option.none()}
-            ${TextOperation.toDownOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!)} | ${Option.some(TextOperation.toDownOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!))}
-            ${TextOperation.toUpOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!)}   | ${Option.none()}
-            ${TextOperation.diff({ prev: 'text1', next: 'text2' })}                                 | ${Option.none()}
-        `(
-            'tests OtStringTemplate {source: $source, expected: $expected}',
-            ({ source, expected }) => {
-                const actual = downOperation(OtString.template, options).decode(source);
-                if (actual._tag === 'Left') {
-                    expect(expected.isNone).toBe(true);
-                    return;
-                }
-                expect(actual.right).toEqual(expected.value);
-            }
-        );
-
-        it.each`
-            source                                                                                                    | expected
-            ${{}}                                                                                                     | ${Option.none()}
-            ${undefined}                                                                                              | ${Option.none()}
-            ${'str'}                                                                                                  | ${Option.none()}
-            ${{ oldValue: 1 }}                                                                                        | ${Option.none()}
-            ${NullableTextOperation.toDownOperation(NullableTextOperation.diff({ prev: 'text1', next: 'text2' })!)}   | ${Option.some(NullableTextOperation.toDownOperation(NullableTextOperation.diff({ prev: 'text1', next: 'text2' })!))}
-            ${NullableTextOperation.toDownOperation(NullableTextOperation.diff({ prev: undefined, next: 'text2' })!)} | ${Option.some(NullableTextOperation.toDownOperation(NullableTextOperation.diff({ prev: undefined, next: 'text2' })!))}
-            ${NullableTextOperation.toDownOperation(NullableTextOperation.diff({ prev: 'text1', next: undefined })!)} | ${Option.some(NullableTextOperation.toDownOperation(NullableTextOperation.diff({ prev: 'text1', next: undefined })!))}
-            ${NullableTextOperation.toUpOperation(NullableTextOperation.diff({ prev: 'text1', next: 'text2' })!)}     | ${Option.none()}
-            ${NullableTextOperation.diff({ prev: 'text1', next: 'text2' })}                                           | ${Option.none()}
-        `(
-            'tests NullableOtStringTemplate {source: $source, expected: $expected}',
-            ({ source, expected }) => {
-                const actual = downOperation(NullableOtString.template, options).decode(source);
-                if (actual._tag === 'Left') {
-                    expect(expected.isNone).toBe(true);
-                    return;
-                }
-                expect(actual.right).toEqual(expected.value);
-            }
-        );
-
-        const validRecordOperation = {
-            value1: { type: update, update: { $v: 1, $r: 2, value: { newValue: 1 } } },
-            value2: { type: replace, replace: { $v: 1, $r: 2, value: 2 } },
-        };
-
-        const validParamRecordOperation = {
-            value1: { $v: 1, $r: 2, value: { oldValue: 1 } },
-            value2: { $v: 1, $r: 2, value: { oldValue: 2 } },
-        };
-
-        it.each`
-            source                                                             | expected
-            ${1}                                                               | ${Option.none()}
-            ${undefined}                                                       | ${Option.none()}
-            ${{}}                                                              | ${Option.some({})}
-            ${validRecordOperation}                                            | ${Option.some(validRecordOperation)}
-            ${validParamRecordOperation}                                       | ${Option.none()}
-            ${{ value1: 1, value2: 2 }}                                        | ${Option.none()}
-            ${{ value1: 1, value2: { $v: 1, $r: 2, value: { oldValue: 2 } } }} | ${Option.none()}
-        `('tests RecordTemplate {source: $source, expected: $expected}', ({ source, expected }) => {
-            const actual = downOperation(RecordValue.template, options).decode(source);
-            if (actual._tag === 'Left') {
-                expect(expected.isNone).toBe(true);
-                return;
-            }
-            expect(actual.right).toEqual(expected.value);
-        });
-
-        it.each`
-            source                                                             | expected
-            ${1}                                                               | ${Option.none()}
-            ${undefined}                                                       | ${Option.none()}
-            ${{}}                                                              | ${Option.some({})}
-            ${validRecordOperation}                                            | ${Option.none()}
-            ${validParamRecordOperation}                                       | ${Option.some(validParamRecordOperation)}
-            ${{ value1: 1, value2: 2 }}                                        | ${Option.none()}
-            ${{ value1: 1, value2: { $v: 1, $r: 2, value: { oldValue: 2 } } }} | ${Option.none()}
-        `(
-            'tests ParamRecordTemplate {source: $source, expected: $expected}',
-            ({ source, expected }) => {
-                const actual = downOperation(ParamRecordValue.template, options).decode(source);
-                if (actual._tag === 'Left') {
-                    expect(expected.isNone).toBe(true);
-                    return;
-                }
-                expect(actual.right).toEqual(expected.value);
-            }
-        );
-
-        it.each`
-            source              | expected
-            ${{}}               | ${Option.some({})}
-            ${{ $v: 1 }}        | ${Option.none()}
-            ${{ $r: 2 }}        | ${Option.none()}
-            ${{ $v: 1, $r: 2 }} | ${Option.none()}
-        `(
-            'tests ObjectTemplate(NoVersion) {source: $source, expected: $expected}',
-            ({ source, expected }) => {
-                const actual = downOperation(ObjectValue.NoVersion.template, options).decode(
-                    source
-                );
-                if (actual._tag === 'Left') {
-                    expect(expected.isNone).toBe(true);
-                    return;
-                }
-                expect(actual.right).toEqual(expected.value);
-            }
-        );
+    it.each`
+        source                                                                                  | expected
+        ${{}}                                                                                   | ${Option.none()}
+        ${undefined}                                                                            | ${Option.none()}
+        ${'str'}                                                                                | ${Option.none()}
+        ${{ oldValue: 1 }}                                                                      | ${Option.none()}
+        ${TextOperation.toDownOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!)} | ${Option.some(TextOperation.toDownOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!))}
+        ${TextOperation.toUpOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!)}   | ${Option.none()}
+        ${TextOperation.diff({ prev: 'text1', next: 'text2' })}                                 | ${Option.none()}
+    `('tests OtStringTemplate {source: $source, expected: $expected}', ({ source, expected }) => {
+        const actual = downOperation(OtString.template).safeParse(source);
+        expect(toOption(actual)).toEqual(expected);
     });
 
     it.each`
-        source                                                                                  | exact    | expected
-        ${undefined}                                                                            | ${false} | ${Option.none()}
-        ${undefined}                                                                            | ${true}  | ${Option.none()}
-        ${'str'}                                                                                | ${false} | ${Option.none()}
-        ${'str'}                                                                                | ${true}  | ${Option.none()}
-        ${{ value1: 1 }}                                                                        | ${false} | ${Option.none()}
-        ${{ value1: 1 }}                                                                        | ${true}  | ${Option.none()}
-        ${TextOperation.toDownOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!)} | ${false} | ${Option.none()}
-        ${TextOperation.toDownOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!)} | ${true}  | ${Option.none()}
-        ${{}}                                                                                   | ${false} | ${Option.none()}
-        ${{}}                                                                                   | ${true}  | ${Option.none()}
-        ${{ $v: 10, $r: 20 }}                                                                   | ${false} | ${Option.none()}
-        ${{ $v: 10, $r: 20 }}                                                                   | ${true}  | ${Option.none()}
-        ${{ $v: 1, $r: 2 }}                                                                     | ${false} | ${Option.some({ $v: 1, $r: 2 })}
-        ${{ $v: 1, $r: 2 }}                                                                     | ${true}  | ${Option.some({ $v: 1, $r: 2 })}
-        ${{ $v: 1, $r: 2, x: 1 }}                                                               | ${false} | ${Option.some({ $v: 1, $r: 2, x: 1 })}
-        ${{ $v: 1, $r: 2, x: 1 }}                                                               | ${true}  | ${Option.some({ $v: 1, $r: 2 })}
-        ${{ $v: 1, $r: 2, value1: undefined, value2: undefined }}                               | ${false} | ${Option.some({ $v: 1, $r: 2 })}
-        ${{ $v: 1, $r: 2, value1: undefined, value2: undefined }}                               | ${true}  | ${Option.some({ $v: 1, $r: 2 })}
-        ${{ $v: 1, $r: 2, value1: { oldValue: 1 } }}                                            | ${false} | ${Option.some({ $v: 1, $r: 2, value1: { oldValue: 1 } })}
-        ${{ $v: 1, $r: 2, value1: { oldValue: 1 } }}                                            | ${true}  | ${Option.some({ $v: 1, $r: 2, value1: { oldValue: 1 } })}
-        ${{ $v: 1, $r: 2, value1: { oldValue: 'str' } }}                                        | ${false} | ${Option.none()}
-        ${{ $v: 1, $r: 2, value1: { oldValue: 'str' } }}                                        | ${true}  | ${Option.none()}
-        ${{ $v: 1, $r: 2, value1: { oldValue: 1 }, value2: { oldValue: 1 } }}                   | ${false} | ${Option.some({ $v: 1, $r: 2, value1: { oldValue: 1 }, value2: { oldValue: 1 } })}
-        ${{ $v: 1, $r: 2, value1: { oldValue: 1 }, value2: { oldValue: 1 } }}                   | ${true}  | ${Option.some({ $v: 1, $r: 2, value1: { oldValue: 1 }, value2: { oldValue: 1 } })}
+        source                                                                                                    | expected
+        ${{}}                                                                                                     | ${Option.none()}
+        ${undefined}                                                                                              | ${Option.none()}
+        ${'str'}                                                                                                  | ${Option.none()}
+        ${{ oldValue: 1 }}                                                                                        | ${Option.none()}
+        ${NullableTextOperation.toDownOperation(NullableTextOperation.diff({ prev: 'text1', next: 'text2' })!)}   | ${Option.some(NullableTextOperation.toDownOperation(NullableTextOperation.diff({ prev: 'text1', next: 'text2' })!))}
+        ${NullableTextOperation.toDownOperation(NullableTextOperation.diff({ prev: undefined, next: 'text2' })!)} | ${Option.some(NullableTextOperation.toDownOperation(NullableTextOperation.diff({ prev: undefined, next: 'text2' })!))}
+        ${NullableTextOperation.toDownOperation(NullableTextOperation.diff({ prev: 'text1', next: undefined })!)} | ${Option.some(NullableTextOperation.toDownOperation(NullableTextOperation.diff({ prev: 'text1', next: undefined })!))}
+        ${NullableTextOperation.toUpOperation(NullableTextOperation.diff({ prev: 'text1', next: 'text2' })!)}     | ${Option.none()}
+        ${NullableTextOperation.diff({ prev: 'text1', next: 'text2' })}                                           | ${Option.none()}
     `(
-        'tests ObjectTemplate {source: $source, exact: $exact, expected: $expected}',
-        ({ source, exact, expected }) => {
-            const actual = downOperation(ObjectValue.template, { exact }).decode(source);
-            if (actual._tag === 'Left') {
-                expect(expected.isNone).toBe(true);
-                return;
-            }
-            expect(actual.right).toEqual(expected.value);
+        'tests NullableOtStringTemplate {source: $source, expected: $expected}',
+        ({ source, expected }) => {
+            const actual = downOperation(NullableOtString.template).safeParse(source);
+            expect(toOption(actual)).toEqual(expected);
         }
     );
+
+    const validRecordOperation = {
+        value1: { type: update, update: { $v: 1, $r: 2, value: { oldValue: 1 } } },
+        value2: { type: replace, replace: { oldValue: { $v: 1, $r: 2, value: 2 } } },
+    };
+
+    const validParamRecordOperation = {
+        value1: { $v: 1, $r: 2, value: { oldValue: 1 } },
+        value2: { $v: 1, $r: 2, value: { oldValue: 2 } },
+    };
+
+    it.each`
+        source                                                             | expected
+        ${1}                                                               | ${Option.none()}
+        ${undefined}                                                       | ${Option.none()}
+        ${{}}                                                              | ${Option.some({})}
+        ${validRecordOperation}                                            | ${Option.some(validRecordOperation)}
+        ${validParamRecordOperation}                                       | ${Option.none()}
+        ${{ value1: 1, value2: 2 }}                                        | ${Option.none()}
+        ${{ value1: 1, value2: { $v: 1, $r: 2, value: { oldValue: 2 } } }} | ${Option.none()}
+    `('tests RecordTemplate {source: $source, expected: $expected}', ({ source, expected }) => {
+        const actual = downOperation(RecordValue.template).safeParse(source);
+        expect(toOption(actual)).toEqual(expected);
+    });
+
+    it.each`
+        source                                                             | expected
+        ${1}                                                               | ${Option.none()}
+        ${undefined}                                                       | ${Option.none()}
+        ${{}}                                                              | ${Option.some({})}
+        ${validRecordOperation}                                            | ${Option.none()}
+        ${validParamRecordOperation}                                       | ${Option.some(validParamRecordOperation)}
+        ${{ value1: 1, value2: 2 }}                                        | ${Option.none()}
+        ${{ value1: 1, value2: { $v: 1, $r: 2, value: { oldValue: 2 } } }} | ${Option.none()}
+    `(
+        'tests ParamRecordTemplate {source: $source, expected: $expected}',
+        ({ source, expected }) => {
+            const actual = downOperation(ParamRecordValue.template).safeParse(source);
+            expect(toOption(actual)).toEqual(expected);
+        }
+    );
+
+    it.each`
+        source              | expected
+        ${{}}               | ${Option.some({})}
+        ${{ $v: 1 }}        | ${Option.none()}
+        ${{ $r: 2 }}        | ${Option.none()}
+        ${{ $v: 1, $r: 2 }} | ${Option.none()}
+    `(
+        'tests ObjectTemplate(NoVersion) {source: $source, expected: $expected}',
+        ({ source, expected }) => {
+            const actual = downOperation(ObjectValue.NoVersion.template).safeParse(source);
+            expect(toOption(actual)).toEqual(expected);
+        }
+    );
+
+    it.each`
+        source                                                                                  | expected
+        ${undefined}                                                                            | ${Option.none()}
+        ${'str'}                                                                                | ${Option.none()}
+        ${{ value1: 1 }}                                                                        | ${Option.none()}
+        ${TextOperation.toDownOperation(TextOperation.diff({ prev: 'text1', next: 'text2' })!)} | ${Option.none()}
+        ${{}}                                                                                   | ${Option.none()}
+        ${{ $v: 10, $r: 20 }}                                                                   | ${Option.none()}
+        ${{ $v: 1, $r: 2 }}                                                                     | ${Option.some({ $v: 1, $r: 2 })}
+        ${{ $v: 1, $r: 2, x: 1 }}                                                               | ${Option.some({ $v: 1, $r: 2 })}
+        ${{ $v: 1, $r: 2, value1: undefined, value2: undefined }}                               | ${Option.some({ $v: 1, $r: 2 })}
+        ${{ $v: 1, $r: 2, value1: { oldValue: 1 } }}                                            | ${Option.some({ $v: 1, $r: 2, value1: { oldValue: 1 } })}
+        ${{ $v: 1, $r: 2, value1: { oldValue: 'str' } }}                                        | ${Option.none()}
+        ${{ $v: 1, $r: 2, value1: { oldValue: 1 }, value2: { oldValue: 1 } }}                   | ${Option.some({ $v: 1, $r: 2, value1: { oldValue: 1 }, value2: { oldValue: 1 } })}
+    `('tests ObjectTemplate {source: $source expected: $expected}', ({ source, expected }) => {
+        const actual = downOperation(ObjectValue.template).safeParse(source);
+        expect(toOption(actual)).toEqual(expected);
+    });
 });
 
 describe('toUpOperation', () => {

@@ -1,6 +1,6 @@
 import * as TextOperationCore from '@kizahasi/ot-string';
 import { Result } from '@kizahasi/result';
-import * as t from 'io-ts';
+import { z } from 'zod';
 import { replace, update } from './recordOperationElement';
 import * as TextOperation from './textOperation';
 
@@ -9,7 +9,7 @@ import * as TextOperation from './textOperation';
 const stateShouldNotBeUndefinedMessage = 'state should not be undefined';
 const firstTypeShouldBeSameAsSecondType = 'first type and second type should be same';
 
-const stringOrUndefined = t.union([t.string, t.undefined]);
+const stringOrUndefined = z.union([z.string(), z.undefined()]);
 
 type ApplyError = TextOperationCore.ApplyError<TextOperationCore.PositiveInt>;
 type ComposeAndTransformUpError = TextOperationCore.ComposeAndTransformError<
@@ -25,34 +25,34 @@ type ComposeAndTransformTwoWayError = TextOperationCore.ComposeAndTransformError
     TextOperationCore.NonEmptyString
 >;
 
-export const downOperation = t.union([
-    t.type({
-        type: t.literal(replace),
-        replace: t.type({
+export const downOperation = z.union([
+    z.object({
+        type: z.literal(replace),
+        replace: z.object({
             oldValue: stringOrUndefined,
         }),
     }),
-    t.type({
-        type: t.literal(update),
+    z.object({
+        type: z.literal(update),
         update: TextOperation.downOperation,
     }),
 ]);
-export type DownOperation = t.TypeOf<typeof downOperation>;
+export type DownOperation = z.TypeOf<typeof downOperation>;
 
-export const upOperation = t.union([
-    t.type({
-        type: t.literal(replace),
-        replace: t.type({
+export const upOperation = z.union([
+    z.object({
+        type: z.literal(replace),
+        replace: z.object({
             newValue: stringOrUndefined,
         }),
     }),
-    t.type({
-        type: t.literal(update),
+    z.object({
+        type: z.literal(update),
         update: TextOperation.upOperation,
     }),
 ]);
 
-export type UpOperation = t.TypeOf<typeof upOperation>;
+export type UpOperation = z.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation =
     | {

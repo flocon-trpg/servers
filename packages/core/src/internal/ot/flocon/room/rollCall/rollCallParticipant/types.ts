@@ -1,10 +1,10 @@
-import * as t from 'io-ts';
-import { maybe } from '../../../../../maybe';
-import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../../generator';
+import { z } from 'zod';
+import { maybe } from '@/maybe';
+import { createObjectValueTemplate, createReplaceValueTemplate } from '@/ot/generator';
 
 export const template = createObjectValueTemplate(
     {
-        answeredAt: createReplaceValueTemplate(maybe(t.number)),
+        answeredAt: createReplaceValueTemplate(maybe(z.number())),
     },
     1,
     1

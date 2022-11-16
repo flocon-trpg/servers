@@ -1,5 +1,5 @@
 import { StrIndex20, strIndex20Array } from '@flocon-trpg/core';
-import * as t from 'io-ts';
+import { z } from 'zod';
 import {
     CharacterTabConfig,
     deserializeCharacterTabConfig,
@@ -61,16 +61,16 @@ export type CharactersPanelConfig = {
     rowKeysOrder: string[];
 } & DraggablePanelConfigBase;
 
-export const serializedCharactersPanelConfig = t.intersection([
-    t.partial({
-        isMinimized: t.boolean,
-        tabs: t.array(partialCharacterTabConfig),
-        rowKeysOrder: t.array(t.string),
-    }),
-    serializedDraggablePanelConfigBase,
-]);
+export const serializedCharactersPanelConfig = z
+    .object({
+        isMinimized: z.boolean(),
+        tabs: z.array(partialCharacterTabConfig),
+        rowKeysOrder: z.array(z.string()),
+    })
+    .partial()
+    .merge(serializedDraggablePanelConfigBase);
 
-export type SerializedCharactersPanelConfig = t.TypeOf<typeof serializedCharactersPanelConfig>;
+export type SerializedCharactersPanelConfig = z.TypeOf<typeof serializedCharactersPanelConfig>;
 
 export const deserializeCharactersPanelConfig = (
     source: SerializedCharactersPanelConfig

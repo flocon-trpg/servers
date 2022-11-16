@@ -1,12 +1,12 @@
-import * as t from 'io-ts';
+import { z } from 'zod';
 
 export const path = 'path';
 
-const $path = t.type({
-    type: t.literal(path),
+const $path = z.object({
+    type: z.literal(path),
 
     // SVG pathのdと同様の値
-    data: t.string,
+    data: z.string(),
 });
 
 export const shape = $path;

@@ -298,7 +298,7 @@ export namespace GlobalRoom {
                 throw toOtError(nextState.error);
             }
 
-            // CONSIDER: サイズの大きいオブジェクトに対してJSON.stringifyするのは重い可能性。そもそももしJSON.stringifyが重いのであればio-tsのdecodeはより重くなりそうだが。
+            // CONSIDER: サイズの大きいオブジェクトに対してJSON.stringifyするのは重い可能性。そもそももしJSON.stringifyが重いのであればzodのparseはより重くなりそうだが。
             target.name = nextState.value.name;
             const newValue = exactDbState(nextState.value);
             const newValueJson = JSON.stringify(newValue);
