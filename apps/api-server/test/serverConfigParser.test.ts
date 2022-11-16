@@ -1,6 +1,8 @@
+import './beforeAllGlobal';
 import { Result } from '@kizahasi/result';
 import { ServerConfigParser } from '../src/config/serverConfigParser';
 import { WritableServerConfig, WritableServerConfigForMigration } from '../src/config/types';
+import { logger } from '@/logger';
 
 const defaultServerConfig: WritableServerConfig = {
     accessControlAllowOrigin: undefined,
@@ -66,6 +68,10 @@ const numberValueCases: EnvValueCase<number | typeof error>[] = [
 ];
 
 describe('serverConfigParser', () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
     it('tests empty serverConfig', () => {
         const actual = new ServerConfigParser({});
         expect(actual.serverConfig).toEqual(Result.ok(defaultServerConfig));
@@ -248,6 +254,33 @@ describe('serverConfigParser', () => {
             })
         );
         expect(actual.serverConfigForMigration).toEqual(Result.ok(defaultServerConfigForMigration));
+    });
+
+    it('tests FIREBASE_PROJECT_ID', () => {
+        const actual = new ServerConfigParser({ FIREBASE_PROJECT_ID: 'test_project_id' });
+        expect(actual.serverConfig).toEqual(
+            Result.ok({
+                ...defaultServerConfig,
+                firebaseProjectId: 'test_project_id',
+            })
+        );
+        expect(actual.serverConfigForMigration).toEqual(Result.ok(defaultServerConfigForMigration));
+    });
+
+    it('should ignore FIREBASE_PROJECTID if FIREBASE_PROJECT_ID is set', () => {
+        const mock = jest.spyOn(logger.get(), 'warn');
+        const actual = new ServerConfigParser({
+            FIREBASE_PROJECT_ID: 'test_project_id1',
+            FIREBASE_PROJECTID: 'test_project_id2',
+        });
+        expect(actual.serverConfig).toEqual(
+            Result.ok({
+                ...defaultServerConfig,
+                firebaseProjectId: 'test_project_id1',
+            })
+        );
+        expect(actual.serverConfigForMigration).toEqual(Result.ok(defaultServerConfigForMigration));
+        expect(mock.mock.calls).toHaveLength(1);
     });
 
     it.each(booleanlikeValueCases)('tests HEROKU %o', $case => {

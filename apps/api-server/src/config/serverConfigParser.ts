@@ -13,6 +13,7 @@ import {
     ENTRY_PASSWORD,
     FIREBASE_ADMIN_SECRET,
     FIREBASE_PROJECTID,
+    FIREBASE_PROJECT_ID,
     FLOCON_ADMIN,
     FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL,
     HEROKU,
@@ -38,6 +39,7 @@ import {
     postgresqlDatabase,
     sqliteDatabase,
 } from './types';
+import { logger } from '@/logger';
 
 loadDotenv();
 
@@ -119,10 +121,9 @@ export class ServerConfigParser {
         return this[FIREBASE_ADMIN_SECRET];
     }
 
-    // GCEなどといった、Google Admin SDKのデータが自動的に取得できる環境ではFIREBASE_ADMIN_SECRETではなくこれを用いるほうが簡便であるため定義している
-    public readonly [FIREBASE_PROJECTID]: string | undefined;
+    public readonly [FIREBASE_PROJECT_ID]: string | undefined;
     public get firebaseProjectId() {
-        return this[FIREBASE_PROJECTID];
+        return this[FIREBASE_PROJECT_ID];
     }
 
     public readonly [FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL]:
@@ -158,12 +159,7 @@ export class ServerConfigParser {
     }
 
     public constructor(env: typeof process.env) {
-        const simpleProps = [
-            ACCESS_CONTROL_ALLOW_ORIGIN,
-            DATABASE_URL,
-            EMBUPLOADER_PATH,
-            FIREBASE_PROJECTID,
-        ] as const;
+        const simpleProps = [ACCESS_CONTROL_ALLOW_ORIGIN, DATABASE_URL, EMBUPLOADER_PATH] as const;
         for (const prop of simpleProps) {
             this[prop] = env[prop];
         }
@@ -210,6 +206,7 @@ export class ServerConfigParser {
 
         this[FLOCON_ADMIN] = ServerConfigParser.admin(env);
         this[FIREBASE_ADMIN_SECRET] = ServerConfigParser.firebaseAdminSecretProp(env);
+        this[FIREBASE_PROJECT_ID] = ServerConfigParser.firebaseProjectId(env);
         this[ENTRY_PASSWORD] = ServerConfigParser.entryPasswordProp(env);
         this[MYSQL] = ServerConfigParser.mysqlProp(env);
         this[POSTGRESQL] = ServerConfigParser.postgresqlProp(env);
@@ -273,6 +270,17 @@ export class ServerConfigParser {
             return Result.error(undefined);
         }
         return Result.ok(j.data);
+    }
+
+    private static firebaseProjectId(env: typeof process.env): string | undefined {
+        const project_id = env[FIREBASE_PROJECT_ID];
+        const projectid = env[FIREBASE_PROJECTID];
+        if (project_id != null && projectid != null) {
+            logger.warn(
+                `${FIREBASE_PROJECT_ID} と ${FIREBASE_PROJECTID} が両方ともセットされているため、${FIREBASE_PROJECT_ID} の値のみが参照されます。`
+            );
+        }
+        return project_id ?? projectid;
     }
 
     private static mysqlProp(
