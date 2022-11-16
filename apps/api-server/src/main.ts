@@ -12,7 +12,7 @@ import { ServerConfig } from './config/types';
 import { InMemoryConnectionManager, pubSub } from './connection/main';
 import { createServer, createServerAsError } from './createServer';
 import { BaasType } from './enums/BaasType';
-import { FIREBASE_PROJECTID } from './env';
+import { FIREBASE_PROJECTID, FIREBASE_PROJECT_ID } from './env';
 import { initializeLogger, logger } from './logger';
 import { checkMigrationsBeforeStart, doAutoMigrationBeforeStart } from './migrate';
 import { AppConsole } from './utils/appConsole';
@@ -74,7 +74,7 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
     if (serverConfig.firebaseAdminSecret == null) {
         if (serverConfig.firebaseProjectId == null) {
             await onError(
-                `FirebaseのプロジェクトIDを取得できませんでした。${FIREBASE_PROJECTID} にプロジェクトIDをセットしてください。`
+                `FirebaseのプロジェクトIDを取得できませんでした。${FIREBASE_PROJECT_ID} にプロジェクトIDをセットしてください。`
             );
             return;
         }
