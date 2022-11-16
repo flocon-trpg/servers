@@ -1,4 +1,5 @@
 import { FilePathFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { loggerRef } from '@flocon-trpg/utils';
 import { soundEffect } from '@flocon-trpg/web-server-utils';
 import { Howl } from 'howler';
 import React from 'react';
@@ -60,8 +61,9 @@ function usePlaySoundEffectCore(value?: SoundEffect): void {
             return;
         }
 
+        const src = url.directLink;
         const howl = new Howl({
-            src: [url.directLink],
+            src: [src],
             loop: false,
             volume: Math.min(value.volume * volumeConfigRef.current, volumeCap),
         });
@@ -69,6 +71,7 @@ function usePlaySoundEffectCore(value?: SoundEffect): void {
             howl,
             volume: value.volume,
         });
+        loggerRef.value.debug({ src }, 'SE is started to play');
         howl.play();
         setTimeout(() => howl.fade(howl.volume(), 0, fadeout), musicLengthLimit);
         setTimeout(() => {

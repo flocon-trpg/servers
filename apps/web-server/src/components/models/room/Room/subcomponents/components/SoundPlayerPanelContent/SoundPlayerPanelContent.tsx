@@ -330,7 +330,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
             <div className={classNames(flex, flexRow, itemsCenter)}>
                 <div style={Styles.Text.larger}>
                     {bgmState != null && (bgmState.files ?? []).length !== 0 ? (
-                        /* 本当はPauseアイコンではなく停止アイコンを使いたいが、antdでは見つからなかったので暫定的にPauseアイコンを用いている */
+                        /* TODO: 本当はPauseアイコンではなく停止アイコンを使いたいが、antdでは見つからなかったので暫定的にPauseアイコンを用いている */
                         bgmState.isPaused ? (
                             <Icon.PauseOutlined />
                         ) : (
