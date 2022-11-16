@@ -1,24 +1,26 @@
-import * as t from 'io-ts';
+import { z } from 'zod';
 
 export const update = 'update';
 export const replace = 'replace';
 
 export const recordDownOperationElementFactory = <
-    TState extends t.Mixed,
-    TOperation extends t.Mixed
+    TState extends z.ZodTypeAny,
+    TOperation extends z.ZodTypeAny
 >(
     state: TState,
     operation: TOperation
 ) =>
-    t.union([
-        t.type({
-            type: t.literal(replace),
-            replace: t.partial({
-                oldValue: state,
-            }),
+    z.union([
+        z.object({
+            type: z.literal(replace),
+            replace: z
+                .object({
+                    oldValue: state,
+                })
+                .partial(),
         }),
-        t.type({
-            type: t.literal(update),
+        z.object({
+            type: z.literal(update),
             update: operation,
         }),
     ]);
@@ -35,19 +37,24 @@ export type RecordDownOperationElement<TState, TOperation> =
           update: TOperation;
       };
 
-export const recordUpOperationElementFactory = <TState extends t.Mixed, TOperation extends t.Mixed>(
+export const recordUpOperationElementFactory = <
+    TState extends z.ZodTypeAny,
+    TOperation extends z.ZodTypeAny
+>(
     state: TState,
     operation: TOperation
 ) =>
-    t.union([
-        t.type({
-            type: t.literal(replace),
-            replace: t.partial({
-                newValue: state,
-            }),
+    z.union([
+        z.object({
+            type: z.literal(replace),
+            replace: z
+                .object({
+                    newValue: state,
+                })
+                .partial(),
         }),
-        t.type({
-            type: t.literal(update),
+        z.object({
+            type: z.literal(update),
             update: operation,
         }),
     ]);

@@ -1,12 +1,12 @@
-import * as t from 'io-ts';
-import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../../generator';
-import * as BoardPositionBase from '../../../boardPosition/types';
+import { z } from 'zod';
+import * as BoardPositionBase from '@/ot/flocon/boardPosition/types';
+import { createObjectValueTemplate, createReplaceValueTemplate } from '@/ot/generator';
 
 export const template = createObjectValueTemplate(
     {
         ...BoardPositionBase.templateValue,
-        boardId: createReplaceValueTemplate(t.string),
-        isPrivate: createReplaceValueTemplate(t.boolean),
+        boardId: createReplaceValueTemplate(z.string()),
+        isPrivate: createReplaceValueTemplate(z.boolean()),
     },
     2,
     1

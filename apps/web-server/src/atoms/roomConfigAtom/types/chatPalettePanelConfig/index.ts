@@ -1,5 +1,5 @@
 import { simpleId } from '@flocon-trpg/core';
-import * as t from 'io-ts';
+import { z } from 'zod';
 import { defaultChatPalettePanelPosition } from '../defaultPanelPositions';
 import {
     DraggablePanelConfigBase,
@@ -17,20 +17,20 @@ export type ChatPalettePanelConfig = {
     isMinimized: boolean;
 } & DraggablePanelConfigBase;
 
-export const serializedChatPalettePanelConfig = t.intersection([
-    t.partial({
-        selectedTextColor: t.string,
-        isPrivateMessageMode: t.boolean,
-        selectedPublicChannelKey: t.string,
-        selectedCharacterId: t.string,
-        customCharacterName: t.string,
-        selectedGameSystem: t.string,
-        isMinimized: t.boolean,
-    }),
-    serializedDraggablePanelConfigBase,
-]);
+export const serializedChatPalettePanelConfig = z
+    .object({
+        selectedTextColor: z.string(),
+        isPrivateMessageMode: z.boolean(),
+        selectedPublicChannelKey: z.string(),
+        selectedCharacterId: z.string(),
+        customCharacterName: z.string(),
+        selectedGameSystem: z.string(),
+        isMinimized: z.boolean(),
+    })
+    .partial()
+    .merge(serializedDraggablePanelConfigBase);
 
-export type SerializedChatPalettePanelConfig = t.TypeOf<typeof serializedChatPalettePanelConfig>;
+export type SerializedChatPalettePanelConfig = z.TypeOf<typeof serializedChatPalettePanelConfig>;
 
 export const deserializeChatPalettePanelConfig = (
     source: SerializedChatPalettePanelConfig

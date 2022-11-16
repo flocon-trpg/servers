@@ -1,6 +1,5 @@
 import { filterInt, parseStringToBoolean, parseStringToBooleanError } from '@flocon-trpg/utils';
 import { Error, Ok, Result } from '@kizahasi/result';
-import * as E from 'fp-ts/Either';
 import { ReadonlyDeep } from 'type-fest/source/readonly-deep';
 import {
     ACCESS_CONTROL_ALLOW_ORIGIN,
@@ -23,7 +22,6 @@ import {
     SQLITE,
     loadDotenv,
 } from '../env';
-import { formatValidationErrors } from '../utils/io-ts-reporters';
 import {
     EntryPasswordConfig,
     FirebaseAdminSecretConfig,
@@ -249,12 +247,12 @@ export class ServerConfigParser {
         if (json.isError) {
             return Result.error(undefined);
         }
-        const j = E.mapLeft(formatValidationErrors)(entryPassword.decode(json.value));
-        if (j._tag === 'Left') {
+        const j = entryPassword.safeParse(json.value);
+        if (!j.success) {
             return Result.error(undefined);
         }
-        if (j.right.type !== none) {
-            return Result.ok(j.right);
+        if (j.data.type !== none) {
+            return Result.ok(j.data);
         }
         return undefined;
     }
@@ -270,11 +268,11 @@ export class ServerConfigParser {
         if (json.isError) {
             return Result.error(undefined);
         }
-        const j = E.mapLeft(formatValidationErrors)(firebaseAdminSecret.decode(json.value));
-        if (j._tag === 'Left') {
+        const j = firebaseAdminSecret.safeParse(json.value);
+        if (!j.success) {
             return Result.error(undefined);
         }
-        return Result.ok(j.right);
+        return Result.ok(j.data);
     }
 
     private static mysqlProp(
@@ -288,11 +286,11 @@ export class ServerConfigParser {
         if (json.isError) {
             return Result.error(undefined);
         }
-        const j = E.mapLeft(formatValidationErrors)(mysqlDatabase.decode(json.value));
-        if (j._tag === 'Left') {
+        const j = mysqlDatabase.safeParse(json.value);
+        if (!j.success) {
             return Result.error(undefined);
         }
-        return Result.ok(j.right);
+        return Result.ok(j.data);
     }
 
     private static postgresqlProp(
@@ -306,11 +304,11 @@ export class ServerConfigParser {
         if (json.isError) {
             return Result.error(undefined);
         }
-        const j = E.mapLeft(formatValidationErrors)(postgresqlDatabase.decode(json.value));
-        if (j._tag === 'Left') {
+        const j = postgresqlDatabase.safeParse(json.value);
+        if (!j.success) {
             return Result.error(undefined);
         }
-        return Result.ok(j.right);
+        return Result.ok(j.data);
     }
 
     private static sqliteProp(
@@ -324,11 +322,11 @@ export class ServerConfigParser {
         if (json.isError) {
             return Result.error(undefined);
         }
-        const j = E.mapLeft(formatValidationErrors)(sqliteDatabase.decode(json.value));
-        if (j._tag === 'Left') {
+        const j = sqliteDatabase.safeParse(json.value);
+        if (!j.success) {
             return Result.error(undefined);
         }
-        return Result.ok(j.right);
+        return Result.ok(j.data);
     }
 
     private parseError(envKey: string): Error<string> {

@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import { z } from 'zod';
 
 export const isEmptyRecord = (source: Record<string, unknown>): boolean => {
     for (const key in source) {
@@ -23,9 +23,7 @@ export const isIdRecord = (source: Record<string, unknown>): boolean => {
     return true;
 };
 
-export const record = <TDomain extends t.Mixed, TCodomain extends t.Mixed>(
-    domain: TDomain,
-    codomain: TCodomain
-) => t.record(domain, t.union([codomain, t.undefined]));
+export const record = <Value extends z.ZodTypeAny>(value: Value) =>
+    z.record(z.union([value, z.undefined()]));
 
 export type StringKeyRecord<T> = Record<string, T | undefined>;

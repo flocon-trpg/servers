@@ -2,7 +2,6 @@ import { State, characterTemplate, simpleId, state } from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
 import { Alert, Modal } from 'antd';
 import classNames from 'classnames';
-import * as E from 'fp-ts/Either';
 import { atom, useAtom } from 'jotai';
 import React from 'react';
 import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateWithImmer';
@@ -10,9 +9,8 @@ import { CollaborativeInput } from '@/components/ui/CollaborativeInput/Collabora
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { flex, flexColumn } from '@/styles/className';
-import { formatValidationErrors } from '@/utils/io-ts/io-ts-reporters';
 
-const characterState = state(characterTemplate, { exact: true });
+const characterState = state(characterTemplate);
 type CharacterState = State<typeof characterTemplate>;
 
 export const importCharacterModalVisibilityAtom = atom(false);
@@ -33,12 +31,12 @@ export const ImportCharacterModal: React.FC = () => {
             setParsed(Result.error(`JSONをパースできませんでした - ${e}`));
             return;
         }
-        const decoded = E.mapLeft(formatValidationErrors)(characterState.decode(json));
-        if (decoded._tag === 'Left') {
-            setParsed(Result.error(decoded.left));
+        const parsed = characterState.safeParse(json);
+        if (!parsed.success) {
+            setParsed(Result.error(parsed.error.message));
             return;
         }
-        setParsed(Result.ok(decoded.right));
+        setParsed(Result.ok(parsed.data));
     }, [value]);
     const setRoomState = useSetRoomStateWithImmer();
     const myUserUid = useMyUserUid();

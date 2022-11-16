@@ -28,11 +28,10 @@
         "@kizahasi/ot-string": "^0.4.1",
         "@kizahasi/result": "^1.0.1",
         "@ltd/j-toml": "^1.23.0",
-        "fp-ts": "^2.11.8",
-        "io-ts": "^2.2.16",
         "lodash.clonedeep": "^4.5.0",
         "sanitize-filename": "^1.6.3",
-        "truncate-utf8-bytes": "^1.0.2"
+        "truncate-utf8-bytes": "^1.0.2",
+        "zod": "^3.19.1"
     },
     "devDependencies": {
         "@flocon-trpg/eslint-config": "workspace:^",

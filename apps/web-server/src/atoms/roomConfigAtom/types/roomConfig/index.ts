@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import { z } from 'zod';
 import { MessageFilter, deserializeMessageFilter, serializedMessageFilter } from '../messageFilter';
 import { MessageFilterUtils } from '../messageFilter/utils';
 import {
@@ -8,7 +8,7 @@ import {
     serializedPanelsConfig,
 } from '../panelsConfig';
 import { defaultMasterVolume, defaultPanelOpacity, defaultSeVolume } from './resources';
-import { record } from '@/utils/io-ts/record';
+import { record } from '@/utils/zod/record';
 
 export type RoomConfig = {
     roomId: string;
@@ -22,21 +22,23 @@ export type RoomConfig = {
     showBackgroundBoardViewer: boolean;
 };
 
-export const serializedRoomConfig = t.partial({
-    // PartialRoomConfigはlocalforage.getItemで使われるが、localforage.setItemでは使われない。
-    // getItemする際、roomIdをキーに用いるため、roomIdをストレージに保存していない。
-    // そのため、RoomConfigのほうでは定義しているroomIdは、こちらでは定義していない。
+export const serializedRoomConfig = z
+    .object({
+        // PartialRoomConfigはlocalforage.getItemで使われるが、localforage.setItemでは使われない。
+        // getItemする際、roomIdをキーに用いるため、roomIdをストレージに保存していない。
+        // そのため、RoomConfigのほうでは定義しているroomIdは、こちらでは定義していない。
 
-    messageNotificationFilter: serializedMessageFilter,
-    panels: serializedPanelsConfig,
-    panelOpacity: t.number,
-    masterVolume: t.number,
-    channelVolumes: record(t.string, t.number),
-    seVolume: t.number,
-    showBackgroundBoardViewer: t.boolean,
-});
+        messageNotificationFilter: serializedMessageFilter,
+        panels: serializedPanelsConfig,
+        panelOpacity: z.number(),
+        masterVolume: z.number(),
+        channelVolumes: record(z.number()),
+        seVolume: z.number(),
+        showBackgroundBoardViewer: z.boolean(),
+    })
+    .partial();
 
-export type SerializedRoomConfig = t.TypeOf<typeof serializedRoomConfig>;
+export type SerializedRoomConfig = z.TypeOf<typeof serializedRoomConfig>;
 
 export const deserializeRoomConfig = (source: SerializedRoomConfig, roomId: string): RoomConfig => {
     return {

@@ -1,6 +1,6 @@
 import { maybe, simpleId } from '@flocon-trpg/core';
 import { chooseRecord } from '@flocon-trpg/utils';
-import * as t from 'io-ts';
+import { z } from 'zod';
 import { BoardConfig, deserializeBoardConfig, serializedBoardConfig } from '../boardConfig';
 import { defaultBoardEditorPanelPosition } from '../defaultPanelPositions';
 import {
@@ -8,7 +8,7 @@ import {
     deserializeDraggablePanelConfigBase,
     serializedDraggablePanelConfigBase,
 } from '../draggablePanelConfig';
-import { record } from '@/utils/io-ts/record';
+import { record } from '@/utils/zod/record';
 
 export type BoardEditorPanelConfig = {
     activeBoardId: string | undefined;
@@ -16,16 +16,16 @@ export type BoardEditorPanelConfig = {
     isMinimized: boolean;
 } & DraggablePanelConfigBase;
 
-export const serializedBoardEditorPanelConfig = t.intersection([
-    t.partial({
-        activeBoardId: maybe(t.string),
-        boards: record(t.string, serializedBoardConfig),
-        isMinimized: t.boolean,
-    }),
-    serializedDraggablePanelConfigBase,
-]);
+export const serializedBoardEditorPanelConfig = z
+    .object({
+        activeBoardId: maybe(z.string()),
+        boards: record(serializedBoardConfig),
+        isMinimized: z.boolean(),
+    })
+    .partial()
+    .merge(serializedDraggablePanelConfigBase);
 
-export type SerializedBoardEditorPanelConfig = t.TypeOf<typeof serializedBoardEditorPanelConfig>;
+export type SerializedBoardEditorPanelConfig = z.TypeOf<typeof serializedBoardEditorPanelConfig>;
 
 export const deserializeBoardEditorPanelConfig = (
     source: SerializedBoardEditorPanelConfig

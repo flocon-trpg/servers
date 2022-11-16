@@ -1,17 +1,17 @@
-import * as t from 'io-ts';
+import { z } from 'zod';
 import { createReplaceValueTemplate } from '../../generator';
 
 export const Default = 'Default';
 export const Uploader = 'Uploader';
 export const FirebaseStorage = 'FirebaseStorage';
 
-const sourceType = t.union([t.literal(Default), t.literal(Uploader), t.literal(FirebaseStorage)]);
+const sourceType = z.union([z.literal(Default), z.literal(Uploader), z.literal(FirebaseStorage)]);
 
-export const filePathValue = t.type({
-    $v: t.literal(1),
-    $r: t.literal(1),
+export const filePathValue = z.object({
+    $v: z.literal(1),
+    $r: z.literal(1),
 
-    path: t.string,
+    path: z.string(),
     sourceType,
 });
 

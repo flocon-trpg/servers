@@ -40,10 +40,11 @@ export class FParticipant extends FObject {
                     this.participant.name = undefined;
                     return;
                 }
-                if (!maxLength100String.is($newValue)) {
+                const parsed = maxLength100String.safeParse($newValue);
+                if (!parsed.success) {
                     throw new ScriptError(`${key}は100文字以下にする必要があります。`);
                 }
-                this.participant.name = $newValue;
+                this.participant.name = parsed.data;
                 return;
             }
             default:

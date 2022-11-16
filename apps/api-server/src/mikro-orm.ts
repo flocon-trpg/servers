@@ -6,7 +6,7 @@ import {
     LogContext,
     LoggerNamespace,
 } from '@mikro-orm/core';
-import * as t from 'io-ts';
+import { z } from 'zod';
 import { sqliteDatabase } from './config/types';
 import { File } from './entities/file/entity';
 import { FileTag } from './entities/fileTag/entity';
@@ -138,7 +138,7 @@ export const createSQLiteOptions = ({
     sqliteConfig,
     dirName,
 }: {
-    sqliteConfig: t.TypeOf<typeof sqliteDatabase>;
+    sqliteConfig: z.TypeOf<typeof sqliteDatabase>;
     dirName: DirName;
 }): Options => {
     return {

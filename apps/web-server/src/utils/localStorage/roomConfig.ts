@@ -16,9 +16,9 @@ const tryGetRoomConfig = async (roomId: string) => {
         return undefined;
     }
     const json = tryParseJSON(raw);
-    const result = serializedRoomConfig.decode(json);
-    if (result._tag === 'Right') {
-        return result.right;
+    const result = serializedRoomConfig.passthrough().safeParse(json);
+    if (result.success) {
+        return result.data;
     }
     return undefined;
 };

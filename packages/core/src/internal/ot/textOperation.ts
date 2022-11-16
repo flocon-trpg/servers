@@ -21,47 +21,47 @@ import {
     transformUpOperation,
 } from '@kizahasi/ot-string';
 import { Result } from '@kizahasi/result';
-import * as t from 'io-ts';
+import { z } from 'zod';
 
 const r = 'r';
 const i = 'i';
 const d = 'd';
 
-const downOperationUnit = t.union([
-    t.type({
-        t: t.literal(r),
-        r: t.number,
+const downOperationUnit = z.union([
+    z.object({
+        t: z.literal(r),
+        r: z.number(),
     }),
-    t.type({
-        t: t.literal(i),
-        i: t.number,
+    z.object({
+        t: z.literal(i),
+        i: z.number(),
     }),
-    t.type({
-        t: t.literal(d),
-        d: t.string,
-    }),
-]);
-
-export const downOperation = t.array(downOperationUnit);
-export type DownOperation = t.TypeOf<typeof downOperation>;
-
-const upOperationUnit = t.union([
-    t.type({
-        t: t.literal(r),
-        r: t.number,
-    }),
-    t.type({
-        t: t.literal(i),
-        i: t.string,
-    }),
-    t.type({
-        t: t.literal(d),
-        d: t.number,
+    z.object({
+        t: z.literal(d),
+        d: z.string(),
     }),
 ]);
 
-export const upOperation = t.array(upOperationUnit);
-export type UpOperation = t.TypeOf<typeof upOperation>;
+export const downOperation = z.array(downOperationUnit);
+export type DownOperation = z.TypeOf<typeof downOperation>;
+
+const upOperationUnit = z.union([
+    z.object({
+        t: z.literal(r),
+        r: z.number(),
+    }),
+    z.object({
+        t: z.literal(i),
+        i: z.string(),
+    }),
+    z.object({
+        t: z.literal(d),
+        d: z.number(),
+    }),
+]);
+
+export const upOperation = z.array(upOperationUnit);
+export type UpOperation = z.TypeOf<typeof upOperation>;
 
 export type TwoWayOperation = (
     | {
