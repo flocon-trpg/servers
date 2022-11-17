@@ -7,7 +7,6 @@
     ],
     "scripts": {
         "build": "yarn workspaces foreach -ptv run build:self",
-        "build-ci": "yarn workspaces foreach -ptv run build-ci",
         "generate-disclaimer": "yarn licenses generate-disclaimer --production --recursive --exclude='@types/*,husky,less,npm-run-all,sass,serve' > ./apps/web-server/public/licenses-npm-package.txt",
         "postinstall": "husky install",
         "lint": "yarn workspaces foreach -pv run lint",

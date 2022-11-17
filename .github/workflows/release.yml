@@ -22,9 +22,6 @@ jobs:
             - name: Create flocon_web_server.zip
               run: zip -r ${GITHUB_WORKSPACE}/flocon_web_server.zip ./out
 
-            - name: Build
-              run: yarn run build
-              working-directory: ./apps/api-server
             - name: Generate Dockerfile
               run: yarn run gen-flyio-dockerfile
               working-directory: ./apps/api-server

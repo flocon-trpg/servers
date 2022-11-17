@@ -11,7 +11,7 @@
         "build:self": "next build",
         "dev": "run-s dev:next",
         "dev:next": "next",
-        "export": "run-s build export:core",
+        "export": "run-s build:self export:core",
         "export:core": "next export",
         "lint": "next lint",
         "prettier": "yarn prettier:base --write --cache",

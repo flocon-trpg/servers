@@ -39,9 +39,6 @@ jobs:
 
             - run: yarn install
 
-            - name: Prepare packages
-              run: yarn build-ci
-
             - name: Test for Node 16 or higher
               if: ${{ matrix.node != '14.x' }}
               run: yarn test --ci --coverage --runInBand
@@ -116,9 +113,6 @@ jobs:
 
             - name: Install
               run: yarn
-
-            - name: Prepare packages
-              run: yarn run build-ci
 
             - name: Migration-up MySQL
               run: yarn migration-up --db mysql
@@ -228,10 +222,6 @@ jobs:
                   cache: yarn
 
             - run: yarn
-
-            - name: Build web-server deps
-              run: yarn build:deps
-              working-directory: ./apps/web-server
 
             - name: Publish to Chromatic
               uses: chromaui/action@v1

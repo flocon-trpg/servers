@@ -11,7 +11,6 @@
     ],
     "scripts": {
         "build": "yarn run build:self",
-        "build-ci": "yarn run build:self",
         "build:rollup": "rollup --config",
         "build:self": "rimraf ./dist && yarn build:rollup",
         "lint": "eslint \"**/*.ts\" --cache",

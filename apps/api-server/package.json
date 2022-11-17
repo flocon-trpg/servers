@@ -5,7 +5,6 @@
     "scripts": {
         "bcrypt-interactive": "ts-node --project tsconfig.ts-node.json src/run-bcryptInteractive.ts",
         "build": "run-s build:deps build:self",
-        "build-ci": "yarn run build:self",
         "build:deps": "yarn workspaces foreach -pvtR --from '@flocon-trpg/api-server' --exclude '@flocon-trpg/api-server' run build",
         "build:rollup": "rollup --config",
         "build:self": "rimraf ./dist && yarn build:rollup",
