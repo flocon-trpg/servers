@@ -178,6 +178,9 @@ jobs:
         runs-on: ubuntu-22.04
 
         steps:
+            - name: List git config
+              run: git config -l
+
             - uses: actions/checkout@v3
 
             - name: Use Node 18.x
@@ -198,6 +201,12 @@ jobs:
 
             - name: Generate licenses disclaimer
               run: yarn generate-disclaimer
+
+            - name: Prepare for Clean CRLF
+              run: git config --local core.autocrlf input
+
+            - name: Clean CRLF
+              run: git add . && git reset
 
             - name: Fail if not all the artifacts are OK
               uses: numtide/clean-git-action@v1
