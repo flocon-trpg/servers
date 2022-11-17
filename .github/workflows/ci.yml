@@ -12,7 +12,7 @@ on:
 
 jobs:
     tests-without-docker:
-        name: Partial Tests and exec Next.js export on Node ${{ matrix.node }} and ${{ matrix.os }}
+        name: Tests without PostgreSQL and MySQL, then exec Next.js export on Node ${{ matrix.node }} and ${{ matrix.os }}
 
         strategy:
             matrix:
@@ -147,8 +147,8 @@ jobs:
                   token: ${{ secrets.CODECOV_TOKEN }}
 
     # fails on windows because it uses crlf
-    lint-prettier-sortpackagejson:
-        name: Lint and prettier
+    check-format:
+        name: Check lint, prettier, and sort-package-json
 
         runs-on: ubuntu-22.04
 
