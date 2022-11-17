@@ -2827,7 +2827,7 @@ __metadata:
     "@types/yargs": ^17.0.3
     "@typescript-eslint/eslint-plugin": 5.39.0
     "@typescript-eslint/parser": 5.39.0
-    "@urql/core": 3.0.3
+    "@urql/core": 3.0.5
     apollo-server-express: ^3.3.0
     axios: 0.27.2
     bcdice: ^3.6.0
@@ -7522,15 +7522,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@urql/core@npm:3.0.3, @urql/core@npm:>=3.0.0, @urql/core@npm:^3.0.3":
-  version: 3.0.3
-  resolution: "@urql/core@npm:3.0.3"
+"@urql/core@npm:3.0.5, @urql/core@npm:>=3.0.0, @urql/core@npm:^3.0.3":
+  version: 3.0.5
+  resolution: "@urql/core@npm:3.0.5"
   dependencies:
     "@graphql-typed-document-node/core": ^3.1.1
     wonka: ^6.0.0
   peerDependencies:
     graphql: ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
-  checksum: 5bc972422fc733e815d82f84b10daef05288d31c2b4958555ea982bd83dd42ec939165c66cc94eeed447c45b8798242971b3682714c7df21c25d6f9bad53303c
+  checksum: e98f2dfb7535f3c5631a3f6d16ad877ba1a66f179f96345a5877301d864e5bffd6fa5dc541ed1ac2531b30d0efea6d85235a70de8ee82d5a2626c3b9a171c7ad
   languageName: node
   linkType: hard
 
