@@ -178,6 +178,28 @@ jobs:
             - name: sort-package-json(check)
               run: yarn sort-package-json --check
 
+    check-artifacts:
+        name: Check artifacts
+
+        runs-on: ubuntu-22.04
+
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Use Node 18.x
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18.x
+                  cache: yarn
+
+            - run: yarn
+
+            - name: Generate licenses disclaimer
+              run: yarn run generate-disclaimer
+
+            - name: Fail if not all the artifacts are OK
+              uses: numtide/clean-git-action@v1
+
     publish-storybook:
         name: Publish Storybook to Chromatic
 
