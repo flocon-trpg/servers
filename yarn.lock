@@ -3357,7 +3357,7 @@ __metadata:
     react-quilljs: ^1.2.17
     react-rnd: ^10.3.7
     react-use: ^17.3.1
-    react-virtuoso: ^2.2.1
+    react-virtuoso: ^3.0.0
     rxjs: ^7.5.6
     sass: ^1.42.1
     sass-loader: 13.0.2
@@ -21512,16 +21512,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-virtuoso@npm:^2.2.1":
-  version: 2.13.3
-  resolution: "react-virtuoso@npm:2.13.3"
+"react-virtuoso@npm:^3.0.0":
+  version: 3.1.4
+  resolution: "react-virtuoso@npm:3.1.4"
   dependencies:
     "@virtuoso.dev/react-urx": ^0.2.12
     "@virtuoso.dev/urx": ^0.2.12
   peerDependencies:
     react: ">=16 || >=17 || >= 18"
     react-dom: ">=16 || >=17 || >= 18"
-  checksum: e5bcc2d59b0dc96013d881ce9aabc2cc5ccc177c7629da8cc59cbfaf9854ebb826a0306af5b17703701845300ffd9536ba738248aff4c217e791003504d99ff7
+  checksum: 4f8b96cdc86a1f3361f8583d85a3f18df40ec74f3995f175de3d86aa3903f467d9335c2559fd1623c28492c0d647a13246adc3f583715c8817bf89f75871b328
   languageName: node
   linkType: hard
 
