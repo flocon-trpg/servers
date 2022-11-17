@@ -21434,13 +21434,13 @@ __metadata:
   linkType: hard
 
 "react-quilljs@npm:^1.2.17":
-  version: 1.3.1
-  resolution: "react-quilljs@npm:1.3.1"
+  version: 1.3.3
+  resolution: "react-quilljs@npm:1.3.3"
   peerDependencies:
-    quill: ^1.3.7
+    quill: ^1.3.7 || ^2.0.0-dev.0
     react: ^17.0.2 || ^18.0.0-0
     react-dom: ^17.0.2 || ^18.0.0-0
-  checksum: 45dad41af6f24a6c12d136a43652f3c0b5bdfd187419e9a7bd20ba276ac8aef8583deb22c55159dbd5ff6807ff7443afb33d13a5529f03e8c8d6e9bab428275e
+  checksum: f7cc6fa106dc20ded8fee28e0ec272d3c8ac3188a7cdcbb85c3cbb0081ab24407de1501bcb63a642137fa136dc9a35c6289bc49ae2cba6f686a85d599f73adb6
   languageName: node
   linkType: hard
 
