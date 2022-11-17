@@ -4,9 +4,6 @@ node_modules/
 dist/
 tmp/
 coverage/
-/apps/web-server/.next/
-/apps/web-server/out/
-/apps/web-server/src/styles/css/antd.css
 *.sqlite3
 .eslintcache
 

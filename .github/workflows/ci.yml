@@ -194,8 +194,12 @@ jobs:
 
             - run: yarn
 
+            - name: Build css file
+              run: yarn build-less
+              working-directory: ./apps/web-server
+
             - name: Generate licenses disclaimer
-              run: yarn run generate-disclaimer
+              run: yarn generate-disclaimer
 
             - name: Fail if not all the artifacts are OK
               uses: numtide/clean-git-action@v1
