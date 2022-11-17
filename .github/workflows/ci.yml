@@ -216,6 +216,8 @@ jobs:
 
         if: ${{ github.event_name == 'push' }}
 
+        needs: [tests-with-docker, tests-without-docker]
+
         runs-on: ubuntu-22.04
 
         steps:
