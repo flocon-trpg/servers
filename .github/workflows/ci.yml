@@ -148,7 +148,7 @@ jobs:
 
     # DATABASE_URL を用いて API サーバーが起動するかどうかのテストと、PnP を有効にした状態で正常に起動するかどうかのテストを行っている。
     check-api-server:
-        name: 'Try starting API server'
+        name: 'Check API server (PnP=${{ matrix.pnp }})'
 
         strategy:
             matrix:
@@ -202,7 +202,7 @@ jobs:
               run: yarn
 
             - name: Try starting api-server with SQLite
-              run: timeout 10 yarn start
+              run: timeout -k 3 10 yarn start || if test $? -eq 124; then echo OK; else exit $?; fi
               working-directory: ./apps/api-server
               env:
                   DATABASE_URL: file://main.sqlite3
@@ -210,7 +210,7 @@ jobs:
                   FIREBASE_PROJECT_ID: test-firebase-id-1234
 
             - name: Try starting api-server with MySQL
-              run: timeout 10 yarn start
+              run: timeout -k 3 10 yarn start || if test $? -eq 124; then echo OK; else exit $?; fi
               working-directory: ./apps/api-server
               env:
                   DATABASE_URL: mysql://test:test@mysql:3306/test
@@ -218,7 +218,7 @@ jobs:
                   FIREBASE_PROJECT_ID: test-firebase-id-1234
 
             - name: Try starting api-server with PostgreSQL
-              run: timeout 10 yarn start
+              run: timeout -k 3 10 yarn start || if test $? -eq 124; then echo OK; else exit $?; fi
               working-directory: ./apps/api-server
               env:
                   DATABASE_URL: postgresql://test:test@postgres:5432/test
