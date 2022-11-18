@@ -8,7 +8,7 @@ const VERSION = new utils.SemVer({
     patch: 11,
     prerelease: {
         type: utils.alpha,
-        version: 1,
+        version: 2,
     },
 });
 
