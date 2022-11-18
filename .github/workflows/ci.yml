@@ -209,6 +209,42 @@ jobs:
             - name: Fail if not all the artifacts are OK
               uses: numtide/clean-git-action@v1
 
+    pnp:
+        name: Tests yarn PnP
+
+        runs-on: ubuntu-22.04
+
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Use Node 18.x
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18.x
+                  cache: yarn
+
+            - name: Enable PnP
+              run: "sed -i 's/nodeLinker: node-modules//g' ./.yarnrc.yml"
+
+            - run: cat ./.yarnrc.yml
+
+            - run: yarn
+
+            - name: Create .env.local
+              run: |
+                  touch .env.local
+                  echo DATABASE_URL=file://temp.sqlite3 > .env.local
+                  echo AUTO_MIGRATION=true >> .env.local
+                  echo FIREBASE_PROJECT_ID=test-firebase-id >> .env.local
+              working-directory: ./apps/api-server
+
+            - run: cat .env.local
+              working-directory: ./apps/api-server
+
+            - name: Run API server
+              run: timeout 5 yarn start
+              working-directory: ./apps/api-server
+
     publish-storybook:
         name: Publish Storybook to Chromatic
 
