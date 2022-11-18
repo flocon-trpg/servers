@@ -3001,9 +3001,18 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@flocon-trpg/rollup-config@workspace:packages/rollup-config"
   dependencies:
+    "@flocon-trpg/eslint-config": "workspace:^"
     "@flocon-trpg/prettier-config": "workspace:^"
+    "@flocon-trpg/tsconfig": "workspace:^"
     "@rollup/plugin-typescript": 9.0.1
+    "@typescript-eslint/eslint-plugin": 5.39.0
+    "@typescript-eslint/parser": 5.39.0
+    eslint: 8.25.0
+    eslint-config-prettier: 8.5.0
+    eslint-import-resolver-typescript: 3.5.2
+    eslint-plugin-import: 2.26.0
     prettier: 2.7.1
+    typescript: 4.8.4
   peerDependencies:
     "@typescript-eslint/eslint-plugin": ^5.39.0
     "@typescript-eslint/parser": ^5.39.0

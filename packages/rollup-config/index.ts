@@ -1,24 +1,19 @@
-'use strict';
-var __importDefault =
-    (this && this.__importDefault) ||
-    function (mod) {
-        return mod && mod.__esModule ? mod : { default: mod };
-    };
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.config = void 0;
-const plugin_typescript_1 = __importDefault(require('@rollup/plugin-typescript'));
-/**
+import typescript from '@rollup/plugin-typescript';
+import { ExternalOption, OutputOptions, RollupOptions } from 'rollup';
+
+/** 
  * @example
  * ```javascript
-const main = require('@flocon-trpg/rollup-config');
+const { config } = require('@flocon-trpg/rollup-config');
 // https://rollupjs.org/guide/en/#importing-packagejson
 const external = Object.keys(require('./package.json').dependencies);
-module.exports = main({ external });
+module.exports = config({ external });
  * ```
  */
-function config({ external }) {
+export function config({ external }: { external: ExternalOption }): RollupOptions[] {
     const input = 'src/index.ts';
-    const config = ({ dir, format }) => ({
+
+    const config = ({ dir, format }: Pick<OutputOptions, 'dir' | 'format'>): RollupOptions => ({
         input,
         output: {
             dir,
@@ -27,8 +22,9 @@ function config({ external }) {
             interop: 'auto',
         },
         external,
-        plugins: [(0, plugin_typescript_1.default)({ compilerOptions: { sourceMap: false } })],
+        plugins: [typescript({ compilerOptions: { sourceMap: false } })],
     });
+
     return [
         config({ dir: 'dist/esm', format: 'esm' }),
         config({
@@ -44,7 +40,7 @@ function config({ external }) {
             },
             external,
             plugins: [
-                (0, plugin_typescript_1.default)({
+                typescript({
                     exclude: '**/*.test.ts',
                     compilerOptions: {
                         declaration: true,
@@ -59,5 +55,3 @@ function config({ external }) {
         },
     ];
 }
-exports.config = config;
-//# sourceMappingURL=index.js.map
