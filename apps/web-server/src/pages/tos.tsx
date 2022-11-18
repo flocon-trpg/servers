@@ -5,6 +5,11 @@ import { FetchTextState } from '../utils/types';
 const padding = 20;
 const filename = 'tos.md';
 
+/**
+ * `tos.md` の内容を用い、利用規約を表示します。
+ *
+ * ただし、サーバーを運用する際は、このコードを改変して利用規約を表示させても構いません。
+ */
 const Tos: React.FC = () => {
     const [text, setText] = React.useState<FetchTextState>({ fetched: false });
     React.useEffect(() => {
