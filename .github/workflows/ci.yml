@@ -146,6 +146,85 @@ jobs:
               with:
                   token: ${{ secrets.CODECOV_TOKEN }}
 
+    # DATABASE_URL を用いて API サーバーが起動するかどうかのテストと、PnP を有効にした状態で正常に起動するかどうかのテストを行っている。
+    check-api-server:
+        name: 'Try starting API server'
+
+        strategy:
+            matrix:
+                pnp: [true, false]
+
+        runs-on: ubuntu-22.04
+        container: node:18-buster
+
+        services:
+            mysql:
+                image: mysql:8.0
+                env:
+                    MYSQL_ROOT_PASSWORD: root_password
+                    MYSQL_USER: test
+                    MYSQL_PASSWORD: test
+                    MYSQL_DATABASE: test
+                options: >-
+                    --health-cmd "mysqladmin ping"
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports:
+                    - 3306:3306
+            postgres:
+                image: postgres
+                env:
+                    POSTGRES_USER: test
+                    POSTGRES_PASSWORD: test
+                    POSTGRES_DB: test
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports:
+                    - 5432:5432
+
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v3
+
+            - run: node --version
+
+            - name: Enable PnP
+              run: "sed -i 's/nodeLinker: node-modules//g' ./.yarnrc.yml"
+              if: ${{ matrix.pnp == true }}
+
+            - run: cat ./.yarnrc.yml
+
+            - name: Install
+              run: yarn
+
+            - name: Try starting api-server with SQLite
+              run: timeout 10 yarn start
+              working-directory: ./apps/api-server
+              env:
+                  DATABASE_URL: file://main.sqlite3
+                  AUTO_MIGRATION: true
+                  FIREBASE_PROJECT_ID: test-firebase-id-1234
+
+            - name: Try starting api-server with MySQL
+              run: timeout 10 yarn start
+              working-directory: ./apps/api-server
+              env:
+                  DATABASE_URL: mysql://test:test@mysql:3306/test
+                  AUTO_MIGRATION: true
+                  FIREBASE_PROJECT_ID: test-firebase-id-1234
+
+            - name: Try starting api-server with PostgreSQL
+              run: timeout 10 yarn start
+              working-directory: ./apps/api-server
+              env:
+                  DATABASE_URL: postgresql://test:test@postgres:5432/test
+                  AUTO_MIGRATION: true
+                  FIREBASE_PROJECT_ID: test-firebase-id-1234
+
     # fails on windows because it uses crlf
     check-format:
         name: Check lint, prettier, and sort-package-json
@@ -208,42 +287,6 @@ jobs:
 
             - name: Fail if not all the artifacts are OK
               uses: numtide/clean-git-action@v1
-
-    pnp:
-        name: Tests yarn PnP
-
-        runs-on: ubuntu-22.04
-
-        steps:
-            - uses: actions/checkout@v3
-
-            - name: Use Node 18.x
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 18.x
-                  cache: yarn
-
-            - name: Enable PnP
-              run: "sed -i 's/nodeLinker: node-modules//g' ./.yarnrc.yml"
-
-            - run: cat ./.yarnrc.yml
-
-            - run: yarn
-
-            - name: Create .env.local
-              run: |
-                  touch .env.local
-                  echo DATABASE_URL=file://temp.sqlite3 > .env.local
-                  echo AUTO_MIGRATION=true >> .env.local
-                  echo FIREBASE_PROJECT_ID=test-firebase-id >> .env.local
-              working-directory: ./apps/api-server
-
-            - run: cat .env.local
-              working-directory: ./apps/api-server
-
-            - name: Run API server
-              run: timeout 5 yarn start
-              working-directory: ./apps/api-server
 
     publish-storybook:
         name: Publish Storybook to Chromatic
