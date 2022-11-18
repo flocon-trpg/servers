@@ -6,10 +6,6 @@ const VERSION = new utils.SemVer({
     major: 0,
     minor: 7,
     patch: 11,
-    prerelease: {
-        type: utils.alpha,
-        version: 2,
-    },
 });
 
 exports.VERSION = VERSION;
