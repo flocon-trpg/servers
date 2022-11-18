@@ -3,7 +3,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 import { CharacterListPanelContent } from './CharacterListPanelContent';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
-import { useSetupMocks } from '@/hooks/useSetupMocks';
+import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 
 type RoomState = S<typeof roomTemplate>;
 
@@ -23,7 +23,7 @@ export const Default: React.FC<{ stateType: StateType; myParticipantRole: Partic
                 };
         }
     }, [stateType]);
-    useSetupMocks({
+    useSetupStorybook({
         roomConfig: {
             myParticipantRole,
             setBoards: stateType === 'default',

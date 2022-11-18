@@ -4,14 +4,14 @@ import { useSetAtom } from 'jotai';
 import React from 'react';
 import { CharacterEditorModal, characterEditorModalAtom } from './CharacterEditorModal';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
-import { useSetupMocks } from '@/hooks/useSetupMocks';
+import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { anotherPlayerCharacterId1, myRichCharacterId, mySimpleCharacterId } from '@/mocks';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole; characterStateId: string }> = ({
     myParticipantRole,
     characterStateId,
 }) => {
-    useSetupMocks({
+    useSetupStorybook({
         roomConfig: {
             myParticipantRole,
         },

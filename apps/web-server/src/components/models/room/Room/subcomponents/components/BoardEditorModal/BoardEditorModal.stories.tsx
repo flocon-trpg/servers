@@ -3,11 +3,11 @@ import { ComponentMeta } from '@storybook/react';
 import { useSetAtom } from 'jotai';
 import React from 'react';
 import { BoardEditorModal, boardEditorModalAtom } from './BoardEditorModal';
-import { useSetupMocks } from '@/hooks/useSetupMocks';
+import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { defaultBoardId, myRichCharacterId } from '@/mocks';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
-    const { isInitialized } = useSetupMocks({
+    const { isInitialized } = useSetupStorybook({
         roomConfig: {
             myParticipantRole,
         },

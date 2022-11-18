@@ -29,7 +29,7 @@ const $apply = apply(roomTemplate);
 
 const roomId = 'dummy-room-id';
 
-export const useSetupMocks = ({
+export const useSetupStorybook = ({
     basicMock: basicMockProp,
     roomConfig: roomConfigProp,
     roomMessagesConfig: roomMessagesConfigProp,

@@ -3,10 +3,10 @@ import { getExactlyOneKey } from '@flocon-trpg/utils';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 import { ChatPalettePanelContent } from './ChatPalettePanelContent';
-import { useSetupMocks } from '@/hooks/useSetupMocks';
+import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
-    const { roomId, roomConfig, isInitialized } = useSetupMocks({
+    const { roomId, roomConfig, isInitialized } = useSetupStorybook({
         roomConfig: {
             myParticipantRole,
         },

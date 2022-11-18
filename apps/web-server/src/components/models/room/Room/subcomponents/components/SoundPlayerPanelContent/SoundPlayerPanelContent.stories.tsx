@@ -3,10 +3,10 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 import { SoundPlayerPanelContent } from './SoundPlayerPanelContent';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
-import { useSetupMocks } from '@/hooks/useSetupMocks';
+import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
-    useSetupMocks({
+    useSetupStorybook({
         roomConfig: {
             myParticipantRole,
         },

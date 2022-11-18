@@ -3,7 +3,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 import { Board, Props } from './Board';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
-import { useSetupMocks } from '@/hooks/useSetupMocks';
+import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { defaultBoardId } from '@/mocks';
 
 type RoomState = S<typeof roomTemplate>;
@@ -21,7 +21,7 @@ export const Default: React.FC<{
         }
         return undefined;
     }, [removeActiveBoard]);
-    useSetupMocks({
+    useSetupStorybook({
         roomConfig: {
             myParticipantRole,
             update: updateRoom,

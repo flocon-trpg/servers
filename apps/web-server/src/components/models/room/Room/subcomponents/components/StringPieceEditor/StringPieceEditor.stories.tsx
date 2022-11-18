@@ -1,11 +1,11 @@
 import { ComponentMeta } from '@storybook/react';
 import React from 'react';
 import { StringPieceEditor } from './StringPieceEditor';
-import { useSetupMocks } from '@/hooks/useSetupMocks';
+import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { defaultBoardId, stringPieceKey1 } from '@/mocks';
 
 export const Update: React.FC = () => {
-    const { isInitialized } = useSetupMocks();
+    const { isInitialized } = useSetupStorybook();
     if (!isInitialized) {
         return <div />;
     }

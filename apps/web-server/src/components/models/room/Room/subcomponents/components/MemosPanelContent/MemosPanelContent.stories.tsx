@@ -1,10 +1,10 @@
 import { ComponentMeta } from '@storybook/react';
 import React from 'react';
 import { MemosPanelContent } from './MemosPanelContent';
-import { useSetupMocks } from '@/hooks/useSetupMocks';
+import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 
 export const Default: React.FC<{ width?: number }> = ({ width }) => {
-    const { isInitialized } = useSetupMocks({
+    const { isInitialized } = useSetupStorybook({
         roomConfig: {
             myParticipantRole: 'Player',
             setCharacterTagNames: false,

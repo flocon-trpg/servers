@@ -3,14 +3,14 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 import { RoomMessagesPanelContent } from './RoomMessagesPanelContent';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
-import { useSetupMocks } from '@/hooks/useSetupMocks';
+import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { CreateMockRoomMessagesParams } from '@/mocks';
 import { createMockUrqlClientForRoomMessage } from '@/mocks/mockAvailableGameSystemsQuery';
 
 export const Default: React.FC<
     { height: number; fetchingMessages: boolean } & CreateMockRoomMessagesParams
 > = ({ height, fetchingMessages, setGeneralMessages }) => {
-    const { roomConfig } = useSetupMocks({
+    const { roomConfig } = useSetupStorybook({
         roomMessagesConfig: {
             setGeneralMessages,
             doNotQuery: fetchingMessages,

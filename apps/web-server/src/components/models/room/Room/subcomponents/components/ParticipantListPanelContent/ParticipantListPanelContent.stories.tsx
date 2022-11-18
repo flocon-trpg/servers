@@ -2,10 +2,10 @@ import { ParticipantRole } from '@flocon-trpg/core';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 import { ParticipantListPanelContent } from './ParticipantListPanelContent';
-import { useSetupMocks } from '@/hooks/useSetupMocks';
+import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 
 export const Master: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
-    const { isInitialized } = useSetupMocks({ roomConfig: { myParticipantRole } });
+    const { isInitialized } = useSetupStorybook({ roomConfig: { myParticipantRole } });
 
     if (!isInitialized) {
         return <div />;

@@ -5,7 +5,7 @@ import React from 'react';
 import { Room } from './Room';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { WebConfig } from '@/configType';
-import { useSetupMocks } from '@/hooks/useSetupMocks';
+import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { mockWebConfig } from '@/mocks';
 import { createMockUrqlClientForRoomMessage } from '@/mocks/mockAvailableGameSystemsQuery';
 
@@ -21,7 +21,7 @@ export const Player: React.FC<WebConfig & { myParticipantRole: ParticipantRole }
             isPublicFirebaseStorageEnabled,
         });
     }, [isPublicFirebaseStorageEnabled, isUnlistedFirebaseStorageEnabled]);
-    useSetupMocks({
+    useSetupStorybook({
         basicMock: {
             webConfig,
         },
