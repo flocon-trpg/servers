@@ -2846,6 +2846,7 @@ __metadata:
     form-data: 4.0.0
     fs-extra: ^10.0.0
     graphql: ^15.6.0
+    graphql-subscriptions: ^1.1.0
     graphql-ws: ^5.8.1
     immer: ^9.0.6
     inquirer: ^8.2.0
@@ -2855,6 +2856,8 @@ __metadata:
     lodash: ^4.17.21
     multer: ^1.4.3
     npm-run-all: ^4.1.5
+    pino: ^8.6.1
+    pino-abstract-transport: ^1.0.0
     pino-http: ^8.2.1
     prettier: 2.7.1
     rate-limiter-flexible: ^2.3.0
@@ -2868,6 +2871,7 @@ __metadata:
     sharp: ^0.30.0
     ts-jest: 29.0.3
     ts-node: ^10.7.0
+    tslib: ^2.4.1
     type-fest: ^3.0.0
     type-graphql: ^1.1.1
     typescript: 4.8.4
@@ -19767,7 +19771,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino-abstract-transport@npm:v1.0.0":
+"pino-abstract-transport@npm:^1.0.0, pino-abstract-transport@npm:v1.0.0":
   version: 1.0.0
   resolution: "pino-abstract-transport@npm:1.0.0"
   dependencies:
@@ -24598,6 +24602,13 @@ __metadata:
   version: 2.4.0
   resolution: "tslib@npm:2.4.0"
   checksum: 8c4aa6a3c5a754bf76aefc38026134180c053b7bd2f81338cb5e5ebf96fefa0f417bff221592bf801077f5bf990562f6264fecbc42cd3309b33872cb6fc3b113
+  languageName: node
+  linkType: hard
+
+"tslib@npm:^2.4.1":
+  version: 2.4.1
+  resolution: "tslib@npm:2.4.1"
+  checksum: 19480d6e0313292bd6505d4efe096a6b31c70e21cf08b5febf4da62e95c265c8f571f7b36fcc3d1a17e068032f59c269fab3459d6cd3ed6949eafecf64315fca
   languageName: node
   linkType: hard
 
