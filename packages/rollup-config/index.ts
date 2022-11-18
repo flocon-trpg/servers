@@ -18,40 +18,30 @@ export function config({ external }: { external: ExternalOption }): RollupOption
         output: {
             dir,
             format,
-            sourcemap: false,
             interop: 'auto',
+            sourcemap: true,
         },
         external,
-        plugins: [typescript({ compilerOptions: { sourceMap: false } })],
+        plugins: [
+            typescript({
+                exclude: '**/*.test.ts',
+                compilerOptions: {
+                    declaration: true,
+                    declarationMap: true,
+                    outDir: dir,
+                    rootDir: 'src',
+                },
+            }),
+        ],
     });
 
+    // @rollup/plugin-typescriptでdeclarationのみを出力するにはnoForceEmitをtrueにする必要がある。
+    // だがそうすると原因は不明だがTypeScriptを正常に解釈できずエラーとなってしまうため、d.tsファイルはcjsとesmに付属させている。
     return [
         config({ dir: 'dist/esm', format: 'esm' }),
         config({
             dir: 'dist/cjs',
             format: 'cjs',
         }),
-        {
-            input,
-            output: {
-                dir: 'dist/types',
-                format: 'esm',
-                sourcemap: true,
-            },
-            external,
-            plugins: [
-                typescript({
-                    exclude: '**/*.test.ts',
-                    compilerOptions: {
-                        declaration: true,
-                        declarationMap: true,
-                        emitDeclarationOnly: true,
-                        rootDir: 'src',
-                        declarationDir: 'dist/types',
-                        sourceMap: true,
-                    },
-                }),
-            ],
-        },
     ];
 }

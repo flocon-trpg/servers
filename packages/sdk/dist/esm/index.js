@@ -1346,3 +1346,4 @@ const createTestRoomClient = (callback) => {
 };
 
 export { BehaviorEvent, ReadonlyBehaviorEvent, createRoomClient, createTestRoomClient };
+//# sourceMappingURL=index.js.map

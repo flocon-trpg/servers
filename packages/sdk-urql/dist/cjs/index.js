@@ -160,3 +160,4 @@ const createGraphQLClientForRoomClient = (client) => {
 
 exports.createGraphQLClientForRoomClient = createGraphQLClientForRoomClient;
 exports.createUrqlClient = createUrqlClient;
+//# sourceMappingURL=index.js.map

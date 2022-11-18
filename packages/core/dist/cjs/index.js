@@ -6263,3 +6263,4 @@ exports.trySanitizePath = trySanitizePath;
 exports.upOperation = upOperation;
 exports.update = update$2;
 exports.updateType = updateType;
+//# sourceMappingURL=index.js.map

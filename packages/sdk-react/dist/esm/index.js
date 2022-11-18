@@ -103,3 +103,4 @@ const useWritingMessageStatus = (roomClient) => {
 };
 
 export { useCreateRoomClient, useReadonlyBehaviorStream, useRoomConnections, useRoomGraphQLStatus, useRoomMessages, useRoomState, useUpdateWritingMessageStatus, useWritingMessageStatus };
+//# sourceMappingURL=index.js.map

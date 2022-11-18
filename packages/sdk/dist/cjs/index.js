@@ -1351,3 +1351,4 @@ exports.BehaviorEvent = BehaviorEvent;
 exports.ReadonlyBehaviorEvent = ReadonlyBehaviorEvent;
 exports.createRoomClient = createRoomClient;
 exports.createTestRoomClient = createTestRoomClient;
+//# sourceMappingURL=index.js.map

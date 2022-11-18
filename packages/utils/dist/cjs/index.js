@@ -1060,3 +1060,4 @@ exports.recordToIterator = recordToIterator;
 exports.recordToMap = recordToMap;
 exports.right = right;
 exports.stringToCompositeKey = stringToCompositeKey;
+//# sourceMappingURL=index.js.map

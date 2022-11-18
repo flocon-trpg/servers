@@ -816,3 +816,4 @@ class RoomMessagesClient {
 }
 
 export { PrivateChannelSet, PrivateChannelSets, RoomChannels, RoomMessagesClient, clear, custom, event, pieceLog, privateMessage, publicChannel, publicMessage, query, reset, soundEffect };
+//# sourceMappingURL=index.js.map
