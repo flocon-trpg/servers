@@ -6,6 +6,7 @@ import {
     LogContext,
     LoggerNamespace,
 } from '@mikro-orm/core';
+import { pickBy } from 'lodash';
 import { z } from 'zod';
 import { sqliteDatabase } from './config/types';
 import { File } from './entities/file/entity';
@@ -141,7 +142,7 @@ export const createSQLiteOptions = ({
     sqliteConfig: z.TypeOf<typeof sqliteDatabase>;
     dirName: DirName;
 }): Options => {
-    return {
+    const opts: Options = {
         ...optionsBase,
         entities,
         dbName: sqliteConfig.dbName,
@@ -150,6 +151,7 @@ export const createSQLiteOptions = ({
         type: 'sqlite',
         forceUndefined: true,
     };
+    return pickBy(opts, x => x !== undefined);
 };
 
 export const createPostgreSQLOptions = ({
@@ -176,11 +178,9 @@ export const createPostgreSQLOptions = ({
         type: 'postgresql',
         forceUndefined: true,
         clientUrl,
+        driverOptions,
     };
-    if (driverOptions != null) {
-        opts.driverOptions = driverOptions;
-    }
-    return opts;
+    return pickBy(opts, x => x !== undefined);
 };
 
 export const createMySQLOptions = ({
@@ -194,7 +194,6 @@ export const createMySQLOptions = ({
     clientUrl: string;
     driverOptions: Dictionary<unknown> | undefined;
 }): Options => {
-    // HACK: driverOptionsにundefinedをセットするとmikro-ormでエラーが出るため、undefinedを渡さないようにしている。
     const opts: Options = {
         ...optionsBase,
         entities,
@@ -203,9 +202,7 @@ export const createMySQLOptions = ({
         type: 'mysql',
         forceUndefined: true,
         clientUrl,
+        driverOptions,
     };
-    if (driverOptions != null) {
-        opts.driverOptions = driverOptions;
-    }
-    return opts;
+    return pickBy(opts, x => x !== undefined);
 };

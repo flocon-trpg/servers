@@ -4,10 +4,11 @@ var result = require('@kizahasi/result');
 var types = require('./types.js');
 
 const determineDatabaseUrl = (DATABASE_URL) => {
-    const protocol = DATABASE_URL.split('://')[0];
+    const [protocol, hierPart] = DATABASE_URL.trim().split('://');
+    if (protocol == null || hierPart == null) {
+        return result.Result.error({ en: 'Could not determine database. URL is invalid.' });
+    }
     switch (protocol) {
-        case undefined:
-            return result.Result.error({ en: 'Could not determine database. URL is invalid.' });
         case 'postgres':
         case 'postgresql':
             return result.Result.ok({ type: types.postgresql, postgresql: { clientUrl: DATABASE_URL } });
@@ -15,7 +16,7 @@ const determineDatabaseUrl = (DATABASE_URL) => {
         case 'sqlite':
             return result.Result.ok({
                 type: types.sqlite,
-                sqlite: { clientUrl: DATABASE_URL },
+                sqlite: { dbName: hierPart },
             });
     }
     if (protocol.startsWith('mysql')) {

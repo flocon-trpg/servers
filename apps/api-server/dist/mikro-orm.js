@@ -1,5 +1,6 @@
 'use strict';
 
+var lodash = require('lodash');
 var entity$4 = require('./entities/file/entity.js');
 var entity$5 = require('./entities/fileTag/entity.js');
 var entity$3 = require('./entities/participant/entity.js');
@@ -85,7 +86,7 @@ const optionsBase = {
     debug: true,
 };
 const createSQLiteOptions = ({ sqliteConfig, dirName, }) => {
-    return {
+    const opts = {
         ...optionsBase,
         entities,
         dbName: sqliteConfig.dbName,
@@ -94,6 +95,7 @@ const createSQLiteOptions = ({ sqliteConfig, dirName, }) => {
         type: 'sqlite',
         forceUndefined: true,
     };
+    return lodash.pickBy(opts, x => x !== undefined);
 };
 const createPostgreSQLOptions = ({ dbName, dirName, clientUrl, driverOptions, }) => {
     const opts = {
@@ -107,11 +109,9 @@ const createPostgreSQLOptions = ({ dbName, dirName, clientUrl, driverOptions, })
         type: 'postgresql',
         forceUndefined: true,
         clientUrl,
+        driverOptions,
     };
-    if (driverOptions != null) {
-        opts.driverOptions = driverOptions;
-    }
-    return opts;
+    return lodash.pickBy(opts, x => x !== undefined);
 };
 const createMySQLOptions = ({ dbName, dirName, clientUrl, driverOptions, }) => {
     const opts = {
@@ -122,11 +122,9 @@ const createMySQLOptions = ({ dbName, dirName, clientUrl, driverOptions, }) => {
         type: 'mysql',
         forceUndefined: true,
         clientUrl,
+        driverOptions,
     };
-    if (driverOptions != null) {
-        opts.driverOptions = driverOptions;
-    }
-    return opts;
+    return lodash.pickBy(opts, x => x !== undefined);
 };
 
 exports.createMySQLOptions = createMySQLOptions;

@@ -204,8 +204,7 @@ const createORMOptions = (serverConfig, databaseArg, dirName) => {
             case types.sqlite:
                 return result.Result.ok(mikroOrm.createSQLiteOptions({
                     sqliteConfig: {
-                        clientUrl: databaseUrlResult.value.sqlite.clientUrl,
-                        dbName: undefined,
+                        dbName: databaseUrlResult.value.sqlite.dbName,
                     },
                     dirName,
                 }));
