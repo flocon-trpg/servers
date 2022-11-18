@@ -113,8 +113,8 @@ describe('createORMOptions', () => {
             },
         });
         expect(actual.type).toBe('sqlite');
-        expect(actual.dbName).toBeUndefined();
-        expect(actual.clientUrl).toBe('file://./main.sqlite');
+        expect(actual.dbName).toBe('./main.sqlite');
+        expect(actual.clientUrl).toBeUndefined();
         expect(actual.driverOptions).toBeFalsy();
     });
 
