@@ -1,18 +1,18 @@
-import * as t from 'io-ts';
-import * as Piece from '../../../piece/types';
-import { maybe } from '../../../../../maybe';
+import { z } from 'zod';
+import { maybe } from '@/maybe';
+import * as Piece from '@/ot/flocon/piece/types';
+import * as Shape from '@/ot/flocon/shape/types';
 import {
     createObjectValueTemplate,
     createRecordValueTemplate,
     createReplaceValueTemplate,
-} from '../../../../generator';
-import * as Shape from '../../../shape/types';
+} from '@/ot/generator';
 
 export const template = createObjectValueTemplate(
     {
         ...Piece.templateValue,
-        ownerParticipantId: createReplaceValueTemplate(maybe(t.string)),
-        isPrivate: createReplaceValueTemplate(t.boolean),
+        ownerParticipantId: createReplaceValueTemplate(maybe(z.string())),
+        isPrivate: createReplaceValueTemplate(z.boolean()),
 
         /**
          * keyは`'1'`から`'9'`の9個のみをサポートしています。詳細は`./functions.ts`を参照してください。

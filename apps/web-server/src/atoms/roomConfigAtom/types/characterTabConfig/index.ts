@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import { z } from 'zod';
 import {
     CharacterTagFilter,
     deserializeCharacterTagFilter,
@@ -13,13 +13,16 @@ export type CharacterTabConfig = {
     tabName?: string;
 } & CharacterTagFilter;
 
-export const partialCharacterTabConfig = t.intersection([
-    t.type({ key: t.string }),
-    t.partial({
-        tabName: t.string,
-    }),
-    serializedCharacterTagFilter,
-]);
+export const partialCharacterTabConfig = z
+    .object({ key: z.string() })
+    .merge(
+        z
+            .object({
+                tabName: z.string(),
+            })
+            .partial()
+    )
+    .merge(serializedCharacterTagFilter);
 
 export const deserializeCharacterTabConfig = (
     source: PartialCharacterTabConfig
@@ -31,4 +34,4 @@ export const deserializeCharacterTabConfig = (
     };
 };
 
-export type PartialCharacterTabConfig = t.TypeOf<typeof partialCharacterTabConfig>;
+export type PartialCharacterTabConfig = z.TypeOf<typeof partialCharacterTabConfig>;

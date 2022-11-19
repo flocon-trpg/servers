@@ -1,22 +1,21 @@
-import { Divider, InputNumber, Modal } from 'antd';
-import React from 'react';
-import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
-import { FileView } from '@/components/models/file/FileView/FileView';
-import { DrawerProps } from 'antd/lib/drawer';
-import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
-import { useBoards } from '../../hooks/useBoards';
 import { State, boardTemplate, simpleId } from '@flocon-trpg/core';
-import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { FilePathModule } from '@/utils/file/filePath';
+import { Divider, InputNumber, Modal, ModalProps } from 'antd';
 import { atom, useAtom } from 'jotai';
-import { create, update } from '@/utils/constants';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
-import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
-import { CopyToClipboardButton } from '@/components/ui/CopyToClipboardButton/CopyToClipboardButton';
-import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
+import React from 'react';
 import { useMemoOne } from 'use-memo-one';
+import { useBoards } from '../../hooks/useBoards';
+import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
+import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { FileView } from '@/components/models/file/FileView/FileView';
+import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateWithImmer';
+import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
+import { CopyToClipboardButton } from '@/components/ui/CopyToClipboardButton/CopyToClipboardButton';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { Table, TableRow } from '@/components/ui/Table/Table';
+import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { create, update } from '@/utils/constants';
+import { FilePathModule } from '@/utils/file/filePath';
 import { image } from '@/utils/fileType';
 
 type BoardState = State<typeof boardTemplate>;
@@ -36,7 +35,7 @@ export type BoardEditorModalType =
 
 export const boardEditorModalAtom = atom<BoardEditorModalType | null>(null);
 
-const drawerBaseProps: Partial<DrawerProps> = {
+const drawerBaseProps: Partial<ModalProps> = {
     width: 600,
 };
 
@@ -146,7 +145,7 @@ export const BoardEditorModal: React.FC = () => {
         <Modal
             {...drawerBaseProps}
             title={modalValue?.type === create ? 'ボードの新規作成' : 'ボードの編集'}
-            visible={modalValue != null}
+            open={modalValue != null}
             closable
             onCancel={() => setModalValue(null)}
             footer={

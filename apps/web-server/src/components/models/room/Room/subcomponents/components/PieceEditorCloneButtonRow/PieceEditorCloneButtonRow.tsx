@@ -1,6 +1,6 @@
-import { TableRow } from '@/components/ui/Table/Table';
 import { Button, Tooltip } from 'antd';
 import React from 'react';
+import { TableRow } from '@/components/ui/Table/Table';
 
 export const PieceEditorCloneButtonRow: React.FC<{ onClick: () => void }> = ({ onClick }) => {
     return (

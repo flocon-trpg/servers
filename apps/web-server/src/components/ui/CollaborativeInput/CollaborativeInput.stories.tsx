@@ -1,8 +1,8 @@
-import React from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
-import { CollaborativeInput, OnChangeParams } from './CollaborativeInput';
-import { interval } from 'rxjs';
 import classNames from 'classnames';
+import React from 'react';
+import { interval } from 'rxjs';
+import { CollaborativeInput, OnChangeParams } from './CollaborativeInput';
 import { flex, flex1, flexColumn, flexInitial } from '@/styles/className';
 
 const Main: React.FC<{

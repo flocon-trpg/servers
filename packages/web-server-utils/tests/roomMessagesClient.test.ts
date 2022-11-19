@@ -1,14 +1,18 @@
-import { RoomMessages } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { Observable, pairwise, startWith } from 'rxjs';
 import {
-    Diff,
-    Message,
-    MessagesChange,
+    Diff as $Diff,
+    Message as $Message,
+    MessagesChange as $MessagesChange,
     RoomMessagesClient,
+    custom,
     privateMessage,
     publicMessage,
 } from '../src';
-import { Resources } from './resources';
+import { Fixtures, TestCustomMessage } from './fixtures';
+
+type Diff = $Diff<TestCustomMessage>;
+type Message = $Message<TestCustomMessage>;
+type MessagesChange = $MessagesChange<TestCustomMessage>;
 
 type MessageFilter = (message: Message) => boolean;
 
@@ -86,13 +90,9 @@ class MessagesChangeTester {
             expect(event.type).toBe('event');
             throw new Error('Guard');
         }
-        if (this.#prevMessages == null) {
-            expect(this.#prevMessages).not.toBeNull();
-            throw new Error('Guard');
-        }
         expect(event.current).toEqual(expected);
         MessagesChangeTester.#testDiff({
-            prevValue: this.#prevMessages,
+            prevValue: this.#prevMessages ?? [],
             nextValue: event.current,
             actualDiff: event.diff,
         });
@@ -116,565 +116,401 @@ class MessagesChangeTester {
 }
 
 const messageFilter =
-    (type: 'a' | 'b' | true | false): MessageFilter =>
+    (startsWith: string | true | false): MessageFilter =>
     message => {
-        if (type === true || type === false) {
-            return type;
+        if (startsWith === true || startsWith === false) {
+            return startsWith;
         }
         switch (message.type) {
             case publicMessage:
             case privateMessage: {
                 const text = message.value.updatedText?.currentText ?? message.value.initText;
                 if (text == null) {
+                    return false;
+                }
+                return text.startsWith(startsWith);
+            }
+            case custom: {
+                const text = message.value;
+                if (text == null) {
                     return true;
                 }
-                return text.startsWith(type + ':');
+                return text.startsWith(startsWith);
             }
             default:
                 return true;
         }
     };
 
-describe.each(
-    // nullはfilterを適用しないことを示す
-    // 'a'は'a:'で始まるメッセージを、'b'は'b:'で始まるメッセージを示す
-    [null, true, false, 'a', 'b'] as const
-)('RoomMessagesClient: filterType=%o', filterType => {
-    const filter = filterType == null ? null : messageFilter(filterType);
-    const arrayFilter = filter ?? (() => true);
-
-    it('tests creating an instance', () => {
-        const baseClient = new RoomMessagesClient();
+describe('RoomMessagesClient', () => {
+    it.each([null, true])('tests creating an instance - filterType=%p', filterType => {
+        const filter = filterType == null ? null : messageFilter(filterType);
+        const baseClient = new RoomMessagesClient<TestCustomMessage>();
         const client = filter == null ? baseClient.messages : baseClient.messages.filter(filter);
-        const clientChanged = new MessagesChangeTester(client.changed);
+        const tester = new MessagesChangeTester(client.changed);
 
-        expect(client.getCurrent()).toBeNull();
-        clientChanged.expectToBeEmpty();
+        expect(client.getCurrent()).toEqual([]);
+        tester.expectToBeEmpty();
     });
 
-    describe('onQuery', () => {
-        it('an empty instance', () => {
-            const baseClient = new RoomMessagesClient();
-            const client =
-                filter == null ? baseClient.messages : baseClient.messages.filter(filter);
-            const clientChanged = new MessagesChangeTester(client.changed);
+    it.each([null, true])('tests an empty query to init - filterType=%p', filterType => {
+        const filter = filterType == null ? null : messageFilter(filterType);
+        const baseClient = new RoomMessagesClient<TestCustomMessage>();
+        const client = filter == null ? baseClient.messages : baseClient.messages.filter(filter);
+        const tester = new MessagesChangeTester(client.changed);
 
-            baseClient.onQuery(Resources.RoomMessages.empty);
+        baseClient.onQuery(Fixtures.RoomMessages.empty);
 
-            expect(client.getCurrent()).toEqual([]);
-            clientChanged.expectToBeOneQuery([]);
-        });
-
-        it.each([
-            {
-                init: {
-                    ...Resources.RoomMessages.empty,
-                    publicMessages: [
-                        Resources.RoomPublicMessage.message1a,
-                        Resources.RoomPublicMessage.message3a,
-                    ],
-                    publicChannels: [Resources.RoomPublicChannel.channel1],
-                },
-                expected: [Resources.Message.publicMessage1, Resources.Message.publicMessage3a],
-            },
-            {
-                init: {
-                    ...Resources.RoomMessages.empty,
-                    publicMessages: [
-                        Resources.RoomPublicMessage.message3a,
-                        Resources.RoomPublicMessage.message1a,
-                    ],
-                    publicChannels: [Resources.RoomPublicChannel.channel1],
-                },
-                expected: [Resources.Message.publicMessage1, Resources.Message.publicMessage3a],
-            },
-            {
-                init: {
-                    ...Resources.RoomMessages.empty,
-                    publicMessages: [
-                        Resources.RoomPublicMessage.message3a,
-                        Resources.RoomPublicMessage.message1a,
-                    ],
-                    publicChannels: [Resources.RoomPublicChannel.channel1],
-                    privateMessages: [Resources.RoomPrivateMessage.message2a],
-                },
-                expected: [
-                    Resources.Message.publicMessage1,
-                    Resources.Message.privateMessage2,
-                    Resources.Message.publicMessage3a,
-                ],
-            },
-        ])('non-empty instances', ({ init, expected }) => {
-            const baseClient = new RoomMessagesClient();
-            const client =
-                filter == null ? baseClient.messages : baseClient.messages.filter(filter);
-            const clientChanged = new MessagesChangeTester(client.changed);
-
-            baseClient.onQuery(init);
-
-            expect(client.getCurrent()).toEqual(expected.filter(arrayFilter));
-            clientChanged.expectToBeOneQuery(expected.filter(arrayFilter));
-        });
+        expect(client.getCurrent()).toEqual([]);
+        tester.expectToBeOneQuery([]);
     });
 
-    it('onEvent', () => {
-        const baseClient = new RoomMessagesClient();
-        const client = filter == null ? baseClient.messages : baseClient.messages.filter(filter);
-        const clientChanged = new MessagesChangeTester(client.changed);
+    it.each([null, true])('tests non-filtered query to init - filterType=%p', filterType => {
+        const init = {
+            ...Fixtures.RoomMessages.empty,
+            publicMessages: [Fixtures.RoomPublicMessage.message7b],
+            publicChannels: [Fixtures.RoomPublicChannel.channel1],
+            privateMessages: [Fixtures.RoomPrivateMessage.message8b],
+        };
+        const expected = [Fixtures.Message.publicMessage7b, Fixtures.Message.privateMessage8b];
 
-        const event = Resources.RoomPublicMessage.message1a;
+        const filter = filterType == null ? null : messageFilter(filterType);
+        const baseClient = new RoomMessagesClient<TestCustomMessage>();
+        const client = filter == null ? baseClient.messages : baseClient.messages.filter(filter);
+        const tester = new MessagesChangeTester(client.changed);
+
+        baseClient.onQuery(init);
+
+        expect(client.getCurrent()).toEqual(expected);
+        tester.expectToBeOneQuery(expected);
+    });
+
+    it('tests filtered query to init', () => {
+        const filter = messageFilter(':a');
+        const baseClient = new RoomMessagesClient<TestCustomMessage>();
+        const client = baseClient.messages.filter(filter);
+        const tester = new MessagesChangeTester(client.changed);
+
+        const init = {
+            ...Fixtures.RoomMessages.empty,
+            publicMessages: [
+                Fixtures.RoomPublicMessage.message3a,
+                Fixtures.RoomPublicMessage.message7b,
+            ],
+            publicChannels: [Fixtures.RoomPublicChannel.channel1],
+            privateMessages: [
+                Fixtures.RoomPrivateMessage.message8b,
+                Fixtures.RoomPrivateMessage.message2a,
+            ],
+        };
+        const expected = [Fixtures.Message.publicMessage3a, Fixtures.Message.privateMessage2a];
+        baseClient.onQuery(init);
+        expect(client.getCurrent()).toEqual(expected.filter(filter));
+        tester.expectToBeOneQuery(expected.filter(filter));
+    });
+
+    it('tests multiple onQuery', () => {
+        const filter = messageFilter(':a');
+        const baseClient = new RoomMessagesClient<TestCustomMessage>();
+        const client = baseClient.messages.filter(filter);
+        const tester = new MessagesChangeTester(client.changed);
+
+        const query1 = {
+            ...Fixtures.RoomMessages.empty,
+            publicMessages: [Fixtures.RoomPublicMessage.message3a],
+            privateMessages: [Fixtures.RoomPrivateMessage.message2a],
+        };
+        const query2 = {
+            ...Fixtures.RoomMessages.empty,
+            publicMessages: [Fixtures.RoomPublicMessage.updatedMessage3b],
+            privateMessages: [Fixtures.RoomPrivateMessage.message4a],
+        };
+        const expected = [
+            Fixtures.Message.updatedPublicMessage3b,
+            Fixtures.Message.privateMessage4a,
+        ];
+
+        baseClient.onQuery(query1);
+        tester.clearChanges();
+        baseClient.onQuery(query2);
+        expect(client.getCurrent()).toEqual(expected.filter(filter));
+        tester.expectToBeOneQuery(expected.filter(filter));
+    });
+
+    it.each([null, true])('tests non-filtered addCustomMessage - filterType=%p', filterType => {
+        const filter = filterType == null ? null : messageFilter(filterType);
+        const baseClient = new RoomMessagesClient<TestCustomMessage>();
+        const client = filter == null ? baseClient.messages : baseClient.messages.filter(filter);
+        const tester = new MessagesChangeTester(client.changed);
+
+        baseClient.addCustomMessage({
+            value: 'TEST_MESSAGE',
+            createdAt: 1_000_000_000,
+        });
+
+        expect(client.getCurrent()).toEqual([
+            {
+                type: custom,
+                value: 'TEST_MESSAGE',
+                createdAt: 1_000_000_000,
+            },
+        ]);
+        tester.expectToBeOneEvent([
+            {
+                type: custom,
+                value: 'TEST_MESSAGE',
+                createdAt: 1_000_000_000,
+            },
+        ]);
+    });
+
+    it('tests filtered addCustomMessage', () => {
+        const filter = messageFilter(false);
+        const baseClient = new RoomMessagesClient<TestCustomMessage>();
+        const client = baseClient.messages.filter(filter);
+        const tester = new MessagesChangeTester(client.changed);
+
+        baseClient.addCustomMessage({
+            value: 'TEST_MESSAGE',
+            createdAt: 1_000_000_000,
+        });
+
+        expect(client.getCurrent()).toEqual([]);
+        tester.expectToBeOneEvent([]);
+    });
+
+    it.each([null, true])('onEvent to init', filterType => {
+        const filter = filterType == null ? null : messageFilter(filterType);
+        const baseClient = new RoomMessagesClient<TestCustomMessage>();
+        const client = filter == null ? baseClient.messages : baseClient.messages.filter(filter);
+        const tester = new MessagesChangeTester(client.changed);
+
+        const event = Fixtures.RoomPublicMessage.message1a;
         baseClient.onEvent(event);
 
-        expect(client.getCurrent()).toBeNull();
-        clientChanged.expectToBeEmpty();
+        expect(client.getCurrent()).toEqual([]);
+        tester.expectToBeOneEvent([]);
     });
 
-    it('clear', () => {
-        const baseClient = new RoomMessagesClient();
+    it.each([null, true])('adds a PublicMessage by an event - filterType=%p', filterType => {
+        const filter = filterType == null ? null : messageFilter(filterType);
+        const baseClient = new RoomMessagesClient<TestCustomMessage>();
         const client = filter == null ? baseClient.messages : baseClient.messages.filter(filter);
-        const clientChanged = new MessagesChangeTester(client.changed);
+        const tester = new MessagesChangeTester(client.changed);
+
+        const query = {
+            ...Fixtures.RoomMessages.empty,
+            publicMessages: [Fixtures.RoomPublicMessage.message1a],
+        };
+        baseClient.onQuery(query);
+        tester.clearChanges();
+
+        const event = Fixtures.RoomPublicMessage.message3a;
+        baseClient.onEvent(event);
+
+        const expected = [Fixtures.Message.publicMessage1a, Fixtures.Message.publicMessage3a];
+        expect(client.getCurrent()).toEqual(expected);
+        tester.expectToBeOneEvent(expected);
+    });
+
+    it.each([null, true])('adds a PrivateMessage by an event - filterType=%p', filterType => {
+        const filter = filterType == null ? null : messageFilter(filterType);
+        const baseClient = new RoomMessagesClient<TestCustomMessage>();
+        const client = filter == null ? baseClient.messages : baseClient.messages.filter(filter);
+        const tester = new MessagesChangeTester(client.changed);
+
+        const query = {
+            ...Fixtures.RoomMessages.empty,
+            publicMessages: [Fixtures.RoomPublicMessage.message1a],
+        };
+        baseClient.onQuery(query);
+        tester.clearChanges();
+
+        const event = Fixtures.RoomPrivateMessage.message2a;
+        baseClient.onEvent(event);
+
+        const expected = [Fixtures.Message.publicMessage1a, Fixtures.Message.privateMessage2a];
+        expect(client.getCurrent()).toEqual(expected);
+        tester.expectToBeOneEvent(expected);
+    });
+
+    it.each([null, true])('adds a PieceLog by an event - filterType=%p', filterType => {
+        const filter = filterType == null ? null : messageFilter(filterType);
+        const baseClient = new RoomMessagesClient<TestCustomMessage>();
+        const client = filter == null ? baseClient.messages : baseClient.messages.filter(filter);
+        const tester = new MessagesChangeTester(client.changed);
+
+        const query = {
+            ...Fixtures.RoomMessages.empty,
+            publicMessages: [Fixtures.RoomPublicMessage.message1a],
+        };
+        baseClient.onQuery(query);
+        tester.clearChanges();
+
+        const event = Fixtures.PieceLog.message6;
+        baseClient.onEvent(event);
+
+        const expected = [Fixtures.Message.publicMessage1a, Fixtures.Message.pieceLog6];
+        expect(client.getCurrent()).toEqual(expected);
+        tester.expectToBeOneEvent(expected);
+    });
+
+    it.each([null, true])('adds a SoundEffect by an event - filterType=%p', filterType => {
+        const filter = filterType == null ? null : messageFilter(filterType);
+        const baseClient = new RoomMessagesClient<TestCustomMessage>();
+        const client = filter == null ? baseClient.messages : baseClient.messages.filter(filter);
+        const tester = new MessagesChangeTester(client.changed);
+
+        const query = {
+            ...Fixtures.RoomMessages.empty,
+            publicMessages: [Fixtures.RoomPublicMessage.message1a],
+        };
+        baseClient.onQuery(query);
+        tester.clearChanges();
+
+        const event = Fixtures.SoundEffect.message5;
+        baseClient.onEvent(event);
+
+        const expected = [Fixtures.Message.publicMessage1a, Fixtures.Message.soundEffect5];
+        expect(client.getCurrent()).toEqual(expected);
+        tester.expectToBeOneEvent(expected);
+    });
+
+    it.each([null, true])('should ignore PublicRoomChannel event - filterType=%p', filterType => {
+        const filter = filterType == null ? null : messageFilter(filterType);
+        const baseClient = new RoomMessagesClient<TestCustomMessage>();
+        const client = filter == null ? baseClient.messages : baseClient.messages.filter(filter);
+        const tester = new MessagesChangeTester(client.changed);
+
+        const query = {
+            ...Fixtures.RoomMessages.empty,
+            publicMessages: [Fixtures.RoomPublicMessage.message1a],
+        };
+        baseClient.onQuery(query);
+        tester.clearChanges();
+
+        const event = Fixtures.RoomPublicChannel.channel1;
+        baseClient.onEvent(event);
+
+        const expected = [Fixtures.Message.publicMessage1a];
+        expect(client.getCurrent()).toEqual(expected);
+        tester.expectToBeEmpty();
+    });
+
+    it.each([null, true])(
+        'updates messages by an update event before - filterType=%p',
+        filterType => {
+            const filter = filterType == null ? null : messageFilter(filterType);
+            const baseClient = new RoomMessagesClient<TestCustomMessage>();
+            const client =
+                filter == null ? baseClient.messages : baseClient.messages.filter(filter);
+            const tester = new MessagesChangeTester(client.changed);
+
+            const event = Fixtures.RoomPublicMessage.updateMessage3aTo3bEvent;
+            baseClient.onEvent(event);
+            tester.clearChanges();
+
+            const query = {
+                ...Fixtures.RoomMessages.empty,
+                publicMessages: [Fixtures.RoomPublicMessage.message3a],
+            };
+            baseClient.onQuery(query);
+            const expected = [Fixtures.Message.updatedPublicMessage3b];
+            expect(client.getCurrent()).toEqual(expected);
+            tester.expectToBeOneQuery(expected);
+        }
+    );
+
+    it.each([null, true])(
+        'updates messages by an update event after - filterType=%p',
+        filterType => {
+            const filter = filterType == null ? null : messageFilter(filterType);
+            const baseClient = new RoomMessagesClient<TestCustomMessage>();
+            const client =
+                filter == null ? baseClient.messages : baseClient.messages.filter(filter);
+            const tester = new MessagesChangeTester(client.changed);
+
+            const query = {
+                ...Fixtures.RoomMessages.empty,
+                privateMessages: [Fixtures.RoomPrivateMessage.message4a],
+            };
+            baseClient.onQuery(query);
+            tester.clearChanges();
+
+            const event = Fixtures.RoomPrivateMessage.updateMessage4aTo4bEvent;
+            baseClient.onEvent(event);
+
+            const expected = [Fixtures.Message.updatedPrivateMessage4b];
+            expect(client.getCurrent()).toEqual(expected);
+            tester.expectToBeOneEvent(expected);
+        }
+    );
+
+    it('should show a message by an update event', () => {
+        const filter = messageFilter('b:');
+        const baseClient = new RoomMessagesClient<TestCustomMessage>();
+        const client = baseClient.messages.filter(filter);
+        const tester = new MessagesChangeTester(client.changed);
+
+        const query = {
+            ...Fixtures.RoomMessages.empty,
+            publicMessages: [Fixtures.RoomPublicMessage.message3a],
+        };
+        baseClient.onQuery(query);
+        tester.clearChanges();
+
+        const event = Fixtures.RoomPublicMessage.updateMessage3aTo3bEvent;
+        baseClient.onEvent(event);
+
+        const expected = [Fixtures.Message.updatedPublicMessage3b];
+        expect(client.getCurrent()).toEqual(expected);
+        tester.expectToBeOneEvent(expected);
+    });
+
+    it('should hide a message by an update event', () => {
+        const filter = messageFilter('a:');
+        const baseClient = new RoomMessagesClient<TestCustomMessage>();
+        const client = baseClient.messages.filter(filter);
+        const tester = new MessagesChangeTester(client.changed);
+
+        const query = {
+            ...Fixtures.RoomMessages.empty,
+            privateMessages: [Fixtures.RoomPrivateMessage.message4a],
+        };
+        baseClient.onQuery(query);
+        tester.clearChanges();
+
+        const event = Fixtures.RoomPrivateMessage.updateMessage4aTo4bEvent;
+        baseClient.onEvent(event);
+
+        const expected: [] = [];
+        expect(client.getCurrent()).toEqual(expected);
+        tester.expectToBeOneEvent(expected);
+    });
+
+    it.each([null, true])('tests clear - filterType=%p', filterType => {
+        const filter = filterType == null ? null : messageFilter(filterType);
+        const baseClient = new RoomMessagesClient<TestCustomMessage>();
+        const client = filter == null ? baseClient.messages : baseClient.messages.filter(filter);
+        const tester = new MessagesChangeTester(client.changed);
+
+        const query = {
+            ...Fixtures.RoomMessages.empty,
+            publicMessages: [Fixtures.RoomPublicMessage.message1a],
+        };
+        baseClient.onQuery(query);
+
+        baseClient.addCustomMessage({
+            value: 'TEST_MESSAGE',
+            createdAt: 1_000_000_000,
+        });
+
+        tester.clearChanges();
 
         baseClient.clear();
 
-        expect(client.getCurrent()).toBeNull();
-        clientChanged.expectToBeOneClear();
+        const expected: [] = [];
+        expect(client.getCurrent()).toEqual(expected);
+        tester.expectToBeOneClear();
     });
-
-    describe.each(['none', 'clear', 'query->clear'] as const)(
-        'multiple operations',
-        clearOnInit => {
-            const queryBeforeClear: RoomMessages = {
-                ...Resources.RoomMessages.empty,
-                publicMessages: [
-                    Resources.RoomPublicMessage.message1a,
-                    Resources.RoomPublicMessage.message3a,
-                    Resources.RoomPublicMessage.message7b,
-                ],
-                privateMessages: [
-                    Resources.RoomPrivateMessage.message2a,
-                    Resources.RoomPrivateMessage.message4a,
-                    Resources.RoomPrivateMessage.message8b,
-                ],
-                soundEffects: [Resources.SoundEffect.message5],
-                pieceLogs: [Resources.PieceLog.message6],
-                publicChannels: [Resources.RoomPublicChannel.channel1],
-            };
-
-            it.each([
-                {
-                    query: {
-                        ...Resources.RoomMessages.empty,
-                        publicMessages: [
-                            Resources.RoomPublicMessage.message1a,
-                            Resources.RoomPublicMessage.message7b,
-                        ],
-                        soundEffects: [Resources.SoundEffect.message5],
-                        pieceLogs: [Resources.PieceLog.message6],
-                        privateMessages: [
-                            Resources.RoomPrivateMessage.message2a,
-                            Resources.RoomPrivateMessage.message4a,
-                            Resources.RoomPrivateMessage.message8b,
-                        ],
-                        publicChannels: [Resources.RoomPublicChannel.channel1],
-                    },
-                    event: Resources.RoomPublicMessage.message3a,
-                    expected: [
-                        Resources.Message.publicMessage1,
-                        Resources.Message.privateMessage2,
-                        Resources.Message.publicMessage3a,
-                        Resources.Message.privateMessage4a,
-                        Resources.Message.soundEffect5,
-                        Resources.Message.pieceLog6,
-                        Resources.Message.publicMessage7,
-                        Resources.Message.privateMessage8,
-                    ],
-                },
-                {
-                    query: {
-                        ...Resources.RoomMessages.empty,
-                        publicMessages: [
-                            Resources.RoomPublicMessage.message1a,
-                            Resources.RoomPublicMessage.message3a,
-                            Resources.RoomPublicMessage.message7b,
-                        ],
-                        soundEffects: [Resources.SoundEffect.message5],
-                        pieceLogs: [Resources.PieceLog.message6],
-                        privateMessages: [
-                            Resources.RoomPrivateMessage.message2a,
-                            Resources.RoomPrivateMessage.message8b,
-                        ],
-                        publicChannels: [Resources.RoomPublicChannel.channel1],
-                    },
-                    event: Resources.RoomPrivateMessage.message4a,
-                    expected: [
-                        Resources.Message.publicMessage1,
-                        Resources.Message.privateMessage2,
-                        Resources.Message.publicMessage3a,
-                        Resources.Message.privateMessage4a,
-                        Resources.Message.soundEffect5,
-                        Resources.Message.pieceLog6,
-                        Resources.Message.publicMessage7,
-                        Resources.Message.privateMessage8,
-                    ],
-                },
-                {
-                    query: {
-                        ...Resources.RoomMessages.empty,
-                        publicMessages: [
-                            Resources.RoomPublicMessage.message1a,
-                            Resources.RoomPublicMessage.message3a,
-                            Resources.RoomPublicMessage.message7b,
-                        ],
-                        soundEffects: [],
-                        pieceLogs: [Resources.PieceLog.message6],
-                        privateMessages: [
-                            Resources.RoomPrivateMessage.message2a,
-                            Resources.RoomPrivateMessage.message4a,
-                            Resources.RoomPrivateMessage.message8b,
-                        ],
-                        publicChannels: [Resources.RoomPublicChannel.channel1],
-                    },
-                    event: Resources.SoundEffect.message5,
-                    expected: [
-                        Resources.Message.publicMessage1,
-                        Resources.Message.privateMessage2,
-                        Resources.Message.publicMessage3a,
-                        Resources.Message.privateMessage4a,
-                        Resources.Message.soundEffect5,
-                        Resources.Message.pieceLog6,
-                        Resources.Message.publicMessage7,
-                        Resources.Message.privateMessage8,
-                    ],
-                },
-                {
-                    query: {
-                        ...Resources.RoomMessages.empty,
-                        publicMessages: [
-                            Resources.RoomPublicMessage.message1a,
-                            Resources.RoomPublicMessage.message3a,
-                            Resources.RoomPublicMessage.message7b,
-                        ],
-                        soundEffects: [Resources.SoundEffect.message5],
-                        pieceLogs: [],
-                        privateMessages: [
-                            Resources.RoomPrivateMessage.message2a,
-                            Resources.RoomPrivateMessage.message4a,
-                            Resources.RoomPrivateMessage.message8b,
-                        ],
-                        publicChannels: [Resources.RoomPublicChannel.channel1],
-                    },
-                    event: Resources.PieceLog.message6,
-                    expected: [
-                        Resources.Message.publicMessage1,
-                        Resources.Message.privateMessage2,
-                        Resources.Message.publicMessage3a,
-                        Resources.Message.privateMessage4a,
-                        Resources.Message.soundEffect5,
-                        Resources.Message.pieceLog6,
-                        Resources.Message.publicMessage7,
-                        Resources.Message.privateMessage8,
-                    ],
-                },
-                {
-                    query: {
-                        ...Resources.RoomMessages.empty,
-                        publicMessages: [
-                            Resources.RoomPublicMessage.message1a,
-                            Resources.RoomPublicMessage.message3a,
-                            Resources.RoomPublicMessage.message7b,
-                        ],
-                        privateMessages: [
-                            Resources.RoomPrivateMessage.message2a,
-                            Resources.RoomPrivateMessage.message4a,
-                            Resources.RoomPrivateMessage.message8b,
-                        ],
-                        soundEffects: [Resources.SoundEffect.message5],
-                        pieceLogs: [Resources.PieceLog.message6],
-                        publicChannels: [Resources.RoomPublicChannel.channel1],
-                    },
-                    event: Resources.RoomPublicMessage.updateMessage3aTo3bEvent,
-                    expected: [
-                        Resources.Message.publicMessage1,
-                        Resources.Message.privateMessage2,
-                        Resources.Message.updatedPublicMessage3b,
-                        Resources.Message.privateMessage4a,
-                        Resources.Message.soundEffect5,
-                        Resources.Message.pieceLog6,
-                        Resources.Message.publicMessage7,
-                        Resources.Message.privateMessage8,
-                    ],
-                },
-                {
-                    query: {
-                        ...Resources.RoomMessages.empty,
-                        publicMessages: [
-                            Resources.RoomPublicMessage.message1a,
-                            Resources.RoomPublicMessage.message3a,
-                            Resources.RoomPublicMessage.message7b,
-                        ],
-                        privateMessages: [
-                            Resources.RoomPrivateMessage.message2a,
-                            Resources.RoomPrivateMessage.message4a,
-                            Resources.RoomPrivateMessage.message8b,
-                        ],
-                        soundEffects: [Resources.SoundEffect.message5],
-                        pieceLogs: [Resources.PieceLog.message6],
-                        publicChannels: [Resources.RoomPublicChannel.channel1],
-                    },
-                    event: Resources.RoomPrivateMessage.updateMessage4aTo4bEvent,
-                    expected: [
-                        Resources.Message.publicMessage1,
-                        Resources.Message.privateMessage2,
-                        Resources.Message.publicMessage3a,
-                        Resources.Message.updatedPrivateMessage4b,
-                        Resources.Message.soundEffect5,
-                        Resources.Message.pieceLog6,
-                        Resources.Message.publicMessage7,
-                        Resources.Message.privateMessage8,
-                    ],
-                },
-            ])('(clear) -> onQuery -> onEvent -> clear', ({ query, event, expected }) => {
-                const baseClient = new RoomMessagesClient();
-                const client =
-                    filter == null ? baseClient.messages : baseClient.messages.filter(filter);
-                const clientChanged = new MessagesChangeTester(client.changed);
-
-                if (clearOnInit !== 'none') {
-                    if (clearOnInit === 'query->clear') {
-                        baseClient.onQuery(queryBeforeClear);
-                    }
-                    baseClient.clear();
-                    clientChanged.clearChanges();
-                }
-
-                baseClient.onQuery(query);
-
-                clientChanged.clearChanges();
-
-                baseClient.onEvent(event);
-
-                expect(client.getCurrent()).toEqual(expected.filter(arrayFilter));
-                clientChanged.expectToBeOneEvent(expected.filter(arrayFilter));
-
-                baseClient.clear();
-
-                expect(client.getCurrent()).toBeNull();
-                clientChanged.expectToBeOneClear();
-            });
-
-            it.each([
-                {
-                    query: {
-                        ...Resources.RoomMessages.empty,
-                        publicMessages: [Resources.RoomPublicMessage.message1a],
-                    },
-                    event1: Resources.RoomPublicMessage.message3a,
-                    event2: Resources.RoomPublicMessage.message7b,
-                    expected: [
-                        Resources.Message.publicMessage1,
-                        Resources.Message.publicMessage3a,
-                        Resources.Message.publicMessage7,
-                    ],
-                },
-            ])(
-                '(clear) -> onQuery -> onEvent -> onEvent -> clear',
-                ({ query, event1, event2, expected }) => {
-                    const baseClient = new RoomMessagesClient();
-                    const client =
-                        filter == null ? baseClient.messages : baseClient.messages.filter(filter);
-                    const clientChanged = new MessagesChangeTester(client.changed);
-
-                    if (clearOnInit !== 'none') {
-                        if (clearOnInit === 'query->clear') {
-                            baseClient.onQuery(queryBeforeClear);
-                        }
-                        baseClient.clear();
-                        clientChanged.clearChanges();
-                    }
-
-                    baseClient.onQuery(query);
-
-                    clientChanged.clearChanges();
-
-                    baseClient.onEvent(event1);
-
-                    clientChanged.clearChanges();
-
-                    baseClient.onEvent(event2);
-
-                    expect(client.getCurrent()).toEqual(expected.filter(arrayFilter));
-                    clientChanged.expectToBeOneEvent(expected.filter(arrayFilter));
-
-                    baseClient.clear();
-
-                    expect(client.getCurrent()).toBeNull();
-                    clientChanged.expectToBeOneClear();
-                }
-            );
-
-            it.each([
-                {
-                    events: [
-                        Resources.RoomPublicMessage.updateMessage3aTo3bEvent,
-                        Resources.RoomPrivateMessage.updateMessage4aTo4bEvent,
-                    ],
-                    query: {
-                        ...Resources.RoomMessages.empty,
-                        publicMessages: [
-                            Resources.RoomPublicMessage.message1a,
-                            Resources.RoomPublicMessage.message3a,
-                            Resources.RoomPublicMessage.message7b,
-                        ],
-                        privateMessages: [
-                            Resources.RoomPrivateMessage.message2a,
-                            Resources.RoomPrivateMessage.message4a,
-                            Resources.RoomPrivateMessage.message8b,
-                        ],
-                        soundEffects: [Resources.SoundEffect.message5],
-                        pieceLogs: [Resources.PieceLog.message6],
-                        publicChannels: [Resources.RoomPublicChannel.channel1],
-                    },
-                    expected: [
-                        Resources.Message.publicMessage1,
-                        Resources.Message.privateMessage2,
-                        Resources.Message.updatedPublicMessage3b,
-                        Resources.Message.updatedPrivateMessage4b,
-                        Resources.Message.soundEffect5,
-                        Resources.Message.pieceLog6,
-                        Resources.Message.publicMessage7,
-                        Resources.Message.privateMessage8,
-                    ],
-                },
-                {
-                    events: [
-                        Resources.RoomPrivateMessage.updateMessage4aTo4bEvent,
-                        Resources.RoomPublicMessage.updateMessage3aTo3bEvent,
-                    ],
-                    query: {
-                        ...Resources.RoomMessages.empty,
-                        publicMessages: [
-                            Resources.RoomPublicMessage.message1a,
-                            Resources.RoomPublicMessage.message3a,
-                            Resources.RoomPublicMessage.message7b,
-                        ],
-                        privateMessages: [
-                            Resources.RoomPrivateMessage.message2a,
-                            Resources.RoomPrivateMessage.message4a,
-                            Resources.RoomPrivateMessage.message8b,
-                        ],
-                        soundEffects: [Resources.SoundEffect.message5],
-                        pieceLogs: [Resources.PieceLog.message6],
-                        publicChannels: [Resources.RoomPublicChannel.channel1],
-                    },
-                    expected: [
-                        Resources.Message.publicMessage1,
-                        Resources.Message.privateMessage2,
-                        Resources.Message.updatedPublicMessage3b,
-                        Resources.Message.updatedPrivateMessage4b,
-                        Resources.Message.soundEffect5,
-                        Resources.Message.pieceLog6,
-                        Resources.Message.publicMessage7,
-                        Resources.Message.privateMessage8,
-                    ],
-                },
-            ])('(clear) -> onEvent -> onQuery -> clear', ({ events, query, expected }) => {
-                const baseClient = new RoomMessagesClient();
-                const client =
-                    filter == null ? baseClient.messages : baseClient.messages.filter(filter);
-                const clientChanged = new MessagesChangeTester(client.changed);
-
-                if (clearOnInit !== 'none') {
-                    if (clearOnInit === 'query->clear') {
-                        baseClient.onQuery(queryBeforeClear);
-                    }
-                    baseClient.clear();
-                    clientChanged.clearChanges();
-                }
-
-                events.forEach(event => baseClient.onEvent(event));
-
-                clientChanged.clearChanges();
-
-                baseClient.onQuery(query);
-
-                expect(client.getCurrent()).toEqual(expected.filter(arrayFilter));
-                clientChanged.expectToBeOneQuery(expected.filter(arrayFilter));
-
-                clientChanged.clearChanges();
-
-                baseClient.clear();
-
-                expect(client.getCurrent()).toBeNull();
-                clientChanged.expectToBeOneClear();
-            });
-
-            it.each([
-                {
-                    query1: {
-                        ...Resources.RoomMessages.empty,
-                        publicMessages: [
-                            Resources.RoomPublicMessage.message1a,
-                            Resources.RoomPublicMessage.message3a,
-                        ],
-                        privateMessages: [
-                            Resources.RoomPrivateMessage.message2a,
-                            Resources.RoomPrivateMessage.message4a,
-                        ],
-                    },
-                    query2: {
-                        ...Resources.RoomMessages.empty,
-                        publicMessages: [
-                            Resources.RoomPublicMessage.updatedMessage3b,
-                            Resources.RoomPublicMessage.message7b,
-                        ],
-                        privateMessages: [
-                            Resources.RoomPrivateMessage.updatedMessage4b,
-                            Resources.RoomPrivateMessage.message8b,
-                        ],
-                        soundEffects: [Resources.SoundEffect.message5],
-                        pieceLogs: [Resources.PieceLog.message6],
-                    },
-                    expected: [
-                        Resources.Message.publicMessage1,
-                        Resources.Message.privateMessage2,
-                        Resources.Message.updatedPublicMessage3b,
-                        Resources.Message.updatedPrivateMessage4b,
-                        Resources.Message.soundEffect5,
-                        Resources.Message.pieceLog6,
-                        Resources.Message.publicMessage7,
-                        Resources.Message.privateMessage8,
-                    ],
-                },
-            ])('(clear) -> onQuery -> onQuery -> clear', ({ query1, query2, expected }) => {
-                const baseClient = new RoomMessagesClient();
-                const client =
-                    filter == null ? baseClient.messages : baseClient.messages.filter(filter);
-                const clientChanged = new MessagesChangeTester(client.changed);
-
-                if (clearOnInit !== 'none') {
-                    if (clearOnInit === 'query->clear') {
-                        baseClient.onQuery(queryBeforeClear);
-                    }
-                    baseClient.clear();
-                    clientChanged.clearChanges();
-                }
-
-                baseClient.onQuery(query1);
-
-                clientChanged.clearChanges();
-
-                baseClient.onQuery(query2);
-
-                expect(client.getCurrent()).toEqual(expected.filter(arrayFilter));
-                clientChanged.expectToBeOneQuery(expected.filter(arrayFilter));
-
-                clientChanged.clearChanges();
-
-                baseClient.clear();
-
-                expect(client.getCurrent()).toBeNull();
-                clientChanged.expectToBeOneClear();
-            });
-        }
-    );
 });

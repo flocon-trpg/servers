@@ -1,16 +1,11 @@
+import { Result } from '@kizahasi/result';
+import { State, TwoWayOperation, UpOperation } from '../../../../generator';
+import { isIdRecord } from '../../../../record';
+import { RequestedBy, canChangeOwnerParticipantId } from '../../../../requestedBy';
 import * as ReplaceOperation from '../../../../util/replaceOperation';
 import { ServerTransform } from '../../../../util/type';
-import { isIdRecord } from '../../../../util/record';
-import { Result } from '@kizahasi/result';
 import * as Piece from '../../../piece/functions';
-import {
-    RequestedBy,
-    anyValue,
-    canChangeOwnerParticipantId,
-    isOwner,
-} from '../../../../util/requestedBy';
 import { template } from './types';
-import { State, TwoWayOperation, UpOperation } from '../../../../generator';
 
 export const toClientState = (source: State<typeof template>): State<typeof template> => {
     return source;
@@ -24,19 +19,23 @@ export const serverTransform =
         TwoWayOperation<typeof template>,
         UpOperation<typeof template>
     > =>
-    ({ prevState, currentState, clientOperation, serverOperation }) => {
-        const isAuthorized = isOwner({
-            requestedBy,
-            ownerParticipantId: currentState.ownerParticipantId ?? anyValue,
-        });
-        if (!isAuthorized) {
-            // 自分以外はどのプロパティも編集できない。
-            return Result.ok(undefined);
-        }
-
+    ({
+        stateBeforeServerOperation,
+        stateAfterServerOperation,
+        clientOperation,
+        serverOperation,
+    }) => {
         const piece = Piece.serverTransform({
-            prevState: { ...prevState, $v: undefined, $r: undefined },
-            currentState: { ...currentState, $v: undefined, $r: undefined },
+            stateBeforeServerOperation: {
+                ...stateBeforeServerOperation,
+                $v: undefined,
+                $r: undefined,
+            },
+            stateAfterServerOperation: {
+                ...stateAfterServerOperation,
+                $v: undefined,
+                $r: undefined,
+            },
             clientOperation: { ...clientOperation, $v: undefined, $r: undefined },
             serverOperation: { ...serverOperation, $v: undefined, $r: undefined },
         });
@@ -53,26 +52,26 @@ export const serverTransform =
         if (
             canChangeOwnerParticipantId({
                 requestedBy,
-                currentOwnerParticipant: currentState,
+                currentOwnerParticipant: stateAfterServerOperation,
             })
         ) {
             twoWayOperation.ownerParticipantId = ReplaceOperation.serverTransform({
                 first: serverOperation?.ownerParticipantId,
                 second: clientOperation.ownerParticipantId,
-                prevState: prevState.ownerParticipantId,
+                prevState: stateBeforeServerOperation.ownerParticipantId,
             });
         }
 
         twoWayOperation.image = ReplaceOperation.serverTransform({
             first: serverOperation?.image,
             second: clientOperation.image,
-            prevState: prevState.image,
+            prevState: stateBeforeServerOperation.image,
         });
 
         twoWayOperation.isPrivate = ReplaceOperation.serverTransform({
             first: serverOperation?.isPrivate,
             second: clientOperation.isPrivate,
-            prevState: prevState.isPrivate,
+            prevState: stateBeforeServerOperation.isPrivate,
         });
 
         if (isIdRecord(twoWayOperation)) {

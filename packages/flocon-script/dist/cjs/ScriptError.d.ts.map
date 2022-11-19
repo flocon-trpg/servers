@@ -1,0 +1,1 @@
+{"version":3,"file":"ScriptError.d.ts","sourceRoot":"","sources":["../../src/ScriptError.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,KAAK,EAAE,MAAM,SAAS,CAAC;AAEhC,qBAAa,WAAY,SAAQ,KAAK;aACmB,KAAK,CAAC;gBAAxC,OAAO,CAAC,EAAE,MAAM,EAAkB,KAAK,CAAC,mBAAO;WAKpD,mBAAmB,CAAC,KAAK,CAAC,EAAE,KAAK;WAIjC,gBAAgB,CAAC,KAAK,CAAC,EAAE,KAAK;CAG/C"}

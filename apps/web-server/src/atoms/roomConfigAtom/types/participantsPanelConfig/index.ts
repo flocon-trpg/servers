@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import { z } from 'zod';
 import { defaultParticipantsPanelPosition } from '../defaultPanelPositions';
 import {
     DraggablePanelConfigBase,
@@ -10,14 +10,14 @@ export type ParticipantsPanelConfig = {
     isMinimized: boolean;
 } & DraggablePanelConfigBase;
 
-export const serializedParticipantsPanelConfig = t.intersection([
-    t.partial({
-        isMinimized: t.boolean,
-    }),
-    serializedDraggablePanelConfigBase,
-]);
+export const serializedParticipantsPanelConfig = z
+    .object({
+        isMinimized: z.boolean(),
+    })
+    .partial()
+    .merge(serializedDraggablePanelConfigBase);
 
-export type SerializedParticipantsPanelConfig = t.TypeOf<typeof serializedParticipantsPanelConfig>;
+export type SerializedParticipantsPanelConfig = z.TypeOf<typeof serializedParticipantsPanelConfig>;
 
 export const deserializeParticipantsPanelConfig = (
     source: SerializedParticipantsPanelConfig

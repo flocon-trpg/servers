@@ -12,8 +12,8 @@ import {
     Unique,
 } from '@mikro-orm/core';
 import { v4 } from 'uuid';
-import { easyFlake } from '../../utils/easyFlake';
 import { EM } from '../../types';
+import { easyFlake } from '../../utils/easyFlake';
 import { Participant } from '../participant/entity';
 import {
     DicePieceLog as DicePieceLogEntity,

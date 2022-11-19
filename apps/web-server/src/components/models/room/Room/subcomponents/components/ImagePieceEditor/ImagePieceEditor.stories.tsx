@@ -1,15 +1,15 @@
 import { ComponentMeta } from '@storybook/react';
 import React from 'react';
-import { useSetupMocks } from '@/hooks/useSetupMocks';
-import { defaultBoardId, imagePieceKey1 } from '@/mocks';
 import { ImagePieceEditor } from './ImagePieceEditor';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
+import { useSetupStorybook } from '@/hooks/useSetupStorybook';
+import { defaultBoardId, imagePieceKey1 } from '@/mocks';
 
 export const Update: React.FC = () => {
-    useSetupMocks();
+    useSetupStorybook();
 
     return (
-        <StorybookProvider>
+        <StorybookProvider waitForRoomClient>
             <ImagePieceEditor updateMode={{ boardId: defaultBoardId, pieceId: imagePieceKey1 }} />
         </StorybookProvider>
     );

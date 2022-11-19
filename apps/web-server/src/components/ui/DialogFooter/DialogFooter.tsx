@@ -1,7 +1,7 @@
-import { flex, flexRow, justifyEnd } from '@/styles/className';
 import { Button, Modal } from 'antd';
 import classNames from 'classnames';
 import React from 'react';
+import { flex, flexRow, justifyEnd } from '@/styles/className';
 
 type CloseTextType = 'close' | 'cancel';
 type OkTextType = 'ok' | 'create' | 'post' | 'loading';

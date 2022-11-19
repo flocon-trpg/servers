@@ -16,9 +16,9 @@ const tryGetUserConfig = async (userUid: string) => {
         return undefined;
     }
     const json = tryParseJSON(raw);
-    const result = serializedUserConfig.decode(json);
-    if (result._tag === 'Right') {
-        return result.right;
+    const result = serializedUserConfig.passthrough().safeParse(json);
+    if (result.success) {
+        return result.data;
     }
     return undefined;
 };

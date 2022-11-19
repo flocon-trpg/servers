@@ -1,63 +1,36 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
-import { success, useImageFromFilePath } from '@/hooks/imageHooks';
-import * as ReactKonva from 'react-konva';
-import { Button, Dropdown, InputNumber, Menu, Popover } from 'antd';
 import * as Icons from '@ant-design/icons';
-import { update } from '@/stateManagers/states/types';
-import { useMe } from '../../hooks/useMe';
-import { useCharacters } from '../../hooks/useCharacters';
-import { useParticipants } from '../../hooks/useParticipants';
-import { useBoards } from '../../hooks/useBoards';
-import { ActiveBoardSelectorModal } from './subcomponents/components/ActiveBoardSelectorModal/ActiveBoardSelecterModal';
-import useConstant from 'use-constant';
-import { debounceTime } from 'rxjs/operators';
-import { Subject } from 'rxjs';
 import { $free, OmitVersion, State, boardTemplate, pieceTemplate } from '@flocon-trpg/core';
-import { keyNames, recordToArray } from '@flocon-trpg/utils';
-import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { FilePath, FileSourceType } from '@flocon-trpg/typed-document-node-v0.7.1';
-import { ImagePiece } from './subcomponents/components/ImagePiece/ImagePiece';
-import {
-    DiceOrShapeOrStringPiece,
-    shapePiece,
-} from './subcomponents/components/CanvasOrDiceOrStringPiece/CanvasOrDiceOrStringPiece';
-import { useTransition } from '@react-spring/konva';
-import { useCharacterPieces } from '../../hooks/useCharacterPieces';
-import { usePortraitPieces } from '../../hooks/usePortraitPieces';
-import { useDicePieces } from '../../hooks/useDicePieces';
-import { useStringPieces } from '../../hooks/useStringPieces';
-import { useImagePieces } from '../../hooks/useImagePieces';
-import { useAllContext } from '@/hooks/useAllContext';
-import { AllContextProvider } from '@/components/behaviors/AllContextProvider';
-import { range } from '@/utils/range';
-import classNames from 'classnames';
-import { cancelRnd, flex, flexColumn, flexRow, itemsCenter, itemsEnd } from '@/styles/className';
-import { rgba } from '@/utils/rgba';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
-import { roomAtom } from '@/atoms/roomAtom/roomAtom';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { BoardConfig, defaultBoardConfig } from '@/atoms/roomConfigAtom/types/boardConfig';
-import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
-import { ActiveBoardPanelConfig } from '@/atoms/roomConfigAtom/types/activeBoardPanelConfig';
-import { BoardEditorPanelConfig } from '@/atoms/roomConfigAtom/types/boardEditorPanelConfig';
-import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
-import { boardTooltipAtom } from '../../atoms/boardTooltipAtom/boardTooltipAtom';
-import { boardPopoverEditorAtom } from '../../atoms/boardPopoverEditorAtom/boardPopoverEditorAtom';
-import { MouseOverOn } from '../../utils/types';
-import { useUpdateAtom } from 'jotai/utils';
-import { boardContextMenuAtom } from '../../atoms/boardContextMenuAtom/boardContextMenuAtom';
-import { create } from '@/utils/constants';
-import { boardEditorModalAtom } from '../BoardEditorModal/BoardEditorModal';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
-import { importBoardModalVisibilityAtom } from '../ImportBoardModal/ImportBoardModal';
-import { BoardType } from '@/utils/types';
-import { useIsMyCharacter } from '../../hooks/useIsMyCharacter';
-import { Styles } from '@/styles';
+import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { Message, publicMessage } from '@flocon-trpg/web-server-utils';
-import { notFetch, useRoomMessages } from '@/hooks/useRoomMessages';
+import { useTransition } from '@react-spring/konva';
+import { Button, Dropdown, InputNumber, Menu, Popover } from 'antd';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
-import { defaultTriggerSubMenuAction } from '@/utils/variables';
+import classNames from 'classnames';
+import { useUpdateAtom } from 'jotai/utils';
+import { KonvaEventObject } from 'konva/lib/Node';
+import { Vector2d } from 'konva/lib/types';
+import React from 'react';
+import * as ReactKonva from 'react-konva';
+import { Subject, debounceTime } from 'rxjs';
+import { CombinedError } from 'urql';
+import useConstant from 'use-constant';
+import { boardContextMenuAtom } from '../../atoms/boardContextMenuAtom/boardContextMenuAtom';
+import { boardPopoverEditorAtom } from '../../atoms/boardPopoverEditorAtom/boardPopoverEditorAtom';
+import { boardTooltipAtom } from '../../atoms/boardTooltipAtom/boardTooltipAtom';
+import { useBoards } from '../../hooks/useBoards';
+import { useCharacterPieces } from '../../hooks/useCharacterPieces';
+import { useCharacters } from '../../hooks/useCharacters';
+import { useDicePieces } from '../../hooks/useDicePieces';
+import { useImagePieces } from '../../hooks/useImagePieces';
+import { useIsMyCharacter } from '../../hooks/useIsMyCharacter';
+import { useMe } from '../../hooks/useMe';
+import { useParticipants } from '../../hooks/useParticipants';
+import { usePortraitPieces } from '../../hooks/usePortraitPieces';
+import { useRoomId } from '../../hooks/useRoomId';
+import { useShapePieces } from '../../hooks/useShapePieces';
+import { useStringPieces } from '../../hooks/useStringPieces';
 import {
     DragEndResult,
     PixelPosition,
@@ -67,11 +40,38 @@ import {
     toCellPosition,
     toCellSize,
 } from '../../utils/positionAndSizeAndRect';
-import { KonvaEventObject } from 'konva/lib/Node';
-import { Vector2d } from 'konva/lib/types';
-import { useShapePieces } from '../../hooks/useShapePieces';
-import { ColorPickerButton } from '@/components/ui/ColorPickerButton/ColorPickerButton';
+import { MouseOverOn } from '../../utils/types';
+import { boardEditorModalAtom } from '../BoardEditorModal/BoardEditorModal';
+import { importBoardModalVisibilityAtom } from '../ImportBoardModal/ImportBoardModal';
+import { ActiveBoardSelectorModal } from './subcomponents/components/ActiveBoardSelectorModal/ActiveBoardSelecterModal';
+import {
+    DiceOrShapeOrStringPiece,
+    shapePiece,
+} from './subcomponents/components/CanvasOrDiceOrStringPiece/CanvasOrDiceOrStringPiece';
+import { ImagePiece } from './subcomponents/components/ImagePiece/ImagePiece';
+import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { ActiveBoardPanelConfig } from '@/atoms/roomConfigAtom/types/activeBoardPanelConfig';
+import { BoardConfig, defaultBoardConfig } from '@/atoms/roomConfigAtom/types/boardConfig';
+import { BoardEditorPanelConfig } from '@/atoms/roomConfigAtom/types/boardEditorPanelConfig';
+import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
+import { AllContextProvider } from '@/components/behaviors/AllContextProvider';
+import { NotificationType } from '@/components/models/room/Room/subcomponents/components/Notification/Notification';
+import { useRoomMessages } from '@/components/models/room/Room/subcomponents/hooks/useRoomMessages';
+import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateWithImmer';
 import { AnimatedImageAsAnyProps } from '@/components/ui/AnimatedKonvaAsAnyProps/AnimatedKonvaAsAnyProps';
+import { ColorPickerButton } from '@/components/ui/ColorPickerButton/ColorPickerButton';
+import { success, useImageFromFilePath } from '@/hooks/imageHooks';
+import { useAllContext } from '@/hooks/useAllContext';
+import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
+import { Styles } from '@/styles';
+import { cancelRnd, flex, flexColumn, flexRow, itemsCenter, itemsEnd } from '@/styles/className';
+import { create, update } from '@/utils/constants';
+import { range } from '@/utils/range';
+import { rgba } from '@/utils/rgba';
+import { BoardType } from '@/utils/types';
+import { defaultTriggerSubMenuAction } from '@/utils/variables';
 
 type BoardState = OmitVersion<State<typeof boardTemplate>>;
 type PieceState = OmitVersion<State<typeof pieceTemplate>>;
@@ -131,7 +131,7 @@ type SelectedPieceId =
           pieceId: string;
       };
 
-const publicMessageFilter = (message: Message): boolean => {
+const publicMessageFilter = (message: Message<NotificationType<CombinedError>>): boolean => {
     return message.type === publicMessage;
 };
 
@@ -180,7 +180,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
 }: BoardCoreProps) => {
     const allContext = useAllContext();
 
-    const roomId = useAtomSelector(roomAtom, state => state.roomId);
+    const roomId = useRoomId();
     const participants = useParticipants();
     const shapePieces = useShapePieces(boardId);
     const dicePieces = useDicePieces(boardId);
@@ -237,10 +237,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     }
 
     const lastPublicMessage = (() => {
-        if (publicMessages === notFetch || publicMessages.isError) {
-            return undefined;
-        }
-        const publicMessagesValue = publicMessages.value.current ?? [];
+        const publicMessagesValue = publicMessages.value;
         const lastMessage = publicMessagesValue[publicMessagesValue.length - 1];
         if (lastMessage == null) {
             return;
@@ -816,18 +813,18 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
     const setBoardContextMenu = useUpdateAtom(boardContextMenuAtom);
     const setBoardEditorModal = useUpdateAtom(boardEditorModalAtom);
     const setImportBoardModal = useUpdateAtom(importBoardModalVisibilityAtom);
-    const roomId = useAtomSelector(roomAtom, state => state.roomId);
+    const roomId = useRoomId();
     const boards = useBoards();
     const characters = useCharacters();
     const myUserUid = useMyUserUid();
     const me = useMe();
-    const activeBoardId = useAtomSelector(roomAtom, state => state.roomState?.state?.activeBoardId);
+    const activeBoardId = useRoomStateValueSelector(state => state.activeBoardId);
     const [activeBoardSelectorModalVisibility, setActiveBoardSelectorModalVisibility] =
         React.useState(false);
 
     const boardIdToShow = (() => {
         if (panel.type === 'activeBoard') {
-            return activeBoardId;
+            return activeBoardId ?? undefined;
         }
         if (panel.config.activeBoardId == null) {
             return undefined;
@@ -840,7 +837,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
     const stringPieces = useStringPieces(boardIdToShow);
     const imagePieces = useImagePieces(boardIdToShow);
 
-    if (me == null || myUserUid == null || roomId == null || boards == null || characters == null) {
+    if (me == null || myUserUid == null || boards == null || characters == null) {
         return null;
     }
 

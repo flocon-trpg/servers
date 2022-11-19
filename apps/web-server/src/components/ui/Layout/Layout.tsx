@@ -1,5 +1,11 @@
-import React, { PropsWithChildren } from 'react';
-import { useRouter } from 'next/router';
+import * as Icon from '@ant-design/icons';
+import {
+    EntryToServerDocument,
+    EntryToServerResultType,
+    IsEntryDocument,
+    IsEntryQuery,
+    IsEntryQueryVariables,
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import {
     Alert,
     Layout as AntdLayout,
@@ -13,25 +19,19 @@ import {
     Space,
     Spin,
 } from 'antd';
-import {
-    EntryToServerDocument,
-    EntryToServerResultType,
-    IsEntryDocument,
-    IsEntryQuery,
-    IsEntryQueryVariables,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
-import { Center } from '../Center/Center';
-import Link from 'next/link';
-import { NotSignInResult } from '../NotSignInResult/NotSignInResult';
-import { LoadingResult } from '../LoadingResult/LoadingResult';
-import * as Icon from '@ant-design/icons';
-import { useSignOut } from '@/hooks/useSignOut';
-import { useClient, useMutation } from 'urql';
-import { useGetMyRoles } from '@/hooks/useGetMyRoles';
 import { useAtomValue } from 'jotai';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import React, { PropsWithChildren } from 'react';
+import { useClient, useMutation } from 'urql';
+import { Center } from '../Center/Center';
+import { LoadingResult } from '../LoadingResult/LoadingResult';
+import { NotSignInResult } from '../NotSignInResult/NotSignInResult';
+import { useGetIdToken } from '@/hooks/useGetIdToken';
+import { useGetMyRoles } from '@/hooks/useGetMyRoles';
+import { useSignOut } from '@/hooks/useSignOut';
 import { firebaseUserAtom } from '@/pages/_app';
 import { authNotFound, loading, notSignIn } from '@/utils/firebase/firebaseUserState';
-import { useGetIdToken } from '@/hooks/useGetIdToken';
 
 const { Header, Content } = AntdLayout;
 
@@ -122,7 +122,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
     onEntry,
     requires,
     hideHeader: hideHeaderProp,
-}: PropsWithChildren<Props>) => {
+}) => {
     const router = useRouter();
     const getMyRolesQueryResult = useGetMyRoles();
     const firebaseUser = useAtomValue(firebaseUserAtom);
@@ -171,13 +171,6 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
         setIsEntry('notRequired');
     }, [requiresEntry, myUserUid, urqlClient, canGetIdToken]);
 
-    const getChildren = (): React.ReactNode => {
-        if (typeof children === 'function') {
-            return children();
-        }
-        return children;
-    };
-
     if (firebaseUser === authNotFound) {
         return (
             <Result status='info' title='Firebase Authentication インスタンスが見つかりません。' />
@@ -188,7 +181,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
     const content = (() => {
         if (requires == null) {
             showChildren = true;
-            return getChildren();
+            return children;
         }
         if (firebaseUser === loading) {
             return <LoadingResult title='Firebase Authentication による認証を行っています…' />;
@@ -227,7 +220,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                 return <Result status='error' title='APIエラー' subTitle={isEntry.error.message} />;
         }
         showChildren = true;
-        return getChildren();
+        return children;
     })();
 
     let hideHeader: boolean;

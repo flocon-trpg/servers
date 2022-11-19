@@ -1,18 +1,18 @@
-import { Alert, Button, Tooltip } from 'antd';
-import * as React from 'react';
-import { FileSourceType, GetFilesDocument } from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Core from '@flocon-trpg/core';
-import { FilePath, FilePathLike } from '@/utils/file/filePath';
+import { FileSourceType, GetFilesDocument } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { Alert, Button, Tooltip } from 'antd';
 import classNames from 'classnames';
-import { flex, flexRow, itemsCenter } from '@/styles/className';
-import { ImageView } from '../ImageView/ImageView';
-import { FileType } from '@/utils/fileType';
 import { StorageReference } from 'firebase/storage';
-import { useFirebaseStorageUrl } from '@/hooks/useFirebaseStorageUrl';
-import { fileName } from '@/utils/filename';
-import { useOpenFloconUploaderFile } from '@/hooks/useOpenFloconUploaderFile';
+import * as React from 'react';
 import { useQuery } from 'urql';
 import { FileSelectorModal } from '../FileSelectorModal/FileSelectorModal';
+import { ImageView } from '../ImageView/ImageView';
+import { useFirebaseStorageUrl } from '@/hooks/useFirebaseStorageUrl';
+import { useOpenFloconUploaderFile } from '@/hooks/useOpenFloconUploaderFile';
+import { flex, flexRow, itemsCenter } from '@/styles/className';
+import { FilePath, FilePathLike } from '@/utils/file/filePath';
+import { FileType } from '@/utils/fileType';
+import { fileName } from '@/utils/filename';
 
 type FilePathState = Core.State<typeof Core.filePathTemplate>;
 

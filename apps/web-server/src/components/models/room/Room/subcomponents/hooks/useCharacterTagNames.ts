@@ -1,49 +1,28 @@
 import React from 'react';
-import { roomAtom } from '@/atoms/roomAtom/roomAtom';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 import { CharacterTagNames } from '@/utils/types';
 
 export function useCharacterTagNames(): Partial<CharacterTagNames> {
-    const characterTag1Name = useAtomSelector(
-        roomAtom,
-        state => state?.roomState?.state?.characterTag1Name
-    );
-    const characterTag2Name = useAtomSelector(
-        roomAtom,
-        state => state?.roomState?.state?.characterTag2Name
-    );
-    const characterTag3Name = useAtomSelector(
-        roomAtom,
-        state => state?.roomState?.state?.characterTag3Name
-    );
-    const characterTag4Name = useAtomSelector(
-        roomAtom,
-        state => state?.roomState?.state?.characterTag4Name
-    );
-    const characterTag5Name = useAtomSelector(
-        roomAtom,
-        state => state?.roomState?.state?.characterTag5Name
-    );
-    const characterTag6Name = useAtomSelector(
-        roomAtom,
-        state => state?.roomState?.state?.characterTag6Name
-    );
-    const characterTag7Name = useAtomSelector(
-        roomAtom,
-        state => state?.roomState?.state?.characterTag7Name
-    );
-    const characterTag8Name = useAtomSelector(
-        roomAtom,
-        state => state?.roomState?.state?.characterTag8Name
-    );
-    const characterTag9Name = useAtomSelector(
-        roomAtom,
-        state => state?.roomState?.state?.characterTag9Name
-    );
-    const characterTag10Name = useAtomSelector(
-        roomAtom,
-        state => state?.roomState?.state?.characterTag10Name
-    );
+    const characterTag1Name =
+        useRoomStateValueSelector(state => state.characterTag1Name) ?? undefined;
+    const characterTag2Name =
+        useRoomStateValueSelector(state => state.characterTag2Name) ?? undefined;
+    const characterTag3Name =
+        useRoomStateValueSelector(state => state.characterTag3Name) ?? undefined;
+    const characterTag4Name =
+        useRoomStateValueSelector(state => state.characterTag4Name) ?? undefined;
+    const characterTag5Name =
+        useRoomStateValueSelector(state => state.characterTag5Name) ?? undefined;
+    const characterTag6Name =
+        useRoomStateValueSelector(state => state.characterTag6Name) ?? undefined;
+    const characterTag7Name =
+        useRoomStateValueSelector(state => state.characterTag7Name) ?? undefined;
+    const characterTag8Name =
+        useRoomStateValueSelector(state => state.characterTag8Name) ?? undefined;
+    const characterTag9Name =
+        useRoomStateValueSelector(state => state.characterTag9Name) ?? undefined;
+    const characterTag10Name =
+        useRoomStateValueSelector(state => state.characterTag10Name) ?? undefined;
 
     const [resultState, setResultState] = React.useState<Partial<CharacterTagNames>>({});
 

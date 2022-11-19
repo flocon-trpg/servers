@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import { z } from 'zod';
 
-export const maybe = <T extends t.Mixed>(source: T) => t.union([source, t.undefined]);
+export const maybe = <T extends z.ZodTypeAny>(source: T) => z.union([source, z.undefined()]);
 export type Maybe<T> = T | undefined;

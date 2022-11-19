@@ -1,9 +1,9 @@
-import * as t from 'io-ts';
+import { z } from 'zod';
 import { createReplaceValueTemplate } from '../../generator';
 
 export const compositeKey = createReplaceValueTemplate(
-    t.type({
-        createdBy: t.string,
-        id: t.string,
+    z.object({
+        createdBy: z.string(),
+        id: z.string(),
     })
 );

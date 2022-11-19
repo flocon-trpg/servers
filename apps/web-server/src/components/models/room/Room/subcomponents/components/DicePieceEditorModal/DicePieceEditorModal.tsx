@@ -1,12 +1,12 @@
 import { Modal } from 'antd';
+import { atom, useAtom } from 'jotai';
 import React from 'react';
+import { Subject } from 'rxjs';
+import useConstant from 'use-constant';
+import { useMemoOne } from 'use-memo-one';
+import { CreateMode, DicePieceEditor, UpdateMode } from '../DicePieceEditor/DicePieceEditor';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { close, create, ok, update } from '@/utils/constants';
-import { atom, useAtom } from 'jotai';
-import { Subject } from 'rxjs';
-import { CreateMode, DicePieceEditor, UpdateMode } from '../DicePieceEditor/DicePieceEditor';
-import { useMemoOne } from 'use-memo-one';
-import useConstant from 'use-constant';
 import { PieceModalState } from '@/utils/types';
 
 export const dicePieceModalAtom = atom<PieceModalState | null>(null);
@@ -48,7 +48,7 @@ export const DicePieceEditorModal: React.FC = () => {
     return (
         <Modal
             title={modalType?.type === update ? 'ダイスコマの編集' : 'ダイスコマの新規作成'}
-            visible={visible}
+            open={visible}
             closable
             onCancel={() => setModalType(null)}
             footer={

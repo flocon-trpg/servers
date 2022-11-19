@@ -1,5 +1,5 @@
-import React from 'react';
 import { ComponentMeta } from '@storybook/react';
+import React from 'react';
 import { Fieldset } from './Fieldset';
 
 export const Default: React.FC = () => {

@@ -1,13 +1,11 @@
-import { roomNotificationsAtom, text } from '@/atoms/roomAtom/roomAtom';
-import { firebaseAuthAtom, firebaseUserAtom } from '@/pages/_app';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useAtomValue } from 'jotai';
 import React from 'react';
 import { useLatest } from 'react-use';
 import { useCallbackOne } from 'use-memo-one';
+import { firebaseAuthAtom, firebaseUserAtom } from '@/pages/_app';
 
 /** @returns getIdTokenResultを実行したときにnon-nullishな値が返ってくると予想される場合は、canGetIdTokenResultはtrueとなる。 */
 export const useGetIdTokenResult = () => {
-    const setRoomNotification = useSetAtom(roomNotificationsAtom);
     const auth = useAtomValue(firebaseAuthAtom);
     const currentUserRef = useLatest(auth?.currentUser);
     const user = useAtomValue(firebaseUserAtom);
@@ -20,19 +18,10 @@ export const useGetIdTokenResult = () => {
         }
         const result = await user.getIdTokenResult().catch(err => {
             console.error('failed at getIdToken', err);
-            setRoomNotification({
-                type: text,
-                notification: {
-                    type: 'error',
-                    message:
-                        'Firebase AuthenticationでIdTokenの取得に失敗しました。ブラウザのコンソールにエラーの内容を出力しました。',
-                    createdAt: new Date().getTime(),
-                },
-            });
             return null;
         });
         return result;
-    }, [currentUserRef, setRoomNotification]);
+    }, [currentUserRef]);
     return React.useMemo(
         () => ({ canGetIdTokenResult, getIdTokenResult }),
         [canGetIdTokenResult, getIdTokenResult]

@@ -1,35 +1,35 @@
-import React from 'react';
-import { replace } from '@/stateManagers/states/types';
-import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
 import {
     State,
     characterTemplate,
     dicePieceStrIndexes,
     dicePieceTemplate,
+    replace,
     simpleId,
 } from '@flocon-trpg/core';
-import { useDicePieces } from '../../hooks/useDicePieces';
-import { MyCharactersSelect } from '../MyCharactersSelect/MyCharactersSelect';
-import { InputDie } from '../InputDie/InputDie';
-import { noValue } from '../../utils/types';
-import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { close, ok } from '@/utils/constants';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
+import { keyNames } from '@flocon-trpg/utils';
+import React from 'react';
 import { Subscribable } from 'rxjs';
+import { useMemoOne } from 'use-memo-one';
+import { useDicePieces } from '../../hooks/useDicePieces';
 import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
+import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
 import {
     CompositeRect,
     PixelPosition,
     PixelSize,
     applyCompositeRect,
 } from '../../utils/positionAndSizeAndRect';
-import { PieceRectEditor } from '../RectEditor/RectEditor';
-import { useMemoOne } from 'use-memo-one';
-import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
-import { keyNames } from '@flocon-trpg/utils';
-import { PieceEditorNameRow } from '../PieceEditorNameRow/PieceEditorNameRow';
-import { PieceEditorMemoRow } from '../PieceEditorMemoRow/PieceEditorMemoRow';
+import { noValue } from '../../utils/types';
+import { InputDie } from '../InputDie/InputDie';
+import { MyCharactersSelect } from '../MyCharactersSelect/MyCharactersSelect';
 import { PieceEditorIdRow } from '../PieceEditorIdRow/PieceEditorIdRow';
+import { PieceEditorMemoRow } from '../PieceEditorMemoRow/PieceEditorMemoRow';
+import { PieceEditorNameRow } from '../PieceEditorNameRow/PieceEditorNameRow';
+import { PieceRectEditor } from '../RectEditor/RectEditor';
+import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { close, ok } from '@/utils/constants';
 
 type CharacterState = State<typeof characterTemplate>;
 type DicePieceState = State<typeof dicePieceTemplate>;
@@ -131,11 +131,14 @@ export const DicePieceEditor: React.FC<{
                 }
                 const { boardId, pieceId } = updateModeProp;
                 setRoomState(roomState => {
-                    const dicePieces = roomState.boards?.[boardId]?.dicePieces;
-                    if (dicePieces == null) {
+                    const board = roomState.boards?.[boardId];
+                    if (board == null) {
                         return;
                     }
-                    dicePieces[pieceId] = newState;
+                    if (board.dicePieces == null) {
+                        board.dicePieces = {};
+                    }
+                    board.dicePieces[pieceId] = newState;
                 });
             },
         };

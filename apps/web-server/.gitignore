@@ -2,5 +2,7 @@
 /.env.local
 /.env.*.local
 
+/.next/
+/out/
 /tsconfig.tsbuildinfo
 /storybook-static

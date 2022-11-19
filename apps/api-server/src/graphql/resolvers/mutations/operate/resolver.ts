@@ -1,4 +1,16 @@
 import {
+    State,
+    TwoWayOperation,
+    client,
+    createLogs,
+    parseUpOperation,
+    restore,
+    roomTemplate,
+    serverTransform,
+    toOtError,
+} from '@flocon-trpg/core';
+import { MaxLength } from 'class-validator';
+import {
     Args,
     ArgsType,
     Authorized,
@@ -14,40 +26,29 @@ import {
     UseMiddleware,
     createUnionType,
 } from 'type-graphql';
-import { ENTRY } from '../../../../utils/roles';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import * as RoomAsListItemGlobal from '../../../../entities-graphql/roomAsListItem';
-import { RoomAsListItem, RoomOperation } from '../../../objects/room';
 import { GlobalRoom } from '../../../../entities-graphql/room';
+import * as RoomAsListItemGlobal from '../../../../entities-graphql/roomAsListItem';
 import {
-    State,
-    TwoWayOperation,
-    client,
-    createLogs,
-    parseUpOperation,
-    restore,
-    roomTemplate,
-    serverTransform,
-} from '@flocon-trpg/core';
+    DicePieceLog as DicePieceLogNameSpace,
+    StringPieceLog as StringPieceLogNameSpace,
+} from '../../../../entities-graphql/roomMessage';
+import {
+    DicePieceLog as DicePieceLog$MikroORM,
+    StringPieceLog as StringPieceLog$MikroORM,
+} from '../../../../entities/roomMessage/entity';
+import { OperateRoomFailureType } from '../../../../enums/OperateRoomFailureType';
+import { ResolverContext } from '../../../../types';
+import { ENTRY } from '../../../../utils/roles';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
+import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
+import { RoomAsListItem, RoomOperation } from '../../../objects/room';
 import { MessageUpdatePayload, RoomOperationPayload } from '../../subsciptions/roomEvent/payload';
+import { SendTo } from '../../types';
 import {
     ensureAuthorizedUser,
     findRoomAndMyParticipant,
     publishRoomEvent,
 } from '../../utils/utils';
-import { MaxLength } from 'class-validator';
-import { SendTo } from '../../types';
-import { OperateRoomFailureType } from '../../../../enums/OperateRoomFailureType';
-import {
-    DicePieceLog as DicePieceLog$MikroORM,
-    StringPieceLog as StringPieceLog$MikroORM,
-} from '../../../../entities/roomMessage/entity';
-import {
-    DicePieceLog as DicePieceLogNameSpace,
-    StringPieceLog as StringPieceLogNameSpace,
-} from '../../../../entities-graphql/roomMessage';
-import { ResolverContext } from '../../../../types';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 type RoomState = State<typeof roomTemplate>;
 type RoomTwoWayOperation = TwoWayOperation<typeof roomTemplate>;
@@ -194,7 +195,7 @@ async function operateCore({
         revisionRange: { from: args.prevRevision, expectedTo: room.revision },
     });
     if (downOperation.isError) {
-        throw downOperation.error;
+        throw toOtError(downOperation.error);
     }
 
     let prevState: RoomState = roomState;
@@ -205,20 +206,20 @@ async function operateCore({
             downOperation: downOperation.value,
         });
         if (restoredRoom.isError) {
-            throw restoredRoom.error;
+            throw toOtError(restoredRoom.error);
         }
         prevState = restoredRoom.value.prevState;
         twoWayOperation = restoredRoom.value.twoWayOperation;
     }
 
     const transformed = serverTransform({ type: client, userUid: authorizedUserUid })({
-        prevState,
-        currentState: roomState,
+        stateBeforeServerOperation: prevState,
+        stateAfterServerOperation: roomState,
         clientOperation: clientOperation,
         serverOperation: twoWayOperation,
     });
     if (transformed.isError) {
-        throw transformed.error;
+        throw toOtError(transformed.error);
     }
     if (transformed.value === undefined) {
         return { type: 'id', result: { requestId: args.requestId } };
@@ -320,7 +321,10 @@ async function operateCore({
 
 @Resolver()
 export class OperateResolver {
-    @Mutation(() => OperateRoomResult)
+    @Mutation(() => OperateRoomResult, {
+        description:
+            'この Mutation を直接実行することは非推奨です。代わりに @flocon-trpg/sdk を用いてください。',
+    })
     @Authorized(ENTRY)
     @UseMiddleware(QueueMiddleware, RateLimitMiddleware(3))
     public async operate(

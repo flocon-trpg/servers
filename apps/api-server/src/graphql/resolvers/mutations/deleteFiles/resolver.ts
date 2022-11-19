@@ -1,14 +1,14 @@
-import { Arg, Authorized, Ctx, Mutation, Resolver, UseMiddleware } from 'type-graphql';
-import { ENTRY } from '../../../../utils/roles';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
-import { File } from '../../../../entities/file/entity';
 import path from 'path';
 import { remove, stat } from 'fs-extra';
-import { thumbsDir } from '../../../../utils/thumbsDir';
-import { ensureAuthorizedUser } from '../../utils/utils';
-import { ResolverContext } from '../../../../types';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
+import { Arg, Authorized, Ctx, Mutation, Resolver, UseMiddleware } from 'type-graphql';
+import { File } from '../../../../entities/file/entity';
 import { logger } from '../../../../logger';
+import { ResolverContext } from '../../../../types';
+import { ENTRY } from '../../../../utils/roles';
+import { thumbsDir } from '../../../../utils/thumbsDir';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
+import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
+import { ensureAuthorizedUser } from '../../utils/utils';
 
 @Resolver()
 export class DeleteFilesResolver {

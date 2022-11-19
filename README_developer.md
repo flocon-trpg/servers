@@ -12,7 +12,14 @@ Flocon
 ┣ 📂 packages
 ┃ ┣ 📦 cache
 ┃ ┣ 📦 core
+┃ ┣ 📦 eslint-config
 ┃ ┣ 📦 flocon-script
+┃ ┣ 📦 prettier-config
+┃ ┣ 📦 rollup-config
+┃ ┣ 📦 sdk
+┃ ┣ 📦 sdk-react
+┃ ┣ 📦 sdk-urql
+┃ ┣ 📦 tsconfig
 ┃ ┣ 📦 typed-document-node-v0.7.1
 ┃ ┣ 📦 typed-document-node-v0.7.2
 ┃ ┣ 📦 typed-document-node-v0.7.8
@@ -22,11 +29,16 @@ Flocon
 ┗ ……
 ```
 
-ビルドやテストは、全体で行うことも、特定のパッケージのみに対して行うこともできます。例えば、この Markdown ファイルがあるディレクトリで`yarn run build`を実行すると全パッケージがビルドされます。`./packages/core`に移動してから`yarn run build`を実行すると`core`パッケージとそれに依存するパッケージのみがビルドされます。
-
-`web-server`パッケージを除き、使用するパッケージはすべて事前にビルドして JavaScript ファイルなどを生成しておく必要があります。前述のとおり、この Markdown ファイルがあるディレクトリで`yarn run build`を実行すれば全パッケージがビルドされるので、ビルドに関しては少なくともこれを実行しておけば間違いはありません。このドキュメントは、これ以降、依存するパッケージは全てビルド済みという前提で書かれています。
+ビルドやテストは、全体で行うことも、特定のパッケージのみに対して行うこともできます。例えば、この Markdown ファイルがあるディレクトリで`yarn run build`を実行すると、全パッケージがビルドされます。`./packages/core`に移動してから`yarn run build`を実行すると、`core`パッケージとそれに依存するパッケージのみがビルドされます。
 
 現時点では watch スクリプトはありません。ご了承ください。
+
+## 必要動作環境
+
+(Netlify や fly.io にデプロイする場合は必要ありません)
+
+-   yarn のインストール
+-   Node.js v14, v16, v18 のいずれかのインストール
 
 ## ローカルでの API サーバーの実行方法
 
@@ -75,7 +87,7 @@ yarn run serve
 
 ```console
 cd ./apps/web-server
-yarn run build:deps && yarn run storybook
+yarn run storybook
 ```
 
 ## テストの実行
@@ -124,9 +136,9 @@ Redis を使用したテストは`./packages/cache`パッケージにのみ存�
 
 リレーショナルデータベースを使用したテストは [api-server](./apps/api-server) パッケージにのみ存在します。このパッケージをテストしない場合は`MYSQL_TEST`、`POSTGRESQL_TEST`、`SQLITE_TEST`の値は利用されません。
 
-#### Node.js 14 以前における web-server パッケージのテスト
+#### Node.js v14 における web-server パッケージのテスト
 
-`web-server` のコードには String.prototype.replaceAll メソッドが含まれています。このメソッドは多くのブラウザや Node.js 16 などでは対応していますが、Node.js 14 などでは未対応です。このため、Node.js 14 では web-server パッケージの一部のテストに失敗します。なお、Node.js 14 で問題が生じるのはテストのみであり、`yarn run dev`、`yarn run build`、`yarn run export` などは正常に動作すると思われます。
+`web-server` のコードには String.prototype.replaceAll メソッドが含まれています。このメソッドは多くのブラウザや Node.js v16 などでは実装されていますが、Node.js v14 では未実装です。このため、Node.js 14 では web-server パッケージの一部のテストに失敗します。なお、Node.js v14 で問題が生じるのはテストのみであり、`yarn run dev`、`yarn run build`、`yarn run export` などは正常に動作すると思われます。
 
 ## licenses-npm-package.txt の生成に関して
 

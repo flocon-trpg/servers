@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import { z } from 'zod';
 
 export const column = 'column';
 export const row = 'row';
@@ -13,15 +13,17 @@ export type UserConfig = {
     chatInputDirection?: typeof column | typeof row;
 };
 
-export const serializedUserConfig = t.partial({
-    // PartialUserConfigはlocalforage.getItemで使われるが、localforage.setItemでは使われない。
-    // getItemする際、userUidをキーに用いるため、userUidをストレージに保存する必要はない。
-    // そのため、UserConfigのほうでは定義しているuserUidは、こちらでは定義していない。
+export const serializedUserConfig = z
+    .object({
+        // PartialUserConfigはlocalforage.getItemで使われるが、localforage.setItemでは使われない。
+        // getItemする際、userUidをキーに用いるため、userUidをストレージに保存する必要はない。
+        // そのため、UserConfigのほうでは定義しているuserUidは、こちらでは定義していない。
 
-    roomMessagesFontSizeDelta: t.number,
-});
+        roomMessagesFontSizeDelta: z.number(),
+    })
+    .partial();
 
-export type SerializedUserConfig = t.TypeOf<typeof serializedUserConfig>;
+export type SerializedUserConfig = z.TypeOf<typeof serializedUserConfig>;
 
 // versionが未対応のものの場合はundefinedを返す。
 export const deserializeUserConfig = (

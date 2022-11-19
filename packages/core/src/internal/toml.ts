@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import { Result } from '@kizahasi/result';
 import {
     LocalDate as TomlLocalDate,
     LocalDateTime as TomlLocalDateTime,
@@ -6,28 +6,19 @@ import {
     OffsetDateTime as TomlOffsetDateTime,
     parse as parseCore,
 } from '@ltd/j-toml';
-import { Result } from '@kizahasi/result';
+import { z } from 'zod';
 import { analyze, expr1 } from './expression';
 import { maybe } from './maybe';
 
 type TomlDateTime = TomlLocalDate | TomlLocalDateTime | TomlLocalTime | TomlOffsetDateTime;
-const dateTime = new t.Type<TomlDateTime>(
-    'DateTime',
-    (obj): obj is TomlDateTime => true,
-    (input: any, context) => {
-        if (input == null) {
-            return t.failure(input, context);
-        }
-        if (typeof input.toJSON !== 'function') {
-            return t.failure(input, context);
-        }
-        return t.success(input);
-    },
-    t.identity
-);
 
-const errorToMessage = (source: t.Errors): string => {
-    return source[0]?.message ?? '不明なエラーが発生しました';
+const isTomlDateTime = (source: unknown): source is TomlDateTime => {
+    return (
+        source instanceof TomlLocalDate ||
+        source instanceof TomlLocalDateTime ||
+        source instanceof TomlLocalTime ||
+        source instanceof TomlOffsetDateTime
+    );
 };
 
 const parseTomlCore = (toml: string) => {
@@ -62,41 +53,55 @@ export const isValidVarToml = (toml: string): Result<undefined> => {
     return Result.ok(undefined);
 };
 
+const tomlDateTime = z.union([
+    z.instanceof(TomlLocalDate),
+    z.instanceof(TomlLocalDateTime),
+    z.instanceof(TomlLocalTime),
+    z.instanceof(TomlOffsetDateTime),
+]);
+
+const tomlObjectType = z.union([
+    // zod は Date や Map などを z.record(z.unknown()) に変換しようとすると失敗するが、独自のクラスでは失敗しない(JavaScript の仕様を考えると当然ではあるが)。そのため、パース処理そのものは tomlDateTime の有無は影響しないと考えられるが、tomlObjectType.parse の戻り値の型を扱いやすくする目的で付け加えている。
+    tomlDateTime,
+    z.record(z.unknown()),
+    z.number(),
+    z.string(),
+    z.null(),
+    z.undefined(),
+]);
+
 export const getVariableFromVarTomlObject = (tomlObject: unknown, path: ReadonlyArray<string>) => {
-    let current: any = tomlObject;
+    let current = tomlObject;
     for (const key of path) {
-        if (current == null || typeof current !== 'object') {
+        const parsed = tomlObjectType.safeParse(current);
+        if (!parsed.success) {
+            return Result.error(parsed.error.message);
+        }
+        if (parsed.data == null) {
             return Result.ok(undefined);
         }
-        const next = current[key];
-        const dateTimeValue = dateTime.decode(next);
-        if (dateTimeValue._tag === 'Right') {
-            return Result.ok(dateTimeValue.right);
-        }
-        current = current[key];
-    }
-    const dateTimeValue = dateTime.decode(current);
-    if (dateTimeValue._tag === 'Right') {
-        return Result.ok(dateTimeValue.right);
-    }
-    switch (typeof current) {
-        case 'boolean':
-        case 'number':
-        case 'string':
-        case 'undefined':
-            return Result.ok(current);
-        default:
+        if (typeof parsed.data === 'string' || typeof parsed.data === 'number') {
             return Result.ok(undefined);
+        }
+        if (isTomlDateTime(parsed.data)) {
+            return Result.ok(undefined);
+        }
+        current = parsed.data[key];
     }
+    const parsed = tomlObjectType.safeParse(current);
+    if (!parsed.success) {
+        return Result.error(parsed.error.message);
+    }
+    return Result.ok(parsed.data);
 };
 
-const exactChatPalette = t.strict({
-    var: maybe(t.UnknownRecord),
+const chatPalette = z.object({
+    var: maybe(z.record(z.unknown())),
 
     // textではなくわざわざ冗長なtext.valueにしたのは、[var]→チャットパレットの文字列 の順で書けるようにするため。
     // また、将来的に例えばtext.typeに何かをセットして…という拡張もできる余地がある。
-    text: t.strict({
-        value: t.string,
+    text: z.object({
+        value: z.string(),
     }),
 });
 
@@ -108,12 +113,9 @@ export const generateChatPalette = (toml: string): Result<string[]> => {
     if (object.isError) {
         return object;
     }
-    const decoded = exactChatPalette.decode(object.value);
-    if (decoded._tag === 'Left') {
-        return Result.error(errorToMessage(decoded.left));
-    }
+    const decoded = chatPalette.parse(object.value);
 
-    const lines = decoded.right.text.value.split(/(?:\r\n|\r|\n)/).map(line => {
+    const lines = decoded.text.value.split(/(?:\r\n|\r|\n)/).map(line => {
         const analyzeResult = analyze(line);
         if (analyzeResult.isError) {
             return line;
@@ -122,7 +124,7 @@ export const generateChatPalette = (toml: string): Result<string[]> => {
             .map(expr => {
                 switch (expr.type) {
                     case expr1: {
-                        const replaced = getVariableFromVarTomlObject(decoded.right.var, expr.path);
+                        const replaced = getVariableFromVarTomlObject(decoded.var, expr.path);
                         if (replaced.isError) {
                             return expr.raw;
                         }
@@ -145,18 +147,4 @@ export const generateChatPalette = (toml: string): Result<string[]> => {
     });
 
     return Result.ok(lines);
-};
-
-/** @deprecated We no longer use TOML in chat palettes. */
-export const isValidChatPalette = (toml: string): Result<undefined> => {
-    // CONSIDER: TOMLのDateTimeに未対応
-    const object = parseTomlCore(toml);
-    if (object.isError) {
-        return object;
-    }
-    const decoded = exactChatPalette.decode(object.value);
-    if (decoded._tag === 'Left') {
-        return Result.error(errorToMessage(decoded.left));
-    }
-    return Result.ok(undefined);
 };

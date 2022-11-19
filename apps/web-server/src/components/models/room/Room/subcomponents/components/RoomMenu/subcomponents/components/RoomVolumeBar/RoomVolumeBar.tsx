@@ -1,11 +1,11 @@
 import classNames from 'classnames';
-import React from 'react';
-import { VolumeBar } from '@/components/ui/VolumeBar/VolumeBar';
-import { defaultChannelVolume } from '@/atoms/roomConfigAtom/types/roomConfig/resources';
-import { flex, flexColumn, flexRow, itemsCenter } from '@/styles/className';
-import { atom, useAtom } from 'jotai';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import produce from 'immer';
+import { atom, useAtom } from 'jotai';
+import React from 'react';
+import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { defaultChannelVolume } from '@/atoms/roomConfigAtom/types/roomConfig/resources';
+import { VolumeBar } from '@/components/ui/VolumeBar/VolumeBar';
+import { flex, flexColumn, flexRow, itemsCenter } from '@/styles/className';
 
 const masterVolumeAtom = atom(
     get => get(roomConfigAtom)?.masterVolume,

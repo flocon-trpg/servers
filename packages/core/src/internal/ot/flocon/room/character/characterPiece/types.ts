@@ -1,12 +1,12 @@
-import * as t from 'io-ts';
-import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../../generator';
-import * as Piece from '../../../piece/types';
+import { z } from 'zod';
+import * as Piece from '@/ot/flocon/piece/types';
+import { createObjectValueTemplate, createReplaceValueTemplate } from '@/ot/generator';
 
 export const template = createObjectValueTemplate(
     {
         ...Piece.templateValue,
-        boardId: createReplaceValueTemplate(t.string),
-        isPrivate: createReplaceValueTemplate(t.boolean),
+        boardId: createReplaceValueTemplate(z.string()),
+        isPrivate: createReplaceValueTemplate(z.boolean()),
     },
     2,
     1

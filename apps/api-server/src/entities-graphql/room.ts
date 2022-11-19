@@ -1,8 +1,3 @@
-import { RoomGetState } from '../graphql/objects/room';
-import { Room, RoomOp } from '../entities/room/entity';
-import { EM } from '../types';
-import { Reference } from '@mikro-orm/core';
-import { Result } from '@kizahasi/result';
 import {
     DownOperation,
     RequestedBy,
@@ -20,17 +15,23 @@ import {
     stringifyUpOperation,
     toClientState,
     toDownOperation,
+    toOtError,
     toUpOperation,
     update,
 } from '@flocon-trpg/core';
-import { Participant } from '../entities/participant/entity';
 import {
     ReadonlyNonEmptyArray,
     isReadonlyNonEmptyArray,
     recordForEachAsync,
 } from '@flocon-trpg/utils';
+import { Result } from '@kizahasi/result';
+import { Reference } from '@mikro-orm/core';
+import { Participant } from '../entities/participant/entity';
+import { Room, RoomOp } from '../entities/room/entity';
 import { User } from '../entities/user/entity';
 import { nullableStringToParticipantRoleType } from '../enums/ParticipantRoleType';
+import { RoomGetState } from '../graphql/objects/room';
+import { EM } from '../types';
 import { convertToMaxLength100String } from '../utils/convertToMaxLength100String';
 
 type RoomState = State<typeof roomTemplate>;
@@ -294,10 +295,10 @@ export namespace GlobalRoom {
                 operation: toUpOperation(roomTemplate)(operation),
             });
             if (nextState.isError) {
-                throw nextState.error;
+                throw toOtError(nextState.error);
             }
 
-            // CONSIDER: サイズの大きいオブジェクトに対してJSON.stringifyするのは重い可能性。そもそももしJSON.stringifyが重いのであればio-tsのdecodeはより重くなりそうだが。
+            // CONSIDER: サイズの大きいオブジェクトに対してJSON.stringifyするのは重い可能性。そもそももしJSON.stringifyが重いのであればzodのparseはより重くなりそうだが。
             target.name = nextState.value.name;
             const newValue = exactDbState(nextState.value);
             const newValueJson = JSON.stringify(newValue);

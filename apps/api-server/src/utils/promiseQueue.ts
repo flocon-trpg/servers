@@ -1,6 +1,6 @@
 import { Observable, Subject } from 'rxjs';
-import * as Rx from 'rxjs/operators';
 import { defer, of } from 'rxjs';
+import * as Rx from 'rxjs';
 import { v4 } from 'uuid';
 
 // promise-queueはtimeoutがなく、またqueueLimitReachedを判定するにはエラーメッセージから求める必要がある。promise-queue-plusが求めているものに近いが、こちらもエラーメッセージからqueueLimitReachedやtimeoutを求める必要があるのと、d.tsファイルが見当たらなかった。そのため自作した。
@@ -20,9 +20,6 @@ type RawResult = {
           }
         | {
               type: typeof timeout;
-          }
-        | {
-              type: typeof queueLimitReached;
           };
 };
 
@@ -49,19 +46,14 @@ export class PromiseQueue {
     }>();
     // _resultはerrorやcompleteが流されない仕様にしている。もしerrorが流されてきたら、コンストラクタ内でsubscribeしているところで例外がthrowされる。
     private readonly _result: Observable<RawResult>;
-    private readonly _pendingPromises = new Set<string>(); // 値は_coreのid
+    private readonly _pendingPromises = new Set<string>(); // 値は_promisesのid
+    private readonly _queueLimit: number | null;
 
     public constructor({ queueLimit }: { queueLimit?: number | null }) {
+        this._queueLimit = queueLimit ?? null;
         this._result = this._promises.pipe(
             Rx.map(({ id, execute, timeout }) => {
                 const rawObservable = new Observable<RawResult>(observer => {
-                    if (queueLimit != null && queueLimit < this._pendingPromises.size) {
-                        this._pendingPromises.delete(id);
-                        observer.next({ id, result: { type: queueLimitReached } });
-                        observer.complete();
-                        return;
-                    }
-
                     execute()
                         .then(result =>
                             observer.next({
@@ -116,6 +108,9 @@ export class PromiseQueue {
         execute: () => Promise<T>,
         timeout: number | null | undefined
     ): Promise<PromiseQueueResultWithTimeout<T>> {
+        if (this._queueLimit != null && this._queueLimit <= this._pendingPromises.size) {
+            return Promise.resolve({ type: queueLimitReached });
+        }
         const id = v4();
         this._pendingPromises.add(id);
         const result = new Promise<PromiseQueueResultWithTimeout<T>>((resolver, reject) => {
@@ -138,9 +133,15 @@ export class PromiseQueue {
                 // _resultにcompleteはおそらく流されないが、何らかの理由でerrorが流されることはあるかもしれない。そのとき、コンストラクタ内での_result.subscribeでエラーがthrowされるが、これがcatchされて握りつぶされてしまったケースに備えている。
                 // publish=>refCountの仕様についての補足: Observableがpublish=>refCountされていて、常にそれをsubscribeしている場合、nextは当然キャッシュされないが、errorやcompleteはキャッシュされる。
                 error: () =>
-                    reject('PromiseQueue observable has thrown an error for an unknown reason.'),
+                    reject(
+                        new Error(
+                            'PromiseQueue observable has thrown an error for an unknown reason.'
+                        )
+                    ),
                 complete: () =>
-                    reject('PromiseQueue observable has completed for an unknown reason.'),
+                    reject(
+                        new Error('PromiseQueue observable has completed for an unknown reason.')
+                    ),
             });
         });
         this._promises.next({ id, execute, timeout });

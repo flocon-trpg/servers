@@ -10,11 +10,11 @@ import {
     createUnionType,
 } from 'type-graphql';
 import { GetRoomConnectionFailureType } from '../../../../enums/GetRoomConnectionFailureType';
-import { ENTRY } from '../../../../utils/roles';
 import { ResolverContext } from '../../../../types';
+import { ENTRY } from '../../../../utils/roles';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import { ensureAuthorizedUser, findRoomAndMyParticipant } from '../../utils/utils';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 const GetRoomConnectionSuccessResultType = 'GetRoomConnectionSuccessResultType';
 
@@ -54,7 +54,10 @@ const GetRoomConnectionsResult = createUnionType({
 
 @Resolver()
 export class GetRoomConnectionsResolver {
-    @Query(() => GetRoomConnectionsResult)
+    @Query(() => GetRoomConnectionsResult, {
+        description:
+            '通常はこの Query を直接実行する必要はありません。@flocon-trpg/sdk を用いることで、リアルタイムに値を取得および自動更新できます。',
+    })
     @Authorized(ENTRY)
     @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async getRoomConnections(

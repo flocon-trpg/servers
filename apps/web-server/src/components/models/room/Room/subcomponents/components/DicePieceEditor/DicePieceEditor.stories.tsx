@@ -1,11 +1,14 @@
 import { ComponentMeta } from '@storybook/react';
 import React from 'react';
-import { useSetupMocks } from '@/hooks/useSetupMocks';
-import { defaultBoardId, dicePieceKey1 } from '@/mocks';
 import { DicePieceEditor } from './DicePieceEditor';
+import { useSetupStorybook } from '@/hooks/useSetupStorybook';
+import { defaultBoardId, dicePieceKey1 } from '@/mocks';
 
 export const Update: React.FC = () => {
-    useSetupMocks();
+    const { isInitialized } = useSetupStorybook();
+    if (!isInitialized) {
+        return <div />;
+    }
     return <DicePieceEditor updateMode={{ boardId: defaultBoardId, pieceId: dicePieceKey1 }} />;
 };
 

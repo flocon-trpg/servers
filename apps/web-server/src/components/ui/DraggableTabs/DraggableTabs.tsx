@@ -1,5 +1,5 @@
-import React from 'react';
 import { Tabs, TabsProps } from 'antd';
+import React from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 
 const dndItemKey = 'key';

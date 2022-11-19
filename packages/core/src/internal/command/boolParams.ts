@@ -8,11 +8,11 @@ import {
     beginCast,
 } from '@flocon-trpg/flocon-script';
 import { recordToArray } from '@flocon-trpg/utils';
-import * as Character from '../ot/flocon/room/character/types';
 import * as BoolParam from '../ot/flocon/room/character/boolParam/types';
+import * as Character from '../ot/flocon/room/character/types';
 import * as Room from '../ot/flocon/room/types';
-import { FBoolParam } from './boolParam';
 import { State } from '../ot/generator';
+import { FBoolParam } from './boolParam';
 
 const createDefaultState = (): State<typeof BoolParam.template> => ({
     $v: 2,

@@ -9,6 +9,9 @@
 //
 // # rc
 // 大規模なアップデートの正式版リリース直前に用いられる。betaのような不安定さは望まないが、新バージョンに早く触れてみたい方向け。betaはmajorやminorが変わるレベルの新機能の追加を取りやめることがありうるが、rcではそれは原則として避ける点で異なる。
+
+import { Operator, compare } from './compare';
+
 // minor=patch=0にすることを推奨。ただし、コードの変更量が非常に多い場合などは従わなくてもよい。
 export const alpha = 'alpha';
 export const beta = 'beta';
@@ -18,8 +21,6 @@ type Prerelease = {
     type: typeof alpha | typeof beta | typeof rc;
     version: number;
 };
-
-export type Operator = '=' | '<' | '<=' | '>' | '>=';
 
 export type SemverOption = {
     major: number;
@@ -80,21 +81,6 @@ export class SemVer {
         return `${this.major}.${this.minor}.${this.patch}-${this.prerelease.type}.${this.prerelease.version}`;
     }
 
-    private static compareNumbers(left: number, operator: Operator, right: number): boolean {
-        switch (operator) {
-            case '=':
-                return left === right;
-            case '<':
-                return left < right;
-            case '<=':
-                return left <= right;
-            case '>':
-                return left > right;
-            case '>=':
-                return left >= right;
-        }
-    }
-
     private static prereleaseTypeToNumber(
         type: typeof alpha | typeof beta | typeof rc | null | undefined
     ): number {
@@ -114,32 +100,24 @@ export class SemVer {
     private static compareCore(left: SemVer, operator: '=' | '<' | '>', right: SemVer): boolean {
         // majorが異なるなら値を即座に返し、同じなら次の判定処理に進むという戦略。他も同様。
         if (left.major !== right.major) {
-            return SemVer.compareNumbers(left.major, operator, right.major);
+            return compare(left.major, operator, right.major);
         }
         if (left.minor !== right.minor) {
-            return SemVer.compareNumbers(left.minor, operator, right.minor);
+            return compare(left.minor, operator, right.minor);
         }
         if (left.patch !== right.patch) {
-            return SemVer.compareNumbers(left.patch, operator, right.patch);
+            return compare(left.patch, operator, right.patch);
         }
 
         const leftPreleaseTypeAsNumber = SemVer.prereleaseTypeToNumber(left.prerelease?.type);
         const rightPreleaseTypeAsNumber = SemVer.prereleaseTypeToNumber(right.prerelease?.type);
 
         if (leftPreleaseTypeAsNumber !== rightPreleaseTypeAsNumber) {
-            return SemVer.compareNumbers(
-                leftPreleaseTypeAsNumber,
-                operator,
-                rightPreleaseTypeAsNumber
-            );
+            return compare(leftPreleaseTypeAsNumber, operator, rightPreleaseTypeAsNumber);
         }
 
         // ?? の右側の-1は、実際は使われることはない
-        return SemVer.compareNumbers(
-            left.prerelease?.version ?? -1,
-            operator,
-            right.prerelease?.version ?? -1
-        );
+        return compare(left.prerelease?.version ?? -1, operator, right.prerelease?.version ?? -1);
     }
 
     /**

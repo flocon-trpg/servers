@@ -1,17 +1,17 @@
-import React from 'react';
+import { ParticipantRole } from '@flocon-trpg/core';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { useSetAtom } from 'jotai';
-import { anotherPlayerCharacterId1, myRichCharacterId, mySimpleCharacterId } from '@/mocks';
-import { ParticipantRole } from '@flocon-trpg/core';
+import React from 'react';
 import { CharacterEditorModal, characterEditorModalAtom } from './CharacterEditorModal';
-import { useSetupMocks } from '@/hooks/useSetupMocks';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
+import { useSetupStorybook } from '@/hooks/useSetupStorybook';
+import { anotherPlayerCharacterId1, myRichCharacterId, mySimpleCharacterId } from '@/mocks';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole; characterStateId: string }> = ({
     myParticipantRole,
     characterStateId,
 }) => {
-    useSetupMocks({
+    useSetupStorybook({
         roomConfig: {
             myParticipantRole,
         },
@@ -25,7 +25,7 @@ export const Player: React.FC<{ myParticipantRole: ParticipantRole; characterSta
     }, [characterStateId, setModalState]);
 
     return (
-        <StorybookProvider>
+        <StorybookProvider waitForRoomClient>
             <div>
                 <CharacterEditorModal />
             </div>

@@ -1,13 +1,4 @@
-import React from 'react';
-import { Tooltip } from 'antd';
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
-import { ToggleButton } from '@/components/ui/ToggleButton/ToggleButton';
-import {
-    parameterIsNotPrivate,
-    parameterIsNotPrivateAndNotCreatedByMe,
-    parameterIsPrivate,
-    parameterIsPrivateAndNotCreatedByMe,
-} from '@/resources/text/main';
 import {
     State,
     StrIndex20,
@@ -17,9 +8,19 @@ import {
     nullableTextDiff,
     strParamTemplate,
     toNullableTextUpOperation,
+    toOtError,
 } from '@flocon-trpg/core';
-import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
+import { Tooltip } from 'antd';
 import classNames from 'classnames';
+import React from 'react';
+import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
+import { ToggleButton } from '@/components/ui/ToggleButton/ToggleButton';
+import {
+    parameterIsNotPrivate,
+    parameterIsNotPrivateAndNotCreatedByMe,
+    parameterIsPrivate,
+    parameterIsPrivateAndNotCreatedByMe,
+} from '@/resources/text/main';
 import { flex, flex1, flexNone } from '@/styles/className';
 
 const applyCharacter = apply(characterTemplate);
@@ -53,7 +54,7 @@ export const StringParameterInput: React.FC<Props> = ({
         (state: CharacterState): CharacterState => {
             const result = applyCharacter({ state, operation });
             if (result.isError) {
-                throw result.error;
+                throw toOtError(result.error);
             }
             return result.value;
         };

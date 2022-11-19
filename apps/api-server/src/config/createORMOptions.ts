@@ -344,8 +344,7 @@ export const createORMOptions = (
                 return Result.ok(
                     createSQLiteOptions({
                         sqliteConfig: {
-                            clientUrl: databaseUrlResult.value.sqlite.clientUrl,
-                            dbName: undefined,
+                            dbName: databaseUrlResult.value.sqlite.dbName,
                         },
                         dirName,
                     })

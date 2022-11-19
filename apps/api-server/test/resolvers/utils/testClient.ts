@@ -1,7 +1,3 @@
-import ws from 'isomorphic-ws';
-import { createClient, defaultExchanges, subscriptionExchange } from '@urql/core';
-import { Resources } from './resources';
-import { createClient as createWsClient } from 'graphql-ws';
 import {
     CreateFileTagDocument,
     CreateFileTagMutation,
@@ -61,7 +57,6 @@ import {
     WritePublicMessageMutation,
     WritePublicMessageMutationVariables,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
-import { TestRoomEventSubscription } from './subscription';
 import {
     DeleteRoomAsAdminDocument,
     DeleteRoomAsAdminMutation,
@@ -84,6 +79,11 @@ import {
     RenameFilesMutation,
     RenameFilesMutationVariables,
 } from '@flocon-trpg/typed-document-node-v0.7.8';
+import { createClient, defaultExchanges, subscriptionExchange } from '@urql/core';
+import { createClient as createWsClient } from 'graphql-ws';
+import ws from 'isomorphic-ws';
+import { Resources } from './resources';
+import { TestRoomEventSubscription } from './subscription';
 
 const wsClient = (wsUrl: string, testAuthorizationHeaderValue: string | undefined) =>
     createWsClient({

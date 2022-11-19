@@ -1,6 +1,6 @@
-import { Cache, createNodeCache, createRedisCache } from '../src';
-import Redis from 'ioredis';
 import { parseStringToBoolean } from '@flocon-trpg/utils';
+import Redis from 'ioredis';
+import { Cache, createNodeCache, createRedisCache } from '../src';
 
 /*
 To run tests in this file, you need to prepare a redis instance. If you want to skip redis tests, set REDIS_TEST env to "0".

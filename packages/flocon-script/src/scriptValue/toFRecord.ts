@@ -1,6 +1,6 @@
-import { toFValue } from './toFValue';
 import { FRecord } from './FRecord';
 import { FString } from './FString';
+import { toFValue } from './toFValue';
 
 // __proto__ のチェックなどは行われない
 export const toFRecord = (source: Record<string, unknown>): FRecord => {

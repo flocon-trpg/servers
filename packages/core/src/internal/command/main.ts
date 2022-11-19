@@ -1,4 +1,3 @@
-import * as Room from '../ot/flocon/room/types';
 import {
     ScriptError,
     arrayClass,
@@ -6,32 +5,30 @@ import {
     exec,
     test,
 } from '@flocon-trpg/flocon-script';
-import { FRoom } from './room';
 import { keyNames } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
+import * as Room from '../ot/flocon/room/types';
 import { State } from '../ot/generator';
+import { FRoom } from './room';
 
 type RoomState = State<typeof Room.template>;
 
-type CommandError = {
-    message: string;
-    range?: readonly [number, number];
-};
+class CommandError extends Error {
+    constructor(message: string, public readonly range?: readonly [number, number]) {
+        super(message);
+        this.name = 'CommandError';
+    }
+}
 
 export const testCommand = (script: string): Result<undefined, CommandError> => {
     try {
         test(script);
     } catch (e: unknown) {
         if (e instanceof ScriptError) {
-            return Result.error({
-                message: e.message,
-                range: e.range,
-            });
+            return Result.error(new CommandError(e.message, e.range));
         }
         if (e instanceof Error) {
-            return Result.error({
-                message: e.message,
-            });
+            return Result.error(new CommandError(e.message));
         }
         throw e;
     }
@@ -68,15 +65,10 @@ export const execCharacterCommand = ({
         exec(script, globalThis);
     } catch (e: unknown) {
         if (e instanceof ScriptError) {
-            return Result.error({
-                message: e.message,
-                range: e.range,
-            });
+            return Result.error(new CommandError(e.message, e.range));
         }
         if (e instanceof Error) {
-            return Result.error({
-                message: e.message,
-            });
+            return Result.error(new CommandError(e.message));
         }
         throw e;
     }

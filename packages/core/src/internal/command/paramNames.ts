@@ -10,9 +10,9 @@ import {
     beginCast,
 } from '@flocon-trpg/flocon-script';
 import { isStrIndex20 } from '../indexes';
-import { State } from '../ot/generator';
 import * as ParamName from '../ot/flocon/room/paramName/types';
 import * as Room from '../ot/flocon/room/types';
+import { State } from '../ot/generator';
 
 export class FParamNames extends FObject {
     public constructor(

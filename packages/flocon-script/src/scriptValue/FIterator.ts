@@ -1,14 +1,14 @@
-import { FObject } from './FObject';
 import { ScriptError } from '../ScriptError';
+import { mapIterator } from '../utils/mapIterator';
+import { toJObject } from '../utils/toJObject';
+import { FBoolean } from './FBoolean';
 import { FFunction } from './FFunction';
+import { FObject } from './FObject';
+import { FRecord } from './FRecord';
+import { FString } from './FString';
 import { FType } from './FType';
 import { FValue } from './FValue';
 import { AstInfo, GetCoreParams, SetCoreParams } from './types';
-import { FBoolean } from './FBoolean';
-import { FRecord } from './FRecord';
-import { FString } from './FString';
-import { toJObject } from '../utils/toJObject';
-import { mapIterator } from '../utils/mapIterator';
 
 export class FIterator extends FObject {
     protected constructor(
@@ -52,6 +52,8 @@ export class FIterator extends FObject {
                     });
                     return result;
                 });
+            default:
+                break;
         }
         return undefined;
     }

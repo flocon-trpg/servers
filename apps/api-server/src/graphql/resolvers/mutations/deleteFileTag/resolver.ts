@@ -1,10 +1,10 @@
 import { Arg, Authorized, Ctx, Mutation, Resolver, UseMiddleware } from 'type-graphql';
-import { ENTRY } from '../../../../utils/roles';
 import { FileTag } from '../../../../entities/fileTag/entity';
+import { ResolverContext } from '../../../../types';
+import { ENTRY } from '../../../../utils/roles';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import { ensureAuthorizedUser } from '../../utils/utils';
-import { ResolverContext } from '../../../../types';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 @Resolver()
 export class DeleteFileTagResolver {

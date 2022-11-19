@@ -1,15 +1,15 @@
-import * as t from 'io-ts';
+import { z } from 'zod';
 import { filePathValue } from '../../../filePath/types';
 import * as Piece from '../../../piece/types';
-import { maybe } from '../../../../../maybe';
-import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../../generator';
+import { maybe } from '@/maybe';
+import { createObjectValueTemplate, createReplaceValueTemplate } from '@/ot/generator';
 
 export const template = createObjectValueTemplate(
     {
         ...Piece.templateValue,
-        ownerParticipantId: createReplaceValueTemplate(maybe(t.string)),
+        ownerParticipantId: createReplaceValueTemplate(maybe(z.string())),
         image: createReplaceValueTemplate(maybe(filePathValue)),
-        isPrivate: createReplaceValueTemplate(t.boolean),
+        isPrivate: createReplaceValueTemplate(z.boolean()),
     },
     2,
     1

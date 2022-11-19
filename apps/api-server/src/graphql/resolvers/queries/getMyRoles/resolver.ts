@@ -1,6 +1,6 @@
 import { Authorized, Ctx, Field, ObjectType, Query, Resolver } from 'type-graphql';
-import { ADMIN, getRoles } from '../../../../utils/roles';
 import { ResolverContext } from '../../../../types';
+import { ADMIN, getRoles } from '../../../../utils/roles';
 import { NotSignIn } from '../../utils/utils';
 
 @ObjectType()

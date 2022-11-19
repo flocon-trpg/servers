@@ -1,22 +1,22 @@
-import * as t from 'io-ts';
+import { z } from 'zod';
 import * as Piece from '../../../piece/types';
-import { maybe } from '../../../../../maybe';
+import { maybe } from '@/maybe';
 import {
     createObjectValueTemplate,
     createReplaceValueTemplate,
     createTextValueTemplate,
-} from '../../../../generator';
+} from '@/ot/generator';
 
 export const String = 'String';
 export const Number = 'Number';
 
-const valueInputType = t.union([t.literal(String), t.literal(Number)]);
+const valueInputType = z.union([z.literal(String), z.literal(Number)]);
 
 export const template = createObjectValueTemplate(
     {
         ...Piece.templateValue,
-        ownerCharacterId: createReplaceValueTemplate(maybe(t.string)),
-        isValuePrivate: createReplaceValueTemplate(t.boolean),
+        ownerCharacterId: createReplaceValueTemplate(maybe(z.string())),
+        isValuePrivate: createReplaceValueTemplate(z.boolean()),
         value: createTextValueTemplate(false),
         valueInputType: createReplaceValueTemplate(maybe(valueInputType)),
     },

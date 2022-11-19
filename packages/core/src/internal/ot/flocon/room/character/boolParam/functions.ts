@@ -1,9 +1,9 @@
-import { ServerTransform } from '../../../../util/type';
-import * as ReplaceValueOperation from '../../../../util/replaceOperation';
-import { isIdRecord } from '../../../../util/record';
 import { Result } from '@kizahasi/result';
-import * as NullableTextOperation from '../../../../util/nullableTextOperation';
 import { State, TwoWayOperation, UpOperation } from '../../../../generator';
+import * as NullableTextOperation from '../../../../nullableTextOperation';
+import { isIdRecord } from '../../../../record';
+import * as ReplaceValueOperation from '../../../../util/replaceOperation';
+import { ServerTransform } from '../../../../util/type';
 import { template } from './types';
 
 export const toClientState =
@@ -23,28 +23,33 @@ export const serverTransform =
         TwoWayOperation<typeof template>,
         UpOperation<typeof template>
     > =>
-    ({ prevState, currentState, clientOperation, serverOperation }) => {
+    ({
+        stateBeforeServerOperation,
+        stateAfterServerOperation,
+        clientOperation,
+        serverOperation,
+    }) => {
         const twoWayOperation: TwoWayOperation<typeof template> = { $v: 2, $r: 1 };
 
         if (isAuthorized) {
             twoWayOperation.isValuePrivate = ReplaceValueOperation.serverTransform({
                 first: serverOperation?.isValuePrivate,
                 second: clientOperation.isValuePrivate,
-                prevState: prevState.isValuePrivate,
+                prevState: stateBeforeServerOperation.isValuePrivate,
             });
         }
-        if (isAuthorized || !currentState.isValuePrivate) {
+        if (isAuthorized || !stateAfterServerOperation.isValuePrivate) {
             twoWayOperation.value = ReplaceValueOperation.serverTransform({
                 first: serverOperation?.value,
                 second: clientOperation.value,
-                prevState: prevState.value,
+                prevState: stateBeforeServerOperation.value,
             });
         }
         {
             const xformResult = NullableTextOperation.serverTransform({
                 first: serverOperation?.overriddenParameterName,
                 second: clientOperation.overriddenParameterName,
-                prevState: prevState.overriddenParameterName,
+                prevState: stateBeforeServerOperation.overriddenParameterName,
             });
             if (xformResult.isError) {
                 return xformResult;

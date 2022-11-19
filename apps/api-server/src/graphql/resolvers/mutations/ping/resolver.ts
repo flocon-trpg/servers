@@ -6,7 +6,10 @@ import { PONG } from '../../subsciptions/pong/topics';
 
 @Resolver()
 export class PingResolver {
-    @Mutation(() => Pong, { description: 'for test' })
+    @Mutation(() => Pong, {
+        description:
+            'GraphQL の動作テストに用いられます。3rd-party の Web サーバーを作成する際は利用しなくて構いません。',
+    })
     public async ping(
         @Arg('value') value: number,
         @Ctx() context: ResolverContext,

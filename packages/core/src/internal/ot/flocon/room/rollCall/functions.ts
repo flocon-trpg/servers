@@ -1,12 +1,12 @@
-import * as Participant from './rollCallParticipant/functions';
-import * as ParticipantTypes from './rollCallParticipant/types';
-import * as RecordOperation from '../../../util/recordOperation';
+import { Result } from '@kizahasi/result';
+import { State, TwoWayOperation, UpOperation } from '../../../generator';
+import { isIdRecord } from '../../../record';
+import * as RecordOperation from '../../../recordOperation';
 import * as ReplaceOperation from '../../../util/replaceOperation';
 import { ServerTransform, TwoWayError } from '../../../util/type';
-import { isIdRecord } from '../../../util/record';
-import { Result } from '@kizahasi/result';
+import * as Participant from './rollCallParticipant/functions';
+import * as ParticipantTypes from './rollCallParticipant/types';
 import { template } from './types';
-import { State, TwoWayOperation, UpOperation } from '../../../generator';
 
 export const toClientState = (source: State<typeof template>): State<typeof template> => {
     return {
@@ -23,7 +23,12 @@ export const serverTransform: ServerTransform<
     State<typeof template>,
     TwoWayOperation<typeof template>,
     UpOperation<typeof template>
-> = ({ prevState, currentState, clientOperation, serverOperation }) => {
+> = ({
+    stateBeforeServerOperation,
+    stateAfterServerOperation,
+    clientOperation,
+    serverOperation,
+}) => {
     const participants = RecordOperation.serverTransform<
         State<typeof ParticipantTypes.template>,
         State<typeof ParticipantTypes.template>,
@@ -31,14 +36,14 @@ export const serverTransform: ServerTransform<
         UpOperation<typeof ParticipantTypes.template>,
         TwoWayError
     >({
-        prevState: prevState.participants,
-        nextState: currentState.participants,
+        stateBeforeFirst: stateBeforeServerOperation.participants ?? {},
+        stateAfterFirst: stateAfterServerOperation.participants ?? {},
         first: serverOperation?.participants,
         second: clientOperation.participants,
         innerTransform: ({ prevState, nextState, first, second }) =>
             Participant.serverTransform({
-                prevState,
-                currentState: nextState,
+                stateBeforeServerOperation: prevState,
+                stateAfterServerOperation: nextState,
                 serverOperation: first,
                 clientOperation: second,
             }),
@@ -58,13 +63,13 @@ export const serverTransform: ServerTransform<
     twoWayOperation.createdAt = ReplaceOperation.serverTransform({
         first: serverOperation?.createdAt,
         second: clientOperation.createdAt,
-        prevState: prevState.createdAt,
+        prevState: stateBeforeServerOperation.createdAt,
     });
 
     twoWayOperation.createdBy = ReplaceOperation.serverTransform({
         first: serverOperation?.createdBy,
         second: clientOperation.createdBy,
-        prevState: prevState.createdBy,
+        prevState: stateBeforeServerOperation.createdBy,
     });
 
     if (isIdRecord(twoWayOperation)) {

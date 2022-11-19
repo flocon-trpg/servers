@@ -1,4 +1,3 @@
-import { GetRoomMessagesFailureType } from '@flocon-trpg/typed-document-node-v0.7.8';
 import {
     Args,
     ArgsType,
@@ -9,19 +8,20 @@ import {
     Resolver,
     UseMiddleware,
 } from 'type-graphql';
+import { GetRoomMessagesFailureType } from '../../../../enums/GetRoomMessagesFailureType';
+import { ResolverContext } from '../../../../types';
 import { ENTRY } from '../../../../utils/roles';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
+import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import {
     GetRoomMessagesFailureResultType,
     GetRoomMessagesResult,
 } from '../../../objects/roomMessage';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import {
     ensureAuthorizedUser,
     findRoomAndMyParticipant,
     getRoomMessagesFromDb,
 } from '../../utils/utils';
-import { ResolverContext } from '../../../../types';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 @ArgsType()
 class GetMessagesArgs {

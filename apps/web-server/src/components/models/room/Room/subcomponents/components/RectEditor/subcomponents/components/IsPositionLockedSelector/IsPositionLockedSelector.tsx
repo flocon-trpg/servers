@@ -1,7 +1,7 @@
-import React from 'react';
 import { Checkbox } from 'antd';
-import produce from 'immer';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
+import produce from 'immer';
+import React from 'react';
 import { useLatest } from 'react-use';
 
 type StateBase = {

@@ -1,19 +1,3 @@
-import { Result } from '@kizahasi/result';
-import { Any } from 'io-ts';
-import { Apply, ClientTransform, Compose, Diff, DownError, Restore } from '../util/type';
-import * as t from 'io-ts';
-import * as TextOperation from '../util/textOperation';
-import * as NullableTextOperation from '../util/nullableTextOperation';
-import * as RecordOperation from '../util/recordOperation';
-import * as ParamRecordOperation from '../util/paramRecordOperation';
-import { record as trecord } from '../util/record';
-import {
-    RecordDownOperationElement,
-    RecordTwoWayOperationElement,
-    RecordUpOperationElement,
-    recordDownOperationElementFactory,
-    recordUpOperationElementFactory,
-} from '../util/recordOperationElement';
 import {
     groupJoinMap,
     left,
@@ -22,7 +6,22 @@ import {
     recordToMap,
     right,
 } from '@flocon-trpg/utils';
-import { isIdRecord } from '../util/record';
+import { Result } from '@kizahasi/result';
+import { z } from 'zod';
+import * as NullableTextOperation from '../nullableTextOperation';
+import * as ParamRecordOperation from '../paramRecordOperation';
+import { record as zrecord } from '../record';
+import { isIdRecord } from '../record';
+import * as RecordOperation from '../recordOperation';
+import {
+    RecordDownOperationElement,
+    RecordTwoWayOperationElement,
+    RecordUpOperationElement,
+    recordDownOperationElementFactory,
+    recordUpOperationElementFactory,
+} from '../recordOperationElement';
+import * as TextOperation from '../textOperation';
+import { Apply, ClientTransform, Compose, Diff, DownError, Restore } from '../util/type';
 
 type ReadonlyRecord<TKey extends keyof any, TValue> = { readonly [P in TKey]: TValue };
 
@@ -55,14 +54,14 @@ type If<T extends boolean, TTrue, TFalse> = T extends true
     ? TFalse
     : TTrue | TFalse;
 
-export type ReplaceValueTemplate<T extends Any> = {
+export type ReplaceValueTemplate<T extends z.ZodTypeAny> = {
     type: typeof atomic;
     mode: typeof replace;
     value: T;
 };
 
 /** Stateならば`T`に、TwoWayOperationならば`{ oldValue:T; newValue:T }`に変換されるtemplateを作成します。*/
-export const createReplaceValueTemplate = <T extends Any>(value: T) => {
+export const createReplaceValueTemplate = <T extends z.ZodTypeAny>(value: T) => {
     return {
         type: atomic,
         mode: replace,
@@ -148,7 +147,7 @@ export const createObjectValueTemplate = <
 };
 
 type AnyTemplate =
-    | ReplaceValueTemplate<Any>
+    | ReplaceValueTemplate<z.ZodTypeAny>
     | OtValueTemplate
     | {
           type: typeof record;
@@ -171,10 +170,6 @@ type ParamRecordValueTemplateBase<TValue extends AnyTemplate> = {
     value: TValue;
 };
 
-export type IoTsOptions = {
-    exact: boolean;
-};
-
 /*
 recordやparamRecordは変換なしで後方互換性を持たせられるように | undefined を付けている。
 これらが undefined の場合は {} と等しいとみなす。いつでも undefined を {} に置き換えたり、その逆をしても良い。
@@ -184,7 +179,7 @@ recordやparamRecordは変換なしで後方互換性を持たせられるよう
 export type State<T extends AnyTemplate> = T extends OtValueTemplate
     ? If<T['nullable'], string | undefined, string>
     : T extends ReplaceValueTemplate<infer U1>
-    ? t.TypeOf<U1>
+    ? z.TypeOf<U1>
     : T extends RecordValueTemplate<infer U2>
     ? { [P in string]?: State<U2> | undefined } | undefined
     : T extends ParamRecordValueTemplateBase<infer U3>
@@ -198,33 +193,30 @@ export type State<T extends AnyTemplate> = T extends OtValueTemplate
       }
     : unknown;
 
-export const state = <T extends AnyTemplate>(source: T, options: IoTsOptions): t.Type<State<T>> => {
+export const state = <T extends AnyTemplate>(source: T): z.ZodType<State<T>> => {
     switch (source.type) {
         case atomic: {
             switch (source.mode) {
                 case replace:
                     return source.value;
                 case ot:
-                    return source.nullable ? t.union([t.string, t.undefined]) : (t.string as any);
+                    return source.nullable
+                        ? z.union([z.string(), z.undefined()])
+                        : (z.string() as any);
             }
             break;
         }
         case record:
         case paramRecord: {
-            return t.union([trecord(t.string, state(source.value, options)), t.undefined]) as any;
+            return z.union([zrecord(state(source.value)), z.undefined()]) as any;
         }
         case object: {
-            const base = t.intersection([
-                t.type({
-                    $v: source.$v == null ? t.undefined : t.literal(source.$v),
-                    $r: source.$r == null ? t.undefined : t.literal(source.$r),
-                }),
-                t.type(mapRecord(source.value, value => state(value, options))),
-            ]) as any;
-            if (options.exact) {
-                return t.exact(base);
-            }
-            return base;
+            return z
+                .object({
+                    $v: source.$v == null ? z.undefined() : z.literal(source.$v),
+                    $r: source.$r == null ? z.undefined() : z.literal(source.$r),
+                })
+                .and(z.object(mapRecord(source.value, value => state(value)))) as any;
         }
     }
 };
@@ -232,7 +224,7 @@ export const state = <T extends AnyTemplate>(source: T, options: IoTsOptions): t
 export type UpOperation<T extends AnyTemplate> = T extends OtValueTemplate
     ? If<T['nullable'], NullableTextOperation.UpOperation, TextOperation.UpOperation>
     : T extends ReplaceValueTemplate<infer U1>
-    ? { newValue: t.TypeOf<U1> }
+    ? { newValue: z.TypeOf<U1> }
     : T extends RecordValueTemplate<infer U2>
     ? {
           [P in string]?: RecordUpOperationElement<State<U2>, UpOperation<U2>> | undefined;
@@ -248,15 +240,12 @@ export type UpOperation<T extends AnyTemplate> = T extends OtValueTemplate
       } & { [P in keyof U3]?: UpOperation<U3[P]> }
     : unknown;
 
-export const upOperation = <T extends AnyTemplate>(
-    source: T,
-    options: IoTsOptions
-): t.Type<UpOperation<T>> => {
+export const upOperation = <T extends AnyTemplate>(source: T): z.ZodType<UpOperation<T>> => {
     switch (source.type) {
         case atomic: {
             switch (source.mode) {
                 case replace:
-                    return t.type({ newValue: source.value }) as any;
+                    return z.object({ newValue: source.value }) as any;
                 case ot:
                     return source.nullable
                         ? NullableTextOperation.upOperation
@@ -265,28 +254,21 @@ export const upOperation = <T extends AnyTemplate>(
             break;
         }
         case record: {
-            return trecord(
-                t.string,
-                recordUpOperationElementFactory(
-                    state(source.value, options),
-                    upOperation(source.value, options)
-                )
+            return zrecord(
+                recordUpOperationElementFactory(state(source.value), upOperation(source.value))
             ) as any;
         }
         case paramRecord:
-            return trecord(t.string, upOperation(source.value, options)) as any;
+            return zrecord(upOperation(source.value)) as any;
         case object: {
-            const base = t.intersection([
-                t.type({
-                    $v: source.$v == null ? t.undefined : t.literal(source.$v),
-                    $r: source.$r == null ? t.undefined : t.literal(source.$r),
-                }),
-                t.partial(mapRecord(source.value, value => upOperation(value, options))),
-            ]) as any;
-            if (options.exact) {
-                return t.exact(base);
-            }
-            return base;
+            return z
+                .object({
+                    $v: source.$v == null ? z.undefined() : z.literal(source.$v),
+                    $r: source.$r == null ? z.undefined() : z.literal(source.$r),
+                })
+                .and(
+                    z.object(mapRecord(source.value, value => upOperation(value))).partial()
+                ) as any;
         }
     }
 };
@@ -294,7 +276,7 @@ export const upOperation = <T extends AnyTemplate>(
 export type DownOperation<T extends AnyTemplate> = T extends OtValueTemplate
     ? If<T['nullable'], NullableTextOperation.DownOperation, TextOperation.DownOperation>
     : T extends ReplaceValueTemplate<infer U1>
-    ? { oldValue: t.TypeOf<U1> }
+    ? { oldValue: z.TypeOf<U1> }
     : T extends RecordValueTemplate<infer U2>
     ? {
           [P in string]?: RecordDownOperationElement<State<U2>, DownOperation<U2>> | undefined;
@@ -310,15 +292,12 @@ export type DownOperation<T extends AnyTemplate> = T extends OtValueTemplate
       } & { [P in keyof U3]?: DownOperation<U3[P]> }
     : unknown;
 
-export const downOperation = <T extends AnyTemplate>(
-    source: T,
-    options: IoTsOptions
-): t.Type<DownOperation<T>> => {
+export const downOperation = <T extends AnyTemplate>(source: T): z.ZodType<DownOperation<T>> => {
     switch (source.type) {
         case atomic: {
             switch (source.mode) {
                 case replace:
-                    return t.type({ oldValue: source.value }) as any;
+                    return z.object({ oldValue: source.value }) as any;
                 case ot:
                     return source.nullable
                         ? NullableTextOperation.downOperation
@@ -327,28 +306,22 @@ export const downOperation = <T extends AnyTemplate>(
             break;
         }
         case record: {
-            return trecord(
-                t.string,
-                recordDownOperationElementFactory(
-                    state(source.value, options),
-                    downOperation(source.value, options)
-                )
+            return zrecord(
+                recordDownOperationElementFactory(state(source.value), downOperation(source.value))
             ) as any;
         }
         case paramRecord: {
-            return trecord(t.string, downOperation(source.value, options)) as any;
+            return zrecord(downOperation(source.value)) as any;
         }
         case object: {
-            const base = t.intersection([
-                t.type({
-                    $v: source.$v == null ? t.undefined : t.literal(source.$v),
-                    $r: source.$r == null ? t.undefined : t.literal(source.$r),
-                }),
-                t.partial(mapRecord(source.value, value => downOperation(value, options))),
-            ]) as any;
-            if (options.exact) {
-                return t.exact(base);
-            }
+            const base = z
+                .object({
+                    $v: source.$v == null ? z.undefined() : z.literal(source.$v),
+                    $r: source.$r == null ? z.undefined() : z.literal(source.$r),
+                })
+                .and(
+                    z.object(mapRecord(source.value, value => downOperation(value))).partial()
+                ) as any;
             return base;
         }
     }
@@ -358,8 +331,8 @@ export type TwoWayOperation<T extends AnyTemplate> = T extends OtValueTemplate
     ? If<T['nullable'], NullableTextOperation.TwoWayOperation, TextOperation.TwoWayOperation>
     : T extends ReplaceValueTemplate<infer U1>
     ? {
-          oldValue: t.TypeOf<U1>;
-          newValue: t.TypeOf<U1>;
+          oldValue: z.TypeOf<U1>;
+          newValue: z.TypeOf<U1>;
       }
     : T extends RecordValueTemplate<infer U2>
     ? {

@@ -1,22 +1,24 @@
-import React from 'react';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
-import { RoomMessagesPanelContent } from './RoomMessagesPanelContent';
-import { CreateMockRoomMessagesParams } from '@/mocks';
 import { getExactlyOneKey } from '@flocon-trpg/utils';
-import { useSetupMocks } from '@/hooks/useSetupMocks';
+import { ComponentMeta, ComponentStory } from '@storybook/react';
+import React from 'react';
+import { RoomMessagesPanelContent } from './RoomMessagesPanelContent';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
+import { useSetupStorybook } from '@/hooks/useSetupStorybook';
+import { CreateMockRoomMessagesParams } from '@/mocks';
+import { createMockUrqlClientForRoomMessage } from '@/mocks/mockAvailableGameSystemsQuery';
 
 export const Default: React.FC<
     { height: number; fetchingMessages: boolean } & CreateMockRoomMessagesParams
 > = ({ height, fetchingMessages, setGeneralMessages }) => {
-    const { roomConfig } = useSetupMocks({
+    const { roomConfig } = useSetupStorybook({
         roomMessagesConfig: {
             setGeneralMessages,
             doNotQuery: fetchingMessages,
         },
     });
+    const mockUrqlClient = React.useRef(createMockUrqlClientForRoomMessage());
     return (
-        <StorybookProvider>
+        <StorybookProvider waitForRoomClient urqlClient={mockUrqlClient.current}>
             <RoomMessagesPanelContent
                 panelId={getExactlyOneKey(roomConfig.panels.messagePanels)}
                 height={height}

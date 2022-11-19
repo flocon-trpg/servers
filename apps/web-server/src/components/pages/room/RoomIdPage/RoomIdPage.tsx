@@ -1,49 +1,36 @@
-import { useMutation } from 'urql';
 import {
     GetRoomFailureType,
     JoinRoomAsPlayerDocument,
     JoinRoomAsSpectatorDocument,
     JoinRoomFailureType,
+    OperateRoomFailureType,
     RoomAsListItemFragment,
-    UpdateWritingMessageStatusDocument,
     WritingMessageStatusInputType,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
-import { Alert, Button, Card, Input, Result, Spin, notification as antdNotification } from 'antd';
+import { Alert, Button, Card, Input, Result, Spin } from 'antd';
 import produce from 'immer';
 import { atom } from 'jotai';
 import { selectAtom, useAtomValue, useUpdateAtom } from 'jotai/utils';
 import { useRouter } from 'next/router';
 import React from 'react';
-import { useDebounce, useLatest, usePrevious } from 'react-use';
-import { Subject, bufferTime } from 'rxjs';
-import { roomPrivateMessageInputAtom } from '@/components/models/room/Room/subcomponents/atoms/roomPrivateMessageInputAtom/roomPrivateMessageInputAtom';
-import { roomPublicMessageInputAtom } from '@/components/models/room/Room/subcomponents/atoms/roomPublicMessageInputAtom/roomPublicMessageInputAtom';
+import { useDebounce, usePrevious } from 'react-use';
+import { useMutation } from 'urql';
 import { hideAllOverlayActionAtom } from '@/atoms/hideAllOverlayActionAtom/hideAllOverlayActionAtom';
-import { roomAtom } from '@/atoms/roomAtom/roomAtom';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { usePublishRoomEventSubscription } from '@/hooks/usePublishRoomEventSubscription';
-import { useStartFetchingRoomMessages } from '@/hooks/useRoomMessages';
-import {
-    deleted,
-    getRoomFailure,
-    joined,
-    loading,
-    mutationFailure,
-    myAuthIsUnavailable,
-    nonJoined,
-    useRoomState,
-} from '@/hooks/useRoomState';
-import { getRoomConfig } from '@/utils/localStorage/roomConfig';
-import { Ref } from '@/utils/types';
 import { Room } from '@/components/models/room/Room/Room';
+import { roomPrivateMessageInputAtom } from '@/components/models/room/Room/subcomponents/atoms/roomPrivateMessageInputAtom/roomPrivateMessageInputAtom';
+import { roomPublicMessageInputAtom } from '@/components/models/room/Room/subcomponents/atoms/roomPublicMessageInputAtom/roomPublicMessageInputAtom';
+import { useUpdateWritingMessageStatus } from '@/components/models/room/Room/subcomponents/hooks/useUpdateWritingMessageStatus';
 import { Center } from '@/components/ui/Center/Center';
+import { GraphQLErrorResult } from '@/components/ui/GraphQLErrorResult/GraphQLErrorResult';
 import { Layout, loginAndEntry, success } from '@/components/ui/Layout/Layout';
 import { LoadingResult } from '@/components/ui/LoadingResult/LoadingResult';
+import { useInitializeRoomClient, useRoomClient, useTryRoomClient } from '@/hooks/roomClientHooks';
+import { useRoomGraphQLStatus } from '@/hooks/useRoomGraphQLStatus';
+import { useRoomState } from '@/hooks/useRoomState';
 import { firebaseUserValueAtom } from '@/pages/_app';
-
-type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
+import { getRoomConfig } from '@/utils/localStorage/roomConfig';
 
 const debouncedWindowInnerWidthAtomCore = atom(0);
 const debouncedWindowInnerHeightAtomCore = atom(0);
@@ -234,28 +221,6 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
     );
 };
 
-function useBufferedWritingMessageStatusInputType() {
-    const timeSpan = 1500;
-    const subjectRef = React.useRef(new Subject<WritingMessageStatusInputType>());
-    // WritingMessageStatusInputTypeの値が変わらないときでもuseEffectをトリガーさせたいので、WritingMessageStatusInputTypeではなくRef<WritingMessageStatusInputType>を使っている
-    const [result, setResult] = React.useState<Ref<WritingMessageStatusInputType>>();
-    const onNext = React.useCallback((item: WritingMessageStatusInputType) => {
-        subjectRef.current.next(item);
-    }, []);
-    React.useEffect(() => {
-        subjectRef.current.pipe(bufferTime(timeSpan)).subscribe({
-            next: items => {
-                const lastElement = items[items.length - 1];
-                if (lastElement === undefined) {
-                    return;
-                }
-                setResult({ value: lastElement });
-            },
-        });
-    }, []);
-    return [result, onNext] as const;
-}
-
 // localForageを用いてRoomConfigを読み込み、atomと紐付ける。
 // Roomが変わるたびに、useRoomConfigが更新される必要がある。RoomのComponentのどこか一箇所でuseRoomConfigを呼び出すだけでよい。
 const useRoomConfig = (roomId: string): boolean => {
@@ -292,8 +257,10 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
     roomId: string;
     children: JSX.Element;
 }) => {
-    const roomIdRef = useLatest(roomId);
-    const setRoomAtomValue = useUpdateAtom(roomAtom);
+    const roomClient = useRoomClient();
+    const roomState = useRoomState();
+    const graphQLStatus = useRoomGraphQLStatus();
+
     const setRoomPublicMessageInput = useUpdateAtom(roomPublicMessageInputAtom);
     const setRoomPrivateMessageInput = useUpdateAtom(roomPrivateMessageInputAtom);
     const hideAllOverlay = useUpdateAtom(hideAllOverlayActionAtom);
@@ -301,63 +268,19 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
     useOnResize();
     useRoomConfig(roomId);
 
-    const [, updateWritingMessageStatus] = useMutation(UpdateWritingMessageStatusDocument);
-
     React.useEffect(() => {
         hideAllOverlay();
         setRoomPublicMessageInput('');
         setRoomPrivateMessageInput('');
     }, [roomId, setRoomPublicMessageInput, setRoomPrivateMessageInput, hideAllOverlay]);
 
-    const {
-        observable,
-        data: roomEventSubscription,
-        error,
-    } = usePublishRoomEventSubscription(roomId);
-    const { state: roomState, refetch: refetchRoomState } = useRoomState(roomId, observable);
-    useStartFetchingRoomMessages({
-        roomId,
-        roomEventSubscription,
-        beginFetch: roomState.type === 'joined',
-    });
-
-    React.useEffect(() => {
-        setRoomAtomValue({ ...roomAtom.init, roomId });
-    }, [roomId, setRoomAtomValue]);
-    React.useEffect(() => {
-        setRoomAtomValue(roomAtomValue => ({ ...roomAtomValue, roomState }));
-    }, [roomState, setRoomAtomValue]);
-    React.useEffect(() => {
-        setRoomAtomValue(roomAtomValue => ({ ...roomAtomValue, roomEventSubscription }));
-    }, [roomEventSubscription, setRoomAtomValue]);
-
-    const newNotification = useAtomSelector(roomAtom, room => room.notifications.newValue);
-    React.useEffect(() => {
-        if (newNotification == null) {
-            return;
-        }
-        antdNotification[newNotification.type]({
-            message: newNotification.message,
-            description: newNotification.description,
-            placement: 'bottomRight',
-        });
-    }, [newNotification]);
-
-    const [writingMessageStatusInputType, onWritingMessageStatusInputTypeChange] =
-        useBufferedWritingMessageStatusInputType();
-    React.useEffect(() => {
-        if (writingMessageStatusInputType == null) {
-            return;
-        }
-        updateWritingMessageStatus({
-            roomId: roomIdRef.current,
-            newStatus: writingMessageStatusInputType.value,
-        });
-    }, [roomIdRef, updateWritingMessageStatus, writingMessageStatusInputType]);
-
+    const updateWritingMessageStatus = useUpdateWritingMessageStatus();
     const publicMessage = useAtomValue(roomPublicMessageInputAtom);
     const prevPublicMessage = usePrevious(publicMessage);
     React.useEffect(() => {
+        if (updateWritingMessageStatus == null) {
+            return;
+        }
         const prevMessage = prevPublicMessage ?? '';
         const currentMessage = publicMessage;
         if (prevMessage === currentMessage) {
@@ -377,80 +300,97 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
                 newStatus = WritingMessageStatusInputType.KeepWriting;
             }
         }
-        onWritingMessageStatusInputTypeChange(newStatus);
-    }, [publicMessage, prevPublicMessage, onWritingMessageStatusInputTypeChange]);
+        updateWritingMessageStatus(newStatus);
+    }, [prevPublicMessage, publicMessage, updateWritingMessageStatus]);
 
-    if (error != null) {
+    if (graphQLStatus?.RoomEventSubscription.type === 'error') {
         return (
-            <Result
-                status='error'
-                title={`Apollo subscription エラー: ${error.message}`}
-                subTitle='ブラウザを更新してください。'
+            <GraphQLErrorResult
+                title='Subscription エラーが発生しました。ブラウザを更新してください。'
+                error={graphQLStatus.RoomEventSubscription.error}
             />
         );
     }
 
     switch (roomState.type) {
-        case joined: {
-            if (roomState.setStateByApply == null) {
-                // TODO: Buttonなどを用いたreloadに対応させる。
-                return (
-                    <Result
-                        status='error'
-                        title='サーバーから応答を受け取ることができませんでした。'
-                        subTitle='ブラウザを更新してください。'
-                    />
-                );
-            }
+        case 'fetching':
+            return <LoadingResult />;
+        case 'joined': {
             return children;
         }
-        case nonJoined:
+        case 'nonJoined':
             return (
                 <Center>
                     <Card title='入室'>
                         <JoinRoomForm
                             roomState={roomState.nonJoinedRoom}
-                            onJoin={() => refetchRoomState()}
+                            onJoin={() => roomClient?.recreate()}
                         />
                     </Card>
                 </Center>
             );
-        case getRoomFailure: {
-            switch (roomState.getRoomFailureType) {
-                case GetRoomFailureType.NotFound:
+        case 'error': {
+            const notFoundResult = (
+                <Result
+                    status='404'
+                    title='該当する部屋が見つかりませんでした。'
+                    subTitle='部屋が存在しているか、適切な権限があるかどうか確認してください。'
+                />
+            );
+            switch (roomState.error.type) {
+                case 'GetRoomFailure': {
+                    switch (roomState.error.error) {
+                        case GetRoomFailureType.NotFound:
+                            return notFoundResult;
+                        default:
+                            throw new Error();
+                    }
+                }
+                case 'GraphQLError': {
                     return (
-                        <Result
-                            status='404'
-                            title='該当する部屋が見つかりませんでした。'
-                            subTitle='部屋が存在しているか、適切な権限があるかどうか確認してください。'
+                        <GraphQLErrorResult
+                            title='GetRoomQuery でエラーが発生しました。ブラウザを更新してくだ   さい。'
+                            error={roomState.error.error}
                         />
+                    );
+                }
+                case 'OperateRoomFailure':
+                    switch (roomState.error.error) {
+                        case OperateRoomFailureType.NotFound:
+                            return notFoundResult;
+                        default:
+                            throw new Error();
+                    }
+                case 'transformationError':
+                    return (
+                        <Result title='transformationError が発生しました。ブラウザを更新してください。' />
                     );
             }
             break;
         }
-        case loading:
-            return <LoadingResult />;
-        case myAuthIsUnavailable:
-            return null;
-        case mutationFailure:
-            // TODO: mutationFailureが細分化されたら、こちらも細分化する。
-            return (
-                <Result
-                    status='error'
-                    title='mutationに失敗しました。'
-                    subTitle='ログイン、エントリーしていることと、ネットワークに問題がないことを確認してください。'
-                />
-            );
-        case deleted:
+        case 'deleted':
             return <Result status='warning' title='この部屋は削除されました。' />;
     }
 };
 
-const RoomLayout: React.FC<{ children: JSX.Element }> = ({
-    children,
-}: {
-    children: JSX.Element;
-}) => {
+const RoomClientInitializer: React.FC<{ roomId: string }> = ({ roomId }) => {
+    useInitializeRoomClient({ roomId });
+
+    const roomClient = useTryRoomClient();
+    // すぐ上で useInitializeRoomClient を実行しているが、それでも一瞬 useTryRoomClient の戻り値が null になる。
+    // useTryRoomClient の戻り値が null のときにもし useRoomClient もしくはそれを使用している hooks を実行するとエラーになってしまう。<Room /> ではそれらの hooks が使われているため、エラーが出ないようにするためにここで弾いている。
+    if (roomClient == null) {
+        return <LoadingResult />;
+    }
+
+    return (
+        <RoomBehavior roomId={roomId}>
+            <Room />
+        </RoomBehavior>
+    );
+};
+
+export const RoomId: React.FC = () => {
     const router = useRouter();
     const id = router.query.id;
 
@@ -464,11 +404,7 @@ const RoomLayout: React.FC<{ children: JSX.Element }> = ({
 
     return (
         <Layout requires={loginAndEntry} hideHeader={success}>
-            <RoomBehavior roomId={id}>{children}</RoomBehavior>
+            <RoomClientInitializer roomId={id} />
         </Layout>
     );
-};
-
-export const RoomId: React.FC = () => {
-    return <RoomLayout>{<Room />}</RoomLayout>;
 };

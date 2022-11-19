@@ -1,41 +1,33 @@
-import React from 'react';
-import { Button, Checkbox, Modal, Tooltip } from 'antd';
-import { WriteRoomSoundEffectDocument } from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Icon from '@ant-design/icons';
-import { VolumeBar } from '@/components/ui/VolumeBar/VolumeBar';
-import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
-import { Styles } from '@/styles';
 import { State, StrIndex5, bgmTemplate } from '@flocon-trpg/core';
-import { flex, flexColumn, flexRow, itemsCenter } from '@/styles/className';
+import { WriteRoomSoundEffectDocument } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { keyNames } from '@flocon-trpg/utils';
+import { Button, Checkbox, Modal, Tooltip } from 'antd';
 import classNames from 'classnames';
-import { sound } from '@/utils/fileType';
-import { FilePathLike, FilePathModule } from '@/utils/file/filePath';
+import React from 'react';
+import { useLatest } from 'react-use';
 import { useMutation } from 'urql';
-import { atom } from 'jotai';
-import { roomAtom } from '@/atoms/roomAtom/roomAtom';
-import { useAtomValue } from 'jotai/utils';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
+import { useRoomId } from '../../hooks/useRoomId';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
+import { FileSelector } from '@/components/models/file/FileSelector/FileSelector';
 import { FileSelectorModal } from '@/components/models/file/FileSelectorModal/FileSelectorModal';
 import { FileView } from '@/components/models/file/FileView/FileView';
-import { keyNames } from '@flocon-trpg/utils';
-import { setStateWithImmer } from '@/utils/setStateWithImmer';
-import { FileSelector } from '@/components/models/file/FileSelector/FileSelector';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { useLatest } from 'react-use';
-import { stretchedModalWidth } from '@/utils/variables';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { Fieldset } from '@/components/ui/Fieldset/Fieldset';
+import { VolumeBar } from '@/components/ui/VolumeBar/VolumeBar';
+import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
+import { Styles } from '@/styles';
+import { flex, flexColumn, flexRow, itemsCenter } from '@/styles/className';
+import { FilePathModule } from '@/utils/file/filePath';
+import { sound } from '@/utils/fileType';
+import { setStateWithImmer } from '@/utils/setStateWithImmer';
+import { stretchedModalWidth } from '@/utils/variables';
 
 type BgmState = State<typeof bgmTemplate>;
 
 const maxWidthOfLink = 300;
 const defaultVolume = 0.5;
 const initBgmState: BgmState = { $v: 1, $r: 1, isPaused: true, files: [], volume: defaultVolume };
-
-const bgmsAtom = atom(get => get(roomAtom).roomState?.state?.bgms);
-
-const toKey = (source: FilePathLike): string => {
-    return keyNames('SoundPlayer', source.sourceType, source.path);
-};
 
 type VolumeBarForSoundPlayerProps = {
     volumeBarValue: number;
@@ -75,7 +67,7 @@ type BgmSimpleModalProps = {
 /** 1曲のみからなるBGMを設定するModal */
 const BgmSimpleModal: React.FC<BgmSimpleModalProps> = ({ channelKey, visible, onClose }) => {
     const setRoomState = useSetRoomStateWithImmer();
-    const currentBgmState = useAtomSelector(bgmsAtom, bgms => bgms?.[channelKey]);
+    const currentBgmState = useRoomStateValueSelector(state => state.bgms?.[channelKey]);
     const currentBgmStateRef = useLatest(currentBgmState);
     const [newBgmState, setNewBgmStateCore] = React.useState<BgmState>(
         currentBgmState ?? initBgmState
@@ -88,7 +80,7 @@ const BgmSimpleModal: React.FC<BgmSimpleModalProps> = ({ channelKey, visible, on
 
     return (
         <Modal
-            visible={visible}
+            open={visible}
             onCancel={onClose}
             width={stretchedModalWidth}
             footer={<DialogFooter close={{ onClick: onClose, textType: 'cancel' }} />}
@@ -144,7 +136,7 @@ type BgmPlaylistModalProps = {
 // CONSIDER: 複数の曲から構成されるBGMの機能に需要があるかどうかが疑問視。
 const BgmPlaylistModal: React.FC<BgmPlaylistModalProps> = ({ channelKey, visible, onClose }) => {
     const setRoomState = useSetRoomStateWithImmer();
-    const currentBgmState = useAtomSelector(bgmsAtom, bgms => bgms?.[channelKey]);
+    const currentBgmState = useRoomStateValueSelector(state => state.bgms?.[channelKey]);
     const currentBgmStateRef = useLatest(currentBgmState);
     const [newBgmState, setNewBgmStateCore] = React.useState<BgmState>(
         currentBgmState ?? initBgmState
@@ -159,7 +151,11 @@ const BgmPlaylistModal: React.FC<BgmPlaylistModalProps> = ({ channelKey, visible
 
     const files = newBgmState.files.map((file, i) => {
         return (
-            <div key={toKey(file)} className={classNames(flex, flexRow)}>
+            <div
+                // 同一ファイルが複数存在することも可能なため、file のみから key を作ることはできない
+                key={keyNames('BgmPlaylistModal-BGM', i)}
+                className={classNames(flex, flexRow)}
+            >
                 <FileView
                     maxWidthOfLink={null}
                     uploaderFileBrowserHeight={null}
@@ -181,7 +177,7 @@ const BgmPlaylistModal: React.FC<BgmPlaylistModalProps> = ({ channelKey, visible
 
     return (
         <Modal
-            visible={visible}
+            open={visible}
             onCancel={onClose}
             width={stretchedModalWidth}
             footer={
@@ -256,7 +252,7 @@ type SeModalProps = {
 };
 
 const SeModal: React.FC<SeModalProps> = ({ visible, onClose }) => {
-    const roomId = useAtomValue(roomIdAtom);
+    const roomId = useRoomId();
 
     const [, writeRoomSoundEffect] = useMutation(WriteRoomSoundEffectDocument);
     const [volumeInput, setVolumeInput] = React.useState<number>(defaultVolume);
@@ -266,7 +262,7 @@ const SeModal: React.FC<SeModalProps> = ({ visible, onClose }) => {
     }
 
     return (
-        <Modal visible={visible} onCancel={onClose} width={stretchedModalWidth}>
+        <Modal open={visible} onCancel={onClose} width={stretchedModalWidth}>
             <div className={classNames(flex, flexColumn)}>
                 <VolumeBarForSoundPlayer
                     volumeBarValue={volumeInput}
@@ -290,8 +286,6 @@ const SeModal: React.FC<SeModalProps> = ({ visible, onClose }) => {
     );
 };
 
-const roomIdAtom = atom(get => get(roomAtom).roomId);
-
 type BgmPlayerProps = {
     channelKey: StrIndex5;
     bgmState: BgmState | undefined;
@@ -309,10 +303,11 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
         setVolumeInput(undefined);
     }, [bgmState?.volume]);
 
-    const tags = (bgmState?.files ?? []).map(file => {
+    const tags = (bgmState?.files ?? []).map((file, i) => {
         return (
             <FileView
-                key={toKey(file)}
+                // 同一ファイルが複数存在することも可能なため、file のみから key を作ることはできない
+                key={keyNames('BgmPlayer-BGM', i)}
                 uploaderFileBrowserHeight={null}
                 filePath={file}
                 onPathChange={null}
@@ -336,7 +331,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
             <div className={classNames(flex, flexRow, itemsCenter)}>
                 <div style={Styles.Text.larger}>
                     {bgmState != null && (bgmState.files ?? []).length !== 0 ? (
-                        /* 本当はPauseアイコンではなく停止アイコンを使いたいが、antdでは見つからなかったので暫定的にPauseアイコンを用いている */
+                        /* TODO: 本当はPauseアイコンではなく停止アイコンを使いたいが、antdでは見つからなかったので暫定的にPauseアイコンを用いている */
                         bgmState.isPaused ? (
                             <Icon.PauseOutlined />
                         ) : (
@@ -436,7 +431,7 @@ const BgmPlayer: React.FC<BgmPlayerProps> = ({ channelKey, bgmState }: BgmPlayer
 };
 
 export const SoundPlayerPanelContent: React.FC = () => {
-    const bgmsState = useAtomValue(bgmsAtom);
+    const bgmsState = useRoomStateValueSelector(state => state.bgms);
     const [isSeModalVisible, setIsSeModalVisible] = React.useState(false);
 
     const padding = 16;

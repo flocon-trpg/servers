@@ -1,35 +1,51 @@
 {
+    "name": "@flocon-trpg/utils",
     "version": "0.9.2",
     "license": "MIT",
+    "author": "kizahasi",
     "main": "dist/cjs/index.js",
     "module": "dist/esm/index.js",
-    "typings": "dist/types/index.d.ts",
     "files": [
         "dist"
     ],
-    "engines": {
-        "node": ">=14 <19"
-    },
     "scripts": {
         "build": "yarn run build:self",
-        "build-ci": "yarn run build:self",
-        "build:self": "rimraf ./dist && yarn build:tsc",
-        "build:tsc": "tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-types.json",
+        "build:rollup": "rollup --config",
+        "build:self": "rimraf ./dist && yarn build:rollup",
+        "lint": "eslint \"**/*.ts\" --cache",
+        "prettier": "yarn prettier:base --write --cache",
+        "prettier-check": "yarn prettier:base --check",
+        "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\"",
         "test": "jest"
     },
-    "name": "@flocon-trpg/utils",
-    "author": "kizahasi",
     "dependencies": {
         "@kizahasi/option": "^1.0.0",
-        "@kizahasi/result": "^1.0.1"
+        "@kizahasi/result": "^1.0.1",
+        "browser-or-node": "^2.0.0",
+        "pino": "^8.6.1"
     },
     "devDependencies": {
+        "@flocon-trpg/eslint-config": "workspace:^",
+        "@flocon-trpg/prettier-config": "workspace:^",
+        "@flocon-trpg/rollup-config": "workspace:^",
+        "@flocon-trpg/tsconfig": "workspace:^",
         "@types/jest": "29.1.2",
-        "@types/lodash": "4.14.186",
+        "@types/lodash": "4.14.188",
+        "@typescript-eslint/eslint-plugin": "5.39.0",
+        "@typescript-eslint/parser": "5.39.0",
+        "eslint": "8.25.0",
+        "eslint-config-prettier": "8.5.0",
+        "eslint-import-resolver-typescript": "3.5.2",
+        "eslint-plugin-import": "2.26.0",
         "jest": "29.1.2",
         "lodash": "4.17.21",
+        "prettier": "2.7.1",
         "rimraf": "3.0.2",
+        "rollup": "3.3.0",
         "ts-jest": "29.0.3",
         "typescript": "4.8.4"
+    },
+    "engines": {
+        "node": ">=14 <19"
     }
 }

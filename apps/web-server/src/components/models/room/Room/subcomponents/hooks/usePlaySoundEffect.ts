@@ -1,14 +1,15 @@
+import { FilePathFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { loggerRef } from '@flocon-trpg/utils';
+import { soundEffect } from '@flocon-trpg/web-server-utils';
 import { Howl } from 'howler';
 import React from 'react';
-import { FilePathFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
-import { analyzeUrl } from '@/utils/analyzeUrl';
-import { volumeCap } from '@/utils/variables';
+import { useLatest } from 'react-use';
+import { useRoomMessages } from './useRoomMessages';
+import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { useSrcFromFilePath } from '@/hooks/srcHooks';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
-import { useLatest } from 'react-use';
-import { useRoomMessageEvent } from '@/hooks/useRoomMessages';
-import { soundEffect } from '@flocon-trpg/web-server-utils';
+import { analyzeUrl } from '@/utils/analyzeUrl';
+import { volumeCap } from '@/utils/variables';
 
 // 長過ぎる曲をSEにしようとした場合、何もしないと部屋に再入室しない限りその曲を止めることができない。それを防ぐため、最大15秒までしか流れないようにしている。15秒という長さは適当。
 const musicLengthLimit = 15 * 1000;
@@ -60,8 +61,9 @@ function usePlaySoundEffectCore(value?: SoundEffect): void {
             return;
         }
 
+        const src = url.directLink;
         const howl = new Howl({
-            src: [url.directLink],
+            src: [src],
             loop: false,
             volume: Math.min(value.volume * volumeConfigRef.current, volumeCap),
         });
@@ -69,6 +71,7 @@ function usePlaySoundEffectCore(value?: SoundEffect): void {
             howl,
             volume: value.volume,
         });
+        loggerRef.value.debug({ src }, 'SE is started to play');
         howl.play();
         setTimeout(() => howl.fade(howl.volume(), 0, fadeout), musicLengthLimit);
         setTimeout(() => {
@@ -85,7 +88,8 @@ function usePlaySoundEffectCore(value?: SoundEffect): void {
 }
 
 export function usePlaySoundEffect(): void {
-    const messageDiff = useRoomMessageEvent();
+    const roomMessages = useRoomMessages({});
+    const messageDiff = roomMessages.diff;
     const [soundEffectState, setSoundEffectState] = React.useState<SoundEffect>();
 
     React.useEffect(() => {

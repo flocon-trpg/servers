@@ -10,17 +10,17 @@ import {
     Resolver,
     UseMiddleware,
 } from 'type-graphql';
-import { ENTRY } from '../../../../utils/roles';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import { LeaveRoomFailureType } from '../../../../enums/LeaveRoomFailureType';
+import { ResolverContext } from '../../../../types';
+import { ENTRY } from '../../../../utils/roles';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
+import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import {
     ensureAuthorizedUser,
     findRoomAndMyParticipant,
     operateParticipantAndFlush,
     publishRoomEvent,
 } from '../../utils/utils';
-import { ResolverContext } from '../../../../types';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 @ObjectType()
 class LeaveRoomResult {

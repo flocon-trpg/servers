@@ -1,19 +1,15 @@
 import { State, paramNameTemplate } from '@flocon-trpg/core';
 import { recordToMap } from '@flocon-trpg/utils';
 import React from 'react';
-import { roomAtom } from '@/atoms/roomAtom/roomAtom';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 
 const emptyRecord = {};
 
 type ParamNameState = State<typeof paramNameTemplate>;
 
 export const useBoolParamNames = (): ReadonlyMap<string, ParamNameState> | undefined => {
-    const boolParamNames = useAtomSelector(roomAtom, state => {
-        if (state.roomState?.state == null) {
-            return undefined;
-        }
-        return state.roomState.state.boolParamNames ?? emptyRecord;
+    const boolParamNames = useRoomStateValueSelector(state => {
+        return state.boolParamNames ?? emptyRecord;
     });
     return React.useMemo(() => {
         if (boolParamNames == null) {
@@ -24,11 +20,8 @@ export const useBoolParamNames = (): ReadonlyMap<string, ParamNameState> | undef
 };
 
 export const useNumParamNames = (): ReadonlyMap<string, ParamNameState> | undefined => {
-    const numParamNames = useAtomSelector(roomAtom, state => {
-        if (state.roomState?.state == null) {
-            return undefined;
-        }
-        return state.roomState.state.numParamNames ?? emptyRecord;
+    const numParamNames = useRoomStateValueSelector(state => {
+        return state.numParamNames ?? emptyRecord;
     });
     return React.useMemo(() => {
         if (numParamNames == null) {
@@ -39,11 +32,8 @@ export const useNumParamNames = (): ReadonlyMap<string, ParamNameState> | undefi
 };
 
 export const useStrParamNames = (): ReadonlyMap<string, ParamNameState> | undefined => {
-    const strParamNames = useAtomSelector(roomAtom, state => {
-        if (state.roomState?.state == null) {
-            return undefined;
-        }
-        return state.roomState.state.strParamNames ?? emptyRecord;
+    const strParamNames = useRoomStateValueSelector(state => {
+        return state.strParamNames ?? emptyRecord;
     });
     return React.useMemo(() => {
         if (strParamNames == null) {

@@ -1,14 +1,14 @@
+import { Draft } from 'immer';
+import { atom } from 'jotai';
+import { useAtomValue } from 'jotai/utils';
 import React from 'react';
-import { CharacterSelector } from './subcomponents/components/CharacterSelector/CharacterSelector';
-import { GameSelector } from '../GameSelector/GameSelector';
 import { TextColorPicker } from '../../../../../../ui/TextColorPicker/TextColorPicker';
+import { GameSelector } from '../GameSelector/GameSelector';
 import { SelectedChannelType, SubmitMessage, publicChannel } from '../SubmitMessage/SubmitMessage';
 import { getSelectedCharacterType } from './getSelectedCharacterType';
-import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
-import { atom } from 'jotai';
+import { CharacterSelector } from './subcomponents/components/CharacterSelector/CharacterSelector';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
-import { Draft } from 'immer';
-import { useAtomValue } from 'jotai/utils';
+import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 
 const flexBasis80: React.CSSProperties = {
     flexBasis: '80px',

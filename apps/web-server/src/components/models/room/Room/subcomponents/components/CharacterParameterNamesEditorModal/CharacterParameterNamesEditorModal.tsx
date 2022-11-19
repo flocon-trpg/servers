@@ -1,19 +1,23 @@
-import { Button, Collapse, Form, Modal, Select, Space } from 'antd';
-import React from 'react';
-import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
-import { replace } from '@/stateManagers/states/types';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { useSetRoomStateByApply } from '@/hooks/useSetRoomStateByApply';
+import {
+    StrIndex20,
+    UpOperation as U,
+    replace,
+    roomTemplate,
+    strIndex20Array,
+} from '@flocon-trpg/core';
 import { recordToMap } from '@flocon-trpg/utils';
-import { StrIndex20, UpOperation as U, roomTemplate, strIndex20Array } from '@flocon-trpg/core';
-import { InputModal } from '@/components/ui/InputModal/InputModal';
+import { Button, Collapse, Form, Modal, Select, Space } from 'antd';
 import classNames from 'classnames';
-import { flex, flexRow } from '@/styles/className';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
-import { roomAtom } from '@/atoms/roomAtom/roomAtom';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { atom, useAtom } from 'jotai';
+import React from 'react';
+import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
+import { InputModal } from '@/components/ui/InputModal/InputModal';
+import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
+import { flex, flexRow } from '@/styles/className';
 
 type UpOperation = U<typeof roomTemplate>;
 
@@ -34,12 +38,9 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
     const [addNumParamSelector, setAddNumParamSelector] = React.useState<StrIndex20>();
     const [addBoolParamSelector, setAddBoolParamSelector] = React.useState<StrIndex20>();
     const [addStrParamSelector, setAddStrParamSelector] = React.useState<StrIndex20>();
-    const boolParamNames = useAtomSelector(
-        roomAtom,
-        state => state.roomState?.state?.boolParamNames
-    );
-    const numParamNames = useAtomSelector(roomAtom, state => state.roomState?.state?.numParamNames);
-    const strParamNames = useAtomSelector(roomAtom, state => state.roomState?.state?.strParamNames);
+    const boolParamNames = useRoomStateValueSelector(state => state.boolParamNames);
+    const numParamNames = useRoomStateValueSelector(state => state.numParamNames);
+    const strParamNames = useRoomStateValueSelector(state => state.strParamNames);
 
     const boolParamNamesMap = React.useMemo(
         () => (boolParamNames == null ? undefined : recordToMap(boolParamNames)),
@@ -248,7 +249,7 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
         <Modal
             title='キャラクターのパラメーター名の追加・編集・削除'
             width={600}
-            visible={editorVisibility}
+            open={editorVisibility}
             closable
             onCancel={() => setEditorVisibility(false)}
             footer={

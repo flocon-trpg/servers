@@ -5,6 +5,11 @@ import { FetchTextState } from '../utils/types';
 const padding = 20;
 const filename = 'privacy_policy.md';
 
+/**
+ * `privacy_policy.md` の内容を用い、プライバシーポリシーを表示します。
+ *
+ * ただし、サーバーを運用する際は、このコードを改変してプライバシーポリシーを表示させても構いません。
+ */
 const PrivacyPolicy: React.FC = () => {
     const [text, setText] = React.useState<FetchTextState>({ fetched: false });
     React.useEffect(() => {

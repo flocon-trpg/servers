@@ -1,49 +1,18 @@
 import React from 'react';
-import { roomAtom } from '@/atoms/roomAtom/roomAtom';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 import { PublicChannelNames } from '@/utils/types';
 
 export function usePublicChannelNames(): PublicChannelNames | null {
-    const publicChannel1Name = useAtomSelector(
-        roomAtom,
-        state => state?.roomState?.state?.publicChannel1Name
-    );
-    const publicChannel2Name = useAtomSelector(
-        roomAtom,
-        state => state?.roomState?.state?.publicChannel2Name
-    );
-    const publicChannel3Name = useAtomSelector(
-        roomAtom,
-        state => state?.roomState?.state?.publicChannel3Name
-    );
-    const publicChannel4Name = useAtomSelector(
-        roomAtom,
-        state => state?.roomState?.state?.publicChannel4Name
-    );
-    const publicChannel5Name = useAtomSelector(
-        roomAtom,
-        state => state?.roomState?.state?.publicChannel5Name
-    );
-    const publicChannel6Name = useAtomSelector(
-        roomAtom,
-        state => state?.roomState?.state?.publicChannel6Name
-    );
-    const publicChannel7Name = useAtomSelector(
-        roomAtom,
-        state => state?.roomState?.state?.publicChannel7Name
-    );
-    const publicChannel8Name = useAtomSelector(
-        roomAtom,
-        state => state?.roomState?.state?.publicChannel8Name
-    );
-    const publicChannel9Name = useAtomSelector(
-        roomAtom,
-        state => state?.roomState?.state?.publicChannel9Name
-    );
-    const publicChannel10Name = useAtomSelector(
-        roomAtom,
-        state => state?.roomState?.state?.publicChannel10Name
-    );
+    const publicChannel1Name = useRoomStateValueSelector(state => state.publicChannel1Name);
+    const publicChannel2Name = useRoomStateValueSelector(state => state.publicChannel2Name);
+    const publicChannel3Name = useRoomStateValueSelector(state => state.publicChannel3Name);
+    const publicChannel4Name = useRoomStateValueSelector(state => state.publicChannel4Name);
+    const publicChannel5Name = useRoomStateValueSelector(state => state.publicChannel5Name);
+    const publicChannel6Name = useRoomStateValueSelector(state => state.publicChannel6Name);
+    const publicChannel7Name = useRoomStateValueSelector(state => state.publicChannel7Name);
+    const publicChannel8Name = useRoomStateValueSelector(state => state.publicChannel8Name);
+    const publicChannel9Name = useRoomStateValueSelector(state => state.publicChannel9Name);
+    const publicChannel10Name = useRoomStateValueSelector(state => state.publicChannel10Name);
 
     const [resultState, setResultState] = React.useState<PublicChannelNames | null>(null);
 

@@ -12,12 +12,18 @@ on:
 
 jobs:
     tests-without-docker:
-        name: Partial Tests and exec Next.js export on Node ${{ matrix.node }} and ${{ matrix.os }}
+        name: Tests without PostgreSQL and MySQL, then exec Next.js export on Node ${{ matrix.node }} and ${{ matrix.os }}
+        if: ${{ !contains(github.event.head_commit.message, '[light ci]') }}
 
         strategy:
             matrix:
                 node: ['14.x', '16.x', '18.x']
-                os: [ubuntu-20.04, windows-2019, macOS-11]
+                os: [ubuntu-22.04]
+                include:
+                    - node: '16.x'
+                      os: 'windows-2019'
+                    - node: '16.x'
+                      os: 'macOS-11'
 
         runs-on: ${{ matrix.os }}
 
@@ -33,9 +39,6 @@ jobs:
             - run: node --version
 
             - run: yarn install
-
-            - name: Prepare packages
-              run: yarn build-ci
 
             - name: Test for Node 16 or higher
               if: ${{ matrix.node != '14.x' }}
@@ -59,12 +62,13 @@ jobs:
 
     tests-with-docker:
         name: 'Full tests on ${{ matrix.container }} and Codecov'
+        if: ${{ !contains(github.event.head_commit.message, '[light ci]') }}
 
         strategy:
             matrix:
                 container: ['node:14-buster', 'node:16-buster', 'node:18-buster']
 
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-22.04
         container: ${{ matrix.container }}
 
         services:
@@ -112,9 +116,6 @@ jobs:
             - name: Install
               run: yarn
 
-            - name: Prepare packages
-              run: yarn run build-ci
-
             - name: Migration-up MySQL
               run: yarn migration-up --db mysql
               working-directory: ./apps/api-server
@@ -147,11 +148,93 @@ jobs:
               with:
                   token: ${{ secrets.CODECOV_TOKEN }}
 
-    # fails on windows because it uses crlf
-    lint-and-prettier:
-        name: Lint and prettier
+    # 以下のテストを行っている。
+    # - DATABASE_URL を用いて API サーバーが起動することの確認
+    # - AUTO_MIGRATION が正常に動くことの確認
+    # - PnP を有効にした状態で API サーバーが起動することの確認
+    check-api-server:
+        name: 'Check API server (PnP=${{ matrix.pnp }})'
 
-        runs-on: ubuntu-20.04
+        strategy:
+            matrix:
+                pnp: [true, false]
+
+        runs-on: ubuntu-22.04
+        container: node:18-buster
+
+        services:
+            mysql:
+                image: mysql:8.0
+                env:
+                    MYSQL_ROOT_PASSWORD: root_password
+                    MYSQL_USER: test
+                    MYSQL_PASSWORD: test
+                    MYSQL_DATABASE: test
+                options: >-
+                    --health-cmd "mysqladmin ping"
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports:
+                    - 3306:3306
+            postgres:
+                image: postgres
+                env:
+                    POSTGRES_USER: test
+                    POSTGRES_PASSWORD: test
+                    POSTGRES_DB: test
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports:
+                    - 5432:5432
+
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v3
+
+            - run: node --version
+
+            - name: Enable PnP
+              run: "sed -i 's/nodeLinker: node-modules//g' ./.yarnrc.yml"
+              if: ${{ matrix.pnp == true }}
+
+            - run: cat ./.yarnrc.yml
+
+            - name: Install
+              run: yarn
+
+            - name: Try starting api-server with SQLite
+              run: timeout -k 3 10 yarn start || if test $? -eq 124; then echo OK; else exit $?; fi
+              working-directory: ./apps/api-server
+              env:
+                  DATABASE_URL: file://main.sqlite3
+                  AUTO_MIGRATION: true
+                  FIREBASE_PROJECT_ID: test-firebase-id-1234
+
+            - name: Try starting api-server with MySQL
+              run: timeout -k 3 10 yarn start || if test $? -eq 124; then echo OK; else exit $?; fi
+              working-directory: ./apps/api-server
+              env:
+                  DATABASE_URL: mysql://test:test@mysql:3306/test
+                  AUTO_MIGRATION: true
+                  FIREBASE_PROJECT_ID: test-firebase-id-1234
+
+            - name: Try starting api-server with PostgreSQL
+              run: timeout -k 3 10 yarn start || if test $? -eq 124; then echo OK; else exit $?; fi
+              working-directory: ./apps/api-server
+              env:
+                  DATABASE_URL: postgresql://test:test@postgres:5432/test
+                  AUTO_MIGRATION: true
+                  FIREBASE_PROJECT_ID: test-firebase-id-1234
+
+    # fails on windows because it uses crlf
+    check-format:
+        name: Check lint, prettier, and sort-package-json
+
+        runs-on: ubuntu-22.04
 
         steps:
             - uses: actions/checkout@v3
@@ -168,14 +251,55 @@ jobs:
               run: yarn lint
 
             - name: Prettier(check)
-              run: yarn prettier:base --check
+              run: yarn prettier-check
+
+            - name: sort-package-json(check)
+              run: yarn sort-package-json --check
+
+    check-artifacts:
+        name: Check artifacts
+
+        runs-on: ubuntu-22.04
+
+        steps:
+            - name: List git config
+              run: git config -l
+
+            - uses: actions/checkout@v3
+
+            - name: Use Node 18.x
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18.x
+                  cache: yarn
+
+            - run: yarn
+
+            - name: Build css file
+              run: yarn build-less
+              working-directory: ./apps/web-server
+
+            # 必要のない web-server のビルドも行われる。web-server のみを除外するとその除外処理でミスが生じる余地があるため、web-server も含めてまとめてビルドしている。
+            - name: Generate dist
+              run: yarn build
+
+            - name: Generate licenses disclaimer
+              run: yarn generate-disclaimer
+
+            # yarn generate-disclaimer で生成されるファイルはLFとCRLFが混在するため、改行コードを統一する処理を行っている。
+            - name: Clean CRLF
+              run: git config --local core.autocrlf input && git add . && git reset
+
+            - name: Fail if not all the artifacts are OK
+              uses: numtide/clean-git-action@v1
 
     publish-storybook:
         name: Publish Storybook to Chromatic
+        if: ${{ !contains(github.event.head_commit.message, '[light ci]') && github.event_name == 'push' }}
 
-        if: ${{ github.event_name == 'push' }}
+        needs: [tests-with-docker, tests-without-docker]
 
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-22.04
 
         steps:
             - uses: actions/checkout@v3
@@ -190,10 +314,6 @@ jobs:
                   cache: yarn
 
             - run: yarn
-
-            - name: Build web-server deps
-              run: yarn build:deps
-              working-directory: ./apps/web-server
 
             - name: Publish to Chromatic
               uses: chromaui/action@v1

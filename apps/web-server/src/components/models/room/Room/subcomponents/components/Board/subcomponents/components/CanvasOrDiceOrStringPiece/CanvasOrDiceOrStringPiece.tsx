@@ -1,6 +1,3 @@
-import React from 'react';
-import * as ReactKonva from 'react-konva';
-import { useSpring } from '@react-spring/konva';
 import {
     State,
     dicePieceStrIndexes,
@@ -9,13 +6,16 @@ import {
     shapePieceTemplate,
     stringPieceTemplate,
 } from '@flocon-trpg/core';
+import { keyNames, recordToArray } from '@flocon-trpg/utils';
+import { useSpring } from '@react-spring/konva';
+import React from 'react';
+import * as ReactKonva from 'react-konva';
+import { usePrevious } from 'react-use';
+import { DicePieceValue } from '../../../../../utils/dicePieceValue';
+import { PixelSize } from '../../../../../utils/positionAndSizeAndRect';
 import { StringPieceValue } from '../../../../../utils/stringPieceValue';
 import { KonvaD6 } from '../../../../KonvaDice/KonvaDice';
-import { DicePieceValue } from '../../../../../utils/dicePieceValue';
-import { usePrevious } from 'react-use';
 import { PieceGroup, PieceGroupProps } from '../../../../PieceGroup/PieceGroup';
-import { PixelSize } from '../../../../../utils/positionAndSizeAndRect';
-import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import {
     AnimatedRectAsAnyProps,
     AnimatedTextAsAnyProps,
@@ -51,7 +51,7 @@ type StringPieceContentProps = {
     createdByMe: boolean;
 } & PixelSize;
 
-const StringPieceContent: React.FC<StringPieceContentProps> = (props: StringPieceContentProps) => {
+const StringPieceContent: React.FC<StringPieceContentProps> = props => {
     const text = StringPieceValue.toKonvaText(props.state, props.createdByMe, undefined);
 
     const prevText = usePrevious(text);
@@ -149,13 +149,7 @@ type ShapePieceContentProps = {
     opacity: number;
 } & PixelSize;
 
-const ShapePieceContent: React.FC<ShapePieceContentProps> = ({
-    state,
-    stateId,
-    w,
-    h,
-    opacity,
-}: ShapePieceContentProps) => {
+const ShapePieceContent: React.FC<ShapePieceContentProps> = ({ state, stateId, w, h, opacity }) => {
     const shapes = recordToArray(state.shapes ?? {}).map(shape => {
         return (
             <ReactKonva.Path
@@ -180,12 +174,7 @@ type DicePieceContentProps = {
     opacity: number;
 } & PixelSize;
 
-const DicePieceContent: React.FC<DicePieceContentProps> = ({
-    state,
-    w,
-    h,
-    opacity,
-}: DicePieceContentProps) => {
+const DicePieceContent: React.FC<DicePieceContentProps> = ({ state, w, h, opacity }) => {
     const largeDieWidth = (w * 2) / 3;
     const largeDieHeight = (h * 2) / 3;
     const dieWidth = w / 2 - w / 20;
@@ -355,7 +344,7 @@ type ValueContentProps = {
     opacity: number;
 } & PixelSize;
 
-const ValueContent: React.FC<ValueContentProps> = (props: ValueContentProps) => {
+const ValueContent: React.FC<ValueContentProps> = props => {
     switch (props.state.type) {
         case shapePiece: {
             return (
@@ -387,7 +376,7 @@ type Props = {
 } & PieceGroupProps;
 
 // DicePieceとShapePieceとStringPieceを表示するコンポーネント。これらのPieceはどれもアニメーションがなくコードが単純なため共通化している。
-export const DiceOrShapeOrStringPiece: React.FC<Props> = (props: Props) => {
+export const DiceOrShapeOrStringPiece: React.FC<Props> = props => {
     return (
         <PieceGroup {...props}>
             <ValueContent {...props} />

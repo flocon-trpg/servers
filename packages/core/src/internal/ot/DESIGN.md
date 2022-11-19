@@ -20,9 +20,9 @@ composeDownOperation は、例えば { oldValue: 1, newValue: undefined }, { old
 
 ## その他
 
-### io-ts の brand vs serverTransform
+### zod の brand vs serverTransform
 
-名前やメモなどに長過ぎる文字列を設定してストレージ空き容量を枯渇させる攻撃対策として、serverTransform で弾く方法と、io-ts の brand を使う方法の 2 つを検討した。
+名前やメモなどに長過ぎる文字列を設定してストレージ空き容量を枯渇させる攻撃対策として、serverTransform で弾く方法と、zod の brand を使う方法の 2 つを検討した。
 
 前者のメリットは下の通り。
 

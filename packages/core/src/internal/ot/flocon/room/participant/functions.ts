@@ -1,10 +1,10 @@
-import { ServerTransform } from '../../../util/type';
-import * as ReplaceOperation from '../../../util/replaceOperation';
-import { isIdRecord } from '../../../util/record';
 import { Result } from '@kizahasi/result';
-import { RequestedBy, admin, isOwner } from '../../../util/requestedBy';
-import { template } from './types';
 import { State, TwoWayOperation, UpOperation } from '../../../generator';
+import { isIdRecord } from '../../../record';
+import { RequestedBy, admin, isOwner } from '../../../requestedBy';
+import * as ReplaceOperation from '../../../util/replaceOperation';
+import { ServerTransform } from '../../../util/type';
+import { template } from './types';
 
 export const toClientState = (source: State<typeof template>): State<typeof template> => {
     return source;
@@ -22,7 +22,7 @@ export const serverTransform =
         TwoWayOperation<typeof template>,
         UpOperation<typeof template>
     > =>
-    ({ prevState, clientOperation, serverOperation }) => {
+    ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
         const isAuthorized = isOwner({
             requestedBy,
             ownerParticipantId: participantKey,
@@ -38,7 +38,7 @@ export const serverTransform =
             twoWayOperation.name = ReplaceOperation.serverTransform({
                 first: serverOperation?.name ?? undefined,
                 second: clientOperation.name ?? undefined,
-                prevState: prevState.name,
+                prevState: stateBeforeServerOperation.name,
             });
         }
 
@@ -46,7 +46,7 @@ export const serverTransform =
             twoWayOperation.role = ReplaceOperation.serverTransform({
                 first: serverOperation?.role ?? undefined,
                 second: clientOperation.role ?? undefined,
-                prevState: prevState.role,
+                prevState: stateBeforeServerOperation.role,
             });
         }
 
