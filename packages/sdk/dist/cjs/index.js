@@ -225,6 +225,7 @@ class RoomConnectionsManager {
                 this.#map.set(userUid, { updatedAt: fetchedAt, isConnected: true });
             }
         });
+        this.#invokeNext(null);
     }
     toReadonlyBehaviorEvent() {
         return new ReadonlyBehaviorEvent(this.#event);
