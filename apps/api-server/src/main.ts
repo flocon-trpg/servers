@@ -12,7 +12,7 @@ import { ServerConfig } from './config/types';
 import { InMemoryConnectionManager, pubSub } from './connection/main';
 import { createServer, createServerAsError } from './createServer';
 import { BaasType } from './enums/BaasType';
-import { FIREBASE_PROJECTID, FIREBASE_PROJECT_ID } from './env';
+import { FIREBASE_PROJECT_ID } from './env';
 import { initializeLogger, logger } from './logger';
 import { checkMigrationsBeforeStart, doAutoMigrationBeforeStart } from './migrate';
 import { AppConsole } from './utils/appConsole';
