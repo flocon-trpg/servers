@@ -292,7 +292,6 @@ const createRoomMessagesClient = ({ client, roomEventSubscription, }) => {
                 return;
             }
             if (result.value.result.__typename !== 'RoomMessages') {
-                result.value.result.failureType;
                 setQueryStatus({
                     type: error$1,
                     error: {
