@@ -7,6 +7,7 @@ module.exports = {
         '@storybook/addon-links',
         '@storybook/addon-essentials',
         '@storybook/addon-interactions',
+        'storybook-addon-next-router',
     ],
     // https://storybook.js.org/docs/react/configure/images-and-assets#serving-static-files-via-storybook-configuration
     staticDirs: ['../public'],

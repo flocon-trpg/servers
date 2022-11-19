@@ -3375,6 +3375,7 @@ __metadata:
     sass: ^1.42.1
     sass-loader: 13.0.2
     serve: ^14.0.0
+    storybook-addon-next-router: ^4.0.1
     sucrase: ^3.20.1
     tsconfig-paths-webpack-plugin: 3.5.2
     typescript: 4.8.4
@@ -23462,6 +23463,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"storybook-addon-next-router@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "storybook-addon-next-router@npm:4.0.1"
+  dependencies:
+    tslib: 2.4.0
+  peerDependencies:
+    "@storybook/addon-actions": ^6.0.0
+    "@storybook/addons": ^6.0.0
+    "@storybook/client-api": ^6.0.0
+    next: ^9.0.0 || ^10.0.0 || ^11.0.0 || ^12.0.0
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: f83c5282046e7a2173329e136d6e38faac3e7e4b05a09e22def6f3b6c590a78d7c4fbb5847a225fca4baeea55ad9d2005f44fbd3be907c1d6eba1d859ecc7aac
+  languageName: node
+  linkType: hard
+
 "stream-browserify@npm:^2.0.1":
   version: 2.0.2
   resolution: "stream-browserify@npm:2.0.2"
@@ -24610,6 +24627,13 @@ __metadata:
   version: 2.3.1
   resolution: "tslib@npm:2.3.1"
   checksum: de17a98d4614481f7fcb5cd53ffc1aaf8654313be0291e1bfaee4b4bb31a20494b7d218ff2e15017883e8ea9626599b3b0e0229c18383ba9dce89da2adf15cb9
+  languageName: node
+  linkType: hard
+
+"tslib@npm:2.4.0":
+  version: 2.4.0
+  resolution: "tslib@npm:2.4.0"
+  checksum: 8c4aa6a3c5a754bf76aefc38026134180c053b7bd2f81338cb5e5ebf96fefa0f417bff221592bf801077f5bf990562f6264fecbc42cd3309b33872cb6fc3b113
   languageName: node
   linkType: hard
 
