@@ -1,10 +1,11 @@
 import { createServer as createHttpServer } from 'http';
 import path from 'path';
+import { ApolloServer, ApolloServerPlugin } from '@apollo/server';
+import { ExpressContextFunctionArgument, expressMiddleware } from '@apollo/server/express4';
 import { Result } from '@kizahasi/result';
 import { Reference } from '@mikro-orm/core';
-import { PluginDefinition } from 'apollo-server-core';
-import { ApolloServer } from 'apollo-server-express';
-import { ExpressContext } from 'apollo-server-express/dist/ApolloServer';
+import { json } from 'body-parser';
+import cors from 'cors';
 import express from 'express';
 import { ensureDir } from 'fs-extra';
 import { GraphQLSchema, execute, subscribe } from 'graphql';
@@ -60,7 +61,7 @@ const setupIndexAsError = (app: ReturnType<typeof express>) => {
     });
 };
 
-const loggingPlugin: PluginDefinition = {
+const loggingPlugin: ApolloServerPlugin = {
     async requestDidStart() {
         return {
             async didEncounterErrors(requestContext) {
@@ -99,6 +100,8 @@ export const createServerAsError = async ({ port }: { port: string | number }) =
     return server;
 };
 
+const graphqlPath = '/graphql';
+
 export const createServer = async ({
     serverConfig,
     promiseQueue,
@@ -119,7 +122,7 @@ export const createServer = async ({
     schema: GraphQLSchema;
     debug: boolean;
     getDecodedIdTokenFromExpressRequest: (
-        req: ExpressContext['req']
+        req: ExpressContextFunctionArgument['req']
     ) => Promise<Result<Readonly<DecodedIdToken>, unknown> | undefined>;
     getDecodedIdTokenFromWsContext: (
         context: Context
@@ -139,25 +142,11 @@ export const createServer = async ({
         });
     }
 
-    const context = async (context: ExpressContext): Promise<ResolverContext> => {
-        return {
-            decodedIdToken: await getDecodedIdTokenFromExpressRequest(context.req),
-            rateLimiter,
-            serverConfig,
-            promiseQueue,
-            connectionManager,
-            em: em.fork(),
-            authorizedUser: null,
-        };
-    };
-
     const apolloServer = new ApolloServer({
         schema,
-        context,
-        debug,
         csrfPrevention: true,
-        cache: 'bounded',
         plugins: [loggingPlugin],
+        includeStacktraceInErrorResponses: debug,
     });
     await apolloServer.start();
 
@@ -168,9 +157,25 @@ export const createServer = async ({
             logger: logger.get(),
         })
     );
-
-    // 先に書くほど優先度が高いようなので、applyMiddlewareを先に書くと、/graphqlが上書きされない。
-    apolloServer.applyMiddleware({ app });
+    app.use(
+        graphqlPath,
+        cors<cors.CorsRequest>(),
+        json(),
+        expressMiddleware(apolloServer, {
+            context: async context => {
+                const result: ResolverContext = {
+                    decodedIdToken: await getDecodedIdTokenFromExpressRequest(context.req),
+                    rateLimiter,
+                    serverConfig,
+                    promiseQueue,
+                    connectionManager,
+                    em: em.fork(),
+                    authorizedUser: null,
+                };
+                return result;
+            },
+        })
+    );
 
     if (serverConfig.accessControlAllowOrigin == null) {
         !quiet &&
@@ -493,10 +498,7 @@ export const createServer = async ({
     }
     const server = httpServer.listen(port, () => {
         // TODO: /graphqlが含まれているとAPI_HTTPなどの設定にも/graphqlの部分も入力してしまいそうなので、対処したほうがいいと思われる。また、createServerAsErrorとの統一性も取れていない
-        !quiet &&
-            logger.infoAsNotice(
-                `🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`
-            );
+        !quiet && logger.infoAsNotice(`🚀 Server ready at http://localhost:${port}${graphqlPath}`);
         !quiet &&
             logger.infoAsNotice(
                 `🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`
