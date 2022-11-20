@@ -180,7 +180,7 @@ describe('useRoomMessages', () => {
         expect(result.current.messages.current).toEqual([expectedMessage]);
     });
 
-    it('tests event with filter', () => {
+    it('tests event with filter which returns true', () => {
         const createdAt = new Date().getTime();
 
         const message: RoomPublicMessage = {
@@ -221,7 +221,7 @@ describe('useRoomMessages', () => {
         expect(result.current.messages.current).toEqual([expectedMessage]);
     });
 
-    it('tests event with filter', () => {
+    it('tests event with filter which returns false', () => {
         const createdAt = new Date().getTime();
 
         const message: RoomPublicMessage = {
@@ -255,5 +255,43 @@ describe('useRoomMessages', () => {
 
         expect(result.current.messages.diff).toBeUndefined();
         expect(result.current.messages.current).toEqual([]);
+    });
+
+    it('tests updating filter', () => {
+        const createdAt = new Date().getTime();
+
+        const message: RoomPublicMessage = {
+            __typename: 'RoomPublicMessage',
+            channelKey: '1',
+            createdAt,
+            isSecret: false,
+            messageId: 'message-id1',
+            initText: 'text1',
+        };
+
+        const testRoomClient = createTestRoomClient({});
+
+        const filter = () => false;
+        const { result, rerender } = renderHook(props => useRoomMessages(props.arg1, props.arg2), {
+            initialProps: { arg1: testRoomClient.roomClient, arg2: filter },
+        });
+        act(() => {
+            testRoomClient.source.roomMessageClient.onQuery({
+                publicMessages: [message],
+                publicChannels: [],
+                privateMessages: [],
+                pieceLogs: [],
+                soundEffects: [],
+            });
+        });
+
+        rerender({ arg1: testRoomClient.roomClient, arg2: () => true });
+
+        const expectedMessage: Message<null> = {
+            type: 'publicMessage',
+            value: message,
+        };
+        expect(result.current.messages.diff).toBeUndefined();
+        expect(result.current.messages.current).toEqual([expectedMessage]);
     });
 });
