@@ -342,15 +342,13 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
     );
 };
 
-type ChannelNameEditorDrawerProps = {
+type ChannelNameEditorProps = {
     visible: boolean;
 
     onClose: () => void;
 };
 
-const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (
-    props: ChannelNameEditorDrawerProps
-) => {
+const ChannelNamesEditor: React.FC<ChannelNameEditorProps> = (props: ChannelNameEditorProps) => {
     const { visible, onClose } = props;
     const publicChannelNames = usePublicChannelNames();
     const operateAsStateWithImmer = useSetRoomStateWithImmer();

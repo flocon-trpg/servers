@@ -1,4 +1,4 @@
-import { DrawerProps, Modal } from 'antd';
+import { Modal, ModalProps } from 'antd';
 import { atom, useAtom } from 'jotai';
 import React from 'react';
 import { Subject } from 'rxjs';
@@ -11,7 +11,7 @@ import { PieceModalState } from '@/utils/types';
 
 export const stringPieceModalAtom = atom<PieceModalState | null>(null);
 
-const drawerBaseProps: Partial<DrawerProps> = {
+const modalBaseProps: Partial<ModalProps> = {
     width: 600,
 };
 
@@ -51,7 +51,7 @@ export const StringPieceEditorModal: React.FC = () => {
 
     return (
         <Modal
-            {...drawerBaseProps}
+            {...modalBaseProps}
             title={modalType?.type == update ? '文字列コマの編集' : '文字列コマの新規作成'}
             open={visible}
             closable
