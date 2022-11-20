@@ -35,7 +35,7 @@ const logEntryPasswordConfig = (serverConfig) => {
         });
     }
 };
-const main = async (params) => {
+const main = async (args) => {
     const logConfigResult = new logConfigParser.LogConfigParser(process.env).logConfig;
     logger.initializeLogger(logConfigResult);
     appConsole.AppConsole.infoAsNotice({
@@ -126,7 +126,7 @@ const main = async (params) => {
         connectionManager,
         em: orm.value.em,
         schema,
-        debug: params.debug,
+        debug: args.debug,
         port: process.env.PORT ?? 4000,
         getDecodedIdTokenFromExpressRequest: context => getDecodedIdTokenFromBearer(context.headers.authorization),
         getDecodedIdTokenFromWsContext,
