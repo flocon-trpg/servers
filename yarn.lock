@@ -16263,39 +16263,42 @@ __metadata:
   linkType: hard
 
 "jotai@npm:^1.8.4":
-  version: 1.8.4
-  resolution: "jotai@npm:1.8.4"
+  version: 1.10.0
+  resolution: "jotai@npm:1.10.0"
   peerDependencies:
     "@babel/core": "*"
     "@babel/template": "*"
-    "@tanstack/query-core": "*"
-    "@urql/core": "*"
-    immer: "*"
-    optics-ts: "*"
+    jotai-immer: "*"
+    jotai-optics: "*"
+    jotai-redux: "*"
+    jotai-tanstack-query: "*"
+    jotai-urql: "*"
+    jotai-valtio: "*"
+    jotai-xstate: "*"
+    jotai-zustand: "*"
     react: ">=16.8"
-    valtio: "*"
-    wonka: "*"
-    xstate: "*"
   peerDependenciesMeta:
     "@babel/core":
       optional: true
     "@babel/template":
       optional: true
-    "@tanstack/query-core":
+    jotai-immer:
       optional: true
-    "@urql/core":
+    jotai-optics:
       optional: true
-    immer:
+    jotai-redux:
       optional: true
-    optics-ts:
+    jotai-tanstack-query:
       optional: true
-    valtio:
+    jotai-urql:
       optional: true
-    wonka:
+    jotai-valtio:
       optional: true
-    xstate:
+    jotai-xstate:
       optional: true
-  checksum: a3e9ffe9d1dad088bc965702fb2ae6f14162282d950bcb149f423ca7e8738466892b8b8652b65dda11d26e481056105170b961e4b19caa34400c3402d4e16157
+    jotai-zustand:
+      optional: true
+  checksum: 72047e84fc24916ea3054822cfe85b381102b5eeae61c36e8d52700b7679b8b10d44f2a7aa545b7efc7c15257f9ed410c90769889141ffe9db925424b2a5d79e
   languageName: node
   linkType: hard
 
@@ -24629,7 +24632,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:2.4.0, tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.1.0, tslib@npm:^2.3.0, tslib@npm:^2.4.0, tslib@npm:~2.4.0":
+"tslib@npm:2.4.0":
   version: 2.4.0
   resolution: "tslib@npm:2.4.0"
   checksum: 8c4aa6a3c5a754bf76aefc38026134180c053b7bd2f81338cb5e5ebf96fefa0f417bff221592bf801077f5bf990562f6264fecbc42cd3309b33872cb6fc3b113
@@ -24643,7 +24646,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.4.1":
+"tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.1.0, tslib@npm:^2.3.0, tslib@npm:^2.4.0, tslib@npm:^2.4.1, tslib@npm:~2.4.0":
   version: 2.4.1
   resolution: "tslib@npm:2.4.1"
   checksum: 19480d6e0313292bd6505d4efe096a6b31c70e21cf08b5febf4da62e95c265c8f571f7b36fcc3d1a17e068032f59c269fab3459d6cd3ed6949eafecf64315fca
