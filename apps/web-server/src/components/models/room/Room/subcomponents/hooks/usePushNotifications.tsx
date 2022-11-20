@@ -68,7 +68,7 @@ export function usePushNotifications(): void {
     const messageFilterRef = useLatest(messageFilter);
 
     const roomMessages = useRoomMessages({});
-    const messageDiff = roomMessages.diff;
+    const messageDiff = roomMessages.messages.diff;
 
     React.useEffect(() => {
         if (myUserUidRef.current == null || messageDiff == null) {

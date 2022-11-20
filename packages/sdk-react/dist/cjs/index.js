@@ -1,15 +1,19 @@
 'use strict';
 
 var sdk = require('@flocon-trpg/sdk');
-var react = require('react');
+var React = require('react');
 var reactUse = require('react-use');
 var useMemoOne = require('use-memo-one');
+
+function _interopDefault (e) { return e && e.__esModule ? e : { default: e }; }
+
+var React__default = /*#__PURE__*/_interopDefault(React);
 
 function useCreateRoomClient(params) {
     const client = params?.client;
     const roomId = params?.roomId;
     const userUid = params?.userUid;
-    const [recreateKey, setRecreateKey] = react.useState(0);
+    const [recreateKey, setRecreateKey] = React.useState(0);
     const result = useMemoOne.useMemoOne(() => {
         if (client == null || roomId == null || userUid == null) {
             return null;
@@ -18,10 +22,10 @@ function useCreateRoomClient(params) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [client, roomId, userUid, recreateKey]);
     const previousResult = reactUse.usePreviousDistinct(result);
-    react.useEffect(() => {
+    React.useEffect(() => {
         previousResult?.unsubscribe();
     }, [previousResult]);
-    return react.useMemo(() => {
+    return React.useMemo(() => {
         if (result == null) {
             return null;
         }
@@ -35,13 +39,13 @@ function useCreateRoomClient(params) {
 }
 
 const useReadonlyBehaviorEvent = (source) => {
-    const [state, setState] = react.useState(() => {
+    const [state, setState] = React.useState(() => {
         if (source instanceof sdk.ReadonlyBehaviorEvent) {
             return source.getValue();
         }
         return source;
     });
-    react.useEffect(() => {
+    React.useEffect(() => {
         if (source instanceof sdk.ReadonlyBehaviorEvent) {
             setState(source.getValue());
             const subscription = source.subscribe({ next: value => setState(value) });
@@ -63,31 +67,30 @@ const useRoomGraphQLStatus = (roomClient) => {
 
 const useRoomMessages = (roomClient, filter) => {
     const queryStatus = useReadonlyBehaviorEvent(roomClient.messages.queryStatus);
-    const messages = react.useMemo(() => {
+    const messagesSource = React.useMemo(() => {
         return filter == null
             ? roomClient.messages.messages
             : roomClient.messages.messages.filter(filter);
     }, [filter, roomClient.messages.messages]);
-    const [result, setResult] = react.useState(() => ({
-        value: messages?.getCurrent() ?? [],
-        queryStatus,
+    const [messages, setMessages] = React.useState(() => ({
+        current: messagesSource?.getCurrent() ?? [],
     }));
-    react.useEffect(() => {
-        if (messages == null) {
+    React.useEffect(() => {
+        if (messagesSource == null) {
             return;
         }
-        const subscription = messages.changed.subscribe({
+        setMessages({ current: messagesSource.getCurrent() });
+        const subscription = messagesSource.changed.subscribe({
             next: e => {
-                setResult(prevState => ({
-                    ...prevState,
-                    value: e.current,
+                setMessages({
+                    current: e.current,
                     diff: e.type === 'event' ? e.diff ?? undefined : undefined,
-                }));
+                });
             },
         });
         return () => subscription.unsubscribe();
-    }, [messages]);
-    return result;
+    }, [messagesSource]);
+    return React__default.default.useMemo(() => ({ messages, queryStatus }), [messages, queryStatus]);
 };
 
 const useRoomState = (roomClient) => {
@@ -95,7 +98,7 @@ const useRoomState = (roomClient) => {
 };
 
 const useUpdateWritingMessageStatus = (roomClient) => {
-    return react.useMemo(() => {
+    return React.useMemo(() => {
         return (...params) => roomClient.writingMessageStatus.update(...params);
     }, [roomClient.writingMessageStatus]);
 };

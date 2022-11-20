@@ -1,50 +1,47 @@
-import { GetMessagesQueryStatus, RoomClient } from '@flocon-trpg/sdk';
+import { RoomClient } from '@flocon-trpg/sdk';
 import { Diff, Message } from '@flocon-trpg/web-server-utils';
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useReadonlyBehaviorEvent } from './useReadonlyBehaviorEvent';
 
 export const useRoomMessages = <TCustomMessage, TGraphQLError>(
     roomClient: Pick<RoomClient<TCustomMessage, TGraphQLError>, 'messages'>,
     filter?: (message: Message<TCustomMessage>) => boolean
 ) => {
-    type ResultType = {
+    type MessagesType = {
         /** メッセージの配列です。作成日時によって昇順にソートされています。 */
-        value: readonly Message<TCustomMessage>[];
+        current: readonly Message<TCustomMessage>[];
 
-        /** 追加、変更、削除されたメッセージです。ブラウザで通知を出す際などに用いられます。 */
+        /** 追加、変更、削除されたメッセージです。ブラウザで通知を出す際などに用いられます。メッセージの多くが変更されたとき(Query による更新など)はundefined になります。 */
         diff?: Diff<TCustomMessage> | undefined;
-
-        queryStatus: GetMessagesQueryStatus<TGraphQLError>;
     };
 
     const queryStatus = useReadonlyBehaviorEvent(roomClient.messages.queryStatus);
 
-    const messages = useMemo(() => {
+    const messagesSource = useMemo(() => {
         return filter == null
             ? roomClient.messages.messages
             : roomClient.messages.messages.filter(filter);
     }, [filter, roomClient.messages.messages]);
 
-    const [result, setResult] = useState<ResultType>(() => ({
-        value: messages?.getCurrent() ?? [],
-        queryStatus,
+    const [messages, setMessages] = useState<MessagesType>(() => ({
+        current: messagesSource?.getCurrent() ?? [],
     }));
 
     useEffect(() => {
-        if (messages == null) {
+        if (messagesSource == null) {
             return;
         }
-        const subscription = messages.changed.subscribe({
+        setMessages({ current: messagesSource.getCurrent() });
+        const subscription = messagesSource.changed.subscribe({
             next: e => {
-                setResult(prevState => ({
-                    ...prevState,
-                    value: e.current,
+                setMessages({
+                    current: e.current,
                     diff: e.type === 'event' ? e.diff ?? undefined : undefined,
-                }));
+                });
             },
         });
         return () => subscription.unsubscribe();
-    }, [messages]);
+    }, [messagesSource]);
 
-    return result;
+    return React.useMemo(() => ({ messages, queryStatus }), [messages, queryStatus]);
 };

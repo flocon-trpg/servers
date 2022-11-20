@@ -754,7 +754,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
 
     const content = (
         <JumpToBottomVirtuoso
-            items={messages.value ?? []}
+            items={messages.messages.current ?? []}
             create={thenMap}
             height={contentHeight - writingStatusHeight}
         />

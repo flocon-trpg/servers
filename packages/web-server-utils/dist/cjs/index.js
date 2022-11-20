@@ -1,5 +1,6 @@
 'use strict';
 
+var utils = require('@flocon-trpg/utils');
 var produce = require('immer');
 var rxjs = require('rxjs');
 
@@ -447,6 +448,7 @@ const createRoomMessage = (source) => {
                 value: source,
             };
         case undefined:
+            utils.loggerRef.value.warn({ object: source }, 'createRoomMessage 関数に渡されたオブジェクトの __typename が undefined だったため、処理はスキップされました。RoomPrivateMessageFragment | RoomPublicMessageFragment | PieceLogFragment | RoomSoundEffectFragment では __typename がないとメッセージを処理できません。GraphQL クライアントの設定を確認し、__typename を常にセットするようにしてください。');
             return undefined;
     }
 };
@@ -544,8 +546,6 @@ const reduceEvent = ({ messages: messagesSource, event, }) => {
                 },
             };
         }
-        case undefined:
-            return noChange;
     }
 };
 const event = 'event';
@@ -732,9 +732,12 @@ class RoomMessagesClient {
                 }
                 case 'RoomPublicChannelUpdate':
                 case 'RoomMessagesReset': {
-                    console.warn(`${event.__typename} is deprecated.`);
+                    utils.loggerRef.value.warn(`${event.__typename} is deprecated.`);
                     break;
                 }
+                case undefined:
+                    utils.loggerRef.value.warn({ object: event }, '#reduceOnQuery メソッドの引数で __typename が undefined のオブジェクトが見つかったため、このオブジェクトの処理はスキップされました。RoomMessageEventFragment では __typename がないとメッセージを処理できません。GraphQL クライアントの設定を確認し、__typename を常にセットするようにしてください。');
+                    break;
             }
         }
         return [...messagesSet.values()].sort((x, y) => createSortKey(x) - createSortKey(y));

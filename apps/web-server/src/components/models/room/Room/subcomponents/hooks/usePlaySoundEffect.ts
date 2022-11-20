@@ -89,7 +89,7 @@ function usePlaySoundEffectCore(value?: SoundEffect): void {
 
 export function usePlaySoundEffect(): void {
     const roomMessages = useRoomMessages({});
-    const messageDiff = roomMessages.diff;
+    const messageDiff = roomMessages.messages.diff;
     const [soundEffectState, setSoundEffectState] = React.useState<SoundEffect>();
 
     React.useEffect(() => {

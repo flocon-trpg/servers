@@ -237,7 +237,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     }
 
     const lastPublicMessage = (() => {
-        const publicMessagesValue = publicMessages.value;
+        const publicMessagesValue = publicMessages.messages.current;
         const lastMessage = publicMessagesValue[publicMessagesValue.length - 1];
         if (lastMessage == null) {
             return;

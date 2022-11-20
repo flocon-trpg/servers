@@ -1,5 +1,5 @@
 import { createRoomClient, ReadonlyBehaviorEvent } from '@flocon-trpg/sdk';
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { usePreviousDistinct } from 'react-use';
 import { useMemoOne } from 'use-memo-one';
 
@@ -61,31 +61,30 @@ const useRoomGraphQLStatus = (roomClient) => {
 
 const useRoomMessages = (roomClient, filter) => {
     const queryStatus = useReadonlyBehaviorEvent(roomClient.messages.queryStatus);
-    const messages = useMemo(() => {
+    const messagesSource = useMemo(() => {
         return filter == null
             ? roomClient.messages.messages
             : roomClient.messages.messages.filter(filter);
     }, [filter, roomClient.messages.messages]);
-    const [result, setResult] = useState(() => ({
-        value: messages?.getCurrent() ?? [],
-        queryStatus,
+    const [messages, setMessages] = useState(() => ({
+        current: messagesSource?.getCurrent() ?? [],
     }));
     useEffect(() => {
-        if (messages == null) {
+        if (messagesSource == null) {
             return;
         }
-        const subscription = messages.changed.subscribe({
+        setMessages({ current: messagesSource.getCurrent() });
+        const subscription = messagesSource.changed.subscribe({
             next: e => {
-                setResult(prevState => ({
-                    ...prevState,
-                    value: e.current,
+                setMessages({
+                    current: e.current,
                     diff: e.type === 'event' ? e.diff ?? undefined : undefined,
-                }));
+                });
             },
         });
         return () => subscription.unsubscribe();
-    }, [messages]);
-    return result;
+    }, [messagesSource]);
+    return React.useMemo(() => ({ messages, queryStatus }), [messages, queryStatus]);
 };
 
 const useRoomState = (roomClient) => {

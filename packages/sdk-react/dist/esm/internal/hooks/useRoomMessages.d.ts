@@ -1,9 +1,9 @@
-import { GetMessagesQueryStatus, RoomClient } from '@flocon-trpg/sdk';
+import { RoomClient } from '@flocon-trpg/sdk';
 import { Diff, Message } from '@flocon-trpg/web-server-utils';
 export declare const useRoomMessages: <TCustomMessage, TGraphQLError>(roomClient: Pick<{
     messages: {
         messages: import("@flocon-trpg/web-server-utils").AllRoomMessages<TCustomMessage>;
-        queryStatus: import("@flocon-trpg/sdk").ReadonlyBehaviorEvent<GetMessagesQueryStatus<TGraphQLError>>;
+        queryStatus: import("@flocon-trpg/sdk").ReadonlyBehaviorEvent<import("@flocon-trpg/sdk").GetMessagesQueryStatus<TGraphQLError>>;
         addCustomMessage: (message: Omit<import("@flocon-trpg/web-server-utils").CustomMessage<TCustomMessage>, "type">) => void;
     };
     roomConnections: import("@flocon-trpg/sdk").ReadonlyBehaviorEvent<{
@@ -51,10 +51,12 @@ export declare const useRoomMessages: <TCustomMessage, TGraphQLError>(roomClient
     }>;
     unsubscribe: () => void;
 }, "messages">, filter?: ((message: Message<TCustomMessage>) => boolean) | undefined) => {
-    /** メッセージの配列です。作成日時によって昇順にソートされています。 */
-    value: readonly Message<TCustomMessage>[];
-    /** 追加、変更、削除されたメッセージです。ブラウザで通知を出す際などに用いられます。 */
-    diff?: Diff<TCustomMessage> | undefined;
-    queryStatus: GetMessagesQueryStatus<TGraphQLError>;
+    messages: {
+        /** メッセージの配列です。作成日時によって昇順にソートされています。 */
+        current: readonly Message<TCustomMessage>[];
+        /** 追加、変更、削除されたメッセージです。ブラウザで通知を出す際などに用いられます。メッセージの多くが変更されたとき(Query による更新など)はundefined になります。 */
+        diff?: Diff<TCustomMessage> | undefined;
+    };
+    queryStatus: import("@flocon-trpg/sdk").GetMessagesQueryStatus<TGraphQLError>;
 };
 //# sourceMappingURL=useRoomMessages.d.ts.map
