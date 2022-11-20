@@ -1,10 +1,10 @@
 import { BehaviorEvent, ReadonlyBehaviorEvent } from '@flocon-trpg/sdk';
 import { act, renderHook } from '@testing-library/react';
-import { useReadonlyBehaviorStream } from './useReadonlyBehaviorEvent';
+import { useReadonlyBehaviorEvent } from './useReadonlyBehaviorEvent';
 
-describe('useReadonlyBehaviorStream', () => {
-    it('tests non-stream -> non-stream', () => {
-        const actual = renderHook(initialProps => useReadonlyBehaviorStream(initialProps), {
+describe('useReadonlyBehaviorEvent', () => {
+    it('tests non-ReadonlyBehaviorEvent -> non-ReadonlyBehaviorEvent', () => {
+        const actual = renderHook(initialProps => useReadonlyBehaviorEvent(initialProps), {
             initialProps: 1,
         });
         expect(actual.result.current).toBe(1);
@@ -12,10 +12,10 @@ describe('useReadonlyBehaviorStream', () => {
         expect(actual.result.current).toBe(2);
     });
 
-    it('tests stream -> stream', () => {
+    it('tests ReadonlyBehaviorEvent -> ReadonlyBehaviorEvent', () => {
         const streamSource1 = new BehaviorEvent(1);
         const stream1 = new ReadonlyBehaviorEvent(streamSource1);
-        const actual = renderHook(initialProps => useReadonlyBehaviorStream(initialProps), {
+        const actual = renderHook(initialProps => useReadonlyBehaviorEvent(initialProps), {
             initialProps: stream1,
         });
         expect(actual.result.current).toBe(1);

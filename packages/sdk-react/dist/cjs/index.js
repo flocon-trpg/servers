@@ -34,7 +34,7 @@ function useCreateRoomClient(params) {
     }, [result]);
 }
 
-const useReadonlyBehaviorStream = (source) => {
+const useReadonlyBehaviorEvent = (source) => {
     const [state, setState] = react.useState(() => {
         if (source instanceof sdk.ReadonlyBehaviorEvent) {
             return source.getValue();
@@ -54,15 +54,15 @@ const useReadonlyBehaviorStream = (source) => {
 };
 
 const useRoomConnections = (roomClient) => {
-    return useReadonlyBehaviorStream(roomClient.roomConnections);
+    return useReadonlyBehaviorEvent(roomClient.roomConnections);
 };
 
 const useRoomGraphQLStatus = (roomClient) => {
-    return useReadonlyBehaviorStream(roomClient.graphQLStatus);
+    return useReadonlyBehaviorEvent(roomClient.graphQLStatus);
 };
 
 const useRoomMessages = (roomClient, filter) => {
-    const queryStatus = useReadonlyBehaviorStream(roomClient.messages.queryStatus);
+    const queryStatus = useReadonlyBehaviorEvent(roomClient.messages.queryStatus);
     const messages = react.useMemo(() => {
         return filter == null
             ? roomClient.messages.messages
@@ -91,7 +91,7 @@ const useRoomMessages = (roomClient, filter) => {
 };
 
 const useRoomState = (roomClient) => {
-    return useReadonlyBehaviorStream(roomClient.roomState);
+    return useReadonlyBehaviorEvent(roomClient.roomState);
 };
 
 const useUpdateWritingMessageStatus = (roomClient) => {
@@ -101,11 +101,11 @@ const useUpdateWritingMessageStatus = (roomClient) => {
 };
 
 const useWritingMessageStatus = (roomClient) => {
-    return useReadonlyBehaviorStream(roomClient.writingMessageStatus.value);
+    return useReadonlyBehaviorEvent(roomClient.writingMessageStatus.value);
 };
 
 exports.useCreateRoomClient = useCreateRoomClient;
-exports.useReadonlyBehaviorStream = useReadonlyBehaviorStream;
+exports.useReadonlyBehaviorEvent = useReadonlyBehaviorEvent;
 exports.useRoomConnections = useRoomConnections;
 exports.useRoomGraphQLStatus = useRoomGraphQLStatus;
 exports.useRoomMessages = useRoomMessages;

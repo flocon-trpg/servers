@@ -1,7 +1,7 @@
 import { GetMessagesQueryStatus, RoomClient } from '@flocon-trpg/sdk';
 import { Diff, Message } from '@flocon-trpg/web-server-utils';
 import { useEffect, useMemo, useState } from 'react';
-import { useReadonlyBehaviorStream } from './useReadonlyBehaviorEvent';
+import { useReadonlyBehaviorEvent } from './useReadonlyBehaviorEvent';
 
 export const useRoomMessages = <TCustomMessage, TGraphQLError>(
     roomClient: Pick<RoomClient<TCustomMessage, TGraphQLError>, 'messages'>,
@@ -17,7 +17,7 @@ export const useRoomMessages = <TCustomMessage, TGraphQLError>(
         queryStatus: GetMessagesQueryStatus<TGraphQLError>;
     };
 
-    const queryStatus = useReadonlyBehaviorStream(roomClient.messages.queryStatus);
+    const queryStatus = useReadonlyBehaviorEvent(roomClient.messages.queryStatus);
 
     const messages = useMemo(() => {
         return filter == null
