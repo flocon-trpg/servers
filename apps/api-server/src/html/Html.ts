@@ -27,8 +27,7 @@ export namespace Html {
     <h2>fly.ioにデプロイした方へ</h2>
     <div>
         <p>
-            おそらくFIREBASE_PROJECT_IDもしくはENTRY_PASSWORDの設定に誤りがあると思われます。Herokuに出力されたエラーログを参照して、Config
-            Varsの設定に問題がないか確認してください。
+            おそらくFIREBASE_PROJECT_IDもしくはENTRY_PASSWORDの設定に誤りがあると思われます。fly.ioのダッシュボードに出力されたエラーログを参照して、設定に問題がないか確認してください。
         </p>
     </div>
 </html>
