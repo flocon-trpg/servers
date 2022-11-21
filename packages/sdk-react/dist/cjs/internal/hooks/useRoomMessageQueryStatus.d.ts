@@ -1,4 +1,4 @@
-import { RoomClient } from "@flocon-trpg/sdk";
+import { RoomClient } from '@flocon-trpg/sdk';
 export declare const useRoomMessageQueryStatus: <TCustomMessage, TGraphQLError>(roomClient: Pick<{
     messages: {
         messages: import("@flocon-trpg/web-server-utils").AllRoomMessages<TCustomMessage>;
