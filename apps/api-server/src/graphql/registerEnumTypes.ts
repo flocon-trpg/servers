@@ -1,35 +1,35 @@
 import { registerEnumType } from 'type-graphql';
-import { ParticipantRoleType } from '../enums/ParticipantRoleType';
-import { JoinRoomFailureType } from '../enums/JoinRoomFailureType';
-import { FileSourceType } from '../enums/FileSourceType';
-import { GetRoomFailureType } from '../enums/GetRoomFailureType';
-import { EntryToServerResultType } from '../enums/EntryToServerResultType';
-import { OperateRoomFailureType } from '../enums/OperateRoomFailureType';
-import { GetRoomMessagesFailureType } from '../enums/GetRoomMessagesFailureType';
-import { WriteRoomPublicMessageFailureType } from '../enums/WriteRoomPublicMessageFailureType';
-import { WriteRoomPrivateMessageFailureType } from '../enums/WriteRoomPrivateMessageFailureType';
-import { LeaveRoomFailureType } from '../enums/LeaveRoomFailureType';
-import { RoomParameterNameType } from '../enums/RoomParameterNameType';
-import { WriteRoomSoundEffectFailureType } from '../enums/WriteRoomSoundEffectFailureType';
-import { DeleteMessageFailureType } from '../enums/DeleteMessageFailureType';
-import { EditMessageFailureType } from '../enums/EditMessageFailureType';
-import { MakeMessageNotSecretFailureType } from '../enums/MakeMessageNotSecretFailureType';
-import { GetRoomLogFailureType } from '../enums/GetRoomLogFailureType';
-import { PromoteFailureType } from '../enums/PromoteFailureType';
+import { BaasType } from '../enums/BaasType';
 import { ChangeParticipantNameFailureType } from '../enums/ChangeParticipantNameFailureType';
+import { CreateRoomFailureType } from '../enums/CreateRoomFailureType';
+import { DeleteMessageFailureType } from '../enums/DeleteMessageFailureType';
+import { DeleteRoomAsAdminFailureType } from '../enums/DeleteRoomAsAdminFailureType';
 import { DeleteRoomFailureType } from '../enums/DeleteRoomFailureType';
-import { PrereleaseType } from '../enums/PrereleaseType';
+import { EditMessageFailureType } from '../enums/EditMessageFailureType';
+import { EntryToServerResultType } from '../enums/EntryToServerResultType';
+import { FileListType } from '../enums/FileListType';
+import { FileSourceType } from '../enums/FileSourceType';
 import { GetRoomConnectionFailureType } from '../enums/GetRoomConnectionFailureType';
+import { GetRoomFailureType } from '../enums/GetRoomFailureType';
+import { GetRoomLogFailureType } from '../enums/GetRoomLogFailureType';
+import { GetRoomMessagesFailureType } from '../enums/GetRoomMessagesFailureType';
+import { GetRoomsListFailureType } from '../enums/GetRoomsListFailureType';
+import { JoinRoomFailureType } from '../enums/JoinRoomFailureType';
+import { LeaveRoomFailureType } from '../enums/LeaveRoomFailureType';
+import { MakeMessageNotSecretFailureType } from '../enums/MakeMessageNotSecretFailureType';
+import { OperateRoomFailureType } from '../enums/OperateRoomFailureType';
+import { ParticipantRoleType } from '../enums/ParticipantRoleType';
+import { PieceLogType } from '../enums/PieceLogType';
+import { PrereleaseType } from '../enums/PrereleaseType';
+import { PromoteFailureType } from '../enums/PromoteFailureType';
+import { ResetRoomMessagesFailureType } from '../enums/ResetRoomMessagesFailureType';
+import { RoomParameterNameType } from '../enums/RoomParameterNameType';
+import { UpdateBookmarkFailureType } from '../enums/UpdateBookmarkFailureType';
+import { WriteRoomPrivateMessageFailureType } from '../enums/WriteRoomPrivateMessageFailureType';
+import { WriteRoomPublicMessageFailureType } from '../enums/WriteRoomPublicMessageFailureType';
+import { WriteRoomSoundEffectFailureType } from '../enums/WriteRoomSoundEffectFailureType';
 import { WritingMessageStatusInputType } from '../enums/WritingMessageStatusInputType';
 import { WritingMessageStatusType } from '../enums/WritingMessageStatusType';
-import { PieceLogType } from '../enums/PieceLogType';
-import { BaasType } from '../enums/BaasType';
-import { CreateRoomFailureType } from '../enums/CreateRoomFailureType';
-import { GetRoomsListFailureType } from '../enums/GetRoomsListFailureType';
-import { ResetRoomMessagesFailureType } from '../enums/ResetRoomMessagesFailureType';
-import { DeleteRoomAsAdminFailureType } from '../enums/DeleteRoomAsAdminFailureType';
-import { UpdateBookmarkFailureType } from '../enums/UpdateBookmarkFailureType';
-import { FileListType } from '../enums/FileListType';
 
 let hasRegistered = false;
 export const registerEnumTypes = (): void => {
@@ -95,7 +95,8 @@ export const registerEnumTypes = (): void => {
         name: 'OperateRoomFailureType',
     });
     registerEnumType(ParticipantRoleType, {
-        // 互換性のため'ParticipantRoleType'ではなく'ParticipantRole'としている。だが、'ParticipantRoleType'に変更することで問題が生じるかどうかは確認していない。
+        // 'ParticipantRoleType'とすべきところを誤って 'ParticipantRole' としたため、互換性を保持するためにそのままにしている。だが、'ParticipantRoleType'に変更することで問題が生じるかどうかは確認していない。
+        // TODO: 破壊的変更のあるアップデートの際にあわせて、'ParticipantRoleType' に変更する
         name: 'ParticipantRole',
     });
     registerEnumType(PieceLogType, {

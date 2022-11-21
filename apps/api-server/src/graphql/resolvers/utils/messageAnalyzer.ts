@@ -7,8 +7,8 @@ import {
     plain,
     roomTemplate,
 } from '@flocon-trpg/core';
-import { Result } from '@kizahasi/result';
 import { recordToArray } from '@flocon-trpg/utils';
+import { Result } from '@kizahasi/result';
 import { DynamicLoader } from 'bcdice';
 import BcdiceResult from 'bcdice/ts/result';
 

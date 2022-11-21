@@ -9,8 +9,8 @@ import {
     ScriptError,
     beginCast,
 } from '@flocon-trpg/flocon-script';
-import { State } from '../ot/generator';
 import * as BgmTypes from '../ot/flocon/room/bgm/types';
+import { State } from '../ot/generator';
 import { toFFilePath, toFilePath } from './filePath';
 
 const isPlaying = 'isPlaying';

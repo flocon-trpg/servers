@@ -1,10 +1,10 @@
-import * as NullableTextOperation from '../../../../util/nullableTextOperation';
+import { Result } from '@kizahasi/result';
+import { State, TwoWayOperation, UpOperation } from '../../../../generator';
+import * as NullableTextOperation from '../../../../nullableTextOperation';
+import { isIdRecord } from '../../../../record';
 import * as ReplaceOperation from '../../../../util/replaceOperation';
 import { ServerTransform } from '../../../../util/type';
-import { isIdRecord } from '../../../../util/record';
-import { Result } from '@kizahasi/result';
 import { template } from './types';
-import { State, TwoWayOperation, UpOperation } from '../../../../generator';
 
 export const toClientState =
     (isAuthorized: boolean) =>
@@ -23,21 +23,26 @@ export const serverTransform =
         TwoWayOperation<typeof template>,
         UpOperation<typeof template>
     > =>
-    ({ prevState, currentState, clientOperation, serverOperation }) => {
+    ({
+        stateBeforeServerOperation,
+        stateAfterServerOperation,
+        clientOperation,
+        serverOperation,
+    }) => {
         const twoWayOperation: TwoWayOperation<typeof template> = { $v: 2, $r: 1 };
 
         if (isAuthorized) {
             twoWayOperation.isValuePrivate = ReplaceOperation.serverTransform({
                 first: serverOperation?.isValuePrivate,
                 second: clientOperation.isValuePrivate,
-                prevState: prevState.isValuePrivate,
+                prevState: stateBeforeServerOperation.isValuePrivate,
             });
         }
-        if (isAuthorized || !currentState.isValuePrivate) {
+        if (isAuthorized || !stateAfterServerOperation.isValuePrivate) {
             const transformed = NullableTextOperation.serverTransform({
                 first: serverOperation?.value,
                 second: clientOperation.value,
-                prevState: prevState.value,
+                prevState: stateBeforeServerOperation.value,
             });
             if (transformed.isError) {
                 return transformed;
@@ -48,7 +53,7 @@ export const serverTransform =
             const xformResult = NullableTextOperation.serverTransform({
                 first: serverOperation?.overriddenParameterName,
                 second: clientOperation.overriddenParameterName,
-                prevState: prevState.overriddenParameterName,
+                prevState: stateBeforeServerOperation.overriddenParameterName,
             });
             if (xformResult.isError) {
                 return xformResult;

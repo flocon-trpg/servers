@@ -1,5 +1,13 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
+import * as Icon from '@ant-design/icons';
+import {
+    State,
+    StrIndex20,
+    characterTemplate,
+    paramNameTemplate,
+    strIndex10Array,
+    update,
+} from '@flocon-trpg/core';
 import {
     Alert,
     Table as AntdTable,
@@ -9,60 +17,52 @@ import {
     Input,
     Menu,
     Modal,
-    Tabs,
     Tooltip,
 } from 'antd';
-import { update } from '@/stateManagers/states/types';
-import { NumberParameterInput } from '../NumberParameterInput/NumberParameterInput';
+import { ColumnType } from 'antd/lib/table';
+import { SortOrder } from 'antd/lib/table/interface';
+import classNames from 'classnames';
+import produce from 'immer';
+import { useUpdateAtom } from 'jotai/utils';
+import React from 'react';
+import { useDrag, useDrop } from 'react-dnd';
+import { IconView } from '../../../../../file/IconView/IconView';
+import { useCharacterTagNames } from '../../hooks/useCharacterTagNames';
+import { useCharacters } from '../../hooks/useCharacters';
+import { useBoolParamNames, useNumParamNames, useStrParamNames } from '../../hooks/useParamNames';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { BooleanParameterInput } from '../BooleanParameterInput/BooleanParameterInput';
+import { characterEditorModalAtom } from '../CharacterEditorModal/CharacterEditorModal';
+import { characterParameterNamesEditorVisibilityAtom } from '../CharacterParameterNamesEditorModal/CharacterParameterNamesEditorModal';
+import { characterTagNamesEditorVisibilityAtom } from '../CharacterTagNamesEditorModal/CharacterTagNamesEditorModal';
+import { importCharacterModalVisibilityAtom } from '../ImportCharacterModal/ImportCharacterModal';
+import { NumberParameterInput } from '../NumberParameterInput/NumberParameterInput';
+import { OverriddenParameterNameEditor } from '../OverriddenParameterNameEditor/OverriddenParameterNameEditor';
 import { StringParameterInput } from '../StringParameterInput/StringParameterInput';
-import * as Icon from '@ant-design/icons';
+import { CharacterTabName } from './subcomponents/components/CharacterTabName/CharacterTabName';
+import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { CharacterTabConfig } from '@/atoms/roomConfigAtom/types/characterTabConfig';
+import { CharacterTabConfigUtils } from '@/atoms/roomConfigAtom/types/characterTabConfig/utils';
+import { RowKeys } from '@/atoms/roomConfigAtom/types/charactersPanelConfig';
+import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
+import { DraggableTabs } from '@/components/ui/DraggableTabs/DraggableTabs';
+import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
 import { ToggleButton } from '@/components/ui/ToggleButton/ToggleButton';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
 import {
     characterIsNotPrivate,
     characterIsNotPrivateAndNotCreatedByMe,
     characterIsPrivate,
 } from '@/resources/text/main';
-import { useCharacters } from '../../hooks/useCharacters';
-import { useBoolParamNames, useNumParamNames, useStrParamNames } from '../../hooks/useParamNames';
-import {
-    State,
-    StrIndex20,
-    characterTemplate,
-    paramNameTemplate,
-    strIndex10Array,
-} from '@flocon-trpg/core';
-import classNames from 'classnames';
 import { cancelRnd, flex, flexRow, itemsCenter } from '@/styles/className';
-import { ColumnType } from 'antd/lib/table';
-import { SortOrder } from 'antd/lib/table/interface';
-import { IconView } from '../../../../../file/IconView/IconView';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
 import { create } from '@/utils/constants';
-import { useUpdateAtom } from 'jotai/utils';
-import { characterEditorModalAtom } from '../CharacterEditorModal/CharacterEditorModal';
-import { OverriddenParameterNameEditor } from '../OverriddenParameterNameEditor/OverriddenParameterNameEditor';
-import produce from 'immer';
-import { characterParameterNamesEditorVisibilityAtom } from '../CharacterParameterNamesEditorModal/CharacterParameterNamesEditorModal';
-import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { characterTagNamesEditorVisibilityAtom } from '../CharacterTagNamesEditorModal/CharacterTagNamesEditorModal';
-import { CharacterTabConfig } from '@/atoms/roomConfigAtom/types/characterTabConfig';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
-import { CharacterTabName } from './subcomponents/components/CharacterTabName/CharacterTabName';
-import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
-import { CharacterTabConfigUtils } from '@/atoms/roomConfigAtom/types/characterTabConfig/utils';
-import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
-import { useCharacterTagNames } from '../../hooks/useCharacterTagNames';
-import { importCharacterModalVisibilityAtom } from '../ImportCharacterModal/ImportCharacterModal';
-import { useDrag, useDrop } from 'react-dnd';
 import { KeySorter } from '@/utils/keySorter';
-import { RowKeys } from '@/atoms/roomConfigAtom/types/charactersPanelConfig';
-import { DraggableTabs } from '@/components/ui/DraggableTabs/DraggableTabs';
 import { moveElement } from '@/utils/moveElement';
+import { AntdTab } from '@/utils/types';
 import { defaultTriggerSubMenuAction } from '@/utils/variables';
-import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
-import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 
 type CharacterState = State<typeof characterTemplate>;
 type ParamNameState = State<typeof paramNameTemplate>;
@@ -441,6 +441,9 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                         return {
                             title: <TableHeaderCell title='' rowKey={rowKey} />,
                             key: '全体公開',
+                            sorter: (x, y) =>
+                                (x.character.state.isPrivate ? 1 : 0) -
+                                (y.character.state.isPrivate ? 1 : 0),
                             width: 36,
                             // eslint-disable-next-line react/display-name
                             render: (_: unknown, { character }: DataSource) => (
@@ -591,7 +594,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
 
     return (
         <Modal
-            visible={config != null}
+            open={config != null}
             title='タブの編集'
             closable
             onCancel={() => onClose()}
@@ -666,88 +669,86 @@ const CharacterListPanelWithPanelId: React.FC<{
     const [editingTabConfigKey, setEditingTabConfigKey] = React.useState<string | undefined>();
 
     return React.useMemo(() => {
-        const tabPanes = (tabs ?? []).map((tab, tabIndex) => {
-            return (
-                <Tabs.TabPane
-                    key={tab.key}
-                    tabKey={tab.key}
-                    style={{ overflowY: 'scroll' }}
-                    closable={false}
-                    tab={
-                        <div
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'row',
-                                justifyItems: 'center',
-                            }}
-                        >
-                            <div style={{ flex: '0 0 auto', maxWidth: 100 }}>
-                                <CharacterTabName tabConfig={tab} />
-                            </div>
-                            <div style={{ flex: 1 }} />
-                            <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>
-                                <Dropdown
-                                    trigger={['click']}
-                                    overlay={
-                                        <Menu
-                                            items={[
-                                                {
-                                                    key: `編集@${panelId}@CharacterList`,
-                                                    icon: <Icon.SettingOutlined />,
-                                                    label: '編集',
-                                                    onClick: () => setEditingTabConfigKey(tab.key),
-                                                },
-                                                {
-                                                    key: `削除@${panelId}@CharacterList`,
-                                                    icon: <Icon.DeleteOutlined />,
-                                                    label: '削除',
-                                                    onClick: () =>
-                                                        Modal.warn({
-                                                            onOk: () => {
-                                                                setRoomConfig(roomConfig => {
-                                                                    if (roomConfig == null) {
-                                                                        return;
-                                                                    }
-                                                                    roomConfig.panels.characterPanel.tabs.splice(
-                                                                        tabIndex,
-                                                                        1
-                                                                    );
-                                                                });
-                                                            },
-                                                            okCancel: true,
-                                                            maskClosable: true,
-                                                            closable: true,
-                                                            content:
-                                                                'タブを削除します。よろしいですか？',
-                                                        }),
-                                                },
-                                            ]}
-                                            triggerSubMenuAction={defaultTriggerSubMenuAction}
-                                        />
-                                    }
-                                >
-                                    <Button
-                                        style={{
-                                            width: 18,
-                                            minWidth: 18,
-
-                                            // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
-                                            padding: '0 2px',
-                                        }}
-                                        type='text'
-                                        size='small'
-                                        onClick={e => e.stopPropagation()}
-                                    >
-                                        <Icon.EllipsisOutlined />
-                                    </Button>
-                                </Dropdown>
-                            </div>
+        const tabItems = (tabs ?? []).map((tab, tabIndex) => {
+            const result: AntdTab = {
+                key: tab.key,
+                tabKey: tab.key,
+                style: { overflowY: 'scroll' },
+                closable: false,
+                label: (
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyItems: 'center',
+                        }}
+                    >
+                        <div style={{ flex: '0 0 auto', maxWidth: 100 }}>
+                            <CharacterTabName tabConfig={tab} />
                         </div>
-                    }
-                >
-                    <CharacterListTabPane tabConfig={tab} />
-                </Tabs.TabPane>
-            );
+                        <div style={{ flex: 1 }} />
+                        <div style={{ flex: '0 0 auto', paddingLeft: 15 }}>
+                            <Dropdown
+                                trigger={['click']}
+                                overlay={
+                                    <Menu
+                                        items={[
+                                            {
+                                                key: `編集@${panelId}@CharacterList`,
+                                                icon: <Icon.SettingOutlined />,
+                                                label: '編集',
+                                                onClick: () => setEditingTabConfigKey(tab.key),
+                                            },
+                                            {
+                                                key: `削除@${panelId}@CharacterList`,
+                                                icon: <Icon.DeleteOutlined />,
+                                                label: '削除',
+                                                onClick: () =>
+                                                    Modal.warn({
+                                                        onOk: () => {
+                                                            setRoomConfig(roomConfig => {
+                                                                if (roomConfig == null) {
+                                                                    return;
+                                                                }
+                                                                roomConfig.panels.characterPanel.tabs.splice(
+                                                                    tabIndex,
+                                                                    1
+                                                                );
+                                                            });
+                                                        },
+                                                        okCancel: true,
+                                                        maskClosable: true,
+                                                        closable: true,
+                                                        content:
+                                                            'タブを削除します。よろしいですか？',
+                                                    }),
+                                            },
+                                        ]}
+                                        triggerSubMenuAction={defaultTriggerSubMenuAction}
+                                    />
+                                }
+                            >
+                                <Button
+                                    style={{
+                                        width: 18,
+                                        minWidth: 18,
+
+                                        // antdのButtonはCSS(.antd-btn-sm)によって padding: 0px 7px が指定されているため、左右に空白ができる。ここではこれを無効化するため、paddingを上書きしている。
+                                        padding: '0 2px',
+                                    }}
+                                    type='text'
+                                    size='small'
+                                    onClick={e => e.stopPropagation()}
+                                >
+                                    <Icon.EllipsisOutlined />
+                                </Button>
+                            </Dropdown>
+                        </div>
+                    </div>
+                ),
+                children: <CharacterListTabPane tabConfig={tab} />,
+            };
+            return result;
         });
 
         return (
@@ -798,6 +799,7 @@ const CharacterListPanelWithPanelId: React.FC<{
                     </Button>
                 </div>
                 <DraggableTabs
+                    items={tabItems}
                     // キャラクターウィンドウは最大で1個までしか存在しないため、静的な値で構わない
                     dndType='CharacterListTabs'
                     type='editable-card'
@@ -841,9 +843,7 @@ const CharacterListPanelWithPanelId: React.FC<{
                             );
                         });
                     }}
-                >
-                    {tabPanes}
-                </DraggableTabs>
+                />
             </div>
         );
     }, [

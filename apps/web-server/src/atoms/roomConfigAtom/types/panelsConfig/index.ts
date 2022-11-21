@@ -1,6 +1,5 @@
 import { chooseRecord } from '@flocon-trpg/utils';
-import * as t from 'io-ts';
-import { record } from '@/utils/io-ts/record';
+import { z } from 'zod';
 import {
     ActiveBoardPanelConfig,
     defaultActiveBoardPanelConfig,
@@ -55,6 +54,7 @@ import {
     deserializePieceValuePanelConfig,
     serializedPieceValuePanelConfig,
 } from '../pieceValuePanelConfig';
+import { record } from '@/utils/zod/record';
 
 export type PanelsConfig = {
     // DraggablePanelConfigBaseのプロパティは使われていない
@@ -71,20 +71,22 @@ export type PanelsConfig = {
     participantPanel: ParticipantsPanelConfig;
 };
 
-export const serializedPanelsConfig = t.partial({
-    activeBoardBackground: serializedActiveBoardPanelConfig,
-    activeBoardPanel: serializedActiveBoardPanelConfig,
-    boardEditorPanels: record(t.string, serializedBoardEditorPanelConfig),
-    characterPanel: serializedCharactersPanelConfig,
-    chatPalettePanels: record(t.string, serializedChatPalettePanelConfig),
-    gameEffectPanel: serializedGameEffectPanelConfig,
-    messagePanels: record(t.string, serializedMessagePanelConfig),
-    memoPanels: record(t.string, serializedMemoPanelConfig),
-    pieceValuePanel: serializedPieceValuePanelConfig,
-    participantPanel: serializedParticipantsPanelConfig,
-});
+export const serializedPanelsConfig = z
+    .object({
+        activeBoardBackground: serializedActiveBoardPanelConfig,
+        activeBoardPanel: serializedActiveBoardPanelConfig,
+        boardEditorPanels: record(serializedBoardEditorPanelConfig),
+        characterPanel: serializedCharactersPanelConfig,
+        chatPalettePanels: record(serializedChatPalettePanelConfig),
+        gameEffectPanel: serializedGameEffectPanelConfig,
+        messagePanels: record(serializedMessagePanelConfig),
+        memoPanels: record(serializedMemoPanelConfig),
+        pieceValuePanel: serializedPieceValuePanelConfig,
+        participantPanel: serializedParticipantsPanelConfig,
+    })
+    .partial();
 
-export type SerializedPanelsConfig = t.TypeOf<typeof serializedPanelsConfig>;
+export type SerializedPanelsConfig = z.TypeOf<typeof serializedPanelsConfig>;
 
 export const deserializePanelsConfig = (source: SerializedPanelsConfig): PanelsConfig => {
     return {

@@ -63,7 +63,7 @@ export const InputModal: React.FC<Props> = ({
     // className='cancel-rnd'がないと、RoomMessageComponent内でInputModalを表示した際に、ドラッグするとカーソルの位置に関わらずメッセージウィンドウが動いてしまう。
     return (
         <Modal
-            visible={visible}
+            open={visible}
             title={title}
             onOk={onOk}
             okButtonProps={disabledValue ? { disabled: true } : undefined}

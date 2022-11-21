@@ -1,29 +1,29 @@
-import * as t from 'io-ts';
+import { z } from 'zod';
 import { filePathValue } from '../../filePath/types';
-import { maybe } from '../../../../maybe';
-import * as ShapePiece from './shapePiece/types';
 import * as DicePiece from './dicePiece/types';
 import * as ImagePiece from './imagePiece/types';
+import * as ShapePiece from './shapePiece/types';
 import * as StringPiece from './stringPiece/types';
+import { maybe } from '@/maybe';
 import {
     createObjectValueTemplate,
     createRecordValueTemplate,
     createReplaceValueTemplate,
     createTextValueTemplate,
-} from '../../../generator';
+} from '@/ot/generator';
 
 export const template = createObjectValueTemplate(
     {
         backgroundImage: createReplaceValueTemplate(maybe(filePathValue)),
-        backgroundImageZoom: createReplaceValueTemplate(t.number),
-        cellColumnCount: createReplaceValueTemplate(t.number),
-        cellHeight: createReplaceValueTemplate(t.number),
-        cellOffsetX: createReplaceValueTemplate(t.number),
-        cellOffsetY: createReplaceValueTemplate(t.number),
-        cellRowCount: createReplaceValueTemplate(t.number),
-        cellWidth: createReplaceValueTemplate(t.number),
+        backgroundImageZoom: createReplaceValueTemplate(z.number()),
+        cellColumnCount: createReplaceValueTemplate(z.number()),
+        cellHeight: createReplaceValueTemplate(z.number()),
+        cellOffsetX: createReplaceValueTemplate(z.number()),
+        cellOffsetY: createReplaceValueTemplate(z.number()),
+        cellRowCount: createReplaceValueTemplate(z.number()),
+        cellWidth: createReplaceValueTemplate(z.number()),
         name: createTextValueTemplate(false),
-        ownerParticipantId: createReplaceValueTemplate(maybe(t.string)),
+        ownerParticipantId: createReplaceValueTemplate(maybe(z.string())),
 
         dicePieces: createRecordValueTemplate(DicePiece.template),
         imagePieces: createRecordValueTemplate(ImagePiece.template),

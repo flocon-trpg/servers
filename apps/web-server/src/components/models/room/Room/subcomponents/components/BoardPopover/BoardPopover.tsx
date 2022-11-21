@@ -9,29 +9,36 @@ import {
     roomTemplate,
     simpleId,
     toUpOperation,
+    update,
 } from '@flocon-trpg/core';
-import { keyNames, recordToArray } from '@flocon-trpg/utils';
-import { Menu, Tooltip } from 'antd';
-import React from 'react';
-import { NewTabLinkify } from '@/components/ui/NewTabLinkify/NewTabLinkify';
 import {
     FileSourceType,
     WriteRoomSoundEffectDocument,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { keyNames, recordToArray } from '@flocon-trpg/utils';
+import { Menu, Tooltip } from 'antd';
+import { ItemType } from 'antd/lib/menu/hooks/useItems';
+import classNames from 'classnames';
+import { useAtomValue, useUpdateAtom } from 'jotai/utils';
+import React from 'react';
+import { useMutation } from 'urql';
+import { ImageView } from '../../../../../file/ImageView/ImageView';
+import {
+    ContextMenuState,
+    boardContextMenuAtom,
+} from '../../atoms/boardContextMenuAtom/boardContextMenuAtom';
+import { boardPopoverEditorAtom } from '../../atoms/boardPopoverEditorAtom/boardPopoverEditorAtom';
+import { boardTooltipAtom } from '../../atoms/boardTooltipAtom/boardTooltipAtom';
 import { useBoards } from '../../hooks/useBoards';
 import { useCharacters } from '../../hooks/useCharacters';
-import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { useSetRoomStateByApply } from '@/hooks/useSetRoomStateByApply';
-import { update } from '@/stateManagers/states/types';
-import { testCommand } from '@/utils/character/command';
+import { useCloneImagePiece } from '../../hooks/useCloneImagePiece';
+import { useIsMyCharacter } from '../../hooks/useIsMyCharacter';
+import { useRoomId } from '../../hooks/useRoomId';
+import { useSetRoomStateByApply } from '../../hooks/useSetRoomStateByApply';
+import { useSetRoomStateWithImmer } from '../../hooks/useSetRoomStateWithImmer';
 import { DicePieceValue } from '../../utils/dicePieceValue';
+import { CellConfig, CompositeRect, toCellPosition } from '../../utils/positionAndSizeAndRect';
 import { StringPieceValue } from '../../utils/stringPieceValue';
-import { useMutation } from 'urql';
-import { roomAtom } from '@/atoms/roomAtom/roomAtom';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { BoardConfig } from '@/atoms/roomConfigAtom/types/boardConfig';
-import { boardTooltipAtom } from '../../atoms/boardTooltipAtom/boardTooltipAtom';
-import { useAtomValue, useUpdateAtom } from 'jotai/utils';
 import {
     character,
     dicePiece,
@@ -40,42 +47,35 @@ import {
     shapePiece,
     stringPiece,
 } from '../../utils/types';
-import { boardPopoverEditorAtom } from '../../atoms/boardPopoverEditorAtom/boardPopoverEditorAtom';
-import {
-    ContextMenuState,
-    boardContextMenuAtom,
-} from '../../atoms/boardContextMenuAtom/boardContextMenuAtom';
-import { create } from '@/utils/constants';
-import { useCloneImagePiece } from '../../hooks/useCloneImagePiece';
-import { ImageView } from '../../../../../file/ImageView/ImageView';
-import classNames from 'classnames';
-import { flex, flexRow, itemsCenter } from '@/styles/className';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
-import { useIsMyCharacter } from '../../hooks/useIsMyCharacter';
 import { characterEditorModalAtom, piece } from '../CharacterEditorModal/CharacterEditorModal';
-import { imagePieceModalAtom } from '../ImagePieceModal/ImagePieceModal';
-import { ItemType } from 'antd/lib/menu/hooks/useItems';
-import { defaultTriggerSubMenuAction } from '@/utils/variables';
 import {
     DicePieceEditor,
     UpdateMode as DicePieceUpdateMode,
 } from '../DicePieceEditor/DicePieceEditor';
-import {
-    StringPieceEditor,
-    UpdateMode as StringPieceUpdateMode,
-} from '../StringPieceEditor/StringPieceEditor';
-import { CellConfig, CompositeRect, toCellPosition } from '../../utils/positionAndSizeAndRect';
+import { dicePieceModalAtom } from '../DicePieceEditorModal/DicePieceEditorModal';
 import {
     ImagePieceEditor,
     UpdateMode as ImagePieceUpdateMode,
 } from '../ImagePieceEditor/ImagePieceEditor';
-import { stringPieceModalAtom } from '../StringPieceEditorModal/StringPieceEditorModal';
-import { dicePieceModalAtom } from '../DicePieceEditorModal/DicePieceEditorModal';
-import { shapePieceModalAtom } from '../ShapePieceEditorModal/ShapePieceEditorModal';
+import { imagePieceModalAtom } from '../ImagePieceModal/ImagePieceModal';
 import {
     ShapePieceEditor,
     UpdateMode as ShapePieceUpdateMode,
 } from '../ShapePieceEditor/ShapePieceEditor';
+import { shapePieceModalAtom } from '../ShapePieceEditorModal/ShapePieceEditorModal';
+import {
+    StringPieceEditor,
+    UpdateMode as StringPieceUpdateMode,
+} from '../StringPieceEditor/StringPieceEditor';
+import { stringPieceModalAtom } from '../StringPieceEditorModal/StringPieceEditorModal';
+import { BoardConfig } from '@/atoms/roomConfigAtom/types/boardConfig';
+import { NewTabLinkify } from '@/components/ui/NewTabLinkify/NewTabLinkify';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { useRoomStateValue } from '@/hooks/useRoomStateValue';
+import { flex, flexRow, itemsCenter } from '@/styles/className';
+import { testCommand } from '@/utils/character/command';
+import { create } from '@/utils/constants';
+import { defaultTriggerSubMenuAction } from '@/utils/variables';
 
 type BoardPositionState = State<typeof boardPositionTemplate>;
 type CharacterState = State<typeof characterTemplate>;
@@ -1105,12 +1105,12 @@ namespace ContextMenuModule {
     export const Main: React.FC = () => {
         const operate = useSetRoomStateByApply();
         const setRoomState = useSetRoomStateWithImmer();
-        const room = useAtomSelector(roomAtom, state => state.roomState?.state);
+        const room = useRoomStateValue();
         const boards = useBoards();
         const characters = useCharacters();
         const myUserUid = useMyUserUid();
         const contextMenuState = useAtomValue(boardContextMenuAtom);
-        const roomId = useAtomSelector(roomAtom, state => state.roomId);
+        const roomId = useRoomId();
         const [, writeSe] = useMutation(WriteRoomSoundEffectDocument);
         const setBoardContextMenu = useUpdateAtom(boardContextMenuAtom);
         const hooks = useHooks();

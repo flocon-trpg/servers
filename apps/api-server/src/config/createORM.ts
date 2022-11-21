@@ -1,7 +1,7 @@
 import { Result } from '@kizahasi/result';
 import { MikroORM } from '@mikro-orm/core';
-import { AppConsole } from '../utils/appConsole';
 import { ORM } from '../types';
+import { AppConsole } from '../utils/appConsole';
 import { createORMOptions } from './createORMOptions';
 
 export const createORM = async (

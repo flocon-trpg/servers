@@ -49,9 +49,10 @@ export type Restore<TState, TDownOperation, TTwoWayOperation> = (params: {
     ScalarError
 >;
 
+/** `apply(stateBeforeServerOperation, serverOperation) = stateAfterServerOperation` という関係が成り立ちます。 */
 export type ServerTransform<TServerState, TTwoWayOperation, TUpOperation> = (params: {
-    prevState: TServerState;
-    currentState: TServerState;
+    stateBeforeServerOperation: TServerState;
+    stateAfterServerOperation: TServerState;
     serverOperation: TTwoWayOperation | undefined;
     clientOperation: TUpOperation;
 }) => Result<TTwoWayOperation | undefined, TwoWayError>;

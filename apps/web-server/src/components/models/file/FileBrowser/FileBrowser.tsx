@@ -1,17 +1,22 @@
 /** @jsxImportSource @emotion/react */
-import {
-    flex,
-    flexColumn,
-    flexRow,
-    itemsCenter,
-    justifyItemsCenter,
-    justifySelfCenter,
-    selfCenter,
-} from '@/styles/className';
-import classNames from 'classnames';
 import * as Icons from '@ant-design/icons';
-import React from 'react';
 import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+import { joinPath } from '@flocon-trpg/core';
+import {
+    DeletableTree,
+    DualKeyMap,
+    MultiKeyMap,
+    MultiValueSet,
+    Tree,
+    arrayEquals,
+    both,
+    groupJoinArray,
+    keyNames,
+    left,
+    right,
+} from '@flocon-trpg/utils';
+import { Result } from '@kizahasi/result';
 import {
     Alert,
     Breadcrumb,
@@ -26,21 +31,9 @@ import {
     Tooltip,
     notification,
 } from 'antd';
-import { VirtuosoGrid } from 'react-virtuoso';
-import styled from '@emotion/styled';
-import {
-    DeletableTree,
-    DualKeyMap,
-    MultiKeyMap,
-    MultiValueSet,
-    Tree,
-    arrayEquals,
-    both,
-    groupJoinArray,
-    keyNames,
-    left,
-    right,
-} from '@flocon-trpg/utils';
+import { ItemType } from 'antd/lib/menu/hooks/useItems';
+import classNames from 'classnames';
+import produce from 'immer';
 import {
     Atom,
     PrimitiveAtom,
@@ -50,14 +43,21 @@ import {
     useAtomValue as useAtomValueCore,
     useSetAtom as useSetAtomCore,
 } from 'jotai';
-import produce from 'immer';
-import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
+import React from 'react';
 import { useDeepCompareEffect, useLatest } from 'react-use';
+import { VirtuosoGrid } from 'react-virtuoso';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { useAtomSelector as useAtomSelectorCore } from '@/hooks/useAtomSelector';
-import { joinPath } from '@flocon-trpg/core';
+import {
+    flex,
+    flexColumn,
+    flexRow,
+    itemsCenter,
+    justifyItemsCenter,
+    justifySelfCenter,
+    selfCenter,
+} from '@/styles/className';
 import { mergeStyles } from '@/utils/mergeStyles';
-import { ItemType } from 'antd/lib/menu/hooks/useItems';
-import { Result } from '@kizahasi/result';
 
 type Scope = symbol | string | number;
 
@@ -1546,7 +1546,7 @@ const DeleteConfirmModal: React.FC = () => {
     };
     return (
         <Modal
-            visible={isModalVisible}
+            open={isModalVisible}
             title='削除の確認'
             footer={
                 <DialogFooter
@@ -1694,7 +1694,7 @@ const RenameConfirmModal: React.FC = () => {
     };
     return (
         <Modal
-            visible={isModalVisible}
+            open={isModalVisible}
             title='移動、リネームの確認'
             footer={
                 <DialogFooter
@@ -1731,7 +1731,7 @@ const RenameInputModal: React.FC = () => {
     };
     return (
         <Modal
-            visible={state != null}
+            open={state != null}
             title='リネーム'
             onCancel={onClose}
             footer={
@@ -1795,7 +1795,7 @@ const CreateFolderModal: React.FC = () => {
 
     return (
         <Modal
-            visible={visible}
+            open={visible}
             title='新しいフォルダの作成'
             onCancel={() => setVisible(false)}
             footer={

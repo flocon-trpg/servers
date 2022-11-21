@@ -1,11 +1,11 @@
-import { TableRow } from '@/components/ui/Table/Table';
 import { OmitVersion, State, boardPositionTemplate, pieceTemplate } from '@flocon-trpg/core';
 import { InputNumber, Space } from 'antd';
 import produce from 'immer';
 import React from 'react';
-import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 import { IsCellModeSelector } from './subcomponents/components/IsCellModeSelector/IsCellModeSelector';
 import { IsPositionLockedSelector } from './subcomponents/components/IsPositionLockedSelector/IsPositionLockedSelector';
+import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
+import { TableRow } from '@/components/ui/Table/Table';
 
 // isPositionLocked == true の場合、いくつかのComponentはUIに一貫性を持たせるためにdisabledとなるようにしている。ただしもし常にdisabled === falseでも動作に支障はない。
 

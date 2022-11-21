@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import { z } from 'zod';
 
 export type BoardConfig = {
     offsetX: number;
@@ -10,16 +10,18 @@ export type BoardConfig = {
     gridLineColor: string;
 };
 
-export const serializedBoardConfig = t.partial({
-    offsetX: t.number,
-    offsetY: t.number,
-    zoom: t.number,
-    showGrid: t.boolean,
-    gridLineTension: t.number,
-    gridLineColor: t.string,
-});
+export const serializedBoardConfig = z
+    .object({
+        offsetX: z.number(),
+        offsetY: z.number(),
+        zoom: z.number(),
+        showGrid: z.boolean(),
+        gridLineTension: z.number(),
+        gridLineColor: z.string(),
+    })
+    .partial();
 
-export type SerializedBoardConfig = t.TypeOf<typeof serializedBoardConfig>;
+export type SerializedBoardConfig = z.TypeOf<typeof serializedBoardConfig>;
 
 export const deserializeBoardConfig = (source: SerializedBoardConfig): BoardConfig => {
     return {

@@ -1,7 +1,7 @@
-import { atom } from 'jotai';
 import { Auth } from '@firebase/auth';
 import { FirebaseStorage } from '@firebase/storage';
 import { Result } from '@kizahasi/result';
+import { atom } from 'jotai';
 import { WebConfig } from '../../configType';
 import { FirebaseUserState } from '../../utils/firebase/firebaseUserState';
 

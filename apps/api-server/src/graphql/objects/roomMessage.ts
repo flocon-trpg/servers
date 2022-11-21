@@ -1,12 +1,12 @@
 import { $free, $system } from '@flocon-trpg/core';
 import { Field, ObjectType, createUnionType } from 'type-graphql';
-import { ResetRoomMessagesFailureType } from '../../enums/ResetRoomMessagesFailureType';
 import { DeleteMessageFailureType } from '../../enums/DeleteMessageFailureType';
 import { EditMessageFailureType } from '../../enums/EditMessageFailureType';
 import { GetRoomLogFailureType } from '../../enums/GetRoomLogFailureType';
 import { GetRoomMessagesFailureType } from '../../enums/GetRoomMessagesFailureType';
 import { MakeMessageNotSecretFailureType } from '../../enums/MakeMessageNotSecretFailureType';
 import { PieceLogType as PieceLogTypeEnum } from '../../enums/PieceLogType';
+import { ResetRoomMessagesFailureType } from '../../enums/ResetRoomMessagesFailureType';
 import { WriteRoomPrivateMessageFailureType } from '../../enums/WriteRoomPrivateMessageFailureType';
 import { WriteRoomPublicMessageFailureType } from '../../enums/WriteRoomPublicMessageFailureType';
 import { WriteRoomSoundEffectFailureType } from '../../enums/WriteRoomSoundEffectFailureType';
@@ -538,8 +538,10 @@ export class RoomPrivateMessageUpdate {
     public updatedAt?: number;
 }
 
+/** @deprecated This is not used now. */
 export const RoomMessagesResetType = 'RoomMessagesReset';
 
+/** @deprecated This is not used now. */
 @ObjectType()
 export class RoomMessagesReset {
     public __tstype!: typeof RoomMessagesResetType;

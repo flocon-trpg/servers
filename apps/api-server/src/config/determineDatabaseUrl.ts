@@ -13,16 +13,16 @@ type Result =
       }
     | {
           type: typeof sqlite;
-          sqlite: { clientUrl: string };
+          sqlite: { dbName: string };
       };
 
 // TODO: あくまで DATABASE_URL のデータベースの種類を特定するだけであり、その URL が mikro-orm でサポートされているかどうかはチェックしない。可能であれば、サポートされていない URL であればここで弾く機能を付ける。
 export const determineDatabaseUrl = (DATABASE_URL: string): $Result<Result, AppConsole.Message> => {
-    const protocol = DATABASE_URL.split('://')[0];
+    const [protocol, hierPart] = DATABASE_URL.trim().split('://');
+    if (protocol == null || hierPart == null) {
+        return $Result.error({ en: 'Could not determine database. URL is invalid.' });
+    }
     switch (protocol) {
-        case undefined:
-            return $Result.error({ en: 'Could not determine database. URL is invalid.' });
-        // https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING
         case 'postgres':
         case 'postgresql':
             return $Result.ok({ type: postgresql, postgresql: { clientUrl: DATABASE_URL } });
@@ -32,7 +32,7 @@ export const determineDatabaseUrl = (DATABASE_URL: string): $Result<Result, AppC
         case 'sqlite':
             return $Result.ok({
                 type: sqlite,
-                sqlite: { clientUrl: DATABASE_URL },
+                sqlite: { dbName: hierPart },
             });
         default:
             break;

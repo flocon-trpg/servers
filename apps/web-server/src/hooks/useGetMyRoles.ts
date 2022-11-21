@@ -1,6 +1,6 @@
-import { useQuery } from 'urql';
 import { GetMyRolesDocument } from '@flocon-trpg/typed-document-node-v0.7.2';
 import React from 'react';
+import { useQuery } from 'urql';
 import { useIsV072OrLater } from './useIsV072OrLater';
 
 export const useGetMyRoles = () => {

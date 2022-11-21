@@ -1,8 +1,8 @@
 import { strIndex10Array } from '@flocon-trpg/core';
 import React from 'react';
+import { usePublicChannelNames } from '../../../../../hooks/usePublicChannelNames';
 import { MessageFilterUtils } from '@/atoms/roomConfigAtom/types/messageFilter/utils';
 import { MessageTabConfig } from '@/atoms/roomConfigAtom/types/messageTabConfig';
-import { usePublicChannelNames } from '../../../../../hooks/usePublicChannelNames';
 
 const generateTabName = (
     tabConfig: MessageTabConfig,

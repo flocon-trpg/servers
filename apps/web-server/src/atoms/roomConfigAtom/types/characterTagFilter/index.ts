@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import { z } from 'zod';
 
 export type CharacterTagFilter = {
     showNoTag: boolean;
@@ -14,21 +14,23 @@ export type CharacterTagFilter = {
     showTag10: boolean;
 };
 
-export const serializedCharacterTagFilter = t.partial({
-    showNoTag: t.boolean,
-    showTag1: t.boolean,
-    showTag2: t.boolean,
-    showTag3: t.boolean,
-    showTag4: t.boolean,
-    showTag5: t.boolean,
-    showTag6: t.boolean,
-    showTag7: t.boolean,
-    showTag8: t.boolean,
-    showTag9: t.boolean,
-    showTag10: t.boolean,
-});
+export const serializedCharacterTagFilter = z
+    .object({
+        showNoTag: z.boolean(),
+        showTag1: z.boolean(),
+        showTag2: z.boolean(),
+        showTag3: z.boolean(),
+        showTag4: z.boolean(),
+        showTag5: z.boolean(),
+        showTag6: z.boolean(),
+        showTag7: z.boolean(),
+        showTag8: z.boolean(),
+        showTag9: z.boolean(),
+        showTag10: z.boolean(),
+    })
+    .partial();
 
-export type SerializedCharacterTagFilter = t.TypeOf<typeof serializedCharacterTagFilter>;
+export type SerializedCharacterTagFilter = z.TypeOf<typeof serializedCharacterTagFilter>;
 
 export const deserializeCharacterTagFilter = (
     source: SerializedCharacterTagFilter

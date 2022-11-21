@@ -1,5 +1,5 @@
-import { Input, Menu, Modal, Popover, Tooltip } from 'antd';
-import React from 'react';
+import * as Icon from '@ant-design/icons';
+import { simpleId } from '@flocon-trpg/core';
 import {
     ChangeParticipantNameDocument,
     DeleteRoomDocument,
@@ -12,40 +12,42 @@ import {
     ResetMessagesDocument,
     ResetRoomMessagesFailureType,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
-import * as Icon from '@ant-design/icons';
-import { RoomVolumeBar } from './subcomponents/components/RoomVolumeBar/RoomVolumeBar';
-import { Jdenticon } from '@/components/ui/Jdenticon/Jdenticon';
-import { path } from '@/resources/path';
-import { useRouter } from 'next/router';
 import { recordToArray } from '@flocon-trpg/utils';
-import { useMe } from '../../hooks/useMe';
-import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { useSignOut } from '@/hooks/useSignOut';
+import { Input, Menu, Modal, Popover, Tooltip } from 'antd';
+import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import classNames from 'classnames';
-import { flex, flexRow, itemsCenter } from '@/styles/className';
-import { GenerateLogModal } from './subcomponents/components/GenerageLogModal/GenerateLogModal';
-import { useMutation, useQuery } from 'urql';
-import { error, roomAtom, roomNotificationsAtom, text } from '@/atoms/roomAtom/roomAtom';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
-import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
-import { simpleId } from '@flocon-trpg/core';
-import { defaultMessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
-import { defaultMemoPanelConfig } from '@/atoms/roomConfigAtom/types/memoPanelConfig';
-import { useUpdateAtom } from 'jotai/utils';
-import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
-import { editRoomDrawerVisibilityAtom } from '../../atoms/editRoomDrawerVisibilityAtom/editRoomDrawerVisibilityAtom';
-import { OpacityBar } from '@/components/ui/VolumeBar/VolumeBar';
-import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import produce from 'immer';
+import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useUpdateAtom } from 'jotai/utils';
+import { useRouter } from 'next/router';
+import React from 'react';
+import { useMutation, useQuery } from 'urql';
+import { editRoomModalVisibilityAtom } from '../../atoms/editRoomModalVisibilityAtom/editRoomModalVisibilityAtom';
+import { useMe } from '../../hooks/useMe';
+import { useRoomId } from '../../hooks/useRoomId';
+import { GenerateLogModal } from './subcomponents/components/GenerageLogModal/GenerateLogModal';
+import { RoomVolumeBar } from './subcomponents/components/RoomVolumeBar/RoomVolumeBar';
+import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
+import { defaultMemoPanelConfig } from '@/atoms/roomConfigAtom/types/memoPanelConfig';
+import { defaultMessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import {
     defaultPanelOpacity,
     minPanelOpacity,
 } from '@/atoms/roomConfigAtom/types/roomConfig/resources';
-import { Styles } from '@/styles';
-import { ItemType } from 'antd/lib/menu/hooks/useItems';
-import { firebaseUserValueAtom } from '@/pages/_app';
+import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
 import { FileSelectorModal } from '@/components/models/file/FileSelectorModal/FileSelectorModal';
+import { Jdenticon } from '@/components/ui/Jdenticon/Jdenticon';
+import { OpacityBar } from '@/components/ui/VolumeBar/VolumeBar';
+import { useAddNotification } from '@/hooks/useAddNotification';
+import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
+import { useSignOut } from '@/hooks/useSignOut';
+import { firebaseUserValueAtom } from '@/pages/_app';
+import { path } from '@/resources/path';
+import { Styles } from '@/styles';
+import { flex, flexRow, itemsCenter } from '@/styles/className';
 
 const panelOpacityAtom = atom(
     get => get(roomConfigAtom)?.panelOpacity,
@@ -90,7 +92,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
     onOk,
     onCancel,
 }: BecomePlayerModalProps) => {
-    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
+    const addRoomNotification = useAddNotification();
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
     const [, promoteToPlayer] = useMutation(PromoteToPlayerDocument);
@@ -114,7 +116,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
     if (getRoomAsListItemResult.data?.result.__typename !== 'GetRoomAsListItemSuccessResult') {
         return (
             <Modal
-                visible={visible}
+                open={visible}
                 title={title}
                 okButtonProps={{ disabled: true }}
                 onCancel={() => onCancel()}
@@ -126,7 +128,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
     if (getRoomAsListItemResult.data.result.room.requiresPlayerPassword) {
         return (
             <Modal
-                visible={visible}
+                open={visible}
                 title={title}
                 okButtonProps={{ disabled: isPosting }}
                 onOk={() => {
@@ -134,9 +136,9 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                     promoteToPlayer({ roomId, password: inputValue }).then(e => {
                         if (e.error != null) {
                             addRoomNotification({
-                                type: error,
-                                createdAt: new Date().getTime(),
+                                type: 'error',
                                 error: e.error,
+                                message: 'PromoteToPlayer Mutation でエラーが発生しました。',
                             });
                             onOk();
                             return;
@@ -156,13 +158,9 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                                     break;
                             }
                             addRoomNotification({
-                                type: 'text',
-                                notification: {
-                                    type: 'warning',
-                                    message: '参加者への昇格に失敗しました。',
-                                    description: text,
-                                    createdAt: new Date().getTime(),
-                                },
+                                type: 'warning',
+                                message: '参加者への昇格に失敗しました。',
+                                description: text,
                             });
                             onOk();
                             return;
@@ -183,7 +181,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
     }
     return (
         <Modal
-            visible={visible}
+            open={visible}
             title={title}
             okButtonProps={{ disabled: isPosting }}
             onOk={() => {
@@ -191,9 +189,9 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                 promoteToPlayer({ roomId }).then(e => {
                     if (e.error != null) {
                         addRoomNotification({
-                            type: error,
-                            createdAt: new Date().getTime(),
+                            type: 'error',
                             error: e.error,
+                            message: 'PromoteToPlayer Mutation でエラーが発生しました。',
                         });
                         onOk();
                         return;
@@ -213,13 +211,9 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                                 break;
                         }
                         addRoomNotification({
-                            type: 'text',
-                            notification: {
-                                type: 'warning',
-                                message: '参加者への昇格に失敗しました。',
-                                description: text,
-                                createdAt: new Date().getTime(),
-                            },
+                            type: 'warning',
+                            message: '参加者への昇格に失敗しました。',
+                            description: text,
                         });
                         onOk();
                         return;
@@ -250,7 +244,7 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
     onCancel,
     roomCreatedByMe,
 }: DeleteRoomModalProps) => {
-    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
+    const addRoomNotification = useAddNotification();
     const [isPosting, setIsPosting] = React.useState(false);
     const [, deleteRoom] = useMutation(DeleteRoomDocument);
     React.useEffect(() => {
@@ -260,7 +254,7 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
     const disabled = isPosting || !roomCreatedByMe;
     return (
         <Modal
-            visible={visible}
+            open={visible}
             title='部屋の削除'
             okButtonProps={{ disabled }}
             okType='danger'
@@ -271,9 +265,9 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
                 deleteRoom({ id: roomId }).then(e => {
                     if (e.error != null) {
                         addRoomNotification({
-                            type: error,
-                            createdAt: new Date().getTime(),
+                            type: 'error',
                             error: e.error,
+                            message: 'DeleteRoom Mutation でエラーが発生しました。',
                         });
                         onOk();
                         return;
@@ -293,13 +287,9 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
                                 break;
                         }
                         addRoomNotification({
-                            type: 'text',
-                            notification: {
-                                type: 'warning',
-                                message: '部屋の削除に失敗しました。',
-                                description: text,
-                                createdAt: new Date().getTime(),
-                            },
+                            type: 'warning',
+                            message: '部屋の削除に失敗しました。',
+                            description: text,
                         });
                         onOk();
                         return;
@@ -342,7 +332,7 @@ const ResetMessagesModal: React.FC<ResetMessagesModalProps> = ({
     onCancel,
     roomCreatedByMe,
 }: DeleteRoomModalProps) => {
-    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
+    const addRoomNotification = useAddNotification();
     const [isPosting, setIsPosting] = React.useState(false);
     const [, resetMessages] = useMutation(ResetMessagesDocument);
     React.useEffect(() => {
@@ -352,7 +342,7 @@ const ResetMessagesModal: React.FC<ResetMessagesModalProps> = ({
     const disabled = isPosting || !roomCreatedByMe;
     return (
         <Modal
-            visible={visible}
+            open={visible}
             title='ログの初期化'
             okButtonProps={{ disabled }}
             okType='danger'
@@ -363,9 +353,9 @@ const ResetMessagesModal: React.FC<ResetMessagesModalProps> = ({
                 resetMessages({ roomId }).then(e => {
                     if (e.error != null) {
                         addRoomNotification({
-                            type: error,
-                            createdAt: new Date().getTime(),
+                            type: 'error',
                             error: e.error,
+                            message: 'ResetMessages Mutation でエラーが発生しました。',
                         });
                         onOk();
                         return;
@@ -386,13 +376,9 @@ const ResetMessagesModal: React.FC<ResetMessagesModalProps> = ({
                                 break;
                         }
                         addRoomNotification({
-                            type: 'text',
-                            notification: {
-                                type: 'warning',
-                                message: '部屋の削除に失敗しました。',
-                                description: text,
-                                createdAt: new Date().getTime(),
-                            },
+                            type: 'warning',
+                            message: '部屋の削除に失敗しました。',
+                            description: text,
                         });
                         onOk();
                         return;
@@ -431,7 +417,7 @@ const PanelsOpacityModal: React.FC<{
     );
     return (
         <Modal
-            visible={visible}
+            open={visible}
             closable
             title='ウィンドウの透過度の設定'
             okButtonProps={{ style: { display: 'none' } }}
@@ -465,7 +451,7 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
     onOk: onOkCore,
     onCancel,
 }: ChangeMyParticipantNameModalProps) => {
-    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
+    const addRoomNotification = useAddNotification();
     const [inputValue, setInputValue] = React.useState('');
     const [isPosting, setIsPosting] = React.useState(false);
     const [, changeParticipantName] = useMutation(ChangeParticipantNameDocument);
@@ -479,9 +465,9 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
         changeParticipantName({ roomId, newName: inputValue }).then(e => {
             if (e.error != null) {
                 addRoomNotification({
-                    type: error,
-                    createdAt: new Date().getTime(),
+                    type: 'error',
                     error: e.error,
+                    message: 'ChangeParticipantName Mutation でエラーが発生しました。',
                 });
                 onOkCore();
                 return;
@@ -489,12 +475,8 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
 
             if (e.data?.result.failureType != null) {
                 addRoomNotification({
-                    type: text,
-                    notification: {
-                        type: 'warning',
-                        message: '名前の変更に失敗しました。',
-                        createdAt: new Date().getTime(),
-                    },
+                    type: 'warning',
+                    message: '名前の変更に失敗しました。',
                 });
                 onOkCore();
                 return;
@@ -506,7 +488,7 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
 
     return (
         <Modal
-            visible={visible}
+            open={visible}
             title='名前を変更'
             okButtonProps={{ disabled: isPosting }}
             onOk={() => onOk()}
@@ -1054,8 +1036,8 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
     const firebaseUser = useAtomValue(firebaseUserValueAtom);
     const router = useRouter();
     const signOut = useSignOut();
-    const roomId = useAtomSelector(roomAtom, state => state.roomId);
-    const createdBy = useAtomSelector(roomAtom, state => state.roomState?.state?.createdBy);
+    const roomId = useRoomId();
+    const createdBy = useRoomStateValueSelector(state => state.createdBy);
 
     const [showBackgroundBoardViewer, setShowBackgroundBoardViewerAtom] = useAtom(
         showBackgroundBoardViewerAtom
@@ -1072,7 +1054,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
     const [isResetMessagesModalVisible, setIsResetMessagesModalVisible] = React.useState(false);
     const [isGenerateLogModalVisible, setIsGenerateSimpleLogModalVisible] = React.useState(false);
     const [fileSelectorModalVisible, setFileSelectorModalVisible] = React.useState(false);
-    const setEditRoomDrawerVisibility = useUpdateAtom(editRoomDrawerVisibilityAtom);
+    const setEditRoomModalVisibility = useUpdateAtom(editRoomModalVisibilityAtom);
 
     const panelsMenuItem = usePanelsMenuItem();
 
@@ -1093,7 +1075,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
                     {
                         key: '編集@menu',
                         label: '編集',
-                        onClick: () => setEditRoomDrawerVisibility(true),
+                        onClick: () => setEditRoomModalVisibility(true),
                     },
                     {
                         key: '削除@menu',
@@ -1279,7 +1261,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
         isResetMessagesModalVisible,
         isGenerateLogModalVisible,
         router,
-        setEditRoomDrawerVisibility,
+        setEditRoomModalVisibility,
         setShowBackgroundBoardViewerAtom,
         leaveRoomMutation,
         signOut,

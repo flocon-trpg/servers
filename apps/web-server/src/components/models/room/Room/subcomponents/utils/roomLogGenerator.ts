@@ -1,16 +1,4 @@
-import {
-    FileSourceType,
-    RoomMessages,
-    RoomPublicChannelFragment,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
-import { escape } from 'html-escaper';
-import moment from 'moment';
-import { PublicChannelNames } from '@/utils/types';
-import {
-    RoomMessage,
-    messageContentMaxHeight,
-} from '../components/RoomMessagesPanelContent/subcomponents/components/RoomMessage/RoomMessage';
-import { isDeleted, toText } from './message';
+import { FirebaseStorage as FirebaseStorageType } from '@firebase/storage';
 import {
     Default,
     FirebaseStorage,
@@ -19,17 +7,29 @@ import {
     participantTemplate,
     simpleId,
 } from '@flocon-trpg/core';
-import { FilePath, FilePathModule } from '@/utils/file/filePath';
-import axios from 'axios';
-import JSZip from 'jszip';
-import { analyzeUrl } from '@/utils/analyzeUrl';
-import { RoomMessageFilter } from '../components/RoomMenu/subcomponents/components/GenerageLogModal/subcomponents/components/ChannelsFilter/ChannelsFilter';
-import { WebConfig } from '@/configType';
-import { FirebaseStorage as FirebaseStorageType } from '@firebase/storage';
-import { HtmlObject, div, generateHtml, span } from './generateHtml';
+import {
+    FileSourceType,
+    RoomMessages,
+    RoomPublicChannelFragment,
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import { PrivateChannelSet } from '@flocon-trpg/web-server-utils';
+import axios from 'axios';
+import { escape } from 'html-escaper';
+import JSZip from 'jszip';
+import moment from 'moment';
+import { RoomMessageFilter } from '../components/RoomMenu/subcomponents/components/GenerageLogModal/subcomponents/components/ChannelsFilter/ChannelsFilter';
+import {
+    RoomMessage,
+    messageContentMaxHeight,
+} from '../components/RoomMessagesPanelContent/subcomponents/components/RoomMessage/RoomMessage';
+import { HtmlObject, div, generateHtml, span } from './generateHtml';
+import { isDeleted, toText } from './message';
+import { WebConfig } from '@/configType';
 import { Styles } from '@/styles';
+import { analyzeUrl } from '@/utils/analyzeUrl';
+import { FilePath, FilePathModule } from '@/utils/file/filePath';
 import { idTokenIsNull } from '@/utils/file/getFloconUploaderFile';
+import { PublicChannelNames } from '@/utils/types';
 
 const logHtml = (messageDivs: string[]) => `
 <!DOCTYPE html>

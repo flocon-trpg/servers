@@ -1,18 +1,17 @@
-import { Modal } from 'antd';
-import React from 'react';
-import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
-import { DrawerProps } from 'antd/lib/drawer';
-import { close, create, ok, update } from '@/utils/constants';
+import { Modal, ModalProps } from 'antd';
 import { atom, useAtom } from 'jotai';
+import React from 'react';
 import { Subject } from 'rxjs';
-import { CreateMode, ShapePieceEditor, UpdateMode } from '../ShapePieceEditor/ShapePieceEditor';
-import { useMemoOne } from 'use-memo-one';
 import useConstant from 'use-constant';
+import { useMemoOne } from 'use-memo-one';
+import { CreateMode, ShapePieceEditor, UpdateMode } from '../ShapePieceEditor/ShapePieceEditor';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
+import { close, create, ok, update } from '@/utils/constants';
 import { PieceModalState } from '@/utils/types';
 
 export const shapePieceModalAtom = atom<PieceModalState | null>(null);
 
-const drawerBaseProps: Partial<DrawerProps> = {
+const modalBaseProps: Partial<ModalProps> = {
     width: 600,
 };
 
@@ -52,9 +51,9 @@ export const ShapePieceEditorModal: React.FC = () => {
 
     return (
         <Modal
-            {...drawerBaseProps}
+            {...modalBaseProps}
             title={modalType?.type == update ? '図形コマの編集' : '図形コマの新規作成'}
-            visible={visible}
+            open={visible}
             closable
             onCancel={() => setModalType(null)}
             footer={

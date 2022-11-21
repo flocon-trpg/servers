@@ -1,13 +1,13 @@
-import React from 'react';
-import { Input, Select } from 'antd';
-import { useMyCharacters } from '../../../../../hooks/useMyCharacters';
 import * as Icon from '@ant-design/icons';
-import { custom, getSelectedCharacterType, none, some } from '../../../getSelectedCharacterType';
+import { Input, Select } from 'antd';
 import classNames from 'classnames';
-import { flex, flexNone, flexRow, itemsCenter } from '@/styles/className';
-import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import { Draft } from 'immer';
+import React from 'react';
+import { useMyCharacters } from '../../../../../hooks/useMyCharacters';
+import { custom, getSelectedCharacterType, none, some } from '../../../getSelectedCharacterType';
+import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import { InputDescription } from '@/components/ui/InputDescription/InputDescription';
+import { flex, flexNone, flexRow, itemsCenter } from '@/styles/className';
 
 type Props = {
     config: MessagePanelConfig;

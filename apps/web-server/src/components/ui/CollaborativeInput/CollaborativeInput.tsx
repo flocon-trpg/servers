@@ -1,14 +1,14 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
-import Quill from 'quill';
-import QuillDelta from 'quill-delta';
 import { SerializedStyles, css } from '@emotion/react';
 import { diff, serializeUpOperation, toUpOperation } from '@kizahasi/ot-string';
+import Quill from 'quill';
+import QuillDelta from 'quill-delta';
+import React from 'react';
+import { useQuill } from 'react-quilljs';
 import { useLatest, usePrevious } from 'react-use';
 // react-quilljs などを使わず直接 Quill を使うと、next build 時に ReferenceError: document is not defined というエラーが出てビルドできない。おそらくawait importでも回避できそうだが、react-quilljs を利用することで解決している。
-import { useQuill } from 'react-quilljs';
-import useConstant from 'use-constant';
 import { Subject, Subscription, debounceTime } from 'rxjs';
+import useConstant from 'use-constant';
 
 /*
 quill.bubble.css:389 に、下のようにplaceholderに関するstyleが記述されている。

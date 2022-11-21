@@ -1,9 +1,9 @@
-import React from 'react';
-import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { State, filePathTemplate } from '@flocon-trpg/core';
 import { Modal } from 'antd';
+import React from 'react';
 import { FileSelector } from '../FileSelector/FileSelector';
 import { UploaderFileBrowser } from '../UploaderFileBrowser/UploaderFileBrowser';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { FileType } from '@/utils/fileType';
 import { stretchedModalWidth } from '@/utils/variables';
 
@@ -33,7 +33,7 @@ export const FileSelectorModal: React.FC<Props> = props => {
     const { visible, onClose, defaultFileTypeFilter } = props;
     return (
         <Modal
-            visible={visible}
+            open={visible}
             width={stretchedModalWidth}
             onCancel={onClose}
             footer={<DialogFooter close={{ textType: 'close', onClick: onClose }} />}

@@ -1,0 +1,9 @@
+{
+    "name": "@flocon-trpg/prettier-config",
+    "version": "1.0.0",
+    "license": "MIT",
+    "author": "kizahasi",
+    "peerDependencies": {
+        "prettier": "^2.7.1"
+    }
+}

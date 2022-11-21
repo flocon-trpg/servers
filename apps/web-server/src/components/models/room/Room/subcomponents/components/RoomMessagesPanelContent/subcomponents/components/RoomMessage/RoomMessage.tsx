@@ -1,22 +1,3 @@
-import { Popover, Tooltip } from 'antd';
-import React from 'react';
-import {
-    PieceLogFragment,
-    PieceLogType,
-    RoomPrivateMessageFragment,
-    RoomPublicMessageFragment,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
-import {
-    Notification,
-    PrivateChannelSet,
-    pieceLog,
-    privateMessage,
-    publicMessage,
-} from '@flocon-trpg/web-server-utils';
-import { PublicChannelNames } from '@/utils/types';
-import { Jdenticon } from '@/components/ui/Jdenticon/Jdenticon';
-import { isDeleted, toText } from '../../../../../utils/message';
-import { NewTabLinkify } from '@/components/ui/NewTabLinkify/NewTabLinkify';
 import {
     $free,
     State,
@@ -25,10 +6,31 @@ import {
     participantTemplate,
     replace,
 } from '@flocon-trpg/core';
+import {
+    PieceLogFragment,
+    PieceLogType,
+    RoomPrivateMessageFragment,
+    RoomPublicMessageFragment,
+} from '@flocon-trpg/typed-document-node-v0.7.1';
 import { recordToMap } from '@flocon-trpg/utils';
+import {
+    CustomMessage,
+    PrivateChannelSet,
+    pieceLog,
+    privateMessage,
+    publicMessage,
+} from '@flocon-trpg/web-server-utils';
+import { Popover, Tooltip } from 'antd';
 import classNames from 'classnames';
-import { flex, flexRow, itemsCenter } from '@/styles/className';
+import React from 'react';
+import { CombinedError } from 'urql';
+import { isDeleted, toText } from '../../../../../utils/message';
 import { IconView } from '@/components/models/file/IconView/IconView';
+import { NotificationType } from '@/components/models/room/Room/subcomponents/components/Notification/Notification';
+import { Jdenticon } from '@/components/ui/Jdenticon/Jdenticon';
+import { NewTabLinkify } from '@/components/ui/NewTabLinkify/NewTabLinkify';
+import { flex, flexRow, itemsCenter } from '@/styles/className';
+import { PublicChannelNames } from '@/utils/types';
 
 type ParticipantState = State<typeof participantTemplate>;
 
@@ -240,16 +242,13 @@ export namespace RoomMessage {
     };
 
     type IconProps = {
-        message: MessageState | Notification;
+        message: MessageState | CustomMessage<NotificationType<CombinedError>>;
         size: number;
     };
 
     export const Icon: React.FC<IconProps> = ({ message, size }: IconProps) => {
         switch (message.type) {
-            case 'success':
-            case 'warning':
-            case 'info':
-            case 'error':
+            case 'custom':
             case pieceLog:
                 return <IconView image='Message' size={size} />;
             case privateMessage:

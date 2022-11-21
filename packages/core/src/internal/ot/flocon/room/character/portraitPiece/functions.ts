@@ -1,10 +1,10 @@
 import { Result } from '@kizahasi/result';
-import { isIdRecord } from '../../../../util/record';
+import { State, TwoWayOperation, UpOperation } from '../../../../generator';
+import { isIdRecord } from '../../../../record';
 import * as ReplaceOperation from '../../../../util/replaceOperation';
 import { ServerTransform } from '../../../../util/type';
 import * as BoardPositionBase from '../../../boardPosition/functions';
 import { template } from './types';
-import { State, TwoWayOperation, UpOperation } from '../../../../generator';
 
 export const toClientState = (source: State<typeof template>): State<typeof template> => {
     return source;
@@ -14,10 +14,15 @@ export const serverTransform: ServerTransform<
     State<typeof template>,
     TwoWayOperation<typeof template>,
     UpOperation<typeof template>
-> = ({ prevState, currentState, clientOperation, serverOperation }) => {
+> = ({
+    stateBeforeServerOperation,
+    stateAfterServerOperation,
+    clientOperation,
+    serverOperation,
+}) => {
     const boardPosition = BoardPositionBase.serverTransform({
-        prevState: { ...prevState, $v: undefined, $r: undefined },
-        currentState: { ...currentState, $v: undefined, $r: undefined },
+        stateBeforeServerOperation: { ...stateBeforeServerOperation, $v: undefined, $r: undefined },
+        stateAfterServerOperation: { ...stateAfterServerOperation, $v: undefined, $r: undefined },
         clientOperation: { ...clientOperation, $v: undefined, $r: undefined },
         serverOperation: { ...serverOperation, $v: undefined, $r: undefined },
     });
@@ -34,7 +39,7 @@ export const serverTransform: ServerTransform<
     twoWayOperation.isPrivate = ReplaceOperation.serverTransform({
         first: serverOperation?.isPrivate,
         second: clientOperation.isPrivate,
-        prevState: prevState.isPrivate,
+        prevState: stateBeforeServerOperation.isPrivate,
     });
 
     if (isIdRecord(twoWayOperation)) {

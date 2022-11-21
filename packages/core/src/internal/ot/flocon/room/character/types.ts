@@ -1,12 +1,12 @@
-import * as t from 'io-ts';
+import { z } from 'zod';
 import { filePathValue } from '../../filePath/types';
-import * as CharacterPiece from './characterPiece/types';
-import * as PortraitPiece from './portraitPiece/types';
 import * as BoolParam from './boolParam/types';
+import * as CharacterPiece from './characterPiece/types';
 import * as Command from './command/types';
 import * as NumParam from './numParam/types';
+import * as PortraitPiece from './portraitPiece/types';
 import * as StrParam from './strParam/types';
-import { maybe } from '../../../../maybe';
+import { maybe } from '@/maybe';
 import {
     State,
     createObjectValueTemplate,
@@ -14,7 +14,7 @@ import {
     createRecordValueTemplate,
     createReplaceValueTemplate,
     createTextValueTemplate,
-} from '../../../generator';
+} from '@/ot/generator';
 
 // boolParams, numParams, numMaxParams, strParams: keyはstrIndex20などの固定キーを想定。
 // pieces, portraitPositions: 誰でも作成できる値。keyはboardのkey。
@@ -47,26 +47,26 @@ export const defaultStrParamState: State<typeof StrParam.template> = {
 
 export const template = createObjectValueTemplate(
     {
-        ownerParticipantId: createReplaceValueTemplate(maybe(t.string)),
+        ownerParticipantId: createReplaceValueTemplate(maybe(z.string())),
 
         image: createReplaceValueTemplate(maybe(filePathValue)),
-        isPrivate: createReplaceValueTemplate(t.boolean),
+        isPrivate: createReplaceValueTemplate(z.boolean()),
         memo: createTextValueTemplate(false),
         name: createTextValueTemplate(false),
         chatPalette: createTextValueTemplate(false),
         privateVarToml: createTextValueTemplate(false),
         portraitImage: createReplaceValueTemplate(maybe(filePathValue)),
 
-        hasTag1: createReplaceValueTemplate(t.boolean),
-        hasTag2: createReplaceValueTemplate(t.boolean),
-        hasTag3: createReplaceValueTemplate(t.boolean),
-        hasTag4: createReplaceValueTemplate(t.boolean),
-        hasTag5: createReplaceValueTemplate(t.boolean),
-        hasTag6: createReplaceValueTemplate(t.boolean),
-        hasTag7: createReplaceValueTemplate(t.boolean),
-        hasTag8: createReplaceValueTemplate(t.boolean),
-        hasTag9: createReplaceValueTemplate(t.boolean),
-        hasTag10: createReplaceValueTemplate(t.boolean),
+        hasTag1: createReplaceValueTemplate(z.boolean()),
+        hasTag2: createReplaceValueTemplate(z.boolean()),
+        hasTag3: createReplaceValueTemplate(z.boolean()),
+        hasTag4: createReplaceValueTemplate(z.boolean()),
+        hasTag5: createReplaceValueTemplate(z.boolean()),
+        hasTag6: createReplaceValueTemplate(z.boolean()),
+        hasTag7: createReplaceValueTemplate(z.boolean()),
+        hasTag8: createReplaceValueTemplate(z.boolean()),
+        hasTag9: createReplaceValueTemplate(z.boolean()),
+        hasTag10: createReplaceValueTemplate(z.boolean()),
 
         boolParams: createParamRecordValueTemplate(BoolParam.template, defaultBoolParamState),
         numParams: createParamRecordValueTemplate(NumParam.template, defaultNumParamState),

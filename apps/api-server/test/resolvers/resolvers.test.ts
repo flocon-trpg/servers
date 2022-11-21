@@ -1,10 +1,6 @@
 import '../beforeAllGlobal';
-import * as $MikroORM from '../../src/entities/room/entity';
-import { EM } from '../../src/types';
-import { User as User$MikroORM } from '../../src/entities/user/entity';
-import { File as File$MikroORM } from '../../src/entities/file/entity';
-import { DbConfig, createOrm, createTestServer } from './utils/createTestServer';
-import { Resources } from './utils/resources';
+import { readFileSync } from 'fs';
+import { $free, UpOperation as U, parseState, roomTemplate } from '@flocon-trpg/core';
 import {
     CreateFileTagMutation,
     CreateRoomMutation,
@@ -32,23 +28,27 @@ import {
     GetRoomsListQuery,
     UpdateBookmarkMutation,
 } from '@flocon-trpg/typed-document-node-v0.7.2';
-import { EntryToServerResultType } from '../../src/enums/EntryToServerResultType';
-import { ServerConfig } from '../../src/config/types';
-import { $free, UpOperation as U, parseState, roomTemplate } from '@flocon-trpg/core';
-import axios from 'axios';
-import FormData from 'form-data';
-import urljoin from 'url-join';
-import { readFileSync } from 'fs';
+import { parseStringToBoolean, recordToArray } from '@flocon-trpg/utils';
 import { diff, serializeUpOperation, toUpOperation } from '@kizahasi/ot-string';
 import { OperationResult } from '@urql/core';
-import { maskKeys, maskTypeNames } from './utils/maskKeys';
-import { TestClients } from './utils/testClients';
-import { parseStringToBoolean, recordToArray } from '@flocon-trpg/utils';
-import { TestClient } from './utils/testClient';
+import axios from 'axios';
+import FormData from 'form-data';
 import produce from 'immer';
-import { doAutoMigrationBeforeStart } from '../../src/migrate';
-import { sqlite1DbName, sqlite2DbName } from './utils/databaseConfig';
+import urljoin from 'url-join';
+import { ServerConfig } from '../../src/config/types';
+import { File as File$MikroORM } from '../../src/entities/file/entity';
+import * as $MikroORM from '../../src/entities/room/entity';
+import { User as User$MikroORM } from '../../src/entities/user/entity';
+import { EntryToServerResultType } from '../../src/enums/EntryToServerResultType';
 import { logger } from '../../src/logger';
+import { doAutoMigrationBeforeStart } from '../../src/migrate';
+import { EM } from '../../src/types';
+import { DbConfig, createOrm, createTestServer } from './utils/createTestServer';
+import { sqlite1DbName, sqlite2DbName } from './utils/databaseConfig';
+import { maskKeys, maskTypeNames } from './utils/maskKeys';
+import { Resources } from './utils/resources';
+import { TestClient } from './utils/testClient';
+import { TestClients } from './utils/testClients';
 
 type UpOperation = U<typeof roomTemplate>;
 
@@ -230,7 +230,7 @@ namespace Assert {
     export namespace GetFilesQuery {
         export const toBeSuccess = (source: OperationResult<GetFilesQuery>) => {
             if (source.data == null) {
-                throw source.error;
+                throw new Error(source.error?.message);
             }
             return source.data.result.files;
         };
@@ -549,8 +549,6 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
     });
 
     const entryPassword = entryPasswordConfig == null ? undefined : Resources.entryPassword;
-
-    type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
 
     const useTestServer = async (
         {

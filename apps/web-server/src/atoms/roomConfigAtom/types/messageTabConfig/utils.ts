@@ -1,6 +1,6 @@
+import { simpleId } from '@flocon-trpg/core';
 import { MessageFilterUtils } from '../messageFilter/utils';
 import { MessageTabConfig } from '.';
-import { simpleId } from '@flocon-trpg/core';
 
 export namespace MessageTabConfigUtils {
     export const createEmpty = ({ tabName }: { tabName?: string }): MessageTabConfig => {

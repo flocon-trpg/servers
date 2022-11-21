@@ -1,17 +1,17 @@
+import * as Icon from '@ant-design/icons';
 import { Alert, Button, Collapse, Typography } from 'antd';
+import classNames from 'classnames';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 import React from 'react';
-import { QueryResultViewer } from '../../ui/QueryResultViewer/QueryResultViewer';
 import { Layout } from '../../ui/Layout/Layout';
 import { SupportedApiServers, VERSION } from '@/VERSION';
-import * as Icon from '@ant-design/icons';
-import { useRouter } from 'next/router';
-import classNames from 'classnames';
+import { FileSelectorModal } from '@/components/models/file/FileSelectorModal/FileSelectorModal';
+import { GraphQLAlert } from '@/components/ui/GraphQLAlert/GraphQLAlert';
+import { useGetApiSemVer } from '@/hooks/useGetApiSemVer';
 import { flex, flexColumn } from '@/styles/className';
 import { apiServerSatisfies } from '@/versioning/apiServerSatisfies';
 import { semVerRangeToString } from '@/versioning/semVerRange';
-import { useGetApiSemVer } from '@/hooks/useGetApiSemVer';
-import Link from 'next/link';
-import { FileSelectorModal } from '@/components/models/file/FileSelectorModal/FileSelectorModal';
 
 export const IndexPage: React.FC = () => {
     const [fileSelectorModalVisible, setFileSelectorModalVisible] = React.useState(false);
@@ -147,13 +147,19 @@ export const IndexPage: React.FC = () => {
                             apiServerSemVer.value.toString()
                         )}
                         <div style={{ maxWidth: 800 }}>
-                            <QueryResultViewer
-                                error={apiServerSemVer?.error}
+                            <GraphQLAlert
+                                error={
+                                    apiServerSemVer?.error == null
+                                        ? undefined
+                                        : {
+                                              mainMessage: 'APIエラー',
+                                              error: apiServerSemVer.error,
+                                          }
+                                }
                                 loading={false}
-                                compact
                             >
                                 {versionInfo}
-                            </QueryResultViewer>
+                            </GraphQLAlert>
                         </div>
                     </li>
                 </ul>

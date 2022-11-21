@@ -8,8 +8,8 @@ import {
     beginCast,
 } from '@flocon-trpg/flocon-script';
 import { maxLength100String } from '../maxLengthString';
-import { State } from '../ot/generator';
 import * as Participant from '../ot/flocon/room/participant/types';
+import { State } from '../ot/generator';
 
 const name = 'name';
 
@@ -40,10 +40,11 @@ export class FParticipant extends FObject {
                     this.participant.name = undefined;
                     return;
                 }
-                if (!maxLength100String.is($newValue)) {
+                const parsed = maxLength100String.safeParse($newValue);
+                if (!parsed.success) {
                     throw new ScriptError(`${key}は100文字以下にする必要があります。`);
                 }
-                this.participant.name = $newValue;
+                this.participant.name = parsed.data;
                 return;
             }
             default:

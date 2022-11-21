@@ -1,3 +1,4 @@
+import { loggerRef } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import { Logger, pino } from 'pino';
 import { LogConfig } from './config/types';
@@ -5,38 +6,27 @@ import { LogConfig } from './config/types';
 export const notice = 'notice';
 
 export type Pino = Logger;
-
 const defaultTransport = './transport/defaultTransport.js';
 
-type LoggerRefInternal = {
-    readonly isInitialized: boolean;
-    readonly get: () => Pino;
-};
+let isInitialized = false;
 
-let uninitializedLoggerCache: Pino | null = null;
-const getUninitializeLogger = () => {
-    if (uninitializedLoggerCache == null) {
-        uninitializedLoggerCache = pino({
-            transport: { target: defaultTransport },
-        });
-    }
-    return uninitializedLoggerCache;
+// LOG_LEVELがパースできなかった場合などはinitializeLoggerが実行されていない状態でエラーを通知する必要がある。その際にuninitializedLoggerが使われる。
+const createUninitializeLogger = () => {
+    return pino({
+        transport: { target: defaultTransport },
+    });
 };
-
-const uninitializedLoggerRef: LoggerRefInternal = {
-    isInitialized: false,
-    get() {
-        // LOG_LEVELがパースできなかった場合などはinitializeLoggerが実行されていない状態でエラーを通知する必要がある。その際にuninitializedLoggerが使われる。
-        return getUninitializeLogger();
-    },
-};
-
-let loggerRef: LoggerRefInternal = uninitializedLoggerRef;
 
 /** `get()`を実行することでloggerを取得できます。 */
 export const logger = {
     get() {
-        return loggerRef.get();
+        if (!isInitialized) {
+            isInitialized = true;
+            // テストでは ts-jest が使われるため、./transport/defaultTransport.js は存在しない。そのため、ここに来るとエラーになる。
+            // テストの場合は事前に initializeLogger を実行しておく必要がある。
+            loggerRef.value = createUninitializeLogger();
+        }
+        return loggerRef.value;
     },
     /** `get().trace` と同じです。 */
     get trace() {
@@ -75,9 +65,9 @@ export const logger = {
     },
 };
 
-/** loggerを準備します。この関数を実行せずにロギングが行われる場合、デフォルトのロガーが使われます。複数回実行するとwanrのログが出力されます。 */
+/** loggerを準備します。この関数を実行せずにロギングが行われる場合、デフォルトのロガーが使われます。複数回実行するとwarnのログが出力されます。 */
 export const initializeLogger = (logConfigResult: Result<LogConfig>) => {
-    if (loggerRef.isInitialized) {
+    if (isInitialized) {
         logger.warn('initializeLogger was called multiple times.');
     }
 
@@ -88,27 +78,17 @@ export const initializeLogger = (logConfigResult: Result<LogConfig>) => {
     const logLevel = logConfigResult.value.logLevel ?? 'info';
     switch (logConfigResult.value.logFormat) {
         case 'json': {
-            const logger = pino({ level: logLevel });
-            loggerRef = {
-                isInitialized: true,
-                get() {
-                    return logger;
-                },
-            };
+            isInitialized = true;
+            loggerRef.value = pino({ level: logLevel });
             break;
         }
         case 'default':
         case undefined: {
-            const logger = pino({
+            isInitialized = true;
+            loggerRef.value = pino({
                 level: logLevel,
                 transport: { target: defaultTransport },
             });
-            loggerRef = {
-                isInitialized: true,
-                get() {
-                    return logger;
-                },
-            };
             break;
         }
     }

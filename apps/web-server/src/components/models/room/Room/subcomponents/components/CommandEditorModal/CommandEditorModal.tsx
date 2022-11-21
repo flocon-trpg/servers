@@ -1,11 +1,3 @@
-import { mapToRecord, recordToMap } from '@flocon-trpg/utils';
-import { Button, Input, Modal, Select } from 'antd';
-import React from 'react';
-import { useCharacter } from '../../hooks/useCharacter';
-import MonacoEditor, { useMonaco } from '@monaco-editor/react';
-import { useBufferValue } from '@/hooks/useBufferValue';
-import { testCommand } from '@/utils/character/command';
-import { useSetRoomStateByApply } from '@/hooks/useSetRoomStateByApply';
 import {
     commandTemplate,
     createRecordValueTemplate,
@@ -13,13 +5,21 @@ import {
     simpleId,
     toUpOperation,
 } from '@flocon-trpg/core';
+import { mapToRecord, recordToMap } from '@flocon-trpg/utils';
+import MonacoEditor, { useMonaco } from '@monaco-editor/react';
+import { Button, Input, Modal, Select } from 'antd';
 import classNames from 'classnames';
-import { flex, flexRow } from '@/styles/className';
-import { characterUpdateOperation } from '@/utils/character/characterUpdateOperation';
+import { atom, useAtom } from 'jotai';
+import React from 'react';
 import { useLatest, usePrevious } from 'react-use';
+import { useCharacter } from '../../hooks/useCharacter';
+import { useSetRoomStateByApply } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateByApply';
+import { useBufferValue } from '@/hooks/useBufferValue';
 import { characterCommandLibSource } from '@/monaco/characterCommandLibSource';
 import { defaultLibSource } from '@/monaco/defaultLibSource';
-import { atom, useAtom } from 'jotai';
+import { flex, flexRow } from '@/styles/className';
+import { characterUpdateOperation } from '@/utils/character/characterUpdateOperation';
+import { testCommand } from '@/utils/character/command';
 
 const privateCommandsDiff = diff(createRecordValueTemplate(commandTemplate));
 const privateCommandsUpOperation = toUpOperation(createRecordValueTemplate(commandTemplate));
@@ -171,7 +171,7 @@ export const CommandEditorModal: React.FC = () => {
     };
 
     if (commandEditorModalType == null) {
-        return <Modal width={modalWidth} visible={false} />;
+        return <Modal width={modalWidth} open={false} />;
     }
 
     const options = () => {
@@ -230,7 +230,7 @@ export const CommandEditorModal: React.FC = () => {
     return (
         <Modal
             width={modalWidth}
-            visible
+            open
             maskClosable={false}
             onOk={() => {
                 if (character == null) {

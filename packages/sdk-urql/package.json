@@ -1,0 +1,49 @@
+{
+    "name": "@flocon-trpg/sdk-urql",
+    "version": "0.1.0",
+    "license": "MIT",
+    "author": "kizahasi",
+    "main": "dist/cjs/index.js",
+    "module": "dist/esm/index.js",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "yarn run build:self",
+        "build:rollup": "rollup --config",
+        "build:self": "rimraf ./dist && yarn build:rollup",
+        "lint": "eslint \"**/*.ts\" --cache",
+        "prettier": "yarn prettier:base --write --cache",
+        "prettier-check": "yarn prettier:base --check",
+        "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\""
+    },
+    "dependencies": {
+        "@flocon-trpg/core": "workspace:^",
+        "@flocon-trpg/sdk": "workspace:^",
+        "@flocon-trpg/typed-document-node-v0.7.1": "workspace:^",
+        "@kizahasi/result": "^1.0.0",
+        "graphql-ws": "^5.8.1",
+        "rxjs": "^7.5.6",
+        "urql": "^3.0.0",
+        "wonka": "^6.0.0"
+    },
+    "devDependencies": {
+        "@flocon-trpg/eslint-config": "workspace:^",
+        "@flocon-trpg/prettier-config": "workspace:^",
+        "@flocon-trpg/rollup-config": "workspace:^",
+        "@flocon-trpg/tsconfig": "workspace:^",
+        "@typescript-eslint/eslint-plugin": "5.39.0",
+        "@typescript-eslint/parser": "5.39.0",
+        "eslint": "8.25.0",
+        "eslint-config-prettier": "8.5.0",
+        "eslint-import-resolver-typescript": "3.5.2",
+        "eslint-plugin-import": "2.26.0",
+        "prettier": "2.7.1",
+        "rimraf": "3.0.2",
+        "rollup": "3.3.0",
+        "typescript": "4.8.4"
+    },
+    "engines": {
+        "node": ">=14 <19"
+    }
+}

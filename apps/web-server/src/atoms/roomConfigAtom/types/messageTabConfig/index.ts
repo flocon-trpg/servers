@@ -1,5 +1,5 @@
 import { simpleId } from '@flocon-trpg/core';
-import * as t from 'io-ts';
+import { z } from 'zod';
 import { MessageFilter, deserializeMessageFilter, serializedMessageFilter } from '../messageFilter';
 
 export type MessageTabConfig = {
@@ -10,13 +10,13 @@ export type MessageTabConfig = {
     tabName?: string;
 } & MessageFilter;
 
-export const partialMessageTabConfig = t.intersection([
-    t.partial({
-        key: t.string,
-        tabName: t.string,
-    }),
-    serializedMessageFilter,
-]);
+export const partialMessageTabConfig = z
+    .object({
+        key: z.string(),
+        tabName: z.string(),
+    })
+    .partial()
+    .merge(serializedMessageFilter);
 
 export const deserializeMessageTabConfig = (source: PartialMessageTabConfig): MessageTabConfig => {
     return {
@@ -26,4 +26,4 @@ export const deserializeMessageTabConfig = (source: PartialMessageTabConfig): Me
     };
 };
 
-export type PartialMessageTabConfig = t.TypeOf<typeof partialMessageTabConfig>;
+export type PartialMessageTabConfig = z.TypeOf<typeof partialMessageTabConfig>;

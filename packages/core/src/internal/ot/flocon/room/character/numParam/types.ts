@@ -1,15 +1,15 @@
-import * as t from 'io-ts';
-import { maybe } from '../../../../../maybe';
+import { z } from 'zod';
+import { maybe } from '@/maybe';
 import {
     createObjectValueTemplate,
     createReplaceValueTemplate,
     createTextValueTemplate,
-} from '../../../../generator';
+} from '@/ot/generator';
 
 export const template = createObjectValueTemplate(
     {
-        isValuePrivate: createReplaceValueTemplate(t.boolean),
-        value: createReplaceValueTemplate(maybe(t.number)),
+        isValuePrivate: createReplaceValueTemplate(z.boolean()),
+        value: createReplaceValueTemplate(maybe(z.number())),
 
         /**
          * @description Do not use this value for numMaxParam.

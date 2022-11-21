@@ -1,14 +1,14 @@
-import * as t from 'io-ts';
+import { z } from 'zod';
 
-export const firebaseConfig = t.type({
+export const firebaseConfig = z.object({
     // databaseURLというキーはおそらくFirestoreを有効化しないと含まれないため、除外している。
 
-    apiKey: t.string,
-    authDomain: t.string,
-    projectId: t.string,
-    storageBucket: t.string,
-    messagingSenderId: t.string,
-    appId: t.string,
+    apiKey: z.string(),
+    authDomain: z.string(),
+    projectId: z.string(),
+    storageBucket: z.string(),
+    messagingSenderId: z.string(),
+    appId: z.string(),
 });
 
-export type FirebaseConfig = t.TypeOf<typeof firebaseConfig>;
+export type FirebaseConfig = z.TypeOf<typeof firebaseConfig>;

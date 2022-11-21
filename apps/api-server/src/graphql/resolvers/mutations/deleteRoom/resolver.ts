@@ -11,14 +11,14 @@ import {
     Resolver,
     UseMiddleware,
 } from 'type-graphql';
-import { ENTRY } from '../../../../utils/roles';
-import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import * as Room$MikroORM from '../../../../entities/room/entity';
 import { DeleteRoomFailureType } from '../../../../enums/DeleteRoomFailureType';
+import { ResolverContext } from '../../../../types';
+import { ENTRY } from '../../../../utils/roles';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
+import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import { all } from '../../types';
 import { ensureAuthorizedUser, publishRoomEvent } from '../../utils/utils';
-import { ResolverContext } from '../../../../types';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 @ArgsType()
 class DeleteRoomArgs {

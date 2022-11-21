@@ -1,5 +1,6 @@
-import { PixelPosition } from '@/components/models/room/Room/subcomponents/utils/positionAndSizeAndRect';
+import { TabsProps } from 'antd';
 import { create, update } from './constants';
+import { PixelPosition } from '@/components/models/room/Room/subcomponents/utils/positionAndSizeAndRect';
 
 export type BoardType =
     | { type: 'boardEditor'; boardEditorPanelId: string }
@@ -60,11 +61,7 @@ export type FetchTextState =
           value: string | null;
       };
 
-export type SetAction<State> = State | ((prevState: State) => State);
-
 export type Recipe<T> = (state: T) => T | void;
-
-export type Ref<T> = { value: T };
 
 export type PieceModalState =
     | {
@@ -77,3 +74,9 @@ export type PieceModalState =
           boardId: string;
           pieceId: string;
       };
+
+export type SetAction<State> = State | ((prevState: State) => State);
+
+type ArrayType<T> = T extends Array<infer U> ? U : never;
+
+export type AntdTab = ArrayType<NonNullable<TabsProps['items']>>;

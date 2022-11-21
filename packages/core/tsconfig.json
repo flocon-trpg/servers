@@ -1,0 +1,9 @@
+{
+    "extends": "@flocon-trpg/tsconfig",
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./src/internal/*"]
+        }
+    }
+}

@@ -1,13 +1,13 @@
-import * as t from 'io-ts';
+import { z } from 'zod';
 import {
     createObjectValueTemplate,
     createReplaceValueTemplate,
     createTextValueTemplate,
-} from '../../../../generator';
+} from '@/ot/generator';
 
 export const template = createObjectValueTemplate(
     {
-        isValuePrivate: createReplaceValueTemplate(t.boolean),
+        isValuePrivate: createReplaceValueTemplate(z.boolean()),
         value: createTextValueTemplate(true),
         overriddenParameterName: createTextValueTemplate(true),
     },

@@ -2,7 +2,7 @@ import { Select } from 'antd';
 import Modal from 'antd/lib/modal/Modal';
 import React from 'react';
 import { useMyBoards } from '../../../../../hooks/useMyBoards';
-import { useSetRoomStateByApply } from '@/hooks/useSetRoomStateByApply';
+import { useSetRoomStateByApply } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateByApply';
 
 type Props = {
     visible: boolean;
@@ -73,7 +73,7 @@ export const ActiveBoardSelectorModal: React.FC<Props> = ({ visible, onComplete 
 
     return (
         <Modal
-            visible={visible}
+            open={visible}
             title='ボードビュアーに表示させるボードの変更'
             onOk={onOk}
             okButtonProps={

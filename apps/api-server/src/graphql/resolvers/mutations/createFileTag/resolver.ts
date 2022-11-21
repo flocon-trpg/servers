@@ -9,13 +9,13 @@ import {
     Resolver,
     UseMiddleware,
 } from 'type-graphql';
-import { ENTRY } from '../../../../utils/roles';
 import { FileTag as FileTagEntity } from '../../../../entities/fileTag/entity';
 import { User } from '../../../../entities/user/entity';
+import { ResolverContext } from '../../../../types';
+import { ENTRY } from '../../../../utils/roles';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import { ensureAuthorizedUser } from '../../utils/utils';
-import { ResolverContext } from '../../../../types';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 @ObjectType()
 export class FileTag {

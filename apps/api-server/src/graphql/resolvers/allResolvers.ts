@@ -1,8 +1,8 @@
 import { ChangeParticipantNameResolver } from './mutations/changeParitipantName/resolver';
 import { CreateFileTagResolver } from './mutations/createFileTag/resolver';
 import { CreateRoomResolver } from './mutations/createRoom/resolver';
-import { DeleteFilesResolver } from './mutations/deleteFiles/resolver';
 import { DeleteFileTagResolver } from './mutations/deleteFileTag/resolver';
+import { DeleteFilesResolver } from './mutations/deleteFiles/resolver';
 import { DeleteMessageResolver } from './mutations/deleteMessage/resolver';
 import { DeleteRoomResolver } from './mutations/deleteRoom/resolver';
 import { DeleteRoomAsAdminResolver } from './mutations/deleteRoomAsAdmin/resolver';

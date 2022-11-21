@@ -1,5 +1,3 @@
-import * as t from 'io-ts';
-
 export type DraggablePanelConfigBase = {
     x: number;
     y: number;
@@ -7,16 +5,19 @@ export type DraggablePanelConfigBase = {
     height: number;
     zIndex: number;
 };
+import { z } from 'zod';
 
-export const serializedDraggablePanelConfigBase = t.partial({
-    x: t.number,
-    y: t.number,
-    width: t.number,
-    height: t.number,
-    zIndex: t.number,
-});
+export const serializedDraggablePanelConfigBase = z
+    .object({
+        x: z.number(),
+        y: z.number(),
+        width: z.number(),
+        height: z.number(),
+        zIndex: z.number(),
+    })
+    .partial();
 
-export type SerializedDraggablePanelConfigBase = t.TypeOf<
+export type SerializedDraggablePanelConfigBase = z.TypeOf<
     typeof serializedDraggablePanelConfigBase
 >;
 

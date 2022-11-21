@@ -1,14 +1,14 @@
-import * as t from 'io-ts';
-import { maybe } from '../../../maybe';
+import { z } from 'zod';
 import {
     createObjectValueTemplate,
     createReplaceValueTemplate,
     createTextValueTemplate,
 } from '../../generator';
+import { maybe } from '@/maybe';
 
 export const templateValue = {
-    h: createReplaceValueTemplate(t.number),
-    isPositionLocked: createReplaceValueTemplate(t.boolean),
+    h: createReplaceValueTemplate(z.number()),
+    isPositionLocked: createReplaceValueTemplate(z.boolean()),
 
     /**
      * @description To 3rd-party developers: Please always set undefined to this if it is CharacterPiece or PortraitPiece.
@@ -23,11 +23,11 @@ export const templateValue = {
     /**
      * @description To 3rd-party developers: Please always set undefined to this because it is not implemented yet in the official web-server.
      */
-    opacity: createReplaceValueTemplate(maybe(t.number)),
+    opacity: createReplaceValueTemplate(maybe(z.number())),
 
-    w: createReplaceValueTemplate(t.number),
-    x: createReplaceValueTemplate(t.number),
-    y: createReplaceValueTemplate(t.number),
+    w: createReplaceValueTemplate(z.number()),
+    x: createReplaceValueTemplate(z.number()),
+    y: createReplaceValueTemplate(z.number()),
 };
 
 export const template = createObjectValueTemplate(templateValue, undefined, undefined);

@@ -1,12 +1,10 @@
 import { MaxLength100String, maxLength100String } from '@flocon-trpg/core';
 
 export const convertToMaxLength100String = (source: string): MaxLength100String => {
-    if (maxLength100String.is(source)) {
-        return source;
+    const parsed = maxLength100String.safeParse(source);
+    if (parsed.success) {
+        return parsed.data;
     }
-    const max100String = source.slice(0, 100);
-    if (maxLength100String.is(max100String)) {
-        return max100String;
-    }
-    throw new Error('this should not happen');
+    const sourceLengthIs100 = source.slice(0, 100);
+    return maxLength100String.parse(sourceLengthIs100);
 };

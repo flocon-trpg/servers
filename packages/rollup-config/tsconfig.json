@@ -1,0 +1,4 @@
+{
+    "extends": "@flocon-trpg/tsconfig",
+    "compilerOptions": { "module": "commonjs", "declarationMap": false }
+}

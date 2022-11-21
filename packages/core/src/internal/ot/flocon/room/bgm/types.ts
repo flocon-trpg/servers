@@ -1,12 +1,12 @@
-import * as t from 'io-ts';
-import { filePathValue } from '../../filePath/types';
+import { z } from 'zod';
 import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../generator';
+import { filePathValue } from '../../filePath/types';
 
 export const template = createObjectValueTemplate(
     {
-        isPaused: createReplaceValueTemplate(t.boolean),
-        files: createReplaceValueTemplate(t.array(filePathValue)),
-        volume: createReplaceValueTemplate(t.number),
+        isPaused: createReplaceValueTemplate(z.boolean()),
+        files: createReplaceValueTemplate(z.array(filePathValue)),
+        volume: createReplaceValueTemplate(z.number()),
     },
     1,
     1

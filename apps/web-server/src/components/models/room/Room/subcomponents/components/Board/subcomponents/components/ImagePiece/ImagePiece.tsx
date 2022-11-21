@@ -1,18 +1,18 @@
-import React from 'react';
-import { success, useImageFromFilePath } from '@/hooks/imageHooks';
-import * as ReactKonva from 'react-konva';
-import { useSpring, useTransition } from '@react-spring/konva';
+import { State, filePathTemplate } from '@flocon-trpg/core';
 import { RoomPublicMessageFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { useSpring, useTransition } from '@react-spring/konva';
+import React from 'react';
+import * as ReactKonva from 'react-konva';
 import { interval } from 'rxjs';
 import { isDeleted, toText as toTextCore } from '../../../../../utils/message';
-import { State, filePathTemplate } from '@flocon-trpg/core';
-import { FilePath } from '@/utils/file/filePath';
 import { PieceGroup, PieceGroupProps } from '../../../../PieceGroup/PieceGroup';
 import { NameLabel } from './subcomponents/NameLabel';
 import {
     AnimatedGroupAsAnyProps,
     AnimatedImageAsAnyProps,
 } from '@/components/ui/AnimatedKonvaAsAnyProps/AnimatedKonvaAsAnyProps';
+import { success, useImageFromFilePath } from '@/hooks/imageHooks';
+import { FilePath } from '@/utils/file/filePath';
 
 type CoreFilePath = State<typeof filePathTemplate>;
 
@@ -39,7 +39,7 @@ const BalloonCore: React.FC<BalloonCoreProps> = ({
     x,
     y,
     width,
-}: BalloonCoreProps) => {
+}) => {
     const labelOpacity = 0.8;
 
     const transitions0 = useTransition(text0, {
@@ -137,13 +137,7 @@ type BalloonProps = {
 };
 
 // 💬を表すコンポーネント。
-const Balloon: React.FC<BalloonProps> = ({
-    message,
-    x,
-    y,
-    width,
-    onBalloonChange,
-}: BalloonProps) => {
+const Balloon: React.FC<BalloonProps> = ({ message, x, y, width, onBalloonChange }) => {
     const onTextsChangeRef = React.useRef(onBalloonChange);
     React.useEffect(() => {
         onTextsChangeRef.current = onBalloonChange;
@@ -248,7 +242,7 @@ type Props = {
     messageFilter?: (message: RoomPublicMessageFragment) => boolean;
 } & PieceGroupProps;
 
-export const ImagePiece: React.FC<Props> = (props: Props) => {
+export const ImagePiece: React.FC<Props> = props => {
     /*
         リサイズや移動の実装方法についてはこちらを参照
         https://konvajs.org/docs/react/Transformer.html

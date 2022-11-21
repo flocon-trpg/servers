@@ -1,9 +1,9 @@
-import React from 'react';
+import { notification } from 'antd';
 import fileDownload from 'js-file-download';
+import React from 'react';
+import { useGetIdToken } from './useGetIdToken';
 import { useWebConfig } from './useWebConfig';
 import { files, getFloconUploaderFile, idTokenIsNull } from '@/utils/file/getFloconUploaderFile';
-import { useGetIdToken } from './useGetIdToken';
-import { notification } from 'antd';
 
 export const useOpenFloconUploaderFile = () => {
     const webConfig = useWebConfig();

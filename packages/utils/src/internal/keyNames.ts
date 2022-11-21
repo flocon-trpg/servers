@@ -29,8 +29,9 @@ function* keyToStrings(key: Key) {
     }
 }
 
+/** React の key に用いる文字列を生成します。 */
 // classNamesを参考にした命名。keyNamesの代わりにkeysは名前が汎用的すぎて衝突しやすいと思うため不採用。
-// clsxを参考にkeyxなどといった命名法も考えられるが、clsxはclassNamesとシグネチャが異なるようなので、もしかしたら適切ではないかもしれないと考え見送った。
+// clsxを参考にkeyxなどといった命名法も考えられるが、clsxはclassNamesとは引数が異なるようなので、もしかしたら適切ではないかもしれないと考え見送った。
 export const keyNames = (...keys: NonEmptyArray<Key>): string => {
     return keys
         .map(key => [...keyToStrings(key)])

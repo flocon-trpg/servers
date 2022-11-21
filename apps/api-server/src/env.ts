@@ -1,6 +1,6 @@
+import { existsSync } from 'fs';
 import { config } from 'dotenv';
 import { expand } from 'dotenv-expand';
-import { existsSync } from 'fs';
 
 export const loadDotenv = (): void => {
     // web-server(next.js)と近い仕様にするように、.env.localもサポートしている。
@@ -29,7 +29,10 @@ export const EMBUPLOADER_SIZE_QUOTA = 'EMBUPLOADER_SIZE_QUOTA';
 export const EMBUPLOADER_COUNT_QUOTA = 'EMBUPLOADER_COUNT_QUOTA';
 export const EMBUPLOADER_PATH = 'EMBUPLOADER_PATH';
 export const ENTRY_PASSWORD = 'ENTRY_PASSWORD';
+/**  `FIREBASE_PROJECT_ID` と取り違えないよう注意してください。 */
 export const FIREBASE_PROJECTID = 'FIREBASE_PROJECTID';
+/**  `FIREBASE_PROJECTID` と取り違えないよう注意してください。 */
+export const FIREBASE_PROJECT_ID = 'FIREBASE_PROJECT_ID';
 export const FIREBASE_ADMIN_SECRET = 'FIREBASE_ADMIN_SECRET';
 export const FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL =
     'FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL';

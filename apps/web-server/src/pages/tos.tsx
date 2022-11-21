@@ -1,6 +1,11 @@
 import { Typography } from 'antd';
 import React from 'react';
 
+/**
+ * `tos.md` の内容を用い、利用規約を表示します。
+ *
+ * ただし、サーバーを運用する際は、このコードを改変して利用規約を表示させても構いません。
+ */
 const Tos: React.FC = () => {
     return (
         <Typography style={{ padding: 8 }}>

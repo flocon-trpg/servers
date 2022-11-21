@@ -1,9 +1,9 @@
 import { ParticipantRole, State as S, roomTemplate } from '@flocon-trpg/core';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
-import { useSetupMocks } from '@/hooks/useSetupMocks';
 import { CharacterListPanelContent } from './CharacterListPanelContent';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
+import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 
 type RoomState = S<typeof roomTemplate>;
 
@@ -23,7 +23,7 @@ export const Default: React.FC<{ stateType: StateType; myParticipantRole: Partic
                 };
         }
     }, [stateType]);
-    useSetupMocks({
+    useSetupStorybook({
         roomConfig: {
             myParticipantRole,
             setBoards: stateType === 'default',
@@ -32,7 +32,7 @@ export const Default: React.FC<{ stateType: StateType; myParticipantRole: Partic
     });
 
     return (
-        <StorybookProvider>
+        <StorybookProvider waitForRoomClient>
             <CharacterListPanelContent />
         </StorybookProvider>
     );

@@ -19,8 +19,6 @@ WORKDIR /app/servers/apps/api-server
 
 RUN yarn workspaces focus
 
-RUN yarn run build
-
 WORKDIR /app/servers
 
 # simple cleanup for the next COPY

@@ -1,10 +1,10 @@
 import { Arg, Ctx, Field, Mutation, ObjectType, Resolver, UseMiddleware } from 'type-graphql';
+import { User } from '../../../../entities/user/entity';
 import { BaasType } from '../../../../enums/BaasType';
 import { EntryToServerResultType } from '../../../../enums/EntryToServerResultType';
-import { User } from '../../../../entities/user/entity';
-import { NotSignIn, checkSignIn, comparePassword } from '../../utils/utils';
 import { ResolverContext } from '../../../../types';
 import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
+import { NotSignIn, checkSignIn, comparePassword } from '../../utils/utils';
 
 @ObjectType()
 class EntryToServerResult {

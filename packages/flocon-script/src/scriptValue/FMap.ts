@@ -1,15 +1,15 @@
-import { FObject } from './FObject';
 import { ScriptError } from '../ScriptError';
-import { beginCast } from './cast';
+import { mapIterator } from '../utils/mapIterator';
+import { FArray } from './FArray';
+import { FBoolean } from './FBoolean';
 import { FFunction } from './FFunction';
+import { FNumber } from './FNumber';
+import { FObject } from './FObject';
 import { FType } from './FType';
 import { FValue } from './FValue';
-import { AstInfo, GetCoreParams, SetCoreParams } from './types';
-import { FBoolean } from './FBoolean';
+import { beginCast } from './cast';
 import { toFValue } from './toFValue';
-import { FNumber } from './FNumber';
-import { FArray } from './FArray';
-import { mapIterator } from '../utils/mapIterator';
+import { AstInfo, GetCoreParams, SetCoreParams } from './types';
 
 type Key = string | number | boolean | symbol | null | undefined;
 
@@ -100,6 +100,8 @@ export class FMap extends FObject {
                     this.source.set(key, value);
                     return undefined;
                 });
+            default:
+                break;
         }
         return undefined;
     }

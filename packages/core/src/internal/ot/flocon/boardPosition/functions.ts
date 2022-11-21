@@ -1,10 +1,10 @@
 import { Result } from '@kizahasi/result';
-import { isIdRecord } from '../../util/record';
+import { State, TwoWayOperation, UpOperation } from '../../generator';
+import * as NullableTextOperation from '../../nullableTextOperation';
+import { isIdRecord } from '../../record';
 import * as ReplaceOperation from '../../util/replaceOperation';
 import { ServerTransform } from '../../util/type';
-import * as NullableTextOperation from '../../util/nullableTextOperation';
 import { template } from './types';
-import { State, TwoWayOperation, UpOperation } from '../../generator';
 
 export const toClientState = (source: State<typeof template>): State<typeof template> => {
     return source;
@@ -14,25 +14,25 @@ export const serverTransform: ServerTransform<
     State<typeof template>,
     TwoWayOperation<typeof template>,
     UpOperation<typeof template>
-> = ({ prevState, clientOperation, serverOperation }) => {
+> = ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
     const twoWayOperation: TwoWayOperation<typeof template> = { $v: undefined, $r: undefined };
 
     twoWayOperation.h = ReplaceOperation.serverTransform({
         first: serverOperation?.h,
         second: clientOperation.h,
-        prevState: prevState.h,
+        prevState: stateBeforeServerOperation.h,
     });
 
     twoWayOperation.isPositionLocked = ReplaceOperation.serverTransform({
         first: serverOperation?.isPositionLocked,
         second: clientOperation.isPositionLocked,
-        prevState: prevState.isPositionLocked,
+        prevState: stateBeforeServerOperation.isPositionLocked,
     });
 
     const transformedMemo = NullableTextOperation.serverTransform({
         first: serverOperation?.memo,
         second: clientOperation.memo,
-        prevState: prevState.memo,
+        prevState: stateBeforeServerOperation.memo,
     });
     if (transformedMemo.isError) {
         return transformedMemo;
@@ -42,7 +42,7 @@ export const serverTransform: ServerTransform<
     const transformedName = NullableTextOperation.serverTransform({
         first: serverOperation?.name,
         second: clientOperation.name,
-        prevState: prevState.name,
+        prevState: stateBeforeServerOperation.name,
     });
     if (transformedName.isError) {
         return transformedName;
@@ -52,25 +52,25 @@ export const serverTransform: ServerTransform<
     twoWayOperation.opacity = ReplaceOperation.serverTransform({
         first: serverOperation?.opacity,
         second: clientOperation.opacity,
-        prevState: prevState.opacity,
+        prevState: stateBeforeServerOperation.opacity,
     });
 
     twoWayOperation.w = ReplaceOperation.serverTransform({
         first: serverOperation?.w,
         second: clientOperation.w,
-        prevState: prevState.w,
+        prevState: stateBeforeServerOperation.w,
     });
 
     twoWayOperation.x = ReplaceOperation.serverTransform({
         first: serverOperation?.x,
         second: clientOperation.x,
-        prevState: prevState.x,
+        prevState: stateBeforeServerOperation.x,
     });
 
     twoWayOperation.y = ReplaceOperation.serverTransform({
         first: serverOperation?.y,
         second: clientOperation.y,
-        prevState: prevState.y,
+        prevState: stateBeforeServerOperation.y,
     });
 
     if (isIdRecord(twoWayOperation)) {

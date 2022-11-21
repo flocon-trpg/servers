@@ -1,16 +1,19 @@
-import React from 'react';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
-import { ChatPalettePanelContent } from './ChatPalettePanelContent';
-import { getExactlyOneKey } from '@flocon-trpg/utils';
 import { ParticipantRole } from '@flocon-trpg/core';
-import { useSetupMocks } from '@/hooks/useSetupMocks';
+import { getExactlyOneKey } from '@flocon-trpg/utils';
+import { ComponentMeta, ComponentStory } from '@storybook/react';
+import React from 'react';
+import { ChatPalettePanelContent } from './ChatPalettePanelContent';
+import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
-    const { roomId, roomConfig } = useSetupMocks({
+    const { roomId, roomConfig, isInitialized } = useSetupStorybook({
         roomConfig: {
             myParticipantRole,
         },
     });
+    if (!isInitialized) {
+        return <div />;
+    }
     return (
         <div style={{ height: 400 }}>
             <ChatPalettePanelContent

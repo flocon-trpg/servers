@@ -1,14 +1,14 @@
-import { Button, Modal } from 'antd';
-import React from 'react';
-import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
-import { strIndex10Array } from '@flocon-trpg/core';
-import classNames from 'classnames';
-import { flex, flexColumn, flexRow } from '@/styles/className';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
-import { atom, useAtom } from 'jotai';
-import { useCharacterTagNames } from '../../hooks/useCharacterTagNames';
 import * as Icons from '@ant-design/icons';
+import { strIndex10Array } from '@flocon-trpg/core';
+import { Button, Modal } from 'antd';
+import classNames from 'classnames';
+import { atom, useAtom } from 'jotai';
+import React from 'react';
+import { useCharacterTagNames } from '../../hooks/useCharacterTagNames';
+import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateWithImmer';
 import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
+import { flex, flexColumn, flexRow } from '@/styles/className';
 
 export const characterTagNamesEditorVisibilityAtom = atom(false);
 
@@ -59,7 +59,7 @@ export const CharacterTagNamesEditorModal: React.FC = () => {
             <Modal
                 title='キャラクターのタグの追加・編集・削除'
                 width={600}
-                visible={editorVisibility}
+                open={editorVisibility}
                 closable
                 onCancel={() => setEditorVisibility(false)}
                 footer={

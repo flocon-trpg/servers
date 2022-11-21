@@ -1,20 +1,28 @@
-import React from 'react';
-import { Client } from 'urql';
-import { IndexPage } from './IndexPage';
-import { fromValue, never } from 'wonka';
 import * as Doc071 from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Doc072 from '@flocon-trpg/typed-document-node-v0.7.2';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
-import { createMockUrqlClient, dummyUrqlOperation } from '@/mocks';
+import React from 'react';
+import { Client, CombinedError } from 'urql';
+import { fromValue, never } from 'wonka';
+import { IndexPage } from './IndexPage';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
+import { createDummyUrqlOperation, createMockUrqlClient } from '@/mocks';
 
 type Version = Doc071.GetServerInfoQuery['result']['version'];
 
-const createMockClient = (version: Version | 'never'): Client => {
+const createMockClient = (version: Version | 'error' | 'never'): Client => {
     return createMockUrqlClient({
         mockQuery: query => {
-            if (version === 'never') {
-                return never;
+            switch (version) {
+                case 'never':
+                    return never;
+                case 'error':
+                    return fromValue({
+                        error: new CombinedError({ graphQLErrors: ['test error'] }),
+                        operation: createDummyUrqlOperation(),
+                    });
+                default:
+                    break;
             }
             switch (query.query) {
                 case Doc071.GetServerInfoDocument:
@@ -28,8 +36,8 @@ const createMockClient = (version: Version | 'never'): Client => {
                         },
                     };
                     return fromValue({
-                        data: res as any,
-                        operation: dummyUrqlOperation,
+                        data: res,
+                        operation: createDummyUrqlOperation(),
                     });
                 }
                 case Doc072.GetMyRolesDocument: {
@@ -41,8 +49,8 @@ const createMockClient = (version: Version | 'never'): Client => {
                         },
                     };
                     return fromValue({
-                        data: res as any,
-                        operation: dummyUrqlOperation,
+                        data: res,
+                        operation: createDummyUrqlOperation(),
                     });
                 }
                 default:
@@ -53,10 +61,10 @@ const createMockClient = (version: Version | 'never'): Client => {
     });
 };
 
-export const Default: React.FC<{ version: Version | 'never' }> = ({ version }) => {
+export const Default: React.FC<{ version: Version | 'error' | 'never' }> = ({ version }) => {
     const urqlClient = React.useMemo(() => createMockClient(version), [version]);
     return (
-        <StorybookProvider urqlClient={urqlClient}>
+        <StorybookProvider waitForRoomClient={false} urqlClient={urqlClient}>
             <IndexPage />
         </StorybookProvider>
     );
@@ -75,6 +83,11 @@ const Template: ComponentStory<typeof Default> = args => <Default {...args} />;
 export const Loading = Template.bind({});
 Loading.args = {
     version: 'never',
+};
+
+export const GraphQLError = Template.bind({});
+GraphQLError.args = {
+    version: 'error',
 };
 
 export const Prerelease = Template.bind({});

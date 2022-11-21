@@ -5,7 +5,11 @@ import { PONG } from './topics';
 
 @Resolver()
 export class PongResolver {
-    @Subscription(() => Pong, { topics: PONG, description: 'for test' })
+    @Subscription(() => Pong, {
+        topics: PONG,
+        description:
+            'GraphQL の動作テストに用いられます。3rd-party の Web サーバーを作成する際は利用しなくて構いません。',
+    })
     public pong(@Root() payload: PongPayload): Pong {
         return payload;
     }

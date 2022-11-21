@@ -1,16 +1,17 @@
 {
     "compilerOptions": {
-        /* Visit https://aka.ms/tsconfig.json to read more about this file */
+        // Visit https://aka.ms/tsconfig.json to read more about this file
 
         // Node 14 で推奨される設定を使用している
         // https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping#node-14
 
         "resolveJsonModule": false,
         "target": "ES2020",
-        "module": "commonjs",
+        "module": "ES2015",
         "sourceMap": true,
-        // https://typegraphql.com/docs/0.17.0/installation.html#packages-installation
+        // https://typegraphql.com/docs/installation.html#packages-installation
         "lib": ["es2020", "esnext.asynciterable"],
+        "moduleResolution": "node",
         "removeComments": true,
         "strict": true,
         "esModuleInterop": true,
@@ -18,7 +19,12 @@
         "emitDecoratorMetadata": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
-        "noUncheckedIndexedAccess": true
+        "noUncheckedIndexedAccess": true,
+
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./src/*"]
+        }
     },
     "exclude": ["node_modules"],
     "include": ["src/**/*.ts", "test/**/*.ts"]

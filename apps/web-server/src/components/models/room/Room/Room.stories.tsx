@@ -1,12 +1,13 @@
-import React from 'react';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
-import { Result } from '@kizahasi/result';
-import { Room } from './Room';
-import { WebConfig } from '@/configType';
-import { mockWebConfig } from '@/mocks';
 import { ParticipantRole } from '@flocon-trpg/core';
-import { useSetupMocks } from '@/hooks/useSetupMocks';
+import { Result } from '@kizahasi/result';
+import { ComponentMeta, ComponentStory } from '@storybook/react';
+import React from 'react';
+import { Room } from './Room';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
+import { WebConfig } from '@/configType';
+import { useSetupStorybook } from '@/hooks/useSetupStorybook';
+import { mockWebConfig } from '@/mocks';
+import { createMockUrqlClientForRoomMessage } from '@/mocks/mockAvailableGameSystemsQuery';
 
 export const Player: React.FC<WebConfig & { myParticipantRole: ParticipantRole }> = ({
     isUnlistedFirebaseStorageEnabled,
@@ -20,7 +21,7 @@ export const Player: React.FC<WebConfig & { myParticipantRole: ParticipantRole }
             isPublicFirebaseStorageEnabled,
         });
     }, [isPublicFirebaseStorageEnabled, isUnlistedFirebaseStorageEnabled]);
-    useSetupMocks({
+    useSetupStorybook({
         basicMock: {
             webConfig,
         },
@@ -28,9 +29,10 @@ export const Player: React.FC<WebConfig & { myParticipantRole: ParticipantRole }
             myParticipantRole,
         },
     });
+    const mockUrqlClient = React.useRef(createMockUrqlClientForRoomMessage());
 
     return (
-        <StorybookProvider>
+        <StorybookProvider waitForRoomClient urqlClient={mockUrqlClient.current}>
             <Room debug={{ window: { innerHeight: 600, innerWidth: 500 } }} />
         </StorybookProvider>
     );

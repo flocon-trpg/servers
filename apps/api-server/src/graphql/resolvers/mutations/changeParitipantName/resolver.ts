@@ -11,7 +11,11 @@ import {
     Resolver,
     UseMiddleware,
 } from 'type-graphql';
+import { ChangeParticipantNameFailureType } from '../../../../enums/ChangeParticipantNameFailureType';
+import { ResolverContext } from '../../../../types';
+import { convertToMaxLength100String } from '../../../../utils/convertToMaxLength100String';
 import { ENTRY } from '../../../../utils/roles';
+import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import {
     ensureAuthorizedUser,
@@ -19,10 +23,6 @@ import {
     operateParticipantAndFlush,
     publishRoomEvent,
 } from '../../utils/utils';
-import { convertToMaxLength100String } from '../../../../utils/convertToMaxLength100String';
-import { ChangeParticipantNameFailureType } from '../../../../enums/ChangeParticipantNameFailureType';
-import { ResolverContext } from '../../../../types';
-import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 
 @ArgsType()
 class ChangeParticipantNameArgs {

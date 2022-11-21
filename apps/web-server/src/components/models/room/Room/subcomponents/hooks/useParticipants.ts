@@ -1,8 +1,7 @@
-import React from 'react';
-import { recordForEach } from '@flocon-trpg/utils';
 import { Master, Player, Spectator, State, participantTemplate } from '@flocon-trpg/core';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { roomAtom } from '@/atoms/roomAtom/roomAtom';
+import { recordForEach } from '@flocon-trpg/utils';
+import React from 'react';
+import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 
 type ParticipantState = State<typeof participantTemplate>;
 
@@ -19,7 +18,7 @@ export const useParticipants = (
     const includePlayer = filter?.[Player] ?? true;
     const includeSpectator = filter?.[Spectator] ?? true;
 
-    const participants = useAtomSelector(roomAtom, state => state.roomState?.state?.participants);
+    const participants = useRoomStateValueSelector(state => state.participants);
     return React.useMemo(() => {
         if (participants == null) {
             return undefined;

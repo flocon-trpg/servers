@@ -1,5 +1,10 @@
-import * as React from 'react';
-import { Modal, Upload, notification } from 'antd';
+import {
+    State,
+    filePathTemplate,
+    joinPath,
+    sanitizeFilename,
+    sanitizeFoldername,
+} from '@flocon-trpg/core';
 import {
     DeleteFilesDocument,
     FileListType,
@@ -7,15 +12,21 @@ import {
     GetServerInfoDocument,
     RenameFilesDocument,
 } from '@flocon-trpg/typed-document-node-v0.7.8';
-import { useMutation, useQuery } from 'urql';
-import { useAtomValue } from 'jotai';
-import { firebaseStorageAtom, firebaseUserAtom } from '@/pages/_app';
-import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { Result } from '@kizahasi/result';
+import { Modal, Upload, notification } from 'antd';
+import axios from 'axios';
+import copy from 'clipboard-copy';
 import { StorageReference, deleteObject, ref, uploadBytes } from 'firebase/storage';
-import { FileType, guessFileType, image, others, sound } from '@/utils/fileType';
-import { useWebConfig } from '@/hooks/useWebConfig';
+import { useAtomValue } from 'jotai';
+import * as React from 'react';
+import { useLatest } from 'react-use';
+import urljoin from 'url-join';
+import { useMutation, useQuery } from 'urql';
 import { FileBrowser, FilePath } from '../FileBrowser/FileBrowser';
-import { fileName } from '@/utils/filename';
+import { ImageView } from '../ImageView/ImageView';
+import { accept } from './utils/helper';
+import { getHttpUri } from '@/atoms/webConfigAtom/webConfigAtom';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import {
     FetchResult,
     File,
@@ -28,26 +39,15 @@ import {
     useFirebaseStorageListAllQuery,
 } from '@/hooks/useFirebaseStorageListAllQuery';
 import { useGetIdToken } from '@/hooks/useGetIdToken';
-import { $public, Path, StorageType, unlisted } from '@/utils/file/firebaseStorage';
-import { accept } from './utils/helper';
-import {
-    State,
-    filePathTemplate,
-    joinPath,
-    sanitizeFilename,
-    sanitizeFoldername,
-} from '@flocon-trpg/core';
-import urljoin from 'url-join';
-import { getHttpUri } from '@/atoms/webConfigAtom/webConfigAtom';
-import axios from 'axios';
-import { useLatest } from 'react-use';
-import copy from 'clipboard-copy';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useOpenFirebaseStorageFile } from '@/hooks/useOpenFirebaseStorageFile';
 import { useOpenFloconUploaderFile } from '@/hooks/useOpenFloconUploaderFile';
-import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
-import { Result } from '@kizahasi/result';
-import { ImageView } from '../ImageView/ImageView';
+import { useWebConfig } from '@/hooks/useWebConfig';
+import { firebaseStorageAtom, firebaseUserAtom } from '@/pages/_app';
+import { $public, Path, StorageType, unlisted } from '@/utils/file/firebaseStorage';
 import { thumbs } from '@/utils/file/getFloconUploaderFile';
+import { FileType, guessFileType, image, others, sound } from '@/utils/fileType';
+import { fileName } from '@/utils/filename';
 
 type FilePathState = State<typeof filePathTemplate>;
 
@@ -121,7 +121,8 @@ const useFirebaseStorageFiles = (onSelect: OnSelect | null) => {
                             });
                         });
                     },
-                    onMoveOrRename: () => Promise.reject('not supported'),
+                    onMoveOrRename: () =>
+                        Promise.reject(new Error('Not supported for Firebase Storage')),
                 };
                 return result;
             };
@@ -689,7 +690,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
             {firebaseStorageUploaderModalState && (
                 <Modal
                     title='ファイルのアップロード'
-                    visible
+                    open
                     onCancel={() => setFirebaseStorageUploaderModalState(undefined)}
                     footer={
                         <DialogFooter
@@ -713,7 +714,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
             {floconUploaderModalState && (
                 <Modal
                     title='ファイルのアップロード'
-                    visible
+                    open
                     onCancel={() => setFloconUploaderModalState(undefined)}
                     footer={
                         <DialogFooter

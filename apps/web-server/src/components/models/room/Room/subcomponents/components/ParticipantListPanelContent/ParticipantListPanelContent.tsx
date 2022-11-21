@@ -1,10 +1,10 @@
-import React from 'react';
-import { Table } from 'antd';
-import { ParticipantRole } from '@flocon-trpg/typed-document-node-v0.7.1';
-import { Jdenticon } from '@/components/ui/Jdenticon/Jdenticon';
-import { useRoomConnections } from '../../hooks/useRoomConnections';
-import { useParticipants } from '../../hooks/useParticipants';
 import { State, participantTemplate } from '@flocon-trpg/core';
+import { ParticipantRole } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { Table } from 'antd';
+import React from 'react';
+import { useParticipants } from '../../hooks/useParticipants';
+import { useRoomConnections } from '../../hooks/useRoomConnections';
+import { Jdenticon } from '@/components/ui/Jdenticon/Jdenticon';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 
 type ParticipantState = State<typeof participantTemplate>;
@@ -26,7 +26,7 @@ export const ParticipantListPanelContent: React.FC = () => {
     const dataSource: DataSource[] = React.useMemo(
         () =>
             [...(participants ?? [])].map(([key, participant]) => {
-                const connection = roomConnections[key];
+                const connection = roomConnections?.current.get(key);
                 return {
                     key, // antdのtableのkeyとして必要
                     participant: {

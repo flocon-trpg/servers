@@ -1,8 +1,14 @@
-import React from 'react';
-import { useMemos } from '../../hooks/useMemos';
 import { State, joinPath, memoTemplate, simpleId } from '@flocon-trpg/core';
+import { Result } from '@kizahasi/result';
 import { Button, Modal } from 'antd';
 import classNames from 'classnames';
+import moment from 'moment';
+import React from 'react';
+import { useMemos } from '../../hooks/useMemos';
+import { FileBrowser, FilePath, text } from '@/components/models/file/FileBrowser/FileBrowser';
+import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateWithImmer';
+import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
+import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import {
     flex,
     flex1,
@@ -12,13 +18,7 @@ import {
     flexRow,
     itemsCenter,
 } from '@/styles/className';
-import moment from 'moment';
-import { useSetRoomStateWithImmer } from '@/hooks/useSetRoomStateWithImmer';
-import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
-import { FileBrowser, FilePath, text } from '@/components/models/file/FileBrowser/FileBrowser';
-import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { stretchedModalWidth } from '@/utils/variables';
-import { Result } from '@kizahasi/result';
 
 type MemoState = State<typeof memoTemplate>;
 
@@ -75,7 +75,7 @@ const MemoBrowserModal: React.FC<{
 
     return (
         <Modal
-            visible={visible}
+            open={visible}
             onCancel={() => onClose(null)}
             footer={<DialogFooter close={{ textType: 'close', onClick: () => onClose(null) }} />}
             width={stretchedModalWidth}

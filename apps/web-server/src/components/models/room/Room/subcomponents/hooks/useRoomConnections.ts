@@ -1,102 +1,41 @@
-import { useQuery } from 'urql';
-import produce from 'immer';
+import * as SDK from '@flocon-trpg/sdk-react';
 import React from 'react';
-import { GetRoomConnectionsDocument } from '@flocon-trpg/typed-document-node-v0.7.1';
-import { Notification } from '@flocon-trpg/web-server-utils';
-import { useParticipants } from './useParticipants';
 import { useLatest } from 'react-use';
-import { roomAtom, roomNotificationsAtom, text } from '@/atoms/roomAtom/roomAtom';
-import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { useUpdateAtom } from 'jotai/utils';
+import { map, skip } from 'rxjs';
+import { useAddNotification } from '../../../../../../hooks/useAddNotification';
+import { useParticipants } from './useParticipants';
+import { useRoomClient } from '@/hooks/roomClientHooks';
 
-export type RoomConnectionsResult = {
-    readonly [userUid: string]: { readonly isConnected: boolean; readonly fetchedAt: number };
-};
-
-export function useRoomConnections() {
-    const roomId = useAtomSelector(roomAtom, state => state.roomId);
-    const roomConnectionEvent = useAtomSelector(
-        roomAtom,
-        state => state.roomEventSubscription?.roomEvent?.roomConnectionEvent
-    );
-    const [result, setResult] = React.useState<RoomConnectionsResult>({});
-    const [roomConnections, getRoomConnections] = useQuery({
-        query: GetRoomConnectionsDocument,
-        requestPolicy: 'network-only',
-        pause: true,
-        variables: roomId == null ? undefined : { roomId },
-    });
-    const addRoomNotification = useUpdateAtom(roomNotificationsAtom);
+/** 差分が Notification として自動追加されるので、複数の個所で同時に呼ばないようにしてください。 */
+export const useRoomConnections = () => {
+    const roomClient = useRoomClient();
+    const addCustomMessage = useAddNotification();
     const participants = useParticipants();
     const participantsRef = useLatest(participants);
-
     React.useEffect(() => {
-        setResult({});
-        if (roomId != null) {
-            getRoomConnections();
-        }
-    }, [roomId, getRoomConnections]);
-    React.useEffect(() => {
-        if (roomConnections.data?.result.__typename !== 'GetRoomConnectionsSuccessResult') {
-            return;
-        }
-        const data = roomConnections.data.result;
-        setResult(oldValue =>
-            produce(oldValue, draft => {
-                data.connectedUserUids.forEach(userUid => {
-                    draft[userUid] = { isConnected: true, fetchedAt: data.fetchedAt };
-                });
-            })
-        );
-    }, [roomConnections.data]);
-    React.useEffect(() => {
-        if (roomConnectionEvent == null) {
-            return;
-        }
-        setResult(oldValue =>
-            produce(oldValue, draft => {
-                const value = draft[roomConnectionEvent.userUid];
-                const participant = participantsRef.current?.get(roomConnectionEvent.userUid);
-                const notification: Notification | undefined =
-                    participant == null
-                        ? undefined
-                        : {
-                              type: 'info',
-                              message: `${participant.name}が${
-                                  roomConnectionEvent.isConnected ? '接続' : '切断'
-                              }しました。`,
-                              createdAt: new Date().getTime(),
-                          };
-                if (value == null) {
-                    if (notification != null) {
-                        addRoomNotification({
-                            type: text,
-                            notification,
-                        });
+        roomClient.value.roomConnections
+            .asObservable()
+            .pipe(
+                skip(1),
+                map(x => x.diff)
+            )
+            .subscribe({
+                next: diff => {
+                    if (diff == null) {
+                        return;
                     }
-                    draft[roomConnectionEvent.userUid] = {
-                        isConnected: roomConnectionEvent.isConnected,
-                        fetchedAt: roomConnectionEvent.updatedAt,
-                    };
-                    return;
-                }
-                if (value.fetchedAt >= roomConnectionEvent.updatedAt) {
-                    return;
-                }
-
-                if (notification != null) {
-                    addRoomNotification({
-                        type: text,
-                        notification,
+                    const participant = participantsRef.current?.get(diff.userUid);
+                    if (participant == null) {
+                        return;
+                    }
+                    addCustomMessage({
+                        type: 'info',
+                        message: `${participant.name}が${
+                            diff.type === 'connect' ? '接続' : '切断'
+                        }しました。`,
                     });
-                }
-                draft[roomConnectionEvent.userUid] = {
-                    isConnected: roomConnectionEvent.isConnected,
-                    fetchedAt: roomConnectionEvent.updatedAt,
-                };
-            })
-        );
-    }, [roomConnectionEvent, participantsRef, addRoomNotification]);
-
-    return result;
-}
+                },
+            });
+    }, [addCustomMessage, participantsRef, roomClient.value.roomConnections]);
+    return SDK.useRoomConnections(roomClient.value);
+};

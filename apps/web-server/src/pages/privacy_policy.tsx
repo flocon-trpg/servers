@@ -1,6 +1,11 @@
 import { Typography } from 'antd';
 import React from 'react';
 
+/**
+ * `privacy_policy.md` の内容を用い、プライバシーポリシーを表示します。
+ *
+ * ただし、サーバーを運用する際は、このコードを改変してプライバシーポリシーを表示させても構いません。
+ */
 const PrivacyPolicy: React.FC = () => {
     return (
         <Typography style={{ padding: 8 }}>

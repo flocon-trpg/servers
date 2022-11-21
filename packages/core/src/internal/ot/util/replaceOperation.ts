@@ -5,24 +5,6 @@ type ServerTransformParameters<T> = {
 };
 type ServerTransformResult<T> = { oldValue: T; newValue: T } | undefined;
 
-export type ReplaceValueTwoWayOperation<T> = {
-    oldValue: T;
-    newValue: T;
-};
-
-export const composeDownOperation = <T>(
-    first: { oldValue: T } | undefined,
-    second: { oldValue: T } | undefined
-): { oldValue: T } | undefined => {
-    if (first === undefined) {
-        return second;
-    }
-    if (second === undefined) {
-        return first;
-    }
-    return { oldValue: first.oldValue };
-};
-
 export const serverTransform = <T>({
     first,
     second,
