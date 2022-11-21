@@ -27,7 +27,7 @@ const splitterPadding = 8;
 
 const MemoBrowserModal: React.FC<{
     visible: boolean;
-    /** @param selectedMemoId - 選択されたメモのIDが変更される場合はnon-null、変更されない場合はnullの値となります。 */
+    /** @param selectedMemoId 選択されたメモのIDが変更される場合はnon-null、変更されない場合はnullの値となります。 */
     onClose: (selectedMemoId: string | null) => void;
 }> = ({ visible, onClose }) => {
     const memos = useMemos();

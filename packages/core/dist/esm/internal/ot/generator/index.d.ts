@@ -154,7 +154,7 @@ export declare const applyBack: <T extends AnyTemplate>(template: T) => Apply<St
 export declare const composeDownOperation: <T extends AnyTemplate>(template: T) => Compose<DownOperation<T>, DownError>;
 /**
  * Stateの情報を用いて、DownOperationをTwoWayOperationに変換します。破壊的な処理は行われません。
- * @param nextState - DownOperationが適用される前の状態のState。
+ * @param nextState DownOperationが適用される前の状態のState。
  */
 export declare const restore: <T extends AnyTemplate>(template: T) => Restore<State<T>, DownOperation<T>, TwoWayOperation<T>>;
 /** 2つのStateオブジェクトの差分を取ります。

@@ -65,6 +65,11 @@ const useRoomGraphQLStatus = (roomClient) => {
     return useReadonlyBehaviorEvent(roomClient.graphQLStatus);
 };
 
+/**
+ * 部屋に投稿されたメッセージ(秘話およびログも含む)およびカスタムメッセージのリストと変更点を返します。
+ *
+ * @param filter function が渡された場合、true を返すメッセージのみを抽出します。変更されるたびに全てのメッセージの抽出処理が行われるため、function を渡す場合は useCallback などを用いる必要があります。
+ */
 const useRoomMessages = (roomClient, filter) => {
     const queryStatus = useReadonlyBehaviorEvent(roomClient.messages.queryStatus);
     const messagesSource = React.useMemo(() => {
