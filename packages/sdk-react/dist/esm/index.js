@@ -1,5 +1,5 @@
 import { createRoomClient, ReadonlyBehaviorEvent } from '@flocon-trpg/sdk';
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { usePreviousDistinct } from 'react-use';
 import { useMemoOne } from 'use-memo-one';
 
@@ -65,23 +65,22 @@ const useRoomGraphQLStatus = (roomClient) => {
  * @param filter function が渡された場合、true を返すメッセージのみを抽出します。変更されるたびに全てのメッセージの抽出処理が行われるため、function を渡す場合は useCallback などを用いる必要があります。
  */
 const useRoomMessages = (roomClient, filter) => {
-    const queryStatus = useReadonlyBehaviorEvent(roomClient.messages.queryStatus);
     const messagesSource = useMemo(() => {
         return filter == null
             ? roomClient.messages.messages
             : roomClient.messages.messages.filter(filter);
     }, [filter, roomClient.messages.messages]);
-    const [messages, setMessages] = useState(() => ({
+    const [result, setResult] = useState(() => ({
         current: messagesSource?.getCurrent() ?? [],
     }));
     useEffect(() => {
         if (messagesSource == null) {
             return;
         }
-        setMessages({ current: messagesSource.getCurrent() });
+        setResult({ current: messagesSource.getCurrent() });
         const subscription = messagesSource.changed.subscribe({
             next: e => {
-                setMessages({
+                setResult({
                     current: e.current,
                     diff: e.type === 'event' ? e.diff ?? undefined : undefined,
                 });
@@ -89,7 +88,11 @@ const useRoomMessages = (roomClient, filter) => {
         });
         return () => subscription.unsubscribe();
     }, [messagesSource]);
-    return React.useMemo(() => ({ messages, queryStatus }), [messages, queryStatus]);
+    return result;
+};
+
+const useRoomMessageQueryStatus = (roomClient) => {
+    return useReadonlyBehaviorEvent(roomClient.messages.queryStatus);
 };
 
 const useRoomState = (roomClient) => {
@@ -106,5 +109,5 @@ const useWritingMessageStatus = (roomClient) => {
     return useReadonlyBehaviorEvent(roomClient.writingMessageStatus.value);
 };
 
-export { useCreateRoomClient, useReadonlyBehaviorEvent, useRoomConnections, useRoomGraphQLStatus, useRoomMessages, useRoomState, useUpdateWritingMessageStatus, useWritingMessageStatus };
+export { useCreateRoomClient, useReadonlyBehaviorEvent, useRoomConnections, useRoomGraphQLStatus, useRoomMessageQueryStatus, useRoomMessages, useRoomState, useUpdateWritingMessageStatus, useWritingMessageStatus };
 //# sourceMappingURL=index.js.map

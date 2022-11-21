@@ -11,11 +11,6 @@ export declare const useRoomMessages: <TCustomMessage, TGraphQLError>(roomClient
         queryStatus: import("@flocon-trpg/sdk").ReadonlyBehaviorEvent<import("@flocon-trpg/sdk").GetMessagesQueryStatus<TGraphQLError>>;
         addCustomMessage: (message: Omit<import("@flocon-trpg/web-server-utils").CustomMessage<TCustomMessage>, "type">) => void;
     };
-    /**
-     * 追加、変更、削除されたメッセージです。ただし、メッセージの多くが変更されたとき(Query による更新など)はundefined になります。
-     *
-     * ブラウザでの通知に用いられることを想定しています。
-     */
     roomConnections: import("@flocon-trpg/sdk").ReadonlyBehaviorEvent<{
         current: ReadonlyMap<string, import("@flocon-trpg/sdk/dist/cjs/internal/roomClient/roomConnections").RoomConnectionStatus>;
         diff: import("@flocon-trpg/sdk/dist/cjs/internal/roomClient/roomConnections").RoomConnectionStatusDiff | null;
@@ -61,16 +56,13 @@ export declare const useRoomMessages: <TCustomMessage, TGraphQLError>(roomClient
     }>;
     unsubscribe: () => void;
 }, "messages">, filter?: ((message: Message<TCustomMessage>) => boolean) | undefined) => {
-    messages: {
-        /** メッセージの配列です。作成日時によって昇順にソートされています。 */
-        current: readonly Message<TCustomMessage>[];
-        /**
-         * 追加、変更、削除されたメッセージです。ただし、メッセージの多くが変更されたとき(Query による更新など)はundefined になります。
-         *
-         * ブラウザでの通知に用いられることを想定しています。
-         */
-        diff?: Diff<TCustomMessage> | undefined;
-    };
-    queryStatus: import("@flocon-trpg/sdk").GetMessagesQueryStatus<TGraphQLError>;
+    /** メッセージの配列です。作成日時によって昇順にソートされています。 */
+    current: readonly Message<TCustomMessage>[];
+    /**
+     * 追加、変更、削除されたメッセージです。ただし、メッセージの多くが変更されたとき(Query による更新など)はundefined になります。
+     *
+     * ブラウザでの通知に用いられることを想定しています。
+     */
+    diff?: Diff<TCustomMessage> | undefined;
 };
 //# sourceMappingURL=useRoomMessages.d.ts.map

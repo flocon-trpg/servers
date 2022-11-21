@@ -1,7 +1,6 @@
 import { RoomClient } from '@flocon-trpg/sdk';
 import { Diff, Message } from '@flocon-trpg/web-server-utils';
-import React, { useEffect, useMemo, useState } from 'react';
-import { useReadonlyBehaviorEvent } from './useReadonlyBehaviorEvent';
+import { useEffect, useMemo, useState } from 'react';
 
 /**
  * 部屋に投稿されたメッセージ(秘話およびログも含む)およびカスタムメッセージのリストと変更点を返します。
@@ -24,15 +23,13 @@ export const useRoomMessages = <TCustomMessage, TGraphQLError>(
         diff?: Diff<TCustomMessage> | undefined;
     };
 
-    const queryStatus = useReadonlyBehaviorEvent(roomClient.messages.queryStatus);
-
     const messagesSource = useMemo(() => {
         return filter == null
             ? roomClient.messages.messages
             : roomClient.messages.messages.filter(filter);
     }, [filter, roomClient.messages.messages]);
 
-    const [messages, setMessages] = useState<MessagesType>(() => ({
+    const [result, setResult] = useState<MessagesType>(() => ({
         current: messagesSource?.getCurrent() ?? [],
     }));
 
@@ -40,10 +37,10 @@ export const useRoomMessages = <TCustomMessage, TGraphQLError>(
         if (messagesSource == null) {
             return;
         }
-        setMessages({ current: messagesSource.getCurrent() });
+        setResult({ current: messagesSource.getCurrent() });
         const subscription = messagesSource.changed.subscribe({
             next: e => {
-                setMessages({
+                setResult({
                     current: e.current,
                     diff: e.type === 'event' ? e.diff ?? undefined : undefined,
                 });
@@ -52,5 +49,5 @@ export const useRoomMessages = <TCustomMessage, TGraphQLError>(
         return () => subscription.unsubscribe();
     }, [messagesSource]);
 
-    return React.useMemo(() => ({ messages, queryStatus }), [messages, queryStatus]);
+    return result;
 };

@@ -720,7 +720,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
     );
     const messages = useRoomMessages({ filter });
 
-    const writingUsers = (writingMessageStatusResult == null ? [] : [...writingMessageStatusResult])
+    const statusBar = (writingMessageStatusResult == null ? [] : [...writingMessageStatusResult])
         .filter(
             ([key, value]) =>
                 key !== firebaseUser?.uid && value === WritingMessageStatusType.Writing
@@ -735,14 +735,14 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
         background-color: #10101090;
         padding: 0 4px;
     `;
-    if (writingUsers.length >= 3) {
+    if (statusBar.length >= 3) {
         writingStatus = <div css={writingStatusCss}>複数人が書き込み中…</div>;
-    } else if (writingUsers.length === 0) {
+    } else if (statusBar.length === 0) {
         writingStatus = <div css={writingStatusCss} />;
     } else {
         writingStatus = (
             <div css={writingStatusCss}>
-                {writingUsers.reduce(
+                {statusBar.reduce(
                     (seed, elem, i) => (i === 0 ? elem : `${seed}, ${elem}`),
                     '' as string
                 ) + ' が書き込み中…'}
@@ -752,7 +752,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
 
     const content = (
         <JumpToBottomVirtuoso
-            items={messages.messages.current ?? []}
+            items={messages.current ?? []}
             create={thenMap}
             height={contentHeight - writingStatusHeight}
         />
