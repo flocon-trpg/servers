@@ -1,7 +1,5 @@
 import { createTestRoomClient } from '@flocon-trpg/sdk';
-import {
-    RoomPublicMessage,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
+import { RoomPublicMessage } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { Message } from '@flocon-trpg/web-server-utils';
 import { act, renderHook } from '@testing-library/react';
 import { useRoomMessages } from './useRoomMessages';
