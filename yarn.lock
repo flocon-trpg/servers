@@ -2935,7 +2935,7 @@ __metadata:
     eslint-config-prettier: 8.5.0
     eslint-import-resolver-typescript: 3.5.2
     eslint-plugin-import: 2.26.0
-    immer: ^9.0.15
+    immer: ^9.0.6
     jest: 29.1.2
     lodash.clonedeep: ^4.5.0
     prettier: 2.7.1
@@ -3257,7 +3257,7 @@ __metadata:
     eslint-import-resolver-typescript: 3.5.2
     eslint-plugin-import: 2.26.0
     fast-check: 3.1.4
-    immer: ^9.0.15
+    immer: ^9.0.6
     jest: 29.1.2
     prettier: 2.7.1
     rimraf: 3.0.2
@@ -14703,7 +14703,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"immer@npm:^9.0.15, immer@npm:^9.0.6":
+"immer@npm:^9.0.6":
   version: 9.0.15
   resolution: "immer@npm:9.0.15"
   checksum: 92e3d63e810e3c3c2bb61b70c45443e37ef983ad12924e3edaf03725ae5979618f5b473439bb3bb4a8c4769f25132f18dec10ea15c40f0b20da5691ff96ff611
