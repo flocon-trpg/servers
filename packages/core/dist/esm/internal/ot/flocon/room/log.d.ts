@@ -2,12 +2,12 @@ import { State } from '../../generator';
 import * as DicePieceLog from './board/dicePiece/log';
 import * as StringPieceLog from './board/stringPiece/log';
 import * as RoomTypes from './types';
-declare type DicePieceLogType = {
+type DicePieceLogType = {
     boardId: string;
     stateId: string;
     value: DicePieceLog.Type;
 };
-declare type StringPieceLogType = {
+type StringPieceLogType = {
     boardId: string;
     stateId: string;
     value: StringPieceLog.Type;

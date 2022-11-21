@@ -58,7 +58,7 @@ export declare const recordDownOperationElementFactory: <TState extends z.ZodTyp
     type: "update";
     update: TOperation["_input"];
 }>[k_3_1]; } : never>]>;
-export declare type RecordDownOperationElement<TState, TOperation> = {
+export type RecordDownOperationElement<TState, TOperation> = {
     type: typeof replace;
     replace: {
         oldValue?: TState;
@@ -124,7 +124,7 @@ export declare const recordUpOperationElementFactory: <TState extends z.ZodTypeA
     type: "update";
     update: TOperation["_input"];
 }>[k_3_1]; } : never>]>;
-export declare type RecordUpOperationElement<TState, TOperation> = {
+export type RecordUpOperationElement<TState, TOperation> = {
     type: typeof replace;
     replace: {
         newValue?: TState;
@@ -133,7 +133,7 @@ export declare type RecordUpOperationElement<TState, TOperation> = {
     type: typeof update;
     update: TOperation;
 };
-export declare type RecordTwoWayOperationElement<TState, TOperation> = {
+export type RecordTwoWayOperationElement<TState, TOperation> = {
     type: typeof replace;
     replace: {
         oldValue?: TState;

@@ -1,6 +1,6 @@
 export declare const replace = "replace";
 export declare const update = "update";
-export declare type OperationElement<TState, TOperation> = {
+export type OperationElement<TState, TOperation> = {
     type: typeof replace;
     newValue: TState | undefined;
 } | {

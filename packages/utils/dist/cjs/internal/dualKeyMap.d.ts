@@ -1,12 +1,12 @@
 import { Option } from '@kizahasi/option';
 import { GroupJoinResult } from './types';
-export declare type DualKey<T1, T2> = {
+export type DualKey<T1, T2> = {
     readonly first: T1;
     readonly second: T2;
 };
 export declare const toJsonString: <T1, T2>(source: DualKey<T1, T2>) => string;
-export declare type DualKeyMapSource<TKey1, TKey2, TValue> = Map<TKey1, Map<TKey2, TValue>> | Map<TKey1, ReadonlyMap<TKey2, TValue>> | ReadonlyMap<TKey1, Map<TKey2, TValue>> | ReadonlyMap<TKey1, ReadonlyMap<TKey2, TValue>>;
-declare type RecordKey = string | number | symbol;
+export type DualKeyMapSource<TKey1, TKey2, TValue> = Map<TKey1, Map<TKey2, TValue>> | Map<TKey1, ReadonlyMap<TKey2, TValue>> | ReadonlyMap<TKey1, Map<TKey2, TValue>> | ReadonlyMap<TKey1, ReadonlyMap<TKey2, TValue>>;
+type RecordKey = string | number | symbol;
 export declare class DualKeyMap<TKey1, TKey2, TValue> {
     private _core;
     constructor(sourceMap?: DualKeyMapSource<TKey1, TKey2, TValue>);
@@ -31,7 +31,7 @@ export declare class DualKeyMap<TKey1, TKey2, TValue> {
     reduce<TResult>(reducer: (seed: TResult, element: TValue, key: DualKey<TKey1, TKey2>) => TResult, seed: TResult): TResult;
     toJSON(valueToString?: (value: TValue) => string): string;
 }
-export declare type ReadonlyDualKeyMap<TKey1, TKey2, TValue> = Omit<Readonly<DualKeyMap<TKey1, TKey2, TValue>>, 'set' | 'delete' | 'getByFirst'> & {
+export type ReadonlyDualKeyMap<TKey1, TKey2, TValue> = Omit<Readonly<DualKeyMap<TKey1, TKey2, TValue>>, 'set' | 'delete' | 'getByFirst'> & {
     [Symbol.iterator](): IterableIterator<readonly [DualKey<TKey1, TKey2>, TValue]>;
     getByFirst(key: TKey1): ReadonlyMap<TKey2, TValue> | undefined;
 };

@@ -1,29 +1,29 @@
 import { Range } from '../range';
 import { FValue } from './FValue';
-export declare type AstInfo = {
+export type AstInfo = {
     range?: Range;
 };
-export declare type GetParams = {
+export type GetParams = {
     property: FValue;
     astInfo?: AstInfo;
 };
-export declare type SetParams = {
+export type SetParams = {
     property: FValue;
     newValue: FValue;
     astInfo?: AstInfo;
 };
-export declare type GetCoreParams = {
+export type GetCoreParams = {
     key: string | number | symbol;
     astInfo?: AstInfo;
 };
-export declare type OnGettingParams = GetCoreParams;
-export declare type SetCoreParams = {
+export type OnGettingParams = GetCoreParams;
+export type SetCoreParams = {
     key: string | number | symbol;
     newValue: FValue;
     astInfo?: AstInfo;
 };
-export declare type OnSettingParams = SetCoreParams;
-export declare type FObjectBase = {
+export type OnSettingParams = SetCoreParams;
+export type FObjectBase = {
     get(params: GetParams): FValue;
     set(params: SetParams): void;
     toPrimitiveAsNumber(): number;

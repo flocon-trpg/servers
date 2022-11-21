@@ -1,14 +1,14 @@
 import { Result } from '@kizahasi/result';
 import { StringKeyRecord } from './record';
 import { RecordDownOperationElement, RecordTwoWayOperationElement, RecordUpOperationElement, replace, update } from './recordOperationElement';
-export declare type RecordDownOperation<TState, TOperation> = Record<string, RecordDownOperationElement<TState, TOperation> | undefined>;
-export declare type RecordUpOperation<TState, TOperation> = Record<string, RecordUpOperationElement<TState, TOperation> | undefined>;
-export declare type RecordTwoWayOperation<TState, TOperation> = Record<string, RecordTwoWayOperationElement<TState, TOperation> | undefined>;
-declare type RestoreResult<TState, TTwoWayOperation> = {
+export type RecordDownOperation<TState, TOperation> = Record<string, RecordDownOperationElement<TState, TOperation> | undefined>;
+export type RecordUpOperation<TState, TOperation> = Record<string, RecordUpOperationElement<TState, TOperation> | undefined>;
+export type RecordTwoWayOperation<TState, TOperation> = Record<string, RecordTwoWayOperationElement<TState, TOperation> | undefined>;
+type RestoreResult<TState, TTwoWayOperation> = {
     prevState: TState;
     twoWayOperation: TTwoWayOperation | undefined;
 };
-export declare type ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> = {
+export type ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> = {
     first?: TFirstOperation;
     second: TSecondOperation;
     prevState: TServerState;
@@ -21,7 +21,7 @@ export declare type ProtectedTransformParameters<TServerState, TFirstOperation, 
  *
  *  関数ではなくundefinedを渡した場合、常にfalseを返す関数が渡されたときと同等の処理が行われます。
  */
-export declare type CancellationPolicy<TKey, TServerState> = {
+export type CancellationPolicy<TKey, TServerState> = {
     cancelRemove?: (params: {
         key: TKey;
         state: TServerState;
@@ -91,7 +91,7 @@ export declare const composeDownOperation: <TState, TDownOperation, TCustomError
         second: TDownOperation;
     }) => Result<TDownOperation | undefined, string | TCustomError>;
 }) => Result<RecordDownOperation<TState, TDownOperation> | undefined, string | TCustomError>;
-declare type ServerTransformCoreParams<TServerState, TClientState, TFirstOperation, TSecondOperation, TCustomError> = {
+type ServerTransformCoreParams<TServerState, TClientState, TFirstOperation, TSecondOperation, TCustomError> = {
     stateBeforeFirst: StringKeyRecord<TServerState>;
     stateAfterFirst: StringKeyRecord<TServerState>;
     first?: RecordUpOperation<TServerState, TFirstOperation>;
@@ -102,7 +102,7 @@ declare type ServerTransformCoreParams<TServerState, TClientState, TFirstOperati
     }) => Result<TFirstOperation | undefined, string | TCustomError>;
     cancellationPolicy: CancellationPolicy<string, TServerState>;
 };
-declare type ServerTransformParams<TServerState, TClientState, TFirstOperation, TSecondOperation, TCustomError> = ServerTransformCoreParams<TServerState, TClientState, TFirstOperation, TSecondOperation, TCustomError> & {
+type ServerTransformParams<TServerState, TClientState, TFirstOperation, TSecondOperation, TCustomError> = ServerTransformCoreParams<TServerState, TClientState, TFirstOperation, TSecondOperation, TCustomError> & {
     /** 制限を設けることができます。指定した制限を満たさない場合は Result.error が返されます。 */
     validation?: {
         /** このRecordの名前です。エラーメッセージを生成する際に用いられます。 */
@@ -113,14 +113,14 @@ declare type ServerTransformParams<TServerState, TClientState, TFirstOperation, 
 };
 /** Make sure `apply(stateBeforeFirst, first) = stateAfterFirst` */
 export declare const serverTransform: <TServerState, TClientState, TFirstOperation, TSecondOperation, TCustomError = string>(params: ServerTransformParams<TServerState, TClientState, TFirstOperation, TSecondOperation, TCustomError>) => Result<RecordTwoWayOperation<TServerState, TFirstOperation> | undefined, string | TCustomError>;
-declare type InnerClientTransform<TFirstOperation, TSecondOperation, TError = string> = (params: {
+type InnerClientTransform<TFirstOperation, TSecondOperation, TError = string> = (params: {
     first: TFirstOperation;
     second: TSecondOperation;
 }) => Result<{
     firstPrime: TFirstOperation | undefined;
     secondPrime: TSecondOperation | undefined;
 }, TError>;
-declare type Diff<TState, TOperation> = (params: {
+type Diff<TState, TOperation> = (params: {
     prevState: TState;
     nextState: TState;
 }) => TOperation | undefined;

@@ -2,7 +2,7 @@ import { Option } from '@kizahasi/option';
 import { FType } from './FType';
 import { FValue } from './FValue';
 import { AstInfo, FObjectBase, GetCoreParams, GetParams, SetParams } from './types';
-declare type FFunctionParams = {
+type FFunctionParams = {
     args: FValue[];
     isNew: boolean;
     astInfo: AstInfo | undefined;

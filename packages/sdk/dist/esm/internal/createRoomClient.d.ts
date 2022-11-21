@@ -63,5 +63,5 @@ export declare const createRoomClient: <TCustomMessage = any, TGraphQLError = an
     /** 内部で使用している `Observable` などの subscription を解除します。これを実行した場合、このオブジェクトの他のプロパティに存在する関数やプロパティにアクセスするとエラーが出ることがありますのでアクセスしないでください。 */
     unsubscribe: () => void;
 };
-export declare type RoomClient<TCustomMessage = any, TGraphQLError = any> = ReturnType<typeof createRoomClient<TCustomMessage, TGraphQLError>>;
+export type RoomClient<TCustomMessage = any, TGraphQLError = any> = ReturnType<typeof createRoomClient<TCustomMessage, TGraphQLError>>;
 //# sourceMappingURL=createRoomClient.d.ts.map

@@ -1,24 +1,24 @@
-export declare type Apply<TState, TOperation> = (params: {
+export type Apply<TState, TOperation> = (params: {
     state: TState;
     operation: TOperation;
 }) => TState;
-export declare type Compose<TState, TOperation> = (params: {
+export type Compose<TState, TOperation> = (params: {
     state: TState;
     first: TOperation;
     second: TOperation;
 }) => TOperation;
-export declare type Transform<TFirstOperation, TSecondOperation> = (params: {
+export type Transform<TFirstOperation, TSecondOperation> = (params: {
     first: TFirstOperation;
     second: TSecondOperation;
 }) => {
     firstPrime: TFirstOperation;
     secondPrime: TSecondOperation;
 };
-export declare type Diff<TState, TOperation> = (params: {
+export type Diff<TState, TOperation> = (params: {
     prevState: TState;
     nextState: TState;
 }) => TOperation | undefined;
-export declare type StateManagerParameters<TState, TOperation> = {
+export type StateManagerParameters<TState, TOperation> = {
     revision: number;
     state: TState;
     apply: Apply<TState, TOperation>;

@@ -1,4 +1,4 @@
-declare type ServerTransformParameters<T> = {
+type ServerTransformParameters<T> = {
     first: {
         oldValue: T;
         newValue: T;
@@ -8,7 +8,7 @@ declare type ServerTransformParameters<T> = {
     } | undefined;
     prevState: T;
 };
-declare type ServerTransformResult<T> = {
+type ServerTransformResult<T> = {
     oldValue: T;
     newValue: T;
 } | undefined;

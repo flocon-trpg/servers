@@ -3,10 +3,10 @@ import { Result } from '@kizahasi/result';
 import { z } from 'zod';
 import { replace, update } from './recordOperationElement';
 import * as TextOperation from './textOperation';
-declare type ApplyError = TextOperationCore.ApplyError<TextOperationCore.PositiveInt>;
-declare type ComposeAndTransformUpError = TextOperationCore.ComposeAndTransformError<TextOperationCore.PositiveInt, TextOperationCore.NonEmptyString>;
-declare type ComposeAndTransformDownError = TextOperationCore.ComposeAndTransformError<TextOperationCore.NonEmptyString, TextOperationCore.PositiveInt>;
-declare type ComposeAndTransformTwoWayError = TextOperationCore.ComposeAndTransformError<TextOperationCore.NonEmptyString, TextOperationCore.NonEmptyString>;
+type ApplyError = TextOperationCore.ApplyError<TextOperationCore.PositiveInt>;
+type ComposeAndTransformUpError = TextOperationCore.ComposeAndTransformError<TextOperationCore.PositiveInt, TextOperationCore.NonEmptyString>;
+type ComposeAndTransformDownError = TextOperationCore.ComposeAndTransformError<TextOperationCore.NonEmptyString, TextOperationCore.PositiveInt>;
+type ComposeAndTransformTwoWayError = TextOperationCore.ComposeAndTransformError<TextOperationCore.NonEmptyString, TextOperationCore.NonEmptyString>;
 export declare const downOperation: z.ZodUnion<[z.ZodObject<{
     type: z.ZodLiteral<"replace">;
     replace: z.ZodObject<{
@@ -81,7 +81,7 @@ export declare const downOperation: z.ZodUnion<[z.ZodObject<{
         d: string;
     })[];
 }>]>;
-export declare type DownOperation = z.TypeOf<typeof downOperation>;
+export type DownOperation = z.TypeOf<typeof downOperation>;
 export declare const upOperation: z.ZodUnion<[z.ZodObject<{
     type: z.ZodLiteral<"replace">;
     replace: z.ZodObject<{
@@ -156,8 +156,8 @@ export declare const upOperation: z.ZodUnion<[z.ZodObject<{
         d: number;
     })[];
 }>]>;
-export declare type UpOperation = z.TypeOf<typeof upOperation>;
-export declare type TwoWayOperation = {
+export type UpOperation = z.TypeOf<typeof upOperation>;
+export type TwoWayOperation = {
     type: typeof replace;
     replace: {
         oldValue: string;

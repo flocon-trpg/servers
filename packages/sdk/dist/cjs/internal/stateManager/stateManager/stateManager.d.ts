@@ -1,5 +1,5 @@
 import { StateManagerParameters } from './types';
-declare type OnPosted<T> = {
+type OnPosted<T> = {
     isSuccess: true;
     isId: false;
     revisionTo: number;
@@ -11,7 +11,7 @@ declare type OnPosted<T> = {
 } | {
     isSuccess: false | null;
 };
-export declare type PostResult<TState, TOperation> = {
+export type PostResult<TState, TOperation> = {
     operationToPost: TOperation;
     syncedState: TState;
     revision: number;
