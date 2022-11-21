@@ -35,7 +35,7 @@ const logEntryPasswordConfig = (serverConfig: ServerConfig) => {
     }
 };
 
-export const main = async (args: { debug: boolean }): Promise<void> => {
+export const main = async (params: { debug: boolean }): Promise<void> => {
     const logConfigResult = new LogConfigParser(process.env).logConfig;
     initializeLogger(logConfigResult);
 
@@ -155,7 +155,7 @@ export const main = async (args: { debug: boolean }): Promise<void> => {
         connectionManager,
         em: orm.value.em,
         schema,
-        debug: args.debug,
+        debug: params.debug,
         port: process.env.PORT ?? 4000,
         getDecodedIdTokenFromExpressRequest: context =>
             getDecodedIdTokenFromBearer(context.headers.authorization),

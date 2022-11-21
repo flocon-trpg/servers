@@ -2,11 +2,8 @@
 
 var http = require('http');
 var path = require('path');
-var server = require('@apollo/server');
-var express4 = require('@apollo/server/express4');
 var core = require('@mikro-orm/core');
-var bodyParser = require('body-parser');
-var cors = require('cors');
+var apolloServerExpress = require('apollo-server-express');
 var express = require('express');
 var fs = require('fs-extra');
 var graphql = require('graphql');
@@ -80,7 +77,6 @@ const createServerAsError = async ({ port }) => {
     });
     return server;
 };
-const graphqlPath = '/graphql';
 const createServer = async ({ serverConfig, promiseQueue, connectionManager, em, schema, debug, getDecodedIdTokenFromExpressRequest, getDecodedIdTokenFromWsContext, port, quiet, httpServerOptions, }) => {
     let rateLimiter = null;
     if (!serverConfig.disableRateLimitExperimental) {
@@ -89,31 +85,31 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
             points: 600,
         });
     }
-    const apolloServer = new server.ApolloServer({
+    const context = async (context) => {
+        return {
+            decodedIdToken: await getDecodedIdTokenFromExpressRequest(context.req),
+            rateLimiter,
+            serverConfig,
+            promiseQueue,
+            connectionManager,
+            em: em.fork(),
+            authorizedUser: null,
+        };
+    };
+    const apolloServer = new apolloServerExpress.ApolloServer({
         schema,
+        context,
+        debug,
         csrfPrevention: true,
+        cache: 'bounded',
         plugins: [loggingPlugin],
-        includeStacktraceInErrorResponses: debug,
     });
     await apolloServer.start();
     const app = express();
     app.use(pinoHttp({
         logger: logger.logger.get(),
     }));
-    app.use(graphqlPath, cors(), bodyParser.json(), express4.expressMiddleware(apolloServer, {
-        context: async (context) => {
-            const result = {
-                decodedIdToken: await getDecodedIdTokenFromExpressRequest(context.req),
-                rateLimiter,
-                serverConfig,
-                promiseQueue,
-                connectionManager,
-                em: em.fork(),
-                authorizedUser: null,
-            };
-            return result;
-        },
-    }));
+    apolloServer.applyMiddleware({ app });
     if (serverConfig.accessControlAllowOrigin == null) {
         !quiet &&
             appConsole.AppConsole.infoAsNotice({
@@ -392,15 +388,15 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
     if (httpServerOptions?.keepAliveTimeout != null) {
         httpServer.keepAliveTimeout = httpServerOptions.keepAliveTimeout;
     }
-    const server$1 = httpServer.listen(port, () => {
+    const server = httpServer.listen(port, () => {
         !quiet &&
-            logger.logger.infoAsNotice(`🚀 Server ready at http://localhost:${port}${graphqlPath}`);
+            logger.logger.infoAsNotice(`🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`);
         !quiet &&
             logger.logger.infoAsNotice(`🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`);
     });
     const close = async () => {
         await new Promise((resolve, reject) => {
-            server$1.close(err => {
+            server.close(err => {
                 if (err == null) {
                     resolve(undefined);
                     return;
