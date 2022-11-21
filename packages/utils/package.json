@@ -30,7 +30,7 @@
         "@flocon-trpg/rollup-config": "workspace:^",
         "@flocon-trpg/tsconfig": "workspace:^",
         "@types/jest": "29.1.2",
-        "@types/lodash": "4.14.188",
+        "@types/lodash": "4.14.189",
         "@typescript-eslint/eslint-plugin": "5.39.0",
         "@typescript-eslint/parser": "5.39.0",
         "eslint": "8.25.0",
