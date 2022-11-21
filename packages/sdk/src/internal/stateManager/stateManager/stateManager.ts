@@ -32,9 +32,9 @@ export class StateManager<TState, TOperation> {
     private _requiresReload = false;
     private _history?: StateManagerHistoryQueue<TState, TOperation>;
 
-    public constructor(private readonly params: StateManagerParameters<TState, TOperation>) {
-        this.core = new StateManagerCore<TState, TOperation>(params);
-        this._history = params.enableHistory === true ? new StateManagerHistoryQueue() : undefined;
+    public constructor(private readonly args: StateManagerParameters<TState, TOperation>) {
+        this.core = new StateManagerCore<TState, TOperation>(args);
+        this._history = args.enableHistory === true ? new StateManagerHistoryQueue() : undefined;
     }
 
     public get isPosting(): boolean {
@@ -87,7 +87,7 @@ export class StateManager<TState, TOperation> {
     // このメソッドは「setUiStateを使えばよい」と判断して一時削除していたが、Operationを書いて適用させたいという場面が少なくなく、必要なapply関数もStateManager内部で保持しているため復帰させた。
     public setUiStateByApply(operation: TOperation): void {
         loggerRef.value.debug({ operation }, 'StateManager.setUiStateByApply');
-        const newState = this.params.apply({ state: this.uiState, operation });
+        const newState = this.args.apply({ state: this.uiState, operation });
         loggerRef.value.debug({ newState }, 'StateManager.setUiStateByApply');
         this.setUiState(newState);
     }
@@ -159,7 +159,7 @@ export class StateManager<TState, TOperation> {
 
     public reload({ state, revision }: { state: TState; revision: number }): void {
         this.core = new StateManagerCore<TState, TOperation>({
-            ...this.params,
+            ...this.args,
             revision: revision,
             state,
         });

@@ -19,11 +19,11 @@ export type PostResult<TState, TOperation> = {
     onPosted: (onPosted: OnPosted<TOperation>) => void;
 };
 export declare class StateManager<TState, TOperation> {
-    private readonly params;
+    private readonly args;
     private core;
     private _requiresReload;
     private _history?;
-    constructor(params: StateManagerParameters<TState, TOperation>);
+    constructor(args: StateManagerParameters<TState, TOperation>);
     get isPosting(): boolean;
     get uiState(): TState;
     get revision(): number;
