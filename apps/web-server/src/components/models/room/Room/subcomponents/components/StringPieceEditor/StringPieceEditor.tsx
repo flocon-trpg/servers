@@ -1,7 +1,6 @@
 import { State, String, characterTemplate, simpleId, stringPieceTemplate } from '@flocon-trpg/core';
 import { Checkbox } from 'antd';
 import React from 'react';
-import { Subscribable } from 'rxjs';
 import { useMemoOne } from 'use-memo-one';
 import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
 import { CreateModeParams, UpdateModeParams, useStateEditor } from '../../hooks/useStateEditor';
@@ -21,12 +20,9 @@ import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcompo
 import { CollaborativeInput } from '@/components/ui/CollaborativeInput/CollaborativeInput';
 import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { close, ok } from '@/utils/constants';
 
 type CharacterState = State<typeof characterTemplate>;
 type StringPieceState = State<typeof stringPieceTemplate>;
-
-type ActionRequest = Subscribable<typeof ok | typeof close>;
 
 const pieceSize: PixelSize = { w: 50, h: 50 };
 
@@ -62,11 +58,13 @@ export type UpdateMode = {
     pieceId: string;
 };
 
-export const StringPieceEditor: React.FC<{
-    actionRequest?: ActionRequest;
+export const useStringPieceEditor = ({
+    createMode,
+    updateMode,
+}: {
     createMode?: CreateMode;
     updateMode?: UpdateMode;
-}> = ({ actionRequest, createMode, updateMode }) => {
+}) => {
     const setRoomState = useSetRoomStateWithImmer();
     const myUserUid = useMyUserUid();
     const boardId = updateMode?.boardId ?? createMode?.boardId;
@@ -143,108 +141,96 @@ export const StringPieceEditor: React.FC<{
         createMode: createModeParams,
         updateMode: updateModeParams,
     });
-    React.useEffect(() => {
-        if (actionRequest == null) {
-            return;
-        }
-        const subscription = actionRequest.subscribe({
-            next: value => {
-                switch (value) {
-                    case 'ok':
-                        ok();
-                        break;
-                    case 'close':
-                        break;
-                }
-            },
-        });
-        return () => subscription.unsubscribe();
-    }, [actionRequest, ok]);
     const labelStyle: React.CSSProperties = React.useMemo(() => ({ minWidth: 100 }), []);
 
+    let element: JSX.Element | null;
     if (myUserUid == null || state == null || boardId == null) {
-        return null;
-    }
+        element = null;
+    } else {
+        element = (
+            <Table labelStyle={labelStyle}>
+                <TableRow label='値'>
+                    <CollaborativeInput
+                        bufferDuration='default'
+                        size='small'
+                        value={state.value}
+                        onChange={({ currentValue }) => {
+                            updateState(state => {
+                                if (state == null) {
+                                    return;
+                                }
+                                state.value = currentValue;
+                            });
+                        }}
+                    />
+                </TableRow>
 
-    return (
-        <Table labelStyle={labelStyle}>
-            <TableRow label='値'>
-                <CollaborativeInput
-                    bufferDuration='default'
-                    size='small'
-                    value={state.value}
-                    onChange={({ currentValue }) => {
-                        updateState(state => {
-                            if (state == null) {
+                <TableRow label='値を非公開にする'>
+                    <Checkbox
+                        checked={state.isValuePrivate}
+                        onChange={e =>
+                            updateState(state => {
+                                if (state == null) {
+                                    return;
+                                }
+                                state.isValuePrivate = e.target.checked;
+                            })
+                        }
+                    />
+                </TableRow>
+
+                <TableDivider />
+
+                <PieceEditorNameRow
+                    state={state.name}
+                    onChange={newValue =>
+                        updateState(pieceValue => {
+                            if (pieceValue == null) {
                                 return;
                             }
-                            state.value = currentValue;
-                        });
-                    }}
-                />
-            </TableRow>
-
-            <TableRow label='値を非公開にする'>
-                <Checkbox
-                    checked={state.isValuePrivate}
-                    onChange={e =>
-                        updateState(state => {
-                            if (state == null) {
-                                return;
-                            }
-                            state.isValuePrivate = e.target.checked;
+                            pieceValue.name = newValue;
                         })
                     }
                 />
-            </TableRow>
 
-            <TableDivider />
-
-            <PieceEditorNameRow
-                state={state.name}
-                onChange={newValue =>
-                    updateState(pieceValue => {
-                        if (pieceValue == null) {
-                            return;
-                        }
-                        pieceValue.name = newValue;
-                    })
-                }
-            />
-
-            <PieceEditorMemoRow
-                state={state.memo}
-                onChange={newValue =>
-                    updateState(pieceValue => {
-                        if (pieceValue == null) {
-                            return;
-                        }
-                        pieceValue.memo = newValue;
-                    })
-                }
-            />
-
-            <TableDivider />
-
-            <PieceRectEditor
-                value={state}
-                onChange={newState => updateState(() => newState)}
-                boardId={boardId}
-            />
-
-            <TableDivider />
-
-            <PieceEditorIdRow pieceId={updateMode?.pieceId} />
-
-            <TableRow label='所有者'>
-                <MyCharactersSelect
-                    selectedCharacterId={
-                        updateMode != null ? state.ownerCharacterId : activeCharacter?.id
+                <PieceEditorMemoRow
+                    state={state.memo}
+                    onChange={newValue =>
+                        updateState(pieceValue => {
+                            if (pieceValue == null) {
+                                return;
+                            }
+                            pieceValue.memo = newValue;
+                        })
                     }
-                    readOnly={createMode == null}
-                    onSelect={setActiveCharacter}
                 />
-            </TableRow>
-        </Table>
-    );
+
+                <TableDivider />
+
+                <PieceRectEditor
+                    value={state}
+                    onChange={newState => updateState(() => newState)}
+                    boardId={boardId}
+                />
+
+                <TableDivider />
+
+                <PieceEditorIdRow pieceId={updateMode?.pieceId} />
+
+                <TableRow label='所有者'>
+                    <MyCharactersSelect
+                        selectedCharacterId={
+                            updateMode != null ? state.ownerCharacterId : activeCharacter?.id
+                        }
+                        readOnly={createMode == null}
+                        onSelect={setActiveCharacter}
+                        showAlert
+                    />
+                </TableRow>
+            </Table>
+        );
+    }
+
+    const canOk = activeCharacter != null;
+    return React.useMemo(() => ({ element, ok, canOk }), [canOk, element, ok]);
 };

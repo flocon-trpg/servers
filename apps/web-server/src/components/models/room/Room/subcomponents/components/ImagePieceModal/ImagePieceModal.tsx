@@ -1,12 +1,10 @@
 import { Modal, ModalProps } from 'antd';
 import { atom, useAtom } from 'jotai';
 import React from 'react';
-import { Subject } from 'rxjs';
-import useConstant from 'use-constant';
 import { useMemoOne } from 'use-memo-one';
-import { CreateMode, ImagePieceEditor, UpdateMode } from '../ImagePieceEditor/ImagePieceEditor';
+import { CreateMode, UpdateMode, useImagePieceEditor } from '../ImagePieceEditor/ImagePieceEditor';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
-import { close, create, ok, update } from '@/utils/constants';
+import { create, update } from '@/utils/constants';
 import { PieceModalState } from '@/utils/types';
 
 export const imagePieceModalAtom = atom<PieceModalState | null>(null);
@@ -17,7 +15,6 @@ const modalBaseProps: Partial<ModalProps> = {
 
 export const ImagePieceModal: React.FC = () => {
     const [modalType, setModalType] = useAtom(imagePieceModalAtom);
-    const actionRequest = useConstant(() => new Subject<typeof ok | typeof close>());
 
     const {
         visible,
@@ -48,6 +45,7 @@ export const ImagePieceModal: React.FC = () => {
             }
         }
     }, [modalType]);
+    const imagePieceEditor = useImagePieceEditor({ createMode, updateMode });
 
     return (
         <Modal
@@ -61,25 +59,20 @@ export const ImagePieceModal: React.FC = () => {
                     close={{
                         textType: modalType?.type === update ? 'close' : 'cancel',
                         onClick: () => {
-                            actionRequest.next(close);
                             setModalType(null);
                         },
                     }}
                     ok={{
                         textType: 'create',
                         onClick: () => {
-                            actionRequest.next(ok);
+                            imagePieceEditor.ok();
                             setModalType(null);
                         },
                     }}
                 />
             }
         >
-            <ImagePieceEditor
-                createMode={createMode}
-                updateMode={updateMode}
-                actionRequest={actionRequest}
-            />
+            {imagePieceEditor.element}
         </Modal>
     );
 };

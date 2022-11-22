@@ -1,6 +1,5 @@
 import { State, imagePieceTemplate, simpleId } from '@flocon-trpg/core';
 import React from 'react';
-import { Subscribable } from 'rxjs';
 import { useMemoOne } from 'use-memo-one';
 import { useCloneImagePiece } from '../../hooks/useCloneImagePiece';
 import { useImagePieces } from '../../hooks/useImagePieces';
@@ -21,7 +20,6 @@ import { FileView } from '@/components/models/file/FileView/FileView';
 import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateWithImmer';
 import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { close, ok } from '@/utils/constants';
 import { FilePathModule } from '@/utils/file/filePath';
 import { image } from '@/utils/fileType';
 
@@ -50,8 +48,6 @@ const defaultImagePiece = (
 
 const pieceSize: PixelSize = { w: 50, h: 50 };
 
-type ActionRequest = Subscribable<typeof ok | typeof close>;
-
 export type CreateMode = {
     boardId: string;
     piecePosition: PixelPosition;
@@ -62,11 +58,13 @@ export type UpdateMode = {
     pieceId: string;
 };
 
-export const ImagePieceEditor: React.FC<{
-    actionRequest?: ActionRequest;
+export const useImagePieceEditor = ({
+    createMode,
+    updateMode,
+}: {
     createMode?: CreateMode;
     updateMode?: UpdateMode;
-}> = ({ actionRequest, createMode, updateMode }) => {
+}) => {
     const setRoomState = useSetRoomStateWithImmer();
     const myUserUid = useMyUserUid();
     const boardId = updateMode?.boardId ?? createMode?.boardId;
@@ -140,106 +138,93 @@ export const ImagePieceEditor: React.FC<{
         createMode: createModeParams,
         updateMode: updateModeParams,
     });
-    React.useEffect(() => {
-        if (actionRequest == null) {
-            return;
-        }
-        const subscription = actionRequest.subscribe({
-            next: value => {
-                switch (value) {
-                    case 'ok':
-                        ok();
-                        break;
-                    case 'close':
-                        break;
-                }
-            },
-        });
-        return () => subscription.unsubscribe();
-    }, [actionRequest, ok]);
+
     const labelStyle: React.CSSProperties = React.useMemo(() => ({ minWidth: 100 }), []);
 
+    let element: JSX.Element | null;
     if (myUserUid == null || state == null || boardId == null) {
-        return null;
-    }
+        element = null;
+    } else {
+        element = (
+            <>
+                <Table labelStyle={labelStyle}>
+                    {/* TODO: isPrivateがまだ未実装 */}
 
-    return (
-        <>
-            <Table labelStyle={labelStyle}>
-                {/* TODO: isPrivateがまだ未実装 */}
+                    <TableRow label='画像'>
+                        <FileView
+                            style={{ maxWidth: 350 }}
+                            maxWidthOfLink={null}
+                            uploaderFileBrowserHeight={null}
+                            defaultFileTypeFilter={image}
+                            filePath={state.image ?? undefined}
+                            onPathChange={path =>
+                                updateState(pieceValue => {
+                                    if (pieceValue == null) {
+                                        return;
+                                    }
+                                    pieceValue.image =
+                                        path == null ? undefined : FilePathModule.toOtState(path);
+                                })
+                            }
+                            showImage
+                        />
+                    </TableRow>
 
-                <TableRow label='画像'>
-                    <FileView
-                        style={{ maxWidth: 350 }}
-                        maxWidthOfLink={null}
-                        uploaderFileBrowserHeight={null}
-                        defaultFileTypeFilter={image}
-                        filePath={state.image ?? undefined}
-                        onPathChange={path =>
+                    <TableDivider />
+
+                    <PieceEditorNameRow
+                        state={state.name}
+                        onChange={newValue =>
                             updateState(pieceValue => {
                                 if (pieceValue == null) {
                                     return;
                                 }
-                                pieceValue.image =
-                                    path == null ? undefined : FilePathModule.toOtState(path);
+                                pieceValue.name = newValue;
                             })
                         }
-                        showImage
                     />
-                </TableRow>
 
-                <TableDivider />
+                    <PieceEditorMemoRow
+                        state={state.memo}
+                        onChange={newValue =>
+                            updateState(pieceValue => {
+                                if (pieceValue == null) {
+                                    return;
+                                }
+                                pieceValue.memo = newValue;
+                            })
+                        }
+                    />
 
-                <PieceEditorNameRow
-                    state={state.name}
-                    onChange={newValue =>
-                        updateState(pieceValue => {
-                            if (pieceValue == null) {
-                                return;
-                            }
-                            pieceValue.name = newValue;
-                        })
-                    }
-                />
+                    <TableDivider />
 
-                <PieceEditorMemoRow
-                    state={state.memo}
-                    onChange={newValue =>
-                        updateState(pieceValue => {
-                            if (pieceValue == null) {
-                                return;
-                            }
-                            pieceValue.memo = newValue;
-                        })
-                    }
-                />
+                    <PieceRectEditor
+                        value={state}
+                        onChange={newState => updateState(() => newState)}
+                        boardId={boardId}
+                    />
 
-                <TableDivider />
+                    <TableDivider />
 
-                <PieceRectEditor
-                    value={state}
-                    onChange={newState => updateState(() => newState)}
-                    boardId={boardId}
-                />
+                    {updateMode == null ? null : (
+                        <>
+                            <PieceEditorCloneButtonRow
+                                onClick={() => {
+                                    clone({
+                                        boardId: updateMode.boardId,
+                                        pieceId: updateMode.pieceId,
+                                    });
+                                }}
+                            />
+                            <TableDivider />
+                        </>
+                    )}
 
-                <TableDivider />
+                    <PieceEditorIdRow pieceId={updateMode?.pieceId} />
+                </Table>
+            </>
+        );
+    }
 
-                {updateMode == null ? null : (
-                    <>
-                        <PieceEditorCloneButtonRow
-                            onClick={() => {
-                                clone({
-                                    boardId: updateMode.boardId,
-                                    pieceId: updateMode.pieceId,
-                                });
-                            }}
-                        />
-                        <TableDivider />
-                    </>
-                )}
-
-                <PieceEditorIdRow pieceId={updateMode?.pieceId} />
-            </Table>
-        </>
-    );
+    return React.useMemo(() => ({ element, ok }), [element, ok]);
 };

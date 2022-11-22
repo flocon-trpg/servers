@@ -8,7 +8,6 @@ import {
 } from '@flocon-trpg/core';
 import { keyNames } from '@flocon-trpg/utils';
 import React from 'react';
-import { Subscribable } from 'rxjs';
 import { useMemoOne } from 'use-memo-one';
 import { useDicePieces } from '../../hooks/useDicePieces';
 import { usePixelRectToCompositeRect } from '../../hooks/usePixelRectToCompositeRect';
@@ -29,7 +28,6 @@ import { PieceEditorNameRow } from '../PieceEditorNameRow/PieceEditorNameRow';
 import { PieceRectEditor } from '../RectEditor/RectEditor';
 import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { close, ok } from '@/utils/constants';
 
 type CharacterState = State<typeof characterTemplate>;
 type DicePieceState = State<typeof dicePieceTemplate>;
@@ -56,8 +54,6 @@ const defaultDicePieceValue = (
 
 const pieceSize: PixelSize = { w: 50, h: 50 };
 
-type ActionRequest = Subscribable<typeof ok | typeof close>;
-
 export type CreateMode = {
     boardId: string;
     piecePosition: PixelPosition;
@@ -68,11 +64,13 @@ export type UpdateMode = {
     pieceId: string;
 };
 
-export const DicePieceEditor: React.FC<{
-    actionRequest?: ActionRequest;
+export const useDicePieceEditor = ({
+    createMode: createModeProp,
+    updateMode: updateModeProp,
+}: {
     createMode?: CreateMode;
     updateMode?: UpdateMode;
-}> = ({ actionRequest, createMode: createModeProp, updateMode: updateModeProp }) => {
+}) => {
     const setRoomState = useSetRoomStateWithImmer();
     const myUserUid = useMyUserUid();
     const boardId = updateModeProp?.boardId ?? createModeProp?.boardId;
@@ -144,132 +142,121 @@ export const DicePieceEditor: React.FC<{
         };
     }, [dicePieces, updateModeProp, myUserUid, setRoomState]);
     const { state, updateState, ok } = useStateEditor({ createMode, updateMode });
-    React.useEffect(() => {
-        if (actionRequest == null) {
-            return;
-        }
-        const subscription = actionRequest.subscribe({
-            next: value => {
-                switch (value) {
-                    case 'ok':
-                        ok();
-                        break;
-                    case 'close':
-                        break;
-                }
-            },
-        });
-        return () => subscription.unsubscribe();
-    }, [actionRequest, ok]);
+
     const labelStyle: React.CSSProperties = React.useMemo(() => ({ minWidth: 100 }), []);
 
+    let element: JSX.Element | null;
     if (myUserUid == null || state == null || boardId == null) {
-        return null;
+        element = null;
+    } else {
+        element = (
+            <Table labelStyle={labelStyle}>
+                {dicePieceStrIndexes.map(key => {
+                    const die = state.dice?.[key];
+
+                    // minHeight: 28
+                    return (
+                        <TableRow
+                            key={keyNames('DicePieceEditor', 'ダイス', key)}
+                            label={`ダイス${key}`}
+                        >
+                            <InputDie
+                                size='small'
+                                state={die ?? null}
+                                onChange={e => {
+                                    updateState(pieceValue => {
+                                        if (pieceValue == null) {
+                                            return;
+                                        }
+                                        if (pieceValue.dice == null) {
+                                            pieceValue.dice = {};
+                                        }
+                                        if (e.type === replace) {
+                                            pieceValue.dice[key] =
+                                                e.newValue == null
+                                                    ? undefined
+                                                    : {
+                                                          $v: 1,
+                                                          $r: 1,
+                                                          dieType: e.newValue.dieType,
+                                                          isValuePrivate: false,
+                                                          value: undefined,
+                                                      };
+                                            return;
+                                        }
+                                        const die = pieceValue.dice[key];
+                                        if (die == null) {
+                                            return;
+                                        }
+                                        die.value = e.newValue === noValue ? undefined : e.newValue;
+                                    });
+                                }}
+                                onIsValuePrivateChange={e => {
+                                    updateState(pieceValue => {
+                                        const die = pieceValue?.dice?.[key];
+                                        if (die == null) {
+                                            return;
+                                        }
+                                        die.isValuePrivate = e;
+                                    });
+                                }}
+                            />
+                        </TableRow>
+                    );
+                })}
+
+                <TableDivider />
+
+                <PieceEditorNameRow
+                    state={state.name}
+                    onChange={newValue =>
+                        updateState(pieceValue => {
+                            if (pieceValue == null) {
+                                return;
+                            }
+                            pieceValue.name = newValue;
+                        })
+                    }
+                />
+
+                <PieceEditorMemoRow
+                    state={state.memo}
+                    onChange={newValue =>
+                        updateState(pieceValue => {
+                            if (pieceValue == null) {
+                                return;
+                            }
+                            pieceValue.memo = newValue;
+                        })
+                    }
+                />
+
+                <TableDivider />
+
+                <PieceRectEditor
+                    value={state}
+                    onChange={newState => updateState(() => newState)}
+                    boardId={boardId}
+                />
+
+                <TableDivider />
+
+                <PieceEditorIdRow pieceId={updateModeProp?.pieceId} />
+
+                <TableRow label='所有者'>
+                    <MyCharactersSelect
+                        selectedCharacterId={
+                            createModeProp == null ? state.ownerCharacterId : activeCharacter?.id
+                        }
+                        readOnly={createModeProp == null}
+                        onSelect={setActiveCharacter}
+                        showAlert
+                    />
+                </TableRow>
+            </Table>
+        );
     }
 
-    return (
-        <Table labelStyle={labelStyle}>
-            {dicePieceStrIndexes.map(key => {
-                const die = state.dice?.[key];
-
-                // minHeight: 28
-                return (
-                    <TableRow
-                        key={keyNames('DicePieceEditor', 'ダイス', key)}
-                        label={`ダイス${key}`}
-                    >
-                        <InputDie
-                            size='small'
-                            state={die ?? null}
-                            onChange={e => {
-                                updateState(pieceValue => {
-                                    if (pieceValue == null) {
-                                        return;
-                                    }
-                                    if (pieceValue.dice == null) {
-                                        pieceValue.dice = {};
-                                    }
-                                    if (e.type === replace) {
-                                        pieceValue.dice[key] =
-                                            e.newValue == null
-                                                ? undefined
-                                                : {
-                                                      $v: 1,
-                                                      $r: 1,
-                                                      dieType: e.newValue.dieType,
-                                                      isValuePrivate: false,
-                                                      value: undefined,
-                                                  };
-                                        return;
-                                    }
-                                    const die = pieceValue.dice[key];
-                                    if (die == null) {
-                                        return;
-                                    }
-                                    die.value = e.newValue === noValue ? undefined : e.newValue;
-                                });
-                            }}
-                            onIsValuePrivateChange={e => {
-                                updateState(pieceValue => {
-                                    const die = pieceValue?.dice?.[key];
-                                    if (die == null) {
-                                        return;
-                                    }
-                                    die.isValuePrivate = e;
-                                });
-                            }}
-                        />
-                    </TableRow>
-                );
-            })}
-
-            <TableDivider />
-
-            <PieceEditorNameRow
-                state={state.name}
-                onChange={newValue =>
-                    updateState(pieceValue => {
-                        if (pieceValue == null) {
-                            return;
-                        }
-                        pieceValue.name = newValue;
-                    })
-                }
-            />
-
-            <PieceEditorMemoRow
-                state={state.memo}
-                onChange={newValue =>
-                    updateState(pieceValue => {
-                        if (pieceValue == null) {
-                            return;
-                        }
-                        pieceValue.memo = newValue;
-                    })
-                }
-            />
-
-            <TableDivider />
-
-            <PieceRectEditor
-                value={state}
-                onChange={newState => updateState(() => newState)}
-                boardId={boardId}
-            />
-
-            <TableDivider />
-
-            <PieceEditorIdRow pieceId={updateModeProp?.pieceId} />
-
-            <TableRow label='所有者'>
-                <MyCharactersSelect
-                    selectedCharacterId={
-                        createModeProp == null ? state.ownerCharacterId : activeCharacter?.id
-                    }
-                    readOnly={createModeProp == null}
-                    onSelect={setActiveCharacter}
-                />
-            </TableRow>
-        </Table>
-    );
+    const canOk = activeCharacter != null;
+    return React.useMemo(() => ({ element, ok, canOk }), [element, ok, canOk]);
 };
