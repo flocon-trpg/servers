@@ -5,6 +5,7 @@ import React, { PropsWithChildren } from 'react';
 import * as ReactKonva from 'react-konva';
 import { KonvaNodeEvents } from 'react-konva';
 import { DragEndResult, PixelPosition, PixelSize } from '../../utils/positionAndSizeAndRect';
+import { NameLabel } from '../Board/subcomponents/components/ImagePiece/subcomponents/NameLabel';
 import { AnimatedGroupAsAnyProps } from '@/components/ui/AnimatedKonvaAsAnyProps/AnimatedKonvaAsAnyProps';
 
 const minimalImageSize = 10;
@@ -14,6 +15,7 @@ export type PieceGroupProps = {
     draggable: boolean;
     resizable: boolean;
     listening: boolean;
+    label: string | undefined;
     onDragEnd?: (resize: DragEndResult) => void;
     onClick?: () => void;
     onDblClick?: (e: KonvaEventObject<MouseEvent>) => void;
@@ -27,6 +29,7 @@ export const PieceGroup: React.FC<PropsWithChildren<PieceGroupProps>> = ({
     draggable,
     resizable,
     listening,
+    label,
     onDragEnd: onDragEndProp,
     onClick,
     onDblClick,
@@ -163,6 +166,7 @@ export const PieceGroup: React.FC<PropsWithChildren<PieceGroupProps>> = ({
         <>
             <AnimatedGroupAsAnyProps {...springStyle} {...konvaGroupStyle} ref={groupRef}>
                 {children}
+                <NameLabel x={0} y={0} w={w} h={h} text={label} />
             </AnimatedGroupAsAnyProps>
             {isSelected && (
                 <ReactKonva.Transformer

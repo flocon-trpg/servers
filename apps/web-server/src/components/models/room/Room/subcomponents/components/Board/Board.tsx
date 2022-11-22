@@ -5,7 +5,7 @@ import { FilePath, FileSourceType } from '@flocon-trpg/typed-document-node-v0.7.
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { Message, publicMessage } from '@flocon-trpg/web-server-utils';
 import { useTransition } from '@react-spring/konva';
-import { Button, Dropdown, InputNumber, Menu, Popover } from 'antd';
+import { Button, Dropdown, Menu, Popover } from 'antd';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import classNames from 'classnames';
 import { useUpdateAtom } from 'jotai/utils';
@@ -44,6 +44,7 @@ import { MouseOverOn } from '../../utils/types';
 import { boardEditorModalAtom } from '../BoardEditorModal/BoardEditorModal';
 import { importBoardModalVisibilityAtom } from '../ImportBoardModal/ImportBoardModal';
 import { ActiveBoardSelectorModal } from './subcomponents/components/ActiveBoardSelectorModal/ActiveBoardSelecterModal';
+import { BoardConfigEditor } from './subcomponents/components/BoardConfigEditor/BoardConfigEditor';
 import {
     DiceOrShapeOrStringPiece,
     shapePiece,
@@ -59,17 +60,15 @@ import { NotificationType } from '@/components/models/room/Room/subcomponents/co
 import { useRoomMessages } from '@/components/models/room/Room/subcomponents/hooks/useRoomMessages';
 import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcomponents/hooks/useSetRoomStateWithImmer';
 import { AnimatedImageAsAnyProps } from '@/components/ui/AnimatedKonvaAsAnyProps/AnimatedKonvaAsAnyProps';
-import { ColorPickerButton } from '@/components/ui/ColorPickerButton/ColorPickerButton';
 import { success, useImageFromFilePath } from '@/hooks/imageHooks';
 import { useAllContext } from '@/hooks/useAllContext';
 import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 import { Styles } from '@/styles';
-import { cancelRnd, flex, flexColumn, flexRow, itemsCenter, itemsEnd } from '@/styles/className';
+import { cancelRnd, flex, flexColumn, itemsEnd } from '@/styles/className';
 import { create, update } from '@/utils/constants';
 import { range } from '@/utils/range';
-import { rgba } from '@/utils/rgba';
 import { BoardType } from '@/utils/types';
 import { defaultTriggerSubMenuAction } from '@/utils/variables';
 
@@ -311,11 +310,12 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                     // TODO: 画像なしでコマを表示する
                     return null;
                 }
+
                 return (
                     <ImagePiece
                         {...stateToPixelRect({ cellConfig: board, state: piece })}
                         opacity={1}
-                        label={piece.name}
+                        label={boardConfig.showCharacterPieceLabel ? character.name : undefined}
                         key={keyNames(characterId, pieceId)}
                         filePath={character.image}
                         draggable={!piece.isPositionLocked}
@@ -381,6 +381,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 return (
                     <ImagePiece
                         key={keyNames(characterId, pieceId)}
+                        label={boardConfig.showPortraitPieceLabel ? piece.name : undefined}
                         opacity={0.75 /* TODO: opacityの値が適当 */}
                         message={lastPublicMessage}
                         messageFilter={msg => {
@@ -465,6 +466,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             return (
                 <ImagePiece
                     {...stateToPixelRect({ cellConfig: board, state: piece })}
+                    label={boardConfig.showImagePieceLabel ? piece.name : undefined}
                     opacity={1}
                     key={pieceId}
                     filePath={piece.image ?? defaultImageFilePath}
@@ -516,6 +518,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 <DiceOrShapeOrStringPiece
                     {...stateToPixelRect({ cellConfig: board, state: piece })}
                     key={pieceId}
+                    label={boardConfig.showDicePieceLabel ? piece.name : undefined}
                     opacity={1}
                     state={{ type: dicePiece, state: piece }}
                     draggable={!piece.isPositionLocked}
@@ -559,6 +562,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             <DiceOrShapeOrStringPiece
                 {...stateToPixelRect({ cellConfig: board, state: piece })}
                 key={pieceId}
+                label={boardConfig.showShapePieceLabel ? piece.name : undefined}
                 opacity={1}
                 state={{ type: shapePiece, state: piece, stateId: pieceId }}
                 draggable={!piece.isPositionLocked}
@@ -602,6 +606,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                 <DiceOrShapeOrStringPiece
                     {...stateToPixelRect({ cellConfig: board, state: piece })}
                     key={pieceId}
+                    label={boardConfig.showStringPieceLabel ? piece.name : undefined}
                     opacity={1}
                     state={{
                         type: 'stringPiece',
@@ -1080,7 +1085,6 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
         );
 
     const noActiveBoardText = '';
-    const descriptionStyle: React.CSSProperties = { maxWidth: 40, minWidth: 40 };
 
     return (
         <div style={{ position: 'relative' }}>
@@ -1128,98 +1132,26 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
             </div>
             <div style={zoomButtonStyle}>
                 <div className={classNames(flex, flexColumn, itemsEnd)}>
-                    <div className={classNames(flex, flexRow)}>
-                        <Button
-                            style={NonTransparentStyle}
-                            onClick={() => {
-                                if (boardIdToShow == null) {
-                                    return;
+                    {boardIdToShow && (
+                        <>
+                            <Popover
+                                trigger='click'
+                                overlayClassName={cancelRnd}
+                                content={
+                                    <BoardConfigEditor
+                                        boardId={boardIdToShow}
+                                        boardType={boardType}
+                                        boardConfig={boardConfig}
+                                    />
                                 }
-                                setRoomConfig(roomConfig => {
-                                    if (roomConfig == null) {
-                                        return;
-                                    }
-                                    RoomConfigUtils.editBoard(
-                                        roomConfig,
-                                        boardIdToShow,
-                                        boardType,
-                                        boardConfig => {
-                                            boardConfig.showGrid = !boardConfig.showGrid;
-                                        }
-                                    );
-                                });
-                            }}
-                        >
-                            セルの線の表示/非表示
-                        </Button>
-                        <Popover
-                            trigger='click'
-                            content={
-                                <div className={classNames(cancelRnd, flex, flexColumn)}>
-                                    <div style={{ paddingBottom: 8 }}>セルの線の設定</div>
-                                    <div className={classNames(flex, flexRow, itemsCenter)}>
-                                        <div style={descriptionStyle}>太さ</div>
-                                        <InputNumber
-                                            value={boardConfig.gridLineTension}
-                                            onChange={e => {
-                                                if (e == null) {
-                                                    return;
-                                                }
-                                                if (boardIdToShow == null) {
-                                                    return;
-                                                }
-                                                setRoomConfig(roomConfig => {
-                                                    if (roomConfig == null) {
-                                                        return;
-                                                    }
-                                                    RoomConfigUtils.editBoard(
-                                                        roomConfig,
-                                                        boardIdToShow,
-                                                        boardType,
-                                                        boardConfig => {
-                                                            boardConfig.gridLineTension = e;
-                                                        }
-                                                    );
-                                                });
-                                            }}
-                                        />
-                                    </div>
-                                    <div className={classNames(flex, flexRow, itemsCenter)}>
-                                        <div style={descriptionStyle}>色</div>
-                                        {/* ↓ trigger='click' にすると、SketchPickerを開いている状態でPopover全体を閉じたときに次にSketchPickerが開かず（開き直したら直る）操作性が悪いため、'click'は用いていない */}
-                                        <ColorPickerButton
-                                            buttonStyle={NonTransparentStyle}
-                                            buttonContent={boardConfig.gridLineColor}
-                                            color={boardConfig.gridLineColor}
-                                            onChange={e => {
-                                                if (boardIdToShow == null) {
-                                                    return;
-                                                }
-                                                setRoomConfig(roomConfig => {
-                                                    if (roomConfig == null) {
-                                                        return;
-                                                    }
-                                                    RoomConfigUtils.editBoard(
-                                                        roomConfig,
-                                                        boardIdToShow,
-                                                        boardType,
-                                                        boardConfig => {
-                                                            boardConfig.gridLineColor = rgba(e.rgb);
-                                                        }
-                                                    );
-                                                });
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-                            }
-                        >
-                            <Button style={NonTransparentStyle}>
-                                <Icons.EllipsisOutlined />
-                            </Button>
-                        </Popover>
-                    </div>
-                    <div style={{ height: 18 }} />
+                                // デフォルトではtopだが、このボタンがブラウザ画面の右端近くにあるとBoardConfigEditorが縦長になってしまい見づらい。ボタンは右下にあるため、縦長になったりはみ出したりすることが最も少ないであろうleftBottomとしている。
+                                placement='leftBottom'
+                            >
+                                <Button>表示設定</Button>
+                            </Popover>
+                            <div style={{ height: 18 }} />
+                        </>
+                    )}
                     <Button
                         style={NonTransparentStyle}
                         onClick={() => {

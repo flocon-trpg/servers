@@ -8,7 +8,7 @@ type Operation = {
 const initRevision = 0;
 const initState = 0;
 
-const createStateManager = (args?: {enableHistory: boolean}) =>
+const createStateManager = (args?: { enableHistory: boolean }) =>
     new StateManager<number, Operation>({
         enableHistory: args?.enableHistory ?? true,
         revision: initRevision,
@@ -40,7 +40,7 @@ const createStateManager = (args?: {enableHistory: boolean}) =>
 // history はまだどこからも参照されておらず仕様がほぼ未確定であるため、テストは現時点では簡略的。
 describe('StateManager', () => {
     test('init StateManager with enableHistory=true', () => {
-        const target = createStateManager({enableHistory: true});
+        const target = createStateManager({ enableHistory: true });
 
         expect(target.isPosting).toBe(false);
         expect(target.requiresReload).toBe(false);
@@ -52,7 +52,7 @@ describe('StateManager', () => {
     });
 
     test('init StateManager with enableHistory=false', () => {
-        const target = createStateManager({enableHistory: false});
+        const target = createStateManager({ enableHistory: false });
 
         expect(target.isPosting).toBe(false);
         expect(target.requiresReload).toBe(false);
