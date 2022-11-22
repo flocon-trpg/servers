@@ -2820,7 +2820,7 @@ __metadata:
     "@types/multer": ^1.4.7
     "@types/node": ^14.18.12
     "@types/safe-compare": ^1.1.0
-    "@types/sharp": ^0.30.0
+    "@types/sharp": ^0.31.0
     "@types/url-join": 4.0.1
     "@types/uuid": ^8.3.1
     "@types/ws": ^8.0.0
@@ -2868,7 +2868,7 @@ __metadata:
     rxjs: ^7.5.6
     safe-compare: ^1.1.4
     sanitize-filename: ^1.6.3
-    sharp: ^0.30.0
+    sharp: ^0.31.0
     ts-jest: 29.0.3
     ts-node: ^10.7.0
     tslib: ^2.4.1
@@ -7302,12 +7302,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/sharp@npm:^0.30.0":
-  version: 0.30.4
-  resolution: "@types/sharp@npm:0.30.4"
+"@types/sharp@npm:^0.31.0":
+  version: 0.31.0
+  resolution: "@types/sharp@npm:0.31.0"
   dependencies:
     "@types/node": "*"
-  checksum: 3ebeaf55aa5ed2826a5bb4f13982a64b35691b6f38c4fd9d536ee7aed4d7e6b39529ae290f19343c5d8334419d69e147a28c214ca61adaed35ebf3ceea7cdf17
+  checksum: c7698de18183a0574bf2f703226a5a7dc32b8a7340b52790eff0f6775b8ad708b6782f48fcaaf4d1be15fd76215c81c3ea55595d55484bf7ce870923c8174294
   languageName: node
   linkType: hard
 
@@ -20231,7 +20231,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prebuild-install@npm:^7.1.0":
+"prebuild-install@npm:^7.1.1":
   version: 7.1.1
   resolution: "prebuild-install@npm:7.1.1"
   dependencies:
@@ -22813,7 +22813,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:7.x, semver@npm:^7.1.2, semver@npm:^7.3.2, semver@npm:^7.3.4, semver@npm:^7.3.5, semver@npm:^7.3.7":
+"semver@npm:7.x, semver@npm:^7.1.2, semver@npm:^7.3.2, semver@npm:^7.3.4, semver@npm:^7.3.5, semver@npm:^7.3.7, semver@npm:^7.3.8":
   version: 7.3.8
   resolution: "semver@npm:7.3.8"
   dependencies:
@@ -23029,20 +23029,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sharp@npm:^0.30.0":
-  version: 0.30.6
-  resolution: "sharp@npm:0.30.6"
+"sharp@npm:^0.31.0":
+  version: 0.31.2
+  resolution: "sharp@npm:0.31.2"
   dependencies:
     color: ^4.2.3
     detect-libc: ^2.0.1
     node-addon-api: ^5.0.0
     node-gyp: latest
-    prebuild-install: ^7.1.0
-    semver: ^7.3.7
+    prebuild-install: ^7.1.1
+    semver: ^7.3.8
     simple-get: ^4.0.1
     tar-fs: ^2.1.1
     tunnel-agent: ^0.6.0
-  checksum: 2560b5769d78ee660d767e59f6fa56531c448d16383f9700e4ecb8016382104c1bb42991bdd4ea741c0f4d934ea5246c5d602fc5f39062bcc1c2c8786421fd5a
+  checksum: 076717b7a073ea47bb522ff2931b74b6608daeb6f7ae334e4848d47fdf4d23bcb18cd49044fd5fb27ef27a1a4aa87d141894d67d1c4bb15a6e2e63cf4dbe329e
   languageName: node
   linkType: hard
 
