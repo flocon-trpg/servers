@@ -119,7 +119,7 @@
         "zod": "^3.19.1"
     },
     "devDependencies": {
-        "@babel/core": "7.19.1",
+        "@babel/core": "7.20.2",
         "@flocon-trpg/eslint-config": "workspace:^",
         "@flocon-trpg/prettier-config": "workspace:^",
         "@mdx-js/react": "1.6.22",
