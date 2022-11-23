@@ -3037,7 +3037,7 @@ __metadata:
     "@flocon-trpg/rollup-config": "workspace:^"
     "@flocon-trpg/sdk": "workspace:^"
     "@flocon-trpg/tsconfig": "workspace:^"
-    "@testing-library/react": ^13.4.0
+    "@testing-library/react": 13.4.0
     "@types/jest": 29.1.2
     "@typescript-eslint/eslint-plugin": 5.39.0
     "@typescript-eslint/parser": 5.39.0
@@ -6556,7 +6556,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/react@npm:13.4.0, @testing-library/react@npm:^13.4.0":
+"@testing-library/react@npm:13.4.0":
   version: 13.4.0
   resolution: "@testing-library/react@npm:13.4.0"
   dependencies:
