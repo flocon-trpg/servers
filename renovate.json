@@ -18,6 +18,11 @@
         {
             "matchDepTypes": ["peerDependencies"],
             "rangeStrategy": "widen"
+        },
+        {
+            "matchUpdateTypes": ["patch", "minor"],
+            "excludePackageNames": ["typescript"],
+            "groupName": "all minor and patch dependencies"
         }
     ],
     "prConcurrentLimit": 30,
