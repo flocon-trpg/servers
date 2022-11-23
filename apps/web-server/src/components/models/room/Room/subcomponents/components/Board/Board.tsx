@@ -1101,7 +1101,13 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                     </Dropdown>
                 ) : (
                     <>
-                        <div style={{ marginRight: 4, padding: 4, background: '#E0E0E010' }}>
+                        <div
+                            style={{
+                                marginRight: 4,
+                                padding: 4,
+                                background: Styles.backgroundColor,
+                            }}
+                        >
                             {board?.name}
                         </div>
                         <Button
