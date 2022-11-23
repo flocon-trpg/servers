@@ -26199,9 +26199,9 @@ __metadata:
   linkType: hard
 
 "wonka@npm:^6.0.0":
-  version: 6.1.0
-  resolution: "wonka@npm:6.1.0"
-  checksum: 662793c7429affc12c4ee9f8b8b642fd44a9f69886bd782ee3df241ac6b1ada66d366e4669bbea43f52f6167e4697dd6f4aa40b8e71dbfe9046d91203ae59731
+  version: 6.1.1
+  resolution: "wonka@npm:6.1.1"
+  checksum: fadd28d21f212cd71440e6b13beb4978d446be8e94c3ee77568ca92eac1875cefcd200bdc61677c4406c464ab7907ae2949b7301faf7ff50acee0eea3542654b
   languageName: node
   linkType: hard
 
