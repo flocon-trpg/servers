@@ -22,9 +22,9 @@
     "dependencies": {
         "@flocon-trpg/flocon-script": "workspace:^",
         "@flocon-trpg/utils": "workspace:^",
-        "@kizahasi/option": "^1.0.0",
+        "@kizahasi/option": "^1.1.0",
         "@kizahasi/ot-string": "^0.4.1",
-        "@kizahasi/result": "^1.0.1",
+        "@kizahasi/result": "^1.1.0",
         "@ltd/j-toml": "^1.23.0",
         "immer": "^9.0.16",
         "lodash.clonedeep": "^4.5.0",

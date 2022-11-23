@@ -20,7 +20,7 @@
     },
     "dependencies": {
         "@flocon-trpg/utils": "workspace:^",
-        "@kizahasi/option": "^1.0.0",
+        "@kizahasi/option": "^1.1.0",
         "acorn": "^8.5.0"
     },
     "devDependencies": {

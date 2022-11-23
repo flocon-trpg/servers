@@ -23,8 +23,8 @@
         "@flocon-trpg/typed-document-node-v0.7.1": "workspace:^",
         "@flocon-trpg/utils": "workspace:^",
         "@flocon-trpg/web-server-utils": "workspace:^",
-        "@kizahasi/option": "^1.0.0",
-        "@kizahasi/result": "^1.0.0",
+        "@kizahasi/option": "^1.1.0",
+        "@kizahasi/result": "^1.1.0",
         "rxjs": "^7.5.6"
     },
     "devDependencies": {
