@@ -3,7 +3,7 @@ import * as NullableTextOperation from '../nullableTextOperation';
 import { RecordDownOperationElement, RecordTwoWayOperationElement, RecordUpOperationElement } from '../recordOperationElement';
 import * as TextOperation from '../textOperation';
 import { Apply, ClientTransform, Compose, Diff, DownError, Restore } from '../util/type';
-declare type ReadonlyRecord<TKey extends keyof any, TValue> = {
+type ReadonlyRecord<TKey extends keyof any, TValue> = {
     readonly [P in TKey]: TValue;
 };
 export declare const $v = "$v";
@@ -14,8 +14,8 @@ export declare const ot = "ot";
 export declare const record = "record";
 export declare const paramRecord = "paramRecord";
 export declare const object = "object";
-declare type If<T extends boolean, TTrue, TFalse> = T extends true ? TTrue : T extends false ? TFalse : TTrue | TFalse;
-export declare type ReplaceValueTemplate<T extends z.ZodTypeAny> = {
+type If<T extends boolean, TTrue, TFalse> = T extends true ? TTrue : T extends false ? TFalse : TTrue | TFalse;
+export type ReplaceValueTemplate<T extends z.ZodTypeAny> = {
     type: typeof atomic;
     mode: typeof replace;
     value: T;
@@ -26,7 +26,7 @@ export declare const createReplaceValueTemplate: <T extends z.ZodTypeAny>(value:
     readonly mode: "replace";
     readonly value: T;
 };
-export declare type OtValueTemplate = {
+export type OtValueTemplate = {
     type: typeof atomic;
     mode: typeof ot;
     nullable: boolean;
@@ -38,7 +38,7 @@ export declare const createTextValueTemplate: <T extends boolean>(nullable: T) =
     readonly mode: "ot";
     readonly nullable: T;
 };
-export declare type RecordValueTemplate<TValue extends AnyTemplate> = {
+export type RecordValueTemplate<TValue extends AnyTemplate> = {
     type: typeof record;
     value: TValue;
 };
@@ -47,7 +47,7 @@ export declare const createRecordValueTemplate: <TValue extends AnyTemplate>(val
     readonly type: "record";
     readonly value: TValue;
 };
-export declare type ParamRecordValueTemplate<TValue extends AnyTemplate> = {
+export type ParamRecordValueTemplate<TValue extends AnyTemplate> = {
     type: typeof paramRecord;
     value: TValue;
     defaultState: State<TValue>;
@@ -58,7 +58,7 @@ export declare const createParamRecordValueTemplate: <TValue extends AnyTemplate
     readonly value: TValue;
     readonly defaultState: State<TValue>;
 };
-export declare type ObjectValueTemplate<T extends ReadonlyRecord<string, AnyTemplate>, V extends number | undefined, R extends number | undefined> = {
+export type ObjectValueTemplate<T extends ReadonlyRecord<string, AnyTemplate>, V extends number | undefined, R extends number | undefined> = {
     type: typeof object;
     $v: V;
     $r: R;
@@ -73,7 +73,7 @@ export declare const createObjectValueTemplate: <T extends ReadonlyRecord<string
     readonly $r: R;
     readonly value: T;
 };
-declare type AnyTemplate = ReplaceValueTemplate<z.ZodTypeAny> | OtValueTemplate | {
+type AnyTemplate = ReplaceValueTemplate<z.ZodTypeAny> | OtValueTemplate | {
     type: typeof record;
     value: AnyTemplate;
 } | {
@@ -88,11 +88,11 @@ declare type AnyTemplate = ReplaceValueTemplate<z.ZodTypeAny> | OtValueTemplate 
         readonly [P in string]: AnyTemplate;
     };
 };
-declare type ParamRecordValueTemplateBase<TValue extends AnyTemplate> = {
+type ParamRecordValueTemplateBase<TValue extends AnyTemplate> = {
     type: typeof paramRecord;
     value: TValue;
 };
-export declare type State<T extends AnyTemplate> = T extends OtValueTemplate ? If<T['nullable'], string | undefined, string> : T extends ReplaceValueTemplate<infer U1> ? z.TypeOf<U1> : T extends RecordValueTemplate<infer U2> ? {
+export type State<T extends AnyTemplate> = T extends OtValueTemplate ? If<T['nullable'], string | undefined, string> : T extends ReplaceValueTemplate<infer U1> ? z.TypeOf<U1> : T extends RecordValueTemplate<infer U2> ? {
     [P in string]?: State<U2> | undefined;
 } | undefined : T extends ParamRecordValueTemplateBase<infer U3> ? {
     [P in string]?: State<U3> | undefined;
@@ -103,7 +103,7 @@ export declare type State<T extends AnyTemplate> = T extends OtValueTemplate ? I
     [P in keyof U4]: State<U4[P]>;
 } : unknown;
 export declare const state: <T extends AnyTemplate>(source: T) => z.ZodType<State<T>, z.ZodTypeDef, State<T>>;
-export declare type UpOperation<T extends AnyTemplate> = T extends OtValueTemplate ? If<T['nullable'], NullableTextOperation.UpOperation, TextOperation.UpOperation> : T extends ReplaceValueTemplate<infer U1> ? {
+export type UpOperation<T extends AnyTemplate> = T extends OtValueTemplate ? If<T['nullable'], NullableTextOperation.UpOperation, TextOperation.UpOperation> : T extends ReplaceValueTemplate<infer U1> ? {
     newValue: z.TypeOf<U1>;
 } : T extends RecordValueTemplate<infer U2> ? {
     [P in string]?: RecordUpOperationElement<State<U2>, UpOperation<U2>> | undefined;
@@ -116,7 +116,7 @@ export declare type UpOperation<T extends AnyTemplate> = T extends OtValueTempla
     [P in keyof U3]?: UpOperation<U3[P]>;
 } : unknown;
 export declare const upOperation: <T extends AnyTemplate>(source: T) => z.ZodType<UpOperation<T>, z.ZodTypeDef, UpOperation<T>>;
-export declare type DownOperation<T extends AnyTemplate> = T extends OtValueTemplate ? If<T['nullable'], NullableTextOperation.DownOperation, TextOperation.DownOperation> : T extends ReplaceValueTemplate<infer U1> ? {
+export type DownOperation<T extends AnyTemplate> = T extends OtValueTemplate ? If<T['nullable'], NullableTextOperation.DownOperation, TextOperation.DownOperation> : T extends ReplaceValueTemplate<infer U1> ? {
     oldValue: z.TypeOf<U1>;
 } : T extends RecordValueTemplate<infer U2> ? {
     [P in string]?: RecordDownOperationElement<State<U2>, DownOperation<U2>> | undefined;
@@ -129,7 +129,7 @@ export declare type DownOperation<T extends AnyTemplate> = T extends OtValueTemp
     [P in keyof U3]?: DownOperation<U3[P]>;
 } : unknown;
 export declare const downOperation: <T extends AnyTemplate>(source: T) => z.ZodType<DownOperation<T>, z.ZodTypeDef, DownOperation<T>>;
-export declare type TwoWayOperation<T extends AnyTemplate> = T extends OtValueTemplate ? If<T['nullable'], NullableTextOperation.TwoWayOperation, TextOperation.TwoWayOperation> : T extends ReplaceValueTemplate<infer U1> ? {
+export type TwoWayOperation<T extends AnyTemplate> = T extends OtValueTemplate ? If<T['nullable'], NullableTextOperation.TwoWayOperation, TextOperation.TwoWayOperation> : T extends ReplaceValueTemplate<infer U1> ? {
     oldValue: z.TypeOf<U1>;
     newValue: z.TypeOf<U1>;
 } : T extends RecordValueTemplate<infer U2> ? {
@@ -154,7 +154,7 @@ export declare const applyBack: <T extends AnyTemplate>(template: T) => Apply<St
 export declare const composeDownOperation: <T extends AnyTemplate>(template: T) => Compose<DownOperation<T>, DownError>;
 /**
  * Stateの情報を用いて、DownOperationをTwoWayOperationに変換します。破壊的な処理は行われません。
- * @param nextState - DownOperationが適用される前の状態のState。
+ * @param nextState DownOperationが適用される前の状態のState。
  */
 export declare const restore: <T extends AnyTemplate>(template: T) => Restore<State<T>, DownOperation<T>, TwoWayOperation<T>>;
 /** 2つのStateオブジェクトの差分を取ります。

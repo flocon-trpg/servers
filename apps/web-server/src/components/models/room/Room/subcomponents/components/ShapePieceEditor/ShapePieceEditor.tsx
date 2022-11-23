@@ -1,6 +1,5 @@
 import { State, path, shape, shapePieceTemplate, simpleId } from '@flocon-trpg/core';
 import React from 'react';
-import { Subscribable } from 'rxjs';
 import { useMemoOne } from 'use-memo-one';
 import { z } from 'zod';
 import { useCloneImagePiece } from '../../hooks/useCloneImagePiece';
@@ -22,7 +21,6 @@ import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcompo
 import { ColorPickerButton } from '@/components/ui/ColorPickerButton/ColorPickerButton';
 import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { close, ok } from '@/utils/constants';
 import { rgb } from '@/utils/rgb';
 
 type Shape = z.TypeOf<typeof shape>;
@@ -58,8 +56,6 @@ const defaultShapePiece = (
 
 const pieceSize: PixelSize = { w: 50, h: 50 };
 
-type ActionRequest = Subscribable<typeof ok | typeof close>;
-
 export type CreateMode = {
     boardId: string;
     piecePosition: PixelPosition;
@@ -70,11 +66,13 @@ export type UpdateMode = {
     pieceId: string;
 };
 
-export const ShapePieceEditor: React.FC<{
-    actionRequest?: ActionRequest;
+export const useShapePieceEditor = ({
+    createMode,
+    updateMode,
+}: {
     createMode?: CreateMode;
     updateMode?: UpdateMode;
-}> = ({ actionRequest, createMode, updateMode }) => {
+}) => {
     const setRoomState = useSetRoomStateWithImmer();
     const myUserUid = useMyUserUid();
     const boardId = updateMode?.boardId ?? createMode?.boardId;
@@ -148,118 +146,105 @@ export const ShapePieceEditor: React.FC<{
         createMode: createModeParams,
         updateMode: updateModeParams,
     });
-    React.useEffect(() => {
-        if (actionRequest == null) {
-            return;
-        }
-        const subscription = actionRequest.subscribe({
-            next: value => {
-                switch (value) {
-                    case 'ok':
-                        ok();
-                        break;
-                    case 'close':
-                        break;
-                }
-            },
-        });
-        return () => subscription.unsubscribe();
-    }, [actionRequest, ok]);
+
     const labelStyle: React.CSSProperties = React.useMemo(() => ({ minWidth: 100 }), []);
 
+    let element: JSX.Element | null;
     if (myUserUid == null || state == null || boardId == null) {
-        return null;
-    }
+        element = null;
+    } else {
+        element = (
+            <>
+                <Table labelStyle={labelStyle}>
+                    {/* TODO: isPrivateがまだ未実装 */}
 
-    return (
-        <>
-            <Table labelStyle={labelStyle}>
-                {/* TODO: isPrivateがまだ未実装 */}
+                    <TableRow label='色'>
+                        <ColorPickerButton
+                            trigger='click'
+                            color={state.shapes?.[shapeKey]?.fill}
+                            buttonContent={state.shapes?.[shapeKey]?.fill ?? '(未指定)'}
+                            onChange={e =>
+                                updateState(pieceValue => {
+                                    if (pieceValue == null) {
+                                        return;
+                                    }
+                                    if (pieceValue.shapes == null) {
+                                        pieceValue.shapes = {};
+                                    }
+                                    const newColor = rgb(e.rgb);
+                                    const targetShape = pieceValue.shapes[shapeKey];
+                                    if (targetShape == null) {
+                                        pieceValue.shapes[shapeKey] = {
+                                            $v: 1,
+                                            $r: 1,
+                                            shape: { ...defaultShape },
+                                            fill: newColor,
+                                            stroke: undefined,
+                                            strokeWidth: undefined,
+                                        };
+                                    } else {
+                                        targetShape.fill = newColor;
+                                    }
+                                })
+                            }
+                        />
+                    </TableRow>
 
-                <TableRow label='色'>
-                    <ColorPickerButton
-                        trigger='click'
-                        color={state.shapes?.[shapeKey]?.fill}
-                        buttonContent={state.shapes?.[shapeKey]?.fill ?? '(未指定)'}
-                        onChange={e =>
+                    <TableDivider />
+
+                    <PieceEditorNameRow
+                        state={state.name}
+                        onChange={newValue =>
                             updateState(pieceValue => {
                                 if (pieceValue == null) {
                                     return;
                                 }
-                                if (pieceValue.shapes == null) {
-                                    pieceValue.shapes = {};
-                                }
-                                const newColor = rgb(e.rgb);
-                                const targetShape = pieceValue.shapes[shapeKey];
-                                if (targetShape == null) {
-                                    pieceValue.shapes[shapeKey] = {
-                                        $v: 1,
-                                        $r: 1,
-                                        shape: { ...defaultShape },
-                                        fill: newColor,
-                                        stroke: undefined,
-                                        strokeWidth: undefined,
-                                    };
-                                } else {
-                                    targetShape.fill = newColor;
-                                }
+                                pieceValue.name = newValue;
                             })
                         }
                     />
-                </TableRow>
 
-                <TableDivider />
+                    <PieceEditorMemoRow
+                        state={state.memo}
+                        onChange={newValue =>
+                            updateState(pieceValue => {
+                                if (pieceValue == null) {
+                                    return;
+                                }
+                                pieceValue.memo = newValue;
+                            })
+                        }
+                    />
 
-                <PieceEditorNameRow
-                    state={state.name}
-                    onChange={newValue =>
-                        updateState(pieceValue => {
-                            if (pieceValue == null) {
-                                return;
-                            }
-                            pieceValue.name = newValue;
-                        })
-                    }
-                />
+                    <TableDivider />
 
-                <PieceEditorMemoRow
-                    state={state.memo}
-                    onChange={newValue =>
-                        updateState(pieceValue => {
-                            if (pieceValue == null) {
-                                return;
-                            }
-                            pieceValue.memo = newValue;
-                        })
-                    }
-                />
+                    <PieceRectEditor
+                        value={state}
+                        onChange={newState => updateState(() => newState)}
+                        boardId={boardId}
+                    />
 
-                <TableDivider />
+                    <TableDivider />
 
-                <PieceRectEditor
-                    value={state}
-                    onChange={newState => updateState(() => newState)}
-                    boardId={boardId}
-                />
+                    {updateMode == null ? null : (
+                        <>
+                            <PieceEditorCloneButtonRow
+                                onClick={() => {
+                                    clone({
+                                        boardId: updateMode.boardId,
+                                        pieceId: updateMode.pieceId,
+                                    });
+                                }}
+                            />
+                            <TableDivider />
+                        </>
+                    )}
 
-                <TableDivider />
+                    <PieceEditorIdRow pieceId={updateMode?.pieceId} />
+                </Table>
+            </>
+        );
+    }
 
-                {updateMode == null ? null : (
-                    <>
-                        <PieceEditorCloneButtonRow
-                            onClick={() => {
-                                clone({
-                                    boardId: updateMode.boardId,
-                                    pieceId: updateMode.pieceId,
-                                });
-                            }}
-                        />
-                        <TableDivider />
-                    </>
-                )}
-
-                <PieceEditorIdRow pieceId={updateMode?.pieceId} />
-            </Table>
-        </>
-    );
+    return React.useMemo(() => ({ element, ok }), [element, ok]);
 };

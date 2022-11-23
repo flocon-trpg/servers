@@ -1,9 +1,9 @@
 import { GraphQLClient, RoomClient } from '@flocon-trpg/sdk';
-declare type Result<TCustomMessage, TGraphQLError> = {
+type Result<TCustomMessage, TGraphQLError> = {
     value: RoomClient<TCustomMessage, TGraphQLError>;
     recreate: () => void;
 };
-declare type Params<TGraphQLError> = {
+type Params<TGraphQLError> = {
     client: GraphQLClient<TGraphQLError>;
     roomId: string;
     userUid: string;

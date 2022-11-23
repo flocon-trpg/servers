@@ -8,8 +8,9 @@ type Operation = {
 const initRevision = 0;
 const initState = 0;
 
-const createStateManager = () =>
+const createStateManager = (args?: { enableHistory: boolean }) =>
     new StateManager<number, Operation>({
+        enableHistory: args?.enableHistory ?? true,
         revision: initRevision,
         state: initState,
         apply: ({ state, operation }) => {
@@ -36,15 +37,30 @@ const createStateManager = () =>
                   },
     });
 
+// history はまだどこからも参照されておらず仕様がほぼ未確定であるため、テストは現時点では簡略的。
 describe('StateManager', () => {
-    test('init StateManager', () => {
-        const target = createStateManager();
+    test('init StateManager with enableHistory=true', () => {
+        const target = createStateManager({ enableHistory: true });
 
         expect(target.isPosting).toBe(false);
         expect(target.requiresReload).toBe(false);
         expect(target.revision).toBe(initRevision);
         expect(target.uiState).toBe(0);
         expect(target.waitingResponseSince()).toBeNull();
+
+        expect(target.history).toEqual([]);
+    });
+
+    test('init StateManager with enableHistory=false', () => {
+        const target = createStateManager({ enableHistory: false });
+
+        expect(target.isPosting).toBe(false);
+        expect(target.requiresReload).toBe(false);
+        expect(target.revision).toBe(initRevision);
+        expect(target.uiState).toBe(0);
+        expect(target.waitingResponseSince()).toBeNull();
+
+        expect(target.history).toBeUndefined();
     });
 
     test('setUiState', () => {
@@ -58,6 +74,8 @@ describe('StateManager', () => {
         expect(target.revision).toBe(initRevision);
         expect(target.uiState).toBe(newState);
         expect(target.waitingResponseSince()).toBeNull();
+
+        expect(target.history).toHaveLength(1);
     });
 
     test('setUiState -> post', () => {
@@ -77,6 +95,8 @@ describe('StateManager', () => {
         expect(postResult?.syncedState).toBe(0);
         expect(postResult?.operationToPost).toEqual(operation);
         expect(postResult?.revision).toBe(initRevision);
+
+        expect(target.history).toHaveLength(3);
     });
 
     test('setUiState -> post -> non-id onPosted', () => {

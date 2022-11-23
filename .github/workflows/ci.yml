@@ -283,10 +283,6 @@ jobs:
             - name: Generate dist
               run: yarn build
 
-            - name: Generate licenses disclaimer
-              run: yarn generate-disclaimer
-
-            # yarn generate-disclaimer で生成されるファイルはLFとCRLFが混在するため、改行コードを統一する処理を行っている。
             - name: Clean CRLF
               run: git config --local core.autocrlf input && git add . && git reset
 

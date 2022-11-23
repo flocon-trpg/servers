@@ -45,19 +45,19 @@ declare type Bgms = {
 
     /**
      * key番目のBGMを返します。例えばkeyに3を渡した場合は、BGM3を返します。該当するBGMオブジェクトが存在しない場合はundefinedを返します。
-     * @param key - 1から5の整数である数値
+     * @param key 1から5の整数である数値
      */
     find(key: Index5): Bgm | undefined;
 
     /**
      * key番目のBGMを返します。例えばkeyに3を渡した場合は、BGM3を返します。該当するBGMオブジェクトが存在しない場合は作成してから返します。
-     * @param key - 1から5の整数である数値
+     * @param key 1から5の整数である数値
      */
     ensure(key: Index5): Bgm;
 
     /**
      * key番目のBGMがもし存在するならば削除します。
-     * @param key - 1から5の整数である数値
+     * @param key 1から5の整数である数値
      */
     delete(key: Index5): boolean;
 };
@@ -268,19 +268,19 @@ declare type ParameterNames = {
 
     /**
      * パラメーター名を取得します。該当するパラメーター名が存在しない場合は、undefinedを返します。
-     * @param key - 1から20の整数である数値
+     * @param key 1から20の整数である数値
      */
     getName(key: Index20): string | undefined;
 
     /**
      * パラメーター名を変更します。該当するパラメーター名が存在しない場合は、パラメーターが自動的に作成されます。
-     * @param key - 1から20の整数である数値
+     * @param key 1から20の整数である数値
      */
     setName(key: Index20, newName: string): void;
 
     /**
      * パラメーターを削除します。該当するパラメーター名が存在した場合はtrueを、そうでなければfalseを返します。
-     * @param key - 1から20の整数である数値
+     * @param key 1から20の整数である数値
      */
     delete(key: Index20): boolean;
 };

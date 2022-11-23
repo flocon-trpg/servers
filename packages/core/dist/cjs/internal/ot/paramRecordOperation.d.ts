@@ -1,11 +1,11 @@
 import { Result } from '@kizahasi/result';
 import { StringKeyRecord } from './record';
 import * as RecordOperation from './recordOperation';
-declare type RestoreResult<TState, TTwoWayOperation> = {
+type RestoreResult<TState, TTwoWayOperation> = {
     prevState: TState;
     twoWayOperation: TTwoWayOperation | undefined;
 };
-export declare type ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> = RecordOperation.ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation>;
+export type ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> = RecordOperation.ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation>;
 export declare const restore: <TState, TDownOperation, TTwoWayOperation, TCustomError = string>({ nextState: unsafeNextState, downOperation: unsafeDownOperation, innerRestore, }: {
     nextState: StringKeyRecord<TState>;
     downOperation?: StringKeyRecord<TDownOperation> | undefined;
@@ -55,7 +55,7 @@ export declare const serverTransform: <TServerState, TFirstOperation, TSecondOpe
     }) => Result<TFirstOperation | undefined, string | TCustomError>;
     defaultState: TServerState;
 }) => Result<StringKeyRecord<TFirstOperation> | undefined, string | TCustomError>;
-declare type InnerClientTransform<TOperation, TError = string> = (params: {
+type InnerClientTransform<TOperation, TError = string> = (params: {
     first: TOperation;
     second: TOperation;
 }) => Result<{

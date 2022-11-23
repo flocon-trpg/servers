@@ -1,4 +1,4 @@
-declare type ExecResult = {
+type ExecResult = {
     result: unknown;
     getGlobalThis(): unknown;
 };

@@ -1,4 +1,4 @@
-export declare type CompositeKey = {
+export type CompositeKey = {
     id: string;
     createdBy: string;
 };

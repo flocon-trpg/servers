@@ -49,23 +49,23 @@ import {
 } from '../../utils/types';
 import { characterEditorModalAtom, piece } from '../CharacterEditorModal/CharacterEditorModal';
 import {
-    DicePieceEditor,
     UpdateMode as DicePieceUpdateMode,
+    useDicePieceEditor,
 } from '../DicePieceEditor/DicePieceEditor';
 import { dicePieceModalAtom } from '../DicePieceEditorModal/DicePieceEditorModal';
 import {
-    ImagePieceEditor,
     UpdateMode as ImagePieceUpdateMode,
+    useImagePieceEditor,
 } from '../ImagePieceEditor/ImagePieceEditor';
 import { imagePieceModalAtom } from '../ImagePieceModal/ImagePieceModal';
 import {
-    ShapePieceEditor,
     UpdateMode as ShapePieceUpdateMode,
+    useShapePieceEditor,
 } from '../ShapePieceEditor/ShapePieceEditor';
 import { shapePieceModalAtom } from '../ShapePieceEditorModal/ShapePieceEditorModal';
 import {
-    StringPieceEditor,
     UpdateMode as StringPieceUpdateMode,
+    useStringPieceEditor,
 } from '../StringPieceEditor/StringPieceEditor';
 import { stringPieceModalAtom } from '../StringPieceEditorModal/StringPieceEditorModal';
 import { BoardConfig } from '@/atoms/roomConfigAtom/types/boardConfig';
@@ -176,7 +176,7 @@ const DicePieceContent: React.FC<PieceProps> = ({ boardId, pieceId }: PieceProps
         };
     }, [boardId, pieceId]);
 
-    return <DicePieceEditor updateMode={updateMode} />;
+    return useDicePieceEditor({ updateMode }).element;
 };
 
 const ImagePieceContent: React.FC<PieceProps> = ({ boardId, pieceId }: PieceProps) => {
@@ -187,7 +187,7 @@ const ImagePieceContent: React.FC<PieceProps> = ({ boardId, pieceId }: PieceProp
         };
     }, [boardId, pieceId]);
 
-    return <ImagePieceEditor updateMode={updateMode} />;
+    return useImagePieceEditor({ updateMode }).element;
 };
 
 const ShapePieceContent: React.FC<PieceProps> = ({ boardId, pieceId }: PieceProps) => {
@@ -198,7 +198,7 @@ const ShapePieceContent: React.FC<PieceProps> = ({ boardId, pieceId }: PieceProp
         };
     }, [boardId, pieceId]);
 
-    return <ShapePieceEditor updateMode={updateMode} />;
+    return useShapePieceEditor({ updateMode }).element;
 };
 
 const StringPieceContent: React.FC<PieceProps> = ({ boardId, pieceId }: PieceProps) => {
@@ -209,7 +209,7 @@ const StringPieceContent: React.FC<PieceProps> = ({ boardId, pieceId }: PiecePro
         };
     }, [boardId, pieceId]);
 
-    return <StringPieceEditor updateMode={updateMode} />;
+    return useStringPieceEditor({ updateMode }).element;
 };
 
 export const PopoverEditor: React.FC = () => {

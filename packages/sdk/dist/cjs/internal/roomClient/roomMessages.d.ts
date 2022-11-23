@@ -5,7 +5,7 @@ import { GraphQLClientWithStatus, PromiseError } from './graphqlClient';
 declare const success = "success";
 declare const fetching = "fetching";
 declare const error = "error";
-export declare type GetMessagesQueryStatus<TGraphQLError> = {
+export type GetMessagesQueryStatus<TGraphQLError> = {
     type: typeof fetching;
 } | {
     type: typeof success;

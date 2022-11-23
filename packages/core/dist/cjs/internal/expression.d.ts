@@ -1,7 +1,7 @@
 import { Result } from '@kizahasi/result';
 export declare const plain = "plain";
 export declare const expr1 = "expr1";
-export declare type Expression = {
+export type Expression = {
     type: typeof plain;
     text: string;
 } | {

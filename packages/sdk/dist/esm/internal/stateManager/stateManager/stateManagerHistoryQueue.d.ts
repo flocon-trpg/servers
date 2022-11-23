@@ -1,5 +1,5 @@
 import { PostResult, StateManager } from './stateManager';
-declare type HistoryElement<TState, TOperation> = {
+type HistoryElement<TState, TOperation> = {
     type: 'operate';
     revision: number;
     nextState: TState;

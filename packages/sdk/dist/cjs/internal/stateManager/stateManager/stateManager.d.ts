@@ -1,5 +1,5 @@
 import { StateManagerParameters } from './types';
-declare type OnPosted<T> = {
+type OnPosted<T> = {
     isSuccess: true;
     isId: false;
     revisionTo: number;
@@ -11,7 +11,7 @@ declare type OnPosted<T> = {
 } | {
     isSuccess: false | null;
 };
-export declare type PostResult<TState, TOperation> = {
+export type PostResult<TState, TOperation> = {
     operationToPost: TOperation;
     syncedState: TState;
     revision: number;
@@ -19,11 +19,11 @@ export declare type PostResult<TState, TOperation> = {
     onPosted: (onPosted: OnPosted<TOperation>) => void;
 };
 export declare class StateManager<TState, TOperation> {
-    private readonly params;
+    private readonly args;
     private core;
     private _requiresReload;
     private _history?;
-    constructor(params: StateManagerParameters<TState, TOperation>);
+    constructor(args: StateManagerParameters<TState, TOperation>);
     get isPosting(): boolean;
     get uiState(): TState;
     get revision(): number;

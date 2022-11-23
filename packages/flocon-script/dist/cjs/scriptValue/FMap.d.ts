@@ -2,7 +2,7 @@ import { FObject } from './FObject';
 import { FType } from './FType';
 import { FValue } from './FValue';
 import { AstInfo, GetCoreParams, SetCoreParams } from './types';
-declare type Key = string | number | boolean | symbol | null | undefined;
+type Key = string | number | boolean | symbol | null | undefined;
 export declare class FMap extends FObject {
     private readonly source;
     private readonly convertValue;

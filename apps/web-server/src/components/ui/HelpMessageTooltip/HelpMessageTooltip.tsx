@@ -14,12 +14,12 @@ export const HelpMessageTooltip: React.FC<Props> = ({
 }: PropsWithChildren<Props>) => {
     return (
         <div className={flex} style={{ justifyContent: 'flex-start' }}>
-            <Tooltip title={title}>
-                <div className={classNames([flex, flexRow, itemsCenter])} style={{ gap: '0 4px' }}>
-                    {children}
-                    {title && <Icons.QuestionCircleTwoTone style={{ fontSize: 14 }} />}
-                </div>
-            </Tooltip>
+            <div className={classNames([flex, flexRow, itemsCenter])} style={{ gap: '0 4px' }}>
+                {children}
+                <Tooltip title={title}>
+                    {title != null && <Icons.QuestionCircleTwoTone style={{ fontSize: 14 }} />}
+                </Tooltip>
+            </div>
         </div>
     );
 };

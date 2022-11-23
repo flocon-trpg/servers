@@ -1,12 +1,10 @@
 import { Modal, ModalProps } from 'antd';
 import { atom, useAtom } from 'jotai';
 import React from 'react';
-import { Subject } from 'rxjs';
-import useConstant from 'use-constant';
 import { useMemoOne } from 'use-memo-one';
-import { CreateMode, ShapePieceEditor, UpdateMode } from '../ShapePieceEditor/ShapePieceEditor';
+import { CreateMode, UpdateMode, useShapePieceEditor } from '../ShapePieceEditor/ShapePieceEditor';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
-import { close, create, ok, update } from '@/utils/constants';
+import { create, update } from '@/utils/constants';
 import { PieceModalState } from '@/utils/types';
 
 export const shapePieceModalAtom = atom<PieceModalState | null>(null);
@@ -17,7 +15,6 @@ const modalBaseProps: Partial<ModalProps> = {
 
 export const ShapePieceEditorModal: React.FC = () => {
     const [modalType, setModalType] = useAtom(shapePieceModalAtom);
-    const actionRequest = useConstant(() => new Subject<typeof ok | typeof close>());
 
     const {
         visible,
@@ -49,6 +46,8 @@ export const ShapePieceEditorModal: React.FC = () => {
         }
     }, [modalType]);
 
+    const shapePieceEditor = useShapePieceEditor({ createMode, updateMode });
+
     return (
         <Modal
             {...modalBaseProps}
@@ -61,25 +60,20 @@ export const ShapePieceEditorModal: React.FC = () => {
                     close={{
                         textType: modalType?.type === update ? 'close' : 'cancel',
                         onClick: () => {
-                            actionRequest.next(close);
                             setModalType(null);
                         },
                     }}
                     ok={{
                         textType: 'create',
                         onClick: () => {
-                            actionRequest.next(ok);
+                            shapePieceEditor.ok();
                             setModalType(null);
                         },
                     }}
                 />
             }
         >
-            <ShapePieceEditor
-                createMode={createMode}
-                updateMode={updateMode}
-                actionRequest={actionRequest}
-            />
+            {shapePieceEditor.element}
         </Modal>
     );
 };

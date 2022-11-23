@@ -1,19 +1,16 @@
 import { Modal } from 'antd';
 import { atom, useAtom } from 'jotai';
 import React from 'react';
-import { Subject } from 'rxjs';
-import useConstant from 'use-constant';
 import { useMemoOne } from 'use-memo-one';
-import { CreateMode, DicePieceEditor, UpdateMode } from '../DicePieceEditor/DicePieceEditor';
+import { CreateMode, UpdateMode, useDicePieceEditor } from '../DicePieceEditor/DicePieceEditor';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
-import { close, create, ok, update } from '@/utils/constants';
+import { create, update } from '@/utils/constants';
 import { PieceModalState } from '@/utils/types';
 
 export const dicePieceModalAtom = atom<PieceModalState | null>(null);
 
 export const DicePieceEditorModal: React.FC = () => {
     const [modalType, setModalType] = useAtom(dicePieceModalAtom);
-    const actionRequest = useConstant(() => new Subject<typeof ok | typeof close>());
 
     const {
         visible,
@@ -45,6 +42,8 @@ export const DicePieceEditorModal: React.FC = () => {
         }
     }, [modalType]);
 
+    const dicePieceEditor = useDicePieceEditor({ createMode, updateMode });
+
     return (
         <Modal
             title={modalType?.type === update ? 'ダイスコマの編集' : 'ダイスコマの新規作成'}
@@ -56,25 +55,21 @@ export const DicePieceEditorModal: React.FC = () => {
                     close={{
                         textType: modalType?.type === update ? 'close' : 'cancel',
                         onClick: () => {
-                            actionRequest.next(close);
                             setModalType(null);
                         },
                     }}
                     ok={{
                         textType: 'create',
                         onClick: () => {
-                            actionRequest.next(ok);
+                            dicePieceEditor.ok();
                             setModalType(null);
                         },
+                        disabled: !dicePieceEditor.canOk,
                     }}
                 />
             }
         >
-            <DicePieceEditor
-                createMode={createMode}
-                updateMode={updateMode}
-                actionRequest={actionRequest}
-            />
+            {dicePieceEditor.element}
         </Modal>
     );
 };

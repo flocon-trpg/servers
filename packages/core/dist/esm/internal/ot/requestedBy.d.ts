@@ -4,7 +4,7 @@ import { State } from './generator';
 export declare const admin = "admin";
 export declare const client = "client";
 export declare const restrict = "restrict";
-export declare type RequestedBy = {
+export type RequestedBy = {
     type: typeof admin;
 } | {
     type: typeof client;
@@ -37,14 +37,14 @@ export declare const isCharacterOwner: ({ requestedBy, characterId, currentRoomS
     characterId: string | typeof anyValue | typeof none;
     currentRoomState: State<typeof Room.template>;
 }) => boolean;
-declare type CurrentOwnerParticipant = string | undefined | {
+type CurrentOwnerParticipant = string | undefined | {
     ownerParticipantId: string | undefined;
 };
 export declare const canChangeOwnerParticipantId: ({ requestedBy, currentOwnerParticipant, }: {
     requestedBy: RequestedBy;
     currentOwnerParticipant: CurrentOwnerParticipant;
 }) => boolean;
-declare type CurrentOwnerCharacter = string | undefined | {
+type CurrentOwnerCharacter = string | undefined | {
     ownerCharacterId: string | undefined;
 };
 export declare const canChangeOwnerCharacterId: ({ requestedBy, currentOwnerCharacter, currentRoomState, }: {

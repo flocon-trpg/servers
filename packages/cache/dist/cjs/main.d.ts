@@ -1,16 +1,16 @@
 import Redis from 'ioredis';
-declare type Key = string;
-declare type Value = string | number;
-declare type NodeCacheConfig = {
+type Key = string;
+type Value = string | number;
+type NodeCacheConfig = {
     checkperiod?: number;
     stdTTL?: number;
     maxKeys?: number;
 };
-declare type RedisConfig = {
+type RedisConfig = {
     keyPrefix: string;
     stdTTL?: number;
 };
-export declare type Cache = {
+export type Cache = {
     getAsString(key: Key): Promise<string | null>;
     getAsNumber(key: Key): Promise<number | null>;
     set(key: Key, value: Value): Promise<boolean>;

@@ -32,7 +32,7 @@ export declare const downOperation: z.ZodArray<z.ZodUnion<[z.ZodObject<{
     t: "d";
     d: string;
 }>]>, "many">;
-export declare type DownOperation = z.TypeOf<typeof downOperation>;
+export type DownOperation = z.TypeOf<typeof downOperation>;
 export declare const upOperation: z.ZodArray<z.ZodUnion<[z.ZodObject<{
     t: z.ZodLiteral<"r">;
     r: z.ZodNumber;
@@ -61,8 +61,8 @@ export declare const upOperation: z.ZodArray<z.ZodUnion<[z.ZodObject<{
     t: "d";
     d: number;
 }>]>, "many">;
-export declare type UpOperation = z.TypeOf<typeof upOperation>;
-export declare type TwoWayOperation = ({
+export type UpOperation = z.TypeOf<typeof upOperation>;
+export type TwoWayOperation = ({
     t: typeof r;
     r: number;
 } | {

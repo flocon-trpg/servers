@@ -702,14 +702,14 @@ class StateManagerHistoryQueue {
 }
 
 class StateManager {
-    params;
+    args;
     core;
     _requiresReload = false;
     _history;
-    constructor(params) {
-        this.params = params;
-        this.core = new StateManagerCore(params);
-        this._history = params.enableHistory === true ? new StateManagerHistoryQueue() : undefined;
+    constructor(args) {
+        this.args = args;
+        this.core = new StateManagerCore(args);
+        this._history = args.enableHistory === true ? new StateManagerHistoryQueue() : undefined;
     }
     get isPosting() {
         if (this.requiresReload) {
@@ -752,7 +752,7 @@ class StateManager {
     // このメソッドは「setUiStateを使えばよい」と判断して一時削除していたが、Operationを書いて適用させたいという場面が少なくなく、必要なapply関数もStateManager内部で保持しているため復帰させた。
     setUiStateByApply(operation) {
         utils.loggerRef.value.debug({ operation }, 'StateManager.setUiStateByApply');
-        const newState = this.params.apply({ state: this.uiState, operation });
+        const newState = this.args.apply({ state: this.uiState, operation });
         utils.loggerRef.value.debug({ newState }, 'StateManager.setUiStateByApply');
         this.setUiState(newState);
     }
@@ -805,7 +805,7 @@ class StateManager {
     }
     reload({ state, revision }) {
         this.core = new StateManagerCore({
-            ...this.params,
+            ...this.args,
             revision: revision,
             state,
         });

@@ -683,7 +683,7 @@ export const composeDownOperation =
 
 /**
  * Stateの情報を用いて、DownOperationをTwoWayOperationに変換します。破壊的な処理は行われません。
- * @param nextState - DownOperationが適用される前の状態のState。
+ * @param nextState DownOperationが適用される前の状態のState。
  */
 export const restore =
     <T extends AnyTemplate>(template: T): Restore<State<T>, DownOperation<T>, TwoWayOperation<T>> =>

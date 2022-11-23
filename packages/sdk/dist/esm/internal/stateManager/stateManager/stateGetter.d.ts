@@ -1,5 +1,5 @@
 import { Diff } from './types';
-declare type PostingState<TState, TOperation, TMetadata> = {
+type PostingState<TState, TOperation, TMetadata> = {
     operation: TOperation | undefined;
     state: TState;
     metadata: TMetadata;

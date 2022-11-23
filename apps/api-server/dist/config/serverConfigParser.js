@@ -22,59 +22,6 @@ const ensureOk = (source) => {
     return source?.value;
 };
 class ServerConfigParser {
-    constructor(env$1) {
-        const simpleProps = [env.ACCESS_CONTROL_ALLOW_ORIGIN, env.DATABASE_URL, env.EMBUPLOADER_PATH];
-        for (const prop of simpleProps) {
-            this[prop] = env$1[prop];
-        }
-        const intProps = [
-            env.EMBUPLOADER_COUNT_QUOTA,
-            env.EMBUPLOADER_MAX_SIZE,
-            env.EMBUPLOADER_SIZE_QUOTA,
-            env.ROOMHIST_COUNT,
-        ];
-        for (const prop of intProps) {
-            const value = env$1[prop];
-            if (value == null) {
-                this[prop] = undefined;
-                continue;
-            }
-            const intValue = utils.filterInt(value.trim());
-            if (intValue == null) {
-                this[prop] = result.Result.error(undefined);
-            }
-            else {
-                this[prop] = result.Result.ok(intValue);
-            }
-        }
-        const booleanProps = [
-            env.AUTO_MIGRATION,
-            env.EMBUPLOADER_ENABLED,
-            env.FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL,
-            env.HEROKU,
-        ];
-        for (const prop of booleanProps) {
-            const value = env$1[prop];
-            if (value == null) {
-                this[prop] = undefined;
-                continue;
-            }
-            const propValue = utils.parseStringToBoolean(value);
-            if (propValue.isError) {
-                this[prop] = result.Result.error(undefined);
-            }
-            else {
-                this[prop] = propValue;
-            }
-        }
-        this[env.FLOCON_ADMIN] = ServerConfigParser.admin(env$1);
-        this[env.FIREBASE_ADMIN_SECRET] = ServerConfigParser.firebaseAdminSecretProp(env$1);
-        this[env.FIREBASE_PROJECT_ID] = ServerConfigParser.firebaseProjectId(env$1);
-        this[env.ENTRY_PASSWORD] = ServerConfigParser.entryPasswordProp(env$1);
-        this[env.MYSQL] = ServerConfigParser.mysqlProp(env$1);
-        this[env.POSTGRESQL] = ServerConfigParser.postgresqlProp(env$1);
-        this[env.SQLITE] = ServerConfigParser.sqliteProp(env$1);
-    }
     get admins() {
         return this[env.FLOCON_ADMIN];
     }
@@ -128,6 +75,59 @@ class ServerConfigParser {
     }
     get sqlite() {
         return this[env.SQLITE];
+    }
+    constructor(env$1) {
+        const simpleProps = [env.ACCESS_CONTROL_ALLOW_ORIGIN, env.DATABASE_URL, env.EMBUPLOADER_PATH];
+        for (const prop of simpleProps) {
+            this[prop] = env$1[prop];
+        }
+        const intProps = [
+            env.EMBUPLOADER_COUNT_QUOTA,
+            env.EMBUPLOADER_MAX_SIZE,
+            env.EMBUPLOADER_SIZE_QUOTA,
+            env.ROOMHIST_COUNT,
+        ];
+        for (const prop of intProps) {
+            const value = env$1[prop];
+            if (value == null) {
+                this[prop] = undefined;
+                continue;
+            }
+            const intValue = utils.filterInt(value.trim());
+            if (intValue == null) {
+                this[prop] = result.Result.error(undefined);
+            }
+            else {
+                this[prop] = result.Result.ok(intValue);
+            }
+        }
+        const booleanProps = [
+            env.AUTO_MIGRATION,
+            env.EMBUPLOADER_ENABLED,
+            env.FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL,
+            env.HEROKU,
+        ];
+        for (const prop of booleanProps) {
+            const value = env$1[prop];
+            if (value == null) {
+                this[prop] = undefined;
+                continue;
+            }
+            const propValue = utils.parseStringToBoolean(value);
+            if (propValue.isError) {
+                this[prop] = result.Result.error(undefined);
+            }
+            else {
+                this[prop] = propValue;
+            }
+        }
+        this[env.FLOCON_ADMIN] = ServerConfigParser.admin(env$1);
+        this[env.FIREBASE_ADMIN_SECRET] = ServerConfigParser.firebaseAdminSecretProp(env$1);
+        this[env.FIREBASE_PROJECT_ID] = ServerConfigParser.firebaseProjectId(env$1);
+        this[env.ENTRY_PASSWORD] = ServerConfigParser.entryPasswordProp(env$1);
+        this[env.MYSQL] = ServerConfigParser.mysqlProp(env$1);
+        this[env.POSTGRESQL] = ServerConfigParser.postgresqlProp(env$1);
+        this[env.SQLITE] = ServerConfigParser.sqliteProp(env$1);
     }
     static admin(env$1) {
         const adminValue = env$1[env.FLOCON_ADMIN];
