@@ -11,18 +11,18 @@ declare const GraphQLError = "GraphQLError";
 declare const transformationError = "transformationError";
 declare const OperateRoomFailure = "OperateRoomFailure";
 declare const deleted = "deleted";
-declare type State = S<typeof roomTemplate>;
-declare type UpOperation = U<typeof roomTemplate>;
+type State = S<typeof roomTemplate>;
+type UpOperation = U<typeof roomTemplate>;
 declare const error = "error";
-export declare type SetAction<State> = State | ((prevState: State) => State);
-declare type NonJoinedRoom = {
+export type SetAction<State> = State | ((prevState: State) => State);
+type NonJoinedRoom = {
     id: string;
     name: string;
     createdBy: string;
     requiresPlayerPassword: boolean;
     requiresSpectatorPassword: boolean;
 };
-export declare type RoomState<TGraphQLError> = {
+export type RoomState<TGraphQLError> = {
     type: typeof fetching;
 } | {
     type: typeof joined;

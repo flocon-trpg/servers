@@ -7,6 +7,7 @@
     ],
     "scripts": {
         "build": "yarn workspaces foreach -ptv run build:self",
+        "format": "yarn lint --fix && yarn build && yarn prettier && yarn sort-package-json && yarn generate-disclaimer",
         "generate-disclaimer": "yarn licenses generate-disclaimer --production --recursive --exclude='@types/*,husky,less,npm-run-all,sass,serve' > ./apps/web-server/public/licenses-npm-package.txt",
         "postinstall": "husky install",
         "lint": "yarn workspaces foreach -pv run lint",
@@ -25,7 +26,7 @@
         "@commitlint/config-conventional": "17.0.3",
         "@flocon-trpg/prettier-config": "workspace:^",
         "prettier": "2.7.1",
-        "sort-package-json": "2.0.0"
+        "sort-package-json": "2.1.0"
     },
     "packageManager": "yarn@3.3.0"
 }

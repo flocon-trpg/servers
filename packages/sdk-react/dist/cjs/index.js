@@ -34,7 +34,7 @@ function useCreateRoomClient(params) {
     }, [result]);
 }
 
-const useReadonlyBehaviorStream = (source) => {
+const useReadonlyBehaviorEvent = (source) => {
     const [state, setState] = react.useState(() => {
         if (source instanceof sdk.ReadonlyBehaviorEvent) {
             return source.getValue();
@@ -54,44 +54,51 @@ const useReadonlyBehaviorStream = (source) => {
 };
 
 const useRoomConnections = (roomClient) => {
-    return useReadonlyBehaviorStream(roomClient.roomConnections);
+    return useReadonlyBehaviorEvent(roomClient.roomConnections);
 };
 
 const useRoomGraphQLStatus = (roomClient) => {
-    return useReadonlyBehaviorStream(roomClient.graphQLStatus);
+    return useReadonlyBehaviorEvent(roomClient.graphQLStatus);
 };
 
+/**
+ * 部屋に投稿されたメッセージ(秘話およびログも含む)およびカスタムメッセージのリストと変更点を返します。
+ *
+ * @param filter function が渡された場合、true を返すメッセージのみを抽出します。変更されるたびに全てのメッセージの抽出処理が行われるため、function を渡す場合は useCallback などを用いる必要があります。
+ */
 const useRoomMessages = (roomClient, filter) => {
-    const queryStatus = useReadonlyBehaviorStream(roomClient.messages.queryStatus);
-    const messages = react.useMemo(() => {
+    const messagesSource = react.useMemo(() => {
         return filter == null
             ? roomClient.messages.messages
             : roomClient.messages.messages.filter(filter);
     }, [filter, roomClient.messages.messages]);
     const [result, setResult] = react.useState(() => ({
-        value: messages?.getCurrent() ?? [],
-        queryStatus,
+        current: messagesSource?.getCurrent() ?? [],
     }));
     react.useEffect(() => {
-        if (messages == null) {
+        if (messagesSource == null) {
             return;
         }
-        const subscription = messages.changed.subscribe({
+        setResult({ current: messagesSource.getCurrent() });
+        const subscription = messagesSource.changed.subscribe({
             next: e => {
-                setResult(prevState => ({
-                    ...prevState,
-                    value: e.current,
+                setResult({
+                    current: e.current,
                     diff: e.type === 'event' ? e.diff ?? undefined : undefined,
-                }));
+                });
             },
         });
         return () => subscription.unsubscribe();
-    }, [messages]);
+    }, [messagesSource]);
     return result;
 };
 
+const useRoomMessageQueryStatus = (roomClient) => {
+    return useReadonlyBehaviorEvent(roomClient.messages.queryStatus);
+};
+
 const useRoomState = (roomClient) => {
-    return useReadonlyBehaviorStream(roomClient.roomState);
+    return useReadonlyBehaviorEvent(roomClient.roomState);
 };
 
 const useUpdateWritingMessageStatus = (roomClient) => {
@@ -101,13 +108,14 @@ const useUpdateWritingMessageStatus = (roomClient) => {
 };
 
 const useWritingMessageStatus = (roomClient) => {
-    return useReadonlyBehaviorStream(roomClient.writingMessageStatus.value);
+    return useReadonlyBehaviorEvent(roomClient.writingMessageStatus.value);
 };
 
 exports.useCreateRoomClient = useCreateRoomClient;
-exports.useReadonlyBehaviorStream = useReadonlyBehaviorStream;
+exports.useReadonlyBehaviorEvent = useReadonlyBehaviorEvent;
 exports.useRoomConnections = useRoomConnections;
 exports.useRoomGraphQLStatus = useRoomGraphQLStatus;
+exports.useRoomMessageQueryStatus = useRoomMessageQueryStatus;
 exports.useRoomMessages = useRoomMessages;
 exports.useRoomState = useRoomState;
 exports.useUpdateWritingMessageStatus = useUpdateWritingMessageStatus;

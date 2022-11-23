@@ -2,7 +2,7 @@ import { z } from 'zod';
 export declare const D4 = "D4";
 export declare const D6 = "D6";
 export declare const dieType: z.ZodUnion<[z.ZodLiteral<"D4">, z.ZodLiteral<"D6">]>;
-export declare type DieType = z.TypeOf<typeof dieType>;
+export type DieType = z.TypeOf<typeof dieType>;
 export declare const template: {
     readonly type: "object";
     readonly $v: 1;

@@ -9,7 +9,7 @@ import { ReadonlyBehaviorEvent } from '../rxjs/readonlyBehaviorEvent';
  *
  * urql を使わない場合は、自作する必要があります。エラーは、Promise の reject や Observable の error ではなく、Promise の resolve や Observable の next から Result.error を返すことで、型を any にせずにエラーを渡すことができます。
  */
-export declare type GraphQLClient<TGraphQLError> = {
+export type GraphQLClient<TGraphQLError> = {
     getMessagesQuery: (variables: GetMessagesQueryVariables) => Promise<Result<GetMessagesQuery, TGraphQLError>>;
     getRoomConnectionsQuery: (variables: GetRoomConnectionsQueryVariables) => Promise<Result<GetRoomConnectionsQuery, TGraphQLError>>;
     getRoomQuery: (variables: GetRoomQueryVariables) => Promise<Result<GetRoomQuery, TGraphQLError>>;
@@ -22,21 +22,21 @@ declare const success = "success";
 declare const error = "error";
 declare const ok = "ok";
 declare const resultError = "resultError";
-export declare type PromiseError<TGraphQLError> = {
+export type PromiseError<TGraphQLError> = {
     type: typeof resultError;
     value: TGraphQLError;
 } | {
     type: 'promiseError';
     value: unknown;
 };
-export declare type ObservableError<TGraphQLError> = {
+export type ObservableError<TGraphQLError> = {
     type: typeof resultError;
     value: TGraphQLError;
 } | {
     type: 'observableError';
     value: unknown;
 };
-declare type QueryStatus<TGraphQLError> = {
+type QueryStatus<TGraphQLError> = {
     type: typeof fetching;
 } | {
     type: typeof success;
@@ -44,7 +44,7 @@ declare type QueryStatus<TGraphQLError> = {
     type: typeof error;
     error: PromiseError<TGraphQLError>;
 };
-declare type SubscriptionStatus<TGraphQLError> = {
+type SubscriptionStatus<TGraphQLError> = {
     type: typeof ok;
 } | {
     type: typeof error;
@@ -53,13 +53,13 @@ declare type SubscriptionStatus<TGraphQLError> = {
 declare const GetMessagesQuery = "GetMessagesQuery";
 declare const GetRoomConnectionsQuery = "GetRoomConnectionsQuery";
 declare const GetRoomQuery = "GetRoomQuery";
-declare type GraphQLStatusSource<TGraphQLError> = {
+type GraphQLStatusSource<TGraphQLError> = {
     [GetMessagesQuery]: QueryStatus<TGraphQLError>;
     [GetRoomConnectionsQuery]: QueryStatus<TGraphQLError>;
     [GetRoomQuery]: QueryStatus<TGraphQLError>;
     RoomEventSubscription: SubscriptionStatus<TGraphQLError>;
 };
-declare type GraphQLStatus<TGraphQLError> = GraphQLStatusSource<TGraphQLError> & {
+type GraphQLStatus<TGraphQLError> = GraphQLStatusSource<TGraphQLError> & {
     hasError: boolean;
 };
 export declare class GraphQLStatusEventEmitter<TGraphQLError> {

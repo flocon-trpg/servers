@@ -1,26 +1,26 @@
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
-export declare type Maybe<T> = T | null;
-export declare type InputMaybe<T> = Maybe<T>;
-export declare type Exact<T extends {
+export type Maybe<T> = T | null;
+export type InputMaybe<T> = Maybe<T>;
+export type Exact<T extends {
     [key: string]: unknown;
 }> = {
     [K in keyof T]: T[K];
 };
-export declare type MakeOptional<T, K extends keyof T> = Omit<T, K> & {
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & {
     [SubKey in K]?: Maybe<T[SubKey]>;
 };
-export declare type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
     [SubKey in K]: Maybe<T[SubKey]>;
 };
 /** All built-in and custom scalars, mapped to their actual values */
-export declare type Scalars = {
+export type Scalars = {
     ID: string;
     String: string;
     Boolean: boolean;
     Int: number;
     Float: number;
 };
-export declare type AvailableGameSystem = {
+export type AvailableGameSystem = {
     __typename?: 'AvailableGameSystem';
     id: Scalars['String'];
     name: Scalars['String'];
@@ -30,11 +30,11 @@ export declare enum ChangeParticipantNameFailureType {
     NotFound = "NotFound",
     NotParticipant = "NotParticipant"
 }
-export declare type ChangeParticipantNameResult = {
+export type ChangeParticipantNameResult = {
     __typename?: 'ChangeParticipantNameResult';
     failureType?: Maybe<ChangeParticipantNameFailureType>;
 };
-export declare type CharacterValueForMessage = {
+export type CharacterValueForMessage = {
     __typename?: 'CharacterValueForMessage';
     image?: Maybe<FilePath>;
     isPrivate: Scalars['Boolean'];
@@ -42,27 +42,27 @@ export declare type CharacterValueForMessage = {
     portraitImage?: Maybe<FilePath>;
     stateId: Scalars['String'];
 };
-export declare type CommandResult = {
+export type CommandResult = {
     __typename?: 'CommandResult';
     /** 成功判定のないコマンドの場合はnullish。成功判定のあるコマンドの場合はその結果。 */
     isSuccess?: Maybe<Scalars['Boolean']>;
     text: Scalars['String'];
 };
-export declare type CreateRoomFailureResult = {
+export type CreateRoomFailureResult = {
     __typename?: 'CreateRoomFailureResult';
     failureType: CreateRoomFailureType;
 };
 export declare enum CreateRoomFailureType {
     UnknownError = "UnknownError"
 }
-export declare type CreateRoomInput = {
+export type CreateRoomInput = {
     participantName: Scalars['String'];
     playerPassword?: InputMaybe<Scalars['String']>;
     roomName: Scalars['String'];
     spectatorPassword?: InputMaybe<Scalars['String']>;
 };
-export declare type CreateRoomResult = CreateRoomFailureResult | CreateRoomSuccessResult;
-export declare type CreateRoomSuccessResult = {
+export type CreateRoomResult = CreateRoomFailureResult | CreateRoomSuccessResult;
+export type CreateRoomSuccessResult = {
     __typename?: 'CreateRoomSuccessResult';
     id: Scalars['String'];
     room: RoomGetState;
@@ -74,14 +74,14 @@ export declare enum DeleteMessageFailureType {
     NotYourMessage = "NotYourMessage",
     RoomNotFound = "RoomNotFound"
 }
-export declare type DeleteMessageResult = {
+export type DeleteMessageResult = {
     __typename?: 'DeleteMessageResult';
     failureType?: Maybe<DeleteMessageFailureType>;
 };
 export declare enum DeleteRoomAsAdminFailureType {
     NotFound = "NotFound"
 }
-export declare type DeleteRoomAsAdminResult = {
+export type DeleteRoomAsAdminResult = {
     __typename?: 'DeleteRoomAsAdminResult';
     failureType?: Maybe<DeleteRoomAsAdminFailureType>;
 };
@@ -89,22 +89,22 @@ export declare enum DeleteRoomFailureType {
     NotCreatedByYou = "NotCreatedByYou",
     NotFound = "NotFound"
 }
-export declare type DeleteRoomOperation = {
+export type DeleteRoomOperation = {
     __typename?: 'DeleteRoomOperation';
     deletedBy: Scalars['String'];
     /** since v0.7.2 */
     deletedByAdmin: Scalars['Boolean'];
 };
-export declare type DeleteRoomResult = {
+export type DeleteRoomResult = {
     __typename?: 'DeleteRoomResult';
     failureType?: Maybe<DeleteRoomFailureType>;
 };
-export declare type EditFileTagActionInput = {
+export type EditFileTagActionInput = {
     add: Array<Scalars['String']>;
     filename: Scalars['String'];
     remove: Array<Scalars['String']>;
 };
-export declare type EditFileTagsInput = {
+export type EditFileTagsInput = {
     actions: Array<EditFileTagActionInput>;
 };
 export declare enum EditMessageFailureType {
@@ -114,11 +114,11 @@ export declare enum EditMessageFailureType {
     NotYourMessage = "NotYourMessage",
     RoomNotFound = "RoomNotFound"
 }
-export declare type EditMessageResult = {
+export type EditMessageResult = {
     __typename?: 'EditMessageResult';
     failureType?: Maybe<EditMessageFailureType>;
 };
-export declare type EntryToServerResult = {
+export type EntryToServerResult = {
     __typename?: 'EntryToServerResult';
     type: EntryToServerResultType;
 };
@@ -129,7 +129,7 @@ export declare enum EntryToServerResultType {
     Success = "Success",
     WrongPassword = "WrongPassword"
 }
-export declare type FileItem = {
+export type FileItem = {
     __typename?: 'FileItem';
     createdAt?: Maybe<Scalars['Float']>;
     /** ファイルをアップロードしたユーザー。Firebase AuthenticationのUserUidで表現される。 */
@@ -146,12 +146,12 @@ export declare enum FileListType {
     Public = "Public",
     Unlisted = "Unlisted"
 }
-export declare type FilePath = {
+export type FilePath = {
     __typename?: 'FilePath';
     path: Scalars['String'];
     sourceType: FileSourceType;
 };
-export declare type FilePathInput = {
+export type FilePathInput = {
     path: Scalars['String'];
     sourceType: FileSourceType;
 };
@@ -160,39 +160,39 @@ export declare enum FileSourceType {
     FirebaseStorage = "FirebaseStorage",
     Uploader = "Uploader"
 }
-export declare type FileTag = {
+export type FileTag = {
     __typename?: 'FileTag';
     id: Scalars['String'];
     name: Scalars['String'];
 };
-export declare type GetAvailableGameSystemsResult = {
+export type GetAvailableGameSystemsResult = {
     __typename?: 'GetAvailableGameSystemsResult';
     value: Array<AvailableGameSystem>;
 };
-export declare type GetFilesInput = {
+export type GetFilesInput = {
     /** FileTagのidを指定することで、指定したタグが付いているファイルのみを抽出して表示する。例えばidがx,yの3つのタグが付いているファイルは、[]や[x]や[x,y]と指定した場合にマッチするが、[x,y,z]と指定された場合は除外される。 */
     fileTagIds: Array<Scalars['String']>;
 };
-export declare type GetFilesResult = {
+export type GetFilesResult = {
     __typename?: 'GetFilesResult';
     files: Array<FileItem>;
 };
-export declare type GetJoinedRoomResult = {
+export type GetJoinedRoomResult = {
     __typename?: 'GetJoinedRoomResult';
     /** 自分の現在のParticipantRoleType。room.roleと同じ値をとる。 */
     role: ParticipantRole;
     room: RoomGetState;
 };
-export declare type GetNonJoinedRoomResult = {
+export type GetNonJoinedRoomResult = {
     __typename?: 'GetNonJoinedRoomResult';
     roomAsListItem: RoomAsListItem;
 };
-export declare type GetRoomAsListItemFailureResult = {
+export type GetRoomAsListItemFailureResult = {
     __typename?: 'GetRoomAsListItemFailureResult';
     failureType: GetRoomFailureType;
 };
-export declare type GetRoomAsListItemResult = GetRoomAsListItemFailureResult | GetRoomAsListItemSuccessResult;
-export declare type GetRoomAsListItemSuccessResult = {
+export type GetRoomAsListItemResult = GetRoomAsListItemFailureResult | GetRoomAsListItemSuccessResult;
+export type GetRoomAsListItemSuccessResult = {
     __typename?: 'GetRoomAsListItemSuccessResult';
     room: RoomAsListItem;
 };
@@ -200,24 +200,24 @@ export declare enum GetRoomConnectionFailureType {
     NotParticipant = "NotParticipant",
     RoomNotFound = "RoomNotFound"
 }
-export declare type GetRoomConnectionsFailureResult = {
+export type GetRoomConnectionsFailureResult = {
     __typename?: 'GetRoomConnectionsFailureResult';
     failureType: GetRoomConnectionFailureType;
 };
-export declare type GetRoomConnectionsResult = GetRoomConnectionsFailureResult | GetRoomConnectionsSuccessResult;
-export declare type GetRoomConnectionsSuccessResult = {
+export type GetRoomConnectionsResult = GetRoomConnectionsFailureResult | GetRoomConnectionsSuccessResult;
+export type GetRoomConnectionsSuccessResult = {
     __typename?: 'GetRoomConnectionsSuccessResult';
     connectedUserUids: Array<Scalars['String']>;
     fetchedAt: Scalars['Float'];
 };
-export declare type GetRoomFailureResult = {
+export type GetRoomFailureResult = {
     __typename?: 'GetRoomFailureResult';
     failureType: GetRoomFailureType;
 };
 export declare enum GetRoomFailureType {
     NotFound = "NotFound"
 }
-export declare type GetRoomLogFailureResult = {
+export type GetRoomLogFailureResult = {
     __typename?: 'GetRoomLogFailureResult';
     failureType: GetRoomLogFailureType;
 };
@@ -227,8 +227,8 @@ export declare enum GetRoomLogFailureType {
     RoomNotFound = "RoomNotFound",
     UnknownError = "UnknownError"
 }
-export declare type GetRoomLogResult = GetRoomLogFailureResult | RoomMessages;
-export declare type GetRoomMessagesFailureResult = {
+export type GetRoomLogResult = GetRoomLogFailureResult | RoomMessages;
+export type GetRoomMessagesFailureResult = {
     __typename?: 'GetRoomMessagesFailureResult';
     failureType: GetRoomMessagesFailureType;
 };
@@ -236,18 +236,18 @@ export declare enum GetRoomMessagesFailureType {
     NotParticipant = "NotParticipant",
     RoomNotFound = "RoomNotFound"
 }
-export declare type GetRoomMessagesResult = GetRoomMessagesFailureResult | RoomMessages;
-export declare type GetRoomResult = GetJoinedRoomResult | GetNonJoinedRoomResult | GetRoomFailureResult;
-export declare type GetRoomsListFailureResult = {
+export type GetRoomMessagesResult = GetRoomMessagesFailureResult | RoomMessages;
+export type GetRoomResult = GetJoinedRoomResult | GetNonJoinedRoomResult | GetRoomFailureResult;
+export type GetRoomsListFailureResult = {
     __typename?: 'GetRoomsListFailureResult';
     failureType: GetRoomFailureType;
 };
-export declare type GetRoomsListResult = GetRoomsListFailureResult | GetRoomsListSuccessResult;
-export declare type GetRoomsListSuccessResult = {
+export type GetRoomsListResult = GetRoomsListFailureResult | GetRoomsListSuccessResult;
+export type GetRoomsListSuccessResult = {
     __typename?: 'GetRoomsListSuccessResult';
     rooms: Array<RoomAsListItem>;
 };
-export declare type JoinRoomFailureResult = {
+export type JoinRoomFailureResult = {
     __typename?: 'JoinRoomFailureResult';
     failureType: JoinRoomFailureType;
 };
@@ -257,8 +257,8 @@ export declare enum JoinRoomFailureType {
     TransformError = "TransformError",
     WrongPassword = "WrongPassword"
 }
-export declare type JoinRoomResult = JoinRoomFailureResult | JoinRoomSuccessResult;
-export declare type JoinRoomSuccessResult = {
+export type JoinRoomResult = JoinRoomFailureResult | JoinRoomSuccessResult;
+export type JoinRoomSuccessResult = {
     __typename?: 'JoinRoomSuccessResult';
     operation?: Maybe<RoomOperation>;
 };
@@ -266,7 +266,7 @@ export declare enum LeaveRoomFailureType {
     NotFound = "NotFound",
     NotParticipant = "NotParticipant"
 }
-export declare type LeaveRoomResult = {
+export type LeaveRoomResult = {
     __typename?: 'LeaveRoomResult';
     failureType?: Maybe<LeaveRoomFailureType>;
 };
@@ -277,11 +277,11 @@ export declare enum MakeMessageNotSecretFailureType {
     NotYourMessage = "NotYourMessage",
     RoomNotFound = "RoomNotFound"
 }
-export declare type MakeMessageNotSecretResult = {
+export type MakeMessageNotSecretResult = {
     __typename?: 'MakeMessageNotSecretResult';
     failureType?: Maybe<MakeMessageNotSecretFailureType>;
 };
-export declare type Mutation = {
+export type Mutation = {
     __typename?: 'Mutation';
     changeParticipantName: ChangeParticipantNameResult;
     /** @deprecated Use screenname to group files by folders instead. */
@@ -315,88 +315,88 @@ export declare type Mutation = {
     writePublicMessage: WriteRoomPublicMessageResult;
     writeRoomSoundEffect: WriteRoomSoundEffectResult;
 };
-export declare type MutationChangeParticipantNameArgs = {
+export type MutationChangeParticipantNameArgs = {
     newName: Scalars['String'];
     roomId: Scalars['String'];
 };
-export declare type MutationCreateFileTagArgs = {
+export type MutationCreateFileTagArgs = {
     tagName: Scalars['String'];
 };
-export declare type MutationCreateRoomArgs = {
+export type MutationCreateRoomArgs = {
     input: CreateRoomInput;
 };
-export declare type MutationDeleteFileTagArgs = {
+export type MutationDeleteFileTagArgs = {
     tagId: Scalars['String'];
 };
-export declare type MutationDeleteFilesArgs = {
+export type MutationDeleteFilesArgs = {
     filenames: Array<Scalars['String']>;
 };
-export declare type MutationDeleteMessageArgs = {
+export type MutationDeleteMessageArgs = {
     messageId: Scalars['String'];
     roomId: Scalars['String'];
 };
-export declare type MutationDeleteRoomArgs = {
+export type MutationDeleteRoomArgs = {
     id: Scalars['String'];
 };
-export declare type MutationDeleteRoomAsAdminArgs = {
+export type MutationDeleteRoomAsAdminArgs = {
     id: Scalars['String'];
 };
-export declare type MutationEditFileTagsArgs = {
+export type MutationEditFileTagsArgs = {
     input: EditFileTagsInput;
 };
-export declare type MutationEditMessageArgs = {
+export type MutationEditMessageArgs = {
     messageId: Scalars['String'];
     roomId: Scalars['String'];
     text: Scalars['String'];
 };
-export declare type MutationEntryToServerArgs = {
+export type MutationEntryToServerArgs = {
     password?: InputMaybe<Scalars['String']>;
 };
-export declare type MutationJoinRoomAsPlayerArgs = {
+export type MutationJoinRoomAsPlayerArgs = {
     id: Scalars['String'];
     name: Scalars['String'];
     password?: InputMaybe<Scalars['String']>;
 };
-export declare type MutationJoinRoomAsSpectatorArgs = {
+export type MutationJoinRoomAsSpectatorArgs = {
     id: Scalars['String'];
     name: Scalars['String'];
     password?: InputMaybe<Scalars['String']>;
 };
-export declare type MutationLeaveRoomArgs = {
+export type MutationLeaveRoomArgs = {
     id: Scalars['String'];
 };
-export declare type MutationMakeMessageNotSecretArgs = {
+export type MutationMakeMessageNotSecretArgs = {
     messageId: Scalars['String'];
     roomId: Scalars['String'];
 };
-export declare type MutationOperateArgs = {
+export type MutationOperateArgs = {
     id: Scalars['String'];
     operation: RoomOperationInput;
     prevRevision: Scalars['Int'];
     requestId: Scalars['String'];
 };
-export declare type MutationPingArgs = {
+export type MutationPingArgs = {
     value: Scalars['Float'];
 };
-export declare type MutationPromoteToPlayerArgs = {
+export type MutationPromoteToPlayerArgs = {
     password?: InputMaybe<Scalars['String']>;
     roomId: Scalars['String'];
 };
-export declare type MutationRenameFilesArgs = {
+export type MutationRenameFilesArgs = {
     input: Array<RenameFileInput>;
 };
-export declare type MutationResetMessagesArgs = {
+export type MutationResetMessagesArgs = {
     roomId: Scalars['String'];
 };
-export declare type MutationUpdateBookmarkArgs = {
+export type MutationUpdateBookmarkArgs = {
     newValue: Scalars['Boolean'];
     roomId: Scalars['String'];
 };
-export declare type MutationUpdateWritingMessageStatusArgs = {
+export type MutationUpdateWritingMessageStatusArgs = {
     newStatus: WritingMessageStatusInputType;
     roomId: Scalars['String'];
 };
-export declare type MutationWritePrivateMessageArgs = {
+export type MutationWritePrivateMessageArgs = {
     characterId?: InputMaybe<Scalars['String']>;
     customName?: InputMaybe<Scalars['String']>;
     gameType?: InputMaybe<Scalars['String']>;
@@ -405,7 +405,7 @@ export declare type MutationWritePrivateMessageArgs = {
     textColor?: InputMaybe<Scalars['String']>;
     visibleTo: Array<Scalars['String']>;
 };
-export declare type MutationWritePublicMessageArgs = {
+export type MutationWritePublicMessageArgs = {
     channelKey: Scalars['String'];
     characterId?: InputMaybe<Scalars['String']>;
     customName?: InputMaybe<Scalars['String']>;
@@ -414,32 +414,32 @@ export declare type MutationWritePublicMessageArgs = {
     text: Scalars['String'];
     textColor?: InputMaybe<Scalars['String']>;
 };
-export declare type MutationWriteRoomSoundEffectArgs = {
+export type MutationWriteRoomSoundEffectArgs = {
     file: FilePathInput;
     roomId: Scalars['String'];
     volume: Scalars['Float'];
 };
-export declare type OperateRoomFailureResult = {
+export type OperateRoomFailureResult = {
     __typename?: 'OperateRoomFailureResult';
     failureType: OperateRoomFailureType;
 };
 export declare enum OperateRoomFailureType {
     NotFound = "NotFound"
 }
-export declare type OperateRoomIdResult = {
+export type OperateRoomIdResult = {
     __typename?: 'OperateRoomIdResult';
     requestId: Scalars['String'];
 };
-export declare type OperateRoomNonJoinedResult = {
+export type OperateRoomNonJoinedResult = {
     __typename?: 'OperateRoomNonJoinedResult';
     roomAsListItem: RoomAsListItem;
 };
-export declare type OperateRoomResult = OperateRoomFailureResult | OperateRoomIdResult | OperateRoomNonJoinedResult | OperateRoomSuccessResult;
-export declare type OperateRoomSuccessResult = {
+export type OperateRoomResult = OperateRoomFailureResult | OperateRoomIdResult | OperateRoomNonJoinedResult | OperateRoomSuccessResult;
+export type OperateRoomSuccessResult = {
     __typename?: 'OperateRoomSuccessResult';
     operation: RoomOperation;
 };
-export declare type OperatedBy = {
+export type OperatedBy = {
     __typename?: 'OperatedBy';
     clientId: Scalars['String'];
     userUid: Scalars['String'];
@@ -449,7 +449,7 @@ export declare enum ParticipantRole {
     Player = "Player",
     Spectator = "Spectator"
 }
-export declare type PieceLog = {
+export type PieceLog = {
     __typename?: 'PieceLog';
     createdAt: Scalars['Float'];
     logType: PieceLogType;
@@ -461,12 +461,12 @@ export declare enum PieceLogType {
     Dice = "Dice",
     String = "String"
 }
-export declare type Pong = {
+export type Pong = {
     __typename?: 'Pong';
     createdBy?: Maybe<Scalars['String']>;
     value: Scalars['Float'];
 };
-export declare type Prerelease = {
+export type Prerelease = {
     __typename?: 'Prerelease';
     type: PrereleaseType;
     version: Scalars['Float'];
@@ -482,11 +482,11 @@ export declare enum PromoteFailureType {
     NotParticipant = "NotParticipant",
     WrongPassword = "WrongPassword"
 }
-export declare type PromoteResult = {
+export type PromoteResult = {
     __typename?: 'PromoteResult';
     failureType?: Maybe<PromoteFailureType>;
 };
-export declare type Query = {
+export type Query = {
     __typename?: 'Query';
     getAvailableGameSystems: GetAvailableGameSystemsResult;
     getDiceHelpMessage?: Maybe<Scalars['String']>;
@@ -502,28 +502,28 @@ export declare type Query = {
     getServerInfo: ServerInfo;
     isEntry: Scalars['Boolean'];
 };
-export declare type QueryGetDiceHelpMessageArgs = {
+export type QueryGetDiceHelpMessageArgs = {
     id: Scalars['String'];
 };
-export declare type QueryGetFilesArgs = {
+export type QueryGetFilesArgs = {
     input: GetFilesInput;
 };
-export declare type QueryGetLogArgs = {
+export type QueryGetLogArgs = {
     roomId: Scalars['String'];
 };
-export declare type QueryGetMessagesArgs = {
+export type QueryGetMessagesArgs = {
     roomId: Scalars['String'];
 };
-export declare type QueryGetRoomArgs = {
+export type QueryGetRoomArgs = {
     id: Scalars['String'];
 };
-export declare type QueryGetRoomAsListItemArgs = {
+export type QueryGetRoomAsListItemArgs = {
     roomId: Scalars['String'];
 };
-export declare type QueryGetRoomConnectionsArgs = {
+export type QueryGetRoomConnectionsArgs = {
     roomId: Scalars['String'];
 };
-export declare type RenameFileInput = {
+export type RenameFileInput = {
     filename: Scalars['String'];
     newScreenname: Scalars['String'];
 };
@@ -532,15 +532,15 @@ export declare enum ResetRoomMessagesFailureType {
     NotParticipant = "NotParticipant",
     RoomNotFound = "RoomNotFound"
 }
-export declare type ResetRoomMessagesResult = {
+export type ResetRoomMessagesResult = {
     __typename?: 'ResetRoomMessagesResult';
     failureType?: Maybe<ResetRoomMessagesFailureType>;
 };
-export declare type Roles = {
+export type Roles = {
     __typename?: 'Roles';
     admin: Scalars['Boolean'];
 };
-export declare type RoomAsListItem = {
+export type RoomAsListItem = {
     __typename?: 'RoomAsListItem';
     /** since v0.7.2 */
     createdAt?: Maybe<Scalars['Float']>;
@@ -560,13 +560,13 @@ export declare type RoomAsListItem = {
      */
     updatedAt?: Maybe<Scalars['Float']>;
 };
-export declare type RoomConnectionEvent = {
+export type RoomConnectionEvent = {
     __typename?: 'RoomConnectionEvent';
     isConnected: Scalars['Boolean'];
     updatedAt: Scalars['Float'];
     userUid: Scalars['String'];
 };
-export declare type RoomEvent = {
+export type RoomEvent = {
     __typename?: 'RoomEvent';
     deleteRoomOperation?: Maybe<DeleteRoomOperation>;
     isRoomMessagesResetEvent: Scalars['Boolean'];
@@ -575,7 +575,7 @@ export declare type RoomEvent = {
     roomOperation?: Maybe<RoomOperation>;
     writingMessageStatus?: Maybe<WritingMessageStatus>;
 };
-export declare type RoomGetState = {
+export type RoomGetState = {
     __typename?: 'RoomGetState';
     /** since v0.7.2 */
     createdAt?: Maybe<Scalars['Float']>;
@@ -595,12 +595,12 @@ export declare type RoomGetState = {
      */
     updatedAt?: Maybe<Scalars['Float']>;
 };
-export declare type RoomMessageEvent = PieceLog | RoomMessagesReset | RoomPrivateMessage | RoomPrivateMessageUpdate | RoomPublicChannel | RoomPublicChannelUpdate | RoomPublicMessage | RoomPublicMessageUpdate | RoomSoundEffect;
-export declare type RoomMessageSyntaxError = {
+export type RoomMessageEvent = PieceLog | RoomMessagesReset | RoomPrivateMessage | RoomPrivateMessageUpdate | RoomPublicChannel | RoomPublicChannelUpdate | RoomPublicMessage | RoomPublicMessageUpdate | RoomSoundEffect;
+export type RoomMessageSyntaxError = {
     __typename?: 'RoomMessageSyntaxError';
     errorMessage: Scalars['String'];
 };
-export declare type RoomMessages = {
+export type RoomMessages = {
     __typename?: 'RoomMessages';
     pieceLogs: Array<PieceLog>;
     privateMessages: Array<RoomPrivateMessage>;
@@ -608,11 +608,11 @@ export declare type RoomMessages = {
     publicMessages: Array<RoomPublicMessage>;
     soundEffects: Array<RoomSoundEffect>;
 };
-export declare type RoomMessagesReset = {
+export type RoomMessagesReset = {
     __typename?: 'RoomMessagesReset';
     publicMessagesDeleted: Scalars['Boolean'];
 };
-export declare type RoomOperation = {
+export type RoomOperation = {
     __typename?: 'RoomOperation';
     /** operateRoomを呼んだ人物。promoteなどの結果の場合はnullishになる。 */
     operatedBy?: Maybe<OperatedBy>;
@@ -620,13 +620,13 @@ export declare type RoomOperation = {
     /** room.upOperationをJSONにしたもの。idならばnullish。 */
     valueJson: Scalars['String'];
 };
-export declare type RoomOperationInput = {
+export type RoomOperationInput = {
     /** クライアントを識別するID。適当なIDをクライアント側で生成して渡す。Operationごとに変える必要はない */
     clientId: Scalars['String'];
     /** room.upOperationをJSONにしたもの */
     valueJson: Scalars['String'];
 };
-export declare type RoomPrivateMessage = {
+export type RoomPrivateMessage = {
     __typename?: 'RoomPrivateMessage';
     altTextToSecret?: Maybe<Scalars['String']>;
     /** 発言がCharacterと紐付いているときはnon-nullish。PLとしての発言、もしくはcreatedByがnullishのときはnullish。後からCharacterの値が更新されても、この値が更新されることはない。 */
@@ -644,7 +644,7 @@ export declare type RoomPrivateMessage = {
     updatedText?: Maybe<UpdatedText>;
     visibleTo: Array<Scalars['String']>;
 };
-export declare type RoomPrivateMessageUpdate = {
+export type RoomPrivateMessageUpdate = {
     __typename?: 'RoomPrivateMessageUpdate';
     altTextToSecret?: Maybe<Scalars['String']>;
     commandResult?: Maybe<CommandResult>;
@@ -655,18 +655,18 @@ export declare type RoomPrivateMessageUpdate = {
     updatedAt?: Maybe<Scalars['Float']>;
     updatedText?: Maybe<UpdatedText>;
 };
-export declare type RoomPublicChannel = {
+export type RoomPublicChannel = {
     __typename?: 'RoomPublicChannel';
     /** 現在の仕様では、$system, $free, '1', … , '10' の12個のみをサポートしている。このうち、$systemはシステムメッセージ専用チャンネルであるため誰も書き込むことができない。'1', …, '10'はSpectatorが書き込むことはできないが、$freeはSpectatorも書き込むことができる。 */
     key: Scalars['String'];
     name?: Maybe<Scalars['String']>;
 };
-export declare type RoomPublicChannelUpdate = {
+export type RoomPublicChannelUpdate = {
     __typename?: 'RoomPublicChannelUpdate';
     key: Scalars['String'];
     name?: Maybe<Scalars['String']>;
 };
-export declare type RoomPublicMessage = {
+export type RoomPublicMessage = {
     __typename?: 'RoomPublicMessage';
     altTextToSecret?: Maybe<Scalars['String']>;
     channelKey: Scalars['String'];
@@ -685,7 +685,7 @@ export declare type RoomPublicMessage = {
     updatedAt?: Maybe<Scalars['Float']>;
     updatedText?: Maybe<UpdatedText>;
 };
-export declare type RoomPublicMessageUpdate = {
+export type RoomPublicMessageUpdate = {
     __typename?: 'RoomPublicMessageUpdate';
     altTextToSecret?: Maybe<Scalars['String']>;
     commandResult?: Maybe<CommandResult>;
@@ -696,7 +696,7 @@ export declare type RoomPublicMessageUpdate = {
     updatedAt?: Maybe<Scalars['Float']>;
     updatedText?: Maybe<UpdatedText>;
 };
-export declare type RoomSoundEffect = {
+export type RoomSoundEffect = {
     __typename?: 'RoomSoundEffect';
     createdAt: Scalars['Float'];
     createdBy?: Maybe<Scalars['String']>;
@@ -704,46 +704,46 @@ export declare type RoomSoundEffect = {
     messageId: Scalars['String'];
     volume: Scalars['Float'];
 };
-export declare type SemVer = {
+export type SemVer = {
     __typename?: 'SemVer';
     major: Scalars['Float'];
     minor: Scalars['Float'];
     patch: Scalars['Float'];
     prerelease?: Maybe<Prerelease>;
 };
-export declare type ServerInfo = {
+export type ServerInfo = {
     __typename?: 'ServerInfo';
     uploaderEnabled: Scalars['Boolean'];
     version: SemVer;
 };
-export declare type Subscription = {
+export type Subscription = {
     __typename?: 'Subscription';
     /** for test */
     pong: Pong;
     roomEvent?: Maybe<RoomEvent>;
 };
-export declare type SubscriptionRoomEventArgs = {
+export type SubscriptionRoomEventArgs = {
     id: Scalars['String'];
 };
-export declare type UpdateBookmarkFailureResult = {
+export type UpdateBookmarkFailureResult = {
     __typename?: 'UpdateBookmarkFailureResult';
     failureType: UpdateBookmarkFailureType;
 };
 export declare enum UpdateBookmarkFailureType {
     NotFound = "NotFound"
 }
-export declare type UpdateBookmarkResult = UpdateBookmarkFailureResult | UpdateBookmarkSuccessResult;
-export declare type UpdateBookmarkSuccessResult = {
+export type UpdateBookmarkResult = UpdateBookmarkFailureResult | UpdateBookmarkSuccessResult;
+export type UpdateBookmarkSuccessResult = {
     __typename?: 'UpdateBookmarkSuccessResult';
     currentValue: Scalars['Boolean'];
     prevValue: Scalars['Boolean'];
 };
-export declare type UpdatedText = {
+export type UpdatedText = {
     __typename?: 'UpdatedText';
     currentText?: Maybe<Scalars['String']>;
     updatedAt: Scalars['Float'];
 };
-export declare type WriteRoomPrivateMessageFailureResult = {
+export type WriteRoomPrivateMessageFailureResult = {
     __typename?: 'WriteRoomPrivateMessageFailureResult';
     failureType: WriteRoomPrivateMessageFailureType;
 };
@@ -753,8 +753,8 @@ export declare enum WriteRoomPrivateMessageFailureType {
     SyntaxError = "SyntaxError",
     VisibleToIsInvalid = "VisibleToIsInvalid"
 }
-export declare type WriteRoomPrivateMessageResult = RoomMessageSyntaxError | RoomPrivateMessage | WriteRoomPrivateMessageFailureResult;
-export declare type WriteRoomPublicMessageFailureResult = {
+export type WriteRoomPrivateMessageResult = RoomMessageSyntaxError | RoomPrivateMessage | WriteRoomPrivateMessageFailureResult;
+export type WriteRoomPublicMessageFailureResult = {
     __typename?: 'WriteRoomPublicMessageFailureResult';
     failureType: WriteRoomPublicMessageFailureType;
 };
@@ -765,8 +765,8 @@ export declare enum WriteRoomPublicMessageFailureType {
     RoomNotFound = "RoomNotFound",
     SyntaxError = "SyntaxError"
 }
-export declare type WriteRoomPublicMessageResult = RoomMessageSyntaxError | RoomPublicMessage | WriteRoomPublicMessageFailureResult;
-export declare type WriteRoomSoundEffectFailureResult = {
+export type WriteRoomPublicMessageResult = RoomMessageSyntaxError | RoomPublicMessage | WriteRoomPublicMessageFailureResult;
+export type WriteRoomSoundEffectFailureResult = {
     __typename?: 'WriteRoomSoundEffectFailureResult';
     failureType: WriteRoomSoundEffectFailureType;
 };
@@ -775,8 +775,8 @@ export declare enum WriteRoomSoundEffectFailureType {
     NotParticipant = "NotParticipant",
     RoomNotFound = "RoomNotFound"
 }
-export declare type WriteRoomSoundEffectResult = RoomSoundEffect | WriteRoomSoundEffectFailureResult;
-export declare type WritingMessageStatus = {
+export type WriteRoomSoundEffectResult = RoomSoundEffect | WriteRoomSoundEffectFailureResult;
+export type WritingMessageStatus = {
     __typename?: 'WritingMessageStatus';
     status: WritingMessageStatusType;
     updatedAt: Scalars['Float'];
@@ -793,7 +793,7 @@ export declare enum WritingMessageStatusType {
     Submit = "Submit",
     Writing = "Writing"
 }
-export declare type CharacterValueForMessageFragment = {
+export type CharacterValueForMessageFragment = {
     __typename?: 'CharacterValueForMessage';
     stateId: string;
     isPrivate: boolean;
@@ -809,11 +809,11 @@ export declare type CharacterValueForMessageFragment = {
         path: string;
     } | null;
 };
-declare type CreateRoomResult_CreateRoomFailureResult_Fragment = {
+type CreateRoomResult_CreateRoomFailureResult_Fragment = {
     __typename: 'CreateRoomFailureResult';
     failureType: CreateRoomFailureType;
 };
-declare type CreateRoomResult_CreateRoomSuccessResult_Fragment = {
+type CreateRoomResult_CreateRoomSuccessResult_Fragment = {
     __typename: 'CreateRoomSuccessResult';
     id: string;
     room: {
@@ -827,8 +827,8 @@ declare type CreateRoomResult_CreateRoomSuccessResult_Fragment = {
         stateJson: string;
     };
 };
-export declare type CreateRoomResultFragment = CreateRoomResult_CreateRoomFailureResult_Fragment | CreateRoomResult_CreateRoomSuccessResult_Fragment;
-export declare type FileItemFragment = {
+export type CreateRoomResultFragment = CreateRoomResult_CreateRoomFailureResult_Fragment | CreateRoomResult_CreateRoomSuccessResult_Fragment;
+export type FileItemFragment = {
     __typename?: 'FileItem';
     filename: string;
     thumbFilename?: string | null;
@@ -837,17 +837,17 @@ export declare type FileItemFragment = {
     createdAt?: number | null;
     listType: FileListType;
 };
-export declare type FilePathFragment = {
+export type FilePathFragment = {
     __typename?: 'FilePath';
     sourceType: FileSourceType;
     path: string;
 };
-export declare type FileTagFragment = {
+export type FileTagFragment = {
     __typename?: 'FileTag';
     id: string;
     name: string;
 };
-export declare type GetNonJoinedRoomResultFragment = {
+export type GetNonJoinedRoomResultFragment = {
     __typename?: 'GetNonJoinedRoomResult';
     roomAsListItem: {
         __typename?: 'RoomAsListItem';
@@ -862,11 +862,11 @@ export declare type GetNonJoinedRoomResultFragment = {
         requiresSpectatorPassword: boolean;
     };
 };
-declare type GetRoomListResult_GetRoomsListFailureResult_Fragment = {
+type GetRoomListResult_GetRoomsListFailureResult_Fragment = {
     __typename: 'GetRoomsListFailureResult';
     failureType: GetRoomFailureType;
 };
-declare type GetRoomListResult_GetRoomsListSuccessResult_Fragment = {
+type GetRoomListResult_GetRoomsListSuccessResult_Fragment = {
     __typename: 'GetRoomsListSuccessResult';
     rooms: Array<{
         __typename?: 'RoomAsListItem';
@@ -881,8 +881,8 @@ declare type GetRoomListResult_GetRoomsListSuccessResult_Fragment = {
         requiresSpectatorPassword: boolean;
     }>;
 };
-export declare type GetRoomListResultFragment = GetRoomListResult_GetRoomsListFailureResult_Fragment | GetRoomListResult_GetRoomsListSuccessResult_Fragment;
-declare type GetRoomResult_GetJoinedRoomResult_Fragment = {
+export type GetRoomListResultFragment = GetRoomListResult_GetRoomsListFailureResult_Fragment | GetRoomListResult_GetRoomsListSuccessResult_Fragment;
+type GetRoomResult_GetJoinedRoomResult_Fragment = {
     __typename: 'GetJoinedRoomResult';
     role: ParticipantRole;
     room: {
@@ -896,7 +896,7 @@ declare type GetRoomResult_GetJoinedRoomResult_Fragment = {
         stateJson: string;
     };
 };
-declare type GetRoomResult_GetNonJoinedRoomResult_Fragment = {
+type GetRoomResult_GetNonJoinedRoomResult_Fragment = {
     __typename: 'GetNonJoinedRoomResult';
     roomAsListItem: {
         __typename?: 'RoomAsListItem';
@@ -911,16 +911,16 @@ declare type GetRoomResult_GetNonJoinedRoomResult_Fragment = {
         requiresSpectatorPassword: boolean;
     };
 };
-declare type GetRoomResult_GetRoomFailureResult_Fragment = {
+type GetRoomResult_GetRoomFailureResult_Fragment = {
     __typename: 'GetRoomFailureResult';
     failureType: GetRoomFailureType;
 };
-export declare type GetRoomResultFragment = GetRoomResult_GetJoinedRoomResult_Fragment | GetRoomResult_GetNonJoinedRoomResult_Fragment | GetRoomResult_GetRoomFailureResult_Fragment;
-declare type JoinRoomResult_JoinRoomFailureResult_Fragment = {
+export type GetRoomResultFragment = GetRoomResult_GetJoinedRoomResult_Fragment | GetRoomResult_GetNonJoinedRoomResult_Fragment | GetRoomResult_GetRoomFailureResult_Fragment;
+type JoinRoomResult_JoinRoomFailureResult_Fragment = {
     __typename: 'JoinRoomFailureResult';
     failureType: JoinRoomFailureType;
 };
-declare type JoinRoomResult_JoinRoomSuccessResult_Fragment = {
+type JoinRoomResult_JoinRoomSuccessResult_Fragment = {
     __typename: 'JoinRoomSuccessResult';
     operation?: {
         __typename?: 'RoomOperation';
@@ -933,8 +933,8 @@ declare type JoinRoomResult_JoinRoomSuccessResult_Fragment = {
         } | null;
     } | null;
 };
-export declare type JoinRoomResultFragment = JoinRoomResult_JoinRoomFailureResult_Fragment | JoinRoomResult_JoinRoomSuccessResult_Fragment;
-export declare type PieceLogFragment = {
+export type JoinRoomResultFragment = JoinRoomResult_JoinRoomFailureResult_Fragment | JoinRoomResult_JoinRoomSuccessResult_Fragment;
+export type PieceLogFragment = {
     __typename?: 'PieceLog';
     messageId: string;
     stateId: string;
@@ -942,7 +942,7 @@ export declare type PieceLogFragment = {
     logType: PieceLogType;
     valueJson: string;
 };
-export declare type RoomAsListItemFragment = {
+export type RoomAsListItemFragment = {
     __typename?: 'RoomAsListItem';
     id: string;
     name: string;
@@ -954,7 +954,7 @@ export declare type RoomAsListItemFragment = {
     requiresPlayerPassword: boolean;
     requiresSpectatorPassword: boolean;
 };
-export declare type RoomGetStateFragment = {
+export type RoomGetStateFragment = {
     __typename?: 'RoomGetState';
     revision: number;
     createdBy: string;
@@ -964,7 +964,7 @@ export declare type RoomGetStateFragment = {
     isBookmarked: boolean;
     stateJson: string;
 };
-export declare type RoomOperationFragment = {
+export type RoomOperationFragment = {
     __typename?: 'RoomOperation';
     revisionTo: number;
     valueJson: string;
@@ -974,12 +974,12 @@ export declare type RoomOperationFragment = {
         clientId: string;
     } | null;
 };
-export declare type RoomPublicChannelFragment = {
+export type RoomPublicChannelFragment = {
     __typename?: 'RoomPublicChannel';
     key: string;
     name?: string | null;
 };
-export declare type RoomPublicMessageFragment = {
+export type RoomPublicMessageFragment = {
     __typename?: 'RoomPublicMessage';
     messageId: string;
     channelKey: string;
@@ -1019,7 +1019,7 @@ export declare type RoomPublicMessageFragment = {
         } | null;
     } | null;
 };
-export declare type RoomPrivateMessageFragment = {
+export type RoomPrivateMessageFragment = {
     __typename?: 'RoomPrivateMessage';
     messageId: string;
     visibleTo: Array<string>;
@@ -1059,7 +1059,7 @@ export declare type RoomPrivateMessageFragment = {
         } | null;
     } | null;
 };
-export declare type RoomSoundEffectFragment = {
+export type RoomSoundEffectFragment = {
     __typename?: 'RoomSoundEffect';
     messageId: string;
     createdBy?: string | null;
@@ -1071,7 +1071,7 @@ export declare type RoomSoundEffectFragment = {
         path: string;
     };
 };
-declare type RoomMessageEvent_PieceLog_Fragment = {
+type RoomMessageEvent_PieceLog_Fragment = {
     __typename: 'PieceLog';
     messageId: string;
     stateId: string;
@@ -1079,10 +1079,10 @@ declare type RoomMessageEvent_PieceLog_Fragment = {
     logType: PieceLogType;
     valueJson: string;
 };
-declare type RoomMessageEvent_RoomMessagesReset_Fragment = {
+type RoomMessageEvent_RoomMessagesReset_Fragment = {
     __typename: 'RoomMessagesReset';
 };
-declare type RoomMessageEvent_RoomPrivateMessage_Fragment = {
+type RoomMessageEvent_RoomPrivateMessage_Fragment = {
     __typename: 'RoomPrivateMessage';
     messageId: string;
     visibleTo: Array<string>;
@@ -1122,7 +1122,7 @@ declare type RoomMessageEvent_RoomPrivateMessage_Fragment = {
         } | null;
     } | null;
 };
-declare type RoomMessageEvent_RoomPrivateMessageUpdate_Fragment = {
+type RoomMessageEvent_RoomPrivateMessageUpdate_Fragment = {
     __typename: 'RoomPrivateMessageUpdate';
     messageId: string;
     initText?: string | null;
@@ -1141,17 +1141,17 @@ declare type RoomMessageEvent_RoomPrivateMessageUpdate_Fragment = {
         isSuccess?: boolean | null;
     } | null;
 };
-declare type RoomMessageEvent_RoomPublicChannel_Fragment = {
+type RoomMessageEvent_RoomPublicChannel_Fragment = {
     __typename: 'RoomPublicChannel';
     key: string;
     name?: string | null;
 };
-declare type RoomMessageEvent_RoomPublicChannelUpdate_Fragment = {
+type RoomMessageEvent_RoomPublicChannelUpdate_Fragment = {
     __typename: 'RoomPublicChannelUpdate';
     key: string;
     name?: string | null;
 };
-declare type RoomMessageEvent_RoomPublicMessage_Fragment = {
+type RoomMessageEvent_RoomPublicMessage_Fragment = {
     __typename: 'RoomPublicMessage';
     messageId: string;
     channelKey: string;
@@ -1191,7 +1191,7 @@ declare type RoomMessageEvent_RoomPublicMessage_Fragment = {
         } | null;
     } | null;
 };
-declare type RoomMessageEvent_RoomPublicMessageUpdate_Fragment = {
+type RoomMessageEvent_RoomPublicMessageUpdate_Fragment = {
     __typename: 'RoomPublicMessageUpdate';
     messageId: string;
     initText?: string | null;
@@ -1210,7 +1210,7 @@ declare type RoomMessageEvent_RoomPublicMessageUpdate_Fragment = {
         isSuccess?: boolean | null;
     } | null;
 };
-declare type RoomMessageEvent_RoomSoundEffect_Fragment = {
+type RoomMessageEvent_RoomSoundEffect_Fragment = {
     __typename: 'RoomSoundEffect';
     messageId: string;
     createdBy?: string | null;
@@ -1222,8 +1222,8 @@ declare type RoomMessageEvent_RoomSoundEffect_Fragment = {
         path: string;
     };
 };
-export declare type RoomMessageEventFragment = RoomMessageEvent_PieceLog_Fragment | RoomMessageEvent_RoomMessagesReset_Fragment | RoomMessageEvent_RoomPrivateMessage_Fragment | RoomMessageEvent_RoomPrivateMessageUpdate_Fragment | RoomMessageEvent_RoomPublicChannel_Fragment | RoomMessageEvent_RoomPublicChannelUpdate_Fragment | RoomMessageEvent_RoomPublicMessage_Fragment | RoomMessageEvent_RoomPublicMessageUpdate_Fragment | RoomMessageEvent_RoomSoundEffect_Fragment;
-export declare type SemVerFragment = {
+export type RoomMessageEventFragment = RoomMessageEvent_PieceLog_Fragment | RoomMessageEvent_RoomMessagesReset_Fragment | RoomMessageEvent_RoomPrivateMessage_Fragment | RoomMessageEvent_RoomPrivateMessageUpdate_Fragment | RoomMessageEvent_RoomPublicChannel_Fragment | RoomMessageEvent_RoomPublicChannelUpdate_Fragment | RoomMessageEvent_RoomPublicMessage_Fragment | RoomMessageEvent_RoomPublicMessageUpdate_Fragment | RoomMessageEvent_RoomSoundEffect_Fragment;
+export type SemVerFragment = {
     __typename?: 'SemVer';
     major: number;
     minor: number;
@@ -1234,10 +1234,10 @@ export declare type SemVerFragment = {
         version: number;
     } | null;
 };
-export declare type GetAvailableGameSystemsQueryVariables = Exact<{
+export type GetAvailableGameSystemsQueryVariables = Exact<{
     [key: string]: never;
 }>;
-export declare type GetAvailableGameSystemsQuery = {
+export type GetAvailableGameSystemsQuery = {
     __typename?: 'Query';
     result: {
         __typename?: 'GetAvailableGameSystemsResult';
@@ -1249,17 +1249,17 @@ export declare type GetAvailableGameSystemsQuery = {
         }>;
     };
 };
-export declare type GetDiceHelpMessagesQueryVariables = Exact<{
+export type GetDiceHelpMessagesQueryVariables = Exact<{
     id: Scalars['String'];
 }>;
-export declare type GetDiceHelpMessagesQuery = {
+export type GetDiceHelpMessagesQuery = {
     __typename?: 'Query';
     result?: string | null;
 };
-export declare type GetFilesQueryVariables = Exact<{
+export type GetFilesQueryVariables = Exact<{
     input: GetFilesInput;
 }>;
-export declare type GetFilesQuery = {
+export type GetFilesQuery = {
     __typename?: 'Query';
     result: {
         __typename?: 'GetFilesResult';
@@ -1274,10 +1274,10 @@ export declare type GetFilesQuery = {
         }>;
     };
 };
-export declare type GetRoomQueryVariables = Exact<{
+export type GetRoomQueryVariables = Exact<{
     id: Scalars['String'];
 }>;
-export declare type GetRoomQuery = {
+export type GetRoomQuery = {
     __typename?: 'Query';
     result: {
         __typename: 'GetJoinedRoomResult';
@@ -1311,10 +1311,10 @@ export declare type GetRoomQuery = {
         failureType: GetRoomFailureType;
     };
 };
-export declare type GetRoomsListQueryVariables = Exact<{
+export type GetRoomsListQueryVariables = Exact<{
     [key: string]: never;
 }>;
-export declare type GetRoomsListQuery = {
+export type GetRoomsListQuery = {
     __typename?: 'Query';
     result: {
         __typename: 'GetRoomsListFailureResult';
@@ -1335,10 +1335,10 @@ export declare type GetRoomsListQuery = {
         }>;
     };
 };
-export declare type GetMessagesQueryVariables = Exact<{
+export type GetMessagesQueryVariables = Exact<{
     roomId: Scalars['String'];
 }>;
-export declare type GetMessagesQuery = {
+export type GetMessagesQuery = {
     __typename?: 'Query';
     result: {
         __typename: 'GetRoomMessagesFailureResult';
@@ -1452,10 +1452,10 @@ export declare type GetMessagesQuery = {
         }>;
     };
 };
-export declare type GetLogQueryVariables = Exact<{
+export type GetLogQueryVariables = Exact<{
     roomId: Scalars['String'];
 }>;
-export declare type GetLogQuery = {
+export type GetLogQuery = {
     __typename?: 'Query';
     result: {
         __typename: 'GetRoomLogFailureResult';
@@ -1569,20 +1569,20 @@ export declare type GetLogQuery = {
         }>;
     };
 };
-export declare type GetMyRolesQueryVariables = Exact<{
+export type GetMyRolesQueryVariables = Exact<{
     [key: string]: never;
 }>;
-export declare type GetMyRolesQuery = {
+export type GetMyRolesQuery = {
     __typename?: 'Query';
     result: {
         __typename?: 'Roles';
         admin: boolean;
     };
 };
-export declare type GetRoomConnectionsQueryVariables = Exact<{
+export type GetRoomConnectionsQueryVariables = Exact<{
     roomId: Scalars['String'];
 }>;
-export declare type GetRoomConnectionsQuery = {
+export type GetRoomConnectionsQuery = {
     __typename?: 'Query';
     result: {
         __typename: 'GetRoomConnectionsFailureResult';
@@ -1593,10 +1593,10 @@ export declare type GetRoomConnectionsQuery = {
         connectedUserUids: Array<string>;
     };
 };
-export declare type GetServerInfoQueryVariables = Exact<{
+export type GetServerInfoQueryVariables = Exact<{
     [key: string]: never;
 }>;
-export declare type GetServerInfoQuery = {
+export type GetServerInfoQuery = {
     __typename?: 'Query';
     result: {
         __typename?: 'ServerInfo';
@@ -1614,17 +1614,17 @@ export declare type GetServerInfoQuery = {
         };
     };
 };
-export declare type IsEntryQueryVariables = Exact<{
+export type IsEntryQueryVariables = Exact<{
     [key: string]: never;
 }>;
-export declare type IsEntryQuery = {
+export type IsEntryQuery = {
     __typename?: 'Query';
     result: boolean;
 };
-export declare type GetRoomAsListItemQueryVariables = Exact<{
+export type GetRoomAsListItemQueryVariables = Exact<{
     roomId: Scalars['String'];
 }>;
-export declare type GetRoomAsListItemQuery = {
+export type GetRoomAsListItemQuery = {
     __typename?: 'Query';
     result: {
         __typename: 'GetRoomAsListItemFailureResult';
@@ -1645,10 +1645,10 @@ export declare type GetRoomAsListItemQuery = {
         };
     };
 };
-export declare type CreateFileTagMutationVariables = Exact<{
+export type CreateFileTagMutationVariables = Exact<{
     tagName: Scalars['String'];
 }>;
-export declare type CreateFileTagMutation = {
+export type CreateFileTagMutation = {
     __typename?: 'Mutation';
     result?: {
         __typename?: 'FileTag';
@@ -1656,21 +1656,21 @@ export declare type CreateFileTagMutation = {
         name: string;
     } | null;
 };
-export declare type ChangeParticipantNameMutationVariables = Exact<{
+export type ChangeParticipantNameMutationVariables = Exact<{
     roomId: Scalars['String'];
     newName: Scalars['String'];
 }>;
-export declare type ChangeParticipantNameMutation = {
+export type ChangeParticipantNameMutation = {
     __typename?: 'Mutation';
     result: {
         __typename?: 'ChangeParticipantNameResult';
         failureType?: ChangeParticipantNameFailureType | null;
     };
 };
-export declare type CreateRoomMutationVariables = Exact<{
+export type CreateRoomMutationVariables = Exact<{
     input: CreateRoomInput;
 }>;
-export declare type CreateRoomMutation = {
+export type CreateRoomMutation = {
     __typename?: 'Mutation';
     result: {
         __typename: 'CreateRoomFailureResult';
@@ -1690,53 +1690,53 @@ export declare type CreateRoomMutation = {
         };
     };
 };
-export declare type DeleteFilesMutationVariables = Exact<{
+export type DeleteFilesMutationVariables = Exact<{
     filenames: Array<Scalars['String']> | Scalars['String'];
 }>;
-export declare type DeleteFilesMutation = {
+export type DeleteFilesMutation = {
     __typename?: 'Mutation';
     result: Array<string>;
 };
-export declare type DeleteFileTagMutationVariables = Exact<{
+export type DeleteFileTagMutationVariables = Exact<{
     tagId: Scalars['String'];
 }>;
-export declare type DeleteFileTagMutation = {
+export type DeleteFileTagMutation = {
     __typename?: 'Mutation';
     result: boolean;
 };
-export declare type DeleteRoomMutationVariables = Exact<{
+export type DeleteRoomMutationVariables = Exact<{
     id: Scalars['String'];
 }>;
-export declare type DeleteRoomMutation = {
+export type DeleteRoomMutation = {
     __typename?: 'Mutation';
     result: {
         __typename?: 'DeleteRoomResult';
         failureType?: DeleteRoomFailureType | null;
     };
 };
-export declare type DeleteRoomAsAdminMutationVariables = Exact<{
+export type DeleteRoomAsAdminMutationVariables = Exact<{
     id: Scalars['String'];
 }>;
-export declare type DeleteRoomAsAdminMutation = {
+export type DeleteRoomAsAdminMutation = {
     __typename?: 'Mutation';
     result: {
         __typename?: 'DeleteRoomAsAdminResult';
         failureType?: DeleteRoomAsAdminFailureType | null;
     };
 };
-export declare type EditFileTagsMutationVariables = Exact<{
+export type EditFileTagsMutationVariables = Exact<{
     input: EditFileTagsInput;
 }>;
-export declare type EditFileTagsMutation = {
+export type EditFileTagsMutation = {
     __typename?: 'Mutation';
     result: boolean;
 };
-export declare type JoinRoomAsPlayerMutationVariables = Exact<{
+export type JoinRoomAsPlayerMutationVariables = Exact<{
     id: Scalars['String'];
     name: Scalars['String'];
     password?: InputMaybe<Scalars['String']>;
 }>;
-export declare type JoinRoomAsPlayerMutation = {
+export type JoinRoomAsPlayerMutation = {
     __typename?: 'Mutation';
     result: {
         __typename: 'JoinRoomFailureResult';
@@ -1755,12 +1755,12 @@ export declare type JoinRoomAsPlayerMutation = {
         } | null;
     };
 };
-export declare type JoinRoomAsSpectatorMutationVariables = Exact<{
+export type JoinRoomAsSpectatorMutationVariables = Exact<{
     id: Scalars['String'];
     name: Scalars['String'];
     password?: InputMaybe<Scalars['String']>;
 }>;
-export declare type JoinRoomAsSpectatorMutation = {
+export type JoinRoomAsSpectatorMutation = {
     __typename?: 'Mutation';
     result: {
         __typename: 'JoinRoomFailureResult';
@@ -1779,33 +1779,33 @@ export declare type JoinRoomAsSpectatorMutation = {
         } | null;
     };
 };
-export declare type EntryToServerMutationVariables = Exact<{
+export type EntryToServerMutationVariables = Exact<{
     password: Scalars['String'];
 }>;
-export declare type EntryToServerMutation = {
+export type EntryToServerMutation = {
     __typename?: 'Mutation';
     result: {
         __typename?: 'EntryToServerResult';
         type: EntryToServerResultType;
     };
 };
-export declare type LeaveRoomMutationVariables = Exact<{
+export type LeaveRoomMutationVariables = Exact<{
     id: Scalars['String'];
 }>;
-export declare type LeaveRoomMutation = {
+export type LeaveRoomMutation = {
     __typename?: 'Mutation';
     result: {
         __typename?: 'LeaveRoomResult';
         failureType?: LeaveRoomFailureType | null;
     };
 };
-export declare type OperateMutationVariables = Exact<{
+export type OperateMutationVariables = Exact<{
     id: Scalars['String'];
     revisionFrom: Scalars['Int'];
     operation: RoomOperationInput;
     requestId: Scalars['String'];
 }>;
-export declare type OperateMutation = {
+export type OperateMutation = {
     __typename?: 'Mutation';
     result: {
         __typename: 'OperateRoomFailureResult';
@@ -1841,10 +1841,10 @@ export declare type OperateMutation = {
         };
     };
 };
-export declare type PingMutationVariables = Exact<{
+export type PingMutationVariables = Exact<{
     value: Scalars['Float'];
 }>;
-export declare type PingMutation = {
+export type PingMutation = {
     __typename?: 'Mutation';
     result: {
         __typename?: 'Pong';
@@ -1852,39 +1852,39 @@ export declare type PingMutation = {
         value: number;
     };
 };
-export declare type PromoteToPlayerMutationVariables = Exact<{
+export type PromoteToPlayerMutationVariables = Exact<{
     roomId: Scalars['String'];
     password?: InputMaybe<Scalars['String']>;
 }>;
-export declare type PromoteToPlayerMutation = {
+export type PromoteToPlayerMutation = {
     __typename?: 'Mutation';
     result: {
         __typename?: 'PromoteResult';
         failureType?: PromoteFailureType | null;
     };
 };
-export declare type RenameFilesMutationVariables = Exact<{
+export type RenameFilesMutationVariables = Exact<{
     input: Array<RenameFileInput> | RenameFileInput;
 }>;
-export declare type RenameFilesMutation = {
+export type RenameFilesMutation = {
     __typename?: 'Mutation';
     result: Array<string>;
 };
-export declare type ResetMessagesMutationVariables = Exact<{
+export type ResetMessagesMutationVariables = Exact<{
     roomId: Scalars['String'];
 }>;
-export declare type ResetMessagesMutation = {
+export type ResetMessagesMutation = {
     __typename?: 'Mutation';
     result: {
         __typename?: 'ResetRoomMessagesResult';
         failureType?: ResetRoomMessagesFailureType | null;
     };
 };
-export declare type UpdateBookmarkMutationVariables = Exact<{
+export type UpdateBookmarkMutationVariables = Exact<{
     roomId: Scalars['String'];
     newValue: Scalars['Boolean'];
 }>;
-export declare type UpdateBookmarkMutation = {
+export type UpdateBookmarkMutation = {
     __typename?: 'Mutation';
     result: {
         __typename: 'UpdateBookmarkFailureResult';
@@ -1895,7 +1895,7 @@ export declare type UpdateBookmarkMutation = {
         currentValue: boolean;
     };
 };
-export declare type WritePublicMessageMutationVariables = Exact<{
+export type WritePublicMessageMutationVariables = Exact<{
     roomId: Scalars['String'];
     text: Scalars['String'];
     textColor?: InputMaybe<Scalars['String']>;
@@ -1904,7 +1904,7 @@ export declare type WritePublicMessageMutationVariables = Exact<{
     customName?: InputMaybe<Scalars['String']>;
     gameType?: InputMaybe<Scalars['String']>;
 }>;
-export declare type WritePublicMessageMutation = {
+export type WritePublicMessageMutation = {
     __typename?: 'Mutation';
     result: {
         __typename: 'RoomMessageSyntaxError';
@@ -1953,7 +1953,7 @@ export declare type WritePublicMessageMutation = {
         failureType: WriteRoomPublicMessageFailureType;
     };
 };
-export declare type WritePrivateMessageMutationVariables = Exact<{
+export type WritePrivateMessageMutationVariables = Exact<{
     roomId: Scalars['String'];
     visibleTo: Array<Scalars['String']> | Scalars['String'];
     text: Scalars['String'];
@@ -1962,7 +1962,7 @@ export declare type WritePrivateMessageMutationVariables = Exact<{
     customName?: InputMaybe<Scalars['String']>;
     gameType?: InputMaybe<Scalars['String']>;
 }>;
-export declare type WritePrivateMessageMutation = {
+export type WritePrivateMessageMutation = {
     __typename?: 'Mutation';
     result: {
         __typename: 'RoomMessageSyntaxError';
@@ -2011,12 +2011,12 @@ export declare type WritePrivateMessageMutation = {
         failureType: WriteRoomPrivateMessageFailureType;
     };
 };
-export declare type WriteRoomSoundEffectMutationVariables = Exact<{
+export type WriteRoomSoundEffectMutationVariables = Exact<{
     roomId: Scalars['String'];
     file: FilePathInput;
     volume: Scalars['Float'];
 }>;
-export declare type WriteRoomSoundEffectMutation = {
+export type WriteRoomSoundEffectMutation = {
     __typename?: 'Mutation';
     result: {
         __typename: 'RoomSoundEffect';
@@ -2034,52 +2034,52 @@ export declare type WriteRoomSoundEffectMutation = {
         failureType: WriteRoomSoundEffectFailureType;
     };
 };
-export declare type EditMessageMutationVariables = Exact<{
+export type EditMessageMutationVariables = Exact<{
     roomId: Scalars['String'];
     messageId: Scalars['String'];
     text: Scalars['String'];
 }>;
-export declare type EditMessageMutation = {
+export type EditMessageMutation = {
     __typename?: 'Mutation';
     result: {
         __typename?: 'EditMessageResult';
         failureType?: EditMessageFailureType | null;
     };
 };
-export declare type DeleteMessageMutationVariables = Exact<{
+export type DeleteMessageMutationVariables = Exact<{
     roomId: Scalars['String'];
     messageId: Scalars['String'];
 }>;
-export declare type DeleteMessageMutation = {
+export type DeleteMessageMutation = {
     __typename?: 'Mutation';
     result: {
         __typename?: 'DeleteMessageResult';
         failureType?: DeleteMessageFailureType | null;
     };
 };
-export declare type MakeMessageNotSecretMutationVariables = Exact<{
+export type MakeMessageNotSecretMutationVariables = Exact<{
     roomId: Scalars['String'];
     messageId: Scalars['String'];
 }>;
-export declare type MakeMessageNotSecretMutation = {
+export type MakeMessageNotSecretMutation = {
     __typename?: 'Mutation';
     result: {
         __typename?: 'MakeMessageNotSecretResult';
         failureType?: MakeMessageNotSecretFailureType | null;
     };
 };
-export declare type UpdateWritingMessageStatusMutationVariables = Exact<{
+export type UpdateWritingMessageStatusMutationVariables = Exact<{
     roomId: Scalars['String'];
     newStatus: WritingMessageStatusInputType;
 }>;
-export declare type UpdateWritingMessageStatusMutation = {
+export type UpdateWritingMessageStatusMutation = {
     __typename?: 'Mutation';
     result: boolean;
 };
-export declare type RoomEventSubscriptionVariables = Exact<{
+export type RoomEventSubscriptionVariables = Exact<{
     id: Scalars['String'];
 }>;
-export declare type RoomEventSubscription = {
+export type RoomEventSubscription = {
     __typename?: 'Subscription';
     roomEvent?: {
         __typename?: 'RoomEvent';
@@ -2254,10 +2254,10 @@ export declare type RoomEventSubscription = {
         } | null;
     } | null;
 };
-export declare type PongSubscriptionVariables = Exact<{
+export type PongSubscriptionVariables = Exact<{
     [key: string]: never;
 }>;
-export declare type PongSubscription = {
+export type PongSubscription = {
     __typename?: 'Subscription';
     pong: {
         __typename?: 'Pong';

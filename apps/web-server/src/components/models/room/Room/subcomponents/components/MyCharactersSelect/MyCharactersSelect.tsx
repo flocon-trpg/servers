@@ -1,5 +1,5 @@
 import { State, characterTemplate } from '@flocon-trpg/core';
-import { Select } from 'antd';
+import { Alert, Select } from 'antd';
 import React from 'react';
 import { useMyCharacters } from '../../hooks/useMyCharacters';
 
@@ -13,13 +13,16 @@ type Props = {
     selectedCharacterId?: string;
 
     readOnly: boolean;
+
+    showAlert: boolean;
 };
 
 export const MyCharactersSelect: React.FC<Props> = ({
     onSelect,
     selectedCharacterId,
     readOnly,
-}: Props) => {
+    showAlert,
+}) => {
     const myCharacters = useMyCharacters();
     const selectedCharacter = React.useMemo(() => {
         return selectedCharacterId == null ? undefined : myCharacters?.get(selectedCharacterId);
@@ -41,28 +44,48 @@ export const MyCharactersSelect: React.FC<Props> = ({
         return <span>{selectedCharacter?.name}</span>;
     }
 
+    let alertMessage: string | undefined;
+    let alertType: 'warning' | 'info' | undefined;
+    if (showAlert) {
+        if (selectedCharacterId == null) {
+            alertType = 'warning';
+            alertMessage =
+                '所有者が選択されていません。リストが空の場合は、キャラクターを作成することで選択できるようになります。';
+        } else if (selectedCharacter == null) {
+            alertType = 'info';
+            alertMessage =
+                '所有者が見つかりませんでした。該当するキャラクターが削除された可能性があります。';
+        }
+    } else {
+        alertType = undefined;
+        alertMessage = undefined;
+    }
+
     return (
-        <Select
-            style={{ minWidth: 150 }}
-            size='small'
-            value={selectedCharacterId}
-            onSelect={(value: string | undefined) => {
-                if (value == null) {
-                    onSelect(undefined);
-                    return;
-                }
-                if (typeof value === 'string') {
-                    const selected = myCharacters?.get(value);
-                    if (selected == null) {
+        <div>
+            <Select
+                style={{ minWidth: 150 }}
+                size='small'
+                value={selectedCharacterId}
+                onSelect={(value: string | undefined) => {
+                    if (value == null) {
                         onSelect(undefined);
                         return;
                     }
-                    onSelect({ id: value, state: selected });
-                    return;
-                }
-            }}
-        >
-            {options}
-        </Select>
+                    if (typeof value === 'string') {
+                        const selected = myCharacters?.get(value);
+                        if (selected == null) {
+                            onSelect(undefined);
+                            return;
+                        }
+                        onSelect({ id: value, state: selected });
+                        return;
+                    }
+                }}
+            >
+                {options}
+            </Select>
+            {alertMessage && <Alert type={alertType} showIcon message={alertMessage} />}
+        </div>
     );
 };

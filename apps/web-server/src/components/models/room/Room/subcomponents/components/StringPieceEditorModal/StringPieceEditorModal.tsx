@@ -1,23 +1,24 @@
-import { DrawerProps, Modal } from 'antd';
+import { Modal, ModalProps } from 'antd';
 import { atom, useAtom } from 'jotai';
 import React from 'react';
-import { Subject } from 'rxjs';
-import useConstant from 'use-constant';
 import { useMemoOne } from 'use-memo-one';
-import { CreateMode, StringPieceEditor, UpdateMode } from '../StringPieceEditor/StringPieceEditor';
+import {
+    CreateMode,
+    UpdateMode,
+    useStringPieceEditor,
+} from '../StringPieceEditor/StringPieceEditor';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
-import { close, create, ok, update } from '@/utils/constants';
+import { create, update } from '@/utils/constants';
 import { PieceModalState } from '@/utils/types';
 
 export const stringPieceModalAtom = atom<PieceModalState | null>(null);
 
-const drawerBaseProps: Partial<DrawerProps> = {
+const modalBaseProps: Partial<ModalProps> = {
     width: 600,
 };
 
 export const StringPieceEditorModal: React.FC = () => {
     const [modalType, setModalType] = useAtom(stringPieceModalAtom);
-    const actionRequest = useConstant(() => new Subject<typeof ok | typeof close>());
 
     const {
         visible,
@@ -49,9 +50,11 @@ export const StringPieceEditorModal: React.FC = () => {
         }
     }, [modalType]);
 
+    const stringPieceEditor = useStringPieceEditor({ createMode, updateMode });
+
     return (
         <Modal
-            {...drawerBaseProps}
+            {...modalBaseProps}
             title={modalType?.type == update ? '文字列コマの編集' : '文字列コマの新規作成'}
             open={visible}
             closable
@@ -61,25 +64,21 @@ export const StringPieceEditorModal: React.FC = () => {
                     close={{
                         textType: modalType?.type === update ? 'close' : 'cancel',
                         onClick: () => {
-                            actionRequest.next(close);
                             setModalType(null);
                         },
                     }}
                     ok={{
                         textType: 'create',
                         onClick: () => {
-                            actionRequest.next(ok);
+                            stringPieceEditor.ok();
                             setModalType(null);
                         },
+                        disabled: !stringPieceEditor.canOk,
                     }}
                 />
             }
         >
-            <StringPieceEditor
-                createMode={createMode}
-                updateMode={updateMode}
-                actionRequest={actionRequest}
-            />
+            {stringPieceEditor.element}
         </Modal>
     );
 };

@@ -2664,7 +2664,7 @@ const composeDownOperation = (template) => ({ first, second }) => {
 };
 /**
  * Stateの情報を用いて、DownOperationをTwoWayOperationに変換します。破壊的な処理は行われません。
- * @param nextState - DownOperationが適用される前の状態のState。
+ * @param nextState DownOperationが適用される前の状態のState。
  */
 const restore = (template) => ({ nextState, downOperation }) => {
     const nextStateAsAny = nextState;
@@ -5320,7 +5320,7 @@ const template$9 = createObjectValueTemplate({
 const oneToTenArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 /**
  * Stateから、指定されたユーザーが閲覧できないデータを取り除いた新しいStateを返す。
- * @param requestedBy - 生成されたStateを渡すユーザーの種類。権限を確認するために用いられる。
+ * @param requestedBy 生成されたStateを渡すユーザーの種類。権限を確認するために用いられる。
  */
 const toClientState = (requestedBy) => (source) => {
     return {
@@ -5382,11 +5382,11 @@ const toClientState = (requestedBy) => (source) => {
  * - クライアントから受け取ったOperationのうち、不正なもの（例: そのユーザーが本来削除できないはずのキャラクターを削除しようとする）を取り除く
  * - 編集競合が発生している場合は解決する
  *
- * @param requestedBy - 変更を要求したユーザーの種類。権限を確認するために用いられる。
- * @param prevState - クライアントが推測する最新のState。
- * @param currentState - APIサーバーにおける実際の最新のState。
- * @param serverOperation - `prevState`と`currentState`のDiff。`prevState`と`currentState`が等しい場合はundefined。
- * @param clientOperation - クライアントが要求している変更。
+ * @param requestedBy 変更を要求したユーザーの種類。権限を確認するために用いられる。
+ * @param prevState クライアントが推測する最新のState。
+ * @param currentState APIサーバーにおける実際の最新のState。
+ * @param serverOperation `prevState`と`currentState`のDiff。`prevState`と`currentState`が等しい場合はundefined。
+ * @param clientOperation クライアントが要求している変更。
  */
 const serverTransform = (requestedBy) => ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
     switch (requestedBy.type) {

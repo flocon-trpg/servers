@@ -24,11 +24,10 @@ export namespace Html {
             ⚠️ エラーが発生したため、APIサーバーを稼働させることができませんでした。サーバーに出力されたエラーメッセージを確認して、環境変数や.env.localファイルなどに問題がないか確認してください。
         </p>
     </div>
-    <h2>Deploy To Herokuボタンを使用してこのAPIサーバーをデプロイした方へ</h2>
+    <h2>fly.ioにデプロイした方へ</h2>
     <div>
         <p>
-            おそらくFIREBASE_ADMIN_SECRETもしくはENTRY_PASSWORDの設定に誤りがあると思われます。Herokuに出力されたエラーログを参照して、Config
-            Varsの設定に問題がないか確認してください。
+            おそらくFIREBASE_PROJECT_IDもしくはENTRY_PASSWORDの設定に誤りがあると思われます。fly.ioのダッシュボードに出力されたエラーログを参照して、設定に問題がないか確認してください。
         </p>
     </div>
 </html>

@@ -612,6 +612,6 @@ export declare const type: z.ZodUnion<[z.ZodObject<{
         };
     } | undefined> | undefined;
 }>>]>;
-export declare type Type = z.TypeOf<typeof type>;
+export type Type = z.TypeOf<typeof type>;
 export declare const ofOperation: (operation: TwoWayOperation<typeof DicePieceValueTypes.template>, currentState: State<typeof DicePieceValueTypes.template>) => Type;
 //# sourceMappingURL=log.d.ts.map

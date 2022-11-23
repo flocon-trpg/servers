@@ -1,5 +1,5 @@
 import { State, participantTemplate } from '@flocon-trpg/core';
-declare type ParticipantState = State<typeof participantTemplate>;
+type ParticipantState = State<typeof participantTemplate>;
 export declare class PrivateChannelSet {
     #private;
     constructor(userUid: string | ReadonlySet<string> | ReadonlyArray<string>);

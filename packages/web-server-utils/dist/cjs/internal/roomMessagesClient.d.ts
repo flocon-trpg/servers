@@ -4,7 +4,7 @@ import { CustomMessage, Diff, Message } from './roomMessageTypes';
 export declare const event = "event";
 export declare const query = "query";
 export declare const clear = "clear";
-export declare type MessagesChange<TCustomMessage> = {
+export type MessagesChange<TCustomMessage> = {
     type: typeof event;
     current: readonly Message<TCustomMessage>[];
     diff: Diff<TCustomMessage> | null;
@@ -12,11 +12,11 @@ export declare type MessagesChange<TCustomMessage> = {
     type: typeof query | typeof clear;
     current: readonly Message<TCustomMessage>[];
 };
-export declare type FilteredRoomMessages<TCustomMessage> = Readonly<{
+export type FilteredRoomMessages<TCustomMessage> = Readonly<{
     getCurrent(): readonly Message<TCustomMessage>[];
     changed: Observable<MessagesChange<TCustomMessage>>;
 }>;
-export declare type AllRoomMessages<TCustomMessage> = FilteredRoomMessages<TCustomMessage> & Readonly<{
+export type AllRoomMessages<TCustomMessage> = FilteredRoomMessages<TCustomMessage> & Readonly<{
     filter(filter: (message: Message<TCustomMessage>) => boolean): FilteredRoomMessages<TCustomMessage>;
 }>;
 export declare class RoomMessagesClient<TCustomMessage> {

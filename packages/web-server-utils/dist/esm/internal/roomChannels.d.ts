@@ -1,6 +1,6 @@
 import { RoomMessageEventFragment, RoomMessages } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { PrivateChannelSet } from './privateChannelSet';
-declare type PublicChannel = {
+type PublicChannel = {
     name: string | null;
 };
 export declare class RoomChannels {

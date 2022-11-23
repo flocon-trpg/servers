@@ -1,7 +1,7 @@
 import { ReadonlyBehaviorEvent } from '@flocon-trpg/sdk';
 import { useEffect, useState } from 'react';
 
-export const useReadonlyBehaviorStream = <T>(source: ReadonlyBehaviorEvent<T> | T): T => {
+export const useReadonlyBehaviorEvent = <T>(source: ReadonlyBehaviorEvent<T> | T): T => {
     const [state, setState] = useState(() => {
         if (source instanceof ReadonlyBehaviorEvent) {
             return source.getValue();

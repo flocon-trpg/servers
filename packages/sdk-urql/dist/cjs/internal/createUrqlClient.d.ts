@@ -1,6 +1,6 @@
 import { IdTokenResult } from '@firebase/auth';
-declare type GetUserIdTokenResult = (() => Promise<IdTokenResult | null>) | null;
-declare type Params = {
+type GetUserIdTokenResult = (() => Promise<IdTokenResult | null>) | null;
+type Params = {
     /** API サーバーの HTTP もしくは HTTPS での URL。通常は `https://` もしくは `http://` で始まる文字列です。 */
     httpUrl: string;
     /** API サーバーの WebSocket の URL。通常は `wss://` もしくは `ws://` で始まる文字列です。 */

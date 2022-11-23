@@ -1,8 +1,8 @@
 import { RoomClient } from '@flocon-trpg/sdk';
-import { useReadonlyBehaviorStream } from './useReadonlyBehaviorEvent';
+import { useReadonlyBehaviorEvent } from './useReadonlyBehaviorEvent';
 
 export const useRoomState = <TGraphQLError>(
     roomClient: Pick<RoomClient<any, TGraphQLError>, 'roomState'>
 ) => {
-    return useReadonlyBehaviorStream(roomClient.roomState);
+    return useReadonlyBehaviorEvent(roomClient.roomState);
 };

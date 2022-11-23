@@ -21,5 +21,5 @@ export declare const firebaseConfig: z.ZodObject<{
     messagingSenderId: string;
     appId: string;
 }>;
-export declare type FirebaseConfig = z.TypeOf<typeof firebaseConfig>;
+export type FirebaseConfig = z.TypeOf<typeof firebaseConfig>;
 //# sourceMappingURL=firebaseConfig.d.ts.map

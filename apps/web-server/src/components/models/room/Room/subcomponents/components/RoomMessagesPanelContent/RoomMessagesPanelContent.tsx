@@ -43,6 +43,7 @@ import { CombinedError, useMutation } from 'urql';
 import { useMessageFilter } from '../../hooks/useMessageFilter';
 import { usePublicChannelNames } from '../../hooks/usePublicChannelNames';
 import { useRoomId } from '../../hooks/useRoomId';
+import { useRoomMessageQueryStatus } from '../../hooks/useRoomMessageQueryStatus';
 import { useWritingMessageStatus } from '../../hooks/useWritingMessageStatus';
 import { isDeleted, toText } from '../../utils/message';
 import { ChatInput } from '../ChatInput';
@@ -342,15 +343,13 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
     );
 };
 
-type ChannelNameEditorDrawerProps = {
+type ChannelNameEditorProps = {
     visible: boolean;
 
     onClose: () => void;
 };
 
-const ChannelNamesEditor: React.FC<ChannelNameEditorDrawerProps> = (
-    props: ChannelNameEditorDrawerProps
-) => {
+const ChannelNamesEditor: React.FC<ChannelNameEditorProps> = (props: ChannelNameEditorProps) => {
     const { visible, onClose } = props;
     const publicChannelNames = usePublicChannelNames();
     const operateAsStateWithImmer = useSetRoomStateWithImmer();
@@ -690,7 +689,7 @@ type MessageTabPaneProps = {
 const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProps) => {
     const { contentHeight, config } = props;
 
-    const writingStatusHeight = 20;
+    const statusBarHeight = 20;
 
     const firebaseUser = useAtomValue(firebaseUserValueAtom);
     const writingMessageStatusResult = useWritingMessageStatus();
@@ -721,49 +720,71 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
         [publicChannelNames]
     );
     const messages = useRoomMessages({ filter });
+    const queryStatus = useRoomMessageQueryStatus();
 
-    const writingUsers = (writingMessageStatusResult == null ? [] : [...writingMessageStatusResult])
-        .filter(
-            ([key, value]) =>
-                key !== firebaseUser?.uid && value === WritingMessageStatusType.Writing
-        )
-        .map(([key]) => key)
-        .map(userUid => participants?.get(userUid)?.name ?? '')
-        .sort();
-    let writingStatus: JSX.Element | null = null;
     // TODO: background-colorが適当
-    const writingStatusCss = css`
-        flex-basis: ${writingStatusHeight}px;
+    const statusBarCss = css`
+        flex-basis: ${statusBarHeight}px;
         background-color: #10101090;
         padding: 0 4px;
     `;
-    if (writingUsers.length >= 3) {
-        writingStatus = <div css={writingStatusCss}>複数人が書き込み中…</div>;
-    } else if (writingUsers.length === 0) {
-        writingStatus = <div css={writingStatusCss} />;
-    } else {
-        writingStatus = (
-            <div css={writingStatusCss}>
-                {writingUsers.reduce(
-                    (seed, elem, i) => (i === 0 ? elem : `${seed}, ${elem}`),
-                    '' as string
-                ) + ' が書き込み中…'}
-            </div>
-        );
+    let statusBar: JSX.Element | null = null;
+    switch (queryStatus.type) {
+        case 'success': {
+            const writingUsers = (
+                writingMessageStatusResult == null ? [] : [...writingMessageStatusResult]
+            )
+                .filter(
+                    ([key, value]) =>
+                        key !== firebaseUser?.uid && value === WritingMessageStatusType.Writing
+                )
+                .map(([key]) => key)
+                .map(userUid => participants?.get(userUid)?.name ?? '')
+                .sort();
+            if (writingUsers.length >= 3) {
+                statusBar = <div css={statusBarCss}>複数人が書き込み中…</div>;
+            } else if (writingUsers.length === 0) {
+                statusBar = <div css={statusBarCss} />;
+            } else {
+                statusBar = (
+                    <div css={statusBarCss}>
+                        {writingUsers.reduce(
+                            (seed, elem, i) => (i === 0 ? elem : `${seed}, ${elem}`),
+                            '' as string
+                        ) + ' が書き込み中…'}
+                    </div>
+                );
+            }
+            break;
+        }
+        case 'fetching': {
+            statusBar = <div css={statusBarCss}>メッセージを API サーバーから取得中です…</div>;
+            break;
+        }
+        case 'error': {
+            statusBar = (
+                <div css={statusBarCss}>
+                    <Tooltip overlay={<div>{JSON.stringify(queryStatus.error)}</div>}>
+                        メッセージを API サーバーから取得できませんでした。
+                    </Tooltip>
+                </div>
+            );
+            break;
+        }
     }
 
     const content = (
         <JumpToBottomVirtuoso
-            items={messages.value ?? []}
+            items={messages.current ?? []}
             create={thenMap}
-            height={contentHeight - writingStatusHeight}
+            height={contentHeight - statusBarHeight}
         />
     );
 
     return (
         <div className={classNames(flex, flexColumn)}>
             <div style={{ padding: '0 4px' }}>{content}</div>
-            {writingStatus}
+            {statusBar}
         </div>
     );
 };

@@ -6,7 +6,6 @@ import * as ReactKonva from 'react-konva';
 import { interval } from 'rxjs';
 import { isDeleted, toText as toTextCore } from '../../../../../utils/message';
 import { PieceGroup, PieceGroupProps } from '../../../../PieceGroup/PieceGroup';
-import { NameLabel } from './subcomponents/NameLabel';
 import {
     AnimatedGroupAsAnyProps,
     AnimatedImageAsAnyProps,
@@ -234,7 +233,7 @@ type Props = {
     // 💬を使いたくない場合は常にundefinedにすればよい。
     message?: RoomPublicMessageFragment;
 
-    label?: string;
+    label: string | undefined;
 
     // undefinedならば(x => true)とみなされる。
     // messageが常にundefinedならばこれもundefinedにしてよい。
@@ -275,7 +274,6 @@ export const ImagePiece: React.FC<Props> = props => {
                     width={props.w}
                     height={props.h}
                 />
-                <NameLabel x={0} y={0} w={props.w} h={props.h} text={props.label} />
             </PieceGroup>
             <Balloon
                 x={props.x}

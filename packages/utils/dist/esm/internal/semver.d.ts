@@ -2,11 +2,11 @@ import { Operator } from './compare';
 export declare const alpha = "alpha";
 export declare const beta = "beta";
 export declare const rc = "rc";
-declare type Prerelease = {
+type Prerelease = {
     type: typeof alpha | typeof beta | typeof rc;
     version: number;
 };
-export declare type SemverOption = {
+export type SemverOption = {
     major: number;
     minor: number;
     patch: number;

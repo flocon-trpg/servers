@@ -45,7 +45,7 @@ const createPostgresOptionsResult = (postgresConfig, serverConfig, databaseArg, 
         if (databaseArg === types.postgresql) {
             return result.Result.error(`使用するデータベースとしてPostgreSQLが指定されましたが、設定が見つかりませんでした。${env.POSTGRESQL}の値を設定する必要があります。Herokuの場合はHeroku Postgresをインストールしていてなおかつ${env.DATABASE_URL}の値が設定されていることを確認してください。`);
         }
-        return result.Result.error(`使用するデータベースとしてPostgreSQLが指定されましたが、${env.POSTGRESQL}の値が設定されていません。`);
+        return result.Result.error(`使用するデータベースとしてPostgreSQLが指定されましたが、${env.POSTGRESQL}の値が設定されていません。もし${env.DATABASE_URL}を利用する場合は、--db パラメーターを指定せずに起動してください。`);
     }
     const result$1 = mikroOrm.createPostgreSQLOptions({
         dbName: postgresConfig.dbName,
@@ -153,13 +153,13 @@ const createORMOptionsWithoutDatabaseUrl = (serverConfig, databaseArg, dirName) 
         }
         case types.mysql: {
             if (serverConfig.mysql == null) {
-                return result.Result.error(`使用するデータベースとしてMySQLが指定されましたが、${env.MYSQL}の値が設定されていません。`);
+                return result.Result.error(`使用するデータベースとしてMySQLが指定されましたが、${env.MYSQL}の値が設定されていません。もし${env.DATABASE_URL}を利用する場合は、--db パラメーターを指定せずに起動してください。`);
             }
             return createMySQLOptionsResult(serverConfig.mysql, databaseArg, dirName);
         }
         case types.sqlite: {
             if (serverConfig.sqlite == null) {
-                return result.Result.error(`使用するデータベースとしてSQLiteが指定されましたが、${env.SQLITE}の値が設定されていません。`);
+                return result.Result.error(`使用するデータベースとしてSQLiteが指定されましたが、${env.SQLITE}の値が設定されていません。もし${env.DATABASE_URL}を利用する場合は、--db パラメーターを指定せずに起動してください。`);
             }
             return createSQLiteOptionsResult(serverConfig.sqlite, dirName);
         }

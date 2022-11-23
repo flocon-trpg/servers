@@ -14,7 +14,7 @@ declare const createTestRoomClientSource: <TCustomMessage, TGraphQLError>() => {
     roomConnections: RoomConnectionsManager;
     writingMessageStatusValue: BehaviorEvent<ReadonlyMap<string, WritingMessageStatusType>>;
 };
-declare type MockSource<TCustomMessage, TGraphQLError> = ReturnType<typeof createTestRoomClientSource<TCustomMessage, TGraphQLError>>;
+type MockSource<TCustomMessage, TGraphQLError> = ReturnType<typeof createTestRoomClientSource<TCustomMessage, TGraphQLError>>;
 export declare const createTestRoomClient: <TCustomMessage, TGraphQLError>(callback: {
     writingMessageStatus?: ((inputType: WritingMessageStatusInputType, source: {
         roomMessageClient: RoomMessagesClient<TCustomMessage>;

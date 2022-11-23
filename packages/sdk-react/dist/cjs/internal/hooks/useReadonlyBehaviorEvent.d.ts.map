@@ -1,1 +1,1 @@
-{"version":3,"file":"useReadonlyBehaviorEvent.d.ts","sourceRoot":"","sources":["../../../../src/internal/hooks/useReadonlyBehaviorEvent.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,qBAAqB,EAAE,MAAM,kBAAkB,CAAC;AAGzD,eAAO,MAAM,yBAAyB,gDAiBrC,CAAC"}
+{"version":3,"file":"useReadonlyBehaviorEvent.d.ts","sourceRoot":"","sources":["../../../../src/internal/hooks/useReadonlyBehaviorEvent.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,qBAAqB,EAAE,MAAM,kBAAkB,CAAC;AAGzD,eAAO,MAAM,wBAAwB,gDAiBpC,CAAC"}

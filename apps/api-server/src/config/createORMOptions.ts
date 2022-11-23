@@ -83,7 +83,7 @@ const createPostgresOptionsResult = (
             );
         }
         return Result.error(
-            `使用するデータベースとしてPostgreSQLが指定されましたが、${POSTGRESQL}の値が設定されていません。`
+            `使用するデータベースとしてPostgreSQLが指定されましたが、${POSTGRESQL}の値が設定されていません。もし${DATABASE_URL}を利用する場合は、--db パラメーターを指定せずに起動してください。`
         );
     }
     const result = createPostgreSQLOptions({
@@ -263,7 +263,7 @@ const createORMOptionsWithoutDatabaseUrl = (
         case mysql: {
             if (serverConfig.mysql == null) {
                 return Result.error(
-                    `使用するデータベースとしてMySQLが指定されましたが、${MYSQL}の値が設定されていません。`
+                    `使用するデータベースとしてMySQLが指定されましたが、${MYSQL}の値が設定されていません。もし${DATABASE_URL}を利用する場合は、--db パラメーターを指定せずに起動してください。`
                 );
             }
             return createMySQLOptionsResult(serverConfig.mysql, databaseArg, dirName);
@@ -271,7 +271,7 @@ const createORMOptionsWithoutDatabaseUrl = (
         case sqlite: {
             if (serverConfig.sqlite == null) {
                 return Result.error(
-                    `使用するデータベースとしてSQLiteが指定されましたが、${SQLITE}の値が設定されていません。`
+                    `使用するデータベースとしてSQLiteが指定されましたが、${SQLITE}の値が設定されていません。もし${DATABASE_URL}を利用する場合は、--db パラメーターを指定せずに起動してください。`
                 );
             }
             return createSQLiteOptionsResult(serverConfig.sqlite, dirName);

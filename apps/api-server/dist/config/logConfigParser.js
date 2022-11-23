@@ -9,15 +9,15 @@ const ensureOk = (source) => {
     return source?.value;
 };
 class LogConfigParser {
-    constructor(env$1) {
-        this[env.LOG_FORMAT] = LogConfigParser.logFormat(env$1);
-        this[env.LOG_LEVEL] = LogConfigParser.logLevel(env$1);
-    }
     get logFormat() {
         return this[env.LOG_FORMAT];
     }
     get logLevel() {
         return this[env.LOG_LEVEL];
+    }
+    constructor(env$1) {
+        this[env.LOG_FORMAT] = LogConfigParser.logFormat(env$1);
+        this[env.LOG_LEVEL] = LogConfigParser.logLevel(env$1);
     }
     static logFormat(env$1) {
         const logFormat = env$1[env.LOG_FORMAT];

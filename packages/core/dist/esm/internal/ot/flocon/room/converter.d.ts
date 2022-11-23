@@ -1,9 +1,9 @@
 import { DownOperation, State, UpOperation } from '../../generator';
 import * as Room from './types';
-declare type RoomState = State<typeof Room.template>;
-declare type RoomDbState = State<typeof Room.dbTemplate>;
-declare type RoomUpOperation = UpOperation<typeof Room.dbTemplate>;
-declare type RoomDownOperation = DownOperation<typeof Room.dbTemplate>;
+type RoomState = State<typeof Room.template>;
+type RoomDbState = State<typeof Room.dbTemplate>;
+type RoomUpOperation = UpOperation<typeof Room.dbTemplate>;
+type RoomDownOperation = DownOperation<typeof Room.dbTemplate>;
 export declare const decodeState: (source: unknown) => RoomState;
 export declare const parseState: (source: string) => RoomState;
 export declare const stringifyState: (source: RoomState) => string;

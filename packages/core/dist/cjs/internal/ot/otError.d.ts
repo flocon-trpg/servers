@@ -1,5 +1,5 @@
 import { DownError, ScalarError, TwoWayError, UpError } from './util/type';
-declare type OtErrorParam = Exclude<ScalarError | UpError | DownError | TwoWayError, string>;
+type OtErrorParam = Exclude<ScalarError | UpError | DownError | TwoWayError, string>;
 export declare class OtError extends Error {
     readonly otError: OtErrorParam;
     constructor(content: OtErrorParam);
