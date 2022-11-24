@@ -9,7 +9,7 @@ const external = [
     'path',
     'http',
     'fs',
-    'fs/promises'
+    'fs/promises',
 ];
 
 module.exports = [
