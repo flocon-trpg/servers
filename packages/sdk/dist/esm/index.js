@@ -542,15 +542,15 @@ class StateManagerCore {
     // isByMyClient === true の場合、revisionToで対応関係がわかるため、requestIdは必要ない。
     onGet(operation, revisionTo, isByMyClient) {
         if (!Number.isInteger(revisionTo)) {
-            console.warn(`${revisionTo} is not an integer. onGet is cancelled.`);
+            loggerRef.value.warn(`${revisionTo} is not an integer. onGet is cancelled.`);
             return;
         }
         if (revisionTo <= this._revision) {
-            console.log(`revisionTo of GetOperation is ${revisionTo}, but state revision is already ${this._revision}`);
+            loggerRef.value.info(`revisionTo of GetOperation is ${revisionTo}, but state revision is already ${this._revision}`);
             return;
         }
         if (this._pendingGetOperations.has(revisionTo)) {
-            console.warn(`stateManagerCore.__pendingGetOperations already contains ${revisionTo}`);
+            loggerRef.value.warn(`stateManagerCore.__pendingGetOperations already contains ${revisionTo}`);
         }
         this._pendingGetOperations.set(revisionTo, {
             operation,

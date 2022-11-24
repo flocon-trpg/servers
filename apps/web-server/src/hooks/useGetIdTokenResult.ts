@@ -1,3 +1,4 @@
+import { loggerRef } from '@flocon-trpg/utils';
 import { useAtomValue } from 'jotai';
 import React from 'react';
 import { useLatest } from 'react-use';
@@ -17,7 +18,7 @@ export const useGetIdTokenResult = () => {
             return null;
         }
         const result = await user.getIdTokenResult().catch(err => {
-            console.error('failed at getIdToken', err);
+            loggerRef.value.error(err, 'failed at getIdToken');
             return null;
         });
         return result;

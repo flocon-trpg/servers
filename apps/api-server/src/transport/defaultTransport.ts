@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import build from 'pino-abstract-transport';
 import { LOG_FORMAT } from '../env';
 import { notice } from '../logger';

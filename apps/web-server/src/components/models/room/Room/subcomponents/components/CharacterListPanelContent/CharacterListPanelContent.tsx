@@ -8,6 +8,7 @@ import {
     strIndex10Array,
     update,
 } from '@flocon-trpg/core';
+import { loggerRef } from '@flocon-trpg/utils';
 import {
     Alert,
     Table as AntdTable,
@@ -492,7 +493,7 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                     return createStringParameterColumn({ key: strParamKey, strParamNames });
                 }
 
-                console.warn(
+                loggerRef.value.warn(
                     `"${rowKey}" は使用可能なキーではありません。KeySorterの設定に誤りがある可能性があります。`
                 );
                 return null;

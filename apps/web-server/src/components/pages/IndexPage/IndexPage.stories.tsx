@@ -1,5 +1,6 @@
 import * as Doc071 from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Doc072 from '@flocon-trpg/typed-document-node-v0.7.2';
+import { loggerRef } from '@flocon-trpg/utils';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 import { Client, CombinedError } from 'urql';
@@ -54,7 +55,7 @@ const createMockClient = (version: Version | 'error' | 'never'): Client => {
                     });
                 }
                 default:
-                    console.error('Query', query.query);
+                    loggerRef.value.error({ query: query.query }, 'Query');
                     throw new Error('Query not match');
             }
         },

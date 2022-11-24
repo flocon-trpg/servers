@@ -12,6 +12,7 @@ import {
     GetServerInfoDocument,
     RenameFilesDocument,
 } from '@flocon-trpg/typed-document-node-v0.7.8';
+import { loggerRef } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import { Modal, Upload, notification } from 'antd';
 import axios from 'axios';
@@ -625,7 +626,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                             });
                             break;
                         default:
-                            console.warn('unknown uploaderType:', uploaderType);
+                            loggerRef.value.warn(`unknown uploaderType: ${uploaderType}`);
                             break;
                     }
                 }}

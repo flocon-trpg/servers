@@ -1,6 +1,7 @@
 import {
     groupJoinMap,
     left,
+    loggerRef,
     mapRecord,
     recordToArray,
     recordToMap,
@@ -43,7 +44,7 @@ const warnNotFoundTemplate = ({
     key: string;
     objectType: 'state' | 'operation';
 }): void => {
-    console.warn(
+    loggerRef.value.warn(
         `"${key}" key found at ${objectType} object, but template not found. Maybe you use keys which are not supported?`
     );
 };

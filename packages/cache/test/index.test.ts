@@ -1,4 +1,4 @@
-import { parseStringToBoolean } from '@flocon-trpg/utils';
+import { loggerRef, parseStringToBoolean } from '@flocon-trpg/utils';
 import Redis from 'ioredis';
 import { Cache, createNodeCache, createRedisCache } from '../src';
 
@@ -10,7 +10,7 @@ const REDIS_TEST = process.env.REDIS_TEST;
 const skipRedis = parseStringToBoolean(REDIS_TEST).value === false;
 
 if (skipRedis) {
-    console.info('Skips Redis tests because `REDIS_TEST` is falsy.');
+    loggerRef.value.info('Skips Redis tests because `REDIS_TEST` is falsy.');
 }
 
 const createEach = (redis: Redis): Cache[] => {

@@ -47,12 +47,8 @@ export class DeleteFilesResolver {
         await context.em.flush();
         for (const filename of filenamesToDelete) {
             const filePath = path.resolve(directory, filename);
-            const statResult = await stat(filePath).catch(err => {
-                logger.warn(
-                    'stat(%s) threw an error. Maybe the file was not found?: %o',
-                    filePath,
-                    err
-                );
+            const statResult = await stat(filePath).catch((err: Error) => {
+                logger.warn(err, `stat(${filePath}) threw an error. Maybe the file was not found?`);
                 return false as const;
             });
             if (statResult === false) {
@@ -62,17 +58,13 @@ export class DeleteFilesResolver {
             if (statResult.isFile()) {
                 await remove(filePath);
             } else {
-                logger.warn('%s is not a file', filePath);
+                logger.warn(`${filePath} is not a file`);
             }
         }
         for (const filename of thumbFilenamesToDelete) {
             const filePath = path.resolve(directory, thumbsDir, filename);
-            const statResult = await stat(filePath).catch(err => {
-                logger.warn(
-                    'stat(%s) threw an error. Maybe the file was not found?: %o',
-                    filePath,
-                    err
-                );
+            const statResult = await stat(filePath).catch((err: Error) => {
+                logger.warn(err, `stat(${filePath}) threw an error. Maybe the file was not found?`);
                 return false as const;
             });
             if (statResult === false) {
@@ -82,7 +74,7 @@ export class DeleteFilesResolver {
             if (statResult.isFile()) {
                 await remove(filePath);
             } else {
-                logger.warn('%s is not a file', filePath);
+                logger.warn(`${filePath} is not a file`);
             }
         }
         return filenamesToDelete;

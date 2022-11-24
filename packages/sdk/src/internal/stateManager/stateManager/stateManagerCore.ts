@@ -1,6 +1,7 @@
 // StateManagerから、PostUnknownを受け取る機能とreloadを取り除いたもの。
 
 import { simpleId } from '@flocon-trpg/core';
+import { loggerRef } from '@flocon-trpg/utils';
 import { StateGetter } from './stateGetter';
 import { StateManagerParameters } from './types';
 
@@ -195,17 +196,19 @@ export class StateManagerCore<TState, TOperation> {
     // isByMyClient === true の場合、revisionToで対応関係がわかるため、requestIdは必要ない。
     public onGet(operation: TOperation, revisionTo: number, isByMyClient: boolean) {
         if (!Number.isInteger(revisionTo)) {
-            console.warn(`${revisionTo} is not an integer. onGet is cancelled.`);
+            loggerRef.value.warn(`${revisionTo} is not an integer. onGet is cancelled.`);
             return;
         }
         if (revisionTo <= this._revision) {
-            console.log(
+            loggerRef.value.info(
                 `revisionTo of GetOperation is ${revisionTo}, but state revision is already ${this._revision}`
             );
             return;
         }
         if (this._pendingGetOperations.has(revisionTo)) {
-            console.warn(`stateManagerCore.__pendingGetOperations already contains ${revisionTo}`);
+            loggerRef.value.warn(
+                `stateManagerCore.__pendingGetOperations already contains ${revisionTo}`
+            );
         }
         this._pendingGetOperations.set(revisionTo, {
             operation,

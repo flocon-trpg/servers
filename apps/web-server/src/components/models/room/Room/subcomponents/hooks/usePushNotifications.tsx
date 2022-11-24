@@ -1,3 +1,4 @@
+import { loggerRef } from '@flocon-trpg/utils';
 import {
     custom,
     pieceLog,
@@ -90,10 +91,10 @@ export function usePushNotifications(): void {
                 if (message.value.error != null) {
                     switch (message.value.type) {
                         case 'error':
-                            console.error(message.value.message, message.value.error);
+                            loggerRef.value.error(message.value.error, message.value.message);
                             break;
                         case 'warning':
-                            console.warn(message.value.message, message.value.error);
+                            loggerRef.value.warn(message.value.error, message.value.message);
                             break;
                         default:
                             break;

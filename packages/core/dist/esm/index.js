@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { Result } from '@kizahasi/result';
 import { LocalDate, LocalDateTime, LocalTime, OffsetDateTime, parse as parse$2 } from '@ltd/j-toml';
 import { FObject, FBoolean, ScriptError, beginCast, FFunction, FRecord, FString, FType, FNumber, FRecordRef, test, arrayClass, createConsoleClass, exec } from '@flocon-trpg/flocon-script';
-import { recordToArray, recordToMap, mapToRecord, groupJoinMap, both, right, left, recordForEach, chooseRecord, mapRecord, keyNames } from '@flocon-trpg/utils';
+import { recordToArray, recordToMap, mapToRecord, groupJoinMap, both, right, left, recordForEach, chooseRecord, mapRecord, loggerRef, keyNames } from '@flocon-trpg/utils';
 import cloneDeep from 'lodash.clonedeep';
 import { deserializeUpOperation, apply as apply$5, serializeTwoWayOperation, diff as diff$5, deserizalizeTwoWayOperation, toUpOperation as toUpOperation$3, serializeUpOperation, deserializeDownOperation, applyBack as applyBack$5, composeDownOperation as composeDownOperation$4, serializeDownOperation, applyBackAndRestore, transformUpOperation, toDownOperation as toDownOperation$3, applyAndRestore, transformTwoWayOperation } from '@kizahasi/ot-string';
 import truncate from 'truncate-utf8-bytes';
@@ -2254,7 +2254,7 @@ const paramRecord = 'paramRecord';
 const object = 'object';
 const isKeyToIgnore = (key) => key === $v || key === $r;
 const warnNotFoundTemplate = ({ key, objectType, }) => {
-    console.warn(`"${key}" key found at ${objectType} object, but template not found. Maybe you use keys which are not supported?`);
+    loggerRef.value.warn(`"${key}" key found at ${objectType} object, but template not found. Maybe you use keys which are not supported?`);
 };
 /** Stateならば`T`に、TwoWayOperationならば`{ oldValue:T; newValue:T }`に変換されるtemplateを作成します。*/
 const createReplaceValueTemplate = (value) => {

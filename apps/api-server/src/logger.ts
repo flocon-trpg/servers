@@ -8,8 +8,6 @@ export const notice = 'notice';
 export type Pino = Logger;
 const defaultTransport = './transport/defaultTransport.js';
 
-let isInitialized = false;
-
 // LOG_LEVELがパースできなかった場合などはinitializeLoggerが実行されていない状態でエラーを通知する必要がある。その際にuninitializedLoggerが使われる。
 const createUninitializeLogger = () => {
     return pino({
@@ -17,16 +15,18 @@ const createUninitializeLogger = () => {
     });
 };
 
+let currentLogger: ReturnType<typeof createUninitializeLogger> | null = null;
+
 /** `get()`を実行することでloggerを取得できます。 */
 export const logger = {
     get() {
-        if (!isInitialized) {
-            isInitialized = true;
+        if (currentLogger == null) {
             // テストでは ts-jest が使われるため、./transport/defaultTransport.js は存在しない。そのため、ここに来るとエラーになる。
             // テストの場合は事前に initializeLogger を実行しておく必要がある。
-            loggerRef.value = createUninitializeLogger();
+            currentLogger = createUninitializeLogger();
+            loggerRef.value = currentLogger;
         }
-        return loggerRef.value;
+        return currentLogger;
     },
     /** `get().trace` と同じです。 */
     get trace() {
@@ -67,7 +67,7 @@ export const logger = {
 
 /** loggerを準備します。この関数を実行せずにロギングが行われる場合、デフォルトのロガーが使われます。複数回実行するとwarnのログが出力されます。 */
 export const initializeLogger = (logConfigResult: Result<LogConfig>) => {
-    if (isInitialized) {
+    if (currentLogger != null) {
         logger.warn('initializeLogger was called multiple times.');
     }
 
@@ -78,17 +78,17 @@ export const initializeLogger = (logConfigResult: Result<LogConfig>) => {
     const logLevel = logConfigResult.value.logLevel ?? 'info';
     switch (logConfigResult.value.logFormat) {
         case 'json': {
-            isInitialized = true;
-            loggerRef.value = pino({ level: logLevel });
+            currentLogger = pino({ level: logLevel });
+            loggerRef.value = currentLogger;
             break;
         }
         case 'default':
         case undefined: {
-            isInitialized = true;
-            loggerRef.value = pino({
+            currentLogger = pino({
                 level: logLevel,
                 transport: { target: defaultTransport },
             });
+            loggerRef.value = currentLogger;
             break;
         }
     }

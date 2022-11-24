@@ -3,11 +3,11 @@
 var option = require('@kizahasi/option');
 var result = require('@kizahasi/result');
 var browserOrNode = require('browser-or-node');
-var p = require('pino');
+var pino = require('pino');
 
 function _interopDefault (e) { return e && e.__esModule ? e : { default: e }; }
 
-var p__default = /*#__PURE__*/_interopDefault(p);
+var pino__default = /*#__PURE__*/_interopDefault(pino);
 
 function* groupJoinArray(left, right) {
     for (let i = 0;; i++) {
@@ -739,7 +739,9 @@ const defaultLogLevel = 'info';
 // ブラウザ以外の場合は、このままだと JSON がそのまま出力されて見づらいので、pino-pretty などを使わない場合は変更するほうがいいかも。
 /** pino のロガーを取得もしくは変更できます。 */
 const loggerRef = {
-    value: browserOrNode.isBrowser ? p__default.default({ level: defaultLogLevel, browser: {} }) : p__default.default({ level: defaultLogLevel }),
+    value: browserOrNode.isBrowser
+        ? pino__default.default({ level: defaultLogLevel, browser: {} })
+        : pino__default.default({ level: defaultLogLevel }),
 };
 
 /** 複数のkeyを使用できるMap */

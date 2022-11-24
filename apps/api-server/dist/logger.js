@@ -5,19 +5,19 @@ var pino = require('pino');
 
 const notice = 'notice';
 const defaultTransport = './transport/defaultTransport.js';
-let isInitialized = false;
 const createUninitializeLogger = () => {
     return pino.pino({
         transport: { target: defaultTransport },
     });
 };
+let currentLogger = null;
 const logger = {
     get() {
-        if (!isInitialized) {
-            isInitialized = true;
-            utils.loggerRef.value = createUninitializeLogger();
+        if (currentLogger == null) {
+            currentLogger = createUninitializeLogger();
+            utils.loggerRef.value = currentLogger;
         }
-        return utils.loggerRef.value;
+        return currentLogger;
     },
     get trace() {
         const logger = this.get();
@@ -49,7 +49,7 @@ const logger = {
     },
 };
 const initializeLogger = (logConfigResult) => {
-    if (isInitialized) {
+    if (currentLogger != null) {
         logger.warn('initializeLogger was called multiple times.');
     }
     if (logConfigResult.isError) {
@@ -58,17 +58,17 @@ const initializeLogger = (logConfigResult) => {
     const logLevel = logConfigResult.value.logLevel ?? 'info';
     switch (logConfigResult.value.logFormat) {
         case 'json': {
-            isInitialized = true;
-            utils.loggerRef.value = pino.pino({ level: logLevel });
+            currentLogger = pino.pino({ level: logLevel });
+            utils.loggerRef.value = currentLogger;
             break;
         }
         case 'default':
         case undefined: {
-            isInitialized = true;
-            utils.loggerRef.value = pino.pino({
+            currentLogger = pino.pino({
                 level: logLevel,
                 transport: { target: defaultTransport },
             });
+            utils.loggerRef.value = currentLogger;
             break;
         }
     }

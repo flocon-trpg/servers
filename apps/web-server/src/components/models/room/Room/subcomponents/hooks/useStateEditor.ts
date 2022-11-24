@@ -1,3 +1,4 @@
+import { loggerRef } from '@flocon-trpg/utils';
 import { Option } from '@kizahasi/option';
 import produce from 'immer';
 import React from 'react';
@@ -36,7 +37,7 @@ export function useStateEditor<T>({
 }) {
     React.useEffect(() => {
         if (updateMode != null && createMode != null) {
-            console.warn('useStateEditorにおいて、updateとcreateの両方がnon-nullishです。');
+            loggerRef.value.warn('useStateEditorにおいて、updateとcreateの両方がnon-nullishです。');
         }
     }, [updateMode, createMode]);
 

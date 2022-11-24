@@ -1,7 +1,7 @@
 import { Option } from '@kizahasi/option';
 import { Result } from '@kizahasi/result';
 import { isBrowser } from 'browser-or-node';
-import p from 'pino';
+import pino from 'pino';
 
 function* groupJoinArray(left, right) {
     for (let i = 0;; i++) {
@@ -733,7 +733,9 @@ const defaultLogLevel = 'info';
 // ブラウザ以外の場合は、このままだと JSON がそのまま出力されて見づらいので、pino-pretty などを使わない場合は変更するほうがいいかも。
 /** pino のロガーを取得もしくは変更できます。 */
 const loggerRef = {
-    value: isBrowser ? p({ level: defaultLogLevel, browser: {} }) : p({ level: defaultLogLevel }),
+    value: isBrowser
+        ? pino({ level: defaultLogLevel, browser: {} })
+        : pino({ level: defaultLogLevel }),
 };
 
 /** 複数のkeyを使用できるMap */

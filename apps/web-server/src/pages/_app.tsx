@@ -30,7 +30,6 @@ import { getHttpUri, getWsUri, publicEnvTxtAtom } from '../atoms/webConfigAtom/w
 import { AllContextProvider } from '../components/behaviors/AllContextProvider';
 import { useMyUserUid } from '../hooks/useMyUserUid';
 import { useWebConfig } from '../hooks/useWebConfig';
-import { appConsole } from '../utils/appConsole';
 import {
     FirebaseUserState,
     authNotFound,
@@ -209,7 +208,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         }
         setFirebaseApp(prevValue => {
             if (prevValue != null) {
-                console.warn('Firebase app is initialized multiple times');
+                loggerRef.value.warn('Firebase app is initialized multiple times');
             }
             return initializeApp(config.value.firebaseConfig);
         });
@@ -242,13 +241,13 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         if (httpUri == null) {
             return;
         }
-        appConsole.log(`GraphQL HTTP URL: ${httpUri}`);
+        loggerRef.value.info(`GraphQL HTTP URL: ${httpUri}`);
     }, [httpUri]);
     React.useEffect(() => {
         if (wsUri == null) {
             return;
         }
-        appConsole.log(`GraphQL WebSocket URL: ${wsUri}`);
+        loggerRef.value.info(`GraphQL WebSocket URL: ${wsUri}`);
     }, [wsUri]);
 
     useSubscribeFirebaseUser();
@@ -318,7 +317,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
 
     const clientId = useConstant(() => simpleId());
     React.useEffect(() => {
-        appConsole.log(`clientId: ${clientId}`);
+        loggerRef.value.info(`clientId: ${clientId}`);
     }, [clientId]);
 
     React.useEffect(() => {
