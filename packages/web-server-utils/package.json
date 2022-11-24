@@ -21,6 +21,7 @@
     "dependencies": {
         "@flocon-trpg/core": "workspace:^",
         "@flocon-trpg/typed-document-node-v0.7.1": "workspace:^",
+        "@flocon-trpg/utils": "workspace:^",
         "immer": "^9.0.16",
         "rxjs": "^7.5.6"
     },
@@ -29,7 +30,6 @@
         "@flocon-trpg/prettier-config": "workspace:^",
         "@flocon-trpg/rollup-config": "workspace:^",
         "@flocon-trpg/tsconfig": "workspace:^",
-        "@flocon-trpg/utils": "workspace:^",
         "@types/jest": "29.2.3",
         "@typescript-eslint/eslint-plugin": "5.44.0",
         "@typescript-eslint/parser": "5.44.0",

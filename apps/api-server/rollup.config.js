@@ -6,6 +6,10 @@ const external = [
     ...Object.keys(require('./package.json').dependencies),
     // preserveModules=true かつ decorator が有効の場合、この 'tslib' がないとコードが想定通りの形で出力されない。
     'tslib',
+    'path',
+    'http',
+    'fs',
+    'fs/promises'
 ];
 
 module.exports = [
