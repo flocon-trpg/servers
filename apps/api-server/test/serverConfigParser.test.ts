@@ -1,8 +1,8 @@
 import './beforeAllGlobal';
+import { loggerRef } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import { ServerConfigParser } from '../src/config/serverConfigParser';
 import { WritableServerConfig, WritableServerConfigForMigration } from '../src/config/types';
-import { logger } from '@/logger';
 
 const defaultServerConfig: WritableServerConfig = {
     accessControlAllowOrigin: undefined,
@@ -268,7 +268,7 @@ describe('serverConfigParser', () => {
     });
 
     it('should ignore FIREBASE_PROJECTID if FIREBASE_PROJECT_ID is set', () => {
-        const mock = jest.spyOn(logger.get(), 'warn');
+        const mock = jest.spyOn(loggerRef, 'warn');
         const actual = new ServerConfigParser({
             FIREBASE_PROJECT_ID: 'test_project_id1',
             FIREBASE_PROJECTID: 'test_project_id2',

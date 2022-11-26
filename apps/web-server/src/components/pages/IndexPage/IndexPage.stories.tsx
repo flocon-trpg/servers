@@ -55,7 +55,7 @@ const createMockClient = (version: Version | 'error' | 'never'): Client => {
                     });
                 }
                 default:
-                    loggerRef.value.error({ query: query.query }, 'Query');
+                    loggerRef.error({ query: query.query }, 'Query');
                     throw new Error('Query not match');
             }
         },

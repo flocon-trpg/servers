@@ -2,6 +2,7 @@
 
 var http = require('http');
 var path = require('path');
+var utils = require('@flocon-trpg/utils');
 var core = require('@mikro-orm/core');
 var apolloServerExpress = require('apollo-server-express');
 var express = require('express');
@@ -21,7 +22,6 @@ var BaasType = require('./enums/BaasType.js');
 var FilePermissionType = require('./enums/FilePermissionType.js');
 var env = require('./env.js');
 var Html = require('./html/Html.js');
-var logger = require('./logger.js');
 var consume = require('./rateLimit/consume.js');
 var appConsole = require('./utils/appConsole.js');
 var easyFlake = require('./utils/easyFlake.js');
@@ -53,14 +53,14 @@ const loggingPlugin = {
     async requestDidStart() {
         return {
             async didEncounterErrors(requestContext) {
-                logger.logger.info({
+                utils.loggerRef.info({
                     request: requestContext.request,
                     response: requestContext.response,
                     errors: requestContext.errors,
                 }, 'GraphQL error encountered');
             },
             async willSendResponse(requestContext) {
-                logger.logger.info({
+                utils.loggerRef.info({
                     request: requestContext.request,
                     response: requestContext.response,
                     errors: requestContext.errors,
@@ -73,7 +73,7 @@ const createServerAsError = async ({ port }) => {
     const app = express();
     setupIndexAsError(app);
     const server = app.listen(port, () => {
-        logger.logger.warn(`⚠️ Server ready at http://localhost:${port}, but API is not working. Please see error messages.`);
+        utils.loggerRef.warn(`⚠️ Server ready at http://localhost:${port}, but API is not working. Please see error messages.`);
     });
     return server;
 };
@@ -107,7 +107,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
     await apolloServer.start();
     const app = express();
     app.use(pinoHttp({
-        logger: logger.logger.get(),
+        logger: utils.loggerRef.value,
     }));
     apolloServer.applyMiddleware({ app });
     if (serverConfig.accessControlAllowOrigin == null) {
@@ -244,7 +244,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
                 .toFile(thumbPath)
                 .then(() => true)
                 .catch(err => {
-                logger.logger.debug(err);
+                utils.loggerRef.debug(err);
                 return false;
             });
             const permissionType = req.params.permission === permission.public
@@ -350,7 +350,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
             return result;
         },
         onSubscribe: async (ctx, message) => {
-            logger.logger.info({ message }, 'graphql-ws onSubscribe');
+            utils.loggerRef.info({ message }, 'graphql-ws onSubscribe');
             message.payload.query;
             if (!isRoomEventSubscription(message.payload.query)) {
                 return;
@@ -368,18 +368,18 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
                 });
             }
             else {
-                logger.logger.warn('(typeof RoomEvent.id) should be string');
+                utils.loggerRef.warn('(typeof RoomEvent.id) should be string');
             }
         },
         onNext(ctx, message, args, result) {
-            logger.logger.info({ message, result }, 'graphql-ws onNext');
+            utils.loggerRef.info({ message, result }, 'graphql-ws onNext');
         },
         onComplete: (ctx, message) => {
-            logger.logger.info({ message }, 'graphql-ws onComplete');
+            utils.loggerRef.info({ message }, 'graphql-ws onComplete');
             return connectionManager.onLeaveRoom({ connectionId: message.id });
         },
         onClose: async (ctx, code, reason) => {
-            logger.logger.info({ code, reason }, 'graphql-ws onClose');
+            utils.loggerRef.info({ code, reason }, 'graphql-ws onClose');
             for (const key in ctx.subscriptions) {
                 await connectionManager.onLeaveRoom({ connectionId: key });
             }
@@ -390,9 +390,9 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
     }
     const server = httpServer.listen(port, () => {
         !quiet &&
-            logger.logger.infoAsNotice(`🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`);
+            utils.loggerRef.infoAsNotice(`🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`);
         !quiet &&
-            logger.logger.infoAsNotice(`🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`);
+            utils.loggerRef.infoAsNotice(`🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`);
     });
     const close = async () => {
         await new Promise((resolve, reject) => {

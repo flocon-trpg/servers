@@ -4,5 +4,5 @@ import { main } from './main';
 import { loadAsMain } from './utils/commandLineArgs';
 
 loadAsMain().then(args => {
-    main(args).catch(err => loggerRef.value.error(err));
+    main(args).catch(err => loggerRef.error(err));
 });

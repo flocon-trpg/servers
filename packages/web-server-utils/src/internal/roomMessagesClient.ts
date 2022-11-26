@@ -53,7 +53,7 @@ const createRoomMessage = (
                 value: source,
             };
         case undefined:
-            loggerRef.value.warn(
+            loggerRef.warn(
                 { object: source },
                 'createRoomMessage 関数に渡されたオブジェクトの __typename が undefined だったため、処理はスキップされました。RoomPrivateMessageFragment | RoomPublicMessageFragment | PieceLogFragment | RoomSoundEffectFragment では __typename がないとメッセージを処理できません。GraphQL クライアントの設定を確認し、__typename を常にセットするようにしてください。'
             );
@@ -443,11 +443,11 @@ export class RoomMessagesClient<TCustomMessage> {
                 }
                 case 'RoomPublicChannelUpdate':
                 case 'RoomMessagesReset': {
-                    loggerRef.value.warn(`${event.__typename} is deprecated.`);
+                    loggerRef.warn(`${event.__typename} is deprecated.`);
                     break;
                 }
                 case undefined:
-                    loggerRef.value.warn(
+                    loggerRef.warn(
                         { object: event },
                         '#reduceOnQuery メソッドの引数で __typename が undefined のオブジェクトが見つかったため、このオブジェクトの処理はスキップされました。RoomMessageEventFragment では __typename がないとメッセージを処理できません。GraphQL クライアントの設定を確認し、__typename を常にセットするようにしてください。'
                     );

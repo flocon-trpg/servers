@@ -2261,7 +2261,7 @@ const paramRecord = 'paramRecord';
 const object = 'object';
 const isKeyToIgnore = (key) => key === $v || key === $r;
 const warnNotFoundTemplate = ({ key, objectType, }) => {
-    utils.loggerRef.value.warn(`"${key}" key found at ${objectType} object, but template not found. Maybe you use keys which are not supported?`);
+    utils.loggerRef.warn(`"${key}" key found at ${objectType} object, but template not found. Maybe you use keys which are not supported?`);
 };
 /** Stateならば`T`に、TwoWayOperationならば`{ oldValue:T; newValue:T }`に変換されるtemplateを作成します。*/
 const createReplaceValueTemplate = (value) => {

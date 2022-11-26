@@ -4,7 +4,6 @@ var utils = require('@flocon-trpg/utils');
 var result = require('@kizahasi/result');
 var env = require('../env.js');
 var types = require('./types.js');
-var logger = require('../logger.js');
 
 env.loadDotenv();
 const tryParseJSON = (json) => {
@@ -179,7 +178,7 @@ class ServerConfigParser {
         const project_id = env$1[env.FIREBASE_PROJECT_ID];
         const projectid = env$1[env.FIREBASE_PROJECTID];
         if (project_id != null && projectid != null) {
-            logger.logger.warn(`${env.FIREBASE_PROJECT_ID} と ${env.FIREBASE_PROJECTID} が両方ともセットされているため、${env.FIREBASE_PROJECT_ID} の値のみが参照されます。`);
+            utils.loggerRef.warn(`${env.FIREBASE_PROJECT_ID} と ${env.FIREBASE_PROJECTID} が両方ともセットされているため、${env.FIREBASE_PROJECT_ID} の値のみが参照されます。`);
         }
         return project_id ?? projectid;
     }

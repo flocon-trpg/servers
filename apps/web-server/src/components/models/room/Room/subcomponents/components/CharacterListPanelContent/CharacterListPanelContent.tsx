@@ -493,7 +493,7 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                     return createStringParameterColumn({ key: strParamKey, strParamNames });
                 }
 
-                loggerRef.value.warn(
+                loggerRef.warn(
                     `"${rowKey}" は使用可能なキーではありません。KeySorterの設定に誤りがある可能性があります。`
                 );
                 return null;

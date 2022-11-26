@@ -2809,6 +2809,7 @@ __metadata:
   dependencies:
     "@flocon-trpg/cache": "workspace:^"
     "@flocon-trpg/core": "workspace:^"
+    "@flocon-trpg/default-pino-transport": "workspace:^"
     "@flocon-trpg/eslint-config": "workspace:^"
     "@flocon-trpg/prettier-config": "workspace:^"
     "@flocon-trpg/tsconfig": "workspace:^"
@@ -2876,7 +2877,6 @@ __metadata:
     multer: ^1.4.3
     npm-run-all: ^4.1.5
     pino: ^8.6.1
-    pino-abstract-transport: ^1.0.0
     pino-http: ^8.2.1
     prettier: 2.8.0
     rate-limiter-flexible: ^2.3.0
@@ -2965,6 +2965,28 @@ __metadata:
     ts-jest: 29.0.3
     typescript: 4.9.3
     zod: ^3.19.1
+  languageName: unknown
+  linkType: soft
+
+"@flocon-trpg/default-pino-transport@workspace:^, @flocon-trpg/default-pino-transport@workspace:packages/defaultPinoTransport":
+  version: 0.0.0-use.local
+  resolution: "@flocon-trpg/default-pino-transport@workspace:packages/defaultPinoTransport"
+  dependencies:
+    "@flocon-trpg/eslint-config": "workspace:^"
+    "@flocon-trpg/prettier-config": "workspace:^"
+    "@flocon-trpg/rollup-config": "workspace:^"
+    "@flocon-trpg/tsconfig": "workspace:^"
+    "@typescript-eslint/eslint-plugin": 5.44.0
+    "@typescript-eslint/parser": 5.44.0
+    eslint: 8.28.0
+    eslint-config-prettier: 8.5.0
+    eslint-import-resolver-typescript: 3.5.2
+    eslint-plugin-import: 2.26.0
+    pino-abstract-transport: ^1.0.0
+    prettier: 2.8.0
+    rimraf: 3.0.2
+    rollup: 3.4.0
+    typescript: 4.9.3
   languageName: unknown
   linkType: soft
 
@@ -3232,6 +3254,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@flocon-trpg/utils@workspace:packages/utils"
   dependencies:
+    "@flocon-trpg/default-pino-transport": "workspace:^"
     "@flocon-trpg/eslint-config": "workspace:^"
     "@flocon-trpg/prettier-config": "workspace:^"
     "@flocon-trpg/rollup-config": "workspace:^"

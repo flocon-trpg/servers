@@ -91,10 +91,10 @@ export function usePushNotifications(): void {
                 if (message.value.error != null) {
                     switch (message.value.type) {
                         case 'error':
-                            loggerRef.value.error(message.value.error, message.value.message);
+                            loggerRef.error(message.value.error, message.value.message);
                             break;
                         case 'warning':
-                            loggerRef.value.warn(message.value.error, message.value.message);
+                            loggerRef.warn(message.value.error, message.value.message);
                             break;
                         default:
                             break;

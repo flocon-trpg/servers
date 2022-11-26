@@ -58,7 +58,7 @@ export const useInitializeTestRoomClient = (roomId: string) => {
     const prevRoomClient = usePreviousDistinct(roomClient);
     React.useEffect(() => {
         if (roomClient != null && prevRoomClient != null) {
-            loggerRef.value.warn(
+            loggerRef.warn(
                 'TestRoomClient が複数回作成されました。TestRoomClient のデータはリセットされます。'
             );
         }

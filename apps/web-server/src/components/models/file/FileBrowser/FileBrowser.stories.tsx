@@ -42,7 +42,7 @@ type PracticalProps = {
 
 const toFilePath = (filesSourceRef: { current: FileSource[] }): FilePath[] => {
     return filesSourceRef.current.map((file): FilePath => {
-        const onClick = () => loggerRef.value.info({ file }, 'clicked');
+        const onClick = () => loggerRef.info({ file }, 'clicked');
         const onDelete = async () => {
             await delay(1000);
             if (file.type !== others) {
@@ -52,8 +52,8 @@ const toFilePath = (filesSourceRef: { current: FileSource[] }): FilePath[] => {
                 arrayEquals(elem.path, file.path)
             );
         };
-        const onOpen = () => loggerRef.value.info({ file }, 'open');
-        const onClipboard = () => loggerRef.value.info({ file }, 'clipboard');
+        const onOpen = () => loggerRef.info({ file }, 'open');
+        const onClipboard = () => loggerRef.info({ file }, 'clipboard');
         const onMoveOrRename: FilePath['onMoveOrRename'] = async params => {
             await delay(1000);
             if (file.type !== others) {

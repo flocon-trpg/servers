@@ -263,7 +263,7 @@ const useWarnPlaceholderChanges = ({
             return;
         }
         if (prevPlaceholderRef.current !== currentPlaceholderRef.current) {
-            loggerRef.value.warn(
+            loggerRef.warn(
                 'placeholderプロパティの値が更新されましたが、CollaborativeInputではplaceholderの更新に対応していないため無視されます。'
             );
         }

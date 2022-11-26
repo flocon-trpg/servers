@@ -1,22 +1,25 @@
-'use strict';
+/* eslint-disable no-console */
+import build from 'pino-abstract-transport';
 
-var build = require('pino-abstract-transport');
-var env = require('../env.js');
-var logger = require('../logger.js');
+export const notice = 'notice';
+export const LOG_FORMAT = 'LOG_FORMAT';
 
 let notified = false;
 const notifyLogIsSkippedOnce = () => {
     if (notified) {
         return;
     }
-    console.info(`Because ${env.LOG_FORMAT} is default or not set, some logs will be skipped. Set ${env.LOG_FORMAT} as json to output skipped logs. / ${env.LOG_FORMAT} が default であるかセットされていないため、一部のログの出力はスキップされます。${env.LOG_FORMAT} を json にすることで、スキップせずに出力されます。`);
+    console.info(
+        `Because ${LOG_FORMAT} is default or not set, some logs will be skipped. Set ${LOG_FORMAT} as json to output skipped logs. / ${LOG_FORMAT} が default であるかセットされていないため、一部のログの出力はスキップされます。${LOG_FORMAT} を json にすることで、スキップせずに出力されます。`
+    );
     notified = true;
 };
+
 const transport = () => {
     return build(source => {
         source.on('data', obj => {
-            let level;
-            let consoleMethodName;
+            let level: string;
+            let consoleMethodName: 'debug' | 'log' | 'info' | 'warn' | 'error';
             switch (obj.level) {
                 case 10:
                     level = '[TRACE]';
@@ -47,20 +50,20 @@ const transport = () => {
                     consoleMethodName = 'log';
                     break;
             }
-            if (obj[logger.notice] !== true && obj.level <= 30) {
+
+            if (obj[notice] !== true && obj.level <= 30) {
                 notifyLogIsSkippedOnce();
                 return;
             }
             const message = `${level} ${obj.msg}`;
             if (obj.err === undefined) {
                 console[consoleMethodName](message);
-            }
-            else {
+            } else {
                 console[consoleMethodName](message, obj.err);
             }
         });
     });
 };
 
-module.exports = transport;
-//# sourceMappingURL=defaultTransport.js.map
+/** pinoのJSONではなく、比較的見やすい形でconsoleに出力します。 */
+export default transport;

@@ -6,6 +6,6 @@ var main = require('./main.js');
 var commandLineArgs = require('./utils/commandLineArgs.js');
 
 commandLineArgs.loadAsMain().then(args => {
-    main.main(args).catch(err => utils.loggerRef.value.error(err));
+    main.main(args).catch(err => utils.loggerRef.error(err));
 });
 //# sourceMappingURL=index.js.map

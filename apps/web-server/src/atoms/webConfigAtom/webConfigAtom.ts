@@ -64,7 +64,7 @@ const parseConfig = (env: DotenvParseOutput | undefined): Result<Env> => {
             : env.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED
     );
     if (isUnlistedFirebaseStorageEnabled.error) {
-        loggerRef.value.warn(
+        loggerRef.warn(
             `${NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED} において次のエラーが発生したため、false とみなされます:` +
                 isUnlistedFirebaseStorageEnabled.error.ja
         );
@@ -173,7 +173,7 @@ export const webConfigAtom = atom<Result<WebConfig> | null>(get => {
             ? undefined
             : parsePinoLogLevel(mergedEnv.logLevel, NEXT_PUBLIC_LOG_LEVEL);
     if (logLevel?.isError === true) {
-        loggerRef.value.warn(logLevel.error);
+        loggerRef.warn(logLevel.error);
     }
     const result: WebConfig = {
         authProviders: mergedEnv.authProviders,

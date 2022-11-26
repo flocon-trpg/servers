@@ -2332,7 +2332,7 @@ const useStartAutoDeleteFiles = () => {
                     message: 'ファイルの削除に失敗しました。',
                     description: joinPath(new Node(fileToDelete.file).path).string,
                 });
-                loggerRef.value.error(e, 'ファイルの削除に失敗しました。');
+                loggerRef.error(e, 'ファイルの削除に失敗しました。');
                 setFileStatus(fileToDelete, 'error');
                 setIsDeleting(false);
             });
@@ -2450,7 +2450,7 @@ const useStartAutoRenameFiles = () => {
                     message: 'ファイルのリネームに失敗しました。',
                     description: joinPath(new Node(fileToRename.file).path).string,
                 });
-                loggerRef.value.error(e, 'ファイルのリネームに失敗しました。');
+                loggerRef.error(e, 'ファイルのリネームに失敗しました。');
                 setFileStatus(fileToRename, 'error');
                 setIsRenaming(false);
             });

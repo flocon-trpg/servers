@@ -37,7 +37,7 @@ export function useStateEditor<T>({
 }) {
     React.useEffect(() => {
         if (updateMode != null && createMode != null) {
-            loggerRef.value.warn('useStateEditorにおいて、updateとcreateの両方がnon-nullishです。');
+            loggerRef.warn('useStateEditorにおいて、updateとcreateの両方がnon-nullishです。');
         }
     }, [updateMode, createMode]);
 

@@ -1,5 +1,7 @@
+import { notice } from '@flocon-trpg/default-pino-transport';
 import { isBrowser } from 'browser-or-node';
-import pino from 'pino';
+import pino, { Logger } from 'pino';
+import { PinoLogLevel } from './parsePinoLogLevel';
 
 const defaultLogLevel = 'info';
 
@@ -10,25 +12,63 @@ interface LogFn {
     (msg: string): void;
 }
 
-export type LoggerType = {
+type Type = {
+    /** pino のインスタンスを get もしくは set できます。 */
+    value: Logger;
     debug: LogFn;
     error: LogFn;
     fatal: LogFn;
     info: LogFn;
+    infoAsNotice: (msg: string) => void;
     warn: LogFn;
     silent: LogFn;
     trace: LogFn;
 };
 
-type Type = {
-    value: LoggerType;
+export const createDefaultLogger = (args?: { logLevel?: PinoLogLevel; isBrowser?: boolean }) => {
+    return args?.isBrowser ?? isBrowser
+        ? pino({ level: args?.logLevel ?? defaultLogLevel, browser: {} })
+        : pino({
+              level: args?.logLevel ?? defaultLogLevel,
+              transport: { target: '@flocon-trpg/default-pino-transport' },
+          });
 };
 
-// ブラウザの場合はほぼ変更なし（ログレベルを変更するくらい）でも構わない。
-// ブラウザ以外の場合は、このままだと JSON がそのまま出力されて見づらいので、pino-pretty などを使わない場合は変更するほうがいいかも。
+let currentLogger: Logger | null = null;
+
 /** pino のロガーを取得もしくは変更できます。 */
 export const loggerRef: Type = {
-    value: isBrowser
-        ? pino({ level: defaultLogLevel, browser: {} })
-        : pino({ level: defaultLogLevel }),
+    get value() {
+        if (currentLogger == null) {
+            currentLogger = createDefaultLogger();
+        }
+        return currentLogger;
+    },
+    set value(value: Logger) {
+        currentLogger = value;
+    },
+    get debug() {
+        return this.value.debug.bind(this.value);
+    },
+    get error() {
+        return this.value.error.bind(this.value);
+    },
+    get fatal() {
+        return this.value.fatal.bind(this.value);
+    },
+    get info() {
+        return this.value.info.bind(this.value);
+    },
+    infoAsNotice(msg) {
+        return this.info({ [notice]: true }, msg);
+    },
+    get warn() {
+        return this.value.warn.bind(this.value);
+    },
+    get silent() {
+        return this.value.silent.bind(this.value);
+    },
+    get trace() {
+        return this.value.trace.bind(this.value);
+    },
 };

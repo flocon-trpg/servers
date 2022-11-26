@@ -1,6 +1,6 @@
 'use strict';
 
-var logger = require('../logger.js');
+var utils = require('@flocon-trpg/utils');
 
 exports.AppConsole = void 0;
 (function (AppConsole) {
@@ -14,20 +14,20 @@ exports.AppConsole = void 0;
     const logCore = (consoleMethodName, message) => {
         const messageStr = AppConsole.messageToString(message);
         if (message.errorObject == null) {
-            logger.logger[consoleMethodName](messageStr);
+            utils.loggerRef[consoleMethodName](messageStr);
         }
         else {
-            logger.logger[consoleMethodName](message.errorObject, messageStr);
+            utils.loggerRef[consoleMethodName](message.errorObject, messageStr);
         }
     };
     AppConsole.info = (message) => {
         logCore('info', message);
     };
     AppConsole.infoAsNotice = (message) => {
-        logger.logger.infoAsNotice(AppConsole.messageToString(message));
+        utils.loggerRef.infoAsNotice(AppConsole.messageToString(message));
     };
     AppConsole.infoAsNoticeJa = (message) => {
-        logger.logger.infoAsNotice(message);
+        utils.loggerRef.infoAsNotice(message);
     };
     AppConsole.warn = (message) => {
         logCore('warn', message);

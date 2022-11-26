@@ -1,8 +1,8 @@
 import path from 'path';
+import { loggerRef } from '@flocon-trpg/utils';
 import { remove, stat } from 'fs-extra';
 import { Arg, Authorized, Ctx, Mutation, Resolver, UseMiddleware } from 'type-graphql';
 import { File } from '../../../../entities/file/entity';
-import { logger } from '../../../../logger';
 import { ResolverContext } from '../../../../types';
 import { ENTRY } from '../../../../utils/roles';
 import { thumbsDir } from '../../../../utils/thumbsDir';
@@ -48,7 +48,10 @@ export class DeleteFilesResolver {
         for (const filename of filenamesToDelete) {
             const filePath = path.resolve(directory, filename);
             const statResult = await stat(filePath).catch((err: Error) => {
-                logger.warn(err, `stat(${filePath}) threw an error. Maybe the file was not found?`);
+                loggerRef.warn(
+                    err,
+                    `stat(${filePath}) threw an error. Maybe the file was not found?`
+                );
                 return false as const;
             });
             if (statResult === false) {
@@ -58,13 +61,16 @@ export class DeleteFilesResolver {
             if (statResult.isFile()) {
                 await remove(filePath);
             } else {
-                logger.warn(`${filePath} is not a file`);
+                loggerRef.warn(`${filePath} is not a file`);
             }
         }
         for (const filename of thumbFilenamesToDelete) {
             const filePath = path.resolve(directory, thumbsDir, filename);
             const statResult = await stat(filePath).catch((err: Error) => {
-                logger.warn(err, `stat(${filePath}) threw an error. Maybe the file was not found?`);
+                loggerRef.warn(
+                    err,
+                    `stat(${filePath}) threw an error. Maybe the file was not found?`
+                );
                 return false as const;
             });
             if (statResult === false) {
@@ -74,7 +80,7 @@ export class DeleteFilesResolver {
             if (statResult.isFile()) {
                 await remove(filePath);
             } else {
-                logger.warn(`${filePath} is not a file`);
+                loggerRef.warn(`${filePath} is not a file`);
             }
         }
         return filenamesToDelete;

@@ -51,7 +51,7 @@ export const createMockUrqlClientForRoomMessage = () => {
                     });
                 }
                 default:
-                    loggerRef.value.error({ query: query.query }, 'Query');
+                    loggerRef.error({ query: query.query }, 'Query');
                     throw new Error('Query not match');
             }
         },

@@ -196,17 +196,17 @@ export class StateManagerCore<TState, TOperation> {
     // isByMyClient === true の場合、revisionToで対応関係がわかるため、requestIdは必要ない。
     public onGet(operation: TOperation, revisionTo: number, isByMyClient: boolean) {
         if (!Number.isInteger(revisionTo)) {
-            loggerRef.value.warn(`${revisionTo} is not an integer. onGet is cancelled.`);
+            loggerRef.warn(`${revisionTo} is not an integer. onGet is cancelled.`);
             return;
         }
         if (revisionTo <= this._revision) {
-            loggerRef.value.info(
+            loggerRef.info(
                 `revisionTo of GetOperation is ${revisionTo}, but state revision is already ${this._revision}`
             );
             return;
         }
         if (this._pendingGetOperations.has(revisionTo)) {
-            loggerRef.value.warn(
+            loggerRef.warn(
                 `stateManagerCore.__pendingGetOperations already contains ${revisionTo}`
             );
         }

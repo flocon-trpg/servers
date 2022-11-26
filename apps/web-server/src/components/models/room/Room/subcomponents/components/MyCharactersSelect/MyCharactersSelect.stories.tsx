@@ -31,7 +31,7 @@ export const Default: React.FC<{
                 selectedCharacterId={selectedCharacterId}
                 showAlert={showAlert}
                 readOnly={readonly}
-                onSelect={value => loggerRef.value.info({ value }, 'onSelect')}
+                onSelect={value => loggerRef.info({ value }, 'onSelect')}
             />
         </StorybookProvider>
     );

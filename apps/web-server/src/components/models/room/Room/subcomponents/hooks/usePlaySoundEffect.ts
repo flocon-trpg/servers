@@ -71,7 +71,7 @@ function usePlaySoundEffectCore(value?: SoundEffect): void {
             howl,
             volume: value.volume,
         });
-        loggerRef.value.debug({ src }, 'SE is started to play');
+        loggerRef.debug({ src }, 'SE is started to play');
         howl.play();
         setTimeout(() => howl.fade(howl.volume(), 0, fadeout), musicLengthLimit);
         setTimeout(() => {

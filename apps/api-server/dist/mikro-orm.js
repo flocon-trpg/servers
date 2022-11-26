@@ -1,5 +1,6 @@
 'use strict';
 
+var utils = require('@flocon-trpg/utils');
 var lodash = require('lodash');
 var entity$4 = require('./entities/file/entity.js');
 var entity$5 = require('./entities/fileTag/entity.js');
@@ -7,7 +8,6 @@ var entity$3 = require('./entities/participant/entity.js');
 var entity = require('./entities/room/entity.js');
 var entity$1 = require('./entities/roomMessage/entity.js');
 var entity$2 = require('./entities/user/entity.js');
-var logger = require('./logger.js');
 
 const entities = [
     entity.Room,
@@ -32,10 +32,10 @@ const loggerFactory = () => {
     const logBase = (methodName, namespace, message, context) => {
         const text = message;
         if (context == null) {
-            logger.logger[methodName]({ namespace }, text);
+            utils.loggerRef[methodName]({ namespace }, text);
         }
         else {
-            logger.logger[methodName]({
+            utils.loggerRef[methodName]({
                 context: {
                     ...context,
                     level: undefined,
@@ -68,7 +68,7 @@ const loggerFactory = () => {
                     methodName = 'warn';
                     break;
             }
-            logger.logger[methodName]({
+            utils.loggerRef[methodName]({
                 ...context,
                 level: undefined,
             }, 'MikroORM logQuery');

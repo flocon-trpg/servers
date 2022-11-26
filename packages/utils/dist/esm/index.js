@@ -1,5 +1,6 @@
 import { Option } from '@kizahasi/option';
 import { Result } from '@kizahasi/result';
+import { notice } from '@flocon-trpg/default-pino-transport';
 import { isBrowser } from 'browser-or-node';
 import pino from 'pino';
 
@@ -729,13 +730,50 @@ const keyNames = (...keys) => {
 };
 
 const defaultLogLevel = 'info';
-// ブラウザの場合はほぼ変更なし（ログレベルを変更するくらい）でも構わない。
-// ブラウザ以外の場合は、このままだと JSON がそのまま出力されて見づらいので、pino-pretty などを使わない場合は変更するほうがいいかも。
+const createDefaultLogger = (args) => {
+    return args?.isBrowser ?? isBrowser
+        ? pino({ level: args?.logLevel ?? defaultLogLevel, browser: {} })
+        : pino({
+            level: args?.logLevel ?? defaultLogLevel,
+            transport: { target: '@flocon-trpg/default-pino-transport' },
+        });
+};
+let currentLogger = null;
 /** pino のロガーを取得もしくは変更できます。 */
 const loggerRef = {
-    value: isBrowser
-        ? pino({ level: defaultLogLevel, browser: {} })
-        : pino({ level: defaultLogLevel }),
+    get value() {
+        if (currentLogger == null) {
+            currentLogger = createDefaultLogger();
+        }
+        return currentLogger;
+    },
+    set value(value) {
+        currentLogger = value;
+    },
+    get debug() {
+        return this.value.debug.bind(this.value);
+    },
+    get error() {
+        return this.value.error.bind(this.value);
+    },
+    get fatal() {
+        return this.value.fatal.bind(this.value);
+    },
+    get info() {
+        return this.value.info.bind(this.value);
+    },
+    infoAsNotice(msg) {
+        return this.info({ [notice]: true }, msg);
+    },
+    get warn() {
+        return this.value.warn.bind(this.value);
+    },
+    get silent() {
+        return this.value.silent.bind(this.value);
+    },
+    get trace() {
+        return this.value.trace.bind(this.value);
+    },
 };
 
 /** 複数のkeyを使用できるMap */
@@ -1009,5 +1047,5 @@ class SemVer {
     }
 }
 
-export { DeletableTree, DualKeyMap, MultiKeyMap, MultiValueSet, SemVer, Tree, alpha, arrayEquals, beta, both, chooseDualKeyRecord, chooseRecord, compare, compositeKeyEquals, compositeKeyToJsonString, delay, dualKeyRecordForEach, dualKeyRecordToDualKeyMap, toJsonString as dualKeyToJsonString, filterInt, getExactlyOneKey, groupJoin3DualKeyMap, groupJoin4DualKeyMap, groupJoinArray, groupJoinDualKeyMap, groupJoinMap, groupJoinSet, isReadonlyNonEmptyArray, isRecordEmpty, keyNames, left, loggerRef, mapDualKeyRecord, mapRecord, mapToRecord, parseEnvListValue, parsePinoLogLevel, parseStringToBoolean, parseStringToBooleanError, rc, recordForEach, recordForEachAsync, recordToArray, recordToIterator, recordToMap, right, stringToCompositeKey };
+export { DeletableTree, DualKeyMap, MultiKeyMap, MultiValueSet, SemVer, Tree, alpha, arrayEquals, beta, both, chooseDualKeyRecord, chooseRecord, compare, compositeKeyEquals, compositeKeyToJsonString, createDefaultLogger, delay, dualKeyRecordForEach, dualKeyRecordToDualKeyMap, toJsonString as dualKeyToJsonString, filterInt, getExactlyOneKey, groupJoin3DualKeyMap, groupJoin4DualKeyMap, groupJoinArray, groupJoinDualKeyMap, groupJoinMap, groupJoinSet, isReadonlyNonEmptyArray, isRecordEmpty, keyNames, left, loggerRef, mapDualKeyRecord, mapRecord, mapToRecord, parseEnvListValue, parsePinoLogLevel, parseStringToBoolean, parseStringToBooleanError, rc, recordForEach, recordForEachAsync, recordToArray, recordToIterator, recordToMap, right, stringToCompositeKey };
 //# sourceMappingURL=index.js.map

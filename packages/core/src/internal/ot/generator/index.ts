@@ -44,7 +44,7 @@ const warnNotFoundTemplate = ({
     key: string;
     objectType: 'state' | 'operation';
 }): void => {
-    loggerRef.value.warn(
+    loggerRef.warn(
         `"${key}" key found at ${objectType} object, but template not found. Maybe you use keys which are not supported?`
     );
 };

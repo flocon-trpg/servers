@@ -18,7 +18,7 @@ export const useGetIdTokenResult = () => {
             return null;
         }
         const result = await user.getIdTokenResult().catch(err => {
-            loggerRef.value.error(err, 'failed at getIdToken');
+            loggerRef.error(err, 'failed at getIdToken');
             return null;
         });
         return result;

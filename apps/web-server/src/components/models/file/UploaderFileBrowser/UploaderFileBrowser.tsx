@@ -626,7 +626,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                             });
                             break;
                         default:
-                            loggerRef.value.warn(`unknown uploaderType: ${uploaderType}`);
+                            loggerRef.warn(`unknown uploaderType: ${uploaderType}`);
                             break;
                     }
                 }}

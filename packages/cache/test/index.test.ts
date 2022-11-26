@@ -10,7 +10,7 @@ const REDIS_TEST = process.env.REDIS_TEST;
 const skipRedis = parseStringToBoolean(REDIS_TEST).value === false;
 
 if (skipRedis) {
-    loggerRef.value.info('Skips Redis tests because `REDIS_TEST` is falsy.');
+    loggerRef.info('Skips Redis tests because `REDIS_TEST` is falsy.');
 }
 
 const createEach = (redis: Redis): Cache[] => {

@@ -1,5 +1,6 @@
 import { createServer as createHttpServer } from 'http';
 import path from 'path';
+import { loggerRef } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import { Reference } from '@mikro-orm/core';
 import { PluginDefinition } from 'apollo-server-core';
@@ -26,7 +27,6 @@ import { BaasType } from './enums/BaasType';
 import { FilePermissionType } from './enums/FilePermissionType';
 import { EMBUPLOADER_PATH } from './env';
 import { Html } from './html/Html';
-import { logger } from './logger';
 import { consume } from './rateLimit/consume';
 import { DecodedIdToken, EM, ResolverContext } from './types';
 import { AppConsole } from './utils/appConsole';
@@ -64,7 +64,7 @@ const loggingPlugin: PluginDefinition = {
     async requestDidStart() {
         return {
             async didEncounterErrors(requestContext) {
-                logger.info(
+                loggerRef.info(
                     {
                         request: requestContext.request,
                         response: requestContext.response,
@@ -74,7 +74,7 @@ const loggingPlugin: PluginDefinition = {
                 );
             },
             async willSendResponse(requestContext) {
-                logger.info(
+                loggerRef.info(
                     {
                         request: requestContext.request,
                         response: requestContext.response,
@@ -92,7 +92,7 @@ export const createServerAsError = async ({ port }: { port: string | number }) =
     setupIndexAsError(app);
 
     const server = app.listen(port, () => {
-        logger.warn(
+        loggerRef.warn(
             `⚠️ Server ready at http://localhost:${port}, but API is not working. Please see error messages.`
         );
     });
@@ -165,7 +165,7 @@ export const createServer = async ({
 
     app.use(
         pinoHttp({
-            logger: logger.get(),
+            logger: loggerRef.value,
         })
     );
 
@@ -325,7 +325,7 @@ export const createServer = async ({
                     .then(() => true)
                     .catch(err => {
                         // 画像かどうかに関わらず全てのファイルをsharpに渡すため、mp3などといった画像でないファイルの場合はほぼ確実にここに来る。そのため、warnなどではなくそれよりlevelの低いdebugを使っている。
-                        logger.debug(err);
+                        loggerRef.debug(err);
                         return false;
                     });
                 const permissionType =
@@ -449,7 +449,7 @@ export const createServer = async ({
                 return result;
             },
             onSubscribe: async (ctx, message) => {
-                logger.info({ message }, 'graphql-ws onSubscribe');
+                loggerRef.info({ message }, 'graphql-ws onSubscribe');
 
                 message.payload.query;
                 // Apollo Clientなどではmessage.payload.operationNameが使えるがurqlではnullishなので、queryを代わりに使っている
@@ -469,18 +469,18 @@ export const createServer = async ({
                         roomId,
                     });
                 } else {
-                    logger.warn('(typeof RoomEvent.id) should be string');
+                    loggerRef.warn('(typeof RoomEvent.id) should be string');
                 }
             },
             onNext(ctx, message, args, result) {
-                logger.info({ message, result }, 'graphql-ws onNext');
+                loggerRef.info({ message, result }, 'graphql-ws onNext');
             },
             onComplete: (ctx, message) => {
-                logger.info({ message }, 'graphql-ws onComplete');
+                loggerRef.info({ message }, 'graphql-ws onComplete');
                 return connectionManager.onLeaveRoom({ connectionId: message.id });
             },
             onClose: async (ctx, code, reason) => {
-                logger.info({ code, reason }, 'graphql-ws onClose');
+                loggerRef.info({ code, reason }, 'graphql-ws onClose');
                 for (const key in ctx.subscriptions) {
                     await connectionManager.onLeaveRoom({ connectionId: key });
                 }
@@ -494,11 +494,11 @@ export const createServer = async ({
     const server = httpServer.listen(port, () => {
         // TODO: /graphqlが含まれているとAPI_HTTPなどの設定にも/graphqlの部分も入力してしまいそうなので、対処したほうがいいと思われる。また、createServerAsErrorとの統一性も取れていない
         !quiet &&
-            logger.infoAsNotice(
+            loggerRef.infoAsNotice(
                 `🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`
             );
         !quiet &&
-            logger.infoAsNotice(
+            loggerRef.infoAsNotice(
                 `🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`
             );
     });

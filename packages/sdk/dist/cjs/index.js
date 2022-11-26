@@ -544,15 +544,15 @@ class StateManagerCore {
     // isByMyClient === true の場合、revisionToで対応関係がわかるため、requestIdは必要ない。
     onGet(operation, revisionTo, isByMyClient) {
         if (!Number.isInteger(revisionTo)) {
-            utils.loggerRef.value.warn(`${revisionTo} is not an integer. onGet is cancelled.`);
+            utils.loggerRef.warn(`${revisionTo} is not an integer. onGet is cancelled.`);
             return;
         }
         if (revisionTo <= this._revision) {
-            utils.loggerRef.value.info(`revisionTo of GetOperation is ${revisionTo}, but state revision is already ${this._revision}`);
+            utils.loggerRef.info(`revisionTo of GetOperation is ${revisionTo}, but state revision is already ${this._revision}`);
             return;
         }
         if (this._pendingGetOperations.has(revisionTo)) {
-            utils.loggerRef.value.warn(`stateManagerCore.__pendingGetOperations already contains ${revisionTo}`);
+            utils.loggerRef.warn(`stateManagerCore.__pendingGetOperations already contains ${revisionTo}`);
         }
         this._pendingGetOperations.set(revisionTo, {
             operation,
@@ -736,7 +736,7 @@ class StateManager {
         if (this.requiresReload) {
             throw new Error('this.requiresReload === true');
         }
-        utils.loggerRef.value.debug({ operation, revisionTo }, 'StateManager.onOtherClientGet');
+        utils.loggerRef.debug({ operation, revisionTo }, 'StateManager.onOtherClientGet');
         this._history?.beforeOtherClientsGet(this, operation, revisionTo);
         this.core.onGet(operation, revisionTo, false);
         this._history?.afterOtherClientsGet(this);
@@ -745,15 +745,15 @@ class StateManager {
         if (this.requiresReload) {
             throw new Error('this.requiresReload === true');
         }
-        utils.loggerRef.value.debug({ state }, 'StateManager.setUiState');
+        utils.loggerRef.debug({ state }, 'StateManager.setUiState');
         this._history?.operateAsState(this, state);
         this.core.setUiState(state);
     }
     // このメソッドは「setUiStateを使えばよい」と判断して一時削除していたが、Operationを書いて適用させたいという場面が少なくなく、必要なapply関数もStateManager内部で保持しているため復帰させた。
     setUiStateByApply(operation) {
-        utils.loggerRef.value.debug({ operation }, 'StateManager.setUiStateByApply');
+        utils.loggerRef.debug({ operation }, 'StateManager.setUiStateByApply');
         const newState = this.args.apply({ state: this.uiState, operation });
-        utils.loggerRef.value.debug({ newState }, 'StateManager.setUiStateByApply');
+        utils.loggerRef.debug({ newState }, 'StateManager.setUiStateByApply');
         this.setUiState(newState);
     }
     post() {
@@ -762,10 +762,10 @@ class StateManager {
         }
         this._history?.beforePost(this);
         const toPost = this.core.post();
-        utils.loggerRef.value.debug({ toPost }, 'StateManager.post begin');
+        utils.loggerRef.debug({ toPost }, 'StateManager.post begin');
         this._history?.beginPost(this, toPost);
         if (toPost === undefined) {
-            utils.loggerRef.value.debug('StateManager.post is finished because toPost is undefined.');
+            utils.loggerRef.debug('StateManager.post is finished because toPost is undefined.');
             return undefined;
         }
         let isOnPostedExecuted = false;
@@ -777,25 +777,25 @@ class StateManager {
             switch (onPosted.isSuccess) {
                 case true:
                     if (onPosted.isId) {
-                        utils.loggerRef.value.debug({ onPosted }, 'StateManager.post is completing as id');
+                        utils.loggerRef.debug({ onPosted }, 'StateManager.post is completing as id');
                         this._history?.beforeEndPostAsId(this, onPosted.requestId);
                         this.core.endPostAsId(onPosted.requestId);
                         this._history?.afterEndPostAsId(this);
                         return;
                     }
-                    utils.loggerRef.value.debug({ onPosted }, 'StateManager.post is completing as non-id');
+                    utils.loggerRef.debug({ onPosted }, 'StateManager.post is completing as non-id');
                     this._history?.beforeEndPostAsSuccess(this, onPosted.result, onPosted.revisionTo);
                     this.core.onGet(onPosted.result, onPosted.revisionTo, true);
                     this._history?.afterEndPostAsSuccess(this);
                     return;
                 case false:
-                    utils.loggerRef.value.debug({ onPosted }, 'StateManager.post is completing as non-success');
+                    utils.loggerRef.debug({ onPosted }, 'StateManager.post is completing as non-success');
                     this._history?.beforeEndPostAsNotSuccess(this);
                     this.core.cancelPost();
                     this._history?.afterEndPostAsNotSuccess(this);
                     return;
                 case null:
-                    utils.loggerRef.value.debug({ onPosted }, 'StateManager.post is completing as unknown result');
+                    utils.loggerRef.debug({ onPosted }, 'StateManager.post is completing as unknown result');
                     this._history?.endPostAsUnknown(this);
                     this._requiresReload = true;
                     return;

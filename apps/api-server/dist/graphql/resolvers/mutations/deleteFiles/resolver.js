@@ -2,10 +2,10 @@
 
 var tslib = require('tslib');
 var path = require('path');
+var utils$1 = require('@flocon-trpg/utils');
 var fs = require('fs-extra');
 var typeGraphql = require('type-graphql');
 var entity = require('../../../../entities/file/entity.js');
-var logger = require('../../../../logger.js');
 var roles = require('../../../../utils/roles.js');
 var thumbsDir = require('../../../../utils/thumbsDir.js');
 var QueueMiddleware = require('../../../middlewares/QueueMiddleware.js');
@@ -42,7 +42,7 @@ exports.DeleteFilesResolver = class DeleteFilesResolver {
         for (const filename of filenamesToDelete) {
             const filePath = path.resolve(directory, filename);
             const statResult = await fs.stat(filePath).catch((err) => {
-                logger.logger.warn(err, `stat(${filePath}) threw an error. Maybe the file was not found?`);
+                utils$1.loggerRef.warn(err, `stat(${filePath}) threw an error. Maybe the file was not found?`);
                 return false;
             });
             if (statResult === false) {
@@ -52,13 +52,13 @@ exports.DeleteFilesResolver = class DeleteFilesResolver {
                 await fs.remove(filePath);
             }
             else {
-                logger.logger.warn(`${filePath} is not a file`);
+                utils$1.loggerRef.warn(`${filePath} is not a file`);
             }
         }
         for (const filename of thumbFilenamesToDelete) {
             const filePath = path.resolve(directory, thumbsDir.thumbsDir, filename);
             const statResult = await fs.stat(filePath).catch((err) => {
-                logger.logger.warn(err, `stat(${filePath}) threw an error. Maybe the file was not found?`);
+                utils$1.loggerRef.warn(err, `stat(${filePath}) threw an error. Maybe the file was not found?`);
                 return false;
             });
             if (statResult === false) {
@@ -68,7 +68,7 @@ exports.DeleteFilesResolver = class DeleteFilesResolver {
                 await fs.remove(filePath);
             }
             else {
-                logger.logger.warn(`${filePath} is not a file`);
+                utils$1.loggerRef.warn(`${filePath} is not a file`);
             }
         }
         return filenamesToDelete;
