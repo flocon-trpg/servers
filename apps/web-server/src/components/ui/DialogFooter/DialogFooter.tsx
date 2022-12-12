@@ -5,6 +5,7 @@ import { flex, flexRow, justifyEnd } from '@/styles/className';
 
 type CloseTextType = 'close' | 'cancel';
 type OkTextType = 'ok' | 'create' | 'post' | 'loading';
+type DestroyTextType = 'delete' | 'end';
 
 type Props = {
     close?: {
@@ -18,6 +19,7 @@ type Props = {
         disabled?: boolean;
     };
     destroy?: {
+        textType: DestroyTextType;
         onClick: () => void;
         modal?: {
             title?: React.ReactNode;
@@ -61,6 +63,15 @@ export const DialogFooter: React.FC<Props> = ({ close, ok, destroy, custom }: Pr
 
     let destroyButton: JSX.Element | null = null;
     if (destroy != null) {
+        let destroyText: string;
+        switch (destroy.textType) {
+            case 'delete':
+                destroyText = '削除';
+                break;
+            case 'end':
+                destroyText = '終了';
+                break;
+        }
         destroyButton = (
             <Button
                 onClick={() => {
@@ -91,7 +102,7 @@ export const DialogFooter: React.FC<Props> = ({ close, ok, destroy, custom }: Pr
                 disabled={destroy.disabled ?? false}
                 danger
             >
-                削除
+                {destroyText}
             </Button>
         );
     }

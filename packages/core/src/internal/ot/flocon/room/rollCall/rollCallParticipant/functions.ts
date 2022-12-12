@@ -4,26 +4,37 @@ import { isIdRecord } from '../../../../record';
 import * as ReplaceOperation from '../../../../util/replaceOperation';
 import { ServerTransform } from '../../../../util/type';
 import { template } from './types';
+import { RequestedBy, admin } from '@/ot/requestedBy';
 
 export const toClientState = (source: State<typeof template>): State<typeof template> => source;
 
-export const serverTransform: ServerTransform<
-    State<typeof template>,
-    TwoWayOperation<typeof template>,
-    UpOperation<typeof template>
-> = ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
-    const twoWayOperation: TwoWayOperation<typeof template> = { $v: 1, $r: 1 };
+export const serverTransform =
+    ({
+        requestedBy,
+    }: {
+        requestedBy: RequestedBy;
+    }): ServerTransform<
+        State<typeof template>,
+        TwoWayOperation<typeof template>,
+        UpOperation<typeof template>
+    > =>
+    ({ stateBeforeServerOperation, serverOperation, clientOperation }) => {
+        const isAdmin = requestedBy.type === admin;
+        if (!isAdmin) {
+            return Result.ok(undefined);
+        }
 
-    // TODO: 自分以外でも編集できてしまうのでできれば修正したほうがいい。また、偽の時刻を申告できてしまう。
-    twoWayOperation.answeredAt = ReplaceOperation.serverTransform({
-        first: serverOperation?.answeredAt,
-        second: clientOperation.answeredAt,
-        prevState: stateBeforeServerOperation.answeredAt,
-    });
+        const twoWayOperation: TwoWayOperation<typeof template> = { $v: 1, $r: 1 };
 
-    if (isIdRecord(twoWayOperation)) {
-        return Result.ok(undefined);
-    }
+        twoWayOperation.answeredAt = ReplaceOperation.serverTransform({
+            first: serverOperation?.answeredAt,
+            second: clientOperation.answeredAt,
+            prevState: stateBeforeServerOperation.answeredAt,
+        });
 
-    return Result.ok({ ...twoWayOperation });
-};
+        if (isIdRecord(twoWayOperation)) {
+            return Result.ok(undefined);
+        }
+
+        return Result.ok(twoWayOperation);
+    };

@@ -7,7 +7,7 @@ export declare const template: {
         ownerParticipantId: {
             readonly type: "atomic";
             readonly mode: "replace";
-            readonly value: z.ZodUnion<[z.ZodString, z.ZodUndefined]>;
+            readonly value: z.ZodOptional<z.ZodString>;
         };
         isPrivate: {
             readonly type: "atomic";
@@ -19,45 +19,46 @@ export declare const template: {
          *
          * ShapeのPath.dataは、widthとheightがともに100pxの正方形として記述します。コマなどの大きさに応じて自動的にscaleされます。
          * */
-        shapes: {
-            readonly type: "record";
+        shapes: import("../../../../generator").RecordValueTemplate<{
+            readonly type: "object";
+            readonly $v: 1;
+            readonly $r: 1;
             readonly value: {
-                readonly type: "object";
-                readonly $v: 1;
-                readonly $r: 1;
-                readonly value: {
-                    shape: {
-                        readonly type: "atomic";
-                        readonly mode: "replace";
-                        readonly value: z.ZodObject<{
-                            type: z.ZodLiteral<"path">;
-                            data: z.ZodString;
-                        }, "strip", z.ZodTypeAny, {
-                            type: "path";
-                            data: string;
-                        }, {
-                            type: "path";
-                            data: string;
-                        }>;
-                    };
-                    fill: {
-                        readonly type: "atomic";
-                        readonly mode: "replace";
-                        readonly value: z.ZodUnion<[z.ZodString, z.ZodUndefined]>;
-                    };
-                    stroke: {
-                        readonly type: "atomic";
-                        readonly mode: "replace";
-                        readonly value: z.ZodUnion<[z.ZodString, z.ZodUndefined]>;
-                    };
-                    strokeWidth: {
-                        readonly type: "atomic";
-                        readonly mode: "replace";
-                        readonly value: z.ZodUnion<[z.ZodNumber, z.ZodUndefined]>;
-                    };
+                shape: {
+                    readonly type: "atomic";
+                    readonly mode: "replace";
+                    readonly value: z.ZodObject<{
+                        type: z.ZodLiteral<"path">;
+                        data: z.ZodString;
+                    }, "strip", z.ZodTypeAny, {
+                        type: "path";
+                        data: string;
+                    }, {
+                        type: "path";
+                        data: string;
+                    }>;
                 };
+                fill: {
+                    readonly type: "atomic";
+                    readonly mode: "replace";
+                    readonly value: z.ZodOptional<z.ZodString>;
+                };
+                stroke: {
+                    readonly type: "atomic";
+                    readonly mode: "replace";
+                    readonly value: z.ZodOptional<z.ZodString>;
+                };
+                strokeWidth: {
+                    readonly type: "atomic";
+                    readonly mode: "replace";
+                    readonly value: z.ZodOptional<z.ZodNumber>;
+                }; /**
+                 * keyは`'1'`から`'9'`の9個のみをサポートしています。詳細は`./functions.ts`を参照してください。
+                 *
+                 * ShapeのPath.dataは、widthとheightがともに100pxの正方形として記述します。コマなどの大きさに応じて自動的にscaleされます。
+                 * */
             };
-        };
+        }>;
         cellH: {
             readonly type: "atomic";
             readonly mode: "replace";
@@ -106,7 +107,7 @@ export declare const template: {
         opacity: {
             readonly type: "atomic";
             readonly mode: "replace";
-            readonly value: z.ZodUnion<[z.ZodNumber, z.ZodUndefined]>;
+            readonly value: z.ZodOptional<z.ZodNumber>;
         };
         w: {
             readonly type: "atomic";

@@ -326,6 +326,7 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
                 role: 'Spectator',
             },
         },
+        rollCalls: undefined,
     };
 
     if (params.setBoards) {

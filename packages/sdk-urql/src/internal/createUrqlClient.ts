@@ -11,7 +11,6 @@ import {
     makeOperation,
     subscriptionExchange,
 } from 'urql';
-
 type GetUserIdTokenResult = (() => Promise<IdTokenResult | null>) | null;
 
 const execGetUserIdTokenResult = async (
@@ -35,12 +34,16 @@ const wsClient = (wsUrl: string, getUserIdToken: GetUserIdTokenResult) =>
         },
     });
 
+type Exchanges = NonNullable<Parameters<typeof createClient>[0]['exchanges']>;
+
 type Params = {
     /** API サーバーの HTTP もしくは HTTPS での URL。通常は `https://` もしくは `http://` で始まる文字列です。 */
     httpUrl: string;
 
     /** API サーバーの WebSocket の URL。通常は `wss://` もしくは `ws://` で始まる文字列です。 */
     wsUrl: string;
+
+    exchanges?: (defaultExchanges: Exchanges) => Exchanges;
 } & (
     | {
           /**
@@ -110,24 +113,26 @@ export const createUrqlClient = (params: Params) => {
         authExchangeResult = null;
     }
 
+    const defaultExchanges: Exchanges = [
+        dedupExchange,
+        cacheExchange,
+        ...(authExchangeResult == null ? [] : [authExchangeResult]),
+        fetchExchange,
+        subscriptionExchange({
+            forwardSubscription: operation => ({
+                subscribe: sink => {
+                    const unsubscribe = wsClient(
+                        params.wsUrl,
+                        params.authorization ? params.getUserIdTokenResult : null
+                    ).subscribe(operation, sink);
+                    return { unsubscribe };
+                },
+            }),
+        }),
+    ];
+
     return createClient({
         url: params.httpUrl,
-        exchanges: [
-            dedupExchange,
-            cacheExchange,
-            ...(authExchangeResult == null ? [] : [authExchangeResult]),
-            fetchExchange,
-            subscriptionExchange({
-                forwardSubscription: operation => ({
-                    subscribe: sink => {
-                        const unsubscribe = wsClient(
-                            params.wsUrl,
-                            params.authorization ? params.getUserIdTokenResult : null
-                        ).subscribe(operation, sink);
-                        return { unsubscribe };
-                    },
-                }),
-            }),
-        ],
+        exchanges: params.exchanges == null ? defaultExchanges : params.exchanges(defaultExchanges),
     });
 };

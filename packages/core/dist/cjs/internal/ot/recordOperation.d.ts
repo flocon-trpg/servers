@@ -96,6 +96,7 @@ type ServerTransformCoreParams<TServerState, TClientState, TFirstOperation, TSec
     stateAfterFirst: StringKeyRecord<TServerState>;
     first?: RecordUpOperation<TServerState, TFirstOperation>;
     second?: RecordUpOperation<TClientState, TSecondOperation>;
+    /** `TClientState` を `TServerState` に変換します。`create` される値の変換を行っても構いません。 */
     toServerState: (state: TClientState, key: string) => TServerState;
     innerTransform: (params: ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> & {
         key: string;

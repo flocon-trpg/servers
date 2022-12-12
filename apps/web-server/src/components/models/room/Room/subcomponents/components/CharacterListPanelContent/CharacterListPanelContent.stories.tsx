@@ -24,7 +24,7 @@ export const Default: React.FC<{ stateType: StateType; myParticipantRole: Partic
         }
     }, [stateType]);
     useSetupStorybook({
-        roomConfig: {
+        room: {
             myParticipantRole,
             setBoards: stateType === 'default',
             update: updateRoom,

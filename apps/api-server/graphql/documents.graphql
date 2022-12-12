@@ -413,6 +413,12 @@ query GetRoomAsListItem($roomId: String!) {
     }
 }
 
+mutation AnswerRollCall($roomId: String!, $rollCallId: String!, $answer: Boolean!) {
+    result: answerRollCall(roomId: $roomId, rollCallId: $rollCallId, answer: $answer) {
+        failureType
+    }
+}
+
 mutation CreateFileTag($tagName: String!) {
     result: createFileTag(tagName: $tagName) {
         ...FileTag
@@ -421,6 +427,12 @@ mutation CreateFileTag($tagName: String!) {
 
 mutation ChangeParticipantName($roomId: String!, $newName: String!) {
     result: changeParticipantName(roomId: $roomId, newName: $newName) {
+        failureType
+    }
+}
+
+mutation CloseRollCall($roomId: String!, $rollCallId: String!) {
+    result: closeRollCall(roomId: $roomId, rollCallId: $rollCallId) {
         failureType
     }
 }
@@ -514,6 +526,12 @@ mutation Operate(
                 ...RoomAsListItem
             }
         }
+    }
+}
+
+mutation PerformRollCall($roomId: String!) {
+    result: performRollCall(roomId: $roomId) {
+        failureType
     }
 }
 

@@ -1,4 +1,6 @@
 import { ParticipantRole, Player, Spectator, State, participantTemplate } from '@flocon-trpg/core';
+import { Result } from '@kizahasi/result';
+import produce from 'immer';
 import {
     Args,
     ArgsType,
@@ -23,15 +25,17 @@ import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import { RoomOperation } from '../../../objects/room';
 import { RoomEventPayload } from '../../subsciptions/roomEvent/payload';
 import {
+    IdOperation,
+    RoomNotFound,
     bcryptCompareNullable,
     ensureAuthorizedUser,
-    findRoomAndMyParticipant,
-    operateParticipantAndFlush,
+    operateAsAdminAndFlush,
     publishRoomEvent,
 } from '../../utils/utils';
 
 type ParticipantState = State<typeof participantTemplate>;
 
+/** @deprecated Operation を渡す手段は Mutation の戻り値と RoomEvent の 2 つがありますが、Operate Mutation 以外では Mutation の戻り値を用いる必要性が薄いため、RoomEvent に一本化される可能性があります。 */
 @ObjectType()
 class JoinRoomSuccessResult {
     @Field({ nullable: true })
@@ -91,64 +95,63 @@ const joinRoomCore = async ({
 }): Promise<{ result: typeof JoinRoomResult; payload: RoomEventPayload | undefined }> => {
     const em = context.em;
     const authorizedUser = ensureAuthorizedUser(context);
-    const findResult = await findRoomAndMyParticipant({
+    const result = await operateAsAdminAndFlush({
         em,
-        userUid: authorizedUser.userUid,
         roomId: args.id,
-    });
-    if (findResult == null) {
-        return {
-            result: {
-                failureType: JoinRoomFailureType.NotFound,
-            },
-            payload: undefined,
-        };
-    }
-    const { room, me } = findResult;
-    const participantUserUids = findResult.participantIds();
-    const strategyResult = await strategy({ me, room, args });
-    switch (strategyResult) {
-        case 'id': {
-            return {
-                result: {
-                    operation: undefined,
-                },
-                payload: undefined,
-            };
-        }
-        case JoinRoomFailureType.WrongPassword: {
-            return {
-                result: {
-                    failureType: JoinRoomFailureType.WrongPassword,
-                },
-                payload: undefined,
-            };
-        }
-        case JoinRoomFailureType.AlreadyParticipant: {
-            return {
-                result: {
-                    failureType: JoinRoomFailureType.AlreadyParticipant,
-                },
-                payload: undefined,
-            };
-        }
-        default: {
-            return await operateParticipantAndFlush({
-                em,
-                room,
-                roomHistCount: context.serverConfig.roomHistCount,
-                participantUserUids,
-                myUserUid: authorizedUser.userUid,
-                create: {
+        roomHistCount: context.serverConfig.roomHistCount,
+        operationType: 'state',
+        operation: async (roomState, { room }) => {
+            const me = roomState.participants?.[authorizedUser.userUid];
+            const strategyResult = await strategy({ room, args, me });
+            switch (strategyResult) {
+                case JoinRoomFailureType.WrongPassword:
+                case JoinRoomFailureType.AlreadyParticipant:
+                    return Result.error({ failureType: strategyResult });
+                case 'id':
+                    return Result.ok(roomState);
+                default:
+                    break;
+            }
+            const nextRoomState = produce(roomState, roomState => {
+                const target = roomState.participants?.[authorizedUser.userUid];
+                if (target != null) {
+                    target.role = strategyResult;
+                    return;
+                }
+                if (roomState.participants == null) {
+                    roomState.participants = {};
+                }
+                roomState.participants[authorizedUser.userUid] = {
+                    $v: 2,
+                    $r: 1,
                     name: convertToMaxLength100String(args.name),
                     role: strategyResult,
-                },
-                update: {
-                    role: { newValue: strategyResult },
-                },
+                };
             });
+            return Result.ok(nextRoomState);
+        },
+    });
+
+    if (result.isError) {
+        if (result.error.type === 'custom') {
+            return { result: { failureType: result.error.error.failureType }, payload: undefined };
         }
+        return { result: { failureType: JoinRoomFailureType.TransformError }, payload: undefined };
     }
+    switch (result.value) {
+        case RoomNotFound:
+            return { result: { failureType: JoinRoomFailureType.NotFound }, payload: undefined };
+        case IdOperation:
+            return { result: {}, payload: undefined };
+        default:
+            break;
+    }
+    return {
+        result: {
+            operation: result.value.generateOperation(authorizedUser.userUid),
+        },
+        payload: result.value,
+    };
 };
 
 @Resolver()

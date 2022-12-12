@@ -25,6 +25,26 @@ export type RequestedBy =
 export const anyValue = { type: 'anyValue' } as const;
 export const none = { type: 'none' } as const;
 
+export const isAuthorized = ({
+    requestedBy,
+    participantId,
+}: {
+    requestedBy: RequestedBy;
+    participantId: string | typeof anyValue | typeof none;
+}): boolean => {
+    if (typeof participantId === 'string' || participantId.type === 'none') {
+        if (requestedBy.type === admin) {
+            return true;
+        }
+        if (requestedBy.type === restrict) {
+            return false;
+        }
+        return requestedBy.userUid === participantId;
+    }
+    return true;
+};
+
+// 元々は isAuthorized 関数は存在せず、isAuthorized 関数に相当する処理は isOwner 関数で行っていた。だが、isOwner という名前と引数がしっくり来ない場面もあったので、isAuthorized 関数に移した。isOwner 関数は削除するとしっくり来ない場面が生じるかもしれないため、現時点では残している。
 export const isOwner = ({
     requestedBy,
     ownerParticipantId,
@@ -32,16 +52,7 @@ export const isOwner = ({
     requestedBy: RequestedBy;
     ownerParticipantId: string | typeof anyValue | typeof none;
 }): boolean => {
-    if (typeof ownerParticipantId === 'string' || ownerParticipantId.type === 'none') {
-        if (requestedBy.type === admin) {
-            return true;
-        }
-        if (requestedBy.type === restrict) {
-            return false;
-        }
-        return requestedBy.userUid === ownerParticipantId;
-    }
-    return true;
+    return isAuthorized({ requestedBy, participantId: ownerParticipantId });
 };
 
 export const isBoardOwner = ({

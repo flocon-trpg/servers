@@ -14,6 +14,7 @@ export namespace RoomConfigUtils {
     export const messagePanel = 'messagePanel';
     export const participantPanel = 'participantPanel';
     export const pieceValuePanel = 'pieceValuePanel';
+    export const rollCallPanel = 'rollCallPanel';
 
     export type PanelAction =
         | {
@@ -46,7 +47,8 @@ export namespace RoomConfigUtils {
           }
         | {
               type: typeof pieceValuePanel;
-          };
+          }
+        | { type: typeof rollCallPanel };
 
     export type ZoomBoardAction = {
         roomId: string;
@@ -177,6 +179,10 @@ export namespace RoomConfigUtils {
             }
             case pieceValuePanel: {
                 state.panels.pieceValuePanel.zIndex = panels.length;
+                return;
+            }
+            case rollCallPanel: {
+                state.panels.rollCallPanel.zIndex = panels.length;
                 return;
             }
         }

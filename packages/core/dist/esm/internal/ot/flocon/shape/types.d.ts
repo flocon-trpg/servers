@@ -21,17 +21,17 @@ export declare const template: {
         fill: {
             readonly type: "atomic";
             readonly mode: "replace";
-            readonly value: z.ZodUnion<[z.ZodString, z.ZodUndefined]>;
+            readonly value: z.ZodOptional<z.ZodString>;
         };
         stroke: {
             readonly type: "atomic";
             readonly mode: "replace";
-            readonly value: z.ZodUnion<[z.ZodString, z.ZodUndefined]>;
+            readonly value: z.ZodOptional<z.ZodString>;
         };
         strokeWidth: {
             readonly type: "atomic";
             readonly mode: "replace";
-            readonly value: z.ZodUnion<[z.ZodNumber, z.ZodUndefined]>;
+            readonly value: z.ZodOptional<z.ZodNumber>;
         };
     };
 };

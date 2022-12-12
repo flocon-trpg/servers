@@ -11,7 +11,7 @@ const notifyLogIsSkippedOnce = () => {
     console.info(`Because ${LOG_FORMAT} is default or not set, some logs will be skipped. Set ${LOG_FORMAT} as json to output skipped logs. / ${LOG_FORMAT} が default であるかセットされていないため、一部のログの出力はスキップされます。${LOG_FORMAT} を json にすることで、スキップせずに出力されます。`);
     notified = true;
 };
-const transport = () => {
+function index () {
     return build(source => {
         source.on('data', obj => {
             let level;
@@ -59,7 +59,7 @@ const transport = () => {
             }
         });
     });
-};
+}
 
-export { LOG_FORMAT, transport as default, notice };
+export { LOG_FORMAT, index as default, notice };
 //# sourceMappingURL=index.js.map

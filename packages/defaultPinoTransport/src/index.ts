@@ -15,7 +15,7 @@ const notifyLogIsSkippedOnce = () => {
     notified = true;
 };
 
-const transport = () => {
+export default function () {
     return build(source => {
         source.on('data', obj => {
             let level: string;
@@ -63,7 +63,4 @@ const transport = () => {
             }
         });
     });
-};
-
-/** pinoのJSONではなく、比較的見やすい形でconsoleに出力します。 */
-export default transport;
+}

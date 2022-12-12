@@ -30,6 +30,9 @@ import { WriteRoomPublicMessageFailureType } from '../enums/WriteRoomPublicMessa
 import { WriteRoomSoundEffectFailureType } from '../enums/WriteRoomSoundEffectFailureType';
 import { WritingMessageStatusInputType } from '../enums/WritingMessageStatusInputType';
 import { WritingMessageStatusType } from '../enums/WritingMessageStatusType';
+import { AnswerRollCallFailureType } from '@/enums/AnswerRollCallFailureType';
+import { CloseRollCallFailureType } from '@/enums/CloseRollCallFailureType';
+import { PerformRollCallFailureType } from '@/enums/PerformRollCallFailureType';
 
 let hasRegistered = false;
 export const registerEnumTypes = (): void => {
@@ -37,11 +40,17 @@ export const registerEnumTypes = (): void => {
         return;
     }
     hasRegistered = true;
+    registerEnumType(AnswerRollCallFailureType, {
+        name: 'AnswerRollCallFailureType',
+    });
     registerEnumType(BaasType, {
         name: 'BaasType',
     });
     registerEnumType(ChangeParticipantNameFailureType, {
         name: 'ChangeParticipantNameFailureType',
+    });
+    registerEnumType(CloseRollCallFailureType, {
+        name: 'CloseRollCallFailureType',
     });
     registerEnumType(CreateRoomFailureType, {
         name: 'CreateRoomFailureType',
@@ -98,6 +107,9 @@ export const registerEnumTypes = (): void => {
         // 'ParticipantRoleType'とすべきところを誤って 'ParticipantRole' としたため、互換性を保持するためにそのままにしている。だが、'ParticipantRoleType'に変更することで問題が生じるかどうかは確認していない。
         // TODO: 破壊的変更のあるアップデートの際にあわせて、'ParticipantRoleType' に変更する
         name: 'ParticipantRole',
+    });
+    registerEnumType(PerformRollCallFailureType, {
+        name: 'PerformRollCallFailureType',
     });
     registerEnumType(PieceLogType, {
         name: 'PieceLogType',

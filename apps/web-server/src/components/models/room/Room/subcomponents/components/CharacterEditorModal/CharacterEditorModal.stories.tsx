@@ -12,7 +12,7 @@ export const Player: React.FC<{ myParticipantRole: ParticipantRole; characterSta
     characterStateId,
 }) => {
     useSetupStorybook({
-        roomConfig: {
+        room: {
             myParticipantRole,
         },
     });

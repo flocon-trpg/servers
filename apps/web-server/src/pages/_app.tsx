@@ -8,6 +8,7 @@ import { simpleId } from '@flocon-trpg/core';
 import { createUrqlClient } from '@flocon-trpg/sdk-urql';
 import { createDefaultLogger, loggerRef } from '@flocon-trpg/utils';
 import { loader } from '@monaco-editor/react';
+import { devtoolsExchange } from '@urql/devtools';
 import { FirebaseApp, initializeApp } from 'firebase/app';
 import { Auth, getAuth } from 'firebase/auth';
 import { FirebaseStorage, getStorage } from 'firebase/storage';
@@ -275,6 +276,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
                     wsUrl: wsUri,
                     authorization: true,
                     getUserIdTokenResult: getIdTokenResult,
+                    exchanges: defaultExchanges => [devtoolsExchange, ...defaultExchanges],
                 })
             );
         } else {
@@ -283,6 +285,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
                     httpUrl: httpUri,
                     wsUrl: wsUri,
                     authorization: false,
+                    exchanges: defaultExchanges => [devtoolsExchange, ...defaultExchanges],
                 })
             );
         }
