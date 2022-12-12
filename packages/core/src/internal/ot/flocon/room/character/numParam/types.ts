@@ -1,15 +1,14 @@
 import { z } from 'zod';
-import { maybe } from '@/maybe';
 import {
     createObjectValueTemplate,
     createReplaceValueTemplate,
     createTextValueTemplate,
-} from '@/ot/generator';
+} from '../../../../generator';
 
 export const template = createObjectValueTemplate(
     {
         isValuePrivate: createReplaceValueTemplate(z.boolean()),
-        value: createReplaceValueTemplate(maybe(z.number())),
+        value: createReplaceValueTemplate(z.number().optional()),
 
         /**
          * @description Do not use this value for numMaxParam.

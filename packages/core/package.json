@@ -27,7 +27,7 @@
         "@kizahasi/result": "^1.1.0",
         "@ltd/j-toml": "^1.23.0",
         "immer": "^9.0.16",
-        "lodash.clonedeep": "^4.5.0",
+        "lodash": "^4.17.21",
         "sanitize-filename": "^1.6.3",
         "truncate-utf8-bytes": "^1.0.2",
         "zod": "^3.19.1"
@@ -39,7 +39,7 @@
         "@flocon-trpg/tsconfig": "workspace:^",
         "@types/estree": "1.0.0",
         "@types/jest": "29.2.3",
-        "@types/lodash.clonedeep": "4.5.7",
+        "@types/lodash": "^4.14.191",
         "@types/sanitize-filename": "1.6.3",
         "@types/truncate-utf8-bytes": "1.0.0",
         "@typescript-eslint/eslint-plugin": "5.44.0",

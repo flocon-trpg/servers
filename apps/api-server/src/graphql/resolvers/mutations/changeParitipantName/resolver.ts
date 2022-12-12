@@ -1,3 +1,7 @@
+import { toOtError } from '@flocon-trpg/core';
+import { loggerRef } from '@flocon-trpg/utils';
+import { Result } from '@kizahasi/result';
+import produce from 'immer';
 import {
     Args,
     ArgsType,
@@ -18,9 +22,10 @@ import { ENTRY } from '../../../../utils/roles';
 import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import {
+    IdOperation,
+    RoomNotFound,
     ensureAuthorizedUser,
-    findRoomAndMyParticipant,
-    operateParticipantAndFlush,
+    operateAsAdminAndFlush,
     publishRoomEvent,
 } from '../../utils/utils';
 
@@ -51,39 +56,45 @@ export class ChangeParticipantNameResolver {
     ): Promise<ChangeParticipantNameResult> {
         const em = context.em;
         const authorizedUserUid = ensureAuthorizedUser(context).userUid;
-        const findResult = await findRoomAndMyParticipant({
+        const flushResult = await operateAsAdminAndFlush({
             em,
-            userUid: authorizedUserUid,
-            roomId: args.roomId,
-        });
-        if (findResult == null) {
-            return {
-                failureType: ChangeParticipantNameFailureType.NotFound,
-            };
-        }
-        const { room, me } = findResult;
-        const participantUserUids = findResult.participantIds();
-        // me.role == nullのときは弾かないようにしてもいいかも？
-        if (me == null || me.role == null) {
-            return {
-                failureType: ChangeParticipantNameFailureType.NotParticipant,
-            };
-        }
-
-        const { payload } = await operateParticipantAndFlush({
-            em,
-            myUserUid: authorizedUserUid,
-            update: {
-                name: { newValue: convertToMaxLength100String(args.newName) },
+            operationType: 'state',
+            operation: roomState => {
+                const me = roomState.participants?.[authorizedUserUid];
+                // me.role == nullのときは弾かないようにしてもいいかも？
+                if (me == null || me.role == null) {
+                    return Result.error(ChangeParticipantNameFailureType.NotParticipant);
+                }
+                const result = produce(roomState, roomState => {
+                    const me = roomState.participants?.[authorizedUserUid];
+                    if (me == null) {
+                        return;
+                    }
+                    me.name = convertToMaxLength100String(args.newName);
+                });
+                return Result.ok(result);
             },
-            room,
-            roomHistCount: context.serverConfig.roomHistCount,
-            participantUserUids,
+            roomId: args.roomId,
+            roomHistCount: undefined,
         });
-
-        if (payload != null) {
-            await publishRoomEvent(pubSub, payload);
+        if (flushResult.isError) {
+            if (flushResult.error.type === 'custom') {
+                return { failureType: flushResult.error.error };
+            }
+            throw toOtError(flushResult.error.error);
         }
+        switch (flushResult.value) {
+            case RoomNotFound:
+                return { failureType: ChangeParticipantNameFailureType.NotFound };
+            case IdOperation:
+                loggerRef.debug(
+                    'An operation in changeParticipantName is id. This should not happen.'
+                );
+                return { failureType: ChangeParticipantNameFailureType.NotParticipant };
+            default:
+                break;
+        }
+        await publishRoomEvent(pubSub, flushResult.value);
         return {
             failureType: undefined,
         };

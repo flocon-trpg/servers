@@ -1,3 +1,7 @@
+import { toOtError } from '@flocon-trpg/core';
+import { loggerRef } from '@flocon-trpg/utils';
+import { Result } from '@kizahasi/result';
+import produce from 'immer';
 import {
     Arg,
     Authorized,
@@ -16,9 +20,10 @@ import { ENTRY } from '../../../../utils/roles';
 import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import {
+    IdOperation,
+    RoomNotFound,
     ensureAuthorizedUser,
-    findRoomAndMyParticipant,
-    operateParticipantAndFlush,
+    operateAsAdminAndFlush,
     publishRoomEvent,
 } from '../../utils/utils';
 
@@ -40,37 +45,40 @@ export class LeaveRoomResolver {
     ): Promise<LeaveRoomResult> {
         const em = context.em;
         const authorizedUserUid = ensureAuthorizedUser(context).userUid;
-        // entryしていなくても呼べる
-        const findResult = await findRoomAndMyParticipant({
+
+        const flushResult = await operateAsAdminAndFlush({
             em,
-            userUid: authorizedUserUid,
             roomId: id,
-        });
-        if (findResult == null) {
-            return {
-                failureType: LeaveRoomFailureType.NotFound,
-            };
-        }
-        const { me, room } = findResult;
-        const participantUserUids = findResult.participantIds();
-        if (me === undefined || me.role == null) {
-            return {
-                failureType: LeaveRoomFailureType.NotParticipant,
-            };
-        }
-        const { payload } = await operateParticipantAndFlush({
-            em,
-            myUserUid: authorizedUserUid,
-            update: {
-                role: { newValue: undefined },
-            },
-            room,
             roomHistCount: context.serverConfig.roomHistCount,
-            participantUserUids,
+            operationType: 'state',
+            operation: async roomState => {
+                if (roomState.participants?.[authorizedUserUid] == null) {
+                    return Result.error(LeaveRoomFailureType.NotParticipant);
+                }
+                const nextRoomState = produce(roomState, roomState => {
+                    delete roomState.participants?.[authorizedUserUid];
+                });
+                return Result.ok(nextRoomState);
+            },
         });
-        if (payload != null) {
-            await publishRoomEvent(pubSub, payload);
+        if (flushResult.isError) {
+            if (flushResult.error.type === 'custom') {
+                return { failureType: LeaveRoomFailureType.NotParticipant };
+            }
+            throw toOtError(flushResult.error.error);
         }
+        switch (flushResult.value) {
+            case RoomNotFound:
+                return {
+                    failureType: LeaveRoomFailureType.NotFound,
+                };
+            case IdOperation:
+                loggerRef.debug('An operation in leaveRoom is id. This should not happen.');
+                return { failureType: LeaveRoomFailureType.NotParticipant };
+            default:
+                break;
+        }
+        await publishRoomEvent(pubSub, flushResult.value);
         return {};
     }
 }

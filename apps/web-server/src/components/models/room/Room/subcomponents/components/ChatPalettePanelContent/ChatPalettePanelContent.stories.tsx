@@ -7,7 +7,7 @@ import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
     const { roomId, roomConfig, isInitialized } = useSetupStorybook({
-        roomConfig: {
+        room: {
             myParticipantRole,
         },
     });

@@ -7,12 +7,12 @@ export declare const template: {
         ownerParticipantId: {
             readonly type: "atomic";
             readonly mode: "replace";
-            readonly value: z.ZodUnion<[z.ZodString, z.ZodUndefined]>;
+            readonly value: z.ZodOptional<z.ZodString>;
         };
         image: {
             readonly type: "atomic";
             readonly mode: "replace";
-            readonly value: z.ZodUnion<[z.ZodObject<{
+            readonly value: z.ZodOptional<z.ZodObject<{
                 $v: z.ZodLiteral<1>;
                 $r: z.ZodLiteral<1>;
                 path: z.ZodString;
@@ -27,7 +27,7 @@ export declare const template: {
                 $v: 1;
                 $r: 1;
                 sourceType: "Default" | "Uploader" | "FirebaseStorage";
-            }>, z.ZodUndefined]>;
+            }>>;
         };
         isPrivate: {
             readonly type: "atomic";
@@ -82,7 +82,7 @@ export declare const template: {
         opacity: {
             readonly type: "atomic";
             readonly mode: "replace";
-            readonly value: z.ZodUnion<[z.ZodNumber, z.ZodUndefined]>;
+            readonly value: z.ZodOptional<z.ZodNumber>;
         };
         w: {
             readonly type: "atomic";

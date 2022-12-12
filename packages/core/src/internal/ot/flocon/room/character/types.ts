@@ -1,12 +1,4 @@
 import { z } from 'zod';
-import { filePathValue } from '../../filePath/types';
-import * as BoolParam from './boolParam/types';
-import * as CharacterPiece from './characterPiece/types';
-import * as Command from './command/types';
-import * as NumParam from './numParam/types';
-import * as PortraitPiece from './portraitPiece/types';
-import * as StrParam from './strParam/types';
-import { maybe } from '@/maybe';
 import {
     State,
     createObjectValueTemplate,
@@ -14,7 +6,14 @@ import {
     createRecordValueTemplate,
     createReplaceValueTemplate,
     createTextValueTemplate,
-} from '@/ot/generator';
+} from '../../../generator';
+import { filePathValue } from '../../filePath/types';
+import * as BoolParam from './boolParam/types';
+import * as CharacterPiece from './characterPiece/types';
+import * as Command from './command/types';
+import * as NumParam from './numParam/types';
+import * as PortraitPiece from './portraitPiece/types';
+import * as StrParam from './strParam/types';
 
 // boolParams, numParams, numMaxParams, strParams: keyはstrIndex20などの固定キーを想定。
 // pieces, portraitPositions: 誰でも作成できる値。keyはboardのkey。
@@ -47,15 +46,15 @@ export const defaultStrParamState: State<typeof StrParam.template> = {
 
 export const template = createObjectValueTemplate(
     {
-        ownerParticipantId: createReplaceValueTemplate(maybe(z.string())),
+        ownerParticipantId: createReplaceValueTemplate(z.string().optional()),
 
-        image: createReplaceValueTemplate(maybe(filePathValue)),
+        image: createReplaceValueTemplate(filePathValue.optional()),
         isPrivate: createReplaceValueTemplate(z.boolean()),
         memo: createTextValueTemplate(false),
         name: createTextValueTemplate(false),
         chatPalette: createTextValueTemplate(false),
         privateVarToml: createTextValueTemplate(false),
-        portraitImage: createReplaceValueTemplate(maybe(filePathValue)),
+        portraitImage: createReplaceValueTemplate(filePathValue.optional()),
 
         hasTag1: createReplaceValueTemplate(z.boolean()),
         hasTag2: createReplaceValueTemplate(z.boolean()),

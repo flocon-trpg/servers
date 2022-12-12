@@ -1,7 +1,7 @@
 import { authToken } from '@flocon-trpg/core';
 import { authExchange } from '@urql/exchange-auth';
 import { createClient as createClient$1 } from 'graphql-ws';
-import { makeOperation, createClient, dedupExchange, cacheExchange, fetchExchange, subscriptionExchange } from 'urql';
+import { makeOperation, dedupExchange, cacheExchange, fetchExchange, subscriptionExchange, createClient } from 'urql';
 import { GetMessagesDocument, GetRoomConnectionsDocument, GetRoomDocument, OperateDocument, UpdateWritingMessageStatusDocument, RoomEventDocument } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { Result } from '@kizahasi/result';
 import { Observable } from 'rxjs';
@@ -68,22 +68,23 @@ const createUrqlClient = (params) => {
     else {
         authExchangeResult = null;
     }
+    const defaultExchanges = [
+        dedupExchange,
+        cacheExchange,
+        ...(authExchangeResult == null ? [] : [authExchangeResult]),
+        fetchExchange,
+        subscriptionExchange({
+            forwardSubscription: operation => ({
+                subscribe: sink => {
+                    const unsubscribe = wsClient(params.wsUrl, params.authorization ? params.getUserIdTokenResult : null).subscribe(operation, sink);
+                    return { unsubscribe };
+                },
+            }),
+        }),
+    ];
     return createClient({
         url: params.httpUrl,
-        exchanges: [
-            dedupExchange,
-            cacheExchange,
-            ...(authExchangeResult == null ? [] : [authExchangeResult]),
-            fetchExchange,
-            subscriptionExchange({
-                forwardSubscription: operation => ({
-                    subscribe: sink => {
-                        const unsubscribe = wsClient(params.wsUrl, params.authorization ? params.getUserIdTokenResult : null).subscribe(operation, sink);
-                        return { unsubscribe };
-                    },
-                }),
-            }),
-        ],
+        exchanges: params.exchanges == null ? defaultExchanges : params.exchanges(defaultExchanges),
     });
 };
 

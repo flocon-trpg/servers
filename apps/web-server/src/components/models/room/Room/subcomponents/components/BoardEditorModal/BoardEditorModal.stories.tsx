@@ -8,7 +8,7 @@ import { defaultBoardId, myRichCharacterId } from '@/mocks';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
     const { isInitialized } = useSetupStorybook({
-        roomConfig: {
+        room: {
             myParticipantRole,
         },
     });

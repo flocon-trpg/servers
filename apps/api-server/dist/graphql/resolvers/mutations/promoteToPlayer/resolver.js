@@ -2,6 +2,8 @@
 
 var tslib = require('tslib');
 var FilePathModule = require('@flocon-trpg/core');
+var result = require('@kizahasi/result');
+var produce = require('immer');
 var typeGraphql = require('type-graphql');
 var PromoteFailureType = require('../../../../enums/PromoteFailureType.js');
 var roles = require('../../../../utils/roles.js');
@@ -34,72 +36,51 @@ PromoteResult = tslib.__decorate([
 const promoteMeCore = async ({ roomId, context, strategy, }) => {
     const em = context.em;
     const authorizedUser = utils.ensureAuthorizedUser(context);
-    const findResult = await utils.findRoomAndMyParticipant({
+    const flushResult = await utils.operateAsAdminAndFlush({
+        operationType: 'state',
         em,
-        userUid: authorizedUser.userUid,
         roomId,
+        roomHistCount: undefined,
+        operation: async (roomState, { room }) => {
+            const me = roomState.participants?.[authorizedUser.userUid];
+            if (me == null) {
+                return result.Result.error(PromoteFailureType.PromoteFailureType.NotParticipant);
+            }
+            const strategyResult = await strategy({ me, room });
+            switch (strategyResult) {
+                case 'Master':
+                case 'Player':
+                case 'Spectator': {
+                    const result$1 = produce(roomState, roomState => {
+                        const me = roomState.participants?.[authorizedUser.userUid];
+                        if (me == null) {
+                            return;
+                        }
+                        me.role = strategyResult;
+                    });
+                    return result.Result.ok(result$1);
+                }
+                default:
+                    return result.Result.error(strategyResult);
+            }
+        },
     });
-    if (findResult == null) {
-        return {
-            result: {
-                failureType: PromoteFailureType.PromoteFailureType.NotFound,
-            },
-            payload: undefined,
-        };
+    if (flushResult.isError) {
+        if (flushResult.error.type === 'custom') {
+            return { result: { failureType: flushResult.error.error }, payload: undefined };
+        }
+        throw FilePathModule.toOtError(flushResult.error.error);
     }
-    const { room, me } = findResult;
-    const participantUserUids = findResult.participantIds();
-    if (me == null) {
-        return {
-            result: {
-                failureType: PromoteFailureType.PromoteFailureType.NotParticipant,
-            },
-            payload: undefined,
-        };
-    }
-    const strategyResult = await strategy({ me, room });
-    switch (strategyResult) {
-        case PromoteFailureType.PromoteFailureType.NoNeedToPromote: {
+    switch (flushResult.value) {
+        case utils.RoomNotFound:
+            return { result: { failureType: PromoteFailureType.PromoteFailureType.NotFound }, payload: undefined };
+        case utils.IdOperation:
             return {
-                result: {
-                    failureType: PromoteFailureType.PromoteFailureType.NoNeedToPromote,
-                },
+                result: { failureType: PromoteFailureType.PromoteFailureType.NoNeedToPromote },
                 payload: undefined,
             };
-        }
-        case PromoteFailureType.PromoteFailureType.WrongPassword: {
-            return {
-                result: {
-                    failureType: PromoteFailureType.PromoteFailureType.WrongPassword,
-                },
-                payload: undefined,
-            };
-        }
-        case PromoteFailureType.PromoteFailureType.NotParticipant: {
-            return {
-                result: {
-                    failureType: PromoteFailureType.PromoteFailureType.NotParticipant,
-                },
-                payload: undefined,
-            };
-        }
-        default: {
-            return {
-                result: {
-                    failureType: undefined,
-                },
-                payload: (await utils.operateParticipantAndFlush({
-                    em,
-                    room,
-                    roomHistCount: context.serverConfig.roomHistCount,
-                    participantUserUids,
-                    myUserUid: authorizedUser.userUid,
-                    update: {
-                        role: { newValue: strategyResult },
-                    },
-                }))?.payload,
-            };
-        }
+        default:
+            return { result: {}, payload: flushResult.value };
     }
 };
 exports.PromoteToPlayerResolver = class PromoteToPlayerResolver {

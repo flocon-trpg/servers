@@ -43,10 +43,7 @@ export type RecordValueTemplate<TValue extends AnyTemplate> = {
     value: TValue;
 };
 /** `Record<string, T>`を表すtemplateを作成します。*/
-export declare const createRecordValueTemplate: <TValue extends AnyTemplate>(value: TValue) => {
-    readonly type: "record";
-    readonly value: TValue;
-};
+export declare const createRecordValueTemplate: <TValue extends AnyTemplate>(value: TValue) => RecordValueTemplate<TValue>;
 export type ParamRecordValueTemplate<TValue extends AnyTemplate> = {
     type: typeof paramRecord;
     value: TValue;

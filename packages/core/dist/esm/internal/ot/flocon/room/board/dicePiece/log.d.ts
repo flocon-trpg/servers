@@ -415,13 +415,13 @@ export declare const type: z.ZodUnion<[z.ZodObject<{
     } | undefined;
 }>>, z.ZodObject<{
     ownerCharacterId: z.ZodOptional<z.ZodObject<{
-        newValue: z.ZodUnion<[z.ZodString, z.ZodUndefined]>;
+        newValue: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
         newValue?: string | undefined;
     }, {
         newValue?: string | undefined;
     }>>;
-    dice: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnion<[z.ZodUnion<[z.ZodObject<{
+    dice: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodOptional<z.ZodUnion<[z.ZodObject<{
         type: z.ZodLiteral<"replace">;
         replace: z.ZodObject<{
             newValue: z.ZodOptional<z.ZodType<{
@@ -493,7 +493,7 @@ export declare const type: z.ZodUnion<[z.ZodObject<{
                 newValue: "D4" | "D6";
             }>>;
             isValuePrivateChanged: z.ZodOptional<z.ZodObject<{
-                newValue: z.ZodUnion<[z.ZodNumber, z.ZodUndefined]>;
+                newValue: z.ZodOptional<z.ZodNumber>;
             }, "strip", z.ZodTypeAny, {
                 newValue?: number | undefined;
             }, {
@@ -550,7 +550,7 @@ export declare const type: z.ZodUnion<[z.ZodObject<{
             $v: 1;
             $r: 1;
         };
-    }>]>, z.ZodUndefined]>>>;
+    }>]>>>>;
 }, "strip", z.ZodTypeAny, {
     ownerCharacterId?: {
         newValue?: string | undefined;

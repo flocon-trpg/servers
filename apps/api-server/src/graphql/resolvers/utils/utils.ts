@@ -1,16 +1,14 @@
 import {
-    MaxLength100String,
-    ParticipantRole,
-    RecordUpOperationElement,
     State,
     UpOperation,
     admin,
     anonymous,
     client,
+    diff,
     participantTemplate,
-    replace,
     roomTemplate,
     serverTransform,
+    toUpOperation,
 } from '@flocon-trpg/core';
 import { recordToArray } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
@@ -30,7 +28,6 @@ import { RoomPrvMsg, RoomPubMsg } from '../../../entities/roomMessage/entity';
 import { User } from '../../../entities/user/entity';
 import { getUserIfEntry } from '../../../entities/user/getUserIfEntry';
 import { BaasType } from '../../../enums/BaasType';
-import { JoinRoomFailureType } from '../../../enums/JoinRoomFailureType';
 import { DecodedIdToken, EM, ResolverContext } from '../../../types';
 import { RoomOperation } from '../../objects/room';
 import {
@@ -52,7 +49,6 @@ import {
     RoomSoundEffectType,
     UpdatedText,
 } from '../../objects/roomMessage';
-import { JoinRoomResult } from '../mutations/joinRoom/resolver';
 import { RoomEventPayload } from '../subsciptions/roomEvent/payload';
 import { ROOM_EVENT } from '../subsciptions/roomEvent/topics';
 import { Context, analyze } from './messageAnalyzer';
@@ -60,8 +56,9 @@ import { Context, analyze } from './messageAnalyzer';
 type RoomState = State<typeof roomTemplate>;
 type RoomUpOperation = UpOperation<typeof roomTemplate>;
 type ParticipantState = State<typeof participantTemplate>;
-type ParticipantUpOperation = UpOperation<typeof participantTemplate>;
 
+export const RoomNotFound = 'RoomNotFound';
+export const IdOperation = 'IdOperation';
 export const NotSignIn = 'NotSignIn';
 export const AnonymousAccount = 'AnonymousAccount';
 
@@ -116,13 +113,14 @@ class FindRoomAndMyParticipantResult {
     }
 }
 
+/** Room をデータベースから探し、Room に付随する様々なデータと併せて返します。 */
 export const findRoomAndMyParticipant = async ({
     em,
     userUid,
     roomId,
 }: {
     em: EM;
-    userUid: string;
+    userUid: string | undefined;
     roomId: string;
 }): Promise<FindRoomAndMyParticipantResult | null> => {
     const room = await em.findOne(Room$MikroORM.Room, { id: roomId });
@@ -130,7 +128,7 @@ export const findRoomAndMyParticipant = async ({
         return null;
     }
     const state = await GlobalRoom.MikroORM.ToGlobal.state(room, em);
-    const me = state.participants?.[userUid];
+    const me = userUid == null ? undefined : state.participants?.[userUid];
     return new FindRoomAndMyParticipantResult(room, state, me);
 };
 
@@ -409,39 +407,43 @@ export async function getRoomMessagesFromDb(
     };
 }
 
-const operateAsAdminAndFlush = async ({
+type PromiseOrValue<T> = T | Promise<T>;
+
+const operateAsAdminAndFlushCore = async <TError>({
     operation: operationSource,
     em,
     room,
+    roomState,
     roomHistCount,
 }: {
-    operation:
-        | RoomUpOperation
-        | undefined
-        | ((roomState: RoomState) => RoomUpOperation | undefined);
+    operation: (
+        roomState: RoomState
+    ) => PromiseOrValue<Result<RoomUpOperation | undefined, TError>>;
     em: EM;
     room: Room$MikroORM.Room;
+    roomState: RoomState;
     roomHistCount: number | undefined;
 }) => {
     const prevRevision = room.revision;
-    const roomState = await GlobalRoom.MikroORM.ToGlobal.state(room, em);
-    const operation =
-        typeof operationSource === 'function' ? operationSource(roomState) : operationSource;
-    if (operation == null) {
-        return Result.ok(undefined);
+    const operation = await operationSource(roomState);
+    if (operation.isError) {
+        return Result.error({ type: 'custom', error: operation.error } as const);
+    }
+    if (operation.value == null) {
+        return Result.ok<typeof IdOperation>(IdOperation);
     }
     const transformed = serverTransform({ type: admin })({
         stateBeforeServerOperation: roomState,
         stateAfterServerOperation: roomState,
-        clientOperation: operation,
+        clientOperation: operation.value,
         serverOperation: undefined,
     });
     if (transformed.isError) {
-        return transformed;
+        return Result.error({ type: 'OT', error: transformed.error } as const);
     }
     const transformedValue = transformed.value;
     if (transformedValue == null) {
-        return Result.ok(undefined);
+        return Result.ok<typeof IdOperation>(IdOperation);
     }
 
     const nextRoomState = await GlobalRoom.Global.applyToEntity({
@@ -475,110 +477,79 @@ const operateAsAdminAndFlush = async ({
     return Result.ok(generateOperation);
 };
 
-export const operateParticipantAndFlush = async ({
-    myUserUid,
-    em,
-    room,
-    roomHistCount,
-    participantUserUids,
-    create,
-    update,
-}: {
-    myUserUid: string;
-    em: EM;
+type OperationRestArg = {
     room: Room$MikroORM.Room;
+};
+
+type OperationChoice<TError> =
+    | {
+          operationType: 'operation';
+          operation: (
+              roomState: RoomState,
+              rest: OperationRestArg
+          ) => PromiseOrValue<Result<RoomUpOperation | undefined, TError>>;
+      }
+    | {
+          operationType: 'state';
+          operation: (
+              roomState: RoomState,
+              rest: OperationRestArg
+          ) => PromiseOrValue<Result<RoomState, TError>>;
+      };
+
+export const operateAsAdminAndFlush = async <TError>({
+    operation,
+    operationType,
+    em,
+    roomId,
+    roomHistCount,
+}: {
+    em: EM;
+    roomId: string;
     roomHistCount: number | undefined;
-    participantUserUids: ReadonlySet<string>;
-    create?: {
-        role: ParticipantRole | undefined;
-        name: MaxLength100String;
-    };
-    update?: {
-        role?: { newValue: ParticipantRole | undefined };
-        name?: { newValue: MaxLength100String };
-    };
-}): Promise<{ result: typeof JoinRoomResult; payload: RoomEventPayload | undefined }> => {
-    const operation = (roomState: RoomState) => {
-        const me = roomState.participants?.[myUserUid];
-        let participantOperation:
-            | RecordUpOperationElement<ParticipantState, ParticipantUpOperation>
-            | undefined = undefined;
-        if (me == null) {
-            if (create != null) {
-                participantOperation = {
-                    type: replace,
-                    replace: {
-                        newValue: {
-                            $v: 2,
-                            $r: 1,
-                            name: create.name,
-                            role: create.role,
-                        },
-                    },
-                };
+} & OperationChoice<TError>) => {
+    const findResult = await findRoomAndMyParticipant({ em, roomId, userUid: undefined });
+    if (findResult == null) {
+        return Result.ok<typeof RoomNotFound>(RoomNotFound);
+    }
+
+    const generateOperationResult = await operateAsAdminAndFlushCore({
+        operation: async state => {
+            if (operationType === 'operation') {
+                return await operation(state, { room: findResult.room });
             }
-        } else {
-            if (update != null) {
-                participantOperation = {
-                    type: 'update',
-                    update: {
-                        $v: 2,
-                        $r: 1,
-                        role: update.role,
-                        name: update.name,
-                    },
-                };
+            const nextState = await operation(state, { room: findResult.room });
+            if (nextState.isError) {
+                return nextState;
             }
-        }
-
-        if (participantOperation == null) {
-            return undefined;
-        }
-
-        const roomUpOperation: RoomUpOperation = {
-            $v: 2,
-            $r: 1,
-            participants: {
-                [myUserUid]: participantOperation,
-            },
-        };
-
-        return roomUpOperation;
-    };
-
-    const generateOperationResult = await operateAsAdminAndFlush({
-        operation,
+            if (nextState.value === state) {
+                // 不要な diff の実行を避け少しでも処理を高速化させるため、確実に等しい場合は早期 return させている。
+                return Result.ok(undefined);
+            }
+            const diffResult = diff(roomTemplate)({ prevState: state, nextState: nextState.value });
+            if (diffResult == null) {
+                return Result.ok(undefined);
+            }
+            return Result.ok(toUpOperation(roomTemplate)(diffResult));
+        },
         em,
-        room,
+        room: findResult.room,
+        roomState: findResult.roomState,
         roomHistCount,
     });
     if (generateOperationResult.isError) {
-        return {
-            result: { failureType: JoinRoomFailureType.TransformError },
-            payload: undefined,
-        };
+        return generateOperationResult;
     }
-    if (generateOperationResult.value == null) {
-        return {
-            result: {},
-            payload: undefined,
-        };
+    if (generateOperationResult.value === IdOperation) {
+        return generateOperationResult;
     }
-
-    const generateOperation = generateOperationResult.value;
-
-    return {
-        result: {
-            operation: generateOperation(myUserUid),
-        },
-        payload: {
-            type: 'roomOperationPayload',
-            // Roomに参加したばかりの場合、decodedToken.uidはparticipantUserUidsに含まれないためSubscriptionは実行されない。だが、そのようなユーザーにroomOperatedで通知する必要はないため問題ない。
-            sendTo: participantUserUids,
-            generateOperation,
-            roomId: room.id,
-        },
+    const payload: RoomEventPayload = {
+        type: 'roomOperationPayload',
+        generateOperation: x => generateOperationResult.value(x),
+        sendTo: findResult.participantIds(),
+        roomId,
     };
+    return Result.ok(payload);
 };
 
 export const fixTextColor = (color: string) => {

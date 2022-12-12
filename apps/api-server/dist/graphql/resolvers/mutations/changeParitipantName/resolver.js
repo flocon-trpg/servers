@@ -1,6 +1,10 @@
 'use strict';
 
 var tslib = require('tslib');
+var FilePathModule = require('@flocon-trpg/core');
+var utils$1 = require('@flocon-trpg/utils');
+var result = require('@kizahasi/result');
+var produce = require('immer');
 var typeGraphql = require('type-graphql');
 var ChangeParticipantNameFailureType = require('../../../../enums/ChangeParticipantNameFailureType.js');
 var convertToMaxLength100String = require('../../../../utils/convertToMaxLength100String.js');
@@ -35,36 +39,40 @@ exports.ChangeParticipantNameResolver = class ChangeParticipantNameResolver {
     async changeParticipantName(args, context, pubSub) {
         const em = context.em;
         const authorizedUserUid = utils.ensureAuthorizedUser(context).userUid;
-        const findResult = await utils.findRoomAndMyParticipant({
+        const flushResult = await utils.operateAsAdminAndFlush({
             em,
-            userUid: authorizedUserUid,
-            roomId: args.roomId,
-        });
-        if (findResult == null) {
-            return {
-                failureType: ChangeParticipantNameFailureType.ChangeParticipantNameFailureType.NotFound,
-            };
-        }
-        const { room, me } = findResult;
-        const participantUserUids = findResult.participantIds();
-        if (me == null || me.role == null) {
-            return {
-                failureType: ChangeParticipantNameFailureType.ChangeParticipantNameFailureType.NotParticipant,
-            };
-        }
-        const { payload } = await utils.operateParticipantAndFlush({
-            em,
-            myUserUid: authorizedUserUid,
-            update: {
-                name: { newValue: convertToMaxLength100String.convertToMaxLength100String(args.newName) },
+            operationType: 'state',
+            operation: roomState => {
+                const me = roomState.participants?.[authorizedUserUid];
+                if (me == null || me.role == null) {
+                    return result.Result.error(ChangeParticipantNameFailureType.ChangeParticipantNameFailureType.NotParticipant);
+                }
+                const result$1 = produce(roomState, roomState => {
+                    const me = roomState.participants?.[authorizedUserUid];
+                    if (me == null) {
+                        return;
+                    }
+                    me.name = convertToMaxLength100String.convertToMaxLength100String(args.newName);
+                });
+                return result.Result.ok(result$1);
             },
-            room,
-            roomHistCount: context.serverConfig.roomHistCount,
-            participantUserUids,
+            roomId: args.roomId,
+            roomHistCount: undefined,
         });
-        if (payload != null) {
-            await utils.publishRoomEvent(pubSub, payload);
+        if (flushResult.isError) {
+            if (flushResult.error.type === 'custom') {
+                return { failureType: flushResult.error.error };
+            }
+            throw FilePathModule.toOtError(flushResult.error.error);
         }
+        switch (flushResult.value) {
+            case utils.RoomNotFound:
+                return { failureType: ChangeParticipantNameFailureType.ChangeParticipantNameFailureType.NotFound };
+            case utils.IdOperation:
+                utils$1.loggerRef.debug('An operation in changeParticipantName is id. This should not happen.');
+                return { failureType: ChangeParticipantNameFailureType.ChangeParticipantNameFailureType.NotParticipant };
+        }
+        await utils.publishRoomEvent(pubSub, flushResult.value);
         return {
             failureType: undefined,
         };

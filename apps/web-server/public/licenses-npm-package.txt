@@ -94,7 +94,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 -----
 
-The following software may be included in this product: @emotion/babel-plugin, @emotion/cache, @emotion/hash, @emotion/is-prop-valid, @emotion/memoize, @emotion/react, @emotion/serialize, @emotion/sheet, @emotion/styled, @emotion/unitless, @emotion/utils, @emotion/weak-memoize. This software contains the following license and notice below:
+The following software may be included in this product: @emotion/babel-plugin, @emotion/cache, @emotion/hash, @emotion/is-prop-valid, @emotion/memoize, @emotion/react, @emotion/serialize, @emotion/sheet, @emotion/styled, @emotion/unitless, @emotion/use-insertion-effect-with-fallbacks, @emotion/utils, @emotion/weak-memoize. This software contains the following license and notice below:
 
 MIT License
 
@@ -811,6 +811,32 @@ SOFTWARE.
 
 -----
 
+The following software may be included in this product: @urql/devtools. A copy of the source code may be downloaded from git+https://github.com/FormidableLabs/urql-devtools-exchange.git. This software contains the following license and notice below:
+
+MIT License
+
+Copyright (c) 2020 Formidable
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-----
+
 The following software may be included in this product: @virtuoso.dev/react-urx, @virtuoso.dev/urx, react-virtuoso. A copy of the source code may be downloaded from https://github.com/virtuoso-dev/urx.git (@virtuoso.dev/react-urx), https://github.com/virtuoso-dev/urx.git (@virtuoso.dev/urx), https://github.com/petyosi/react-virtuoso.git (react-virtuoso). This software contains the following license and notice below:
 
 MIT License
@@ -1096,10 +1122,10 @@ THE SOFTWARE.
 
 -----
 
-The following software may be included in this product: babel-plugin-macros, rtl-css-js. A copy of the source code may be downloaded from https://github.com/kentcdodds/babel-plugin-macros.git (babel-plugin-macros), https://github.com/kentcdodds/rtl-css-js.git (rtl-css-js). This software contains the following license and notice below:
+The following software may be included in this product: babel-plugin-macros, match-sorter. A copy of the source code may be downloaded from https://github.com/kentcdodds/babel-plugin-macros (babel-plugin-macros), https://github.com/kentcdodds/match-sorter (match-sorter). This software contains the following license and notice below:
 
 The MIT License (MIT)
-Copyright (c) 2017 Kent C. Dodds
+Copyright (c) 2020 Kent C. Dodds
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -5057,7 +5083,7 @@ terms above.
 
 -----
 
-The following software may be included in this product: lodash.camelcase, lodash.clonedeep. This software contains the following license and notice below:
+The following software may be included in this product: lodash.camelcase. This software contains the following license and notice below:
 
 Copyright jQuery Foundation and other contributors <https://jquery.org/>
 
@@ -5544,31 +5570,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-
------
-
-The following software may be included in this product: match-sorter. A copy of the source code may be downloaded from https://github.com/kentcdodds/match-sorter. This software contains the following license and notice below:
-
-The MIT License (MIT)
-Copyright (c) 2020 Kent C. Dodds
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
 
 -----
 
@@ -7370,6 +7371,31 @@ The following software may be included in this product: resolve. A copy of the s
 MIT License
 
 Copyright (c) 2012 James Halliday
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-----
+
+The following software may be included in this product: rtl-css-js. A copy of the source code may be downloaded from https://github.com/kentcdodds/rtl-css-js.git. This software contains the following license and notice below:
+
+The MIT License (MIT)
+Copyright (c) 2017 Kent C. Dodds
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

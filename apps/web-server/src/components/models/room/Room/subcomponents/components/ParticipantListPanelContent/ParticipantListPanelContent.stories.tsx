@@ -5,7 +5,7 @@ import { ParticipantListPanelContent } from './ParticipantListPanelContent';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 
 export const Master: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
-    const { isInitialized } = useSetupStorybook({ roomConfig: { myParticipantRole } });
+    const { isInitialized } = useSetupStorybook({ room: { myParticipantRole } });
 
     if (!isInitialized) {
         return <div />;

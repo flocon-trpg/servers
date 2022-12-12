@@ -12,6 +12,7 @@ import * as Character from './character/types';
 import * as Memo from './memo/types';
 import * as ParamNames from './paramName/types';
 import * as Participant from './participant/types';
+import * as RollCall from './rollCall/types';
 
 const templateBase = {
     activeBoardId: createReplaceValueTemplate(maybe(z.string())),
@@ -30,7 +31,8 @@ const templateBase = {
     characterTag9Name: createTextValueTemplate(true),
     characterTag10Name: createTextValueTemplate(true),
     memos: createRecordValueTemplate(Memo.template), // keyはランダムなID
-    numParamNames: createRecordValueTemplate(ParamNames.template), //keyはStrIndex20
+    numParamNames: createRecordValueTemplate(ParamNames.template), // keyはStrIndex20
+    rollCalls: createRecordValueTemplate(RollCall.template), // keyはランダムなID
     publicChannel1Name: createTextValueTemplate(false),
     publicChannel2Name: createTextValueTemplate(false),
     publicChannel3Name: createTextValueTemplate(false),

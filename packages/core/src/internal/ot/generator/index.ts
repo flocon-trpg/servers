@@ -91,7 +91,9 @@ export type RecordValueTemplate<TValue extends AnyTemplate> = {
 };
 
 /** `Record<string, T>`を表すtemplateを作成します。*/
-export const createRecordValueTemplate = <TValue extends AnyTemplate>(value: TValue) => {
+export const createRecordValueTemplate = <TValue extends AnyTemplate>(
+    value: TValue
+): RecordValueTemplate<TValue> => {
     return {
         type: record,
         value,

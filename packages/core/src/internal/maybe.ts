@@ -1,4 +1,5 @@
 import { z } from 'zod';
 
-export const maybe = <T extends z.ZodTypeAny>(source: T) => z.union([source, z.undefined()]);
+/** @deprecated Use `optional` method in zod. */
+export const maybe = <T extends z.ZodTypeAny>(source: T) => source.optional();
 export type Maybe<T> = T | undefined;

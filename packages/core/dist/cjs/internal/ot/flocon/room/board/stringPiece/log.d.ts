@@ -359,14 +359,14 @@ export declare const type: z.ZodUnion<[z.ZodObject<{
     } | undefined;
 }>>, z.ZodObject<{
     ownerCharacterId: z.ZodOptional<z.ZodObject<{
-        newValue: z.ZodUnion<[z.ZodString, z.ZodUndefined]>;
+        newValue: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
         newValue?: string | undefined;
     }, {
         newValue?: string | undefined;
     }>>;
     isValuePrivateChanged: z.ZodOptional<z.ZodObject<{
-        newValue: z.ZodUnion<[z.ZodString, z.ZodUndefined]>;
+        newValue: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
         newValue?: string | undefined;
     }, {

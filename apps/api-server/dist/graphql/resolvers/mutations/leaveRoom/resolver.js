@@ -1,6 +1,10 @@
 'use strict';
 
 var tslib = require('tslib');
+var FilePathModule = require('@flocon-trpg/core');
+var utils$1 = require('@flocon-trpg/utils');
+var result = require('@kizahasi/result');
+var produce = require('immer');
 var typeGraphql = require('type-graphql');
 var LeaveRoomFailureType = require('../../../../enums/LeaveRoomFailureType.js');
 var roles = require('../../../../utils/roles.js');
@@ -21,36 +25,37 @@ exports.LeaveRoomResolver = class LeaveRoomResolver {
     async leaveRoom(id, context, pubSub) {
         const em = context.em;
         const authorizedUserUid = utils.ensureAuthorizedUser(context).userUid;
-        const findResult = await utils.findRoomAndMyParticipant({
+        const flushResult = await utils.operateAsAdminAndFlush({
             em,
-            userUid: authorizedUserUid,
             roomId: id,
-        });
-        if (findResult == null) {
-            return {
-                failureType: LeaveRoomFailureType.LeaveRoomFailureType.NotFound,
-            };
-        }
-        const { me, room } = findResult;
-        const participantUserUids = findResult.participantIds();
-        if (me === undefined || me.role == null) {
-            return {
-                failureType: LeaveRoomFailureType.LeaveRoomFailureType.NotParticipant,
-            };
-        }
-        const { payload } = await utils.operateParticipantAndFlush({
-            em,
-            myUserUid: authorizedUserUid,
-            update: {
-                role: { newValue: undefined },
-            },
-            room,
             roomHistCount: context.serverConfig.roomHistCount,
-            participantUserUids,
+            operationType: 'state',
+            operation: async (roomState) => {
+                if (roomState.participants?.[authorizedUserUid] == null) {
+                    return result.Result.error(LeaveRoomFailureType.LeaveRoomFailureType.NotParticipant);
+                }
+                const nextRoomState = produce(roomState, roomState => {
+                    delete roomState.participants?.[authorizedUserUid];
+                });
+                return result.Result.ok(nextRoomState);
+            },
         });
-        if (payload != null) {
-            await utils.publishRoomEvent(pubSub, payload);
+        if (flushResult.isError) {
+            if (flushResult.error.type === 'custom') {
+                return { failureType: LeaveRoomFailureType.LeaveRoomFailureType.NotParticipant };
+            }
+            throw FilePathModule.toOtError(flushResult.error.error);
         }
+        switch (flushResult.value) {
+            case utils.RoomNotFound:
+                return {
+                    failureType: LeaveRoomFailureType.LeaveRoomFailureType.NotFound,
+                };
+            case utils.IdOperation:
+                utils$1.loggerRef.debug('An operation in leaveRoom is id. This should not happen.');
+                return { failureType: LeaveRoomFailureType.LeaveRoomFailureType.NotParticipant };
+        }
+        await utils.publishRoomEvent(pubSub, flushResult.value);
         return {};
     }
 };
