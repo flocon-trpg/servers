@@ -2829,7 +2829,7 @@ __metadata:
     "@mikro-orm/mysql": ^5.1.1
     "@mikro-orm/postgresql": ^5.1.1
     "@mikro-orm/sqlite": ^5.1.1
-    "@rollup/plugin-typescript": 9.0.2
+    "@rollup/plugin-typescript": 10.0.1
     "@types/bcrypt": ^5.0.0
     "@types/color": ^3.0.2
     "@types/express": ^4.17.13
@@ -2882,7 +2882,7 @@ __metadata:
     rate-limiter-flexible: ^2.3.0
     reflect-metadata: ^0.1.13
     rimraf: 3.0.2
-    rollup: 3.4.0
+    rollup: 3.7.0
     rollup-plugin-multi-input: ^1.3.1
     rxjs: ^7.5.6
     safe-compare: ^1.1.4
@@ -2923,7 +2923,7 @@ __metadata:
     node-cache: ^5.1.2
     prettier: 2.8.0
     rimraf: 3.0.2
-    rollup: 3.4.0
+    rollup: 3.7.0
     ts-jest: 29.0.3
     typescript: 4.9.3
   languageName: unknown
@@ -2959,7 +2959,7 @@ __metadata:
     lodash.clonedeep: ^4.5.0
     prettier: 2.8.0
     rimraf: 3.0.2
-    rollup: 3.4.0
+    rollup: 3.7.0
     sanitize-filename: ^1.6.3
     truncate-utf8-bytes: ^1.0.2
     ts-jest: 29.0.3
@@ -2985,7 +2985,7 @@ __metadata:
     pino-abstract-transport: ^1.0.0
     prettier: 2.8.0
     rimraf: 3.0.2
-    rollup: 3.4.0
+    rollup: 3.7.0
     typescript: 4.9.3
   languageName: unknown
   linkType: soft
@@ -3028,7 +3028,7 @@ __metadata:
     jest: 29.3.1
     prettier: 2.8.0
     rimraf: 3.0.2
-    rollup: 3.4.0
+    rollup: 3.7.0
     ts-jest: 29.0.3
     typescript: 4.9.3
   languageName: unknown
@@ -3049,7 +3049,7 @@ __metadata:
     "@flocon-trpg/eslint-config": "workspace:^"
     "@flocon-trpg/prettier-config": "workspace:^"
     "@flocon-trpg/tsconfig": "workspace:^"
-    "@rollup/plugin-typescript": 9.0.2
+    "@rollup/plugin-typescript": 10.0.1
     "@typescript-eslint/eslint-plugin": 5.44.0
     "@typescript-eslint/parser": 5.44.0
     eslint: 8.28.0
@@ -3094,7 +3094,7 @@ __metadata:
     react: ^18.0.0
     react-use: ^17.3.1
     rimraf: 3.0.2
-    rollup: 3.4.0
+    rollup: 3.7.0
     ts-jest: 29.0.3
     typescript: 4.9.3
     use-memo-one: ^1.1.2
@@ -3123,7 +3123,7 @@ __metadata:
     graphql-ws: ^5.8.1
     prettier: 2.8.0
     rimraf: 3.0.2
-    rollup: 3.4.0
+    rollup: 3.7.0
     rxjs: ^7.5.6
     typescript: 4.9.3
     urql: ^3.0.0
@@ -3155,7 +3155,7 @@ __metadata:
     jest: 29.3.1
     prettier: 2.8.0
     rimraf: 3.0.2
-    rollup: 3.4.0
+    rollup: 3.7.0
     rxjs: ^7.5.6
     ts-jest: 29.0.3
     typescript: 4.9.3
@@ -3199,7 +3199,7 @@ __metadata:
     graphql: ^15.6.0
     prettier: 2.8.0
     rimraf: 3.0.2
-    rollup: 3.4.0
+    rollup: 3.7.0
     typescript: 4.9.3
   languageName: unknown
   linkType: soft
@@ -3222,7 +3222,7 @@ __metadata:
     graphql: ^15.6.0
     prettier: 2.8.0
     rimraf: 3.0.2
-    rollup: 3.4.0
+    rollup: 3.7.0
     typescript: 4.9.3
   languageName: unknown
   linkType: soft
@@ -3245,7 +3245,7 @@ __metadata:
     graphql: ^15.6.0
     prettier: 2.8.0
     rimraf: 3.0.2
-    rollup: 3.4.0
+    rollup: 3.7.0
     typescript: 4.9.3
   languageName: unknown
   linkType: soft
@@ -3275,7 +3275,7 @@ __metadata:
     pino: ^8.6.1
     prettier: 2.8.0
     rimraf: 3.0.2
-    rollup: 3.4.0
+    rollup: 3.7.0
     ts-jest: 29.0.3
     typescript: 4.9.3
   languageName: unknown
@@ -3304,7 +3304,7 @@ __metadata:
     jest: 29.3.1
     prettier: 2.8.0
     rimraf: 3.0.2
-    rollup: 3.4.0
+    rollup: 3.7.0
     rxjs: ^7.5.6
     ts-jest: 29.0.3
     typescript: 4.9.3
@@ -5254,9 +5254,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-typescript@npm:9.0.2":
-  version: 9.0.2
-  resolution: "@rollup/plugin-typescript@npm:9.0.2"
+"@rollup/plugin-typescript@npm:10.0.1":
+  version: 10.0.1
+  resolution: "@rollup/plugin-typescript@npm:10.0.1"
   dependencies:
     "@rollup/pluginutils": ^5.0.1
     resolve: ^1.22.1
@@ -5269,7 +5269,7 @@ __metadata:
       optional: true
     tslib:
       optional: true
-  checksum: 0b3a15e7402a8cf46a491003a0bfe6bf50294939133cf898c1dee0b9f1f8f4742242e81abd15effd8de2e9f3fe5fd81d01a03020341e1d3d0b7f4c6be21d989f
+  checksum: d3e85674b5ff56c4376bbd79fd2baced3e988b7110d60b1f818eb344721f5605eaa3b56a1668631d210399db7188a7cc4790bb423ad9e56144d015fd1591ccc3
   languageName: node
   linkType: hard
 
@@ -22589,9 +22589,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup@npm:3.4.0":
-  version: 3.4.0
-  resolution: "rollup@npm:3.4.0"
+"rollup@npm:3.7.0":
+  version: 3.7.0
+  resolution: "rollup@npm:3.7.0"
   dependencies:
     fsevents: ~2.3.2
   dependenciesMeta:
@@ -22599,7 +22599,7 @@ __metadata:
       optional: true
   bin:
     rollup: dist/bin/rollup
-  checksum: 6c6cd76a89b44d5798d1e5e15bc9fe3e33177e0c49cc94cf4460252826cc69fec8df9c3c0415578d2b8e173fe8e0c799e943d311a8d0aacc6e57860f058fbbf6
+  checksum: 9a407469cd25e1255fb5a5956eff53ff963c90ffba949ec81ea8104d1271e1ce377c28231078d96c2d14a8a9727a06d1d2421f3db4d11b74d46cbcc2a02c3768
   languageName: node
   linkType: hard
 
