@@ -52,7 +52,11 @@ export declare const template: {
                     readonly type: "atomic";
                     readonly mode: "replace";
                     readonly value: z.ZodOptional<z.ZodNumber>;
-                };
+                }; /**
+                 * keyは`'1'`から`'9'`の9個のみをサポートしています。詳細は`./functions.ts`を参照してください。
+                 *
+                 * ShapeのPath.dataは、widthとheightがともに100pxの正方形として記述します。コマなどの大きさに応じて自動的にscaleされます。
+                 * */
             };
         }>;
         cellH: {
@@ -94,11 +98,7 @@ export declare const template: {
             readonly type: "atomic";
             readonly mode: "ot";
             readonly nullable: true;
-        }; /**
-         * keyは`'1'`から`'9'`の9個のみをサポートしています。詳細は`./functions.ts`を参照してください。
-         *
-         * ShapeのPath.dataは、widthとheightがともに100pxの正方形として記述します。コマなどの大きさに応じて自動的にscaleされます。
-         * */
+        };
         name: {
             readonly type: "atomic";
             readonly mode: "ot";

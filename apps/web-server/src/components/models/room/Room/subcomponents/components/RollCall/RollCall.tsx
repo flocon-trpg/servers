@@ -6,7 +6,7 @@ import {
     PerformRollCallDocument,
 } from '@flocon-trpg/typed-document-node-v0.7.13';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
-import { Button, Modal } from 'antd';
+import { Button, Divider, Modal, Tooltip } from 'antd';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
 import { maxBy, sortBy } from 'lodash';
@@ -17,6 +17,7 @@ import { useJoinParticipants } from '../../hooks/useJoinParticipants';
 import { useRoomId } from '../../hooks/useRoomId';
 import { prettyElapsed } from './prettyElapsed';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
+import { HelpMessageTooltip } from '@/components/ui/HelpMessageTooltip/HelpMessageTooltip';
 import { Jdenticon } from '@/components/ui/Jdenticon/Jdenticon';
 import { Table, TableHeader, TableRow } from '@/components/ui/Table/Table';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
@@ -26,6 +27,28 @@ import { flex, flexColumn, flexRow, itemsCenter } from '@/styles/className';
 type RoomState = State<typeof roomTemplate>;
 type RollCallsState = NonNullable<RoomState['rollCalls']>;
 type RollCallState = NonNullable<RollCallsState[string]>;
+
+const Help: React.FC = () => {
+    const title = (
+        <div>
+            <p>{'参加者のみが点呼に参加できます。観戦者は点呼の対象になりません。'}</p>
+            <p>
+                {
+                    '参加者全員が点呼の対象となります。一部の参加者のみを点呼の対象にすることはできません。'
+                }
+            </p>
+            <p>{'点呼作成後に入室した参加者も点呼の対象となります。'}</p>
+            <p>{'参加者のみが点呼を開始できます。'}</p>
+            <p>{'現在行われている点呼の終了は、参加者であれば誰でも行うことができます。'}</p>
+            <p>{'点呼を終了せずに放置しても、サーバー等に負荷がかかることはありません。'}</p>
+        </div>
+    );
+    return (
+        <Tooltip title={title} trigger='click'>
+            <Button size='small'>説明書を見る</Button>
+        </Tooltip>
+    );
+};
 
 type RollCallResultProps = {
     rollCallId: string;
@@ -117,7 +140,9 @@ const RollCallResult: React.FC<RollCallResultProps> = ({
     }, [answerRollCall, answerRollCallResult.fetching, isOpen, joined, rollCallId, roomId]);
 
     const participantsElement = (
-        <div className={classNames(flex, flexColumn)}>{participantsElementContent}</div>
+        <div style={{ margin: '2px 0' }} className={classNames(flex, flexColumn)}>
+            {participantsElementContent}
+        </div>
     );
     const getCreatedAtText = () => {
         return `${dayjs(rollCall.createdAt).format('YYYY/MM/DD HH:mm:ss')} (${prettyElapsed(
@@ -138,6 +163,9 @@ const RollCallResult: React.FC<RollCallResultProps> = ({
                 .filter(p => p.answered != null)
                 .reduce(seed => seed + 1, 0)} / ${joined.length}`}</TableRow>
             <TableRow label='返事の状況'>{participantsElement}</TableRow>
+            <TableRow label='説明書'>
+                <Help />
+            </TableRow>
         </Table>
     );
 };
@@ -188,7 +216,10 @@ const HasOpenRollCall: React.FC<{ rollCall: RollCallState; rollCallId: string }>
                     />
                 }
             >
-                {'現在行われている点呼を終了します。よろしいですか？'}
+                <div>
+                    <p>{'現在行われている点呼を終了します。よろしいですか？'}</p>
+                    <p>{'点呼の作成者でなくとも、参加者であれば誰でも終了できます。'}</p>
+                </div>
             </Modal>
         </div>
     );
