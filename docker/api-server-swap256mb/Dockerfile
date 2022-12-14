@@ -4,7 +4,7 @@
 # example of docker build:
 # docker build -t flocon-api-swap256mb --build-arg branch="api/v0.7.7" . 
 
-FROM node:16-bullseye as build
+FROM node:18-bullseye as build
 
 # branchという名前ですが、ブランチではなくタグも指定できます。
 # これを変更することで、デプロイするAPIサーバーのバージョンを変更できます。
@@ -31,7 +31,7 @@ RUN rm -rf ./.yarn/cache
 RUN rm -rf ./apps/web-server
 
 
-FROM node:16-bullseye-slim
+FROM node:18-bullseye-slim
 
 WORKDIR /app
 
