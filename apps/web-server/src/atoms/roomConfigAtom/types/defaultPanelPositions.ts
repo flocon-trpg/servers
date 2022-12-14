@@ -15,7 +15,7 @@ export const defaultPieceValuePanelPosition: PanelPosition = {
 };
 
 export const defaultRollCallPanelPosition: PanelPosition = {
-    x: xRatio* 1,
+    x: xRatio * 1,
     y: yRatio * 1,
     width: 400,
     height: 350,
