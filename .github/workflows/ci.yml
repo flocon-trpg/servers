@@ -160,7 +160,7 @@ jobs:
                 pnp: [true, false]
 
         runs-on: ubuntu-22.04
-        container: node:18-buster
+        container: node:19-buster
 
         services:
             mysql:
