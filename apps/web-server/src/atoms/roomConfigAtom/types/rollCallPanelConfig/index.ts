@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { defaultPieceValuePanelPosition } from '../defaultPanelPositions';
+import { defaultRollCallPanelPosition } from '../defaultPanelPositions';
 import {
     DraggablePanelConfigBase,
     deserializeDraggablePanelConfigBase,
@@ -30,6 +30,6 @@ export const deserializeRollCallPanelConfig = (
 
 export const defaultRollCallPanelConfig = (): RollCallPanelConfig => {
     return {
-        ...defaultPieceValuePanelPosition,
+        ...defaultRollCallPanelPosition,
     };
 };
