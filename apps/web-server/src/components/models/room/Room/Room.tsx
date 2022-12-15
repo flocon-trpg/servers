@@ -37,6 +37,7 @@ import { usePlayBgm } from './subcomponents/hooks/usePlayBgm';
 import { usePlaySoundEffect } from './subcomponents/hooks/usePlaySoundEffect';
 import { usePushNotifications } from './subcomponents/hooks/usePushNotifications';
 import { useRoomId } from './subcomponents/hooks/useRoomId';
+import { panelHighlightKeysAtom } from '@/atoms/panelHighlightKeysAtom/panelHighlightKeysAtom';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { BoardEditorPanelConfig } from '@/atoms/roomConfigAtom/types/boardEditorPanelConfig';
 import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
@@ -773,6 +774,7 @@ const PieceValuePanel: React.FC = () => {
 const RollCallPanel: React.FC = () => {
     const config = useAtomSelector(roomConfigAtom, state => state?.panels.rollCallPanel);
     const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const highlightKey = useAtomValue(panelHighlightKeysAtom);
 
     const onDragStop = React.useCallback(
         (e: ControlPosition) => {
@@ -833,6 +835,7 @@ const RollCallPanel: React.FC = () => {
             minHeight={150}
             minWidth={150}
             zIndex={config.zIndex}
+            highlightKey={highlightKey.rollCallPanel}
         >
             <RollCall rollCalls={rollCalls ?? {}} />
         </DraggableCard>

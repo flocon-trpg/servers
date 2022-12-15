@@ -3360,6 +3360,7 @@ __metadata:
     "@next/bundle-analyzer": ^12.0.0
     "@next/eslint-plugin-next": 12.3.4
     "@react-spring/konva": ^9.2.4
+    "@react-spring/web": ^9.0.0
     "@sinonjs/fake-timers": 9.1.2
     "@storybook/addon-actions": 6.5.13
     "@storybook/addon-console": 1.2.3
@@ -5223,6 +5224,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-spring/animated@npm:~9.6.0":
+  version: 9.6.0
+  resolution: "@react-spring/animated@npm:9.6.0"
+  dependencies:
+    "@react-spring/shared": ~9.6.0
+    "@react-spring/types": ~9.6.0
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: e0a8bc049c0922cb299c8cf44a0d8847a6ee009b776e1e9990bbb878d87aac25afeae3400fa37ad811930edca9c104044139990a6645a02f041e4bbaed9a21e9
+  languageName: node
+  linkType: hard
+
 "@react-spring/core@npm:~9.5.5":
   version: 9.5.5
   resolution: "@react-spring/core@npm:9.5.5"
@@ -5234,6 +5247,20 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
   checksum: dc737bcb41922f4caa89b3ef44f0ab7600b3e1fc49f62b4fc27b6327472dd0682c5f47ba4f443830ac6858b89e1700a708e65d5f24ae6dd7cfc9ad6bd7d43d1b
+  languageName: node
+  linkType: hard
+
+"@react-spring/core@npm:~9.6.0":
+  version: 9.6.0
+  resolution: "@react-spring/core@npm:9.6.0"
+  dependencies:
+    "@react-spring/animated": ~9.6.0
+    "@react-spring/rafz": ~9.6.0
+    "@react-spring/shared": ~9.6.0
+    "@react-spring/types": ~9.6.0
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: f7c2dda1d7a82292f44e4f257bbaf15d00f74399b3599242a107f9f3941664db17299a9a4b510e64ef1e1d1fb435f443291786cf04e6b553b0c86a3a3dc431a1
   languageName: node
   linkType: hard
 
@@ -5260,6 +5287,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-spring/rafz@npm:~9.6.0":
+  version: 9.6.0
+  resolution: "@react-spring/rafz@npm:9.6.0"
+  checksum: b71f5755bf9032bf1d95e4520584a0521ca3304e0fc9b54d43d4dd2818953e28955ad41c02cf733619dc4e61ecbd25e4d6402cd2571dbf5408717656b76ff64c
+  languageName: node
+  linkType: hard
+
 "@react-spring/shared@npm:~9.5.5":
   version: 9.5.5
   resolution: "@react-spring/shared@npm:9.5.5"
@@ -5272,10 +5306,44 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-spring/shared@npm:~9.6.0":
+  version: 9.6.0
+  resolution: "@react-spring/shared@npm:9.6.0"
+  dependencies:
+    "@react-spring/rafz": ~9.6.0
+    "@react-spring/types": ~9.6.0
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: a15a4393192f5a8cb763b0da7e92c49a7eecccdfabeffefa5cc906abaf831ee051092d5d8a2d24e397b0d05ebb4193c8ebed28a23da0a85436391d333f2492ed
+  languageName: node
+  linkType: hard
+
 "@react-spring/types@npm:~9.5.5":
   version: 9.5.5
   resolution: "@react-spring/types@npm:9.5.5"
   checksum: 7fa92982ffed216cfeff7817fc6703200d0ee7925e376d394729b804ec621f09d0800b67d1942b5b7c3b5df5396f7206c01aebd343ba47da619ad2b6363b7bc3
+  languageName: node
+  linkType: hard
+
+"@react-spring/types@npm:~9.6.0":
+  version: 9.6.0
+  resolution: "@react-spring/types@npm:9.6.0"
+  checksum: 9c8d3377adb99ffba7adc599f8f7d329a90a8c45ab99d89ed5fb1e9d2d497505cee10955f3d60b73fc610606ef3c26e402d1c79a2a3e88a7c13f8f68cb8c7304
+  languageName: node
+  linkType: hard
+
+"@react-spring/web@npm:^9.0.0":
+  version: 9.6.0
+  resolution: "@react-spring/web@npm:9.6.0"
+  dependencies:
+    "@react-spring/animated": ~9.6.0
+    "@react-spring/core": ~9.6.0
+    "@react-spring/shared": ~9.6.0
+    "@react-spring/types": ~9.6.0
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: 6a282a07f317d7d22ace17ee9736745f035a9ff72c68442949a9eaddc8b579b0d23242654f71be84e8aceaf3c31d850f53cc325abdb75189135f146c52971b96
   languageName: node
   linkType: hard
 
