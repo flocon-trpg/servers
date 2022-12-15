@@ -1,6 +1,6 @@
 import { loggerRef } from '@flocon-trpg/utils';
 import { Option } from '@kizahasi/option';
-import produce from 'immer';
+import { produce } from 'immer';
 import React from 'react';
 import { useLatest } from 'react-use';
 import { Recipe } from '@/utils/types';

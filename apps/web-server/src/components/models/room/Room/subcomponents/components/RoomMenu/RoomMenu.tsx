@@ -16,7 +16,7 @@ import { recordToArray } from '@flocon-trpg/utils';
 import { Input, Menu, Modal, Popover, Tooltip } from 'antd';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import classNames from 'classnames';
-import produce from 'immer';
+import { produce } from 'immer';
 import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useUpdateAtom } from 'jotai/utils';
 import { useRouter } from 'next/router';

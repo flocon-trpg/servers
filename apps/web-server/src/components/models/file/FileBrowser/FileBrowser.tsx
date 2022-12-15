@@ -34,7 +34,7 @@ import {
 } from 'antd';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import classNames from 'classnames';
-import produce from 'immer';
+import { produce } from 'immer';
 import {
     Atom,
     PrimitiveAtom,

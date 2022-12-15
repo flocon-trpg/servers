@@ -3,7 +3,7 @@
 var tslib = require('tslib');
 var FilePathModule = require('@flocon-trpg/core');
 var result = require('@kizahasi/result');
-var produce = require('immer');
+var immer = require('immer');
 var typeGraphql = require('type-graphql');
 var PromoteFailureType = require('../../../../enums/PromoteFailureType.js');
 var roles = require('../../../../utils/roles.js');
@@ -51,7 +51,7 @@ const promoteMeCore = async ({ roomId, context, strategy, }) => {
                 case 'Master':
                 case 'Player':
                 case 'Spectator': {
-                    const result$1 = produce(roomState, roomState => {
+                    const result$1 = immer.produce(roomState, roomState => {
                         const me = roomState.participants?.[authorizedUser.userUid];
                         if (me == null) {
                             return;

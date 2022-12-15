@@ -1,6 +1,6 @@
 import { ParticipantRole, Player, Spectator, State, participantTemplate } from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
-import produce from 'immer';
+import { produce } from 'immer';
 import {
     Args,
     ArgsType,

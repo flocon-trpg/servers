@@ -4,7 +4,7 @@ var tslib = require('tslib');
 var FilePathModule = require('@flocon-trpg/core');
 var utils$1 = require('@flocon-trpg/utils');
 var result = require('@kizahasi/result');
-var produce = require('immer');
+var immer = require('immer');
 var typeGraphql = require('type-graphql');
 var LeaveRoomFailureType = require('../../../../enums/LeaveRoomFailureType.js');
 var roles = require('../../../../utils/roles.js');
@@ -34,7 +34,7 @@ exports.LeaveRoomResolver = class LeaveRoomResolver {
                 if (roomState.participants?.[authorizedUserUid] == null) {
                     return result.Result.error(LeaveRoomFailureType.LeaveRoomFailureType.NotParticipant);
                 }
-                const nextRoomState = produce(roomState, roomState => {
+                const nextRoomState = immer.produce(roomState, roomState => {
                     delete roomState.participants?.[authorizedUserUid];
                 });
                 return result.Result.ok(nextRoomState);

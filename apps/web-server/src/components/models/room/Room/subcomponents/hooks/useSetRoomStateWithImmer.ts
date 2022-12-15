@@ -1,5 +1,5 @@
 import { State, roomTemplate } from '@flocon-trpg/core';
-import produce from 'immer';
+import { produce } from 'immer';
 import React from 'react';
 import { useLatest } from 'react-use';
 import { useSetRoomState } from './useSetRoomState';

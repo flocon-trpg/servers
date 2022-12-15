@@ -3,7 +3,7 @@
 var tslib = require('tslib');
 var FilePathModule = require('@flocon-trpg/core');
 var result = require('@kizahasi/result');
-var produce = require('immer');
+var immer = require('immer');
 var typeGraphql = require('type-graphql');
 var roles = require('../../../../utils/roles.js');
 var QueueMiddleware = require('../../../middlewares/QueueMiddleware.js');
@@ -44,7 +44,7 @@ exports.CloseRollCallResolver = class CloseRollCallResolver {
                 if (rollCall.closeStatus != null) {
                     return result.Result.error(CloseRollCallFailureType.CloseRollCallFailureType.AlreadyClosed);
                 }
-                const nextRoomState = produce.produce(roomState, roomState => {
+                const nextRoomState = immer.produce(roomState, roomState => {
                     const rollCall = roomState.rollCalls?.[rollCallId];
                     if (rollCall == null) {
                         return;

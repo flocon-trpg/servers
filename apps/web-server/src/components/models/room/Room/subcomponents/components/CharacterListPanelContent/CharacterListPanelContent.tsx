@@ -23,7 +23,7 @@ import {
 import { ColumnType } from 'antd/lib/table';
 import { SortOrder } from 'antd/lib/table/interface';
 import classNames from 'classnames';
-import produce from 'immer';
+import { produce } from 'immer';
 import { useUpdateAtom } from 'jotai/utils';
 import React from 'react';
 import { useDrag, useDrop } from 'react-dnd';

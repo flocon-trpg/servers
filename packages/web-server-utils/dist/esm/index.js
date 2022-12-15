@@ -1,5 +1,5 @@
 import { loggerRef } from '@flocon-trpg/utils';
-import produce from 'immer';
+import { produce } from 'immer';
 import { Subject, map, Observable } from 'rxjs';
 
 const visibleToToString = (visibleTo) => {

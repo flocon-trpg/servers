@@ -3,7 +3,7 @@
 var tslib = require('tslib');
 var FilePathModule = require('@flocon-trpg/core');
 var result = require('@kizahasi/result');
-var produce = require('immer');
+var immer = require('immer');
 var typeGraphql = require('type-graphql');
 var roles = require('../../../../utils/roles.js');
 var QueueMiddleware = require('../../../middlewares/QueueMiddleware.js');
@@ -41,7 +41,7 @@ exports.AnswerRollCallResolver = class AnswerRollCallResolver {
                 if (rollCall == null) {
                     return result.Result.error(AnswerRollCallFailureType.AnswerRollCallFailureType.RollCallNotFound);
                 }
-                const nextRoomState = produce.produce(roomState, roomState => {
+                const nextRoomState = immer.produce(roomState, roomState => {
                     const rollCall = roomState.rollCalls?.[rollCallId];
                     if (rollCall == null) {
                         return;

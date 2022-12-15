@@ -7,7 +7,7 @@ import {
     RoomSoundEffectFragment,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { loggerRef } from '@flocon-trpg/utils';
-import produce from 'immer';
+import { produce } from 'immer';
 import { Observable, Subject, map } from 'rxjs';
 import { FilteredSortedArray, SortedArray } from './filteredArray';
 import { MessageSet } from './messageSet';

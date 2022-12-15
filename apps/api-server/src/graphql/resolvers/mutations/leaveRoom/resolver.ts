@@ -1,7 +1,7 @@
 import { toOtError } from '@flocon-trpg/core';
 import { loggerRef } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
-import produce from 'immer';
+import { produce } from 'immer';
 import {
     Arg,
     Authorized,

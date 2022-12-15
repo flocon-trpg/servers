@@ -2,7 +2,7 @@ import { Auth } from '@firebase/auth';
 import { FirebaseStorage } from '@firebase/storage';
 import { State as S, UpOperation as U, apply, roomTemplate, toOtError } from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
-import produce from 'immer';
+import { produce } from 'immer';
 import { useSetAtom } from 'jotai';
 import React from 'react';
 import { useMemoOne } from 'use-memo-one';

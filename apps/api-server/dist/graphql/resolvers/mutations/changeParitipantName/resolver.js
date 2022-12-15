@@ -4,7 +4,7 @@ var tslib = require('tslib');
 var FilePathModule = require('@flocon-trpg/core');
 var utils$1 = require('@flocon-trpg/utils');
 var result = require('@kizahasi/result');
-var produce = require('immer');
+var immer = require('immer');
 var typeGraphql = require('type-graphql');
 var ChangeParticipantNameFailureType = require('../../../../enums/ChangeParticipantNameFailureType.js');
 var convertToMaxLength100String = require('../../../../utils/convertToMaxLength100String.js');
@@ -47,7 +47,7 @@ exports.ChangeParticipantNameResolver = class ChangeParticipantNameResolver {
                 if (me == null || me.role == null) {
                     return result.Result.error(ChangeParticipantNameFailureType.ChangeParticipantNameFailureType.NotParticipant);
                 }
-                const result$1 = produce(roomState, roomState => {
+                const result$1 = immer.produce(roomState, roomState => {
                     const me = roomState.participants?.[authorizedUserUid];
                     if (me == null) {
                         return;

@@ -3,7 +3,7 @@
 var FilePathModule = require('@flocon-trpg/core');
 var utils = require('@flocon-trpg/utils');
 var result = require('@kizahasi/result');
-var produce = require('immer');
+var immer = require('immer');
 var lodash = require('lodash');
 var PerformRollCallFailureType = require('../../../../enums/PerformRollCallFailureType.js');
 
@@ -29,7 +29,7 @@ const performRollCall = (source, myUserUid) => {
             return result.Result.error(PerformRollCallFailureType.PerformRollCallFailureType.TooManyRequests);
         }
     }
-    const result$1 = produce.produce(source, source => {
+    const result$1 = immer.produce(source, source => {
         const openRollCall = FilePathModule.getOpenRollCall(source.rollCalls);
         if (openRollCall != null) {
             return;

@@ -33,7 +33,7 @@ import { diff, serializeUpOperation, toUpOperation } from '@kizahasi/ot-string';
 import { OperationResult } from '@urql/core';
 import axios from 'axios';
 import FormData from 'form-data';
-import produce from 'immer';
+import { produce } from 'immer';
 import urljoin from 'url-join';
 import { ServerConfig } from '../../src/config/types';
 import { File as File$MikroORM } from '../../src/entities/file/entity';

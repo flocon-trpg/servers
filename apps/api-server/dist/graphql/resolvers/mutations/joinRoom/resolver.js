@@ -3,7 +3,7 @@
 var tslib = require('tslib');
 var FilePathModule = require('@flocon-trpg/core');
 var result = require('@kizahasi/result');
-var produce = require('immer');
+var immer = require('immer');
 var typeGraphql = require('type-graphql');
 var JoinRoomFailureType = require('../../../../enums/JoinRoomFailureType.js');
 var convertToMaxLength100String = require('../../../../utils/convertToMaxLength100String.js');
@@ -79,7 +79,7 @@ const joinRoomCore = async ({ args, context, strategy, }) => {
                 case 'id':
                     return result.Result.ok(roomState);
             }
-            const nextRoomState = produce(roomState, roomState => {
+            const nextRoomState = immer.produce(roomState, roomState => {
                 const target = roomState.participants?.[authorizedUser.userUid];
                 if (target != null) {
                     target.role = strategyResult;

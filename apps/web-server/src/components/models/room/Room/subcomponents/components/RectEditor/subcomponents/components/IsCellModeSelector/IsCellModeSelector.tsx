@@ -1,6 +1,6 @@
 import { Checkbox } from 'antd';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
-import produce from 'immer';
+import { produce } from 'immer';
 import React from 'react';
 import { useLatest } from 'react-use';
 import { useCellRectToCompositeRect } from '../../../../../hooks/useCellRectToCompositeRect';

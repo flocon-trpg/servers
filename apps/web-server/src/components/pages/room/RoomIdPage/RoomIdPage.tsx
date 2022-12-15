@@ -8,7 +8,7 @@ import {
     WritingMessageStatusInputType,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { Alert, Button, Card, Input, Result, Spin } from 'antd';
-import produce from 'immer';
+import { produce } from 'immer';
 import { atom } from 'jotai';
 import { selectAtom, useAtomValue, useUpdateAtom } from 'jotai/utils';
 import { useRouter } from 'next/router';
