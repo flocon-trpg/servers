@@ -5880,6 +5880,10 @@ const closeReason = zod.z.object({
      */
     reason: zod.z.literal('Closed'),
 });
+const soundEffect = zod.z.object({
+    file: filePathValue,
+    volume: zod.z.number(),
+});
 /** 点呼の状況。 */
 const template$1 = createObjectValueTemplate({
     createdAt: createReplaceValueTemplate(zod.z.number()),
@@ -5899,6 +5903,9 @@ const template$1 = createObjectValueTemplate({
      * この Record に存在しない `Player` や `Master` も点呼に参加できます。
      */
     participants: createRecordValueTemplate(template$2),
+    // このプロパティを実装せず、代わりにクライアント側で点呼開始と同時に通常時の SE 機能から流す案は、次の理由で却下した。もし点呼開始の mutation 実行開始と同時に流す場合は、点呼開始に失敗したときにも SE が流れてしまう。mutation の応答を待って成功していたときのみ流す場合は、点呼開始直後にブラウザを閉じたりしたときに SE が流れないという問題点がある。
+    /** 点呼開始時に流す SE。 */
+    soundEffect: createReplaceValueTemplate(soundEffect.optional()),
 }, 1, 1);
 
 const templateBase = {

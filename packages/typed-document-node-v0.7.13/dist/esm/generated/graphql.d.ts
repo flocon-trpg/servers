@@ -53,6 +53,7 @@ export type CharacterValueForMessage = {
     stateId: Scalars['String'];
 };
 export declare enum CloseRollCallFailureType {
+    AlreadyClosed = "AlreadyClosed",
     NotAuthorizedParticipant = "NotAuthorizedParticipant",
     RollCallNotFound = "RollCallNotFound",
     RoomNotFound = "RoomNotFound",
@@ -413,7 +414,7 @@ export type MutationOperateArgs = {
     requestId: Scalars['String'];
 };
 export type MutationPerformRollCallArgs = {
-    roomId: Scalars['String'];
+    input: PerformRollCallInput;
 };
 export type MutationPingArgs = {
     value: Scalars['Float'];
@@ -490,10 +491,18 @@ export declare enum ParticipantRole {
     Spectator = "Spectator"
 }
 export declare enum PerformRollCallFailureType {
+    HasOpenRollCall = "HasOpenRollCall",
     NotAuthorizedParticipant = "NotAuthorizedParticipant",
     NotFound = "NotFound",
     TooManyRequests = "TooManyRequests"
 }
+export type PerformRollCallInput = {
+    roomId: Scalars['String'];
+    /** SE を設定する場合、これと併せて soundEffectVolume もセットする必要があります。 */
+    soundEffectFile?: InputMaybe<FilePathInput>;
+    /** SE を設定する場合、これと併せて soundEffectFile もセットする必要があります。 */
+    soundEffectVolume?: InputMaybe<Scalars['Float']>;
+};
 export type PerformRollCallResult = {
     __typename?: 'PerformRollCallResult';
     failureType?: Maybe<PerformRollCallFailureType>;
@@ -1917,7 +1926,7 @@ export type OperateMutation = {
     };
 };
 export type PerformRollCallMutationVariables = Exact<{
-    roomId: Scalars['String'];
+    input: PerformRollCallInput;
 }>;
 export type PerformRollCallMutation = {
     __typename?: 'Mutation';
@@ -2462,7 +2471,7 @@ export declare const OperateDocument: DocumentNode<OperateMutation, Exact<{
     requestId: Scalars['String'];
 }>>;
 export declare const PerformRollCallDocument: DocumentNode<PerformRollCallMutation, Exact<{
-    roomId: Scalars['String'];
+    input: PerformRollCallInput;
 }>>;
 export declare const PingDocument: DocumentNode<PingMutation, Exact<{
     value: Scalars['Float'];

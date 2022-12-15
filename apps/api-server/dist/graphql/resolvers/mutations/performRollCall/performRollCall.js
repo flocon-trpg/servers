@@ -9,7 +9,7 @@ var PerformRollCallFailureType = require('../../../../enums/PerformRollCallFailu
 
 const maxRollCallHistoryCount = 3;
 const minimumTimeWindow = 60000;
-const performRollCall = (source, myUserUid) => {
+const performRollCall = (source, myUserUid, soundEffect) => {
     const me = source.participants?.[myUserUid];
     switch (me?.role) {
         case FilePathModule.Master:
@@ -59,6 +59,7 @@ const performRollCall = (source, myUserUid) => {
                 },
             },
             closeStatus: undefined,
+            soundEffect,
         };
     });
     return result.Result.ok(result$1);

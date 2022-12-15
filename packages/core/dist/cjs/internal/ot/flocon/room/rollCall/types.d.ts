@@ -58,6 +58,46 @@ export declare const template: {
                 };
             };
         }>;
+        /** 点呼開始時に流す SE。 */
+        soundEffect: {
+            readonly type: "atomic";
+            readonly mode: "replace";
+            readonly value: z.ZodOptional<z.ZodObject<{
+                file: z.ZodObject<{
+                    $v: z.ZodLiteral<1>;
+                    $r: z.ZodLiteral<1>;
+                    path: z.ZodString;
+                    sourceType: z.ZodUnion<[z.ZodLiteral<"Default">, z.ZodLiteral<"Uploader">, z.ZodLiteral<"FirebaseStorage">]>;
+                }, "strip", z.ZodTypeAny, {
+                    path: string;
+                    $v: 1;
+                    $r: 1;
+                    sourceType: "Default" | "Uploader" | "FirebaseStorage";
+                }, {
+                    path: string;
+                    $v: 1;
+                    $r: 1;
+                    sourceType: "Default" | "Uploader" | "FirebaseStorage";
+                }>;
+                volume: z.ZodNumber;
+            }, "strip", z.ZodTypeAny, {
+                volume: number;
+                file: {
+                    path: string;
+                    $v: 1;
+                    $r: 1;
+                    sourceType: "Default" | "Uploader" | "FirebaseStorage";
+                };
+            }, {
+                volume: number;
+                file: {
+                    path: string;
+                    $v: 1;
+                    $r: 1;
+                    sourceType: "Default" | "Uploader" | "FirebaseStorage";
+                };
+            }>>;
+        };
     };
 };
 //# sourceMappingURL=types.d.ts.map

@@ -1,14 +1,18 @@
+import { getOpenRollCall } from '@flocon-trpg/core';
 import { FilePathFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { loggerRef } from '@flocon-trpg/utils';
 import { soundEffect } from '@flocon-trpg/web-server-utils';
 import { Howl } from 'howler';
 import React from 'react';
-import { useLatest } from 'react-use';
+import { useLatest, usePrevious } from 'react-use';
 import { useRoomMessages } from './useRoomMessages';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { useSrcFromFilePath } from '@/hooks/srcHooks';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
+import { useRoomStateValue } from '@/hooks/useRoomStateValue';
 import { analyzeUrl } from '@/utils/analyzeUrl';
+import { FilePathModule } from '@/utils/file/filePath';
 import { volumeCap } from '@/utils/variables';
 
 // 長過ぎる曲をSEにしようとした場合、何もしないと部屋に再入室しない限りその曲を止めることができない。それを防ぐため、最大15秒までしか流れないようにしている。15秒という長さは適当。
@@ -16,12 +20,11 @@ const musicLengthLimit = 15 * 1000;
 const fadeout = 1 * 1000;
 
 type SoundEffect = {
-    filePath: FilePathFragment;
+    filePath: Pick<FilePathFragment, 'sourceType' | 'path'>;
     volume: number;
 
-    // これがないと、同じSEを複数回流そうとしたとき、urlが変わらないため2回目以降のSEが流れない。これがあることでdepsの中身が変わり、SEが複数回流れるようになる。
-    // depsの中身を変えられるものであればなんでもいいが、messageIdが使いやすいと思って採用している。
-    messageId: string;
+    // これがないと、同じSEを複数回流そうとしたとき、urlが変わらないため2回目以降のSEが流れない。それを防ぐため、これを毎回変えることでSEが複数回流れるようになる。
+    key: string;
 };
 
 function usePlaySoundEffectCore(value?: SoundEffect): void {
@@ -38,14 +41,14 @@ function usePlaySoundEffectCore(value?: SoundEffect): void {
 
     const url = useSrcFromFilePath(value?.filePath);
 
-    // value?.messageIdが変わったときに音声を流すuseEffectの処理をトリガーさせるための処理。
-    // url.srcが同じでも、新しいsrcObjectオブジェクトを作成することで、srcObjectへの参照を変えることでトリガーさせている。
+    // value?.keyが変わったときに音声を流すuseEffectの処理をトリガーさせるための処理。
+    // url.srcが同じでも、新しいsrcObjectオブジェクトを作成してsrcObjectへの参照を変えることでトリガーさせている。
     const [srcObject, setSrcObject] = React.useState<{ src: string | undefined }>({
         src: undefined,
     });
     React.useEffect(() => {
         setSrcObject({ src: url.src });
-    }, [url.src, value?.messageId]);
+    }, [url.src, value?.key]);
 
     const howlsRef = React.useRef<Map<string, { howl: Howl; volume: number }>>(new Map());
 
@@ -67,7 +70,7 @@ function usePlaySoundEffectCore(value?: SoundEffect): void {
             loop: false,
             volume: Math.min(value.volume * volumeConfigRef.current, volumeCap),
         });
-        howlsRef.current.set(value.messageId, {
+        howlsRef.current.set(value.key, {
             howl,
             volume: value.volume,
         });
@@ -76,7 +79,7 @@ function usePlaySoundEffectCore(value?: SoundEffect): void {
         setTimeout(() => howl.fade(howl.volume(), 0, fadeout), musicLengthLimit);
         setTimeout(() => {
             howl.stop();
-            howlsRef.current.delete(value.messageId);
+            howlsRef.current.delete(value.key);
         }, musicLengthLimit + fadeout);
     }, [srcObject, valueRef]);
 
@@ -87,7 +90,7 @@ function usePlaySoundEffectCore(value?: SoundEffect): void {
     }, [volumeConfig]);
 }
 
-export function usePlaySoundEffect(): void {
+function usePlaySoundEffectMessage(): void {
     const roomMessages = useRoomMessages({});
     const messageDiff = roomMessages.diff;
     const [soundEffectState, setSoundEffectState] = React.useState<SoundEffect>();
@@ -108,9 +111,51 @@ export function usePlaySoundEffect(): void {
         setSoundEffectState({
             filePath: messageDiff.nextValue.value.file,
             volume: messageDiff.nextValue.value.volume,
-            messageId: messageDiff.nextValue.value.messageId,
+            key: messageDiff.nextValue.value.messageId,
         });
     }, [messageDiff]);
 
     usePlaySoundEffectCore(soundEffectState);
+}
+
+function usePlayRollCallSoundEffect(): void {
+    const myUserUid = useMyUserUid();
+    const myUserUidRef = useLatest(myUserUid);
+    const roomState = useRoomStateValue();
+    const prevRoomState = usePrevious(roomState);
+    const [soundEffectState, setSoundEffectState] = React.useState<SoundEffect>();
+    React.useEffect(() => {
+        if (prevRoomState == null || roomState == null) {
+            return;
+        }
+        if (myUserUidRef.current == null) {
+            return;
+        }
+
+        const prevOpenRollCall = getOpenRollCall(prevRoomState.rollCalls ?? {});
+        const currentOpenRollCall = getOpenRollCall(roomState.rollCalls ?? {});
+        if (currentOpenRollCall == null) {
+            return;
+        }
+        if (prevOpenRollCall?.key === currentOpenRollCall.key) {
+            return;
+        }
+        if (currentOpenRollCall.value.soundEffect == null) {
+            return;
+        }
+        if (currentOpenRollCall.value.createdBy === myUserUidRef.current) {
+            return;
+        }
+        setSoundEffectState({
+            filePath: FilePathModule.toGraphQL(currentOpenRollCall.value.soundEffect.file),
+            volume: currentOpenRollCall.value.soundEffect.volume,
+            key: currentOpenRollCall.key,
+        });
+    }, [myUserUidRef, prevRoomState, roomState]);
+    usePlaySoundEffectCore(soundEffectState);
+}
+
+export function usePlaySoundEffect() {
+    usePlaySoundEffectMessage();
+    usePlayRollCallSoundEffect();
 }

@@ -529,8 +529,8 @@ mutation Operate(
     }
 }
 
-mutation PerformRollCall($roomId: String!) {
-    result: performRollCall(roomId: $roomId) {
+mutation PerformRollCall($input: PerformRollCallInput!) {
+    result: performRollCall(input: $input) {
         failureType
     }
 }

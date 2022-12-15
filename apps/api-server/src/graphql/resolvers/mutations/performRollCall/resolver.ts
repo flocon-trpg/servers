@@ -1,9 +1,11 @@
 import { toOtError } from '@flocon-trpg/core';
 import {
     Arg,
+    Args,
     Authorized,
     Ctx,
     Field,
+    InputType,
     Mutation,
     ObjectType,
     PubSub,
@@ -24,11 +26,31 @@ import {
 } from '../../utils/utils';
 import { performRollCall } from './performRollCall';
 import { PerformRollCallFailureType } from '@/enums/PerformRollCallFailureType';
+import { FilePath } from '@/graphql/objects/filePath';
 
 @ObjectType()
 class PerformRollCallResult {
     @Field(() => PerformRollCallFailureType, { nullable: true })
-    public failureType?: PerformRollCallFailureType;
+    failureType?: PerformRollCallFailureType;
+}
+
+@InputType()
+class PerformRollCallInput {
+    @Field()
+    roomId!: string;
+
+    @Field(() => FilePath, {
+        nullable: true,
+        description:
+            'SE を設定する場合、これと併せて soundEffectVolume もセットする必要があります。',
+    })
+    soundEffectFile?: FilePath;
+
+    @Field({
+        nullable: true,
+        description: 'SE を設定する場合、これと併せて soundEffectFile もセットする必要があります。',
+    })
+    soundEffectVolume?: number;
 }
 
 // 過去の点呼の自動削除や、作成日時をサーバーでセットする必要があるため、Operate mutation ではなくこの mutation で点呼を作成するようにしている。
@@ -39,17 +61,26 @@ export class PerformRollCallResolver {
     @Authorized(ENTRY)
     @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async performRollCall(
-        @Arg('roomId') roomId: string,
+        @Arg('input') input: PerformRollCallInput,
         @Ctx() context: ResolverContext,
         @PubSub() pubSub: PubSubEngine
     ): Promise<PerformRollCallResult> {
         const myUserUid = ensureUserUid(context);
         const result = await operateAsAdminAndFlush({
             em: context.em,
-            roomId,
+            roomId: input.roomId,
             roomHistCount: undefined,
             operationType: 'state',
-            operation: roomState => performRollCall(roomState, myUserUid),
+            operation: roomState => {
+                const soundEffect =
+                    input.soundEffectFile != null && input.soundEffectVolume != null
+                        ? {
+                              file: { ...input.soundEffectFile, $v: 1, $r: 1 } as const,
+                              volume: input.soundEffectVolume,
+                          }
+                        : undefined;
+                return performRollCall(roomState, myUserUid, soundEffect);
+            },
         });
         if (result.isError) {
             if (result.error.type === 'custom') {

@@ -420,6 +420,15 @@ export namespace Fixture {
                         answeredAt: undefined,
                     },
                 },
+                soundEffect: {
+                    file: {
+                        $v: 1,
+                        $r: 1,
+                        path: 'ROLLCALL_SE',
+                        sourceType: 'Default',
+                    },
+                    volume: 0.5,
+                },
             },
         },
         publicChannel1Name: '',

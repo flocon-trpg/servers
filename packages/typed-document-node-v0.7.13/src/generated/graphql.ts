@@ -52,6 +52,7 @@ export type CharacterValueForMessage = {
 };
 
 export enum CloseRollCallFailureType {
+    AlreadyClosed = 'AlreadyClosed',
     NotAuthorizedParticipant = 'NotAuthorizedParticipant',
     RollCallNotFound = 'RollCallNotFound',
     RoomNotFound = 'RoomNotFound',
@@ -494,7 +495,7 @@ export type MutationOperateArgs = {
 };
 
 export type MutationPerformRollCallArgs = {
-    roomId: Scalars['String'];
+    input: PerformRollCallInput;
 };
 
 export type MutationPingArgs = {
@@ -593,10 +594,19 @@ export enum ParticipantRole {
 }
 
 export enum PerformRollCallFailureType {
+    HasOpenRollCall = 'HasOpenRollCall',
     NotAuthorizedParticipant = 'NotAuthorizedParticipant',
     NotFound = 'NotFound',
     TooManyRequests = 'TooManyRequests',
 }
+
+export type PerformRollCallInput = {
+    roomId: Scalars['String'];
+    /** SE を設定する場合、これと併せて soundEffectVolume もセットする必要があります。 */
+    soundEffectFile?: InputMaybe<FilePathInput>;
+    /** SE を設定する場合、これと併せて soundEffectFile もセットする必要があります。 */
+    soundEffectVolume?: InputMaybe<Scalars['Float']>;
+};
 
 export type PerformRollCallResult = {
     __typename?: 'PerformRollCallResult';
@@ -2091,7 +2101,7 @@ export type OperateMutation = {
 };
 
 export type PerformRollCallMutationVariables = Exact<{
-    roomId: Scalars['String'];
+    input: PerformRollCallInput;
 }>;
 
 export type PerformRollCallMutation = {
@@ -5293,10 +5303,13 @@ export const PerformRollCallDocument = {
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
-                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'roomId' } },
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
                     type: {
                         kind: 'NonNullType',
-                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'PerformRollCallInput' },
+                        },
                     },
                 },
             ],
@@ -5310,11 +5323,8 @@ export const PerformRollCallDocument = {
                         arguments: [
                             {
                                 kind: 'Argument',
-                                name: { kind: 'Name', value: 'roomId' },
-                                value: {
-                                    kind: 'Variable',
-                                    name: { kind: 'Name', value: 'roomId' },
-                                },
+                                name: { kind: 'Name', value: 'input' },
+                                value: { kind: 'Variable', name: { kind: 'Name', value: 'input' } },
                             },
                         ],
                         selectionSet: {

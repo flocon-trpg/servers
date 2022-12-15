@@ -3,6 +3,7 @@ import { Master, Player, State, getOpenRollCall, roomTemplate } from '@flocon-tr
 import {
     AnswerRollCallDocument,
     CloseRollCallDocument,
+    FileSourceType,
     PerformRollCallDocument,
 } from '@flocon-trpg/typed-document-node-v0.7.13';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
@@ -227,7 +228,7 @@ const HasOpenRollCall: React.FC<{ rollCall: RollCallState; rollCallId: string }>
 
 const NoOpenRollCall: React.FC = () => {
     const roomId = useRoomId();
-    const [startRollCallResult, startRollCall] = useMutation(PerformRollCallDocument);
+    const [performRollCallResult, performRollCall] = useMutation(PerformRollCallDocument);
     const rollCalls = useRoomStateValueSelector(state => state.rollCalls);
     const latestRollCall = React.useMemo(() => {
         return maxBy(recordToArray(rollCalls ?? {}), r => r.value.createdAt);
@@ -239,11 +240,21 @@ const NoOpenRollCall: React.FC = () => {
                 {'現在行われている点呼はありません。'}
                 <Button
                     onClick={() => {
-                        startRollCall({ roomId });
+                        performRollCall({
+                            input: {
+                                roomId,
+                                soundEffectFile: {
+                                    sourceType: FileSourceType.Default,
+                                    path: '/assets/roll-call.mp3',
+                                },
+                                // TODO: 値が適当
+                                soundEffectVolume: 0.7,
+                            },
+                        });
                     }}
                     type='primary'
                     size='small'
-                    disabled={startRollCallResult.fetching}
+                    disabled={performRollCallResult.fetching}
                 >
                     点呼を開始
                 </Button>

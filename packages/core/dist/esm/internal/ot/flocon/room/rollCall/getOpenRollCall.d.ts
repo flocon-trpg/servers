@@ -26,6 +26,15 @@ export declare const getOpenRollCall: (source: StringKeyRecord<State<typeof temp
                 answeredAt: number | undefined;
             }) | undefined;
         } | undefined;
+        soundEffect: {
+            volume: number;
+            file: {
+                path: string;
+                $v: 1;
+                $r: 1;
+                sourceType: "Default" | "Uploader" | "FirebaseStorage";
+            };
+        } | undefined;
     };
 } | undefined;
 //# sourceMappingURL=getOpenRollCall.d.ts.map

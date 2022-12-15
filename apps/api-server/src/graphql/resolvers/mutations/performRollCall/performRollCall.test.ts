@@ -76,7 +76,10 @@ describe('startRollCall', () => {
     it('checks RollCall properies', () => {
         jest.setSystemTime(1_000_000_000);
 
-        const actual = performRollCall(baseState, playerUserUid);
+        const actual = performRollCall(baseState, playerUserUid, {
+            file: { $v: 1, $r: 1, path: 'FILE_PATH', sourceType: 'Default' },
+            volume: 0.5,
+        });
         if (actual.isError) {
             throw new Error('expected to return OK, but actually error');
         }
@@ -93,6 +96,10 @@ describe('startRollCall', () => {
                 $r: 1,
                 answeredAt: 1_000_000_000,
             },
+        });
+        expect(actualRollCall.value.soundEffect).toEqual({
+            file: { $v: 1, $r: 1, path: 'FILE_PATH', sourceType: 'Default' },
+            volume: 0.5,
         });
     });
 
@@ -115,11 +122,12 @@ describe('startRollCall', () => {
                         },
                     },
                     closeStatus: undefined,
+                    soundEffect: undefined,
                 },
             },
         };
 
-        const actual = performRollCall(state, playerUserUid);
+        const actual = performRollCall(state, playerUserUid, undefined);
         expect(actual).toEqual(Result.error(PerformRollCallFailureType.HasOpenRollCall));
     });
 
@@ -142,11 +150,12 @@ describe('startRollCall', () => {
                         },
                     },
                     closeStatus: { closedBy: 'createdBy', reason: 'Closed' },
+                    soundEffect: undefined,
                 },
             },
         };
 
-        const actual = performRollCall(state, playerUserUid);
+        const actual = performRollCall(state, playerUserUid, undefined);
         expect(actual).toEqual(Result.error(PerformRollCallFailureType.TooManyRequests));
     });
 });

@@ -9,10 +9,13 @@ const maxRollCallHistoryCount = 3;
 const minimumTimeWindow = 60_000;
 
 type RoomState = State<typeof roomTemplate>;
+type RollCallsState = NonNullable<RoomState['rollCalls']>;
+type RollCallState = NonNullable<RollCallsState[string]>;
 
 export const performRollCall = (
     source: RoomState,
-    myUserUid: string
+    myUserUid: string,
+    soundEffect: RollCallState['soundEffect']
 ): Result<RoomState, PerformRollCallFailureType> => {
     const me = source.participants?.[myUserUid];
     switch (me?.role) {
@@ -68,6 +71,7 @@ export const performRollCall = (
                 },
             },
             closeStatus: undefined,
+            soundEffect,
         };
     });
     return Result.ok(result);
