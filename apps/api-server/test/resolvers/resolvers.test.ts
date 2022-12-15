@@ -31,9 +31,9 @@ import {
 import { loggerRef, parseStringToBoolean, recordToArray } from '@flocon-trpg/utils';
 import { diff, serializeUpOperation, toUpOperation } from '@kizahasi/ot-string';
 import { OperationResult } from '@urql/core';
-import axios from 'axios';
 import FormData from 'form-data';
 import { produce } from 'immer';
+import fetch from 'node-fetch';
 import urljoin from 'url-join';
 import { ServerConfig } from '../../src/config/types';
 import { File as File$MikroORM } from '../../src/entities/file/entity';
@@ -714,19 +714,17 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                             filename: 'test-image.jpg',
                         }
                     );
-                    const axiosConfig = {
-                        headers: {
-                            ...formData.getHeaders(),
-                            [Resources.testAuthorizationHeader]: userUid1,
-                        },
-                    };
-                    const postResult = await axios
-                        .post(
-                            urljoin(httpUri, 'uploader', 'upload', publicOrUnlisted),
-                            formData,
-                            axiosConfig
-                        )
-                        .then(() => true)
+                    const postResult = await fetch(
+                        urljoin(httpUri, 'uploader', 'upload', publicOrUnlisted),
+                        {
+                            method: 'POST',
+                            headers: {
+                                [Resources.testAuthorizationHeader]: userUid1,
+                            },
+                            body: formData,
+                        }
+                    )
+                        .then(r => r.ok)
                         .catch(err => err);
                     expect(postResult).toBe(true);
                 }
@@ -759,21 +757,20 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                     ['thumbs', userUid2],
                 ] as const;
                 for (const [fileType, id] of cases) {
-                    const axiosResult = await axios
-                        .get(
-                            urljoin(
-                                httpUri,
-                                'uploader',
-                                fileType,
-                                fileType === 'files' ? filename : thumbFilename
-                            ),
-                            {
-                                headers: {
-                                    [Resources.testAuthorizationHeader]: id,
-                                },
-                            }
-                        )
-                        .then(() => true)
+                    const axiosResult = await fetch(
+                        urljoin(
+                            httpUri,
+                            'uploader',
+                            fileType,
+                            fileType === 'files' ? filename : thumbFilename
+                        ),
+                        {
+                            headers: {
+                                [Resources.testAuthorizationHeader]: id,
+                            },
+                        }
+                    )
+                        .then(r => r.ok)
                         .catch(err => err);
                     expect(axiosResult).toBe(true);
                 }

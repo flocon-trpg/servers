@@ -2849,7 +2849,6 @@ __metadata:
     "@typescript-eslint/parser": 5.44.0
     "@urql/core": 3.0.5
     apollo-server-express: ^3.3.0
-    axios: 0.27.2
     bcdice: ^4.0.0
     bcrypt: ^5.0.1
     check-disk-space: ^3.0.1
@@ -2875,6 +2874,7 @@ __metadata:
     jest: 29.3.1
     lodash: ^4.17.21
     multer: ^1.4.3
+    node-fetch: 2.6.7
     npm-run-all: ^4.1.5
     pino: ^8.6.1
     pino-http: ^8.2.1
@@ -9135,16 +9135,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:0.27.2":
-  version: 0.27.2
-  resolution: "axios@npm:0.27.2"
-  dependencies:
-    follow-redirects: ^1.14.9
-    form-data: ^4.0.0
-  checksum: 38cb7540465fe8c4102850c4368053c21683af85c5fdf0ea619f9628abbcb59415d1e22ebc8a6390d2bbc9b58a9806c874f139767389c862ec9b772235f06854
-  languageName: node
-  linkType: hard
-
 "babel-jest@npm:^29.3.1":
   version: 29.3.1
   resolution: "babel-jest@npm:29.3.1"
@@ -13395,16 +13385,6 @@ __metadata:
   dependencies:
     tslib: ^1.9.3
   checksum: 3b25b06bb8e23a3a826a8eda89e547593a688486df531db92f6b767d96d397dc1efed4529ec3a44cb3ec1fbdd44abe50a30d0ce498f732501b36f5f18b619003
-  languageName: node
-  linkType: hard
-
-"follow-redirects@npm:^1.14.9":
-  version: 1.14.9
-  resolution: "follow-redirects@npm:1.14.9"
-  peerDependenciesMeta:
-    debug:
-      optional: true
-  checksum: f5982e0eb481818642492d3ca35a86989c98af1128b8e1a62911a3410621bc15d2b079e8170b35b19d3bdee770b73ed431a257ed86195af773771145baa57845
   languageName: node
   linkType: hard
 
