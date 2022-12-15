@@ -1,3 +1,4 @@
+import { loggerRef } from '@flocon-trpg/utils';
 import { extname } from './extname';
 
 export const others = 'others';
@@ -32,17 +33,24 @@ const getFileData = (pathname: string) => {
 };
 
 export const analyzeUrl = (url: string): Result | null => {
-    let parsed: URL;
+    let parsed: URL | null;
     try {
         parsed = new URL(url);
     } catch {
-        return null;
+        // 'assets/chat.mp3' や '/assets/chat.mp3' のようなパスの処理
+        const fileData = getFileData(url);
+        return {
+            ...fileData,
+            type: others,
+            directLink: url,
+        };
     }
     switch (parsed.protocol) {
         case 'http:':
         case 'https:':
             break;
         default:
+            loggerRef.debug({ url, protocol: parsed.protocol }, '対応していないプロトコルです。');
             return null;
     }
     const fileData = getFileData(parsed.pathname);
