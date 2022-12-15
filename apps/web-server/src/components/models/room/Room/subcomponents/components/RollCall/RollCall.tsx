@@ -6,7 +6,7 @@ import {
     PerformRollCallDocument,
 } from '@flocon-trpg/typed-document-node-v0.7.13';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
-import { Button, Divider, Modal, Tooltip } from 'antd';
+import { Button, Modal, Tooltip } from 'antd';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
 import { maxBy, sortBy } from 'lodash';
@@ -17,7 +17,6 @@ import { useJoinParticipants } from '../../hooks/useJoinParticipants';
 import { useRoomId } from '../../hooks/useRoomId';
 import { prettyElapsed } from './prettyElapsed';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
-import { HelpMessageTooltip } from '@/components/ui/HelpMessageTooltip/HelpMessageTooltip';
 import { Jdenticon } from '@/components/ui/Jdenticon/Jdenticon';
 import { Table, TableHeader, TableRow } from '@/components/ui/Table/Table';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
@@ -187,6 +186,7 @@ const HasOpenRollCall: React.FC<{ rollCall: RollCallState; rollCallId: string }>
                     onClick={() => {
                         setShowModal(true);
                     }}
+                    size='small'
                     disabled={disableClose}
                 >
                     点呼を終了
@@ -242,6 +242,7 @@ const NoOpenRollCall: React.FC = () => {
                         startRollCall({ roomId });
                     }}
                     type='primary'
+                    size='small'
                     disabled={startRollCallResult.fetching}
                 >
                     点呼を開始

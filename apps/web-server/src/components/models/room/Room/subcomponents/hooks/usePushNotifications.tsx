@@ -180,7 +180,7 @@ function useRollCallNotifications(): void {
             // never be closed automatically
             duration: null,
             message: (
-                <div className={classNames(flex, flexColumn)}>
+                <div className={classNames(flex, flexColumn)} style={{ gap: 8 }}>
                     <div>{'点呼が行われています。'}</div>
                     <Button
                         onClick={() => {
