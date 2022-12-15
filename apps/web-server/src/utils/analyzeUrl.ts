@@ -37,6 +37,12 @@ export const analyzeUrl = (url: string): Result | null => {
     try {
         parsed = new URL(url);
     } catch {
+        try {
+            new URL(url, 'https://example.com/');
+        } catch {
+            return null;
+        }
+
         // 'assets/chat.mp3' や '/assets/chat.mp3' のようなパスの処理
         const fileData = getFileData(url);
         return {

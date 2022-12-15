@@ -38,6 +38,7 @@ describe('getOpenRollCall', () => {
                         answeredAt: 1_000_000,
                     },
                 },
+                soundEffect: undefined,
             },
             key2: {
                 $v: 1,
@@ -57,6 +58,7 @@ describe('getOpenRollCall', () => {
                         answeredAt: undefined,
                     },
                 },
+                soundEffect: undefined,
             },
         });
 

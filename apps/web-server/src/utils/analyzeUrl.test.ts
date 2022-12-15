@@ -27,20 +27,47 @@ describe('analyzeUrl', () => {
         expect(actual?.fileExtension).toBe('jpg');
     });
 
-    it.each([
-        '',
-        ' ',
-        'foo',
-        '/',
-        '/foo',
-        './foo',
-        'file:./foo',
-        'file:///',
-        'javascript:alert("hello!")',
-        'ftp://example.com/foo.txt',
-        'git@github.com:flocon-trpg/servers.git',
-    ])('tests "%o"', invalidUrl => {
-        const actual = analyzeUrl(invalidUrl);
-        expect(actual).toBeNull();
+    it('tests foo/bar.mp3', () => {
+        const actual = analyzeUrl('foo/bar.mp3');
+        expect(actual).not.toBeNull();
+        expect(actual?.type).toBe('others');
+        expect(actual?.directLink).toBe('foo/bar.mp3');
+        expect(actual?.fileName).toBe('bar');
+        expect(actual?.fileExtension).toBe('mp3');
     });
+
+    it('tests root-relative URL', () => {
+        const actual = analyzeUrl('/foo/bar/baz');
+        expect(actual).not.toBeNull();
+        expect(actual?.type).toBe('others');
+        expect(actual?.directLink).toBe('/foo/bar/baz');
+        expect(actual?.fileName).toBe('baz');
+        expect(actual?.fileExtension).toBeNull();
+    });
+
+    it('tests ""', () => {
+        const actual = analyzeUrl('');
+        expect(actual).not.toBeNull();
+        expect(actual?.type).toBe('others');
+        expect(actual?.directLink).toBe('');
+        expect(actual?.fileName).toBe('');
+        expect(actual?.fileExtension).toBeNull();
+    });
+
+    it('tests "/"', () => {
+        const actual = analyzeUrl('/');
+        expect(actual).not.toBeNull();
+        expect(actual?.type).toBe('others');
+        expect(actual?.directLink).toBe('/');
+        expect(actual?.fileName).toBe('');
+        expect(actual?.fileExtension).toBeNull();
+    });
+
+    it.each(['file:./foo', 'file:///', 'javascript:alert("hello!")', 'ftp://example.com/foo.txt'])(
+        'tests "%o"',
+        invalidUrl => {
+            const actual = analyzeUrl(invalidUrl);
+            expect(actual).toBeNull();
+        }
+    );
 });

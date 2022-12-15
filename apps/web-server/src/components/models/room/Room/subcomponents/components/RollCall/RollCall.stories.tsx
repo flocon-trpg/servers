@@ -111,6 +111,7 @@ const closedRollCall: RollCallState = {
             answeredAt: undefined,
         },
     },
+    soundEffect: undefined,
 };
 
 const stateForClosedRollCall: RoomState = {
@@ -142,6 +143,7 @@ const stateForOpenAndAnswered: RoomState = {
                     answeredAt: currentDateTime - 50_000,
                 },
             },
+            soundEffect: undefined,
         },
     },
 };
@@ -168,6 +170,7 @@ const stateForOpenAndNotAnswered: RoomState = {
                     answeredAt: currentDateTime - 50_000,
                 },
             },
+            soundEffect: undefined,
         },
     },
 };
