@@ -116,8 +116,9 @@ export namespace RoomConfigUtils {
                 panels.push(panel);
             }
         }
-        panels.push(state.panels.pieceValuePanel);
         panels.push(state.panels.participantPanel);
+        panels.push(state.panels.pieceValuePanel);
+        panels.push(state.panels.rollCallPanel);
 
         // まずzIndexが小さい順に0,1,2,…と割り振っていく。こうすることで、例えば[-100, 5, 10000]のように飛び飛びになっている状態を修正する。zIndexが同一であるパネルが複数ある場合でも異なるzIndexになるため、場合によっては前面に来るパネルが変わる可能性もあるが、直接Configを編集したりしていない限りすべてのzIndexは異なっているはずなので無視している。
         // 次に、最前面にさせたいパネルのzIndexに(max(割り振ったzIndexの集合) + 1)を代入して完了。
