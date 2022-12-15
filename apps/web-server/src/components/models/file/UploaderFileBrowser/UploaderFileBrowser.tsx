@@ -15,7 +15,6 @@ import {
 import { loggerRef } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import { Modal, Upload, notification } from 'antd';
-import axios from 'axios';
 import copy from 'clipboard-copy';
 import { StorageReference, deleteObject, ref, uploadBytes } from 'firebase/storage';
 import { useAtomValue } from 'jotai';
@@ -326,23 +325,22 @@ const FloconUploader: React.FC<FloconUploaderProps> = ({ onUploaded, storageType
                         options.file,
                         joinPath(folderPath, options.file.name).string
                     );
-                    const axiosConfig = {
-                        headers: {
-                            Authorization: `Bearer ${idToken}`,
-                            'Content-Type': 'multipart/form-data',
-                        },
-                    };
-                    const result = await axios
-                        .post(
-                            urljoin(
-                                getHttpUri(config.value),
-                                'uploader',
-                                'upload',
-                                storageType === $public ? 'public' : 'unlisted'
-                            ),
-                            formData,
-                            axiosConfig
-                        )
+                    const result = await fetch(
+                        urljoin(
+                            getHttpUri(config.value),
+                            'uploader',
+                            'upload',
+                            storageType === $public ? 'public' : 'unlisted'
+                        ),
+                        {
+                            method: 'POST',
+                            headers: {
+                                Authorization: `Bearer ${idToken}`,
+                                'Content-Type': 'multipart/form-data',
+                            },
+                            body: formData,
+                        }
+                    )
                         .then(() => true)
                         .catch(err => err);
 

@@ -13,7 +13,6 @@ import {
     RoomPublicChannelFragment,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { PrivateChannelSet } from '@flocon-trpg/web-server-utils';
-import axios from 'axios';
 import { escape } from 'html-escaper';
 import JSZip from 'jszip';
 import moment from 'moment';
@@ -614,7 +613,7 @@ class ImageDownloader {
             return null;
         }
         const { directLink, filename } = url;
-        const image = await axios.get(directLink, { responseType: 'blob' }).catch(() => null);
+        const image = await (await fetch(directLink)).blob().catch(() => null);
         if (image == null) {
             if (filePath.sourceType === FileSourceType.FirebaseStorage) {
                 this.firebaseImages.set(filePath.path, null);
@@ -626,7 +625,7 @@ class ImageDownloader {
         }
         const result: ImageResult = {
             filename,
-            blob: new Blob([image.data]),
+            blob: image,
         };
         if (filePath.sourceType === FileSourceType.FirebaseStorage) {
             this.firebaseImages.set(filePath.path, result);
@@ -697,18 +696,18 @@ export const generateAsRichLog = async ({
         throw new Error(thisShouldNotHappen);
     }
     onProgressChange({ percent: 1 });
-    const nonameImage = await axios
-        .get('/assets/log/noname.png', { responseType: 'blob' })
+    const nonameImage = await fetch('/assets/log/noname.png')
+        .then(r => r.blob())
         .catch(() => null);
     if (nonameImage != null) {
-        imgFolder.file('noname.png', nonameImage.data);
+        imgFolder.file('noname.png', nonameImage);
     }
     onProgressChange({ percent: 3 });
-    const diceImage = await axios
-        .get('/assets/log/dice.png', { responseType: 'blob' })
+    const diceImage = await fetch('/assets/log/dice.png')
+        .then(r => r.blob())
         .catch(() => null);
     if (diceImage != null) {
-        imgFolder.file('dice.png', diceImage.data);
+        imgFolder.file('dice.png', diceImage);
     }
     onProgressChange({ percent: 5 });
 

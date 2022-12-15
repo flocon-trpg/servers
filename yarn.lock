@@ -3387,7 +3387,6 @@ __metadata:
     "@types/url-join": ^4.0.1
     "@urql/devtools": ^2.0.3
     antd: ^4.20.6
-    axios: ^0.27.0
     babel-loader: 8.3.0
     chromatic: 6.11.4
     classnames: ^2.3.1
@@ -9068,7 +9067,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:0.27.2, axios@npm:^0.27.0":
+"axios@npm:0.27.2":
   version: 0.27.2
   resolution: "axios@npm:0.27.2"
   dependencies:

@@ -149,23 +149,22 @@ export namespace FilePathModule {
             filename: string;
             floconUploaderMode: typeof files | typeof thumbs;
         }) => {
-            const axiosResponse = await getFloconUploaderFileCore({
+            const blob = await getFloconUploaderFileCore({
                 filename,
                 config,
                 getIdToken,
                 mode: floconUploaderMode,
             });
-            if (axiosResponse === idTokenIsNull) {
+            if (blob === idTokenIsNull) {
                 return idTokenIsNull;
             }
-            if (axiosResponse.data == null) {
+            if (blob == null) {
                 return {
                     type: Core.Uploader,
                     src: undefined,
                     blob: undefined,
                 } as const;
             }
-            const blob = new Blob([axiosResponse.data]);
             // 現在の仕様では、内蔵アップローダーのダウンロードにはAuthorizationヘッダーが必要なため、axiosなどでなければダウンロードできない。そのため、URL.createObjectURLを経由して渡している。
             return {
                 type: Core.Uploader,
