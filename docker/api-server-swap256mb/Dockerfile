@@ -1,8 +1,9 @@
 # このDockerfileでビルドされたイメージを使用すると、スワップ領域を追加した上でAPIサーバーが起動します。いっぽう、../api-server/Dockerfile ではスワップ領域の追加を行わずにAPIサーバーが起動します。また、rootlessコンテナとして動きます。
 # fly.ioの無料枠のインスタンスなどといった、メモリが非常に少ない環境の場合は、このDockerfileでビルドされたイメージを使わないとメモリ不足により正常に動きません。対して十分なメモリがある場合は、代わりに ../api-server/Dockerfile でビルドされたイメージのほうを使用することを推奨します。
 
-# example of docker build:
+# an example of docker build:
 # docker build -t flocon-api-swap256mb --build-arg branch="api/v0.7.7" . 
+
 
 FROM node:18-bullseye as build
 

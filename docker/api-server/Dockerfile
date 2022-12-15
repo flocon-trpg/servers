@@ -1,4 +1,4 @@
-# example of docker build:
+# an example of docker build:
 # docker build -t flocon-api --build-arg branch="api/v0.7.7" . 
 
 
