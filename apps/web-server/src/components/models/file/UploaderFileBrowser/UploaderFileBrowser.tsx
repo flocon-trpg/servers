@@ -336,7 +336,6 @@ const FloconUploader: React.FC<FloconUploaderProps> = ({ onUploaded, storageType
                             method: 'POST',
                             headers: {
                                 Authorization: `Bearer ${idToken}`,
-                                'Content-Type': 'multipart/form-data',
                             },
                             body: formData,
                         }
