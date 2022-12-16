@@ -8,6 +8,7 @@ import {
     WritingMessageStatusInputType,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { Alert, Button, Card, Input, Result, Spin } from 'antd';
+import classNames from 'classnames';
 import { produce } from 'immer';
 import { atom } from 'jotai';
 import { selectAtom, useAtomValue, useUpdateAtom } from 'jotai/utils';
@@ -30,6 +31,7 @@ import { useInitializeRoomClient, useRoomClient, useTryRoomClient } from '@/hook
 import { useRoomGraphQLStatus } from '@/hooks/useRoomGraphQLStatus';
 import { useRoomState } from '@/hooks/useRoomState';
 import { firebaseUserValueAtom } from '@/pages/_app';
+import { flex, flexColumn, itemsCenter } from '@/styles/className';
 import { getRoomConfig } from '@/utils/localStorage/roomConfig';
 
 const debouncedWindowInnerWidthAtomCore = atom(0);
@@ -81,6 +83,24 @@ const useOnResize = () => {
         },
         debounceTime,
         [windowInnerHeightState]
+    );
+};
+
+const LinkToRoot: React.FC = () => {
+    const router = useRouter();
+    return (
+        <a style={{ padding: 12 }} onClick={() => router.push('/')}>
+            {'トップページに戻る'}
+        </a>
+    );
+};
+
+const ResultContainer: React.FC = ({ children }) => {
+    return (
+        <div className={classNames(flex, flexColumn, itemsCenter)}>
+            {children}
+            <LinkToRoot />
+        </div>
     );
 };
 
@@ -305,10 +325,12 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
 
     if (graphQLStatus?.RoomEventSubscription.type === 'error') {
         return (
-            <GraphQLErrorResult
-                title='Subscription エラーが発生しました。ブラウザを更新してください。'
-                error={graphQLStatus.RoomEventSubscription.error}
-            />
+            <ResultContainer>
+                <GraphQLErrorResult
+                    title='Subscription エラーが発生しました。ブラウザを更新してください。'
+                    error={graphQLStatus.RoomEventSubscription.error}
+                />
+            </ResultContainer>
         );
     }
 
@@ -331,11 +353,13 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
             );
         case 'error': {
             const notFoundResult = (
-                <Result
-                    status='404'
-                    title='該当する部屋が見つかりませんでした。'
-                    subTitle='部屋が存在しているか、適切な権限があるかどうか確認してください。'
-                />
+                <ResultContainer>
+                    <Result
+                        status='404'
+                        title='該当する部屋が見つかりませんでした。'
+                        subTitle='部屋が存在しているか、適切な権限があるかどうか確認してください。'
+                    />
+                </ResultContainer>
             );
             switch (roomState.error.type) {
                 case 'GetRoomFailure': {
@@ -348,10 +372,12 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
                 }
                 case 'GraphQLError': {
                     return (
-                        <GraphQLErrorResult
-                            title='GetRoomQuery でエラーが発生しました。ブラウザを更新してくだ   さい。'
-                            error={roomState.error.error}
-                        />
+                        <ResultContainer>
+                            <GraphQLErrorResult
+                                title='GetRoomQuery でエラーが発生しました。ブラウザを更新してください。'
+                                error={roomState.error.error}
+                            />
+                        </ResultContainer>
                     );
                 }
                 case 'OperateRoomFailure':
@@ -363,13 +389,19 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
                     }
                 case 'transformationError':
                     return (
-                        <Result title='transformationError が発生しました。ブラウザを更新してください。' />
+                        <ResultContainer>
+                            <Result title='transformationError が発生しました。ブラウザを更新してください。' />
+                        </ResultContainer>
                     );
             }
             break;
         }
         case 'deleted':
-            return <Result status='warning' title='この部屋は削除されました。' />;
+            return (
+                <ResultContainer>
+                    <Result status='warning' title='この部屋は削除されました。' />
+                </ResultContainer>
+            );
     }
 };
 
@@ -396,7 +428,7 @@ export const RoomId: React.FC = () => {
 
     if (Array.isArray(id) || id == null) {
         return (
-            <Layout requires={loginAndEntry}>
+            <Layout>
                 <Result status='error' title='パラメーターが不正です。' />
             </Layout>
         );
