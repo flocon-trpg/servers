@@ -14,12 +14,7 @@ const external = [
 
 module.exports = [
     {
-        input: [
-            'src/index.ts',
-            'src/run-*.ts',
-            'src/transport/**/*.ts',
-            'src/__migrations__/**/*.ts',
-        ],
+        input: ['src/index.ts', 'src/run-*.ts', 'src/__migrations__/**/*.ts'],
         output: {
             dir: 'dist',
             format: 'cjs',
