@@ -19,7 +19,7 @@ module.exports = [
             dir: 'dist',
             format: 'cjs',
             sourcemap: true,
-            // pinoのtransportやmikro-ormのmigrationでJavaScriptファイルを参照しているため、これらを正常に動作させるためにtrueにしている。
+            // mikro-ormのmigrationでJavaScriptファイルを参照しているため、これらを正常に動作させるためにtrueにしている。
             preserveModules: true,
         },
         plugins: [

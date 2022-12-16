@@ -2834,7 +2834,7 @@ __metadata:
     "@types/color": ^3.0.2
     "@types/express": ^4.17.13
     "@types/fs-extra": ^9.0.13
-    "@types/inquirer": 8.2.5
+    "@types/inquirer": ^8.2.5
     "@types/jest": 29.2.3
     "@types/lodash": ^4.14.181
     "@types/multer": ^1.4.7
@@ -7063,7 +7063,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/inquirer@npm:8.2.5":
+"@types/inquirer@npm:^8.2.5":
   version: 8.2.5
   resolution: "@types/inquirer@npm:8.2.5"
   dependencies:
