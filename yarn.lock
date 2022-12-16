@@ -2893,7 +2893,7 @@ __metadata:
     tslib: ^2.4.1
     type-fest: ^3.0.0
     type-graphql: ^1.1.1
-    typescript: 4.9.3
+    typescript: 4.9.4
     url-join: 4.0.1
     uuid: ^8.3.2
     ws: ^8.8.1
@@ -2925,7 +2925,7 @@ __metadata:
     rimraf: 3.0.2
     rollup: 3.7.0
     ts-jest: 29.0.3
-    typescript: 4.9.3
+    typescript: 4.9.4
   languageName: unknown
   linkType: soft
 
@@ -2963,7 +2963,7 @@ __metadata:
     sanitize-filename: ^1.6.3
     truncate-utf8-bytes: ^1.0.2
     ts-jest: 29.0.3
-    typescript: 4.9.3
+    typescript: 4.9.4
     zod: ^3.19.1
   languageName: unknown
   linkType: soft
@@ -2986,7 +2986,7 @@ __metadata:
     prettier: 2.8.0
     rimraf: 3.0.2
     rollup: 3.7.0
-    typescript: 4.9.3
+    typescript: 4.9.4
   languageName: unknown
   linkType: soft
 
@@ -3030,7 +3030,7 @@ __metadata:
     rimraf: 3.0.2
     rollup: 3.7.0
     ts-jest: 29.0.3
-    typescript: 4.9.3
+    typescript: 4.9.4
   languageName: unknown
   linkType: soft
 
@@ -3057,7 +3057,7 @@ __metadata:
     eslint-import-resolver-typescript: 3.5.2
     eslint-plugin-import: 2.26.0
     prettier: 2.8.0
-    typescript: 4.9.3
+    typescript: 4.9.4
   peerDependencies:
     "@typescript-eslint/eslint-plugin": ^5.39.0
     "@typescript-eslint/parser": ^5.39.0
@@ -3096,7 +3096,7 @@ __metadata:
     rimraf: 3.0.2
     rollup: 3.7.0
     ts-jest: 29.0.3
-    typescript: 4.9.3
+    typescript: 4.9.4
     use-memo-one: ^1.1.2
   languageName: unknown
   linkType: soft
@@ -3125,7 +3125,7 @@ __metadata:
     rimraf: 3.0.2
     rollup: 3.7.0
     rxjs: ^7.5.6
-    typescript: 4.9.3
+    typescript: 4.9.4
     urql: ^3.0.0
     wonka: ^6.0.0
   languageName: unknown
@@ -3158,7 +3158,7 @@ __metadata:
     rollup: 3.7.0
     rxjs: ^7.5.6
     ts-jest: 29.0.3
-    typescript: 4.9.3
+    typescript: 4.9.4
   languageName: unknown
   linkType: soft
 
@@ -3200,7 +3200,7 @@ __metadata:
     prettier: 2.8.0
     rimraf: 3.0.2
     rollup: 3.7.0
-    typescript: 4.9.3
+    typescript: 4.9.4
   languageName: unknown
   linkType: soft
 
@@ -3223,7 +3223,7 @@ __metadata:
     prettier: 2.8.0
     rimraf: 3.0.2
     rollup: 3.7.0
-    typescript: 4.9.3
+    typescript: 4.9.4
   languageName: unknown
   linkType: soft
 
@@ -3246,7 +3246,7 @@ __metadata:
     prettier: 2.8.0
     rimraf: 3.0.2
     rollup: 3.7.0
-    typescript: 4.9.3
+    typescript: 4.9.4
   languageName: unknown
   linkType: soft
 
@@ -3269,7 +3269,7 @@ __metadata:
     prettier: 2.8.0
     rimraf: 3.0.2
     rollup: 3.7.0
-    typescript: 4.9.3
+    typescript: 4.9.4
   languageName: unknown
   linkType: soft
 
@@ -3300,7 +3300,7 @@ __metadata:
     rimraf: 3.0.2
     rollup: 3.7.0
     ts-jest: 29.0.3
-    typescript: 4.9.3
+    typescript: 4.9.4
   languageName: unknown
   linkType: soft
 
@@ -3330,7 +3330,7 @@ __metadata:
     rollup: 3.7.0
     rxjs: ^7.5.6
     ts-jest: 29.0.3
-    typescript: 4.9.3
+    typescript: 4.9.4
   languageName: unknown
   linkType: soft
 
@@ -3446,7 +3446,7 @@ __metadata:
     storybook-addon-next-router: 4.0.1
     sucrase: ^3.20.1
     tsconfig-paths-webpack-plugin: 3.5.2
-    typescript: 4.9.3
+    typescript: 4.9.4
     url-join: ^4.0.1
     urql: ^3.0.3
     use-constant: ^1.1.0
@@ -11431,14 +11431,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dayjs@npm:1.x":
-  version: 1.11.2
-  resolution: "dayjs@npm:1.11.2"
-  checksum: 78f8bd04a9e5f5554aa06eacda65a7d59e162d39f621a46fd34fb3b51367c3662426d86b4e2f4ac535f81e0c4d5af3e8a83b37e672412eb556267d726c61f8f3
-  languageName: node
-  linkType: hard
-
-"dayjs@npm:^1.11.7":
+"dayjs@npm:1.x, dayjs@npm:^1.11.7":
   version: 1.11.7
   resolution: "dayjs@npm:1.11.7"
   checksum: 5003a7c1dd9ed51385beb658231c3548700b82d3548c0cfbe549d85f2d08e90e972510282b7506941452c58d32136d6362f009c77ca55381a09c704e9f177ebb
@@ -25153,23 +25146,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:4.9.3, typescript@npm:^4.6.4":
-  version: 4.9.3
-  resolution: "typescript@npm:4.9.3"
+"typescript@npm:4.9.4, typescript@npm:^4.6.4":
+  version: 4.9.4
+  resolution: "typescript@npm:4.9.4"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 17b8f816050b412403e38d48eef0e893deb6be522d6dc7caf105e54a72e34daf6835c447735fd2b28b66784e72bfbf87f627abb4818a8e43d1fa8106396128dc
+  checksum: e782fb9e0031cb258a80000f6c13530288c6d63f1177ed43f770533fdc15740d271554cdae86701c1dd2c83b082cea808b07e97fd68b38a172a83dbf9e0d0ef9
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@4.9.3#~builtin<compat/typescript>, typescript@patch:typescript@^4.6.4#~builtin<compat/typescript>":
-  version: 4.9.3
-  resolution: "typescript@patch:typescript@npm%3A4.9.3#~builtin<compat/typescript>::version=4.9.3&hash=d73830"
+"typescript@patch:typescript@4.9.4#~builtin<compat/typescript>, typescript@patch:typescript@^4.6.4#~builtin<compat/typescript>":
+  version: 4.9.4
+  resolution: "typescript@patch:typescript@npm%3A4.9.4#~builtin<compat/typescript>::version=4.9.4&hash=d73830"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 67ca21a387c0572f1c04936e638dde7782c5aa520c3754aadc7cc9b7c915da9ebc3e27c601bfff4ccb7d7264e82dce6d277ada82ec09dc75024349e0ef64926d
+  checksum: 37f6e2c3c5e2aa5934b85b0fddbf32eeac8b1bacf3a5b51d01946936d03f5377fe86255d4e5a4ae628fd0cd553386355ad362c57f13b4635064400f3e8e05b9d
   languageName: node
   linkType: hard
 
@@ -26391,17 +26384,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"wonka@npm:>= 4.0.9":
+"wonka@npm:>= 4.0.9, wonka@npm:^6.0.0":
   version: 6.1.2
   resolution: "wonka@npm:6.1.2"
   checksum: 474dcffd3861faaf5df8f4ef1ea1e614eb0cf36f54003974ebd4ab43b8fd6aad26317ef75e55488e7a61d64922531ae3ca2890dac90922d46715e0dd795682ce
-  languageName: node
-  linkType: hard
-
-"wonka@npm:^6.0.0":
-  version: 6.1.1
-  resolution: "wonka@npm:6.1.1"
-  checksum: fadd28d21f212cd71440e6b13beb4978d446be8e94c3ee77568ca92eac1875cefcd200bdc61677c4406c464ab7907ae2949b7301faf7ff50acee0eea3542654b
   languageName: node
   linkType: hard
 
