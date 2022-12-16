@@ -7,7 +7,7 @@ import {
     PerformRollCallDocument,
 } from '@flocon-trpg/typed-document-node-v0.7.13';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
-import { Button, Modal, Tooltip } from 'antd';
+import { Alert, Button, Modal, Tooltip } from 'antd';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
 import { maxBy, sortBy } from 'lodash';
@@ -68,6 +68,7 @@ const RollCallResult: React.FC<RollCallResultProps> = ({
     const participants = useJoinParticipants(rollCall.participants);
     const [answerRollCallResult, answerRollCall] = useMutation(AnswerRollCallDocument);
     const roomId = useRoomId();
+    const failureType = answerRollCallResult.data?.result.failureType;
 
     const joined = React.useMemo(() => {
         return [...participants].flatMap(([key, value]) => {
@@ -121,23 +122,34 @@ const RollCallResult: React.FC<RollCallResultProps> = ({
             }
 
             return (
-                <div
-                    style={{ height: 22 }}
-                    key={keyNames('ActiveRollCall.Participant', p.userUid)}
-                    className={classNames(flex, flexRow, itemsCenter)}
-                >
-                    <div style={{ width: 16 }}>{checkbox}</div>
-                    <Jdenticon
-                        hashOrValue={p.userUid}
-                        size={16}
-                        tooltipMode={{ type: 'userUid', userName: p.participantName }}
-                    />
-                    <div>{p.participantName ?? '(不明な名前)'}</div>
-                    {button}
+                <div className={classNames(flex, flexColumn)}>
+                    <div
+                        style={{ height: 22 }}
+                        key={keyNames('ActiveRollCall.Participant', p.userUid)}
+                        className={classNames(flex, flexRow, itemsCenter)}
+                    >
+                        <div style={{ width: 16 }}>{checkbox}</div>
+                        <Jdenticon
+                            hashOrValue={p.userUid}
+                            size={16}
+                            tooltipMode={{ type: 'userUid', userName: p.participantName }}
+                        />
+                        <div>{p.participantName ?? '(不明な名前)'}</div>
+                        {button}
+                    </div>
+                    {p.isMe && failureType && <Alert type='warning' message={failureType} />}
                 </div>
             );
         });
-    }, [answerRollCall, answerRollCallResult.fetching, isOpen, joined, rollCallId, roomId]);
+    }, [
+        answerRollCall,
+        answerRollCallResult.fetching,
+        failureType,
+        isOpen,
+        joined,
+        rollCallId,
+        roomId,
+    ]);
 
     const participantsElement = (
         <div style={{ margin: '2px 0' }} className={classNames(flex, flexColumn)}>
@@ -178,10 +190,11 @@ const HasOpenRollCall: React.FC<{ rollCall: RollCallState; rollCallId: string }>
     const [closeRollCallResult, closeRollCall] = useMutation(CloseRollCallDocument);
     const disableClose = closeRollCallResult.fetching;
     const [showModal, setShowModal] = React.useState(false);
+    const failureType = closeRollCallResult.data?.result.failureType;
 
     return (
         <div>
-            <div style={{ marginBottom: 12 }} className={classNames(flex, flexRow, itemsCenter)}>
+            <div className={classNames(flex, flexRow, itemsCenter)}>
                 <strong>{'点呼が行われています。'}</strong>
                 <Button
                     onClick={() => {
@@ -193,6 +206,8 @@ const HasOpenRollCall: React.FC<{ rollCall: RollCallState; rollCallId: string }>
                     点呼を終了
                 </Button>
             </div>
+            {failureType && <Alert type='warning' message={failureType} />}
+            <div style={{ height: 12 }} />
             <RollCallResult
                 rollCall={rollCall}
                 rollCallId={rollCallId}
@@ -233,10 +248,11 @@ const NoOpenRollCall: React.FC = () => {
     const latestRollCall = React.useMemo(() => {
         return maxBy(recordToArray(rollCalls ?? {}), r => r.value.createdAt);
     }, [rollCalls]);
+    const failureType = performRollCallResult.data?.result.failureType;
 
     return (
         <div>
-            <div style={{ marginBottom: 12 }} className={classNames(flex, flexRow, itemsCenter)}>
+            <div className={classNames(flex, flexRow, itemsCenter)}>
                 {'現在行われている点呼はありません。'}
                 <Button
                     onClick={() => {
@@ -259,6 +275,8 @@ const NoOpenRollCall: React.FC = () => {
                     点呼を開始
                 </Button>
             </div>
+            {failureType && <Alert type='warning' message={failureType} />}
+            <div style={{ height: 12 }} />
             {latestRollCall && (
                 <RollCallResult
                     rollCall={latestRollCall.value}
