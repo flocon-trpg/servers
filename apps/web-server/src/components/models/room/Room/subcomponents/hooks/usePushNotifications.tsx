@@ -27,7 +27,6 @@ import {
 } from '@/atoms/roomConfigAtom/types/roomConfig/resources';
 import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { useGetMyRoles } from '@/hooks/useGetMyRoles';
 import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
