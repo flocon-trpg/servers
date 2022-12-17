@@ -5,7 +5,10 @@ import {
     Spectator,
     State,
     participantTemplate,
+    toOtError,
 } from '@flocon-trpg/core';
+import { Result } from '@kizahasi/result';
+import { produce } from 'immer';
 import {
     Args,
     ArgsType,
@@ -27,10 +30,11 @@ import { QueueMiddleware } from '../../../middlewares/QueueMiddleware';
 import { RateLimitMiddleware } from '../../../middlewares/RateLimitMiddleware';
 import { RoomEventPayload } from '../../subsciptions/roomEvent/payload';
 import {
+    IdOperation,
+    RoomNotFound,
     bcryptCompareNullable,
     ensureAuthorizedUser,
-    findRoomAndMyParticipant,
-    operateParticipantAndFlush,
+    operateAsAdminAndFlush,
     publishRoomEvent,
 } from '../../utils/utils';
 
@@ -70,74 +74,51 @@ const promoteMeCore = async ({
 }): Promise<{ result: PromoteResult; payload: RoomEventPayload | undefined }> => {
     const em = context.em;
     const authorizedUser = ensureAuthorizedUser(context);
-    const findResult = await findRoomAndMyParticipant({
+    const flushResult = await operateAsAdminAndFlush({
+        operationType: 'state',
         em,
-        userUid: authorizedUser.userUid,
         roomId,
+        roomHistCount: undefined,
+        operation: async (roomState, { room }) => {
+            const me = roomState.participants?.[authorizedUser.userUid];
+            if (me == null) {
+                return Result.error(PromoteFailureType.NotParticipant);
+            }
+            const strategyResult = await strategy({ me, room });
+            switch (strategyResult) {
+                case 'Master':
+                case 'Player':
+                case 'Spectator': {
+                    const result = produce(roomState, roomState => {
+                        const me = roomState.participants?.[authorizedUser.userUid];
+                        if (me == null) {
+                            return;
+                        }
+                        me.role = strategyResult;
+                    });
+                    return Result.ok(result);
+                }
+                default:
+                    return Result.error(strategyResult);
+            }
+        },
     });
-    if (findResult == null) {
-        return {
-            result: {
-                failureType: PromoteFailureType.NotFound,
-            },
-            payload: undefined,
-        };
+    if (flushResult.isError) {
+        if (flushResult.error.type === 'custom') {
+            return { result: { failureType: flushResult.error.error }, payload: undefined };
+        }
+        throw toOtError(flushResult.error.error);
     }
-    const { room, me } = findResult;
-    const participantUserUids = findResult.participantIds();
-    if (me == null) {
-        return {
-            result: {
-                failureType: PromoteFailureType.NotParticipant,
-            },
-            payload: undefined,
-        };
-    }
-    const strategyResult = await strategy({ me, room });
-    switch (strategyResult) {
-        case PromoteFailureType.NoNeedToPromote: {
+    switch (flushResult.value) {
+        case RoomNotFound:
+            return { result: { failureType: PromoteFailureType.NotFound }, payload: undefined };
+        case IdOperation:
             return {
-                result: {
-                    failureType: PromoteFailureType.NoNeedToPromote,
-                },
+                result: { failureType: PromoteFailureType.NoNeedToPromote },
                 payload: undefined,
             };
-        }
-        case PromoteFailureType.WrongPassword: {
-            return {
-                result: {
-                    failureType: PromoteFailureType.WrongPassword,
-                },
-                payload: undefined,
-            };
-        }
-        case PromoteFailureType.NotParticipant: {
-            return {
-                result: {
-                    failureType: PromoteFailureType.NotParticipant,
-                },
-                payload: undefined,
-            };
-        }
-        default: {
-            return {
-                result: {
-                    failureType: undefined,
-                },
-                payload: (
-                    await operateParticipantAndFlush({
-                        em,
-                        room,
-                        roomHistCount: context.serverConfig.roomHistCount,
-                        participantUserUids,
-                        myUserUid: authorizedUser.userUid,
-                        update: {
-                            role: { newValue: strategyResult },
-                        },
-                    })
-                )?.payload,
-            };
-        }
+        default:
+            return { result: {}, payload: flushResult.value };
     }
 };
 

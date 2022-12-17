@@ -60,10 +60,10 @@ class PlaylistHowler {
         const nextSrcAndFormat = this.srcAndFormat[this.#playlistIndex];
         if (nextSrcAndFormat == null) {
             this.#howl = this.#initializeHowl();
-            loggerRef.value.debug('Music ended. Starting the first music.');
+            loggerRef.debug('Music ended. Starting the first music.');
         } else {
             this.#howl = this.#createHowl(nextSrcAndFormat);
-            loggerRef.value.debug(
+            loggerRef.debug(
                 { srcAndFormat: nextSrcAndFormat },
                 'Music ended. Starting the next music.'
             );
@@ -171,11 +171,11 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmCoreProps): void {
         const howl = new PlaylistHowler(srcAndFormat, volume);
         howlRef.current = howl;
         if ((isPausedRef.current ?? true) === false) {
-            loggerRef.value.debug({ srcAndFormat }, 'BGM is started to play');
+            loggerRef.debug({ srcAndFormat }, 'BGM is started to play');
             howl.play();
         }
         return () => {
-            loggerRef.value.debug('BGM is stopping');
+            loggerRef.debug('BGM is stopping');
             howlRef.current = undefined;
             howl.fade({ from: howl.getVolume(), to: 0, duration: 1000, thenStop: true });
         };
@@ -203,11 +203,11 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmCoreProps): void {
             return;
         }
         if (bgm.isPaused) {
-            loggerRef.value.debug({ srcAndFormat: howl.srcAndFormat }, 'BGM is pausing');
+            loggerRef.debug({ srcAndFormat: howl.srcAndFormat }, 'BGM is pausing');
             howl.fade({ from: howl.getVolume(), to: 0, duration: 1000, thenStop: true });
             return;
         }
-        loggerRef.value.debug({ srcAndFormat: howl.srcAndFormat }, 'BGM is starting');
+        loggerRef.debug({ srcAndFormat: howl.srcAndFormat }, 'BGM is starting');
         howl.initialize();
         howl.setVolume(Math.min(volumeRef.current ?? 0, volumeCap));
         howl.play();

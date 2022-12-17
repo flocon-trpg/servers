@@ -41,6 +41,8 @@ export { template as stringPieceTemplate, String, Number, } from './internal/ot/
 export { decode as decodeStringPiece, parse as parseStringPiece, } from './internal/ot/flocon/room/board/stringPiece/converter';
 export { type as stringPieceLog, Type as StringPieceLog, } from './internal/ot/flocon/room/board/stringPiece/log';
 export { template as memoTemplate, Plain, Markdown } from './internal/ot/flocon/room/memo/types';
+export { getOpenRollCall } from './internal/ot/flocon/room/rollCall/getOpenRollCall';
+export { isOpenRollCall } from './internal/ot/flocon/room/rollCall/isOpenRollCall';
 export { OtError, toOtError } from './internal/ot/otError';
 export { DownOperation as NullableTextDownOperation, UpOperation as NullableTextUpOperation, TwoWayOperation as NullableTextTwoWayOperation, apply as applyNullableText, diff as nullableTextDiff, toUpOperation as toNullableTextUpOperation, } from './internal/ot/nullableTextOperation';
 export { isIdRecord } from './internal/ot/record';

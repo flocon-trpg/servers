@@ -1,6 +1,7 @@
 import * as Doc071 from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as Doc072 from '@flocon-trpg/typed-document-node-v0.7.2';
 import * as Doc078 from '@flocon-trpg/typed-document-node-v0.7.8';
+import { loggerRef } from '@flocon-trpg/utils';
 import { AnyVariables, GraphQLRequest } from 'urql';
 import { fromValue } from 'wonka';
 import { createDummyUrqlOperation, createMockUrqlClient } from '.';
@@ -50,7 +51,7 @@ export const createMockUrqlClientForRoomMessage = () => {
                     });
                 }
                 default:
-                    console.error('Query', query.query);
+                    loggerRef.error({ query: query.query }, 'Query');
                     throw new Error('Query not match');
             }
         },

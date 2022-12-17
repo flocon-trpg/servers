@@ -40,6 +40,12 @@ Flocon
 -   yarn のインストール
 -   Node.js v14, v16, v18 のいずれかのインストール
 
+## husky のインストール
+
+Flocon は [husky](https://typicode.github.io/husky) を用いて [https://www.npmjs.com/package/@commitlint/cli](https://www.npmjs.com/package/@commitlint/cli) によるコミットメッセージの自動チェックを行う機能がありますが、husky のインストールは自動的には行われません。インストールするには、この Markdown ファイルがあるディレクトリで `yarn install-husky` を手動で実行する必要があります。
+
+Flocon リポジトリへの Pull Request の作成を考えていない場合、husky のインストールは必要ありません。また、Pull Request を作成する予定がある場合でも husky のインストールは任意です。
+
 ## ローカルでの API サーバーの実行方法
 
 [環境変数のセット](https://flocon.app/docs/server/details/api-server/vars)が必須です。また、環境変数のセットにおいて、Firebase プロジェクトの準備も必要になります。

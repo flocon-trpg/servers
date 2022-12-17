@@ -4,7 +4,7 @@ var createORM = require('./config/createORM.js');
 var createORMOptions = require('./config/createORMOptions.js');
 var logConfigParser = require('./config/logConfigParser.js');
 var serverConfigParser = require('./config/serverConfigParser.js');
-var logger = require('./logger.js');
+var initializeLogger = require('./initializeLogger.js');
 var appConsole = require('./utils/appConsole.js');
 var commandLineArgs = require('./utils/commandLineArgs.js');
 
@@ -58,7 +58,7 @@ const migrateUpCore = async ({ type, orm, }) => {
 };
 const migrateByNpmScript = async (type) => {
     const logConfigResult = new logConfigParser.LogConfigParser(process.env).logConfig;
-    logger.initializeLogger(logConfigResult);
+    initializeLogger.initializeLogger(logConfigResult);
     const serverConfigParser$1 = new serverConfigParser.ServerConfigParser(process.env);
     const serverConfig = serverConfigParser$1.serverConfigForMigration;
     if (serverConfig.isError) {

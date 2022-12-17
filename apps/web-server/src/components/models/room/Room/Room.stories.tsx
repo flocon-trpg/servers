@@ -25,7 +25,7 @@ export const Player: React.FC<WebConfig & { myParticipantRole: ParticipantRole }
         basicMock: {
             webConfig,
         },
-        roomConfig: {
+        room: {
             myParticipantRole,
         },
     });

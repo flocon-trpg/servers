@@ -1,4 +1,5 @@
 import { existsSync } from 'fs';
+import { LOG_FORMAT as $LOG_FORMAT } from '@flocon-trpg/default-pino-transport';
 import { config } from 'dotenv';
 import { expand } from 'dotenv-expand';
 
@@ -38,7 +39,7 @@ export const FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL =
     'FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL';
 export const FLOCON_ADMIN = 'FLOCON_ADMIN';
 export const HEROKU = 'HEROKU';
-export const LOG_FORMAT = 'LOG_FORMAT';
+export const LOG_FORMAT = $LOG_FORMAT;
 export const LOG_LEVEL = 'LOG_LEVEL';
 export const MYSQL = 'MYSQL';
 export const POSTGRESQL = 'POSTGRESQL';

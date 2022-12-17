@@ -16,7 +16,7 @@ import { recordToArray } from '@flocon-trpg/utils';
 import { Input, Menu, Modal, Popover, Tooltip } from 'antd';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import classNames from 'classnames';
-import produce from 'immer';
+import { produce } from 'immer';
 import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useUpdateAtom } from 'jotai/utils';
 import { useRouter } from 'next/router';
@@ -525,6 +525,7 @@ const usePanelsMenuItem = () => {
     const memoPanels = useAtomSelector(roomConfigAtom, state => state?.panels.memoPanels);
     const messagePanels = useAtomSelector(roomConfigAtom, state => state?.panels.messagePanels);
     const pieceValuePanel = useAtomSelector(roomConfigAtom, state => state?.panels.pieceValuePanel);
+    const rollCallPanel = useAtomSelector(roomConfigAtom, state => state?.panels.rollCallPanel);
     const setIsPanelsOpacityModalVisible = useSetAtom(panelsOpacityModalVisibilityAtom);
 
     const activeBoardPanelMenu = React.useMemo(() => {
@@ -991,6 +992,37 @@ const usePanelsMenuItem = () => {
             },
         };
     }, [pieceValuePanel, setRoomConfig]);
+    const rollCallPanelMenu = React.useMemo(() => {
+        if (rollCallPanel == null) {
+            return null;
+        }
+        return {
+            key: 'rollCallPanelMenu',
+            label: (
+                <div>
+                    <span>
+                        {rollCallPanel.isMinimized ? (
+                            <Icon.BorderOutlined />
+                        ) : (
+                            <Icon.CheckSquareOutlined />
+                        )}
+                    </span>
+                    <span>点呼</span>
+                </div>
+            ),
+            onClick: () => {
+                setRoomConfig(roomConfig => {
+                    if (roomConfig == null) {
+                        return;
+                    }
+                    roomConfig.panels.rollCallPanel.isMinimized = false;
+                    RoomConfigUtils.bringPanelToFront(roomConfig, {
+                        type: 'rollCallPanel',
+                    });
+                });
+            },
+        };
+    }, [rollCallPanel, setRoomConfig]);
 
     const menuItem = React.useMemo((): ItemType => {
         return {
@@ -1003,9 +1035,10 @@ const usePanelsMenuItem = () => {
                 chatPalettePanelsMenu,
                 messagePanelsMenu,
                 memoPanelsMenu,
-                pieceValuePanelMenu,
                 gameEffectPanelMenu,
                 participantPanelMenu,
+                rollCallPanelMenu,
+                pieceValuePanelMenu,
                 { type: 'divider' },
                 {
                     key: '透過度の設定',
@@ -1024,6 +1057,7 @@ const usePanelsMenuItem = () => {
         messagePanelsMenu,
         participantPanelMenu,
         pieceValuePanelMenu,
+        rollCallPanelMenu,
         setIsPanelsOpacityModalVisible,
     ]);
 

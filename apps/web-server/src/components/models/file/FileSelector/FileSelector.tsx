@@ -69,7 +69,12 @@ export const FileSelector: React.FC<Props> = ({
                             if (url == null || isUrlInputValueEmpty) {
                                 return;
                             }
-                            onSelect({ $v: 1, $r: 1, path: urlInputValue, sourceType: 'Default' });
+                            onSelect({
+                                $v: 1,
+                                $r: 1,
+                                path: urlInputValue.trim(),
+                                sourceType: 'Default',
+                            });
                             setUrlInputValue('');
                         }}
                     >

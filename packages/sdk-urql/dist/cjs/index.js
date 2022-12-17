@@ -70,22 +70,23 @@ const createUrqlClient = (params) => {
     else {
         authExchangeResult = null;
     }
+    const defaultExchanges = [
+        urql.dedupExchange,
+        urql.cacheExchange,
+        ...(authExchangeResult == null ? [] : [authExchangeResult]),
+        urql.fetchExchange,
+        urql.subscriptionExchange({
+            forwardSubscription: operation => ({
+                subscribe: sink => {
+                    const unsubscribe = wsClient(params.wsUrl, params.authorization ? params.getUserIdTokenResult : null).subscribe(operation, sink);
+                    return { unsubscribe };
+                },
+            }),
+        }),
+    ];
     return urql.createClient({
         url: params.httpUrl,
-        exchanges: [
-            urql.dedupExchange,
-            urql.cacheExchange,
-            ...(authExchangeResult == null ? [] : [authExchangeResult]),
-            urql.fetchExchange,
-            urql.subscriptionExchange({
-                forwardSubscription: operation => ({
-                    subscribe: sink => {
-                        const unsubscribe = wsClient(params.wsUrl, params.authorization ? params.getUserIdTokenResult : null).subscribe(operation, sink);
-                        return { unsubscribe };
-                    },
-                }),
-            }),
-        ],
+        exchanges: params.exchanges == null ? defaultExchanges : params.exchanges(defaultExchanges),
     });
 };
 

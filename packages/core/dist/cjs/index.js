@@ -5,13 +5,12 @@ var result = require('@kizahasi/result');
 var jToml = require('@ltd/j-toml');
 var floconScript = require('@flocon-trpg/flocon-script');
 var utils = require('@flocon-trpg/utils');
-var cloneDeep = require('lodash.clonedeep');
+var lodash = require('lodash');
 var otString = require('@kizahasi/ot-string');
 var truncate = require('truncate-utf8-bytes');
 
 function _interopDefault (e) { return e && e.__esModule ? e : { default: e }; }
 
-var cloneDeep__default = /*#__PURE__*/_interopDefault(cloneDeep);
 var truncate__default = /*#__PURE__*/_interopDefault(truncate);
 
 const anonymous = 'anonymous';
@@ -195,7 +194,8 @@ const forceMaxLength100String = (source) => {
     return maxLength100String.parse(source);
 };
 
-const maybe = (source) => zod.z.union([source, zod.z.undefined()]);
+/** @deprecated Use `optional` method in zod. */
+const maybe = (source) => source.optional();
 
 /* eslint-disable @typescript-eslint/no-namespace */
 exports.PublicChannelKey = void 0;
@@ -1001,7 +1001,7 @@ const serverTransformCore = ({ first, second, prevState, }) => {
         secondPrime: otString.serializeTwoWayOperation(result$1.value.secondPrime),
     });
 };
-const serverTransform$p = ({ first, second, prevState, }) => {
+const serverTransform$r = ({ first, second, prevState, }) => {
     const result$1 = serverTransformCore({ first, second, prevState });
     if (result$1.isError) {
         return result$1;
@@ -1251,7 +1251,7 @@ const restore$3 = ({ nextState, downOperation, }) => {
             },
     });
 };
-const serverTransform$o = ({ first, second, prevState, }) => {
+const serverTransform$q = ({ first, second, prevState, }) => {
     if (second == null) {
         return result.Result.ok(undefined);
     }
@@ -1294,7 +1294,7 @@ const serverTransform$o = ({ first, second, prevState, }) => {
     if (first?.type === replace$1) {
         return result.Result.error(firstTypeShouldBeSameAsSecondType);
     }
-    const xformResult = serverTransform$p({
+    const xformResult = serverTransform$r({
         first: first?.update,
         second: second.update,
         prevState: prevState,
@@ -1400,7 +1400,7 @@ const isIdRecord = (source) => {
     }
     return true;
 };
-const record$1 = (value) => zod.z.record(zod.z.union([value, zod.z.undefined()]));
+const record$1 = (value) => zod.z.record(value.optional());
 
 // (不正な|悪意のある)キーが混入するおそれがあるのはserverTransformのときのみなので、serverTransform以外では使わなくてよい
 const isValidKey = (key) => {
@@ -1523,7 +1523,7 @@ const compose = ({ first, second, innerCompose, }) => {
     return result.Result.ok(result$1.size === 0 ? undefined : utils.mapToRecord(result$1));
 };
 /** Make sure `apply(stateBeforeFirst, first) = stateAfterFirst` */
-const serverTransform$n = ({ first: unsafeFirst, second: unsafeSecond, stateBeforeFirst: unsafeStateBeforeFirst, stateAfterFirst: unsafeStateAfterFirst, innerTransform, defaultState, }) => {
+const serverTransform$p = ({ first: unsafeFirst, second: unsafeSecond, stateBeforeFirst: unsafeStateBeforeFirst, stateAfterFirst: unsafeStateAfterFirst, innerTransform, defaultState, }) => {
     if (unsafeSecond === undefined) {
         return result.Result.ok(undefined);
     }
@@ -2019,7 +2019,7 @@ const serverTransformWithoutValidation = ({ first, second, stateBeforeFirst, sta
     return result.Result.ok(result$1.size === 0 ? undefined : utils.mapToRecord(result$1));
 };
 /** Make sure `apply(stateBeforeFirst, first) = stateAfterFirst` */
-const serverTransform$m = (params) => {
+const serverTransform$o = (params) => {
     const result$1 = serverTransformWithoutValidation(params);
     if (result$1.isError) {
         return result$1;
@@ -2261,7 +2261,7 @@ const paramRecord = 'paramRecord';
 const object = 'object';
 const isKeyToIgnore = (key) => key === $v || key === $r;
 const warnNotFoundTemplate = ({ key, objectType, }) => {
-    console.warn(`"${key}" key found at ${objectType} object, but template not found. Maybe you use keys which are not supported?`);
+    utils.loggerRef.warn(`"${key}" key found at ${objectType} object, but template not found. Maybe you use keys which are not supported?`);
 };
 /** Stateならば`T`に、TwoWayOperationならば`{ oldValue:T; newValue:T }`に変換されるtemplateを作成します。*/
 const createReplaceValueTemplate = (value) => {
@@ -3520,7 +3520,7 @@ class FRoom extends floconScript.FObject {
     constructor(source, myUserUid) {
         super();
         this.myUserUid = myUserUid;
-        this._room = cloneDeep__default.default(source);
+        this._room = lodash.cloneDeep(source);
     }
     get room() {
         return this._room;
@@ -3779,17 +3779,21 @@ const client = 'client';
 const restrict = 'restrict';
 const anyValue = { type: 'anyValue' };
 const none = { type: 'none' };
-const isOwner = ({ requestedBy, ownerParticipantId, }) => {
-    if (typeof ownerParticipantId === 'string' || ownerParticipantId.type === 'none') {
+const isAuthorized = ({ requestedBy, participantId, }) => {
+    if (typeof participantId === 'string' || participantId.type === 'none') {
         if (requestedBy.type === admin) {
             return true;
         }
         if (requestedBy.type === restrict) {
             return false;
         }
-        return requestedBy.userUid === ownerParticipantId;
+        return requestedBy.userUid === participantId;
     }
     return true;
+};
+// 元々は isAuthorized 関数は存在せず、isAuthorized 関数に相当する処理は isOwner 関数で行っていた。だが、isOwner という名前と引数がしっくり来ない場面もあったので、isAuthorized 関数に移した。isOwner 関数は削除するとしっくり来ない場面が生じるかもしれないため、現時点では残している。
+const isOwner = ({ requestedBy, ownerParticipantId, }) => {
+    return isAuthorized({ requestedBy, participantId: ownerParticipantId });
 };
 const isBoardOwner = ({ boardId, requestedBy, currentRoomState, }) => {
     if (requestedBy.type === admin) {
@@ -3865,7 +3869,7 @@ const canChangeOwnerCharacterId = ({ requestedBy, currentOwnerCharacter, current
     });
 };
 
-const serverTransform$l = ({ first, second, prevState, }) => {
+const serverTransform$n = ({ first, second, prevState, }) => {
     if (first === undefined && second !== undefined) {
         const newOperation = { oldValue: prevState, newValue: second.newValue };
         if (newOperation.oldValue !== newOperation.newValue) {
@@ -3876,19 +3880,19 @@ const serverTransform$l = ({ first, second, prevState, }) => {
 };
 
 const toClientState$h = (source) => source;
-const serverTransform$k = ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
+const serverTransform$m = ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
     const twoWayOperation = { $v: 1, $r: 1 };
-    twoWayOperation.isPaused = serverTransform$l({
+    twoWayOperation.isPaused = serverTransform$n({
         first: serverOperation?.isPaused,
         second: clientOperation.isPaused,
         prevState: stateBeforeServerOperation.isPaused,
     });
-    twoWayOperation.files = serverTransform$l({
+    twoWayOperation.files = serverTransform$n({
         first: serverOperation?.files,
         second: clientOperation.files,
         prevState: stateBeforeServerOperation.files,
     });
-    twoWayOperation.volume = serverTransform$l({
+    twoWayOperation.volume = serverTransform$n({
         first: serverOperation?.volume,
         second: clientOperation.volume,
         prevState: stateBeforeServerOperation.volume,
@@ -3899,19 +3903,19 @@ const serverTransform$k = ({ stateBeforeServerOperation, clientOperation, server
     return result.Result.ok(twoWayOperation);
 };
 
-const serverTransform$j = ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
+const serverTransform$l = ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
     const twoWayOperation = { $v: undefined, $r: undefined };
-    twoWayOperation.h = serverTransform$l({
+    twoWayOperation.h = serverTransform$n({
         first: serverOperation?.h,
         second: clientOperation.h,
         prevState: stateBeforeServerOperation.h,
     });
-    twoWayOperation.isPositionLocked = serverTransform$l({
+    twoWayOperation.isPositionLocked = serverTransform$n({
         first: serverOperation?.isPositionLocked,
         second: clientOperation.isPositionLocked,
         prevState: stateBeforeServerOperation.isPositionLocked,
     });
-    const transformedMemo = serverTransform$o({
+    const transformedMemo = serverTransform$q({
         first: serverOperation?.memo,
         second: clientOperation.memo,
         prevState: stateBeforeServerOperation.memo,
@@ -3920,7 +3924,7 @@ const serverTransform$j = ({ stateBeforeServerOperation, clientOperation, server
         return transformedMemo;
     }
     twoWayOperation.memo = transformedMemo.value;
-    const transformedName = serverTransform$o({
+    const transformedName = serverTransform$q({
         first: serverOperation?.name,
         second: clientOperation.name,
         prevState: stateBeforeServerOperation.name,
@@ -3929,22 +3933,22 @@ const serverTransform$j = ({ stateBeforeServerOperation, clientOperation, server
         return transformedName;
     }
     twoWayOperation.name = transformedName.value;
-    twoWayOperation.opacity = serverTransform$l({
+    twoWayOperation.opacity = serverTransform$n({
         first: serverOperation?.opacity,
         second: clientOperation.opacity,
         prevState: stateBeforeServerOperation.opacity,
     });
-    twoWayOperation.w = serverTransform$l({
+    twoWayOperation.w = serverTransform$n({
         first: serverOperation?.w,
         second: clientOperation.w,
         prevState: stateBeforeServerOperation.w,
     });
-    twoWayOperation.x = serverTransform$l({
+    twoWayOperation.x = serverTransform$n({
         first: serverOperation?.x,
         second: clientOperation.x,
         prevState: stateBeforeServerOperation.x,
     });
-    twoWayOperation.y = serverTransform$l({
+    twoWayOperation.y = serverTransform$n({
         first: serverOperation?.y,
         second: clientOperation.y,
         prevState: stateBeforeServerOperation.y,
@@ -3955,8 +3959,8 @@ const serverTransform$j = ({ stateBeforeServerOperation, clientOperation, server
     return result.Result.ok(twoWayOperation);
 };
 
-const serverTransform$i = ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
-    const boardPosition = serverTransform$j({
+const serverTransform$k = ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
+    const boardPosition = serverTransform$l({
         stateBeforeServerOperation: stateBeforeServerOperation,
         stateAfterServerOperation: stateAfterServerOperation,
         clientOperation,
@@ -3970,27 +3974,27 @@ const serverTransform$i = ({ stateBeforeServerOperation, stateAfterServerOperati
         $v: undefined,
         $r: undefined,
     };
-    twoWayOperation.cellH = serverTransform$l({
+    twoWayOperation.cellH = serverTransform$n({
         first: serverOperation?.cellH,
         second: clientOperation.cellH,
         prevState: stateBeforeServerOperation.cellH,
     });
-    twoWayOperation.cellW = serverTransform$l({
+    twoWayOperation.cellW = serverTransform$n({
         first: serverOperation?.cellW,
         second: clientOperation.cellW,
         prevState: stateBeforeServerOperation.cellW,
     });
-    twoWayOperation.cellX = serverTransform$l({
+    twoWayOperation.cellX = serverTransform$n({
         first: serverOperation?.cellX,
         second: clientOperation.cellX,
         prevState: stateBeforeServerOperation.cellX,
     });
-    twoWayOperation.cellY = serverTransform$l({
+    twoWayOperation.cellY = serverTransform$n({
         first: serverOperation?.cellY,
         second: clientOperation.cellY,
         prevState: stateBeforeServerOperation.cellY,
     });
-    twoWayOperation.isCellMode = serverTransform$l({
+    twoWayOperation.isCellMode = serverTransform$n({
         first: serverOperation?.isCellMode,
         second: clientOperation.isCellMode,
         prevState: stateBeforeServerOperation.isCellMode,
@@ -4007,7 +4011,7 @@ const toClientState$g = (isAuthorized) => (source) => {
         value: source.isValuePrivate && !isAuthorized ? undefined : source.value,
     };
 };
-const serverTransform$h = (isAuthorized) => ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
+const serverTransform$j = (isAuthorized) => ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
     if (!isAuthorized) {
         // 自分以外はどのプロパティも編集できない。
         return result.Result.ok(undefined);
@@ -4016,18 +4020,18 @@ const serverTransform$h = (isAuthorized) => ({ stateBeforeServerOperation, clien
         $v: 1,
         $r: 1,
     };
-    twoWayOperation.dieType = serverTransform$l({
+    twoWayOperation.dieType = serverTransform$n({
         first: serverOperation?.dieType ?? undefined,
         second: clientOperation.dieType ?? undefined,
         prevState: stateBeforeServerOperation.dieType,
     });
-    twoWayOperation.isValuePrivate = serverTransform$l({
+    twoWayOperation.isValuePrivate = serverTransform$n({
         first: serverOperation?.isValuePrivate ?? undefined,
         second: clientOperation.isValuePrivate ?? undefined,
         prevState: stateBeforeServerOperation.isValuePrivate,
     });
     // !isAuthorized の場合は最初の方ですべて弾いているため、isValuePrivateのチェックをする必要はない。
-    twoWayOperation.value = serverTransform$l({
+    twoWayOperation.value = serverTransform$n({
         first: serverOperation?.value ?? undefined,
         second: clientOperation.value ?? undefined,
         prevState: stateBeforeServerOperation.value,
@@ -4057,7 +4061,7 @@ const templateValue$1 = {
     x: createReplaceValueTemplate(zod.z.number()),
     y: createReplaceValueTemplate(zod.z.number()),
 };
-const template$k = createObjectValueTemplate(templateValue$1, undefined, undefined);
+const template$m = createObjectValueTemplate(templateValue$1, undefined, undefined);
 
 const templateValue = {
     ...templateValue$1,
@@ -4067,13 +4071,13 @@ const templateValue = {
     cellY: createReplaceValueTemplate(zod.z.number()),
     isCellMode: createReplaceValueTemplate(zod.z.boolean()),
 };
-const template$j = createObjectValueTemplate(templateValue, undefined, undefined);
+const template$l = createObjectValueTemplate(templateValue, undefined, undefined);
 
 // 今の所D6しか対応していない。D4は将来のために予約されている。
 const D4 = 'D4';
 const D6 = 'D6';
 const dieType = zod.z.union([zod.z.literal(D4), zod.z.literal(D6)]);
-const template$i = createObjectValueTemplate({
+const template$k = createObjectValueTemplate({
     dieType: createReplaceValueTemplate(dieType),
     isValuePrivate: createReplaceValueTemplate(zod.z.boolean()),
     // undefined になるのは、次の2つのいずれかもしくは両方のケース。
@@ -4083,10 +4087,10 @@ const template$i = createObjectValueTemplate({
 }, 1, 1);
 
 const dicePieceStrIndexes = ['1', '2', '3', '4'];
-const template$h = createObjectValueTemplate({
+const template$j = createObjectValueTemplate({
     ...templateValue,
     ownerCharacterId: createReplaceValueTemplate(maybe(zod.z.string())),
-    dice: createRecordValueTemplate(template$i),
+    dice: createRecordValueTemplate(template$k),
 }, 2, 1);
 
 const toClientState$f = (requestedBy, currentRoomState) => (source) => {
@@ -4100,18 +4104,18 @@ const toClientState$f = (requestedBy, currentRoomState) => (source) => {
         dice: utils.chooseRecord(source.dice ?? {}, state => toClientState$g(isAuthorized)(state)),
     };
 };
-const serverTransform$g = (requestedBy, currentRoomState) => ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
+const serverTransform$i = (requestedBy, currentRoomState) => ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
     const isAuthorized = isCharacterOwner({
         requestedBy,
         characterId: stateAfterServerOperation.ownerCharacterId ?? anyValue,
         currentRoomState,
     });
-    const dice = serverTransform$m({
+    const dice = serverTransform$o({
         stateBeforeFirst: stateBeforeServerOperation.dice ?? {},
         stateAfterFirst: stateAfterServerOperation.dice ?? {},
         first: serverOperation?.dice,
         second: clientOperation.dice,
-        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$h(true)({
+        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$j(true)({
             stateBeforeServerOperation: prevState,
             stateAfterServerOperation: nextState,
             serverOperation: first,
@@ -4127,7 +4131,7 @@ const serverTransform$g = (requestedBy, currentRoomState) => ({ stateBeforeServe
     if (dice.isError) {
         return dice;
     }
-    const piece = serverTransform$i({
+    const piece = serverTransform$k({
         stateBeforeServerOperation: {
             ...stateBeforeServerOperation,
             $v: undefined,
@@ -4155,7 +4159,7 @@ const serverTransform$g = (requestedBy, currentRoomState) => ({ stateBeforeServe
         currentOwnerCharacter: stateAfterServerOperation,
         currentRoomState,
     })) {
-        twoWayOperation.ownerCharacterId = serverTransform$l({
+        twoWayOperation.ownerCharacterId = serverTransform$n({
             first: serverOperation?.ownerCharacterId,
             second: clientOperation.ownerCharacterId,
             prevState: stateBeforeServerOperation.ownerCharacterId,
@@ -4170,8 +4174,8 @@ const serverTransform$g = (requestedBy, currentRoomState) => ({ stateBeforeServe
 const toClientState$e = (source) => {
     return source;
 };
-const serverTransform$f = (requestedBy) => ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
-    const piece = serverTransform$i({
+const serverTransform$h = (requestedBy) => ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
+    const piece = serverTransform$k({
         stateBeforeServerOperation: {
             ...stateBeforeServerOperation,
             $v: undefined,
@@ -4197,18 +4201,18 @@ const serverTransform$f = (requestedBy) => ({ stateBeforeServerOperation, stateA
         requestedBy,
         currentOwnerParticipant: stateAfterServerOperation,
     })) {
-        twoWayOperation.ownerParticipantId = serverTransform$l({
+        twoWayOperation.ownerParticipantId = serverTransform$n({
             first: serverOperation?.ownerParticipantId,
             second: clientOperation.ownerParticipantId,
             prevState: stateBeforeServerOperation.ownerParticipantId,
         });
     }
-    twoWayOperation.image = serverTransform$l({
+    twoWayOperation.image = serverTransform$n({
         first: serverOperation?.image,
         second: clientOperation.image,
         prevState: stateBeforeServerOperation.image,
     });
-    twoWayOperation.isPrivate = serverTransform$l({
+    twoWayOperation.isPrivate = serverTransform$n({
         first: serverOperation?.isPrivate,
         second: clientOperation.isPrivate,
         prevState: stateBeforeServerOperation.isPrivate,
@@ -4219,27 +4223,27 @@ const serverTransform$f = (requestedBy) => ({ stateBeforeServerOperation, stateA
     return result.Result.ok(twoWayOperation);
 };
 
-const serverTransform$e = ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
+const serverTransform$g = ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
     const twoWayOperation = {
         $v: 1,
         $r: 1,
     };
-    twoWayOperation.fill = serverTransform$l({
+    twoWayOperation.fill = serverTransform$n({
         first: serverOperation?.fill,
         second: clientOperation.fill,
         prevState: stateBeforeServerOperation.fill,
     });
-    twoWayOperation.shape = serverTransform$l({
+    twoWayOperation.shape = serverTransform$n({
         first: serverOperation?.shape,
         second: clientOperation.shape,
         prevState: stateBeforeServerOperation.shape,
     });
-    twoWayOperation.stroke = serverTransform$l({
+    twoWayOperation.stroke = serverTransform$n({
         first: serverOperation?.stroke,
         second: clientOperation.stroke,
         prevState: stateBeforeServerOperation.stroke,
     });
-    twoWayOperation.strokeWidth = serverTransform$l({
+    twoWayOperation.strokeWidth = serverTransform$n({
         first: serverOperation?.strokeWidth,
         second: clientOperation.strokeWidth,
         prevState: stateBeforeServerOperation.strokeWidth,
@@ -4258,8 +4262,8 @@ const validateShapeKey = (key) => {
 const toClientState$d = (source) => {
     return source;
 };
-const serverTransform$d = (requestedBy) => ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
-    const piece = serverTransform$i({
+const serverTransform$f = (requestedBy) => ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
+    const piece = serverTransform$k({
         stateBeforeServerOperation: {
             ...stateBeforeServerOperation,
             $v: undefined,
@@ -4285,23 +4289,23 @@ const serverTransform$d = (requestedBy) => ({ stateBeforeServerOperation, stateA
         requestedBy,
         currentOwnerParticipant: stateAfterServerOperation,
     })) {
-        twoWayOperation.ownerParticipantId = serverTransform$l({
+        twoWayOperation.ownerParticipantId = serverTransform$n({
             first: serverOperation?.ownerParticipantId,
             second: clientOperation.ownerParticipantId,
             prevState: stateBeforeServerOperation.ownerParticipantId,
         });
     }
-    twoWayOperation.isPrivate = serverTransform$l({
+    twoWayOperation.isPrivate = serverTransform$n({
         first: serverOperation?.isPrivate,
         second: clientOperation.isPrivate,
         prevState: stateBeforeServerOperation.isPrivate,
     });
-    const shapes = serverTransform$m({
+    const shapes = serverTransform$o({
         first: serverOperation?.shapes,
         second: clientOperation.shapes,
         stateBeforeFirst: stateBeforeServerOperation.shapes ?? {},
         stateAfterFirst: stateAfterServerOperation.shapes ?? {},
-        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$e({
+        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$g({
             stateBeforeServerOperation: prevState,
             stateAfterServerOperation: nextState,
             serverOperation: first,
@@ -4334,8 +4338,8 @@ const toClientState$c = (requestedBy, currentRoomState) => (source) => {
         value: source.isValuePrivate && !isAuthorized ? '' : source.value,
     };
 };
-const serverTransform$c = (requestedBy, currentRoomState) => ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
-    const piece = serverTransform$i({
+const serverTransform$e = (requestedBy, currentRoomState) => ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
+    const piece = serverTransform$k({
         stateBeforeServerOperation: {
             ...stateBeforeServerOperation,
             $v: undefined,
@@ -4362,19 +4366,19 @@ const serverTransform$c = (requestedBy, currentRoomState) => ({ stateBeforeServe
         currentOwnerCharacter: stateAfterServerOperation,
         currentRoomState,
     })) {
-        twoWayOperation.ownerCharacterId = serverTransform$l({
+        twoWayOperation.ownerCharacterId = serverTransform$n({
             first: serverOperation?.ownerCharacterId,
             second: clientOperation.ownerCharacterId,
             prevState: stateBeforeServerOperation.ownerCharacterId,
         });
     }
-    twoWayOperation.isValuePrivate = serverTransform$l({
+    twoWayOperation.isValuePrivate = serverTransform$n({
         first: serverOperation?.isValuePrivate ?? undefined,
         second: clientOperation.isValuePrivate ?? undefined,
         prevState: stateBeforeServerOperation.isValuePrivate,
     });
     // !isAuthorized の場合は最初の方ですべて弾いているため、isValuePrivateのチェックをする必要はない。
-    const valueResult = serverTransform$p({
+    const valueResult = serverTransform$r({
         first: serverOperation?.value ?? undefined,
         second: clientOperation.value ?? undefined,
         prevState: stateBeforeServerOperation.value,
@@ -4383,7 +4387,7 @@ const serverTransform$c = (requestedBy, currentRoomState) => ({ stateBeforeServe
         return valueResult;
     }
     twoWayOperation.value = valueResult.value;
-    twoWayOperation.valueInputType = serverTransform$l({
+    twoWayOperation.valueInputType = serverTransform$n({
         first: serverOperation?.valueInputType ?? undefined,
         second: clientOperation.valueInputType ?? undefined,
         prevState: stateBeforeServerOperation.valueInputType,
@@ -4427,7 +4431,7 @@ const toClientState$b = (requestedBy, currentRoomState) => (source) => {
         }),
     };
 };
-const serverTransform$b = (requestedBy, currentRoomState) => ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
+const serverTransform$d = (requestedBy, currentRoomState) => ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
     const cancellationPolicyOfCharacterPieces = {
         cancelCreate: ({ newState }) => !isCharacterOwner({
             requestedBy,
@@ -4450,12 +4454,12 @@ const serverTransform$b = (requestedBy, currentRoomState) => ({ stateBeforeServe
             ownerParticipantId: state.ownerParticipantId ?? anyValue,
         }),
     };
-    const dicePieces = serverTransform$m({
+    const dicePieces = serverTransform$o({
         first: serverOperation?.dicePieces,
         second: clientOperation.dicePieces,
         stateBeforeFirst: stateBeforeServerOperation.dicePieces ?? {},
         stateAfterFirst: stateAfterServerOperation.dicePieces ?? {},
-        innerTransform: ({ first, second, prevState, nextState }) => serverTransform$g(requestedBy, currentRoomState)({
+        innerTransform: ({ first, second, prevState, nextState }) => serverTransform$i(requestedBy, currentRoomState)({
             stateBeforeServerOperation: prevState,
             stateAfterServerOperation: nextState,
             serverOperation: first,
@@ -4467,12 +4471,12 @@ const serverTransform$b = (requestedBy, currentRoomState) => ({ stateBeforeServe
     if (dicePieces.isError) {
         return dicePieces;
     }
-    const imagePieces = serverTransform$m({
+    const imagePieces = serverTransform$o({
         first: serverOperation?.imagePieces,
         second: clientOperation.imagePieces,
         stateBeforeFirst: stateBeforeServerOperation.imagePieces ?? {},
         stateAfterFirst: stateAfterServerOperation.imagePieces ?? {},
-        innerTransform: ({ first, second, prevState, nextState }) => serverTransform$f(requestedBy)({
+        innerTransform: ({ first, second, prevState, nextState }) => serverTransform$h(requestedBy)({
             stateBeforeServerOperation: prevState,
             stateAfterServerOperation: nextState,
             serverOperation: first,
@@ -4484,12 +4488,12 @@ const serverTransform$b = (requestedBy, currentRoomState) => ({ stateBeforeServe
     if (imagePieces.isError) {
         return imagePieces;
     }
-    const shapePieces = serverTransform$m({
+    const shapePieces = serverTransform$o({
         first: serverOperation?.shapePieces,
         second: clientOperation.shapePieces,
         stateBeforeFirst: stateBeforeServerOperation.shapePieces ?? {},
         stateAfterFirst: stateAfterServerOperation.shapePieces ?? {},
-        innerTransform: ({ first, second, prevState, nextState }) => serverTransform$d(requestedBy)({
+        innerTransform: ({ first, second, prevState, nextState }) => serverTransform$f(requestedBy)({
             stateBeforeServerOperation: prevState,
             stateAfterServerOperation: nextState,
             serverOperation: first,
@@ -4501,12 +4505,12 @@ const serverTransform$b = (requestedBy, currentRoomState) => ({ stateBeforeServe
     if (shapePieces.isError) {
         return shapePieces;
     }
-    const stringPieces = serverTransform$m({
+    const stringPieces = serverTransform$o({
         first: serverOperation?.stringPieces,
         second: clientOperation.stringPieces,
         stateBeforeFirst: stateBeforeServerOperation.stringPieces ?? {},
         stateAfterFirst: stateAfterServerOperation.stringPieces ?? {},
-        innerTransform: ({ first, second, prevState, nextState }) => serverTransform$c(requestedBy, currentRoomState)({
+        innerTransform: ({ first, second, prevState, nextState }) => serverTransform$e(requestedBy, currentRoomState)({
             stateBeforeServerOperation: prevState,
             stateAfterServerOperation: nextState,
             serverOperation: first,
@@ -4526,47 +4530,47 @@ const serverTransform$b = (requestedBy, currentRoomState) => ({ stateBeforeServe
         shapePieces: shapePieces.value,
         stringPieces: stringPieces.value,
     };
-    twoWayOperation.backgroundImage = serverTransform$l({
+    twoWayOperation.backgroundImage = serverTransform$n({
         first: serverOperation?.backgroundImage,
         second: clientOperation.backgroundImage,
         prevState: stateBeforeServerOperation.backgroundImage,
     });
-    twoWayOperation.backgroundImageZoom = serverTransform$l({
+    twoWayOperation.backgroundImageZoom = serverTransform$n({
         first: serverOperation?.backgroundImageZoom,
         second: clientOperation.backgroundImageZoom,
         prevState: stateBeforeServerOperation.backgroundImageZoom,
     });
-    twoWayOperation.cellColumnCount = serverTransform$l({
+    twoWayOperation.cellColumnCount = serverTransform$n({
         first: serverOperation?.cellColumnCount,
         second: clientOperation.cellColumnCount,
         prevState: stateBeforeServerOperation.cellColumnCount,
     });
-    twoWayOperation.cellHeight = serverTransform$l({
+    twoWayOperation.cellHeight = serverTransform$n({
         first: serverOperation?.cellHeight,
         second: clientOperation.cellHeight,
         prevState: stateBeforeServerOperation.cellHeight,
     });
-    twoWayOperation.cellOffsetX = serverTransform$l({
+    twoWayOperation.cellOffsetX = serverTransform$n({
         first: serverOperation?.cellOffsetX,
         second: clientOperation.cellOffsetX,
         prevState: stateBeforeServerOperation.cellOffsetX,
     });
-    twoWayOperation.cellOffsetY = serverTransform$l({
+    twoWayOperation.cellOffsetY = serverTransform$n({
         first: serverOperation?.cellOffsetY,
         second: clientOperation.cellOffsetY,
         prevState: stateBeforeServerOperation.cellOffsetY,
     });
-    twoWayOperation.cellRowCount = serverTransform$l({
+    twoWayOperation.cellRowCount = serverTransform$n({
         first: serverOperation?.cellRowCount,
         second: clientOperation.cellRowCount,
         prevState: stateBeforeServerOperation.cellRowCount,
     });
-    twoWayOperation.cellWidth = serverTransform$l({
+    twoWayOperation.cellWidth = serverTransform$n({
         first: serverOperation?.cellWidth,
         second: clientOperation.cellWidth,
         prevState: stateBeforeServerOperation.cellWidth,
     });
-    const name = serverTransform$p({
+    const name = serverTransform$r({
         first: serverOperation?.name,
         second: clientOperation.name,
         prevState: stateBeforeServerOperation.name,
@@ -4579,7 +4583,7 @@ const serverTransform$b = (requestedBy, currentRoomState) => ({ stateBeforeServe
         requestedBy,
         currentOwnerParticipant: stateAfterServerOperation,
     })) {
-        twoWayOperation.ownerParticipantId = serverTransform$l({
+        twoWayOperation.ownerParticipantId = serverTransform$n({
             first: serverOperation?.ownerParticipantId,
             second: clientOperation.ownerParticipantId,
             prevState: stateBeforeServerOperation.ownerParticipantId,
@@ -4597,24 +4601,24 @@ const toClientState$a = (isAuthorized, defaultValue) => (source) => {
         value: source.isValuePrivate && !isAuthorized ? defaultValue : source.value,
     };
 };
-const serverTransform$a = (isAuthorized) => ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
+const serverTransform$c = (isAuthorized) => ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
     const twoWayOperation = { $v: 2, $r: 1 };
     if (isAuthorized) {
-        twoWayOperation.isValuePrivate = serverTransform$l({
+        twoWayOperation.isValuePrivate = serverTransform$n({
             first: serverOperation?.isValuePrivate,
             second: clientOperation.isValuePrivate,
             prevState: stateBeforeServerOperation.isValuePrivate,
         });
     }
     if (isAuthorized || !stateAfterServerOperation.isValuePrivate) {
-        twoWayOperation.value = serverTransform$l({
+        twoWayOperation.value = serverTransform$n({
             first: serverOperation?.value,
             second: clientOperation.value,
             prevState: stateBeforeServerOperation.value,
         });
     }
     {
-        const xformResult = serverTransform$o({
+        const xformResult = serverTransform$q({
             first: serverOperation?.overriddenParameterName,
             second: clientOperation.overriddenParameterName,
             prevState: stateBeforeServerOperation.overriddenParameterName,
@@ -4633,8 +4637,8 @@ const serverTransform$a = (isAuthorized) => ({ stateBeforeServerOperation, state
 const toClientState$9 = (source) => {
     return source;
 };
-const serverTransform$9 = ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
-    const boardPosition = serverTransform$i({
+const serverTransform$b = ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
+    const boardPosition = serverTransform$k({
         stateBeforeServerOperation: { ...stateBeforeServerOperation, $v: undefined, $r: undefined },
         stateAfterServerOperation: { ...stateAfterServerOperation, $v: undefined, $r: undefined },
         clientOperation: { ...clientOperation, $v: undefined, $r: undefined },
@@ -4648,7 +4652,7 @@ const serverTransform$9 = ({ stateBeforeServerOperation, stateAfterServerOperati
         $v: 2,
         $r: 1,
     };
-    twoWayOperation.isPrivate = serverTransform$l({
+    twoWayOperation.isPrivate = serverTransform$n({
         first: serverOperation?.isPrivate,
         second: clientOperation.isPrivate,
         prevState: stateBeforeServerOperation.isPrivate,
@@ -4662,12 +4666,12 @@ const serverTransform$9 = ({ stateBeforeServerOperation, stateAfterServerOperati
 const toClientState$8 = (source) => {
     return source;
 };
-const serverTransform$8 = ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
+const serverTransform$a = ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
     const twoWayOperation = {
         $v: 1,
         $r: 1,
     };
-    const name = serverTransform$p({
+    const name = serverTransform$r({
         first: serverOperation?.name,
         second: clientOperation.name,
         prevState: stateBeforeServerOperation.name,
@@ -4676,7 +4680,7 @@ const serverTransform$8 = ({ stateBeforeServerOperation, clientOperation, server
         return name;
     }
     twoWayOperation.name = name.value;
-    const value = serverTransform$p({
+    const value = serverTransform$r({
         first: serverOperation?.value,
         second: clientOperation.value,
         prevState: stateBeforeServerOperation.value,
@@ -4697,24 +4701,24 @@ const toClientState$7 = (isAuthorized, defaultValue) => (source) => {
         value: source.isValuePrivate && !isAuthorized ? defaultValue : source.value,
     };
 };
-const serverTransform$7 = (isAuthorized) => ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
+const serverTransform$9 = (isAuthorized) => ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
     const twoWayOperation = { $v: 2, $r: 1 };
     if (isAuthorized) {
-        twoWayOperation.isValuePrivate = serverTransform$l({
+        twoWayOperation.isValuePrivate = serverTransform$n({
             first: serverOperation?.isValuePrivate,
             second: clientOperation.isValuePrivate,
             prevState: stateBeforeServerOperation.isValuePrivate,
         });
     }
     if (isAuthorized || !stateAfterServerOperation.isValuePrivate) {
-        twoWayOperation.value = serverTransform$l({
+        twoWayOperation.value = serverTransform$n({
             first: serverOperation?.value,
             second: clientOperation.value,
             prevState: stateBeforeServerOperation.value,
         });
     }
     {
-        const xformResult = serverTransform$o({
+        const xformResult = serverTransform$q({
             first: serverOperation?.overriddenParameterName,
             second: clientOperation.overriddenParameterName,
             prevState: stateBeforeServerOperation.overriddenParameterName,
@@ -4733,8 +4737,8 @@ const serverTransform$7 = (isAuthorized) => ({ stateBeforeServerOperation, state
 const toClientState$6 = (source) => {
     return source;
 };
-const serverTransform$6 = ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
-    const boardPosition = serverTransform$j({
+const serverTransform$8 = ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
+    const boardPosition = serverTransform$l({
         stateBeforeServerOperation: { ...stateBeforeServerOperation, $v: undefined, $r: undefined },
         stateAfterServerOperation: { ...stateAfterServerOperation, $v: undefined, $r: undefined },
         clientOperation: { ...clientOperation, $v: undefined, $r: undefined },
@@ -4748,7 +4752,7 @@ const serverTransform$6 = ({ stateBeforeServerOperation, stateAfterServerOperati
         $v: 2,
         $r: 1,
     };
-    twoWayOperation.isPrivate = serverTransform$l({
+    twoWayOperation.isPrivate = serverTransform$n({
         first: serverOperation?.isPrivate,
         second: clientOperation.isPrivate,
         prevState: stateBeforeServerOperation.isPrivate,
@@ -4765,17 +4769,17 @@ const toClientState$5 = (isAuthorized) => (source) => {
         value: source.isValuePrivate && !isAuthorized ? '' : source.value,
     };
 };
-const serverTransform$5 = (isAuthorized) => ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
+const serverTransform$7 = (isAuthorized) => ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
     const twoWayOperation = { $v: 2, $r: 1 };
     if (isAuthorized) {
-        twoWayOperation.isValuePrivate = serverTransform$l({
+        twoWayOperation.isValuePrivate = serverTransform$n({
             first: serverOperation?.isValuePrivate,
             second: clientOperation.isValuePrivate,
             prevState: stateBeforeServerOperation.isValuePrivate,
         });
     }
     if (isAuthorized || !stateAfterServerOperation.isValuePrivate) {
-        const transformed = serverTransform$o({
+        const transformed = serverTransform$q({
             first: serverOperation?.value,
             second: clientOperation.value,
             prevState: stateBeforeServerOperation.value,
@@ -4786,7 +4790,7 @@ const serverTransform$5 = (isAuthorized) => ({ stateBeforeServerOperation, state
         twoWayOperation.value = transformed.value;
     }
     {
-        const xformResult = serverTransform$o({
+        const xformResult = serverTransform$q({
             first: serverOperation?.overriddenParameterName,
             second: clientOperation.overriddenParameterName,
             prevState: stateBeforeServerOperation.overriddenParameterName,
@@ -4802,39 +4806,39 @@ const serverTransform$5 = (isAuthorized) => ({ stateBeforeServerOperation, state
     return result.Result.ok(twoWayOperation);
 };
 
-const template$g = createObjectValueTemplate({
+const template$i = createObjectValueTemplate({
     isValuePrivate: createReplaceValueTemplate(zod.z.boolean()),
-    value: createReplaceValueTemplate(maybe(zod.z.boolean())),
+    value: createReplaceValueTemplate(zod.z.boolean().optional()),
     overriddenParameterName: createTextValueTemplate(true),
 }, 2, 1);
 
-const template$f = createObjectValueTemplate({
+const template$h = createObjectValueTemplate({
     ...templateValue,
     boardId: createReplaceValueTemplate(zod.z.string()),
     isPrivate: createReplaceValueTemplate(zod.z.boolean()),
 }, 2, 1);
 
-const template$e = createObjectValueTemplate({
+const template$g = createObjectValueTemplate({
     name: createTextValueTemplate(false),
     value: createTextValueTemplate(false),
 }, 1, 1);
 
-const template$d = createObjectValueTemplate({
+const template$f = createObjectValueTemplate({
     isValuePrivate: createReplaceValueTemplate(zod.z.boolean()),
-    value: createReplaceValueTemplate(maybe(zod.z.number())),
+    value: createReplaceValueTemplate(zod.z.number().optional()),
     /**
      * @description Do not use this value for numMaxParam.
      */
     overriddenParameterName: createTextValueTemplate(true),
 }, 2, 1);
 
-const template$c = createObjectValueTemplate({
+const template$e = createObjectValueTemplate({
     ...templateValue$1,
     boardId: createReplaceValueTemplate(zod.z.string()),
     isPrivate: createReplaceValueTemplate(zod.z.boolean()),
 }, 2, 1);
 
-const template$b = createObjectValueTemplate({
+const template$d = createObjectValueTemplate({
     isValuePrivate: createReplaceValueTemplate(zod.z.boolean()),
     value: createTextValueTemplate(true),
     overriddenParameterName: createTextValueTemplate(true),
@@ -4864,15 +4868,15 @@ const defaultStrParamState = {
     value: undefined,
     overriddenParameterName: undefined,
 };
-const template$a = createObjectValueTemplate({
-    ownerParticipantId: createReplaceValueTemplate(maybe(zod.z.string())),
-    image: createReplaceValueTemplate(maybe(filePathValue)),
+const template$c = createObjectValueTemplate({
+    ownerParticipantId: createReplaceValueTemplate(zod.z.string().optional()),
+    image: createReplaceValueTemplate(filePathValue.optional()),
     isPrivate: createReplaceValueTemplate(zod.z.boolean()),
     memo: createTextValueTemplate(false),
     name: createTextValueTemplate(false),
     chatPalette: createTextValueTemplate(false),
     privateVarToml: createTextValueTemplate(false),
-    portraitImage: createReplaceValueTemplate(maybe(filePathValue)),
+    portraitImage: createReplaceValueTemplate(filePathValue.optional()),
     hasTag1: createReplaceValueTemplate(zod.z.boolean()),
     hasTag2: createReplaceValueTemplate(zod.z.boolean()),
     hasTag3: createReplaceValueTemplate(zod.z.boolean()),
@@ -4883,13 +4887,13 @@ const template$a = createObjectValueTemplate({
     hasTag8: createReplaceValueTemplate(zod.z.boolean()),
     hasTag9: createReplaceValueTemplate(zod.z.boolean()),
     hasTag10: createReplaceValueTemplate(zod.z.boolean()),
-    boolParams: createParamRecordValueTemplate(template$g, defaultBoolParamState),
-    numParams: createParamRecordValueTemplate(template$d, defaultNumParamState),
-    numMaxParams: createParamRecordValueTemplate(template$d, defaultNumParamState),
-    strParams: createParamRecordValueTemplate(template$b, defaultStrParamState),
-    pieces: createRecordValueTemplate(template$f),
-    privateCommands: createRecordValueTemplate(template$e),
-    portraitPieces: createRecordValueTemplate(template$c),
+    boolParams: createParamRecordValueTemplate(template$i, defaultBoolParamState),
+    numParams: createParamRecordValueTemplate(template$f, defaultNumParamState),
+    numMaxParams: createParamRecordValueTemplate(template$f, defaultNumParamState),
+    strParams: createParamRecordValueTemplate(template$d, defaultStrParamState),
+    pieces: createRecordValueTemplate(template$h),
+    privateCommands: createRecordValueTemplate(template$g),
+    portraitPieces: createRecordValueTemplate(template$e),
 }, 2, 1);
 
 const oneToTenArray$1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -4943,16 +4947,16 @@ const toClientState$4 = (isAuthorized, requestedBy, currentRoomState) => (source
         }),
     };
 };
-const serverTransform$4 = (isAuthorized, requestedBy, currentRoomState) => ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
+const serverTransform$6 = (isAuthorized, requestedBy, currentRoomState) => ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
     if (!isAuthorized && stateAfterServerOperation.isPrivate) {
         return result.Result.ok(undefined);
     }
-    const boolParams = serverTransform$n({
+    const boolParams = serverTransform$p({
         stateBeforeFirst: stateBeforeServerOperation.boolParams ?? {},
         stateAfterFirst: stateAfterServerOperation.boolParams ?? {},
         first: serverOperation?.boolParams,
         second: clientOperation.boolParams,
-        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$a(isAuthorized)({
+        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$c(isAuthorized)({
             stateBeforeServerOperation: prevState,
             stateAfterServerOperation: nextState,
             serverOperation: { ...first, $v: 2, $r: 1 },
@@ -4963,12 +4967,12 @@ const serverTransform$4 = (isAuthorized, requestedBy, currentRoomState) => ({ st
     if (boolParams.isError) {
         return boolParams;
     }
-    const numParams = serverTransform$n({
+    const numParams = serverTransform$p({
         stateBeforeFirst: stateBeforeServerOperation.numParams ?? {},
         stateAfterFirst: stateAfterServerOperation.numParams ?? {},
         first: serverOperation?.numParams,
         second: clientOperation.numParams,
-        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$7(isAuthorized)({
+        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$9(isAuthorized)({
             stateBeforeServerOperation: prevState,
             stateAfterServerOperation: nextState,
             serverOperation: first,
@@ -4979,12 +4983,12 @@ const serverTransform$4 = (isAuthorized, requestedBy, currentRoomState) => ({ st
     if (numParams.isError) {
         return numParams;
     }
-    const numMaxParams = serverTransform$n({
+    const numMaxParams = serverTransform$p({
         stateBeforeFirst: stateBeforeServerOperation.numMaxParams ?? {},
         stateAfterFirst: stateAfterServerOperation.numMaxParams ?? {},
         first: serverOperation?.numMaxParams,
         second: clientOperation.numMaxParams,
-        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$7(isAuthorized)({
+        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$9(isAuthorized)({
             stateBeforeServerOperation: prevState,
             stateAfterServerOperation: nextState,
             serverOperation: first,
@@ -4995,12 +4999,12 @@ const serverTransform$4 = (isAuthorized, requestedBy, currentRoomState) => ({ st
     if (numMaxParams.isError) {
         return numMaxParams;
     }
-    const strParams = serverTransform$n({
+    const strParams = serverTransform$p({
         stateBeforeFirst: stateBeforeServerOperation.strParams ?? {},
         stateAfterFirst: stateAfterServerOperation.strParams ?? {},
         first: serverOperation?.strParams,
         second: clientOperation.strParams,
-        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$5(isAuthorized)({
+        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$7(isAuthorized)({
             stateBeforeServerOperation: prevState,
             stateAfterServerOperation: nextState,
             serverOperation: first,
@@ -5011,12 +5015,12 @@ const serverTransform$4 = (isAuthorized, requestedBy, currentRoomState) => ({ st
     if (strParams.isError) {
         return strParams;
     }
-    const pieces = serverTransform$m({
+    const pieces = serverTransform$o({
         stateBeforeFirst: stateBeforeServerOperation.pieces ?? {},
         stateAfterFirst: stateAfterServerOperation.pieces ?? {},
         first: serverOperation?.pieces,
         second: clientOperation.pieces,
-        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$9({
+        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$b({
             stateBeforeServerOperation: prevState,
             stateAfterServerOperation: nextState,
             serverOperation: first,
@@ -5058,12 +5062,12 @@ const serverTransform$4 = (isAuthorized, requestedBy, currentRoomState) => ({ st
     if (pieces.isError) {
         return pieces;
     }
-    const privateCommands = serverTransform$m({
+    const privateCommands = serverTransform$o({
         stateBeforeFirst: stateBeforeServerOperation.privateCommands ?? {},
         stateAfterFirst: stateAfterServerOperation.privateCommands ?? {},
         first: serverOperation?.privateCommands,
         second: clientOperation.privateCommands,
-        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$8({
+        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$a({
             stateBeforeServerOperation: prevState,
             stateAfterServerOperation: nextState,
             serverOperation: first,
@@ -5079,12 +5083,12 @@ const serverTransform$4 = (isAuthorized, requestedBy, currentRoomState) => ({ st
     if (privateCommands.isError) {
         return privateCommands;
     }
-    const portraitPositions = serverTransform$m({
+    const portraitPositions = serverTransform$o({
         stateBeforeFirst: stateBeforeServerOperation.portraitPieces ?? {},
         stateAfterFirst: stateAfterServerOperation.portraitPieces ?? {},
         first: serverOperation?.portraitPieces,
         second: clientOperation.portraitPieces,
-        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$6({
+        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$8({
             stateBeforeServerOperation: prevState,
             stateAfterServerOperation: nextState,
             serverOperation: first,
@@ -5141,36 +5145,36 @@ const serverTransform$4 = (isAuthorized, requestedBy, currentRoomState) => ({ st
         requestedBy,
         currentOwnerParticipant: stateAfterServerOperation,
     })) {
-        twoWayOperation.ownerParticipantId = serverTransform$l({
+        twoWayOperation.ownerParticipantId = serverTransform$n({
             first: serverOperation?.ownerParticipantId,
             second: clientOperation.ownerParticipantId,
             prevState: stateBeforeServerOperation.ownerParticipantId,
         });
     }
-    twoWayOperation.image = serverTransform$l({
+    twoWayOperation.image = serverTransform$n({
         first: serverOperation?.image,
         second: clientOperation.image,
         prevState: stateBeforeServerOperation.image,
     });
-    twoWayOperation.portraitImage = serverTransform$l({
+    twoWayOperation.portraitImage = serverTransform$n({
         first: serverOperation?.portraitImage,
         second: clientOperation.portraitImage,
         prevState: stateBeforeServerOperation.portraitImage,
     });
-    twoWayOperation.isPrivate = serverTransform$l({
+    twoWayOperation.isPrivate = serverTransform$n({
         first: serverOperation?.isPrivate,
         second: clientOperation.isPrivate,
         prevState: stateBeforeServerOperation.isPrivate,
     });
     for (const index of oneToTenArray$1) {
         const key = `hasTag${index}`;
-        twoWayOperation[key] = serverTransform$l({
+        twoWayOperation[key] = serverTransform$n({
             first: serverOperation?.[key],
             second: clientOperation[key],
             prevState: stateBeforeServerOperation[key],
         });
     }
-    const transformedMemo = serverTransform$p({
+    const transformedMemo = serverTransform$r({
         first: serverOperation?.memo,
         second: clientOperation.memo,
         prevState: stateBeforeServerOperation.memo,
@@ -5179,7 +5183,7 @@ const serverTransform$4 = (isAuthorized, requestedBy, currentRoomState) => ({ st
         return transformedMemo;
     }
     twoWayOperation.memo = transformedMemo.value;
-    const transformedName = serverTransform$p({
+    const transformedName = serverTransform$r({
         first: serverOperation?.name,
         second: clientOperation.name,
         prevState: stateBeforeServerOperation.name,
@@ -5189,7 +5193,7 @@ const serverTransform$4 = (isAuthorized, requestedBy, currentRoomState) => ({ st
     }
     twoWayOperation.name = transformedName.value;
     if (isAuthorized) {
-        const transformedChatPalette = serverTransform$p({
+        const transformedChatPalette = serverTransform$r({
             first: serverOperation?.chatPalette,
             second: clientOperation.chatPalette,
             prevState: stateBeforeServerOperation.chatPalette,
@@ -5200,7 +5204,7 @@ const serverTransform$4 = (isAuthorized, requestedBy, currentRoomState) => ({ st
         twoWayOperation.chatPalette = transformedChatPalette.value;
     }
     if (isAuthorized) {
-        const transformed = serverTransform$p({
+        const transformed = serverTransform$r({
             first: serverOperation?.privateVarToml,
             second: clientOperation.privateVarToml,
             prevState: stateBeforeServerOperation.privateVarToml,
@@ -5217,17 +5221,17 @@ const serverTransform$4 = (isAuthorized, requestedBy, currentRoomState) => ({ st
 };
 
 const toClientState$3 = (source) => source;
-const serverTransform$3 = ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
+const serverTransform$5 = ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
     const twoWayOperation = { $v: 1, $r: 1 };
     // 暫定的にディレクトリの深さは1までとしている
     if ((clientOperation.dir?.newValue.length ?? 0) <= 1) {
-        twoWayOperation.dir = serverTransform$l({
+        twoWayOperation.dir = serverTransform$n({
             first: serverOperation?.dir,
             second: clientOperation.dir,
             prevState: stateBeforeServerOperation.dir,
         });
     }
-    const name = serverTransform$p({
+    const name = serverTransform$r({
         first: serverOperation?.name,
         second: clientOperation.name,
         prevState: stateBeforeServerOperation.name,
@@ -5236,7 +5240,7 @@ const serverTransform$3 = ({ stateBeforeServerOperation, clientOperation, server
         return name;
     }
     twoWayOperation.name = name.value;
-    const text = serverTransform$p({
+    const text = serverTransform$r({
         first: serverOperation?.text,
         second: clientOperation.text,
         prevState: stateBeforeServerOperation.text,
@@ -5245,7 +5249,7 @@ const serverTransform$3 = ({ stateBeforeServerOperation, clientOperation, server
         return text;
     }
     twoWayOperation.text = text.value;
-    twoWayOperation.textType = serverTransform$l({
+    twoWayOperation.textType = serverTransform$n({
         first: serverOperation?.textType,
         second: clientOperation.textType,
         prevState: stateBeforeServerOperation.textType,
@@ -5257,9 +5261,9 @@ const serverTransform$3 = ({ stateBeforeServerOperation, clientOperation, server
 };
 
 const toClientState$2 = (source) => source;
-const serverTransform$2 = ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
+const serverTransform$4 = ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
     const twoWayOperation = { $v: 1, $r: 1 };
-    const name = serverTransform$p({
+    const name = serverTransform$r({
         first: serverOperation?.name,
         second: clientOperation.name,
         prevState: stateBeforeServerOperation.name,
@@ -5277,7 +5281,7 @@ const serverTransform$2 = ({ stateBeforeServerOperation, clientOperation, server
 const toClientState$1 = (source) => {
     return source;
 };
-const serverTransform$1 = ({ requestedBy, participantKey, }) => ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
+const serverTransform$3 = ({ requestedBy, participantKey, }) => ({ stateBeforeServerOperation, clientOperation, serverOperation }) => {
     const isAuthorized = isOwner({
         requestedBy,
         ownerParticipantId: participantKey,
@@ -5288,14 +5292,14 @@ const serverTransform$1 = ({ requestedBy, participantKey, }) => ({ stateBeforeSe
     };
     if (isAuthorized) {
         // CONSIDER: ユーザーがnameをnullishに変更することは禁止すべきかもしれない
-        twoWayOperation.name = serverTransform$l({
+        twoWayOperation.name = serverTransform$n({
             first: serverOperation?.name ?? undefined,
             second: clientOperation.name ?? undefined,
             prevState: stateBeforeServerOperation.name,
         });
     }
     if (requestedBy.type === admin) {
-        twoWayOperation.role = serverTransform$l({
+        twoWayOperation.role = serverTransform$n({
             first: serverOperation?.role ?? undefined,
             second: clientOperation.role ?? undefined,
             prevState: stateBeforeServerOperation.role,
@@ -5312,10 +5316,103 @@ const Player = 'Player';
 const Spectator = 'Spectator';
 const Master = 'Master';
 const participantRole = zod.z.union([zod.z.literal(Player), zod.z.literal(Spectator), zod.z.literal(Master)]);
-const template$9 = createObjectValueTemplate({
+const template$b = createObjectValueTemplate({
     name: createReplaceValueTemplate(maybe(maxLength100String)),
     role: createReplaceValueTemplate(maybe(participantRole)),
 }, 2, 1);
+
+const getOpenRollCalls = (source) => {
+    return utils.recordToArray(source).filter(({ value }) => {
+        return value.closeStatus == null;
+    });
+};
+/**
+ * 現在行われている点呼があればそれを返します。
+ *
+ * 原則として、現在行われている点呼は最大でも 1 つまでしか存在できません。
+ */
+const getOpenRollCall = (source) => {
+    const activeRollCalls = getOpenRollCalls(source);
+    return lodash.maxBy(activeRollCalls, ({ value }) => value.createdAt);
+};
+
+const isOpenRollCall = (source) => {
+    // キーは何でもいいので、適当なキーを指定している。
+    const r = getOpenRollCall({ key: source });
+    return r != null;
+};
+
+const serverTransform$2 = ({ requestedBy, }) => ({ stateBeforeServerOperation, serverOperation, clientOperation }) => {
+    const isAdmin = requestedBy.type === admin;
+    if (!isAdmin) {
+        return result.Result.ok(undefined);
+    }
+    const twoWayOperation = { $v: 1, $r: 1 };
+    twoWayOperation.answeredAt = serverTransform$n({
+        first: serverOperation?.answeredAt,
+        second: clientOperation.answeredAt,
+        prevState: stateBeforeServerOperation.answeredAt,
+    });
+    if (isIdRecord(twoWayOperation)) {
+        return result.Result.ok(undefined);
+    }
+    return result.Result.ok(twoWayOperation);
+};
+
+const serverTransform$1 = ({ requestedBy, }) => ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
+    const isOpenRollCallValue = isOpenRollCall(stateAfterServerOperation);
+    const isAdmin = requestedBy.type === admin;
+    const participants = serverTransform$o({
+        stateBeforeFirst: stateBeforeServerOperation.participants ?? {},
+        stateAfterFirst: stateAfterServerOperation.participants ?? {},
+        first: serverOperation?.participants,
+        second: clientOperation.participants,
+        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$2({
+            requestedBy,
+        })({
+            stateBeforeServerOperation: prevState,
+            stateAfterServerOperation: nextState,
+            serverOperation: first,
+            clientOperation: second,
+        }),
+        toServerState: state => state,
+        cancellationPolicy: {
+            // Master および Player は自分の userUid であれば追加できる。
+            // Spectator は Operate Mutation を実行しても無視されるため、Spectator を弾く処理は必要ない。
+            cancelCreate: ({ key }) => !(isOpenRollCallValue && isAuthorized({ requestedBy, participantId: key })),
+            cancelRemove: () => !isAdmin,
+        },
+    });
+    if (participants.isError) {
+        return participants;
+    }
+    const twoWayOperation = {
+        $v: 1,
+        $r: 1,
+        participants: participants.value,
+    };
+    if (isAdmin) {
+        twoWayOperation.closeStatus = serverTransform$n({
+            first: serverOperation?.closeStatus,
+            second: clientOperation.closeStatus,
+            prevState: stateBeforeServerOperation.closeStatus,
+        });
+        twoWayOperation.createdAt = serverTransform$n({
+            first: serverOperation?.createdAt,
+            second: clientOperation.createdAt,
+            prevState: stateBeforeServerOperation.createdAt,
+        });
+        twoWayOperation.createdBy = serverTransform$n({
+            first: serverOperation?.createdBy,
+            second: clientOperation.createdBy,
+            prevState: stateBeforeServerOperation.createdBy,
+        });
+    }
+    if (isIdRecord(twoWayOperation)) {
+        return result.Result.ok(undefined);
+    }
+    return result.Result.ok(twoWayOperation);
+};
 
 const oneToTenArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 /**
@@ -5402,12 +5499,13 @@ const serverTransform = (requestedBy) => ({ stateBeforeServerOperation, stateAft
             break;
         }
     }
-    const bgms = serverTransform$m({
+    const isAdmin = requestedBy.type === admin;
+    const bgms = serverTransform$o({
         stateBeforeFirst: stateBeforeServerOperation.bgms ?? {},
         stateAfterFirst: stateAfterServerOperation.bgms ?? {},
         first: serverOperation?.bgms,
         second: clientOperation.bgms,
-        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$k({
+        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$m({
             stateBeforeServerOperation: prevState,
             stateAfterServerOperation: nextState,
             serverOperation: first,
@@ -5421,12 +5519,12 @@ const serverTransform = (requestedBy) => ({ stateBeforeServerOperation, stateAft
     if (bgms.isError) {
         return bgms;
     }
-    const boolParamNames = serverTransform$m({
+    const boolParamNames = serverTransform$o({
         stateBeforeFirst: stateBeforeServerOperation.boolParamNames ?? {},
         stateAfterFirst: stateAfterServerOperation.boolParamNames ?? {},
         first: serverOperation?.boolParamNames,
         second: clientOperation.boolParamNames,
-        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$2({
+        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$4({
             stateBeforeServerOperation: prevState,
             stateAfterServerOperation: nextState,
             serverOperation: first,
@@ -5440,12 +5538,12 @@ const serverTransform = (requestedBy) => ({ stateBeforeServerOperation, stateAft
     if (boolParamNames.isError) {
         return boolParamNames;
     }
-    const boards = serverTransform$m({
+    const boards = serverTransform$o({
         first: serverOperation?.boards,
         second: clientOperation.boards,
         stateBeforeFirst: stateBeforeServerOperation.boards ?? {},
         stateAfterFirst: stateAfterServerOperation.boards ?? {},
-        innerTransform: ({ first, second, prevState, nextState }) => serverTransform$b(requestedBy, stateAfterServerOperation)({
+        innerTransform: ({ first, second, prevState, nextState }) => serverTransform$d(requestedBy, stateAfterServerOperation)({
             stateBeforeServerOperation: prevState,
             stateAfterServerOperation: nextState,
             serverOperation: first,
@@ -5473,12 +5571,12 @@ const serverTransform = (requestedBy) => ({ stateBeforeServerOperation, stateAft
     if (boards.isError) {
         return boards;
     }
-    const characters = serverTransform$m({
+    const characters = serverTransform$o({
         first: serverOperation?.characters,
         second: clientOperation.characters,
         stateBeforeFirst: stateBeforeServerOperation.characters ?? {},
         stateAfterFirst: stateAfterServerOperation.characters ?? {},
-        innerTransform: ({ first, second, prevState, nextState }) => serverTransform$4(isOwner({
+        innerTransform: ({ first, second, prevState, nextState }) => serverTransform$6(isOwner({
             requestedBy,
             ownerParticipantId: nextState.ownerParticipantId ?? anyValue,
         }), requestedBy, stateAfterServerOperation)({
@@ -5507,12 +5605,12 @@ const serverTransform = (requestedBy) => ({ stateBeforeServerOperation, stateAft
         return characters;
     }
     // TODO: ファイルサイズが巨大になりそうなときに拒否する機能
-    const memos = serverTransform$m({
+    const memos = serverTransform$o({
         stateBeforeFirst: stateBeforeServerOperation.memos ?? {},
         stateAfterFirst: stateAfterServerOperation.memos ?? {},
         first: serverOperation?.memos,
         second: clientOperation.memos,
-        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$3({
+        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$5({
             stateBeforeServerOperation: prevState,
             stateAfterServerOperation: nextState,
             serverOperation: first,
@@ -5524,12 +5622,12 @@ const serverTransform = (requestedBy) => ({ stateBeforeServerOperation, stateAft
     if (memos.isError) {
         return memos;
     }
-    const numParamNames = serverTransform$m({
+    const numParamNames = serverTransform$o({
         stateBeforeFirst: stateBeforeServerOperation.numParamNames ?? {},
         stateAfterFirst: stateAfterServerOperation.numParamNames ?? {},
         first: serverOperation?.numParamNames,
         second: clientOperation.numParamNames,
-        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$2({
+        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$4({
             stateBeforeServerOperation: prevState,
             stateAfterServerOperation: nextState,
             serverOperation: first,
@@ -5543,12 +5641,12 @@ const serverTransform = (requestedBy) => ({ stateBeforeServerOperation, stateAft
     if (numParamNames.isError) {
         return numParamNames;
     }
-    const strParamNames = serverTransform$m({
+    const strParamNames = serverTransform$o({
         stateBeforeFirst: stateBeforeServerOperation.strParamNames ?? {},
         stateAfterFirst: stateAfterServerOperation.strParamNames ?? {},
         first: serverOperation?.strParamNames,
         second: clientOperation.strParamNames,
-        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$2({
+        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$4({
             stateBeforeServerOperation: prevState,
             stateAfterServerOperation: nextState,
             serverOperation: first,
@@ -5562,12 +5660,12 @@ const serverTransform = (requestedBy) => ({ stateBeforeServerOperation, stateAft
     if (strParamNames.isError) {
         return strParamNames;
     }
-    const participants = serverTransform$m({
+    const participants = serverTransform$o({
         stateBeforeFirst: stateBeforeServerOperation.participants ?? {},
         stateAfterFirst: stateAfterServerOperation.participants ?? {},
         first: serverOperation?.participants,
         second: clientOperation.participants,
-        innerTransform: ({ prevState, nextState, first, second, key }) => serverTransform$1({
+        innerTransform: ({ prevState, nextState, first, second, key }) => serverTransform$3({
             requestedBy,
             participantKey: key,
         })({
@@ -5582,6 +5680,29 @@ const serverTransform = (requestedBy) => ({ stateBeforeServerOperation, stateAft
     if (participants.isError) {
         return participants;
     }
+    const hasNoOpenRollCall = getOpenRollCall(stateAfterServerOperation.rollCalls ?? {}) == null;
+    const rollCalls = serverTransform$o({
+        stateBeforeFirst: stateBeforeServerOperation.rollCalls ?? {},
+        stateAfterFirst: stateAfterServerOperation.rollCalls ?? {},
+        first: serverOperation?.rollCalls,
+        second: clientOperation.rollCalls,
+        innerTransform: ({ prevState, nextState, first, second }) => serverTransform$1({
+            requestedBy,
+        })({
+            stateBeforeServerOperation: prevState,
+            stateAfterServerOperation: nextState,
+            serverOperation: first,
+            clientOperation: second,
+        }),
+        toServerState: state => state,
+        cancellationPolicy: {
+            cancelCreate: () => !(isAdmin && hasNoOpenRollCall),
+            cancelRemove: () => !(isAdmin && hasNoOpenRollCall),
+        },
+    });
+    if (rollCalls.isError) {
+        return rollCalls;
+    }
     const twoWayOperation = {
         $v: 2,
         $r: 1,
@@ -5593,6 +5714,7 @@ const serverTransform = (requestedBy) => ({ stateBeforeServerOperation, stateAft
         numParamNames: numParamNames.value,
         strParamNames: strParamNames.value,
         participants: participants.value,
+        rollCalls: rollCalls.value,
     };
     // activeBoardIdには、自分が作成したBoardしか設定できない。ただし、nullishにするのは誰でもできる。
     if (clientOperation.activeBoardId != null) {
@@ -5602,14 +5724,14 @@ const serverTransform = (requestedBy) => ({ stateBeforeServerOperation, stateAft
                 boardId: clientOperation.activeBoardId.newValue,
                 currentRoomState: stateAfterServerOperation,
             }) === true) {
-            twoWayOperation.activeBoardId = serverTransform$l({
+            twoWayOperation.activeBoardId = serverTransform$n({
                 first: serverOperation?.activeBoardId,
                 second: clientOperation.activeBoardId,
                 prevState: stateBeforeServerOperation.activeBoardId,
             });
         }
     }
-    const name = serverTransform$p({
+    const name = serverTransform$r({
         first: serverOperation?.name,
         second: clientOperation.name,
         prevState: stateBeforeServerOperation.name,
@@ -5620,7 +5742,7 @@ const serverTransform = (requestedBy) => ({ stateBeforeServerOperation, stateAft
     twoWayOperation.name = name.value;
     for (const i of oneToTenArray) {
         const key = `characterTag${i}Name`;
-        const transformed = serverTransform$o({
+        const transformed = serverTransform$q({
             first: serverOperation?.[key],
             second: clientOperation[key],
             prevState: stateBeforeServerOperation[key],
@@ -5632,7 +5754,7 @@ const serverTransform = (requestedBy) => ({ stateBeforeServerOperation, stateAft
     }
     for (const i of oneToTenArray) {
         const key = `publicChannel${i}Name`;
-        const transformed = serverTransform$p({
+        const transformed = serverTransform$r({
             first: serverOperation?.[key],
             second: clientOperation[key],
             prevState: stateBeforeServerOperation[key],
@@ -5648,13 +5770,13 @@ const serverTransform = (requestedBy) => ({ stateBeforeServerOperation, stateAft
     return result.Result.ok(twoWayOperation);
 };
 
-const template$8 = createObjectValueTemplate({
+const template$a = createObjectValueTemplate({
     isPaused: createReplaceValueTemplate(zod.z.boolean()),
     files: createReplaceValueTemplate(zod.z.array(filePathValue)),
     volume: createReplaceValueTemplate(zod.z.number()),
 }, 1, 1);
 
-const template$7 = createObjectValueTemplate({
+const template$9 = createObjectValueTemplate({
     ...templateValue,
     ownerParticipantId: createReplaceValueTemplate(maybe(zod.z.string())),
     image: createReplaceValueTemplate(maybe(filePathValue)),
@@ -5669,29 +5791,29 @@ const $path = zod.z.object({
 });
 const shape = $path;
 
-const template$6 = createObjectValueTemplate({
+const template$8 = createObjectValueTemplate({
     shape: createReplaceValueTemplate(shape),
     fill: createReplaceValueTemplate(maybe(zod.z.string())),
     stroke: createReplaceValueTemplate(maybe(zod.z.string())),
     strokeWidth: createReplaceValueTemplate(maybe(zod.z.number())),
 }, 1, 1);
 
-const template$5 = createObjectValueTemplate({
+const template$7 = createObjectValueTemplate({
     ...templateValue,
-    ownerParticipantId: createReplaceValueTemplate(maybe(zod.z.string())),
+    ownerParticipantId: createReplaceValueTemplate(zod.z.string().optional()),
     isPrivate: createReplaceValueTemplate(zod.z.boolean()),
     /**
      * keyは`'1'`から`'9'`の9個のみをサポートしています。詳細は`./functions.ts`を参照してください。
      *
      * ShapeのPath.dataは、widthとheightがともに100pxの正方形として記述します。コマなどの大きさに応じて自動的にscaleされます。
      * */
-    shapes: createRecordValueTemplate(template$6),
+    shapes: createRecordValueTemplate(template$8),
 }, 1, 1);
 
 const String = 'String';
 const Number = 'Number';
 const valueInputType = zod.z.union([zod.z.literal(String), zod.z.literal(Number)]);
-const template$4 = createObjectValueTemplate({
+const template$6 = createObjectValueTemplate({
     ...templateValue,
     ownerCharacterId: createReplaceValueTemplate(maybe(zod.z.string())),
     isValuePrivate: createReplaceValueTemplate(zod.z.boolean()),
@@ -5699,7 +5821,7 @@ const template$4 = createObjectValueTemplate({
     valueInputType: createReplaceValueTemplate(maybe(valueInputType)),
 }, 2, 1);
 
-const template$3 = createObjectValueTemplate({
+const template$5 = createObjectValueTemplate({
     backgroundImage: createReplaceValueTemplate(maybe(filePathValue)),
     backgroundImageZoom: createReplaceValueTemplate(zod.z.number()),
     cellColumnCount: createReplaceValueTemplate(zod.z.number()),
@@ -5710,10 +5832,10 @@ const template$3 = createObjectValueTemplate({
     cellWidth: createReplaceValueTemplate(zod.z.number()),
     name: createTextValueTemplate(false),
     ownerParticipantId: createReplaceValueTemplate(maybe(zod.z.string())),
-    dicePieces: createRecordValueTemplate(template$h),
-    imagePieces: createRecordValueTemplate(template$7),
-    shapePieces: createRecordValueTemplate(template$5),
-    stringPieces: createRecordValueTemplate(template$4),
+    dicePieces: createRecordValueTemplate(template$j),
+    imagePieces: createRecordValueTemplate(template$9),
+    shapePieces: createRecordValueTemplate(template$7),
+    stringPieces: createRecordValueTemplate(template$6),
 }, 2, 1);
 
 const Plain = 'Plain';
@@ -5723,7 +5845,7 @@ const Markdown = 'Markdown';
  */
 const textType = zod.z.union([zod.z.literal(Plain), zod.z.literal(Markdown)]);
 // メモのパスは、/を区切りとして例えば グループ1/グループ2/メモ であれば dir=['グループ1', 'グループ2'], name='メモ' とする。
-const template$2 = createObjectValueTemplate({
+const template$4 = createObjectValueTemplate({
     name: createTextValueTemplate(false),
     dir: createReplaceValueTemplate(zod.z.array(zod.z.string())),
     text: createTextValueTemplate(false),
@@ -5733,16 +5855,65 @@ const template$2 = createObjectValueTemplate({
     textType: createReplaceValueTemplate(textType),
 }, 1, 1);
 
-const template$1 = createObjectValueTemplate({
+const template$3 = createObjectValueTemplate({
     name: createTextValueTemplate(false),
+}, 1, 1);
+
+const template$2 = createObjectValueTemplate({
+    /** 点呼に返事したかどうか。`number` の場合は返事をしたことを表し、値は返事した日時となります。 `undefined` の場合は返事をしていないことを表します。`number` から `undefined` に戻すことで返事を撤回することもできます。また、`number` から `number` に変更することで、返事をした時間を更新することもできます。 */
+    answeredAt: createReplaceValueTemplate(zod.z.number().optional()),
+}, 1, 1);
+
+// # 点呼機能と投票機能(未実装)の違いに関する考察
+//
+// 点呼機能は投票機能(複数の選択肢があってそこから選ぶ機能)も兼ねようと考えたが、次の点が異なるため、もし投票機能を実装する場合は分けたほうがいいと結論付けた。
+// - 投票機能は、何らかのアクションの許可と関連付ける可能性がある。例えば、GMを変更する、デッキの内容を変更していいか確認をとるなど。対して点呼はそのような機能は必要なさそう。
+// - 投票機能は、締め切られるまで他の人がどちらに投票したかわからないようにすると理想的(必須ではない)。対して点呼はそのような必要がない。
+// - 点呼は全員が返事するかどうかが最も大事。投票はその限りではなく、もし多数決であれば無投票があっても問題ない。
+// - 投票は複数が同時進行しても構わないが、点呼は基本的に1つまで。
+const closeReason = zod.z.object({
+    closedBy: zod.z.string(),
+    /**
+     * ユーザーが明示的に点呼を終了させたときは `Closed`。
+     *
+     * 現時点では `Closed` のみに対応していますが、将来、他の点呼が開始されたため自動終了したときの値として `Replaced` が追加される可能性があります。
+     */
+    reason: zod.z.literal('Closed'),
+});
+const soundEffect = zod.z.object({
+    file: filePathValue,
+    volume: zod.z.number(),
+});
+/** 点呼の状況。 */
+const template$1 = createObjectValueTemplate({
+    createdAt: createReplaceValueTemplate(zod.z.number()),
+    // Participant ID
+    createdBy: createReplaceValueTemplate(zod.z.string()),
+    /**
+     * 締め切られたかどうか。nullish ならば締め切られていないことを表します。原則として、締め切られていない点呼は、最大で1つまでしか存在できません。
+     *
+     * 締め切られていない場合、参加者は誰でも締め切ることができます(ただし、締め切るには GraphQL の Mutation から実行する必要があります)。すでに締め切られている場合は、再開させることはできません。
+     */
+    closeStatus: createReplaceValueTemplate(closeReason.optional()),
+    /**
+     * 各ユーザーの点呼の状況です。keyはParticipantのIDです。
+     *
+     * 原則として、`Spectator` もしくは存在しない Participant を追加すること、値を削除すること、すでに締め切られている場合に値を追加および変更することはできません。
+     *
+     * この Record に存在しない `Player` や `Master` も点呼に参加できます。
+     */
+    participants: createRecordValueTemplate(template$2),
+    // このプロパティを実装せず、代わりにクライアント側で点呼開始と同時に通常時の SE 機能から流す案は、次の理由で却下した。もし点呼開始の mutation 実行開始と同時に流す場合は、点呼開始に失敗したときにも SE が流れてしまう。mutation の応答を待って成功していたときのみ流す場合は、点呼開始直後にブラウザを閉じたりしたときに SE が流れないという問題点がある。
+    /** 点呼開始時に流す SE。 */
+    soundEffect: createReplaceValueTemplate(soundEffect.optional()),
 }, 1, 1);
 
 const templateBase = {
     activeBoardId: createReplaceValueTemplate(maybe(zod.z.string())),
-    bgms: createRecordValueTemplate(template$8),
-    boolParamNames: createRecordValueTemplate(template$1),
-    boards: createRecordValueTemplate(template$3),
-    characters: createRecordValueTemplate(template$a),
+    bgms: createRecordValueTemplate(template$a),
+    boolParamNames: createRecordValueTemplate(template$3),
+    boards: createRecordValueTemplate(template$5),
+    characters: createRecordValueTemplate(template$c),
     characterTag1Name: createTextValueTemplate(true),
     characterTag2Name: createTextValueTemplate(true),
     characterTag3Name: createTextValueTemplate(true),
@@ -5753,8 +5924,9 @@ const templateBase = {
     characterTag8Name: createTextValueTemplate(true),
     characterTag9Name: createTextValueTemplate(true),
     characterTag10Name: createTextValueTemplate(true),
-    memos: createRecordValueTemplate(template$2),
-    numParamNames: createRecordValueTemplate(template$1),
+    memos: createRecordValueTemplate(template$4),
+    numParamNames: createRecordValueTemplate(template$3),
+    rollCalls: createRecordValueTemplate(template$1),
     publicChannel1Name: createTextValueTemplate(false),
     publicChannel2Name: createTextValueTemplate(false),
     publicChannel3Name: createTextValueTemplate(false),
@@ -5765,7 +5937,7 @@ const templateBase = {
     publicChannel8Name: createTextValueTemplate(false),
     publicChannel9Name: createTextValueTemplate(false),
     publicChannel10Name: createTextValueTemplate(false),
-    strParamNames: createRecordValueTemplate(template$1), //keyはStrIndex20
+    strParamNames: createRecordValueTemplate(template$3), //keyはStrIndex20
 };
 const dbTemplate = createObjectValueTemplate(templateBase, 2, 1);
 // nameとcreatedByはDBから頻繁に取得されると思われる値なので独立させている。
@@ -5773,7 +5945,7 @@ const template = createObjectValueTemplate({
     ...templateBase,
     createdBy: createReplaceValueTemplate(zod.z.string()),
     name: createTextValueTemplate(false),
-    participants: createRecordValueTemplate(template$9),
+    participants: createRecordValueTemplate(template$b),
 }, 2, 1);
 
 const decodeState = (source) => {
@@ -5836,7 +6008,7 @@ const update$1 = zod.z
     .and(zod.z
     .object({
     ownerCharacterId: zod.z.object({ newValue: maybe(zod.z.string()) }),
-    dice: record$1(recordUpOperationElementFactory(state(template$i), dieValueUpOperation)),
+    dice: record$1(recordUpOperationElementFactory(state(template$k), dieValueUpOperation)),
 })
     .partial());
 const type$1 = zod.z.union([
@@ -5844,19 +6016,19 @@ const type$1 = zod.z.union([
         $v: zod.z.literal(2),
         $r: zod.z.literal(1),
         type: zod.z.literal(createType),
-        value: state(template$h),
+        value: state(template$j),
     }),
     zod.z.object({
         $v: zod.z.literal(2),
         $r: zod.z.literal(1),
         type: zod.z.literal(deleteType),
-        value: state(template$h),
+        value: state(template$j),
     }),
     update$1,
 ]);
 const ofOperation$1 = (operation, currentState) => {
     const result = {
-        ...toUpOperation(template$h)(operation),
+        ...toUpOperation(template$j)(operation),
         $v: 2,
         $r: 1,
         type: updateType,
@@ -5933,19 +6105,19 @@ const type = zod.z.union([
         $v: zod.z.literal(2),
         $r: zod.z.literal(1),
         type: zod.z.literal(createType),
-        value: state(template$4),
+        value: state(template$6),
     }),
     zod.z.object({
         $v: zod.z.literal(2),
         $r: zod.z.literal(1),
         type: zod.z.literal(deleteType),
-        value: state(template$4),
+        value: state(template$6),
     }),
     update,
 ]);
 const ofOperation = (operation, currentState) => {
     const result = {
-        ...toUpOperation(template$4)(operation),
+        ...toUpOperation(template$6)(operation),
         $v: 2,
         $r: 1,
         type: updateType,
@@ -5989,7 +6161,7 @@ const createLogs = ({ prevState, nextState, }) => {
     const boardsDiff = diff$1({
         prevState: prevState.boards ?? {},
         nextState: nextState.boards ?? {},
-        innerDiff: params => diff(template$3)(params),
+        innerDiff: params => diff(template$5)(params),
     });
     if (boardsDiff == null) {
         return undefined;
@@ -6159,15 +6331,15 @@ exports.applyNullableText = apply$3;
 exports.applyText = apply$4;
 exports.atomic = atomic;
 exports.authToken = authToken;
-exports.bgmTemplate = template$8;
-exports.boardPositionTemplate = template$k;
-exports.boardTemplate = template$3;
-exports.boolParamTemplate = template$g;
-exports.characterPieceTemplate = template$f;
-exports.characterTemplate = template$a;
+exports.bgmTemplate = template$a;
+exports.boardPositionTemplate = template$m;
+exports.boardTemplate = template$5;
+exports.boolParamTemplate = template$i;
+exports.characterPieceTemplate = template$h;
+exports.characterTemplate = template$c;
 exports.client = client;
 exports.clientTransform = clientTransform;
-exports.commandTemplate = template$e;
+exports.commandTemplate = template$g;
 exports.composeDownOperation = composeDownOperation;
 exports.createLogs = createLogs;
 exports.createObjectValueTemplate = createObjectValueTemplate;
@@ -6183,8 +6355,8 @@ exports.decodeStringPiece = decode;
 exports.deleteType = deleteType;
 exports.dicePieceLog = type$1;
 exports.dicePieceStrIndexes = dicePieceStrIndexes;
-exports.dicePieceTemplate = template$h;
-exports.dieValueTemplate = template$i;
+exports.dicePieceTemplate = template$j;
+exports.dieValueTemplate = template$k;
 exports.diff = diff;
 exports.downOperation = downOperation;
 exports.exactDbState = exactDbState;
@@ -6197,11 +6369,13 @@ exports.filePathTemplate = filePathTemplate;
 exports.firebaseConfig = firebaseConfig;
 exports.forceMaxLength100String = forceMaxLength100String;
 exports.generateChatPalette = generateChatPalette;
+exports.getOpenRollCall = getOpenRollCall;
 exports.getVariableFromVarTomlObject = getVariableFromVarTomlObject;
-exports.imagePieceTemplate = template$7;
+exports.imagePieceTemplate = template$9;
 exports.isBoardOwner = isBoardOwner;
 exports.isCharacterOwner = isCharacterOwner;
 exports.isIdRecord = isIdRecord;
+exports.isOpenRollCall = isOpenRollCall;
 exports.isOwner = isOwner;
 exports.isStrIndex10 = isStrIndex10;
 exports.isStrIndex100 = isStrIndex100;
@@ -6211,23 +6385,23 @@ exports.isValidVarToml = isValidVarToml;
 exports.joinPath = joinPath;
 exports.maxLength100String = maxLength100String;
 exports.maybe = maybe;
-exports.memoTemplate = template$2;
+exports.memoTemplate = template$4;
 exports.nullableTextDiff = diff$3;
-exports.numParamTemplate = template$d;
+exports.numParamTemplate = template$f;
 exports.object = object;
 exports.ot = ot;
-exports.paramNameTemplate = template$1;
+exports.paramNameTemplate = template$3;
 exports.paramRecord = paramRecord;
 exports.parseDicePiece = parse$1;
 exports.parseState = parseState;
 exports.parseStringPiece = parse;
 exports.parseToml = parseToml;
 exports.parseUpOperation = parseUpOperation;
-exports.participantTemplate = template$9;
+exports.participantTemplate = template$b;
 exports.path = path;
-exports.pieceTemplate = template$j;
+exports.pieceTemplate = template$l;
 exports.plain = plain;
-exports.portraitPieceTemplate = template$c;
+exports.portraitPieceTemplate = template$e;
 exports.record = record;
 exports.replace = replace$1;
 exports.restore = restore;
@@ -6238,17 +6412,17 @@ exports.sanitizeFilename = sanitizeFilename;
 exports.sanitizeFoldername = sanitizeFoldername;
 exports.serverTransform = serverTransform;
 exports.shape = shape;
-exports.shapePieceTemplate = template$5;
-exports.shapeTemplate = template$6;
+exports.shapePieceTemplate = template$7;
+exports.shapeTemplate = template$8;
 exports.simpleId = simpleId;
 exports.state = state;
 exports.strIndex100Array = strIndex100Array;
 exports.strIndex10Array = strIndex10Array;
 exports.strIndex20Array = strIndex20Array;
 exports.strIndex5Array = strIndex5Array;
-exports.strParamTemplate = template$b;
+exports.strParamTemplate = template$d;
 exports.stringPieceLog = type;
-exports.stringPieceTemplate = template$4;
+exports.stringPieceTemplate = template$6;
 exports.stringifyState = stringifyState;
 exports.stringifyUpOperation = stringifyUpOperation;
 exports.testCommand = testCommand;

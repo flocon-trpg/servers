@@ -179,6 +179,10 @@ export {
 
 export { template as memoTemplate, Plain, Markdown } from './internal/ot/flocon/room/memo/types';
 
+export { getOpenRollCall } from './internal/ot/flocon/room/rollCall/getOpenRollCall';
+
+export { isOpenRollCall } from './internal/ot/flocon/room/rollCall/isOpenRollCall';
+
 export { OtError, toOtError } from './internal/ot/otError';
 
 export {

@@ -1,6 +1,6 @@
 import { OmitVersion, State, boardPositionTemplate, pieceTemplate } from '@flocon-trpg/core';
 import { InputNumber, Space } from 'antd';
-import produce from 'immer';
+import { produce } from 'immer';
 import React from 'react';
 import { IsCellModeSelector } from './subcomponents/components/IsCellModeSelector/IsCellModeSelector';
 import { IsPositionLockedSelector } from './subcomponents/components/IsPositionLockedSelector/IsPositionLockedSelector';

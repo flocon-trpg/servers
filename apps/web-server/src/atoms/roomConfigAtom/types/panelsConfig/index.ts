@@ -54,6 +54,12 @@ import {
     deserializePieceValuePanelConfig,
     serializedPieceValuePanelConfig,
 } from '../pieceValuePanelConfig';
+import {
+    RollCallPanelConfig,
+    defaultRollCallPanelConfig,
+    deserializeRollCallPanelConfig,
+    serializedRollCallPanelConfig,
+} from '../rollCallPanelConfig';
 import { record } from '@/utils/zod/record';
 
 export type PanelsConfig = {
@@ -69,6 +75,7 @@ export type PanelsConfig = {
     messagePanels: Record<string, MessagePanelConfig | undefined>;
     pieceValuePanel: PieceValuePanelConfig;
     participantPanel: ParticipantsPanelConfig;
+    rollCallPanel: RollCallPanelConfig;
 };
 
 export const serializedPanelsConfig = z
@@ -83,6 +90,7 @@ export const serializedPanelsConfig = z
         memoPanels: record(serializedMemoPanelConfig),
         pieceValuePanel: serializedPieceValuePanelConfig,
         participantPanel: serializedParticipantsPanelConfig,
+        rollCallPanel: serializedRollCallPanelConfig,
     })
     .partial();
 
@@ -108,6 +116,7 @@ export const deserializePanelsConfig = (source: SerializedPanelsConfig): PanelsC
         messagePanels: chooseRecord(source.messagePanels ?? {}, deserializeMessagePanelConfig),
         pieceValuePanel: deserializePieceValuePanelConfig(source.pieceValuePanel ?? {}),
         participantPanel: deserializeParticipantsPanelConfig(source.participantPanel ?? {}),
+        rollCallPanel: deserializeRollCallPanelConfig(source.rollCallPanel ?? {}),
     };
 };
 
@@ -123,5 +132,6 @@ export const defaultPanelsConfig = (): PanelsConfig => {
         messagePanels: defaultMessagePanelsConfig(),
         pieceValuePanel: defaultPieceValuePanelConfig(),
         participantPanel: defaultParticipantsPanelConfig(),
+        rollCallPanel: defaultRollCallPanelConfig(),
     };
 };

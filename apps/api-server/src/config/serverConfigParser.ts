@@ -1,4 +1,9 @@
-import { filterInt, parseStringToBoolean, parseStringToBooleanError } from '@flocon-trpg/utils';
+import {
+    filterInt,
+    loggerRef,
+    parseStringToBoolean,
+    parseStringToBooleanError,
+} from '@flocon-trpg/utils';
 import { Error, Ok, Result } from '@kizahasi/result';
 import { ReadonlyDeep } from 'type-fest/source/readonly-deep';
 import {
@@ -39,7 +44,6 @@ import {
     postgresqlDatabase,
     sqliteDatabase,
 } from './types';
-import { logger } from '@/logger';
 
 loadDotenv();
 
@@ -276,7 +280,7 @@ export class ServerConfigParser {
         const project_id = env[FIREBASE_PROJECT_ID];
         const projectid = env[FIREBASE_PROJECTID];
         if (project_id != null && projectid != null) {
-            logger.warn(
+            loggerRef.warn(
                 `${FIREBASE_PROJECT_ID} と ${FIREBASE_PROJECTID} が両方ともセットされているため、${FIREBASE_PROJECT_ID} の値のみが参照されます。`
             );
         }

@@ -13,11 +13,12 @@ var roomMessage$1 = require('../../../entities-graphql/roomMessage.js');
 var entity = require('../../../entities/room/entity.js');
 var entity$1 = require('../../../entities/roomMessage/entity.js');
 var getUserIfEntry = require('../../../entities/user/getUserIfEntry.js');
-var JoinRoomFailureType = require('../../../enums/JoinRoomFailureType.js');
 var roomMessage = require('../../objects/roomMessage.js');
 var topics = require('../subsciptions/roomEvent/topics.js');
 var messageAnalyzer = require('./messageAnalyzer.js');
 
+const RoomNotFound = 'RoomNotFound';
+const IdOperation = 'IdOperation';
 const NotSignIn = 'NotSignIn';
 const checkSignIn = (context) => {
     if (context.decodedIdToken == null || context.decodedIdToken.isError) {
@@ -47,7 +48,7 @@ const findRoomAndMyParticipant = async ({ em, userUid, roomId, }) => {
         return null;
     }
     const state = await room.GlobalRoom.MikroORM.ToGlobal.state(room$1, em);
-    const me = state.participants?.[userUid];
+    const me = userUid == null ? undefined : state.participants?.[userUid];
     return new FindRoomAndMyParticipantResult(room$1, state, me);
 };
 const ensureUserUid = (context) => {
@@ -269,25 +270,27 @@ async function getRoomMessagesFromDb(room, userUid, mode) {
         soundEffects,
     };
 }
-const operateAsAdminAndFlush = async ({ operation: operationSource, em, room: room$1, roomHistCount, }) => {
+const operateAsAdminAndFlushCore = async ({ operation: operationSource, em, room: room$1, roomState, roomHistCount, }) => {
     const prevRevision = room$1.revision;
-    const roomState = await room.GlobalRoom.MikroORM.ToGlobal.state(room$1, em);
-    const operation = typeof operationSource === 'function' ? operationSource(roomState) : operationSource;
-    if (operation == null) {
-        return result.Result.ok(undefined);
+    const operation = await operationSource(roomState);
+    if (operation.isError) {
+        return result.Result.error({ type: 'custom', error: operation.error });
+    }
+    if (operation.value == null) {
+        return result.Result.ok(IdOperation);
     }
     const transformed = FilePathModule.serverTransform({ type: FilePathModule.admin })({
         stateBeforeServerOperation: roomState,
         stateAfterServerOperation: roomState,
-        clientOperation: operation,
+        clientOperation: operation.value,
         serverOperation: undefined,
     });
     if (transformed.isError) {
-        return transformed;
+        return result.Result.error({ type: 'OT', error: transformed.error });
     }
     const transformedValue = transformed.value;
     if (transformedValue == null) {
-        return result.Result.ok(undefined);
+        return result.Result.ok(IdOperation);
     }
     const nextRoomState = await room.GlobalRoom.Global.applyToEntity({
         em,
@@ -316,80 +319,47 @@ const operateAsAdminAndFlush = async ({ operation: operationSource, em, room: ro
     };
     return result.Result.ok(generateOperation);
 };
-const operateParticipantAndFlush = async ({ myUserUid, em, room, roomHistCount, participantUserUids, create, update, }) => {
-    const operation = (roomState) => {
-        const me = roomState.participants?.[myUserUid];
-        let participantOperation = undefined;
-        if (me == null) {
-            if (create != null) {
-                participantOperation = {
-                    type: FilePathModule.replace,
-                    replace: {
-                        newValue: {
-                            $v: 2,
-                            $r: 1,
-                            name: create.name,
-                            role: create.role,
-                        },
-                    },
-                };
+const operateAsAdminAndFlush = async ({ operation, operationType, em, roomId, roomHistCount, }) => {
+    const findResult = await findRoomAndMyParticipant({ em, roomId, userUid: undefined });
+    if (findResult == null) {
+        return result.Result.ok(RoomNotFound);
+    }
+    const generateOperationResult = await operateAsAdminAndFlushCore({
+        operation: async (state) => {
+            if (operationType === 'operation') {
+                return await operation(state, { room: findResult.room });
             }
-        }
-        else {
-            if (update != null) {
-                participantOperation = {
-                    type: 'update',
-                    update: {
-                        $v: 2,
-                        $r: 1,
-                        role: update.role,
-                        name: update.name,
-                    },
-                };
+            const nextState = await operation(state, { room: findResult.room });
+            if (nextState.isError) {
+                return nextState;
             }
-        }
-        if (participantOperation == null) {
-            return undefined;
-        }
-        const roomUpOperation = {
-            $v: 2,
-            $r: 1,
-            participants: {
-                [myUserUid]: participantOperation,
-            },
-        };
-        return roomUpOperation;
-    };
-    const generateOperationResult = await operateAsAdminAndFlush({
-        operation,
+            if (nextState.value === state) {
+                return result.Result.ok(undefined);
+            }
+            const diffResult = FilePathModule.diff(FilePathModule.roomTemplate)({ prevState: state, nextState: nextState.value });
+            if (diffResult == null) {
+                return result.Result.ok(undefined);
+            }
+            return result.Result.ok(FilePathModule.toUpOperation(FilePathModule.roomTemplate)(diffResult));
+        },
         em,
-        room,
+        room: findResult.room,
+        roomState: findResult.roomState,
         roomHistCount,
     });
     if (generateOperationResult.isError) {
-        return {
-            result: { failureType: JoinRoomFailureType.JoinRoomFailureType.TransformError },
-            payload: undefined,
-        };
+        return generateOperationResult;
     }
-    if (generateOperationResult.value == null) {
-        return {
-            result: {},
-            payload: undefined,
-        };
+    if (generateOperationResult.value === IdOperation) {
+        return generateOperationResult;
     }
-    const generateOperation = generateOperationResult.value;
-    return {
-        result: {
-            operation: generateOperation(myUserUid),
-        },
-        payload: {
-            type: 'roomOperationPayload',
-            sendTo: participantUserUids,
-            generateOperation,
-            roomId: room.id,
-        },
+    const payload = {
+        type: 'roomOperationPayload',
+        generateOperation: x => generateOperationResult.value(x),
+        sendTo: findResult.participantIds(),
+        roomId,
     };
+    return result.Result.ok(payload);
 };
 const fixTextColor = (color) => {
     try {
@@ -434,7 +404,9 @@ const analyzeTextAndSetToEntity = async (params) => {
     return result.Result.ok(targetEntity);
 };
 
+exports.IdOperation = IdOperation;
 exports.NotSignIn = NotSignIn;
+exports.RoomNotFound = RoomNotFound;
 exports.analyzeTextAndSetToEntity = analyzeTextAndSetToEntity;
 exports.bcryptCompareNullable = bcryptCompareNullable;
 exports.checkEntry = checkEntry;
@@ -451,6 +423,6 @@ exports.ensureUserUid = ensureUserUid;
 exports.findRoomAndMyParticipant = findRoomAndMyParticipant;
 exports.fixTextColor = fixTextColor;
 exports.getRoomMessagesFromDb = getRoomMessagesFromDb;
-exports.operateParticipantAndFlush = operateParticipantAndFlush;
+exports.operateAsAdminAndFlush = operateAsAdminAndFlush;
 exports.publishRoomEvent = publishRoomEvent;
 //# sourceMappingURL=utils.js.map

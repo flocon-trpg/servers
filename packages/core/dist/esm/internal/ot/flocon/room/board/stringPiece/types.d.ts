@@ -9,7 +9,7 @@ export declare const template: {
         ownerCharacterId: {
             readonly type: "atomic";
             readonly mode: "replace";
-            readonly value: z.ZodUnion<[z.ZodString, z.ZodUndefined]>;
+            readonly value: z.ZodOptional<z.ZodString>;
         };
         isValuePrivate: {
             readonly type: "atomic";
@@ -24,7 +24,7 @@ export declare const template: {
         valueInputType: {
             readonly type: "atomic";
             readonly mode: "replace";
-            readonly value: z.ZodUnion<[z.ZodUnion<[z.ZodLiteral<"String">, z.ZodLiteral<"Number">]>, z.ZodUndefined]>;
+            readonly value: z.ZodOptional<z.ZodUnion<[z.ZodLiteral<"String">, z.ZodLiteral<"Number">]>>;
         };
         cellH: {
             readonly type: "atomic";
@@ -74,7 +74,7 @@ export declare const template: {
         opacity: {
             readonly type: "atomic";
             readonly mode: "replace";
-            readonly value: z.ZodUnion<[z.ZodNumber, z.ZodUndefined]>;
+            readonly value: z.ZodOptional<z.ZodNumber>;
         };
         w: {
             readonly type: "atomic";

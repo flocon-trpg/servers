@@ -22,7 +22,7 @@ export const Default: React.FC<{
         return undefined;
     }, [removeActiveBoard]);
     useSetupStorybook({
-        roomConfig: {
+        room: {
             myParticipantRole,
             update: updateRoom,
         },

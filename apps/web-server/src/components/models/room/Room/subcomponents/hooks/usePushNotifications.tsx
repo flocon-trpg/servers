@@ -1,3 +1,5 @@
+import { Master, Player, getOpenRollCall, simpleId } from '@flocon-trpg/core';
+import { keyNames, loggerRef } from '@flocon-trpg/utils';
 import {
     custom,
     pieceLog,
@@ -5,8 +7,7 @@ import {
     publicMessage,
     soundEffect,
 } from '@flocon-trpg/web-server-utils';
-import { notification } from 'antd';
-import { ArgsProps } from 'antd/lib/notification';
+import { Button, notification } from 'antd';
 import classNames from 'classnames';
 import { Howl } from 'howler';
 import React from 'react';
@@ -17,22 +18,22 @@ import { useMessageFilter } from './useMessageFilter';
 import { useParticipants } from './useParticipants';
 import { usePublicChannelNames } from './usePublicChannelNames';
 import { useRoomMessages } from './useRoomMessages';
+import { panelHighlightKeysAtom } from '@/atoms/panelHighlightKeysAtom/panelHighlightKeysAtom';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { MessageFilterUtils } from '@/atoms/roomConfigAtom/types/messageFilter/utils';
 import {
     defaultMasterVolume,
     defaultSeVolume,
 } from '@/atoms/roomConfigAtom/types/roomConfig/resources';
+import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
+import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
-import { flex, flexRow } from '@/styles/className';
+import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
+import { flex, flexColumn, flexRow } from '@/styles/className';
 import { emptyPublicChannelNames } from '@/utils/types';
 
-const argsBase: Omit<ArgsProps, 'message'> = {
-    placement: 'bottomRight',
-};
-
-export function usePushNotifications(): void {
+function useMessageNotifications(): void {
     const publicChannelNames = usePublicChannelNames();
     const publicChannelNameRef = useLatest(publicChannelNames);
     const participantsMap = useParticipants();
@@ -90,10 +91,10 @@ export function usePushNotifications(): void {
                 if (message.value.error != null) {
                     switch (message.value.type) {
                         case 'error':
-                            console.error(message.value.message, message.value.error);
+                            loggerRef.error(message.value.error, message.value.message);
                             break;
                         case 'warning':
-                            console.warn(message.value.message, message.value.error);
+                            loggerRef.warn(message.value.error, message.value.message);
                             break;
                         default:
                             break;
@@ -125,7 +126,7 @@ export function usePushNotifications(): void {
             return;
         }
         notification.open({
-            ...argsBase,
+            placement: 'bottomRight',
             message: (
                 <div className={classNames(flex, flexRow)}>
                     {RoomMessage.userName(message, participantsMapRef.current ?? new Map())}
@@ -140,4 +141,79 @@ export function usePushNotifications(): void {
             description: <RoomMessage.Content style={{}} message={message} />,
         });
     }, [messageDiff, messageFilterRef, participantsMapRef, publicChannelNameRef]);
+}
+
+function useRollCallNotifications(): void {
+    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const myUserUid = useMyUserUid();
+    const rollCalls = useRoomStateValueSelector(roomState => roomState.rollCalls);
+    const openRollCall = React.useMemo(() => getOpenRollCall(rollCalls), [rollCalls]);
+    const openRollCallId = openRollCall?.key;
+    const openRollCallRef = useLatest(openRollCall?.value);
+    const setPanelHightlightKeys = useImmerUpdateAtom(panelHighlightKeysAtom);
+    const participants = useRoomStateValueSelector(roomState => roomState.participants);
+    const myRole = myUserUid == null ? undefined : participants?.[myUserUid]?.role;
+    const myRoleRef = useLatest(myRole);
+
+    React.useEffect(() => {
+        if (openRollCallId == null || openRollCallRef.current == null || myUserUid == null) {
+            return;
+        }
+        switch (myRoleRef.current) {
+            case Master:
+            case Player:
+                break;
+            default:
+                return;
+        }
+        if (openRollCallRef.current.createdBy === myUserUid) {
+            return;
+        }
+        if (openRollCallRef.current.participants?.[myUserUid]?.answeredAt != null) {
+            return;
+        }
+        const key = keyNames('RollCallNotification', simpleId());
+        notification.open({
+            key,
+            placement: 'bottomLeft',
+            // never be closed automatically
+            duration: null,
+            message: (
+                <div className={classNames(flex, flexColumn)} style={{ gap: 8 }}>
+                    <div>{'点呼が行われています。'}</div>
+                    <Button
+                        onClick={() => {
+                            setRoomConfig(roomConfig => {
+                                if (roomConfig == null) {
+                                    return;
+                                }
+                                RoomConfigUtils.bringPanelToFront(roomConfig, {
+                                    type: 'rollCallPanel',
+                                });
+                            });
+                            setPanelHightlightKeys(keys => {
+                                keys.rollCallPanel = simpleId();
+                            });
+                            notification.close(key);
+                        }}
+                    >
+                        点呼ウィンドウを開く
+                    </Button>
+                </div>
+            ),
+        });
+        return () => notification.close(key);
+    }, [
+        myRoleRef,
+        myUserUid,
+        openRollCallId,
+        openRollCallRef,
+        setPanelHightlightKeys,
+        setRoomConfig,
+    ]);
+}
+
+export function usePushNotifications(): void {
+    useMessageNotifications();
+    useRollCallNotifications();
 }

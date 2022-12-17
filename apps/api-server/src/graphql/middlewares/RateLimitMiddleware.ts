@@ -1,5 +1,5 @@
+import { loggerRef } from '@flocon-trpg/utils';
 import { MiddlewareFn } from 'type-graphql';
-import { logger } from '../../logger';
 import { consume as consumeFunction } from '../../rateLimit/consume';
 import { ResolverContext } from '../../types';
 import { NotSignIn, checkSignIn } from '../resolvers/utils/utils';
@@ -10,7 +10,7 @@ export const RateLimitMiddleware =
     async ({ context }, next) => {
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
-            logger.warn(
+            loggerRef.warn(
                 `RateLimitMiddlewareにおいて、decondedIdTokenが見つかりませんでした。RateLimitMiddlewareが@Authorizedとともに使われていることを確認してください。`
             );
             return await next();

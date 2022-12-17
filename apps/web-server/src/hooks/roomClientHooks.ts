@@ -1,6 +1,7 @@
 import { RoomClient, createTestRoomClient } from '@flocon-trpg/sdk';
 import { useCreateRoomClient } from '@flocon-trpg/sdk-react';
 import { createGraphQLClientForRoomClient } from '@flocon-trpg/sdk-urql';
+import { loggerRef } from '@flocon-trpg/utils';
 import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import React from 'react';
 import { useLatest, usePreviousDistinct } from 'react-use';
@@ -57,7 +58,7 @@ export const useInitializeTestRoomClient = (roomId: string) => {
     const prevRoomClient = usePreviousDistinct(roomClient);
     React.useEffect(() => {
         if (roomClient != null && prevRoomClient != null) {
-            console.warn(
+            loggerRef.warn(
                 'TestRoomClient が複数回作成されました。TestRoomClient のデータはリセットされます。'
             );
         }

@@ -2,12 +2,13 @@
 
 var option = require('@kizahasi/option');
 var result = require('@kizahasi/result');
+var defaultPinoTransport = require('@flocon-trpg/default-pino-transport');
 var browserOrNode = require('browser-or-node');
-var p = require('pino');
+var pino = require('pino');
 
 function _interopDefault (e) { return e && e.__esModule ? e : { default: e }; }
 
-var p__default = /*#__PURE__*/_interopDefault(p);
+var pino__default = /*#__PURE__*/_interopDefault(pino);
 
 function* groupJoinArray(left, right) {
     for (let i = 0;; i++) {
@@ -735,11 +736,50 @@ const keyNames = (...keys) => {
 };
 
 const defaultLogLevel = 'info';
-// ブラウザの場合はほぼ変更なし（ログレベルを変更するくらい）でも構わない。
-// ブラウザ以外の場合は、このままだと JSON がそのまま出力されて見づらいので、pino-pretty などを使わない場合は変更するほうがいいかも。
+const createDefaultLogger = (args) => {
+    return args?.isBrowser ?? browserOrNode.isBrowser
+        ? pino__default.default({ level: args?.logLevel ?? defaultLogLevel, browser: {} })
+        : pino__default.default({
+            level: args?.logLevel ?? defaultLogLevel,
+            transport: { target: '@flocon-trpg/default-pino-transport' },
+        });
+};
+let currentLogger = null;
 /** pino のロガーを取得もしくは変更できます。 */
 const loggerRef = {
-    value: browserOrNode.isBrowser ? p__default.default({ level: defaultLogLevel, browser: {} }) : p__default.default({ level: defaultLogLevel }),
+    get value() {
+        if (currentLogger == null) {
+            currentLogger = createDefaultLogger();
+        }
+        return currentLogger;
+    },
+    set value(value) {
+        currentLogger = value;
+    },
+    get debug() {
+        return this.value.debug.bind(this.value);
+    },
+    get error() {
+        return this.value.error.bind(this.value);
+    },
+    get fatal() {
+        return this.value.fatal.bind(this.value);
+    },
+    get info() {
+        return this.value.info.bind(this.value);
+    },
+    infoAsNotice(msg) {
+        return this.info({ [defaultPinoTransport.notice]: true }, msg);
+    },
+    get warn() {
+        return this.value.warn.bind(this.value);
+    },
+    get silent() {
+        return this.value.silent.bind(this.value);
+    },
+    get trace() {
+        return this.value.trace.bind(this.value);
+    },
 };
 
 /** 複数のkeyを使用できるMap */
@@ -1028,6 +1068,7 @@ exports.chooseRecord = chooseRecord;
 exports.compare = compare;
 exports.compositeKeyEquals = compositeKeyEquals;
 exports.compositeKeyToJsonString = compositeKeyToJsonString;
+exports.createDefaultLogger = createDefaultLogger;
 exports.delay = delay;
 exports.dualKeyRecordForEach = dualKeyRecordForEach;
 exports.dualKeyRecordToDualKeyMap = dualKeyRecordToDualKeyMap;

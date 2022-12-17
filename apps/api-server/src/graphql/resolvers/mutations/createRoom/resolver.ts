@@ -114,6 +114,7 @@ export class CreateRoomResolver {
                 boards: {},
                 characters: {},
                 numParamNames: {},
+                rollCalls: {},
                 strParamNames: {},
                 memos: {},
             },

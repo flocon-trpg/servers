@@ -1,12 +1,8 @@
 'use strict';
 
 var utils = require('@flocon-trpg/utils');
-var produce = require('immer');
+var immer = require('immer');
 var rxjs = require('rxjs');
-
-function _interopDefault (e) { return e && e.__esModule ? e : { default: e }; }
-
-var produce__default = /*#__PURE__*/_interopDefault(produce);
 
 const visibleToToString = (visibleTo) => {
     return [...visibleTo]
@@ -448,7 +444,7 @@ const createRoomMessage = (source) => {
                 value: source,
             };
         case undefined:
-            utils.loggerRef.value.warn({ object: source }, 'createRoomMessage 関数に渡されたオブジェクトの __typename が undefined だったため、処理はスキップされました。RoomPrivateMessageFragment | RoomPublicMessageFragment | PieceLogFragment | RoomSoundEffectFragment では __typename がないとメッセージを処理できません。GraphQL クライアントの設定を確認し、__typename を常にセットするようにしてください。');
+            utils.loggerRef.warn({ object: source }, 'createRoomMessage 関数に渡されたオブジェクトの __typename が undefined だったため、処理はスキップされました。RoomPrivateMessageFragment | RoomPublicMessageFragment | PieceLogFragment | RoomSoundEffectFragment では __typename がないとメッセージを処理できません。GraphQL クライアントの設定を確認し、__typename を常にセットするようにしてください。');
             return undefined;
     }
 };
@@ -514,7 +510,7 @@ const reduceEvent = ({ messages: messagesSource, event, }) => {
                 if (!compareUpdatedAt(msg.value.updatedAt, '<', event.updatedAt)) {
                     return undefined;
                 }
-                return produce__default.default(msg, msg => {
+                return immer.produce(msg, msg => {
                     msg.value.altTextToSecret = event.altTextToSecret;
                     msg.value.commandResult = event.commandResult;
                     msg.value.isSecret = event.isSecret;
@@ -698,7 +694,7 @@ class RoomMessagesClient {
                         break;
                     }
                     if (compareUpdatedAt(found.updatedAt, '<', event.updatedAt)) {
-                        const newValue = produce__default.default(found, found => {
+                        const newValue = immer.produce(found, found => {
                             found.altTextToSecret = event.altTextToSecret;
                             found.commandResult = event.commandResult;
                             found.initText = event.initText;
@@ -717,7 +713,7 @@ class RoomMessagesClient {
                         break;
                     }
                     if (compareUpdatedAt(found.updatedAt, '<', event.updatedAt)) {
-                        const newValue = produce__default.default(found, found => {
+                        const newValue = immer.produce(found, found => {
                             found.altTextToSecret = event.altTextToSecret;
                             found.commandResult = event.commandResult;
                             found.initText = event.initText;
@@ -732,11 +728,11 @@ class RoomMessagesClient {
                 }
                 case 'RoomPublicChannelUpdate':
                 case 'RoomMessagesReset': {
-                    utils.loggerRef.value.warn(`${event.__typename} is deprecated.`);
+                    utils.loggerRef.warn(`${event.__typename} is deprecated.`);
                     break;
                 }
                 case undefined:
-                    utils.loggerRef.value.warn({ object: event }, '#reduceOnQuery メソッドの引数で __typename が undefined のオブジェクトが見つかったため、このオブジェクトの処理はスキップされました。RoomMessageEventFragment では __typename がないとメッセージを処理できません。GraphQL クライアントの設定を確認し、__typename を常にセットするようにしてください。');
+                    utils.loggerRef.warn({ object: event }, '#reduceOnQuery メソッドの引数で __typename が undefined のオブジェクトが見つかったため、このオブジェクトの処理はスキップされました。RoomMessageEventFragment では __typename がないとメッセージを処理できません。GraphQL クライアントの設定を確認し、__typename を常にセットするようにしてください。');
                     break;
             }
         }

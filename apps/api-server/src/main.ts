@@ -1,4 +1,5 @@
 import { authToken } from '@flocon-trpg/core';
+import { loggerRef } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import admin from 'firebase-admin';
 import { Context } from 'graphql-ws/lib/server';
@@ -13,7 +14,7 @@ import { InMemoryConnectionManager, pubSub } from './connection/main';
 import { createServer, createServerAsError } from './createServer';
 import { BaasType } from './enums/BaasType';
 import { FIREBASE_PROJECT_ID } from './env';
-import { initializeLogger, logger } from './logger';
+import { initializeLogger } from './initializeLogger';
 import { checkMigrationsBeforeStart, doAutoMigrationBeforeStart } from './migrate';
 import { AppConsole } from './utils/appConsole';
 import { loadAsMain } from './utils/commandLineArgs';
@@ -46,7 +47,7 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
     const port = process.env.PORT ?? 4000;
 
     const onError = async (message: string) => {
-        logger.error(message);
+        loggerRef.error(message);
         await createServerAsError({
             port,
         });

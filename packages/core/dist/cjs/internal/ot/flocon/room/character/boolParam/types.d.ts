@@ -12,7 +12,7 @@ export declare const template: {
         value: {
             readonly type: "atomic";
             readonly mode: "replace";
-            readonly value: z.ZodUnion<[z.ZodBoolean, z.ZodUndefined]>;
+            readonly value: z.ZodOptional<z.ZodBoolean>;
         };
         overriddenParameterName: {
             readonly type: "atomic";

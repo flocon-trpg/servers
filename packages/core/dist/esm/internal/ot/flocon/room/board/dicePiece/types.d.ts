@@ -8,33 +8,30 @@ export declare const template: {
         ownerCharacterId: {
             readonly type: "atomic";
             readonly mode: "replace";
-            readonly value: z.ZodUnion<[z.ZodString, z.ZodUndefined]>;
+            readonly value: z.ZodOptional<z.ZodString>;
         };
-        dice: {
-            readonly type: "record";
+        dice: import("@/ot/generator").RecordValueTemplate<{
+            readonly type: "object";
+            readonly $v: 1;
+            readonly $r: 1;
             readonly value: {
-                readonly type: "object";
-                readonly $v: 1;
-                readonly $r: 1;
-                readonly value: {
-                    dieType: {
-                        readonly type: "atomic";
-                        readonly mode: "replace";
-                        readonly value: z.ZodUnion<[z.ZodLiteral<"D4">, z.ZodLiteral<"D6">]>;
-                    };
-                    isValuePrivate: {
-                        readonly type: "atomic";
-                        readonly mode: "replace";
-                        readonly value: z.ZodBoolean;
-                    };
-                    value: {
-                        readonly type: "atomic";
-                        readonly mode: "replace";
-                        readonly value: z.ZodUnion<[z.ZodNumber, z.ZodUndefined]>;
-                    };
+                dieType: {
+                    readonly type: "atomic";
+                    readonly mode: "replace";
+                    readonly value: z.ZodUnion<[z.ZodLiteral<"D4">, z.ZodLiteral<"D6">]>;
+                };
+                isValuePrivate: {
+                    readonly type: "atomic";
+                    readonly mode: "replace";
+                    readonly value: z.ZodBoolean;
+                };
+                value: {
+                    readonly type: "atomic";
+                    readonly mode: "replace";
+                    readonly value: z.ZodOptional<z.ZodNumber>;
                 };
             };
-        };
+        }>;
         cellH: {
             readonly type: "atomic";
             readonly mode: "replace";
@@ -83,7 +80,7 @@ export declare const template: {
         opacity: {
             readonly type: "atomic";
             readonly mode: "replace";
-            readonly value: z.ZodUnion<[z.ZodNumber, z.ZodUndefined]>;
+            readonly value: z.ZodOptional<z.ZodNumber>;
         };
         w: {
             readonly type: "atomic";

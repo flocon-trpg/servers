@@ -2,7 +2,7 @@ import { Auth } from '@firebase/auth';
 import { FirebaseStorage } from '@firebase/storage';
 import { State as S, UpOperation as U, apply, roomTemplate, toOtError } from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
-import produce from 'immer';
+import { produce } from 'immer';
 import { useSetAtom } from 'jotai';
 import React from 'react';
 import { useMemoOne } from 'use-memo-one';
@@ -31,7 +31,7 @@ const roomId = 'dummy-room-id';
 
 export const useSetupStorybook = ({
     basicMock: basicMockProp,
-    roomConfig: roomConfigProp,
+    room: roomProp,
     roomMessagesConfig: roomMessagesConfigProp,
 }: {
     basicMock?: {
@@ -40,7 +40,10 @@ export const useSetupStorybook = ({
         storage?: FirebaseStorage;
         webConfig?: Result<WebConfig>;
     };
-    roomConfig?: Partial<Parameters<typeof createMockRoom>[0]> & {
+    // custom が nullish ならば、Partial<Parameters<typeof createMockRoom>[0]> の値から createMockRoom を実行して RoomState が作成される。update はどちらの場合でも用いられる。
+    room?: Partial<Parameters<typeof createMockRoom>[0]> & {
+        custom?: RoomState;
+
         // non-nullishな値を渡す場合はuseCallbackなどを使う
         update?: Recipe<RoomState>;
     };
@@ -70,27 +73,30 @@ export const useSetupStorybook = ({
     const { isInitialized, source: testRoomClient } = useInitializeTestRoomClient(roomId);
 
     const room = useMemoOne(() => {
-        const result = createMockRoom({
-            myParticipantRole: roomConfigProp?.myParticipantRole ?? 'Player',
-            setCharacterTagNames: roomConfigProp?.setCharacterTagNames ?? true,
-            setPublicChannelNames: roomConfigProp?.setPublicChannelNames ?? true,
-            setBoards: roomConfigProp?.setBoards ?? true,
-            setCharacters: roomConfigProp?.setCharacters ?? true,
-            setParamNames: roomConfigProp?.setParamNames ?? true,
-        });
-        const update = roomConfigProp?.update;
+        const result =
+            roomProp?.custom ??
+            createMockRoom({
+                myParticipantRole: roomProp?.myParticipantRole ?? 'Player',
+                setCharacterTagNames: roomProp?.setCharacterTagNames ?? true,
+                setPublicChannelNames: roomProp?.setPublicChannelNames ?? true,
+                setBoards: roomProp?.setBoards ?? true,
+                setCharacters: roomProp?.setCharacters ?? true,
+                setParamNames: roomProp?.setParamNames ?? true,
+            });
+        const update = roomProp?.update;
         if (update == null) {
             return result;
         }
         return produce(result, update);
     }, [
-        roomConfigProp?.myParticipantRole,
-        roomConfigProp?.setBoards,
-        roomConfigProp?.setCharacterTagNames,
-        roomConfigProp?.setCharacters,
-        roomConfigProp?.setParamNames,
-        roomConfigProp?.setPublicChannelNames,
-        roomConfigProp?.update,
+        roomProp?.custom,
+        roomProp?.myParticipantRole,
+        roomProp?.setBoards,
+        roomProp?.setCharacterTagNames,
+        roomProp?.setCharacters,
+        roomProp?.setParamNames,
+        roomProp?.setPublicChannelNames,
+        roomProp?.update,
     ]);
 
     React.useEffect(() => {

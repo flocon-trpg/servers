@@ -14,6 +14,7 @@ export namespace RoomConfigUtils {
     export const messagePanel = 'messagePanel';
     export const participantPanel = 'participantPanel';
     export const pieceValuePanel = 'pieceValuePanel';
+    export const rollCallPanel = 'rollCallPanel';
 
     export type PanelAction =
         | {
@@ -46,7 +47,8 @@ export namespace RoomConfigUtils {
           }
         | {
               type: typeof pieceValuePanel;
-          };
+          }
+        | { type: typeof rollCallPanel };
 
     export type ZoomBoardAction = {
         roomId: string;
@@ -114,8 +116,9 @@ export namespace RoomConfigUtils {
                 panels.push(panel);
             }
         }
-        panels.push(state.panels.pieceValuePanel);
         panels.push(state.panels.participantPanel);
+        panels.push(state.panels.pieceValuePanel);
+        panels.push(state.panels.rollCallPanel);
 
         // まずzIndexが小さい順に0,1,2,…と割り振っていく。こうすることで、例えば[-100, 5, 10000]のように飛び飛びになっている状態を修正する。zIndexが同一であるパネルが複数ある場合でも異なるzIndexになるため、場合によっては前面に来るパネルが変わる可能性もあるが、直接Configを編集したりしていない限りすべてのzIndexは異なっているはずなので無視している。
         // 次に、最前面にさせたいパネルのzIndexに(max(割り振ったzIndexの集合) + 1)を代入して完了。
@@ -177,6 +180,10 @@ export namespace RoomConfigUtils {
             }
             case pieceValuePanel: {
                 state.panels.pieceValuePanel.zIndex = panels.length;
+                return;
+            }
+            case rollCallPanel: {
+                state.panels.rollCallPanel.zIndex = panels.length;
                 return;
             }
         }

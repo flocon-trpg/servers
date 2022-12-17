@@ -24,21 +24,20 @@ export const useOpenFloconUploaderFile = () => {
                 return;
             }
             setIsFetching(true);
-            const axiosResponse = await getFloconUploaderFile({
+            const blob = await getFloconUploaderFile({
                 filename: file.filename,
                 config: webConfig.value,
                 getIdToken,
                 mode: files,
             }).finally(() => setIsFetching(false));
-            if (axiosResponse === idTokenIsNull) {
+            if (blob === idTokenIsNull) {
                 // CONSIDER: notificationなどで通知したほうがいいか
                 return;
             }
-            if (axiosResponse.data == null) {
+            if (blob == null) {
                 // CONSIDER: notificationなどで通知したほうがいいか
                 return;
             }
-            const blob = new Blob([axiosResponse.data]);
             // screennameは拡張子などが変わっている可能性があるためfilenameを用いている
             // CONSIDER: 画像などであれば、ダウンロードするのではなく、新しいタブで開いたほうがいい
             fileDownload(blob, file.filename);

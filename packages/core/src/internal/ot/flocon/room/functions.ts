@@ -30,6 +30,8 @@ import * as ParamNames from './paramName/functions';
 import * as ParamNamesTypes from './paramName/types';
 import * as Participant from './participant/functions';
 import * as ParticipantTypes from './participant/types';
+import * as RollCalls from './rollCall/functions';
+import { getOpenRollCall } from './rollCall/getOpenRollCall';
 import { template } from './types';
 
 const oneToTenArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
@@ -146,6 +148,7 @@ export const serverTransform =
             case admin:
                 break;
         }
+        const isAdmin = requestedBy.type === admin;
 
         const bgms = RecordOperation.serverTransform<
             State<typeof BgmTypes.template>,
@@ -403,6 +406,32 @@ export const serverTransform =
             return participants;
         }
 
+        const hasNoOpenRollCall =
+            getOpenRollCall(stateAfterServerOperation.rollCalls ?? {}) == null;
+        const rollCalls = RecordOperation.serverTransform({
+            stateBeforeFirst: stateBeforeServerOperation.rollCalls ?? {},
+            stateAfterFirst: stateAfterServerOperation.rollCalls ?? {},
+            first: serverOperation?.rollCalls,
+            second: clientOperation.rollCalls,
+            innerTransform: ({ prevState, nextState, first, second }) =>
+                RollCalls.serverTransform({
+                    requestedBy,
+                })({
+                    stateBeforeServerOperation: prevState,
+                    stateAfterServerOperation: nextState,
+                    serverOperation: first,
+                    clientOperation: second,
+                }),
+            toServerState: state => state,
+            cancellationPolicy: {
+                cancelCreate: () => !(isAdmin && hasNoOpenRollCall),
+                cancelRemove: () => !(isAdmin && hasNoOpenRollCall),
+            },
+        });
+        if (rollCalls.isError) {
+            return rollCalls;
+        }
+
         const twoWayOperation: TwoWayOperation<typeof template> = {
             $v: 2,
             $r: 1,
@@ -414,6 +443,7 @@ export const serverTransform =
             numParamNames: numParamNames.value,
             strParamNames: strParamNames.value,
             participants: participants.value,
+            rollCalls: rollCalls.value,
         };
 
         // activeBoardIdには、自分が作成したBoardしか設定できない。ただし、nullishにするのは誰でもできる。

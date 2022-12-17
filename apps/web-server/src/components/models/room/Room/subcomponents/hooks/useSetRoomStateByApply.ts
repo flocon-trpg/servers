@@ -1,11 +1,13 @@
 import { UpOperation, roomTemplate } from '@flocon-trpg/core';
 import { useRoomState } from '@/hooks/useRoomState';
 
-const emptyOperate = (operation: UpOperation<typeof roomTemplate>): void => {
+type Result = (operation: UpOperation<typeof roomTemplate>) => void;
+
+const emptyOperate: Result = () => {
     throw new Error('useSetRoomStateByApply is not ready');
 };
 
-export const useSetRoomStateByApply = () => {
+export const useSetRoomStateByApply = (): Result => {
     const roomState = useRoomState();
     if (roomState.type !== 'joined') {
         return emptyOperate;

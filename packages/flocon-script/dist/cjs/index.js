@@ -2190,6 +2190,7 @@ class FConsoleClass extends FFunction {
             case 'log': {
                 return option.Option.some(new FFunction(({ args, isNew }) => {
                     FConsoleClass.prepareStaticMethod(isNew, astInfo);
+                    // eslint-disable-next-line no-console
                     console.log(...[this.header, ...args.map(arg => toJObject(arg))]);
                     return undefined;
                 }));
@@ -2197,6 +2198,7 @@ class FConsoleClass extends FFunction {
             case 'info': {
                 return option.Option.some(new FFunction(({ args, isNew }) => {
                     FConsoleClass.prepareStaticMethod(isNew, astInfo);
+                    // eslint-disable-next-line no-console
                     console.info(...[this.header, ...args.map(arg => toJObject(arg))]);
                     return undefined;
                 }));
@@ -2204,6 +2206,7 @@ class FConsoleClass extends FFunction {
             case 'warn': {
                 return option.Option.some(new FFunction(({ args, isNew }) => {
                     FConsoleClass.prepareStaticMethod(isNew, astInfo);
+                    // eslint-disable-next-line no-console
                     console.warn(...[this.header, ...args.map(arg => toJObject(arg))]);
                     return undefined;
                 }));
@@ -2211,6 +2214,7 @@ class FConsoleClass extends FFunction {
             case 'error': {
                 return option.Option.some(new FFunction(({ args, isNew }) => {
                     FConsoleClass.prepareStaticMethod(isNew, astInfo);
+                    // eslint-disable-next-line no-console
                     console.error(...[this.header, ...args.map(arg => toJObject(arg))]);
                     return undefined;
                 }));

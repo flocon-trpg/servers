@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import * as Piece from '@/ot/flocon/piece/types';
-import { createObjectValueTemplate, createReplaceValueTemplate } from '@/ot/generator';
+import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../../generator';
+import * as Piece from '../../../piece/types';
 
 export const template = createObjectValueTemplate(
     {

@@ -32,6 +32,9 @@ var WriteRoomPublicMessageFailureType = require('../enums/WriteRoomPublicMessage
 var WriteRoomSoundEffectFailureType = require('../enums/WriteRoomSoundEffectFailureType.js');
 var WritingMessageStatusInputType = require('../enums/WritingMessageStatusInputType.js');
 var WritingMessageStatusType = require('../enums/WritingMessageStatusType.js');
+var AnswerRollCallFailureType = require('../enums/AnswerRollCallFailureType.js');
+var CloseRollCallFailureType = require('../enums/CloseRollCallFailureType.js');
+var PerformRollCallFailureType = require('../enums/PerformRollCallFailureType.js');
 
 let hasRegistered = false;
 const registerEnumTypes = () => {
@@ -39,11 +42,17 @@ const registerEnumTypes = () => {
         return;
     }
     hasRegistered = true;
+    typeGraphql.registerEnumType(AnswerRollCallFailureType.AnswerRollCallFailureType, {
+        name: 'AnswerRollCallFailureType',
+    });
     typeGraphql.registerEnumType(BaasType.BaasType, {
         name: 'BaasType',
     });
     typeGraphql.registerEnumType(ChangeParticipantNameFailureType.ChangeParticipantNameFailureType, {
         name: 'ChangeParticipantNameFailureType',
+    });
+    typeGraphql.registerEnumType(CloseRollCallFailureType.CloseRollCallFailureType, {
+        name: 'CloseRollCallFailureType',
     });
     typeGraphql.registerEnumType(CreateRoomFailureType.CreateRoomFailureType, {
         name: 'CreateRoomFailureType',
@@ -98,6 +107,9 @@ const registerEnumTypes = () => {
     });
     typeGraphql.registerEnumType(ParticipantRoleType.ParticipantRoleType, {
         name: 'ParticipantRole',
+    });
+    typeGraphql.registerEnumType(PerformRollCallFailureType.PerformRollCallFailureType, {
+        name: 'PerformRollCallFailureType',
     });
     typeGraphql.registerEnumType(PieceLogType.PieceLogType, {
         name: 'PieceLogType',

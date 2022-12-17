@@ -28,19 +28,18 @@ import {
     GetRoomsListQuery,
     UpdateBookmarkMutation,
 } from '@flocon-trpg/typed-document-node-v0.7.2';
-import { parseStringToBoolean, recordToArray } from '@flocon-trpg/utils';
+import { loggerRef, parseStringToBoolean, recordToArray } from '@flocon-trpg/utils';
 import { diff, serializeUpOperation, toUpOperation } from '@kizahasi/ot-string';
 import { OperationResult } from '@urql/core';
-import axios from 'axios';
 import FormData from 'form-data';
-import produce from 'immer';
+import { produce } from 'immer';
+import fetch from 'node-fetch';
 import urljoin from 'url-join';
 import { ServerConfig } from '../../src/config/types';
 import { File as File$MikroORM } from '../../src/entities/file/entity';
 import * as $MikroORM from '../../src/entities/room/entity';
 import { User as User$MikroORM } from '../../src/entities/user/entity';
 import { EntryToServerResultType } from '../../src/enums/EntryToServerResultType';
-import { logger } from '../../src/logger';
 import { doAutoMigrationBeforeStart } from '../../src/migrate';
 import { EM } from '../../src/types';
 import { DbConfig, createOrm, createTestServer } from './utils/createTestServer';
@@ -425,21 +424,21 @@ const createCases = (): [DbConfig, ServerConfig['entryPassword'] | undefined][] 
 
     const SQLITE_TEST = process.env.SQLITE_TEST;
     if (parseStringToBoolean(SQLITE_TEST).value === false) {
-        logger.info('Skips SQLite tests because SQLITE_TEST env is falsy.');
+        loggerRef.info('Skips SQLite tests because SQLITE_TEST env is falsy.');
     } else {
         result.push([sqlite1Type, undefined], [sqlite2Type, plainEntryPassword]);
     }
 
     const POSTGRESQL_TEST = process.env.POSTGRESQL_TEST;
     if (parseStringToBoolean(POSTGRESQL_TEST).value === false) {
-        logger.info('Skips PostgreSQL tests because POSTGRESQL_TEST env is falsy.');
+        loggerRef.info('Skips PostgreSQL tests because POSTGRESQL_TEST env is falsy.');
     } else {
         result.push([postgresqlType, plainEntryPassword]);
     }
 
     const MYSQL_TEST = process.env.MYSQL_TEST;
     if (parseStringToBoolean(MYSQL_TEST).value === false) {
-        logger.info('Skips MySQL tests because MYSQL_TEST env is falsy.');
+        loggerRef.info('Skips MySQL tests because MYSQL_TEST env is falsy.');
     } else {
         result.push([mysqlType, plainEntryPassword]);
     }
@@ -715,19 +714,17 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                             filename: 'test-image.jpg',
                         }
                     );
-                    const axiosConfig = {
-                        headers: {
-                            ...formData.getHeaders(),
-                            [Resources.testAuthorizationHeader]: userUid1,
-                        },
-                    };
-                    const postResult = await axios
-                        .post(
-                            urljoin(httpUri, 'uploader', 'upload', publicOrUnlisted),
-                            formData,
-                            axiosConfig
-                        )
-                        .then(() => true)
+                    const postResult = await fetch(
+                        urljoin(httpUri, 'uploader', 'upload', publicOrUnlisted),
+                        {
+                            method: 'POST',
+                            headers: {
+                                [Resources.testAuthorizationHeader]: userUid1,
+                            },
+                            body: formData,
+                        }
+                    )
+                        .then(r => r.ok)
                         .catch(err => err);
                     expect(postResult).toBe(true);
                 }
@@ -760,21 +757,20 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
                     ['thumbs', userUid2],
                 ] as const;
                 for (const [fileType, id] of cases) {
-                    const axiosResult = await axios
-                        .get(
-                            urljoin(
-                                httpUri,
-                                'uploader',
-                                fileType,
-                                fileType === 'files' ? filename : thumbFilename
-                            ),
-                            {
-                                headers: {
-                                    [Resources.testAuthorizationHeader]: id,
-                                },
-                            }
-                        )
-                        .then(() => true)
+                    const axiosResult = await fetch(
+                        urljoin(
+                            httpUri,
+                            'uploader',
+                            fileType,
+                            fileType === 'files' ? filename : thumbFilename
+                        ),
+                        {
+                            headers: {
+                                [Resources.testAuthorizationHeader]: id,
+                            },
+                        }
+                    )
+                        .then(r => r.ok)
                         .catch(err => err);
                     expect(axiosResult).toBe(true);
                 }
@@ -906,7 +902,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
             const roomMasterResult = Assert.GetRoomsListQuery.toBeSuccess(
                 await clients[Resources.UserUid.master].getRoomsListQuery()
             );
-            logger.trace('getRoomsList query result: %o', roomMasterResult);
+            loggerRef.trace({ roomMasterResult }, 'getRoomsList query result');
             expect(roomMasterResult.rooms).toHaveLength(1);
             expect(roomMasterResult.rooms[0]!.id).toBe(roomId);
             expect(roomMasterResult.rooms[0]!.name).toBe(roomName);

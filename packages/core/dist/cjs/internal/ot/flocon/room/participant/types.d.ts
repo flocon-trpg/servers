@@ -12,12 +12,12 @@ export declare const template: {
         name: {
             readonly type: "atomic";
             readonly mode: "replace";
-            readonly value: z.ZodUnion<[z.ZodBranded<z.ZodString, "MaxLength100String">, z.ZodUndefined]>;
+            readonly value: z.ZodOptional<z.ZodBranded<z.ZodString, "MaxLength100String">>;
         };
         role: {
             readonly type: "atomic";
             readonly mode: "replace";
-            readonly value: z.ZodUnion<[z.ZodUnion<[z.ZodLiteral<"Player">, z.ZodLiteral<"Spectator">, z.ZodLiteral<"Master">]>, z.ZodUndefined]>;
+            readonly value: z.ZodOptional<z.ZodUnion<[z.ZodLiteral<"Player">, z.ZodLiteral<"Spectator">, z.ZodLiteral<"Master">]>>;
         };
     };
 };

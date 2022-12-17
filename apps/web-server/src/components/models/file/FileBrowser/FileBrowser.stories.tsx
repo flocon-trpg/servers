@@ -1,4 +1,4 @@
-import { both, delay, groupJoinArray } from '@flocon-trpg/utils';
+import { both, delay, groupJoinArray, loggerRef } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
@@ -42,7 +42,7 @@ type PracticalProps = {
 
 const toFilePath = (filesSourceRef: { current: FileSource[] }): FilePath[] => {
     return filesSourceRef.current.map((file): FilePath => {
-        const onClick = () => console.log('clicked', file.path);
+        const onClick = () => loggerRef.info({ file }, 'clicked');
         const onDelete = async () => {
             await delay(1000);
             if (file.type !== others) {
@@ -52,8 +52,8 @@ const toFilePath = (filesSourceRef: { current: FileSource[] }): FilePath[] => {
                 arrayEquals(elem.path, file.path)
             );
         };
-        const onOpen = () => console.log('open', file.path);
-        const onClipboard = () => console.log('clipboard', file.path);
+        const onOpen = () => loggerRef.info({ file }, 'open');
+        const onClipboard = () => loggerRef.info({ file }, 'clipboard');
         const onMoveOrRename: FilePath['onMoveOrRename'] = async params => {
             await delay(1000);
             if (file.type !== others) {

@@ -11,6 +11,11 @@ type Filter = {
     [Spectator]: boolean;
 };
 
+/**
+ * Participant を取得します。
+ *
+ * 代わりに `useJoinParticipants` の使用も検討してください。
+ */
 export const useParticipants = (
     filter?: Filter
 ): ReadonlyMap<string, ParticipantState> | undefined => {

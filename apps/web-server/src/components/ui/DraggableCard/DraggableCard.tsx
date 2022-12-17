@@ -1,4 +1,5 @@
 import { CloseOutlined } from '@ant-design/icons';
+import { animated, useSpring } from '@react-spring/web';
 import { NumberSize, ResizeDirection } from 're-resizable';
 import React, { PropsWithChildren } from 'react';
 import { ControlPosition } from 'react-draggable';
@@ -21,6 +22,8 @@ const defaultTopElementContainerHeight = 60;
 export const horizontalPadding = 24;
 const headerBackgroundColor = 'rgba(32, 49, 117, 1)'; // antdのgeekblue-4と等しい
 const borderColor = 'rgba(32, 49, 117, 0.4)';
+const headerBackgroundActiveColor = 'rgba(242, 171, 48, 1)';
+const borderActiveColor = 'rgba(242, 171, 48, 0.4)';
 const headerColor = undefined;
 const defaultHeaderHeight = 28;
 const borderWidth = 2;
@@ -48,9 +51,28 @@ type Props = {
     // これをtrueにするとリサイズ時のパフォーマンス向上が期待できるが、ユーザー体験は損なわれる。
     // また、リサイズ中はcontent自体がなくなるため、content内で例えば'network-only'のuseQueryが初めに呼び出されるようになっている場合は無駄な処理が発生してしまう。
     hideElementsOnResize?: boolean;
+    /** この値が変更されるたびに、ウィンドウの色が変わり強調表示されます。ただし `undefined` に変更されたときは除きます。 */
+    highlightKey?: string | undefined;
 };
 
 export const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) => {
+    const [styles, api] = useSpring(() => ({ headerBackgroundColor, borderColor }), []);
+
+    React.useEffect(() => {
+        if (props.highlightKey == null) {
+            return;
+        }
+        api.start({
+            to: [
+                {
+                    headerBackgroundColor: headerBackgroundActiveColor,
+                    borderColor: borderActiveColor,
+                },
+                { headerBackgroundColor, borderColor },
+            ],
+        });
+    }, [props.highlightKey, api]);
+
     const bottomElementContainerHeight =
         props.bottomElement == null
             ? 0
@@ -69,12 +91,12 @@ export const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) 
     const [resizing, setResizing] = React.useState(false);
 
     const header = (
-        <div
+        <animated.div
             style={{
                 flex: `0 1 ${props.headerHeight ?? defaultHeaderHeight}px`,
                 display: 'flex',
                 alignItems: 'center',
-                background: headerBackgroundColor,
+                background: styles.headerBackgroundColor,
                 color: headerColor,
                 fontSize: 14,
                 padding: `0 ${horizontalPadding}px`,
@@ -85,7 +107,7 @@ export const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) 
             <div style={{ flex: 0, cursor: 'pointer' }} onClick={() => props.onClose()}>
                 <CloseOutlined style={{ opacity: 0.7 }} />
             </div>
-        </div>
+        </animated.div>
     );
 
     const hideElementsOnResize = props.hideElementsOnResize === true && resizing;
@@ -118,14 +140,14 @@ export const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) 
             }}
         >
             {header}
-            <div
+            <animated.div
                 className={cancelRnd}
                 style={{
                     flex: 1,
                     display: 'flex',
                     borderWidth: `0 ${borderWidth}px ${borderWidth}px ${borderWidth}px`,
                     borderStyle: 'solid',
-                    borderColor,
+                    borderColor: styles.borderColor,
                     overflow: 'auto',
                 }}
             >
@@ -159,7 +181,7 @@ export const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) 
                 >
                     {!hideElementsOnResize && props.bottomElement}
                 </div>
-            </div>
+            </animated.div>
         </Rnd>
     );
 };
