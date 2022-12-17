@@ -51,8 +51,9 @@ export const IndexPage: React.FC = () => {
                         <div className={classNames(flex, flexColumn)}>
                             <div>{`このWebサーバーが対応しているAPIサーバーのバージョン範囲: ${supportedApiServersAsString}`}</div>
                             <div>
-                                ※
-                                prereleaseの比較は、Node.jsにおけるSemVerとは異なった方法を採用しています
+                                {
+                                    '※ prereleaseの比較は、Node.jsにおけるSemVerとは異なった方法を採用しています。例えば Node.js では "1.0.1-beta.1" は ">1.0.0" の制約を満たしませんが、Flocon では満たしていると判定されます。'
+                                }
                             </div>
                         </div>
                     </Collapse.Panel>
@@ -120,14 +121,19 @@ export const IndexPage: React.FC = () => {
                 <Typography.Title level={3}>動作環境</Typography.Title>
                 <ul>
                     <li>
-                        ブラウザはChrome系(Edgeを含む)かFirefoxを推奨します。Internet
-                        Explorerではおそらく動作しません。Safariでは、概ね正常に動きますが、メッセージのスクロールでカクつくかもしれません（要調査）。
+                        {
+                            'ブラウザはChrome系(Edgeを含む)かFirefoxを推奨します。Internet Explorerではおそらく動作しません。Safariでは、概ね正常に動きますが、メッセージのスクロールでカクつくかもしれません（要調査）。'
+                        }
                     </li>
-                    <li>現時点ではスマートフォンには対応しておりません。</li>
                     <li>
-                        AdblockやAdblock
-                        Plusを使用していると正常にサイトが動かない不具合が報告されています。もし動作に支障がある場合は、これらの拡張機能を無効にしてからの利用を推奨します。なお、uBlock
-                        Originでは不具合は確認されておりません。
+                        {
+                            '現時点ではスマートフォンには対応しておりません。動作はしますが、快適にご利用いただけない可能性があります。'
+                        }
+                    </li>
+                    <li>
+                        {
+                            'AdblockやAdblock Plusを使用していると正常にサイトが動かない不具合が報告されています。もし動作に支障がある場合は、これらの拡張機能を無効にしてからの利用を推奨します。なお、uBlock Originでは不具合は確認されておりません。'
+                        }
                     </li>
                 </ul>
                 <div style={{ height: spacing }} />
@@ -135,7 +141,7 @@ export const IndexPage: React.FC = () => {
                 <ul>
                     <li>{`Webサーバー: ${VERSION}`}</li>
                     <li>
-                        APIサーバー:{' '}
+                        {'APIサーバー: '}
                         {apiServerSemVer == null ? (
                             <span>
                                 <Icon.LoadingOutlined />

@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import React from 'react';
 import { useMutation } from 'urql';
 import { Center } from '@/components/ui/Center/Center';
+import { HelpMessageTooltip } from '@/components/ui/HelpMessageTooltip/HelpMessageTooltip';
 import { Layout, loginAndEntry } from '@/components/ui/Layout/Layout';
 import { firebaseUserValueAtom } from '@/pages/_app';
 
@@ -25,7 +26,7 @@ export const RoomCreatePage: React.FC = () => {
         React.useState<boolean>(false);
     const firebaseUser = useAtomValue(firebaseUserValueAtom);
 
-    // TODO: 横幅などが足りないため、Formで表現するようなものではない気がする。
+    // TODO: 横幅などが足りないため、Formで表現するようなものではない気がする。Flocon の Table に置き換えたほうがよさそうか。
     const form = (
         <Form
             name='createRoom'
@@ -73,16 +74,35 @@ export const RoomCreatePage: React.FC = () => {
             <Form.Item label='部屋の名前' name={roomName}>
                 <Input />
             </Form.Item>
-            <Form.Item label='自分の名前' name={participantName}>
+            <Form.Item
+                label={
+                    <HelpMessageTooltip title='この部屋における自分の名前です。この名前は、入室したユーザー全員に公開されます。セッションに用いるキャラクターなどの名前と一致させる必要はありません。入室後も変更できます。'>
+                        {'自分の名前'}
+                    </HelpMessageTooltip>
+                }
+                name={participantName}
+            >
                 <Input />
             </Form.Item>
-            <Form.Item label='参加パスワードを有効化'>
+            <Form.Item
+                label={
+                    <HelpMessageTooltip title='有効化すると、ユーザーが参加者として入室する際にパスワードが必要になります。'>
+                        {'参加パスワードを有効化'}
+                    </HelpMessageTooltip>
+                }
+            >
                 <Switch checked={isPlayerPasswordEnabled} onChange={setIsPlayerPasswordEnabled} />
             </Form.Item>
             <Form.Item label='参加パスワード' name={playerPassword}>
                 <Input.Password disabled={!isPlayerPasswordEnabled} />
             </Form.Item>
-            <Form.Item label='観戦パスワードを有効化'>
+            <Form.Item
+                label={
+                    <HelpMessageTooltip title='有効化すると、ユーザーが観戦者として入室する際にパスワードが必要になります。'>
+                        {'観戦パスワードを有効化'}
+                    </HelpMessageTooltip>
+                }
+            >
                 <Switch
                     checked={isSpectatorPasswordEnabled}
                     onChange={setIsSpectatorPasswordEnabled}
@@ -94,7 +114,7 @@ export const RoomCreatePage: React.FC = () => {
 
             <Form.Item wrapperCol={{ offset: labelCol, span: wrapperCol }}>
                 <Button disabled={isSubmitting} type='primary' htmlType='submit'>
-                    OK
+                    作成
                 </Button>
                 {isSubmitting ? <Spin /> : null}
                 {createRoomResult.error == null ? null : (

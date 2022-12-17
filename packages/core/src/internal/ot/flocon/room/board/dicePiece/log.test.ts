@@ -1,4 +1,4 @@
-import produce from 'immer';
+import { produce } from 'immer';
 import { Type, ofOperation } from './log';
 import { template } from './types';
 import { updateType } from '@/ot/flocon/piece/log';

@@ -5,7 +5,7 @@ import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 
 export const Default: React.FC<{ width?: number }> = ({ width }) => {
     const { isInitialized } = useSetupStorybook({
-        roomConfig: {
+        room: {
             myParticipantRole: 'Player',
             setCharacterTagNames: false,
             setPublicChannelNames: false,

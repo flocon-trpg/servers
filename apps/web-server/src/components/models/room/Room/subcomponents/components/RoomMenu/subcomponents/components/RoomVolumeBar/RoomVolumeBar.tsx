@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import produce from 'immer';
+import { produce } from 'immer';
 import { atom, useAtom } from 'jotai';
 import React from 'react';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';

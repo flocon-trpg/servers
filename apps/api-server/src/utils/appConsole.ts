@@ -1,4 +1,4 @@
-import { logger } from '../logger';
+import { loggerRef } from '@flocon-trpg/utils';
 
 export namespace AppConsole {
     export type Message = {
@@ -22,9 +22,9 @@ export namespace AppConsole {
     ): void => {
         const messageStr = messageToString(message);
         if (message.errorObject == null) {
-            logger[consoleMethodName](messageStr);
+            loggerRef[consoleMethodName](messageStr);
         } else {
-            logger[consoleMethodName](message.errorObject, messageStr);
+            loggerRef[consoleMethodName](message.errorObject, messageStr);
         }
     };
 
@@ -33,11 +33,11 @@ export namespace AppConsole {
     };
 
     export const infoAsNotice = (message: Omit<Message, 'errorObject'>): void => {
-        logger.infoAsNotice(messageToString(message));
+        loggerRef.infoAsNotice(messageToString(message));
     };
 
     export const infoAsNoticeJa = (message: string): void => {
-        logger.infoAsNotice(message);
+        loggerRef.infoAsNotice(message);
     };
 
     export const warn = (message: Message): void => {

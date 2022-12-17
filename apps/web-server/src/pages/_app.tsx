@@ -6,8 +6,9 @@ import 'firebase/storage';
 
 import { simpleId } from '@flocon-trpg/core';
 import { createUrqlClient } from '@flocon-trpg/sdk-urql';
-import { loggerRef } from '@flocon-trpg/utils';
+import { createDefaultLogger, loggerRef } from '@flocon-trpg/utils';
 import { loader } from '@monaco-editor/react';
+import { devtoolsExchange } from '@urql/devtools';
 import { FirebaseApp, initializeApp } from 'firebase/app';
 import { Auth, getAuth } from 'firebase/auth';
 import { FirebaseStorage, getStorage } from 'firebase/storage';
@@ -30,7 +31,6 @@ import { getHttpUri, getWsUri, publicEnvTxtAtom } from '../atoms/webConfigAtom/w
 import { AllContextProvider } from '../components/behaviors/AllContextProvider';
 import { useMyUserUid } from '../hooks/useMyUserUid';
 import { useWebConfig } from '../hooks/useWebConfig';
-import { appConsole } from '../utils/appConsole';
 import {
     FirebaseUserState,
     authNotFound,
@@ -181,6 +181,7 @@ const useSubscribeFirebaseUser = (): void => {
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     const setPublicEnvTxt = useSetAtom(publicEnvTxtAtom);
+    const storybook = useAtomValue(storybookAtom);
     React.useEffect(() => {
         const main = async () => {
             // chromeなどではfetchできないと `http://localhost:3000/env.txt 404 (Not Found)` などといったエラーメッセージが表示されるが、実際は問題ない
@@ -198,8 +199,10 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     const config = useWebConfig();
     React.useEffect(() => {
         const defaultLevel = 'info';
-        loggerRef.value = pino({ level: config?.value?.logLevel ?? defaultLevel, browser: {} });
-    }, [config?.value?.logLevel]);
+        loggerRef.value = storybook.isStorybook
+            ? pino()
+            : createDefaultLogger({ logLevel: config?.value?.logLevel ?? defaultLevel });
+    }, [config?.value?.logLevel, storybook.isStorybook]);
 
     const [firebaseApp, setFirebaseApp] = useAtom(firebaseAppCoreAtom);
     React.useEffect(() => {
@@ -209,7 +212,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         }
         setFirebaseApp(prevValue => {
             if (prevValue != null) {
-                console.warn('Firebase app is initialized multiple times');
+                loggerRef.warn('Firebase app is initialized multiple times');
             }
             return initializeApp(config.value.firebaseConfig);
         });
@@ -242,13 +245,13 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
         if (httpUri == null) {
             return;
         }
-        appConsole.log(`GraphQL HTTP URL: ${httpUri}`);
+        loggerRef.info(`GraphQL HTTP URL: ${httpUri}`);
     }, [httpUri]);
     React.useEffect(() => {
         if (wsUri == null) {
             return;
         }
-        appConsole.log(`GraphQL WebSocket URL: ${wsUri}`);
+        loggerRef.info(`GraphQL WebSocket URL: ${wsUri}`);
     }, [wsUri]);
 
     useSubscribeFirebaseUser();
@@ -273,6 +276,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
                     wsUrl: wsUri,
                     authorization: true,
                     getUserIdTokenResult: getIdTokenResult,
+                    exchanges: defaultExchanges => [devtoolsExchange, ...defaultExchanges],
                 })
             );
         } else {
@@ -281,6 +285,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
                     httpUrl: httpUri,
                     wsUrl: wsUri,
                     authorization: false,
+                    exchanges: defaultExchanges => [devtoolsExchange, ...defaultExchanges],
                 })
             );
         }
@@ -318,7 +323,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
 
     const clientId = useConstant(() => simpleId());
     React.useEffect(() => {
-        appConsole.log(`clientId: ${clientId}`);
+        loggerRef.info(`clientId: ${clientId}`);
     }, [clientId]);
 
     React.useEffect(() => {

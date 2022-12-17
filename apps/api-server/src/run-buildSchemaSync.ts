@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import 'reflect-metadata';
 import { buildSchemaSync, noAuthCheck } from './buildSchema';
 import { registerEnumTypes } from './graphql/registerEnumTypes';

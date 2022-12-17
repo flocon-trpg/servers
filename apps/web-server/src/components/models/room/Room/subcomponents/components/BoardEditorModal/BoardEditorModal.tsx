@@ -169,6 +169,7 @@ export const BoardEditorModal: React.FC = () => {
                         onDestroy == null
                             ? undefined
                             : {
+                                  textType: 'delete',
                                   modal: {
                                       title: 'ボードの削除の確認',
                                       content: `このボード "${board.name}" を削除します。よろしいですか？`,

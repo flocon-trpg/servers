@@ -230,7 +230,7 @@ const generateDummyImage = ({
         (typeof color === 'string' ? color : Color.rgb(color).hex()).replaceAll('#', '');
     const bgHexColor = toHex(bgColor);
     const textHexColor = textColor == null ? '000000' : toHex(textColor);
-    const textParam = text == null ? '' : `&text=${text}`;
+    const textParam = text == null ? '' : `?text=${text}`;
     return `https://dummyimage.com/${size}/${bgHexColor}/${textHexColor}.png${textParam}`;
 };
 
@@ -326,6 +326,7 @@ export const createMockRoom = (params: CreateMockRoomParams): State => {
                 role: 'Spectator',
             },
         },
+        rollCalls: undefined,
     };
 
     if (params.setBoards) {

@@ -4,7 +4,7 @@ import { createORM as createORMCore } from './config/createORM';
 import { createORMOptions } from './config/createORMOptions';
 import { LogConfigParser } from './config/logConfigParser';
 import { ServerConfigParser } from './config/serverConfigParser';
-import { initializeLogger } from './logger';
+import { initializeLogger } from './initializeLogger';
 import { ORM } from './types';
 import { AppConsole } from './utils/appConsole';
 import {

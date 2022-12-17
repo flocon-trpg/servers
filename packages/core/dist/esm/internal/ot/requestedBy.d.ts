@@ -18,6 +18,10 @@ export declare const anyValue: {
 export declare const none: {
     readonly type: "none";
 };
+export declare const isAuthorized: ({ requestedBy, participantId, }: {
+    requestedBy: RequestedBy;
+    participantId: string | typeof anyValue | typeof none;
+}) => boolean;
 export declare const isOwner: ({ requestedBy, ownerParticipantId, }: {
     requestedBy: RequestedBy;
     ownerParticipantId: string | typeof anyValue | typeof none;

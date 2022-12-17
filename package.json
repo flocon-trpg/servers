@@ -9,7 +9,7 @@
         "build": "yarn workspaces foreach -ptv run build:self",
         "format": "yarn lint --fix && yarn build && yarn prettier && yarn sort-package-json && yarn generate-disclaimer",
         "generate-disclaimer": "yarn licenses generate-disclaimer --production --recursive --exclude='@types/*,husky,less,npm-run-all,sass,serve' > ./apps/web-server/public/licenses-npm-package.txt",
-        "postinstall": "husky install",
+        "install-husky": "husky install",
         "lint": "yarn workspaces foreach -pv run lint",
         "prettier": "yarn prettier:base --write --cache && yarn workspaces foreach -pv run prettier",
         "prettier-check": "yarn prettier:base --check && yarn workspaces foreach -pv run prettier-check",
@@ -18,14 +18,12 @@
         "test": "yarn workspaces foreach -pv run test",
         "test-node14": "yarn workspaces foreach -pv --exclude '{@flocon-trpg/servers,@flocon-trpg/web-server}' run test"
     },
-    "dependencies": {
-        "husky": "^8.0.0"
-    },
     "devDependencies": {
-        "@commitlint/cli": "17.0.3",
-        "@commitlint/config-conventional": "17.0.3",
+        "@commitlint/cli": "17.3.0",
+        "@commitlint/config-conventional": "17.3.0",
         "@flocon-trpg/prettier-config": "workspace:^",
-        "prettier": "2.7.1",
+        "husky": "8.0.2",
+        "prettier": "2.8.0",
         "sort-package-json": "2.1.0"
     },
     "packageManager": "yarn@3.3.0"

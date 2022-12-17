@@ -1,3 +1,4 @@
+import { loggerRef } from '@flocon-trpg/utils';
 import {
     Options as $Options,
     Connection,
@@ -22,7 +23,6 @@ import {
     StringPieceLog,
 } from './entities/roomMessage/entity';
 import { User } from './entities/user/entity';
-import { logger } from './logger';
 
 const entities = [
     Room,
@@ -71,9 +71,9 @@ const loggerFactory: Options['loggerFactory'] = () => {
     ): void => {
         const text = message;
         if (context == null) {
-            logger[methodName]({ namespace }, text);
+            loggerRef[methodName]({ namespace }, text);
         } else {
-            logger[methodName](
+            loggerRef[methodName](
                 {
                     context: {
                         ...context,
@@ -110,7 +110,7 @@ const loggerFactory: Options['loggerFactory'] = () => {
                     methodName = 'warn';
                     break;
             }
-            logger[methodName](
+            loggerRef[methodName](
                 {
                     ...context,
                     // pinoのlevelと重複して出力されるのを防ぐため、mikro-ormのログのlevelは取り除いている。

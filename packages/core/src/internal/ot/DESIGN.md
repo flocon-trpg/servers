@@ -2,7 +2,7 @@
 
 Flocon の部屋(Room)を Operational Transformation を用いて編集する機能を提供している。ログを表すオブジェクトを生成する関数も付属している。
 
-多くの関数は`./template`のコードで自動的に生成している。ただし、toClientState は閲覧権限、serverTransform は編集権限の処理が行われているため、手動で作っている。この 2 つの関数は`./flocon`にある。基準となるのは`./room`にある`functions.ts`。ただし Room には例えば Bgm や Participant などが 1:N の関係で存在しており、これらを 1 つのファイルで表すとあまりにもコードが長くなるため、`./room/bgm`や`./room/participant`などに分割している。
+多くの関数は`./generator`のコードで自動的に生成している。ただし、toClientState は閲覧権限、serverTransform は編集権限の処理が行われているため、手動で書く必要がある。
 
 ## \$v と\$r
 

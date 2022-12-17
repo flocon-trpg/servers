@@ -1,5 +1,5 @@
 import { Result } from '@kizahasi/result';
-import { initializeLogger } from '../src/logger';
+import { initializeLogger } from '../src/initializeLogger';
 
 // Loggerが必要なテストは import './beforeAllGlobal' としてloggerをinitializeする必要がある。
 

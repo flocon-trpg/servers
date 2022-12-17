@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import * as BoardPositionBase from '@/ot/flocon/boardPosition/types';
-import { createObjectValueTemplate, createReplaceValueTemplate } from '@/ot/generator';
+import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../../generator';
+import * as BoardPositionBase from '../../../boardPosition/types';
 
 export const template = createObjectValueTemplate(
     {

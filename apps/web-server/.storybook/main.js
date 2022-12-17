@@ -35,6 +35,10 @@ module.exports = {
             ],
             include: path.resolve(__dirname, '../'),
         });
+
+        // ModuleNotFoundError: Module not found: Error: Can't resolve 'stream' in '(dir)\server\node_modules\pino-abstract-transport\node_modules\split2' (おそらく pino で transport を指定しているのが原因)に対する対処
+        config.resolve.fallback.stream = false;
+
         return config;
     },
     // これがないと constructor(private readonly param: string) のように引数に修飾子が付いているコードでエラーが出る

@@ -348,6 +348,7 @@ export const CharacterEditorModal: React.FC = () => {
                             onDestroy == null
                                 ? undefined
                                 : {
+                                      textType: 'delete',
                                       modal: {
                                           title: 'キャラクターの削除の確認',
                                           content: `このキャラクター "${character.name}" を削除します。よろしいですか？`,

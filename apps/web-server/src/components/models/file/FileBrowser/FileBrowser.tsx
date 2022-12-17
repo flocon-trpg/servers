@@ -14,6 +14,7 @@ import {
     groupJoinArray,
     keyNames,
     left,
+    loggerRef,
     right,
 } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
@@ -33,7 +34,7 @@ import {
 } from 'antd';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import classNames from 'classnames';
-import produce from 'immer';
+import { produce } from 'immer';
 import {
     Atom,
     PrimitiveAtom,
@@ -2331,7 +2332,7 @@ const useStartAutoDeleteFiles = () => {
                     message: 'ファイルの削除に失敗しました。',
                     description: joinPath(new Node(fileToDelete.file).path).string,
                 });
-                console.error('ファイルの削除に失敗しました。', e);
+                loggerRef.error(e, 'ファイルの削除に失敗しました。');
                 setFileStatus(fileToDelete, 'error');
                 setIsDeleting(false);
             });
@@ -2449,7 +2450,7 @@ const useStartAutoRenameFiles = () => {
                     message: 'ファイルのリネームに失敗しました。',
                     description: joinPath(new Node(fileToRename.file).path).string,
                 });
-                console.error('ファイルのリネームに失敗しました。', e);
+                loggerRef.error(e, 'ファイルのリネームに失敗しました。');
                 setFileStatus(fileToRename, 'error');
                 setIsRenaming(false);
             });

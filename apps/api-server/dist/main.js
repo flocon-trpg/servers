@@ -1,6 +1,7 @@
 'use strict';
 
 var FilePathModule = require('@flocon-trpg/core');
+var utils = require('@flocon-trpg/utils');
 var result = require('@kizahasi/result');
 var admin = require('firebase-admin');
 var VERSION = require('./VERSION.js');
@@ -13,7 +14,7 @@ var main$1 = require('./connection/main.js');
 var createServer = require('./createServer.js');
 var BaasType = require('./enums/BaasType.js');
 var env = require('./env.js');
-var logger = require('./logger.js');
+var initializeLogger = require('./initializeLogger.js');
 var migrate = require('./migrate.js');
 var appConsole = require('./utils/appConsole.js');
 var commandLineArgs = require('./utils/commandLineArgs.js');
@@ -37,13 +38,13 @@ const logEntryPasswordConfig = (serverConfig) => {
 };
 const main = async (params) => {
     const logConfigResult = new logConfigParser.LogConfigParser(process.env).logConfig;
-    logger.initializeLogger(logConfigResult);
+    initializeLogger.initializeLogger(logConfigResult);
     appConsole.AppConsole.infoAsNotice({
         en: `Flocon API Server v${VERSION.VERSION.toString()}`,
     });
     const port = process.env.PORT ?? 4000;
     const onError = async (message) => {
-        logger.logger.error(message);
+        utils.loggerRef.error(message);
         await createServer.createServerAsError({
             port,
         });

@@ -1,4 +1,6 @@
+import { AnswerRollCallResolver } from './mutations/answerRollCall/resolver';
 import { ChangeParticipantNameResolver } from './mutations/changeParitipantName/resolver';
+import { CloseRollCallResolver } from './mutations/closeRollCall/resolver';
 import { CreateFileTagResolver } from './mutations/createFileTag/resolver';
 import { CreateRoomResolver } from './mutations/createRoom/resolver';
 import { DeleteFileTagResolver } from './mutations/deleteFileTag/resolver';
@@ -13,6 +15,7 @@ import { JoinRoomResolver } from './mutations/joinRoom/resolver';
 import { LeaveRoomResolver } from './mutations/leaveRoom/resolver';
 import { MakeMessageNotSecretResolver } from './mutations/makeMessageNotSecret/resolver';
 import { OperateResolver } from './mutations/operate/resolver';
+import { PerformRollCallResolver } from './mutations/performRollCall/resolver';
 import { PingResolver } from './mutations/ping/resolver';
 import { PromoteToPlayerResolver } from './mutations/promoteToPlayer/resolver';
 import { RenameFilesResolver } from './mutations/renameFiles/resolver';
@@ -38,7 +41,9 @@ import { PongResolver } from './subsciptions/pong/resolver';
 import { RoomEventResolver } from './subsciptions/roomEvent/resolver';
 
 export const allResolvers = [
+    AnswerRollCallResolver,
     ChangeParticipantNameResolver,
+    CloseRollCallResolver,
     CreateFileTagResolver,
     CreateRoomResolver,
     DeleteFilesResolver,
@@ -53,6 +58,7 @@ export const allResolvers = [
     LeaveRoomResolver,
     MakeMessageNotSecretResolver,
     OperateResolver,
+    PerformRollCallResolver,
     PingResolver,
     PromoteToPlayerResolver,
     RenameFilesResolver,

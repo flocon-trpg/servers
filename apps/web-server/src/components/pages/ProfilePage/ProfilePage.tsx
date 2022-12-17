@@ -1,9 +1,10 @@
 import { updateProfile } from '@firebase/auth';
-import { Alert, Button, Card, Form, Input, Spin, Switch } from 'antd';
+import { Alert, Button, Card, Form, Input, Spin } from 'antd';
 import { useAtomValue } from 'jotai';
 import React from 'react';
 import { Center } from '../../ui/Center/Center';
 import { Layout, login } from '../../ui/Layout/Layout';
+import { HelpMessageTooltip } from '@/components/ui/HelpMessageTooltip/HelpMessageTooltip';
 import { firebaseUserValueAtom } from '@/pages/_app';
 
 const labelCol = 10;
@@ -13,6 +14,7 @@ export const ProfilePage: React.FC = () => {
     const firebaseUser = useAtomValue(firebaseUserValueAtom);
     const [isSubmitting, setIsSubmitting] = React.useState(false);
     const [submitErrorMessage, setSubmitErrorMessage] = React.useState<string>();
+    // undefined ならば User を取得中。null ならば User.displayName === null。
     const [displayName, setDisplayName] = React.useState<string | null>();
     React.useEffect(() => {
         if (firebaseUser == null) {
@@ -44,15 +46,30 @@ export const ProfilePage: React.FC = () => {
                     .finally(() => setIsSubmitting(false));
             }}
         >
-            <Form.Item label='ユーザー名を有効化'>
-                <Switch
-                    checked={displayName != null}
-                    onChange={newValue => setDisplayName(newValue ? '' : null)}
-                />
-            </Form.Item>
-            <Form.Item label='ユーザー名'>
+            <Form.Item
+                label={
+                    <HelpMessageTooltip
+                        title={
+                            <div>
+                                <p>{'アカウントのユーザー名を変更できます。'}</p>
+                                <p>
+                                    {
+                                        'Flocon ではユーザー名が使われる場面は少ないため、適当でも構いません。'
+                                    }
+                                </p>
+                                <p></p>
+                                {
+                                    'ただし、自分のユーザー名は他のユーザーに見られる可能性があるため、ユーザー名には個人情報などに関わる情報を含めないことを推奨します。'
+                                }
+                            </div>
+                        }
+                    >
+                        {'ユーザー名'}
+                    </HelpMessageTooltip>
+                }
+            >
                 <Input
-                    disabled={displayName == null}
+                    disabled={displayName === undefined}
                     value={displayName ?? ''}
                     onChange={e => {
                         setDisplayName(e.target.value);

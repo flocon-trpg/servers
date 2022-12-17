@@ -1,3 +1,4 @@
+import { loggerRef } from '@flocon-trpg/utils';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 import { MyCharactersSelect } from './MyCharactersSelect';
@@ -30,7 +31,7 @@ export const Default: React.FC<{
                 selectedCharacterId={selectedCharacterId}
                 showAlert={showAlert}
                 readOnly={readonly}
-                onSelect={value => console.log(value)}
+                onSelect={value => loggerRef.info({ value }, 'onSelect')}
             />
         </StorybookProvider>
     );

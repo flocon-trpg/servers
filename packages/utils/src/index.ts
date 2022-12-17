@@ -21,7 +21,7 @@ export { DeletableTree } from './internal/deletableTree';
 export { filterInt } from './internal/filterInt';
 export { parseStringToBoolean, parseStringToBooleanError } from './internal/parseStringToBoolean';
 export { keyNames } from './internal/keyNames';
-export { loggerRef } from './internal/logger';
+export { loggerRef, createDefaultLogger } from './internal/logger';
 export { MultiKeyMap } from './internal/multiKeyMap';
 export { MultiValueSet } from './internal/multiValueSet';
 export {

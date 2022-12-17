@@ -1,0 +1,32 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:base",
+        ":timezone(Asia/Tokyo)",
+        "schedule:weekly",
+        "helpers:disableTypesNodeMajor"
+    ],
+    "packageRules": [
+        {
+            "matchPackagePatterns": ["*"],
+            "rangeStrategy": "update-lockfile"
+        },
+        {
+            "matchDepTypes": ["devDependencies"],
+            "rangeStrategy": "pin"
+        },
+        {
+            "matchDepTypes": ["peerDependencies"],
+            "rangeStrategy": "widen"
+        },
+        {
+            "matchUpdateTypes": ["patch", "minor"],
+            "excludePackageNames": ["typescript"],
+            "groupName": "all minor and patch dependencies"
+        }
+    ],
+    "prConcurrentLimit": 30,
+    "postUpdateOptions": ["yarnDedupeHighest"],
+    // npm は 72h 以内なら unpublish が可能なことと、少し待って renovate による "Passing" などの statistics を見たいことから、3d に設定している。 
+    "stabilityDays": 3
+}

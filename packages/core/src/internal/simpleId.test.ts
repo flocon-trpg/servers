@@ -2,7 +2,7 @@ import { simpleId } from '..';
 
 describe('simpleId', () => {
     it('tests length', () => {
-        for (let i = 0; i < 1_000_000; i++) {
+        for (let i = 0; i < 10_000; i++) {
             const id = simpleId();
             expect(id).toHaveLength(9);
         }
@@ -10,7 +10,7 @@ describe('simpleId', () => {
 
     it('tests randomness', () => {
         const map = new Map<string, number>();
-        for (let i = 0; i < 100_000; i++) {
+        for (let i = 0; i < 10_000; i++) {
             const id = simpleId();
             const prevCount = map.get(id) ?? 0;
             map.set(id, prevCount + 1);

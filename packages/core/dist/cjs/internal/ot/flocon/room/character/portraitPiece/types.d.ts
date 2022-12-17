@@ -37,7 +37,7 @@ export declare const template: {
         opacity: {
             readonly type: "atomic";
             readonly mode: "replace";
-            readonly value: z.ZodUnion<[z.ZodNumber, z.ZodUndefined]>;
+            readonly value: z.ZodOptional<z.ZodNumber>;
         };
         w: {
             readonly type: "atomic";

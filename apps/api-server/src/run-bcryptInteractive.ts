@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { existsSync } from 'fs';
 import { writeFile } from 'fs/promises';
 import bcrypt from 'bcrypt';

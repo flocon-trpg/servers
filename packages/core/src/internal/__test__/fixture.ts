@@ -134,6 +134,7 @@ export namespace Fixture {
         numParamNames: {},
         strParamNames: {},
         memos: {},
+        rollCalls: {},
         characterTag1Name: undefined,
         characterTag2Name: undefined,
         characterTag3Name: undefined,
@@ -398,6 +399,36 @@ export namespace Fixture {
                 dir: ['MEMO_DIR'],
                 text: 'MEMO_TEXT',
                 textType: 'Plain',
+            },
+        },
+        rollCalls: {
+            ROLL_CALL_ID: {
+                $v: 1,
+                $r: 1,
+                createdAt: 1_000_000_000,
+                createdBy: Participant.Player1.userUid,
+                closeStatus: undefined,
+                participants: {
+                    [Participant.Player1.userUid]: {
+                        $v: 1,
+                        $r: 1,
+                        answeredAt: 1_000_000_000,
+                    },
+                    [Participant.Player2.userUid]: {
+                        $v: 1,
+                        $r: 1,
+                        answeredAt: undefined,
+                    },
+                },
+                soundEffect: {
+                    file: {
+                        $v: 1,
+                        $r: 1,
+                        path: 'ROLLCALL_SE',
+                        sourceType: 'Default',
+                    },
+                    volume: 0.5,
+                },
             },
         },
         publicChannel1Name: '',

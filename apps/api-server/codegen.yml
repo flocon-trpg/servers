@@ -4,7 +4,7 @@ overwrite: true
 schema: './tmp/schema.gql'
 documents: './graphql/**/*.graphql'
 generates:
-    ../../packages/typed-document-node-v0.7.8/src/generated/graphql.ts:
+    ../../packages/typed-document-node-v0.7.13/src/generated/graphql.ts:
         plugins:
             - 'typescript'
             - 'typescript-operations'

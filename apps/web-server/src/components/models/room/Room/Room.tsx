@@ -27,6 +27,7 @@ import { ImportCharacterModal } from './subcomponents/components/ImportCharacter
 import { MemosPanelContent } from './subcomponents/components/MemosPanelContent/MemosPanelContent';
 import { ParticipantListPanelContent } from './subcomponents/components/ParticipantListPanelContent/ParticipantListPanelContent';
 import { PieceListPanelContent } from './subcomponents/components/PieceListPanelContent/PieceListPanelContent';
+import { RollCall } from './subcomponents/components/RollCall/RollCall';
 import { RoomMenu } from './subcomponents/components/RoomMenu/RoomMenu';
 import { RoomMessagesPanelContent } from './subcomponents/components/RoomMessagesPanelContent/RoomMessagesPanelContent';
 import { ShapePieceEditorModal } from './subcomponents/components/ShapePieceEditorModal/ShapePieceEditorModal';
@@ -36,6 +37,7 @@ import { usePlayBgm } from './subcomponents/hooks/usePlayBgm';
 import { usePlaySoundEffect } from './subcomponents/hooks/usePlaySoundEffect';
 import { usePushNotifications } from './subcomponents/hooks/usePushNotifications';
 import { useRoomId } from './subcomponents/hooks/useRoomId';
+import { panelHighlightKeysAtom } from '@/atoms/panelHighlightKeysAtom/panelHighlightKeysAtom';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { BoardEditorPanelConfig } from '@/atoms/roomConfigAtom/types/boardEditorPanelConfig';
 import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalettePanelConfig';
@@ -76,8 +78,6 @@ const Board: React.ComponentType<BoardProps> = dynamic(
     { ssr: false }
 );
 
-const overflowHidden = { overflow: 'hidden' } as const;
-
 type ConfigProps<T> = {
     config: T;
 };
@@ -85,6 +85,13 @@ type ConfigProps<T> = {
 type ConfigAndKeyProps<T> = {
     keyName: string;
 } & ConfigProps<T>;
+
+const overflowHiddenStyle = { overflow: 'hidden' } as const;
+const childrenContainerPadding = `12px ${horizontalPadding}px`;
+const childrenContainerStyle: React.CSSProperties = {
+    padding: childrenContainerPadding,
+    overflowY: 'scroll',
+};
 
 const ActiveBoardPanel: React.FC = React.memo(function ActiveBoardPanel() {
     const config = useAtomSelector(roomConfigAtom, state => state?.panels.activeBoardPanel);
@@ -142,7 +149,7 @@ const ActiveBoardPanel: React.FC = React.memo(function ActiveBoardPanel() {
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
             onClose={onClose}
-            childrenContainerStyle={overflowHidden}
+            childrenContainerStyle={overflowHiddenStyle}
             position={config}
             size={config}
             minHeight={150}
@@ -231,7 +238,7 @@ const BoardEditorPanel: React.FC<ConfigAndKeyProps<BoardEditorPanelConfig>> = Re
                 onResizeStop={onResizeStop}
                 onMoveToFront={onMoveToFront}
                 onClose={onClose}
-                childrenContainerStyle={overflowHidden}
+                childrenContainerStyle={overflowHiddenStyle}
                 position={config}
                 size={config}
                 minHeight={150}
@@ -337,7 +344,7 @@ const ChatPalettePanel: React.FC<ConfigAndKeyProps<ChatPalettePanelConfig>> = Re
                 onResizeStop={onResizeStop}
                 onMoveToFront={onMoveToFront}
                 onClose={onClose}
-                childrenContainerStyle={overflowHidden}
+                childrenContainerStyle={overflowHiddenStyle}
                 position={config}
                 size={config}
                 minHeight={150}
@@ -410,12 +417,6 @@ const CharacterPanel: React.FC = React.memo(function CharacterPanel() {
             roomConfig.panels.characterPanel.isMinimized = true;
         });
     }, [setRoomConfig]);
-    const childrenContainerStyle: React.CSSProperties = React.useMemo(
-        () => ({
-            padding: childrenContainerPadding,
-        }),
-        []
-    );
 
     if (config == null || config.isMinimized) {
         return null;
@@ -484,13 +485,6 @@ const GameEffectPanel: React.FC = React.memo(function GameEffectPanel() {
             roomConfig.panels.gameEffectPanel.isMinimized = true;
         });
     }, [setRoomConfig]);
-    const childrenContainerStyle: React.CSSProperties = React.useMemo(
-        () => ({
-            padding: childrenContainerPadding,
-            overflowY: 'scroll',
-        }),
-        []
-    );
 
     if (config == null || config.isMinimized) {
         return null;
@@ -602,7 +596,7 @@ const MemoPanel: React.FC<ConfigAndKeyProps<MemoPanelConfig>> = React.memo(funct
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
             onClose={onClose}
-            childrenContainerStyle={overflowHidden}
+            childrenContainerStyle={overflowHiddenStyle}
             position={config}
             size={config}
             minHeight={150}
@@ -680,13 +674,6 @@ const ParticipantPanel: React.FC = () => {
             roomConfig.panels.participantPanel.isMinimized = true;
         });
     }, [setRoomConfig]);
-    const childrenContainerStyle: React.CSSProperties = React.useMemo(
-        () => ({
-            padding: childrenContainerPadding,
-            overflowY: 'scroll',
-        }),
-        []
-    );
 
     if (participantPanel == null || participantPanel.isMinimized) {
         return null;
@@ -756,13 +743,6 @@ const PieceValuePanel: React.FC = () => {
             roomConfig.panels.pieceValuePanel.isMinimized = true;
         });
     }, [setRoomConfig]);
-    const childrenContainerStyle: React.CSSProperties = React.useMemo(
-        () => ({
-            padding: childrenContainerPadding,
-            overflowY: 'scroll',
-        }),
-        []
-    );
 
     if (config == null || config.isMinimized) {
         return null;
@@ -787,6 +767,77 @@ const PieceValuePanel: React.FC = () => {
             ) : (
                 <PieceListPanelContent boardId={activeBoardId} />
             )}
+        </DraggableCard>
+    );
+};
+
+const RollCallPanel: React.FC = () => {
+    const config = useAtomSelector(roomConfigAtom, state => state?.panels.rollCallPanel);
+    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const highlightKey = useAtomValue(panelHighlightKeysAtom);
+
+    const onDragStop = React.useCallback(
+        (e: ControlPosition) => {
+            setRoomConfig(roomConfig => {
+                if (roomConfig == null) {
+                    return;
+                }
+                RoomConfigUtils.movePanel(roomConfig.panels.rollCallPanel, e);
+            });
+        },
+        [setRoomConfig]
+    );
+    const onResizeStop = React.useCallback(
+        (dir: ResizeDirection, delta: NumberSize) => {
+            setRoomConfig(roomConfig => {
+                if (roomConfig == null) {
+                    return;
+                }
+                RoomConfigUtils.resizePanel(roomConfig.panels.rollCallPanel, dir, delta);
+            });
+        },
+        [setRoomConfig]
+    );
+    const onMoveToFront = React.useCallback(() => {
+        setRoomConfig(roomConfig => {
+            if (roomConfig == null) {
+                return;
+            }
+            RoomConfigUtils.bringPanelToFront(roomConfig, {
+                type: 'rollCallPanel',
+            });
+        });
+    }, [setRoomConfig]);
+    const onClose = React.useCallback(() => {
+        setRoomConfig(roomConfig => {
+            if (roomConfig == null) {
+                return;
+            }
+            roomConfig.panels.rollCallPanel.isMinimized = true;
+        });
+    }, [setRoomConfig]);
+    const rollCalls = useRoomStateValueSelector(state => state.rollCalls);
+
+    if (config == null || config.isMinimized) {
+        return null;
+    }
+
+    return (
+        <DraggableCard
+            header='点呼'
+            onDragStop={onDragStop}
+            onResizeStop={onResizeStop}
+            onMoveToFront={onMoveToFront}
+            onClose={onClose}
+            childrenContainerStyle={childrenContainerStyle}
+            position={config}
+            size={config}
+            minHeight={150}
+            minWidth={150}
+            zIndex={config.zIndex}
+            highlightKey={highlightKey.rollCallPanel}
+        >
+            <RollCall rollCalls={rollCalls ?? {}} />
         </DraggableCard>
     );
 };
@@ -872,7 +923,7 @@ const RoomMessagePanel: React.FC<ConfigAndKeyProps<MessagePanelConfig>> = React.
                 onResizeStop={onResizeStop}
                 onMoveToFront={onMoveToFront}
                 onClose={onClose}
-                childrenContainerStyle={overflowHidden}
+                childrenContainerStyle={overflowHiddenStyle}
                 position={config}
                 size={config}
                 minHeight={150}
@@ -900,8 +951,6 @@ const RoomMessagePanels: React.FC = () => {
         </>
     );
 };
-
-const childrenContainerPadding = `12px ${horizontalPadding}px`;
 
 type Props = {
     debug?: {
@@ -979,6 +1028,7 @@ export const Room: React.FC<Props> = ({ debug }) => {
                     <MemoPanels />
                     <ParticipantPanel />
                     <PieceValuePanel />
+                    <RollCallPanel />
                 </div>
 
                 <BoardContextMenu />

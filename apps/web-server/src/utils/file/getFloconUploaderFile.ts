@@ -1,4 +1,3 @@
-import axios from 'axios';
 import urljoin from 'url-join';
 import { getHttpUri } from '../../atoms/webConfigAtom/webConfigAtom';
 import { WebConfig } from '../../configType';
@@ -22,11 +21,12 @@ export const getFloconUploaderFile = async ({
     if (idToken == null) {
         return idTokenIsNull;
     }
-    return await axios.get(urljoin(getHttpUri(config), 'uploader', mode, filename), {
-        // URL.createObjectURLを用いて変換する際、このように responseType: 'blob' にしておかないと画像が表示されない。
-        responseType: 'blob',
+    const url = urljoin(getHttpUri(config), 'uploader', mode, filename);
+    return await fetch(url, {
         headers: {
             Authorization: `Bearer ${idToken}`,
         },
-    });
+    })
+        .then(r => r.blob())
+        .catch(() => null);
 };

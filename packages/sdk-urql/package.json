@@ -22,6 +22,7 @@
         "@flocon-trpg/sdk": "workspace:^",
         "@flocon-trpg/typed-document-node-v0.7.1": "workspace:^",
         "@kizahasi/result": "^1.1.0",
+        "@urql/exchange-auth": "^1.0.0",
         "graphql-ws": "^5.8.1",
         "rxjs": "^7.5.6",
         "urql": "^3.0.0",
@@ -32,16 +33,16 @@
         "@flocon-trpg/prettier-config": "workspace:^",
         "@flocon-trpg/rollup-config": "workspace:^",
         "@flocon-trpg/tsconfig": "workspace:^",
-        "@typescript-eslint/eslint-plugin": "5.39.0",
-        "@typescript-eslint/parser": "5.39.0",
-        "eslint": "8.25.0",
+        "@typescript-eslint/eslint-plugin": "5.44.0",
+        "@typescript-eslint/parser": "5.44.0",
+        "eslint": "8.28.0",
         "eslint-config-prettier": "8.5.0",
         "eslint-import-resolver-typescript": "3.5.2",
         "eslint-plugin-import": "2.26.0",
-        "prettier": "2.7.1",
+        "prettier": "2.8.0",
         "rimraf": "3.0.2",
-        "rollup": "3.3.0",
-        "typescript": "4.9.3"
+        "rollup": "3.7.0",
+        "typescript": "4.9.4"
     },
     "engines": {
         "node": ">=14 <19"

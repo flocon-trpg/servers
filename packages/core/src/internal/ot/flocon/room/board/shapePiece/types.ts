@@ -1,17 +1,16 @@
 import { z } from 'zod';
-import { maybe } from '@/maybe';
-import * as Piece from '@/ot/flocon/piece/types';
-import * as Shape from '@/ot/flocon/shape/types';
 import {
     createObjectValueTemplate,
     createRecordValueTemplate,
     createReplaceValueTemplate,
-} from '@/ot/generator';
+} from '../../../../generator';
+import * as Piece from '../../../piece/types';
+import * as Shape from '../../../shape/types';
 
 export const template = createObjectValueTemplate(
     {
         ...Piece.templateValue,
-        ownerParticipantId: createReplaceValueTemplate(maybe(z.string())),
+        ownerParticipantId: createReplaceValueTemplate(z.string().optional()),
         isPrivate: createReplaceValueTemplate(z.boolean()),
 
         /**

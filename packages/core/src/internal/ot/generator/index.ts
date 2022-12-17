@@ -1,6 +1,7 @@
 import {
     groupJoinMap,
     left,
+    loggerRef,
     mapRecord,
     recordToArray,
     recordToMap,
@@ -43,7 +44,7 @@ const warnNotFoundTemplate = ({
     key: string;
     objectType: 'state' | 'operation';
 }): void => {
-    console.warn(
+    loggerRef.warn(
         `"${key}" key found at ${objectType} object, but template not found. Maybe you use keys which are not supported?`
     );
 };
@@ -90,7 +91,9 @@ export type RecordValueTemplate<TValue extends AnyTemplate> = {
 };
 
 /** `Record<string, T>`を表すtemplateを作成します。*/
-export const createRecordValueTemplate = <TValue extends AnyTemplate>(value: TValue) => {
+export const createRecordValueTemplate = <TValue extends AnyTemplate>(
+    value: TValue
+): RecordValueTemplate<TValue> => {
     return {
         type: record,
         value,
