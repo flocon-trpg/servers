@@ -1,4 +1,5 @@
 import { Player, Spectator, State, forceMaxLength100String, roomTemplate } from '@flocon-trpg/core';
+import FakeTimers from '@sinonjs/fake-timers';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 import { RollCall } from './RollCall';
@@ -6,7 +7,7 @@ import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { mockUser } from '@/mocks';
 
-const currentDateTime = new Date().getTime();
+const currentDateTime = 1_000_000_000_000;
 
 type RoomState = State<typeof roomTemplate>;
 type RollCallState = NonNullable<RoomState['rollCalls']>[string];
@@ -183,7 +184,10 @@ export const Default: React.FC<{ roomState: RoomState }> = ({ roomState }) => {
     });
     return (
         <StorybookProvider waitForRoomClient>
-            <RollCall rollCalls={roomState.rollCalls ?? {}} />
+            <RollCall
+                rollCalls={roomState.rollCalls ?? {}}
+                mockDate={() => new Date(currentDateTime)}
+            />
         </StorybookProvider>
     );
 };

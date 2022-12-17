@@ -2,9 +2,8 @@ import '../src/styles/css/antd.css';
 import '../src/styles/css/main.scss';
 import '@storybook/addon-console';
 import { RouterContext } from 'next/dist/shared/lib/router-context';
-import FakeTimers from '@sinonjs/fake-timers';
 
-FakeTimers.install({ now: 1_000_000_000_000 });
+// 当初、ここで @sinonjs/fake-timers を使って Date を mock していたが、Board の Story で 画像が表示されなかったり縮尺が変わるという問題が発生したので取り除いた
 
 export const parameters = {
     actions: { argTypesRegex: '^on[A-Z].*' },

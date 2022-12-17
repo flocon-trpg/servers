@@ -56,6 +56,7 @@ type RollCallResultProps = {
     /** 点呼が行われているかどうかを示します。`true` のときは AnswerRollCall を実行するボタンなどが有効化されます。 */
     isOpen: boolean;
     tableHeader: string;
+    mockDate?: () => Date;
 };
 
 const RollCallResult: React.FC<RollCallResultProps> = ({
@@ -63,6 +64,7 @@ const RollCallResult: React.FC<RollCallResultProps> = ({
     rollCallId,
     isOpen,
     tableHeader,
+    mockDate,
 }) => {
     const myUserUid = useMyUserUid();
     const participants = useJoinParticipants(rollCall.participants);
@@ -159,7 +161,10 @@ const RollCallResult: React.FC<RollCallResultProps> = ({
     const getCreatedAtText = () => {
         return `${dayjs(rollCall.createdAt).format('YYYY/MM/DD HH:mm:ss')} (${prettyElapsed(
             rollCall.createdAt,
-            { customizeMilliseconds: i => i - (i % 10_000) }
+            {
+                customizeMilliseconds: i => i - (i % 10_000),
+                now: mockDate ? mockDate() : new Date(),
+            }
         )})`;
     };
     const [elapesedText, setElapsedText] = React.useState<string>(getCreatedAtText());
@@ -182,10 +187,11 @@ const RollCallResult: React.FC<RollCallResultProps> = ({
     );
 };
 
-const HasOpenRollCall: React.FC<{ rollCall: RollCallState; rollCallId: string }> = ({
-    rollCall,
-    rollCallId,
-}) => {
+const HasOpenRollCall: React.FC<{
+    rollCall: RollCallState;
+    rollCallId: string;
+    mockDate?: () => Date;
+}> = ({ rollCall, rollCallId, mockDate }) => {
     const roomId = useRoomId();
     const [closeRollCallResult, closeRollCall] = useMutation(CloseRollCallDocument);
     const disableClose = closeRollCallResult.fetching;
@@ -213,6 +219,7 @@ const HasOpenRollCall: React.FC<{ rollCall: RollCallState; rollCallId: string }>
                 rollCallId={rollCallId}
                 isOpen
                 tableHeader='点呼の状況'
+                mockDate={mockDate}
             />
             <Modal
                 open={showModal}
@@ -241,7 +248,7 @@ const HasOpenRollCall: React.FC<{ rollCall: RollCallState; rollCallId: string }>
     );
 };
 
-const NoOpenRollCall: React.FC = () => {
+const NoOpenRollCall: React.FC<{ mockDate?: () => Date }> = ({ mockDate }) => {
     const roomId = useRoomId();
     const [performRollCallResult, performRollCall] = useMutation(PerformRollCallDocument);
     const rollCalls = useRoomStateValueSelector(state => state.rollCalls);
@@ -283,6 +290,7 @@ const NoOpenRollCall: React.FC = () => {
                     rollCallId={latestRollCall.key}
                     isOpen={false}
                     tableHeader='最後に行われた点呼の結果'
+                    mockDate={mockDate}
                 />
             )}
         </div>
@@ -291,12 +299,19 @@ const NoOpenRollCall: React.FC = () => {
 
 export type Props = {
     rollCalls: RollCallsState;
+    mockDate?: () => Date;
 };
 
-export const RollCall: React.FC<Props> = ({ rollCalls }) => {
+export const RollCall: React.FC<Props> = ({ rollCalls, mockDate }) => {
     const openRollCall = React.useMemo(() => getOpenRollCall(rollCalls), [rollCalls]);
     if (openRollCall == null) {
-        return <NoOpenRollCall />;
+        return <NoOpenRollCall mockDate={mockDate} />;
     }
-    return <HasOpenRollCall rollCallId={openRollCall.key} rollCall={openRollCall.value} />;
+    return (
+        <HasOpenRollCall
+            rollCallId={openRollCall.key}
+            rollCall={openRollCall.value}
+            mockDate={mockDate}
+        />
+    );
 };
