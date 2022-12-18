@@ -61,7 +61,7 @@
         "class-validator": "^0.13.1",
         "color": "^4.0.1",
         "dotenv": "^16.0.0",
-        "dotenv-expand": "^8.0.0",
+        "dotenv-expand": "^9.0.0",
         "express": "^4.17.1",
         "firebase-admin": "^11.0.0",
         "fs-extra": "^10.0.0",
