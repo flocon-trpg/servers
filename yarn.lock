@@ -3361,7 +3361,6 @@ __metadata:
     "@next/eslint-plugin-next": 12.3.4
     "@react-spring/konva": ^9.2.4
     "@react-spring/web": ^9.0.0
-    "@sinonjs/fake-timers": 9.1.2
     "@storybook/addon-actions": 6.5.13
     "@storybook/addon-console": 1.2.3
     "@storybook/addon-docs": 6.5.13
@@ -5409,7 +5408,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sinonjs/fake-timers@npm:9.1.2, @sinonjs/fake-timers@npm:^9.1.2":
+"@sinonjs/fake-timers@npm:^9.1.2":
   version: 9.1.2
   resolution: "@sinonjs/fake-timers@npm:9.1.2"
   dependencies:
