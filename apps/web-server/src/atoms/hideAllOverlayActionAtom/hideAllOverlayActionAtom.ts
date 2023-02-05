@@ -1,4 +1,4 @@
-import { atom } from 'jotai';
+import { atom } from 'jotai/vanilla';
 import { boardContextMenuAtom } from '@/components/models/room/Room/subcomponents/atoms/boardContextMenuAtom/boardContextMenuAtom';
 import { boardPopoverEditorAtom } from '@/components/models/room/Room/subcomponents/atoms/boardPopoverEditorAtom/boardPopoverEditorAtom';
 import { boardTooltipAtom } from '@/components/models/room/Room/subcomponents/atoms/boardTooltipAtom/boardTooltipAtom';
@@ -11,7 +11,7 @@ import { dicePieceModalAtom } from '@/components/models/room/Room/subcomponents/
 import { imagePieceModalAtom } from '@/components/models/room/Room/subcomponents/components/ImagePieceModal/ImagePieceModal';
 import { stringPieceModalAtom } from '@/components/models/room/Room/subcomponents/components/StringPieceEditorModal/StringPieceEditorModal';
 
-export const hideAllOverlayActionAtom = atom<null, void>(null, (get, set) => {
+export const hideAllOverlayActionAtom = atom(null, (get, set) => {
     set(boardEditorModalAtom, null);
     set(characterEditorModalAtom, null);
     set(characterParameterNamesEditorVisibilityAtom, false);

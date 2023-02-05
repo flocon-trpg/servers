@@ -19,7 +19,7 @@ import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { Menu, Tooltip } from 'antd';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import classNames from 'classnames';
-import { useAtomValue, useUpdateAtom } from 'jotai/utils';
+import { useAtomValue, useSetAtom } from 'jotai/react';
 import React from 'react';
 import { useMutation } from 'urql';
 import { ImageView } from '../../../../../file/ImageView/ImageView';
@@ -214,7 +214,7 @@ const StringPieceContent: React.FC<PieceProps> = ({ boardId, pieceId }: PiecePro
 
 export const PopoverEditor: React.FC = () => {
     const popoverEditor = useAtomValue(boardPopoverEditorAtom);
-    const setCharacterEditorModal = useUpdateAtom(characterEditorModalAtom);
+    const setCharacterEditorModal = useSetAtom(characterEditorModalAtom);
 
     const [childrenState, setChildrenState] = React.useState<{
         children: JSX.Element;
@@ -338,12 +338,12 @@ const toBoardPosition = ({
 
 // 1つ1つ個別に渡すコードを書くのが面倒なのでこのように1つにまとめて全て渡している
 const useHooks = () => {
-    const setCharacterModal = useUpdateAtom(characterEditorModalAtom);
-    const setDicePieceModal = useUpdateAtom(dicePieceModalAtom);
-    const setShapePieceModal = useUpdateAtom(shapePieceModalAtom);
-    const setStringPieceModal = useUpdateAtom(stringPieceModalAtom);
-    const setImagePieceModal = useUpdateAtom(imagePieceModalAtom);
-    const setPopoverEditor = useUpdateAtom(boardPopoverEditorAtom);
+    const setCharacterModal = useSetAtom(characterEditorModalAtom);
+    const setDicePieceModal = useSetAtom(dicePieceModalAtom);
+    const setShapePieceModal = useSetAtom(shapePieceModalAtom);
+    const setStringPieceModal = useSetAtom(stringPieceModalAtom);
+    const setImagePieceModal = useSetAtom(imagePieceModalAtom);
+    const setPopoverEditor = useSetAtom(boardPopoverEditorAtom);
     const cloneImagePiece = useCloneImagePiece();
     return React.useMemo(
         () => ({
@@ -1112,7 +1112,7 @@ namespace ContextMenuModule {
         const contextMenuState = useAtomValue(boardContextMenuAtom);
         const roomId = useRoomId();
         const [, writeSe] = useMutation(WriteRoomSoundEffectDocument);
-        const setBoardContextMenu = useUpdateAtom(boardContextMenuAtom);
+        const setBoardContextMenu = useSetAtom(boardContextMenuAtom);
         const hooks = useHooks();
         const isMyCharacter = useIsMyCharacter();
 

@@ -1,7 +1,7 @@
 import { Select } from 'antd';
 import classNames from 'classnames';
 import { Draft } from 'immer';
-import { useUpdateAtom } from 'jotai/utils';
+import { useSetAtom } from 'jotai/react';
 import React from 'react';
 import { Subject } from 'rxjs';
 import { TextColorPicker } from '../../../../../../ui/TextColorPicker/TextColorPicker';
@@ -19,7 +19,7 @@ import { CollaborativeInput } from '@/components/ui/CollaborativeInput/Collabora
 import { UISelector } from '@/components/ui/UISelector/UISelector';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
 import { useBufferValue } from '@/hooks/useBufferValue';
-import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
+import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { flex, flex1, flexColumn, flexNone, flexRow, itemsCenter } from '@/styles/className';
 
 const descriptionStyle: React.CSSProperties = {
@@ -124,13 +124,13 @@ export const ChatPalettePanelContent: React.FC<ChatPalettePanelContentProps> = (
 }: ChatPalettePanelContentProps) => {
     const miniInputMaxWidth = 200;
 
-    const setPublicMessageInput = useUpdateAtom(roomPublicMessageInputAtom);
-    const setPrivateMessageInput = useUpdateAtom(roomPrivateMessageInputAtom);
+    const setPublicMessageInput = useSetAtom(roomPublicMessageInputAtom);
+    const setPrivateMessageInput = useSetAtom(roomPrivateMessageInputAtom);
     const config = useAtomSelector(
         roomConfigAtom,
         state => state?.panels.chatPalettePanels?.[panelId]
     );
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
     const subject = React.useMemo(() => new Subject<string>(), []);
     const myCharacters = useMyCharacters();
     const [selectedChannelType, setSelectedChannelType] =

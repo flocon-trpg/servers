@@ -12,7 +12,7 @@ import { CollaborativeInput } from '@/components/ui/CollaborativeInput/Collabora
 import { CopyToClipboardButton } from '@/components/ui/CopyToClipboardButton/CopyToClipboardButton';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { Table, TableRow } from '@/components/ui/Table/Table';
-import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
+import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { create, update } from '@/utils/constants';
 import { FilePathModule } from '@/utils/file/filePath';
@@ -69,7 +69,7 @@ export const BoardEditorModal: React.FC = () => {
     const myUserUid = useMyUserUid();
     const setRoomState = useSetRoomStateWithImmer();
     const [modalValue, setModalValue] = useAtom(boardEditorModalAtom);
-    const setRoomConfigAtom = useImmerUpdateAtom(roomConfigAtom);
+    const setRoomConfigAtom = useImmerSetAtom(roomConfigAtom);
     const boards = useBoards();
     const createMode: CreateModeParams<BoardState | undefined> | undefined = useMemoOne(() => {
         if (modalValue?.type !== create) {

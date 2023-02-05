@@ -6,7 +6,7 @@ import {
 } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { Button, Checkbox, Modal, Progress, Radio } from 'antd';
 import classNames from 'classnames';
-import { useAtomValue } from 'jotai/utils';
+import { useAtomValue } from 'jotai/react';
 import fileDownload from 'js-file-download';
 import moment from 'moment';
 import React from 'react';

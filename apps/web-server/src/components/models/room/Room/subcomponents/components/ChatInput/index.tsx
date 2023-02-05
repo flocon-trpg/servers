@@ -1,6 +1,6 @@
 import { Draft } from 'immer';
-import { atom } from 'jotai';
-import { useAtomValue } from 'jotai/utils';
+import { useAtomValue } from 'jotai/react';
+import { atom } from 'jotai/vanilla';
 import React from 'react';
 import { TextColorPicker } from '../../../../../../ui/TextColorPicker/TextColorPicker';
 import { GameSelector } from '../GameSelector/GameSelector';

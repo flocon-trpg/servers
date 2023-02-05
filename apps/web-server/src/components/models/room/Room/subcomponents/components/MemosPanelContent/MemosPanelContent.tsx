@@ -2,6 +2,7 @@ import { State, joinPath, memoTemplate, simpleId } from '@flocon-trpg/core';
 import { Result } from '@kizahasi/result';
 import { Button, Modal } from 'antd';
 import classNames from 'classnames';
+import { createStore } from 'jotai/vanilla';
 import moment from 'moment';
 import React from 'react';
 import { useMemos } from '../../hooks/useMemos';
@@ -24,6 +25,9 @@ type MemoState = State<typeof memoTemplate>;
 
 const padding = 4;
 const splitterPadding = 8;
+
+// CONSIDER: jotai v2 で scope が廃止される前のコードの挙動に近づけるため、グローバルに store を作成している。だが、代わりに useMemo などを使って store を作成するほうがいいかもしれない。
+const jotaiStore = createStore();
 
 const MemoBrowserModal: React.FC<{
     visible: boolean;
@@ -81,7 +85,7 @@ const MemoBrowserModal: React.FC<{
             width={stretchedModalWidth}
         >
             <FileBrowser
-                jotaiScope='MemosPanelContent'
+                jotaiStore={jotaiStore}
                 files={files}
                 fileCreateLabel='メモを作成'
                 searchPlaceholder='メモの名前で検索'

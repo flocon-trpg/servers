@@ -11,7 +11,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/Table/Table';
-import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
+import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { Styles } from '@/styles';
 import { rgba } from '@/utils/rgba';
 import { BoardType } from '@/utils/types';
@@ -25,7 +25,7 @@ export const BoardConfigEditor: React.FC<{
     boardType: BoardType;
     boardConfig: BoardConfig;
 }> = ({ boardId, boardType, boardConfig }) => {
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
 
     const createLabelVisibilityCheckbox = (
         label: string,

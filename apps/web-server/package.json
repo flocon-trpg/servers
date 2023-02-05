@@ -79,7 +79,7 @@
         "html-escaper": "^3.0.3",
         "immer": "^9.0.16",
         "jdenticon": "^3.1.1",
-        "jotai": "^1.8.4",
+        "jotai": "^2.0.0",
         "js-file-download": "^0.4.12",
         "jszip": "^3.9.1",
         "konva": "^8.3.9",

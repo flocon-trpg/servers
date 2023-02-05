@@ -17,8 +17,8 @@ import { Input, Menu, Modal, Popover, Tooltip } from 'antd';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import classNames from 'classnames';
 import { produce } from 'immer';
-import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { useUpdateAtom } from 'jotai/utils';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai/react';
+import { atom } from 'jotai/vanilla';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { useMutation, useQuery } from 'urql';
@@ -40,7 +40,7 @@ import { Jdenticon } from '@/components/ui/Jdenticon/Jdenticon';
 import { OpacityBar } from '@/components/ui/VolumeBar/VolumeBar';
 import { useAddNotification } from '@/hooks/useAddNotification';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
+import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 import { useSignOut } from '@/hooks/useSignOut';
@@ -506,7 +506,7 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
 };
 
 const usePanelsMenuItem = () => {
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
     const activeBoardPanel = useAtomSelector(
         roomConfigAtom,
         state => state?.panels.activeBoardPanel
@@ -1088,7 +1088,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
     const [isResetMessagesModalVisible, setIsResetMessagesModalVisible] = React.useState(false);
     const [isGenerateLogModalVisible, setIsGenerateSimpleLogModalVisible] = React.useState(false);
     const [fileSelectorModalVisible, setFileSelectorModalVisible] = React.useState(false);
-    const setEditRoomModalVisibility = useUpdateAtom(editRoomModalVisibilityAtom);
+    const setEditRoomModalVisibility = useSetAtom(editRoomModalVisibilityAtom);
 
     const panelsMenuItem = usePanelsMenuItem();
 

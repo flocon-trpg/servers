@@ -3408,7 +3408,7 @@ __metadata:
     jdenticon: ^3.1.1
     jest: 29.3.1
     jest-environment-jsdom: 29.3.1
-    jotai: ^1.8.4
+    jotai: ^2.0.0
     js-file-download: ^0.4.12
     jszip: ^3.9.1
     konva: ^8.3.9
@@ -16452,43 +16452,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jotai@npm:^1.8.4":
-  version: 1.10.0
-  resolution: "jotai@npm:1.10.0"
+"jotai@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "jotai@npm:2.0.0"
   peerDependencies:
-    "@babel/core": "*"
-    "@babel/template": "*"
-    jotai-immer: "*"
-    jotai-optics: "*"
-    jotai-redux: "*"
-    jotai-tanstack-query: "*"
-    jotai-urql: "*"
-    jotai-valtio: "*"
-    jotai-xstate: "*"
-    jotai-zustand: "*"
-    react: ">=16.8"
+    react: ">=17.0.0"
   peerDependenciesMeta:
-    "@babel/core":
+    react:
       optional: true
-    "@babel/template":
-      optional: true
-    jotai-immer:
-      optional: true
-    jotai-optics:
-      optional: true
-    jotai-redux:
-      optional: true
-    jotai-tanstack-query:
-      optional: true
-    jotai-urql:
-      optional: true
-    jotai-valtio:
-      optional: true
-    jotai-xstate:
-      optional: true
-    jotai-zustand:
-      optional: true
-  checksum: 72047e84fc24916ea3054822cfe85b381102b5eeae61c36e8d52700b7679b8b10d44f2a7aa545b7efc7c15257f9ed410c90769889141ffe9db925424b2a5d79e
+  checksum: 19ff656797ebfa3e935ab8e53f9895982c1d12d44a6f03611147b3ee3381387baf91edf5d81f2a17ed3c709a7278a26daee090164e83855120391ea60769e20b
   languageName: node
   linkType: hard
 

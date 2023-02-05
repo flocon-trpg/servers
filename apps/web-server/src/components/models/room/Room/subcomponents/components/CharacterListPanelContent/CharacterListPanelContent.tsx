@@ -24,7 +24,7 @@ import { ColumnType } from 'antd/lib/table';
 import { SortOrder } from 'antd/lib/table/interface';
 import classNames from 'classnames';
 import { produce } from 'immer';
-import { useUpdateAtom } from 'jotai/utils';
+import { useSetAtom } from 'jotai/react';
 import React from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { IconView } from '../../../../../file/IconView/IconView';
@@ -51,7 +51,7 @@ import { DraggableTabs } from '@/components/ui/DraggableTabs/DraggableTabs';
 import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
 import { ToggleButton } from '@/components/ui/ToggleButton/ToggleButton';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
+import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import {
     characterIsNotPrivate,
@@ -283,7 +283,7 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
     // キャラクターウィンドウは現時点では最大1個までしか存在しないため、静的な文字列で構わない
     const type = 'TableHeaderCell';
 
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
     const keySorter = React.useMemo(() => new KeySorter(RowKeys.all), []);
 
     const [, drag] = useDrag(
@@ -354,7 +354,7 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
 }: CharacterListTabPaneProps) => {
     const myUserUid = useMyUserUid();
     const setRoomState = useSetRoomStateWithImmer();
-    const setCharacterEditorModal = useUpdateAtom(characterEditorModalAtom);
+    const setCharacterEditorModal = useSetAtom(characterEditorModalAtom);
 
     const characters = useCharacters(tabConfig);
     const boolParamNames = useBoolParamNames();
@@ -658,15 +658,13 @@ const CharacterListPanelWithPanelId: React.FC<{
         roomConfigAtom,
         roomConfig => roomConfig?.panels.characterPanel.tabs
     );
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
-    const setCharacterParameterNamesEditorVisibility = useUpdateAtom(
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const setCharacterParameterNamesEditorVisibility = useSetAtom(
         characterParameterNamesEditorVisibilityAtom
     );
-    const setCharacterTagNamesEditorVisibility = useUpdateAtom(
-        characterTagNamesEditorVisibilityAtom
-    );
-    const setCharacterEditorModal = useUpdateAtom(characterEditorModalAtom);
-    const setImportCharacterModal = useUpdateAtom(importCharacterModalVisibilityAtom);
+    const setCharacterTagNamesEditorVisibility = useSetAtom(characterTagNamesEditorVisibilityAtom);
+    const setCharacterEditorModal = useSetAtom(characterEditorModalAtom);
+    const setImportCharacterModal = useSetAtom(importCharacterModalVisibilityAtom);
     const [editingTabConfigKey, setEditingTabConfigKey] = React.useState<string | undefined>();
 
     return React.useMemo(() => {

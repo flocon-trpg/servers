@@ -8,7 +8,7 @@ import { useTransition } from '@react-spring/konva';
 import { Button, Dropdown, Menu, Popover } from 'antd';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import classNames from 'classnames';
-import { useUpdateAtom } from 'jotai/utils';
+import { useSetAtom } from 'jotai/react';
 import { KonvaEventObject } from 'konva/lib/Node';
 import { Vector2d } from 'konva/lib/types';
 import React from 'react';
@@ -62,7 +62,7 @@ import { useSetRoomStateWithImmer } from '@/components/models/room/Room/subcompo
 import { AnimatedImageAsAnyProps } from '@/components/ui/AnimatedKonvaAsAnyProps/AnimatedKonvaAsAnyProps';
 import { success, useImageFromFilePath } from '@/hooks/imageHooks';
 import { useAllContext } from '@/hooks/useAllContext';
-import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
+import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 import { Styles } from '@/styles';
@@ -188,12 +188,12 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const characterPieces = useCharacterPieces(boardId);
     const portraitPositions = usePortraitPieces(boardId);
 
-    const setBoardPopoverEditor = useUpdateAtom(boardPopoverEditorAtom);
+    const setBoardPopoverEditor = useSetAtom(boardPopoverEditorAtom);
     const unsetPopoverEditor = () => {
         setBoardPopoverEditor(null);
     };
 
-    const setBoardTooltip = useUpdateAtom(boardTooltipAtom);
+    const setBoardTooltip = useSetAtom(boardTooltipAtom);
 
     const mouseOverOnRef = React.useRef<MouseOverOn>({ type: background });
     const { stoppedCursor, onMove } = useGetStoppedCursor();
@@ -213,7 +213,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
     const backgroundImage = useImageFromFilePath(board.backgroundImage);
     const backgroundImageResult =
         backgroundImage.type === success ? backgroundImage.image : undefined;
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
     const setRoomState = useSetRoomStateWithImmer();
     const publicMessages = useRoomMessages({ filter: publicMessageFilter });
     const myUserUid = useMyUserUid();
@@ -814,10 +814,10 @@ const NonTransparentStyle: React.CSSProperties = {
 };
 
 export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: Props) => {
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
-    const setBoardContextMenu = useUpdateAtom(boardContextMenuAtom);
-    const setBoardEditorModal = useUpdateAtom(boardEditorModalAtom);
-    const setImportBoardModal = useUpdateAtom(importBoardModalVisibilityAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const setBoardContextMenu = useSetAtom(boardContextMenuAtom);
+    const setBoardEditorModal = useSetAtom(boardEditorModalAtom);
+    const setImportBoardModal = useSetAtom(importBoardModalVisibilityAtom);
     const roomId = useRoomId();
     const boards = useBoards();
     const characters = useCharacters();

@@ -10,8 +10,9 @@ import {
 import { Alert, Button, Card, Input, Result, Spin } from 'antd';
 import classNames from 'classnames';
 import { produce } from 'immer';
-import { atom } from 'jotai';
-import { selectAtom, useAtomValue, useUpdateAtom } from 'jotai/utils';
+import { useAtomValue, useSetAtom } from 'jotai/react';
+import { selectAtom } from 'jotai/utils';
+import { atom } from 'jotai/vanilla';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { useDebounce, usePrevious } from 'react-use';
@@ -51,8 +52,8 @@ const useOnResize = () => {
         debouncedWindowInnerHeightAtomCore.init
     );
 
-    const setWindowInnerWidthAtom = useUpdateAtom(debouncedWindowInnerWidthAtomCore);
-    const setWindowInnerHeightAtom = useUpdateAtom(debouncedWindowInnerHeightAtomCore);
+    const setWindowInnerWidthAtom = useSetAtom(debouncedWindowInnerWidthAtomCore);
+    const setWindowInnerHeightAtom = useSetAtom(debouncedWindowInnerHeightAtomCore);
 
     React.useEffect(() => {
         const updateInnerWindowSize = () => {
@@ -245,7 +246,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
 // Roomが変わるたびに、useRoomConfigが更新される必要がある。RoomのComponentのどこか一箇所でuseRoomConfigを呼び出すだけでよい。
 const useRoomConfig = (roomId: string): boolean => {
     const [result, setResult] = React.useState<boolean>(false);
-    const setRoomConfig = useUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useSetAtom(roomConfigAtom);
 
     React.useEffect(() => {
         let unmounted = false;
@@ -281,9 +282,9 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
     const roomState = useRoomState();
     const graphQLStatus = useRoomGraphQLStatus();
 
-    const setRoomPublicMessageInput = useUpdateAtom(roomPublicMessageInputAtom);
-    const setRoomPrivateMessageInput = useUpdateAtom(roomPrivateMessageInputAtom);
-    const hideAllOverlay = useUpdateAtom(hideAllOverlayActionAtom);
+    const setRoomPublicMessageInput = useSetAtom(roomPublicMessageInputAtom);
+    const setRoomPrivateMessageInput = useSetAtom(roomPrivateMessageInputAtom);
+    const hideAllOverlay = useSetAtom(hideAllOverlayActionAtom);
 
     useOnResize();
     useRoomConfig(roomId);

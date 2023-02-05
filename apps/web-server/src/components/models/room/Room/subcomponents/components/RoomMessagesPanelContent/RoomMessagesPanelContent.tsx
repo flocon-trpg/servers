@@ -35,8 +35,8 @@ import {
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import classNames from 'classnames';
 import { WritableDraft } from 'immer/dist/internal';
-import { atom } from 'jotai';
-import { useAtomValue } from 'jotai/utils';
+import { useAtomValue } from 'jotai/react';
+import { atom } from 'jotai/vanilla';
 import moment from 'moment';
 import React from 'react';
 import { CombinedError, useMutation } from 'urql';
@@ -71,7 +71,7 @@ import { InputDescription } from '@/components/ui/InputDescription/InputDescript
 import { InputModal } from '@/components/ui/InputModal/InputModal';
 import { JumpToBottomVirtuoso } from '@/components/ui/JumpToBottomVirtuoso/JumpToBottomVirtuoso';
 import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
-import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
+import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 import { firebaseUserValueAtom } from '@/pages/_app';
 import { Styles } from '@/styles';
@@ -799,8 +799,8 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
         return atom(get => get(roomConfigAtom)?.panels.messagePanels?.[panelId]?.tabs);
     }, [panelId]);
     const tabs = useAtomValue(tabsAtom);
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
-    const setUserConfig = useImmerUpdateAtom(userConfigAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const setUserConfig = useImmerSetAtom(userConfigAtom);
 
     const [editingTabConfigKey, setEditingTabConfigKey] = React.useState<string>();
     const editingTabConfig = React.useMemo(() => {

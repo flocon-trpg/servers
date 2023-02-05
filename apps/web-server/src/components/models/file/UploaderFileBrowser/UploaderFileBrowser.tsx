@@ -17,11 +17,13 @@ import { Result } from '@kizahasi/result';
 import { Modal, Upload, notification } from 'antd';
 import copy from 'clipboard-copy';
 import { StorageReference, deleteObject, ref, uploadBytes } from 'firebase/storage';
-import { useAtomValue } from 'jotai';
+import { useAtomValue } from 'jotai/react';
+import { createStore } from 'jotai/vanilla';
 import * as React from 'react';
 import { useLatest } from 'react-use';
 import urljoin from 'url-join';
 import { useMutation, useQuery } from 'urql';
+import useConstant from 'use-constant';
 import { FileBrowser, FilePath } from '../FileBrowser/FileBrowser';
 import { ImageView } from '../ImageView/ImageView';
 import { accept } from './utils/helper';
@@ -498,10 +500,12 @@ export const UploaderFileBrowser: React.FC<Props> = ({
         isEmbeddedUploaderDisabled,
     ]);
 
+    const jotaiStore = useConstant(() => createStore());
+
     return (
         <>
             <FileBrowser
-                jotaiScope='UploaderFileBrowser'
+                jotaiStore={jotaiStore}
                 height={height}
                 fileCreateLabel='ファイルをアップロード'
                 searchPlaceholder='ファイル名で検索'

@@ -1,7 +1,7 @@
 import { recordToArray } from '@flocon-trpg/utils';
 import { Layout as AntdLayout, Modal, Result } from 'antd';
 import classNames from 'classnames';
-import { useAtomValue } from 'jotai/utils';
+import { useAtomValue } from 'jotai/react';
 import dynamic from 'next/dynamic';
 import { NumberSize, ResizeDirection } from 're-resizable';
 import React from 'react';
@@ -51,7 +51,7 @@ import {
 import { DraggableCard, horizontalPadding } from '@/components/ui/DraggableCard/DraggableCard';
 import { LoadingResult } from '@/components/ui/LoadingResult/LoadingResult';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
+import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 import { relative } from '@/styles/className';
@@ -95,7 +95,7 @@ const childrenContainerStyle: React.CSSProperties = {
 
 const ActiveBoardPanel: React.FC = React.memo(function ActiveBoardPanel() {
     const config = useAtomSelector(roomConfigAtom, state => state?.panels.activeBoardPanel);
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
 
     const onDragStop = React.useCallback(
         (e: ControlPosition) => {
@@ -169,7 +169,7 @@ const ActiveBoardPanel: React.FC = React.memo(function ActiveBoardPanel() {
 
 const BoardEditorPanel: React.FC<ConfigAndKeyProps<BoardEditorPanelConfig>> = React.memo(
     function BoardEditorPanel({ config, keyName }) {
-        const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+        const setRoomConfig = useImmerSetAtom(roomConfigAtom);
 
         const onDragStop = React.useCallback(
             (e: ControlPosition) => {
@@ -275,7 +275,7 @@ const BoardEditorPanels: React.FC = () => {
 
 const ChatPalettePanel: React.FC<ConfigAndKeyProps<ChatPalettePanelConfig>> = React.memo(
     function ChatPalettePanel({ keyName, config }) {
-        const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+        const setRoomConfig = useImmerSetAtom(roomConfigAtom);
         const roomId = useRoomId();
 
         const onDragStop = React.useCallback(
@@ -375,7 +375,7 @@ const ChatPalettePanels: React.FC = () => {
 
 const CharacterPanel: React.FC = React.memo(function CharacterPanel() {
     const config = useAtomSelector(roomConfigAtom, state => state?.panels.characterPanel);
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
 
     const onDragStop = React.useCallback(
         (e: ControlPosition) => {
@@ -443,7 +443,7 @@ const CharacterPanel: React.FC = React.memo(function CharacterPanel() {
 
 const GameEffectPanel: React.FC = React.memo(function GameEffectPanel() {
     const config = useAtomSelector(roomConfigAtom, state => state?.panels.gameEffectPanel);
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
 
     const onDragStop = React.useCallback(
         (e: ControlPosition) => {
@@ -513,7 +513,7 @@ const MemoPanel: React.FC<ConfigAndKeyProps<MemoPanelConfig>> = React.memo(funct
     config,
     keyName,
 }) {
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
 
     const onDragStop = React.useCallback(
         (e: ControlPosition) => {
@@ -632,7 +632,7 @@ const ParticipantPanel: React.FC = () => {
         roomConfigAtom,
         state => state?.panels.participantPanel
     );
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
 
     const onDragStop = React.useCallback(
         (e: ControlPosition) => {
@@ -700,7 +700,7 @@ const ParticipantPanel: React.FC = () => {
 
 const PieceValuePanel: React.FC = () => {
     const config = useAtomSelector(roomConfigAtom, state => state?.panels.pieceValuePanel);
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
     const activeBoardId = useRoomStateValueSelector(state => state.activeBoardId);
 
     const onDragStop = React.useCallback(
@@ -773,7 +773,7 @@ const PieceValuePanel: React.FC = () => {
 
 const RollCallPanel: React.FC = () => {
     const config = useAtomSelector(roomConfigAtom, state => state?.panels.rollCallPanel);
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
     const highlightKey = useAtomValue(panelHighlightKeysAtom);
 
     const onDragStop = React.useCallback(
@@ -844,7 +844,7 @@ const RollCallPanel: React.FC = () => {
 
 const RoomMessagePanel: React.FC<ConfigAndKeyProps<MessagePanelConfig>> = React.memo(
     function RoomMessagePanel({ config, keyName }) {
-        const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+        const setRoomConfig = useImmerSetAtom(roomConfigAtom);
 
         const onDragStop = React.useCallback(
             (e: ControlPosition) => {

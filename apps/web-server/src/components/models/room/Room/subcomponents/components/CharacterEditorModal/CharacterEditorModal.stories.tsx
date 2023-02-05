@@ -1,6 +1,6 @@
 import { ParticipantRole } from '@flocon-trpg/core';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
-import { useSetAtom } from 'jotai';
+import { useSetAtom } from 'jotai/react';
 import React from 'react';
 import { CharacterEditorModal, characterEditorModalAtom } from './CharacterEditorModal';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';

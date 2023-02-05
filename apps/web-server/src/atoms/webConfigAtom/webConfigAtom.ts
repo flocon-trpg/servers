@@ -6,7 +6,7 @@ import {
     parseStringToBoolean,
 } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
-import { atom } from 'jotai';
+import { atom } from 'jotai/vanilla';
 import { WebConfig } from '../../configType';
 import {
     NEXT_PUBLIC_FIREBASE_CONFIG,

@@ -3,8 +3,8 @@ import { State, characterTemplate, simpleId, strIndex20Array } from '@flocon-trp
 import { keyNames } from '@flocon-trpg/utils';
 import { Button, Modal, Tooltip } from 'antd';
 import classNames from 'classnames';
-import { atom } from 'jotai';
-import { useAtomValue, useUpdateAtom } from 'jotai/utils';
+import { useAtomValue, useSetAtom } from 'jotai/react';
+import { atom } from 'jotai/vanilla';
 import React from 'react';
 import { useMemoOne } from 'use-memo-one';
 import { FileView } from '../../../../../file/FileView/FileView';
@@ -90,12 +90,9 @@ export type CharacterEditorModalAction =
     | null;
 
 const characterEditorModalPrimitiveAtom = atom<CharacterEditorModalState | null>(null);
-export const characterEditorModalAtom = atom<
-    CharacterEditorModalState | null,
-    CharacterEditorModalAction
->(
+export const characterEditorModalAtom = atom(
     get => get(characterEditorModalPrimitiveAtom),
-    (get, set, newValue) => {
+    (get, set, newValue: CharacterEditorModalAction) => {
         switch (newValue?.type) {
             case create:
                 set(characterEditorModalPrimitiveAtom, newValue);
@@ -218,8 +215,8 @@ const defaultCharacter: CharacterState = {
 export const CharacterEditorModal: React.FC = () => {
     const myUserUid = useMyUserUid();
     const atomValue = useAtomValue(characterEditorModalPrimitiveAtom);
-    const setAtomValue = useUpdateAtom(characterEditorModalAtom);
-    const setCommandEditorModal = useUpdateAtom(commandEditorModalAtom);
+    const setAtomValue = useSetAtom(characterEditorModalAtom);
+    const setCommandEditorModal = useSetAtom(commandEditorModalAtom);
     const setRoomState = useSetRoomStateWithImmer();
     const isMyCharacter = useIsMyCharacter();
     const characters = useCharacters();

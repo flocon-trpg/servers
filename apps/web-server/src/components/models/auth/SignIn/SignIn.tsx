@@ -18,8 +18,8 @@ import {
     signInWithPopup,
     updateProfile,
 } from 'firebase/auth';
-import { atom, useAtom, useSetAtom } from 'jotai';
-import { useAtomValue } from 'jotai/utils';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai/react';
+import { atom } from 'jotai/vanilla';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { storybookAtom } from '@/atoms/storybookAtom/storybookAtom';

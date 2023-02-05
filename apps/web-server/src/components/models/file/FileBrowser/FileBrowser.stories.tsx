@@ -1,7 +1,9 @@
 import { both, delay, groupJoinArray, loggerRef } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { createStore } from 'jotai/vanilla';
 import React from 'react';
+import useConstant from 'use-constant';
 import {
     FileBrowser,
     Props as FileBrowserProps,
@@ -109,10 +111,11 @@ const Practical: React.FC<PracticalProps> = ({
     React.useEffect(() => {
         setFilesState(toFilePath(filesSourceRef));
     }, []);
+    const jotaiStore = useConstant(() => createStore());
 
     return (
         <FileBrowser
-            jotaiScope='Pratical'
+            jotaiStore={jotaiStore}
             height={null}
             files={filesState}
             fileCreateLabel='😀ファイルを作成🤖'
@@ -175,6 +178,8 @@ export const Default: React.FC<Props> = ({
     defaultFileTypeFilter,
     ensuredFolderPaths,
 }) => {
+    const jotaiStore = useConstant(() => createStore());
+
     if (files == null) {
         if (filesSource == null) {
             throw new Error();
@@ -194,7 +199,7 @@ export const Default: React.FC<Props> = ({
 
     return (
         <FileBrowser
-            jotaiScope='Default'
+            jotaiStore={jotaiStore}
             height={null}
             fileCreateLabel='😀ファイルを作成🤖'
             searchPlaceholder='😀検索🤖'
