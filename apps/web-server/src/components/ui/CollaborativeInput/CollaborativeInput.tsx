@@ -286,6 +286,9 @@ export const CollaborativeInput: React.FC<Props> = ({
     const multiline = multilineProp === true;
     const disabled = disabledProp === true;
 
+    const [isOnComposition, setIsOnComposition] = React.useState(false);
+    const prevIsOnComposition = usePrevious(isOnComposition);
+    const isOnCompositionRef = useLatest(isOnComposition);
     const valueRef = useLatest(value);
     const onGetQuillRef = useLatest(onGetQuill);
 
@@ -310,6 +313,7 @@ export const CollaborativeInput: React.FC<Props> = ({
         formats: [],
         theme: 'bubble',
     });
+    const prevQuill = usePrevious(quill);
 
     let bufferDuration: number | null;
     switch (bufferDurationProp) {
@@ -362,24 +366,50 @@ export const CollaborativeInput: React.FC<Props> = ({
         }
     }, [bufferRef, onGetQuillRef, quill]);
 
+    const prevTextRef = React.useRef<string>();
     React.useEffect(() => {
         if (quill == null) {
             return;
         }
 
-        quill.setText(valueRef.current);
-
-        let prevText = quill.getText();
-        const textChangeHandler = () => {
+        const onTextChange = () => {
+            const prevText = prevTextRef.current;
+            if (prevText == null) {
+                return;
+            }
             const currentText = quill.getText();
             if (prevText !== currentText) {
                 onSkippingRef.current({ isSkipping: true });
                 onChangeInput(currentText);
             }
-            prevText = currentText;
+            prevTextRef.current = currentText;
         };
-        quill.on('text-change', textChangeHandler);
-    }, [onChangeInput, onSkippingRef, quill, valueRef]);
+        if (prevQuill !== quill) {
+            quill.setText(valueRef.current);
+            prevTextRef.current = quill.getText();
+            quill.on('text-change', () => {
+                if (isOnCompositionRef.current) {
+                    // 漢字変換前のひらがなの入力などの際は関数を実行しない(onCompositionEndが実行された際に実行する)ようにする処理。
+                    // これにより、漢字変換前のひらがなが、しばしば二重で入力されることがある不具合を回避している。
+                    return;
+                }
+                onTextChange();
+            });
+        }
+        if (prevIsOnComposition === true && isOnComposition === false) {
+            // 漢字変換前のひらがななどを入力していた場合は、onCompositionEndが実行された際に初めて変更を送信する処理。
+            onTextChange();
+        }
+    }, [
+        isOnComposition,
+        isOnCompositionRef,
+        onChangeInput,
+        onSkippingRef,
+        prevIsOnComposition,
+        prevQuill,
+        quill,
+        valueRef,
+    ]);
 
     React.useEffect(() => {
         if (quill == null) {
@@ -409,13 +439,20 @@ export const CollaborativeInput: React.FC<Props> = ({
         return css([sizeCss, disabled ? disabledCss : null]);
     }, [sizeCss, disabled]);
 
+    const onCompositionStart = React.useCallback(() => setIsOnComposition(true), []);
+    const onCompositionEnd = React.useCallback(() => setIsOnComposition(false), []);
     /* 
     refのあるdivにはQuillによってclassが自動的にセットされる。もしcssをrefのあるdivと同じ場所に置くと、cssValueが変わったときにrefのあるdivに入っていたclassが消失してしまう。
     それを防ぐため、cssとrefは別の場所に置いている。
     */
     return (
         <div css={cssValue} style={style} className={className}>
-            <div ref={quillRef} spellCheck={false} />
+            <div
+                ref={quillRef}
+                spellCheck={false}
+                onCompositionStart={onCompositionStart}
+                onCompositionEnd={onCompositionEnd}
+            />
         </div>
     );
 };
