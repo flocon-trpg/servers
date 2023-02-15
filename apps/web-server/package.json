@@ -5,7 +5,6 @@
     "license": "MIT",
     "scripts": {
         "build": "run-s build:deps build:self",
-        "build-less": "lessc ./src/styles/css/antd.less ./src/styles/css/antd.css --js",
         "build-storybook": "build-storybook",
         "build:deps": "yarn workspaces foreach -pvtR --from '@flocon-trpg/web-server' --exclude '@flocon-trpg/web-server' run build",
         "build:self": "next build",
@@ -67,7 +66,7 @@
         "@types/react-linkify": "^1.0.1",
         "@types/url-join": "^4.0.1",
         "@urql/devtools": "^2.0.3",
-        "antd": "^4.20.6",
+        "antd": "^5.0.0",
         "classnames": "^2.3.1",
         "clipboard-copy": "^4.0.1",
         "dayjs": "^1.11.7",

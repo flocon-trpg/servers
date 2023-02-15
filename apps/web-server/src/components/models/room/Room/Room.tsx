@@ -1,5 +1,6 @@
+import { Global } from '@emotion/react';
 import { recordToArray } from '@flocon-trpg/utils';
-import { Layout as AntdLayout, Modal, Result } from 'antd';
+import { Layout as AntdLayout, App, Result, theme } from 'antd';
 import classNames from 'classnames';
 import { useAtomValue } from 'jotai/react';
 import dynamic from 'next/dynamic';
@@ -845,6 +846,7 @@ const RollCallPanel: React.FC = () => {
 const RoomMessagePanel: React.FC<ConfigAndKeyProps<MessagePanelConfig>> = React.memo(
     function RoomMessagePanel({ config, keyName }) {
         const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+        const { modal } = App.useApp();
 
         const onDragStop = React.useCallback(
             (e: ControlPosition) => {
@@ -892,7 +894,7 @@ const RoomMessagePanel: React.FC<ConfigAndKeyProps<MessagePanelConfig>> = React.
             });
         }, [keyName, setRoomConfig]);
         const onClose = React.useCallback(() => {
-            Modal.confirm({
+            modal.confirm({
                 title: '削除の確認',
                 content: '選択されたメッセージウィンドウを削除します。よろしいですか？',
                 onOk: () => {
@@ -908,7 +910,7 @@ const RoomMessagePanel: React.FC<ConfigAndKeyProps<MessagePanelConfig>> = React.
                 closable: true,
                 maskClosable: true,
             });
-        }, [keyName, setRoomConfig]);
+        }, [keyName, modal, setRoomConfig]);
 
         if (config == null || config.isMinimized) {
             return null;
@@ -962,6 +964,11 @@ type Props = {
 };
 
 export const Room: React.FC<Props> = ({ debug }) => {
+    const { token } = theme.useToken();
+    const globalStyles = React.useMemo(
+        () => ({ body: { background: token.colorBgBase } }),
+        [token.colorBgBase]
+    );
     const myUserUid = useMyUserUid();
     const innerWidth = useAtomValue(debouncedWindowInnerWidthAtom);
     const innerHeight = useAtomValue(debouncedWindowInnerHeightAtom);
@@ -1004,6 +1011,8 @@ export const Room: React.FC<Props> = ({ debug }) => {
 
     return (
         <AntdLayout>
+            {/* ウィンドウがはみ出た場合でもブラウザ画面全体の background が黒くなるように、body に background を指定している。*/}
+            <Global styles={globalStyles} />
             <AntdLayout.Content>
                 <RoomMenu />
                 <div className={classNames(relative)}>

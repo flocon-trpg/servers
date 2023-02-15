@@ -1,7 +1,7 @@
 import * as Icons from '@ant-design/icons';
 import * as DocNode071 from '@flocon-trpg/typed-document-node-v0.7.1';
 import * as DocNode072 from '@flocon-trpg/typed-document-node-v0.7.2';
-import { Button, Dropdown, Menu, Modal, Table, Tooltip, notification } from 'antd';
+import { App, Button, Dropdown, Menu, Table, Tooltip } from 'antd';
 import classNames from 'classnames';
 import moment from 'moment';
 import { useRouter } from 'next/router';
@@ -25,6 +25,7 @@ const BookmarkButton: React.FC<{ data: Data072 }> = ({ data }) => {
     const [, updateBookmark] = useMutation(DocNode072.UpdateBookmarkDocument);
     const [loading, setLoading] = React.useState(false);
     const [checked, setChecked] = React.useState(data.isBookmarked);
+    const { notification } = App.useApp();
 
     return (
         <ToggleButton
@@ -65,6 +66,7 @@ const BookmarkButton: React.FC<{ data: Data072 }> = ({ data }) => {
 };
 
 const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
+    const { modal } = App.useApp();
     const router = useRouter();
     const isV072OrLater = useIsV072OrLater();
     const [, deleteRoomAsAdmin] = useMutation(DocNode072.DeleteRoomAsAdminDocument);
@@ -95,7 +97,7 @@ const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
                                 icon: <Icons.DeleteOutlined />,
                                 label: <div style={Styles.Text.danger}>削除</div>,
                                 onClick: () => {
-                                    Modal.warn({
+                                    modal.warning({
                                         onOk: async () => {
                                             await deleteRoomAsAdmin({ id: roomId });
                                             getRooms();
@@ -116,6 +118,7 @@ const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
     }, [
         isV072OrLater,
         getMyRolesQueryResult.data?.result.admin,
+        modal,
         deleteRoomAsAdmin,
         roomId,
         getRooms,
@@ -249,6 +252,7 @@ const RoomsListComponent: React.FC<RoomsListComponentProps> = ({
     roomsTable,
     onReload,
 }: RoomsListComponentProps) => {
+    const { notification } = App.useApp();
     const router = useRouter();
 
     return (

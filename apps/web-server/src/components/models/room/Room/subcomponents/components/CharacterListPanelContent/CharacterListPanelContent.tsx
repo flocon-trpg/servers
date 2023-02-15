@@ -12,6 +12,7 @@ import { loggerRef } from '@flocon-trpg/utils';
 import {
     Alert,
     Table as AntdTable,
+    App,
     Button,
     Checkbox,
     Dropdown,
@@ -654,6 +655,7 @@ const CharacterListPanelWithPanelId: React.FC<{
     // 複数のCharacterListが存在する場合は、panelIdをそれぞれ異なるものにする。
     panelId: string;
 }> = ({ panelId }) => {
+    const { modal } = App.useApp();
     const tabs = useAtomSelector(
         roomConfigAtom,
         roomConfig => roomConfig?.panels.characterPanel.tabs
@@ -703,7 +705,7 @@ const CharacterListPanelWithPanelId: React.FC<{
                                                 icon: <Icon.DeleteOutlined />,
                                                 label: '削除',
                                                 onClick: () =>
-                                                    Modal.warn({
+                                                    modal.warning({
                                                         onOk: () => {
                                                             setRoomConfig(roomConfig => {
                                                                 if (roomConfig == null) {
@@ -847,6 +849,7 @@ const CharacterListPanelWithPanelId: React.FC<{
         );
     }, [
         editingTabConfigKey,
+        modal,
         panelId,
         setCharacterEditorModal,
         setCharacterParameterNamesEditorVisibility,

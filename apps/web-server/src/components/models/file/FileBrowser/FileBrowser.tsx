@@ -20,6 +20,7 @@ import {
 import { Result } from '@kizahasi/result';
 import {
     Alert,
+    App,
     Breadcrumb,
     Button,
     Checkbox,
@@ -30,7 +31,6 @@ import {
     Modal,
     Select,
     Tooltip,
-    notification,
 } from 'antd';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import classNames from 'classnames';
@@ -1138,11 +1138,12 @@ const useCreateFolderAction = () => {
 const useTrySetDeleteStatusAsAsking = () => {
     const [deleteStatus, setDeleteStatus] = useAtom(deleteStatusAtom);
     const setIsModalVisible = useSetAtom(isDeleteConfirmModalVisibleAtom);
+    const { notification } = App.useApp();
 
     return React.useCallback(
         (askingDeleteStatus: AskingDeleteStatus) => {
             if (deleteStatus.type === 'deleting') {
-                notification.warn({
+                notification.warning({
                     placement: 'bottomRight',
                     message:
                         '現在行われている削除が全て完了するまで、他のファイルを削除することはできません。',
@@ -1153,7 +1154,7 @@ const useTrySetDeleteStatusAsAsking = () => {
             setDeleteStatus(() => askingDeleteStatus);
             setIsModalVisible(true);
         },
-        [deleteStatus.type, setDeleteStatus, setIsModalVisible]
+        [deleteStatus.type, notification, setDeleteStatus, setIsModalVisible]
     );
 };
 
@@ -1215,11 +1216,12 @@ const useRequestDeletingNodeAction = () => {
 const useTrySetRenameStatusAsAsking = () => {
     const [renameStatus, setRenameStatus] = useAtom(renameStatusAtom);
     const setIsModalVisible = useSetAtom(isRenameConfirmModalVisibleAtom);
+    const { notification } = App.useApp();
 
     return React.useCallback(
         (askingRenameStatus: AskingRenameStatus) => {
             if (renameStatus.type === 'renaming') {
-                notification.warn({
+                notification.warning({
                     placement: 'bottomRight',
                     message:
                         '現在行われているリネームが全て完了するまで、他のファイルをリネームすることはできません。',
@@ -1230,7 +1232,7 @@ const useTrySetRenameStatusAsAsking = () => {
             setRenameStatus(() => askingRenameStatus);
             setIsModalVisible(true);
         },
-        [renameStatus.type, setRenameStatus, setIsModalVisible]
+        [renameStatus.type, setRenameStatus, setIsModalVisible, notification]
     );
 };
 
@@ -2255,6 +2257,7 @@ const useStartAutoDeleteFiles = () => {
     const foldersDeletingOnNextRootFolderUpdate = useSetAtom(
         foldersDeletingOnNextRootFolderUpdateAtom
     );
+    const { notification } = App.useApp();
 
     React.useEffect(() => {
         if (isDeleting) {
@@ -2346,6 +2349,7 @@ const useStartAutoDeleteFiles = () => {
         setDeleteStatus,
         foldersDeletingOnNextRootFolderUpdate,
         setPathState,
+        notification,
     ]);
 };
 
@@ -2362,6 +2366,7 @@ const useStartAutoRenameFiles = () => {
     const setDeletingFoldersOnNextRootFolderUpdate = useSetAtom(
         foldersDeletingOnNextRootFolderUpdateAtom
     );
+    const { notification } = App.useApp();
 
     React.useEffect(() => {
         if (isRenaming) {
@@ -2464,6 +2469,7 @@ const useStartAutoRenameFiles = () => {
         setPathState,
         renameStatusRef,
         setDeletingFoldersOnNextRootFolderUpdate,
+        notification,
     ]);
 };
 

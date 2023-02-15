@@ -21,6 +21,7 @@ import {
 } from '@flocon-trpg/web-server-utils';
 import {
     Alert,
+    App,
     Button,
     Checkbox,
     Dropdown,
@@ -795,6 +796,8 @@ type Props = {
 };
 
 export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: Props) => {
+    const { modal } = App.useApp();
+
     const tabsAtom = React.useMemo(() => {
         return atom(get => get(roomConfigAtom)?.panels.messagePanels?.[panelId]?.tabs);
     }, [panelId]);
@@ -851,7 +854,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
 
         const createTabItem = (tab: MessageTabConfig, tabIndex: number) => {
             const onTabDelete = () => {
-                Modal.warn({
+                modal.warning({
                     onOk: () => {
                         setRoomConfig(roomConfig => {
                             if (roomConfig == null) {
@@ -987,7 +990,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                 }}
             />
         );
-    }, [contentHeight, editingTabConfigKey, panelId, setRoomConfig, tabs, tabsHeight]);
+    }, [contentHeight, editingTabConfigKey, modal, panelId, setRoomConfig, tabs, tabsHeight]);
 
     if (roomId == null || draggableTabs == null) {
         return null;

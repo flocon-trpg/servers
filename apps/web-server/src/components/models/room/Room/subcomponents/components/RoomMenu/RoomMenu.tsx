@@ -1099,7 +1099,14 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
         const menuItems: ItemType[] = [
             {
                 key: 'logo@menu',
-                label: <img src='/assets/logo.png' width={24} height={24} />,
+                label: (
+                    <img
+                        src='/assets/logo.png'
+                        width={24}
+                        height={24}
+                        style={{ verticalAlign: 'middle' }}
+                    />
+                ),
                 onClick: () => router.push('/'),
             },
             {

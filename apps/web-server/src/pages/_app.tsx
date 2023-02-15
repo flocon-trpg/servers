@@ -1,4 +1,3 @@
-import '../styles/css/antd.css';
 import '../styles/css/main.scss';
 
 import 'firebase/auth';

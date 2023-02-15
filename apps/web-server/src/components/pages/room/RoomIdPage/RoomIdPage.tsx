@@ -20,6 +20,7 @@ import { useMutation } from 'urql';
 import { hideAllOverlayActionAtom } from '@/atoms/hideAllOverlayActionAtom/hideAllOverlayActionAtom';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
+import { AntdThemeConfigProvider } from '@/components/behaviors/AntdThemeConfigProvider';
 import { Room } from '@/components/models/room/Room/Room';
 import { roomPrivateMessageInputAtom } from '@/components/models/room/Room/subcomponents/atoms/roomPrivateMessageInputAtom/roomPrivateMessageInputAtom';
 import { roomPublicMessageInputAtom } from '@/components/models/room/Room/subcomponents/atoms/roomPublicMessageInputAtom/roomPublicMessageInputAtom';
@@ -418,7 +419,9 @@ const RoomClientInitializer: React.FC<{ roomId: string }> = ({ roomId }) => {
 
     return (
         <RoomBehavior roomId={roomId}>
-            <Room />
+            <AntdThemeConfigProvider compact>
+                <Room />
+            </AntdThemeConfigProvider>
         </RoomBehavior>
     );
 };

@@ -236,14 +236,14 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
     }
 
     return (
-        <AntdLayout style={{ height: '100vh' }}>
+        <AntdLayout style={{ minHeight: '100vh' }}>
             {!hideHeader && (
                 <Header>
                     <Row>
                         <Col flex={0}>
                             <Link href='/'>
                                 <img
-                                    style={{ cursor: 'pointer' }}
+                                    style={{ cursor: 'pointer', verticalAlign: 'middle' }}
                                     src='/assets/logo.png'
                                     width={32}
                                     height={32}
