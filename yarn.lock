@@ -2842,7 +2842,7 @@ __metadata:
     "@types/safe-compare": ^1.1.0
     "@types/sharp": ^0.31.0
     "@types/url-join": 4.0.1
-    "@types/uuid": ^8.3.1
+    "@types/uuid": ^9.0.0
     "@types/ws": ^8.0.0
     "@types/yargs": ^17.0.3
     "@typescript-eslint/eslint-plugin": 5.44.0
@@ -2895,7 +2895,7 @@ __metadata:
     type-graphql: ^1.1.1
     typescript: 4.9.5
     url-join: 4.0.1
-    uuid: ^8.3.2
+    uuid: ^9.0.0
     ws: ^8.8.1
     yargs: ^17.2.1
     zod: ^3.19.1
@@ -7552,10 +7552,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/uuid@npm:^8.3.1":
-  version: 8.3.4
-  resolution: "@types/uuid@npm:8.3.4"
-  checksum: 6f11f3ff70f30210edaa8071422d405e9c1d4e53abbe50fdce365150d3c698fe7bbff65c1e71ae080cbfb8fded860dbb5e174da96fdbbdfcaa3fb3daa474d20f
+"@types/uuid@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "@types/uuid@npm:9.0.0"
+  checksum: 59ae56d9547c8758588659da2a2b4c97cce79c2aae1798c892bb29452ef08e87859dea2ec3a66bfa88d0d2153147520be2b1893be920f9f0bc9c53a3207ea6aa
   languageName: node
   linkType: hard
 
@@ -25774,7 +25774,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:^8.0.0, uuid@npm:^8.3.2":
+"uuid@npm:^8.0.0":
   version: 8.3.2
   resolution: "uuid@npm:8.3.2"
   bin:
