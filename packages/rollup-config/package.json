@@ -10,7 +10,7 @@
         "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\""
     },
     "dependencies": {
-        "@rollup/plugin-typescript": "10.0.1"
+        "@rollup/plugin-typescript": "11.0.0"
     },
     "devDependencies": {
         "@flocon-trpg/eslint-config": "workspace:^",

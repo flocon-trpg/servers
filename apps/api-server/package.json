@@ -105,7 +105,7 @@
         "@graphql-codegen/typed-document-node": "2.3.13",
         "@graphql-codegen/typescript": "2.8.8",
         "@graphql-codegen/typescript-operations": "2.5.13",
-        "@rollup/plugin-typescript": "10.0.1",
+        "@rollup/plugin-typescript": "11.0.0",
         "@types/jest": "29.4.0",
         "@types/url-join": "4.0.1",
         "@typescript-eslint/eslint-plugin": "5.51.0",

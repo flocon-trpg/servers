@@ -2834,7 +2834,7 @@ __metadata:
     "@mikro-orm/mysql": ^5.1.1
     "@mikro-orm/postgresql": ^5.1.1
     "@mikro-orm/sqlite": ^5.1.1
-    "@rollup/plugin-typescript": 10.0.1
+    "@rollup/plugin-typescript": 11.0.0
     "@types/bcrypt": ^5.0.0
     "@types/color": ^3.0.2
     "@types/express": ^4.17.13
@@ -3054,7 +3054,7 @@ __metadata:
     "@flocon-trpg/eslint-config": "workspace:^"
     "@flocon-trpg/prettier-config": "workspace:^"
     "@flocon-trpg/tsconfig": "workspace:^"
-    "@rollup/plugin-typescript": 10.0.1
+    "@rollup/plugin-typescript": 11.0.0
     "@typescript-eslint/eslint-plugin": 5.51.0
     "@typescript-eslint/parser": 5.51.0
     eslint: 8.34.0
@@ -5321,9 +5321,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-typescript@npm:10.0.1":
-  version: 10.0.1
-  resolution: "@rollup/plugin-typescript@npm:10.0.1"
+"@rollup/plugin-typescript@npm:11.0.0":
+  version: 11.0.0
+  resolution: "@rollup/plugin-typescript@npm:11.0.0"
   dependencies:
     "@rollup/pluginutils": ^5.0.1
     resolve: ^1.22.1
@@ -5336,7 +5336,7 @@ __metadata:
       optional: true
     tslib:
       optional: true
-  checksum: d3e85674b5ff56c4376bbd79fd2baced3e988b7110d60b1f818eb344721f5605eaa3b56a1668631d210399db7188a7cc4790bb423ad9e56144d015fd1591ccc3
+  checksum: b0d34ff0ad6bfc681c437ef42df7b02f04c361465be5a2044cd30cac5b003045c54e4377d58ab91925e296076b792bbb5ddded72cacdd21092bc8694a95b046f
   languageName: node
   linkType: hard
 
