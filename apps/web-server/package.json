@@ -67,7 +67,7 @@
         "@types/react-linkify": "^1.0.1",
         "@types/url-join": "^4.0.1",
         "@urql/devtools": "^2.0.3",
-        "antd": "^4.20.6",
+        "antd": "^5.0.0",
         "classnames": "^2.3.1",
         "clipboard-copy": "^4.0.1",
         "dayjs": "^1.11.7",
