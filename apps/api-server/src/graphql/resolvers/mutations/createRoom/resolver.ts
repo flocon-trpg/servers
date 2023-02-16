@@ -12,9 +12,9 @@ import {
     UseMiddleware,
     createUnionType,
 } from 'type-graphql';
-import { GlobalRoom } from '../../../../entities-graphql/room';
 import * as Participant$MikroORM from '../../../../entities/participant/entity';
 import * as Room$MikroORM from '../../../../entities/room/entity';
+import { GlobalRoom } from '../../../../entities-graphql/room';
 import { CreateRoomFailureType } from '../../../../enums/CreateRoomFailureType';
 import { ParticipantRoleType } from '../../../../enums/ParticipantRoleType';
 import { ResolverContext } from '../../../../types';

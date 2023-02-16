@@ -26,16 +26,16 @@ import {
     UseMiddleware,
     createUnionType,
 } from 'type-graphql';
+import {
+    DicePieceLog as DicePieceLog$MikroORM,
+    StringPieceLog as StringPieceLog$MikroORM,
+} from '../../../../entities/roomMessage/entity';
 import { GlobalRoom } from '../../../../entities-graphql/room';
 import * as RoomAsListItemGlobal from '../../../../entities-graphql/roomAsListItem';
 import {
     DicePieceLog as DicePieceLogNameSpace,
     StringPieceLog as StringPieceLogNameSpace,
 } from '../../../../entities-graphql/roomMessage';
-import {
-    DicePieceLog as DicePieceLog$MikroORM,
-    StringPieceLog as StringPieceLog$MikroORM,
-} from '../../../../entities/roomMessage/entity';
 import { OperateRoomFailureType } from '../../../../enums/OperateRoomFailureType';
 import { ResolverContext } from '../../../../types';
 import { ENTRY } from '../../../../utils/roles';

@@ -40,7 +40,7 @@ const buildSchema = (serverConfig) => async (options) => {
         authChecker: authChecker(serverConfig),
         emitSchemaFile,
         pubSub: options.pubSub,
-        validate
+        validate,
     });
 };
 const buildSchemaSync = (serverConfig) => (options) => {
@@ -54,7 +54,7 @@ const buildSchemaSync = (serverConfig) => (options) => {
         authChecker: authChecker(serverConfig),
         emitSchemaFile,
         pubSub: options.pubSub,
-        validate
+        validate,
     });
 };
 

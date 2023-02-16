@@ -18,15 +18,15 @@ import Color from 'color';
 import safeCompare from 'safe-compare';
 import { PubSubEngine } from 'type-graphql';
 import { EntryPasswordConfig, ServerConfig, plain } from '../../../config/types';
+import * as Room$MikroORM from '../../../entities/room/entity';
+import { RoomPrvMsg, RoomPubMsg } from '../../../entities/roomMessage/entity';
+import { User } from '../../../entities/user/entity';
+import { getUserIfEntry } from '../../../entities/user/getUserIfEntry';
 import { GlobalRoom } from '../../../entities-graphql/room';
 import {
     DicePieceLog as DicePieceLogNameSpace,
     StringPieceLog as StringPieceLogNameSpace,
 } from '../../../entities-graphql/roomMessage';
-import * as Room$MikroORM from '../../../entities/room/entity';
-import { RoomPrvMsg, RoomPubMsg } from '../../../entities/roomMessage/entity';
-import { User } from '../../../entities/user/entity';
-import { getUserIfEntry } from '../../../entities/user/getUserIfEntry';
 import { BaasType } from '../../../enums/BaasType';
 import { DecodedIdToken, EM, ResolverContext } from '../../../types';
 import { RoomOperation } from '../../objects/room';
