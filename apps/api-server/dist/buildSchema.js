@@ -28,6 +28,7 @@ const optionBase = {
 const emitSchemaFileOptions = {
     path: path.resolve(process.cwd(), './tmp/schema.gql'),
 };
+const validate = { forbidUnknownValues: false };
 const buildSchema = (serverConfig) => async (options) => {
     registerEnumTypes.registerEnumTypes();
     let emitSchemaFile = undefined;
@@ -39,6 +40,7 @@ const buildSchema = (serverConfig) => async (options) => {
         authChecker: authChecker(serverConfig),
         emitSchemaFile,
         pubSub: options.pubSub,
+        validate
     });
 };
 const buildSchemaSync = (serverConfig) => (options) => {
@@ -52,6 +54,7 @@ const buildSchemaSync = (serverConfig) => (options) => {
         authChecker: authChecker(serverConfig),
         emitSchemaFile,
         pubSub: options.pubSub,
+        validate
     });
 };
 
