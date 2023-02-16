@@ -29,6 +29,20 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----
 
+The following software may be included in this product: @ant-design/cssinjs, rc-input, rc-motion, rc-overflow, rc-picker, rc-resize-observer, rc-segmented, rc-textarea. A copy of the source code may be downloaded from git@github.com:ant-design/cssinjs.git (@ant-design/cssinjs), git@github.com:react-component/input.git (rc-input), git@github.com:react-component/motion.git (rc-motion), git@github.com:react-component/overflow.git (rc-overflow), git@github.com:react-component/picker.git (rc-picker), git@github.com:react-component/resize-observer.git (rc-resize-observer), git@github.com:react-component/segmented.git (rc-segmented), git@github.com:react-component/textarea.git (rc-textarea). This software contains the following license and notice below:
+
+The MIT License (MIT)
+
+Copyright (c) 2019-present afc163
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-----
+
 The following software may be included in this product: @ant-design/react-slick, json2mq. A copy of the source code may be downloaded from https://github.com/ant-design/react-slick (@ant-design/react-slick), https://github.com/akiran/json2mq (json2mq). This software contains the following license and notice below:
 
 The MIT License (MIT)
@@ -657,7 +671,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 -----
 
-The following software may be included in this product: @rc-component/portal, rc-field-form. A copy of the source code may be downloaded from https://github.com/react-component/portal.git (@rc-component/portal), https://github.com/react-component/field-form.git (rc-field-form). This software contains the following license and notice below:
+The following software may be included in this product: @rc-component/context, async-validator, dom-align, rc-align, rc-collapse, rc-dialog, rc-input-number, rc-menu, rc-notification, rc-pagination, rc-progress, rc-rate, rc-steps, rc-switch, rc-tabs. A copy of the source code may be downloaded from git@github.com:react-component/context.git (@rc-component/context), git@github.com:yiminghe/async-validator.git (async-validator), git@github.com:yiminghe/dom-align.git (dom-align), git@github.com:react-component/align.git (rc-align), git@github.com:react-component/collapse.git (rc-collapse), git@github.com:react-component/dialog.git (rc-dialog), git@github.com:react-component/input-number.git (rc-input-number), git@github.com:react-component/menu.git (rc-menu), git@github.com:react-component/notification.git (rc-notification), git@github.com:react-component/pagination.git (rc-pagination), git@github.com:react-component/progress.git (rc-progress), https://github.com/react-component/rate.git (rc-rate),  git+ssh://git@github.com/react-component/steps.git (rc-steps), git@github.com:react-component/switch.git (rc-switch), git@github.com:react-component/tabs.git (rc-tabs). This software contains the following license and notice below:
+
+The MIT License (MIT)
+
+Copyright (c) 2014-present yiminghe
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-----
+
+The following software may be included in this product: @rc-component/mini-decimal, @rc-component/mutate-observer, @rc-component/portal, @rc-component/tour, rc-field-form. A copy of the source code may be downloaded from https://github.com/react-component/mini-decimal.git (@rc-component/mini-decimal), https://github.com/react-component/mutate-observer.git (@rc-component/mutate-observer), https://github.com/react-component/portal.git (@rc-component/portal), https://github.com/react-component/tour.git (@rc-component/tour), https://github.com/react-component/field-form.git (rc-field-form). This software contains the following license and notice below:
 
 MIT License
 
@@ -1030,20 +1058,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-
------
-
-The following software may be included in this product: async-validator, dom-align, rc-align, rc-collapse, rc-dialog, rc-input-number, rc-menu, rc-notification, rc-pagination, rc-progress, rc-rate, rc-steps, rc-switch, rc-tabs. A copy of the source code may be downloaded from git@github.com:yiminghe/async-validator.git (async-validator), git@github.com:yiminghe/dom-align.git (dom-align), git@github.com:react-component/align.git (rc-align), git@github.com:react-component/collapse.git (rc-collapse), git@github.com:react-component/dialog.git (rc-dialog), git@github.com:react-component/input-number.git (rc-input-number), git@github.com:react-component/menu.git (rc-menu), git@github.com:react-component/notification.git (rc-notification), git@github.com:react-component/pagination.git (rc-pagination), git@github.com:react-component/progress.git (rc-progress), https://github.com/react-component/rate.git (rc-rate),  git+ssh://git@github.com/react-component/steps.git (rc-steps), git@github.com:react-component/switch.git (rc-switch), git@github.com:react-component/tabs.git (rc-tabs). This software contains the following license and notice below:
-
-The MIT License (MIT)
-
-Copyright (c) 2014-present yiminghe
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----
 
@@ -1961,11 +1975,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----
 
-The following software may be included in this product: compute-scroll-into-view. A copy of the source code may be downloaded from git+https://github.com/stipsan/compute-scroll-into-view.git. This software contains the following license and notice below:
+The following software may be included in this product: compute-scroll-into-view, scroll-into-view-if-needed. A copy of the source code may be downloaded from git+https://github.com/scroll-into-view/compute-scroll-into-view.git (compute-scroll-into-view), git+https://github.com/scroll-into-view/scroll-into-view-if-needed.git (scroll-into-view-if-needed). This software contains the following license and notice below:
 
 MIT License
 
-Copyright (c) 2018 Cody Olsen
+Copyright (c) 2023 Cody Olsen
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -2167,32 +2181,6 @@ THE SOFTWARE.
 The following software may be included in this product: csstype. This software contains the following license and notice below:
 
 Copyright (c) 2017-2018 Fredrik Nicol
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
------
-
-The following software may be included in this product: date-fns. This software contains the following license and notice below:
-
-MIT License
-
-Copyright (c) 2021 Sasha Koss and Lesha Koss https://kossnocorp.mit-license.org
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -6394,6 +6382,29 @@ support library is itself covered by the above license.
 
 -----
 
+The following software may be included in this product: qrcode.react. A copy of the source code may be downloaded from https://github.com/zpao/qrcode.react.git. This software contains the following license and notice below:
+
+ISC License
+
+Copyright (c) 2015, Paul O’Shannessy
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+
+This product bundles QR Code Generator, which is available under a
+"MIT" license. For details, see src/third-party/qrcodegen.
+
+-----
+
 The following software may be included in this product: quick-format-unescaped. A copy of the source code may be downloaded from git+https://github.com/davidmarkclements/quick-format.git. This software contains the following license and notice below:
 
 The MIT License (MIT)
@@ -6556,20 +6567,6 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
------
-
-The following software may be included in this product: rc-input, rc-motion, rc-overflow, rc-picker, rc-resize-observer, rc-segmented, rc-textarea. A copy of the source code may be downloaded from git@github.com:react-component/input.git (rc-input), git@github.com:react-component/motion.git (rc-motion), git@github.com:react-component/overflow.git (rc-overflow), git@github.com:react-component/picker.git (rc-picker), git@github.com:react-component/resize-observer.git (rc-resize-observer), git@github.com:react-component/segmented.git (rc-segmented), git@github.com:react-component/textarea.git (rc-textarea). This software contains the following license and notice below:
-
-The MIT License (MIT)
-
-Copyright (c) 2019-present afc163
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----
 
@@ -7538,32 +7535,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 -----
 
-The following software may be included in this product: scroll-into-view-if-needed. A copy of the source code may be downloaded from git+https://github.com/stipsan/scroll-into-view-if-needed.git. This software contains the following license and notice below:
-
-MIT License
-
-Copyright (c) 2017 Stian Didriksen
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
------
-
 The following software may be included in this product: set-harmonic-interval. This software contains the following license and notice below:
 
 This is free and unencumbered software released into the public domain.
@@ -7600,32 +7571,6 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
------
-
-The following software may be included in this product: shallowequal. This software contains the following license and notice below:
-
-MIT License
-
-Copyright (c) 2017 Alberto Leal <mailforalberto@gmail.com> (github.com/dashed)
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
 
 -----
 
