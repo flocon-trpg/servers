@@ -1,7 +1,7 @@
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 import { State, characterTemplate, simpleId, strIndex20Array } from '@flocon-trpg/core';
 import { keyNames } from '@flocon-trpg/utils';
-import { Button, Modal, Tooltip } from 'antd';
+import { Button, Divider, Modal, Tooltip } from 'antd';
 import classNames from 'classnames';
 import { useAtomValue, useSetAtom } from 'jotai/react';
 import { atom } from 'jotai/vanilla';
@@ -356,428 +356,448 @@ export const CharacterEditorModal: React.FC = () => {
                     />
                 }
             >
-                <div className={classNames(flex, flexRow)}>
-                    <Table style={{ minWidth: 500 }}>
-                        {atomValue?.type === update && atomValue.selectedPieceType === piece && (
-                            <CharacterPieceEditor
-                                pieceId={atomValue.pieceId}
-                                boardId={atomValue.boardId}
-                            />
-                        )}
-
-                        {atomValue?.type === update && atomValue.selectedPieceType === portrait && (
-                            <PortraitPieceEditor
-                                pieceId={atomValue.pieceId}
-                                boardId={atomValue.boardId}
-                            />
-                        )}
-
-                        {atomValue?.type === update && (
-                            <>
-                                <TableHeader>作成者</TableHeader>
-                                <TableRow label='作成者'>
-                                    <>
-                                        <span>{participantName}</span>
-                                        {createdByMe && (
-                                            <span style={{ paddingLeft: 2, fontWeight: 'bold' }}>
-                                                (自分)
-                                            </span>
-                                        )}
-                                    </>
-                                </TableRow>
-                            </>
-                        )}
-
-                        {atomValue?.type !== update ? null : (
-                            <>
-                                <TableHeader>アクション</TableHeader>
-
-                                <TableRow>
-                                    <Tooltip title='コマを除き、このキャラクターを複製します。'>
-                                        {/* TODO: 複製したことを何らかの形で通知したほうがいい */}
-                                        <Button
-                                            size='small'
-                                            onClick={() => {
-                                                const id = simpleId();
-                                                setRoomState(roomState => {
-                                                    if (roomState.characters == null) {
-                                                        roomState.characters = {};
-                                                    }
-                                                    roomState.characters[id] = {
-                                                        ...character,
-                                                        name: `${character.name} (複製)`,
-                                                    };
-                                                });
-                                            }}
-                                        >
-                                            このキャラクターを複製
-                                        </Button>
-                                    </Tooltip>
-                                </TableRow>
-                            </>
-                        )}
-
-                        <TableHeader>全体公開</TableHeader>
-
-                        <TableRow label='全体公開'>
-                            <ToggleButton
-                                size='small'
-                                disabled={
-                                    createdByMe || atomValue?.type === create
-                                        ? false
-                                        : characterIsNotPrivateAndNotCreatedByMe
-                                }
-                                showAsTextWhenDisabled
-                                checked={!character.isPrivate}
-                                checkedChildren={<EyeOutlined />}
-                                unCheckedChildren={<EyeInvisibleOutlined />}
-                                tooltip={
-                                    character.isPrivate
-                                        ? characterIsPrivate({
-                                              isCreate,
-                                          })
-                                        : characterIsNotPrivate({
-                                              isCreate,
-                                          })
-                                }
-                                onChange={newValue =>
-                                    updateCharacter(character => {
-                                        if (character == null) {
-                                            return;
-                                        }
-                                        character.isPrivate = !newValue;
-                                    })
-                                }
-                                shape='circle'
-                                defaultType='dashed'
-                            />
-                        </TableRow>
-
-                        <TableHeader>共通パラメーター</TableHeader>
-
-                        <TableRow label='名前'>
-                            <CollaborativeInput
-                                bufferDuration='default'
-                                size='small'
-                                value={character.name}
-                                onChange={e => {
-                                    if (e.previousValue === e.currentValue) {
-                                        return;
-                                    }
-                                    updateCharacter(character => {
-                                        if (character == null) {
-                                            return;
-                                        }
-                                        character.name = e.currentValue;
-                                    });
-                                }}
-                            />
-                        </TableRow>
-
-                        <TableRow label='アイコン画像'>
-                            <FileView
-                                filePath={character.image ?? undefined}
-                                onPathChange={path =>
-                                    updateCharacter(character => {
-                                        if (character == null) {
-                                            return;
-                                        }
-                                        character.image =
-                                            path == null
-                                                ? undefined
-                                                : FilePathModule.toOtState(path);
-                                    })
-                                }
-                                showImage
-                                maxWidthOfLink={100}
-                                uploaderFileBrowserHeight={null}
-                                defaultFileTypeFilter={image}
-                            />
-                        </TableRow>
-
-                        <TableRow label='立ち絵画像'>
-                            <FileView
-                                filePath={character.portraitImage ?? undefined}
-                                onPathChange={path =>
-                                    updateCharacter(character => {
-                                        if (character == null) {
-                                            return;
-                                        }
-                                        character.portraitImage =
-                                            path == null
-                                                ? undefined
-                                                : FilePathModule.toOtState(path);
-                                    })
-                                }
-                                showImage
-                                maxWidthOfLink={100}
-                                defaultFileTypeFilter={image}
-                                uploaderFileBrowserHeight={null}
-                            />
-                        </TableRow>
-
-                        <TableHeader>タグ</TableHeader>
-
-                        <TableCombinedRow>
-                            <CharacterTagsSelect
-                                character={character}
-                                onChange={recipe =>
-                                    updateCharacter(character => {
-                                        if (character == null) {
-                                            return;
-                                        }
-                                        recipe(character);
-                                    })
-                                }
-                            />
-                        </TableCombinedRow>
-
-                        <TableHeader>数値パラメーター</TableHeader>
-
-                        {strIndex20Array.map(key => {
-                            const paramName = numParamNames.get(key);
-                            if (paramName === undefined) {
-                                return null;
-                            }
-                            const value = character.numParams?.[key];
-                            const maxValue = character.numMaxParams?.[key];
-                            return (
-                                <TableRow
-                                    key={keyNames('CharacterEditorModal', `numParam${key}Row`)}
-                                    label={
-                                        <OverriddenParameterNameEditor
-                                            type='editor'
-                                            baseName={paramName.name}
-                                            overriddenParameterName={value?.overriddenParameterName}
-                                            onOverriddenParameterNameChange={newValue =>
-                                                updateCharacter(character => {
-                                                    const param = character?.numParams?.[key];
-                                                    if (param == null) {
-                                                        return;
-                                                    }
-                                                    param.overriddenParameterName = newValue;
-                                                })
-                                            }
-                                        />
-                                    }
-                                >
-                                    <NumberParameterInput
-                                        isCharacterPrivate={character.isPrivate}
-                                        isCreate={isCreate}
-                                        compact={false}
-                                        parameterKey={key}
-                                        numberParameter={value}
-                                        numberMaxParameter={maxValue}
-                                        createdByMe={createdByMe}
-                                        onOperate={mapping => {
-                                            updateCharacter(character => {
-                                                if (character == null) {
-                                                    return;
-                                                }
-                                                return mapping(character);
-                                            });
-                                        }}
+                <div className={classNames(flex, flexColumn)}>
+                    <Divider />
+                    <div className={classNames(flex, flexRow)}>
+                        <Table style={{ minWidth: 500 }}>
+                            {atomValue?.type === update &&
+                                atomValue.selectedPieceType === piece && (
+                                    <CharacterPieceEditor
+                                        pieceId={atomValue.pieceId}
+                                        boardId={atomValue.boardId}
                                     />
-                                </TableRow>
-                            );
-                        })}
+                                )}
 
-                        {numParamNames.size === 0 && (
-                            <TableCombinedRow>数値パラメーターはありません。</TableCombinedRow>
-                        )}
-
-                        <TableHeader>チェックマークパラメーター</TableHeader>
-
-                        {strIndex20Array.map(key => {
-                            const paramName = boolParamNames.get(key);
-                            if (paramName === undefined) {
-                                return null;
-                            }
-                            const value = character.boolParams?.[key];
-                            return (
-                                <TableRow
-                                    key={keyNames('CharacterEditorModal', `boolParam${key}Row`)}
-                                    label={
-                                        <OverriddenParameterNameEditor
-                                            type='editor'
-                                            baseName={paramName.name}
-                                            overriddenParameterName={value?.overriddenParameterName}
-                                            onOverriddenParameterNameChange={newValue =>
-                                                updateCharacter(character => {
-                                                    const param = character?.boolParams?.[key];
-                                                    if (param == null) {
-                                                        return;
-                                                    }
-                                                    param.overriddenParameterName = newValue;
-                                                })
-                                            }
-                                        />
-                                    }
-                                >
-                                    <BooleanParameterInput
-                                        isCharacterPrivate={character.isPrivate}
-                                        isCreate={isCreate}
-                                        compact={false}
-                                        parameterKey={key}
-                                        parameter={value}
-                                        createdByMe={createdByMe}
-                                        onOperate={mapping => {
-                                            updateCharacter(character => {
-                                                if (character == null) {
-                                                    return;
-                                                }
-                                                return mapping(character);
-                                            });
-                                        }}
+                            {atomValue?.type === update &&
+                                atomValue.selectedPieceType === portrait && (
+                                    <PortraitPieceEditor
+                                        pieceId={atomValue.pieceId}
+                                        boardId={atomValue.boardId}
                                     />
-                                </TableRow>
-                            );
-                        })}
+                                )}
 
-                        {boolParamNames.size === 0 && (
-                            <TableCombinedRow>
-                                チェックマークパラメーターはありません。
-                            </TableCombinedRow>
-                        )}
+                            {atomValue?.type === update && (
+                                <>
+                                    <TableHeader>作成者</TableHeader>
+                                    <TableRow label='作成者'>
+                                        <>
+                                            <span>{participantName}</span>
+                                            {createdByMe && (
+                                                <span
+                                                    style={{ paddingLeft: 2, fontWeight: 'bold' }}
+                                                >
+                                                    (自分)
+                                                </span>
+                                            )}
+                                        </>
+                                    </TableRow>
+                                </>
+                            )}
 
-                        <TableHeader>文字列パラメーター</TableHeader>
+                            {atomValue?.type !== update ? null : (
+                                <>
+                                    <TableHeader>アクション</TableHeader>
 
-                        {strIndex20Array.map(key => {
-                            const paramName = strParamNames.get(key);
-                            if (paramName === undefined) {
-                                return null;
-                            }
-                            const value = character.strParams?.[key];
-                            return (
-                                <TableRow
-                                    key={keyNames('CharacterEditorModal', `strParam${key}Row`)}
-                                    label={
-                                        <OverriddenParameterNameEditor
-                                            type='editor'
-                                            baseName={paramName.name}
-                                            overriddenParameterName={value?.overriddenParameterName}
-                                            onOverriddenParameterNameChange={newValue =>
-                                                updateCharacter(character => {
-                                                    const param = character?.strParams?.[key];
-                                                    if (param == null) {
-                                                        return;
-                                                    }
-                                                    param.overriddenParameterName = newValue;
-                                                })
-                                            }
-                                        />
+                                    <TableRow>
+                                        <Tooltip title='コマを除き、このキャラクターを複製します。'>
+                                            {/* TODO: 複製したことを何らかの形で通知したほうがいい */}
+                                            <Button
+                                                size='small'
+                                                onClick={() => {
+                                                    const id = simpleId();
+                                                    setRoomState(roomState => {
+                                                        if (roomState.characters == null) {
+                                                            roomState.characters = {};
+                                                        }
+                                                        roomState.characters[id] = {
+                                                            ...character,
+                                                            name: `${character.name} (複製)`,
+                                                        };
+                                                    });
+                                                }}
+                                            >
+                                                このキャラクターを複製
+                                            </Button>
+                                        </Tooltip>
+                                    </TableRow>
+                                </>
+                            )}
+
+                            <TableHeader>全体公開</TableHeader>
+
+                            <TableRow label='全体公開'>
+                                <ToggleButton
+                                    size='small'
+                                    disabled={
+                                        createdByMe || atomValue?.type === create
+                                            ? false
+                                            : characterIsNotPrivateAndNotCreatedByMe
                                     }
-                                >
-                                    <StringParameterInput
-                                        compact={false}
-                                        isCharacterPrivate={character.isPrivate}
-                                        isCreate={isCreate}
-                                        parameterKey={key}
-                                        parameter={value}
-                                        createdByMe={createdByMe}
-                                        onOperate={mapping => {
-                                            updateCharacter(character => {
-                                                if (character == null) {
-                                                    return;
-                                                }
-                                                return mapping(character);
-                                            });
-                                        }}
-                                    />
-                                </TableRow>
-                            );
-                        })}
-
-                        {strParamNames.size === 0 && (
-                            <TableCombinedRow>文字列パラメーターはありません。</TableCombinedRow>
-                        )}
-                    </Table>
-
-                    <div
-                        className={classNames(flexAuto, flex, flexColumn)}
-                        style={{ paddingLeft: 60, overflow: 'hidden' }}
-                    >
-                        <EditorGroupHeader>メモ</EditorGroupHeader>
-
-                        <CollaborativeInput
-                            style={{ overflow: 'auto', flex: '1 0 auto', maxHeight: 300 }}
-                            multiline
-                            size='small'
-                            bufferDuration='default'
-                            value={character.memo}
-                            onChange={e => {
-                                updateCharacter(character => {
-                                    if (character == null) {
-                                        return;
+                                    showAsTextWhenDisabled
+                                    checked={!character.isPrivate}
+                                    checkedChildren={<EyeOutlined />}
+                                    unCheckedChildren={<EyeInvisibleOutlined />}
+                                    tooltip={
+                                        character.isPrivate
+                                            ? characterIsPrivate({
+                                                  isCreate,
+                                              })
+                                            : characterIsNotPrivate({
+                                                  isCreate,
+                                              })
                                     }
-                                    character.memo = e.currentValue;
-                                });
-                            }}
-                        />
-
-                        {createdByMe && (
-                            <>
-                                <EditorGroupHeader>変数</EditorGroupHeader>
-
-                                <CharacterVarInput
-                                    style={{ overflow: 'auto', flex: '1 0 auto', maxHeight: 300 }}
-                                    character={character}
                                     onChange={newValue =>
                                         updateCharacter(character => {
                                             if (character == null) {
                                                 return;
                                             }
-                                            character.privateVarToml = newValue;
+                                            character.isPrivate = !newValue;
+                                        })
+                                    }
+                                    shape='circle'
+                                    defaultType='dashed'
+                                />
+                            </TableRow>
+
+                            <TableHeader>共通パラメーター</TableHeader>
+
+                            <TableRow label='名前'>
+                                <CollaborativeInput
+                                    bufferDuration='default'
+                                    size='small'
+                                    value={character.name}
+                                    onChange={e => {
+                                        if (e.previousValue === e.currentValue) {
+                                            return;
+                                        }
+                                        updateCharacter(character => {
+                                            if (character == null) {
+                                                return;
+                                            }
+                                            character.name = e.currentValue;
+                                        });
+                                    }}
+                                />
+                            </TableRow>
+
+                            <TableRow label='アイコン画像'>
+                                <FileView
+                                    filePath={character.image ?? undefined}
+                                    onPathChange={path =>
+                                        updateCharacter(character => {
+                                            if (character == null) {
+                                                return;
+                                            }
+                                            character.image =
+                                                path == null
+                                                    ? undefined
+                                                    : FilePathModule.toOtState(path);
+                                        })
+                                    }
+                                    showImage
+                                    maxWidthOfLink={100}
+                                    uploaderFileBrowserHeight={null}
+                                    defaultFileTypeFilter={image}
+                                />
+                            </TableRow>
+
+                            <TableRow label='立ち絵画像'>
+                                <FileView
+                                    filePath={character.portraitImage ?? undefined}
+                                    onPathChange={path =>
+                                        updateCharacter(character => {
+                                            if (character == null) {
+                                                return;
+                                            }
+                                            character.portraitImage =
+                                                path == null
+                                                    ? undefined
+                                                    : FilePathModule.toOtState(path);
+                                        })
+                                    }
+                                    showImage
+                                    maxWidthOfLink={100}
+                                    defaultFileTypeFilter={image}
+                                    uploaderFileBrowserHeight={null}
+                                />
+                            </TableRow>
+
+                            <TableHeader>タグ</TableHeader>
+
+                            <TableCombinedRow>
+                                <CharacterTagsSelect
+                                    character={character}
+                                    onChange={recipe =>
+                                        updateCharacter(character => {
+                                            if (character == null) {
+                                                return;
+                                            }
+                                            recipe(character);
                                         })
                                     }
                                 />
-                            </>
-                        )}
+                            </TableCombinedRow>
 
-                        {createdByMe && atomValue?.type === update && (
-                            <>
-                                <EditorGroupHeader>コマンド</EditorGroupHeader>
+                            <TableHeader>数値パラメーター</TableHeader>
 
-                                <div>
-                                    <Button
-                                        onClick={() =>
-                                            setCommandEditorModal({
-                                                characterId: atomValue.stateId,
-                                            })
+                            {strIndex20Array.map(key => {
+                                const paramName = numParamNames.get(key);
+                                if (paramName === undefined) {
+                                    return null;
+                                }
+                                const value = character.numParams?.[key];
+                                const maxValue = character.numMaxParams?.[key];
+                                return (
+                                    <TableRow
+                                        key={keyNames('CharacterEditorModal', `numParam${key}Row`)}
+                                        label={
+                                            <OverriddenParameterNameEditor
+                                                type='editor'
+                                                baseName={paramName.name}
+                                                overriddenParameterName={
+                                                    value?.overriddenParameterName
+                                                }
+                                                onOverriddenParameterNameChange={newValue =>
+                                                    updateCharacter(character => {
+                                                        const param = character?.numParams?.[key];
+                                                        if (param == null) {
+                                                            return;
+                                                        }
+                                                        param.overriddenParameterName = newValue;
+                                                    })
+                                                }
+                                            />
                                         }
                                     >
-                                        編集
-                                    </Button>
-                                </div>
-                            </>
-                        )}
+                                        <NumberParameterInput
+                                            isCharacterPrivate={character.isPrivate}
+                                            isCreate={isCreate}
+                                            compact={false}
+                                            parameterKey={key}
+                                            numberParameter={value}
+                                            numberMaxParameter={maxValue}
+                                            createdByMe={createdByMe}
+                                            onOperate={mapping => {
+                                                updateCharacter(character => {
+                                                    if (character == null) {
+                                                        return;
+                                                    }
+                                                    return mapping(character);
+                                                });
+                                            }}
+                                        />
+                                    </TableRow>
+                                );
+                            })}
 
-                        <EditorGroupHeader>エクスポート</EditorGroupHeader>
+                            {numParamNames.size === 0 && (
+                                <TableCombinedRow>数値パラメーターはありません。</TableCombinedRow>
+                            )}
 
-                        <div>
-                            <CopyToClipboardButton
-                                clipboardText={async () => {
-                                    const characterToExport: typeof character = {
-                                        ...character,
-                                        pieces: {},
-                                        portraitPieces: {},
-                                    };
-                                    return JSON.stringify(characterToExport);
+                            <TableHeader>チェックマークパラメーター</TableHeader>
+
+                            {strIndex20Array.map(key => {
+                                const paramName = boolParamNames.get(key);
+                                if (paramName === undefined) {
+                                    return null;
+                                }
+                                const value = character.boolParams?.[key];
+                                return (
+                                    <TableRow
+                                        key={keyNames('CharacterEditorModal', `boolParam${key}Row`)}
+                                        label={
+                                            <OverriddenParameterNameEditor
+                                                type='editor'
+                                                baseName={paramName.name}
+                                                overriddenParameterName={
+                                                    value?.overriddenParameterName
+                                                }
+                                                onOverriddenParameterNameChange={newValue =>
+                                                    updateCharacter(character => {
+                                                        const param = character?.boolParams?.[key];
+                                                        if (param == null) {
+                                                            return;
+                                                        }
+                                                        param.overriddenParameterName = newValue;
+                                                    })
+                                                }
+                                            />
+                                        }
+                                    >
+                                        <BooleanParameterInput
+                                            isCharacterPrivate={character.isPrivate}
+                                            isCreate={isCreate}
+                                            compact={false}
+                                            parameterKey={key}
+                                            parameter={value}
+                                            createdByMe={createdByMe}
+                                            onOperate={mapping => {
+                                                updateCharacter(character => {
+                                                    if (character == null) {
+                                                        return;
+                                                    }
+                                                    return mapping(character);
+                                                });
+                                            }}
+                                        />
+                                    </TableRow>
+                                );
+                            })}
+
+                            {boolParamNames.size === 0 && (
+                                <TableCombinedRow>
+                                    チェックマークパラメーターはありません。
+                                </TableCombinedRow>
+                            )}
+
+                            <TableHeader>文字列パラメーター</TableHeader>
+
+                            {strIndex20Array.map(key => {
+                                const paramName = strParamNames.get(key);
+                                if (paramName === undefined) {
+                                    return null;
+                                }
+                                const value = character.strParams?.[key];
+                                return (
+                                    <TableRow
+                                        key={keyNames('CharacterEditorModal', `strParam${key}Row`)}
+                                        label={
+                                            <OverriddenParameterNameEditor
+                                                type='editor'
+                                                baseName={paramName.name}
+                                                overriddenParameterName={
+                                                    value?.overriddenParameterName
+                                                }
+                                                onOverriddenParameterNameChange={newValue =>
+                                                    updateCharacter(character => {
+                                                        const param = character?.strParams?.[key];
+                                                        if (param == null) {
+                                                            return;
+                                                        }
+                                                        param.overriddenParameterName = newValue;
+                                                    })
+                                                }
+                                            />
+                                        }
+                                    >
+                                        <StringParameterInput
+                                            compact={false}
+                                            isCharacterPrivate={character.isPrivate}
+                                            isCreate={isCreate}
+                                            parameterKey={key}
+                                            parameter={value}
+                                            createdByMe={createdByMe}
+                                            onOperate={mapping => {
+                                                updateCharacter(character => {
+                                                    if (character == null) {
+                                                        return;
+                                                    }
+                                                    return mapping(character);
+                                                });
+                                            }}
+                                        />
+                                    </TableRow>
+                                );
+                            })}
+
+                            {strParamNames.size === 0 && (
+                                <TableCombinedRow>
+                                    文字列パラメーターはありません。
+                                </TableCombinedRow>
+                            )}
+                        </Table>
+
+                        <div
+                            className={classNames(flexAuto, flex, flexColumn)}
+                            style={{ paddingLeft: 60, overflow: 'hidden' }}
+                        >
+                            <EditorGroupHeader>メモ</EditorGroupHeader>
+
+                            <CollaborativeInput
+                                style={{ overflow: 'auto', flex: '1 0 auto', maxHeight: 300 }}
+                                multiline
+                                size='small'
+                                bufferDuration='default'
+                                value={character.memo}
+                                onChange={e => {
+                                    updateCharacter(character => {
+                                        if (character == null) {
+                                            return;
+                                        }
+                                        character.memo = e.currentValue;
+                                    });
                                 }}
-                            >
-                                クリップボードにエクスポート
-                            </CopyToClipboardButton>
-                            <p>
-                                {
-                                    'キャラクターコマ、キャラクター立ち絵コマはエクスポートされません。'
-                                }
-                                <br />
-                                {
-                                    '自分が閲覧できない値はエクスポートされません。例えば、他のユーザーによって非公開にされている値はエクスポートの対象外ですが、自分が非公開にしている値は自分が閲覧可能なためエクスポートの対象内となります。'
-                                }
-                            </p>
+                            />
+
+                            {createdByMe && (
+                                <>
+                                    <EditorGroupHeader>変数</EditorGroupHeader>
+
+                                    <CharacterVarInput
+                                        style={{
+                                            overflow: 'auto',
+                                            flex: '1 0 auto',
+                                            maxHeight: 300,
+                                        }}
+                                        character={character}
+                                        onChange={newValue =>
+                                            updateCharacter(character => {
+                                                if (character == null) {
+                                                    return;
+                                                }
+                                                character.privateVarToml = newValue;
+                                            })
+                                        }
+                                    />
+                                </>
+                            )}
+
+                            {createdByMe && atomValue?.type === update && (
+                                <>
+                                    <EditorGroupHeader>コマンド</EditorGroupHeader>
+
+                                    <div>
+                                        <Button
+                                            onClick={() =>
+                                                setCommandEditorModal({
+                                                    characterId: atomValue.stateId,
+                                                })
+                                            }
+                                        >
+                                            編集
+                                        </Button>
+                                    </div>
+                                </>
+                            )}
+
+                            <EditorGroupHeader>エクスポート</EditorGroupHeader>
+
+                            <div>
+                                <CopyToClipboardButton
+                                    clipboardText={async () => {
+                                        const characterToExport: typeof character = {
+                                            ...character,
+                                            pieces: {},
+                                            portraitPieces: {},
+                                        };
+                                        return JSON.stringify(characterToExport);
+                                    }}
+                                >
+                                    クリップボードにエクスポート
+                                </CopyToClipboardButton>
+                                <p>
+                                    {
+                                        'キャラクターコマ、キャラクター立ち絵コマはエクスポートされません。'
+                                    }
+                                    <br />
+                                    {
+                                        '自分が閲覧できない値はエクスポートされません。例えば、他のユーザーによって非公開にされている値はエクスポートの対象外ですが、自分が非公開にしている値は自分が閲覧可能なためエクスポートの対象内となります。'
+                                    }
+                                </p>
+                            </div>
                         </div>
                     </div>
+                    <Divider />
                 </div>
             </Modal>
         );

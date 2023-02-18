@@ -181,6 +181,7 @@ export const BoardEditorModal: React.FC = () => {
             }
         >
             <div>
+                <Divider />
                 <Table>
                     <TableRow label='名前'>
                         <CollaborativeInput
@@ -312,6 +313,7 @@ export const BoardEditorModal: React.FC = () => {
                         '自分が閲覧できない値はエクスポートされません。例えば、他のユーザーが作成して非公開にしている値はエクスポートの対象外ですが、自分が作成して非公開にしている値は自分が閲覧可能なためエクスポートの対象内となります。'
                     }
                 </p>
+                <Divider />
             </div>
         </Modal>
     );
