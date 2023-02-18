@@ -4,6 +4,7 @@ import React from 'react';
 import { interval } from 'rxjs';
 import { OnChangeParams } from '../CollaborativeInput/CollaborativeInput';
 import { TomlInput } from './Tomllnput';
+import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { flex, flex1, flexColumn, flexInitial } from '@/styles/className';
 
 const Main: React.FC<{
@@ -26,25 +27,27 @@ const Main: React.FC<{
     }, [testUpdate]);
 
     return (
-        <div className={classNames(flex, flexColumn)} style={{ height: 300 }}>
-            <TomlInput
-                className={classNames(flex1)}
-                value={value}
-                onChange={e => {
-                    setChangelog(state => [...state, e]);
-                }}
-                bufferDuration={bufferDuration}
-                placeholder={placeholder}
-                disabled={disabled}
-            />
-            <div className={classNames(flexInitial)}>
-                {changelog.slice(-3).map((log, i) => (
-                    <div
-                        key={i}
-                    >{`previousValue: ${log.previousValue}, currentValue: ${log.currentValue}`}</div>
-                ))}
+        <StorybookProvider compact roomClientContextValue={null}>
+            <div className={classNames(flex, flexColumn)} style={{ height: 300 }}>
+                <TomlInput
+                    className={classNames(flex1)}
+                    value={value}
+                    onChange={e => {
+                        setChangelog(state => [...state, e]);
+                    }}
+                    bufferDuration={bufferDuration}
+                    placeholder={placeholder}
+                    disabled={disabled}
+                />
+                <div className={classNames(flexInitial)}>
+                    {changelog.slice(-3).map((log, i) => (
+                        <div
+                            key={i}
+                        >{`previousValue: ${log.previousValue}, currentValue: ${log.currentValue}`}</div>
+                    ))}
+                </div>
             </div>
-        </div>
+        </StorybookProvider>
     );
 };
 

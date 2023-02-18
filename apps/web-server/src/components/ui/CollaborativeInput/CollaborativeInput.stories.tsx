@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import React from 'react';
 import { interval } from 'rxjs';
 import { CollaborativeInput, OnChangeParams } from './CollaborativeInput';
+import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { flex, flex1, flexColumn, flexInitial } from '@/styles/className';
 
 const Main: React.FC<{
@@ -27,41 +28,43 @@ const Main: React.FC<{
     }, [testUpdate]);
 
     return (
-        <div
-            className={classNames(flex, flexColumn)}
-            style={multiline ? { height: 300 } : undefined}
-        >
-            <CollaborativeInput
-                className={classNames(flex1)}
-                style={multiline ? { overflow: 'auto' } : undefined}
-                value={value}
-                multiline={multiline}
-                onChange={e => {
-                    setChangelog(state => [...state, e]);
-                }}
-                bufferDuration={bufferDuration}
-                placeholder={placeholder}
-                disabled={disabled}
-                onSkipping={
-                    testBottomElement
-                        ? e =>
-                              setBottomElement(
-                                  <div className={classNames(flexInitial)}>
-                                      {e.isSkipping ? 'skipping' : 'not skipping'}
-                                  </div>
-                              )
-                        : undefined
-                }
-            />
-            {testBottomElement ? bottomElement : null}
-            <div className={classNames(flexInitial)}>
-                {changelog.slice(-3).map((log, i) => (
-                    <div
-                        key={i}
-                    >{`previousValue: ${log.previousValue}, currentValue: ${log.currentValue}`}</div>
-                ))}
+        <StorybookProvider compact roomClientContextValue={null}>
+            <div
+                className={classNames(flex, flexColumn)}
+                style={multiline ? { height: 300 } : undefined}
+            >
+                <CollaborativeInput
+                    className={classNames(flex1)}
+                    style={multiline ? { overflow: 'auto' } : undefined}
+                    value={value}
+                    multiline={multiline}
+                    onChange={e => {
+                        setChangelog(state => [...state, e]);
+                    }}
+                    bufferDuration={bufferDuration}
+                    placeholder={placeholder}
+                    disabled={disabled}
+                    onSkipping={
+                        testBottomElement
+                            ? e =>
+                                  setBottomElement(
+                                      <div className={classNames(flexInitial)}>
+                                          {e.isSkipping ? 'skipping' : 'not skipping'}
+                                      </div>
+                                  )
+                            : undefined
+                    }
+                />
+                {testBottomElement ? bottomElement : null}
+                <div className={classNames(flexInitial)}>
+                    {changelog.slice(-3).map((log, i) => (
+                        <div
+                            key={i}
+                        >{`previousValue: ${log.previousValue}, currentValue: ${log.currentValue}`}</div>
+                    ))}
+                </div>
             </div>
-        </div>
+        </StorybookProvider>
     );
 };
 
