@@ -8,7 +8,7 @@ import {
     OperateRoomFailureType,
     RoomAsListItemFragment,
     WritingMessageStatusInputType,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
+} from '@flocon-trpg/typed-document-node-v0.7.13';
 import { Alert, Button, Card, Input, Result, Spin } from 'antd';
 import classNames from 'classnames';
 import { produce } from 'immer';
@@ -114,7 +114,7 @@ const ResultContainer: React.FC = ({ children }) => {
 };
 
 type JoinRoomFormProps = {
-    roomState: RoomAsListItemFragment;
+    roomState: Omit<RoomAsListItemFragment, 'isBookmarked'>;
     onJoin?: () => void;
 };
 

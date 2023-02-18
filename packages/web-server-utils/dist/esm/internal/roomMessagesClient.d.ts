@@ -1,4 +1,4 @@
-import { RoomMessageEventFragment, RoomMessages } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { RoomMessageEventFragment, RoomMessages } from '@flocon-trpg/typed-document-node-v0.7.13';
 import { Observable } from 'rxjs';
 import { CustomMessage, Diff, Message } from './roomMessageTypes';
 export declare const event = "event";

@@ -1,5 +1,5 @@
 import { simpleId } from '@flocon-trpg/core';
-import { WritingMessageStatusInputType } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { WritingMessageStatusInputType } from '@flocon-trpg/typed-document-node-v0.7.13';
 import { filter, mergeMap, take } from 'rxjs';
 import { GraphQLClient, GraphQLClientWithStatus } from './roomClient/graphqlClient';
 import { subscribeRoomConnections } from './roomClient/roomConnections';

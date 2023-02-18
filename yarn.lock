@@ -2850,8 +2850,7 @@ __metadata:
     "@flocon-trpg/eslint-config": "workspace:^"
     "@flocon-trpg/prettier-config": "workspace:^"
     "@flocon-trpg/tsconfig": "workspace:^"
-    "@flocon-trpg/typed-document-node-v0.7.2": "workspace:*"
-    "@flocon-trpg/typed-document-node-v0.7.8": "workspace:*"
+    "@flocon-trpg/typed-document-node-v0.7.13": "workspace:*"
     "@flocon-trpg/utils": "workspace:^"
     "@flocon-trpg/web-server-utils": "workspace:*"
     "@graphql-codegen/cli": 2.16.5
@@ -3148,7 +3147,7 @@ __metadata:
     "@flocon-trpg/rollup-config": "workspace:^"
     "@flocon-trpg/sdk": "workspace:^"
     "@flocon-trpg/tsconfig": "workspace:^"
-    "@flocon-trpg/typed-document-node-v0.7.1": "workspace:^"
+    "@flocon-trpg/typed-document-node-v0.7.13": "workspace:^"
     "@kizahasi/result": ^1.1.0
     "@typescript-eslint/eslint-plugin": 5.51.0
     "@typescript-eslint/parser": 5.51.0
@@ -3177,7 +3176,7 @@ __metadata:
     "@flocon-trpg/prettier-config": "workspace:^"
     "@flocon-trpg/rollup-config": "workspace:^"
     "@flocon-trpg/tsconfig": "workspace:^"
-    "@flocon-trpg/typed-document-node-v0.7.1": "workspace:^"
+    "@flocon-trpg/typed-document-node-v0.7.13": "workspace:^"
     "@flocon-trpg/utils": "workspace:^"
     "@flocon-trpg/web-server-utils": "workspace:^"
     "@kizahasi/option": ^1.1.0
@@ -3218,78 +3217,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@flocon-trpg/typed-document-node-v0.7.13@workspace:^, @flocon-trpg/typed-document-node-v0.7.13@workspace:packages/typed-document-node-v0.7.13":
+"@flocon-trpg/typed-document-node-v0.7.13@workspace:*, @flocon-trpg/typed-document-node-v0.7.13@workspace:^, @flocon-trpg/typed-document-node-v0.7.13@workspace:packages/typed-document-node-v0.7.13":
   version: 0.0.0-use.local
   resolution: "@flocon-trpg/typed-document-node-v0.7.13@workspace:packages/typed-document-node-v0.7.13"
-  dependencies:
-    "@flocon-trpg/eslint-config": "workspace:^"
-    "@flocon-trpg/prettier-config": "workspace:^"
-    "@flocon-trpg/rollup-config": "workspace:^"
-    "@flocon-trpg/tsconfig": "workspace:^"
-    "@graphql-typed-document-node/core": ^3.1.0
-    "@typescript-eslint/eslint-plugin": 5.51.0
-    "@typescript-eslint/parser": 5.51.0
-    eslint: 8.34.0
-    eslint-config-prettier: 8.6.0
-    eslint-import-resolver-typescript: 3.5.3
-    eslint-plugin-import: 2.27.5
-    graphql: ^15.6.0
-    prettier: 2.8.4
-    rimraf: 4.1.2
-    rollup: 3.15.0
-    typescript: 4.9.5
-  languageName: unknown
-  linkType: soft
-
-"@flocon-trpg/typed-document-node-v0.7.1@workspace:^, @flocon-trpg/typed-document-node-v0.7.1@workspace:packages/typed-document-node-v0.7.1":
-  version: 0.0.0-use.local
-  resolution: "@flocon-trpg/typed-document-node-v0.7.1@workspace:packages/typed-document-node-v0.7.1"
-  dependencies:
-    "@flocon-trpg/eslint-config": "workspace:^"
-    "@flocon-trpg/prettier-config": "workspace:^"
-    "@flocon-trpg/rollup-config": "workspace:^"
-    "@flocon-trpg/tsconfig": "workspace:^"
-    "@graphql-typed-document-node/core": ^3.1.0
-    "@typescript-eslint/eslint-plugin": 5.51.0
-    "@typescript-eslint/parser": 5.51.0
-    eslint: 8.34.0
-    eslint-config-prettier: 8.6.0
-    eslint-import-resolver-typescript: 3.5.3
-    eslint-plugin-import: 2.27.5
-    graphql: ^15.6.0
-    prettier: 2.8.4
-    rimraf: 4.1.2
-    rollup: 3.15.0
-    typescript: 4.9.5
-  languageName: unknown
-  linkType: soft
-
-"@flocon-trpg/typed-document-node-v0.7.2@workspace:*, @flocon-trpg/typed-document-node-v0.7.2@workspace:^, @flocon-trpg/typed-document-node-v0.7.2@workspace:packages/typed-document-node-v0.7.2":
-  version: 0.0.0-use.local
-  resolution: "@flocon-trpg/typed-document-node-v0.7.2@workspace:packages/typed-document-node-v0.7.2"
-  dependencies:
-    "@flocon-trpg/eslint-config": "workspace:^"
-    "@flocon-trpg/prettier-config": "workspace:^"
-    "@flocon-trpg/rollup-config": "workspace:^"
-    "@flocon-trpg/tsconfig": "workspace:^"
-    "@graphql-typed-document-node/core": ^3.1.0
-    "@typescript-eslint/eslint-plugin": 5.51.0
-    "@typescript-eslint/parser": 5.51.0
-    eslint: 8.34.0
-    eslint-config-prettier: 8.6.0
-    eslint-import-resolver-typescript: 3.5.3
-    eslint-plugin-import: 2.27.5
-    graphql: ^15.6.0
-    prettier: 2.8.4
-    rimraf: 4.1.2
-    rollup: 3.15.0
-    typescript: 4.9.5
-  languageName: unknown
-  linkType: soft
-
-"@flocon-trpg/typed-document-node-v0.7.8@workspace:*, @flocon-trpg/typed-document-node-v0.7.8@workspace:^, @flocon-trpg/typed-document-node-v0.7.8@workspace:packages/typed-document-node-v0.7.8":
-  version: 0.0.0-use.local
-  resolution: "@flocon-trpg/typed-document-node-v0.7.8@workspace:packages/typed-document-node-v0.7.8"
   dependencies:
     "@flocon-trpg/eslint-config": "workspace:^"
     "@flocon-trpg/prettier-config": "workspace:^"
@@ -3350,7 +3280,7 @@ __metadata:
     "@flocon-trpg/prettier-config": "workspace:^"
     "@flocon-trpg/rollup-config": "workspace:^"
     "@flocon-trpg/tsconfig": "workspace:^"
-    "@flocon-trpg/typed-document-node-v0.7.1": "workspace:^"
+    "@flocon-trpg/typed-document-node-v0.7.13": "workspace:^"
     "@flocon-trpg/utils": "workspace:^"
     "@types/jest": 29.4.0
     "@typescript-eslint/eslint-plugin": 5.51.0
@@ -3384,10 +3314,7 @@ __metadata:
     "@flocon-trpg/sdk": "workspace:^"
     "@flocon-trpg/sdk-react": "workspace:^"
     "@flocon-trpg/sdk-urql": "workspace:^"
-    "@flocon-trpg/typed-document-node-v0.7.1": "workspace:^"
     "@flocon-trpg/typed-document-node-v0.7.13": "workspace:^"
-    "@flocon-trpg/typed-document-node-v0.7.2": "workspace:^"
-    "@flocon-trpg/typed-document-node-v0.7.8": "workspace:^"
     "@flocon-trpg/utils": "workspace:^"
     "@kizahasi/option": ^1.1.0
     "@kizahasi/ot-string": ^0.4.1

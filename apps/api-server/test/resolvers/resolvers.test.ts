@@ -5,12 +5,16 @@ import {
     CreateFileTagMutation,
     CreateRoomMutation,
     DeleteMessageMutation,
+    DeleteRoomAsAdminMutation,
     DeleteRoomFailureType,
     DeleteRoomMutation,
     EditFileTagsMutation,
     EditMessageMutation,
     GetFilesQuery,
     GetMessagesQuery,
+    GetRoomFailureType,
+    GetRoomQuery,
+    GetRoomsListQuery,
     JoinRoomAsPlayerMutation,
     JoinRoomAsSpectatorMutation,
     LeaveRoomMutation,
@@ -18,16 +22,10 @@ import {
     OperateMutation,
     ParticipantRole,
     RoomPublicMessageFragment,
+    UpdateBookmarkMutation,
     WritePrivateMessageMutation,
     WritePublicMessageMutation,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
-import {
-    DeleteRoomAsAdminMutation,
-    GetRoomFailureType,
-    GetRoomQuery,
-    GetRoomsListQuery,
-    UpdateBookmarkMutation,
-} from '@flocon-trpg/typed-document-node-v0.7.2';
+} from '@flocon-trpg/typed-document-node-v0.7.13';
 import { loggerRef, parseStringToBoolean, recordToArray } from '@flocon-trpg/utils';
 import { diff, serializeUpOperation, toUpOperation } from '@kizahasi/ot-string';
 import { OperationResult } from '@urql/core';

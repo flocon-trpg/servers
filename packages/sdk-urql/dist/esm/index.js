@@ -2,7 +2,7 @@ import { authToken } from '@flocon-trpg/core';
 import { authExchange } from '@urql/exchange-auth';
 import { createClient as createClient$1 } from 'graphql-ws';
 import { makeOperation, dedupExchange, cacheExchange, fetchExchange, subscriptionExchange, createClient } from 'urql';
-import { GetMessagesDocument, GetRoomConnectionsDocument, GetRoomDocument, OperateDocument, UpdateWritingMessageStatusDocument, RoomEventDocument } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { GetMessagesDocument, GetRoomConnectionsDocument, GetRoomDocument, OperateDocument, UpdateWritingMessageStatusDocument, RoomEventDocument } from '@flocon-trpg/typed-document-node-v0.7.13';
 import { Result } from '@kizahasi/result';
 import { Observable, share } from 'rxjs';
 import { pipe, subscribe } from 'wonka';

@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import * as Icons from '@ant-design/icons';
 import { $free, OmitVersion, State, boardTemplate, pieceTemplate } from '@flocon-trpg/core';
-import { FilePath, FileSourceType } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { FilePath, FileSourceType } from '@flocon-trpg/typed-document-node-v0.7.13';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { Message, publicMessage } from '@flocon-trpg/web-server-utils';
 import { useTransition } from '@react-spring/konva';

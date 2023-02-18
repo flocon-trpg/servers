@@ -1,6 +1,5 @@
 import * as Icons from '@ant-design/icons';
-import * as DocNode071 from '@flocon-trpg/typed-document-node-v0.7.1';
-import * as DocNode072 from '@flocon-trpg/typed-document-node-v0.7.2';
+import * as DocNode0713 from '@flocon-trpg/typed-document-node-v0.7.13';
 import { App, Button, Dropdown, Menu, Table, Tooltip } from 'antd';
 import classNames from 'classnames';
 import moment from 'moment';
@@ -12,17 +11,15 @@ import { GraphQLResult } from '@/components/ui/GraphQLResult/GraphQLResult';
 import { Layout, loginAndEntry } from '@/components/ui/Layout/Layout';
 import { ToggleButton } from '@/components/ui/ToggleButton/ToggleButton';
 import { useGetMyRoles } from '@/hooks/useGetMyRoles';
-import { useIsV072OrLater } from '@/hooks/useIsV072OrLater';
 import { Styles } from '@/styles';
 import { flex, flexNone, flexRow } from '@/styles/className';
 import { defaultTriggerSubMenuAction } from '@/utils/variables';
 
-type Data072 = DocNode072.RoomAsListItemFragment;
-type Data071 = DocNode071.RoomAsListItemFragment;
-type Data = Data072 | Data071;
+type Data0713 = DocNode0713.RoomAsListItemFragment;
+type Data = Data0713;
 
-const BookmarkButton: React.FC<{ data: Data072 }> = ({ data }) => {
-    const [, updateBookmark] = useMutation(DocNode072.UpdateBookmarkDocument);
+const BookmarkButton: React.FC<{ data: Data0713 }> = ({ data }) => {
+    const [, updateBookmark] = useMutation(DocNode0713.UpdateBookmarkDocument);
     const [loading, setLoading] = React.useState(false);
     const [checked, setChecked] = React.useState(data.isBookmarked);
     const { notification } = App.useApp();
@@ -68,19 +65,15 @@ const BookmarkButton: React.FC<{ data: Data072 }> = ({ data }) => {
 const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
     const { modal } = App.useApp();
     const router = useRouter();
-    const isV072OrLater = useIsV072OrLater();
-    const [, deleteRoomAsAdmin] = useMutation(DocNode072.DeleteRoomAsAdminDocument);
+    const [, deleteRoomAsAdmin] = useMutation(DocNode0713.DeleteRoomAsAdminDocument);
     const [, getRooms] = useQuery({
-        query: DocNode072.GetRoomsListDocument,
+        query: DocNode0713.GetRoomsListDocument,
         pause: true,
         requestPolicy: 'network-only',
     });
     const getMyRolesQueryResult = useGetMyRoles();
 
     const overlay = React.useMemo(() => {
-        if (!isV072OrLater) {
-            return undefined;
-        }
         if (getMyRolesQueryResult.data?.result.admin !== true) {
             return undefined;
         }
@@ -115,14 +108,7 @@ const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
                 triggerSubMenuAction={defaultTriggerSubMenuAction}
             />
         );
-    }, [
-        isV072OrLater,
-        getMyRolesQueryResult.data?.result.admin,
-        modal,
-        deleteRoomAsAdmin,
-        roomId,
-        getRooms,
-    ]);
+    }, [getMyRolesQueryResult.data?.result.admin, modal, deleteRoomAsAdmin, roomId, getRooms]);
     const join = React.useCallback(() => router.push(`/rooms/${roomId}`), [roomId, router]);
 
     const joinText = '入室';
@@ -143,8 +129,8 @@ const dateToString = (dateMilliSeconds: number) =>
 const bookmarkColumn = {
     title: '',
     dataIndex: 'isBookmarked',
-    sorter: (x: Data072, y: Data072) => (x.isBookmarked ? 1 : 0) - (y.isBookmarked ? 1 : 0),
-    render: (_: any, record: Data072) => <BookmarkButton data={record} />,
+    sorter: (x: Data0713, y: Data0713) => (x.isBookmarked ? 1 : 0) - (y.isBookmarked ? 1 : 0),
+    render: (_: any, record: Data0713) => <BookmarkButton data={record} />,
     width: 60,
 };
 const nameColumn = {
@@ -172,47 +158,47 @@ const nameColumn = {
 const createdAtColumn = {
     title: '作成日時',
     dataIndex: 'createdAt',
-    sorter: (x: Data072, y: Data072) => (x.createdAt ?? -1) - (y.createdAt ?? -1),
+    sorter: (x: Data0713, y: Data0713) => (x.createdAt ?? -1) - (y.createdAt ?? -1),
     // eslint-disable-next-line react/display-name
-    render: (_: any, record: Data072) =>
+    render: (_: any, record: Data0713) =>
         record.createdAt == null ? '?' : dateToString(record.createdAt),
 };
 const updatedAtColumn = {
     title: '最終更新日時',
     dataIndex: 'updatedAt',
-    sorter: (x: Data072, y: Data072) => (x.updatedAt ?? -1) - (y.updatedAt ?? -1),
+    sorter: (x: Data0713, y: Data0713) => (x.updatedAt ?? -1) - (y.updatedAt ?? -1),
     // eslint-disable-next-line react/display-name
-    render: (_: any, record: Data072) =>
+    render: (_: any, record: Data0713) =>
         record.updatedAt == null ? '?' : dateToString(record.updatedAt),
 };
 const roleColumn = {
     title: '参加状況',
     dataIndex: 'role',
-    sorter: (x: Data072, y: Data072) => {
-        const toNumber = (source: Data072['role']) => {
+    sorter: (x: Data0713, y: Data0713) => {
+        const toNumber = (source: Data0713['role']) => {
             switch (source) {
                 case null:
                 case undefined:
                     return 0;
-                case DocNode072.ParticipantRole.Master:
-                case DocNode072.ParticipantRole.Player:
+                case DocNode0713.ParticipantRole.Master:
+                case DocNode0713.ParticipantRole.Player:
                     return 2;
-                case DocNode072.ParticipantRole.Spectator:
+                case DocNode0713.ParticipantRole.Spectator:
                     return 1;
             }
         };
         return toNumber(x.role) - toNumber(y.role);
     },
     // eslint-disable-next-line react/display-name
-    render: (_: any, record: Data072) => {
+    render: (_: any, record: Data0713) => {
         switch (record.role) {
             case null:
             case undefined:
                 return '-';
-            case DocNode072.ParticipantRole.Master:
-            case DocNode072.ParticipantRole.Player:
+            case DocNode0713.ParticipantRole.Master:
+            case DocNode0713.ParticipantRole.Player:
                 return '参加者';
-            case DocNode072.ParticipantRole.Spectator:
+            case DocNode0713.ParticipantRole.Spectator:
                 return '観戦者';
         }
     },
@@ -225,7 +211,7 @@ const actionColumn = {
     render: (_: any, record: Data) => <RoomButton roomId={record.id} />,
 };
 
-const columnV072 = [
+const columnV0713 = [
     bookmarkColumn,
     nameColumn,
     createdAtColumn,
@@ -233,14 +219,9 @@ const columnV072 = [
     roleColumn,
     actionColumn,
 ];
-const columnV071 = [nameColumn, actionColumn];
 
-const RoomsTable072: React.FC<{ rooms: readonly Data072[] }> = ({ rooms }) => {
-    return <Table rowKey='id' style={{ flex: 'auto' }} columns={columnV072} dataSource={rooms} />;
-};
-
-const RoomsTable071: React.FC<{ rooms: readonly Data071[] }> = ({ rooms }) => {
-    return <Table rowKey='id' style={{ flex: 'auto' }} columns={columnV071} dataSource={rooms} />;
+const RoomsTable0713: React.FC<{ rooms: readonly Data0713[] }> = ({ rooms }) => {
+    return <Table rowKey='id' style={{ flex: 'auto' }} columns={columnV0713} dataSource={rooms} />;
 };
 
 type RoomsListComponentProps = {
@@ -289,17 +270,12 @@ const RoomsListComponent: React.FC<RoomsListComponentProps> = ({
 };
 
 const Room: React.FC = () => {
-    const [rooms072, getRooms072] = useQuery({
-        query: DocNode072.GetRoomsListDocument,
+    const [rooms0713, getRooms0713] = useQuery({
+        query: DocNode0713.GetRoomsListDocument,
         requestPolicy: 'network-only',
     });
-    const [rooms071, getRooms071] = useQuery({
-        query: DocNode071.GetRoomsListDocument,
-        requestPolicy: 'network-only',
-    });
-    const fetching = rooms072.fetching && rooms071.fetching;
-    const error = rooms072.error && rooms071.error;
-    const isV072OrLater = useIsV072OrLater();
+    const fetching = rooms0713.fetching;
+    const error = rooms0713.error;
     const subscriptionsRef = React.useRef(new Subscription());
 
     React.useEffect(() => {
@@ -311,32 +287,17 @@ const Room: React.FC = () => {
     }, []);
 
     React.useEffect(() => {
-        if (isV072OrLater) {
-            getRooms072();
-        } else {
-            getRooms071();
-        }
-    }, [getRooms071, getRooms072, isV072OrLater]);
+        getRooms0713();
+    }, [getRooms0713]);
 
-    let roomsData072;
-    switch (rooms072.data?.result.__typename) {
+    let roomsData0713;
+    switch (rooms0713.data?.result.__typename) {
         case 'GetRoomsListSuccessResult':
-            roomsData072 = rooms072.data.result.rooms;
+            roomsData0713 = rooms0713.data.result.rooms;
             break;
         case 'GetRoomsListFailureResult':
         case undefined:
-            roomsData072 = undefined;
-            break;
-    }
-
-    let roomsData071;
-    switch (rooms071.data?.result.__typename) {
-        case 'GetRoomsListSuccessResult':
-            roomsData071 = rooms071.data.result.rooms;
-            break;
-        case 'GetRoomsListFailureResult':
-        case undefined:
-            roomsData071 = undefined;
+            roomsData0713 = undefined;
             break;
     }
 
@@ -347,20 +308,10 @@ const Room: React.FC = () => {
         >
             <RoomsListComponent
                 roomsTable={
-                    roomsData072 != null ? (
-                        <RoomsTable072 rooms={roomsData072} />
-                    ) : roomsData071 != null ? (
-                        <RoomsTable071 rooms={roomsData071} />
-                    ) : (
-                        <div />
-                    )
+                    roomsData0713 != null ? <RoomsTable0713 rooms={roomsData0713} /> : <div />
                 }
                 onReload={() => {
-                    if (isV072OrLater) {
-                        getRooms072();
-                    } else {
-                        getRooms071();
-                    }
+                    getRooms0713();
                 }}
             />
         </GraphQLResult>

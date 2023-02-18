@@ -1,4 +1,4 @@
-import { RoomPrivateMessage, RoomPublicMessage } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { RoomPrivateMessage, RoomPublicMessage } from '@flocon-trpg/typed-document-node-v0.7.13';
 
 export const isDeleted = (
     message: Omit<RoomPublicMessage | RoomPrivateMessage, 'createdAt'>

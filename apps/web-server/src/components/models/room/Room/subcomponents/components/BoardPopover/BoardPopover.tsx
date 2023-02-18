@@ -14,7 +14,7 @@ import {
 import {
     FileSourceType,
     WriteRoomSoundEffectDocument,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
+} from '@flocon-trpg/typed-document-node-v0.7.13';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { Menu, Tooltip } from 'antd';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';

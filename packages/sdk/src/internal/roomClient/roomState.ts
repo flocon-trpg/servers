@@ -4,7 +4,7 @@ import {
     OperateRoomFailureType,
     RoomEventSubscription,
     RoomOperationFragment,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
+} from '@flocon-trpg/typed-document-node-v0.7.13';
 import { EMPTY, Observable, Subject, Subscription, map, mergeAll, sampleTime } from 'rxjs';
 import { BehaviorEvent } from '../rxjs/behaviorEvent';
 import { ReadonlyBehaviorEvent } from '../rxjs/readonlyBehaviorEvent';

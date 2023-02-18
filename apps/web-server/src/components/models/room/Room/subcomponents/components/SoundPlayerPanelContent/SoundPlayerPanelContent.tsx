@@ -1,6 +1,6 @@
 import * as Icon from '@ant-design/icons';
 import { State, StrIndex5, bgmTemplate } from '@flocon-trpg/core';
-import { WriteRoomSoundEffectDocument } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { WriteRoomSoundEffectDocument } from '@flocon-trpg/typed-document-node-v0.7.13';
 import { keyNames } from '@flocon-trpg/utils';
 import { Button, Checkbox, Modal, Tooltip } from 'antd';
 import classNames from 'classnames';

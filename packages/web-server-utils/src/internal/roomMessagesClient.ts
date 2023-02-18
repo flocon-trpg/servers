@@ -5,7 +5,7 @@ import {
     RoomPrivateMessageFragment,
     RoomPublicMessageFragment,
     RoomSoundEffectFragment,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
+} from '@flocon-trpg/typed-document-node-v0.7.13';
 import { loggerRef } from '@flocon-trpg/utils';
 import { produce } from 'immer';
 import { Observable, Subject, map } from 'rxjs';

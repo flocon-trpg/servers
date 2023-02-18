@@ -20,7 +20,7 @@
     "dependencies": {
         "@flocon-trpg/core": "workspace:^",
         "@flocon-trpg/sdk": "workspace:^",
-        "@flocon-trpg/typed-document-node-v0.7.1": "workspace:^",
+        "@flocon-trpg/typed-document-node-v0.7.13": "workspace:^",
         "@kizahasi/result": "^1.1.0",
         "@urql/exchange-auth": "^1.0.0",
         "graphql-ws": "^5.8.1",

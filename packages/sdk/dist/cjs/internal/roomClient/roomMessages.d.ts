@@ -1,4 +1,4 @@
-import { GetRoomMessagesFailureType, RoomEventSubscription } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { GetRoomMessagesFailureType, RoomEventSubscription } from '@flocon-trpg/typed-document-node-v0.7.13';
 import { Observable } from 'rxjs';
 import { ReadonlyBehaviorEvent } from '../rxjs/readonlyBehaviorEvent';
 import { GraphQLClientWithStatus, PromiseError } from './graphqlClient';

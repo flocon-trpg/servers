@@ -5,7 +5,7 @@ import {
     WritePrivateMessageDocument,
     WritePublicMessageDocument,
     WriteRoomPublicMessageFailureType,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
+} from '@flocon-trpg/typed-document-node-v0.7.13';
 import { Button, Input } from 'antd';
 import { TextAreaRef } from 'antd/lib/input/TextArea';
 import classNames from 'classnames';

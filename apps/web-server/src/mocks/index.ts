@@ -12,7 +12,7 @@ import {
     RoomMessages,
     RoomPrivateMessage,
     RoomPublicMessage,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
+} from '@flocon-trpg/typed-document-node-v0.7.13';
 import { Client, createClient } from '@urql/core';
 import Color from 'color';
 import ColorName from 'color-name';

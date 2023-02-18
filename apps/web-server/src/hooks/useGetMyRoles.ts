@@ -1,20 +1,16 @@
-import { GetMyRolesDocument } from '@flocon-trpg/typed-document-node-v0.7.2';
+import { GetMyRolesDocument } from '@flocon-trpg/typed-document-node-v0.7.13';
 import React from 'react';
 import { useQuery } from 'urql';
-import { useIsV072OrLater } from './useIsV072OrLater';
 
 export const useGetMyRoles = () => {
-    const isV072OrLater = useIsV072OrLater();
     const [getMyRolesQueryResult, getMyRolesQuery] = useQuery({
         query: GetMyRolesDocument,
         pause: true,
     });
 
     React.useEffect(() => {
-        if (isV072OrLater) {
-            getMyRolesQuery();
-        }
-    }, [getMyRolesQuery, isV072OrLater]);
+        getMyRolesQuery();
+    }, [getMyRolesQuery]);
 
     return getMyRolesQueryResult;
 };

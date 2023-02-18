@@ -7,7 +7,7 @@ import {
     RoomEventDocument,
     RoomEventSubscription,
     UpdateWritingMessageStatusDocument,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
+} from '@flocon-trpg/typed-document-node-v0.7.13';
 import { Result } from '@kizahasi/result';
 import { Observable, share } from 'rxjs';
 import { Client, CombinedError } from 'urql';

@@ -2,7 +2,7 @@ import {
     FileSourceType,
     PieceLogType,
     RoomMessages,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
+} from '@flocon-trpg/typed-document-node-v0.7.13';
 import { Message, pieceLog, privateMessage, publicMessage, soundEffect } from '../src';
 
 export type TestCustomMessage = string;

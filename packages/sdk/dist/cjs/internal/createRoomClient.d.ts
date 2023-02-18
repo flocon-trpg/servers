@@ -1,4 +1,4 @@
-import { WritingMessageStatusInputType } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { WritingMessageStatusInputType } from '@flocon-trpg/typed-document-node-v0.7.13';
 import { GraphQLClient } from './roomClient/graphqlClient';
 export declare const createRoomClient: <TCustomMessage = any, TGraphQLError = any>({ client: clientSource, roomId, userUid, }: {
     client: GraphQLClient<TGraphQLError>;
@@ -21,7 +21,7 @@ export declare const createRoomClient: <TCustomMessage = any, TGraphQLError = an
     /** メッセージを書き込み中のユーザー一覧の取得と、自分が書き込み中かどうかを示すステータスの更新を行えます。ステータスの更新は必ず行ってください。 */
     writingMessageStatus: {
         /** メッセージを書き込み中のユーザー一覧。 */
-        value: import("..").ReadonlyBehaviorEvent<ReadonlyMap<string, import("@flocon-trpg/typed-document-node-v0.7.1").WritingMessageStatusType>>;
+        value: import("..").ReadonlyBehaviorEvent<ReadonlyMap<string, import("@flocon-trpg/typed-document-node-v0.7.13").WritingMessageStatusType>>;
         /** 実行することで、自分が書き込み中かどうかを示すステータスの更新を行えます。短時間で複数回実行された場合は、間引いてから API サーバーに送信されます。 */
         update: (inputType: WritingMessageStatusInputType) => void;
     };
@@ -38,7 +38,7 @@ export declare const createRoomClient: <TCustomMessage = any, TGraphQLError = an
         } | {
             type: "success";
         } | {
-            type: "error"; /** 部屋に参加しているユーザーの接続状況を表します。キーは Firebase Authentication の userUid です。`isConnected` が false であるか、もしくは Map に含まれないユーザーは未接続を表します。 */
+            type: "error";
             error: import("./roomClient/graphqlClient").PromiseError<TGraphQLError>;
         };
         GetRoomConnectionsQuery: {
@@ -46,7 +46,7 @@ export declare const createRoomClient: <TCustomMessage = any, TGraphQLError = an
         } | {
             type: "success";
         } | {
-            type: "error"; /** 部屋に参加しているユーザーの接続状況を表します。キーは Firebase Authentication の userUid です。`isConnected` が false であるか、もしくは Map に含まれないユーザーは未接続を表します。 */
+            type: "error";
             error: import("./roomClient/graphqlClient").PromiseError<TGraphQLError>;
         };
         GetRoomQuery: {
@@ -54,7 +54,7 @@ export declare const createRoomClient: <TCustomMessage = any, TGraphQLError = an
         } | {
             type: "success";
         } | {
-            type: "error"; /** 部屋に参加しているユーザーの接続状況を表します。キーは Firebase Authentication の userUid です。`isConnected` が false であるか、もしくは Map に含まれないユーザーは未接続を表します。 */
+            type: "error";
             error: import("./roomClient/graphqlClient").PromiseError<TGraphQLError>;
         };
     } & {
