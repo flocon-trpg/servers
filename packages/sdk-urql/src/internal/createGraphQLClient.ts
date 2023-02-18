@@ -9,9 +9,9 @@ import {
     UpdateWritingMessageStatusDocument,
 } from '@flocon-trpg/typed-document-node-v0.7.1';
 import { Result } from '@kizahasi/result';
-import { Observable } from 'rxjs';
+import { Observable, share } from 'rxjs';
 import { Client, CombinedError } from 'urql';
-import { toObservable } from 'wonka';
+import { pipe, subscribe } from 'wonka';
 
 export const createGraphQLClientForRoomClient = (client: Client): GraphQLClient<CombinedError> => {
     return {
@@ -68,23 +68,25 @@ export const createGraphQLClientForRoomClient = (client: Client): GraphQLClient<
                     return Result.error(result.error!);
                 }),
         roomEventSubscription: variables => {
-            const roomEventSubscriptionSource = client.subscription(RoomEventDocument, variables);
-            const roomEventSubscriptionAsWonkaObservable = toObservable(
-                roomEventSubscriptionSource
+            // 当初は、client.subscription() の戻り値を wonka の toObservable で wonka の Observable に変換して、それを RxJS の Observable に変換していた。
+            // だがこの方法だと unsubscribe が効かないという問題が発生したため、toObservable を使わずに実装している。
+
+            const observable = new Observable<Result<RoomEventSubscription, CombinedError>>(
+                observer => {
+                    const subscription = pipe(
+                        client.subscription(RoomEventDocument, variables),
+                        subscribe(value => {
+                            if (value.data != null) {
+                                observer.next(Result.ok(value.data));
+                                return;
+                            }
+                            observer.next(Result.error(value.error!));
+                        })
+                    );
+                    return subscription;
+                }
             );
-            return new Observable<Result<RoomEventSubscription, CombinedError>>(observer => {
-                return roomEventSubscriptionAsWonkaObservable.subscribe({
-                    next: value => {
-                        if (value.data != null) {
-                            observer.next(Result.ok(value.data));
-                            return;
-                        }
-                        observer.next(Result.error(value.error!));
-                    },
-                    error: e => observer.error(e),
-                    complete: () => observer.complete(),
-                });
-            });
+            return observable.pipe(share());
         },
     };
 };

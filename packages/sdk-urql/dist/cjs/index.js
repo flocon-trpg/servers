@@ -140,21 +140,19 @@ const createGraphQLClientForRoomClient = (client) => {
             return result.Result.error(result$1.error);
         }),
         roomEventSubscription: variables => {
-            const roomEventSubscriptionSource = client.subscription(typedDocumentNodeV0_7_1.RoomEventDocument, variables);
-            const roomEventSubscriptionAsWonkaObservable = wonka.toObservable(roomEventSubscriptionSource);
-            return new rxjs.Observable(observer => {
-                return roomEventSubscriptionAsWonkaObservable.subscribe({
-                    next: value => {
-                        if (value.data != null) {
-                            observer.next(result.Result.ok(value.data));
-                            return;
-                        }
-                        observer.next(result.Result.error(value.error));
-                    },
-                    error: e => observer.error(e),
-                    complete: () => observer.complete(),
-                });
+            // 当初は、client.subscription() の戻り値を wonka の toObservable で wonka の Observable に変換して、それを RxJS の Observable に変換していた。
+            // だがこの方法だと unsubscribe が効かないという問題が発生したため、toObservable を使わずに実装している。
+            const observable = new rxjs.Observable(observer => {
+                const subscription = wonka.pipe(client.subscription(typedDocumentNodeV0_7_1.RoomEventDocument, variables), wonka.subscribe(value => {
+                    if (value.data != null) {
+                        observer.next(result.Result.ok(value.data));
+                        return;
+                    }
+                    observer.next(result.Result.error(value.error));
+                }));
+                return subscription;
             });
+            return observable.pipe(rxjs.share());
         },
     };
 };
