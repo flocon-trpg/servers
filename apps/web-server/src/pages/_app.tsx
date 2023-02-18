@@ -8,6 +8,7 @@ import { createUrqlClient } from '@flocon-trpg/sdk-urql';
 import { createDefaultLogger, loggerRef } from '@flocon-trpg/utils';
 import { loader } from '@monaco-editor/react';
 import { devtoolsExchange } from '@urql/devtools';
+import { App as AntdApp, Layout } from 'antd';
 import { FirebaseApp, initializeApp } from 'firebase/app';
 import { Auth, getAuth } from 'firebase/auth';
 import { FirebaseStorage, getStorage } from 'firebase/storage';
@@ -17,7 +18,7 @@ import { atom } from 'jotai/vanilla';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
 import pino from 'pino';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { QueryClient } from 'react-query';
 import { useAsync, useDebounce } from 'react-use';
 import urljoin from 'url-join';
@@ -39,6 +40,7 @@ import {
 } from '../utils/firebase/firebaseUserState';
 import { setRoomConfig } from '../utils/localStorage/roomConfig';
 import { getUserConfig, setUserConfig } from '../utils/localStorage/userConfig';
+import { AntdThemeConfigProvider } from '@/components/behaviors/AntdThemeConfigProvider';
 import { useGetIdTokenResult } from '@/hooks/useGetIdTokenResult';
 
 enableMapSet();
@@ -177,6 +179,23 @@ const useSubscribeFirebaseUser = (): void => {
             unsubscribe();
         };
     }, [auth, setUser]);
+};
+
+const ThemedDiv: React.FC<PropsWithChildren<{ style?: React.CSSProperties }>> = ({
+    children,
+    style,
+}) => {
+    return (
+        <AntdThemeConfigProvider compact={false}>
+            <AntdApp>
+                <Layout style={{ minHeight: '100vh' }}>
+                    <Layout.Content>
+                        <div style={style}>{children}</div>
+                    </Layout.Content>
+                </Layout>
+            </AntdApp>
+        </AntdThemeConfigProvider>
+    );
 };
 
 const App = ({ Component, pageProps }: AppProps): JSX.Element => {
@@ -332,24 +351,30 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
     }, []);
 
     if (config == null) {
-        return <div style={{ padding: 5 }}>{'env.txt を確認しています…'}</div>;
+        return <ThemedDiv style={{ padding: 5 }}>{'env.txt を確認しています…'}</ThemedDiv>;
     }
 
     if (config.isError) {
-        return <div style={{ padding: 5 }}>{`設定ファイルに問題があります: ${config.error}`}</div>;
+        return (
+            <ThemedDiv
+                style={{ padding: 5 }}
+            >{`設定ファイルに問題があります: ${config.error}`}</ThemedDiv>
+        );
     }
 
     if (authNotFoundState) {
         return (
-            <div style={{ padding: 5 }}>
+            <ThemedDiv style={{ padding: 5 }}>
                 {
                     '予期しないエラーが発生しました: authNotFound / An unexpected error occured: authNotFound'
                 }
-            </div>
+            </ThemedDiv>
         );
     }
     if (urqlClient == null || reactQueryClient == null) {
-        return <div style={{ padding: 5 }}>{'しばらくお待ち下さい… / Please wait…'}</div>;
+        return (
+            <ThemedDiv style={{ padding: 5 }}>{'しばらくお待ち下さい… / Please wait…'}</ThemedDiv>
+        );
     }
     return (
         <>
