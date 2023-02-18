@@ -653,7 +653,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
         });
 
         pieces = (
-            <AllContextProvider {...allContext}>
+            <AllContextProvider {...allContext} excludeAntdApp>
                 <ReactKonva.Layer>
                     {imagePieceElements}
                     {shapePieceElements}
@@ -726,7 +726,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
             }}
         >
             {/* background: ドラッグで全体を動かせる */}
-            <AllContextProvider {...allContext}>
+            <AllContextProvider {...allContext} excludeAntdApp>
                 <ReactKonva.Layer
                     onMouseDown={e => {
                         if ((e.evt.buttons & 1) !== 0) {

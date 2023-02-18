@@ -14,6 +14,7 @@ export type Props = {
     reactQueryClient: QueryClient;
     compact?: boolean | undefined;
     roomClient: RoomClientContextValue | null;
+    excludeAntdApp?: boolean;
 };
 
 export const AllContextProvider: React.FC<PropsWithChildren<Props>> = ({
@@ -22,6 +23,7 @@ export const AllContextProvider: React.FC<PropsWithChildren<Props>> = ({
     reactQueryClient,
     compact,
     roomClient,
+    excludeAntdApp,
     children,
 }: PropsWithChildren<Props>) => {
     return (
@@ -31,7 +33,7 @@ export const AllContextProvider: React.FC<PropsWithChildren<Props>> = ({
                     <DndProvider backend={HTML5Backend}>
                         <RoomClientContext.Provider value={roomClient}>
                             <AntdThemeConfigProvider compact={compact}>
-                                <App>{children}</App>
+                                {excludeAntdApp ? children : <App>{children}</App>}
                             </AntdThemeConfigProvider>
                         </RoomClientContext.Provider>
                     </DndProvider>
