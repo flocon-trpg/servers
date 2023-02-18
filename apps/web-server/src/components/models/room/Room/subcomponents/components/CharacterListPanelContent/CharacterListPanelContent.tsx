@@ -273,7 +273,7 @@ const createStringParameterColumn = ({
 const dndItemKey = 'rowKey';
 
 type TableHeaderCellProps = {
-    title: string;
+    title: string | null;
     rowKey: string;
 };
 
@@ -317,8 +317,30 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
         drop: () => ({ [dndItemKey]: rowKey }),
     });
     return (
-        <div ref={drop}>
-            {title}
+        <div
+            ref={drop}
+            className={classNames(flex, flexRow, itemsCenter)}
+            style={{
+                // 設定ボタンの列などでは移動ボタンが右寄せだと見た目が悪いので、中央に来るようにしている。それ以外は移動ボタンは右寄せにしている。
+                justifyContent: title ? 'space-between' : 'center',
+            }}
+        >
+            {title && (
+                <Tooltip overlayClassName={cancelRnd} overlay={title}>
+                    <div
+                        style={{
+                            // 概ね3行までの高さ
+                            maxHeight: 40,
+                            // デフォルトより行間を狭くし、省スペース化させている
+                            lineHeight: '110%',
+                            overflow: 'hidden',
+                            wordBreak: 'break-word',
+                        }}
+                    >
+                        {title}
+                    </div>
+                </Tooltip>
+            )}
             <Tooltip
                 overlayClassName={cancelRnd}
                 overlay={
@@ -339,7 +361,12 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
                     size='small'
                     onClick={e => e.stopPropagation()}
                 >
-                    <Icon.MenuOutlined />
+                    <Icon.MenuOutlined
+                        style={{
+                            // ボタンの左右にある空白を取り除いている
+                            margin: '0 -6px',
+                        }}
+                    />
                 </Button>
             </Tooltip>
         </div>
@@ -382,7 +409,7 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                 switch (rowKey) {
                     case RowKeys.EditButton:
                         return {
-                            title: <TableHeaderCell title='' rowKey={rowKey} />,
+                            title: <TableHeaderCell title={null} rowKey={rowKey} />,
                             key: 'menu',
                             width: 36,
                             // eslint-disable-next-line react/display-name
@@ -443,7 +470,7 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                         };
                     case RowKeys.TogglePrivate:
                         return {
-                            title: <TableHeaderCell title='' rowKey={rowKey} />,
+                            title: <TableHeaderCell title={null} rowKey={rowKey} />,
                             key: '全体公開',
                             sorter: (x, y) =>
                                 (x.character.state.isPrivate ? 1 : 0) -
