@@ -1,7 +1,7 @@
 import { ComponentMeta } from '@storybook/react';
 import React from 'react';
 import { useStringPieceEditor } from './StringPieceEditor';
-import { RoomClientContext } from '@/contexts/RoomClientContext';
+import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { defaultBoardId, stringPieceKey1 } from '@/mocks';
 
@@ -18,9 +18,9 @@ const Core: React.FC = () => {
 export const Update: React.FC = () => {
     const { roomClientContextValue } = useSetupStorybook();
     return (
-        <RoomClientContext.Provider value={roomClientContextValue}>
+        <StorybookProvider compact roomClientContextValue={roomClientContextValue}>
             <Core />
-        </RoomClientContext.Provider>
+        </StorybookProvider>
     );
 };
 

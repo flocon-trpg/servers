@@ -1,7 +1,7 @@
 import { ComponentMeta } from '@storybook/react';
 import React from 'react';
 import { MemosPanelContent } from './MemosPanelContent';
-import { RoomClientContext } from '@/contexts/RoomClientContext';
+import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 
 export const Default: React.FC<{ width?: number }> = ({ width }) => {
@@ -18,12 +18,12 @@ export const Default: React.FC<{ width?: number }> = ({ width }) => {
     const [selectedMemoId, setSelectedMemoId] = React.useState<string>('');
     return (
         <div style={{ height: 200, width }}>
-            <RoomClientContext.Provider value={roomClientContextValue}>
+            <StorybookProvider compact roomClientContextValue={roomClientContextValue}>
                 <MemosPanelContent
                     selectedMemoId={selectedMemoId}
                     onSelectedMemoIdChange={setSelectedMemoId}
                 />
-            </RoomClientContext.Provider>
+            </StorybookProvider>
         </div>
     );
 };

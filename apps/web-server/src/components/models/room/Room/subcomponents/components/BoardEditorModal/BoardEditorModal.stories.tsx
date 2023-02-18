@@ -3,7 +3,7 @@ import { ComponentMeta } from '@storybook/react';
 import { useSetAtom } from 'jotai';
 import React from 'react';
 import { BoardEditorModal, boardEditorModalAtom } from './BoardEditorModal';
-import { RoomClientContext } from '@/contexts/RoomClientContext';
+import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { defaultBoardId, myRichCharacterId } from '@/mocks';
 
@@ -22,9 +22,9 @@ export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myPar
 
     return (
         <div>
-            <RoomClientContext.Provider value={roomClientContextValue}>
+            <StorybookProvider compact roomClientContextValue={roomClientContextValue}>
                 <BoardEditorModal />
-            </RoomClientContext.Provider>
+            </StorybookProvider>
         </div>
     );
 };

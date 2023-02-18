@@ -4,6 +4,7 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Client, Provider } from 'urql';
+import { RoomGlobalStyle } from '../globalStyles/RoomGlobalStyle';
 import { AntdThemeConfigProvider } from './AntdThemeConfigProvider';
 import { RoomClientContext, RoomClientContextValue } from '@/contexts/RoomClientContext';
 
@@ -28,7 +29,10 @@ export const StorybookProvider: React.FC<{
         <QueryClientProvider client={queryClientRef.current}>
             <DndProvider backend={HTML5Backend}>
                 <AntdThemeConfigProvider compact={compact}>
-                    <App>{childrenWithRoomClient}</App>
+                    <App>
+                        <RoomGlobalStyle />
+                        {childrenWithRoomClient}
+                    </App>
                 </AntdThemeConfigProvider>
             </DndProvider>
         </QueryClientProvider>

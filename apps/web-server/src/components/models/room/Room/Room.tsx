@@ -1,6 +1,5 @@
-import { Global } from '@emotion/react';
 import { recordToArray } from '@flocon-trpg/utils';
-import { Layout as AntdLayout, App, Result, theme } from 'antd';
+import { Layout as AntdLayout, App, Result } from 'antd';
 import classNames from 'classnames';
 import { useAtomValue } from 'jotai/react';
 import dynamic from 'next/dynamic';
@@ -45,6 +44,7 @@ import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalette
 import { MemoPanelConfig } from '@/atoms/roomConfigAtom/types/memoPanelConfig';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
+import { RoomGlobalStyle } from '@/components/globalStyles/RoomGlobalStyle';
 import {
     debouncedWindowInnerHeightAtom,
     debouncedWindowInnerWidthAtom,
@@ -964,11 +964,6 @@ type Props = {
 };
 
 export const Room: React.FC<Props> = ({ debug }) => {
-    const { token } = theme.useToken();
-    const globalStyles = React.useMemo(
-        () => ({ body: { background: token.colorBgBase } }),
-        [token.colorBgBase]
-    );
     const myUserUid = useMyUserUid();
     const innerWidth = useAtomValue(debouncedWindowInnerWidthAtom);
     const innerHeight = useAtomValue(debouncedWindowInnerHeightAtom);
@@ -1011,8 +1006,7 @@ export const Room: React.FC<Props> = ({ debug }) => {
 
     return (
         <AntdLayout>
-            {/* ウィンドウがはみ出た場合でもブラウザ画面全体の background が黒くなるように、body に background を指定している。*/}
-            <Global styles={globalStyles} />
+            <RoomGlobalStyle />
             <AntdLayout.Content>
                 <RoomMenu />
                 <div className={classNames(relative)}>
