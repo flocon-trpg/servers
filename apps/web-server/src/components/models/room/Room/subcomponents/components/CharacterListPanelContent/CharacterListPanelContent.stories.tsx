@@ -33,7 +33,7 @@ export const Default: React.FC<{ stateType: StateType; myParticipantRole: Partic
 
     return (
         <StorybookProvider compact roomClientContextValue={roomClientContextValue}>
-            <CharacterListPanelContent />
+            <CharacterListPanelContent height={400} />
         </StorybookProvider>
     );
 };

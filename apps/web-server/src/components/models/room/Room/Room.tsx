@@ -87,12 +87,18 @@ type ConfigAndKeyProps<T> = {
     keyName: string;
 } & ConfigProps<T>;
 
-const overflowHiddenStyle = { overflow: 'hidden' } as const;
-const childrenContainerPadding = `12px ${horizontalPadding}px`;
-const childrenContainerStyle: React.CSSProperties = {
-    padding: childrenContainerPadding,
-    overflowY: 'scroll',
-};
+namespace ChildrenContainerStyle {
+    const childrenContainerPadding = `12px ${horizontalPadding}px`;
+    export const defaultStyle: React.CSSProperties = {
+        padding: childrenContainerPadding,
+        overflowY: 'scroll',
+    };
+    export const overflowHiddenStyle: React.CSSProperties = { overflow: 'hidden' };
+    export const characterListPanelStyle: React.CSSProperties = {
+        ...overflowHiddenStyle,
+        padding: '12px 12px',
+    };
+}
 
 const ActiveBoardPanel: React.FC = React.memo(function ActiveBoardPanel() {
     const config = useAtomSelector(roomConfigAtom, state => state?.panels.activeBoardPanel);
@@ -150,7 +156,7 @@ const ActiveBoardPanel: React.FC = React.memo(function ActiveBoardPanel() {
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
             onClose={onClose}
-            childrenContainerStyle={overflowHiddenStyle}
+            childrenContainerStyle={ChildrenContainerStyle.overflowHiddenStyle}
             position={config}
             size={config}
             minHeight={150}
@@ -239,7 +245,7 @@ const BoardEditorPanel: React.FC<ConfigAndKeyProps<BoardEditorPanelConfig>> = Re
                 onResizeStop={onResizeStop}
                 onMoveToFront={onMoveToFront}
                 onClose={onClose}
-                childrenContainerStyle={overflowHiddenStyle}
+                childrenContainerStyle={ChildrenContainerStyle.overflowHiddenStyle}
                 position={config}
                 size={config}
                 minHeight={150}
@@ -345,7 +351,7 @@ const ChatPalettePanel: React.FC<ConfigAndKeyProps<ChatPalettePanelConfig>> = Re
                 onResizeStop={onResizeStop}
                 onMoveToFront={onMoveToFront}
                 onClose={onClose}
-                childrenContainerStyle={overflowHiddenStyle}
+                childrenContainerStyle={ChildrenContainerStyle.overflowHiddenStyle}
                 position={config}
                 size={config}
                 minHeight={150}
@@ -430,14 +436,14 @@ const CharacterPanel: React.FC = React.memo(function CharacterPanel() {
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
             onClose={onClose}
-            childrenContainerStyle={childrenContainerStyle}
+            childrenContainerStyle={ChildrenContainerStyle.characterListPanelStyle}
             position={config}
             size={config}
             minHeight={150}
             minWidth={150}
             zIndex={config.zIndex}
         >
-            <CharacterListPanelContent />
+            <CharacterListPanelContent height={config.height} />
         </DraggableCard>
     );
 });
@@ -498,7 +504,7 @@ const GameEffectPanel: React.FC = React.memo(function GameEffectPanel() {
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
             onClose={onClose}
-            childrenContainerStyle={childrenContainerStyle}
+            childrenContainerStyle={ChildrenContainerStyle.defaultStyle}
             position={config}
             size={config}
             minHeight={150}
@@ -597,7 +603,7 @@ const MemoPanel: React.FC<ConfigAndKeyProps<MemoPanelConfig>> = React.memo(funct
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
             onClose={onClose}
-            childrenContainerStyle={overflowHiddenStyle}
+            childrenContainerStyle={ChildrenContainerStyle.overflowHiddenStyle}
             position={config}
             size={config}
             minHeight={150}
@@ -687,7 +693,7 @@ const ParticipantPanel: React.FC = () => {
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
             onClose={onClose}
-            childrenContainerStyle={childrenContainerStyle}
+            childrenContainerStyle={ChildrenContainerStyle.defaultStyle}
             position={participantPanel}
             size={participantPanel}
             minHeight={150}
@@ -756,7 +762,7 @@ const PieceValuePanel: React.FC = () => {
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
             onClose={onClose}
-            childrenContainerStyle={childrenContainerStyle}
+            childrenContainerStyle={ChildrenContainerStyle.defaultStyle}
             position={config}
             size={config}
             minHeight={150}
@@ -830,7 +836,7 @@ const RollCallPanel: React.FC = () => {
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
             onClose={onClose}
-            childrenContainerStyle={childrenContainerStyle}
+            childrenContainerStyle={ChildrenContainerStyle.defaultStyle}
             position={config}
             size={config}
             minHeight={150}
@@ -916,7 +922,6 @@ const RoomMessagePanel: React.FC<ConfigAndKeyProps<MessagePanelConfig>> = React.
             return null;
         }
 
-        // canvasWidthとcanvasHeightはDraggableCardのchildrenの表示領域より大きい値
         return (
             <DraggableCard
                 key={keyName}
@@ -925,7 +930,7 @@ const RoomMessagePanel: React.FC<ConfigAndKeyProps<MessagePanelConfig>> = React.
                 onResizeStop={onResizeStop}
                 onMoveToFront={onMoveToFront}
                 onClose={onClose}
-                childrenContainerStyle={overflowHiddenStyle}
+                childrenContainerStyle={ChildrenContainerStyle.overflowHiddenStyle}
                 position={config}
                 size={config}
                 minHeight={150}

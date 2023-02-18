@@ -348,10 +348,12 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
 
 type CharacterListTabPaneProps = {
     tabConfig: CharacterTabConfig;
+    tableHeight: number;
 };
 
 const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
     tabConfig,
+    tableHeight,
 }: CharacterListTabPaneProps) => {
     const myUserUid = useMyUserUid();
     const setRoomState = useSetRoomStateWithImmer();
@@ -550,6 +552,7 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
             pagination={false}
             // 列をドラッグして動かすときにTooltipをドラッグするとキャラクターウィンドウが開いてしまう。簡単な方法でTooltipを調整する手段はなさそうなので、非表示にすることで解決している
             showSorterTooltip={false}
+            scroll={{ x: true, y: tableHeight }}
         />
     );
 };
@@ -654,7 +657,8 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
 const CharacterListPanelWithPanelId: React.FC<{
     // 複数のCharacterListが存在する場合は、panelIdをそれぞれ異なるものにする。
     panelId: string;
-}> = ({ panelId }) => {
+    height: number;
+}> = ({ panelId, height }) => {
     const { modal } = App.useApp();
     const tabs = useAtomSelector(
         roomConfigAtom,
@@ -674,7 +678,7 @@ const CharacterListPanelWithPanelId: React.FC<{
             const result: AntdTab = {
                 key: tab.key,
                 tabKey: tab.key,
-                style: { overflowY: 'scroll' },
+                style: { overflowX: 'scroll', overflowY: 'scroll' },
                 closable: false,
                 label: (
                     <div
@@ -747,7 +751,9 @@ const CharacterListPanelWithPanelId: React.FC<{
                         </div>
                     </div>
                 ),
-                children: <CharacterListTabPane tabConfig={tab} />,
+                children: (
+                    <CharacterListTabPane tabConfig={tab} tableHeight={Math.max(height - 200, 0)} />
+                ),
             };
             return result;
         });
@@ -758,7 +764,6 @@ const CharacterListPanelWithPanelId: React.FC<{
                     display: 'flex',
                     flexDirection: 'column',
                     height: '100%',
-                    margin: '2px 4px',
                 }}
             >
                 <div style={{ paddingBottom: 8 }}>
@@ -849,6 +854,7 @@ const CharacterListPanelWithPanelId: React.FC<{
         );
     }, [
         editingTabConfigKey,
+        height,
         modal,
         panelId,
         setCharacterEditorModal,
@@ -860,7 +866,7 @@ const CharacterListPanelWithPanelId: React.FC<{
     ]);
 };
 
-export const CharacterListPanelContent: React.FC = () => {
+export const CharacterListPanelContent: React.FC<{ height: number }> = ({ height }) => {
     // 現状ではCharacterListは最大でも1つしか存在しないため、panelIdは適当で構わない
-    return <CharacterListPanelWithPanelId panelId='CharacterList' />;
+    return <CharacterListPanelWithPanelId panelId='CharacterList' height={height} />;
 };
