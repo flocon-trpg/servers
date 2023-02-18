@@ -62,7 +62,6 @@ export const IndexPage: React.FC = () => {
         );
     }
 
-    const spacing = 24;
     return (
         <Layout>
             <div style={{ padding: 32 }}>
@@ -89,7 +88,6 @@ export const IndexPage: React.FC = () => {
                         uploaderFileBrowserHeight={null}
                     />
                 </div>
-                <div style={{ height: spacing }} />
                 <Typography.Title level={3}>動作環境</Typography.Title>
                 <ul>
                     <li>
@@ -108,7 +106,6 @@ export const IndexPage: React.FC = () => {
                         }
                     </li>
                 </ul>
-                <div style={{ height: spacing }} />
                 <Typography.Title level={3}>バージョン情報</Typography.Title>
                 <ul>
                     <li>{`Webサーバー: ${VERSION}`}</li>
@@ -141,7 +138,6 @@ export const IndexPage: React.FC = () => {
                         </div>
                     </li>
                 </ul>
-                <div style={{ height: spacing }} />
                 <Typography.Title level={3}>利用規約・プライバシーポリシー</Typography.Title>
                 <ul>
                     <li>
@@ -151,7 +147,6 @@ export const IndexPage: React.FC = () => {
                         <Link href='/privacy_policy'>プライバシーポリシー</Link>
                     </li>
                 </ul>
-                <div style={{ height: spacing }} />
                 <Typography.Title level={3}>外部リンク</Typography.Title>
                 <ul>
                     <li>
@@ -178,7 +173,6 @@ export const IndexPage: React.FC = () => {
                         </a>
                     </li>
                 </ul>
-                <div style={{ height: spacing }} />
                 <Typography.Title level={3}>その他</Typography.Title>
                 <ul>
                     <li>
