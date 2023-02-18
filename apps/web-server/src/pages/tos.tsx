@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { FetchTextState } from '../utils/types';
+import { Layout } from '@/components/ui/Layout/Layout';
 
 const padding = 20;
 const filename = 'tos.md';
@@ -8,9 +9,9 @@ const filename = 'tos.md';
 /**
  * `tos.md` の内容を用い、利用規約を表示します。
  *
- * ただし、サーバーを運用する際は、このコードを改変して利用規約を表示させても構いません。
+ * サーバーを運用する際は、このコードを改変して利用規約を直接表示させても構いません。その場合は必ずしも `tos.md` を使う必要はありません。
  */
-const Tos: React.FC = () => {
+const TosContent: React.FC = () => {
     const [text, setText] = React.useState<FetchTextState>({ fetched: false });
     React.useEffect(() => {
         const main = async () => {
@@ -52,6 +53,14 @@ const Tos: React.FC = () => {
                 <ReactMarkdown>{text.value}</ReactMarkdown>
             )}
         </div>
+    );
+};
+
+const Tos: React.FC = () => {
+    return (
+        <Layout>
+            <TosContent />
+        </Layout>
     );
 };
 

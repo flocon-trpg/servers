@@ -351,7 +351,7 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
         }
         case 'nonJoined':
             return (
-                <Center>
+                <Center setPaddingY>
                     <Card title='入室'>
                         <JoinRoomForm
                             roomState={roomState.nonJoinedRoom}

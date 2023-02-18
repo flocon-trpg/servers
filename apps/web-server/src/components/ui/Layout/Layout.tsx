@@ -200,7 +200,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                 );
             case false:
                 return (
-                    <Center>
+                    <Center setPaddingY>
                         <Card title='エントリーパスワードの入力'>
                             <EntryFormComponent
                                 onEntry={() => {

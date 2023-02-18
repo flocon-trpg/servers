@@ -126,7 +126,7 @@ export const RoomCreatePage: React.FC = () => {
 
     return (
         <Layout requires={loginAndEntry}>
-            <Center>
+            <Center setPaddingY>
                 <Card title='部屋の新規作成'>{form}</Card>
             </Center>
         </Layout>

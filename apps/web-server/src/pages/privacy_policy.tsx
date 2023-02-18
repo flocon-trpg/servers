@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { FetchTextState } from '../utils/types';
+import { Layout } from '@/components/ui/Layout/Layout';
 
 const padding = 20;
 const filename = 'privacy_policy.md';
@@ -8,9 +9,9 @@ const filename = 'privacy_policy.md';
 /**
  * `privacy_policy.md` の内容を用い、プライバシーポリシーを表示します。
  *
- * ただし、サーバーを運用する際は、このコードを改変してプライバシーポリシーを表示させても構いません。
+ * サーバーを運用する際は、このコードを改変してプライバシーポリシーを直接表示させても構いません。その場合は必ずしも `privacy_policy.md` を使う必要はありません。
  */
-const PrivacyPolicy: React.FC = () => {
+const PrivacyPolicyContent: React.FC = () => {
     const [text, setText] = React.useState<FetchTextState>({ fetched: false });
     React.useEffect(() => {
         const main = async () => {
@@ -52,6 +53,14 @@ const PrivacyPolicy: React.FC = () => {
                 <ReactMarkdown>{text.value}</ReactMarkdown>
             )}
         </div>
+    );
+};
+
+const PrivacyPolicy: React.FC = () => {
+    return (
+        <Layout>
+            <PrivacyPolicyContent />
+        </Layout>
     );
 };
 
