@@ -2,25 +2,25 @@
 
 var sdk = require('@flocon-trpg/sdk');
 var react = require('react');
-var reactUse = require('react-use');
-var useMemoOne = require('use-memo-one');
 
 function useCreateRoomClient(params) {
     const client = params?.client;
     const roomId = params?.roomId;
     const userUid = params?.userUid;
     const [recreateKey, setRecreateKey] = react.useState(0);
-    const result = useMemoOne.useMemoOne(() => {
-        if (client == null || roomId == null || userUid == null) {
-            return null;
-        }
-        return sdk.createRoomClient({ client, roomId, userUid });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [client, roomId, userUid, recreateKey]);
-    const previousResult = reactUse.usePreviousDistinct(result);
+    const [result, setResult] = react.useState();
     react.useEffect(() => {
-        previousResult?.unsubscribe();
-    }, [previousResult]);
+        if (client == null || roomId == null || userUid == null) {
+            return;
+        }
+        const next = sdk.createRoomClient({ client, roomId, userUid });
+        setResult(prev => {
+            if (prev != null) {
+                prev.unsubscribe();
+            }
+            return next;
+        });
+    }, [client, roomId, userUid, recreateKey]);
     return react.useMemo(() => {
         if (result == null) {
             return null;

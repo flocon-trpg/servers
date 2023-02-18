@@ -1,24 +1,24 @@
 import { createRoomClient, ReadonlyBehaviorEvent } from '@flocon-trpg/sdk';
 import { useState, useEffect, useMemo } from 'react';
-import { usePreviousDistinct } from 'react-use';
-import { useMemoOne } from 'use-memo-one';
 
 function useCreateRoomClient(params) {
     const client = params?.client;
     const roomId = params?.roomId;
     const userUid = params?.userUid;
     const [recreateKey, setRecreateKey] = useState(0);
-    const result = useMemoOne(() => {
-        if (client == null || roomId == null || userUid == null) {
-            return null;
-        }
-        return createRoomClient({ client, roomId, userUid });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [client, roomId, userUid, recreateKey]);
-    const previousResult = usePreviousDistinct(result);
+    const [result, setResult] = useState();
     useEffect(() => {
-        previousResult?.unsubscribe();
-    }, [previousResult]);
+        if (client == null || roomId == null || userUid == null) {
+            return;
+        }
+        const next = createRoomClient({ client, roomId, userUid });
+        setResult(prev => {
+            if (prev != null) {
+                prev.unsubscribe();
+            }
+            return next;
+        });
+    }, [client, roomId, userUid, recreateKey]);
     return useMemo(() => {
         if (result == null) {
             return null;

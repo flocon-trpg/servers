@@ -3,23 +3,23 @@ import { getExactlyOneKey } from '@flocon-trpg/utils';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 import { ChatPalettePanelContent } from './ChatPalettePanelContent';
+import { RoomClientContext } from '@/contexts/RoomClientContext';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
-    const { roomId, roomConfig, isInitialized } = useSetupStorybook({
+    const { roomId, roomConfig, roomClientContextValue } = useSetupStorybook({
         room: {
             myParticipantRole,
         },
     });
-    if (!isInitialized) {
-        return <div />;
-    }
     return (
         <div style={{ height: 400 }}>
-            <ChatPalettePanelContent
-                roomId={roomId}
-                panelId={getExactlyOneKey(roomConfig.panels.chatPalettePanels)}
-            />
+            <RoomClientContext.Provider value={roomClientContextValue}>
+                <ChatPalettePanelContent
+                    roomId={roomId}
+                    panelId={getExactlyOneKey(roomConfig.panels.chatPalettePanels)}
+                />
+            </RoomClientContext.Provider>
         </div>
     );
 };

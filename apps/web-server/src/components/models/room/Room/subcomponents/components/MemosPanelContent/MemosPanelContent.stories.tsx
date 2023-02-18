@@ -1,10 +1,11 @@
 import { ComponentMeta } from '@storybook/react';
 import React from 'react';
 import { MemosPanelContent } from './MemosPanelContent';
+import { RoomClientContext } from '@/contexts/RoomClientContext';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 
 export const Default: React.FC<{ width?: number }> = ({ width }) => {
-    const { isInitialized } = useSetupStorybook({
+    const { roomClientContextValue } = useSetupStorybook({
         room: {
             myParticipantRole: 'Player',
             setCharacterTagNames: false,
@@ -15,15 +16,14 @@ export const Default: React.FC<{ width?: number }> = ({ width }) => {
         },
     });
     const [selectedMemoId, setSelectedMemoId] = React.useState<string>('');
-    if (!isInitialized) {
-        return <div />;
-    }
     return (
         <div style={{ height: 200, width }}>
-            <MemosPanelContent
-                selectedMemoId={selectedMemoId}
-                onSelectedMemoIdChange={setSelectedMemoId}
-            />
+            <RoomClientContext.Provider value={roomClientContextValue}>
+                <MemosPanelContent
+                    selectedMemoId={selectedMemoId}
+                    onSelectedMemoIdChange={setSelectedMemoId}
+                />
+            </RoomClientContext.Provider>
         </div>
     );
 };

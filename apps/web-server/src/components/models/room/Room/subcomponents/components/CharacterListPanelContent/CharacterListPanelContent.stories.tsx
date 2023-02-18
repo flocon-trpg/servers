@@ -23,7 +23,7 @@ export const Default: React.FC<{ stateType: StateType; myParticipantRole: Partic
                 };
         }
     }, [stateType]);
-    useSetupStorybook({
+    const { roomClientContextValue } = useSetupStorybook({
         room: {
             myParticipantRole,
             setBoards: stateType === 'default',
@@ -32,7 +32,7 @@ export const Default: React.FC<{ stateType: StateType; myParticipantRole: Partic
     });
 
     return (
-        <StorybookProvider waitForRoomClient>
+        <StorybookProvider compact roomClientContextValue={roomClientContextValue}>
             <CharacterListPanelContent />
         </StorybookProvider>
     );

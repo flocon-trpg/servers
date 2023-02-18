@@ -176,13 +176,13 @@ const stateForOpenAndNotAnswered: RoomState = {
 };
 
 export const Default: React.FC<{ roomState: RoomState }> = ({ roomState }) => {
-    useSetupStorybook({
+    const { roomClientContextValue } = useSetupStorybook({
         room: {
             custom: roomState,
         },
     });
     return (
-        <StorybookProvider waitForRoomClient>
+        <StorybookProvider compact roomClientContextValue={roomClientContextValue}>
             <RollCall
                 rollCalls={roomState.rollCalls ?? {}}
                 mockDate={() => new Date(currentDateTime)}

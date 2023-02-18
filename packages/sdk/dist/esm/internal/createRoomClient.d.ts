@@ -38,7 +38,7 @@ export declare const createRoomClient: <TCustomMessage = any, TGraphQLError = an
         } | {
             type: "success";
         } | {
-            type: "error";
+            type: "error"; /** 部屋に参加しているユーザーの接続状況を表します。キーは Firebase Authentication の userUid です。`isConnected` が false であるか、もしくは Map に含まれないユーザーは未接続を表します。 */
             error: import("./roomClient/graphqlClient").PromiseError<TGraphQLError>;
         };
         GetRoomConnectionsQuery: {
@@ -46,7 +46,7 @@ export declare const createRoomClient: <TCustomMessage = any, TGraphQLError = an
         } | {
             type: "success";
         } | {
-            type: "error";
+            type: "error"; /** 部屋に参加しているユーザーの接続状況を表します。キーは Firebase Authentication の userUid です。`isConnected` が false であるか、もしくは Map に含まれないユーザーは未接続を表します。 */
             error: import("./roomClient/graphqlClient").PromiseError<TGraphQLError>;
         };
         GetRoomQuery: {
@@ -54,7 +54,7 @@ export declare const createRoomClient: <TCustomMessage = any, TGraphQLError = an
         } | {
             type: "success";
         } | {
-            type: "error";
+            type: "error"; /** 部屋に参加しているユーザーの接続状況を表します。キーは Firebase Authentication の userUid です。`isConnected` が false であるか、もしくは Map に含まれないユーザーは未接続を表します。 */
             error: import("./roomClient/graphqlClient").PromiseError<TGraphQLError>;
         };
     } & {

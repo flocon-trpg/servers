@@ -1,7 +1,5 @@
 import { GraphQLClient, RoomClient, createRoomClient } from '@flocon-trpg/sdk';
 import { useEffect, useMemo, useState } from 'react';
-import { usePreviousDistinct } from 'react-use';
-import { useMemoOne } from 'use-memo-one';
 
 type Result<TCustomMessage, TGraphQLError> = {
     value: RoomClient<TCustomMessage, TGraphQLError>;
@@ -32,19 +30,20 @@ export function useCreateRoomClient<TCustomMessage, TGraphQLError>(
     const roomId = params?.roomId;
     const userUid = params?.userUid;
     const [recreateKey, setRecreateKey] = useState(0);
-
-    const result = useMemoOne(() => {
-        if (client == null || roomId == null || userUid == null) {
-            return null;
-        }
-        return createRoomClient<TCustomMessage, TGraphQLError>({ client, roomId, userUid });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [client, roomId, userUid, recreateKey]);
-    const previousResult = usePreviousDistinct(result);
-
+    const [result, setResult] =
+        useState<ReturnType<typeof createRoomClient<TCustomMessage, TGraphQLError>>>();
     useEffect(() => {
-        previousResult?.unsubscribe();
-    }, [previousResult]);
+        if (client == null || roomId == null || userUid == null) {
+            return;
+        }
+        const next = createRoomClient<TCustomMessage, TGraphQLError>({ client, roomId, userUid });
+        setResult(prev => {
+            if (prev != null) {
+                prev.unsubscribe();
+            }
+            return next;
+        });
+    }, [client, roomId, userUid, recreateKey]);
 
     return useMemo(() => {
         if (result == null) {

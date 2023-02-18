@@ -21,7 +21,7 @@ export const Player: React.FC<WebConfig & { myParticipantRole: ParticipantRole }
             isPublicFirebaseStorageEnabled,
         });
     }, [isPublicFirebaseStorageEnabled, isUnlistedFirebaseStorageEnabled]);
-    useSetupStorybook({
+    const { roomClientContextValue } = useSetupStorybook({
         basicMock: {
             webConfig,
         },
@@ -32,7 +32,11 @@ export const Player: React.FC<WebConfig & { myParticipantRole: ParticipantRole }
     const mockUrqlClient = React.useRef(createMockUrqlClientForRoomMessage());
 
     return (
-        <StorybookProvider waitForRoomClient urqlClient={mockUrqlClient.current}>
+        <StorybookProvider
+            compact
+            roomClientContextValue={roomClientContextValue}
+            urqlClient={mockUrqlClient.current}
+        >
             <Room debug={{ window: { innerHeight: 600, innerWidth: 500 } }} />
         </StorybookProvider>
     );

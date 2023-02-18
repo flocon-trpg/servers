@@ -360,6 +360,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
                 clientId={clientId}
                 urqlClient={urqlClient}
                 reactQueryClient={reactQueryClient}
+                roomClient={null}
             >
                 <Component {...pageProps} />
             </AllContextProvider>

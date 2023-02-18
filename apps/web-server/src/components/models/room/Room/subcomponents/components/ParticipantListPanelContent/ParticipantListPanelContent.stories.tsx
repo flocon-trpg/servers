@@ -2,16 +2,17 @@ import { ParticipantRole } from '@flocon-trpg/core';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 import { ParticipantListPanelContent } from './ParticipantListPanelContent';
+import { RoomClientContext } from '@/contexts/RoomClientContext';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 
 export const Master: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
-    const { isInitialized } = useSetupStorybook({ room: { myParticipantRole } });
+    const { roomClientContextValue } = useSetupStorybook({ room: { myParticipantRole } });
 
-    if (!isInitialized) {
-        return <div />;
-    }
-
-    return <ParticipantListPanelContent />;
+    return (
+        <RoomClientContext.Provider value={roomClientContextValue}>
+            <ParticipantListPanelContent />
+        </RoomClientContext.Provider>
+    );
 };
 
 export default {

@@ -6,12 +6,14 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { Client, Provider } from 'urql';
 import { ClientIdContext } from '../../contexts/ClientIdContext';
 import { AntdThemeConfigProvider } from './AntdThemeConfigProvider';
+import { RoomClientContext, RoomClientContextValue } from '@/contexts/RoomClientContext';
 
 export type Props = {
     clientId: string | null;
     urqlClient: Client;
     reactQueryClient: QueryClient;
     compact?: boolean | undefined;
+    roomClient: RoomClientContextValue | null;
 };
 
 export const AllContextProvider: React.FC<PropsWithChildren<Props>> = ({
@@ -19,6 +21,7 @@ export const AllContextProvider: React.FC<PropsWithChildren<Props>> = ({
     urqlClient,
     reactQueryClient,
     compact,
+    roomClient,
     children,
 }: PropsWithChildren<Props>) => {
     return (
@@ -26,9 +29,11 @@ export const AllContextProvider: React.FC<PropsWithChildren<Props>> = ({
             <Provider value={urqlClient}>
                 <QueryClientProvider client={reactQueryClient}>
                     <DndProvider backend={HTML5Backend}>
-                        <AntdThemeConfigProvider compact={compact}>
-                            <App>{children}</App>
-                        </AntdThemeConfigProvider>
+                        <RoomClientContext.Provider value={roomClient}>
+                            <AntdThemeConfigProvider compact={compact}>
+                                <App>{children}</App>
+                            </AntdThemeConfigProvider>
+                        </RoomClientContext.Provider>
                     </DndProvider>
                 </QueryClientProvider>
             </Provider>
