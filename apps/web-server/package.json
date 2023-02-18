@@ -1,6 +1,6 @@
 {
     "name": "@flocon-trpg/web-server",
-    "version": "0.8.7",
+    "version": "0.8.7-alpha.2",
     "description": "Flocon Web server",
     "license": "MIT",
     "scripts": {
