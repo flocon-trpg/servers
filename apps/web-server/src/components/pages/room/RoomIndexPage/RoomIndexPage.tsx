@@ -210,7 +210,7 @@ const actionColumn = {
     render: (_: any, record: Data) => <RoomButton roomId={record.id} />,
 };
 
-const columnV0713 = [
+const columns = [
     bookmarkColumn,
     nameColumn,
     createdAtColumn,
@@ -219,8 +219,8 @@ const columnV0713 = [
     actionColumn,
 ];
 
-const RoomsTable0713: React.FC<{ rooms: readonly Data[] }> = ({ rooms }) => {
-    return <Table rowKey='id' style={{ flex: 'auto' }} columns={columnV0713} dataSource={rooms} />;
+const RoomsTable: React.FC<{ rooms: readonly Data[] }> = ({ rooms }) => {
+    return <Table rowKey='id' style={{ flex: 'auto' }} columns={columns} dataSource={rooms} />;
 };
 
 type RoomsListComponentProps = {
@@ -269,12 +269,12 @@ const RoomsListComponent: React.FC<RoomsListComponentProps> = ({
 };
 
 const Room: React.FC = () => {
-    const [rooms0713, getRooms0713] = useQuery({
+    const [rooms, getRooms] = useQuery({
         query: Doc.GetRoomsListDocument,
         requestPolicy: 'network-only',
     });
-    const fetching = rooms0713.fetching;
-    const error = rooms0713.error;
+    const fetching = rooms.fetching;
+    const error = rooms.error;
     const subscriptionsRef = React.useRef(new Subscription());
 
     React.useEffect(() => {
@@ -286,17 +286,17 @@ const Room: React.FC = () => {
     }, []);
 
     React.useEffect(() => {
-        getRooms0713();
-    }, [getRooms0713]);
+        getRooms();
+    }, [getRooms]);
 
-    let roomsData0713;
-    switch (rooms0713.data?.result.__typename) {
+    let roomsData;
+    switch (rooms.data?.result.__typename) {
         case 'GetRoomsListSuccessResult':
-            roomsData0713 = rooms0713.data.result.rooms;
+            roomsData = rooms.data.result.rooms;
             break;
         case 'GetRoomsListFailureResult':
         case undefined:
-            roomsData0713 = undefined;
+            roomsData = undefined;
             break;
     }
 
@@ -306,11 +306,9 @@ const Room: React.FC = () => {
             error={error == null ? undefined : { error, title: 'API エラー' }}
         >
             <RoomsListComponent
-                roomsTable={
-                    roomsData0713 != null ? <RoomsTable0713 rooms={roomsData0713} /> : <div />
-                }
+                roomsTable={roomsData != null ? <RoomsTable rooms={roomsData} /> : <div />}
                 onReload={() => {
-                    getRooms0713();
+                    getRooms();
                 }}
             />
         </GraphQLResult>
