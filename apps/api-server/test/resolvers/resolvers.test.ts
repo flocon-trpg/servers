@@ -25,7 +25,7 @@ import {
     UpdateBookmarkMutation,
     WritePrivateMessageMutation,
     WritePublicMessageMutation,
-} from '@flocon-trpg/typed-document-node-v0.7.13';
+} from '@flocon-trpg/typed-document-node';
 import { loggerRef, parseStringToBoolean, recordToArray } from '@flocon-trpg/utils';
 import { diff, serializeUpOperation, toUpOperation } from '@kizahasi/ot-string';
 import { OperationResult } from '@urql/core';

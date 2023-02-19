@@ -1,4 +1,4 @@
-import * as Doc0713 from '@flocon-trpg/typed-document-node-v0.7.13';
+import * as Doc from '@flocon-trpg/typed-document-node';
 import { loggerRef } from '@flocon-trpg/utils';
 import { AnyVariables, GraphQLRequest } from 'urql';
 import { fromValue } from 'wonka';
@@ -8,8 +8,8 @@ export const createMockUrqlClientForRoomMessage = () => {
     return createMockUrqlClient({
         mockQuery: (query: GraphQLRequest<any, AnyVariables>) => {
             switch (query.query) {
-                case Doc0713.GetAvailableGameSystemsDocument: {
-                    const res: Doc0713.GetAvailableGameSystemsQuery = {
+                case Doc.GetAvailableGameSystemsDocument: {
+                    const res: Doc.GetAvailableGameSystemsQuery = {
                         __typename: 'Query',
                         result: {
                             __typename: 'GetAvailableGameSystemsResult',
@@ -34,8 +34,8 @@ export const createMockUrqlClientForRoomMessage = () => {
                         operation: createDummyUrqlOperation(),
                     });
                 }
-                case Doc0713.GetDiceHelpMessagesDocument: {
-                    const res: Doc0713.GetDiceHelpMessagesQuery = {
+                case Doc.GetDiceHelpMessagesDocument: {
+                    const res: Doc.GetDiceHelpMessagesQuery = {
                         __typename: 'Query',
                         result: 'Test DiceHelpMessage',
                     };

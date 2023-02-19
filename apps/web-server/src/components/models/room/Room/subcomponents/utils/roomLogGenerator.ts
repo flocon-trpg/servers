@@ -11,7 +11,7 @@ import {
     FileSourceType,
     RoomMessages,
     RoomPublicChannelFragment,
-} from '@flocon-trpg/typed-document-node-v0.7.13';
+} from '@flocon-trpg/typed-document-node';
 import { PrivateChannelSet } from '@flocon-trpg/web-server-utils';
 import { escape } from 'html-escaper';
 import JSZip from 'jszip';

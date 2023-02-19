@@ -7,7 +7,7 @@ import {
     EditMessageDocument,
     MakeMessageNotSecretDocument,
     WritingMessageStatusType,
-} from '@flocon-trpg/typed-document-node-v0.7.13';
+} from '@flocon-trpg/typed-document-node';
 import { keyNames, recordToMap } from '@flocon-trpg/utils';
 import {
     CustomMessage,

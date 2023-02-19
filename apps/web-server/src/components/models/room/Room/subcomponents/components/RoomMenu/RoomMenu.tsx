@@ -11,7 +11,7 @@ import {
     PromoteToPlayerDocument,
     ResetMessagesDocument,
     ResetRoomMessagesFailureType,
-} from '@flocon-trpg/typed-document-node-v0.7.13';
+} from '@flocon-trpg/typed-document-node';
 import { recordToArray } from '@flocon-trpg/utils';
 import { Input, Menu, Modal, Popover, Tooltip } from 'antd';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';

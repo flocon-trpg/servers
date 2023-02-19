@@ -1,7 +1,4 @@
-import {
-    RoomEventSubscription,
-    WritingMessageStatusType,
-} from '@flocon-trpg/typed-document-node-v0.7.13';
+import { RoomEventSubscription, WritingMessageStatusType } from '@flocon-trpg/typed-document-node';
 import { Observable, interval } from 'rxjs';
 import { BehaviorEvent } from '../rxjs/behaviorEvent';
 import { ReadonlyBehaviorEvent } from '../rxjs/readonlyBehaviorEvent';

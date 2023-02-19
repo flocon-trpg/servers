@@ -1,5 +1,5 @@
 import { State as S, UpOperation as U, roomTemplate } from '@flocon-trpg/core';
-import { RoomGetStateFragment, RoomOperationFragment, RoomOperationInput } from '@flocon-trpg/typed-document-node-v0.7.13';
+import { RoomGetStateFragment, RoomOperationFragment, RoomOperationInput } from '@flocon-trpg/typed-document-node';
 type State = S<typeof roomTemplate>;
 type UpOperation = U<typeof roomTemplate>;
 export declare namespace Room {

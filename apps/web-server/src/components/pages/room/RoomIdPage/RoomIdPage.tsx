@@ -8,7 +8,7 @@ import {
     OperateRoomFailureType,
     RoomAsListItemFragment,
     WritingMessageStatusInputType,
-} from '@flocon-trpg/typed-document-node-v0.7.13';
+} from '@flocon-trpg/typed-document-node';
 import { Alert, Button, Card, Input, Result, Spin } from 'antd';
 import classNames from 'classnames';
 import { produce } from 'immer';

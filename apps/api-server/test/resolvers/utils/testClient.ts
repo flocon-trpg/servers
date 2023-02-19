@@ -74,7 +74,7 @@ import {
     WritePublicMessageDocument,
     WritePublicMessageMutation,
     WritePublicMessageMutationVariables,
-} from '@flocon-trpg/typed-document-node-v0.7.13';
+} from '@flocon-trpg/typed-document-node';
 import { createClient, defaultExchanges, subscriptionExchange } from '@urql/core';
 import { createClient as createWsClient } from 'graphql-ws';
 import ws from 'isomorphic-ws';

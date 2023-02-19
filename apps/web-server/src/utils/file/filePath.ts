@@ -1,9 +1,5 @@
 import * as Core from '@flocon-trpg/core';
-import {
-    FilePathFragment,
-    FilePathInput,
-    FileSourceType,
-} from '@flocon-trpg/typed-document-node-v0.7.13';
+import { FilePathFragment, FilePathInput, FileSourceType } from '@flocon-trpg/typed-document-node';
 import { FirebaseStorage, getDownloadURL, ref } from 'firebase/storage';
 import { WebConfig } from '../../configType';
 import {

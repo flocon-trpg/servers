@@ -1,5 +1,5 @@
 import { getOpenRollCall } from '@flocon-trpg/core';
-import { FilePathFragment } from '@flocon-trpg/typed-document-node-v0.7.13';
+import { FilePathFragment } from '@flocon-trpg/typed-document-node';
 import { loggerRef } from '@flocon-trpg/utils';
 import { soundEffect } from '@flocon-trpg/web-server-utils';
 import { Howl } from 'howler';

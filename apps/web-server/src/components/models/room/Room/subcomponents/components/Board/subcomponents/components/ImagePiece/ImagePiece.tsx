@@ -1,5 +1,5 @@
 import { State, filePathTemplate } from '@flocon-trpg/core';
-import { RoomPublicMessageFragment } from '@flocon-trpg/typed-document-node-v0.7.13';
+import { RoomPublicMessageFragment } from '@flocon-trpg/typed-document-node';
 import { useSpring, useTransition } from '@react-spring/konva';
 import React from 'react';
 import * as ReactKonva from 'react-konva';

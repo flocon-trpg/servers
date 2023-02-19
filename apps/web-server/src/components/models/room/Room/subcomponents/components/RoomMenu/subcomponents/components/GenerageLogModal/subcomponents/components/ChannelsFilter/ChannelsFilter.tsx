@@ -1,5 +1,5 @@
 import { $free, $system } from '@flocon-trpg/core';
-import { RoomPrivateMessage, RoomPublicMessage } from '@flocon-trpg/typed-document-node-v0.7.13';
+import { RoomPrivateMessage, RoomPublicMessage } from '@flocon-trpg/typed-document-node';
 import { Checkbox } from 'antd';
 import classNames from 'classnames';
 import React from 'react';

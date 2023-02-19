@@ -3,7 +3,7 @@ import {
     RoomPrivateMessageFragment,
     RoomPublicMessageFragment,
     RoomSoundEffectFragment,
-} from '@flocon-trpg/typed-document-node-v0.7.13';
+} from '@flocon-trpg/typed-document-node';
 import {
     CustomMessage,
     Message,

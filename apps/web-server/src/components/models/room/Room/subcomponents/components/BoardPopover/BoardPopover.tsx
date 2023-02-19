@@ -11,10 +11,7 @@ import {
     toUpOperation,
     update,
 } from '@flocon-trpg/core';
-import {
-    FileSourceType,
-    WriteRoomSoundEffectDocument,
-} from '@flocon-trpg/typed-document-node-v0.7.13';
+import { FileSourceType, WriteRoomSoundEffectDocument } from '@flocon-trpg/typed-document-node';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { Menu, Tooltip } from 'antd';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';

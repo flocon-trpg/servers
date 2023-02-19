@@ -98,7 +98,7 @@
         "@flocon-trpg/eslint-config": "workspace:^",
         "@flocon-trpg/prettier-config": "workspace:^",
         "@flocon-trpg/tsconfig": "workspace:^",
-        "@flocon-trpg/typed-document-node-v0.7.13": "workspace:*",
+        "@flocon-trpg/typed-document-node": "workspace:*",
         "@flocon-trpg/web-server-utils": "workspace:*",
         "@graphql-codegen/cli": "2.16.5",
         "@graphql-codegen/typed-document-node": "2.3.13",

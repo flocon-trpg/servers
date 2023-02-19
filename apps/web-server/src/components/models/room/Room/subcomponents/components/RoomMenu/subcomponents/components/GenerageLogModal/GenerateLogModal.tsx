@@ -3,7 +3,7 @@ import {
     GetLogQuery,
     GetLogQueryVariables,
     GetRoomLogFailureType,
-} from '@flocon-trpg/typed-document-node-v0.7.13';
+} from '@flocon-trpg/typed-document-node';
 import { Button, Checkbox, Modal, Progress, Radio } from 'antd';
 import classNames from 'classnames';
 import { useAtomValue } from 'jotai/react';

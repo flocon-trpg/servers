@@ -1,5 +1,5 @@
 import { createTestRoomClient } from '@flocon-trpg/sdk';
-import { GetRoomMessagesFailureType } from '@flocon-trpg/typed-document-node-v0.7.13';
+import { GetRoomMessagesFailureType } from '@flocon-trpg/typed-document-node';
 import { act, renderHook } from '@testing-library/react';
 import { useRoomMessageQueryStatus } from './useRoomMessageQueryStatus';
 

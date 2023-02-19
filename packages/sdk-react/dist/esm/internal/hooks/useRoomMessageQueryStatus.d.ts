@@ -11,8 +11,8 @@ export declare const useRoomMessageQueryStatus: <TCustomMessage, TGraphQLError>(
     }>;
     roomState: import("@flocon-trpg/sdk").ReadonlyBehaviorEvent<import("@flocon-trpg/sdk").RoomState<TGraphQLError>>;
     writingMessageStatus: {
-        value: import("@flocon-trpg/sdk").ReadonlyBehaviorEvent<ReadonlyMap<string, import("@flocon-trpg/typed-document-node-v0.7.13").WritingMessageStatusType>>;
-        update: (inputType: import("@flocon-trpg/typed-document-node-v0.7.13").WritingMessageStatusInputType) => void;
+        value: import("@flocon-trpg/sdk").ReadonlyBehaviorEvent<ReadonlyMap<string, import("@flocon-trpg/typed-document-node").WritingMessageStatusType>>;
+        update: (inputType: import("@flocon-trpg/typed-document-node").WritingMessageStatusInputType) => void;
     };
     graphQLStatus: import("@flocon-trpg/sdk").ReadonlyBehaviorEvent<{
         RoomEventSubscription: {

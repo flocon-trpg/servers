@@ -11,7 +11,7 @@ import {
     GetFilesDocument,
     GetServerInfoDocument,
     RenameFilesDocument,
-} from '@flocon-trpg/typed-document-node-v0.7.13';
+} from '@flocon-trpg/typed-document-node';
 import { loggerRef } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import { App, Modal, Upload } from 'antd';
