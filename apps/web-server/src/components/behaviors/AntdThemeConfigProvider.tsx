@@ -1,5 +1,6 @@
 import { ConfigProvider, theme } from 'antd';
 import { ThemeConfig } from 'antd/es/config-provider/context';
+import jaJP from 'antd/locale/ja_JP';
 import React from 'react';
 import { AntdThemeContext, Value } from '@/contexts/AntdThemeContext';
 
@@ -19,7 +20,7 @@ export const AntdThemeConfigProvider: React.FC<Props> = ({ compact, children }) 
     }, [childCompact]);
 
     return (
-        <ConfigProvider theme={childCompact ? compactTheme : defaultTheme}>
+        <ConfigProvider theme={childCompact ? compactTheme : defaultTheme} locale={jaJP}>
             <AntdThemeContext.Provider value={childContextValue}>
                 {children}
             </AntdThemeContext.Provider>
