@@ -6,8 +6,8 @@
         "packages/*"
     ],
     "scripts": {
-        "build": "yarn workspaces foreach -ptv run build:self",
-        "format": "yarn lint --fix && yarn build && yarn prettier && yarn sort-package-json && yarn generate-disclaimer",
+        "build": "yarn workspace '@flocon-trpg/api-server' run build && yarn workspace '@flocon-trpg/web-server' run build:deps",
+        "format": "yarn lint --fix && yarn prettier && yarn build && yarn sort-package-json && yarn generate-disclaimer",
         "generate-disclaimer": "yarn licenses generate-disclaimer --production --recursive --exclude='@types/*,husky,less,npm-run-all,sass,serve' > ./apps/web-server/public/licenses-npm-package.txt",
         "install-husky": "husky install",
         "lint": "yarn workspaces foreach -pv run lint",

@@ -58,7 +58,7 @@ export declare const createRoomClient: <TCustomMessage = any, TGraphQLError = an
             error: import("./roomClient/graphqlClient").PromiseError<TGraphQLError>;
         };
     } & {
-        hasError: boolean; /** `client` のいずれかがエラーを送信(`Promise` の場合は reject、`Observable` の場合は error)したかどうかを示します。エラーが送信された場合は再度 `createRoomClient` を実行することを推奨します。 */
+        hasError: boolean;
     }>;
     /** 内部で使用している `Observable` などの subscription を解除します。これを実行した場合、このオブジェクトの他のプロパティに存在する関数やプロパティにアクセスするとエラーが出ることがありますのでアクセスしないでください。 */
     unsubscribe: () => void;
