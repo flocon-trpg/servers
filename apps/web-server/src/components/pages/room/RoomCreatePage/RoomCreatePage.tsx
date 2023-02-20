@@ -1,4 +1,4 @@
-import { CreateRoomDocument, CreateRoomInput } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { CreateRoomDocument, CreateRoomInput } from '@flocon-trpg/typed-document-node';
 import { Alert, Button, Card, Form, Input, Spin, Switch } from 'antd';
 import { useAtomValue } from 'jotai';
 import { useRouter } from 'next/router';
@@ -126,7 +126,7 @@ export const RoomCreatePage: React.FC = () => {
 
     return (
         <Layout requires={loginAndEntry}>
-            <Center>
+            <Center setPaddingY>
                 <Card title='部屋の新規作成'>{form}</Card>
             </Center>
         </Layout>

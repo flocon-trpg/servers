@@ -1,4 +1,4 @@
-import { PieceLogFragment, RoomPrivateMessageFragment, RoomPublicChannelFragment, RoomPublicMessageFragment, RoomSoundEffectFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { PieceLogFragment, RoomPrivateMessageFragment, RoomPublicChannelFragment, RoomPublicMessageFragment, RoomSoundEffectFragment } from '@flocon-trpg/typed-document-node';
 export declare const privateMessage = "privateMessage";
 export declare const publicMessage = "publicMessage";
 export declare const pieceLog = "pieceLog";

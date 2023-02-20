@@ -275,10 +275,6 @@ jobs:
 
             - run: yarn
 
-            - name: Build css file
-              run: yarn build-less
-              working-directory: ./apps/web-server
-
             # 必要のない web-server のビルドも行われる。web-server のみを除外するとその除外処理でミスが生じる余地があるため、web-server も含めてまとめてビルドしている。
             - name: Generate dist
               run: yarn build

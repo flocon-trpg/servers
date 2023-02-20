@@ -1,7 +1,9 @@
 import { both, delay, groupJoinArray, loggerRef } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { createStore } from 'jotai/vanilla';
 import React from 'react';
+import useConstant from 'use-constant';
 import {
     FileBrowser,
     Props as FileBrowserProps,
@@ -10,6 +12,7 @@ import {
     others,
     sound,
 } from './FileBrowser';
+import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 
 type FileSource =
     | {
@@ -109,56 +112,59 @@ const Practical: React.FC<PracticalProps> = ({
     React.useEffect(() => {
         setFilesState(toFilePath(filesSourceRef));
     }, []);
+    const jotaiStore = useConstant(() => createStore());
 
     return (
-        <FileBrowser
-            jotaiScope='Pratical'
-            height={null}
-            files={filesState}
-            fileCreateLabel='😀ファイルを作成🤖'
-            searchPlaceholder='😀検索🤖'
-            onDelete={() => {
-                setFilesState(toFilePath(filesSourceRef));
-            }}
-            onRename={() => {
-                setFilesState(toFilePath(filesSourceRef));
-            }}
-            // TODO: canMoveを用いたstoryも作成する
-            canMove={() => Result.ok(undefined)}
-            // TODO: canRenameを用いたstoryも作成する
-            canRename={() => Result.ok(undefined)}
-            canCreateFolder={({ foldername }) => {
-                if (foldername === '') {
-                    return Result.error('empty foldername');
-                }
-                if (foldername.includes('/')) {
-                    return Result.error('includes /');
-                }
-                return Result.ok(undefined);
-            }}
-            fileTypes={{
-                defaultFileTypeFilter,
-                fileTypes: [
-                    {
-                        fileType: image,
-                        name: '画像',
-                    },
-                    {
-                        fileType: sound,
-                        name: '音声',
-                    },
-                    {
-                        fileType: others,
-                        name: 'その他',
-                    },
-                ],
-            }}
-            isProtected={() => false}
-            onFileCreate={() => Promise.resolve(true)}
-            ensuredFolderPaths={ensuredFolderPaths}
-            // TODO: overridingElementsを用いたstoryも作成する
-            overridingElements={[]}
-        />
+        <StorybookProvider compact roomClientContextValue={null}>
+            <FileBrowser
+                jotaiStore={jotaiStore}
+                height={null}
+                files={filesState}
+                fileCreateLabel='😀ファイルを作成🤖'
+                searchPlaceholder='😀検索🤖'
+                onDelete={() => {
+                    setFilesState(toFilePath(filesSourceRef));
+                }}
+                onRename={() => {
+                    setFilesState(toFilePath(filesSourceRef));
+                }}
+                // TODO: canMoveを用いたstoryも作成する
+                canMove={() => Result.ok(undefined)}
+                // TODO: canRenameを用いたstoryも作成する
+                canRename={() => Result.ok(undefined)}
+                canCreateFolder={({ foldername }) => {
+                    if (foldername === '') {
+                        return Result.error('empty foldername');
+                    }
+                    if (foldername.includes('/')) {
+                        return Result.error('includes /');
+                    }
+                    return Result.ok(undefined);
+                }}
+                fileTypes={{
+                    defaultFileTypeFilter,
+                    fileTypes: [
+                        {
+                            fileType: image,
+                            name: '画像',
+                        },
+                        {
+                            fileType: sound,
+                            name: '音声',
+                        },
+                        {
+                            fileType: others,
+                            name: 'その他',
+                        },
+                    ],
+                }}
+                isProtected={() => false}
+                onFileCreate={() => Promise.resolve(true)}
+                ensuredFolderPaths={ensuredFolderPaths}
+                // TODO: overridingElementsを用いたstoryも作成する
+                overridingElements={[]}
+            />
+        </StorybookProvider>
     );
 };
 
@@ -175,6 +181,8 @@ export const Default: React.FC<Props> = ({
     defaultFileTypeFilter,
     ensuredFolderPaths,
 }) => {
+    const jotaiStore = useConstant(() => createStore());
+
     if (files == null) {
         if (filesSource == null) {
             throw new Error();
@@ -193,20 +201,22 @@ export const Default: React.FC<Props> = ({
     }
 
     return (
-        <FileBrowser
-            jotaiScope='Default'
-            height={null}
-            fileCreateLabel='😀ファイルを作成🤖'
-            searchPlaceholder='😀検索🤖'
-            files={files}
-            isProtected={() => false}
-            onFileCreate={() => Promise.resolve(true)}
-            ensuredFolderPaths={ensuredFolderPaths}
-            overridingElements={[]}
-            canMove={() => Result.error('fake error')}
-            canRename={() => Result.error('fake error')}
-            canCreateFolder={() => Result.error('fake error')}
-        />
+        <StorybookProvider compact roomClientContextValue={null}>
+            <FileBrowser
+                jotaiStore={jotaiStore}
+                height={null}
+                fileCreateLabel='😀ファイルを作成🤖'
+                searchPlaceholder='😀検索🤖'
+                files={files}
+                isProtected={() => false}
+                onFileCreate={() => Promise.resolve(true)}
+                ensuredFolderPaths={ensuredFolderPaths}
+                overridingElements={[]}
+                canMove={() => Result.error('fake error')}
+                canRename={() => Result.error('fake error')}
+                canCreateFolder={() => Result.error('fake error')}
+            />
+        </StorybookProvider>
     );
 };
 

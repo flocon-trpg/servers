@@ -1,7 +1,7 @@
 import { recordToArray } from '@flocon-trpg/utils';
-import { Layout as AntdLayout, Modal, Result } from 'antd';
+import { Layout as AntdLayout, App, Result } from 'antd';
 import classNames from 'classnames';
-import { useAtomValue } from 'jotai/utils';
+import { useAtomValue } from 'jotai/react';
 import dynamic from 'next/dynamic';
 import { NumberSize, ResizeDirection } from 're-resizable';
 import React from 'react';
@@ -44,6 +44,7 @@ import { ChatPalettePanelConfig } from '@/atoms/roomConfigAtom/types/chatPalette
 import { MemoPanelConfig } from '@/atoms/roomConfigAtom/types/memoPanelConfig';
 import { MessagePanelConfig } from '@/atoms/roomConfigAtom/types/messagePanelConfig';
 import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
+import { RoomGlobalStyle } from '@/components/globalStyles/RoomGlobalStyle';
 import {
     debouncedWindowInnerHeightAtom,
     debouncedWindowInnerWidthAtom,
@@ -51,7 +52,7 @@ import {
 import { DraggableCard, horizontalPadding } from '@/components/ui/DraggableCard/DraggableCard';
 import { LoadingResult } from '@/components/ui/LoadingResult/LoadingResult';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
+import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 import { relative } from '@/styles/className';
@@ -86,16 +87,22 @@ type ConfigAndKeyProps<T> = {
     keyName: string;
 } & ConfigProps<T>;
 
-const overflowHiddenStyle = { overflow: 'hidden' } as const;
-const childrenContainerPadding = `12px ${horizontalPadding}px`;
-const childrenContainerStyle: React.CSSProperties = {
-    padding: childrenContainerPadding,
-    overflowY: 'scroll',
-};
+namespace ChildrenContainerStyle {
+    const childrenContainerPadding = `12px ${horizontalPadding}px`;
+    export const defaultStyle: React.CSSProperties = {
+        padding: childrenContainerPadding,
+        overflowY: 'scroll',
+    };
+    export const overflowHiddenStyle: React.CSSProperties = { overflow: 'hidden' };
+    export const characterListPanelStyle: React.CSSProperties = {
+        ...overflowHiddenStyle,
+        padding: '12px 12px',
+    };
+}
 
 const ActiveBoardPanel: React.FC = React.memo(function ActiveBoardPanel() {
     const config = useAtomSelector(roomConfigAtom, state => state?.panels.activeBoardPanel);
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
 
     const onDragStop = React.useCallback(
         (e: ControlPosition) => {
@@ -149,7 +156,7 @@ const ActiveBoardPanel: React.FC = React.memo(function ActiveBoardPanel() {
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
             onClose={onClose}
-            childrenContainerStyle={overflowHiddenStyle}
+            childrenContainerStyle={ChildrenContainerStyle.overflowHiddenStyle}
             position={config}
             size={config}
             minHeight={150}
@@ -169,7 +176,7 @@ const ActiveBoardPanel: React.FC = React.memo(function ActiveBoardPanel() {
 
 const BoardEditorPanel: React.FC<ConfigAndKeyProps<BoardEditorPanelConfig>> = React.memo(
     function BoardEditorPanel({ config, keyName }) {
-        const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+        const setRoomConfig = useImmerSetAtom(roomConfigAtom);
 
         const onDragStop = React.useCallback(
             (e: ControlPosition) => {
@@ -238,7 +245,7 @@ const BoardEditorPanel: React.FC<ConfigAndKeyProps<BoardEditorPanelConfig>> = Re
                 onResizeStop={onResizeStop}
                 onMoveToFront={onMoveToFront}
                 onClose={onClose}
-                childrenContainerStyle={overflowHiddenStyle}
+                childrenContainerStyle={ChildrenContainerStyle.overflowHiddenStyle}
                 position={config}
                 size={config}
                 minHeight={150}
@@ -275,7 +282,7 @@ const BoardEditorPanels: React.FC = () => {
 
 const ChatPalettePanel: React.FC<ConfigAndKeyProps<ChatPalettePanelConfig>> = React.memo(
     function ChatPalettePanel({ keyName, config }) {
-        const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+        const setRoomConfig = useImmerSetAtom(roomConfigAtom);
         const roomId = useRoomId();
 
         const onDragStop = React.useCallback(
@@ -344,7 +351,7 @@ const ChatPalettePanel: React.FC<ConfigAndKeyProps<ChatPalettePanelConfig>> = Re
                 onResizeStop={onResizeStop}
                 onMoveToFront={onMoveToFront}
                 onClose={onClose}
-                childrenContainerStyle={overflowHiddenStyle}
+                childrenContainerStyle={ChildrenContainerStyle.overflowHiddenStyle}
                 position={config}
                 size={config}
                 minHeight={150}
@@ -375,7 +382,7 @@ const ChatPalettePanels: React.FC = () => {
 
 const CharacterPanel: React.FC = React.memo(function CharacterPanel() {
     const config = useAtomSelector(roomConfigAtom, state => state?.panels.characterPanel);
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
 
     const onDragStop = React.useCallback(
         (e: ControlPosition) => {
@@ -429,21 +436,21 @@ const CharacterPanel: React.FC = React.memo(function CharacterPanel() {
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
             onClose={onClose}
-            childrenContainerStyle={childrenContainerStyle}
+            childrenContainerStyle={ChildrenContainerStyle.characterListPanelStyle}
             position={config}
             size={config}
             minHeight={150}
             minWidth={150}
             zIndex={config.zIndex}
         >
-            <CharacterListPanelContent />
+            <CharacterListPanelContent height={config.height} />
         </DraggableCard>
     );
 });
 
 const GameEffectPanel: React.FC = React.memo(function GameEffectPanel() {
     const config = useAtomSelector(roomConfigAtom, state => state?.panels.gameEffectPanel);
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
 
     const onDragStop = React.useCallback(
         (e: ControlPosition) => {
@@ -497,7 +504,7 @@ const GameEffectPanel: React.FC = React.memo(function GameEffectPanel() {
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
             onClose={onClose}
-            childrenContainerStyle={childrenContainerStyle}
+            childrenContainerStyle={ChildrenContainerStyle.defaultStyle}
             position={config}
             size={config}
             minHeight={150}
@@ -513,7 +520,7 @@ const MemoPanel: React.FC<ConfigAndKeyProps<MemoPanelConfig>> = React.memo(funct
     config,
     keyName,
 }) {
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
 
     const onDragStop = React.useCallback(
         (e: ControlPosition) => {
@@ -596,7 +603,7 @@ const MemoPanel: React.FC<ConfigAndKeyProps<MemoPanelConfig>> = React.memo(funct
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
             onClose={onClose}
-            childrenContainerStyle={overflowHiddenStyle}
+            childrenContainerStyle={ChildrenContainerStyle.overflowHiddenStyle}
             position={config}
             size={config}
             minHeight={150}
@@ -632,7 +639,7 @@ const ParticipantPanel: React.FC = () => {
         roomConfigAtom,
         state => state?.panels.participantPanel
     );
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
 
     const onDragStop = React.useCallback(
         (e: ControlPosition) => {
@@ -686,7 +693,7 @@ const ParticipantPanel: React.FC = () => {
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
             onClose={onClose}
-            childrenContainerStyle={childrenContainerStyle}
+            childrenContainerStyle={ChildrenContainerStyle.defaultStyle}
             position={participantPanel}
             size={participantPanel}
             minHeight={150}
@@ -700,7 +707,7 @@ const ParticipantPanel: React.FC = () => {
 
 const PieceValuePanel: React.FC = () => {
     const config = useAtomSelector(roomConfigAtom, state => state?.panels.pieceValuePanel);
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
     const activeBoardId = useRoomStateValueSelector(state => state.activeBoardId);
 
     const onDragStop = React.useCallback(
@@ -755,7 +762,7 @@ const PieceValuePanel: React.FC = () => {
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
             onClose={onClose}
-            childrenContainerStyle={childrenContainerStyle}
+            childrenContainerStyle={ChildrenContainerStyle.defaultStyle}
             position={config}
             size={config}
             minHeight={150}
@@ -773,7 +780,7 @@ const PieceValuePanel: React.FC = () => {
 
 const RollCallPanel: React.FC = () => {
     const config = useAtomSelector(roomConfigAtom, state => state?.panels.rollCallPanel);
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
     const highlightKey = useAtomValue(panelHighlightKeysAtom);
 
     const onDragStop = React.useCallback(
@@ -829,7 +836,7 @@ const RollCallPanel: React.FC = () => {
             onResizeStop={onResizeStop}
             onMoveToFront={onMoveToFront}
             onClose={onClose}
-            childrenContainerStyle={childrenContainerStyle}
+            childrenContainerStyle={ChildrenContainerStyle.defaultStyle}
             position={config}
             size={config}
             minHeight={150}
@@ -844,7 +851,8 @@ const RollCallPanel: React.FC = () => {
 
 const RoomMessagePanel: React.FC<ConfigAndKeyProps<MessagePanelConfig>> = React.memo(
     function RoomMessagePanel({ config, keyName }) {
-        const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+        const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+        const { modal } = App.useApp();
 
         const onDragStop = React.useCallback(
             (e: ControlPosition) => {
@@ -892,7 +900,7 @@ const RoomMessagePanel: React.FC<ConfigAndKeyProps<MessagePanelConfig>> = React.
             });
         }, [keyName, setRoomConfig]);
         const onClose = React.useCallback(() => {
-            Modal.confirm({
+            modal.confirm({
                 title: '削除の確認',
                 content: '選択されたメッセージウィンドウを削除します。よろしいですか？',
                 onOk: () => {
@@ -908,13 +916,12 @@ const RoomMessagePanel: React.FC<ConfigAndKeyProps<MessagePanelConfig>> = React.
                 closable: true,
                 maskClosable: true,
             });
-        }, [keyName, setRoomConfig]);
+        }, [keyName, modal, setRoomConfig]);
 
         if (config == null || config.isMinimized) {
             return null;
         }
 
-        // canvasWidthとcanvasHeightはDraggableCardのchildrenの表示領域より大きい値
         return (
             <DraggableCard
                 key={keyName}
@@ -923,7 +930,7 @@ const RoomMessagePanel: React.FC<ConfigAndKeyProps<MessagePanelConfig>> = React.
                 onResizeStop={onResizeStop}
                 onMoveToFront={onMoveToFront}
                 onClose={onClose}
-                childrenContainerStyle={overflowHiddenStyle}
+                childrenContainerStyle={ChildrenContainerStyle.overflowHiddenStyle}
                 position={config}
                 size={config}
                 minHeight={150}
@@ -1004,6 +1011,7 @@ export const Room: React.FC<Props> = ({ debug }) => {
 
     return (
         <AntdLayout>
+            <RoomGlobalStyle />
             <AntdLayout.Content>
                 <RoomMenu />
                 <div className={classNames(relative)}>

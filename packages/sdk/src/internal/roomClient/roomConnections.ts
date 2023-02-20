@@ -1,4 +1,4 @@
-import { RoomEventSubscription } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { RoomEventSubscription } from '@flocon-trpg/typed-document-node';
 import { Observable } from 'rxjs';
 import { BehaviorEvent } from '../rxjs/behaviorEvent';
 import { ReadonlyBehaviorEvent } from '../rxjs/readonlyBehaviorEvent';

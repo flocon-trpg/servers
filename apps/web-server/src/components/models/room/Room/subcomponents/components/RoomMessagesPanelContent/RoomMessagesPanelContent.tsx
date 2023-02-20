@@ -7,7 +7,7 @@ import {
     EditMessageDocument,
     MakeMessageNotSecretDocument,
     WritingMessageStatusType,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
+} from '@flocon-trpg/typed-document-node';
 import { keyNames, recordToMap } from '@flocon-trpg/utils';
 import {
     CustomMessage,
@@ -21,6 +21,7 @@ import {
 } from '@flocon-trpg/web-server-utils';
 import {
     Alert,
+    App,
     Button,
     Checkbox,
     Dropdown,
@@ -35,8 +36,8 @@ import {
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import classNames from 'classnames';
 import { WritableDraft } from 'immer/dist/internal';
-import { atom } from 'jotai';
-import { useAtomValue } from 'jotai/utils';
+import { useAtomValue } from 'jotai/react';
+import { atom } from 'jotai/vanilla';
 import moment from 'moment';
 import React from 'react';
 import { CombinedError, useMutation } from 'urql';
@@ -71,7 +72,7 @@ import { InputDescription } from '@/components/ui/InputDescription/InputDescript
 import { InputModal } from '@/components/ui/InputModal/InputModal';
 import { JumpToBottomVirtuoso } from '@/components/ui/JumpToBottomVirtuoso/JumpToBottomVirtuoso';
 import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
-import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
+import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 import { firebaseUserValueAtom } from '@/pages/_app';
 import { Styles } from '@/styles';
@@ -795,12 +796,14 @@ type Props = {
 };
 
 export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: Props) => {
+    const { modal } = App.useApp();
+
     const tabsAtom = React.useMemo(() => {
         return atom(get => get(roomConfigAtom)?.panels.messagePanels?.[panelId]?.tabs);
     }, [panelId]);
     const tabs = useAtomValue(tabsAtom);
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
-    const setUserConfig = useImmerUpdateAtom(userConfigAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const setUserConfig = useImmerSetAtom(userConfigAtom);
 
     const [editingTabConfigKey, setEditingTabConfigKey] = React.useState<string>();
     const editingTabConfig = React.useMemo(() => {
@@ -851,7 +854,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
 
         const createTabItem = (tab: MessageTabConfig, tabIndex: number) => {
             const onTabDelete = () => {
-                Modal.warn({
+                modal.warning({
                     onOk: () => {
                         setRoomConfig(roomConfig => {
                             if (roomConfig == null) {
@@ -987,7 +990,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                 }}
             />
         );
-    }, [contentHeight, editingTabConfigKey, panelId, setRoomConfig, tabs, tabsHeight]);
+    }, [contentHeight, editingTabConfigKey, modal, panelId, setRoomConfig, tabs, tabsHeight]);
 
     if (roomId == null || draggableTabs == null) {
         return null;

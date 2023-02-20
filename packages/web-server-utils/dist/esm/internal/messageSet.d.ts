@@ -1,4 +1,4 @@
-import { RoomPrivateMessageFragment, RoomPublicMessageFragment } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { RoomPrivateMessageFragment, RoomPublicMessageFragment } from '@flocon-trpg/typed-document-node';
 import { Message, RoomMessage } from './roomMessageTypes';
 export declare class MessageSet<TCustomMessage> {
     #private;

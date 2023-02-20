@@ -12,7 +12,7 @@ import { CollaborativeInput } from '@/components/ui/CollaborativeInput/Collabora
 import { CopyToClipboardButton } from '@/components/ui/CopyToClipboardButton/CopyToClipboardButton';
 import { DialogFooter } from '@/components/ui/DialogFooter/DialogFooter';
 import { Table, TableRow } from '@/components/ui/Table/Table';
-import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
+import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { create, update } from '@/utils/constants';
 import { FilePathModule } from '@/utils/file/filePath';
@@ -69,7 +69,7 @@ export const BoardEditorModal: React.FC = () => {
     const myUserUid = useMyUserUid();
     const setRoomState = useSetRoomStateWithImmer();
     const [modalValue, setModalValue] = useAtom(boardEditorModalAtom);
-    const setRoomConfigAtom = useImmerUpdateAtom(roomConfigAtom);
+    const setRoomConfigAtom = useImmerSetAtom(roomConfigAtom);
     const boards = useBoards();
     const createMode: CreateModeParams<BoardState | undefined> | undefined = useMemoOne(() => {
         if (modalValue?.type !== create) {
@@ -181,6 +181,7 @@ export const BoardEditorModal: React.FC = () => {
             }
         >
             <div>
+                <Divider />
                 <Table>
                     <TableRow label='名前'>
                         <CollaborativeInput
@@ -312,6 +313,7 @@ export const BoardEditorModal: React.FC = () => {
                         '自分が閲覧できない値はエクスポートされません。例えば、他のユーザーが作成して非公開にしている値はエクスポートの対象外ですが、自分が作成して非公開にしている値は自分が閲覧可能なためエクスポートの対象内となります。'
                     }
                 </p>
+                <Divider />
             </div>
         </Modal>
     );

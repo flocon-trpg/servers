@@ -1,4 +1,4 @@
-import { useAtomValue } from 'jotai/utils';
+import { useAtomValue } from 'jotai/react';
 import React from 'react';
 import { UseQueryResult, useQueries } from 'react-query';
 import { useMemoOne } from 'use-memo-one';

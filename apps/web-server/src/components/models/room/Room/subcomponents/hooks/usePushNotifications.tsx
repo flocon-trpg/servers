@@ -7,7 +7,7 @@ import {
     publicMessage,
     soundEffect,
 } from '@flocon-trpg/web-server-utils';
-import { Button, notification } from 'antd';
+import { App, Button } from 'antd';
 import classNames from 'classnames';
 import { Howl } from 'howler';
 import React from 'react';
@@ -27,13 +27,14 @@ import {
 } from '@/atoms/roomConfigAtom/types/roomConfig/resources';
 import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
+import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
 import { flex, flexColumn, flexRow } from '@/styles/className';
 import { emptyPublicChannelNames } from '@/utils/types';
 
 function useMessageNotifications(): void {
+    const { notification } = App.useApp();
     const publicChannelNames = usePublicChannelNames();
     const publicChannelNameRef = useLatest(publicChannelNames);
     const participantsMap = useParticipants();
@@ -140,20 +141,21 @@ function useMessageNotifications(): void {
             ),
             description: <RoomMessage.Content style={{}} message={message} />,
         });
-    }, [messageDiff, messageFilterRef, participantsMapRef, publicChannelNameRef]);
+    }, [messageDiff, messageFilterRef, notification, participantsMapRef, publicChannelNameRef]);
 }
 
 function useRollCallNotifications(): void {
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
     const myUserUid = useMyUserUid();
     const rollCalls = useRoomStateValueSelector(roomState => roomState.rollCalls);
     const openRollCall = React.useMemo(() => getOpenRollCall(rollCalls), [rollCalls]);
     const openRollCallId = openRollCall?.key;
     const openRollCallRef = useLatest(openRollCall?.value);
-    const setPanelHightlightKeys = useImmerUpdateAtom(panelHighlightKeysAtom);
+    const setPanelHightlightKeys = useImmerSetAtom(panelHighlightKeysAtom);
     const participants = useRoomStateValueSelector(roomState => roomState.participants);
     const myRole = myUserUid == null ? undefined : participants?.[myUserUid]?.role;
     const myRoleRef = useLatest(myRole);
+    const { notification } = App.useApp();
 
     React.useEffect(() => {
         if (openRollCallId == null || openRollCallRef.current == null || myUserUid == null) {
@@ -194,7 +196,7 @@ function useRollCallNotifications(): void {
                             setPanelHightlightKeys(keys => {
                                 keys.rollCallPanel = simpleId();
                             });
-                            notification.close(key);
+                            notification.destroy(key);
                         }}
                     >
                         点呼ウィンドウを開く
@@ -202,10 +204,11 @@ function useRollCallNotifications(): void {
                 </div>
             ),
         });
-        return () => notification.close(key);
+        return () => notification.destroy(key);
     }, [
         myRoleRef,
         myUserUid,
+        notification,
         openRollCallId,
         openRollCallRef,
         setPanelHightlightKeys,

@@ -2,10 +2,10 @@ import { authToken } from '@flocon-trpg/core';
 import { authExchange } from '@urql/exchange-auth';
 import { createClient as createClient$1 } from 'graphql-ws';
 import { makeOperation, dedupExchange, cacheExchange, fetchExchange, subscriptionExchange, createClient } from 'urql';
-import { GetMessagesDocument, GetRoomConnectionsDocument, GetRoomDocument, OperateDocument, UpdateWritingMessageStatusDocument, RoomEventDocument } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { GetMessagesDocument, GetRoomConnectionsDocument, GetRoomDocument, OperateDocument, UpdateWritingMessageStatusDocument, RoomEventDocument } from '@flocon-trpg/typed-document-node';
 import { Result } from '@kizahasi/result';
-import { Observable } from 'rxjs';
-import { toObservable } from 'wonka';
+import { Observable, share } from 'rxjs';
+import { pipe, subscribe } from 'wonka';
 
 const execGetUserIdTokenResult = async (source) => {
     if (source == null) {
@@ -138,21 +138,19 @@ const createGraphQLClientForRoomClient = (client) => {
             return Result.error(result.error);
         }),
         roomEventSubscription: variables => {
-            const roomEventSubscriptionSource = client.subscription(RoomEventDocument, variables);
-            const roomEventSubscriptionAsWonkaObservable = toObservable(roomEventSubscriptionSource);
-            return new Observable(observer => {
-                return roomEventSubscriptionAsWonkaObservable.subscribe({
-                    next: value => {
-                        if (value.data != null) {
-                            observer.next(Result.ok(value.data));
-                            return;
-                        }
-                        observer.next(Result.error(value.error));
-                    },
-                    error: e => observer.error(e),
-                    complete: () => observer.complete(),
-                });
+            // 当初は、client.subscription() の戻り値を wonka の toObservable で wonka の Observable に変換して、それを RxJS の Observable に変換していた。
+            // だがこの方法だと unsubscribe が効かないという問題が発生したため、toObservable を使わずに実装している。
+            const observable = new Observable(observer => {
+                const subscription = pipe(client.subscription(RoomEventDocument, variables), subscribe(value => {
+                    if (value.data != null) {
+                        observer.next(Result.ok(value.data));
+                        return;
+                    }
+                    observer.next(Result.error(value.error));
+                }));
+                return subscription;
             });
+            return observable.pipe(share());
         },
     };
 };

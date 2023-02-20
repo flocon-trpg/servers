@@ -1,4 +1,4 @@
-import { GetMessagesQuery, GetMessagesQueryVariables, GetRoomConnectionsQuery, GetRoomConnectionsQueryVariables, GetRoomQuery, GetRoomQueryVariables, OperateMutation, OperateMutationVariables, RoomEventSubscription, RoomEventSubscriptionVariables, RoomOperationInput, UpdateWritingMessageStatusMutation, UpdateWritingMessageStatusMutationVariables, WritingMessageStatusInputType } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { GetMessagesQuery, GetMessagesQueryVariables, GetRoomConnectionsQuery, GetRoomConnectionsQueryVariables, GetRoomQuery, GetRoomQueryVariables, OperateMutation, OperateMutationVariables, RoomEventSubscription, RoomEventSubscriptionVariables, RoomOperationInput, UpdateWritingMessageStatusMutation, UpdateWritingMessageStatusMutationVariables, WritingMessageStatusInputType } from '@flocon-trpg/typed-document-node';
 import { Result } from '@kizahasi/result';
 import { Observable } from 'rxjs';
 import { ReadonlyBehaviorEvent } from '../rxjs/readonlyBehaviorEvent';

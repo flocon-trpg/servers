@@ -2,7 +2,7 @@ import * as Icons from '@ant-design/icons';
 import {
     GetAvailableGameSystemsDocument,
     GetDiceHelpMessagesDocument,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
+} from '@flocon-trpg/typed-document-node';
 import { Button, Popover, Select } from 'antd';
 import classNames from 'classnames';
 import { Draft } from 'immer';

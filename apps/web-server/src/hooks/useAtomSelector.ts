@@ -1,12 +1,12 @@
-import { Atom, atom } from 'jotai';
-import { useAtomValue } from 'jotai/utils';
+import { useAtomValue } from 'jotai/react';
+import { Atom, atom, createStore } from 'jotai/vanilla';
 import React from 'react';
 import { useLatest } from 'react-use';
 
-type Scope = symbol | string | number;
+type Store = ReturnType<typeof createStore>;
 
 type Options = {
-    scope?: Scope;
+    store?: Store;
 };
 
 export const useAtomSelector = <T1, T2>(
@@ -20,6 +20,9 @@ export const useAtomSelector = <T1, T2>(
         return atom(get => mappingRef.current(get(anAtom)));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [anAtom, mappingRef, ...(additionalDeps ?? [])]);
-    const result = useAtomValue(mappedAtom, options?.scope);
+    const result = useAtomValue(
+        mappedAtom,
+        options?.store == null ? undefined : { store: options.store }
+    );
     return result;
 };

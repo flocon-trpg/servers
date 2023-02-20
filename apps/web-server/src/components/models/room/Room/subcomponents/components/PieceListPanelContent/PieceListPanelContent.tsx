@@ -2,7 +2,7 @@ import * as Icon from '@ant-design/icons';
 import { State, dicePieceTemplate, stringPieceTemplate, update } from '@flocon-trpg/core';
 import { keyNames } from '@flocon-trpg/utils';
 import { Button, Table, Tooltip } from 'antd';
-import { useUpdateAtom } from 'jotai/utils';
+import { useSetAtom } from 'jotai/react';
 import React from 'react';
 import { useCharacters } from '../../hooks/useCharacters';
 import { useDicePieces } from '../../hooks/useDicePieces';
@@ -37,8 +37,8 @@ export const PieceListPanelContent: React.FC<Props> = ({ boardId }: Props) => {
     const characters = useCharacters();
     const dicePieces = useDicePieces(boardId);
     const stringPieces = useStringPieces(boardId);
-    const setDicePieceModal = useUpdateAtom(dicePieceModalAtom);
-    const setStringPieceModal = useUpdateAtom(stringPieceModalAtom);
+    const setDicePieceModal = useSetAtom(dicePieceModalAtom);
+    const setStringPieceModal = useSetAtom(stringPieceModalAtom);
 
     if (dicePieces == null || stringPieces == null) {
         return null;

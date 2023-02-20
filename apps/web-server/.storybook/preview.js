@@ -1,4 +1,3 @@
-import '../src/styles/css/antd.css';
 import '../src/styles/css/main.scss';
 import '@storybook/addon-console';
 import { RouterContext } from 'next/dist/shared/lib/router-context';

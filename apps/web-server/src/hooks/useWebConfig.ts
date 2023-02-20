@@ -1,4 +1,4 @@
-import { useAtomValue } from 'jotai/utils';
+import { useAtomValue } from 'jotai/react';
 import { webConfigAtom } from '../atoms/webConfigAtom/webConfigAtom';
 
 export const useWebConfig = () => {

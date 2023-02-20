@@ -1,4 +1,4 @@
-import { atom } from 'jotai';
+import { atom } from 'jotai/vanilla';
 import { MouseOverOn } from '../../utils/types';
 
 export type BoardTooltipState = { pageX: number; pageY: number; mouseOverOn: MouseOverOn };

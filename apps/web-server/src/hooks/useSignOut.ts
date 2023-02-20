@@ -1,4 +1,4 @@
-import { useAtomValue, useUpdateAtom } from 'jotai/utils';
+import { useAtomValue, useSetAtom } from 'jotai/react';
 import React from 'react';
 import { useQueryClient } from 'react-query';
 import { hideAllOverlayActionAtom } from '../atoms/hideAllOverlayActionAtom/hideAllOverlayActionAtom';
@@ -7,7 +7,7 @@ import { firebaseAuthAtom } from '../pages/_app';
 export function useSignOut() {
     const auth = useAtomValue(firebaseAuthAtom);
     const queryClient = useQueryClient();
-    const hideAllOverlay = useUpdateAtom(hideAllOverlayActionAtom);
+    const hideAllOverlay = useSetAtom(hideAllOverlayActionAtom);
 
     return React.useCallback(async () => {
         if (auth == null) {

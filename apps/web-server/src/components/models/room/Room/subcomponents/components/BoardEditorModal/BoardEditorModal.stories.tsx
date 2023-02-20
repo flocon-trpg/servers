@@ -3,11 +3,12 @@ import { ComponentMeta } from '@storybook/react';
 import { useSetAtom } from 'jotai';
 import React from 'react';
 import { BoardEditorModal, boardEditorModalAtom } from './BoardEditorModal';
+import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { defaultBoardId, myRichCharacterId } from '@/mocks';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
-    const { isInitialized } = useSetupStorybook({
+    const { roomClientContextValue } = useSetupStorybook({
         room: {
             myParticipantRole,
         },
@@ -19,13 +20,11 @@ export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myPar
         setModalState({ type: 'update', stateId: defaultBoardId });
     }, [setModalState]);
 
-    if (!isInitialized) {
-        return <div />;
-    }
-
     return (
         <div>
-            <BoardEditorModal />
+            <StorybookProvider compact roomClientContextValue={roomClientContextValue}>
+                <BoardEditorModal />
+            </StorybookProvider>
         </div>
     );
 };

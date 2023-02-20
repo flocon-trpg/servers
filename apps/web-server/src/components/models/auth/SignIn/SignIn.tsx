@@ -18,12 +18,13 @@ import {
     signInWithPopup,
     updateProfile,
 } from 'firebase/auth';
-import { atom, useAtom, useSetAtom } from 'jotai';
-import { useAtomValue } from 'jotai/utils';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai/react';
+import { atom } from 'jotai/vanilla';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { storybookAtom } from '@/atoms/storybookAtom/storybookAtom';
 import { Center } from '@/components/ui/Center/Center';
+import { Layout } from '@/components/ui/Layout/Layout';
 import { anonymous, email, facebook, github, google, phone, twitter } from '@/env';
 import { useWebConfig } from '@/hooks/useWebConfig';
 import { firebaseAuthAtom } from '@/pages/_app';
@@ -266,7 +267,7 @@ const areProvidersEmpty = (providers: string[]): boolean => {
     return true;
 };
 
-export const SignIn: React.FC = () => {
+const SignInContent: React.FC = () => {
     const setIsSubmitting = useSetAtom(isSubmittingAtom);
     React.useEffect(() => {
         setIsSubmitting(false);
@@ -500,10 +501,10 @@ export const SignIn: React.FC = () => {
     const alertProps = authError == null ? null : authErrorToAlertProps(authError);
 
     return (
-        <Center>
+        <Center setPaddingY={false}>
             <div style={{ padding: 24 }} className={classNames(flex, flexColumn)}>
                 {alertProps != null && (
-                    <Center>
+                    <Center setPaddingY={false}>
                         <Alert
                             style={{ width: formWidth, marginBottom: 16 }}
                             type={alertProps.type}
@@ -516,5 +517,13 @@ export const SignIn: React.FC = () => {
                 {authUI}
             </div>
         </Center>
+    );
+};
+
+export const SignIn: React.FC = () => {
+    return (
+        <Layout>
+            <SignInContent />
+        </Layout>
     );
 };

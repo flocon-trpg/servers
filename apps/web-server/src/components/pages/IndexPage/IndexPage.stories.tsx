@@ -1,5 +1,4 @@
-import * as Doc071 from '@flocon-trpg/typed-document-node-v0.7.1';
-import * as Doc072 from '@flocon-trpg/typed-document-node-v0.7.2';
+import * as Doc from '@flocon-trpg/typed-document-node';
 import { loggerRef } from '@flocon-trpg/utils';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
@@ -9,7 +8,7 @@ import { IndexPage } from './IndexPage';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { createDummyUrqlOperation, createMockUrqlClient } from '@/mocks';
 
-type Version = Doc071.GetServerInfoQuery['result']['version'];
+type Version = Doc.GetServerInfoQuery['result']['version'];
 
 const createMockClient = (version: Version | 'error' | 'never'): Client => {
     return createMockUrqlClient({
@@ -26,9 +25,8 @@ const createMockClient = (version: Version | 'error' | 'never'): Client => {
                     break;
             }
             switch (query.query) {
-                case Doc071.GetServerInfoDocument:
-                case Doc072.GetServerInfoDocument: {
-                    const res: Doc071.GetServerInfoQuery = {
+                case Doc.GetServerInfoDocument: {
+                    const res: Doc.GetServerInfoQuery = {
                         __typename: 'Query',
                         result: {
                             __typename: 'ServerInfo',
@@ -41,8 +39,8 @@ const createMockClient = (version: Version | 'error' | 'never'): Client => {
                         operation: createDummyUrqlOperation(),
                     });
                 }
-                case Doc072.GetMyRolesDocument: {
-                    const res: Doc072.GetMyRolesQuery = {
+                case Doc.GetMyRolesDocument: {
+                    const res: Doc.GetMyRolesQuery = {
                         __typename: 'Query',
                         result: {
                             __typename: 'Roles',
@@ -65,7 +63,7 @@ const createMockClient = (version: Version | 'error' | 'never'): Client => {
 export const Default: React.FC<{ version: Version | 'error' | 'never' }> = ({ version }) => {
     const urqlClient = React.useMemo(() => createMockClient(version), [version]);
     return (
-        <StorybookProvider waitForRoomClient={false} urqlClient={urqlClient}>
+        <StorybookProvider compact={false} roomClientContextValue={null} urqlClient={urqlClient}>
             <IndexPage />
         </StorybookProvider>
     );
@@ -97,7 +95,7 @@ Prerelease.args = {
         major: 0,
         minor: 7,
         patch: 100,
-        prerelease: { type: Doc071.PrereleaseType.Alpha, version: 1 },
+        prerelease: { type: Doc.PrereleaseType.Alpha, version: 1 },
     },
 };
 

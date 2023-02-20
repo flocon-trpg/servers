@@ -4,6 +4,7 @@ import { useSetAtom } from 'jotai';
 import React from 'react';
 import { SignIn } from './SignIn';
 import { storybookAtom } from '@/atoms/storybookAtom/storybookAtom';
+import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import * as Env from '@/env';
 import { mockAuth, mockUser, mockWebConfig } from '@/mocks';
 
@@ -64,7 +65,11 @@ export const Default: React.FC<{
             },
         });
     }, [amIAnonymous, authProviders, setStorybook]);
-    return <SignIn />;
+    return (
+        <StorybookProvider compact={false} roomClientContextValue={null}>
+            <SignIn />
+        </StorybookProvider>
+    );
 };
 
 export default {

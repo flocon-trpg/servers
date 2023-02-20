@@ -1,4 +1,4 @@
-import { notification } from 'antd';
+import { App } from 'antd';
 import fileDownload from 'js-file-download';
 import React from 'react';
 import { useGetIdToken } from './useGetIdToken';
@@ -9,6 +9,7 @@ export const useOpenFloconUploaderFile = () => {
     const webConfig = useWebConfig();
     const [isFetching, setIsFetching] = React.useState(false);
     const { getIdToken } = useGetIdToken();
+    const { notification } = App.useApp();
 
     const open = React.useCallback(
         async (file: { filename: string; screenname: string }) => {
@@ -17,7 +18,7 @@ export const useOpenFloconUploaderFile = () => {
                 return;
             }
             if (isFetching) {
-                notification.warn({
+                notification.warning({
                     message:
                         '他のファイルをダウンロードしているため、ダウンロードを開始できませんでした。',
                 });
@@ -42,7 +43,7 @@ export const useOpenFloconUploaderFile = () => {
             // CONSIDER: 画像などであれば、ダウンロードするのではなく、新しいタブで開いたほうがいい
             fileDownload(blob, file.filename);
         },
-        [getIdToken, isFetching, webConfig?.value]
+        [getIdToken, isFetching, notification, webConfig?.value]
     );
 
     return React.useMemo(

@@ -20,6 +20,7 @@ import {
 import { Result } from '@kizahasi/result';
 import {
     Alert,
+    App,
     Breadcrumb,
     Button,
     Checkbox,
@@ -30,20 +31,17 @@ import {
     Modal,
     Select,
     Tooltip,
-    notification,
 } from 'antd';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import classNames from 'classnames';
 import { produce } from 'immer';
 import {
-    Atom,
-    PrimitiveAtom,
     Provider,
-    atom,
     useAtom as useAtomCore,
     useAtomValue as useAtomValueCore,
     useSetAtom as useSetAtomCore,
-} from 'jotai';
+} from 'jotai/react';
+import { Atom, PrimitiveAtom, atom, createStore } from 'jotai/vanilla';
 import React from 'react';
 import { useDeepCompareEffect, useLatest } from 'react-use';
 import { VirtuosoGrid } from 'react-virtuoso';
@@ -60,8 +58,6 @@ import {
 } from '@/styles/className';
 import { mergeStyles } from '@/utils/mergeStyles';
 
-type Scope = symbol | string | number;
-
 export const image = 'image';
 export const sound = 'sound';
 export const text = 'text';
@@ -74,6 +70,8 @@ const none = '__none__';
 const columnGap = '4px 0';
 
 const protectedErrorMessage = 'このフォルダでは無効化されています。';
+
+type Store = ReturnType<typeof createStore>;
 
 type Path = {
     path: readonly string[];
@@ -169,7 +167,7 @@ type IsProtected = (absolutePath: readonly string[]) => boolean;
 const defaultHeight = 350;
 
 export type Props = {
-    jotaiScope: Scope;
+    jotaiStore: Store;
 
     files: readonly FilePath[];
 
@@ -234,8 +232,10 @@ export type Props = {
     }[];
 };
 
+const defaultJotaiStore = createStore();
+
 const defaultProps: Props = {
-    jotaiScope: 'defaultProps - 061dd7e3-35fa-4d44-9225-99a67a16f238',
+    jotaiStore: defaultJotaiStore,
     files: [],
     height: null,
     isProtected: () => false,
@@ -1073,26 +1073,26 @@ class PathState {
     }
 }
 
-const JotaiScopeContext = React.createContext<Scope>(defaultProps.jotaiScope);
+const JotaiStoreContext = React.createContext<Store>(defaultProps.jotaiStore);
 
-const useJotaiScope = () => {
-    return React.useContext(JotaiScopeContext);
+const useJotaiStore = () => {
+    return React.useContext(JotaiStoreContext);
 };
 
 const useAtomValue = <T,>(atom: Atom<T>) => {
-    return useAtomValueCore(atom, useJotaiScope());
+    return useAtomValueCore(atom, { store: useJotaiStore() });
 };
 
 const useSetAtom = <T,>(atom: PrimitiveAtom<T>) => {
-    return useSetAtomCore(atom, useJotaiScope());
+    return useSetAtomCore(atom, { store: useJotaiStore() });
 };
 
 const useAtom = <T,>(atom: PrimitiveAtom<T>) => {
-    return useAtomCore(atom, useJotaiScope());
+    return useAtomCore(atom, { store: useJotaiStore() });
 };
 
 const useAtomSelector = <T1, T2>(atom: Atom<T1>, mapping: (value: T1) => T2) => {
-    return useAtomSelectorCore(atom, mapping, undefined, { scope: useJotaiScope() });
+    return useAtomSelectorCore(atom, mapping, undefined, { store: useJotaiStore() });
 };
 
 const pathStateAtom = atom(PathState.init());
@@ -1138,11 +1138,12 @@ const useCreateFolderAction = () => {
 const useTrySetDeleteStatusAsAsking = () => {
     const [deleteStatus, setDeleteStatus] = useAtom(deleteStatusAtom);
     const setIsModalVisible = useSetAtom(isDeleteConfirmModalVisibleAtom);
+    const { notification } = App.useApp();
 
     return React.useCallback(
         (askingDeleteStatus: AskingDeleteStatus) => {
             if (deleteStatus.type === 'deleting') {
-                notification.warn({
+                notification.warning({
                     placement: 'bottomRight',
                     message:
                         '現在行われている削除が全て完了するまで、他のファイルを削除することはできません。',
@@ -1153,7 +1154,7 @@ const useTrySetDeleteStatusAsAsking = () => {
             setDeleteStatus(() => askingDeleteStatus);
             setIsModalVisible(true);
         },
-        [deleteStatus.type, setDeleteStatus, setIsModalVisible]
+        [deleteStatus.type, notification, setDeleteStatus, setIsModalVisible]
     );
 };
 
@@ -1215,11 +1216,12 @@ const useRequestDeletingNodeAction = () => {
 const useTrySetRenameStatusAsAsking = () => {
     const [renameStatus, setRenameStatus] = useAtom(renameStatusAtom);
     const setIsModalVisible = useSetAtom(isRenameConfirmModalVisibleAtom);
+    const { notification } = App.useApp();
 
     return React.useCallback(
         (askingRenameStatus: AskingRenameStatus) => {
             if (renameStatus.type === 'renaming') {
-                notification.warn({
+                notification.warning({
                     placement: 'bottomRight',
                     message:
                         '現在行われているリネームが全て完了するまで、他のファイルをリネームすることはできません。',
@@ -1230,7 +1232,7 @@ const useTrySetRenameStatusAsAsking = () => {
             setRenameStatus(() => askingRenameStatus);
             setIsModalVisible(true);
         },
-        [renameStatus.type, setRenameStatus, setIsModalVisible]
+        [renameStatus.type, setRenameStatus, setIsModalVisible, notification]
     );
 };
 
@@ -2255,6 +2257,7 @@ const useStartAutoDeleteFiles = () => {
     const foldersDeletingOnNextRootFolderUpdate = useSetAtom(
         foldersDeletingOnNextRootFolderUpdateAtom
     );
+    const { notification } = App.useApp();
 
     React.useEffect(() => {
         if (isDeleting) {
@@ -2346,6 +2349,7 @@ const useStartAutoDeleteFiles = () => {
         setDeleteStatus,
         foldersDeletingOnNextRootFolderUpdate,
         setPathState,
+        notification,
     ]);
 };
 
@@ -2362,6 +2366,7 @@ const useStartAutoRenameFiles = () => {
     const setDeletingFoldersOnNextRootFolderUpdate = useSetAtom(
         foldersDeletingOnNextRootFolderUpdateAtom
     );
+    const { notification } = App.useApp();
 
     React.useEffect(() => {
         if (isRenaming) {
@@ -2464,6 +2469,7 @@ const useStartAutoRenameFiles = () => {
         setPathState,
         renameStatusRef,
         setDeletingFoldersOnNextRootFolderUpdate,
+        notification,
     ]);
 };
 
@@ -2529,10 +2535,10 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
 export const FileBrowser: React.FC<Props> = props => {
     // もしProvider.scopeがない場合、jotaiは最も近いProviderにアクセスするため、useWebConfigなどが常にnullishとなってしまう。それを防ぐため、scopeを用いている。
     return (
-        <JotaiScopeContext.Provider value={props.jotaiScope}>
-            <Provider scope={props.jotaiScope}>
+        <JotaiStoreContext.Provider value={props.jotaiStore}>
+            <Provider store={props.jotaiStore}>
                 <FileBrowserWithoutJotaiProvider {...props} />
             </Provider>
-        </JotaiScopeContext.Provider>
+        </JotaiStoreContext.Provider>
     );
 };
