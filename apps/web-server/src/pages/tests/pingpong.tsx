@@ -3,7 +3,7 @@ import {
     PongDocument,
     PongSubscription,
     PongSubscriptionVariables,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
+} from '@flocon-trpg/typed-document-node';
 import { Button, InputNumber } from 'antd';
 import React from 'react';
 import { CombinedError, useClient, useMutation, useSubscription } from 'urql';

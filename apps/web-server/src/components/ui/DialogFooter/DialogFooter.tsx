@@ -1,4 +1,4 @@
-import { Button, Modal } from 'antd';
+import { App, Button } from 'antd';
 import classNames from 'classnames';
 import React from 'react';
 import { flex, flexRow, justifyEnd } from '@/styles/className';
@@ -31,6 +31,8 @@ type Props = {
 };
 
 export const DialogFooter: React.FC<Props> = ({ close, ok, destroy, custom }: Props) => {
+    const { modal } = App.useApp();
+
     if (close == null && ok == null && destroy == null) {
         return null;
     }
@@ -83,7 +85,7 @@ export const DialogFooter: React.FC<Props> = ({ close, ok, destroy, custom }: Pr
                             destroy.onClick();
                             return;
                         }
-                        Modal.confirm({
+                        modal.confirm({
                             title: destroy.modal.title,
                             content: destroy.modal.content,
                             onOk: () => {

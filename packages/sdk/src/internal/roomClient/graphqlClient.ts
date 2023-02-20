@@ -13,7 +13,7 @@ import {
     UpdateWritingMessageStatusMutation,
     UpdateWritingMessageStatusMutationVariables,
     WritingMessageStatusInputType,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
+} from '@flocon-trpg/typed-document-node';
 import { Result } from '@kizahasi/result';
 import { EMPTY, Observable, catchError, mergeMap, of, shareReplay } from 'rxjs';
 import { BehaviorEvent } from '../rxjs/behaviorEvent';

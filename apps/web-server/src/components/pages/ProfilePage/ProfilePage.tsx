@@ -90,7 +90,7 @@ export const ProfilePage: React.FC = () => {
 
     return (
         <Layout requires={login}>
-            <Center>
+            <Center setPaddingY>
                 <Card title='ユーザー情報の変更'>{form}</Card>
             </Center>
         </Layout>

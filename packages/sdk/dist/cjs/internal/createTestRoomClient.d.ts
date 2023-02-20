@@ -1,4 +1,4 @@
-import { WritingMessageStatusInputType, WritingMessageStatusType } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { WritingMessageStatusInputType, WritingMessageStatusType } from '@flocon-trpg/typed-document-node';
 import { RoomMessagesClient } from '@flocon-trpg/web-server-utils';
 import { GraphQLStatusEventEmitter } from './roomClient/graphqlClient';
 import { RoomConnectionsManager } from './roomClient/roomConnections';

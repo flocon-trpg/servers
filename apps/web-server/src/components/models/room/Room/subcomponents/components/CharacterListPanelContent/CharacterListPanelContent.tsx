@@ -12,6 +12,7 @@ import { loggerRef } from '@flocon-trpg/utils';
 import {
     Alert,
     Table as AntdTable,
+    App,
     Button,
     Checkbox,
     Dropdown,
@@ -24,7 +25,7 @@ import { ColumnType } from 'antd/lib/table';
 import { SortOrder } from 'antd/lib/table/interface';
 import classNames from 'classnames';
 import { produce } from 'immer';
-import { useUpdateAtom } from 'jotai/utils';
+import { useSetAtom } from 'jotai/react';
 import React from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { IconView } from '../../../../../file/IconView/IconView';
@@ -51,7 +52,7 @@ import { DraggableTabs } from '@/components/ui/DraggableTabs/DraggableTabs';
 import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
 import { ToggleButton } from '@/components/ui/ToggleButton/ToggleButton';
 import { useAtomSelector } from '@/hooks/useAtomSelector';
-import { useImmerUpdateAtom } from '@/hooks/useImmerUpdateAtom';
+import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import {
     characterIsNotPrivate,
@@ -272,7 +273,7 @@ const createStringParameterColumn = ({
 const dndItemKey = 'rowKey';
 
 type TableHeaderCellProps = {
-    title: string;
+    title: string | null;
     rowKey: string;
 };
 
@@ -283,7 +284,7 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
     // キャラクターウィンドウは現時点では最大1個までしか存在しないため、静的な文字列で構わない
     const type = 'TableHeaderCell';
 
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
     const keySorter = React.useMemo(() => new KeySorter(RowKeys.all), []);
 
     const [, drag] = useDrag(
@@ -316,8 +317,30 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
         drop: () => ({ [dndItemKey]: rowKey }),
     });
     return (
-        <div ref={drop}>
-            {title}
+        <div
+            ref={drop}
+            className={classNames(flex, flexRow, itemsCenter)}
+            style={{
+                // 設定ボタンの列などでは移動ボタンが右寄せだと見た目が悪いので、中央に来るようにしている。それ以外は移動ボタンは右寄せにしている。
+                justifyContent: title ? 'space-between' : 'center',
+            }}
+        >
+            {title && (
+                <Tooltip overlayClassName={cancelRnd} overlay={title}>
+                    <div
+                        style={{
+                            // 概ね3行までの高さ
+                            maxHeight: 40,
+                            // デフォルトより行間を狭くし、省スペース化させている
+                            lineHeight: '110%',
+                            overflow: 'hidden',
+                            wordBreak: 'break-word',
+                        }}
+                    >
+                        {title}
+                    </div>
+                </Tooltip>
+            )}
             <Tooltip
                 overlayClassName={cancelRnd}
                 overlay={
@@ -338,7 +361,12 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
                     size='small'
                     onClick={e => e.stopPropagation()}
                 >
-                    <Icon.MenuOutlined />
+                    <Icon.MenuOutlined
+                        style={{
+                            // ボタンの左右にある空白を取り除いている
+                            margin: '0 -6px',
+                        }}
+                    />
                 </Button>
             </Tooltip>
         </div>
@@ -347,14 +375,16 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
 
 type CharacterListTabPaneProps = {
     tabConfig: CharacterTabConfig;
+    tableHeight: number;
 };
 
 const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
     tabConfig,
+    tableHeight,
 }: CharacterListTabPaneProps) => {
     const myUserUid = useMyUserUid();
     const setRoomState = useSetRoomStateWithImmer();
-    const setCharacterEditorModal = useUpdateAtom(characterEditorModalAtom);
+    const setCharacterEditorModal = useSetAtom(characterEditorModalAtom);
 
     const characters = useCharacters(tabConfig);
     const boolParamNames = useBoolParamNames();
@@ -379,7 +409,7 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                 switch (rowKey) {
                     case RowKeys.EditButton:
                         return {
-                            title: <TableHeaderCell title='' rowKey={rowKey} />,
+                            title: <TableHeaderCell title={null} rowKey={rowKey} />,
                             key: 'menu',
                             width: 36,
                             // eslint-disable-next-line react/display-name
@@ -440,7 +470,7 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                         };
                     case RowKeys.TogglePrivate:
                         return {
-                            title: <TableHeaderCell title='' rowKey={rowKey} />,
+                            title: <TableHeaderCell title={null} rowKey={rowKey} />,
                             key: '全体公開',
                             sorter: (x, y) =>
                                 (x.character.state.isPrivate ? 1 : 0) -
@@ -549,6 +579,7 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
             pagination={false}
             // 列をドラッグして動かすときにTooltipをドラッグするとキャラクターウィンドウが開いてしまう。簡単な方法でTooltipを調整する手段はなさそうなので、非表示にすることで解決している
             showSorterTooltip={false}
+            scroll={{ x: true, y: tableHeight }}
         />
     );
 };
@@ -653,20 +684,20 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
 const CharacterListPanelWithPanelId: React.FC<{
     // 複数のCharacterListが存在する場合は、panelIdをそれぞれ異なるものにする。
     panelId: string;
-}> = ({ panelId }) => {
+    height: number;
+}> = ({ panelId, height }) => {
+    const { modal } = App.useApp();
     const tabs = useAtomSelector(
         roomConfigAtom,
         roomConfig => roomConfig?.panels.characterPanel.tabs
     );
-    const setRoomConfig = useImmerUpdateAtom(roomConfigAtom);
-    const setCharacterParameterNamesEditorVisibility = useUpdateAtom(
+    const setRoomConfig = useImmerSetAtom(roomConfigAtom);
+    const setCharacterParameterNamesEditorVisibility = useSetAtom(
         characterParameterNamesEditorVisibilityAtom
     );
-    const setCharacterTagNamesEditorVisibility = useUpdateAtom(
-        characterTagNamesEditorVisibilityAtom
-    );
-    const setCharacterEditorModal = useUpdateAtom(characterEditorModalAtom);
-    const setImportCharacterModal = useUpdateAtom(importCharacterModalVisibilityAtom);
+    const setCharacterTagNamesEditorVisibility = useSetAtom(characterTagNamesEditorVisibilityAtom);
+    const setCharacterEditorModal = useSetAtom(characterEditorModalAtom);
+    const setImportCharacterModal = useSetAtom(importCharacterModalVisibilityAtom);
     const [editingTabConfigKey, setEditingTabConfigKey] = React.useState<string | undefined>();
 
     return React.useMemo(() => {
@@ -674,7 +705,7 @@ const CharacterListPanelWithPanelId: React.FC<{
             const result: AntdTab = {
                 key: tab.key,
                 tabKey: tab.key,
-                style: { overflowY: 'scroll' },
+                style: { overflowX: 'scroll', overflowY: 'scroll' },
                 closable: false,
                 label: (
                     <div
@@ -705,7 +736,7 @@ const CharacterListPanelWithPanelId: React.FC<{
                                                 icon: <Icon.DeleteOutlined />,
                                                 label: '削除',
                                                 onClick: () =>
-                                                    Modal.warn({
+                                                    modal.warning({
                                                         onOk: () => {
                                                             setRoomConfig(roomConfig => {
                                                                 if (roomConfig == null) {
@@ -747,7 +778,9 @@ const CharacterListPanelWithPanelId: React.FC<{
                         </div>
                     </div>
                 ),
-                children: <CharacterListTabPane tabConfig={tab} />,
+                children: (
+                    <CharacterListTabPane tabConfig={tab} tableHeight={Math.max(height - 200, 0)} />
+                ),
             };
             return result;
         });
@@ -758,7 +791,6 @@ const CharacterListPanelWithPanelId: React.FC<{
                     display: 'flex',
                     flexDirection: 'column',
                     height: '100%',
-                    margin: '2px 4px',
                 }}
             >
                 <div style={{ paddingBottom: 8 }}>
@@ -849,6 +881,8 @@ const CharacterListPanelWithPanelId: React.FC<{
         );
     }, [
         editingTabConfigKey,
+        height,
+        modal,
         panelId,
         setCharacterEditorModal,
         setCharacterParameterNamesEditorVisibility,
@@ -859,7 +893,7 @@ const CharacterListPanelWithPanelId: React.FC<{
     ]);
 };
 
-export const CharacterListPanelContent: React.FC = () => {
+export const CharacterListPanelContent: React.FC<{ height: number }> = ({ height }) => {
     // 現状ではCharacterListは最大でも1つしか存在しないため、panelIdは適当で構わない
-    return <CharacterListPanelWithPanelId panelId='CharacterList' />;
+    return <CharacterListPanelWithPanelId panelId='CharacterList' height={height} />;
 };

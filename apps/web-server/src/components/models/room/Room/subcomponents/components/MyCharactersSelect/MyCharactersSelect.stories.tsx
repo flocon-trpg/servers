@@ -11,7 +11,7 @@ export const Default: React.FC<{
     showAlert: boolean;
     readonly: boolean;
 }> = ({ characterIdMode, showAlert, readonly }) => {
-    useSetupStorybook({});
+    const { roomClientContextValue } = useSetupStorybook({});
 
     let selectedCharacterId: string | undefined;
     switch (characterIdMode) {
@@ -26,7 +26,7 @@ export const Default: React.FC<{
             break;
     }
     return (
-        <StorybookProvider waitForRoomClient>
+        <StorybookProvider compact roomClientContextValue={roomClientContextValue}>
             <MyCharactersSelect
                 selectedCharacterId={selectedCharacterId}
                 showAlert={showAlert}

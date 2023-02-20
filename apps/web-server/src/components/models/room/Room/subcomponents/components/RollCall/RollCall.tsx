@@ -5,7 +5,7 @@ import {
     CloseRollCallDocument,
     FileSourceType,
     PerformRollCallDocument,
-} from '@flocon-trpg/typed-document-node-v0.7.13';
+} from '@flocon-trpg/typed-document-node';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { Alert, Button, Modal, Tooltip } from 'antd';
 import classNames from 'classnames';

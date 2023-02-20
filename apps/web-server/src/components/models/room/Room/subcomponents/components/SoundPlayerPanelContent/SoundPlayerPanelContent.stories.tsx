@@ -6,13 +6,13 @@ import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole }> = ({ myParticipantRole }) => {
-    useSetupStorybook({
+    const { roomClientContextValue } = useSetupStorybook({
         room: {
             myParticipantRole,
         },
     });
     return (
-        <StorybookProvider waitForRoomClient>
+        <StorybookProvider compact roomClientContextValue={roomClientContextValue}>
             <SoundPlayerPanelContent />
         </StorybookProvider>
     );

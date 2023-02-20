@@ -2,8 +2,8 @@
 
 var tslib = require('tslib');
 var typeGraphql = require('type-graphql');
-var roomAsListItem = require('../../../../entities-graphql/roomAsListItem.js');
 var entity = require('../../../../entities/room/entity.js');
+var roomAsListItem = require('../../../../entities-graphql/roomAsListItem.js');
 var GetRoomFailureType = require('../../../../enums/GetRoomFailureType.js');
 var roles = require('../../../../utils/roles.js');
 var QueueMiddleware = require('../../../middlewares/QueueMiddleware.js');

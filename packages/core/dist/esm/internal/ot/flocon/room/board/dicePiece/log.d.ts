@@ -484,7 +484,7 @@ export declare const type: z.ZodUnion<[z.ZodObject<{
         };
     }>, z.ZodObject<{
         type: z.ZodLiteral<"update">;
-        update: z.ZodObject<z.extendShape<{
+        update: z.ZodObject<{
             dieType: z.ZodOptional<z.ZodObject<{
                 newValue: z.ZodUnion<[z.ZodLiteral<"D4">, z.ZodLiteral<"D6">]>;
             }, "strip", z.ZodTypeAny, {
@@ -500,10 +500,9 @@ export declare const type: z.ZodUnion<[z.ZodObject<{
                 newValue?: number | undefined;
             }>>;
             isValueChanged: z.ZodOptional<z.ZodBoolean>;
-        }, {
             $v: z.ZodLiteral<1>;
             $r: z.ZodLiteral<1>;
-        }>, "strip", z.ZodTypeAny, {
+        }, "strip", z.ZodTypeAny, {
             dieType?: {
                 newValue: "D4" | "D6";
             } | undefined;

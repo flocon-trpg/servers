@@ -21,14 +21,14 @@ export const Default: React.FC<{
         }
         return undefined;
     }, [removeActiveBoard]);
-    useSetupStorybook({
+    const { roomClientContextValue } = useSetupStorybook({
         room: {
             myParticipantRole,
             update: updateRoom,
         },
     });
     return (
-        <StorybookProvider waitForRoomClient>
+        <StorybookProvider compact roomClientContextValue={roomClientContextValue}>
             <Board {...boardProps} />
         </StorybookProvider>
     );

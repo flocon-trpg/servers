@@ -7,9 +7,10 @@ import {
 } from '@flocon-trpg/core';
 import { mapToRecord, recordToMap } from '@flocon-trpg/utils';
 import MonacoEditor, { useMonaco } from '@monaco-editor/react';
-import { Button, Input, Modal, Select } from 'antd';
+import { App, Button, Input, Modal, Select } from 'antd';
 import classNames from 'classnames';
-import { atom, useAtom } from 'jotai';
+import { useAtom } from 'jotai/react';
+import { atom } from 'jotai/vanilla';
 import React from 'react';
 import { useLatest, usePrevious } from 'react-use';
 import { useCharacter } from '../../hooks/useCharacter';
@@ -124,6 +125,7 @@ type CommandState = {
 export const CommandEditorModal: React.FC = () => {
     const modalWidth = 10000;
 
+    const { modal } = App.useApp();
     const operate = useSetRoomStateByApply();
     const [commandEditorModalType, setCommandEditorModalType] = useAtom(commandEditorModalAtom);
     const character = useCharacter(commandEditorModalType?.characterId);
@@ -218,7 +220,7 @@ export const CommandEditorModal: React.FC = () => {
     }
 
     const close = () => {
-        Modal.confirm({
+        modal.confirm({
             content:
                 '閉じてもよろしいですか？もしコマンドに変更があった場合、その変更は破棄されます。',
             onOk: () => {

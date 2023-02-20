@@ -11,10 +11,10 @@ import {
     UseMiddleware,
     createUnionType,
 } from 'type-graphql';
-import { GlobalRoom } from '../../../../entities-graphql/room';
-import { stateToGraphQL } from '../../../../entities-graphql/roomAsListItem';
 import { isBookmarked } from '../../../../entities/room/isBookmarked';
 import { role } from '../../../../entities/room/role';
+import { GlobalRoom } from '../../../../entities-graphql/room';
+import { stateToGraphQL } from '../../../../entities-graphql/roomAsListItem';
 import { GetRoomFailureType } from '../../../../enums/GetRoomFailureType';
 import {
     ParticipantRoleType,

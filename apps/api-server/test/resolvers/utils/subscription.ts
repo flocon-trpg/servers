@@ -1,4 +1,4 @@
-import { RoomEventSubscription } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { RoomEventSubscription } from '@flocon-trpg/typed-document-node';
 import { recordForEach } from '@flocon-trpg/utils';
 import { RoomMessagesClient, privateMessage, publicMessage } from '@flocon-trpg/web-server-utils';
 import { Option } from '@kizahasi/option';

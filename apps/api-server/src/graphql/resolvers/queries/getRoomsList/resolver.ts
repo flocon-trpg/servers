@@ -8,8 +8,8 @@ import {
     UseMiddleware,
     createUnionType,
 } from 'type-graphql';
-import * as RoomAsListItemGlobal from '../../../../entities-graphql/roomAsListItem';
 import * as Room$MikroORM from '../../../../entities/room/entity';
+import * as RoomAsListItemGlobal from '../../../../entities-graphql/roomAsListItem';
 import { GetRoomFailureType } from '../../../../enums/GetRoomFailureType';
 import { ResolverContext } from '../../../../types';
 import { ENTRY } from '../../../../utils/roles';

@@ -1,4 +1,4 @@
-import { WritingMessageStatusInputType } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { WritingMessageStatusInputType } from '@flocon-trpg/typed-document-node';
 import { GraphQLClientWithStatus } from './graphqlClient';
 export declare const updateWritingMessageStatus: <TGraphQLError>(client: Pick<GraphQLClientWithStatus<TGraphQLError>, "updateWritingMessagesStatusMutation">) => {
     next: (inputType: WritingMessageStatusInputType) => void;

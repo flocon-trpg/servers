@@ -5,7 +5,7 @@ import {
     IsEntryDocument,
     IsEntryQuery,
     IsEntryQueryVariables,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
+} from '@flocon-trpg/typed-document-node';
 import {
     Alert,
     Layout as AntdLayout,
@@ -200,7 +200,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                 );
             case false:
                 return (
-                    <Center>
+                    <Center setPaddingY>
                         <Card title='エントリーパスワードの入力'>
                             <EntryFormComponent
                                 onEntry={() => {
@@ -236,14 +236,14 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
     }
 
     return (
-        <AntdLayout style={{ height: '100vh' }}>
+        <AntdLayout style={{ minHeight: '100vh' }}>
             {!hideHeader && (
                 <Header>
                     <Row>
                         <Col flex={0}>
                             <Link href='/'>
                                 <img
-                                    style={{ cursor: 'pointer' }}
+                                    style={{ cursor: 'pointer', verticalAlign: 'middle' }}
                                     src='/assets/logo.png'
                                     width={32}
                                     height={32}

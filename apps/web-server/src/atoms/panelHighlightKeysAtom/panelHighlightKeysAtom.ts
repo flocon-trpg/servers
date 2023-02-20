@@ -1,4 +1,4 @@
-import { atom } from 'jotai';
+import { atom } from 'jotai/vanilla';
 
 // rollCallPanel 以外のpanelは、現時点では強調表示する機会がないため対応していない。
 type Type = {

@@ -1,3 +1,5 @@
+import { useCreateRoomClient } from '@flocon-trpg/sdk-react';
+import { createGraphQLClientForRoomClient } from '@flocon-trpg/sdk-urql';
 import {
     GetRoomFailureType,
     JoinRoomAsPlayerDocument,
@@ -6,28 +8,35 @@ import {
     OperateRoomFailureType,
     RoomAsListItemFragment,
     WritingMessageStatusInputType,
-} from '@flocon-trpg/typed-document-node-v0.7.1';
+} from '@flocon-trpg/typed-document-node';
 import { Alert, Button, Card, Input, Result, Spin } from 'antd';
 import classNames from 'classnames';
 import { produce } from 'immer';
-import { atom } from 'jotai';
-import { selectAtom, useAtomValue, useUpdateAtom } from 'jotai/utils';
+import { useAtomValue, useSetAtom } from 'jotai/react';
+import { selectAtom } from 'jotai/utils';
+import { atom } from 'jotai/vanilla';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { useDebounce, usePrevious } from 'react-use';
-import { useMutation } from 'urql';
+import { CombinedError, useClient, useMutation } from 'urql';
+import { useMemoOne } from 'use-memo-one';
 import { hideAllOverlayActionAtom } from '@/atoms/hideAllOverlayActionAtom/hideAllOverlayActionAtom';
 import { roomConfigAtom } from '@/atoms/roomConfigAtom/roomConfigAtom';
 import { RoomConfigUtils } from '@/atoms/roomConfigAtom/types/roomConfig/utils';
+import { AntdThemeConfigProvider } from '@/components/behaviors/AntdThemeConfigProvider';
 import { Room } from '@/components/models/room/Room/Room';
 import { roomPrivateMessageInputAtom } from '@/components/models/room/Room/subcomponents/atoms/roomPrivateMessageInputAtom/roomPrivateMessageInputAtom';
 import { roomPublicMessageInputAtom } from '@/components/models/room/Room/subcomponents/atoms/roomPublicMessageInputAtom/roomPublicMessageInputAtom';
+import { NotificationType } from '@/components/models/room/Room/subcomponents/components/Notification/Notification';
 import { useUpdateWritingMessageStatus } from '@/components/models/room/Room/subcomponents/hooks/useUpdateWritingMessageStatus';
 import { Center } from '@/components/ui/Center/Center';
 import { GraphQLErrorResult } from '@/components/ui/GraphQLErrorResult/GraphQLErrorResult';
 import { Layout, loginAndEntry, success } from '@/components/ui/Layout/Layout';
 import { LoadingResult } from '@/components/ui/LoadingResult/LoadingResult';
-import { useInitializeRoomClient, useRoomClient, useTryRoomClient } from '@/hooks/roomClientHooks';
+import { RoomClientContext, RoomClientContextValue } from '@/contexts/RoomClientContext';
+import { useRoomClient } from '@/hooks/roomClientHooks';
+import { useGetIdToken } from '@/hooks/useGetIdToken';
+import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useRoomGraphQLStatus } from '@/hooks/useRoomGraphQLStatus';
 import { useRoomState } from '@/hooks/useRoomState';
 import { firebaseUserValueAtom } from '@/pages/_app';
@@ -51,8 +60,8 @@ const useOnResize = () => {
         debouncedWindowInnerHeightAtomCore.init
     );
 
-    const setWindowInnerWidthAtom = useUpdateAtom(debouncedWindowInnerWidthAtomCore);
-    const setWindowInnerHeightAtom = useUpdateAtom(debouncedWindowInnerHeightAtomCore);
+    const setWindowInnerWidthAtom = useSetAtom(debouncedWindowInnerWidthAtomCore);
+    const setWindowInnerHeightAtom = useSetAtom(debouncedWindowInnerHeightAtomCore);
 
     React.useEffect(() => {
         const updateInnerWindowSize = () => {
@@ -105,7 +114,7 @@ const ResultContainer: React.FC = ({ children }) => {
 };
 
 type JoinRoomFormProps = {
-    roomState: RoomAsListItemFragment;
+    roomState: Omit<RoomAsListItemFragment, 'isBookmarked'>;
     onJoin?: () => void;
 };
 
@@ -245,7 +254,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
 // Roomが変わるたびに、useRoomConfigが更新される必要がある。RoomのComponentのどこか一箇所でuseRoomConfigを呼び出すだけでよい。
 const useRoomConfig = (roomId: string): boolean => {
     const [result, setResult] = React.useState<boolean>(false);
-    const setRoomConfig = useUpdateAtom(roomConfigAtom);
+    const setRoomConfig = useSetAtom(roomConfigAtom);
 
     React.useEffect(() => {
         let unmounted = false;
@@ -281,9 +290,9 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
     const roomState = useRoomState();
     const graphQLStatus = useRoomGraphQLStatus();
 
-    const setRoomPublicMessageInput = useUpdateAtom(roomPublicMessageInputAtom);
-    const setRoomPrivateMessageInput = useUpdateAtom(roomPrivateMessageInputAtom);
-    const hideAllOverlay = useUpdateAtom(hideAllOverlayActionAtom);
+    const setRoomPublicMessageInput = useSetAtom(roomPublicMessageInputAtom);
+    const setRoomPrivateMessageInput = useSetAtom(roomPrivateMessageInputAtom);
+    const hideAllOverlay = useSetAtom(hideAllOverlayActionAtom);
 
     useOnResize();
     useRoomConfig(roomId);
@@ -342,7 +351,7 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
         }
         case 'nonJoined':
             return (
-                <Center>
+                <Center setPaddingY>
                     <Card title='入室'>
                         <JoinRoomForm
                             roomState={roomState.nonJoinedRoom}
@@ -405,20 +414,40 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
     }
 };
 
-const RoomClientInitializer: React.FC<{ roomId: string }> = ({ roomId }) => {
-    useInitializeRoomClient({ roomId });
+const useCreateRoomClientForContext = ({
+    roomId,
+}: {
+    roomId: string;
+}): RoomClientContextValue | null => {
+    const urqlClient = useClient();
+    const userUid = useMyUserUid();
+    const { canGetIdToken } = useGetIdToken();
+    const client = useMemoOne(() => {
+        return createGraphQLClientForRoomClient(urqlClient);
+    }, [urqlClient]);
+    // canGetIdToken === false のときは失敗することが確定しているので RoomClient を作成しないようにしている
+    const roomClientResult = useCreateRoomClient<NotificationType<CombinedError>, CombinedError>(
+        !canGetIdToken || userUid == null ? null : { client, roomId, userUid }
+    );
+    return useMemoOne(() => {
+        return roomClientResult == null ? null : { ...roomClientResult, isMock: false, roomId };
+    }, [roomClientResult, roomId]);
+};
 
-    const roomClient = useTryRoomClient();
-    // すぐ上で useInitializeRoomClient を実行しているが、それでも一瞬 useTryRoomClient の戻り値が null になる。
-    // useTryRoomClient の戻り値が null のときにもし useRoomClient もしくはそれを使用している hooks を実行するとエラーになってしまう。<Room /> ではそれらの hooks が使われているため、エラーが出ないようにするためにここで弾いている。
+const RoomClientInitializer: React.FC<{ roomId: string }> = ({ roomId }) => {
+    const roomClient = useCreateRoomClientForContext({ roomId });
     if (roomClient == null) {
         return <LoadingResult />;
     }
 
     return (
-        <RoomBehavior roomId={roomId}>
-            <Room />
-        </RoomBehavior>
+        <RoomClientContext.Provider value={roomClient}>
+            <RoomBehavior roomId={roomId}>
+                <AntdThemeConfigProvider compact>
+                    <Room />
+                </AntdThemeConfigProvider>
+            </RoomBehavior>
+        </RoomClientContext.Provider>
     );
 };
 

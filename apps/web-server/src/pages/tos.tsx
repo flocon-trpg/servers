@@ -1,12 +1,13 @@
 import { Typography } from 'antd';
 import React from 'react';
+import { Layout } from '@/components/ui/Layout/Layout';
 
 /**
  * `tos.md` の内容を用い、利用規約を表示します。
  *
- * ただし、サーバーを運用する際は、このコードを改変して利用規約を表示させても構いません。
+ * サーバーを運用する際は、このコードを改変して利用規約を直接表示させても構いません。その場合は必ずしも `tos.md` を使う必要はありません。
  */
-const Tos: React.FC = () => {
+const TosContent: React.FC = () => {
     return (
         <Typography style={{ padding: 8 }}>
             <Typography.Title level={1}>Flocon 公式サーバー利用規約</Typography.Title>
@@ -41,6 +42,14 @@ const Tos: React.FC = () => {
                 当サーバーの運営者は、ユーザーの個別の同意を要せず、事前に連絡することなく、当サーバーを一時的もしくは恒久的に停止できるものとします。
             </p>
         </Typography>
+    );
+};
+
+const Tos: React.FC = () => {
+    return (
+        <Layout>
+            <TosContent />
+        </Layout>
     );
 };
 

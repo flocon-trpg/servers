@@ -26,9 +26,9 @@ html {
     background-color: #686868;
 }
 
-// body {
-//     padding: $pt-navbar-height 0 0 0;
-// }
+body {
+    margin: 0;
+}
 
 // cancel-rndがclassNameに指定されている場合、react-rndが無効化されるようなコードにしている(そのため、単純にemotionなどで置き換えてはいけない)。また、ついでにcursorをautoにしている。
 .cancel-rnd {

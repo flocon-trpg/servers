@@ -1,12 +1,13 @@
 import { Typography } from 'antd';
 import React from 'react';
+import { Layout } from '@/components/ui/Layout/Layout';
 
 /**
  * `privacy_policy.md` の内容を用い、プライバシーポリシーを表示します。
  *
- * ただし、サーバーを運用する際は、このコードを改変してプライバシーポリシーを表示させても構いません。
+ * サーバーを運用する際は、このコードを改変してプライバシーポリシーを直接表示させても構いません。その場合は必ずしも `privacy_policy.md` を使う必要はありません。
  */
-const PrivacyPolicy: React.FC = () => {
+const PrivacyPolicyContent: React.FC = () => {
     return (
         <Typography style={{ padding: 8 }}>
             <Typography.Title level={1}>プライバシーポリシー</Typography.Title>
@@ -27,6 +28,14 @@ const PrivacyPolicy: React.FC = () => {
                 <li>司法・行政機関からの要請</li>
             </ul>
         </Typography>
+    );
+};
+
+const PrivacyPolicy: React.FC = () => {
+    return (
+        <Layout>
+            <PrivacyPolicyContent />
+        </Layout>
     );
 };
 

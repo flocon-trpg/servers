@@ -11,17 +11,19 @@ import {
     GetFilesDocument,
     GetServerInfoDocument,
     RenameFilesDocument,
-} from '@flocon-trpg/typed-document-node-v0.7.8';
+} from '@flocon-trpg/typed-document-node';
 import { loggerRef } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
-import { Modal, Upload, notification } from 'antd';
+import { App, Modal, Upload } from 'antd';
 import copy from 'clipboard-copy';
 import { StorageReference, deleteObject, ref, uploadBytes } from 'firebase/storage';
-import { useAtomValue } from 'jotai';
+import { useAtomValue } from 'jotai/react';
+import { createStore } from 'jotai/vanilla';
 import * as React from 'react';
 import { useLatest } from 'react-use';
 import urljoin from 'url-join';
 import { useMutation, useQuery } from 'urql';
+import useConstant from 'use-constant';
 import { FileBrowser, FilePath } from '../FileBrowser/FileBrowser';
 import { ImageView } from '../ImageView/ImageView';
 import { accept } from './utils/helper';
@@ -77,6 +79,7 @@ const useFirebaseStorageFiles = (onSelect: OnSelect | null) => {
     const onSelectRef = useLatest(onSelect);
     const { open } = useOpenFirebaseStorageFile();
     const isOnSelectNullish = onSelect == null;
+    const { notification } = App.useApp();
 
     return React.useMemo(() => {
         const toFilePath =
@@ -130,7 +133,7 @@ const useFirebaseStorageFiles = (onSelect: OnSelect | null) => {
         const publicFiles = mapFetchResult(files.public, x => x.map(toFilePath($public)));
         const unlistedFiles = mapFetchResult(files.unlisted, x => x.map(toFilePath(unlisted)));
         return { public: publicFiles, unlisted: unlistedFiles };
-    }, [files, isOnSelectNullish, onSelectRef, open]);
+    }, [files.public, files.unlisted, isOnSelectNullish, notification, onSelectRef, open]);
 };
 
 const useFloconUploaderFiles = (onSelect: OnSelect | null, pause: boolean) => {
@@ -145,6 +148,7 @@ const useFloconUploaderFiles = (onSelect: OnSelect | null, pause: boolean) => {
     const { open } = useOpenFloconUploaderFile();
     const onSelectRef = useLatest(onSelect);
     const isOnSelectNullish = onSelect == null;
+    const { notification } = App.useApp();
 
     return React.useMemo(() => {
         if (data == null) {
@@ -211,7 +215,15 @@ const useFloconUploaderFiles = (onSelect: OnSelect | null, pause: boolean) => {
             };
             return result;
         });
-    }, [data, deleteFilesMutation, isOnSelectNullish, onSelectRef, open, renameFilesMutation]);
+    }, [
+        data,
+        deleteFilesMutation,
+        isOnSelectNullish,
+        notification,
+        onSelectRef,
+        open,
+        renameFilesMutation,
+    ]);
 };
 
 type UploaderProps = {
@@ -498,10 +510,12 @@ export const UploaderFileBrowser: React.FC<Props> = ({
         isEmbeddedUploaderDisabled,
     ]);
 
+    const jotaiStore = useConstant(() => createStore());
+
     return (
         <>
             <FileBrowser
-                jotaiScope='UploaderFileBrowser'
+                jotaiStore={jotaiStore}
                 height={height}
                 fileCreateLabel='ファイルをアップロード'
                 searchPlaceholder='ファイル名で検索'

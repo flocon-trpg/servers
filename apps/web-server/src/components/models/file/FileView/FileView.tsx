@@ -1,5 +1,5 @@
 import * as Core from '@flocon-trpg/core';
-import { FileSourceType, GetFilesDocument } from '@flocon-trpg/typed-document-node-v0.7.1';
+import { FileSourceType, GetFilesDocument } from '@flocon-trpg/typed-document-node';
 import { Alert, Button, Tooltip } from 'antd';
 import classNames from 'classnames';
 import { StorageReference } from 'firebase/storage';

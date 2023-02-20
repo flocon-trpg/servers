@@ -1,5 +1,5 @@
 import { StorageReference } from '@firebase/storage';
-import { notification } from 'antd';
+import { App } from 'antd';
 import React from 'react';
 import { useQueryClient } from 'react-query';
 import { fetchFirebaseStorageUrlQuery } from './useFirebaseStorageUrlQuery';
@@ -7,11 +7,12 @@ import { fetchFirebaseStorageUrlQuery } from './useFirebaseStorageUrlQuery';
 export const useOpenFirebaseStorageFile = () => {
     const queryClient = useQueryClient();
     const [isFetching, setIsFetching] = React.useState(false);
+    const { notification } = App.useApp();
 
     const open = React.useCallback(
         async (storageReference: StorageReference) => {
             if (isFetching) {
-                notification.warn({
+                notification.warning({
                     message:
                         '他のファイルをダウンロードしているため、ダウンロードを開始できませんでした。',
                 });
@@ -24,14 +25,14 @@ export const useOpenFirebaseStorageFile = () => {
                     setIsFetching(false);
                 });
             if (url == null) {
-                notification.warn({
+                notification.warning({
                     message: 'ファイルを開けませんでした。',
                 });
                 return;
             }
             window.open(url, '_blank', 'noreferrer');
         },
-        [isFetching, queryClient]
+        [isFetching, notification, queryClient]
     );
 
     return React.useMemo(

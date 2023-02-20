@@ -16,12 +16,9 @@ const Core: React.FC = () => {
 };
 
 export const Update: React.FC = () => {
-    const { isInitialized } = useSetupStorybook();
-    if (!isInitialized) {
-        return <div />;
-    }
+    const { roomClientContextValue } = useSetupStorybook();
     return (
-        <StorybookProvider waitForRoomClient>
+        <StorybookProvider compact roomClientContextValue={roomClientContextValue}>
             <Core />
         </StorybookProvider>
     );
