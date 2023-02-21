@@ -394,9 +394,13 @@ export const UploaderFileBrowser: React.FC<Props> = ({
     height,
 }: Props) => {
     const [{ data: serverInfo }] = useQuery({ query: GetServerInfoDocument });
-    const isEmbeddedUploaderDisabled = serverInfo?.result.uploaderEnabled !== true;
+    /** `true` ならば enabled、`false` ならば disabled、nullish ならば判定中だということを示します。 */
+    const isEmbeddedUploaderEnabled = serverInfo?.result.uploaderEnabled;
     const firebaseStorageFiles = useFirebaseStorageFiles(onSelect);
-    const floconUploaderFiles = useFloconUploaderFiles(onSelect, isEmbeddedUploaderDisabled);
+    const floconUploaderFiles = useFloconUploaderFiles(
+        onSelect,
+        isEmbeddedUploaderEnabled !== true
+    );
     const [firebaseStorageUploaderModalState, setFirebaseStorageUploaderModalState] =
         React.useState<{ storageType: StorageType; folderPath: readonly string[] }>();
     const [floconUploaderModalState, setFloconUploaderModalState] = React.useState<{
@@ -477,28 +481,56 @@ export const UploaderFileBrowser: React.FC<Props> = ({
         push(firebaseStorageFiles.public, [uploaderTypeFolderName.publicFirebaseStorage]);
         push(firebaseStorageFiles.unlisted, [uploaderTypeFolderName.unlistedFirebaseStorage]);
 
-        if (isEmbeddedUploaderDisabled) {
-            result.push(
-                {
-                    path: [uploaderTypeFolderName.publicApiServer],
-                    element: <div style={style}>設定によって無効化されています。</div>,
-                },
-                {
-                    path: [uploaderTypeFolderName.unlistedApiServer],
-                    element: <div style={style}>設定によって無効化されています。</div>,
+        switch (isEmbeddedUploaderEnabled) {
+            case null:
+            case undefined: {
+                result.push(
+                    {
+                        path: [uploaderTypeFolderName.publicApiServer],
+                        element: (
+                            <div style={style}>
+                                内蔵アップローダーが有効かどうかを確認しています…
+                            </div>
+                        ),
+                    },
+                    {
+                        path: [uploaderTypeFolderName.unlistedApiServer],
+                        element: (
+                            <div style={style}>
+                                内蔵アップローダーが有効かどうかを確認しています…
+                            </div>
+                        ),
+                    }
+                );
+                break;
+            }
+            case false: {
+                result.push(
+                    {
+                        path: [uploaderTypeFolderName.publicApiServer],
+                        element: <div style={style}>設定によって無効化されています。</div>,
+                    },
+                    {
+                        path: [uploaderTypeFolderName.unlistedApiServer],
+                        element: <div style={style}>設定によって無効化されています。</div>,
+                    }
+                );
+                break;
+            }
+            case true: {
+                if (floconUploaderFiles == null) {
+                    result.push(
+                        {
+                            path: [uploaderTypeFolderName.publicApiServer],
+                            element: <div style={style}>読み込み中です…</div>,
+                        },
+                        {
+                            path: [uploaderTypeFolderName.unlistedApiServer],
+                            element: <div style={style}>読み込み中です…</div>,
+                        }
+                    );
                 }
-            );
-        } else if (floconUploaderFiles == null) {
-            result.push(
-                {
-                    path: [uploaderTypeFolderName.publicApiServer],
-                    element: <div style={style}>読み込み中です…</div>,
-                },
-                {
-                    path: [uploaderTypeFolderName.unlistedApiServer],
-                    element: <div style={style}>読み込み中です…</div>,
-                }
-            );
+            }
         }
 
         return result;
@@ -507,7 +539,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
         firebaseStorageFiles.unlisted,
         firebaseUser,
         floconUploaderFiles,
-        isEmbeddedUploaderDisabled,
+        isEmbeddedUploaderEnabled,
     ]);
 
     const jotaiStore = useConstant(() => createStore());

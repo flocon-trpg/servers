@@ -36,12 +36,11 @@ import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import classNames from 'classnames';
 import { produce } from 'immer';
 import {
-    Provider,
     useAtom as useAtomCore,
     useAtomValue as useAtomValueCore,
     useSetAtom as useSetAtomCore,
 } from 'jotai/react';
-import { Atom, PrimitiveAtom, atom, createStore } from 'jotai/vanilla';
+import { Atom, PrimitiveAtom, atom, createStore, getDefaultStore } from 'jotai/vanilla';
 import React from 'react';
 import { useDeepCompareEffect, useLatest } from 'react-use';
 import { VirtuosoGrid } from 'react-virtuoso';
@@ -232,10 +231,8 @@ export type Props = {
     }[];
 };
 
-const defaultJotaiStore = createStore();
-
 const defaultProps: Props = {
-    jotaiStore: defaultJotaiStore,
+    jotaiStore: getDefaultStore(),
     files: [],
     height: null,
     isProtected: () => false,
@@ -2533,12 +2530,9 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
 
 /** 汎用的なファイルブラウザー（ファイルマネージャ）です。 */
 export const FileBrowser: React.FC<Props> = props => {
-    // もしProvider.scopeがない場合、jotaiは最も近いProviderにアクセスするため、useWebConfigなどが常にnullishとなってしまう。それを防ぐため、scopeを用いている。
     return (
         <JotaiStoreContext.Provider value={props.jotaiStore}>
-            <Provider store={props.jotaiStore}>
-                <FileBrowserWithoutJotaiProvider {...props} />
-            </Provider>
+            <FileBrowserWithoutJotaiProvider {...props} />
         </JotaiStoreContext.Provider>
     );
 };
