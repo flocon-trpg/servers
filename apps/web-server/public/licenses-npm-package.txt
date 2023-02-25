@@ -69,7 +69,7 @@ SOFTWARE.
 
 -----
 
-The following software may be included in this product: @babel/code-frame, @babel/helper-module-imports, @babel/helper-plugin-utils, @babel/helper-string-parser, @babel/helper-validator-identifier, @babel/highlight, @babel/runtime, @babel/types. A copy of the source code may be downloaded from https://github.com/babel/babel.git (@babel/code-frame), https://github.com/babel/babel.git (@babel/helper-module-imports), https://github.com/babel/babel.git (@babel/helper-plugin-utils), https://github.com/babel/babel.git (@babel/helper-string-parser), https://github.com/babel/babel.git (@babel/helper-validator-identifier), https://github.com/babel/babel.git (@babel/highlight), https://github.com/babel/babel.git (@babel/runtime), https://github.com/babel/babel.git (@babel/types). This software contains the following license and notice below:
+The following software may be included in this product: @babel/code-frame, @babel/helper-module-imports, @babel/helper-string-parser, @babel/helper-validator-identifier, @babel/highlight, @babel/runtime, @babel/types. A copy of the source code may be downloaded from https://github.com/babel/babel.git (@babel/code-frame), https://github.com/babel/babel.git (@babel/helper-module-imports), https://github.com/babel/babel.git (@babel/helper-string-parser), https://github.com/babel/babel.git (@babel/helper-validator-identifier), https://github.com/babel/babel.git (@babel/highlight), https://github.com/babel/babel.git (@babel/runtime), https://github.com/babel/babel.git (@babel/types). This software contains the following license and notice below:
 
 MIT License
 

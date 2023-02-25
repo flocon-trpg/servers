@@ -36,4 +36,7 @@ export default {
         myParticipantRole: 'Player',
         characterStateId: myRichCharacterId,
     },
+    parameters: {
+        chromatic: { delay: 1000 },
+    },
 } as ComponentMeta<typeof Player>;
