@@ -46,6 +46,9 @@ export default {
     title: 'models/room/Room',
     component: Player,
     args: { myParticipantRole: 'Player' },
+    parameters: {
+        chromatic: { delay: 1000 },
+    },
 } as ComponentMeta<typeof Player>;
 
 const Template: ComponentStory<typeof Player> = args => <Player {...args} />;
