@@ -7,6 +7,29 @@ on:
             - 'v3*.*.*'
 
 jobs:
+    git-diff-main:
+        name: git diff remotes/origin/main
+
+        runs-on: ubuntu-22.04
+
+        steps:
+            - name: List git config
+              run: git config -l
+
+            - uses: actions/checkout@v3
+              with:
+                  fetch-depth: 0
+
+            - name: Fail if not all the files are OK
+              run: |
+                  if [[ -n "$(git diff remotes/origin/main)" ]]; then
+                      echo "ERROR: The project is dirty!"
+                      git diff --stat remotes/origin/main
+                    exit 1
+                  else
+                      echo "OK."
+                  fi
+
     release:
         runs-on: ubuntu-20.04
         steps:

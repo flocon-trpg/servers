@@ -104,6 +104,9 @@ export default {
     title: 'models/room/Room/Board',
     component: Default,
     args: { myParticipantRole: 'Player', boardProps: boardEditorProps, setActiveBoard: false },
+    parameters: {
+        chromatic: { delay: 1000 },
+    },
 } as ComponentMeta<typeof Default>;
 
 const Template: ComponentStory<typeof Default> = args => <Default {...args} />;
