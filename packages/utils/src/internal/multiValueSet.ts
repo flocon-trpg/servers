@@ -1,4 +1,4 @@
-import { map } from './iterable';
+import { mapIterable } from './iterable';
 import { MultiKeyMap } from './multiKeyMap';
 
 /** 複数の値を使用できるSet */
@@ -22,7 +22,7 @@ export class MultiValueSet<T> {
     }
 
     public toIterator(): Iterable<readonly T[]> {
-        return map(this.#core.traverse(), elem => elem.absolutePath);
+        return mapIterable(this.#core.traverse(), elem => elem.absolutePath);
     }
 
     public clone(): MultiValueSet<T> {

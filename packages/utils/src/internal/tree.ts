@@ -1,5 +1,5 @@
 import { Option } from '@kizahasi/option';
-import { map } from './iterable';
+import { mapIterable } from './iterable';
 
 type Node<TKey, TValue> = {
     absolutePath: readonly TKey[];
@@ -122,7 +122,7 @@ export class Tree<TKey, TValue> {
     }
 
     public traverse(): Iterable<{ absolutePath: readonly TKey[]; value: TValue }> {
-        return map(this.#traverseNodes(), elem => ({
+        return mapIterable(this.#traverseNodes(), elem => ({
             absolutePath: elem.absolutePath,
             value: elem.value,
         }));

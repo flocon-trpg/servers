@@ -1,10 +1,10 @@
 'use strict';
 
 var option = require('@kizahasi/option');
-var result = require('@kizahasi/result');
 var defaultPinoTransport = require('@flocon-trpg/default-pino-transport');
 var browserOrNode = require('browser-or-node');
 var pino = require('pino');
+var result = require('@kizahasi/result');
 
 function _interopDefault (e) { return e && e.__esModule ? e : { default: e }; }
 
@@ -419,17 +419,24 @@ const groupJoin4DualKeyMap = (source1, source2, source3, source4) => {
     });
 };
 
-function* map(source, mapping) {
+function* mapIterable(source, mapping) {
     for (const elem of source) {
         yield mapping(elem);
     }
 }
-function* choose(source, mapping) {
+function* chooseIterable(source, mapping) {
     for (const elem of source) {
         const newValue = mapping(elem);
         if (!newValue.isNone) {
             yield newValue.value;
         }
+    }
+}
+function* pairwiseIterable(source) {
+    let prev = undefined;
+    for (const elem of source) {
+        yield { prev, current: elem };
+        prev = elem;
     }
 }
 
@@ -528,7 +535,7 @@ class Tree {
         return main();
     }
     traverse() {
-        return map(this.#traverseNodes(), elem => ({
+        return mapIterable(this.#traverseNodes(), elem => ({
             absolutePath: elem.absolutePath,
             value: elem.value,
         }));
@@ -638,7 +645,7 @@ class DeletableTree {
         subTree.replaceAllValues(() => option.Option.none());
     }
     traverse() {
-        return choose(this.#source.traverse(), elem => {
+        return chooseIterable(this.#source.traverse(), elem => {
             if (elem.value.isNone) {
                 return option.Option.none();
             }
@@ -674,30 +681,44 @@ const filterInt = (value) => {
     }
 };
 
-const parseStringToBooleanError = {
-    ja: `真偽値に変換できませんでした。真として使用できる値は true, 1, yes, on で、偽として使用できる値は false, 0, no, off です。`,
+const groupJoinMap = (left, right) => {
+    const result = new Map();
+    const rightClone = new Map(right);
+    left.forEach((leftElement, key) => {
+        const rightElement = rightClone.get(key);
+        rightClone.delete(key);
+        if (rightElement === undefined) {
+            result.set(key, { type: 'left', left: leftElement });
+            return;
+        }
+        result.set(key, {
+            type: 'both',
+            left: leftElement,
+            right: rightElement,
+        });
+    });
+    rightClone.forEach((rightElement, key) => {
+        result.set(key, { type: 'right', right: rightElement });
+    });
+    return result;
 };
-const parseStringToBooleanCore = (source) => {
-    switch (source.trim().toLowerCase()) {
-        case 'true':
-        case '1':
-        case 'yes':
-        case 'on':
-            return result.Result.ok(true);
-        case 'false':
-        case '0':
-        case 'no':
-        case 'off':
-            return result.Result.ok(false);
-        default:
-            return result.Result.error(parseStringToBooleanError);
-    }
-};
-const parseStringToBoolean = (source) => {
-    if (source == null) {
-        return result.Result.ok(source);
-    }
-    return parseStringToBooleanCore(source);
+
+const groupJoinSet = (left, right) => {
+    const result = new Map();
+    const rightClone = new Set(right);
+    left.forEach(leftElement => {
+        const existsInRight = rightClone.has(leftElement);
+        rightClone.delete(leftElement);
+        if (existsInRight) {
+            result.set(leftElement, 'both');
+            return;
+        }
+        result.set(leftElement, 'left');
+    });
+    rightClone.forEach(rightElement => {
+        result.set(rightElement, 'right');
+    });
+    return result;
 };
 
 const isCompositeKey = (source) => {
@@ -837,7 +858,7 @@ class MultiKeyMap {
         this.replace(key, () => undefined);
     }
     traverse() {
-        return choose(this.#source.traverse(), element => {
+        return chooseIterable(this.#source.traverse(), element => {
             if (element.value.isNone) {
                 return option.Option.none();
             }
@@ -886,7 +907,7 @@ class MultiValueSet {
         return [...this.#core.traverse()].filter(({ value }) => value).length;
     }
     toIterator() {
-        return map(this.#core.traverse(), elem => elem.absolutePath);
+        return mapIterable(this.#core.traverse(), elem => elem.absolutePath);
     }
     clone() {
         const result = new MultiValueSet();
@@ -897,44 +918,30 @@ class MultiValueSet {
 
 const isReadonlyNonEmptyArray = (source) => source.length > 0;
 
-const groupJoinMap = (left, right) => {
-    const result = new Map();
-    const rightClone = new Map(right);
-    left.forEach((leftElement, key) => {
-        const rightElement = rightClone.get(key);
-        rightClone.delete(key);
-        if (rightElement === undefined) {
-            result.set(key, { type: 'left', left: leftElement });
-            return;
-        }
-        result.set(key, {
-            type: 'both',
-            left: leftElement,
-            right: rightElement,
-        });
-    });
-    rightClone.forEach((rightElement, key) => {
-        result.set(key, { type: 'right', right: rightElement });
-    });
-    return result;
+const parseStringToBooleanError = {
+    ja: `真偽値に変換できませんでした。真として使用できる値は true, 1, yes, on で、偽として使用できる値は false, 0, no, off です。`,
 };
-
-const groupJoinSet = (left, right) => {
-    const result = new Map();
-    const rightClone = new Set(right);
-    left.forEach(leftElement => {
-        const existsInRight = rightClone.has(leftElement);
-        rightClone.delete(leftElement);
-        if (existsInRight) {
-            result.set(leftElement, 'both');
-            return;
-        }
-        result.set(leftElement, 'left');
-    });
-    rightClone.forEach(rightElement => {
-        result.set(rightElement, 'right');
-    });
-    return result;
+const parseStringToBooleanCore = (source) => {
+    switch (source.trim().toLowerCase()) {
+        case 'true':
+        case '1':
+        case 'yes':
+        case 'on':
+            return result.Result.ok(true);
+        case 'false':
+        case '0':
+        case 'no':
+        case 'off':
+            return result.Result.ok(false);
+        default:
+            return result.Result.error(parseStringToBooleanError);
+    }
+};
+const parseStringToBoolean = (source) => {
+    if (source == null) {
+        return result.Result.ok(source);
+    }
+    return parseStringToBooleanCore(source);
 };
 
 const parseEnvListValue = (source) => {
@@ -1064,6 +1071,7 @@ exports.arrayEquals = arrayEquals;
 exports.beta = beta;
 exports.both = both;
 exports.chooseDualKeyRecord = chooseDualKeyRecord;
+exports.chooseIterable = chooseIterable;
 exports.chooseRecord = chooseRecord;
 exports.compare = compare;
 exports.compositeKeyEquals = compositeKeyEquals;
@@ -1087,8 +1095,10 @@ exports.keyNames = keyNames;
 exports.left = left;
 exports.loggerRef = loggerRef;
 exports.mapDualKeyRecord = mapDualKeyRecord;
+exports.mapIterable = mapIterable;
 exports.mapRecord = mapRecord;
 exports.mapToRecord = mapToRecord;
+exports.pairwiseIterable = pairwiseIterable;
 exports.parseEnvListValue = parseEnvListValue;
 exports.parsePinoLogLevel = parsePinoLogLevel;
 exports.parseStringToBoolean = parseStringToBoolean;
