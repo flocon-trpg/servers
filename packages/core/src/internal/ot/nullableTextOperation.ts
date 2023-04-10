@@ -1,4 +1,5 @@
-import * as TextOperationCore from '@kizahasi/ot-string';
+import * as TextOperationCore from '@kizahasi/ot-core';
+import { NonEmptyString } from '@kizahasi/ot-string';
 import { Result } from '@kizahasi/result';
 import { z } from 'zod';
 import { replace, update } from './recordOperationElement';
@@ -11,18 +12,18 @@ const firstTypeShouldBeSameAsSecondType = 'first type and second type should be 
 
 const stringOrUndefined = z.union([z.string(), z.undefined()]);
 
-type ApplyError = TextOperationCore.ApplyError<TextOperationCore.PositiveInt>;
+type ApplyError = TextOperationCore.ApplyError<NonEmptyString, TextOperationCore.PositiveInt>;
 type ComposeAndTransformUpError = TextOperationCore.ComposeAndTransformError<
     TextOperationCore.PositiveInt,
-    TextOperationCore.NonEmptyString
+    NonEmptyString
 >;
 type ComposeAndTransformDownError = TextOperationCore.ComposeAndTransformError<
-    TextOperationCore.NonEmptyString,
+    NonEmptyString,
     TextOperationCore.PositiveInt
 >;
 type ComposeAndTransformTwoWayError = TextOperationCore.ComposeAndTransformError<
-    TextOperationCore.NonEmptyString,
-    TextOperationCore.NonEmptyString
+    NonEmptyString,
+    NonEmptyString
 >;
 
 export const downOperation = z.union([

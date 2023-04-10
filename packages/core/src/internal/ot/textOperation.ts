@@ -1,7 +1,6 @@
+import { ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-core';
 import {
-    ComposeAndTransformError,
     NonEmptyString,
-    PositiveInt,
     applyAndRestore,
     applyBackAndRestore,
     applyBack as applyBackCore,
