@@ -85,7 +85,7 @@ export type RecordTwoWayOperationElement<TState, TOperation> =
       };
 
 /**
- * @deprecated Consider using map(Dual)?KeyRecord(Up|Down)?Operation
+ * @deprecated Consider using map(DualKey)?Record(Up|Down)?Operation
  */
 export const mapRecordOperationElement = <TReplace1, TReplace2, TUpdate1, TUpdate2>({
     source,

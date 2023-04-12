@@ -21,6 +21,21 @@ import {
 } from './recordOperationElement';
 import { isValidKey } from './util/isValidKey';
 
+type RecordOperationElement<TReplace, TUpdate> =
+    | {
+          type: typeof update;
+          update: TUpdate;
+      }
+    | {
+          type: typeof replace;
+          replace: TReplace;
+      };
+
+type RecordOperation<TReplace, TUpdate> = Record<
+    string,
+    RecordOperationElement<TReplace, TUpdate> | undefined
+>;
+
 export type RecordDownOperation<TState, TOperation> = Record<
     string,
     RecordDownOperationElement<TState, TOperation> | undefined
@@ -311,25 +326,37 @@ export const applyBack = <TState, TDownOperation, TCustomError = string>({
 };
 
 // stateが必要ないため処理を高速化&簡略化できるが、その代わり戻り値のreplaceにおいて oldValue === undefined && newValue === undefined もしくは oldValue !== undefined && newValue !== undefinedになるケースがある。
-export const composeDownOperation = <TState, TDownOperation, TCustomError = string>({
+export const compose = <TReplace, TUpdate, TError>({
     first,
     second,
-    innerApplyBack,
-    innerCompose,
+    composeReplaceReplace,
+    composeReplaceUpdate,
+    composeUpdateReplace,
+    composeUpdateUpdate,
 }: {
-    first?: RecordDownOperation<TState, TDownOperation>;
-    second?: RecordDownOperation<TState, TDownOperation>;
-    innerApplyBack: (params: {
+    first?: RecordOperation<TReplace, TUpdate>;
+    second?: RecordOperation<TReplace, TUpdate>;
+    composeReplaceReplace: (params: {
+        first: TReplace;
+        second: TReplace;
         key: string;
-        operation: TDownOperation;
-        state: TState;
-    }) => Result<TState, string | TCustomError>;
-    innerCompose: (params: {
+    }) => Result<TReplace | undefined, TError>;
+    composeReplaceUpdate: (params: {
+        first: TReplace;
+        second: TUpdate;
         key: string;
-        first: TDownOperation;
-        second: TDownOperation;
-    }) => Result<TDownOperation | undefined, string | TCustomError>;
-}): Result<RecordDownOperation<TState, TDownOperation> | undefined, string | TCustomError> => {
+    }) => Result<TReplace | undefined, TError>;
+    composeUpdateReplace: (params: {
+        first: TUpdate;
+        second: TReplace;
+        key: string;
+    }) => Result<TReplace | undefined, TError>;
+    composeUpdateUpdate: (params: {
+        first: TUpdate;
+        second: TUpdate;
+        key: string;
+    }) => Result<TUpdate | undefined, TError>;
+}): Result<RecordOperation<TReplace, TUpdate> | undefined, TError> => {
     if (first == null) {
         return Result.ok(second == null || isEmptyRecord(second) ? undefined : second);
     }
@@ -337,7 +364,7 @@ export const composeDownOperation = <TState, TDownOperation, TCustomError = stri
         return Result.ok(first == null || isEmptyRecord(first) ? undefined : first);
     }
 
-    const result = new Map<string, RecordDownOperationElement<TState, TDownOperation>>();
+    const result = new Map<string, RecordOperationElement<TReplace, TUpdate>>();
 
     for (const [key, groupJoined] of groupJoinMap(recordToMap(first), recordToMap(second))) {
         switch (groupJoined.type) {
@@ -378,58 +405,78 @@ export const composeDownOperation = <TState, TDownOperation, TCustomError = stri
                     case 'replace':
                         switch (groupJoined.right.type) {
                             case 'replace': {
-                                const left = groupJoined.left.replace.oldValue;
-                                result.set(key, {
-                                    type: 'replace',
-                                    replace: { oldValue: left },
-                                });
-                                continue;
-                            }
-                            case 'update':
-                                break;
-                        }
-                        result.set(key, {
-                            type: 'replace',
-                            replace: groupJoined.left.replace,
-                        });
-                        continue;
-                    case 'update':
-                        switch (groupJoined.right.type) {
-                            case 'replace': {
-                                if (groupJoined.right.replace.oldValue === undefined) {
-                                    return Result.error(
-                                        `first is update, but second.oldValue is null. the key is "${key}".`
-                                    );
-                                }
-                                const firstOldValue = innerApplyBack({
+                                const composed = composeReplaceReplace({
+                                    first: groupJoined.left.replace,
+                                    second: groupJoined.right.replace,
                                     key,
-                                    operation: groupJoined.left.update,
-                                    state: groupJoined.right.replace.oldValue,
                                 });
-                                if (firstOldValue.isError) {
-                                    return firstOldValue;
+                                if (composed.isError) {
+                                    return composed;
+                                }
+                                if (composed.value === undefined) {
+                                    continue;
                                 }
                                 result.set(key, {
                                     type: 'replace',
-                                    replace: { oldValue: firstOldValue.value },
+                                    replace: composed.value,
                                 });
                                 continue;
                             }
                             case 'update': {
-                                const update = innerCompose({
+                                const composed = composeReplaceUpdate({
+                                    first: groupJoined.left.replace,
+                                    second: groupJoined.right.update,
                                     key,
+                                });
+                                if (composed.isError) {
+                                    return composed;
+                                }
+                                if (composed.value === undefined) {
+                                    continue;
+                                }
+                                result.set(key, {
+                                    type: 'replace',
+                                    replace: composed.value,
+                                });
+                                continue;
+                            }
+                        }
+                        continue;
+                    case 'update':
+                        switch (groupJoined.right.type) {
+                            case 'replace': {
+                                const composed = composeUpdateReplace({
+                                    first: groupJoined.left.update,
+                                    second: groupJoined.right.replace,
+                                    key,
+                                });
+                                if (composed.isError) {
+                                    return composed;
+                                }
+                                if (composed.value === undefined) {
+                                    continue;
+                                }
+                                result.set(key, {
+                                    type: 'replace',
+                                    replace: composed.value,
+                                });
+                                continue;
+                            }
+                            case 'update': {
+                                const composed = composeUpdateUpdate({
                                     first: groupJoined.left.update,
                                     second: groupJoined.right.update,
+                                    key,
                                 });
-                                if (update.isError) {
-                                    return update;
+                                if (composed.isError) {
+                                    return composed;
                                 }
-                                if (update.value === undefined) {
+                                if (composed.value === undefined) {
                                     continue;
                                 }
                                 result.set(key, {
                                     type: 'update',
-                                    update: update.value,
+                                    update: composed.value,
                                 });
                                 continue;
                             }
@@ -439,6 +486,60 @@ export const composeDownOperation = <TState, TDownOperation, TCustomError = stri
         }
     }
     return Result.ok(result.size === 0 ? undefined : mapToRecord(result));
+};
+
+export const composeDownOperation = <TState, TDownOperation, TCustomError = string>({
+    first,
+    second,
+    innerApplyBack,
+    innerCompose,
+}: {
+    first?: RecordDownOperation<TState, TDownOperation>;
+    second?: RecordDownOperation<TState, TDownOperation>;
+    innerApplyBack: (params: {
+        key: string;
+        operation: TDownOperation;
+        state: TState;
+    }) => Result<TState, string | TCustomError>;
+    innerCompose: (params: {
+        key: string;
+        first: TDownOperation;
+        second: TDownOperation;
+    }) => Result<TDownOperation | undefined, string | TCustomError>;
+}): Result<RecordDownOperation<TState, TDownOperation> | undefined, string | TCustomError> => {
+    return compose<{ oldValue?: TState }, TDownOperation, string | TCustomError>({
+        first,
+        second,
+        composeReplaceReplace: params => {
+            return Result.ok(params.first);
+        },
+        composeReplaceUpdate: params => {
+            return Result.ok(params.first);
+        },
+        composeUpdateReplace: params => {
+            if (params.second.oldValue === undefined) {
+                return Result.error(
+                    `first is update, but second.oldValue is null. the key is "${params.key}".`
+                );
+            }
+            const firstOldValue = innerApplyBack({
+                key: params.key,
+                operation: params.first,
+                state: params.second.oldValue,
+            });
+            if (firstOldValue.isError) {
+                return firstOldValue;
+            }
+            return Result.ok({ oldValue: firstOldValue.value });
+        },
+        composeUpdateUpdate: params => {
+            return innerCompose({
+                key: params.key,
+                first: params.first,
+                second: params.second,
+            });
+        },
+    });
 };
 
 type ServerTransformCoreParams<
@@ -617,7 +718,7 @@ const serverTransformWithoutValidation = <
     return Result.ok(result.size === 0 ? undefined : mapToRecord(result));
 };
 
-type ServerTransformParams<
+export type ServerTransformParams<
     TServerState,
     TClientState,
     TFirstOperation,
@@ -937,7 +1038,7 @@ export const mapRecordUpOperation = <TState1, TState2, TOperation1, TOperation2>
 }: {
     source: Record<string, RecordUpOperationElement<TState1, TOperation1> | undefined>;
     mapState: (state: TState1) => TState2;
-    mapOperation: (state: TOperation1) => TOperation2;
+    mapOperation: (operation: TOperation1) => TOperation2;
 }): Record<string, RecordUpOperationElement<TState2, TOperation2>> => {
     return chooseRecord(source, element => {
         if (element.type === replace) {
@@ -965,7 +1066,7 @@ export const mapRecordDownOperation = <TState1, TState2, TOperation1, TOperation
 }: {
     source: Record<string, RecordDownOperationElement<TState1, TOperation1> | undefined>;
     mapState: (state: TState1) => TState2;
-    mapOperation: (state: TOperation1) => TOperation2;
+    mapOperation: (operation: TOperation1) => TOperation2;
 }): Record<string, RecordDownOperationElement<TState2, TOperation2>> => {
     return chooseRecord(source, element => {
         if (element.type === replace) {
