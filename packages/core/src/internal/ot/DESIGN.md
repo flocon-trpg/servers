@@ -1,6 +1,6 @@
 # ot ディレクトリにあるコードについて
 
-Flocon の部屋(Room)を Operational Transformation を用いて編集する機能を提供している。ログを表すオブジェクトを生成する関数も付属している。
+Flocon の部屋(Room)を Operational Transformation を用いて処理する機能を提供している。ログを表すオブジェクトを生成する関数も付属している。
 
 多くの関数は`./generator`のコードで自動的に生成している。ただし、toClientState は閲覧権限、serverTransform は編集権限の処理が行われているため、手動で書く必要がある。
 
@@ -10,7 +10,7 @@ State や Operation の定義を変更した場合、変更した型自身およ
 
 ## functions.ts
 
-クライアントに State を渡すのは文字通り toClientState で行う。クライアントに Operation を渡すには、toClientState(prevState)と toClientState(nextState)を求めてから diff する。かつては toClientOperation を定義しておりそれを用いていたが、activeBoardId（旧 activeBoardKey） が後で追加され、activeBoardId が変わったときにそれに伴う Piece の変更も含めなければならず、さらに Piece を子に持つ Character、DicePieceValue にも変更を反映させなければならず… ということをしなければならなくなり、toClientOperation を使うのはパフォーマンスこそいいもののロジックが複雑化して大変なので diff を取る作戦を採用することにした。ただ、パフォーマンスのために activeBoardId が絡まない部分だけ toClientOperation を用い、残りは diff を用いるという折衷案もありかもしれない。
+クライアントに渡す State を生成するには、toClientState を実行する。クライアントに渡す Operation を生成するには、toClientState(prevState)と toClientState(nextState)を求めてから diff する。かつては toClientOperation を定義しておりそれを用いていたが、activeBoardId（旧 activeBoardKey） が後で追加され、activeBoardId が変わったときにそれに伴う Piece の変更も含めなければならず、さらに Piece を子に持つ Character、DicePieceValue にも変更を反映させなければならず… ということをしなければならなくなり、toClientOperation を使うのはパフォーマンスこそ優れているもののロジックが複雑化して大変なので diff を取る作戦を採用することにした。ただ、パフォーマンスのために activeBoardId が絡まない部分だけ toClientOperation を用い、残りは diff を用いるという折衷案もありかもしれない。
 
 Participant の Role などは、クライアント側による operation では変更できず、サーバーによる operation でしか変更できない仕様にしている。そのため、クライアント側で Role を変更する Operation を作成するべきではない(もしそのような Operation をサーバーに送信しても無視される)。ただし、サーバーから受け取った Operation に Role の変更が含まれていて、その Operation をクライアントの State に apply したり、clientTransform することは頻繁に行われる。
 
@@ -18,9 +18,7 @@ composeDownOperation は、例えば { oldValue: 1, newValue: undefined }, { old
 
 現状の仕様だと、API 側の OT は、「composeDownOperation でまとめる →restore で正常な twoWayOperation にする」という流れになっている。だが、これは「逐次 restore していく →composeTwoWayOperation でまとめる」にするほうが綺麗。パフォーマンスに関しては restore の回数が増えるので state を更新する回数も増えるため、この点でパフォーマンスが悪くなる可能性があるが、operation が肥大でない限り、diff と比べればそこまで重くないと思われる。あわせて composeDownOperation は廃止できる。ただし、書き換えが面倒なのと、newValue の設定をしなくていいというメリットはあるのと、restore による正常化という特殊な工程はすべて recordOperation 系が担っているので、とりあえず現状維持の方針。
 
-## その他
-
-### zod の brand vs serverTransform
+## validation は serverTransform と zod の brand のどちらで行うべきか
 
 名前やメモなどに長過ぎる文字列を設定してストレージ空き容量を枯渇させる攻撃対策として、serverTransform で弾く方法と、zod の brand を使う方法の 2 つを検討した。
 
@@ -33,7 +31,7 @@ composeDownOperation は、例えば { oldValue: 1, newValue: undefined }, { old
 
 後者のメリットは下の通り。
 
--   型と制約が一体化しているため、確実に制約を守らせることができ、ドキュメントとしての役割を果たす。また、io-ts の機能により、値が制約を満たしているかを直接なおかつ確実に検証できる。
+-   型と制約が一体化しているため、確実に制約を守らせることができ、ドキュメントとしての役割を果たす。また、zod の機能により、値が制約を満たしているかを直接なおかつ確実に検証できる。
 
 どちらも一長一短であるため、次のすべてを満たす場合は brand を、そうでない場合は serverTransform を用いる、という方針で使い分けるようにしている。
 
@@ -47,7 +45,7 @@ brand を使う具体例は下のとおり。
 -   正の数
 -   メールアドレス
 
-### コマのログ
+## コマのログ
 
 コマのログを非公開状態にしている状態で値をこっそり変える不正への対策が求められたため、ログ機能を実装した。コマの単なる diff は非公開の値に対して有効に働かないので、ログ専用の型を定義している。
 
