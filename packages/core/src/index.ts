@@ -48,6 +48,8 @@ export {
 
 export { fakeFirebaseConfig1, fakeFirebaseConfig2 } from './internal/fake/fakeFirebaseConfig';
 
+export { $index, arrayToIndexObjects, indexObjectsToArray, IndexObject } from './internal/ot/array';
+
 export {
     Default,
     Uploader,
