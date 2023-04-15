@@ -1,5 +1,6 @@
 import { chooseRecord } from '@flocon-trpg/utils';
 import { z } from 'zod';
+import { maybe } from '../../../../../maybe';
 import {
     State,
     TwoWayOperation,
@@ -20,7 +21,6 @@ import * as PieceBaseTypes from '../../../piece/types';
 import * as DieValue from './dieValue/functions';
 import * as DieValueTypes from './dieValue/types';
 import * as DicePieceValueTypes from './types';
-import { maybe } from '@/maybe';
 
 const dieValueUpOperation = createOperation(1, 1, {
     dieType: z.object({ newValue: DieValueTypes.dieType }),

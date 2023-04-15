@@ -1,6 +1,6 @@
+import { State } from '../../../generator';
+import { StringKeyRecord } from '../../../record';
 import { template } from './types';
-import { State } from '@/ot/generator';
-import { StringKeyRecord } from '@/ot/record';
 /**
  * 現在行われている点呼があればそれを返します。
  *

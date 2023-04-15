@@ -1,6 +1,6 @@
 import { z } from 'zod';
+import { State, TwoWayOperation } from '../../../../generator';
 import * as StringPieceValueTypes from './types';
-import { State, TwoWayOperation } from '@/ot/generator';
 export declare const type: z.ZodUnion<[z.ZodObject<{
     $v: z.ZodLiteral<2>;
     $r: z.ZodLiteral<1>;

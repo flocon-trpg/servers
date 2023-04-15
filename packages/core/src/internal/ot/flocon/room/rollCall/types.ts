@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import { filePathValue } from '../../filePath/types';
-import * as RollCallParticipant from './rollCallParticipant/types';
 import {
     createObjectValueTemplate,
     createRecordValueTemplate,
     createReplaceValueTemplate,
-} from '@/ot/generator';
+} from '../../../generator';
+import { filePathValue } from '../../filePath/types';
+import * as RollCallParticipant from './rollCallParticipant/types';
 
 // # 点呼機能と投票機能(未実装)の違いに関する考察
 //

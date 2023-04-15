@@ -1,7 +1,7 @@
 import { State, TwoWayOperation, UpOperation } from '../../../../generator';
+import { RequestedBy } from '../../../../requestedBy';
 import { ServerTransform } from '../../../../util/type';
 import { template } from './types';
-import { RequestedBy } from '@/ot/requestedBy';
 export declare const toClientState: (source: State<typeof template>) => State<typeof template>;
 export declare const serverTransform: ({ requestedBy, }: {
     requestedBy: RequestedBy;

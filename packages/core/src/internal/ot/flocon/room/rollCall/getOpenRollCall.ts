@@ -1,8 +1,8 @@
 import { recordToArray } from '@flocon-trpg/utils';
 import { maxBy } from 'lodash';
+import { State } from '../../../generator';
+import { StringKeyRecord } from '../../../record';
 import { template } from './types';
-import { State } from '@/ot/generator';
-import { StringKeyRecord } from '@/ot/record';
 
 const getOpenRollCalls = (source: StringKeyRecord<State<typeof template>>) => {
     return recordToArray(source).filter(({ value }) => {

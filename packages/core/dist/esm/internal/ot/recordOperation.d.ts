@@ -1,6 +1,14 @@
 import { Result } from '@kizahasi/result';
 import { StringKeyRecord } from './record';
 import { RecordDownOperationElement, RecordTwoWayOperationElement, RecordUpOperationElement, replace, update } from './recordOperationElement';
+type RecordOperationElement<TReplace, TUpdate> = {
+    type: typeof update;
+    update: TUpdate;
+} | {
+    type: typeof replace;
+    replace: TReplace;
+};
+type RecordOperation<TReplace, TUpdate> = Record<string, RecordOperationElement<TReplace, TUpdate> | undefined>;
 export type RecordDownOperation<TState, TOperation> = Record<string, RecordDownOperationElement<TState, TOperation> | undefined>;
 export type RecordUpOperation<TState, TOperation> = Record<string, RecordUpOperationElement<TState, TOperation> | undefined>;
 export type RecordTwoWayOperation<TState, TOperation> = Record<string, RecordTwoWayOperationElement<TState, TOperation> | undefined>;
@@ -77,6 +85,30 @@ export declare const applyBack: <TState, TDownOperation, TCustomError = string>(
         state: TState;
     }) => Result<TState, string | TCustomError>;
 }) => Result<StringKeyRecord<TState>, string | TCustomError>;
+export declare const compose: <TReplace, TUpdate, TError>({ first, second, composeReplaceReplace, composeReplaceUpdate, composeUpdateReplace, composeUpdateUpdate, }: {
+    first?: RecordOperation<TReplace, TUpdate> | undefined;
+    second?: RecordOperation<TReplace, TUpdate> | undefined;
+    composeReplaceReplace: (params: {
+        first: TReplace;
+        second: TReplace;
+        key: string;
+    }) => Result<TReplace | undefined, TError>;
+    composeReplaceUpdate: (params: {
+        first: TReplace;
+        second: TUpdate;
+        key: string;
+    }) => Result<TReplace | undefined, TError>;
+    composeUpdateReplace: (params: {
+        first: TUpdate;
+        second: TReplace;
+        key: string;
+    }) => Result<TReplace | undefined, TError>;
+    composeUpdateUpdate: (params: {
+        first: TUpdate;
+        second: TUpdate;
+        key: string;
+    }) => Result<TUpdate | undefined, TError>;
+}) => Result<RecordOperation<TReplace, TUpdate> | undefined, TError>;
 export declare const composeDownOperation: <TState, TDownOperation, TCustomError = string>({ first, second, innerApplyBack, innerCompose, }: {
     first?: RecordDownOperation<TState, TDownOperation> | undefined;
     second?: RecordDownOperation<TState, TDownOperation> | undefined;
@@ -103,7 +135,7 @@ type ServerTransformCoreParams<TServerState, TClientState, TFirstOperation, TSec
     }) => Result<TFirstOperation | undefined, string | TCustomError>;
     cancellationPolicy: CancellationPolicy<string, TServerState>;
 };
-type ServerTransformParams<TServerState, TClientState, TFirstOperation, TSecondOperation, TCustomError> = ServerTransformCoreParams<TServerState, TClientState, TFirstOperation, TSecondOperation, TCustomError> & {
+export type ServerTransformParams<TServerState, TClientState, TFirstOperation, TSecondOperation, TCustomError> = ServerTransformCoreParams<TServerState, TClientState, TFirstOperation, TSecondOperation, TCustomError> & {
     /** 制限を設けることができます。指定した制限を満たさない場合は Result.error が返されます。 */
     validation?: {
         /** このRecordの名前です。エラーメッセージを生成する際に用いられます。 */
@@ -146,12 +178,12 @@ export declare const diff: <TState, TOperation>({ prevState, nextState, innerDif
 export declare const mapRecordUpOperation: <TState1, TState2, TOperation1, TOperation2>({ source, mapState, mapOperation, }: {
     source: Record<string, RecordUpOperationElement<TState1, TOperation1> | undefined>;
     mapState: (state: TState1) => TState2;
-    mapOperation: (state: TOperation1) => TOperation2;
+    mapOperation: (operation: TOperation1) => TOperation2;
 }) => Record<string, RecordUpOperationElement<TState2, TOperation2>>;
 export declare const mapRecordDownOperation: <TState1, TState2, TOperation1, TOperation2>({ source, mapState, mapOperation, }: {
     source: Record<string, RecordDownOperationElement<TState1, TOperation1> | undefined>;
     mapState: (state: TState1) => TState2;
-    mapOperation: (state: TOperation1) => TOperation2;
+    mapOperation: (operation: TOperation1) => TOperation2;
 }) => Record<string, RecordDownOperationElement<TState2, TOperation2>>;
 export declare const mapRecordOperation: <TReplace1, TReplace2, TUpdate1, TUpdate2>({ source, mapReplace, mapUpdate, }: {
     source: Record<string, {

@@ -1,12 +1,12 @@
 import { z } from 'zod';
-import * as Piece from '../../../piece/types';
-import * as DieValueTypes from './dieValue/types';
-import { maybe } from '@/maybe';
+import { maybe } from '../../../../../maybe';
 import {
     createObjectValueTemplate,
     createRecordValueTemplate,
     createReplaceValueTemplate,
-} from '@/ot/generator';
+} from '../../../../generator';
+import * as Piece from '../../../piece/types';
+import * as DieValueTypes from './dieValue/types';
 
 export const dicePieceStrIndexes = ['1', '2', '3', '4'] as const;
 

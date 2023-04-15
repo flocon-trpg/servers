@@ -69,7 +69,7 @@ export declare const template: {
             readonly mode: "replace";
             readonly value: z.ZodOptional<z.ZodString>;
         };
-        dicePieces: import("@/ot/generator").RecordValueTemplate<{
+        dicePieces: import("../../../generator").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 2;
             readonly $r: 1;
@@ -79,7 +79,7 @@ export declare const template: {
                     readonly mode: "replace";
                     readonly value: z.ZodOptional<z.ZodString>;
                 };
-                dice: import("@/ot/generator").RecordValueTemplate<{
+                dice: import("../../../generator").RecordValueTemplate<{
                     readonly type: "object";
                     readonly $v: 1;
                     readonly $r: 1;
@@ -168,7 +168,7 @@ export declare const template: {
                 };
             };
         }>;
-        imagePieces: import("@/ot/generator").RecordValueTemplate<{
+        imagePieces: import("../../../generator").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 2;
             readonly $r: 1;
@@ -270,7 +270,7 @@ export declare const template: {
                 };
             };
         }>;
-        shapePieces: import("@/ot/generator").RecordValueTemplate<{
+        shapePieces: import("../../../generator").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 1;
             readonly $r: 1;
@@ -285,7 +285,7 @@ export declare const template: {
                     readonly mode: "replace";
                     readonly value: z.ZodBoolean;
                 };
-                shapes: import("@/ot/generator").RecordValueTemplate<{
+                shapes: import("../../../generator").RecordValueTemplate<{
                     readonly type: "object";
                     readonly $v: 1;
                     readonly $r: 1;
@@ -388,7 +388,7 @@ export declare const template: {
                 };
             };
         }>;
-        stringPieces: import("@/ot/generator").RecordValueTemplate<{
+        stringPieces: import("../../../generator").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 2;
             readonly $r: 1;

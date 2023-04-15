@@ -1,8 +1,5 @@
 import { z } from 'zod';
-import { createType, deleteType, updateType } from '../../../piece/log';
-import * as PieceBaseTypes from '../../../piece/types';
-import * as StringPieceValueTypes from './types';
-import { maybe } from '@/maybe';
+import { maybe } from '../../../../../maybe';
 import {
     State,
     TwoWayOperation,
@@ -10,7 +7,10 @@ import {
     state,
     toUpOperation,
     upOperation,
-} from '@/ot/generator';
+} from '../../../../generator';
+import { createType, deleteType, updateType } from '../../../piece/log';
+import * as PieceBaseTypes from '../../../piece/types';
+import * as StringPieceValueTypes from './types';
 
 const update = z
     .object({

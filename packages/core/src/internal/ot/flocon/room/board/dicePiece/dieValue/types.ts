@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { maybe } from '@/maybe';
-import { createObjectValueTemplate, createReplaceValueTemplate } from '@/ot/generator';
+import { maybe } from '../../../../../../maybe';
+import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../../../generator';
 
 // 今の所D6しか対応していない。D4は将来のために予約されている。
 export const D4 = 'D4';

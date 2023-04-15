@@ -46,7 +46,7 @@ export declare const template: {
          *
          * この Record に存在しない `Player` や `Master` も点呼に参加できます。
          */
-        participants: import("@/ot/generator").RecordValueTemplate<{
+        participants: import("../../../generator").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 1;
             readonly $r: 1;

@@ -1482,7 +1482,7 @@ const applyBack$2 = ({ nextState: unsafeNextState, operation, innerApplyBack, de
     return Result.ok(mapToRecord(prevState));
 };
 // UpOperation、DownOperation、TwoWayOperation のいずれにも使用可能なので、composeDownOperationではなくcomposeという汎用的な名前を付けている。
-const compose = ({ first, second, innerCompose, }) => {
+const compose$1 = ({ first, second, innerCompose, }) => {
     if (first == null) {
         return Result.ok(second == null || isEmptyRecord(second) ? undefined : second);
     }
@@ -1797,7 +1797,7 @@ const applyBack$1 = ({ nextState, operation, innerApplyBack, }) => {
     return Result.ok(mapToRecord(prevState));
 };
 // stateが必要ないため処理を高速化&簡略化できるが、その代わり戻り値のreplaceにおいて oldValue === undefined && newValue === undefined もしくは oldValue !== undefined && newValue !== undefinedになるケースがある。
-const composeDownOperation$1 = ({ first, second, innerApplyBack, innerCompose, }) => {
+const compose = ({ first, second, composeReplaceReplace, composeReplaceUpdate, composeUpdateReplace, composeUpdateUpdate, }) => {
     if (first == null) {
         return Result.ok(second == null || isEmptyRecord(second) ? undefined : second);
     }
@@ -1844,54 +1844,78 @@ const composeDownOperation$1 = ({ first, second, innerApplyBack, innerCompose, }
                     case 'replace':
                         switch (groupJoined.right.type) {
                             case 'replace': {
-                                const left = groupJoined.left.replace.oldValue;
-                                result.set(key, {
-                                    type: 'replace',
-                                    replace: { oldValue: left },
-                                });
-                                continue;
-                            }
-                        }
-                        result.set(key, {
-                            type: 'replace',
-                            replace: groupJoined.left.replace,
-                        });
-                        continue;
-                    case 'update':
-                        switch (groupJoined.right.type) {
-                            case 'replace': {
-                                if (groupJoined.right.replace.oldValue === undefined) {
-                                    return Result.error(`first is update, but second.oldValue is null. the key is "${key}".`);
-                                }
-                                const firstOldValue = innerApplyBack({
+                                const composed = composeReplaceReplace({
+                                    first: groupJoined.left.replace,
+                                    second: groupJoined.right.replace,
                                     key,
-                                    operation: groupJoined.left.update,
-                                    state: groupJoined.right.replace.oldValue,
                                 });
-                                if (firstOldValue.isError) {
-                                    return firstOldValue;
+                                if (composed.isError) {
+                                    return composed;
+                                }
+                                if (composed.value === undefined) {
+                                    continue;
                                 }
                                 result.set(key, {
                                     type: 'replace',
-                                    replace: { oldValue: firstOldValue.value },
+                                    replace: composed.value,
                                 });
                                 continue;
                             }
                             case 'update': {
-                                const update = innerCompose({
+                                const composed = composeReplaceUpdate({
+                                    first: groupJoined.left.replace,
+                                    second: groupJoined.right.update,
                                     key,
+                                });
+                                if (composed.isError) {
+                                    return composed;
+                                }
+                                if (composed.value === undefined) {
+                                    continue;
+                                }
+                                result.set(key, {
+                                    type: 'replace',
+                                    replace: composed.value,
+                                });
+                                continue;
+                            }
+                        }
+                        continue;
+                    case 'update':
+                        switch (groupJoined.right.type) {
+                            case 'replace': {
+                                const composed = composeUpdateReplace({
+                                    first: groupJoined.left.update,
+                                    second: groupJoined.right.replace,
+                                    key,
+                                });
+                                if (composed.isError) {
+                                    return composed;
+                                }
+                                if (composed.value === undefined) {
+                                    continue;
+                                }
+                                result.set(key, {
+                                    type: 'replace',
+                                    replace: composed.value,
+                                });
+                                continue;
+                            }
+                            case 'update': {
+                                const composed = composeUpdateUpdate({
                                     first: groupJoined.left.update,
                                     second: groupJoined.right.update,
+                                    key,
                                 });
-                                if (update.isError) {
-                                    return update;
+                                if (composed.isError) {
+                                    return composed;
                                 }
-                                if (update.value === undefined) {
+                                if (composed.value === undefined) {
                                     continue;
                                 }
                                 result.set(key, {
                                     type: 'update',
-                                    update: update.value,
+                                    update: composed.value,
                                 });
                                 continue;
                             }
@@ -1901,6 +1925,39 @@ const composeDownOperation$1 = ({ first, second, innerApplyBack, innerCompose, }
         }
     }
     return Result.ok(result.size === 0 ? undefined : mapToRecord(result));
+};
+const composeDownOperation$1 = ({ first, second, innerApplyBack, innerCompose, }) => {
+    return compose({
+        first,
+        second,
+        composeReplaceReplace: params => {
+            return Result.ok(params.first);
+        },
+        composeReplaceUpdate: params => {
+            return Result.ok(params.first);
+        },
+        composeUpdateReplace: params => {
+            if (params.second.oldValue === undefined) {
+                return Result.error(`first is update, but second.oldValue is null. the key is "${params.key}".`);
+            }
+            const firstOldValue = innerApplyBack({
+                key: params.key,
+                operation: params.first,
+                state: params.second.oldValue,
+            });
+            if (firstOldValue.isError) {
+                return firstOldValue;
+            }
+            return Result.ok({ oldValue: firstOldValue.value });
+        },
+        composeUpdateUpdate: params => {
+            return innerCompose({
+                key: params.key,
+                first: params.first,
+                second: params.second,
+            });
+        },
+    });
 };
 /** Make sure `apply(stateBeforeFirst, first) = stateAfterFirst` */
 const serverTransformWithoutValidation = ({ first, second, stateBeforeFirst, stateAfterFirst, innerTransform, toServerState, cancellationPolicy, }) => {
@@ -2611,7 +2668,7 @@ const composeDownOperation = (template) => ({ first, second }) => {
             });
         }
         case paramRecord: {
-            return compose({
+            return compose$1({
                 first,
                 second,
                 innerCompose: ({ first, second }) => composeDownOperation(template.value)({ first, second }),
@@ -5470,14 +5527,15 @@ const toClientState = (requestedBy) => (source) => {
 };
 /**
  * クライアントによる変更の要求を表すOperationを受け取り、APIサーバーのStateに対してapplyできる状態のOperationに変換して返す。変換処理では、主に次の2つが行われる。
- * - クライアントから受け取ったOperationのうち、不正なもの（例: そのユーザーが本来削除できないはずのキャラクターを削除しようとする）を取り除く
+ * - クライアントから受け取ったOperationのうち、不正なもの（例: そのユーザーが本来削除できないはずのキャラクターを削除しようとする）があった場合に、取り除くか拒否してエラーを返す
  * - 編集競合が発生している場合は解決する
  *
  * @param requestedBy 変更を要求したユーザーの種類。権限を確認するために用いられる。
- * @param prevState クライアントが推測する最新のState。
- * @param currentState APIサーバーにおける実際の最新のState。
- * @param serverOperation `prevState`と`currentState`のDiff。`prevState`と`currentState`が等しい場合はundefined。
+ * @param stateBeforeServerOperation クライアントがStateを変更しようとしたときに用いられたState。
+ * @param stateAfterServerOperation APIサーバーにおける実際の最新のState。
+ * @param serverOperation `stateBeforeServerOperation`と`stateAfterServerOperation`のDiff。`stateBeforeServerOperation`と`stateAfterServerOperation`が等しい場合はundefined。
  * @param clientOperation クライアントが要求している変更。
+ * @returns `stateAfterServerOperation`に対してapplyできる状態のOperation。
  */
 const serverTransform = (requestedBy) => ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
     switch (requestedBy.type) {

@@ -1,12 +1,13 @@
-import * as TextOperationCore from '@kizahasi/ot-string';
+import * as TextOperationCore from '@kizahasi/ot-core';
+import { NonEmptyString } from '@kizahasi/ot-string';
 import { Result } from '@kizahasi/result';
 import { z } from 'zod';
 import { replace, update } from './recordOperationElement';
 import * as TextOperation from './textOperation';
-type ApplyError = TextOperationCore.ApplyError<TextOperationCore.PositiveInt>;
-type ComposeAndTransformUpError = TextOperationCore.ComposeAndTransformError<TextOperationCore.PositiveInt, TextOperationCore.NonEmptyString>;
-type ComposeAndTransformDownError = TextOperationCore.ComposeAndTransformError<TextOperationCore.NonEmptyString, TextOperationCore.PositiveInt>;
-type ComposeAndTransformTwoWayError = TextOperationCore.ComposeAndTransformError<TextOperationCore.NonEmptyString, TextOperationCore.NonEmptyString>;
+type ApplyError = TextOperationCore.ApplyError<NonEmptyString, TextOperationCore.PositiveInt>;
+type ComposeAndTransformUpError = TextOperationCore.ComposeAndTransformError<TextOperationCore.PositiveInt, NonEmptyString>;
+type ComposeAndTransformDownError = TextOperationCore.ComposeAndTransformError<NonEmptyString, TextOperationCore.PositiveInt>;
+type ComposeAndTransformTwoWayError = TextOperationCore.ComposeAndTransformError<NonEmptyString, NonEmptyString>;
 export declare const downOperation: z.ZodUnion<[z.ZodObject<{
     type: z.ZodLiteral<"replace">;
     replace: z.ZodObject<{
@@ -172,8 +173,8 @@ export type TwoWayOperation = {
 };
 export declare const toUpOperation: (source: TwoWayOperation) => UpOperation;
 export declare const toDownOperation: (source: TwoWayOperation) => DownOperation;
-export declare const apply: (state: string | undefined, action: UpOperation | TwoWayOperation) => import("@kizahasi/result").Error<string> | import("@kizahasi/result").Error<TextOperationCore.ApplyError<TextOperationCore.PositiveInt>> | import("@kizahasi/result").Ok<string | undefined>;
-export declare const applyBack: (state: string | undefined, action: DownOperation) => import("@kizahasi/result").Error<string> | import("@kizahasi/result").Error<TextOperationCore.ApplyError<TextOperationCore.PositiveInt>> | import("@kizahasi/result").Ok<string | undefined>;
+export declare const apply: (state: string | undefined, action: UpOperation | TwoWayOperation) => import("@kizahasi/result").Error<string> | import("@kizahasi/result").Error<TextOperationCore.ApplyError<NonEmptyString, TextOperationCore.PositiveInt>> | import("@kizahasi/result").Ok<string | undefined>;
+export declare const applyBack: (state: string | undefined, action: DownOperation) => import("@kizahasi/result").Error<string> | import("@kizahasi/result").Error<TextOperationCore.ApplyError<NonEmptyString, TextOperationCore.PositiveInt>> | import("@kizahasi/result").Ok<string | undefined>;
 export declare const composeDownOperation: (first: DownOperation | undefined, second: DownOperation | undefined) => Result<DownOperation | undefined, string | ApplyError | ComposeAndTransformUpError>;
 export declare const diff: ({ prev, next, }: {
     prev: string | undefined;

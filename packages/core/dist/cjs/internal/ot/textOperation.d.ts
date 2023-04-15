@@ -1,4 +1,5 @@
-import { ComposeAndTransformError, NonEmptyString, PositiveInt } from '@kizahasi/ot-string';
+import { ComposeAndTransformError, PositiveInt } from '@kizahasi/ot-core';
+import { NonEmptyString } from '@kizahasi/ot-string';
 import { Result } from '@kizahasi/result';
 import { z } from 'zod';
 declare const r = "r";
@@ -72,7 +73,7 @@ export type TwoWayOperation = ({
     t: typeof d;
     d: string;
 })[];
-export declare const apply: (state: string, action: UpOperation | TwoWayOperation) => Result<string, import("@kizahasi/ot-string").ApplyError<PositiveInt>>;
+export declare const apply: (state: string, action: UpOperation | TwoWayOperation) => Result<string, import("@kizahasi/ot-core").ApplyError<NonEmptyString, PositiveInt>>;
 export declare const applyBack: (state: string, action: ({
     t: "r";
     r: number;
@@ -82,13 +83,13 @@ export declare const applyBack: (state: string, action: ({
 } | {
     t: "d";
     d: string;
-})[]) => Result<string, import("@kizahasi/ot-string").ApplyError<PositiveInt>>;
+})[]) => Result<string, import("@kizahasi/ot-core").ApplyError<NonEmptyString, PositiveInt>>;
 export declare const composeUpOperation: (first: UpOperation | undefined, second: UpOperation | undefined) => Result<UpOperation | undefined, ComposeAndTransformError<NonEmptyString, PositiveInt>>;
 export declare const composeDownOperation: (first: DownOperation | undefined, second: DownOperation | undefined) => Result<DownOperation | undefined, ComposeAndTransformError<PositiveInt, NonEmptyString>>;
 export declare const restore: ({ nextState, downOperation, }: {
     nextState: string;
     downOperation: DownOperation | undefined;
-}) => import("@kizahasi/result").Error<import("@kizahasi/ot-string").ApplyError<PositiveInt>> | import("@kizahasi/result").Ok<{
+}) => import("@kizahasi/result").Error<import("@kizahasi/ot-core").ApplyError<NonEmptyString, PositiveInt>> | import("@kizahasi/result").Ok<{
     prevState: string;
     twoWayOperation: undefined;
 }> | import("@kizahasi/result").Ok<{
@@ -108,7 +109,7 @@ export declare const serverTransform: ({ first, second, prevState, }: {
         d: number;
     })[] | undefined;
     prevState: string;
-}) => import("@kizahasi/result").Error<import("@kizahasi/ot-string").ApplyError<PositiveInt>> | import("@kizahasi/result").Error<ComposeAndTransformError<NonEmptyString, NonEmptyString>> | import("@kizahasi/result").Ok<import("@kizahasi/ot-string").TwoWayOperationUnit[] | undefined>;
+}) => import("@kizahasi/result").Error<import("@kizahasi/ot-core").ApplyError<NonEmptyString, PositiveInt>> | import("@kizahasi/result").Error<ComposeAndTransformError<NonEmptyString, NonEmptyString>> | import("@kizahasi/result").Ok<import("@kizahasi/ot-string").TwoWayOperationUnit[] | undefined>;
 export declare const clientTransform: ({ first, second, }: {
     first?: ({
         t: "r";

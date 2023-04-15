@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createObjectValueTemplate, createReplaceValueTemplate } from '@/ot/generator';
+import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../../generator';
 
 export const template = createObjectValueTemplate(
     {
