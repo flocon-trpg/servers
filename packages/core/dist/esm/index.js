@@ -3,9 +3,11 @@ import { Result } from '@kizahasi/result';
 import { LocalDate, LocalDateTime, LocalTime, OffsetDateTime, parse as parse$2 } from '@ltd/j-toml';
 import { FObject, FBoolean, ScriptError, beginCast, FFunction, FRecord, FString, FType, FNumber, FRecordRef, test, arrayClass, createConsoleClass, exec } from '@flocon-trpg/flocon-script';
 import { recordToArray, recordToMap, mapToRecord, groupJoinMap, both, right, left, recordForEach, chooseRecord, mapRecord, loggerRef, keyNames } from '@flocon-trpg/utils';
-import { cloneDeep, maxBy } from 'lodash';
+import { cloneDeep, groupBy, maxBy } from 'lodash';
 import { deserializeUpOperation, apply as apply$5, serializeTwoWayOperation, diff as diff$5, deserizalizeTwoWayOperation, toUpOperation as toUpOperation$3, serializeUpOperation, deserializeDownOperation, applyBack as applyBack$5, composeDownOperation as composeDownOperation$4, serializeDownOperation, applyBackAndRestore, transformUpOperation, toDownOperation as toDownOperation$3, applyAndRestore, transformTwoWayOperation } from '@kizahasi/ot-string';
 import truncate from 'truncate-utf8-bytes';
+import produce from 'immer';
+import '@kizahasi/ot-core';
 
 const anonymous = 'anonymous';
 const authToken = 'authToken';
@@ -3822,6 +3824,70 @@ const createFakeFirebaseConfig2 = () => {
 };
 const fakeFirebaseConfig2 = createFakeFirebaseConfig2();
 
+// サーバーとクライアントで書き換え可能だが特殊な値であるため、他のプロパティとの衝突を避ける目的で文字列の頭に $ を頭に付けている。
+const $index = '$index';
+/**
+ * Record を 配列とみなすときに、その要素として必要な値が入った template を作成する際に用いる値。
+ *
+ * @example
+ * ```
+ * const linkedListTemplate = createRecordValueTemplate(
+ *     createObjectValueTemplate(
+ *         {
+ *             ...indexObjectTemplateValue,
+ *
+ *             // add more properies...
+ *         },
+ *         1,
+ *         1
+ *     )
+ * );
+ * ```
+ */
+/*
+配列の表現方法には { $key: string, ...otherProperties }[] と Record<string, { $index: number; ...otherProperties }> の2種類が考えられたが、後者を採用している。
+前者はデータをエクスポートした際にテキストエディタで比較的編集しやすいというメリットがある。ただし、replace と update の2種類だけでは、要素が移動した際に要素を丸ごと delete と insert する必要があるため Operation の容量がかさばるという問題点がある。move のような Operation も定義すれば解決すると思われるが、手間がかかる。いっぽう、後者の方法だと $index を変更するだけで済むため容量がかさばる問題は存在せず、既存の Record の Operational Transformation のシステムに乗っかれるというメリットがある。よって単純化を重視して後者を採用した。
+*/
+({
+    /**
+     * 自身の要素のインデックス。一般的な配列と同様に、0 から始まります。
+     *
+     * インデックスが他の要素と重複してはなりません。また、0 から順に連続的に割り当てる必要があります。
+     */
+    [$index]: createReplaceValueTemplate(z.number().nonnegative().int()),
+});
+const indexObjectsToArray = (linkedList) => {
+    const groupBy$index = recordToMap(groupBy(recordToArray(linkedList), ({ value }) => value[$index].toString()));
+    const result = [];
+    for (let i = 0; groupBy$index.size >= 1; i++) {
+        const groupValue = groupBy$index.get(i.toString());
+        groupBy$index.delete(i.toString());
+        if (groupValue == null || groupValue.length !== 1) {
+            return Result.error(`Just one element where index is ${i} should exist, but there are ${groupValue?.length ?? 0} elements.`);
+        }
+        const element = groupValue[0];
+        result.push(element);
+    }
+    return Result.ok(result);
+};
+/**
+ * 配列を Record に変換します。
+ *
+ * 引数に渡された `$index` は誤っていてもエラーにはならず、自動的かつ非破壊的に調整されます。
+ */
+const arrayToIndexObjects = (array) => {
+    const result = {};
+    array.forEach((element, index) => {
+        if (result[element.key] !== undefined) {
+            throw new Error(`"${element.key}" key is duplicated.`);
+        }
+        result[element.key] = produce(element.value, value => {
+            value[$index] = index;
+        });
+    });
+    return result;
+};
+
 /** 全てのStateに完全にアクセスできる。*/
 const admin = 'admin';
 /* userUidに基づき、一部のStateへのアクセスを制限する。*/
@@ -6359,5 +6425,5 @@ const createLogs = ({ prevState, nextState, }) => {
     };
 };
 
-export { $free, $r, $system, $v, Default, FirebaseStorage, Markdown, Master, Number, OtError, Plain, Player, PublicChannelKey, Spectator, String, Uploader, admin, analyze, anonymous, apply, applyBack, apply$3 as applyNullableText, apply$4 as applyText, atomic, authToken, template$a as bgmTemplate, template$m as boardPositionTemplate, template$5 as boardTemplate, template$i as boolParamTemplate, template$h as characterPieceTemplate, template$c as characterTemplate, client, clientTransform, template$g as commandTemplate, composeDownOperation, createLogs, createObjectValueTemplate, createTextValueTemplate as createOtValueTemplate, createParamRecordValueTemplate, createRecordValueTemplate, createReplaceValueTemplate, createType, decodeDbState, decode$1 as decodeDicePiece, decodeDownOperation, decode as decodeStringPiece, deleteType, type$1 as dicePieceLog, dicePieceStrIndexes, template$j as dicePieceTemplate, template$k as dieValueTemplate, diff, downOperation, exactDbState, exactDownOperation, execCharacterCommand, expr1, fakeFirebaseConfig1, fakeFirebaseConfig2, filePathTemplate, firebaseConfig, forceMaxLength100String, generateChatPalette, getOpenRollCall, getVariableFromVarTomlObject, template$9 as imagePieceTemplate, isBoardOwner, isCharacterOwner, isIdRecord, isOpenRollCall, isOwner, isStrIndex10, isStrIndex100, isStrIndex20, isStrIndex5, isValidVarToml, joinPath, maxLength100String, maybe, template$4 as memoTemplate, diff$3 as nullableTextDiff, template$f as numParamTemplate, object, ot, template$3 as paramNameTemplate, paramRecord, parse$1 as parseDicePiece, parseState, parse as parseStringPiece, parseToml, parseUpOperation, template$b as participantTemplate, path, template$l as pieceTemplate, plain, template$e as portraitPieceTemplate, record, replace$1 as replace, restore, restrict, dbTemplate as roomDbTemplate, template as roomTemplate, sanitizeFilename, sanitizeFoldername, serverTransform, shape, template$7 as shapePieceTemplate, template$8 as shapeTemplate, simpleId, state, strIndex100Array, strIndex10Array, strIndex20Array, strIndex5Array, template$d as strParamTemplate, type as stringPieceLog, template$6 as stringPieceTemplate, stringifyState, stringifyUpOperation, testCommand, diff$4 as textDiff, toClientState, toDownOperation, toUpOperation$1 as toNullableTextUpOperation, toOtError, toUpOperation$2 as toTextUpOperation, toUpOperation, trySanitizePath, upOperation, update$2 as update, updateType };
+export { $free, $index, $r, $system, $v, Default, FirebaseStorage, Markdown, Master, Number, OtError, Plain, Player, PublicChannelKey, Spectator, String, Uploader, admin, analyze, anonymous, apply, applyBack, apply$3 as applyNullableText, apply$4 as applyText, arrayToIndexObjects, atomic, authToken, template$a as bgmTemplate, template$m as boardPositionTemplate, template$5 as boardTemplate, template$i as boolParamTemplate, template$h as characterPieceTemplate, template$c as characterTemplate, client, clientTransform, template$g as commandTemplate, composeDownOperation, createLogs, createObjectValueTemplate, createTextValueTemplate as createOtValueTemplate, createParamRecordValueTemplate, createRecordValueTemplate, createReplaceValueTemplate, createType, decodeDbState, decode$1 as decodeDicePiece, decodeDownOperation, decode as decodeStringPiece, deleteType, type$1 as dicePieceLog, dicePieceStrIndexes, template$j as dicePieceTemplate, template$k as dieValueTemplate, diff, downOperation, exactDbState, exactDownOperation, execCharacterCommand, expr1, fakeFirebaseConfig1, fakeFirebaseConfig2, filePathTemplate, firebaseConfig, forceMaxLength100String, generateChatPalette, getOpenRollCall, getVariableFromVarTomlObject, template$9 as imagePieceTemplate, indexObjectsToArray, isBoardOwner, isCharacterOwner, isIdRecord, isOpenRollCall, isOwner, isStrIndex10, isStrIndex100, isStrIndex20, isStrIndex5, isValidVarToml, joinPath, maxLength100String, maybe, template$4 as memoTemplate, diff$3 as nullableTextDiff, template$f as numParamTemplate, object, ot, template$3 as paramNameTemplate, paramRecord, parse$1 as parseDicePiece, parseState, parse as parseStringPiece, parseToml, parseUpOperation, template$b as participantTemplate, path, template$l as pieceTemplate, plain, template$e as portraitPieceTemplate, record, replace$1 as replace, restore, restrict, dbTemplate as roomDbTemplate, template as roomTemplate, sanitizeFilename, sanitizeFoldername, serverTransform, shape, template$7 as shapePieceTemplate, template$8 as shapeTemplate, simpleId, state, strIndex100Array, strIndex10Array, strIndex20Array, strIndex5Array, template$d as strParamTemplate, type as stringPieceLog, template$6 as stringPieceTemplate, stringifyState, stringifyUpOperation, testCommand, diff$4 as textDiff, toClientState, toDownOperation, toUpOperation$1 as toNullableTextUpOperation, toOtError, toUpOperation$2 as toTextUpOperation, toUpOperation, trySanitizePath, upOperation, update$2 as update, updateType };
 //# sourceMappingURL=index.js.map

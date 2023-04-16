@@ -11,6 +11,7 @@ export { testCommand, execCharacterCommand } from './internal/command/main';
 export { Expression, plain, expr1, analyze } from './internal/expression';
 export { sanitizeFilename, sanitizeFoldername, trySanitizePath, joinPath, UploaderPathSource, } from './internal/uploaderPath';
 export { fakeFirebaseConfig1, fakeFirebaseConfig2 } from './internal/fake/fakeFirebaseConfig';
+export { $index, arrayToIndexObjects, indexObjectsToArray, IndexObject } from './internal/ot/array';
 export { Default, Uploader, FirebaseStorage, filePathTemplate, } from './internal/ot/flocon/filePath/types';
 export { $v, $r, atomic, ot, record, paramRecord, object, state, State, upOperation, UpOperation, downOperation, DownOperation, TwoWayOperation, toDownOperation, toUpOperation, apply, applyBack, composeDownOperation, restore, diff, clientTransform, createObjectValueTemplate, createTextValueTemplate as createOtValueTemplate, createParamRecordValueTemplate, createRecordValueTemplate, createReplaceValueTemplate, } from './internal/ot/generator';
 export { OmitVersion } from './internal/ot/generator/omitVersion';

@@ -34,7 +34,7 @@ export declare const indexObjectTemplateValue: {
         readonly value: z.ZodNumber;
     };
 };
-declare const arrayTemplate: {
+declare const indexObjectTemplate: {
     readonly type: "object";
     readonly $v: 1;
     readonly $r: 1;
@@ -51,21 +51,31 @@ declare const arrayTemplate: {
         };
     };
 };
-type ArrayElementState = OmitVersion<State<typeof arrayTemplate>>;
-export type ArrayElement = ArrayElementState;
-type ArrayElementUpOperation = OmitVersion<UpOperation<typeof arrayTemplate>>;
-type ArrayElementTwoWayOperation = OmitVersion<TwoWayOperation<typeof arrayTemplate>>;
+type IndexObjectState = OmitVersion<State<typeof indexObjectTemplate>>;
+export type IndexObject = IndexObjectState;
+type IndexObjectUpOperation = OmitVersion<UpOperation<typeof indexObjectTemplate>>;
+type IndexObjectTwoWayOperation = OmitVersion<TwoWayOperation<typeof indexObjectTemplate>>;
 type OtArray<T> = {
     key: string;
     value: T;
 }[];
-export declare const indexObjectsToArray: <T extends ArrayElementState>(linkedList: Record<string, T | undefined>) => Result<OtArray<T>, string>;
+type ReadonlyOtArray<T> = Readonly<OtArray<T>>;
+export declare const indexObjectsToArray: <T extends IndexObjectState>(linkedList: Record<string, T | undefined>) => Result<OtArray<T>, string>;
+/**
+ * 配列を Record に変換します。
+ *
+ * 引数に渡された `$index` は誤っていてもエラーにはならず、自動的かつ非破壊的に調整されます。
+ */
+export declare const arrayToIndexObjects: <T extends IndexObjectState>(array: readonly {
+    key: string;
+    value: T;
+}[]) => Record<string, T | undefined>;
 /**
  * 配列に対して serverTransform を行い、secondPrime を返します。
  *
  * 通常の Record の serverTransform の処理（つまり、`$index` 以外のプロパティの処理など）も内部で行われるため、通常の Record の serverTransform を別途実行することは避けてください。
  */
-export declare const serverTransform: <TServerState extends ArrayElementState, TClientState extends ArrayElementState, TFirstOperation extends ArrayElementTwoWayOperation, TSecondOperation extends ArrayElementUpOperation, TCustomError = string>(params: {
+export declare const serverTransform: <TServerState extends IndexObjectState, TClientState extends IndexObjectState, TFirstOperation extends IndexObjectTwoWayOperation, TSecondOperation extends IndexObjectUpOperation, TCustomError = string>(params: {
     stateBeforeFirst: import("./record").StringKeyRecord<TServerState>;
     stateAfterFirst: import("./record").StringKeyRecord<TServerState>;
     first?: RecordOperation.RecordUpOperation<TServerState, TFirstOperation> | undefined;
@@ -82,7 +92,7 @@ export declare const serverTransform: <TServerState extends ArrayElementState, T
     } | undefined;
 } & {
     /** Operation の型を変換して、TFirstOperation にします。通常は、単に `$v` と `$r` を付与するだけで構いません。 */
-    mapOperation: (operation: ArrayElementTwoWayOperation) => TFirstOperation;
+    mapOperation: (operation: IndexObjectTwoWayOperation) => TFirstOperation;
 }) => Result<RecordOperation.RecordTwoWayOperation<TServerState, TFirstOperation> | undefined, string | TCustomError>;
 export {};
 //# sourceMappingURL=array.d.ts.map

@@ -8,10 +8,13 @@ var utils = require('@flocon-trpg/utils');
 var lodash = require('lodash');
 var otString = require('@kizahasi/ot-string');
 var truncate = require('truncate-utf8-bytes');
+var produce = require('immer');
+require('@kizahasi/ot-core');
 
 function _interopDefault (e) { return e && e.__esModule ? e : { default: e }; }
 
 var truncate__default = /*#__PURE__*/_interopDefault(truncate);
+var produce__default = /*#__PURE__*/_interopDefault(produce);
 
 const anonymous = 'anonymous';
 const authToken = 'authToken';
@@ -3828,6 +3831,70 @@ const createFakeFirebaseConfig2 = () => {
 };
 const fakeFirebaseConfig2 = createFakeFirebaseConfig2();
 
+// サーバーとクライアントで書き換え可能だが特殊な値であるため、他のプロパティとの衝突を避ける目的で文字列の頭に $ を頭に付けている。
+const $index = '$index';
+/**
+ * Record を 配列とみなすときに、その要素として必要な値が入った template を作成する際に用いる値。
+ *
+ * @example
+ * ```
+ * const linkedListTemplate = createRecordValueTemplate(
+ *     createObjectValueTemplate(
+ *         {
+ *             ...indexObjectTemplateValue,
+ *
+ *             // add more properies...
+ *         },
+ *         1,
+ *         1
+ *     )
+ * );
+ * ```
+ */
+/*
+配列の表現方法には { $key: string, ...otherProperties }[] と Record<string, { $index: number; ...otherProperties }> の2種類が考えられたが、後者を採用している。
+前者はデータをエクスポートした際にテキストエディタで比較的編集しやすいというメリットがある。ただし、replace と update の2種類だけでは、要素が移動した際に要素を丸ごと delete と insert する必要があるため Operation の容量がかさばるという問題点がある。move のような Operation も定義すれば解決すると思われるが、手間がかかる。いっぽう、後者の方法だと $index を変更するだけで済むため容量がかさばる問題は存在せず、既存の Record の Operational Transformation のシステムに乗っかれるというメリットがある。よって単純化を重視して後者を採用した。
+*/
+({
+    /**
+     * 自身の要素のインデックス。一般的な配列と同様に、0 から始まります。
+     *
+     * インデックスが他の要素と重複してはなりません。また、0 から順に連続的に割り当てる必要があります。
+     */
+    [$index]: createReplaceValueTemplate(zod.z.number().nonnegative().int()),
+});
+const indexObjectsToArray = (linkedList) => {
+    const groupBy$index = utils.recordToMap(lodash.groupBy(utils.recordToArray(linkedList), ({ value }) => value[$index].toString()));
+    const result$1 = [];
+    for (let i = 0; groupBy$index.size >= 1; i++) {
+        const groupValue = groupBy$index.get(i.toString());
+        groupBy$index.delete(i.toString());
+        if (groupValue == null || groupValue.length !== 1) {
+            return result.Result.error(`Just one element where index is ${i} should exist, but there are ${groupValue?.length ?? 0} elements.`);
+        }
+        const element = groupValue[0];
+        result$1.push(element);
+    }
+    return result.Result.ok(result$1);
+};
+/**
+ * 配列を Record に変換します。
+ *
+ * 引数に渡された `$index` は誤っていてもエラーにはならず、自動的かつ非破壊的に調整されます。
+ */
+const arrayToIndexObjects = (array) => {
+    const result = {};
+    array.forEach((element, index) => {
+        if (result[element.key] !== undefined) {
+            throw new Error(`"${element.key}" key is duplicated.`);
+        }
+        result[element.key] = produce__default.default(element.value, value => {
+            value[$index] = index;
+        });
+    });
+    return result;
+};
+
 /** 全てのStateに完全にアクセスできる。*/
 const admin = 'admin';
 /* userUidに基づき、一部のStateへのアクセスを制限する。*/
@@ -6366,6 +6433,7 @@ const createLogs = ({ prevState, nextState, }) => {
 };
 
 exports.$free = $free;
+exports.$index = $index;
 exports.$r = $r;
 exports.$system = $system;
 exports.$v = $v;
@@ -6387,6 +6455,7 @@ exports.apply = apply;
 exports.applyBack = applyBack;
 exports.applyNullableText = apply$3;
 exports.applyText = apply$4;
+exports.arrayToIndexObjects = arrayToIndexObjects;
 exports.atomic = atomic;
 exports.authToken = authToken;
 exports.bgmTemplate = template$a;
@@ -6430,6 +6499,7 @@ exports.generateChatPalette = generateChatPalette;
 exports.getOpenRollCall = getOpenRollCall;
 exports.getVariableFromVarTomlObject = getVariableFromVarTomlObject;
 exports.imagePieceTemplate = template$9;
+exports.indexObjectsToArray = indexObjectsToArray;
 exports.isBoardOwner = isBoardOwner;
 exports.isCharacterOwner = isCharacterOwner;
 exports.isIdRecord = isIdRecord;
