@@ -53,8 +53,7 @@ export const indexObjectTemplateValue = {
     [$index]: createReplaceValueTemplate(z.number().nonnegative().int()),
 };
 
-// $v と $r がtemplateにおいて必須であるため仮に入れるだけの値。これがどのような値であっても、外部から渡された State や Operation には影響を与えない。$v = $r である必要はないが、コードを単純化するために $v = $r としている。
-const dummyVersion = 1;
+const dummyVersion = undefined;
 
 const indexObjectTemplate = createObjectValueTemplate(
     indexObjectTemplateValue,
