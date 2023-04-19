@@ -53,7 +53,8 @@ export type ServerTransform<TServerState, TTwoWayOperation, TUpOperation> = (par
     clientOperation: TUpOperation;
 }) => Result<TTwoWayOperation | undefined, TwoWayError>;
 
-export type ClientTransform<TOperation> = (params: {
+export type ClientTransform<TState, TOperation> = (params: {
+    state: TState;
     first: TOperation;
     second: TOperation;
 }) => Result<{ firstPrime: TOperation | undefined; secondPrime: TOperation | undefined }, UpError>;

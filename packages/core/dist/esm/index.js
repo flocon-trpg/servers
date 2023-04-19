@@ -1551,7 +1551,7 @@ const serverTransform$p = ({ first: unsafeFirst, second: unsafeSecond, stateBefo
     }
     return Result.ok(result.size === 0 ? undefined : mapToRecord(result));
 };
-const clientTransform$2 = ({ first, second, innerTransform, }) => {
+const clientTransform$2 = ({ state, first, second, innerTransform, defaultState, }) => {
     if (first === undefined || second === undefined) {
         return Result.ok({
             firstPrime: first === undefined || isEmptyRecord(first) ? undefined : first,
@@ -1575,7 +1575,9 @@ const clientTransform$2 = ({ first, second, innerTransform, }) => {
                 return;
             }
             case both: {
+                const s = state[key] ?? defaultState;
                 const xform = innerTransform({
+                    state: s,
                     first: group.left,
                     second: group.right,
                 });
@@ -2101,7 +2103,7 @@ const serverTransform$o = (params) => {
     }
     return result;
 };
-const transformElement = ({ first, second, innerTransform, innerDiff, }) => {
+const transformElement = ({ state, first, second, innerTransform, innerDiff, }) => {
     switch (first.type) {
         case replace$1:
             switch (second.type) {
@@ -2154,6 +2156,7 @@ const transformElement = ({ first, second, innerTransform, innerDiff, }) => {
                 }
                 case update$2: {
                     const xform = innerTransform({
+                        state,
                         first: first.update,
                         second: second.update,
                     });
@@ -2179,7 +2182,7 @@ const transformElement = ({ first, second, innerTransform, innerDiff, }) => {
             break;
     }
 };
-const clientTransform$1 = ({ first, second, innerTransform, innerDiff, }) => {
+const clientTransform$1 = ({ state, first, second, innerTransform, innerDiff, }) => {
     if (first == null || second == null) {
         return Result.ok({
             firstPrime: first == null || isEmptyRecord(first) ? undefined : first,
@@ -2203,7 +2206,13 @@ const clientTransform$1 = ({ first, second, innerTransform, innerDiff, }) => {
                 return;
             }
             case both: {
+                const s = state[key];
+                if (s === undefined) {
+                    error = { error: `"${key}" is not found at RecordOperation.clientTransform.` };
+                    return;
+                }
                 const xform = transformElement({
+                    state: s,
                     first: group.left,
                     second: group.right,
                     innerTransform,
@@ -2868,7 +2877,7 @@ const diff = (template) => ({ prevState, nextState }) => {
  * - `first`適用前のStateと`second`適用前のStateは等しい。
  * - このStateに対して`first`と`secondPrime`を順に適用したStateと、`second`と`firstPrime`を順に適用したStateは等しい。
  */
-const clientTransform = (template) => ({ first, second }) => {
+const clientTransform = (template) => ({ state, first, second }) => {
     switch (template.type) {
         case atomic: {
             switch (template.mode) {
@@ -2894,9 +2903,11 @@ const clientTransform = (template) => ({ first, second }) => {
         }
         case record: {
             return clientTransform$1({
+                state,
                 first: first,
                 second: second,
-                innerTransform: ({ first, second }) => clientTransform(template.value)({
+                innerTransform: ({ state, first, second }) => clientTransform(template.value)({
+                    state,
                     first,
                     second,
                 }),
@@ -2911,9 +2922,12 @@ const clientTransform = (template) => ({ first, second }) => {
         }
         case paramRecord: {
             return clientTransform$2({
+                state,
+                defaultState: template.defaultState,
                 first: first,
                 second: second,
-                innerTransform: ({ first, second }) => clientTransform(template.value)({
+                innerTransform: ({ state, first, second }) => clientTransform(template.value)({
+                    state,
                     first,
                     second,
                 }),
@@ -2942,12 +2956,17 @@ const clientTransform = (template) => ({ first, second }) => {
                         secondPrime[key] = value.right;
                         break;
                     default: {
+                        const s = state[key];
+                        if (s === undefined) {
+                            return Result.error(`${key} is not found at object client transform.`);
+                        }
                         const templateElement = template.value[key];
                         if (templateElement == null) {
                             warnNotFoundTemplate({ key, objectType: 'operation' });
                             continue;
                         }
                         const xformed = clientTransform(templateElement)({
+                            state: s,
                             first: value.left,
                             second: value.right,
                         });
@@ -5449,6 +5468,9 @@ const getOpenRollCalls = (source) => {
  * 原則として、現在行われている点呼は最大でも 1 つまでしか存在できません。
  */
 const getOpenRollCall = (source) => {
+    if (source == null) {
+        return undefined;
+    }
     const activeRollCalls = getOpenRollCalls(source);
     return maxBy(activeRollCalls, ({ value }) => value.createdAt);
 };

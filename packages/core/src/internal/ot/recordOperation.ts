@@ -793,7 +793,8 @@ export const serverTransform = <
     return result;
 };
 
-type InnerClientTransform<TFirstOperation, TSecondOperation, TError = string> = (params: {
+type InnerClientTransform<TState, TFirstOperation, TSecondOperation, TError = string> = (params: {
+    state: TState;
     first: TFirstOperation;
     second: TSecondOperation;
 }) => Result<
@@ -810,14 +811,16 @@ type Diff<TState, TOperation> = (params: {
 }) => TOperation | undefined;
 
 const transformElement = <TState, TFirstOperation, TSecondOperation, TError = string>({
+    state,
     first,
     second,
     innerTransform,
     innerDiff,
 }: {
+    state: TState;
     first: RecordUpOperationElement<TState, TFirstOperation>;
     second: RecordUpOperationElement<TState, TSecondOperation>;
-    innerTransform: InnerClientTransform<TFirstOperation, TSecondOperation, TError>;
+    innerTransform: InnerClientTransform<TState, TFirstOperation, TSecondOperation, TError>;
     innerDiff: Diff<TState, TFirstOperation>;
 }): Result<
     {
@@ -883,6 +886,7 @@ const transformElement = <TState, TFirstOperation, TSecondOperation, TError = st
                 }
                 case update: {
                     const xform = innerTransform({
+                        state,
                         first: first.update,
                         second: second.update,
                     });
@@ -912,21 +916,23 @@ const transformElement = <TState, TFirstOperation, TSecondOperation, TError = st
 };
 
 export const clientTransform = <TState, TOperation, TError = string>({
+    state,
     first,
     second,
     innerTransform,
     innerDiff,
 }: {
+    state: StringKeyRecord<TState>;
     first?: RecordUpOperation<TState, TOperation>;
     second?: RecordUpOperation<TState, TOperation>;
-    innerTransform: InnerClientTransform<TOperation, TOperation, TError>;
+    innerTransform: InnerClientTransform<TState, TOperation, TOperation, TError>;
     innerDiff: Diff<TState, TOperation>;
 }): Result<
     {
         firstPrime: RecordUpOperation<TState, TOperation> | undefined;
         secondPrime: RecordUpOperation<TState, TOperation> | undefined;
     },
-    TError
+    string | TError
 > => {
     if (first == null || second == null) {
         return Result.ok({
@@ -937,7 +943,7 @@ export const clientTransform = <TState, TOperation, TError = string>({
 
     const firstPrime = new Map<string, RecordUpOperationElement<TState, TOperation>>();
     const secondPrime = new Map<string, RecordUpOperationElement<TState, TOperation>>();
-    let error = undefined as { error: TError } | undefined;
+    let error = undefined as { error: string | TError } | undefined;
 
     groupJoinMap(recordToMap(first), recordToMap(second)).forEach((group, key) => {
         if (error != null) {
@@ -953,7 +959,13 @@ export const clientTransform = <TState, TOperation, TError = string>({
                 return;
             }
             case both: {
+                const s = state[key];
+                if (s === undefined) {
+                    error = { error: `"${key}" is not found at RecordOperation.clientTransform.` };
+                    return;
+                }
                 const xform = transformElement({
+                    state: s,
                     first: group.left,
                     second: group.right,
                     innerTransform,

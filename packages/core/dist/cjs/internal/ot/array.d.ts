@@ -36,8 +36,8 @@ export declare const indexObjectTemplateValue: {
 };
 declare const indexObjectTemplate: {
     readonly type: "object";
-    readonly $v: 1;
-    readonly $r: 1;
+    readonly $v: undefined;
+    readonly $r: undefined;
     readonly value: {
         /**
          * 自身の要素のインデックス。一般的な配列と同様に、0 から始まります。

@@ -9,7 +9,8 @@ export type Compose<TState, TOperation> = (params: {
     second: TOperation;
 }) => TOperation;
 
-export type Transform<TFirstOperation, TSecondOperation> = (params: {
+export type Transform<TState, TFirstOperation, TSecondOperation> = (params: {
+    state: TState;
     first: TFirstOperation;
     second: TSecondOperation;
 }) => { firstPrime: TFirstOperation; secondPrime: TSecondOperation };
@@ -23,7 +24,7 @@ export type StateManagerParameters<TState, TOperation> = {
     revision: number;
     state: TState;
     apply: Apply<TState, TOperation>;
-    transform: Transform<TOperation, TOperation>;
+    transform: Transform<TState, TOperation, TOperation>;
     diff: Diff<TState, TOperation>;
 
     // if true, debugging gets easier but makes StateManager slower

@@ -7,7 +7,8 @@ export type Compose<TState, TOperation> = (params: {
     first: TOperation;
     second: TOperation;
 }) => TOperation;
-export type Transform<TFirstOperation, TSecondOperation> = (params: {
+export type Transform<TState, TFirstOperation, TSecondOperation> = (params: {
+    state: TState;
     first: TFirstOperation;
     second: TSecondOperation;
 }) => {
@@ -22,7 +23,7 @@ export type StateManagerParameters<TState, TOperation> = {
     revision: number;
     state: TState;
     apply: Apply<TState, TOperation>;
-    transform: Transform<TOperation, TOperation>;
+    transform: Transform<TState, TOperation, TOperation>;
     diff: Diff<TState, TOperation>;
     enableHistory?: boolean;
 };

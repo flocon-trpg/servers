@@ -254,19 +254,24 @@ export const serverTransform = <
     return Result.ok(result.size === 0 ? undefined : mapToRecord(result));
 };
 
-type InnerClientTransform<TOperation, TError = string> = (params: {
+type InnerClientTransform<TState, TOperation, TError = string> = (params: {
+    state: TState;
     first: TOperation;
     second: TOperation;
 }) => Result<{ firstPrime: TOperation | undefined; secondPrime: TOperation | undefined }, TError>;
 
-export const clientTransform = <TOperation, TError = string>({
+export const clientTransform = <TState, TOperation, TError = string>({
+    state,
     first,
     second,
     innerTransform,
+    defaultState,
 }: {
+    state: StringKeyRecord<TState>;
     first?: StringKeyRecord<TOperation>;
     second?: StringKeyRecord<TOperation>;
-    innerTransform: InnerClientTransform<TOperation, TError>;
+    innerTransform: InnerClientTransform<TState, TOperation, TError>;
+    defaultState: TState;
 }): Result<
     {
         firstPrime: StringKeyRecord<TOperation> | undefined;
@@ -299,7 +304,9 @@ export const clientTransform = <TOperation, TError = string>({
                 return;
             }
             case both: {
+                const s = state[key] ?? defaultState;
                 const xform = innerTransform({
+                    state: s,
                     first: group.left,
                     second: group.right,
                 });

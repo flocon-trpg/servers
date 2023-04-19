@@ -55,17 +55,20 @@ export declare const serverTransform: <TServerState, TFirstOperation, TSecondOpe
     }) => Result<TFirstOperation | undefined, string | TCustomError>;
     defaultState: TServerState;
 }) => Result<StringKeyRecord<TFirstOperation> | undefined, string | TCustomError>;
-type InnerClientTransform<TOperation, TError = string> = (params: {
+type InnerClientTransform<TState, TOperation, TError = string> = (params: {
+    state: TState;
     first: TOperation;
     second: TOperation;
 }) => Result<{
     firstPrime: TOperation | undefined;
     secondPrime: TOperation | undefined;
 }, TError>;
-export declare const clientTransform: <TOperation, TError = string>({ first, second, innerTransform, }: {
+export declare const clientTransform: <TState, TOperation, TError = string>({ state, first, second, innerTransform, defaultState, }: {
+    state: StringKeyRecord<TState>;
     first?: StringKeyRecord<TOperation> | undefined;
     second?: StringKeyRecord<TOperation> | undefined;
-    innerTransform: InnerClientTransform<TOperation, TError>;
+    innerTransform: InnerClientTransform<TState, TOperation, TError>;
+    defaultState: TState;
 }) => Result<{
     firstPrime: StringKeyRecord<TOperation> | undefined;
     secondPrime: StringKeyRecord<TOperation> | undefined;

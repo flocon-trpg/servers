@@ -146,7 +146,8 @@ export type ServerTransformParams<TServerState, TClientState, TFirstOperation, T
 };
 /** Make sure `apply(stateBeforeFirst, first) = stateAfterFirst` */
 export declare const serverTransform: <TServerState, TClientState, TFirstOperation, TSecondOperation, TCustomError = string>(params: ServerTransformParams<TServerState, TClientState, TFirstOperation, TSecondOperation, TCustomError>) => Result<RecordTwoWayOperation<TServerState, TFirstOperation> | undefined, string | TCustomError>;
-type InnerClientTransform<TFirstOperation, TSecondOperation, TError = string> = (params: {
+type InnerClientTransform<TState, TFirstOperation, TSecondOperation, TError = string> = (params: {
+    state: TState;
     first: TFirstOperation;
     second: TSecondOperation;
 }) => Result<{
@@ -157,15 +158,16 @@ type Diff<TState, TOperation> = (params: {
     prevState: TState;
     nextState: TState;
 }) => TOperation | undefined;
-export declare const clientTransform: <TState, TOperation, TError = string>({ first, second, innerTransform, innerDiff, }: {
+export declare const clientTransform: <TState, TOperation, TError = string>({ state, first, second, innerTransform, innerDiff, }: {
+    state: StringKeyRecord<TState>;
     first?: RecordUpOperation<TState, TOperation> | undefined;
     second?: RecordUpOperation<TState, TOperation> | undefined;
-    innerTransform: InnerClientTransform<TOperation, TOperation, TError>;
+    innerTransform: InnerClientTransform<TState, TOperation, TOperation, TError>;
     innerDiff: Diff<TState, TOperation>;
 }) => Result<{
     firstPrime: RecordUpOperation<TState, TOperation> | undefined;
     secondPrime: RecordUpOperation<TState, TOperation> | undefined;
-}, TError>;
+}, string | TError>;
 export declare const diff: <TState, TOperation>({ prevState, nextState, innerDiff, }: {
     prevState: StringKeyRecord<TState>;
     nextState: StringKeyRecord<TState>;

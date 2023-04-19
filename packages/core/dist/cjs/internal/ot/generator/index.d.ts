@@ -165,6 +165,6 @@ export declare const diff: <T extends AnyTemplate>(template: T) => Diff<State<T>
  * - `first`適用前のStateと`second`適用前のStateは等しい。
  * - このStateに対して`first`と`secondPrime`を順に適用したStateと、`second`と`firstPrime`を順に適用したStateは等しい。
  */
-export declare const clientTransform: <T extends AnyTemplate>(template: T) => ClientTransform<UpOperation<T>>;
+export declare const clientTransform: <T extends AnyTemplate>(template: T) => ClientTransform<State<T>, UpOperation<T>>;
 export {};
 //# sourceMappingURL=index.d.ts.map

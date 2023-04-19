@@ -34,7 +34,8 @@ export type ServerTransform<TServerState, TTwoWayOperation, TUpOperation> = (par
     serverOperation: TTwoWayOperation | undefined;
     clientOperation: TUpOperation;
 }) => Result<TTwoWayOperation | undefined, TwoWayError>;
-export type ClientTransform<TOperation> = (params: {
+export type ClientTransform<TState, TOperation> = (params: {
+    state: TState;
     first: TOperation;
     second: TOperation;
 }) => Result<{

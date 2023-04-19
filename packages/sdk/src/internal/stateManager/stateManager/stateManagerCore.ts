@@ -75,21 +75,9 @@ export class StateManagerCore<TState, TOperation> {
         this._pendingGetOperations.delete(this._revision + 1);
 
         if (toApply.isByMyClient) {
-            /*                                      prev syncedState
-             *                                          /        \
-             *                                         /          \
-             *                this._postingState.diff /            \ toApply.operation
-             *                                       /              \
-             *                                      /      diff      \
-             *              this._postingState.state  ------------- next syncedState
-             *                        /                                  /
-             *                       /                                  /
-             *       localOperation /                                  / (xform)
-             *                     /                                  /
-             *                    /                                  /
-             *              this._uiState                      next uiState
-             */
+            // see "by my client" page in ./transformation.drawio
 
+            const prevSyncedState = this._stateGetter.syncedState;
             this._stateGetter.syncedState = this.params.apply({
                 state: this._stateGetter.syncedState,
                 operation: toApply.operation,
@@ -108,7 +96,11 @@ export class StateManagerCore<TState, TOperation> {
                     });
                 }
                 if (diff !== undefined) {
-                    const xform = this.params.transform({ first: localOperation, second: diff });
+                    const xform = this.params.transform({
+                        state: this._stateGetter.postingState?.state ?? prevSyncedState,
+                        first: localOperation,
+                        second: diff,
+                    });
                     this._stateGetter.setUiState(
                         this.params.apply({
                             state: this._stateGetter.syncedState,
@@ -124,21 +116,9 @@ export class StateManagerCore<TState, TOperation> {
             return;
         }
 
-        /*                    prev this._syncedState
-         *                            /        \
-         *   this._postingState.diff /          \ toApply.operation
-         *                          /            \
-         *        this._postingState.state    next this._syncedState
-         *                       / \            /
-         * this._localOperation /  (xform)     / next this._postingOperation.diff
-         *                     /        \     /
-         *        prev this._uiState     --- (expected posted state')
-         *                     \            /
-         *              (xform) \          / next this._localOperation
-         *                       \        /
-         *                  next this._uiState
-         */
+        // see "not by my client" page in ./transformation.drawio
 
+        const prevSyncedState = this._stateGetter.syncedState;
         const prevLocalOperation = this._stateGetter.getLocalOperation();
         this._stateGetter.syncedState = this.params.apply({
             state: this._stateGetter.syncedState,
@@ -152,6 +132,7 @@ export class StateManagerCore<TState, TOperation> {
                 };
             }
             const xform = this.params.transform({
+                state: prevSyncedState,
                 first: toApply.operation,
                 second: this._stateGetter.postingState.operation,
             });
@@ -175,6 +156,7 @@ export class StateManagerCore<TState, TOperation> {
             prevLocalOperation === undefined
                 ? undefined
                 : this.params.transform({
+                      state: this._stateGetter.postingState?.state ?? prevSyncedState,
                       first: toApplyOperationPrime,
                       second: prevLocalOperation,
                   }).firstPrime;

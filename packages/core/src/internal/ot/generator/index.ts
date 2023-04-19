@@ -859,8 +859,8 @@ export const diff =
  * - このStateに対して`first`と`secondPrime`を順に適用したStateと、`second`と`firstPrime`を順に適用したStateは等しい。
  */
 export const clientTransform =
-    <T extends AnyTemplate>(template: T): ClientTransform<UpOperation<T>> =>
-    ({ first, second }) => {
+    <T extends AnyTemplate>(template: T): ClientTransform<State<T>, UpOperation<T>> =>
+    ({ state, first, second }) => {
         switch (template.type) {
             case atomic: {
                 switch (template.mode) {
@@ -886,6 +886,7 @@ export const clientTransform =
             }
             case record: {
                 return RecordOperation.clientTransform({
+                    state,
                     first: first as RecordOperation.RecordUpOperation<
                         State<AnyTemplate>,
                         UpOperation<AnyTemplate>
@@ -894,8 +895,9 @@ export const clientTransform =
                         State<AnyTemplate>,
                         UpOperation<AnyTemplate>
                     >,
-                    innerTransform: ({ first, second }) =>
+                    innerTransform: ({ state, first, second }) =>
                         clientTransform(template.value)({
+                            state,
                             first,
                             second,
                         }),
@@ -910,10 +912,13 @@ export const clientTransform =
             }
             case paramRecord: {
                 return ParamRecordOperation.clientTransform({
+                    state,
+                    defaultState: template.defaultState,
                     first: first as Record<string, UpOperation<AnyTemplate> | undefined>,
                     second: second as Record<string, UpOperation<AnyTemplate> | undefined>,
-                    innerTransform: ({ first, second }) =>
+                    innerTransform: ({ state, first, second }) =>
                         clientTransform(template.value)({
+                            state,
                             first,
                             second,
                         }),
@@ -942,12 +947,19 @@ export const clientTransform =
                             secondPrime[key] = value.right;
                             break;
                         default: {
+                            const s = state[key];
+                            if (s === undefined) {
+                                return Result.error(
+                                    `${key} is not found at object client transform.`
+                                );
+                            }
                             const templateElement = template.value[key];
                             if (templateElement == null) {
                                 warnNotFoundTemplate({ key, objectType: 'operation' });
                                 continue;
                             }
                             const xformed = clientTransform(templateElement)({
+                                state: s,
                                 first: value.left,
                                 second: value.right,
                             });

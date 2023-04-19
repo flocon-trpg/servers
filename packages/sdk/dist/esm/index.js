@@ -327,6 +327,11 @@ const createRoomMessagesClient = ({ client, roomEventSubscription, }) => {
 };
 
 class StateGetter {
+    /**
+     * クライアントから見た、API サーバーにおける最新の State。
+     *
+     * ただし、通信のラグなどの影響で、実際の最新の状態より少し古い可能性があります。
+     */
     syncedState;
     _diff;
     // this._syncedStateにthis._postingState.operationをapplyした結果がstateになる。通常、this._postingState.operationをAPIサーバーに送信して、その応答を待つ形になる。
@@ -337,6 +342,9 @@ class StateGetter {
         this.syncedState = syncedState;
         this._diff = diff;
     }
+    /**
+     * クライアントの画面に表示すべき State。
+     */
     get uiState() {
         if (this._uiStateCore.isNone) {
             return this._postingState?.state ?? this.syncedState;
@@ -346,9 +354,11 @@ class StateGetter {
     setUiState(value) {
         this._uiStateCore = Option.some(value);
     }
+    /** `uiState` を `syncedState` の状態に戻します。 */
     clearUiState() {
         this._uiStateCore = Option.none();
     }
+    /** API サーバーに Operation の post を開始した時点の State。 */
     get postingState() {
         return this._postingState;
     }
@@ -362,8 +372,11 @@ class StateGetter {
     clearPostingState() {
         this._postingState = undefined;
     }
-    // まだpostしていないoperationを表す。
-    // 詳しく書くと、post中の場合は、post後にクライアント側でたまっているoperationを表す。post中でないときは、単にクライアント側でたまっているoperationを表す。
+    /**
+     * まだpostしていないoperation。
+     *
+     * post中の場合は、post後にクライアント側でたまっているoperationを表します。post中でないときは、単にクライアント側でたまっているoperationを表します。
+     */
     getLocalOperation() {
         if (this._uiStateCore.isNone) {
             return undefined;
@@ -446,6 +459,7 @@ class StateManagerCore {
              *                    /                                  /
              *              this._uiState                      next uiState
              */
+            const prevSyncedState = this._stateGetter.syncedState;
             this._stateGetter.syncedState = this.params.apply({
                 state: this._stateGetter.syncedState,
                 operation: toApply.operation,
@@ -466,7 +480,10 @@ class StateManagerCore {
                     });
                 }
                 if (diff !== undefined) {
-                    const xform = this.params.transform({ first: localOperation, second: diff });
+                    const xform = this.params.transform({
+                        state: this._stateGetter.postingState?.state ?? prevSyncedState,
+                        first: localOperation, second: diff
+                    });
                     this._stateGetter.setUiState(this.params.apply({
                         state: this._stateGetter.syncedState,
                         operation: xform.firstPrime,
@@ -478,20 +495,8 @@ class StateManagerCore {
             this.tryApplyPendingGetOperations();
             return;
         }
-        /*                    prev this._syncedState
-         *                            /        \
-         *   this._postingState.diff /          \ toApply.operation
-         *                          /            \
-         *        this._postingState.state    next this._syncedState
-         *                       / \            /
-         * this._localOperation /  (xform)     / next this._postingOperation.diff
-         *                     /        \     /
-         *        prev this._uiState     --- (expected posted state')
-         *                     \            /
-         *              (xform) \          / next this._localOperation
-         *                       \        /
-         *                  next this._uiState
-         */
+        // see ./graph1.drawio
+        const prevSyncedState = this._stateGetter.syncedState;
         const prevLocalOperation = this._stateGetter.getLocalOperation();
         this._stateGetter.syncedState = this.params.apply({
             state: this._stateGetter.syncedState,
@@ -505,6 +510,7 @@ class StateManagerCore {
                 };
             }
             const xform = this.params.transform({
+                state: prevSyncedState,
                 first: toApply.operation,
                 second: this._stateGetter.postingState.operation,
             });
@@ -524,6 +530,7 @@ class StateManagerCore {
         const nextLocalOperation = prevLocalOperation === undefined
             ? undefined
             : this.params.transform({
+                state: this._stateGetter.postingState?.state ?? prevSyncedState,
                 first: toApplyOperationPrime,
                 second: prevLocalOperation,
             }).firstPrime;
