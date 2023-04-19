@@ -148,7 +148,7 @@ function useRollCallNotifications(): void {
     const setRoomConfig = useImmerSetAtom(roomConfigAtom);
     const myUserUid = useMyUserUid();
     const rollCalls = useRoomStateValueSelector(roomState => roomState.rollCalls);
-    const openRollCall = React.useMemo(() => getOpenRollCall(rollCalls), [rollCalls]);
+    const openRollCall = React.useMemo(() => getOpenRollCall(rollCalls ?? {}), [rollCalls]);
     const openRollCallId = openRollCall?.key;
     const openRollCallRef = useLatest(openRollCall?.value);
     const setPanelHightlightKeys = useImmerSetAtom(panelHighlightKeysAtom);

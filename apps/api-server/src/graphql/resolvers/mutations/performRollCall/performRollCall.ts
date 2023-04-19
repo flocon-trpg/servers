@@ -25,7 +25,7 @@ export const performRollCall = (
         default:
             return Result.error(PerformRollCallFailureType.NotAuthorizedParticipant);
     }
-    const openRollCall = getOpenRollCall(source.rollCalls);
+    const openRollCall = getOpenRollCall(source.rollCalls ?? {});
     if (openRollCall != null) {
         return Result.error(PerformRollCallFailureType.HasOpenRollCall);
     }
@@ -40,7 +40,7 @@ export const performRollCall = (
         }
     }
     const result = produce(source, source => {
-        const openRollCall = getOpenRollCall(source.rollCalls);
+        const openRollCall = getOpenRollCall(source.rollCalls ?? {});
         if (openRollCall != null) {
             return;
         }
