@@ -816,18 +816,20 @@ const transformElement = <TState, TFirstOperation, TSecondOperation, TError = st
     second,
     innerTransform,
     innerDiff,
+    errorMessageOnStateNotFound,
 }: {
-    state: TState;
+    state: TState | undefined;
     first: RecordUpOperationElement<TState, TFirstOperation>;
     second: RecordUpOperationElement<TState, TSecondOperation>;
     innerTransform: InnerClientTransform<TState, TFirstOperation, TSecondOperation, TError>;
     innerDiff: Diff<TState, TFirstOperation>;
+    errorMessageOnStateNotFound: string;
 }): Result<
     {
         firstPrime: RecordUpOperationElement<TState, TFirstOperation> | undefined;
         secondPrime: RecordUpOperationElement<TState, TSecondOperation> | undefined;
     },
-    TError
+    string | TError
 > => {
     switch (first.type) {
         case replace:
@@ -885,6 +887,9 @@ const transformElement = <TState, TFirstOperation, TSecondOperation, TError = st
                     });
                 }
                 case update: {
+                    if (state === undefined) {
+                        return Result.error(errorMessageOnStateNotFound);
+                    }
                     const xform = innerTransform({
                         state,
                         first: first.update,
@@ -959,17 +964,13 @@ export const clientTransform = <TState, TOperation, TError = string>({
                 return;
             }
             case both: {
-                const s = state[key];
-                if (s === undefined) {
-                    error = { error: `"${key}" is not found at RecordOperation.clientTransform.` };
-                    return;
-                }
                 const xform = transformElement({
-                    state: s,
+                    state: state[key],
                     first: group.left,
                     second: group.right,
                     innerTransform,
                     innerDiff,
+                    errorMessageOnStateNotFound: `"${key}" is not found at RecordOperation.clientTransform.`,
                 });
                 if (xform.isError) {
                     error = { error: xform.error };
