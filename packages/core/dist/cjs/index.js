@@ -5474,9 +5474,6 @@ const getOpenRollCalls = (source) => {
  * 原則として、現在行われている点呼は最大でも 1 つまでしか存在できません。
  */
 const getOpenRollCall = (source) => {
-    if (source == null) {
-        return undefined;
-    }
     const activeRollCalls = getOpenRollCalls(source);
     return lodash.maxBy(activeRollCalls, ({ value }) => value.createdAt);
 };

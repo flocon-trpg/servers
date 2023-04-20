@@ -6,12 +6,12 @@ export declare const template: {
     readonly $r: 1;
     readonly value: {
         createdAt: {
-            readonly type: "atomic";
+            readonly type: "atomic"; /** 点呼開始時に流す SE。 */
             readonly mode: "replace";
             readonly value: z.ZodNumber;
         };
         createdBy: {
-            readonly type: "atomic";
+            readonly type: "atomic"; /** 点呼開始時に流す SE。 */
             readonly mode: "replace";
             readonly value: z.ZodString;
         };
@@ -21,7 +21,7 @@ export declare const template: {
          * 締め切られていない場合、参加者は誰でも締め切ることができます(ただし、締め切るには GraphQL の Mutation から実行する必要があります)。すでに締め切られている場合は、再開させることはできません。
          */
         closeStatus: {
-            readonly type: "atomic";
+            readonly type: "atomic"; /** 点呼開始時に流す SE。 */
             readonly mode: "replace";
             readonly value: z.ZodOptional<z.ZodObject<{
                 closedBy: z.ZodString;
@@ -52,7 +52,7 @@ export declare const template: {
             readonly $r: 1;
             readonly value: {
                 answeredAt: {
-                    readonly type: "atomic";
+                    readonly type: "atomic"; /** 点呼開始時に流す SE。 */
                     readonly mode: "replace";
                     readonly value: z.ZodOptional<z.ZodNumber>;
                 };
@@ -60,7 +60,7 @@ export declare const template: {
         }>;
         /** 点呼開始時に流す SE。 */
         soundEffect: {
-            readonly type: "atomic";
+            readonly type: "atomic"; /** 点呼開始時に流す SE。 */
             readonly mode: "replace";
             readonly value: z.ZodOptional<z.ZodObject<{
                 file: z.ZodObject<{
