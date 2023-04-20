@@ -9,7 +9,7 @@ import {
     roomTemplate,
 } from '../..';
 
-export namespace Fixture {
+export namespace Fixtures {
     const boardId = 'BOARD_ID';
 
     export namespace Participant {
