@@ -2103,7 +2103,7 @@ const serverTransform$o = (params) => {
     }
     return result;
 };
-const transformElement = ({ state, first, second, innerTransform, innerDiff, }) => {
+const transformElement = ({ state, first, second, innerTransform, innerDiff, errorMessageOnStateNotFound, }) => {
     switch (first.type) {
         case replace$1:
             switch (second.type) {
@@ -2155,6 +2155,9 @@ const transformElement = ({ state, first, second, innerTransform, innerDiff, }) 
                     });
                 }
                 case update$2: {
+                    if (state === undefined) {
+                        return Result.error(errorMessageOnStateNotFound);
+                    }
                     const xform = innerTransform({
                         state,
                         first: first.update,
@@ -2206,17 +2209,13 @@ const clientTransform$1 = ({ state, first, second, innerTransform, innerDiff, })
                 return;
             }
             case both: {
-                const s = state[key];
-                if (s === undefined) {
-                    error = { error: `"${key}" is not found at RecordOperation.clientTransform.` };
-                    return;
-                }
                 const xform = transformElement({
-                    state: s,
+                    state: state[key],
                     first: group.left,
                     second: group.right,
                     innerTransform,
                     innerDiff,
+                    errorMessageOnStateNotFound: `"${key}" is not found at RecordOperation.clientTransform.`,
                 });
                 if (xform.isError) {
                     error = { error: xform.error };

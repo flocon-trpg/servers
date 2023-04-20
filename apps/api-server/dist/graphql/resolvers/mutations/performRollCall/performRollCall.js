@@ -18,7 +18,7 @@ const performRollCall = (source, myUserUid, soundEffect) => {
         default:
             return result.Result.error(PerformRollCallFailureType.PerformRollCallFailureType.NotAuthorizedParticipant);
     }
-    const openRollCall = FilePathModule.getOpenRollCall(source.rollCalls);
+    const openRollCall = FilePathModule.getOpenRollCall(source.rollCalls ?? {});
     if (openRollCall != null) {
         return result.Result.error(PerformRollCallFailureType.PerformRollCallFailureType.HasOpenRollCall);
     }
@@ -30,7 +30,7 @@ const performRollCall = (source, myUserUid, soundEffect) => {
         }
     }
     const result$1 = immer.produce(source, source => {
-        const openRollCall = FilePathModule.getOpenRollCall(source.rollCalls);
+        const openRollCall = FilePathModule.getOpenRollCall(source.rollCalls ?? {});
         if (openRollCall != null) {
             return;
         }
