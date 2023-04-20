@@ -1049,6 +1049,7 @@ describe('recordOperation.clientTransform', () => {
         const innerDiff = jest.fn();
         const innerTransform = jest.fn();
         const actual = clientTransform({
+            state: { foo: 1 },
             first,
             second,
             innerDiff,
@@ -1065,6 +1066,7 @@ describe('recordOperation.clientTransform', () => {
             Result.ok({ firstPrime: undefined, secondPrime: '2,3' })
         );
         clientTransform({
+            state: { target: '1' },
             first: {
                 target: { type: update, update: '1,2' },
             },
@@ -1076,13 +1078,14 @@ describe('recordOperation.clientTransform', () => {
         });
         expect(innerDiff).not.toBeCalled();
         expect(innerTransform).toBeCalledTimes(1);
-        expect(innerTransform.mock.lastCall).toEqual([{ first: '1,2', second: '1,3' }]);
+        expect(innerTransform.mock.lastCall).toEqual([{ state: '1', first: '1,2', second: '1,3' }]);
     });
 
     it('tests callback on replace', () => {
         const innerDiff = jest.fn(() => '2,1');
         const innerTransform = jest.fn();
         clientTransform({
+            state: {},
             first: {
                 target: { type: replace, replace: { newValue: 1 } },
             },

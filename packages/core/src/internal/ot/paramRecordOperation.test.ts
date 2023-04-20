@@ -495,6 +495,8 @@ describe('paramRecordOperation.clientTransform', () => {
     ])('tests %j to return undefined', ({ first, second }) => {
         const innerTransform = jest.fn();
         const actual = clientTransform({
+            state: { foo: '1' },
+            defaultState: '0',
             first,
             second,
             innerTransform,
@@ -511,6 +513,8 @@ describe('paramRecordOperation.clientTransform', () => {
     it('tests case 1', () => {
         const innerTransform = jest.fn();
         const actual = clientTransform({
+            state: { target: '1' },
+            defaultState: '0',
             second: {
                 target: '1,2',
             },
@@ -530,6 +534,8 @@ describe('paramRecordOperation.clientTransform', () => {
     it('tests case 3', () => {
         const innerTransform = jest.fn(() => Result.error('test error'));
         const actual = clientTransform({
+            state: { target: '1' },
+            defaultState: '0',
             first: {
                 target: '1,2',
             },
@@ -540,7 +546,7 @@ describe('paramRecordOperation.clientTransform', () => {
         });
         expect(actual.isError).toBe(true);
         expect(innerTransform).toBeCalledTimes(1);
-        expect(innerTransform.mock.lastCall).toEqual([{ first: '1,2', second: '1,3' }]);
+        expect(innerTransform.mock.lastCall).toEqual([{ state: '1', first: '1,2', second: '1,3' }]);
     });
 
     /*
@@ -551,6 +557,8 @@ describe('paramRecordOperation.clientTransform', () => {
     it('tests case 4', () => {
         const innerTransform = jest.fn();
         const actual = clientTransform({
+            state: { target: '1' },
+            defaultState: '0',
             first: {
                 target: '1,2',
             },

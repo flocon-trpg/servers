@@ -1,3 +1,5 @@
+import { Fixture } from '../../../__test__/fixture';
+import { diff, toDownOperation, toUpOperation } from '../../generator';
 import {
     decodeDbState,
     decodeDownOperation,
@@ -9,8 +11,6 @@ import {
     stringifyUpOperation,
 } from './converter';
 import { template } from './types';
-import { Fixture } from '@/__test__/fixture';
-import { diff, toDownOperation, toUpOperation } from '@/ot/generator';
 
 const getUpOperation = () => {
     const twoWayOperation = diff(template)({

@@ -2221,13 +2221,14 @@ describe('clientTransform', () => {
         [1, undefined],
         [undefined, 2],
     ] as const)('tests ReplaceValueTemplate', (state1, state2) => {
+        const baseState = 0;
         const first: ReplaceValue.UpOperation = {
             newValue: state1,
         };
         const second: ReplaceValue.UpOperation = {
             newValue: state2,
         };
-        expect(clientTransform(ReplaceValue.template)({ first, second })).toEqual(
+        expect(clientTransform(ReplaceValue.template)({ state: baseState, first, second })).toEqual(
             Result.ok({
                 firstPrime: first,
             })
@@ -2246,13 +2247,14 @@ describe('clientTransform', () => {
         );
         const second: OtString.UpOperation = TextOperation.toUpOperation(
             TextOperation.diff({
-                prev: state2,
+                prev: state1,
                 next: state3,
             })!
         );
         const expected = TextOperation.clientTransform({ first, second });
         expect(
             clientTransform(OtString.template)({
+                state: state1,
                 first,
                 second,
             })
@@ -2281,6 +2283,7 @@ describe('clientTransform', () => {
         const expected = NullableTextOperation.clientTransform({ first, second });
         expect(
             clientTransform(NullableOtString.template)({
+                state: state1,
                 first,
                 second,
             })
@@ -2288,6 +2291,14 @@ describe('clientTransform', () => {
     });
 
     it('tests ObjectTemplate', () => {
+        const baseState: ObjectValue.State = {
+            $v: 1,
+            $r: 2,
+            value1: 10,
+            value2: 20,
+            value3: 30,
+            value4: 40,
+        };
         const first: ObjectValue.UpOperation = {
             $v: 1,
             $r: 2,
@@ -2317,7 +2328,7 @@ describe('clientTransform', () => {
             value4: undefined,
         };
 
-        expect(clientTransform(ObjectValue.template)({ first, second })).toEqual(
+        expect(clientTransform(ObjectValue.template)({ state: baseState, first, second })).toEqual(
             Result.ok({
                 firstPrime: {
                     $v: 1,
@@ -2337,6 +2348,13 @@ describe('clientTransform', () => {
     });
 
     it('tests RecordTemplate', () => {
+        const baseState: RecordValue.State = {
+            idUpdate: { $v: 1, $r: 2, value: 0 },
+            updateId: { $v: 1, $r: 2, value: 0 },
+            updateUpdate: { $v: 1, $r: 2, value: 0 },
+            updateReplace: { $v: 1, $r: 2, value: 0 },
+            replaceUpdate: { $v: 1, $r: 2, value: 0 },
+        };
         const first: RecordValue.UpOperation = {
             idUpdate: undefined,
             updateId: {
@@ -2511,12 +2529,13 @@ describe('clientTransform', () => {
             replaceUpdate: undefined,
         };
 
-        expect(clientTransform(RecordValue.template)({ first, second })).toEqual(
+        expect(clientTransform(RecordValue.template)({ state: baseState, first, second })).toEqual(
             Result.ok({ firstPrime: expectedFirstPrime, secondPrime: expectedSecondPrime })
         );
     });
 
     it('tests ParamRecordTemplate', () => {
+        const baseState: ParamRecordValue.State = {};
         const first: ParamRecordValue.UpOperation = {
             idUpdate: undefined,
             updateId: {
@@ -2580,8 +2599,8 @@ describe('clientTransform', () => {
             updateUpdate: undefined,
         };
 
-        expect(clientTransform(ParamRecordValue.template)({ first, second })).toEqual(
-            Result.ok({ firstPrime: expectedFirstPrime, secondPrime: expectedSecondPrime })
-        );
+        expect(
+            clientTransform(ParamRecordValue.template)({ state: baseState, first, second })
+        ).toEqual(Result.ok({ firstPrime: expectedFirstPrime, secondPrime: expectedSecondPrime }));
     });
 });
