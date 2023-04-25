@@ -27,7 +27,7 @@ export const $index = '$index';
  *
  * @example
  * ```
- * const linkedListTemplate = createRecordValueTemplate(
+ * const indexObjectTemplate = createRecordValueTemplate(
  *     createObjectValueTemplate(
  *         {
  *             ...indexObjectTemplateValue,
@@ -74,10 +74,10 @@ type OtArray<T> = {
 type ReadonlyOtArray<T> = Readonly<OtArray<T>>;
 
 export const indexObjectsToArray = <T extends IndexObjectState>(
-    linkedList: Record<string, T | undefined>
+    record: Record<string, T | undefined>
 ): Result<OtArray<T>> => {
     const groupBy$index = recordToMap(
-        groupBy(recordToArray(linkedList), ({ value }) => value[$index].toString())
+        groupBy(recordToArray(record), ({ value }) => value[$index].toString())
     );
 
     const result: OtArray<T> = [];
@@ -301,17 +301,17 @@ export const serverTransform = <
             );
         },
         composeUpdateUpdate: ({ first, second }) => {
-            let composedLinkedListOperation: { oldValue: number; newValue: number } | undefined;
+            let composed$indexOperation: { oldValue: number; newValue: number } | undefined;
             if (first[$index] === undefined) {
-                composedLinkedListOperation = second[$index];
+                composed$indexOperation = second[$index];
             } else {
                 if (second[$index] === undefined) {
-                    composedLinkedListOperation = first[$index];
+                    composed$indexOperation = first[$index];
                 } else {
                     if (first[$index].oldValue === second[$index].newValue) {
-                        composedLinkedListOperation = undefined;
+                        composed$indexOperation = undefined;
                     } else {
-                        composedLinkedListOperation = {
+                        composed$indexOperation = {
                             oldValue: first[$index].oldValue,
                             newValue: second[$index].newValue,
                         };
@@ -319,7 +319,7 @@ export const serverTransform = <
                 }
             }
             const result = produce(first, first => {
-                first.$index = composedLinkedListOperation;
+                first.$index = composed$indexOperation;
             });
             return Result.ok(isIdRecord(result) ? undefined : result);
         },
@@ -506,14 +506,14 @@ export const clientTransform = <
                 );
             },
             composeUpdateUpdate: ({ first, second }) => {
-                let composedLinkedListOperation: { newValue: number } | undefined;
+                let composed$indexOperation: { newValue: number } | undefined;
                 if (second[$index] === undefined) {
-                    composedLinkedListOperation = first[$index];
+                    composed$indexOperation = first[$index];
                 } else {
-                    composedLinkedListOperation = second[$index];
+                    composed$indexOperation = second[$index];
                 }
                 const result = produce(first, first => {
-                    first.$index = composedLinkedListOperation;
+                    first.$index = composed$indexOperation;
                 });
                 return Result.ok(isIdRecord(result) ? undefined : result);
             },

@@ -10,7 +10,7 @@ export declare const $index = "$index";
  *
  * @example
  * ```
- * const linkedListTemplate = createRecordValueTemplate(
+ * const indexObjectTemplate = createRecordValueTemplate(
  *     createObjectValueTemplate(
  *         {
  *             ...indexObjectTemplateValue,
@@ -61,7 +61,7 @@ type OtArray<T> = {
     value: T;
 }[];
 type ReadonlyOtArray<T> = Readonly<OtArray<T>>;
-export declare const indexObjectsToArray: <T extends IndexObjectState>(linkedList: Record<string, T | undefined>) => Result<OtArray<T>, string>;
+export declare const indexObjectsToArray: <T extends IndexObjectState>(record: Record<string, T | undefined>) => Result<OtArray<T>, string>;
 /**
  * 配列を Record に変換します。
  *

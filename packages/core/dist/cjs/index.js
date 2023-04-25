@@ -4254,7 +4254,7 @@ const $index = '$index';
  *
  * @example
  * ```
- * const linkedListTemplate = createRecordValueTemplate(
+ * const indexObjectTemplate = createRecordValueTemplate(
  *     createObjectValueTemplate(
  *         {
  *             ...indexObjectTemplateValue,
@@ -4281,8 +4281,8 @@ const indexObjectTemplateValue = {
 };
 const dummyVersion = undefined;
 const indexObjectTemplate = createObjectValueTemplate(indexObjectTemplateValue, dummyVersion, dummyVersion);
-const indexObjectsToArray = (linkedList) => {
-    const groupBy$index = utils.recordToMap(lodash.groupBy(utils.recordToArray(linkedList), ({ value }) => value[$index].toString()));
+const indexObjectsToArray = (record) => {
+    const groupBy$index = utils.recordToMap(lodash.groupBy(utils.recordToArray(record), ({ value }) => value[$index].toString()));
     const result$1 = [];
     for (let i = 0; groupBy$index.size >= 1; i++) {
         const groupValue = groupBy$index.get(i.toString());
@@ -4442,15 +4442,15 @@ const clientTransform = (params) => {
             }));
         },
         composeUpdateUpdate: ({ first, second }) => {
-            let composedLinkedListOperation;
+            let composed$indexOperation;
             if (second[$index] === undefined) {
-                composedLinkedListOperation = first[$index];
+                composed$indexOperation = first[$index];
             }
             else {
-                composedLinkedListOperation = second[$index];
+                composed$indexOperation = second[$index];
             }
             const result$1 = produce__default.default(first, first => {
-                first.$index = composedLinkedListOperation;
+                first.$index = composed$indexOperation;
             });
             return result.Result.ok(isIdRecord(result$1) ? undefined : result$1);
         },
