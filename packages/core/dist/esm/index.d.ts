@@ -14,7 +14,7 @@ export { fakeFirebaseConfig1, fakeFirebaseConfig2 } from './internal/fake/fakeFi
 export { $index, arrayToIndexObjects, indexObjectsToArray, IndexObject } from './internal/ot/array';
 export { Default, Uploader, FirebaseStorage, filePathTemplate, } from './internal/ot/flocon/filePath/types';
 export { $v, $r, toDownOperation, toUpOperation, apply, applyBack, composeDownOperation, restore, diff, clientTransform, } from './internal/ot/generator/functions';
-export { atomic, ot, record, paramRecord, object, state, State, upOperation, UpOperation, downOperation, DownOperation, TwoWayOperation, createObjectValueTemplate, createTextValueTemplate as createOtValueTemplate, createParamRecordValueTemplate, createRecordValueTemplate, createReplaceValueTemplate, } from './internal/ot/generator/types';
+export { atomic, ot, record, paramRecord, object, state, State, upOperation, UpOperation, downOperation, DownOperation, TwoWayOperation, createObjectValueTemplate, createTextValueTemplate, createParamRecordValueTemplate, createRecordValueTemplate, createReplaceValueTemplate, } from './internal/ot/generator/types';
 export { OmitVersion } from './internal/ot/generator/omitVersion';
 export { toClientState, serverTransform } from './internal/ot/flocon/room/functions';
 export { template as roomTemplate, dbTemplate as roomDbTemplate, } from './internal/ot/flocon/room/types';

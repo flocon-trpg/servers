@@ -85,7 +85,7 @@ export {
     DownOperation,
     TwoWayOperation,
     createObjectValueTemplate,
-    createTextValueTemplate as createOtValueTemplate,
+    createTextValueTemplate,
     createParamRecordValueTemplate,
     createRecordValueTemplate,
     createReplaceValueTemplate,
