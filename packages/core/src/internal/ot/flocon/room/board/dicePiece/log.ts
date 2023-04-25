@@ -1,14 +1,14 @@
 import { chooseRecord } from '@flocon-trpg/utils';
 import { z } from 'zod';
 import { maybe } from '../../../../../maybe';
+import { toUpOperation } from '../../../../generator/functions';
 import {
     State,
     TwoWayOperation,
     createObjectValueTemplate,
     state,
-    toUpOperation,
     upOperation,
-} from '../../../../generator';
+} from '../../../../generator/types';
 import { record } from '../../../../record';
 import {
     recordUpOperationElementFactory,

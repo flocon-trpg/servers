@@ -1,5 +1,5 @@
 import { Fixtures } from '../../../__test__/fixtures';
-import { diff, toDownOperation, toUpOperation } from '../../generator';
+import { diff, toDownOperation, toUpOperation } from '../../generator/functions';
 import {
     decodeDbState,
     decodeDownOperation,

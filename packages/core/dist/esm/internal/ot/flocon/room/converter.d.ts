@@ -1,4 +1,4 @@
-import { DownOperation, State, UpOperation } from '../../generator';
+import { DownOperation, State, UpOperation } from '../../generator/types';
 import * as Room from './types';
 type RoomState = State<typeof Room.template>;
 type RoomDbState = State<typeof Room.dbTemplate>;

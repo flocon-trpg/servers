@@ -1,6 +1,7 @@
 import { Result } from '@kizahasi/result';
 import { z } from 'zod';
 import { $index, indexObjectTemplateValue, serverTransform } from './array';
+import { diff } from './generator/functions';
 import {
     State,
     TwoWayOperation,
@@ -8,8 +9,7 @@ import {
     createObjectValueTemplate,
     createRecordValueTemplate,
     createReplaceValueTemplate,
-    diff,
-} from './generator';
+} from './generator/types';
 import { isIdRecord } from './record';
 import * as ReplaceOperation from './util/replaceOperation';
 

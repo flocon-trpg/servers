@@ -1,6 +1,6 @@
 import { Result } from '@kizahasi/result';
 import { isStrIndex20, isStrIndex5 } from '../../../indexes';
-import { State, TwoWayOperation, UpOperation } from '../../generator';
+import { State, TwoWayOperation, UpOperation } from '../../generator/types';
 import * as NullableTextOperation from '../../nullableTextOperation';
 import { isIdRecord } from '../../record';
 import * as RecordOperation from '../../recordOperation';

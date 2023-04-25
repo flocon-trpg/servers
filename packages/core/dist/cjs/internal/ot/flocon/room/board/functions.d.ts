@@ -1,4 +1,4 @@
-import { State, TwoWayOperation, UpOperation } from '../../../generator';
+import { State, TwoWayOperation, UpOperation } from '../../../generator/types';
 import { RequestedBy } from '../../../requestedBy';
 import { ServerTransform } from '../../../util/type';
 import * as Room from '../types';

@@ -11,7 +11,7 @@ import { recordToArray } from '@flocon-trpg/utils';
 import * as BoolParam from '../ot/flocon/room/character/boolParam/types';
 import * as Character from '../ot/flocon/room/character/types';
 import * as Room from '../ot/flocon/room/types';
-import { State } from '../ot/generator';
+import { State } from '../ot/generator/types';
 import { FBoolParam } from './boolParam';
 
 const createDefaultState = (): State<typeof BoolParam.template> => ({

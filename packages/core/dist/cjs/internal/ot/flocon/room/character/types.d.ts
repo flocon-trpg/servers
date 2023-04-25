@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { State } from '../../../generator';
+import { State } from '../../../generator/types';
 import * as BoolParam from './boolParam/types';
 import * as NumParam from './numParam/types';
 import * as StrParam from './strParam/types';
@@ -263,7 +263,7 @@ export declare const template: {
                 overriddenParameterName: string | undefined;
             };
         };
-        pieces: import("../../../generator").RecordValueTemplate<{
+        pieces: import("../../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 2;
             readonly $r: 1;
@@ -345,7 +345,7 @@ export declare const template: {
                 };
             };
         }>;
-        privateCommands: import("../../../generator").RecordValueTemplate<{
+        privateCommands: import("../../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 1;
             readonly $r: 1;
@@ -362,7 +362,7 @@ export declare const template: {
                 };
             };
         }>;
-        portraitPieces: import("../../../generator").RecordValueTemplate<{
+        portraitPieces: import("../../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 2;
             readonly $r: 1;

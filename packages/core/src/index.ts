@@ -60,6 +60,17 @@ export {
 export {
     $v,
     $r,
+    toDownOperation,
+    toUpOperation,
+    apply,
+    applyBack,
+    composeDownOperation,
+    restore,
+    diff,
+    clientTransform,
+} from './internal/ot/generator/functions';
+
+export {
     atomic,
     // replace,
     ot,
@@ -73,20 +84,12 @@ export {
     downOperation,
     DownOperation,
     TwoWayOperation,
-    toDownOperation,
-    toUpOperation,
-    apply,
-    applyBack,
-    composeDownOperation,
-    restore,
-    diff,
-    clientTransform,
     createObjectValueTemplate,
     createTextValueTemplate as createOtValueTemplate,
     createParamRecordValueTemplate,
     createRecordValueTemplate,
     createReplaceValueTemplate,
-} from './internal/ot/generator';
+} from './internal/ot/generator/types';
 
 export { OmitVersion } from './internal/ot/generator/omitVersion';
 

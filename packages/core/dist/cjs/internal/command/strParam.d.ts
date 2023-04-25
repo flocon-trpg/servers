@@ -1,6 +1,6 @@
 import { FObject, FValue, OnGettingParams, OnSettingParams } from '@flocon-trpg/flocon-script';
 import * as StrParam from '../ot/flocon/room/character/strParam/types';
-import { State } from '../ot/generator';
+import { State } from '../ot/generator/types';
 export declare class FStrParam extends FObject {
     private readonly strParam;
     constructor(strParam: State<typeof StrParam.template>);

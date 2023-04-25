@@ -1,4 +1,4 @@
-import { State } from '../../generator';
+import { State } from '../../generator/types';
 import * as DicePieceLog from './board/dicePiece/log';
 import * as StringPieceLog from './board/stringPiece/log';
 import * as RoomTypes from './types';

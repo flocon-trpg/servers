@@ -3,7 +3,7 @@ import {
     createObjectValueTemplate,
     createRecordValueTemplate,
     createReplaceValueTemplate,
-} from '../../../generator';
+} from '../../../generator/types';
 import { filePathValue } from '../../filePath/types';
 import * as RollCallParticipant from './rollCallParticipant/types';
 

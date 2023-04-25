@@ -9,7 +9,7 @@ import {
     beginCast,
 } from '@flocon-trpg/flocon-script';
 import * as StrParam from '../ot/flocon/room/character/strParam/types';
-import { State } from '../ot/generator';
+import { State } from '../ot/generator/types';
 
 const value = 'value';
 const isValueSecret = 'isValueSecret';

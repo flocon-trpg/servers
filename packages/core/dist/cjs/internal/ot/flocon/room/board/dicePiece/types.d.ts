@@ -10,7 +10,7 @@ export declare const template: {
             readonly mode: "replace";
             readonly value: z.ZodOptional<z.ZodString>;
         };
-        dice: import("../../../../generator").RecordValueTemplate<{
+        dice: import("../../../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 1;
             readonly $r: 1;

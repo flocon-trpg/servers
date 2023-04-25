@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../../generator';
+import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../../generator/types';
 import * as BoardPositionBase from '../../../boardPosition/types';
 
 export const template = createObjectValueTemplate(

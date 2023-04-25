@@ -1,5 +1,6 @@
 import { recordForEach } from '@flocon-trpg/utils';
-import { State, TwoWayOperation, diff } from '../../generator';
+import { diff } from '../../generator/functions';
+import { State, TwoWayOperation } from '../../generator/types';
 import * as RecordOperation from '../../recordOperation';
 import { replace } from '../../recordOperationElement';
 import { restrict } from '../../requestedBy';

@@ -3,18 +3,18 @@ import { Result } from '@kizahasi/result';
 import produce from 'immer';
 import { groupBy } from 'lodash';
 import { z } from 'zod';
+import { apply, diff } from './generator/functions';
+import { OmitVersion } from './generator/omitVersion';
 import {
     State,
     TwoWayOperation,
     UpOperation,
-    apply,
     createObjectValueTemplate,
     createRecordValueTemplate,
     createReplaceValueTemplate,
-    diff,
-} from './generator';
-import { OmitVersion } from './generator/omitVersion';
-import { isIdRecord } from './record';
+} from './generator/types';
+import { toOtError } from './otError';
+import { StringKeyRecord, isIdRecord } from './record';
 import * as RecordOperation from './recordOperation';
 import { update } from './recordOperationElement';
 import { transform } from './util/array/arrayTransform';
@@ -116,6 +116,42 @@ export const arrayToIndexObjects = <T extends IndexObjectState>(array: ReadonlyO
     return result;
 };
 
+const generateArrayDiff = <TOperation>({
+    prevState,
+    nextState,
+    mapOperation,
+}: {
+    prevState: StringKeyRecord<IndexObjectState>;
+    nextState: StringKeyRecord<IndexObjectState>;
+    mapOperation: (operation: IndexObjectTwoWayOperation) => TOperation;
+}) => {
+    const execDiff = diff(createRecordValueTemplate(indexObjectTemplate));
+
+    const diffResult = execDiff({
+        prevState: mapRecord(prevState, ({ $index }) => ({
+            $v: dummyVersion,
+            $r: dummyVersion,
+            $index,
+        })),
+        nextState: mapRecord(nextState, ({ $index }) => ({
+            $v: dummyVersion,
+            $r: dummyVersion,
+            $index,
+        })),
+    });
+
+    // replaceは存在しないので、updateだけ抽出する
+    return mapRecord(diffResult ?? {}, x =>
+        x.type === update
+            ? {
+                  ...x,
+                  // RecordOperation.compose で型エラーを起こさないためだけに行っている変換。
+                  update: mapOperation(x.update),
+              }
+            : undefined
+    );
+};
+
 /**
  * 配列に対して serverTransform を行い、secondPrime を返します。
  *
@@ -150,9 +186,8 @@ export const serverTransform = <
     }
 
     const execApply = apply(createRecordValueTemplate(indexObjectTemplate));
-    const execDiff = diff(createRecordValueTemplate(indexObjectTemplate));
 
-    const stateAfterSecond = execApply({
+    const arrayObjectAfterSecond = execApply({
         state: mapRecord(params.stateBeforeFirst, ({ $index }) => ({
             $v: dummyVersion,
             $r: dummyVersion,
@@ -165,46 +200,49 @@ export const serverTransform = <
         }),
     });
 
-    if (stateAfterSecond.isError) {
+    if (arrayObjectAfterSecond.isError) {
         // ここに来るということは、クライアントから受け取った Operation が不正(存在しない State に対して update しようとしたなど)であることを示す。だが、その場合は上のRecordOperation.serverTransformですでに弾かれているので、ここには来ないはず。
-        return Result.error('Error at applying an array operation. This is probablly a bug.');
-    }
-
-    const stateAfterSecondAsArray = indexObjectsToArray(stateAfterSecond.value ?? {});
-    if (stateAfterSecondAsArray.isError) {
         return Result.error(
-            'Cannot create a valid array from requested operation. This is probably a bug. Message: ' +
-                stateAfterSecondAsArray.error
+            'Error at applying an array operation. This is probablly a bug. Message: ' +
+                toOtError(arrayObjectAfterSecond.error).message
         );
     }
 
-    const stateBeforeFirstAsArray = indexObjectsToArray(
+    const arrayAfterSecond = indexObjectsToArray(arrayObjectAfterSecond.value ?? {});
+    if (arrayAfterSecond.isError) {
+        return Result.error(
+            'Cannot create a valid array from requested operation. This is probably a bug. Message: ' +
+                arrayAfterSecond.error
+        );
+    }
+
+    const arrayBeforeFirst = indexObjectsToArray(
         mapRecord(params.stateBeforeFirst, ({ $index }) => ({ $index }))
     );
-    const stateAfterFirstAsArray = indexObjectsToArray(
+    const arrayAfterFirst = indexObjectsToArray(
         mapRecord(params.stateAfterFirst, ({ $index }) => ({ $index }))
     );
 
     let finalArray: ReadonlyOtArray<IndexObjectState>;
-    if (stateAfterFirstAsArray.isError) {
+    if (arrayAfterFirst.isError) {
         loggerRef.error(
             '`stateAfterFirst` is invalid as an array. This is probablly a bug or caused by database issues. The order of this array will be rearranged automatically. Message: ' +
-                stateAfterFirstAsArray.error
+                arrayAfterFirst.error
         );
         finalArray = recordToArray(params.stateAfterFirst).sort((x, y) =>
             x.key.localeCompare(y.key)
         );
-    } else if (stateBeforeFirstAsArray.isError) {
+    } else if (arrayBeforeFirst.isError) {
         loggerRef.error(
             '`stateBeforeFirst` is invalid as an array. This is probablly a bug or caused by database issues. The operation to change the order of this array will be ignored. Message: ' +
-                stateBeforeFirstAsArray.error
+                arrayBeforeFirst.error
         );
-        finalArray = stateAfterFirstAsArray.value;
+        finalArray = arrayAfterFirst.value;
     } else {
         const finalArrayResult = transform(
-            stateBeforeFirstAsArray.value,
-            stateAfterFirstAsArray.value,
-            stateAfterSecondAsArray.value,
+            arrayBeforeFirst.value,
+            arrayAfterFirst.value,
+            arrayAfterSecond.value,
             x => x.key
         );
         if (finalArrayResult.isError) {
@@ -217,8 +255,7 @@ export const serverTransform = <
         finalArray = finalArrayResult.value;
     }
 
-    const finalArrayAsRecord = arrayToIndexObjects(finalArray);
-    const stateBeforeIndexRearrangement = RecordOperation.apply({
+    const finalStateBeforeIndexRearrangement = RecordOperation.apply({
         prevState: params.stateAfterFirst,
         operation: resultFirst.value,
         innerApply: ({ prevState, operation }): Result<TServerState> =>
@@ -231,32 +268,17 @@ export const serverTransform = <
                 })
             ),
     });
-    if (stateBeforeIndexRearrangement.isError) {
-        throw new Error('This should not happen. Message: ' + stateBeforeIndexRearrangement.error);
+    if (finalStateBeforeIndexRearrangement.isError) {
+        throw new Error(
+            'This should not happen. Message: ' + finalStateBeforeIndexRearrangement.error
+        );
     }
-    const secondSource = execDiff({
-        prevState: mapRecord(stateBeforeIndexRearrangement.value, ({ $index }) => ({
-            $v: dummyVersion,
-            $r: dummyVersion,
-            $index,
-        })),
-        nextState: mapRecord(finalArrayAsRecord, ({ $index }) => ({
-            $v: dummyVersion,
-            $r: dummyVersion,
-            $index,
-        })),
-    });
 
-    // replaceは存在しないので、updateだけ抽出する
-    const resultSecond = mapRecord(secondSource ?? {}, x =>
-        x.type === update
-            ? {
-                  ...x,
-                  // RecordOperation.compose で型エラーを起こさないためだけに行っている変換。
-                  update: params.mapOperation(x.update),
-              }
-            : undefined
-    );
+    const resultSecond = generateArrayDiff({
+        prevState: finalStateBeforeIndexRearrangement.value,
+        nextState: arrayToIndexObjects(finalArray),
+        mapOperation: params.mapOperation,
+    });
 
     const composed = RecordOperation.compose({
         first: resultFirst.value,
@@ -315,4 +337,205 @@ export const serverTransform = <
     }
 
     return Result.ok(composed.value);
+};
+
+/**
+ * 配列に対して clientTransform を行います。
+ *
+ * 通常の Record の serverTransform の処理（つまり、`$index` 以外のプロパティの処理など）も内部で行われるため、通常の Record の serverTransform を別途実行することは避けてください。
+ */
+export const clientTransform = <
+    TState extends IndexObjectState,
+    TOperation extends IndexObjectUpOperation,
+    TCustomError = string
+>(
+    params: Parameters<
+        typeof RecordOperation.clientTransform<TState, TOperation, TCustomError>
+    >[0] & {
+        innerApply: (params: {
+            prevState: TState;
+            operation: TOperation;
+        }) => Result<TState, string | TCustomError>;
+    }
+): Result<
+    {
+        firstPrime?: RecordOperation.RecordUpOperation<TState, TOperation | IndexObjectUpOperation>;
+        secondPrime?: RecordOperation.RecordUpOperation<
+            TState,
+            TOperation | IndexObjectUpOperation
+        >;
+    },
+    string | TCustomError
+> => {
+    // いったん通常のRecordOperation.clientTransformを行い、エラーがないかどうか確かめる。
+    // Operationの内容に問題がなくともresultFirstの時点では不正な$indexが存在する可能性があるが、この後のresultSecondをcomposeすることで正常になる。
+    const recordOperationTransformResult = RecordOperation.clientTransform(params);
+    if (recordOperationTransformResult.isError) {
+        return recordOperationTransformResult;
+    }
+
+    const execApply = apply(createRecordValueTemplate(indexObjectTemplate));
+
+    const arrayObjectAfterFirst = execApply({
+        state: mapRecord(params.state, ({ $index }) => ({
+            $v: dummyVersion,
+            $r: dummyVersion,
+            $index,
+        })),
+        operation: RecordOperation.mapRecordUpOperation({
+            source: params.first ?? {},
+            mapState: ({ $index }) => ({ $v: dummyVersion, $r: dummyVersion, $index }),
+            mapOperation: ({ $index }) => ({ $v: dummyVersion, $r: dummyVersion, $index }),
+        }),
+    });
+    if (arrayObjectAfterFirst.isError) {
+        // ここに来るということは、クライアントから受け取った Operation が不正(存在しない State に対して update しようとしたなど)であることを示す。だが、その場合は上のRecordOperation.clientTransformですでに弾かれているので、ここには来ないはず。
+        return Result.error(
+            'Error at applying first as an array operation. This is probablly a bug. Message: ' +
+                toOtError(arrayObjectAfterFirst.error).message
+        );
+    }
+
+    const arrayObjectAfterSecond = execApply({
+        state: mapRecord(params.state, ({ $index }) => ({
+            $v: dummyVersion,
+            $r: dummyVersion,
+            $index,
+        })),
+        operation: RecordOperation.mapRecordUpOperation({
+            source: params.second ?? {},
+            mapState: ({ $index }) => ({ $v: dummyVersion, $r: dummyVersion, $index }),
+            mapOperation: ({ $index }) => ({ $v: dummyVersion, $r: dummyVersion, $index }),
+        }),
+    });
+    if (arrayObjectAfterSecond.isError) {
+        // ここに来るということは、クライアントから受け取った Operation が不正(存在しない State に対して update しようとしたなど)であることを示す。だが、その場合は上のRecordOperation.clientTransformですでに弾かれているので、ここには来ないはず。
+        return Result.error(
+            'Error at applying second as an array operation. This is probablly a bug. Message: ' +
+                toOtError(arrayObjectAfterSecond.error).message
+        );
+    }
+
+    const baseArray = indexObjectsToArray(mapRecord(params.state, ({ $index }) => ({ $index })));
+    if (baseArray.isError) {
+        return Result.error('state is invalid as an array. Message: ' + baseArray.error);
+    }
+    const arrayAfterFirst = indexObjectsToArray(
+        mapRecord(arrayObjectAfterFirst.value ?? {}, ({ $index }) => ({ $index }))
+    );
+    if (arrayAfterFirst.isError) {
+        return Result.error(
+            'state applied first is invalid as an array. Message: ' + arrayAfterFirst.error
+        );
+    }
+    const arrayAfterSecond = indexObjectsToArray(
+        mapRecord(arrayObjectAfterSecond.value ?? {}, ({ $index }) => ({ $index }))
+    );
+    if (arrayAfterSecond.isError) {
+        return Result.error(
+            'state applied second is invalid as an array. Message: ' + arrayAfterFirst.error
+        );
+    }
+
+    const finalArrayResult = transform(
+        baseArray.value,
+        arrayAfterFirst.value,
+        arrayAfterSecond.value,
+        x => x.key
+    );
+    if (finalArrayResult.isError) {
+        // 配列のtransformでエラーが発生することは通常はない。
+        return Result.error(
+            'Error at transforming an array operation. This is probablly a bug. Message: ' +
+                finalArrayResult.error
+        );
+    }
+
+    const stateAfterFirst = RecordOperation.apply({
+        prevState: params.state,
+        operation: params.first ?? {},
+        innerApply: ({ prevState, operation }) => params.innerApply({ prevState, operation }),
+    });
+
+    if (stateAfterFirst.isError) {
+        throw new Error('This should not happen. Message: ' + stateAfterFirst.error);
+    }
+
+    const finalStateBeforeIndexRearrangement = RecordOperation.apply({
+        prevState: stateAfterFirst.value,
+        operation: recordOperationTransformResult.value.secondPrime,
+        innerApply: ({ prevState, operation }) => params.innerApply({ prevState, operation }),
+    });
+    if (finalStateBeforeIndexRearrangement.isError) {
+        throw new Error(
+            'This should not happen. Message: ' + finalStateBeforeIndexRearrangement.error
+        );
+    }
+
+    const resultSecond = generateArrayDiff({
+        prevState: finalStateBeforeIndexRearrangement.value,
+        nextState: arrayToIndexObjects(finalArrayResult.value),
+        mapOperation: x => ({
+            [$index]: x[$index] == null ? undefined : { newValue: x[$index].newValue },
+        }),
+    });
+
+    const compose = (first: RecordOperation.RecordUpOperation<TState, TOperation>) =>
+        RecordOperation.compose<
+            { newValue?: TState | undefined },
+            TOperation | IndexObjectUpOperation,
+            TCustomError
+        >({
+            first,
+            second: resultSecond,
+            composeReplaceUpdate: ({ first, second }) => {
+                if (first.newValue === undefined) {
+                    // 通常はここには来ない
+                    return Result.ok(first);
+                }
+                return Result.ok(
+                    produce(first, first => {
+                        if (second.$index === undefined) {
+                            return;
+                        }
+                        if (first.newValue === undefined) {
+                            return;
+                        }
+                        first.newValue.$index = second.$index.newValue;
+                    })
+                );
+            },
+            composeUpdateUpdate: ({ first, second }) => {
+                let composedLinkedListOperation: { newValue: number } | undefined;
+                if (second[$index] === undefined) {
+                    composedLinkedListOperation = first[$index];
+                } else {
+                    composedLinkedListOperation = second[$index];
+                }
+                const result = produce(first, first => {
+                    first.$index = composedLinkedListOperation;
+                });
+                return Result.ok(isIdRecord(result) ? undefined : result);
+            },
+            composeReplaceReplace: () => {
+                throw new Error('This should not happen.');
+            },
+            composeUpdateReplace: () => {
+                throw new Error('This should not happen.');
+            },
+        });
+
+    const firstPrime = compose(recordOperationTransformResult.value.firstPrime ?? {});
+    if (firstPrime.isError) {
+        return firstPrime;
+    }
+    const secondPrime = compose(recordOperationTransformResult.value.secondPrime ?? {});
+    if (secondPrime.isError) {
+        return secondPrime;
+    }
+
+    return Result.ok({
+        firstPrime: isIdRecord(firstPrime.value ?? {}) ? undefined : firstPrime.value,
+        secondPrime: isIdRecord(secondPrime.value ?? {}) ? undefined : secondPrime.value,
+    });
 };

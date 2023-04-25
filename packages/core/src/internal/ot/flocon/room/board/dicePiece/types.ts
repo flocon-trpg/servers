@@ -4,7 +4,7 @@ import {
     createObjectValueTemplate,
     createRecordValueTemplate,
     createReplaceValueTemplate,
-} from '../../../../generator';
+} from '../../../../generator/types';
 import * as Piece from '../../../piece/types';
 import * as DieValueTypes from './dieValue/types';
 

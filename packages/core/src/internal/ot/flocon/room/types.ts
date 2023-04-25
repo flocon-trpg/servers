@@ -5,7 +5,7 @@ import {
     createRecordValueTemplate,
     createReplaceValueTemplate,
     createTextValueTemplate,
-} from '../../generator';
+} from '../../generator/types';
 import * as Bgm from './bgm/types';
 import * as Board from './board/types';
 import * as Character from './character/types';

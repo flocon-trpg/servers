@@ -1,6 +1,6 @@
 import { Result } from '@kizahasi/result';
 import * as Room from '../ot/flocon/room/types';
-import { State } from '../ot/generator';
+import { State } from '../ot/generator/types';
 type RoomState = State<typeof Room.template>;
 declare class CommandError extends Error {
     readonly range?: readonly [number, number] | undefined;

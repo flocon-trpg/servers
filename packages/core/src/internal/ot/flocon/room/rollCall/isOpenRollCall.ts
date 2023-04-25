@@ -1,4 +1,4 @@
-import { State } from '../../../generator';
+import { State } from '../../../generator/types';
 import { getOpenRollCall } from './getOpenRollCall';
 import { template } from './types';
 

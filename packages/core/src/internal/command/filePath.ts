@@ -9,7 +9,7 @@ import {
     beginCast,
 } from '@flocon-trpg/flocon-script';
 import * as FilePath from '../ot/flocon/filePath/types';
-import { State } from '../ot/generator';
+import { State } from '../ot/generator/types';
 
 export const toFFilePath = (
     source: State<typeof FilePath.filePathTemplate>,

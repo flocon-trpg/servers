@@ -1,7 +1,7 @@
 import { FObject, FValue, OnGettingParams, OnSettingParams } from '@flocon-trpg/flocon-script';
 import * as Character from '../ot/flocon/room/character/types';
 import * as Room from '../ot/flocon/room/types';
-import { State } from '../ot/generator';
+import { State } from '../ot/generator/types';
 export declare class FCharacter extends FObject {
     readonly character: State<typeof Character.template>;
     private readonly room;

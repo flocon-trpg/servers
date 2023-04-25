@@ -1,4 +1,4 @@
-import { State, TwoWayOperation, UpOperation } from '../../../generator';
+import { State, TwoWayOperation, UpOperation } from '../../../generator/types';
 import { ServerTransform } from '../../../util/type';
 import { template } from './types';
 export declare const toClientState: (source: State<typeof template>) => State<typeof template>;

@@ -11,7 +11,7 @@ import { recordToArray } from '@flocon-trpg/utils';
 import * as StrParam from '../ot/flocon/room/character/strParam/types';
 import * as Character from '../ot/flocon/room/character/types';
 import * as Room from '../ot/flocon/room/types';
-import { State } from '../ot/generator';
+import { State } from '../ot/generator/types';
 import { FStrParam } from './strParam';
 
 const createDefaultState = (): State<typeof StrParam.template> => ({

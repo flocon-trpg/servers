@@ -1,5 +1,5 @@
 import { Result } from '@kizahasi/result';
-import { State, TwoWayOperation, UpOperation } from '../../../generator';
+import { State, TwoWayOperation, UpOperation } from '../../../generator/types';
 import * as ParamRecordOperation from '../../../paramRecordOperation';
 import { isIdRecord } from '../../../record';
 import * as RecordOperation from '../../../recordOperation';

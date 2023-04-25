@@ -3,7 +3,7 @@ import {
     createObjectValueTemplate,
     createReplaceValueTemplate,
     createTextValueTemplate,
-} from '../../../generator';
+} from '../../../generator/types';
 
 export const Plain = 'Plain';
 export const Markdown = 'Markdown';

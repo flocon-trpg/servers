@@ -19,7 +19,7 @@ export declare const template: {
          *
          * ShapeのPath.dataは、widthとheightがともに100pxの正方形として記述します。コマなどの大きさに応じて自動的にscaleされます。
          * */
-        shapes: import("../../../../generator").RecordValueTemplate<{
+        shapes: import("../../../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 1;
             readonly $r: 1;

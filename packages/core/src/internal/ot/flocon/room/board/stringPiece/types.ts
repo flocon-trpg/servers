@@ -4,7 +4,7 @@ import {
     createObjectValueTemplate,
     createReplaceValueTemplate,
     createTextValueTemplate,
-} from '../../../../generator';
+} from '../../../../generator/types';
 import * as Piece from '../../../piece/types';
 
 export const String = 'String';

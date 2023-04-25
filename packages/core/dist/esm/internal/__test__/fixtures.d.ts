@@ -1,5 +1,5 @@
 import { State, boardTemplate, characterTemplate, roomDbTemplate, roomTemplate } from '../..';
-export declare namespace Fixture {
+export declare namespace Fixtures {
     namespace Participant {
         namespace Spectator {
             const userUid = "SPECTATOR";
@@ -31,4 +31,4 @@ export declare namespace Fixture {
     const complexDbState: State<typeof roomDbTemplate>;
     const complexState: State<typeof roomTemplate>;
 }
-//# sourceMappingURL=fixture.d.ts.map
+//# sourceMappingURL=fixtures.d.ts.map

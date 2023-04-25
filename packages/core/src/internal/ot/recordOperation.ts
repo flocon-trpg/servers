@@ -920,7 +920,7 @@ const transformElement = <TState, TFirstOperation, TSecondOperation, TError = st
     }
 };
 
-export const clientTransform = <TState, TOperation, TError = string>({
+export const clientTransform = <TState, TOperation, TCustomError = string>({
     state,
     first,
     second,
@@ -930,14 +930,14 @@ export const clientTransform = <TState, TOperation, TError = string>({
     state: StringKeyRecord<TState>;
     first?: RecordUpOperation<TState, TOperation>;
     second?: RecordUpOperation<TState, TOperation>;
-    innerTransform: InnerClientTransform<TState, TOperation, TOperation, TError>;
+    innerTransform: InnerClientTransform<TState, TOperation, TOperation, TCustomError>;
     innerDiff: Diff<TState, TOperation>;
 }): Result<
     {
         firstPrime: RecordUpOperation<TState, TOperation> | undefined;
         secondPrime: RecordUpOperation<TState, TOperation> | undefined;
     },
-    string | TError
+    string | TCustomError
 > => {
     if (first == null || second == null) {
         return Result.ok({
@@ -948,7 +948,7 @@ export const clientTransform = <TState, TOperation, TError = string>({
 
     const firstPrime = new Map<string, RecordUpOperationElement<TState, TOperation>>();
     const secondPrime = new Map<string, RecordUpOperationElement<TState, TOperation>>();
-    let error = undefined as { error: string | TError } | undefined;
+    let error = undefined as { error: string | TCustomError } | undefined;
 
     groupJoinMap(recordToMap(first), recordToMap(second)).forEach((group, key) => {
         if (error != null) {

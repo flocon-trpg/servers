@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { maybe } from '../../../../../maybe';
-import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../../generator';
+import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../../generator/types';
 import { filePathValue } from '../../../filePath/types';
 import * as Piece from '../../../piece/types';
 

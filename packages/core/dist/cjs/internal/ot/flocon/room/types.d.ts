@@ -9,7 +9,7 @@ export declare const dbTemplate: {
             readonly mode: "replace";
             readonly value: z.ZodOptional<z.ZodString>;
         };
-        bgms: import("../../generator").RecordValueTemplate<{
+        bgms: import("../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 1;
             readonly $r: 1;
@@ -46,7 +46,7 @@ export declare const dbTemplate: {
                 };
             };
         }>;
-        boolParamNames: import("../../generator").RecordValueTemplate<{
+        boolParamNames: import("../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 1;
             readonly $r: 1;
@@ -58,7 +58,7 @@ export declare const dbTemplate: {
                 };
             };
         }>;
-        boards: import("../../generator").RecordValueTemplate<{
+        boards: import("../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 2;
             readonly $r: 1;
@@ -128,7 +128,7 @@ export declare const dbTemplate: {
                     readonly mode: "replace";
                     readonly value: z.ZodOptional<z.ZodString>;
                 };
-                dicePieces: import("../../generator").RecordValueTemplate<{
+                dicePieces: import("../../generator/types").RecordValueTemplate<{
                     readonly type: "object";
                     readonly $v: 2;
                     readonly $r: 1;
@@ -138,7 +138,7 @@ export declare const dbTemplate: {
                             readonly mode: "replace";
                             readonly value: z.ZodOptional<z.ZodString>;
                         };
-                        dice: import("../../generator").RecordValueTemplate<{
+                        dice: import("../../generator/types").RecordValueTemplate<{
                             readonly type: "object";
                             readonly $v: 1;
                             readonly $r: 1;
@@ -227,7 +227,7 @@ export declare const dbTemplate: {
                         };
                     };
                 }>;
-                imagePieces: import("../../generator").RecordValueTemplate<{
+                imagePieces: import("../../generator/types").RecordValueTemplate<{
                     readonly type: "object";
                     readonly $v: 2;
                     readonly $r: 1;
@@ -329,7 +329,7 @@ export declare const dbTemplate: {
                         };
                     };
                 }>;
-                shapePieces: import("../../generator").RecordValueTemplate<{
+                shapePieces: import("../../generator/types").RecordValueTemplate<{
                     readonly type: "object";
                     readonly $v: 1;
                     readonly $r: 1;
@@ -344,7 +344,7 @@ export declare const dbTemplate: {
                             readonly mode: "replace";
                             readonly value: z.ZodBoolean;
                         };
-                        shapes: import("../../generator").RecordValueTemplate<{
+                        shapes: import("../../generator/types").RecordValueTemplate<{
                             readonly type: "object";
                             readonly $v: 1;
                             readonly $r: 1;
@@ -447,7 +447,7 @@ export declare const dbTemplate: {
                         };
                     };
                 }>;
-                stringPieces: import("../../generator").RecordValueTemplate<{
+                stringPieces: import("../../generator/types").RecordValueTemplate<{
                     readonly type: "object";
                     readonly $v: 2;
                     readonly $r: 1;
@@ -541,7 +541,7 @@ export declare const dbTemplate: {
                 }>;
             };
         }>;
-        characters: import("../../generator").RecordValueTemplate<{
+        characters: import("../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 2;
             readonly $r: 1;
@@ -798,7 +798,7 @@ export declare const dbTemplate: {
                         overriddenParameterName: string | undefined;
                     };
                 };
-                pieces: import("../../generator").RecordValueTemplate<{
+                pieces: import("../../generator/types").RecordValueTemplate<{
                     readonly type: "object";
                     readonly $v: 2;
                     readonly $r: 1;
@@ -880,7 +880,7 @@ export declare const dbTemplate: {
                         };
                     };
                 }>;
-                privateCommands: import("../../generator").RecordValueTemplate<{
+                privateCommands: import("../../generator/types").RecordValueTemplate<{
                     readonly type: "object";
                     readonly $v: 1;
                     readonly $r: 1;
@@ -897,7 +897,7 @@ export declare const dbTemplate: {
                         };
                     };
                 }>;
-                portraitPieces: import("../../generator").RecordValueTemplate<{
+                portraitPieces: import("../../generator/types").RecordValueTemplate<{
                     readonly type: "object";
                     readonly $v: 2;
                     readonly $r: 1;
@@ -1006,7 +1006,7 @@ export declare const dbTemplate: {
             readonly mode: "ot";
             readonly nullable: true;
         };
-        memos: import("../../generator").RecordValueTemplate<{
+        memos: import("../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 1;
             readonly $r: 1;
@@ -1033,7 +1033,7 @@ export declare const dbTemplate: {
                 };
             };
         }>;
-        numParamNames: import("../../generator").RecordValueTemplate<{
+        numParamNames: import("../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 1;
             readonly $r: 1;
@@ -1045,7 +1045,7 @@ export declare const dbTemplate: {
                 };
             };
         }>;
-        rollCalls: import("../../generator").RecordValueTemplate<{
+        rollCalls: import("../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 1;
             readonly $r: 1;
@@ -1074,7 +1074,7 @@ export declare const dbTemplate: {
                         reason: "Closed";
                     }>>;
                 };
-                participants: import("../../generator").RecordValueTemplate<{
+                participants: import("../../generator/types").RecordValueTemplate<{
                     readonly type: "object";
                     readonly $v: 1;
                     readonly $r: 1;
@@ -1177,7 +1177,7 @@ export declare const dbTemplate: {
             readonly mode: "ot";
             readonly nullable: false;
         };
-        strParamNames: import("../../generator").RecordValueTemplate<{
+        strParamNames: import("../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 1;
             readonly $r: 1;
@@ -1206,7 +1206,7 @@ export declare const template: {
             readonly mode: "ot";
             readonly nullable: false;
         };
-        participants: import("../../generator").RecordValueTemplate<{
+        participants: import("../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 2;
             readonly $r: 1;
@@ -1228,7 +1228,7 @@ export declare const template: {
             readonly mode: "replace";
             readonly value: z.ZodOptional<z.ZodString>;
         };
-        bgms: import("../../generator").RecordValueTemplate<{
+        bgms: import("../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 1;
             readonly $r: 1;
@@ -1265,7 +1265,7 @@ export declare const template: {
                 };
             };
         }>;
-        boolParamNames: import("../../generator").RecordValueTemplate<{
+        boolParamNames: import("../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 1;
             readonly $r: 1;
@@ -1277,7 +1277,7 @@ export declare const template: {
                 };
             };
         }>;
-        boards: import("../../generator").RecordValueTemplate<{
+        boards: import("../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 2;
             readonly $r: 1;
@@ -1347,7 +1347,7 @@ export declare const template: {
                     readonly mode: "replace";
                     readonly value: z.ZodOptional<z.ZodString>;
                 };
-                dicePieces: import("../../generator").RecordValueTemplate<{
+                dicePieces: import("../../generator/types").RecordValueTemplate<{
                     readonly type: "object";
                     readonly $v: 2;
                     readonly $r: 1;
@@ -1357,7 +1357,7 @@ export declare const template: {
                             readonly mode: "replace";
                             readonly value: z.ZodOptional<z.ZodString>;
                         };
-                        dice: import("../../generator").RecordValueTemplate<{
+                        dice: import("../../generator/types").RecordValueTemplate<{
                             readonly type: "object";
                             readonly $v: 1;
                             readonly $r: 1;
@@ -1446,7 +1446,7 @@ export declare const template: {
                         };
                     };
                 }>;
-                imagePieces: import("../../generator").RecordValueTemplate<{
+                imagePieces: import("../../generator/types").RecordValueTemplate<{
                     readonly type: "object";
                     readonly $v: 2;
                     readonly $r: 1;
@@ -1548,7 +1548,7 @@ export declare const template: {
                         };
                     };
                 }>;
-                shapePieces: import("../../generator").RecordValueTemplate<{
+                shapePieces: import("../../generator/types").RecordValueTemplate<{
                     readonly type: "object";
                     readonly $v: 1;
                     readonly $r: 1;
@@ -1563,7 +1563,7 @@ export declare const template: {
                             readonly mode: "replace";
                             readonly value: z.ZodBoolean;
                         };
-                        shapes: import("../../generator").RecordValueTemplate<{
+                        shapes: import("../../generator/types").RecordValueTemplate<{
                             readonly type: "object";
                             readonly $v: 1;
                             readonly $r: 1;
@@ -1666,7 +1666,7 @@ export declare const template: {
                         };
                     };
                 }>;
-                stringPieces: import("../../generator").RecordValueTemplate<{
+                stringPieces: import("../../generator/types").RecordValueTemplate<{
                     readonly type: "object";
                     readonly $v: 2;
                     readonly $r: 1;
@@ -1760,7 +1760,7 @@ export declare const template: {
                 }>;
             };
         }>;
-        characters: import("../../generator").RecordValueTemplate<{
+        characters: import("../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 2;
             readonly $r: 1;
@@ -2017,7 +2017,7 @@ export declare const template: {
                         overriddenParameterName: string | undefined;
                     };
                 };
-                pieces: import("../../generator").RecordValueTemplate<{
+                pieces: import("../../generator/types").RecordValueTemplate<{
                     readonly type: "object";
                     readonly $v: 2;
                     readonly $r: 1;
@@ -2099,7 +2099,7 @@ export declare const template: {
                         };
                     };
                 }>;
-                privateCommands: import("../../generator").RecordValueTemplate<{
+                privateCommands: import("../../generator/types").RecordValueTemplate<{
                     readonly type: "object";
                     readonly $v: 1;
                     readonly $r: 1;
@@ -2116,7 +2116,7 @@ export declare const template: {
                         };
                     };
                 }>;
-                portraitPieces: import("../../generator").RecordValueTemplate<{
+                portraitPieces: import("../../generator/types").RecordValueTemplate<{
                     readonly type: "object";
                     readonly $v: 2;
                     readonly $r: 1;
@@ -2225,7 +2225,7 @@ export declare const template: {
             readonly mode: "ot";
             readonly nullable: true;
         };
-        memos: import("../../generator").RecordValueTemplate<{
+        memos: import("../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 1;
             readonly $r: 1;
@@ -2252,7 +2252,7 @@ export declare const template: {
                 };
             };
         }>;
-        numParamNames: import("../../generator").RecordValueTemplate<{
+        numParamNames: import("../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 1;
             readonly $r: 1;
@@ -2264,7 +2264,7 @@ export declare const template: {
                 };
             };
         }>;
-        rollCalls: import("../../generator").RecordValueTemplate<{
+        rollCalls: import("../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 1;
             readonly $r: 1;
@@ -2293,7 +2293,7 @@ export declare const template: {
                         reason: "Closed";
                     }>>;
                 };
-                participants: import("../../generator").RecordValueTemplate<{
+                participants: import("../../generator/types").RecordValueTemplate<{
                     readonly type: "object";
                     readonly $v: 1;
                     readonly $r: 1;
@@ -2396,7 +2396,7 @@ export declare const template: {
             readonly mode: "ot";
             readonly nullable: false;
         };
-        strParamNames: import("../../generator").RecordValueTemplate<{
+        strParamNames: import("../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 1;
             readonly $r: 1;

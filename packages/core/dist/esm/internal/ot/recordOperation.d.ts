@@ -158,16 +158,16 @@ type Diff<TState, TOperation> = (params: {
     prevState: TState;
     nextState: TState;
 }) => TOperation | undefined;
-export declare const clientTransform: <TState, TOperation, TError = string>({ state, first, second, innerTransform, innerDiff, }: {
+export declare const clientTransform: <TState, TOperation, TCustomError = string>({ state, first, second, innerTransform, innerDiff, }: {
     state: StringKeyRecord<TState>;
     first?: RecordUpOperation<TState, TOperation> | undefined;
     second?: RecordUpOperation<TState, TOperation> | undefined;
-    innerTransform: InnerClientTransform<TState, TOperation, TOperation, TError>;
+    innerTransform: InnerClientTransform<TState, TOperation, TOperation, TCustomError>;
     innerDiff: Diff<TState, TOperation>;
 }) => Result<{
     firstPrime: RecordUpOperation<TState, TOperation> | undefined;
     secondPrime: RecordUpOperation<TState, TOperation> | undefined;
-}, string | TError>;
+}, string | TCustomError>;
 export declare const diff: <TState, TOperation>({ prevState, nextState, innerDiff, }: {
     prevState: StringKeyRecord<TState>;
     nextState: StringKeyRecord<TState>;

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { State, TwoWayOperation } from '../../../../generator';
+import { State, TwoWayOperation } from '../../../../generator/types';
 import * as DicePieceValueTypes from './types';
 export declare const type: z.ZodUnion<[z.ZodObject<{
     $v: z.ZodLiteral<2>;

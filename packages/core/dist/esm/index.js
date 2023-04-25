@@ -2,12 +2,12 @@ import { z } from 'zod';
 import { Result } from '@kizahasi/result';
 import { LocalDate, LocalDateTime, LocalTime, OffsetDateTime, parse as parse$2 } from '@ltd/j-toml';
 import { FObject, FBoolean, ScriptError, beginCast, FFunction, FRecord, FString, FType, FNumber, FRecordRef, test, arrayClass, createConsoleClass, exec } from '@flocon-trpg/flocon-script';
-import { recordToArray, recordToMap, mapToRecord, groupJoinMap, both, right, left, recordForEach, chooseRecord, mapRecord, loggerRef, keyNames } from '@flocon-trpg/utils';
+import { recordToArray, mapRecord, keyNames, recordToMap, mapToRecord, groupJoinMap, both, right, left, recordForEach, chooseRecord, loggerRef, isReadonlyNonEmptyArray, groupJoinArray, pairwiseIterable, DualKeyMap } from '@flocon-trpg/utils';
 import { cloneDeep, groupBy, maxBy } from 'lodash';
-import { deserializeUpOperation, apply as apply$5, serializeTwoWayOperation, diff as diff$5, deserizalizeTwoWayOperation, toUpOperation as toUpOperation$3, serializeUpOperation, deserializeDownOperation, applyBack as applyBack$5, composeDownOperation as composeDownOperation$4, serializeDownOperation, applyBackAndRestore, transformUpOperation, toDownOperation as toDownOperation$3, applyAndRestore, transformTwoWayOperation } from '@kizahasi/ot-string';
+import { deserializeUpOperation, apply as apply$6, serializeTwoWayOperation, diff as diff$5, deserizalizeTwoWayOperation, toUpOperation as toUpOperation$3, serializeUpOperation, deserializeDownOperation, applyBack as applyBack$5, composeDownOperation as composeDownOperation$4, serializeDownOperation, applyBackAndRestore, transformUpOperation, toDownOperation as toDownOperation$3, applyAndRestore, transformTwoWayOperation } from '@kizahasi/ot-string';
 import truncate from 'truncate-utf8-bytes';
 import produce from 'immer';
-import '@kizahasi/ot-core';
+import { OperationBuilder, PositiveInt, transform as transform$1, delete$, apply as apply$7 } from '@kizahasi/ot-core';
 
 const anonymous = 'anonymous';
 const authToken = 'authToken';
@@ -890,12 +890,12 @@ const upOperationUnit = z.union([
     }),
 ]);
 const upOperation$2 = z.array(upOperationUnit);
-const apply$4 = (state, action) => {
+const apply$5 = (state, action) => {
     const action$ = deserializeUpOperation(action);
     if (action$ == null) {
         return Result.ok(state);
     }
-    return apply$5({
+    return apply$6({
         prevState: state,
         upOperation: action$,
     });
@@ -1004,7 +1004,7 @@ const serverTransform$r = ({ first, second, prevState, }) => {
     }
     return Result.ok(result.value.secondPrime);
 };
-const clientTransform$4 = ({ first, second, }) => {
+const clientTransform$5 = ({ first, second, }) => {
     const first$ = first == null ? undefined : deserializeUpOperation(first);
     if (first$ === undefined) {
         const second$ = second == null ? undefined : deserializeUpOperation(second);
@@ -1120,14 +1120,14 @@ const toDownOperation$1 = (source) => {
         update: toDownOperation$2(source.update),
     };
 };
-const apply$3 = (state, action) => {
+const apply$4 = (state, action) => {
     if (action.type === replace$1) {
         return Result.ok(action.replace.newValue);
     }
     if (state == null) {
         return Result.error(stateShouldNotBeUndefinedMessage);
     }
-    return apply$4(state, action.update);
+    return apply$5(state, action.update);
 };
 const applyBack$3 = (state, action) => {
     if (action.type === replace$1) {
@@ -1306,7 +1306,7 @@ const serverTransform$q = ({ first, second, prevState, }) => {
         update: xformResult.value,
     });
 };
-const clientTransform$3 = ({ first, second, }) => {
+const clientTransform$4 = ({ first, second, }) => {
     if (first == null || second == null) {
         return Result.ok({
             firstPrime: first,
@@ -1345,7 +1345,7 @@ const clientTransform$3 = ({ first, second, }) => {
         });
     }
     if (second.type === update$2) {
-        const xformResult = clientTransform$4({
+        const xformResult = clientTransform$5({
             first: first.update,
             second: second.update,
         });
@@ -1398,932 +1398,12 @@ const isIdRecord = (source) => {
 };
 const record$1 = (value) => z.record(value.optional());
 
-// (不正な|悪意のある)キーが混入するおそれがあるのはserverTransformのときのみなので、serverTransform以外では使わなくてよい
-const isValidKey = (key) => {
-    // Firebase Authenticationのuidは28文字のようなので、最低でもその文字数は許容しなければならない
-    if (key.length >= 40) {
-        return false;
-    }
-    return key.match(/^([0-9a-zA-Z]|-|_)+$/g) != null;
-};
-
-const restore$2 = ({ nextState: unsafeNextState, downOperation: unsafeDownOperation, innerRestore, }) => {
-    const nextState = recordToMap(unsafeNextState);
-    if (unsafeDownOperation == null) {
-        return Result.ok({
-            prevState: mapToRecord(nextState),
-            twoWayOperation: undefined,
-        });
-    }
-    const prevState = new Map(nextState);
-    const twoWayOperation = new Map();
-    for (const [key, value] of recordToMap(unsafeDownOperation)) {
-        const nextStateElement = nextState.get(key);
-        if (nextStateElement === undefined) {
-            return Result.error(`tried to update "${key}", but nextState does not have such a key`);
-        }
-        const restored = innerRestore({
-            downOperation: value,
-            nextState: nextStateElement,
-            key,
-        });
-        if (restored.isError) {
-            return restored;
-        }
-        if (restored.value === undefined) {
-            continue;
-        }
-        prevState.set(key, restored.value.prevState);
-        if (restored.value.twoWayOperation !== undefined) {
-            twoWayOperation.set(key, restored.value.twoWayOperation);
-        }
-    }
-    return Result.ok({
-        prevState: mapToRecord(prevState),
-        twoWayOperation: twoWayOperation.size === 0 ? undefined : mapToRecord(twoWayOperation),
-    });
-};
-const apply$2 = ({ prevState: unsafePrevState, operation, innerApply, defaultState, }) => {
-    if (operation == null) {
-        return Result.ok(unsafePrevState);
-    }
-    const prevState = recordToMap(unsafePrevState);
-    const nextState = new Map(prevState);
-    for (const [key, value] of recordToMap(operation)) {
-        const prevStateElement = prevState.get(key) ?? defaultState;
-        const newValue = innerApply({
-            operation: value,
-            prevState: prevStateElement,
-            key,
-        });
-        if (newValue.isError) {
-            return newValue;
-        }
-        nextState.set(key, newValue.value);
-    }
-    return Result.ok(mapToRecord(nextState));
-};
-const applyBack$2 = ({ nextState: unsafeNextState, operation, innerApplyBack, defaultState, }) => {
-    if (operation == null) {
-        return Result.ok(unsafeNextState);
-    }
-    const nextState = recordToMap(unsafeNextState);
-    const prevState = new Map(nextState);
-    for (const [key, value] of recordToMap(operation)) {
-        const nextStateElement = nextState.get(key) ?? defaultState;
-        const oldValue = innerApplyBack({
-            operation: value,
-            nextState: nextStateElement,
-            key,
-        });
-        if (oldValue.isError) {
-            return oldValue;
-        }
-        prevState.set(key, oldValue.value);
-    }
-    return Result.ok(mapToRecord(prevState));
-};
-// UpOperation、DownOperation、TwoWayOperation のいずれにも使用可能なので、composeDownOperationではなくcomposeという汎用的な名前を付けている。
-const compose$1 = ({ first, second, innerCompose, }) => {
-    if (first == null) {
-        return Result.ok(second == null || isEmptyRecord(second) ? undefined : second);
-    }
-    if (second == null) {
-        return Result.ok(first == null || isEmptyRecord(first) ? undefined : first);
-    }
-    const result = new Map();
-    for (const [key, groupJoined] of groupJoinMap(recordToMap(first), recordToMap(second))) {
-        switch (groupJoined.type) {
-            case left:
-                result.set(key, groupJoined.left);
-                continue;
-            case right:
-                result.set(key, groupJoined.right);
-                continue;
-            case both: {
-                const update = innerCompose({
-                    first: groupJoined.left,
-                    second: groupJoined.right,
-                    key,
-                });
-                if (update.isError) {
-                    return update;
-                }
-                if (update.value !== undefined) {
-                    result.set(key, update.value);
-                }
-                continue;
-            }
-        }
-    }
-    return Result.ok(result.size === 0 ? undefined : mapToRecord(result));
-};
-/** Make sure `apply(stateBeforeFirst, first) = stateAfterFirst` */
-const serverTransform$p = ({ first: unsafeFirst, second: unsafeSecond, stateBeforeFirst: unsafeStateBeforeFirst, stateAfterFirst: unsafeStateAfterFirst, innerTransform, defaultState, }) => {
-    if (unsafeSecond === undefined) {
-        return Result.ok(undefined);
-    }
-    const result = new Map();
-    const prevState = recordToMap(unsafeStateBeforeFirst);
-    const nextState = recordToMap(unsafeStateAfterFirst);
-    const first = unsafeFirst == null ? undefined : recordToMap(unsafeFirst);
-    for (const [key, operation] of recordToMap(unsafeSecond)) {
-        if (!isValidKey(key)) {
-            return Result.error(`${key} is not a valid key.`);
-        }
-        const innerPrevState = prevState.get(key) ?? defaultState;
-        const innerNextState = nextState.get(key) ?? defaultState;
-        const innerFirst = first == null ? undefined : first.get(key);
-        const transformed = innerTransform({
-            first: innerFirst,
-            second: operation,
-            prevState: innerPrevState,
-            nextState: innerNextState,
-            key,
-        });
-        if (transformed.isError) {
-            return transformed;
-        }
-        const transformedUpdate = transformed.value;
-        if (transformedUpdate !== undefined) {
-            result.set(key, transformedUpdate);
-        }
-    }
-    return Result.ok(result.size === 0 ? undefined : mapToRecord(result));
-};
-const clientTransform$2 = ({ state, first, second, innerTransform, defaultState, }) => {
-    if (first === undefined || second === undefined) {
-        return Result.ok({
-            firstPrime: first === undefined || isEmptyRecord(first) ? undefined : first,
-            secondPrime: second === undefined || isEmptyRecord(second) ? undefined : second,
-        });
-    }
-    const firstPrime = new Map();
-    const secondPrime = new Map();
-    let error = undefined;
-    groupJoinMap(recordToMap(first), recordToMap(second)).forEach((group, key) => {
-        if (error != null) {
-            return;
-        }
-        switch (group.type) {
-            case left: {
-                firstPrime.set(key, group.left);
-                return;
-            }
-            case right: {
-                secondPrime.set(key, group.right);
-                return;
-            }
-            case both: {
-                const s = state[key] ?? defaultState;
-                const xform = innerTransform({
-                    state: s,
-                    first: group.left,
-                    second: group.right,
-                });
-                if (xform.isError) {
-                    error = { error: xform.error };
-                    return;
-                }
-                if (xform.value.firstPrime !== undefined) {
-                    firstPrime.set(key, xform.value.firstPrime);
-                }
-                if (xform.value.secondPrime !== undefined) {
-                    secondPrime.set(key, xform.value.secondPrime);
-                }
-                return;
-            }
-        }
-    });
-    if (error != null) {
-        return Result.error(error.error);
-    }
-    return Result.ok({
-        firstPrime: firstPrime.size === 0 ? undefined : mapToRecord(firstPrime),
-        secondPrime: secondPrime.size === 0 ? undefined : mapToRecord(secondPrime),
-    });
-};
-const diff$2 = ({ prevState, nextState, innerDiff, }) => {
-    const result = new Map();
-    for (const [key, value] of groupJoinMap(recordToMap(prevState), recordToMap(nextState))) {
-        let prevState = undefined;
-        let nextState = undefined;
-        switch (value.type) {
-            case left:
-                prevState = value.left;
-                break;
-            case right: {
-                nextState = value.right;
-                break;
-            }
-            case both: {
-                prevState = value.left;
-                nextState = value.right;
-                break;
-            }
-        }
-        const diffResult = innerDiff({ prevState, nextState, key });
-        if (diffResult === undefined) {
-            continue;
-        }
-        result.set(key, diffResult);
-        continue;
-    }
-    if (result.size === 0) {
-        return undefined;
-    }
-    return mapToRecord(result);
-};
-
-/** Make sure `apply(prevState, source) = nextState` */
-const toClientState$i = ({ serverState, isPrivate, toClientState, }) => {
-    if (serverState == null) {
-        return undefined;
-    }
-    const result = new Map();
-    recordForEach(serverState, (value, key) => {
-        if (isPrivate(value, key)) {
-            return;
-        }
-        result.set(key, toClientState({ state: value, key }));
-    });
-    return mapToRecord(result);
-};
-// composeDownOperationは、レコード内の同一キーを時系列順でremove→addしたものをcomposeすると、本来はupdateになるべきだが、replaceになってしまうという仕様がある。だが、このrestore関数ではそれをupdateに変換してくれる。その代わり、innerDiffはdownでなくtwoWayである必要がある。
-const restore$1 = ({ nextState, downOperation, innerRestore, innerDiff, }) => {
-    if (downOperation == null) {
-        return Result.ok({
-            prevState: nextState,
-            twoWayOperation: undefined,
-        });
-    }
-    const prevState = recordToMap(nextState);
-    const twoWayOperation = new Map();
-    for (const [key, value] of recordToMap(downOperation)) {
-        switch (value.type) {
-            case 'replace': {
-                const oldValue = value.replace.oldValue;
-                const newValue = nextState[key];
-                if (oldValue === undefined) {
-                    prevState.delete(key);
-                }
-                else {
-                    prevState.set(key, oldValue);
-                }
-                if (oldValue === undefined) {
-                    if (newValue === undefined) {
-                        break;
-                    }
-                    twoWayOperation.set(key, {
-                        type: 'replace',
-                        replace: { oldValue, newValue },
-                    });
-                    break;
-                }
-                if (newValue === undefined) {
-                    twoWayOperation.set(key, {
-                        type: 'replace',
-                        replace: { oldValue, newValue: undefined },
-                    });
-                    break;
-                }
-                const diff = innerDiff({
-                    key,
-                    prevState: oldValue,
-                    nextState: newValue,
-                });
-                if (diff !== undefined) {
-                    twoWayOperation.set(key, { type: 'update', update: diff });
-                }
-                break;
-            }
-            case 'update': {
-                const nextStateElement = nextState[key];
-                if (nextStateElement === undefined) {
-                    return Result.error(`tried to update "${key}", but nextState does not have such a key`);
-                }
-                const restored = innerRestore({
-                    key,
-                    downOperation: value.update,
-                    nextState: nextStateElement,
-                });
-                if (restored.isError) {
-                    return restored;
-                }
-                prevState.set(key, restored.value.prevState);
-                if (restored.value.twoWayOperation !== undefined) {
-                    twoWayOperation.set(key, {
-                        type: 'update',
-                        update: restored.value.twoWayOperation,
-                    });
-                }
-                break;
-            }
-        }
-    }
-    return Result.ok({
-        prevState: mapToRecord(prevState),
-        twoWayOperation: twoWayOperation.size === 0 ? undefined : mapToRecord(twoWayOperation),
-    });
-};
-// replace によって、存在しないキーを削除しようとしたり、すでに存在するキーに上書きするような operation は、現時点では許容している。だが、将来禁止するかもしれない。
-const apply$1 = ({ prevState, operation, innerApply, }) => {
-    if (operation == null) {
-        return Result.ok(prevState);
-    }
-    const nextState = recordToMap(prevState);
-    for (const [key, value] of recordToMap(operation)) {
-        switch (value.type) {
-            case 'replace': {
-                if (value.replace.newValue === undefined) {
-                    nextState.delete(key);
-                }
-                else {
-                    nextState.set(key, value.replace.newValue);
-                }
-                break;
-            }
-            case 'update': {
-                const prevStateElement = prevState[key];
-                if (prevStateElement === undefined) {
-                    return Result.error(`tried to update "${key}", but prevState does not have such a key`);
-                }
-                const newValue = innerApply({
-                    key,
-                    operation: value.update,
-                    prevState: prevStateElement,
-                });
-                if (newValue.isError) {
-                    return newValue;
-                }
-                nextState.set(key, newValue.value);
-                break;
-            }
-        }
-    }
-    return Result.ok(mapToRecord(nextState));
-};
-// replace によって、存在しないキーを削除しようとしたり、すでに存在するキーに上書きするような operation は、現時点では許容している。だが、将来禁止するかもしれない。
-const applyBack$1 = ({ nextState, operation, innerApplyBack, }) => {
-    if (operation == null) {
-        return Result.ok(nextState);
-    }
-    const prevState = recordToMap(nextState);
-    for (const [key, value] of recordToMap(operation)) {
-        switch (value.type) {
-            case 'replace': {
-                if (value.replace.oldValue === undefined) {
-                    prevState.delete(key);
-                }
-                else {
-                    prevState.set(key, value.replace.oldValue);
-                }
-                break;
-            }
-            case 'update': {
-                const nextStateElement = nextState[key];
-                if (nextStateElement === undefined) {
-                    return Result.error(`tried to update "${key}", but nextState does not have such a key`);
-                }
-                const oldValue = innerApplyBack({
-                    key,
-                    operation: value.update,
-                    state: nextStateElement,
-                });
-                if (oldValue.isError) {
-                    return oldValue;
-                }
-                prevState.set(key, oldValue.value);
-                break;
-            }
-        }
-    }
-    return Result.ok(mapToRecord(prevState));
-};
-// stateが必要ないため処理を高速化&簡略化できるが、その代わり戻り値のreplaceにおいて oldValue === undefined && newValue === undefined もしくは oldValue !== undefined && newValue !== undefinedになるケースがある。
-const compose = ({ first, second, composeReplaceReplace, composeReplaceUpdate, composeUpdateReplace, composeUpdateUpdate, }) => {
-    if (first == null) {
-        return Result.ok(second == null || isEmptyRecord(second) ? undefined : second);
-    }
-    if (second == null) {
-        return Result.ok(first == null || isEmptyRecord(first) ? undefined : first);
-    }
-    const result = new Map();
-    for (const [key, groupJoined] of groupJoinMap(recordToMap(first), recordToMap(second))) {
-        switch (groupJoined.type) {
-            case left:
-                switch (groupJoined.left.type) {
-                    case 'replace':
-                        result.set(key, {
-                            type: 'replace',
-                            replace: groupJoined.left.replace,
-                        });
-                        continue;
-                    case 'update':
-                        result.set(key, {
-                            type: 'update',
-                            update: groupJoined.left.update,
-                        });
-                        continue;
-                }
-                break;
-            case right:
-                switch (groupJoined.right.type) {
-                    case 'replace':
-                        result.set(key, {
-                            type: 'replace',
-                            replace: groupJoined.right.replace,
-                        });
-                        continue;
-                    case 'update':
-                        result.set(key, {
-                            type: 'update',
-                            update: groupJoined.right.update,
-                        });
-                        continue;
-                }
-                break;
-            case both:
-                switch (groupJoined.left.type) {
-                    case 'replace':
-                        switch (groupJoined.right.type) {
-                            case 'replace': {
-                                const composed = composeReplaceReplace({
-                                    first: groupJoined.left.replace,
-                                    second: groupJoined.right.replace,
-                                    key,
-                                });
-                                if (composed.isError) {
-                                    return composed;
-                                }
-                                if (composed.value === undefined) {
-                                    continue;
-                                }
-                                result.set(key, {
-                                    type: 'replace',
-                                    replace: composed.value,
-                                });
-                                continue;
-                            }
-                            case 'update': {
-                                const composed = composeReplaceUpdate({
-                                    first: groupJoined.left.replace,
-                                    second: groupJoined.right.update,
-                                    key,
-                                });
-                                if (composed.isError) {
-                                    return composed;
-                                }
-                                if (composed.value === undefined) {
-                                    continue;
-                                }
-                                result.set(key, {
-                                    type: 'replace',
-                                    replace: composed.value,
-                                });
-                                continue;
-                            }
-                        }
-                        continue;
-                    case 'update':
-                        switch (groupJoined.right.type) {
-                            case 'replace': {
-                                const composed = composeUpdateReplace({
-                                    first: groupJoined.left.update,
-                                    second: groupJoined.right.replace,
-                                    key,
-                                });
-                                if (composed.isError) {
-                                    return composed;
-                                }
-                                if (composed.value === undefined) {
-                                    continue;
-                                }
-                                result.set(key, {
-                                    type: 'replace',
-                                    replace: composed.value,
-                                });
-                                continue;
-                            }
-                            case 'update': {
-                                const composed = composeUpdateUpdate({
-                                    first: groupJoined.left.update,
-                                    second: groupJoined.right.update,
-                                    key,
-                                });
-                                if (composed.isError) {
-                                    return composed;
-                                }
-                                if (composed.value === undefined) {
-                                    continue;
-                                }
-                                result.set(key, {
-                                    type: 'update',
-                                    update: composed.value,
-                                });
-                                continue;
-                            }
-                        }
-                }
-                break;
-        }
-    }
-    return Result.ok(result.size === 0 ? undefined : mapToRecord(result));
-};
-const composeDownOperation$1 = ({ first, second, innerApplyBack, innerCompose, }) => {
-    return compose({
-        first,
-        second,
-        composeReplaceReplace: params => {
-            return Result.ok(params.first);
-        },
-        composeReplaceUpdate: params => {
-            return Result.ok(params.first);
-        },
-        composeUpdateReplace: params => {
-            if (params.second.oldValue === undefined) {
-                return Result.error(`first is update, but second.oldValue is null. the key is "${params.key}".`);
-            }
-            const firstOldValue = innerApplyBack({
-                key: params.key,
-                operation: params.first,
-                state: params.second.oldValue,
-            });
-            if (firstOldValue.isError) {
-                return firstOldValue;
-            }
-            return Result.ok({ oldValue: firstOldValue.value });
-        },
-        composeUpdateUpdate: params => {
-            return innerCompose({
-                key: params.key,
-                first: params.first,
-                second: params.second,
-            });
-        },
-    });
-};
-/** Make sure `apply(stateBeforeFirst, first) = stateAfterFirst` */
-const serverTransformWithoutValidation = ({ first, second, stateBeforeFirst, stateAfterFirst, innerTransform, toServerState, cancellationPolicy, }) => {
-    // 現在のCharacterの全体Privateの仕組みだと、PrivateになっているCharacterをupdateもしくはremoveしようとしてもエラーは出ない（最新の状態でPrivateになっているかどうかはクライアント側はわからないので、代わりにエラーを返すのは問題がある）。だが、現在のこのtransformのコードだと、存在しないCharacterをupdateもしくはremoveしようとするとエラーを返す。このため、keyを Brute-force attackすることで、PrivateになっているCharacterが存在することを理論上は判別できてしまう。だが、中の値は見ることができないので、現状のままでも問題ないと考えている。
-    if (second === undefined) {
-        return Result.ok(undefined);
-    }
-    const result = new Map();
-    for (const [key, operation] of recordToMap(second)) {
-        if (!isValidKey(key)) {
-            return Result.error(`"${key}" is not a valid key.`);
-        }
-        switch (operation.type) {
-            case replace$1: {
-                const innerPrevState = stateBeforeFirst?.[key];
-                const innerNextState = stateAfterFirst?.[key];
-                /**** requested to remove ****/
-                if (operation.replace.newValue === undefined) {
-                    if (innerPrevState === undefined) {
-                        return Result.error(`"${key}" was not found at requested revision. It is not allowed to try to remove non-existing element.`);
-                    }
-                    if (innerNextState === undefined) {
-                        // removeを試みたが、既に誰かによってremoveされているので何もする必要がない。よって終了。
-                        break;
-                    }
-                    if (cancellationPolicy.cancelRemove) {
-                        if (cancellationPolicy.cancelRemove({
-                            key,
-                            state: innerNextState,
-                        })) {
-                            break;
-                        }
-                    }
-                    result.set(key, {
-                        type: replace$1,
-                        replace: {
-                            oldValue: innerNextState,
-                            newValue: undefined,
-                        },
-                    });
-                    break;
-                }
-                /**** requested to add ****/
-                if (innerPrevState !== undefined) {
-                    return Result.error(`"${key}" was found at requested revision. When adding a state, old value must be empty.`);
-                }
-                if (innerNextState !== undefined) {
-                    // addを試みたが、既に誰かによってaddされているので何もする必要がない。よって終了。
-                    break;
-                }
-                const newValue = toServerState(operation.replace.newValue, key);
-                if (cancellationPolicy.cancelCreate) {
-                    if (cancellationPolicy.cancelCreate({ key, newState: newValue })) {
-                        break;
-                    }
-                }
-                result.set(key, {
-                    type: replace$1,
-                    replace: {
-                        oldValue: undefined,
-                        newValue,
-                    },
-                });
-                break;
-            }
-            case update$2: {
-                const innerPrevState = stateBeforeFirst?.[key];
-                const innerNextState = stateAfterFirst?.[key];
-                const innerFirst = first?.[key];
-                if (innerPrevState === undefined) {
-                    return Result.error(`tried to update "${key}", but not found.`);
-                }
-                if (innerNextState === undefined) {
-                    // updateを試みたが、既に誰かによってremoveされているのでupdateは行われない。よって終了。
-                    break;
-                }
-                // Type guard。事前条件が満たされていれば、innerPrevState !== undefinedかつinnerNextState !== undefinedならばこれは必ずfalseになるので、下のbreakには来ない。
-                if (innerFirst !== undefined && innerFirst.type === replace$1) {
-                    break;
-                }
-                if (cancellationPolicy.cancelUpdate) {
-                    if (cancellationPolicy.cancelUpdate({
-                        key,
-                        prevState: innerPrevState,
-                        nextState: innerNextState,
-                    })) {
-                        break;
-                    }
-                }
-                const transformed = innerTransform({
-                    first: innerFirst?.update,
-                    second: operation.update,
-                    prevState: innerPrevState,
-                    nextState: innerNextState,
-                    key,
-                });
-                if (transformed.isError) {
-                    return transformed;
-                }
-                const transformedUpdate = transformed.value;
-                if (transformedUpdate !== undefined) {
-                    result.set(key, {
-                        type: update$2,
-                        update: transformedUpdate,
-                    });
-                }
-            }
-        }
-    }
-    return Result.ok(result.size === 0 ? undefined : mapToRecord(result));
-};
-/** Make sure `apply(stateBeforeFirst, first) = stateAfterFirst` */
-const serverTransform$o = (params) => {
-    const result = serverTransformWithoutValidation(params);
-    if (result.isError) {
-        return result;
-    }
-    if (result.value == null) {
-        return result;
-    }
-    if (params.validation?.maxRecordLength != null) {
-        const prevStateLength = recordToArray(params.stateAfterFirst).length;
-        let nextStateLength = prevStateLength;
-        recordForEach(result.value, operation => {
-            if (operation.type === update$2) {
-                return;
-            }
-            if (operation.replace.oldValue != null) {
-                nextStateLength--;
-            }
-            if (operation.replace.newValue != null) {
-                nextStateLength++;
-            }
-        });
-        if (params.validation.maxRecordLength < nextStateLength &&
-            prevStateLength < nextStateLength) {
-            return Result.error(`${params.validation.recordName} の要素の数が多すぎるため、これ以上追加することはできません。追加するには、不要な要素を削除してください。`);
-        }
-    }
-    return result;
-};
-const transformElement = ({ state, first, second, innerTransform, innerDiff, errorMessageOnStateNotFound, }) => {
-    switch (first.type) {
-        case replace$1:
-            switch (second.type) {
-                case replace$1:
-                    // 通常、片方がnon-undefinedならばもう片方もnon-undefined。
-                    if (first.replace.newValue !== undefined &&
-                        second.replace.newValue !== undefined) {
-                        const diffResult = innerDiff({
-                            nextState: first.replace.newValue,
-                            prevState: second.replace.newValue,
-                        });
-                        if (diffResult === undefined) {
-                            return Result.ok({
-                                firstPrime: undefined,
-                                secondPrime: undefined,
-                            });
-                        }
-                        return Result.ok({
-                            firstPrime: { type: update$2, update: diffResult },
-                            secondPrime: undefined,
-                        });
-                    }
-                    // 通常、ここに来る場合は first.newValue === undefined && second.newValue === undefined
-                    return Result.ok({
-                        firstPrime: undefined,
-                        secondPrime: undefined,
-                    });
-                case update$2:
-                    return Result.ok({
-                        firstPrime: first,
-                        secondPrime: undefined,
-                    });
-            }
-            break;
-        case update$2:
-            switch (second.type) {
-                case replace$1: {
-                    if (second.replace.newValue !== undefined) {
-                        throw new Error('Tried to add an element, but already exists another value.');
-                    }
-                    return Result.ok({
-                        firstPrime: undefined,
-                        secondPrime: {
-                            type: replace$1,
-                            replace: {
-                                newValue: undefined,
-                            },
-                        },
-                    });
-                }
-                case update$2: {
-                    if (state === undefined) {
-                        return Result.error(errorMessageOnStateNotFound);
-                    }
-                    const xform = innerTransform({
-                        state,
-                        first: first.update,
-                        second: second.update,
-                    });
-                    if (xform.isError) {
-                        return xform;
-                    }
-                    return Result.ok({
-                        firstPrime: xform.value.firstPrime == null
-                            ? undefined
-                            : {
-                                type: update$2,
-                                update: xform.value.firstPrime,
-                            },
-                        secondPrime: xform.value.secondPrime == null
-                            ? undefined
-                            : {
-                                type: update$2,
-                                update: xform.value.secondPrime,
-                            },
-                    });
-                }
-            }
-            break;
-    }
-};
-const clientTransform$1 = ({ state, first, second, innerTransform, innerDiff, }) => {
-    if (first == null || second == null) {
-        return Result.ok({
-            firstPrime: first == null || isEmptyRecord(first) ? undefined : first,
-            secondPrime: second == null || isEmptyRecord(second) ? undefined : second,
-        });
-    }
-    const firstPrime = new Map();
-    const secondPrime = new Map();
-    let error = undefined;
-    groupJoinMap(recordToMap(first), recordToMap(second)).forEach((group, key) => {
-        if (error != null) {
-            return;
-        }
-        switch (group.type) {
-            case left: {
-                firstPrime.set(key, group.left);
-                return;
-            }
-            case right: {
-                secondPrime.set(key, group.right);
-                return;
-            }
-            case both: {
-                const xform = transformElement({
-                    state: state[key],
-                    first: group.left,
-                    second: group.right,
-                    innerTransform,
-                    innerDiff,
-                    errorMessageOnStateNotFound: `"${key}" is not found at RecordOperation.clientTransform.`,
-                });
-                if (xform.isError) {
-                    error = { error: xform.error };
-                    return;
-                }
-                if (xform.value.firstPrime !== undefined) {
-                    firstPrime.set(key, xform.value.firstPrime);
-                }
-                if (xform.value.secondPrime !== undefined) {
-                    secondPrime.set(key, xform.value.secondPrime);
-                }
-                return;
-            }
-        }
-    });
-    if (error != null) {
-        return Result.error(error.error);
-    }
-    return Result.ok({
-        firstPrime: firstPrime.size === 0 ? undefined : mapToRecord(firstPrime),
-        secondPrime: secondPrime.size === 0 ? undefined : mapToRecord(secondPrime),
-    });
-};
-const diff$1 = ({ prevState, nextState, innerDiff, }) => {
-    const result = new Map();
-    for (const [key, value] of groupJoinMap(recordToMap(prevState), recordToMap(nextState))) {
-        switch (value.type) {
-            case left:
-                result.set(key, {
-                    type: replace$1,
-                    replace: { oldValue: value.left, newValue: undefined },
-                });
-                continue;
-            case right: {
-                result.set(key, {
-                    type: replace$1,
-                    replace: { oldValue: undefined, newValue: value.right },
-                });
-                continue;
-            }
-            case both: {
-                const diffResult = innerDiff({
-                    key,
-                    prevState: value.left,
-                    nextState: value.right,
-                });
-                if (diffResult === undefined) {
-                    continue;
-                }
-                result.set(key, { type: update$2, update: diffResult });
-                continue;
-            }
-        }
-    }
-    if (result.size === 0) {
-        return undefined;
-    }
-    return mapToRecord(result);
-};
-const mapRecordUpOperation = ({ source, mapState, mapOperation, }) => {
-    return chooseRecord(source, element => {
-        if (element.type === replace$1) {
-            return {
-                type: replace$1,
-                replace: {
-                    newValue: element.replace.newValue == null
-                        ? undefined
-                        : mapState(element.replace.newValue),
-                },
-            };
-        }
-        return {
-            type: update$2,
-            update: mapOperation(element.update),
-        };
-    });
-};
-const mapRecordDownOperation = ({ source, mapState, mapOperation, }) => {
-    return chooseRecord(source, element => {
-        if (element.type === replace$1) {
-            return {
-                type: replace$1,
-                replace: {
-                    oldValue: element.replace.oldValue == null
-                        ? undefined
-                        : mapState(element.replace.oldValue),
-                },
-            };
-        }
-        return {
-            type: update$2,
-            update: mapOperation(element.update),
-        };
-    });
-};
-
-const $v = '$v';
-const $r = '$r';
 const atomic = 'atomic';
 const replace = 'replace';
 const ot = 'ot';
 const record = 'record';
 const paramRecord = 'paramRecord';
 const object = 'object';
-const isKeyToIgnore = (key) => key === $v || key === $r;
-const warnNotFoundTemplate = ({ key, objectType, }) => {
-    loggerRef.warn(`"${key}" key found at ${objectType} object, but template not found. Maybe you use keys which are not supported?`);
-};
 /** Stateならば`T`に、TwoWayOperationならば`{ oldValue:T; newValue:T }`に変換されるtemplateを作成します。*/
 const createReplaceValueTemplate = (value) => {
     return {
@@ -2444,543 +1524,6 @@ const downOperation = (source) => {
             })
                 .and(z.object(mapRecord(source.value, value => downOperation(value))).partial());
             return base;
-        }
-    }
-};
-/** TwoWayOperationをUpOperationに変換します。 */
-const toUpOperation = (template) => (twoWayOperation) => {
-    const twoWayOperationAsAny = twoWayOperation;
-    switch (template.type) {
-        case atomic: {
-            switch (template.mode) {
-                case replace:
-                    return {
-                        newValue: twoWayOperationAsAny.newValue,
-                    };
-                case ot:
-                    return template.nullable
-                        ? toUpOperation$1(twoWayOperationAsAny)
-                        : toUpOperation$2(twoWayOperationAsAny);
-            }
-            break;
-        }
-        case record: {
-            return mapRecordUpOperation({
-                source: twoWayOperation,
-                mapState: x => x,
-                mapOperation: operation => toUpOperation(template.value)(operation),
-            });
-        }
-        case paramRecord: {
-            return mapRecord(twoWayOperation, x => toUpOperation(template.value)(x));
-        }
-        case object: {
-            return mapRecord(twoWayOperation, (operationElement, key) => {
-                if (isKeyToIgnore(key)) {
-                    return operationElement;
-                }
-                const templateElement = template.value[key];
-                if (templateElement == null) {
-                    warnNotFoundTemplate({ key, objectType: 'operation' });
-                    return undefined;
-                }
-                return toUpOperation(templateElement)(operationElement);
-            });
-        }
-    }
-};
-/** TwoWayOperationをDownOperationに変換します。 */
-const toDownOperation = (template) => (twoWayOperation) => {
-    const twoWayOperationAsAny = twoWayOperation;
-    switch (template.type) {
-        case atomic: {
-            switch (template.mode) {
-                case replace:
-                    return {
-                        oldValue: twoWayOperationAsAny.oldValue,
-                    };
-                case ot:
-                    return template.nullable
-                        ? toDownOperation$1(twoWayOperationAsAny)
-                        : toDownOperation$2(twoWayOperationAsAny);
-            }
-            break;
-        }
-        case record: {
-            return mapRecordDownOperation({
-                source: twoWayOperation,
-                mapState: x => x,
-                mapOperation: operation => toDownOperation(template.value)(operation),
-            });
-        }
-        case paramRecord: {
-            return mapRecord(twoWayOperation, x => toDownOperation(template.value)(x));
-        }
-        case object: {
-            return mapRecord(twoWayOperation, (operationElement, key) => {
-                if (isKeyToIgnore(key)) {
-                    return operationElement;
-                }
-                const templateElement = template.value[key];
-                if (templateElement == null) {
-                    warnNotFoundTemplate({ key, objectType: 'operation' });
-                    return undefined;
-                }
-                return toDownOperation(templateElement)(operationElement);
-            });
-        }
-    }
-};
-/** StateにUpOperationを適用します。破壊的な処理は行われません。 */
-const apply = (template) => ({ state, operation }) => {
-    const operationAsAny = operation;
-    switch (template.type) {
-        case atomic: {
-            switch (template.mode) {
-                case replace:
-                    return Result.ok(operationAsAny.newValue);
-                case ot:
-                    return template.nullable
-                        ? apply$3(state, operationAsAny)
-                        : apply$4(state, operationAsAny);
-            }
-            break;
-        }
-        case record: {
-            return apply$1({
-                prevState: (state ?? {}),
-                operation: operation,
-                innerApply: ({ prevState, operation }) => apply(template.value)({
-                    state: prevState,
-                    operation: operation,
-                }),
-            });
-        }
-        case paramRecord: {
-            return apply$2({
-                prevState: state ?? {},
-                operation: operation,
-                innerApply: ({ prevState, operation }) => apply(template.value)({
-                    state: prevState,
-                    operation: operation,
-                }),
-                defaultState: template.defaultState,
-            });
-        }
-        case object: {
-            const result = { ...state };
-            for (const { key, value } of recordToArray(operation)) {
-                if (isKeyToIgnore(key)) {
-                    continue;
-                }
-                const templateElement = template.value[key];
-                if (templateElement == null) {
-                    warnNotFoundTemplate({ key, objectType: 'operation' });
-                    continue;
-                }
-                const applied = apply(templateElement)({
-                    state: state[key],
-                    operation: value,
-                });
-                if (applied.isError) {
-                    return applied;
-                }
-                result[key] = applied.value;
-            }
-            return Result.ok(result);
-        }
-    }
-};
-/** StateにDownOperationを適用します。破壊的な処理は行われません。 */
-const applyBack = (template) => ({ state, operation }) => {
-    const operationAsAny = operation;
-    switch (template.type) {
-        case atomic: {
-            switch (template.mode) {
-                case replace:
-                    return Result.ok(operationAsAny.oldValue);
-                case ot:
-                    return template.nullable
-                        ? applyBack$3(state, operationAsAny)
-                        : applyBack$4(state, operationAsAny);
-            }
-            break;
-        }
-        case record: {
-            return applyBack$1({
-                nextState: (state ?? {}),
-                operation: operation,
-                innerApplyBack: ({ state, operation }) => applyBack(template.value)({
-                    state,
-                    operation: operation,
-                }),
-            });
-        }
-        case paramRecord: {
-            return applyBack$2({
-                nextState: state ?? {},
-                operation: operation,
-                innerApplyBack: ({ nextState, operation }) => applyBack(template.value)({
-                    state: nextState,
-                    operation: operation,
-                }),
-                defaultState: template.defaultState,
-            });
-        }
-        case object: {
-            const result = { ...state };
-            for (const { key, value } of recordToArray(operation)) {
-                if (isKeyToIgnore(key)) {
-                    continue;
-                }
-                const templateElement = template.value[key];
-                if (templateElement == null) {
-                    warnNotFoundTemplate({ key, objectType: 'operation' });
-                    continue;
-                }
-                const applied = applyBack(templateElement)({
-                    state: state[key],
-                    operation: value,
-                });
-                if (applied.isError) {
-                    return applied;
-                }
-                result[key] = applied.value;
-            }
-            return Result.ok(result);
-        }
-    }
-};
-/** 連続する2つのDownOperationを合成します。破壊的な処理は行われません。 */
-const composeDownOperation = (template) => ({ first, second }) => {
-    const firstAsAny = first;
-    const secondAsAny = second;
-    switch (template.type) {
-        case atomic: {
-            switch (template.mode) {
-                case replace:
-                    return Result.ok({
-                        oldValue: firstAsAny.oldValue,
-                    });
-                case ot:
-                    return template.nullable
-                        ? composeDownOperation$2(firstAsAny, secondAsAny)
-                        : composeDownOperation$3(firstAsAny, secondAsAny);
-            }
-            break;
-        }
-        case record: {
-            return composeDownOperation$1({
-                first: first,
-                second: second,
-                innerApplyBack: ({ state, operation }) => applyBack(template.value)({ state, operation }),
-                innerCompose: ({ first, second }) => composeDownOperation(template.value)({ first, second }),
-            });
-        }
-        case paramRecord: {
-            return compose$1({
-                first,
-                second,
-                innerCompose: ({ first, second }) => composeDownOperation(template.value)({ first, second }),
-            });
-        }
-        case object: {
-            const firstMap = recordToMap(first);
-            const secondMap = recordToMap(second);
-            const result = {
-                [$v]: template.$v,
-                [$r]: template.$r,
-            };
-            for (const [key, value] of groupJoinMap(firstMap, secondMap)) {
-                if (isKeyToIgnore(key)) {
-                    continue;
-                }
-                switch (value.type) {
-                    case left:
-                        result[key] = value.left;
-                        break;
-                    case right:
-                        result[key] = value.right;
-                        break;
-                    default: {
-                        const templateElement = template.value[key];
-                        if (templateElement == null) {
-                            warnNotFoundTemplate({ key, objectType: 'operation' });
-                            continue;
-                        }
-                        const composed = composeDownOperation(templateElement)({
-                            first: value.left,
-                            second: value.right,
-                        });
-                        if (composed.isError) {
-                            return composed;
-                        }
-                        result[key] = composed.value;
-                    }
-                }
-            }
-            return Result.ok(result);
-        }
-    }
-};
-/**
- * Stateの情報を用いて、DownOperationをTwoWayOperationに変換します。破壊的な処理は行われません。
- * @param nextState DownOperationが適用される前の状態のState。
- */
-const restore = (template) => ({ nextState, downOperation }) => {
-    const nextStateAsAny = nextState;
-    const downOperationAsAny = downOperation;
-    switch (template.type) {
-        case atomic: {
-            switch (template.mode) {
-                case replace:
-                    return Result.ok({
-                        prevState: downOperationAsAny.oldValue,
-                        twoWayOperation: {
-                            oldValue: downOperationAsAny.oldValue,
-                            newValue: nextState,
-                        },
-                    });
-                case ot:
-                    return template.nullable
-                        ? restore$3({
-                            nextState: nextStateAsAny,
-                            downOperation: downOperationAsAny,
-                        })
-                        : restore$4({
-                            nextState: nextStateAsAny,
-                            downOperation: downOperationAsAny,
-                        });
-            }
-            break;
-        }
-        case record: {
-            return restore$1({
-                nextState: (nextState ?? {}),
-                downOperation: downOperation,
-                innerDiff: ({ prevState, nextState }) => diff(template.value)({ prevState, nextState }),
-                innerRestore: ({ downOperation, nextState }) => restore(template.value)({ downOperation: downOperation, nextState }),
-            });
-        }
-        case paramRecord: {
-            return restore$2({
-                nextState: nextState ?? {},
-                downOperation: downOperation,
-                innerRestore: ({ downOperation, nextState }) => restore(template.value)({ downOperation: downOperation, nextState }),
-            });
-        }
-        case object: {
-            const prevState = { ...nextState };
-            const twoWayOperation = {
-                [$v]: template.$v,
-                [$r]: template.$r,
-            };
-            for (const { key, value } of recordToArray(downOperation)) {
-                if (isKeyToIgnore(key)) {
-                    continue;
-                }
-                const templateElement = template.value[key];
-                if (templateElement == null) {
-                    warnNotFoundTemplate({ key, objectType: 'operation' });
-                    continue;
-                }
-                const restored = restore(templateElement)({
-                    nextState: nextState[key],
-                    downOperation: value,
-                });
-                if (restored.isError) {
-                    return restored;
-                }
-                prevState[key] = restored.value.prevState;
-                twoWayOperation[key] = restored.value.twoWayOperation;
-            }
-            return Result.ok({ prevState, twoWayOperation });
-        }
-    }
-};
-/** 2つのStateオブジェクトの差分を取ります。
- * @returns 2つのオブジェクトが意味上で同一であればundefinedを返します。
- */
-const diff = (template) => ({ prevState, nextState }) => {
-    const prevStateAsAny = prevState;
-    const nextStateAsAny = nextState;
-    switch (template.type) {
-        case atomic: {
-            switch (template.mode) {
-                case replace:
-                    return prevState === nextState
-                        ? undefined
-                        : {
-                            oldValue: prevState,
-                            newValue: nextState,
-                        };
-                case ot:
-                    return template.nullable
-                        ? diff$3({
-                            prev: prevStateAsAny,
-                            next: nextStateAsAny,
-                        })
-                        : diff$4({ prev: prevStateAsAny, next: nextStateAsAny });
-            }
-            break;
-        }
-        case record: {
-            return diff$1({
-                prevState: (prevState ?? {}),
-                nextState: (nextState ?? {}),
-                innerDiff: ({ prevState, nextState }) => diff(template.value)({ prevState, nextState }),
-            });
-        }
-        case paramRecord: {
-            return diff$2({
-                prevState: (prevState ?? {}),
-                nextState: (nextState ?? {}),
-                innerDiff: ({ prevState, nextState }) => diff(template.value)({
-                    prevState: prevState ?? template.defaultState,
-                    nextState: nextState ?? template.defaultState,
-                }),
-            });
-        }
-        case object: {
-            const prevStateMap = recordToMap(prevState);
-            const nextStateMap = recordToMap(nextState);
-            const result = {
-                [$v]: template.$v,
-                [$r]: template.$r,
-            };
-            for (const [key, value] of groupJoinMap(prevStateMap, nextStateMap)) {
-                if (isKeyToIgnore(key)) {
-                    continue;
-                }
-                const templateElement = template.value[key];
-                if (templateElement == null) {
-                    warnNotFoundTemplate({ key, objectType: 'state' });
-                    continue;
-                }
-                result[key] = diff(templateElement)({
-                    prevState: value.left,
-                    nextState: value.right,
-                });
-            }
-            if (isIdRecord(result)) {
-                return undefined;
-            }
-            return result;
-        }
-    }
-};
-/**
- * ユーザーの権限を考慮せずに、通常のOperational Transformを行います。主にクライアント側で使われます。破壊的な処理は行われません。
- *
- * この関数は次の2つの制約があります。
- * - `first`適用前のStateと`second`適用前のStateは等しい。
- * - このStateに対して`first`と`secondPrime`を順に適用したStateと、`second`と`firstPrime`を順に適用したStateは等しい。
- */
-const clientTransform = (template) => ({ state, first, second }) => {
-    switch (template.type) {
-        case atomic: {
-            switch (template.mode) {
-                case replace:
-                    return Result.ok({
-                        firstPrime: {
-                            newValue: first.newValue,
-                        },
-                        secondPrime: undefined,
-                    });
-                case ot:
-                    return template.nullable
-                        ? clientTransform$3({
-                            first: first,
-                            second: second,
-                        })
-                        : clientTransform$4({
-                            first: first,
-                            second: second,
-                        });
-            }
-            break;
-        }
-        case record: {
-            return clientTransform$1({
-                state,
-                first: first,
-                second: second,
-                innerTransform: ({ state, first, second }) => clientTransform(template.value)({
-                    state,
-                    first,
-                    second,
-                }),
-                innerDiff: ({ prevState, nextState }) => {
-                    const d = diff(template.value)({ prevState, nextState });
-                    if (d == null) {
-                        return undefined;
-                    }
-                    return toUpOperation(template.value)(d);
-                },
-            });
-        }
-        case paramRecord: {
-            return clientTransform$2({
-                state,
-                defaultState: template.defaultState,
-                first: first,
-                second: second,
-                innerTransform: ({ state, first, second }) => clientTransform(template.value)({
-                    state,
-                    first,
-                    second,
-                }),
-            });
-        }
-        case object: {
-            const firstMap = recordToMap(first);
-            const secondMap = recordToMap(second);
-            const firstPrime = {
-                [$v]: template.$v,
-                [$r]: template.$r,
-            };
-            const secondPrime = {
-                [$v]: template.$v,
-                [$r]: template.$r,
-            };
-            for (const [key, value] of groupJoinMap(firstMap, secondMap)) {
-                if (isKeyToIgnore(key)) {
-                    continue;
-                }
-                switch (value.type) {
-                    case left:
-                        firstPrime[key] = value.left;
-                        break;
-                    case right:
-                        secondPrime[key] = value.right;
-                        break;
-                    default: {
-                        const s = state[key];
-                        if (s === undefined) {
-                            return Result.error(`${key} is not found at object client transform.`);
-                        }
-                        const templateElement = template.value[key];
-                        if (templateElement == null) {
-                            warnNotFoundTemplate({ key, objectType: 'operation' });
-                            continue;
-                        }
-                        const xformed = clientTransform(templateElement)({
-                            state: s,
-                            first: value.left,
-                            second: value.right,
-                        });
-                        if (xformed.isError) {
-                            return xformed;
-                        }
-                        firstPrime[key] = xformed.value.firstPrime;
-                        secondPrime[key] = xformed.value.secondPrime;
-                    }
-                }
-            }
-            return Result.ok({
-                firstPrime: isIdRecord(firstPrime) ? undefined : firstPrime,
-                secondPrime: isIdRecord(secondPrime) ? undefined : secondPrime,
-            });
         }
     }
 };
@@ -3842,6 +2385,1861 @@ const createFakeFirebaseConfig2 = () => {
 };
 const fakeFirebaseConfig2 = createFakeFirebaseConfig2();
 
+// (不正な|悪意のある)キーが混入するおそれがあるのはserverTransformのときのみなので、serverTransform以外では使わなくてよい
+const isValidKey = (key) => {
+    // Firebase Authenticationのuidは28文字のようなので、最低でもその文字数は許容しなければならない
+    if (key.length >= 40) {
+        return false;
+    }
+    return key.match(/^([0-9a-zA-Z]|-|_)+$/g) != null;
+};
+
+const restore$2 = ({ nextState: unsafeNextState, downOperation: unsafeDownOperation, innerRestore, }) => {
+    const nextState = recordToMap(unsafeNextState);
+    if (unsafeDownOperation == null) {
+        return Result.ok({
+            prevState: mapToRecord(nextState),
+            twoWayOperation: undefined,
+        });
+    }
+    const prevState = new Map(nextState);
+    const twoWayOperation = new Map();
+    for (const [key, value] of recordToMap(unsafeDownOperation)) {
+        const nextStateElement = nextState.get(key);
+        if (nextStateElement === undefined) {
+            return Result.error(`tried to update "${key}", but nextState does not have such a key`);
+        }
+        const restored = innerRestore({
+            downOperation: value,
+            nextState: nextStateElement,
+            key,
+        });
+        if (restored.isError) {
+            return restored;
+        }
+        if (restored.value === undefined) {
+            continue;
+        }
+        prevState.set(key, restored.value.prevState);
+        if (restored.value.twoWayOperation !== undefined) {
+            twoWayOperation.set(key, restored.value.twoWayOperation);
+        }
+    }
+    return Result.ok({
+        prevState: mapToRecord(prevState),
+        twoWayOperation: twoWayOperation.size === 0 ? undefined : mapToRecord(twoWayOperation),
+    });
+};
+const apply$3 = ({ prevState: unsafePrevState, operation, innerApply, defaultState, }) => {
+    if (operation == null) {
+        return Result.ok(unsafePrevState);
+    }
+    const prevState = recordToMap(unsafePrevState);
+    const nextState = new Map(prevState);
+    for (const [key, value] of recordToMap(operation)) {
+        const prevStateElement = prevState.get(key) ?? defaultState;
+        const newValue = innerApply({
+            operation: value,
+            prevState: prevStateElement,
+            key,
+        });
+        if (newValue.isError) {
+            return newValue;
+        }
+        nextState.set(key, newValue.value);
+    }
+    return Result.ok(mapToRecord(nextState));
+};
+const applyBack$2 = ({ nextState: unsafeNextState, operation, innerApplyBack, defaultState, }) => {
+    if (operation == null) {
+        return Result.ok(unsafeNextState);
+    }
+    const nextState = recordToMap(unsafeNextState);
+    const prevState = new Map(nextState);
+    for (const [key, value] of recordToMap(operation)) {
+        const nextStateElement = nextState.get(key) ?? defaultState;
+        const oldValue = innerApplyBack({
+            operation: value,
+            nextState: nextStateElement,
+            key,
+        });
+        if (oldValue.isError) {
+            return oldValue;
+        }
+        prevState.set(key, oldValue.value);
+    }
+    return Result.ok(mapToRecord(prevState));
+};
+// UpOperation、DownOperation、TwoWayOperation のいずれにも使用可能なので、composeDownOperationではなくcomposeという汎用的な名前を付けている。
+const compose$1 = ({ first, second, innerCompose, }) => {
+    if (first == null) {
+        return Result.ok(second == null || isEmptyRecord(second) ? undefined : second);
+    }
+    if (second == null) {
+        return Result.ok(first == null || isEmptyRecord(first) ? undefined : first);
+    }
+    const result = new Map();
+    for (const [key, groupJoined] of groupJoinMap(recordToMap(first), recordToMap(second))) {
+        switch (groupJoined.type) {
+            case left:
+                result.set(key, groupJoined.left);
+                continue;
+            case right:
+                result.set(key, groupJoined.right);
+                continue;
+            case both: {
+                const update = innerCompose({
+                    first: groupJoined.left,
+                    second: groupJoined.right,
+                    key,
+                });
+                if (update.isError) {
+                    return update;
+                }
+                if (update.value !== undefined) {
+                    result.set(key, update.value);
+                }
+                continue;
+            }
+        }
+    }
+    return Result.ok(result.size === 0 ? undefined : mapToRecord(result));
+};
+/** Make sure `apply(stateBeforeFirst, first) = stateAfterFirst` */
+const serverTransform$p = ({ first: unsafeFirst, second: unsafeSecond, stateBeforeFirst: unsafeStateBeforeFirst, stateAfterFirst: unsafeStateAfterFirst, innerTransform, defaultState, }) => {
+    if (unsafeSecond === undefined) {
+        return Result.ok(undefined);
+    }
+    const result = new Map();
+    const prevState = recordToMap(unsafeStateBeforeFirst);
+    const nextState = recordToMap(unsafeStateAfterFirst);
+    const first = unsafeFirst == null ? undefined : recordToMap(unsafeFirst);
+    for (const [key, operation] of recordToMap(unsafeSecond)) {
+        if (!isValidKey(key)) {
+            return Result.error(`${key} is not a valid key.`);
+        }
+        const innerPrevState = prevState.get(key) ?? defaultState;
+        const innerNextState = nextState.get(key) ?? defaultState;
+        const innerFirst = first == null ? undefined : first.get(key);
+        const transformed = innerTransform({
+            first: innerFirst,
+            second: operation,
+            prevState: innerPrevState,
+            nextState: innerNextState,
+            key,
+        });
+        if (transformed.isError) {
+            return transformed;
+        }
+        const transformedUpdate = transformed.value;
+        if (transformedUpdate !== undefined) {
+            result.set(key, transformedUpdate);
+        }
+    }
+    return Result.ok(result.size === 0 ? undefined : mapToRecord(result));
+};
+const clientTransform$3 = ({ state, first, second, innerTransform, defaultState, }) => {
+    if (first === undefined || second === undefined) {
+        return Result.ok({
+            firstPrime: first === undefined || isEmptyRecord(first) ? undefined : first,
+            secondPrime: second === undefined || isEmptyRecord(second) ? undefined : second,
+        });
+    }
+    const firstPrime = new Map();
+    const secondPrime = new Map();
+    let error = undefined;
+    groupJoinMap(recordToMap(first), recordToMap(second)).forEach((group, key) => {
+        if (error != null) {
+            return;
+        }
+        switch (group.type) {
+            case left: {
+                firstPrime.set(key, group.left);
+                return;
+            }
+            case right: {
+                secondPrime.set(key, group.right);
+                return;
+            }
+            case both: {
+                const s = state[key] ?? defaultState;
+                const xform = innerTransform({
+                    state: s,
+                    first: group.left,
+                    second: group.right,
+                });
+                if (xform.isError) {
+                    error = { error: xform.error };
+                    return;
+                }
+                if (xform.value.firstPrime !== undefined) {
+                    firstPrime.set(key, xform.value.firstPrime);
+                }
+                if (xform.value.secondPrime !== undefined) {
+                    secondPrime.set(key, xform.value.secondPrime);
+                }
+                return;
+            }
+        }
+    });
+    if (error != null) {
+        return Result.error(error.error);
+    }
+    return Result.ok({
+        firstPrime: firstPrime.size === 0 ? undefined : mapToRecord(firstPrime),
+        secondPrime: secondPrime.size === 0 ? undefined : mapToRecord(secondPrime),
+    });
+};
+const diff$2 = ({ prevState, nextState, innerDiff, }) => {
+    const result = new Map();
+    for (const [key, value] of groupJoinMap(recordToMap(prevState), recordToMap(nextState))) {
+        let prevState = undefined;
+        let nextState = undefined;
+        switch (value.type) {
+            case left:
+                prevState = value.left;
+                break;
+            case right: {
+                nextState = value.right;
+                break;
+            }
+            case both: {
+                prevState = value.left;
+                nextState = value.right;
+                break;
+            }
+        }
+        const diffResult = innerDiff({ prevState, nextState, key });
+        if (diffResult === undefined) {
+            continue;
+        }
+        result.set(key, diffResult);
+        continue;
+    }
+    if (result.size === 0) {
+        return undefined;
+    }
+    return mapToRecord(result);
+};
+
+/** Make sure `apply(prevState, source) = nextState` */
+const toClientState$i = ({ serverState, isPrivate, toClientState, }) => {
+    if (serverState == null) {
+        return undefined;
+    }
+    const result = new Map();
+    recordForEach(serverState, (value, key) => {
+        if (isPrivate(value, key)) {
+            return;
+        }
+        result.set(key, toClientState({ state: value, key }));
+    });
+    return mapToRecord(result);
+};
+// composeDownOperationは、レコード内の同一キーを時系列順でremove→addしたものをcomposeすると、本来はupdateになるべきだが、replaceになってしまうという仕様がある。だが、このrestore関数ではそれをupdateに変換してくれる。その代わり、innerDiffはdownでなくtwoWayである必要がある。
+const restore$1 = ({ nextState, downOperation, innerRestore, innerDiff, }) => {
+    if (downOperation == null) {
+        return Result.ok({
+            prevState: nextState,
+            twoWayOperation: undefined,
+        });
+    }
+    const prevState = recordToMap(nextState);
+    const twoWayOperation = new Map();
+    for (const [key, value] of recordToMap(downOperation)) {
+        switch (value.type) {
+            case 'replace': {
+                const oldValue = value.replace.oldValue;
+                const newValue = nextState[key];
+                if (oldValue === undefined) {
+                    prevState.delete(key);
+                }
+                else {
+                    prevState.set(key, oldValue);
+                }
+                if (oldValue === undefined) {
+                    if (newValue === undefined) {
+                        break;
+                    }
+                    twoWayOperation.set(key, {
+                        type: 'replace',
+                        replace: { oldValue, newValue },
+                    });
+                    break;
+                }
+                if (newValue === undefined) {
+                    twoWayOperation.set(key, {
+                        type: 'replace',
+                        replace: { oldValue, newValue: undefined },
+                    });
+                    break;
+                }
+                const diff = innerDiff({
+                    key,
+                    prevState: oldValue,
+                    nextState: newValue,
+                });
+                if (diff !== undefined) {
+                    twoWayOperation.set(key, { type: 'update', update: diff });
+                }
+                break;
+            }
+            case 'update': {
+                const nextStateElement = nextState[key];
+                if (nextStateElement === undefined) {
+                    return Result.error(`tried to update "${key}", but nextState does not have such a key`);
+                }
+                const restored = innerRestore({
+                    key,
+                    downOperation: value.update,
+                    nextState: nextStateElement,
+                });
+                if (restored.isError) {
+                    return restored;
+                }
+                prevState.set(key, restored.value.prevState);
+                if (restored.value.twoWayOperation !== undefined) {
+                    twoWayOperation.set(key, {
+                        type: 'update',
+                        update: restored.value.twoWayOperation,
+                    });
+                }
+                break;
+            }
+        }
+    }
+    return Result.ok({
+        prevState: mapToRecord(prevState),
+        twoWayOperation: twoWayOperation.size === 0 ? undefined : mapToRecord(twoWayOperation),
+    });
+};
+// replace によって、存在しないキーを削除しようとしたり、すでに存在するキーに上書きするような operation は、現時点では許容している。だが、将来禁止するかもしれない。
+const apply$2 = ({ prevState, operation, innerApply, }) => {
+    if (operation == null) {
+        return Result.ok(prevState);
+    }
+    const nextState = recordToMap(prevState);
+    for (const [key, value] of recordToMap(operation)) {
+        switch (value.type) {
+            case 'replace': {
+                if (value.replace.newValue === undefined) {
+                    nextState.delete(key);
+                }
+                else {
+                    nextState.set(key, value.replace.newValue);
+                }
+                break;
+            }
+            case 'update': {
+                const prevStateElement = prevState[key];
+                if (prevStateElement === undefined) {
+                    return Result.error(`tried to update "${key}", but prevState does not have such a key`);
+                }
+                const newValue = innerApply({
+                    key,
+                    operation: value.update,
+                    prevState: prevStateElement,
+                });
+                if (newValue.isError) {
+                    return newValue;
+                }
+                nextState.set(key, newValue.value);
+                break;
+            }
+        }
+    }
+    return Result.ok(mapToRecord(nextState));
+};
+// replace によって、存在しないキーを削除しようとしたり、すでに存在するキーに上書きするような operation は、現時点では許容している。だが、将来禁止するかもしれない。
+const applyBack$1 = ({ nextState, operation, innerApplyBack, }) => {
+    if (operation == null) {
+        return Result.ok(nextState);
+    }
+    const prevState = recordToMap(nextState);
+    for (const [key, value] of recordToMap(operation)) {
+        switch (value.type) {
+            case 'replace': {
+                if (value.replace.oldValue === undefined) {
+                    prevState.delete(key);
+                }
+                else {
+                    prevState.set(key, value.replace.oldValue);
+                }
+                break;
+            }
+            case 'update': {
+                const nextStateElement = nextState[key];
+                if (nextStateElement === undefined) {
+                    return Result.error(`tried to update "${key}", but nextState does not have such a key`);
+                }
+                const oldValue = innerApplyBack({
+                    key,
+                    operation: value.update,
+                    state: nextStateElement,
+                });
+                if (oldValue.isError) {
+                    return oldValue;
+                }
+                prevState.set(key, oldValue.value);
+                break;
+            }
+        }
+    }
+    return Result.ok(mapToRecord(prevState));
+};
+// stateが必要ないため処理を高速化&簡略化できるが、その代わり戻り値のreplaceにおいて oldValue === undefined && newValue === undefined もしくは oldValue !== undefined && newValue !== undefinedになるケースがある。
+const compose = ({ first, second, composeReplaceReplace, composeReplaceUpdate, composeUpdateReplace, composeUpdateUpdate, }) => {
+    if (first == null) {
+        return Result.ok(second == null || isEmptyRecord(second) ? undefined : second);
+    }
+    if (second == null) {
+        return Result.ok(first == null || isEmptyRecord(first) ? undefined : first);
+    }
+    const result = new Map();
+    for (const [key, groupJoined] of groupJoinMap(recordToMap(first), recordToMap(second))) {
+        switch (groupJoined.type) {
+            case left:
+                switch (groupJoined.left.type) {
+                    case 'replace':
+                        result.set(key, {
+                            type: 'replace',
+                            replace: groupJoined.left.replace,
+                        });
+                        continue;
+                    case 'update':
+                        result.set(key, {
+                            type: 'update',
+                            update: groupJoined.left.update,
+                        });
+                        continue;
+                }
+                break;
+            case right:
+                switch (groupJoined.right.type) {
+                    case 'replace':
+                        result.set(key, {
+                            type: 'replace',
+                            replace: groupJoined.right.replace,
+                        });
+                        continue;
+                    case 'update':
+                        result.set(key, {
+                            type: 'update',
+                            update: groupJoined.right.update,
+                        });
+                        continue;
+                }
+                break;
+            case both:
+                switch (groupJoined.left.type) {
+                    case 'replace':
+                        switch (groupJoined.right.type) {
+                            case 'replace': {
+                                const composed = composeReplaceReplace({
+                                    first: groupJoined.left.replace,
+                                    second: groupJoined.right.replace,
+                                    key,
+                                });
+                                if (composed.isError) {
+                                    return composed;
+                                }
+                                if (composed.value === undefined) {
+                                    continue;
+                                }
+                                result.set(key, {
+                                    type: 'replace',
+                                    replace: composed.value,
+                                });
+                                continue;
+                            }
+                            case 'update': {
+                                const composed = composeReplaceUpdate({
+                                    first: groupJoined.left.replace,
+                                    second: groupJoined.right.update,
+                                    key,
+                                });
+                                if (composed.isError) {
+                                    return composed;
+                                }
+                                if (composed.value === undefined) {
+                                    continue;
+                                }
+                                result.set(key, {
+                                    type: 'replace',
+                                    replace: composed.value,
+                                });
+                                continue;
+                            }
+                        }
+                        continue;
+                    case 'update':
+                        switch (groupJoined.right.type) {
+                            case 'replace': {
+                                const composed = composeUpdateReplace({
+                                    first: groupJoined.left.update,
+                                    second: groupJoined.right.replace,
+                                    key,
+                                });
+                                if (composed.isError) {
+                                    return composed;
+                                }
+                                if (composed.value === undefined) {
+                                    continue;
+                                }
+                                result.set(key, {
+                                    type: 'replace',
+                                    replace: composed.value,
+                                });
+                                continue;
+                            }
+                            case 'update': {
+                                const composed = composeUpdateUpdate({
+                                    first: groupJoined.left.update,
+                                    second: groupJoined.right.update,
+                                    key,
+                                });
+                                if (composed.isError) {
+                                    return composed;
+                                }
+                                if (composed.value === undefined) {
+                                    continue;
+                                }
+                                result.set(key, {
+                                    type: 'update',
+                                    update: composed.value,
+                                });
+                                continue;
+                            }
+                        }
+                }
+                break;
+        }
+    }
+    return Result.ok(result.size === 0 ? undefined : mapToRecord(result));
+};
+const composeDownOperation$1 = ({ first, second, innerApplyBack, innerCompose, }) => {
+    return compose({
+        first,
+        second,
+        composeReplaceReplace: params => {
+            return Result.ok(params.first);
+        },
+        composeReplaceUpdate: params => {
+            return Result.ok(params.first);
+        },
+        composeUpdateReplace: params => {
+            if (params.second.oldValue === undefined) {
+                return Result.error(`first is update, but second.oldValue is null. the key is "${params.key}".`);
+            }
+            const firstOldValue = innerApplyBack({
+                key: params.key,
+                operation: params.first,
+                state: params.second.oldValue,
+            });
+            if (firstOldValue.isError) {
+                return firstOldValue;
+            }
+            return Result.ok({ oldValue: firstOldValue.value });
+        },
+        composeUpdateUpdate: params => {
+            return innerCompose({
+                key: params.key,
+                first: params.first,
+                second: params.second,
+            });
+        },
+    });
+};
+/** Make sure `apply(stateBeforeFirst, first) = stateAfterFirst` */
+const serverTransformWithoutValidation = ({ first, second, stateBeforeFirst, stateAfterFirst, innerTransform, toServerState, cancellationPolicy, }) => {
+    // 現在のCharacterの全体Privateの仕組みだと、PrivateになっているCharacterをupdateもしくはremoveしようとしてもエラーは出ない（最新の状態でPrivateになっているかどうかはクライアント側はわからないので、代わりにエラーを返すのは問題がある）。だが、現在のこのtransformのコードだと、存在しないCharacterをupdateもしくはremoveしようとするとエラーを返す。このため、keyを Brute-force attackすることで、PrivateになっているCharacterが存在することを理論上は判別できてしまう。だが、中の値は見ることができないので、現状のままでも問題ないと考えている。
+    if (second === undefined) {
+        return Result.ok(undefined);
+    }
+    const result = new Map();
+    for (const [key, operation] of recordToMap(second)) {
+        if (!isValidKey(key)) {
+            return Result.error(`"${key}" is not a valid key.`);
+        }
+        switch (operation.type) {
+            case replace$1: {
+                const innerPrevState = stateBeforeFirst?.[key];
+                const innerNextState = stateAfterFirst?.[key];
+                /**** requested to remove ****/
+                if (operation.replace.newValue === undefined) {
+                    if (innerPrevState === undefined) {
+                        return Result.error(`"${key}" was not found at requested revision. It is not allowed to try to remove non-existing element.`);
+                    }
+                    if (innerNextState === undefined) {
+                        // removeを試みたが、既に誰かによってremoveされているので何もする必要がない。よって終了。
+                        break;
+                    }
+                    if (cancellationPolicy.cancelRemove) {
+                        if (cancellationPolicy.cancelRemove({
+                            key,
+                            state: innerNextState,
+                        })) {
+                            break;
+                        }
+                    }
+                    result.set(key, {
+                        type: replace$1,
+                        replace: {
+                            oldValue: innerNextState,
+                            newValue: undefined,
+                        },
+                    });
+                    break;
+                }
+                /**** requested to add ****/
+                if (innerPrevState !== undefined) {
+                    return Result.error(`"${key}" was found at requested revision. When adding a state, old value must be empty.`);
+                }
+                if (innerNextState !== undefined) {
+                    // addを試みたが、既に誰かによってaddされているので何もする必要がない。よって終了。
+                    break;
+                }
+                const newValue = toServerState(operation.replace.newValue, key);
+                if (cancellationPolicy.cancelCreate) {
+                    if (cancellationPolicy.cancelCreate({ key, newState: newValue })) {
+                        break;
+                    }
+                }
+                result.set(key, {
+                    type: replace$1,
+                    replace: {
+                        oldValue: undefined,
+                        newValue,
+                    },
+                });
+                break;
+            }
+            case update$2: {
+                const innerPrevState = stateBeforeFirst?.[key];
+                const innerNextState = stateAfterFirst?.[key];
+                const innerFirst = first?.[key];
+                if (innerPrevState === undefined) {
+                    return Result.error(`tried to update "${key}", but not found.`);
+                }
+                if (innerNextState === undefined) {
+                    // updateを試みたが、既に誰かによってremoveされているのでupdateは行われない。よって終了。
+                    break;
+                }
+                // Type guard。事前条件が満たされていれば、innerPrevState !== undefinedかつinnerNextState !== undefinedならばこれは必ずfalseになるので、下のbreakには来ない。
+                if (innerFirst !== undefined && innerFirst.type === replace$1) {
+                    break;
+                }
+                if (cancellationPolicy.cancelUpdate) {
+                    if (cancellationPolicy.cancelUpdate({
+                        key,
+                        prevState: innerPrevState,
+                        nextState: innerNextState,
+                    })) {
+                        break;
+                    }
+                }
+                const transformed = innerTransform({
+                    first: innerFirst?.update,
+                    second: operation.update,
+                    prevState: innerPrevState,
+                    nextState: innerNextState,
+                    key,
+                });
+                if (transformed.isError) {
+                    return transformed;
+                }
+                const transformedUpdate = transformed.value;
+                if (transformedUpdate !== undefined) {
+                    result.set(key, {
+                        type: update$2,
+                        update: transformedUpdate,
+                    });
+                }
+            }
+        }
+    }
+    return Result.ok(result.size === 0 ? undefined : mapToRecord(result));
+};
+/** Make sure `apply(stateBeforeFirst, first) = stateAfterFirst` */
+const serverTransform$o = (params) => {
+    const result = serverTransformWithoutValidation(params);
+    if (result.isError) {
+        return result;
+    }
+    if (result.value == null) {
+        return result;
+    }
+    if (params.validation?.maxRecordLength != null) {
+        const prevStateLength = recordToArray(params.stateAfterFirst).length;
+        let nextStateLength = prevStateLength;
+        recordForEach(result.value, operation => {
+            if (operation.type === update$2) {
+                return;
+            }
+            if (operation.replace.oldValue != null) {
+                nextStateLength--;
+            }
+            if (operation.replace.newValue != null) {
+                nextStateLength++;
+            }
+        });
+        if (params.validation.maxRecordLength < nextStateLength &&
+            prevStateLength < nextStateLength) {
+            return Result.error(`${params.validation.recordName} の要素の数が多すぎるため、これ以上追加することはできません。追加するには、不要な要素を削除してください。`);
+        }
+    }
+    return result;
+};
+const transformElement = ({ state, first, second, innerTransform, innerDiff, errorMessageOnStateNotFound, }) => {
+    switch (first.type) {
+        case replace$1:
+            switch (second.type) {
+                case replace$1:
+                    // 通常、片方がnon-undefinedならばもう片方もnon-undefined。
+                    if (first.replace.newValue !== undefined &&
+                        second.replace.newValue !== undefined) {
+                        const diffResult = innerDiff({
+                            nextState: first.replace.newValue,
+                            prevState: second.replace.newValue,
+                        });
+                        if (diffResult === undefined) {
+                            return Result.ok({
+                                firstPrime: undefined,
+                                secondPrime: undefined,
+                            });
+                        }
+                        return Result.ok({
+                            firstPrime: { type: update$2, update: diffResult },
+                            secondPrime: undefined,
+                        });
+                    }
+                    // 通常、ここに来る場合は first.newValue === undefined && second.newValue === undefined
+                    return Result.ok({
+                        firstPrime: undefined,
+                        secondPrime: undefined,
+                    });
+                case update$2:
+                    return Result.ok({
+                        firstPrime: first,
+                        secondPrime: undefined,
+                    });
+            }
+            break;
+        case update$2:
+            switch (second.type) {
+                case replace$1: {
+                    if (second.replace.newValue !== undefined) {
+                        throw new Error('Tried to add an element, but already exists another value.');
+                    }
+                    return Result.ok({
+                        firstPrime: undefined,
+                        secondPrime: {
+                            type: replace$1,
+                            replace: {
+                                newValue: undefined,
+                            },
+                        },
+                    });
+                }
+                case update$2: {
+                    if (state === undefined) {
+                        return Result.error(errorMessageOnStateNotFound);
+                    }
+                    const xform = innerTransform({
+                        state,
+                        first: first.update,
+                        second: second.update,
+                    });
+                    if (xform.isError) {
+                        return xform;
+                    }
+                    return Result.ok({
+                        firstPrime: xform.value.firstPrime == null
+                            ? undefined
+                            : {
+                                type: update$2,
+                                update: xform.value.firstPrime,
+                            },
+                        secondPrime: xform.value.secondPrime == null
+                            ? undefined
+                            : {
+                                type: update$2,
+                                update: xform.value.secondPrime,
+                            },
+                    });
+                }
+            }
+            break;
+    }
+};
+const clientTransform$2 = ({ state, first, second, innerTransform, innerDiff, }) => {
+    if (first == null || second == null) {
+        return Result.ok({
+            firstPrime: first == null || isEmptyRecord(first) ? undefined : first,
+            secondPrime: second == null || isEmptyRecord(second) ? undefined : second,
+        });
+    }
+    const firstPrime = new Map();
+    const secondPrime = new Map();
+    let error = undefined;
+    groupJoinMap(recordToMap(first), recordToMap(second)).forEach((group, key) => {
+        if (error != null) {
+            return;
+        }
+        switch (group.type) {
+            case left: {
+                firstPrime.set(key, group.left);
+                return;
+            }
+            case right: {
+                secondPrime.set(key, group.right);
+                return;
+            }
+            case both: {
+                const xform = transformElement({
+                    state: state[key],
+                    first: group.left,
+                    second: group.right,
+                    innerTransform,
+                    innerDiff,
+                    errorMessageOnStateNotFound: `"${key}" is not found at RecordOperation.clientTransform.`,
+                });
+                if (xform.isError) {
+                    error = { error: xform.error };
+                    return;
+                }
+                if (xform.value.firstPrime !== undefined) {
+                    firstPrime.set(key, xform.value.firstPrime);
+                }
+                if (xform.value.secondPrime !== undefined) {
+                    secondPrime.set(key, xform.value.secondPrime);
+                }
+                return;
+            }
+        }
+    });
+    if (error != null) {
+        return Result.error(error.error);
+    }
+    return Result.ok({
+        firstPrime: firstPrime.size === 0 ? undefined : mapToRecord(firstPrime),
+        secondPrime: secondPrime.size === 0 ? undefined : mapToRecord(secondPrime),
+    });
+};
+const diff$1 = ({ prevState, nextState, innerDiff, }) => {
+    const result = new Map();
+    for (const [key, value] of groupJoinMap(recordToMap(prevState), recordToMap(nextState))) {
+        switch (value.type) {
+            case left:
+                result.set(key, {
+                    type: replace$1,
+                    replace: { oldValue: value.left, newValue: undefined },
+                });
+                continue;
+            case right: {
+                result.set(key, {
+                    type: replace$1,
+                    replace: { oldValue: undefined, newValue: value.right },
+                });
+                continue;
+            }
+            case both: {
+                const diffResult = innerDiff({
+                    key,
+                    prevState: value.left,
+                    nextState: value.right,
+                });
+                if (diffResult === undefined) {
+                    continue;
+                }
+                result.set(key, { type: update$2, update: diffResult });
+                continue;
+            }
+        }
+    }
+    if (result.size === 0) {
+        return undefined;
+    }
+    return mapToRecord(result);
+};
+const mapRecordUpOperation = ({ source, mapState, mapOperation, }) => {
+    return chooseRecord(source, element => {
+        if (element.type === replace$1) {
+            return {
+                type: replace$1,
+                replace: {
+                    newValue: element.replace.newValue == null
+                        ? undefined
+                        : mapState(element.replace.newValue),
+                },
+            };
+        }
+        return {
+            type: update$2,
+            update: mapOperation(element.update),
+        };
+    });
+};
+const mapRecordDownOperation = ({ source, mapState, mapOperation, }) => {
+    return chooseRecord(source, element => {
+        if (element.type === replace$1) {
+            return {
+                type: replace$1,
+                replace: {
+                    oldValue: element.replace.oldValue == null
+                        ? undefined
+                        : mapState(element.replace.oldValue),
+                },
+            };
+        }
+        return {
+            type: update$2,
+            update: mapOperation(element.update),
+        };
+    });
+};
+
+const $v = '$v';
+const $r = '$r';
+const isKeyToIgnore = (key) => key === $v || key === $r;
+const warnNotFoundTemplate = ({ key, objectType, }) => {
+    loggerRef.warn(`"${key}" key was found at ${objectType} object, but template not found. It seems that the template is invalid or the ${objectType} object has keys which are not in the template.`);
+};
+/** TwoWayOperationをUpOperationに変換します。 */
+const toUpOperation = (template) => (twoWayOperation) => {
+    const twoWayOperationAsAny = twoWayOperation;
+    switch (template.type) {
+        case atomic: {
+            switch (template.mode) {
+                case replace:
+                    return {
+                        newValue: twoWayOperationAsAny.newValue,
+                    };
+                case ot:
+                    return template.nullable
+                        ? toUpOperation$1(twoWayOperationAsAny)
+                        : toUpOperation$2(twoWayOperationAsAny);
+            }
+            break;
+        }
+        case record: {
+            return mapRecordUpOperation({
+                source: twoWayOperation,
+                mapState: x => x,
+                mapOperation: operation => toUpOperation(template.value)(operation),
+            });
+        }
+        case paramRecord: {
+            return mapRecord(twoWayOperation, x => toUpOperation(template.value)(x));
+        }
+        case object: {
+            return mapRecord(twoWayOperation, (operationElement, key) => {
+                if (isKeyToIgnore(key)) {
+                    return operationElement;
+                }
+                const templateElement = template.value[key];
+                if (templateElement == null) {
+                    warnNotFoundTemplate({ key, objectType: 'operation' });
+                    return undefined;
+                }
+                return toUpOperation(templateElement)(operationElement);
+            });
+        }
+    }
+};
+/** TwoWayOperationをDownOperationに変換します。 */
+const toDownOperation = (template) => (twoWayOperation) => {
+    const twoWayOperationAsAny = twoWayOperation;
+    switch (template.type) {
+        case atomic: {
+            switch (template.mode) {
+                case replace:
+                    return {
+                        oldValue: twoWayOperationAsAny.oldValue,
+                    };
+                case ot:
+                    return template.nullable
+                        ? toDownOperation$1(twoWayOperationAsAny)
+                        : toDownOperation$2(twoWayOperationAsAny);
+            }
+            break;
+        }
+        case record: {
+            return mapRecordDownOperation({
+                source: twoWayOperation,
+                mapState: x => x,
+                mapOperation: operation => toDownOperation(template.value)(operation),
+            });
+        }
+        case paramRecord: {
+            return mapRecord(twoWayOperation, x => toDownOperation(template.value)(x));
+        }
+        case object: {
+            return mapRecord(twoWayOperation, (operationElement, key) => {
+                if (isKeyToIgnore(key)) {
+                    return operationElement;
+                }
+                const templateElement = template.value[key];
+                if (templateElement == null) {
+                    warnNotFoundTemplate({ key, objectType: 'operation' });
+                    return undefined;
+                }
+                return toDownOperation(templateElement)(operationElement);
+            });
+        }
+    }
+};
+/** StateにUpOperationを適用します。破壊的な処理は行われません。 */
+const apply$1 = (template) => ({ state, operation }) => {
+    const operationAsAny = operation;
+    switch (template.type) {
+        case atomic: {
+            switch (template.mode) {
+                case replace:
+                    return Result.ok(operationAsAny.newValue);
+                case ot:
+                    return template.nullable
+                        ? apply$4(state, operationAsAny)
+                        : apply$5(state, operationAsAny);
+            }
+            break;
+        }
+        case record: {
+            return apply$2({
+                prevState: (state ?? {}),
+                operation: operation,
+                innerApply: ({ prevState, operation }) => apply$1(template.value)({
+                    state: prevState,
+                    operation: operation,
+                }),
+            });
+        }
+        case paramRecord: {
+            return apply$3({
+                prevState: state ?? {},
+                operation: operation,
+                innerApply: ({ prevState, operation }) => apply$1(template.value)({
+                    state: prevState,
+                    operation: operation,
+                }),
+                defaultState: template.defaultState,
+            });
+        }
+        case object: {
+            const result = { ...state };
+            for (const { key, value } of recordToArray(operation)) {
+                if (isKeyToIgnore(key)) {
+                    continue;
+                }
+                const templateElement = template.value[key];
+                if (templateElement == null) {
+                    warnNotFoundTemplate({ key, objectType: 'operation' });
+                    continue;
+                }
+                const applied = apply$1(templateElement)({
+                    state: state[key],
+                    operation: value,
+                });
+                if (applied.isError) {
+                    return applied;
+                }
+                result[key] = applied.value;
+            }
+            return Result.ok(result);
+        }
+    }
+};
+/** StateにDownOperationを適用します。破壊的な処理は行われません。 */
+const applyBack = (template) => ({ state, operation }) => {
+    const operationAsAny = operation;
+    switch (template.type) {
+        case atomic: {
+            switch (template.mode) {
+                case replace:
+                    return Result.ok(operationAsAny.oldValue);
+                case ot:
+                    return template.nullable
+                        ? applyBack$3(state, operationAsAny)
+                        : applyBack$4(state, operationAsAny);
+            }
+            break;
+        }
+        case record: {
+            return applyBack$1({
+                nextState: (state ?? {}),
+                operation: operation,
+                innerApplyBack: ({ state, operation }) => applyBack(template.value)({
+                    state,
+                    operation: operation,
+                }),
+            });
+        }
+        case paramRecord: {
+            return applyBack$2({
+                nextState: state ?? {},
+                operation: operation,
+                innerApplyBack: ({ nextState, operation }) => applyBack(template.value)({
+                    state: nextState,
+                    operation: operation,
+                }),
+                defaultState: template.defaultState,
+            });
+        }
+        case object: {
+            const result = { ...state };
+            for (const { key, value } of recordToArray(operation)) {
+                if (isKeyToIgnore(key)) {
+                    continue;
+                }
+                const templateElement = template.value[key];
+                if (templateElement == null) {
+                    warnNotFoundTemplate({ key, objectType: 'operation' });
+                    continue;
+                }
+                const applied = applyBack(templateElement)({
+                    state: state[key],
+                    operation: value,
+                });
+                if (applied.isError) {
+                    return applied;
+                }
+                result[key] = applied.value;
+            }
+            return Result.ok(result);
+        }
+    }
+};
+/** 連続する2つのDownOperationを合成します。破壊的な処理は行われません。 */
+const composeDownOperation = (template) => ({ first, second }) => {
+    const firstAsAny = first;
+    const secondAsAny = second;
+    switch (template.type) {
+        case atomic: {
+            switch (template.mode) {
+                case replace:
+                    return Result.ok({
+                        oldValue: firstAsAny.oldValue,
+                    });
+                case ot:
+                    return template.nullable
+                        ? composeDownOperation$2(firstAsAny, secondAsAny)
+                        : composeDownOperation$3(firstAsAny, secondAsAny);
+            }
+            break;
+        }
+        case record: {
+            return composeDownOperation$1({
+                first: first,
+                second: second,
+                innerApplyBack: ({ state, operation }) => applyBack(template.value)({ state, operation }),
+                innerCompose: ({ first, second }) => composeDownOperation(template.value)({ first, second }),
+            });
+        }
+        case paramRecord: {
+            return compose$1({
+                first,
+                second,
+                innerCompose: ({ first, second }) => composeDownOperation(template.value)({ first, second }),
+            });
+        }
+        case object: {
+            const firstMap = recordToMap(first);
+            const secondMap = recordToMap(second);
+            const result = {
+                [$v]: template.$v,
+                [$r]: template.$r,
+            };
+            for (const [key, value] of groupJoinMap(firstMap, secondMap)) {
+                if (isKeyToIgnore(key)) {
+                    continue;
+                }
+                switch (value.type) {
+                    case left:
+                        result[key] = value.left;
+                        break;
+                    case right:
+                        result[key] = value.right;
+                        break;
+                    default: {
+                        const templateElement = template.value[key];
+                        if (templateElement == null) {
+                            warnNotFoundTemplate({ key, objectType: 'operation' });
+                            continue;
+                        }
+                        const composed = composeDownOperation(templateElement)({
+                            first: value.left,
+                            second: value.right,
+                        });
+                        if (composed.isError) {
+                            return composed;
+                        }
+                        result[key] = composed.value;
+                    }
+                }
+            }
+            return Result.ok(result);
+        }
+    }
+};
+/**
+ * Stateの情報を用いて、DownOperationをTwoWayOperationに変換します。破壊的な処理は行われません。
+ * @param nextState DownOperationが適用される前の状態のState。
+ */
+const restore = (template) => ({ nextState, downOperation }) => {
+    const nextStateAsAny = nextState;
+    const downOperationAsAny = downOperation;
+    switch (template.type) {
+        case atomic: {
+            switch (template.mode) {
+                case replace:
+                    return Result.ok({
+                        prevState: downOperationAsAny.oldValue,
+                        twoWayOperation: {
+                            oldValue: downOperationAsAny.oldValue,
+                            newValue: nextState,
+                        },
+                    });
+                case ot:
+                    return template.nullable
+                        ? restore$3({
+                            nextState: nextStateAsAny,
+                            downOperation: downOperationAsAny,
+                        })
+                        : restore$4({
+                            nextState: nextStateAsAny,
+                            downOperation: downOperationAsAny,
+                        });
+            }
+            break;
+        }
+        case record: {
+            return restore$1({
+                nextState: (nextState ?? {}),
+                downOperation: downOperation,
+                innerDiff: ({ prevState, nextState }) => diff(template.value)({ prevState, nextState }),
+                innerRestore: ({ downOperation, nextState }) => restore(template.value)({ downOperation: downOperation, nextState }),
+            });
+        }
+        case paramRecord: {
+            return restore$2({
+                nextState: nextState ?? {},
+                downOperation: downOperation,
+                innerRestore: ({ downOperation, nextState }) => restore(template.value)({ downOperation: downOperation, nextState }),
+            });
+        }
+        case object: {
+            const prevState = { ...nextState };
+            const twoWayOperation = {
+                [$v]: template.$v,
+                [$r]: template.$r,
+            };
+            for (const { key, value } of recordToArray(downOperation)) {
+                if (isKeyToIgnore(key)) {
+                    continue;
+                }
+                const templateElement = template.value[key];
+                if (templateElement == null) {
+                    warnNotFoundTemplate({ key, objectType: 'operation' });
+                    continue;
+                }
+                const restored = restore(templateElement)({
+                    nextState: nextState[key],
+                    downOperation: value,
+                });
+                if (restored.isError) {
+                    return restored;
+                }
+                prevState[key] = restored.value.prevState;
+                twoWayOperation[key] = restored.value.twoWayOperation;
+            }
+            return Result.ok({ prevState, twoWayOperation });
+        }
+    }
+};
+/** 2つのStateオブジェクトの差分を取ります。
+ * @returns 2つのオブジェクトが意味上で同一であればundefinedを返します。
+ */
+const diff = (template) => ({ prevState, nextState }) => {
+    const prevStateAsAny = prevState;
+    const nextStateAsAny = nextState;
+    switch (template.type) {
+        case atomic: {
+            switch (template.mode) {
+                case replace:
+                    return prevState === nextState
+                        ? undefined
+                        : {
+                            oldValue: prevState,
+                            newValue: nextState,
+                        };
+                case ot:
+                    return template.nullable
+                        ? diff$3({
+                            prev: prevStateAsAny,
+                            next: nextStateAsAny,
+                        })
+                        : diff$4({ prev: prevStateAsAny, next: nextStateAsAny });
+            }
+            break;
+        }
+        case record: {
+            return diff$1({
+                prevState: (prevState ?? {}),
+                nextState: (nextState ?? {}),
+                innerDiff: ({ prevState, nextState }) => diff(template.value)({ prevState, nextState }),
+            });
+        }
+        case paramRecord: {
+            return diff$2({
+                prevState: (prevState ?? {}),
+                nextState: (nextState ?? {}),
+                innerDiff: ({ prevState, nextState }) => diff(template.value)({
+                    prevState: prevState ?? template.defaultState,
+                    nextState: nextState ?? template.defaultState,
+                }),
+            });
+        }
+        case object: {
+            const prevStateMap = recordToMap(prevState);
+            const nextStateMap = recordToMap(nextState);
+            const result = {
+                [$v]: template.$v,
+                [$r]: template.$r,
+            };
+            for (const [key, value] of groupJoinMap(prevStateMap, nextStateMap)) {
+                if (isKeyToIgnore(key)) {
+                    continue;
+                }
+                const templateElement = template.value[key];
+                if (templateElement == null) {
+                    warnNotFoundTemplate({ key, objectType: 'state' });
+                    continue;
+                }
+                result[key] = diff(templateElement)({
+                    prevState: value.left,
+                    nextState: value.right,
+                });
+            }
+            if (isIdRecord(result)) {
+                return undefined;
+            }
+            return result;
+        }
+    }
+};
+const requiresArrayTransformation = (operations) => {
+    for (const operation of operations) {
+        if (operation == null) {
+            continue;
+        }
+        for (const operationElement of recordToArray(operation)) {
+            if (operationElement.value.type === replace) {
+                const newValue = operationElement.value.replace.newValue;
+                if (typeof newValue === 'object' &&
+                    newValue != null &&
+                    $index in newValue &&
+                    newValue[$index] !== undefined) {
+                    return true;
+                }
+                continue;
+            }
+            const update = operationElement.value.update;
+            if (typeof update === 'object' &&
+                update != null &&
+                $index in update &&
+                update[$index] !== undefined) {
+                return true;
+            }
+        }
+    }
+    return false;
+};
+/**
+ * ユーザーの権限を考慮せずに、通常のOperational Transformを行います。主にクライアント側で使われます。破壊的な処理は行われません。
+ *
+ * この関数は次の2つの制約があります。
+ * - `first`適用前のStateと`second`適用前のStateは等しい。
+ * - このStateに対して`first`と`secondPrime`を順に適用したStateと、`second`と`firstPrime`を順に適用したStateは等しい。
+ *
+ * Record の template の場合、state や operation に `$index` というキーのプロパティがある場合はIndexObject(配列の要素)であるとみなされ、`$index`を調整する operation が自動的に追加されることがあります。そのため、配列の要素とみなしたい場合を除いて`$index`というキーをオブジェクトに含めないようにしてください。
+ */
+const clientTransform$1 = (template) => ({ state, first, second }) => {
+    switch (template.type) {
+        case atomic: {
+            switch (template.mode) {
+                case replace:
+                    return Result.ok({
+                        firstPrime: {
+                            newValue: first.newValue,
+                        },
+                        secondPrime: undefined,
+                    });
+                case ot:
+                    return template.nullable
+                        ? clientTransform$4({
+                            first: first,
+                            second: second,
+                        })
+                        : clientTransform$5({
+                            first: first,
+                            second: second,
+                        });
+            }
+            break;
+        }
+        case record: {
+            const $first = first;
+            const $second = second;
+            const args = {
+                state,
+                first: $first,
+                second: $second,
+                innerTransform: ({ state, first, second }) => clientTransform$1(template.value)({
+                    state,
+                    first,
+                    second,
+                }),
+                innerDiff: ({ prevState, nextState }) => {
+                    const d = diff(template.value)({ prevState, nextState });
+                    if (d == null) {
+                        return undefined;
+                    }
+                    return toUpOperation(template.value)(d);
+                },
+            };
+            if (requiresArrayTransformation([$first, $second])) {
+                return clientTransform({
+                    ...args,
+                    innerApply: ({ prevState, operation }) => apply$1(template.value)({ state: prevState, operation }),
+                });
+            }
+            return clientTransform$2(args);
+        }
+        case paramRecord: {
+            return clientTransform$3({
+                state,
+                defaultState: template.defaultState,
+                first: first,
+                second: second,
+                innerTransform: ({ state, first, second }) => clientTransform$1(template.value)({
+                    state,
+                    first,
+                    second,
+                }),
+            });
+        }
+        case object: {
+            const firstMap = recordToMap(first);
+            const secondMap = recordToMap(second);
+            const firstPrime = {
+                [$v]: template.$v,
+                [$r]: template.$r,
+            };
+            const secondPrime = {
+                [$v]: template.$v,
+                [$r]: template.$r,
+            };
+            for (const [key, value] of groupJoinMap(firstMap, secondMap)) {
+                if (isKeyToIgnore(key)) {
+                    continue;
+                }
+                switch (value.type) {
+                    case left:
+                        firstPrime[key] = value.left;
+                        break;
+                    case right:
+                        secondPrime[key] = value.right;
+                        break;
+                    default: {
+                        const s = state[key];
+                        if (s === undefined) {
+                            return Result.error(`${key} is not found at object client transform.`);
+                        }
+                        const templateElement = template.value[key];
+                        if (templateElement == null) {
+                            warnNotFoundTemplate({ key, objectType: 'operation' });
+                            continue;
+                        }
+                        const xformed = clientTransform$1(templateElement)({
+                            state: s,
+                            first: value.left,
+                            second: value.right,
+                        });
+                        if (xformed.isError) {
+                            return xformed;
+                        }
+                        firstPrime[key] = xformed.value.firstPrime;
+                        secondPrime[key] = xformed.value.secondPrime;
+                    }
+                }
+            }
+            return Result.ok({
+                firstPrime: isIdRecord(firstPrime) ? undefined : firstPrime,
+                secondPrime: isIdRecord(secondPrime) ? undefined : secondPrime,
+            });
+        }
+    }
+};
+
+class OtError extends Error {
+    otError;
+    constructor(content) {
+        // TODO: よりわかりやすいメッセージを表示する
+        const message = content.type;
+        super(message);
+        this.otError = content;
+        this.name = 'OtError';
+    }
+}
+const toOtError = (content) => {
+    if (typeof content === 'string') {
+        return new Error(content);
+    }
+    return new OtError(content);
+};
+
+class NodeAndEdges {
+    node;
+    edgeTargetNodes;
+    constructor(node, 
+    /** この node が始点となる edge の全てのうち、それらの終点を表します。 */
+    edgeTargetNodes) {
+        this.node = node;
+        this.edgeTargetNodes = edgeTargetNodes;
+    }
+    #longestPathsMemo = null;
+    /** この node を始点とした、最長の path を返します。この node は含まれます。最長の path が複数ある場合はすべて返します。 */
+    // 値はメモ化されるため、longestPath を実行した後に edgeTargetNodes を変更してはならない。
+    longestPaths() {
+        if (this.#longestPathsMemo != null) {
+            return this.#longestPathsMemo;
+        }
+        let longestPaths = [{ path: [this.node] }];
+        let longestPathLength = 1;
+        for (const edgeTargetNode of this.edgeTargetNodes) {
+            for (const longestPath of edgeTargetNode.longestPaths()) {
+                const path = [this.node, ...longestPath.path];
+                if (path.length < longestPathLength) {
+                    continue;
+                }
+                if (path.length === longestPathLength) {
+                    longestPaths.push({ path });
+                    continue;
+                }
+                longestPaths = [{ path }];
+                longestPathLength = path.length;
+            }
+        }
+        this.#longestPathsMemo = longestPaths;
+        return this.#longestPathsMemo;
+    }
+}
+/**
+ * 与えられた配列について、次のすべての条件を満たした有向グラフを作成します。
+ *
+ * 条件1. 配列の要素はすべてグラフの node である。例: [1,4,2] の場合は 1,4,2 の3つが node。
+ *
+ * 条件2. edge の方向は、必ず配列内の位置で左から右の向き。例: [1,4,2] の場合は 1→4,4→2,1→2 のみが edge になりうる。4→1 や 1→1 などは決して edge にならない。
+ *
+ * 条件3. 2つの edge があり、それを a, b とする。前者の edge の両端の node を x_a, y_a、後者のそれを x_b, y_b とする。このとき、a = b ⇔ x_a = x_b かつ y_a = y_b が成り立つ。つまり、2つの node を結ぶ edge は最大でも1つまでしか存在しない。
+ *
+ * 条件4. edge は、(edge の始点) < (edge の終点) という順序関係を満たす。なお、(edge の始点) = (edge の終点) という順序関係を満たすことは許容されていない。 例: [1,4,2] の場合は、条件3もあわせて考慮すると、1→4,1→2 のみが edge になりうる。4→2 は決して edge にならない。
+ *
+ * 条件5. edge は可能な限り多くする。例: [1,4,2,3] の場合は、条件1～4 もあわせて考慮すると、node は 1,4,2,3 で、edge は 1→4, 1→2, 1→3, 2→3 である。
+ *
+ * なお、次の条件は理論的には必須ではありませんが、この関数を必要とする関数での処理の高速化のために設けています。
+ *
+ * 条件6. 2つの相異なる node 間を結ぶ path が複数ある場合、最も edge の数が多い path を構成する edge のみを残し、他の edge はすべて削除する。これは条件5より優先される。例: [1,4,2,3] の場合は、条件1～4 のみを考慮すると edge は 1→4, 1→2, 1→3, 2→3 であるが、このうち1→3は1→2→3よりedgeの数が少ないため取り除く。「ショートカットできる経路はすべて削除する」と考えてもよい。
+ */
+const createGraph = (source, comparer) => {
+    const memoized = source.map(() => null);
+    function getOrCreateNode(sourceIndex) {
+        const memoizedElement = memoized[sourceIndex];
+        if (memoizedElement != null) {
+            return memoizedElement;
+        }
+        const startingNode = source[sourceIndex];
+        const edgeTargetNodes = [];
+        for (let i = sourceIndex + 1; i < source.length; i++) {
+            const edgeTargetNode = getOrCreateNode(i);
+            const lastEdgeTargetNode = edgeTargetNodes[edgeTargetNodes.length - 1];
+            // 上の条件6を満たすような edge の追加はせず continue する
+            if (lastEdgeTargetNode != null &&
+                comparer(lastEdgeTargetNode.node, edgeTargetNode.node) === '<') {
+                continue;
+            }
+            if (comparer(startingNode, edgeTargetNode.node) === '<') {
+                edgeTargetNodes.push(edgeTargetNode);
+            }
+        }
+        const result = new NodeAndEdges(startingNode, edgeTargetNodes);
+        memoized[sourceIndex] = result;
+        return result;
+    }
+    source.forEach((_, index) => getOrCreateNode(index));
+    return memoized.map(elem => {
+        if (elem == null) {
+            throw new Error('This should not happen');
+        }
+        return elem;
+    });
+};
+const getBetterFixedPoints = ({ x, y, getIndex, }) => {
+    if (x.length < y.length) {
+        return 'yIsBetter';
+    }
+    if (x.length > y.length) {
+        return 'xIsBetter';
+    }
+    const getGaps = (path) => [...pairwiseIterable(path)]
+        .flatMap(pair => {
+        if (pair.prev == null) {
+            return [];
+        }
+        return [getIndex(pair.current) - getIndex(pair.prev)];
+    })
+        .sort((i, j) => i - j);
+    const gapsOfPrev = getGaps(x);
+    const gapsOfNext = getGaps(y);
+    for (const group of groupJoinArray(gapsOfPrev, gapsOfNext)) {
+        if (group.type !== both) {
+            throw new Error(`group.type should be "${both}", but actually "${group.type}".`);
+        }
+        if (group.left === group.right) {
+            continue;
+        }
+        return group.left < group.right ? 'yIsBetter' : 'xIsBetter';
+    }
+    return 'same';
+};
+/** 配列が `prev` の状態から `next` の状態に変更されたとみなしたときに、動かすべきでない要素の一覧を返します。undefined である要素は無視されます。 */
+const getBestFixedPoints = ({ prev, next, getKey, comparer, }) => {
+    const nextMap = new Map(next.map((value, index) => [getKey(value), { value, index }]));
+    const graph = createGraph(prev.filter(value => nextMap.has(getKey(value))).map((value, index) => ({ value, index })), (x, y) => {
+        const nextX = nextMap.get(getKey(x.value));
+        const nextY = nextMap.get(getKey(y.value));
+        // nextX = nextY = null のときでも '>' を返せば edge は生成されないので問題ない
+        if (nextY === undefined) {
+            return '>';
+        }
+        if (nextX === undefined) {
+            return '<';
+        }
+        return comparer(nextX, nextY);
+    });
+    let longestPath = [];
+    for (const g of graph) {
+        for (const { path } of g.longestPaths()) {
+            const compareResult = getBetterFixedPoints({
+                x: longestPath,
+                y: path,
+                getIndex: x => x.index,
+            });
+            switch (compareResult) {
+                case 'xIsBetter':
+                    break;
+                case 'yIsBetter':
+                    longestPath = path;
+                    break;
+            }
+        }
+    }
+    return longestPath.map(({ value }) => value);
+};
+/**
+ *
+ * 配列を最初の要素から順番に見ていって、`predicate` が満たされなくなるまで配列から要素を取り除きます。
+ *
+ * @returns 取り除かれた要素。
+ *
+ */
+const removeUntil = (source, predicate) => {
+    const result = [];
+    while (source.length !== 0) {
+        const first = source[0];
+        if (!predicate(first)) {
+            return result;
+        }
+        result.push(first);
+        source.splice(0, 1);
+    }
+    return result;
+};
+const arrayDiff = ({ prev, next, getKey, }) => {
+    const clonedPrev = [...prev];
+    const clonedNext = [...next];
+    const fixedPoints = getBestFixedPoints({
+        prev: clonedPrev,
+        next: clonedNext,
+        getKey,
+        comparer: (x, y) => (x.index < y.index ? '<' : '>'),
+    });
+    const builder = new OperationBuilder({
+        getInsertLength: insert => new PositiveInt(insert.length),
+        getDeleteLength: del => new PositiveInt(del.length),
+        concatInsert: (x, y) => [...x, ...y],
+        concatDelete: (x, y) => [...x, ...y],
+    });
+    for (const fixedPoint of fixedPoints) {
+        const deleted = removeUntil(clonedPrev, x => getKey(x) !== getKey(fixedPoint));
+        if (isReadonlyNonEmptyArray(deleted)) {
+            builder.delete(deleted);
+        }
+        clonedPrev.splice(0, 1);
+        const inserted = removeUntil(clonedNext, x => getKey(x) !== getKey(fixedPoint));
+        if (isReadonlyNonEmptyArray(inserted)) {
+            builder.insert(inserted);
+        }
+        clonedNext.splice(0, 1);
+        builder.retain(PositiveInt.one);
+    }
+    if (isReadonlyNonEmptyArray(clonedPrev)) {
+        builder.delete(clonedPrev);
+    }
+    if (isReadonlyNonEmptyArray(clonedNext)) {
+        builder.insert(clonedNext);
+    }
+    return {
+        value: builder.build(),
+        iterate: () => builder.toIterable(),
+        toUnits: () => builder.toUnits(),
+    };
+};
+
+const apply = (state, operation) => {
+    const builder = new OperationBuilder({
+        getInsertLength: insert => new PositiveInt(insert.length),
+        getDeleteLength: del => new PositiveInt(del.length),
+        concatInsert: (first, second) => [...first, ...second],
+        concatDelete: (first, second) => [...first, ...second],
+    }, operation);
+    const applied = apply$7({
+        state,
+        action: [...builder.toIterable()],
+        getStateLength: state => state.length,
+        getInsertLength: insert => insert.length,
+        getDeleteLength: del => new PositiveInt(del.length),
+        insert: ({ state, start, replacement }) => {
+            const result = [...state.slice(0, start), ...replacement, ...state.slice(start)];
+            return { newState: result };
+        },
+        replace: ({ state, start, replacement, deleteCount }) => {
+            const deleted = state.slice(start, deleteCount.value);
+            const result = [
+                ...state.slice(0, start),
+                ...(replacement.isNone ? [] : replacement.value),
+                ...state.slice(start + deleteCount.value),
+            ];
+            return { newState: result, deleted: deleted };
+        },
+    });
+    if (applied.isError) {
+        return applied;
+    }
+    return Result.ok(applied.value.newState);
+};
+const transform = (state, stateAppliedFirst, stateAppliedSecond, getKey) => {
+    const tagKey = '$tag';
+    const $state = state.map(value => ({ value, [tagKey]: 0 }));
+    const $stateAppliedFirst = stateAppliedFirst.map(value => ({ value, [tagKey]: 1 }));
+    const $stateAppliedSecond = stateAppliedSecond.map(value => ({ value, [tagKey]: 2 }));
+    const $getKey = (x) => getKey(x.value);
+    const first = arrayDiff({
+        prev: $state,
+        next: $stateAppliedFirst,
+        getKey: $getKey,
+    });
+    const firstUnits = [...first.toUnits()];
+    const second = arrayDiff({
+        prev: $state,
+        next: $stateAppliedSecond,
+        getKey: $getKey,
+    });
+    const secondUnits = [...second.toUnits()];
+    const transformed = transform$1({
+        first: firstUnits,
+        second: secondUnits,
+        splitDelete: (target, index) => {
+            const left = target.slice(0, index.value);
+            const right = target.slice(index.value);
+            return [
+                left,
+                right,
+            ];
+        },
+        factory: {
+            getInsertLength: insert => new PositiveInt(insert.length),
+            getDeleteLength: del => new PositiveInt(del.length),
+            concatInsert: (first, second) => [...first, ...second],
+            concatDelete: (first, second) => [...first, ...second],
+        },
+    });
+    if (transformed.isError) {
+        return transformed;
+    }
+    // stateAppliedFirst に secondPrime を apply しているが、代わりに stateAppliedSecond に firstPrime を apply したものでも構わない。
+    const nonDistictedLastState = apply($stateAppliedFirst, transformed.value.secondPrime);
+    if (nonDistictedLastState.isError) {
+        return nonDistictedLastState;
+    }
+    /*
+    @kizahasi/ot-core の transform の仕様では要素の同一性は考慮されないため、もし nonDistictedLastState.value をそのまま返してしまうと次のような問題が生じる。
+    - 例えば first が [insert 'x', retain 1, delete 'x', retain 1] で、second が [retain 1, delete 'x', retain 1, insert 'x'] のとき(つまり、同一の要素が同時に移動されたとき)、nonDistictedLastState.value に 'x' が2つ存在することになってしまう。そのため、二重に存在する要素は1つのみにしなければならない。
+    - first が [delete 'x', retain 1] で、second が [delete 'x', retain 1, insert 'x'] のように、片方が移動で片方が削除の場合は最終的に削除されてほしいが、insert 'x' が残るため nonDistictedLastState.value に 'x' が含まれてしまう。
+    そのため、これより下で、nonDistictedLastState.value からそのような要素を取り除く処理を行っている。
+    */
+    const deletedElemets = new DualKeyMap();
+    for (const operation of firstUnits) {
+        if (operation.type === delete$) {
+            for (const d of operation.delete) {
+                deletedElemets.set({ first: getKey(d.value), second: 1 }, null);
+            }
+        }
+    }
+    for (const operation of secondUnits) {
+        if (operation.type === delete$) {
+            for (const d of operation.delete) {
+                deletedElemets.set({ first: getKey(d.value), second: 2 }, null);
+            }
+        }
+    }
+    const groupedLastState = new DualKeyMap();
+    for (const { value, $tag } of nonDistictedLastState.value) {
+        if ($tag === 0) {
+            // 0 は使わないのでスキップ。
+            continue;
+        }
+        groupedLastState.set({ first: getKey(value), second: $tag }, null);
+    }
+    const result = nonDistictedLastState.value.flatMap(({ value, $tag }) => {
+        const key = getKey(value);
+        const deletedSimultaneously = deletedElemets.getByFirst(key).size >= 2;
+        if (!deletedSimultaneously) {
+            return [value];
+        }
+        const tags = groupedLastState.getByFirst(key);
+        switch (tags.size) {
+            case 0:
+                // 両方のOperationで削除となったケース。
+                // この場合は削除とする。
+                return [];
+            case 1:
+                // 片方のOperationでは移動だが、もう片方のOperationでは削除されたケース。
+                // この場合は削除を優先する。
+                return [];
+            case 2:
+                // 両方のOperationで移動となったケース。
+                // この場合は常にfirstを優先することにしている(問題があれば変えるかも)。
+                // ここで $tag === 0 になることはない(もし $tag === 0 であればこの要素を削除するOperationはないことになるが、その場合は deletedSimultaneously === false になるため)。
+                return $tag === 1 ? [value] : [];
+            default:
+                // ここに来ることはない。
+                return [];
+        }
+    });
+    return Result.ok(result);
+};
+
 // サーバーとクライアントで書き換え可能だが特殊な値であるため、他のプロパティとの衝突を避ける目的で文字列の頭に $ を頭に付けている。
 const $index = '$index';
 /**
@@ -3866,14 +4264,16 @@ const $index = '$index';
 配列の表現方法には { $key: string, ...otherProperties }[] と Record<string, { $index: number; ...otherProperties }> の2種類が考えられたが、後者を採用している。
 前者はデータをエクスポートした際にテキストエディタで比較的編集しやすいというメリットがある。ただし、replace と update の2種類だけでは、要素が移動した際に要素を丸ごと delete と insert する必要があるため Operation の容量がかさばるという問題点がある。move のような Operation も定義すれば解決すると思われるが、手間がかかる。いっぽう、後者の方法だと $index を変更するだけで済むため容量がかさばる問題は存在せず、既存の Record の Operational Transformation のシステムに乗っかれるというメリットがある。よって単純化を重視して後者を採用した。
 */
-({
+const indexObjectTemplateValue = {
     /**
      * 自身の要素のインデックス。一般的な配列と同様に、0 から始まります。
      *
      * インデックスが他の要素と重複してはなりません。また、0 から順に連続的に割り当てる必要があります。
      */
     [$index]: createReplaceValueTemplate(z.number().nonnegative().int()),
-});
+};
+const dummyVersion = undefined;
+const indexObjectTemplate = createObjectValueTemplate(indexObjectTemplateValue, dummyVersion, dummyVersion);
 const indexObjectsToArray = (linkedList) => {
     const groupBy$index = recordToMap(groupBy(recordToArray(linkedList), ({ value }) => value[$index].toString()));
     const result = [];
@@ -3904,6 +4304,168 @@ const arrayToIndexObjects = (array) => {
         });
     });
     return result;
+};
+const generateArrayDiff = ({ prevState, nextState, mapOperation, }) => {
+    const execDiff = diff(createRecordValueTemplate(indexObjectTemplate));
+    const diffResult = execDiff({
+        prevState: mapRecord(prevState, ({ $index }) => ({
+            $v: dummyVersion,
+            $r: dummyVersion,
+            $index,
+        })),
+        nextState: mapRecord(nextState, ({ $index }) => ({
+            $v: dummyVersion,
+            $r: dummyVersion,
+            $index,
+        })),
+    });
+    // replaceは存在しないので、updateだけ抽出する
+    return mapRecord(diffResult ?? {}, x => x.type === update$2
+        ? {
+            ...x,
+            // RecordOperation.compose で型エラーを起こさないためだけに行っている変換。
+            update: mapOperation(x.update),
+        }
+        : undefined);
+};
+/**
+ * 配列に対して clientTransform を行います。
+ *
+ * 通常の Record の serverTransform の処理（つまり、`$index` 以外のプロパティの処理など）も内部で行われるため、通常の Record の serverTransform を別途実行することは避けてください。
+ */
+const clientTransform = (params) => {
+    // いったん通常のRecordOperation.clientTransformを行い、エラーがないかどうか確かめる。
+    // Operationの内容に問題がなくともresultFirstの時点では不正な$indexが存在する可能性があるが、この後のresultSecondをcomposeすることで正常になる。
+    const recordOperationTransformResult = clientTransform$2(params);
+    if (recordOperationTransformResult.isError) {
+        return recordOperationTransformResult;
+    }
+    const execApply = apply$1(createRecordValueTemplate(indexObjectTemplate));
+    const arrayObjectAfterFirst = execApply({
+        state: mapRecord(params.state, ({ $index }) => ({
+            $v: dummyVersion,
+            $r: dummyVersion,
+            $index,
+        })),
+        operation: mapRecordUpOperation({
+            source: params.first ?? {},
+            mapState: ({ $index }) => ({ $v: dummyVersion, $r: dummyVersion, $index }),
+            mapOperation: ({ $index }) => ({ $v: dummyVersion, $r: dummyVersion, $index }),
+        }),
+    });
+    if (arrayObjectAfterFirst.isError) {
+        // ここに来るということは、クライアントから受け取った Operation が不正(存在しない State に対して update しようとしたなど)であることを示す。だが、その場合は上のRecordOperation.clientTransformですでに弾かれているので、ここには来ないはず。
+        return Result.error('Error at applying first as an array operation. This is probablly a bug. Message: ' +
+            toOtError(arrayObjectAfterFirst.error).message);
+    }
+    const arrayObjectAfterSecond = execApply({
+        state: mapRecord(params.state, ({ $index }) => ({
+            $v: dummyVersion,
+            $r: dummyVersion,
+            $index,
+        })),
+        operation: mapRecordUpOperation({
+            source: params.second ?? {},
+            mapState: ({ $index }) => ({ $v: dummyVersion, $r: dummyVersion, $index }),
+            mapOperation: ({ $index }) => ({ $v: dummyVersion, $r: dummyVersion, $index }),
+        }),
+    });
+    if (arrayObjectAfterSecond.isError) {
+        // ここに来るということは、クライアントから受け取った Operation が不正(存在しない State に対して update しようとしたなど)であることを示す。だが、その場合は上のRecordOperation.clientTransformですでに弾かれているので、ここには来ないはず。
+        return Result.error('Error at applying second as an array operation. This is probablly a bug. Message: ' +
+            toOtError(arrayObjectAfterSecond.error).message);
+    }
+    const baseArray = indexObjectsToArray(mapRecord(params.state, ({ $index }) => ({ $index })));
+    if (baseArray.isError) {
+        return Result.error('state is invalid as an array. Message: ' + baseArray.error);
+    }
+    const arrayAfterFirst = indexObjectsToArray(mapRecord(arrayObjectAfterFirst.value ?? {}, ({ $index }) => ({ $index })));
+    if (arrayAfterFirst.isError) {
+        return Result.error('state applied first is invalid as an array. Message: ' + arrayAfterFirst.error);
+    }
+    const arrayAfterSecond = indexObjectsToArray(mapRecord(arrayObjectAfterSecond.value ?? {}, ({ $index }) => ({ $index })));
+    if (arrayAfterSecond.isError) {
+        return Result.error('state applied second is invalid as an array. Message: ' + arrayAfterFirst.error);
+    }
+    const finalArrayResult = transform(baseArray.value, arrayAfterFirst.value, arrayAfterSecond.value, x => x.key);
+    if (finalArrayResult.isError) {
+        // 配列のtransformでエラーが発生することは通常はない。
+        return Result.error('Error at transforming an array operation. This is probablly a bug. Message: ' +
+            finalArrayResult.error);
+    }
+    const stateAfterFirst = apply$2({
+        prevState: params.state,
+        operation: params.first ?? {},
+        innerApply: ({ prevState, operation }) => params.innerApply({ prevState, operation }),
+    });
+    if (stateAfterFirst.isError) {
+        throw new Error('This should not happen. Message: ' + stateAfterFirst.error);
+    }
+    const finalStateBeforeIndexRearrangement = apply$2({
+        prevState: stateAfterFirst.value,
+        operation: recordOperationTransformResult.value.secondPrime,
+        innerApply: ({ prevState, operation }) => params.innerApply({ prevState, operation }),
+    });
+    if (finalStateBeforeIndexRearrangement.isError) {
+        throw new Error('This should not happen. Message: ' + finalStateBeforeIndexRearrangement.error);
+    }
+    const resultSecond = generateArrayDiff({
+        prevState: finalStateBeforeIndexRearrangement.value,
+        nextState: arrayToIndexObjects(finalArrayResult.value),
+        mapOperation: x => ({
+            [$index]: x[$index] == null ? undefined : { newValue: x[$index].newValue },
+        }),
+    });
+    const compose$1 = (first) => compose({
+        first,
+        second: resultSecond,
+        composeReplaceUpdate: ({ first, second }) => {
+            if (first.newValue === undefined) {
+                // 通常はここには来ない
+                return Result.ok(first);
+            }
+            return Result.ok(produce(first, first => {
+                if (second.$index === undefined) {
+                    return;
+                }
+                if (first.newValue === undefined) {
+                    return;
+                }
+                first.newValue.$index = second.$index.newValue;
+            }));
+        },
+        composeUpdateUpdate: ({ first, second }) => {
+            let composedLinkedListOperation;
+            if (second[$index] === undefined) {
+                composedLinkedListOperation = first[$index];
+            }
+            else {
+                composedLinkedListOperation = second[$index];
+            }
+            const result = produce(first, first => {
+                first.$index = composedLinkedListOperation;
+            });
+            return Result.ok(isIdRecord(result) ? undefined : result);
+        },
+        composeReplaceReplace: () => {
+            throw new Error('This should not happen.');
+        },
+        composeUpdateReplace: () => {
+            throw new Error('This should not happen.');
+        },
+    });
+    const firstPrime = compose$1(recordOperationTransformResult.value.firstPrime ?? {});
+    if (firstPrime.isError) {
+        return firstPrime;
+    }
+    const secondPrime = compose$1(recordOperationTransformResult.value.secondPrime ?? {});
+    if (secondPrime.isError) {
+        return secondPrime;
+    }
+    return Result.ok({
+        firstPrime: isIdRecord(firstPrime.value ?? {}) ? undefined : firstPrime.value,
+        secondPrime: isIdRecord(secondPrime.value ?? {}) ? undefined : secondPrime.value,
+    });
 };
 
 /** 全てのStateに完全にアクセスできる。*/
@@ -6276,23 +6838,6 @@ const parse = (source) => {
     return decode(JSON.parse(source));
 };
 
-class OtError extends Error {
-    otError;
-    constructor(content) {
-        // TODO: よりわかりやすいメッセージを表示する
-        const message = content.type;
-        super(message);
-        this.otError = content;
-        this.name = 'OtError';
-    }
-}
-const toOtError = (content) => {
-    if (typeof content === 'string') {
-        return new Error(content);
-    }
-    return new OtError(content);
-};
-
 const createLogs = ({ prevState, nextState, }) => {
     const boardsDiff = diff$1({
         prevState: prevState.boards ?? {},
@@ -6443,5 +6988,5 @@ const createLogs = ({ prevState, nextState, }) => {
     };
 };
 
-export { $free, $index, $r, $system, $v, Default, FirebaseStorage, Markdown, Master, Number, OtError, Plain, Player, PublicChannelKey, Spectator, String, Uploader, admin, analyze, anonymous, apply, applyBack, apply$3 as applyNullableText, apply$4 as applyText, arrayToIndexObjects, atomic, authToken, template$a as bgmTemplate, template$m as boardPositionTemplate, template$5 as boardTemplate, template$i as boolParamTemplate, template$h as characterPieceTemplate, template$c as characterTemplate, client, clientTransform, template$g as commandTemplate, composeDownOperation, createLogs, createObjectValueTemplate, createTextValueTemplate as createOtValueTemplate, createParamRecordValueTemplate, createRecordValueTemplate, createReplaceValueTemplate, createType, decodeDbState, decode$1 as decodeDicePiece, decodeDownOperation, decode as decodeStringPiece, deleteType, type$1 as dicePieceLog, dicePieceStrIndexes, template$j as dicePieceTemplate, template$k as dieValueTemplate, diff, downOperation, exactDbState, exactDownOperation, execCharacterCommand, expr1, fakeFirebaseConfig1, fakeFirebaseConfig2, filePathTemplate, firebaseConfig, forceMaxLength100String, generateChatPalette, getOpenRollCall, getVariableFromVarTomlObject, template$9 as imagePieceTemplate, indexObjectsToArray, isBoardOwner, isCharacterOwner, isIdRecord, isOpenRollCall, isOwner, isStrIndex10, isStrIndex100, isStrIndex20, isStrIndex5, isValidVarToml, joinPath, maxLength100String, maybe, template$4 as memoTemplate, diff$3 as nullableTextDiff, template$f as numParamTemplate, object, ot, template$3 as paramNameTemplate, paramRecord, parse$1 as parseDicePiece, parseState, parse as parseStringPiece, parseToml, parseUpOperation, template$b as participantTemplate, path, template$l as pieceTemplate, plain, template$e as portraitPieceTemplate, record, replace$1 as replace, restore, restrict, dbTemplate as roomDbTemplate, template as roomTemplate, sanitizeFilename, sanitizeFoldername, serverTransform, shape, template$7 as shapePieceTemplate, template$8 as shapeTemplate, simpleId, state, strIndex100Array, strIndex10Array, strIndex20Array, strIndex5Array, template$d as strParamTemplate, type as stringPieceLog, template$6 as stringPieceTemplate, stringifyState, stringifyUpOperation, testCommand, diff$4 as textDiff, toClientState, toDownOperation, toUpOperation$1 as toNullableTextUpOperation, toOtError, toUpOperation$2 as toTextUpOperation, toUpOperation, trySanitizePath, upOperation, update$2 as update, updateType };
+export { $free, $index, $r, $system, $v, Default, FirebaseStorage, Markdown, Master, Number, OtError, Plain, Player, PublicChannelKey, Spectator, String, Uploader, admin, analyze, anonymous, apply$1 as apply, applyBack, apply$4 as applyNullableText, apply$5 as applyText, arrayToIndexObjects, atomic, authToken, template$a as bgmTemplate, template$m as boardPositionTemplate, template$5 as boardTemplate, template$i as boolParamTemplate, template$h as characterPieceTemplate, template$c as characterTemplate, client, clientTransform$1 as clientTransform, template$g as commandTemplate, composeDownOperation, createLogs, createObjectValueTemplate, createTextValueTemplate as createOtValueTemplate, createParamRecordValueTemplate, createRecordValueTemplate, createReplaceValueTemplate, createType, decodeDbState, decode$1 as decodeDicePiece, decodeDownOperation, decode as decodeStringPiece, deleteType, type$1 as dicePieceLog, dicePieceStrIndexes, template$j as dicePieceTemplate, template$k as dieValueTemplate, diff, downOperation, exactDbState, exactDownOperation, execCharacterCommand, expr1, fakeFirebaseConfig1, fakeFirebaseConfig2, filePathTemplate, firebaseConfig, forceMaxLength100String, generateChatPalette, getOpenRollCall, getVariableFromVarTomlObject, template$9 as imagePieceTemplate, indexObjectsToArray, isBoardOwner, isCharacterOwner, isIdRecord, isOpenRollCall, isOwner, isStrIndex10, isStrIndex100, isStrIndex20, isStrIndex5, isValidVarToml, joinPath, maxLength100String, maybe, template$4 as memoTemplate, diff$3 as nullableTextDiff, template$f as numParamTemplate, object, ot, template$3 as paramNameTemplate, paramRecord, parse$1 as parseDicePiece, parseState, parse as parseStringPiece, parseToml, parseUpOperation, template$b as participantTemplate, path, template$l as pieceTemplate, plain, template$e as portraitPieceTemplate, record, replace$1 as replace, restore, restrict, dbTemplate as roomDbTemplate, template as roomTemplate, sanitizeFilename, sanitizeFoldername, serverTransform, shape, template$7 as shapePieceTemplate, template$8 as shapeTemplate, simpleId, state, strIndex100Array, strIndex10Array, strIndex20Array, strIndex5Array, template$d as strParamTemplate, type as stringPieceLog, template$6 as stringPieceTemplate, stringifyState, stringifyUpOperation, testCommand, diff$4 as textDiff, toClientState, toDownOperation, toUpOperation$1 as toNullableTextUpOperation, toOtError, toUpOperation$2 as toTextUpOperation, toUpOperation, trySanitizePath, upOperation, update$2 as update, updateType };
 //# sourceMappingURL=index.js.map

@@ -1,7 +1,8 @@
 import { Result } from '@kizahasi/result';
 import { z } from 'zod';
-import { State, TwoWayOperation, UpOperation } from './generator';
 import { OmitVersion } from './generator/omitVersion';
+import { State, TwoWayOperation, UpOperation } from './generator/types';
+import { StringKeyRecord } from './record';
 import * as RecordOperation from './recordOperation';
 export declare const $index = "$index";
 /**
@@ -76,8 +77,8 @@ export declare const arrayToIndexObjects: <T extends IndexObjectState>(array: re
  * 通常の Record の serverTransform の処理（つまり、`$index` 以外のプロパティの処理など）も内部で行われるため、通常の Record の serverTransform を別途実行することは避けてください。
  */
 export declare const serverTransform: <TServerState extends IndexObjectState, TClientState extends IndexObjectState, TFirstOperation extends IndexObjectTwoWayOperation, TSecondOperation extends IndexObjectUpOperation, TCustomError = string>(params: {
-    stateBeforeFirst: import("./record").StringKeyRecord<TServerState>;
-    stateAfterFirst: import("./record").StringKeyRecord<TServerState>;
+    stateBeforeFirst: StringKeyRecord<TServerState>;
+    stateAfterFirst: StringKeyRecord<TServerState>;
     first?: RecordOperation.RecordUpOperation<TServerState, TFirstOperation> | undefined;
     second?: RecordOperation.RecordUpOperation<TClientState, TSecondOperation> | undefined;
     toServerState: (state: TClientState, key: string) => TServerState;
@@ -94,5 +95,35 @@ export declare const serverTransform: <TServerState extends IndexObjectState, TC
     /** Operation の型を変換して、TFirstOperation にします。通常は、単に `$v` と `$r` を付与するだけで構いません。 */
     mapOperation: (operation: IndexObjectTwoWayOperation) => TFirstOperation;
 }) => Result<RecordOperation.RecordTwoWayOperation<TServerState, TFirstOperation> | undefined, string | TCustomError>;
+/**
+ * 配列に対して clientTransform を行います。
+ *
+ * 通常の Record の serverTransform の処理（つまり、`$index` 以外のプロパティの処理など）も内部で行われるため、通常の Record の serverTransform を別途実行することは避けてください。
+ */
+export declare const clientTransform: <TState extends IndexObjectState, TOperation extends IndexObjectUpOperation, TCustomError = string>(params: {
+    state: StringKeyRecord<TState>;
+    first?: RecordOperation.RecordUpOperation<TState, TOperation> | undefined;
+    second?: RecordOperation.RecordUpOperation<TState, TOperation> | undefined;
+    innerTransform: (params: {
+        state: TState;
+        first: TOperation;
+        second: TOperation;
+    }) => Result<{
+        firstPrime: TOperation | undefined;
+        secondPrime: TOperation | undefined;
+    }, TCustomError>;
+    innerDiff: (params: {
+        prevState: TState;
+        nextState: TState;
+    }) => TOperation | undefined;
+} & {
+    innerApply: (params: {
+        prevState: TState;
+        operation: TOperation;
+    }) => Result<TState, string | TCustomError>;
+}) => Result<{
+    firstPrime?: RecordOperation.RecordUpOperation<TState, TOperation | IndexObjectUpOperation> | undefined;
+    secondPrime?: RecordOperation.RecordUpOperation<TState, TOperation | IndexObjectUpOperation> | undefined;
+}, string | TCustomError>;
 export {};
 //# sourceMappingURL=array.d.ts.map

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createReplaceValueTemplate } from '../../generator';
+import { createReplaceValueTemplate } from '../../generator/types';
 
 export const compositeKey = createReplaceValueTemplate(
     z.object({

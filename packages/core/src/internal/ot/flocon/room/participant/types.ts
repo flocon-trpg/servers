@@ -5,7 +5,7 @@
 import { z } from 'zod';
 import { maxLength100String } from '../../../../maxLengthString';
 import { maybe } from '../../../../maybe';
-import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../generator';
+import { createObjectValueTemplate, createReplaceValueTemplate } from '../../../generator/types';
 
 export const Player = 'Player';
 export const Spectator = 'Spectator';

@@ -1,13 +1,13 @@
 import { z } from 'zod';
 import { maybe } from '../../../../../maybe';
+import { toUpOperation } from '../../../../generator/functions';
 import {
     State,
     TwoWayOperation,
     createObjectValueTemplate,
     state,
-    toUpOperation,
     upOperation,
-} from '../../../../generator';
+} from '../../../../generator/types';
 import { createType, deleteType, updateType } from '../../../piece/log';
 import * as PieceBaseTypes from '../../../piece/types';
 import * as StringPieceValueTypes from './types';

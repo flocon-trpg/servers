@@ -2,19 +2,15 @@ import { z } from 'zod';
 import * as NullableTextOperation from '../nullableTextOperation';
 import { RecordDownOperationElement, RecordTwoWayOperationElement, RecordUpOperationElement } from '../recordOperationElement';
 import * as TextOperation from '../textOperation';
-import { Apply, ClientTransform, Compose, Diff, DownError, Restore } from '../util/type';
 type ReadonlyRecord<TKey extends keyof any, TValue> = {
     readonly [P in TKey]: TValue;
 };
-export declare const $v = "$v";
-export declare const $r = "$r";
 export declare const atomic = "atomic";
 export declare const replace = "replace";
 export declare const ot = "ot";
 export declare const record = "record";
 export declare const paramRecord = "paramRecord";
 export declare const object = "object";
-type If<T extends boolean, TTrue, TFalse> = T extends true ? TTrue : T extends false ? TFalse : TTrue | TFalse;
 export type ReplaceValueTemplate<T extends z.ZodTypeAny> = {
     type: typeof atomic;
     mode: typeof replace;
@@ -70,7 +66,7 @@ export declare const createObjectValueTemplate: <T extends ReadonlyRecord<string
     readonly $r: R;
     readonly value: T;
 };
-type AnyTemplate = ReplaceValueTemplate<z.ZodTypeAny> | OtValueTemplate | {
+export type AnyTemplate = ReplaceValueTemplate<z.ZodTypeAny> | OtValueTemplate | {
     type: typeof record;
     value: AnyTemplate;
 } | {
@@ -85,6 +81,7 @@ type AnyTemplate = ReplaceValueTemplate<z.ZodTypeAny> | OtValueTemplate | {
         readonly [P in string]: AnyTemplate;
     };
 };
+type If<T extends boolean, TTrue, TFalse> = T extends true ? TTrue : T extends false ? TFalse : TTrue | TFalse;
 type ParamRecordValueTemplateBase<TValue extends AnyTemplate> = {
     type: typeof paramRecord;
     value: TValue;
@@ -139,32 +136,5 @@ export type TwoWayOperation<T extends AnyTemplate> = T extends OtValueTemplate ?
 } & {
     [P in keyof U4]?: TwoWayOperation<U4[P]>;
 } : unknown;
-/** TwoWayOperationをUpOperationに変換します。 */
-export declare const toUpOperation: <T extends AnyTemplate>(template: T) => (twoWayOperation: TwoWayOperation<T>) => UpOperation<T>;
-/** TwoWayOperationをDownOperationに変換します。 */
-export declare const toDownOperation: <T extends AnyTemplate>(template: T) => (twoWayOperation: TwoWayOperation<T>) => DownOperation<T>;
-/** StateにUpOperationを適用します。破壊的な処理は行われません。 */
-export declare const apply: <T extends AnyTemplate>(template: T) => Apply<State<T>, UpOperation<T>>;
-/** StateにDownOperationを適用します。破壊的な処理は行われません。 */
-export declare const applyBack: <T extends AnyTemplate>(template: T) => Apply<State<T>, DownOperation<T>>;
-/** 連続する2つのDownOperationを合成します。破壊的な処理は行われません。 */
-export declare const composeDownOperation: <T extends AnyTemplate>(template: T) => Compose<DownOperation<T>, DownError>;
-/**
- * Stateの情報を用いて、DownOperationをTwoWayOperationに変換します。破壊的な処理は行われません。
- * @param nextState DownOperationが適用される前の状態のState。
- */
-export declare const restore: <T extends AnyTemplate>(template: T) => Restore<State<T>, DownOperation<T>, TwoWayOperation<T>>;
-/** 2つのStateオブジェクトの差分を取ります。
- * @returns 2つのオブジェクトが意味上で同一であればundefinedを返します。
- */
-export declare const diff: <T extends AnyTemplate>(template: T) => Diff<State<T>, TwoWayOperation<T>>;
-/**
- * ユーザーの権限を考慮せずに、通常のOperational Transformを行います。主にクライアント側で使われます。破壊的な処理は行われません。
- *
- * この関数は次の2つの制約があります。
- * - `first`適用前のStateと`second`適用前のStateは等しい。
- * - このStateに対して`first`と`secondPrime`を順に適用したStateと、`second`と`firstPrime`を順に適用したStateは等しい。
- */
-export declare const clientTransform: <T extends AnyTemplate>(template: T) => ClientTransform<State<T>, UpOperation<T>>;
 export {};
-//# sourceMappingURL=index.d.ts.map
+//# sourceMappingURL=types.d.ts.map

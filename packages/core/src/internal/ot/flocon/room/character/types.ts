@@ -6,7 +6,7 @@ import {
     createRecordValueTemplate,
     createReplaceValueTemplate,
     createTextValueTemplate,
-} from '../../../generator';
+} from '../../../generator/types';
 import { filePathValue } from '../../filePath/types';
 import * as BoolParam from './boolParam/types';
 import * as CharacterPiece from './characterPiece/types';

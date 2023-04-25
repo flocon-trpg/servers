@@ -1,31 +1,35 @@
 import { Option } from '@kizahasi/option';
 import { Result } from '@kizahasi/result';
 import { z } from 'zod';
+import { indexObjectTemplateValue } from '../array';
 import * as NullableTextOperation from '../nullableTextOperation';
+import { toOtError } from '../otError';
 import { replace, update } from '../recordOperationElement';
 import * as TextOperation from '../textOperation';
 import {
-    DownOperation as DownOperationType,
-    State as StateType,
-    TwoWayOperation as TwoWayOperationType,
-    UpOperation as UpOperationType,
     apply,
     applyBack,
     clientTransform,
     composeDownOperation,
     diff,
+    restore,
+    toDownOperation,
+    toUpOperation,
+} from './functions';
+import {
+    DownOperation as DownOperationType,
+    State as StateType,
+    TwoWayOperation as TwoWayOperationType,
+    UpOperation as UpOperationType,
     downOperation,
     createObjectValueTemplate as obj,
     createTextValueTemplate as otString,
     createParamRecordValueTemplate as prec,
     createRecordValueTemplate as rec,
     createReplaceValueTemplate as rep,
-    restore,
     state,
-    toDownOperation,
-    toUpOperation,
     upOperation,
-} from '.';
+} from './types';
 
 namespace ReplaceValue {
     export const template = rep(z.union([z.number(), z.undefined()]));
@@ -49,16 +53,14 @@ namespace NullableOtString {
 }
 
 namespace ObjectValue {
-    export const template = obj(
-        {
-            value1: ReplaceValue.template,
-            value2: ReplaceValue.template,
-            value3: ReplaceValue.template,
-            value4: ReplaceValue.template,
-        },
-        1,
-        2
-    );
+    export const templateValue = {
+        value1: ReplaceValue.template,
+        value2: ReplaceValue.template,
+        value3: ReplaceValue.template,
+        value4: ReplaceValue.template,
+    };
+
+    export const template = obj(templateValue, 1, 2);
     export type State = StateType<typeof template>;
     export type UpOperation = UpOperationType<typeof template>;
     export type DownOperation = DownOperationType<typeof template>;
@@ -86,6 +88,23 @@ namespace RecordValue {
     export const template = rec(
         obj(
             {
+                value: ReplaceValue.template,
+            },
+            1,
+            2
+        )
+    );
+    export type State = StateType<typeof template>;
+    export type DownOperation = DownOperationType<typeof template>;
+    export type UpOperation = UpOperationType<typeof template>;
+    export type TwoWayOperation = TwoWayOperationType<typeof template>;
+}
+
+namespace ArrayValue {
+    export const template = rec(
+        obj(
+            {
+                ...indexObjectTemplateValue,
                 value: ReplaceValue.template,
             },
             1,
@@ -2347,7 +2366,7 @@ describe('clientTransform', () => {
         );
     });
 
-    it('tests RecordTemplate', () => {
+    it('tests non-array RecordTemplate', () => {
         const baseState: RecordValue.State = {
             idUpdate: { $v: 1, $r: 2, value: 0 },
             updateId: { $v: 1, $r: 2, value: 0 },
@@ -2532,6 +2551,138 @@ describe('clientTransform', () => {
         expect(clientTransform(RecordValue.template)({ state: baseState, first, second })).toEqual(
             Result.ok({ firstPrime: expectedFirstPrime, secondPrime: expectedSecondPrime })
         );
+    });
+
+    it('tests array RecordTemplate', () => {
+        const baseState: ArrayValue.State = {
+            key0: { $v: 1, $r: 2, $index: 0, value: 0 },
+            key1: { $v: 1, $r: 2, $index: 1, value: 1 },
+            key2: { $v: 1, $r: 2, $index: 2, value: 2 },
+            key3: { $v: 1, $r: 2, $index: 3, value: 3 },
+            key4: { $v: 1, $r: 2, $index: 4, value: 4 },
+            key5: { $v: 1, $r: 2, $index: 5, value: 5 },
+        };
+
+        // swaps 1-4
+        const first: ArrayValue.UpOperation = {
+            key1: {
+                type: update,
+                update: {
+                    $v: 1,
+                    $r: 2,
+                    $index: {
+                        newValue: 4,
+                    },
+                },
+            },
+            key4: {
+                type: update,
+                update: {
+                    $v: 1,
+                    $r: 2,
+                    $index: {
+                        newValue: 1,
+                    },
+                },
+            },
+        };
+
+        // insert between 2 and 3
+        const second: ArrayValue.UpOperation = {
+            key2_5: {
+                type: replace,
+                replace: {
+                    newValue: {
+                        $v: 1,
+                        $r: 2,
+                        $index: 3,
+                        value: 2.5,
+                    },
+                },
+            },
+            key3: {
+                type: update,
+                update: {
+                    $v: 1,
+                    $r: 2,
+                    $index: {
+                        newValue: 4,
+                    },
+                },
+            },
+            key4: {
+                type: update,
+                update: {
+                    $v: 1,
+                    $r: 2,
+                    $index: {
+                        newValue: 5,
+                    },
+                },
+            },
+            key5: {
+                type: update,
+                update: {
+                    $v: 1,
+                    $r: 2,
+                    $index: {
+                        newValue: 6,
+                    },
+                },
+            },
+        };
+
+        const transformed = clientTransform(ArrayValue.template)({
+            state: baseState,
+            first,
+            second,
+        });
+        if (transformed.isError) {
+            throw toOtError(transformed.error);
+        }
+
+        const stateAppliedFirst = apply(ArrayValue.template)({
+            state: baseState,
+            operation: first,
+        });
+        if (stateAppliedFirst.isError) {
+            throw toOtError(stateAppliedFirst.error);
+        }
+        const stateAppliedSecond = apply(ArrayValue.template)({
+            state: baseState,
+            operation: second,
+        });
+        if (stateAppliedSecond.isError) {
+            throw toOtError(stateAppliedSecond.error);
+        }
+        const stateAppliedFirstThenSecondPrime = apply(ArrayValue.template)({
+            state: stateAppliedFirst.value,
+            operation: transformed.value.secondPrime ?? {},
+        });
+        if (stateAppliedFirstThenSecondPrime.isError) {
+            throw toOtError(stateAppliedFirstThenSecondPrime.error);
+        }
+        const stateAppliedSecondThenFirstPrime = apply(ArrayValue.template)({
+            state: stateAppliedSecond.value,
+            operation: transformed.value.firstPrime ?? {},
+        });
+        if (stateAppliedSecondThenFirstPrime.isError) {
+            throw toOtError(stateAppliedSecondThenFirstPrime.error);
+        }
+
+        const finalState: ArrayValue.State = {
+            key0: { $v: 1, $r: 2, $index: 0, value: 0 },
+            key1: { $v: 1, $r: 2, $index: 5, value: 1 },
+            key2: { $v: 1, $r: 2, $index: 2, value: 2 },
+            key2_5: { $v: 1, $r: 2, $index: 3, value: 2.5 },
+            key3: { $v: 1, $r: 2, $index: 4, value: 3 },
+            key4: { $v: 1, $r: 2, $index: 1, value: 4 },
+            key5: { $v: 1, $r: 2, $index: 6, value: 5 },
+        };
+
+        // $vや$rがあるoperationとないoperationが混在すること、idであるoperation(例えば元の値が3に対して {newValue: 3} というoperation)が来ることがありtoEqualでoperationをテストするのは手間がかかるため、代わりにoperationがapplyされたstateでテストしている
+        expect(stateAppliedFirstThenSecondPrime.value).toEqual(finalState);
+        expect(stateAppliedSecondThenFirstPrime.value).toEqual(finalState);
     });
 
     it('tests ParamRecordTemplate', () => {

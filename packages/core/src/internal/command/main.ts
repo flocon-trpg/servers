@@ -8,7 +8,7 @@ import {
 import { keyNames } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
 import * as Room from '../ot/flocon/room/types';
-import { State } from '../ot/generator';
+import { State } from '../ot/generator/types';
 import { FRoom } from './room';
 
 type RoomState = State<typeof Room.template>;

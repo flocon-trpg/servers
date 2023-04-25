@@ -12,7 +12,7 @@ import {
 import { isStrIndex20 } from '../indexes';
 import * as ParamName from '../ot/flocon/room/paramName/types';
 import * as Room from '../ot/flocon/room/types';
-import { State } from '../ot/generator';
+import { State } from '../ot/generator/types';
 
 export class FParamNames extends FObject {
     public constructor(

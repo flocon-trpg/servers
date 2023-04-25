@@ -69,7 +69,7 @@ export declare const template: {
             readonly mode: "replace";
             readonly value: z.ZodOptional<z.ZodString>;
         };
-        dicePieces: import("../../../generator").RecordValueTemplate<{
+        dicePieces: import("../../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 2;
             readonly $r: 1;
@@ -79,7 +79,7 @@ export declare const template: {
                     readonly mode: "replace";
                     readonly value: z.ZodOptional<z.ZodString>;
                 };
-                dice: import("../../../generator").RecordValueTemplate<{
+                dice: import("../../../generator/types").RecordValueTemplate<{
                     readonly type: "object";
                     readonly $v: 1;
                     readonly $r: 1;
@@ -168,7 +168,7 @@ export declare const template: {
                 };
             };
         }>;
-        imagePieces: import("../../../generator").RecordValueTemplate<{
+        imagePieces: import("../../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 2;
             readonly $r: 1;
@@ -270,7 +270,7 @@ export declare const template: {
                 };
             };
         }>;
-        shapePieces: import("../../../generator").RecordValueTemplate<{
+        shapePieces: import("../../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 1;
             readonly $r: 1;
@@ -285,7 +285,7 @@ export declare const template: {
                     readonly mode: "replace";
                     readonly value: z.ZodBoolean;
                 };
-                shapes: import("../../../generator").RecordValueTemplate<{
+                shapes: import("../../../generator/types").RecordValueTemplate<{
                     readonly type: "object";
                     readonly $v: 1;
                     readonly $r: 1;
@@ -388,7 +388,7 @@ export declare const template: {
                 };
             };
         }>;
-        stringPieces: import("../../../generator").RecordValueTemplate<{
+        stringPieces: import("../../../generator/types").RecordValueTemplate<{
             readonly type: "object";
             readonly $v: 2;
             readonly $r: 1;

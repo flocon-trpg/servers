@@ -5,7 +5,7 @@ import {
     createRecordValueTemplate,
     createReplaceValueTemplate,
     createTextValueTemplate,
-} from '../../../generator';
+} from '../../../generator/types';
 import { filePathValue } from '../../filePath/types';
 import * as DicePiece from './dicePiece/types';
 import * as ImagePiece from './imagePiece/types';
