@@ -53,9 +53,9 @@ type Props = {
     hideElementsOnResize?: boolean;
     /** この値が変更されるたびに、ウィンドウの色が変わり強調表示されます。ただし `undefined` に変更されたときは除きます。 */
     highlightKey?: string | undefined;
-};
+} & PropsWithChildren;
 
-export const DraggableCard: React.FC<Props> = (props: PropsWithChildren<Props>) => {
+export const DraggableCard: React.FC<Props> = (props: Props) => {
     const [styles, api] = useSpring(() => ({ headerBackgroundColor, borderColor }), []);
 
     React.useEffect(() => {

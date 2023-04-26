@@ -16,7 +16,7 @@ import { useAtomValue, useSetAtom } from 'jotai/react';
 import { selectAtom } from 'jotai/utils';
 import { atom } from 'jotai/vanilla';
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { useDebounce, usePrevious } from 'react-use';
 import { CombinedError, useClient, useMutation } from 'urql';
 import { useMemoOne } from 'use-memo-one';
@@ -104,7 +104,7 @@ const LinkToRoot: React.FC = () => {
     );
 };
 
-const ResultContainer: React.FC = ({ children }) => {
+const ResultContainer: React.FC<PropsWithChildren> = ({ children }) => {
     return (
         <div className={classNames(flex, flexColumn, itemsCenter)}>
             {children}

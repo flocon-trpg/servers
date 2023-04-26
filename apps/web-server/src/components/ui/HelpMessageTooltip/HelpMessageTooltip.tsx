@@ -7,12 +7,9 @@ import { flex, flexRow, itemsCenter } from '@/styles/className';
 
 export type Props = {
     title?: React.ReactNode;
-};
+} & PropsWithChildren;
 
-export const HelpMessageTooltip: React.FC<Props> = ({
-    title,
-    children,
-}: PropsWithChildren<Props>) => {
+export const HelpMessageTooltip: React.FC<Props> = ({ title, children }: Props) => {
     const compact = React.useContext(AntdThemeContext).compact;
     return (
         <div className={flex} style={{ justifyContent: 'flex-start' }}>

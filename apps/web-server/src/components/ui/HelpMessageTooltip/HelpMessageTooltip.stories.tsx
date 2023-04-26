@@ -1,9 +1,9 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { HelpMessageTooltip, Props } from './HelpMessageTooltip';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 
-const Main: React.FC<Props & { compact: boolean }> = props => {
+const Main: React.FC<Props & { compact: boolean } & PropsWithChildren> = props => {
     const { compact, ...restProps } = props;
     return (
         <StorybookProvider roomClientContextValue={null} compact={compact}>

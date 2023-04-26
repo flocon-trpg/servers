@@ -63,7 +63,7 @@ export const DraggableTabs: React.FC<Props> = (props: Props) => {
         ),
         [dndType, onDnd]
     );
-    const renderTabBar: TabsProps['renderTabBar'] = React.useCallback(
+    const renderTabBar = React.useCallback<NonNullable<TabsProps['renderTabBar']>>(
         (props, DefaultTabBar) => <DefaultTabBar {...props}>{tabBarChildren}</DefaultTabBar>,
         [tabBarChildren]
     );
