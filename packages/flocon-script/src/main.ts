@@ -373,6 +373,11 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                 case '|=':
                     newValue = compareToNumber(oldValue, right, 'number', (l, r) => l | r);
                     break;
+                case '&&=':
+                case '??=':
+                case '||=':
+                    // 現時点では acorn は ecmaVersion=2020 として parse しているため、ここには来ないはず。
+                    throw new Error(`"${expression.operator}" operator is not supported. This should not happen.`);
             }
             if (expression.left.type === 'Identifier') {
                 context.assign(expression.left.name, newValue, toRange(expression));
@@ -768,7 +773,7 @@ type ExecResult = {
 };
 
 const toProgram = (script: string) => {
-    // @types/estreeが2020までにしか対応していない模様（AssignmentOperatorに&&=などがない）ため、acornもとりあえず2020としている。
+    // @types/estreeが2020までにしか対応していない時期にこのプロジェクトに取り掛かったため、2021 以降の機能（AssignmentOperatorの&&=など）に対応していない。そのため、acornも2020としている。
     return parse(script, { ecmaVersion: 2020, ranges: true }) as unknown as Program;
 };
 
