@@ -5,6 +5,18 @@ __metadata:
   version: 6
   cacheKey: 8
 
+"@0no-co/graphql.web@npm:^1.0.0":
+  version: 1.0.1
+  resolution: "@0no-co/graphql.web@npm:1.0.1"
+  peerDependencies:
+    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
+  peerDependenciesMeta:
+    graphql:
+      optional: true
+  checksum: e577a80a210e48e0b054dcf363efa2107ab67b931ec923b1540300350f55576fc5493b6d4ca7f35379748d20bc0280ee32bdc98c2c2380476c814a472bcf0757
+  languageName: node
+  linkType: hard
+
 "@adobe/css-tools@npm:^4.0.1":
   version: 4.0.1
   resolution: "@adobe/css-tools@npm:4.0.1"
@@ -2901,7 +2913,7 @@ __metadata:
     "@types/yargs": ^17.0.3
     "@typescript-eslint/eslint-plugin": 5.59.0
     "@typescript-eslint/parser": 5.59.0
-    "@urql/core": 3.2.2
+    "@urql/core": 4.0.6
     apollo-server-express: ^3.3.0
     bcdice: ^4.0.0
     bcrypt: ^5.0.1
@@ -8109,7 +8121,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@urql/core@npm:3.2.2, @urql/core@npm:>=3.0.0, @urql/core@npm:^3.2.0":
+"@urql/core@npm:4.0.6, @urql/core@npm:>=3.0.0":
+  version: 4.0.6
+  resolution: "@urql/core@npm:4.0.6"
+  dependencies:
+    "@0no-co/graphql.web": ^1.0.0
+    wonka: ^6.3.0
+  checksum: fa8a80598b9b11dae4c9835535e4577c66c458a1db85dd1ee8e7cc28a0d87f3951810e932d75e1b67bb7c5069e39497b6461c2282a9218ff5e472717f46d2c77
+  languageName: node
+  linkType: hard
+
+"@urql/core@npm:^3.2.0":
   version: 3.2.2
   resolution: "@urql/core@npm:3.2.2"
   dependencies:
@@ -27363,7 +27385,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"wonka@npm:>= 4.0.9, wonka@npm:^6.0.0, wonka@npm:^6.1.2":
+"wonka@npm:>= 4.0.9, wonka@npm:^6.0.0, wonka@npm:^6.1.2, wonka@npm:^6.3.0":
   version: 6.3.2
   resolution: "wonka@npm:6.3.2"
   checksum: e161f377a4ea17cc2b19fe8820219a9e3e2c78db5df08b820525bc2cc261184823d1bc33bd2385e632656a9676c9de6ff614b6324c441dd5fc5faa253433d032
