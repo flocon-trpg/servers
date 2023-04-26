@@ -2935,7 +2935,7 @@ __metadata:
     prettier: 2.8.8
     rate-limiter-flexible: ^2.3.0
     reflect-metadata: ^0.1.13
-    rimraf: 4.4.1
+    rimraf: 5.0.0
     rollup: 3.20.7
     rollup-plugin-multi-input: ^1.3.1
     rxjs: ^7.5.6
@@ -2976,7 +2976,7 @@ __metadata:
     jest: 29.5.0
     node-cache: ^5.1.2
     prettier: 2.8.8
-    rimraf: 4.4.1
+    rimraf: 5.0.0
     rollup: 3.20.7
     ts-jest: 29.1.0
     typescript: 5.0.4
@@ -3013,7 +3013,7 @@ __metadata:
     jest: 29.5.0
     lodash: ^4.17.21
     prettier: 2.8.8
-    rimraf: 4.4.1
+    rimraf: 5.0.0
     rollup: 3.20.7
     sanitize-filename: ^1.6.3
     truncate-utf8-bytes: ^1.0.2
@@ -3039,7 +3039,7 @@ __metadata:
     eslint-plugin-import: 2.27.5
     pino-abstract-transport: ^1.0.0
     prettier: 2.8.8
-    rimraf: 4.4.1
+    rimraf: 5.0.0
     rollup: 3.20.7
     typescript: 5.0.4
   languageName: unknown
@@ -3082,7 +3082,7 @@ __metadata:
     eslint-plugin-import: 2.27.5
     jest: 29.5.0
     prettier: 2.8.8
-    rimraf: 4.4.1
+    rimraf: 5.0.0
     rollup: 3.20.7
     ts-jest: 29.1.0
     typescript: 5.0.4
@@ -3148,7 +3148,7 @@ __metadata:
     prettier: 2.8.8
     react: ^18.0.0
     react-use: ^17.3.1
-    rimraf: 4.4.1
+    rimraf: 5.0.0
     rollup: 3.20.7
     ts-jest: 29.1.0
     typescript: 5.0.4
@@ -3177,7 +3177,7 @@ __metadata:
     eslint-plugin-import: 2.27.5
     graphql-ws: ^5.8.1
     prettier: 2.8.8
-    rimraf: 4.4.1
+    rimraf: 5.0.0
     rollup: 3.20.7
     rxjs: ^7.5.6
     typescript: 5.0.4
@@ -3209,7 +3209,7 @@ __metadata:
     eslint-plugin-import: 2.27.5
     jest: 29.5.0
     prettier: 2.8.8
-    rimraf: 4.4.1
+    rimraf: 5.0.0
     rollup: 3.20.7
     rxjs: ^7.5.6
     ts-jest: 29.1.0
@@ -3253,7 +3253,7 @@ __metadata:
     eslint-plugin-import: 2.27.5
     graphql: ^15.6.0
     prettier: 2.8.8
-    rimraf: 4.4.1
+    rimraf: 5.0.0
     rollup: 3.20.7
     typescript: 5.0.4
   languageName: unknown
@@ -3283,7 +3283,7 @@ __metadata:
     lodash: 4.17.21
     pino: ^8.6.1
     prettier: 2.8.8
-    rimraf: 4.4.1
+    rimraf: 5.0.0
     rollup: 3.20.7
     ts-jest: 29.1.0
     typescript: 5.0.4
@@ -3312,7 +3312,7 @@ __metadata:
     immer: ^9.0.16
     jest: 29.5.0
     prettier: 2.8.8
-    rimraf: 4.4.1
+    rimraf: 5.0.0
     rollup: 3.20.7
     rxjs: ^7.5.6
     ts-jest: 29.1.0
@@ -5079,6 +5079,13 @@ __metadata:
     tslib: ^2.4.0
     webcrypto-core: ^1.7.4
   checksum: 3a7a3c8f253170436f353a61b807d2e2e7a686e6a9607487fde6459ddfff34c8000414287a6cd904bd81e002ce4564811b3c7789a0fd932cf015df6c4002fd02
+  languageName: node
+  linkType: hard
+
+"@pkgjs/parseargs@npm:^0.11.0":
+  version: 0.11.0
+  resolution: "@pkgjs/parseargs@npm:0.11.0"
+  checksum: 6ad6a00fc4f2f2cfc6bff76fb1d88b8ee20bc0601e18ebb01b6d4be583733a860239a521a7fbca73b612e66705078809483549d2b18f370eb346c5155c8e4a0f
   languageName: node
   linkType: hard
 
@@ -11106,7 +11113,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cliui@npm:^7.0.2":
+"cliui@npm:^7.0.2, cliui@npm:^7.0.4":
   version: 7.0.4
   resolution: "cliui@npm:7.0.4"
   dependencies:
@@ -14000,6 +14007,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"foreground-child@npm:^3.1.0":
+  version: 3.1.1
+  resolution: "foreground-child@npm:3.1.1"
+  dependencies:
+    cross-spawn: ^7.0.0
+    signal-exit: ^4.0.1
+  checksum: 139d270bc82dc9e6f8bc045fe2aae4001dc2472157044fdfad376d0a3457f77857fa883c1c8b21b491c6caade9a926a4bed3d3d2e8d3c9202b151a4cbbd0bcd5
+  languageName: node
+  linkType: hard
+
 "fork-ts-checker-webpack-plugin@npm:^4.1.6":
   version: 4.1.6
   resolution: "fork-ts-checker-webpack-plugin@npm:4.1.6"
@@ -14569,6 +14586,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"glob@npm:^10.0.0":
+  version: 10.2.2
+  resolution: "glob@npm:10.2.2"
+  dependencies:
+    foreground-child: ^3.1.0
+    jackspeak: ^2.0.3
+    minimatch: ^9.0.0
+    minipass: ^5.0.0
+    path-scurry: ^1.7.0
+  bin:
+    glob: dist/cjs/src/bin.js
+  checksum: 33cbbbea74deb605107715f2ee51937953271ff2f6ce712b57d95a714e2f1bf272fa2c2b0c5101097bf98d3e5d40856941af498b05bce07567aca1a6e3cc7ae9
+  languageName: node
+  linkType: hard
+
 "glob@npm:^7.1.1, glob@npm:^7.1.3, glob@npm:^7.1.4, glob@npm:^7.1.6":
   version: 7.2.0
   resolution: "glob@npm:7.2.0"
@@ -14593,18 +14625,6 @@ __metadata:
     minimatch: ^5.0.1
     once: ^1.3.0
   checksum: 50bcdea19d8e79d8de5f460b1939ffc2b3299eac28deb502093fdca22a78efebc03e66bf54f0abc3d3d07d8134d19a32850288b7440d77e072aa55f9d33b18c5
-  languageName: node
-  linkType: hard
-
-"glob@npm:^9.2.0":
-  version: 9.3.5
-  resolution: "glob@npm:9.3.5"
-  dependencies:
-    fs.realpath: ^1.0.0
-    minimatch: ^8.0.2
-    minipass: ^4.2.4
-    path-scurry: ^1.6.1
-  checksum: 94b093adbc591bc36b582f77927d1fb0dbf3ccc231828512b017601408be98d1fe798fc8c0b19c6f2d1a7660339c3502ce698de475e9d938ccbb69b47b647c84
   languageName: node
   linkType: hard
 
@@ -16576,6 +16596,19 @@ __metadata:
   peerDependencies:
     react: ">=18.0"
   checksum: bfd4f775084dc1f301280e85fdbfa5b75dff72603fe6d03e7e0181b0e3369ad2cdcb5be9015d21e6990ddd79fcef2e0f075a52023492545215661d125f980bf4
+  languageName: node
+  linkType: hard
+
+"jackspeak@npm:^2.0.3":
+  version: 2.1.0
+  resolution: "jackspeak@npm:2.1.0"
+  dependencies:
+    "@pkgjs/parseargs": ^0.11.0
+    cliui: ^7.0.4
+  dependenciesMeta:
+    "@pkgjs/parseargs":
+      optional: true
+  checksum: 63edf74e0ba916bc80568d04bd3985bff2dab26382627bb0a7011c43af4a5bc6bd536871a98655fffd1b740354c4d6e87dbd2d626b84cb94bc4cef45ade2abbd
   languageName: node
   linkType: hard
 
@@ -19193,12 +19226,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:^8.0.2":
-  version: 8.0.4
-  resolution: "minimatch@npm:8.0.4"
+"minimatch@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "minimatch@npm:9.0.0"
   dependencies:
     brace-expansion: ^2.0.1
-  checksum: 2e46cffb86bacbc524ad45a6426f338920c529dd13f3a732cc2cf7618988ee1aae88df4ca28983285aca9e0f45222019ac2d14ebd17c1edadd2ee12221ab801a
+  checksum: 7bd57899edd1d1b0560f50b5b2d1ea4ad2a366c5a2c8e0a943372cf2f200b64c256bae45a87a80915adbce27fa36526264296ace0da57b600481fe5ea3e372e5
   languageName: node
   linkType: hard
 
@@ -19277,13 +19310,6 @@ __metadata:
   dependencies:
     yallist: ^4.0.0
   checksum: 8b410b9a5bd99ceb9d63c895891d1c30511791fdc7b717da4cf9403ca2419bc57af63b8485ffdaa421ef6cff56f63ae0b2f5135f8df502d21296e8c91460ebf9
-  languageName: node
-  linkType: hard
-
-"minipass@npm:^4.2.4":
-  version: 4.2.8
-  resolution: "minipass@npm:4.2.8"
-  checksum: 7f4914d5295a9a30807cae5227a37a926e6d910c03f315930fde52332cf0575dfbc20295318f91f0baf0e6bb11a6f668e30cde8027dea7a11b9d159867a3c830
   languageName: node
   linkType: hard
 
@@ -20769,7 +20795,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"path-scurry@npm:^1.6.1":
+"path-scurry@npm:^1.7.0":
   version: 1.7.0
   resolution: "path-scurry@npm:1.7.0"
   dependencies:
@@ -23499,14 +23525,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rimraf@npm:4.4.1":
-  version: 4.4.1
-  resolution: "rimraf@npm:4.4.1"
+"rimraf@npm:5.0.0":
+  version: 5.0.0
+  resolution: "rimraf@npm:5.0.0"
   dependencies:
-    glob: ^9.2.0
+    glob: ^10.0.0
   bin:
     rimraf: dist/cjs/src/bin.js
-  checksum: b786adc02651e2e24bbedb04bbdea80652fc9612632931ff2d9f898c5e4708fe30956186597373c568bd5230a4dc2fadfc816ccacba8a1daded3a006a6b74f1a
+  checksum: 60c5a7f152014d4f6bbf23f48e6badd145960a9be1115b719a07ba688c760b1bb8270abd6650bbd184ae2011843d8e9c775409652c89ff97550418aa5d581b27
   languageName: node
   linkType: hard
 
@@ -24133,6 +24159,13 @@ __metadata:
   version: 3.0.7
   resolution: "signal-exit@npm:3.0.7"
   checksum: a2f098f247adc367dffc27845853e9959b9e88b01cb301658cfe4194352d8d2bb32e18467c786a7fe15f1d44b233ea35633d076d5e737870b7139949d1ab6318
+  languageName: node
+  linkType: hard
+
+"signal-exit@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "signal-exit@npm:4.0.1"
+  checksum: 832043367dca23e61ab6033e8b41c595fc805119bfe4fee63dea201cdc809a8b086bc54597bbbc1b2cde1a63c7dd554d1295ed2cca92db598233834a0b59b281
   languageName: node
   linkType: hard
 
