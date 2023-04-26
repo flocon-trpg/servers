@@ -25,7 +25,7 @@
         "@urql/exchange-auth": "^1.0.0",
         "graphql-ws": "^5.8.1",
         "rxjs": "^7.5.6",
-        "urql": "^3.0.0",
+        "urql": "^4.0.0",
         "wonka": "^6.0.0"
     },
     "devDependencies": {
