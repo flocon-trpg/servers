@@ -2,6 +2,7 @@ import * as Doc from '@flocon-trpg/typed-document-node';
 import { loggerRef } from '@flocon-trpg/utils';
 import { AnyVariables, GraphQLRequest } from 'urql';
 import { fromValue } from 'wonka';
+import { withPromise } from './withPromise';
 import { createDummyUrqlOperation, createMockUrqlClient } from '.';
 
 export const createMockUrqlClientForRoomMessage = () => {
@@ -29,20 +30,28 @@ export const createMockUrqlClientForRoomMessage = () => {
                             ],
                         },
                     };
-                    return fromValue({
-                        data: res,
-                        operation: createDummyUrqlOperation(),
-                    });
+                    return withPromise(
+                        fromValue({
+                            data: res,
+                            operation: createDummyUrqlOperation(),
+                            stale: false,
+                            hasNext: false,
+                        })
+                    );
                 }
                 case Doc.GetDiceHelpMessagesDocument: {
                     const res: Doc.GetDiceHelpMessagesQuery = {
                         __typename: 'Query',
                         result: 'Test DiceHelpMessage',
                     };
-                    return fromValue({
-                        data: res as any,
-                        operation: createDummyUrqlOperation(),
-                    });
+                    return withPromise(
+                        fromValue({
+                            data: res as any,
+                            operation: createDummyUrqlOperation(),
+                            stale: false,
+                            hasNext: false,
+                        })
+                    );
                 }
                 default:
                     loggerRef.error({ query: query.query }, 'Query');

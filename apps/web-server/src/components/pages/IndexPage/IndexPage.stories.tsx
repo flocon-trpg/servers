@@ -7,6 +7,7 @@ import { fromValue, never } from 'wonka';
 import { IndexPage } from './IndexPage';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { createDummyUrqlOperation, createMockUrqlClient } from '@/mocks';
+import { withPromise } from '@/mocks/withPromise';
 
 type Version = Doc.GetServerInfoQuery['result']['version'];
 
@@ -15,12 +16,16 @@ const createMockClient = (version: Version | 'error' | 'never'): Client => {
         mockQuery: query => {
             switch (version) {
                 case 'never':
-                    return never;
+                    return withPromise(never);
                 case 'error':
-                    return fromValue({
-                        error: new CombinedError({ graphQLErrors: ['test error'] }),
-                        operation: createDummyUrqlOperation(),
-                    });
+                    return withPromise(
+                        fromValue({
+                            error: new CombinedError({ graphQLErrors: ['test error'] }),
+                            operation: createDummyUrqlOperation(),
+                            stale: false,
+                            hasNext: false,
+                        })
+                    );
                 default:
                     break;
             }
@@ -34,10 +39,14 @@ const createMockClient = (version: Version | 'error' | 'never'): Client => {
                             version,
                         },
                     };
-                    return fromValue({
-                        data: res,
-                        operation: createDummyUrqlOperation(),
-                    });
+                    return withPromise(
+                        fromValue({
+                            data: res,
+                            operation: createDummyUrqlOperation(),
+                            stale: false,
+                            hasNext: false,
+                        })
+                    );
                 }
                 case Doc.GetMyRolesDocument: {
                     const res: Doc.GetMyRolesQuery = {
@@ -47,10 +56,14 @@ const createMockClient = (version: Version | 'error' | 'never'): Client => {
                             admin: false,
                         },
                     };
-                    return fromValue({
-                        data: res,
-                        operation: createDummyUrqlOperation(),
-                    });
+                    return withPromise(
+                        fromValue({
+                            data: res,
+                            operation: createDummyUrqlOperation(),
+                            stale: false,
+                            hasNext: false,
+                        })
+                    );
                 }
                 default:
                     loggerRef.error({ query: query.query }, 'Query');

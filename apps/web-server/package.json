@@ -109,7 +109,7 @@
         "sucrase": "^3.20.1",
         "typescript": "5.0.4",
         "url-join": "^4.0.1",
-        "urql": "^3.0.3",
+        "urql": "^4.0.0",
         "use-constant": "^1.1.0",
         "use-image": "1.1.0",
         "use-memo-one": "^1.1.2",

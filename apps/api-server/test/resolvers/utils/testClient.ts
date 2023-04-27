@@ -75,9 +75,9 @@ import {
     WritePublicMessageMutation,
     WritePublicMessageMutationVariables,
 } from '@flocon-trpg/typed-document-node';
-import { createClient, defaultExchanges, subscriptionExchange } from '@urql/core';
 import { createClient as createWsClient } from 'graphql-ws';
 import ws from 'isomorphic-ws';
+import { cacheExchange, createClient, fetchExchange, subscriptionExchange } from 'urql';
 import { Resources } from './resources';
 import { TestRoomEventSubscription } from './subscription';
 
@@ -105,16 +105,20 @@ const createUrqlClient = (
             headers,
         },
         exchanges: [
-            ...defaultExchanges,
+            cacheExchange,
+            fetchExchange,
             subscriptionExchange({
-                forwardSubscription: operation => ({
-                    subscribe: sink => ({
-                        unsubscribe: wsClient(wsUrl, testAuthorizationHeaderValue).subscribe(
-                            operation,
-                            sink
-                        ),
-                    }),
-                }),
+                forwardSubscription: request => {
+                    const input = { ...request, query: request.query || '' };
+                    return {
+                        subscribe: sink => ({
+                            unsubscribe: wsClient(wsUrl, testAuthorizationHeaderValue).subscribe(
+                                input,
+                                sink
+                            ),
+                        }),
+                    };
+                },
             }),
         ],
     });

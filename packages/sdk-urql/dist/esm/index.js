@@ -1,7 +1,7 @@
 import { authToken } from '@flocon-trpg/core';
 import { authExchange } from '@urql/exchange-auth';
 import { createClient as createClient$1 } from 'graphql-ws';
-import { makeOperation, dedupExchange, cacheExchange, fetchExchange, subscriptionExchange, createClient } from 'urql';
+import { cacheExchange, fetchExchange, subscriptionExchange, createClient } from 'urql';
 import { GetMessagesDocument, GetRoomConnectionsDocument, GetRoomDocument, OperateDocument, UpdateWritingMessageStatusDocument, RoomEventDocument } from '@flocon-trpg/typed-document-node';
 import { Result } from '@kizahasi/result';
 import { Observable, share } from 'rxjs';
@@ -27,59 +27,56 @@ const createUrqlClient = (params) => {
     let authExchangeResult;
     if (params.authorization) {
         const getUserIdTokenResult = params.getUserIdTokenResult;
-        authExchangeResult = authExchange({
-            getAuth: async () => {
-                const userIdTokenResult = await execGetUserIdTokenResult(getUserIdTokenResult);
-                return { userIdTokenResult };
+        let userIdTokenResult = null;
+        authExchangeResult = authExchange(async (utils) => ({
+            refreshAuth: async () => {
+                userIdTokenResult = await execGetUserIdTokenResult(getUserIdTokenResult);
             },
-            willAuthError: ({ authState }) => {
-                if (authState?.userIdTokenResult == null) {
+            didAuthError: error => {
+                return error.graphQLErrors.some(error => 
+                // auth error のとき、error.extensions.code は 'INTERNAL_SERVER_ERROR' であるため、error.extensions.code だけでは auth error かどうかを判定するのは困難。
+                error.message.includes("Access denied! You don't have permission for this action!"));
+            },
+            willAuthError: () => {
+                if (userIdTokenResult == null) {
                     return true;
                 }
                 // この秒数以内にidTokenがexpireする状態であればエラーとみなしてidTokenの再取得を行う。
                 // getIdTokenResultは、あと5分以内にexpireする状態でないとidTokenは自動更新されないため、5分以下の値にしている。
                 // https://github.com/firebase/firebase-js-sdk/blob/7cad614ec2d2a34b40a3c24443c4f35571e3e68c/packages/auth/src/core/user/id_token_result.ts#L47
                 const refreshIfExpiresIn = 240;
-                const expirationDate = new Date(authState.userIdTokenResult.expirationTime);
+                const expirationDate = new Date(userIdTokenResult.expirationTime);
                 expirationDate.setSeconds(expirationDate.getSeconds() - refreshIfExpiresIn);
                 return expirationDate < new Date();
             },
             // https://formidable.com/open-source/urql/docs/advanced/authentication/#configuring-addauthtooperation
-            addAuthToOperation: ({ authState, operation }) => {
-                if (authState?.userIdTokenResult == null) {
+            addAuthToOperation: operation => {
+                if (userIdTokenResult == null) {
                     return operation;
                 }
-                const fetchOptions = typeof operation.context.fetchOptions === 'function'
-                    ? operation.context.fetchOptions()
-                    : operation.context.fetchOptions || {};
-                return makeOperation(operation.kind, operation, {
-                    ...operation.context,
-                    fetchOptions: {
-                        ...fetchOptions,
-                        headers: {
-                            ...fetchOptions.headers,
-                            Authorization: `Bearer ${authState.userIdTokenResult.token}`,
-                        },
-                    },
+                return utils.appendHeaders(operation, {
+                    Authorization: `Bearer ${userIdTokenResult.token}`,
                 });
             },
-        });
+        }));
     }
     else {
         authExchangeResult = null;
     }
     const defaultExchanges = [
-        dedupExchange,
         cacheExchange,
         ...(authExchangeResult == null ? [] : [authExchangeResult]),
         fetchExchange,
         subscriptionExchange({
-            forwardSubscription: operation => ({
-                subscribe: sink => {
-                    const unsubscribe = wsClient(params.wsUrl, params.authorization ? params.getUserIdTokenResult : null).subscribe(operation, sink);
-                    return { unsubscribe };
-                },
-            }),
+            forwardSubscription: request => {
+                const input = { ...request, query: request.query || '' };
+                return {
+                    subscribe: sink => {
+                        const unsubscribe = wsClient(params.wsUrl, params.authorization ? params.getUserIdTokenResult : null).subscribe(input, sink);
+                        return { unsubscribe };
+                    },
+                };
+            },
         }),
     ];
     return createClient({

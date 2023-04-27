@@ -13,12 +13,11 @@ import {
     RoomPrivateMessage,
     RoomPublicMessage,
 } from '@flocon-trpg/typed-document-node';
-import { Client, createClient } from '@urql/core';
 import Color from 'color';
 import ColorName from 'color-name';
 import { Auth, Config, IdTokenResult, Unsubscribe, User } from 'firebase/auth';
 import moment from 'moment';
-import { AnyVariables, Operation } from 'urql';
+import { AnyVariables, Client, Operation, createClient } from 'urql';
 import { UserConfig, defaultUserConfig } from '../atoms/userConfigAtom/types';
 import { WebConfig } from '../configType';
 
