@@ -503,6 +503,8 @@ export declare const type: z.ZodUnion<[z.ZodObject<{
             $v: z.ZodLiteral<1>;
             $r: z.ZodLiteral<1>;
         }, "strip", z.ZodTypeAny, {
+            $v: 1;
+            $r: 1;
             dieType?: {
                 newValue: "D4" | "D6";
             } | undefined;
@@ -510,9 +512,9 @@ export declare const type: z.ZodUnion<[z.ZodObject<{
                 newValue?: number | undefined;
             } | undefined;
             isValueChanged?: boolean | undefined;
-            $v: 1;
-            $r: 1;
         }, {
+            $v: 1;
+            $r: 1;
             dieType?: {
                 newValue: "D4" | "D6";
             } | undefined;
@@ -520,12 +522,12 @@ export declare const type: z.ZodUnion<[z.ZodObject<{
                 newValue?: number | undefined;
             } | undefined;
             isValueChanged?: boolean | undefined;
-            $v: 1;
-            $r: 1;
         }>;
     }, "strip", z.ZodTypeAny, {
         type: "update";
         update: {
+            $v: 1;
+            $r: 1;
             dieType?: {
                 newValue: "D4" | "D6";
             } | undefined;
@@ -533,12 +535,12 @@ export declare const type: z.ZodUnion<[z.ZodObject<{
                 newValue?: number | undefined;
             } | undefined;
             isValueChanged?: boolean | undefined;
-            $v: 1;
-            $r: 1;
         };
     }, {
         type: "update";
         update: {
+            $v: 1;
+            $r: 1;
             dieType?: {
                 newValue: "D4" | "D6";
             } | undefined;
@@ -546,8 +548,6 @@ export declare const type: z.ZodUnion<[z.ZodObject<{
                 newValue?: number | undefined;
             } | undefined;
             isValueChanged?: boolean | undefined;
-            $v: 1;
-            $r: 1;
         };
     }>]>>>>;
 }, "strip", z.ZodTypeAny, {
@@ -569,6 +569,8 @@ export declare const type: z.ZodUnion<[z.ZodObject<{
     } | {
         type: "update";
         update: {
+            $v: 1;
+            $r: 1;
             dieType?: {
                 newValue: "D4" | "D6";
             } | undefined;
@@ -576,8 +578,6 @@ export declare const type: z.ZodUnion<[z.ZodObject<{
                 newValue?: number | undefined;
             } | undefined;
             isValueChanged?: boolean | undefined;
-            $v: 1;
-            $r: 1;
         };
     } | undefined> | undefined;
 }, {
@@ -599,6 +599,8 @@ export declare const type: z.ZodUnion<[z.ZodObject<{
     } | {
         type: "update";
         update: {
+            $v: 1;
+            $r: 1;
             dieType?: {
                 newValue: "D4" | "D6";
             } | undefined;
@@ -606,8 +608,6 @@ export declare const type: z.ZodUnion<[z.ZodObject<{
                 newValue?: number | undefined;
             } | undefined;
             isValueChanged?: boolean | undefined;
-            $v: 1;
-            $r: 1;
         };
     } | undefined> | undefined;
 }>>]>;

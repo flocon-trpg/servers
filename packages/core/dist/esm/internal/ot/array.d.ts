@@ -61,7 +61,7 @@ type OtArray<T> = {
     value: T;
 }[];
 type ReadonlyOtArray<T> = Readonly<OtArray<T>>;
-export declare const indexObjectsToArray: <T extends IndexObjectState>(record: Record<string, T | undefined>) => Result<OtArray<T>, string>;
+export declare const indexObjectsToArray: <T extends IndexObjectState>(record: Record<string, T | undefined>) => Result<OtArray<T>>;
 /**
  * 配列を Record に変換します。
  *

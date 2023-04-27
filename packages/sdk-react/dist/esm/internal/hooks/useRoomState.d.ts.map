@@ -1,1 +1,1 @@
-{"version":3,"file":"useRoomState.d.ts","sourceRoot":"","sources":["../../../../src/internal/hooks/useRoomState.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,UAAU,EAAE,MAAM,kBAAkB,CAAC;AAG9C,eAAO,MAAM,YAAY;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;uEAIxB,CAAC"}
+{"version":3,"file":"useRoomState.d.ts","sourceRoot":"","sources":["../../../../src/internal/hooks/useRoomState.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,UAAU,EAAE,MAAM,kBAAkB,CAAC;AAG9C,eAAO,MAAM,YAAY,uIAIxB,CAAC"}

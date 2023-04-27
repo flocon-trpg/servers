@@ -5,70 +5,90 @@ export declare const recordDownOperationElementFactory: <TState extends z.ZodTyp
     type: z.ZodLiteral<"replace">;
     replace: z.ZodObject<{
         oldValue: z.ZodOptional<TState>;
-    }, "strip", z.ZodTypeAny, z.baseObjectOutputType<{
+    }, "strip", z.ZodTypeAny, z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
         oldValue: z.ZodOptional<TState>;
-    }> extends infer T extends object ? { [k in keyof T]: z.baseObjectOutputType<{
+    }>, undefined extends TState["_output"] | undefined ? never : "oldValue"> extends infer T ? { [k in keyof T]: z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
         oldValue: z.ZodOptional<TState>;
-    }>[k]; } : never, z.objectUtil.addQuestionMarks<{
-        oldValue: TState["_input"] | undefined;
-    }> extends infer T_1 extends object ? { [k_1 in keyof T_1]: z.objectUtil.addQuestionMarks<{
-        oldValue: TState["_input"] | undefined;
+    }>, undefined extends TState["_output"] | undefined ? never : "oldValue">[k]; } : never, z.baseObjectInputType<{
+        oldValue: z.ZodOptional<TState>;
+    }> extends infer T_1 ? { [k_1 in keyof T_1]: z.baseObjectInputType<{
+        oldValue: z.ZodOptional<TState>;
     }>[k_1]; } : never>;
-}, "strip", z.ZodTypeAny, z.baseObjectOutputType<{
+}, "strip", z.ZodTypeAny, z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
     type: z.ZodLiteral<"replace">;
     replace: z.ZodObject<{
         oldValue: z.ZodOptional<TState>;
-    }, "strip", z.ZodTypeAny, z.baseObjectOutputType<{
+    }, "strip", z.ZodTypeAny, z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
         oldValue: z.ZodOptional<TState>;
-    }> extends infer T extends object ? { [k in keyof T]: z.baseObjectOutputType<{
+    }>, undefined extends TState["_output"] | undefined ? never : "oldValue"> extends infer T ? { [k in keyof T]: z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
         oldValue: z.ZodOptional<TState>;
-    }>[k]; } : never, z.objectUtil.addQuestionMarks<{
-        oldValue: TState["_input"] | undefined;
-    }> extends infer T_1 extends object ? { [k_1 in keyof T_1]: z.objectUtil.addQuestionMarks<{
-        oldValue: TState["_input"] | undefined;
+    }>, undefined extends TState["_output"] | undefined ? never : "oldValue">[k]; } : never, z.baseObjectInputType<{
+        oldValue: z.ZodOptional<TState>;
+    }> extends infer T_1 ? { [k_1 in keyof T_1]: z.baseObjectInputType<{
+        oldValue: z.ZodOptional<TState>;
     }>[k_1]; } : never>;
-}> extends infer T_2 ? { [k_2 in keyof T_2]: z.baseObjectOutputType<{
+}>, "type" | (undefined extends (z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
+    oldValue: z.ZodOptional<TState>;
+}>, undefined extends TState["_output"] | undefined ? never : "oldValue"> extends infer T_3 ? { [k in keyof T_3]: z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
+    oldValue: z.ZodOptional<TState>;
+}>, undefined extends TState["_output"] | undefined ? never : "oldValue">[k]; } : never) ? never : "replace")> extends infer T_2 ? { [k_1 in keyof T_2]: z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
     type: z.ZodLiteral<"replace">;
     replace: z.ZodObject<{
         oldValue: z.ZodOptional<TState>;
-    }, "strip", z.ZodTypeAny, z.baseObjectOutputType<{
+    }, "strip", z.ZodTypeAny, z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
         oldValue: z.ZodOptional<TState>;
-    }> extends infer T extends object ? { [k in keyof T]: z.baseObjectOutputType<{
+    }>, undefined extends TState["_output"] | undefined ? never : "oldValue"> extends infer T ? { [k in keyof T]: z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
         oldValue: z.ZodOptional<TState>;
-    }>[k]; } : never, z.objectUtil.addQuestionMarks<{
-        oldValue: TState["_input"] | undefined;
-    }> extends infer T_1 extends object ? { [k_1 in keyof T_1]: z.objectUtil.addQuestionMarks<{
-        oldValue: TState["_input"] | undefined;
+    }>, undefined extends TState["_output"] | undefined ? never : "oldValue">[k]; } : never, z.baseObjectInputType<{
+        oldValue: z.ZodOptional<TState>;
+    }> extends infer T_1 ? { [k_1 in keyof T_1]: z.baseObjectInputType<{
+        oldValue: z.ZodOptional<TState>;
     }>[k_1]; } : never>;
-}>[k_2]; } : never, z.objectUtil.addQuestionMarks<{
-    type: "replace";
-    replace: z.objectUtil.addQuestionMarks<{
-        oldValue: TState["_input"] | undefined;
-    }> extends infer T_1 extends object ? { [k_1 in keyof T_1]: z.objectUtil.addQuestionMarks<{
-        oldValue: TState["_input"] | undefined;
-    }>[k_1]; } : never;
-}> extends infer T_3 ? { [k_2 in keyof T_3]: z.objectUtil.addQuestionMarks<{
-    type: "replace";
-    replace: z.objectUtil.addQuestionMarks<{
-        oldValue: TState["_input"] | undefined;
-    }> extends infer T_1 extends object ? { [k_1 in keyof T_1]: z.objectUtil.addQuestionMarks<{
-        oldValue: TState["_input"] | undefined;
-    }>[k_1]; } : never;
+}>, "type" | (undefined extends (z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
+    oldValue: z.ZodOptional<TState>;
+}>, undefined extends TState["_output"] | undefined ? never : "oldValue"> extends infer T_3 ? { [k in keyof T_3]: z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
+    oldValue: z.ZodOptional<TState>;
+}>, undefined extends TState["_output"] | undefined ? never : "oldValue">[k]; } : never) ? never : "replace")>[k_1]; } : never, z.baseObjectInputType<{
+    type: z.ZodLiteral<"replace">;
+    replace: z.ZodObject<{
+        oldValue: z.ZodOptional<TState>;
+    }, "strip", z.ZodTypeAny, z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
+        oldValue: z.ZodOptional<TState>;
+    }>, undefined extends TState["_output"] | undefined ? never : "oldValue"> extends infer T ? { [k in keyof T]: z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
+        oldValue: z.ZodOptional<TState>;
+    }>, undefined extends TState["_output"] | undefined ? never : "oldValue">[k]; } : never, z.baseObjectInputType<{
+        oldValue: z.ZodOptional<TState>;
+    }> extends infer T_1 ? { [k_1 in keyof T_1]: z.baseObjectInputType<{
+        oldValue: z.ZodOptional<TState>;
+    }>[k_1]; } : never>;
+}> extends infer T_4 ? { [k_2 in keyof T_4]: z.baseObjectInputType<{
+    type: z.ZodLiteral<"replace">;
+    replace: z.ZodObject<{
+        oldValue: z.ZodOptional<TState>;
+    }, "strip", z.ZodTypeAny, z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
+        oldValue: z.ZodOptional<TState>;
+    }>, undefined extends TState["_output"] | undefined ? never : "oldValue"> extends infer T ? { [k in keyof T]: z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
+        oldValue: z.ZodOptional<TState>;
+    }>, undefined extends TState["_output"] | undefined ? never : "oldValue">[k]; } : never, z.baseObjectInputType<{
+        oldValue: z.ZodOptional<TState>;
+    }> extends infer T_1 ? { [k_1 in keyof T_1]: z.baseObjectInputType<{
+        oldValue: z.ZodOptional<TState>;
+    }>[k_1]; } : never>;
 }>[k_2]; } : never>, z.ZodObject<{
     type: z.ZodLiteral<"update">;
     update: TOperation;
-}, "strip", z.ZodTypeAny, z.baseObjectOutputType<{
+}, "strip", z.ZodTypeAny, z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
     type: z.ZodLiteral<"update">;
     update: TOperation;
-}> extends infer T_4 ? { [k_3 in keyof T_4]: z.baseObjectOutputType<{
+}>, "type" | (undefined extends TOperation["_output"] ? never : "update")> extends infer T_5 ? { [k_1_1 in keyof T_5]: z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
     type: z.ZodLiteral<"update">;
     update: TOperation;
-}>[k_3]; } : never, z.objectUtil.addQuestionMarks<{
-    type: "update";
-    update: TOperation["_input"];
-}> extends infer T_5 ? { [k_2_1 in keyof T_5]: z.objectUtil.addQuestionMarks<{
-    type: "update";
-    update: TOperation["_input"];
+}>, "type" | (undefined extends TOperation["_output"] ? never : "update")>[k_1_1]; } : never, z.baseObjectInputType<{
+    type: z.ZodLiteral<"update">;
+    update: TOperation;
+}> extends infer T_6 ? { [k_2_1 in keyof T_6]: z.baseObjectInputType<{
+    type: z.ZodLiteral<"update">;
+    update: TOperation;
 }>[k_2_1]; } : never>]>;
 export type RecordDownOperationElement<TState, TOperation> = {
     type: typeof replace;
@@ -83,70 +103,90 @@ export declare const recordUpOperationElementFactory: <TState extends z.ZodTypeA
     type: z.ZodLiteral<"replace">;
     replace: z.ZodObject<{
         newValue: z.ZodOptional<TState>;
-    }, "strip", z.ZodTypeAny, z.baseObjectOutputType<{
+    }, "strip", z.ZodTypeAny, z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
         newValue: z.ZodOptional<TState>;
-    }> extends infer T extends object ? { [k in keyof T]: z.baseObjectOutputType<{
+    }>, undefined extends TState["_output"] | undefined ? never : "newValue"> extends infer T ? { [k in keyof T]: z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
         newValue: z.ZodOptional<TState>;
-    }>[k]; } : never, z.objectUtil.addQuestionMarks<{
-        newValue: TState["_input"] | undefined;
-    }> extends infer T_1 extends object ? { [k_1 in keyof T_1]: z.objectUtil.addQuestionMarks<{
-        newValue: TState["_input"] | undefined;
+    }>, undefined extends TState["_output"] | undefined ? never : "newValue">[k]; } : never, z.baseObjectInputType<{
+        newValue: z.ZodOptional<TState>;
+    }> extends infer T_1 ? { [k_1 in keyof T_1]: z.baseObjectInputType<{
+        newValue: z.ZodOptional<TState>;
     }>[k_1]; } : never>;
-}, "strip", z.ZodTypeAny, z.baseObjectOutputType<{
+}, "strip", z.ZodTypeAny, z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
     type: z.ZodLiteral<"replace">;
     replace: z.ZodObject<{
         newValue: z.ZodOptional<TState>;
-    }, "strip", z.ZodTypeAny, z.baseObjectOutputType<{
+    }, "strip", z.ZodTypeAny, z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
         newValue: z.ZodOptional<TState>;
-    }> extends infer T extends object ? { [k in keyof T]: z.baseObjectOutputType<{
+    }>, undefined extends TState["_output"] | undefined ? never : "newValue"> extends infer T ? { [k in keyof T]: z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
         newValue: z.ZodOptional<TState>;
-    }>[k]; } : never, z.objectUtil.addQuestionMarks<{
-        newValue: TState["_input"] | undefined;
-    }> extends infer T_1 extends object ? { [k_1 in keyof T_1]: z.objectUtil.addQuestionMarks<{
-        newValue: TState["_input"] | undefined;
+    }>, undefined extends TState["_output"] | undefined ? never : "newValue">[k]; } : never, z.baseObjectInputType<{
+        newValue: z.ZodOptional<TState>;
+    }> extends infer T_1 ? { [k_1 in keyof T_1]: z.baseObjectInputType<{
+        newValue: z.ZodOptional<TState>;
     }>[k_1]; } : never>;
-}> extends infer T_2 ? { [k_2 in keyof T_2]: z.baseObjectOutputType<{
+}>, "type" | (undefined extends (z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
+    newValue: z.ZodOptional<TState>;
+}>, undefined extends TState["_output"] | undefined ? never : "newValue"> extends infer T_3 ? { [k in keyof T_3]: z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
+    newValue: z.ZodOptional<TState>;
+}>, undefined extends TState["_output"] | undefined ? never : "newValue">[k]; } : never) ? never : "replace")> extends infer T_2 ? { [k_1 in keyof T_2]: z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
     type: z.ZodLiteral<"replace">;
     replace: z.ZodObject<{
         newValue: z.ZodOptional<TState>;
-    }, "strip", z.ZodTypeAny, z.baseObjectOutputType<{
+    }, "strip", z.ZodTypeAny, z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
         newValue: z.ZodOptional<TState>;
-    }> extends infer T extends object ? { [k in keyof T]: z.baseObjectOutputType<{
+    }>, undefined extends TState["_output"] | undefined ? never : "newValue"> extends infer T ? { [k in keyof T]: z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
         newValue: z.ZodOptional<TState>;
-    }>[k]; } : never, z.objectUtil.addQuestionMarks<{
-        newValue: TState["_input"] | undefined;
-    }> extends infer T_1 extends object ? { [k_1 in keyof T_1]: z.objectUtil.addQuestionMarks<{
-        newValue: TState["_input"] | undefined;
+    }>, undefined extends TState["_output"] | undefined ? never : "newValue">[k]; } : never, z.baseObjectInputType<{
+        newValue: z.ZodOptional<TState>;
+    }> extends infer T_1 ? { [k_1 in keyof T_1]: z.baseObjectInputType<{
+        newValue: z.ZodOptional<TState>;
     }>[k_1]; } : never>;
-}>[k_2]; } : never, z.objectUtil.addQuestionMarks<{
-    type: "replace";
-    replace: z.objectUtil.addQuestionMarks<{
-        newValue: TState["_input"] | undefined;
-    }> extends infer T_1 extends object ? { [k_1 in keyof T_1]: z.objectUtil.addQuestionMarks<{
-        newValue: TState["_input"] | undefined;
-    }>[k_1]; } : never;
-}> extends infer T_3 ? { [k_2 in keyof T_3]: z.objectUtil.addQuestionMarks<{
-    type: "replace";
-    replace: z.objectUtil.addQuestionMarks<{
-        newValue: TState["_input"] | undefined;
-    }> extends infer T_1 extends object ? { [k_1 in keyof T_1]: z.objectUtil.addQuestionMarks<{
-        newValue: TState["_input"] | undefined;
-    }>[k_1]; } : never;
+}>, "type" | (undefined extends (z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
+    newValue: z.ZodOptional<TState>;
+}>, undefined extends TState["_output"] | undefined ? never : "newValue"> extends infer T_3 ? { [k in keyof T_3]: z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
+    newValue: z.ZodOptional<TState>;
+}>, undefined extends TState["_output"] | undefined ? never : "newValue">[k]; } : never) ? never : "replace")>[k_1]; } : never, z.baseObjectInputType<{
+    type: z.ZodLiteral<"replace">;
+    replace: z.ZodObject<{
+        newValue: z.ZodOptional<TState>;
+    }, "strip", z.ZodTypeAny, z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
+        newValue: z.ZodOptional<TState>;
+    }>, undefined extends TState["_output"] | undefined ? never : "newValue"> extends infer T ? { [k in keyof T]: z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
+        newValue: z.ZodOptional<TState>;
+    }>, undefined extends TState["_output"] | undefined ? never : "newValue">[k]; } : never, z.baseObjectInputType<{
+        newValue: z.ZodOptional<TState>;
+    }> extends infer T_1 ? { [k_1 in keyof T_1]: z.baseObjectInputType<{
+        newValue: z.ZodOptional<TState>;
+    }>[k_1]; } : never>;
+}> extends infer T_4 ? { [k_2 in keyof T_4]: z.baseObjectInputType<{
+    type: z.ZodLiteral<"replace">;
+    replace: z.ZodObject<{
+        newValue: z.ZodOptional<TState>;
+    }, "strip", z.ZodTypeAny, z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
+        newValue: z.ZodOptional<TState>;
+    }>, undefined extends TState["_output"] | undefined ? never : "newValue"> extends infer T ? { [k in keyof T]: z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
+        newValue: z.ZodOptional<TState>;
+    }>, undefined extends TState["_output"] | undefined ? never : "newValue">[k]; } : never, z.baseObjectInputType<{
+        newValue: z.ZodOptional<TState>;
+    }> extends infer T_1 ? { [k_1 in keyof T_1]: z.baseObjectInputType<{
+        newValue: z.ZodOptional<TState>;
+    }>[k_1]; } : never>;
 }>[k_2]; } : never>, z.ZodObject<{
     type: z.ZodLiteral<"update">;
     update: TOperation;
-}, "strip", z.ZodTypeAny, z.baseObjectOutputType<{
+}, "strip", z.ZodTypeAny, z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
     type: z.ZodLiteral<"update">;
     update: TOperation;
-}> extends infer T_4 ? { [k_3 in keyof T_4]: z.baseObjectOutputType<{
+}>, "type" | (undefined extends TOperation["_output"] ? never : "update")> extends infer T_5 ? { [k_1_1 in keyof T_5]: z.objectUtil.addQuestionMarks<z.baseObjectOutputType<{
     type: z.ZodLiteral<"update">;
     update: TOperation;
-}>[k_3]; } : never, z.objectUtil.addQuestionMarks<{
-    type: "update";
-    update: TOperation["_input"];
-}> extends infer T_5 ? { [k_2_1 in keyof T_5]: z.objectUtil.addQuestionMarks<{
-    type: "update";
-    update: TOperation["_input"];
+}>, "type" | (undefined extends TOperation["_output"] ? never : "update")>[k_1_1]; } : never, z.baseObjectInputType<{
+    type: z.ZodLiteral<"update">;
+    update: TOperation;
+}> extends infer T_6 ? { [k_2_1 in keyof T_6]: z.baseObjectInputType<{
+    type: z.ZodLiteral<"update">;
+    update: TOperation;
 }>[k_2_1]; } : never>]>;
 export type RecordUpOperationElement<TState, TOperation> = {
     type: typeof replace;

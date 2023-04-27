@@ -24,6 +24,6 @@ type Params = {
     authorization: true;
     getUserIdTokenResult: GetUserIdTokenResult;
 });
-export declare const createUrqlClient: (params: Params) => import("urql").Client;
+export declare const createUrqlClient: (params: Params) => import("@urql/core/dist/urql-core-chunk").Client;
 export {};
 //# sourceMappingURL=createUrqlClient.d.ts.map

@@ -1,11 +1,11 @@
 import { WritingMessageStatusInputType, WritingMessageStatusType } from '@flocon-trpg/typed-document-node';
 import { RoomMessagesClient } from '@flocon-trpg/web-server-utils';
+import { RoomClient } from './createRoomClient';
 import { GraphQLStatusEventEmitter } from './roomClient/graphqlClient';
 import { RoomConnectionsManager } from './roomClient/roomConnections';
 import { GetMessagesQueryStatus } from './roomClient/roomMessages';
 import { RoomState } from './roomClient/roomState';
 import { BehaviorEvent } from './rxjs/behaviorEvent';
-import { ReadonlyBehaviorEvent } from './rxjs/readonlyBehaviorEvent';
 declare const createTestRoomClientSource: <TCustomMessage, TGraphQLError>() => {
     roomMessageClient: RoomMessagesClient<TCustomMessage>;
     queryStatus: BehaviorEvent<GetMessagesQueryStatus<TGraphQLError>>;
@@ -33,57 +33,7 @@ export declare const createTestRoomClient: <TCustomMessage, TGraphQLError>(callb
         writingMessageStatusValue: BehaviorEvent<ReadonlyMap<string, WritingMessageStatusType>>;
     }) => void) | undefined;
 }) => {
-    roomClient: {
-        messages: {
-            messages: import("@flocon-trpg/web-server-utils").AllRoomMessages<TCustomMessage>;
-            queryStatus: ReadonlyBehaviorEvent<GetMessagesQueryStatus<TGraphQLError>>;
-            addCustomMessage: (message: Omit<import("@flocon-trpg/web-server-utils").CustomMessage<TCustomMessage>, "type">) => void;
-        };
-        roomConnections: ReadonlyBehaviorEvent<{
-            current: ReadonlyMap<string, import("./roomClient/roomConnections").RoomConnectionStatus>;
-            diff: import("./roomClient/roomConnections").RoomConnectionStatusDiff | null;
-        }>;
-        roomState: ReadonlyBehaviorEvent<RoomState<TGraphQLError>>;
-        writingMessageStatus: {
-            value: ReadonlyBehaviorEvent<ReadonlyMap<string, WritingMessageStatusType>>;
-            update: (inputType: WritingMessageStatusInputType) => void;
-        };
-        graphQLStatus: ReadonlyBehaviorEvent<{
-            RoomEventSubscription: {
-                type: "ok";
-            } | {
-                type: "error";
-                error: import("./roomClient/graphqlClient").ObservableError<TGraphQLError>;
-            };
-            GetMessagesQuery: {
-                type: "fetching";
-            } | {
-                type: "success";
-            } | {
-                type: "error";
-                error: import("./roomClient/graphqlClient").PromiseError<TGraphQLError>;
-            };
-            GetRoomConnectionsQuery: {
-                type: "fetching";
-            } | {
-                type: "success";
-            } | {
-                type: "error";
-                error: import("./roomClient/graphqlClient").PromiseError<TGraphQLError>;
-            };
-            GetRoomQuery: {
-                type: "fetching";
-            } | {
-                type: "success";
-            } | {
-                type: "error";
-                error: import("./roomClient/graphqlClient").PromiseError<TGraphQLError>;
-            };
-        } & {
-            hasError: boolean;
-        }>;
-        unsubscribe: () => void;
-    };
+    roomClient: RoomClient<TCustomMessage, TGraphQLError>;
     source: {
         clientStatus: {
             next: (update: (source: {

@@ -447,20 +447,7 @@ class StateManagerCore {
         }
         this._pendingGetOperations.delete(this._revision + 1);
         if (toApply.isByMyClient) {
-            /*                                      prev syncedState
-             *                                          /        \
-             *                                         /          \
-             *                this._postingState.diff /            \ toApply.operation
-             *                                       /              \
-             *                                      /      diff      \
-             *              this._postingState.state  ------------- next syncedState
-             *                        /                                  /
-             *                       /                                  /
-             *       localOperation /                                  / (xform)
-             *                     /                                  /
-             *                    /                                  /
-             *              this._uiState                      next uiState
-             */
+            // see "by my client" page in ./transformation.drawio
             const prevSyncedState = this._stateGetter.syncedState;
             this._stateGetter.syncedState = this.params.apply({
                 state: this._stateGetter.syncedState,
@@ -484,7 +471,8 @@ class StateManagerCore {
                 if (diff !== undefined) {
                     const xform = this.params.transform({
                         state: this._stateGetter.postingState?.state ?? prevSyncedState,
-                        first: localOperation, second: diff
+                        first: localOperation,
+                        second: diff,
                     });
                     this._stateGetter.setUiState(this.params.apply({
                         state: this._stateGetter.syncedState,
@@ -497,7 +485,7 @@ class StateManagerCore {
             this.tryApplyPendingGetOperations();
             return;
         }
-        // see ./graph1.drawio
+        // see "not by my client" page in ./transformation.drawio
         const prevSyncedState = this._stateGetter.syncedState;
         const prevLocalOperation = this._stateGetter.getLocalOperation();
         this._stateGetter.syncedState = this.params.apply({
