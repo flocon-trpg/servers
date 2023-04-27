@@ -2893,6 +2893,7 @@ __metadata:
     "@types/lodash": ^4.14.181
     "@types/multer": ^1.4.7
     "@types/node": ^14.18.12
+    "@types/node-fetch": 2.6.3
     "@types/safe-compare": ^1.1.0
     "@types/sharp": ^0.31.0
     "@types/url-join": 4.0.1
@@ -7599,6 +7600,16 @@ __metadata:
   dependencies:
     "@types/express": "*"
   checksum: 680cb0710aa25264d20cdcdaf34c212b636b55ea141310f06c25354ab1401193c7aa6839f9d22abf64a223fab1f2b8287f2512b0bef7e1628c4e9ffe54b4aeb2
+  languageName: node
+  linkType: hard
+
+"@types/node-fetch@npm:2.6.3":
+  version: 2.6.3
+  resolution: "@types/node-fetch@npm:2.6.3"
+  dependencies:
+    "@types/node": "*"
+    form-data: ^3.0.0
+  checksum: b68cda58e91535a42dd5337932443c37f8e198ca1e8deeb95bd92a64a9a84d92071867b91c5eb84ee8e13f33d45a70549fe2bc11dd070a894dd561909f4d39f5
   languageName: node
   linkType: hard
 
