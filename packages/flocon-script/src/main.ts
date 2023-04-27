@@ -377,7 +377,9 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                 case '??=':
                 case '||=':
                     // 現時点では acorn は ecmaVersion=2020 として parse しているため、ここには来ないはず。
-                    throw new Error(`"${expression.operator}" operator is not supported. This should not happen.`);
+                    throw new Error(
+                        `"${expression.operator}" operator is not supported. This should not happen.`
+                    );
             }
             if (expression.left.type === 'Identifier') {
                 context.assign(expression.left.name, newValue, toRange(expression));
