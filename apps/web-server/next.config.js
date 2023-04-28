@@ -3,6 +3,11 @@ const defaultConfig = {
     env: {
         customKey: 'test',
     },
+    experimental: {
+        // （現時点ではコメントのみしか書かれていないが）.babelrc などといったファイルがあると Next.js が SWC を無効化してしまうため、それを防いでいる。
+        // https://nextjs.org/docs/messages/swc-disabled
+        forceSwcTransforms: true,
+    },
 };
 
 // https://www.npmjs.com/package/@next/bundle-analyzer
