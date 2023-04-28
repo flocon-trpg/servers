@@ -7,6 +7,7 @@ import { storybookAtom } from '@/atoms/storybookAtom/storybookAtom';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import * as Env from '@/env';
 import { mockAuth, mockUser, mockWebConfig } from '@/mocks';
+import { createMockUrqlClientForLayout } from '@/mocks/createMockUrqlClientForLayout';
 
 export const Default: React.FC<{
     amIAnonymous: boolean;
@@ -65,8 +66,13 @@ export const Default: React.FC<{
             },
         });
     }, [amIAnonymous, authProviders, setStorybook]);
+    const mockUrqlClient = React.useRef(createMockUrqlClientForLayout());
     return (
-        <StorybookProvider compact={false} roomClientContextValue={null}>
+        <StorybookProvider
+            compact={false}
+            roomClientContextValue={null}
+            urqlClient={mockUrqlClient.current}
+        >
             <SignIn />
         </StorybookProvider>
     );

@@ -7,7 +7,7 @@ import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { WebConfig } from '@/configType';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { mockWebConfig } from '@/mocks';
-import { createMockUrqlClientForRoomMessage } from '@/mocks/mockAvailableGameSystemsQuery';
+import { createMockUrqlClientForRoomMessage } from '@/mocks/createMockUrqlClientForRoomMessage';
 
 export const Player: React.FC<WebConfig & { myParticipantRole: ParticipantRole }> = ({
     isUnlistedFirebaseStorageEnabled,

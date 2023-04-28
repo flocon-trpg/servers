@@ -5,6 +5,7 @@ import { Board, Props } from './Board';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { defaultBoardId } from '@/mocks';
+import { createMockUrqlClientForLayout } from '@/mocks/createMockUrqlClientForLayout';
 
 type RoomState = S<typeof roomTemplate>;
 
@@ -27,8 +28,13 @@ export const Default: React.FC<{
             update: updateRoom,
         },
     });
+    const mockUrqlClient = React.useRef(createMockUrqlClientForLayout());
     return (
-        <StorybookProvider compact roomClientContextValue={roomClientContextValue}>
+        <StorybookProvider
+            compact
+            roomClientContextValue={roomClientContextValue}
+            urqlClient={mockUrqlClient.current}
+        >
             <Board {...boardProps} />
         </StorybookProvider>
     );

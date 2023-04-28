@@ -5,7 +5,7 @@ import { RoomMessagesPanelContent } from './RoomMessagesPanelContent';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { CreateMockRoomMessagesParams } from '@/mocks';
-import { createMockUrqlClientForRoomMessage } from '@/mocks/mockAvailableGameSystemsQuery';
+import { createMockUrqlClientForRoomMessage } from '@/mocks/createMockUrqlClientForRoomMessage';
 
 export const Default: React.FC<
     { height: number; fetchingMessages: boolean } & CreateMockRoomMessagesParams
