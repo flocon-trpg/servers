@@ -3798,7 +3798,7 @@ __metadata:
     jotai: ^2.0.0
     js-file-download: ^0.4.12
     jszip: ^3.9.1
-    konva: ^8.3.9
+    konva: ^9.0.0
     less: ^4.1.1
     linkify-react: ^4.0.2
     linkifyjs: ^4.0.2
@@ -16080,10 +16080,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"konva@npm:^8.3.9":
-  version: 8.4.3
-  resolution: "konva@npm:8.4.3"
-  checksum: 5fc805e2c51a3eab4e08d3752ca43a6cd12917da5d44b73d9ce3b022fcfe84f215eedb44082b0d9fa9e456f029673e42db6a72dcf123e290dfe68e971150a6e3
+"konva@npm:^9.0.0":
+  version: 9.2.0
+  resolution: "konva@npm:9.2.0"
+  checksum: 12f8635b54189a8788f9e49e1426b9e80e934769df2750a66b0ae4c88b22ae765e373fec7573411b46e5225086437bb99030ef0497c79e9e199e774bac835845
   languageName: node
   linkType: hard
 
