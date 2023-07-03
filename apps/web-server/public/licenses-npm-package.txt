@@ -836,6 +836,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 -----
 
+The following software may be included in this product: @rc-component/color-picker, rc-mentions. A copy of the source code may be downloaded from git@github.com:react-component/color-picker.git (@rc-component/color-picker), git@github.com:react-component/mentions.git (rc-mentions). This software contains the following license and notice below:
+
+The MIT License (MIT)
+
+Copyright (c) 2019-present alipay.com
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-----
+
 The following software may be included in this product: @rc-component/context, async-validator, dom-align, rc-align, rc-collapse, rc-dialog, rc-input-number, rc-menu, rc-notification, rc-pagination, rc-progress, rc-rate, rc-steps, rc-switch, rc-tabs. A copy of the source code may be downloaded from git@github.com:react-component/context.git (@rc-component/context), git@github.com:yiminghe/async-validator.git (async-validator), git@github.com:yiminghe/dom-align.git (dom-align), git@github.com:react-component/align.git (rc-align), git@github.com:react-component/collapse.git (rc-collapse), git@github.com:react-component/dialog.git (rc-dialog), git@github.com:react-component/input-number.git (rc-input-number), git@github.com:react-component/menu.git (rc-menu), git@github.com:react-component/notification.git (rc-notification), git@github.com:react-component/pagination.git (rc-pagination), git@github.com:react-component/progress.git (rc-progress), https://github.com/react-component/rate.git (rc-rate),  git+ssh://git@github.com/react-component/steps.git (rc-steps), git@github.com:react-component/switch.git (rc-switch), git@github.com:react-component/tabs.git (rc-tabs). This software contains the following license and notice below:
 
 The MIT License (MIT)
@@ -876,7 +890,7 @@ SOFTWARE.
 
 -----
 
-The following software may be included in this product: @rc-component/trigger, rc-dropdown, rc-slider, rc-trigger. A copy of the source code may be downloaded from https://github.com/react-component/trigger.git (@rc-component/trigger), git@github.com:react-component/dropdown.git (rc-dropdown), git@github.com:react-component/slider.git (rc-slider), https://github.com/react-component/trigger.git (rc-trigger). This software contains the following license and notice below:
+The following software may be included in this product: @rc-component/trigger, rc-dropdown, rc-slider. A copy of the source code may be downloaded from https://github.com/react-component/trigger.git (@rc-component/trigger), git@github.com:react-component/dropdown.git (rc-dropdown), git@github.com:react-component/slider.git (rc-slider). This software contains the following license and notice below:
 
 The MIT License (MIT)
 Copyright (c) 2015-present Alipay.com, https://www.alipay.com/
@@ -925,7 +939,7 @@ IN THE SOFTWARE.
 
 -----
 
-The following software may be included in this product: @react-spring/animated, @react-spring/core, @react-spring/konva, @react-spring/rafz, @react-spring/shared, @react-spring/types, @react-spring/web. This software contains the following license and notice below:
+The following software may be included in this product: @react-spring/animated, @react-spring/core, @react-spring/konva, @react-spring/shared, @react-spring/types, @react-spring/web. This software contains the following license and notice below:
 
 MIT License
 
@@ -6697,20 +6711,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -----
 
-The following software may be included in this product: rc-mentions. A copy of the source code may be downloaded from git@github.com:react-component/mentions.git. This software contains the following license and notice below:
-
-The MIT License (MIT)
-
-Copyright (c) 2019-present alipay.com
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
------
-
 The following software may be included in this product: rc-table. A copy of the source code may be downloaded from git@github.com:react-component/table.git. This software contains the following license and notice below:
 
 MIT LICENSE
@@ -8800,7 +8800,7 @@ The following software may be included in this product: use-image. A copy of the
 
 MIT License
 
-Copyright (c) 2019
+Copyright (c) 2019 Anton Lavrenov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -1,6 +1,6 @@
 import { loggerRef, mapRecord, recordToArray, recordToMap } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
-import produce from 'immer';
+import { produce } from 'immer';
 import { groupBy } from 'lodash';
 import { z } from 'zod';
 import { apply, diff } from './generator/functions';

@@ -8,13 +8,12 @@ var utils = require('@flocon-trpg/utils');
 var lodash = require('lodash');
 var otString = require('@kizahasi/ot-string');
 var truncate = require('truncate-utf8-bytes');
-var produce = require('immer');
+var immer = require('immer');
 var otCore = require('@kizahasi/ot-core');
 
 function _interopDefault (e) { return e && e.__esModule ? e : { default: e }; }
 
 var truncate__default = /*#__PURE__*/_interopDefault(truncate);
-var produce__default = /*#__PURE__*/_interopDefault(produce);
 
 const anonymous = 'anonymous';
 const authToken = 'authToken';
@@ -4306,7 +4305,7 @@ const arrayToIndexObjects = (array) => {
         if (result[element.key] !== undefined) {
             throw new Error(`"${element.key}" key is duplicated.`);
         }
-        result[element.key] = produce__default.default(element.value, value => {
+        result[element.key] = immer.produce(element.value, value => {
             value[$index] = index;
         });
     });
@@ -4431,7 +4430,7 @@ const clientTransform = (params) => {
                 // 通常はここには来ない
                 return result.Result.ok(first);
             }
-            return result.Result.ok(produce__default.default(first, first => {
+            return result.Result.ok(immer.produce(first, first => {
                 if (second.$index === undefined) {
                     return;
                 }
@@ -4449,7 +4448,7 @@ const clientTransform = (params) => {
             else {
                 composed$indexOperation = second[$index];
             }
-            const result$1 = produce__default.default(first, first => {
+            const result$1 = immer.produce(first, first => {
                 first.$index = composed$indexOperation;
             });
             return result.Result.ok(isIdRecord(result$1) ? undefined : result$1);
@@ -6016,6 +6015,7 @@ const serverTransform$3 = ({ requestedBy, participantKey, }) => ({ stateBeforeSe
 };
 
 // Participantとは、そのRoomに入っているユーザーのこと。通常は、Player、Spectatorなどのroleを持っている。
+// nameはJSONのあるエンティティとは別に保存される想定であるため、nameが見つからないもしくは一時的に取得できないという状況がありうる。そのため、maybeを付けており、TextOperationではなくReplaceOperationとして定義している。ReplaceOperationは文字数が多いと非効率化するため、maxLength100Stringとしている。
 const Player = 'Player';
 const Spectator = 'Spectator';
 const Master = 'Master';

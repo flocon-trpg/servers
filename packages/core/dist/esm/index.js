@@ -6,7 +6,7 @@ import { recordToArray, mapRecord, keyNames, recordToMap, mapToRecord, groupJoin
 import { cloneDeep, groupBy, maxBy } from 'lodash';
 import { deserializeUpOperation, apply as apply$6, serializeTwoWayOperation, diff as diff$5, deserizalizeTwoWayOperation, toUpOperation as toUpOperation$3, serializeUpOperation, deserializeDownOperation, applyBack as applyBack$5, composeDownOperation as composeDownOperation$4, serializeDownOperation, applyBackAndRestore, transformUpOperation, toDownOperation as toDownOperation$3, applyAndRestore, transformTwoWayOperation } from '@kizahasi/ot-string';
 import truncate from 'truncate-utf8-bytes';
-import produce from 'immer';
+import { produce } from 'immer';
 import { OperationBuilder, PositiveInt, transform as transform$1, delete$, apply as apply$7 } from '@kizahasi/ot-core';
 
 const anonymous = 'anonymous';
@@ -6009,6 +6009,7 @@ const serverTransform$3 = ({ requestedBy, participantKey, }) => ({ stateBeforeSe
 };
 
 // Participantとは、そのRoomに入っているユーザーのこと。通常は、Player、Spectatorなどのroleを持っている。
+// nameはJSONのあるエンティティとは別に保存される想定であるため、nameが見つからないもしくは一時的に取得できないという状況がありうる。そのため、maybeを付けており、TextOperationではなくReplaceOperationとして定義している。ReplaceOperationは文字数が多いと非効率化するため、maxLength100Stringとしている。
 const Player = 'Player';
 const Spectator = 'Spectator';
 const Master = 'Master';
