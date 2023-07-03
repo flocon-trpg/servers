@@ -1,6 +1,6 @@
+import { UseQueryResult, useQueries } from '@tanstack/react-query';
 import { useAtomValue } from 'jotai/react';
 import React from 'react';
-import { UseQueryResult, useQueries } from 'react-query';
 import { useMemoOne } from 'use-memo-one';
 import { firebaseStorageAtom } from '../pages/_app';
 import { FilePathLikeOrThumb, FilePathModule } from '../utils/file/filePath';
@@ -71,7 +71,7 @@ export function useSrcArrayFromFilePath(
                   return { queryKey, queryFn, cacheTime };
               });
 
-    const queriesResult = useQueries(cleanPathArray);
+    const queriesResult = useQueries({ queries: cleanPathArray });
 
     const isPathArrayNullish = pathArray == null;
 

@@ -1,6 +1,6 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { useAtomValue, useSetAtom } from 'jotai/react';
 import React from 'react';
-import { useQueryClient } from 'react-query';
 import { hideAllOverlayActionAtom } from '../atoms/hideAllOverlayActionAtom/hideAllOverlayActionAtom';
 import { firebaseAuthAtom } from '../pages/_app';
 

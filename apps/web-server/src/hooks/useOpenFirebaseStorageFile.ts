@@ -1,7 +1,7 @@
 import { StorageReference } from '@firebase/storage';
+import { useQueryClient } from '@tanstack/react-query';
 import { App } from 'antd';
 import React from 'react';
-import { useQueryClient } from 'react-query';
 import { fetchFirebaseStorageUrlQuery } from './useFirebaseStorageUrlQuery';
 
 export const useOpenFirebaseStorageFile = () => {

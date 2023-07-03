@@ -1,5 +1,5 @@
 import { FirebaseStorage, StorageReference, getDownloadURL, ref } from '@firebase/storage';
-import { QueryClient, useQuery } from 'react-query';
+import { QueryClient, useQuery } from '@tanstack/react-query';
 
 export const reference = 'reference';
 export const string = 'string';
