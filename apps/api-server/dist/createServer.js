@@ -82,7 +82,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
     if (!serverConfig.disableRateLimitExperimental) {
         rateLimiter = new rateLimiterFlexible.RateLimiterMemory({
             duration: 60,
-            points: 600,
+            points: 3000,
         });
     }
     const context = async (context) => {

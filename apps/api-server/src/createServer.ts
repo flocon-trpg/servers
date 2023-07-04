@@ -133,9 +133,9 @@ export const createServer = async ({
     let rateLimiter: RateLimiterAbstract | null = null;
     if (!serverConfig.disableRateLimitExperimental) {
         rateLimiter = new RateLimiterMemory({
-            // TODO: 値をちゃんと決める
+            // TODO: 値をちゃんと決める。現時点では、Rate limit によるエラーでユーザー体験が損なわれないようにするため、暫定的に大きめのポイントを設定している。
             duration: 60,
-            points: 600,
+            points: 3000,
         });
     }
 
