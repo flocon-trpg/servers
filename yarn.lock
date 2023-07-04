@@ -3322,7 +3322,7 @@ __metadata:
     graphql: ^15.6.0
     graphql-subscriptions: ^1.1.0
     graphql-ws: ^5.8.1
-    immer: ^9.0.16
+    immer: ^10.0.0
     inquirer: ^8.0.0
     isomorphic-fetch: 3.0.0
     isomorphic-ws: 5.0.0
@@ -3410,7 +3410,7 @@ __metadata:
     eslint-config-prettier: 8.8.0
     eslint-import-resolver-typescript: 3.5.5
     eslint-plugin-import: 2.27.5
-    immer: ^9.0.16
+    immer: ^10.0.0
     jest: 29.5.0
     lodash: ^4.17.21
     prettier: 2.8.8
@@ -3710,7 +3710,7 @@ __metadata:
     eslint-import-resolver-typescript: 3.5.5
     eslint-plugin-import: 2.27.5
     fast-check: 3.10.0
-    immer: ^9.0.16
+    immer: ^10.0.0
     jest: 29.5.0
     prettier: 2.8.8
     rimraf: 5.0.1
@@ -3791,7 +3791,7 @@ __metadata:
     graphql-ws: ^5.8.1
     howler: ^2.2.3
     html-escaper: ^3.0.3
-    immer: ^9.0.16
+    immer: ^10.0.0
     jdenticon: ^3.1.1
     jest: 29.5.0
     jest-environment-jsdom: 29.5.0
@@ -14283,10 +14283,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"immer@npm:^9.0.16":
-  version: 9.0.21
-  resolution: "immer@npm:9.0.21"
-  checksum: 70e3c274165995352f6936695f0ef4723c52c92c92dd0e9afdfe008175af39fa28e76aafb3a2ca9d57d1fb8f796efc4dd1e1cc36f18d33fa5b74f3dfb0375432
+"immer@npm:^10.0.0":
+  version: 10.0.2
+  resolution: "immer@npm:10.0.2"
+  checksum: 525a3b14210d02ae420c3b9f6ca14f7e9bcf625611d1356e773e7739f14c7c8de50dac442e6c7de3a6e24a782f7b792b6b8666bc0b3f00269d21a95f8f68ca84
   languageName: node
   linkType: hard
 

@@ -27,7 +27,7 @@
         "@kizahasi/ot-string": "0.6.0",
         "@kizahasi/result": "^1.1.0",
         "@ltd/j-toml": "^1.23.0",
-        "immer": "^9.0.16",
+        "immer": "^10.0.0",
         "lodash": "^4.17.21",
         "sanitize-filename": "^1.6.3",
         "truncate-utf8-bytes": "^1.0.2",

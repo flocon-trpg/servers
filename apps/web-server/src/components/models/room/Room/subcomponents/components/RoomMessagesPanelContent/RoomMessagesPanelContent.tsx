@@ -35,7 +35,7 @@ import {
 } from 'antd';
 import { ItemType } from 'antd/lib/menu/hooks/useItems';
 import classNames from 'classnames';
-import { WritableDraft } from 'immer/dist/internal';
+import { Draft } from 'immer';
 import { useAtomValue } from 'jotai/react';
 import { atom } from 'jotai/vanilla';
 import moment from 'moment';
@@ -821,7 +821,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
 
     // GameSelectorの無駄なrerenderを抑止するため、useCallbackを使っている。
     const onChatInputConfigUpdate = React.useCallback(
-        (recipe: (draft: WritableDraft<MessagePanelConfig>) => void) => {
+        (recipe: (draft: Draft<MessagePanelConfig>) => void) => {
             setRoomConfig(roomConfig => {
                 if (roomConfig == null) {
                     return;
