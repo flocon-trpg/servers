@@ -22,7 +22,7 @@
         "@flocon-trpg/core": "workspace:^",
         "@flocon-trpg/typed-document-node": "workspace:^",
         "@flocon-trpg/utils": "workspace:^",
-        "immer": "^9.0.16",
+        "immer": "^10.0.0",
         "rxjs": "^7.5.6"
     },
     "devDependencies": {
