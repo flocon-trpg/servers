@@ -3424,9 +3424,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@flocon-trpg/default-pino-transport@workspace:^, @flocon-trpg/default-pino-transport@workspace:packages/defaultPinoTransport":
+"@flocon-trpg/default-pino-transport@workspace:^, @flocon-trpg/default-pino-transport@workspace:packages/default-pino-transport":
   version: 0.0.0-use.local
-  resolution: "@flocon-trpg/default-pino-transport@workspace:packages/defaultPinoTransport"
+  resolution: "@flocon-trpg/default-pino-transport@workspace:packages/default-pino-transport"
   dependencies:
     "@flocon-trpg/eslint-config": "workspace:^"
     "@flocon-trpg/prettier-config": "workspace:^"
