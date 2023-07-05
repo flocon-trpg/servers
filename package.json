@@ -15,8 +15,7 @@
         "prettier-check": "yarn prettier:base --check && yarn workspaces foreach -pv run prettier-check",
         "prettier:base": "prettier \"**/*.{json,yml,md}\"",
         "sort-package-json": "sort-package-json \"package.json\" \"apps/*/package.json\" \"packages/*/package.json\"",
-        "test": "yarn workspaces foreach -pv run test",
-        "test-node14": "yarn workspaces foreach -pv --exclude '{@flocon-trpg/servers,@flocon-trpg/web-server}' run test"
+        "test": "yarn workspaces foreach -pv run test"
     },
     "devDependencies": {
         "@commitlint/cli": "17.6.6",

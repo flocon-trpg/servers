@@ -17,7 +17,7 @@ jobs:
 
         strategy:
             matrix:
-                node: ['14.x', '16.x', '18.x']
+                node: ['16.x', '18.x']
                 os: [ubuntu-22.04]
                 include:
                     - node: '16.x'
@@ -40,17 +40,8 @@ jobs:
 
             - run: yarn install
 
-            - name: Test for Node 16 or higher
-              if: ${{ matrix.node != '14.x' }}
+            - name: Test
               run: yarn test --ci --coverage --runInBand
-              env:
-                  REDIS_TEST: 0
-                  MYSQL_TEST: 0
-                  POSTGRESQL_TEST: 0
-
-            - name: Test for Node 14
-              if: ${{ matrix.node == '14.x' }}
-              run: yarn test-node14 --ci --coverage --runInBand
               env:
                   REDIS_TEST: 0
                   MYSQL_TEST: 0
@@ -66,7 +57,7 @@ jobs:
 
         strategy:
             matrix:
-                container: ['node:14-buster', 'node:16-buster', 'node:18-buster']
+                container: ['node:16-buster', 'node:18-buster']
 
         runs-on: ubuntu-22.04
         container: ${{ matrix.container }}
@@ -134,13 +125,8 @@ jobs:
                           "clientUrl": "postgresql://test:test@postgres:5432/test"
                       }
 
-            - name: Test for Node 16 or higher
-              if: ${{ matrix.container != 'node:14-buster' }}
+            - name: Test
               run: yarn test --ci --coverage --runInBand
-
-            - name: Test for Node 14
-              if: ${{ matrix.container == 'node:14-buster' }}
-              run: yarn test-node14 --ci --coverage --runInBand
 
             - name: Upload coverages to Codecov
               if: ${{ matrix.container == 'node:16-buster' }}
