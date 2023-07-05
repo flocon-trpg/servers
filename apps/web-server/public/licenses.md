@@ -22,6 +22,10 @@ assets ディレクトリ内のいくつかのファイルは、次の素材を�
 
 <https://commons.nicovideo.jp/material/nc23509>
 
+### assets/playing-card の画像
+
+<http://byronknoll.blogspot.com/2011/03/vector-playing-cards.html>
+
 ## ライブラリのライセンス一覧
 
 [licenses-npm-package.txt](./licenses-npm-package.txt) をご覧ください。なお、これらば Web サーバーから参照されているライブラリのライセンスの一覧であり、API サーバーなどは含まれていません。
