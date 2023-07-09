@@ -6,8 +6,8 @@ import * as RecordOperation from '../../../../recordOperation';
 import {
     RequestedBy,
     anyValue,
+    canChangeCharacterValue,
     canChangeOwnerCharacterId,
-    isCharacterOwner,
 } from '../../../../requestedBy';
 import * as ReplaceOperation from '../../../../util/replaceOperation';
 import { ServerTransform, TwoWayError } from '../../../../util/type';
@@ -20,7 +20,7 @@ import { dicePieceStrIndexes, template } from './types';
 export const toClientState =
     (requestedBy: RequestedBy, currentRoomState: State<typeof Room.template>) =>
     (source: State<typeof template>): State<typeof template> => {
-        const isAuthorized = isCharacterOwner({
+        const isAuthorized = canChangeCharacterValue({
             requestedBy,
             characterId: source.ownerCharacterId ?? anyValue,
             currentRoomState,
@@ -48,7 +48,7 @@ export const serverTransform =
         clientOperation,
         serverOperation,
     }) => {
-        const isAuthorized = isCharacterOwner({
+        const isAuthorized = canChangeCharacterValue({
             requestedBy,
             characterId: stateAfterServerOperation.ownerCharacterId ?? anyValue,
             currentRoomState,

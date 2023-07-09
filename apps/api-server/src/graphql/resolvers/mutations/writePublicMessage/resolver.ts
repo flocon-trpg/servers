@@ -145,7 +145,7 @@ export class WritePublicMessageResolver {
                     requestedBy: { type: client, userUid: authorizedUser.userUid },
                     characterId: args.characterId,
                     currentRoomState: roomState,
-                })
+                }) === true
             )
                 chara = roomState.characters?.[args.characterId];
         }

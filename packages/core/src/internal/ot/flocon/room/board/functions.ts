@@ -5,8 +5,8 @@ import * as RecordOperation from '../../../recordOperation';
 import {
     RequestedBy,
     anyValue,
+    canChangeCharacterValue,
     canChangeOwnerParticipantId,
-    isCharacterOwner,
     isOwner,
     none,
 } from '../../../requestedBy';
@@ -96,13 +96,13 @@ export const serverTransform =
             { ownerCharacterId: string | undefined }
         > = {
             cancelCreate: ({ newState }) =>
-                !isCharacterOwner({
+                !canChangeCharacterValue({
                     requestedBy,
                     characterId: newState.ownerCharacterId ?? none,
                     currentRoomState,
                 }),
             cancelRemove: ({ state }) =>
-                !isCharacterOwner({
+                !canChangeCharacterValue({
                     requestedBy,
                     characterId: state.ownerCharacterId ?? anyValue,
                     currentRoomState,

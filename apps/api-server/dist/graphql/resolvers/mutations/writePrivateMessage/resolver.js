@@ -84,8 +84,9 @@ exports.WritePrivateMessageResolver = class WritePrivateMessageResolver {
                 requestedBy: { type: FilePathModule.client, userUid: authorizedUser.userUid },
                 characterId: args.characterId,
                 currentRoomState: roomState,
-            }))
+            }) === true) {
                 chara = roomState.characters?.[args.characterId];
+            }
         }
         const entityResult = await utils.analyzeTextAndSetToEntity({
             type: 'RoomPrvMsg',

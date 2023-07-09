@@ -224,15 +224,7 @@ export {
     toUpOperation as toTextUpOperation,
 } from './internal/ot/textOperation';
 
-export {
-    client,
-    admin,
-    restrict,
-    RequestedBy,
-    isCharacterOwner,
-    isBoardOwner,
-    isOwner,
-} from './internal/ot/requestedBy';
+export { client, admin, restrict, RequestedBy, isCharacterOwner } from './internal/ot/requestedBy';
 
 export { path, shape } from './internal/ot/shape';
 

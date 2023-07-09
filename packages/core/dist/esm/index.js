@@ -4488,6 +4488,7 @@ const isAuthorized = ({ requestedBy, participantId, }) => {
     }
     return true;
 };
+/** @deprecated Use `isAuthorized` instead. */
 // 元々は isAuthorized 関数は存在せず、isAuthorized 関数に相当する処理は isOwner 関数で行っていた。だが、isOwner という名前と引数がしっくり来ない場面もあったので、isAuthorized 関数に移した。isOwner 関数は削除するとしっくり来ない場面が生じるかもしれないため、現時点では残している。
 const isOwner = ({ requestedBy, ownerParticipantId, }) => {
     return isAuthorized({ requestedBy, participantId: ownerParticipantId });
@@ -4515,6 +4516,7 @@ const isBoardVisible = ({ boardId, requestedBy, currentRoomState, }) => {
     }
     return currentRoomState.activeBoardId === boardId;
 };
+const characterNotFound = 'characterNotFound';
 const isCharacterOwner = ({ requestedBy, characterId, currentRoomState, }) => {
     if (requestedBy.type === admin) {
         return true;
@@ -4524,16 +4526,19 @@ const isCharacterOwner = ({ requestedBy, characterId, currentRoomState, }) => {
     }
     const userUid = requestedBy.type === client ? requestedBy.userUid : undefined;
     const character = (currentRoomState.characters ?? {})[characterId];
-    if (character != null) {
-        if (character.ownerParticipantId == null) {
-            return true;
-        }
-        if (character.ownerParticipantId === userUid) {
-            return true;
-        }
-        return false;
+    if (character == null) {
+        return characterNotFound;
+    }
+    if (character.ownerParticipantId == null) {
+        return true;
+    }
+    if (character.ownerParticipantId === userUid) {
+        return true;
     }
     return false;
+};
+const canChangeCharacterValue = (args) => {
+    return !!isCharacterOwner(args);
 };
 const canChangeOwnerParticipantId = ({ requestedBy, currentOwnerParticipant, }) => {
     if (requestedBy.type === admin) {
@@ -4559,7 +4564,7 @@ const canChangeOwnerCharacterId = ({ requestedBy, currentOwnerCharacter, current
     else {
         currentOwnerCharacterId = currentOwnerCharacter?.ownerCharacterId;
     }
-    return isCharacterOwner({
+    return canChangeCharacterValue({
         requestedBy,
         characterId: currentOwnerCharacterId ?? anyValue,
         currentRoomState,
@@ -4791,7 +4796,7 @@ const template$j = createObjectValueTemplate({
 }, 2, 1);
 
 const toClientState$f = (requestedBy, currentRoomState) => (source) => {
-    const isAuthorized = isCharacterOwner({
+    const isAuthorized = canChangeCharacterValue({
         requestedBy,
         characterId: source.ownerCharacterId ?? anyValue,
         currentRoomState,
@@ -4802,7 +4807,7 @@ const toClientState$f = (requestedBy, currentRoomState) => (source) => {
     };
 };
 const serverTransform$i = (requestedBy, currentRoomState) => ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
-    const isAuthorized = isCharacterOwner({
+    const isAuthorized = canChangeCharacterValue({
         requestedBy,
         characterId: stateAfterServerOperation.ownerCharacterId ?? anyValue,
         currentRoomState,
@@ -5025,7 +5030,7 @@ const serverTransform$f = (requestedBy) => ({ stateBeforeServerOperation, stateA
 };
 
 const toClientState$c = (requestedBy, currentRoomState) => (source) => {
-    const isAuthorized = isCharacterOwner({
+    const isAuthorized = canChangeCharacterValue({
         requestedBy,
         characterId: source.ownerCharacterId ?? anyValue,
         currentRoomState,
@@ -5130,12 +5135,12 @@ const toClientState$b = (requestedBy, currentRoomState) => (source) => {
 };
 const serverTransform$d = (requestedBy, currentRoomState) => ({ stateBeforeServerOperation, stateAfterServerOperation, clientOperation, serverOperation, }) => {
     const cancellationPolicyOfCharacterPieces = {
-        cancelCreate: ({ newState }) => !isCharacterOwner({
+        cancelCreate: ({ newState }) => !canChangeCharacterValue({
             requestedBy,
             characterId: newState.ownerCharacterId ?? none,
             currentRoomState,
         }),
-        cancelRemove: ({ state }) => !isCharacterOwner({
+        cancelRemove: ({ state }) => !canChangeCharacterValue({
             requestedBy,
             characterId: state.ownerCharacterId ?? anyValue,
             currentRoomState,
@@ -6989,5 +6994,5 @@ const createLogs = ({ prevState, nextState, }) => {
     };
 };
 
-export { $free, $index, $r, $system, $v, Default, FirebaseStorage, Markdown, Master, Number, OtError, Plain, Player, PublicChannelKey, Spectator, String, Uploader, admin, analyze, anonymous, apply$1 as apply, applyBack, apply$4 as applyNullableText, apply$5 as applyText, arrayToIndexObjects, atomic, authToken, template$a as bgmTemplate, template$m as boardPositionTemplate, template$5 as boardTemplate, template$i as boolParamTemplate, template$h as characterPieceTemplate, template$c as characterTemplate, client, clientTransform$1 as clientTransform, template$g as commandTemplate, composeDownOperation, createLogs, createObjectValueTemplate, createParamRecordValueTemplate, createRecordValueTemplate, createReplaceValueTemplate, createTextValueTemplate, createType, decodeDbState, decode$1 as decodeDicePiece, decodeDownOperation, decode as decodeStringPiece, deleteType, type$1 as dicePieceLog, dicePieceStrIndexes, template$j as dicePieceTemplate, template$k as dieValueTemplate, diff, downOperation, exactDbState, exactDownOperation, execCharacterCommand, expr1, fakeFirebaseConfig1, fakeFirebaseConfig2, filePathTemplate, firebaseConfig, forceMaxLength100String, generateChatPalette, getOpenRollCall, getVariableFromVarTomlObject, template$9 as imagePieceTemplate, indexObjectsToArray, isBoardOwner, isCharacterOwner, isIdRecord, isOpenRollCall, isOwner, isStrIndex10, isStrIndex100, isStrIndex20, isStrIndex5, isValidVarToml, joinPath, maxLength100String, maybe, template$4 as memoTemplate, diff$3 as nullableTextDiff, template$f as numParamTemplate, object, ot, template$3 as paramNameTemplate, paramRecord, parse$1 as parseDicePiece, parseState, parse as parseStringPiece, parseToml, parseUpOperation, template$b as participantTemplate, path, template$l as pieceTemplate, plain, template$e as portraitPieceTemplate, record, replace$1 as replace, restore, restrict, dbTemplate as roomDbTemplate, template as roomTemplate, sanitizeFilename, sanitizeFoldername, serverTransform, shape, template$7 as shapePieceTemplate, template$8 as shapeTemplate, simpleId, state, strIndex100Array, strIndex10Array, strIndex20Array, strIndex5Array, template$d as strParamTemplate, type as stringPieceLog, template$6 as stringPieceTemplate, stringifyState, stringifyUpOperation, testCommand, diff$4 as textDiff, toClientState, toDownOperation, toUpOperation$1 as toNullableTextUpOperation, toOtError, toUpOperation$2 as toTextUpOperation, toUpOperation, trySanitizePath, upOperation, update$2 as update, updateType };
+export { $free, $index, $r, $system, $v, Default, FirebaseStorage, Markdown, Master, Number, OtError, Plain, Player, PublicChannelKey, Spectator, String, Uploader, admin, analyze, anonymous, apply$1 as apply, applyBack, apply$4 as applyNullableText, apply$5 as applyText, arrayToIndexObjects, atomic, authToken, template$a as bgmTemplate, template$m as boardPositionTemplate, template$5 as boardTemplate, template$i as boolParamTemplate, template$h as characterPieceTemplate, template$c as characterTemplate, client, clientTransform$1 as clientTransform, template$g as commandTemplate, composeDownOperation, createLogs, createObjectValueTemplate, createParamRecordValueTemplate, createRecordValueTemplate, createReplaceValueTemplate, createTextValueTemplate, createType, decodeDbState, decode$1 as decodeDicePiece, decodeDownOperation, decode as decodeStringPiece, deleteType, type$1 as dicePieceLog, dicePieceStrIndexes, template$j as dicePieceTemplate, template$k as dieValueTemplate, diff, downOperation, exactDbState, exactDownOperation, execCharacterCommand, expr1, fakeFirebaseConfig1, fakeFirebaseConfig2, filePathTemplate, firebaseConfig, forceMaxLength100String, generateChatPalette, getOpenRollCall, getVariableFromVarTomlObject, template$9 as imagePieceTemplate, indexObjectsToArray, isCharacterOwner, isIdRecord, isOpenRollCall, isStrIndex10, isStrIndex100, isStrIndex20, isStrIndex5, isValidVarToml, joinPath, maxLength100String, maybe, template$4 as memoTemplate, diff$3 as nullableTextDiff, template$f as numParamTemplate, object, ot, template$3 as paramNameTemplate, paramRecord, parse$1 as parseDicePiece, parseState, parse as parseStringPiece, parseToml, parseUpOperation, template$b as participantTemplate, path, template$l as pieceTemplate, plain, template$e as portraitPieceTemplate, record, replace$1 as replace, restore, restrict, dbTemplate as roomDbTemplate, template as roomTemplate, sanitizeFilename, sanitizeFoldername, serverTransform, shape, template$7 as shapePieceTemplate, template$8 as shapeTemplate, simpleId, state, strIndex100Array, strIndex10Array, strIndex20Array, strIndex5Array, template$d as strParamTemplate, type as stringPieceLog, template$6 as stringPieceTemplate, stringifyState, stringifyUpOperation, testCommand, diff$4 as textDiff, toClientState, toDownOperation, toUpOperation$1 as toNullableTextUpOperation, toOtError, toUpOperation$2 as toTextUpOperation, toUpOperation, trySanitizePath, upOperation, update$2 as update, updateType };
 //# sourceMappingURL=index.js.map

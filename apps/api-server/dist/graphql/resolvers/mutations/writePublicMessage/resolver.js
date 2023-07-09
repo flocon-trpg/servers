@@ -110,7 +110,7 @@ exports.WritePublicMessageResolver = class WritePublicMessageResolver {
                 requestedBy: { type: FilePathModule.client, userUid: authorizedUser.userUid },
                 characterId: args.characterId,
                 currentRoomState: roomState,
-            }))
+            }) === true)
                 chara = roomState.characters?.[args.characterId];
         }
         const entityResult = await utils.analyzeTextAndSetToEntity({

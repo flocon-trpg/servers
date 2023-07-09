@@ -51,7 +51,7 @@ export { isIdRecord } from './internal/ot/record';
 export { replace, update, RecordDownOperationElement, RecordTwoWayOperationElement, RecordUpOperationElement, } from './internal/ot/recordOperationElement';
 export { RecordDownOperation, RecordUpOperation, RecordTwoWayOperation, } from './internal/ot/recordOperation';
 export { DownOperation as TextDownOperation, UpOperation as TextUpOperation, TwoWayOperation as TextTwoWayOperation, apply as applyText, diff as textDiff, toUpOperation as toTextUpOperation, } from './internal/ot/textOperation';
-export { client, admin, restrict, RequestedBy, isCharacterOwner, isBoardOwner, isOwner, } from './internal/ot/requestedBy';
+export { client, admin, restrict, RequestedBy, isCharacterOwner } from './internal/ot/requestedBy';
 export { path, shape } from './internal/ot/shape';
 export { updateType, createType, deleteType } from './internal/ot/flocon/piece/log';
 export { createLogs } from './internal/ot/flocon/room/log';

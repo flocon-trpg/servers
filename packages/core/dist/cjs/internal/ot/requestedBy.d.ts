@@ -22,6 +22,7 @@ export declare const isAuthorized: ({ requestedBy, participantId, }: {
     requestedBy: RequestedBy;
     participantId: string | typeof anyValue | typeof none;
 }) => boolean;
+/** @deprecated Use `isAuthorized` instead. */
 export declare const isOwner: ({ requestedBy, ownerParticipantId, }: {
     requestedBy: RequestedBy;
     ownerParticipantId: string | typeof anyValue | typeof none;
@@ -36,11 +37,13 @@ export declare const isBoardVisible: ({ boardId, requestedBy, currentRoomState, 
     requestedBy: RequestedBy;
     currentRoomState: State<typeof Room.template>;
 }) => boolean;
+export declare const characterNotFound = "characterNotFound";
 export declare const isCharacterOwner: ({ requestedBy, characterId, currentRoomState, }: {
     requestedBy: RequestedBy;
     characterId: string | typeof anyValue | typeof none;
     currentRoomState: State<typeof Room.template>;
-}) => boolean;
+}) => boolean | typeof characterNotFound;
+export declare const canChangeCharacterValue: (args: Parameters<typeof isCharacterOwner>[0]) => boolean;
 type CurrentOwnerParticipant = string | undefined | {
     ownerParticipantId: string | undefined;
 };
