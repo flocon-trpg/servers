@@ -3334,7 +3334,7 @@ __metadata:
     pino: ^8.6.1
     pino-http: ^8.2.1
     prettier: 2.8.8
-    rate-limiter-flexible: ^2.3.0
+    rate-limiter-flexible: ^3.0.0
     reflect-metadata: ^0.1.13
     rimraf: 5.0.1
     rollup: 3.26.0
@@ -19768,10 +19768,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rate-limiter-flexible@npm:^2.3.0":
-  version: 2.4.1
-  resolution: "rate-limiter-flexible@npm:2.4.1"
-  checksum: 5eea3ffbb6a11f634edd8b9575815c2bf239a8becdfdc82c4183cad92025e853913972a2b2f2d45c16e81aea1a3451fbad8da76dee1ba0e4549c22a0ba58c50f
+"rate-limiter-flexible@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "rate-limiter-flexible@npm:3.0.0"
+  checksum: 2ad889db22f26dea5a1f7fcbe3117ebfd64d5f642c5a68732c4bf633f45c279b072eda3da258348a6ce9512f41bbcad4a3059e3f4ea10aa09417fe108ce7388e
   languageName: node
   linkType: hard
 
