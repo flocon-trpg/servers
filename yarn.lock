@@ -3776,7 +3776,7 @@ __metadata:
     "@urql/devtools": ^2.0.3
     antd: ^5.0.0
     babel-loader: 8.3.0
-    chromatic: 6.19.9
+    chromatic: 7.6.0
     classnames: ^2.3.1
     clipboard-copy: ^4.0.1
     color: 4.2.3
@@ -10233,14 +10233,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chromatic@npm:6.19.9":
-  version: 6.19.9
-  resolution: "chromatic@npm:6.19.9"
+"chromatic@npm:7.6.0":
+  version: 7.6.0
+  resolution: "chromatic@npm:7.6.0"
   bin:
     chroma: dist/bin.js
     chromatic: dist/bin.js
     chromatic-cli: dist/bin.js
-  checksum: 50552c3043d96e7badb0d16ddd1839c0601d0f5e0c2c573acda5d6b0d0fad96067f0c659ad0a2b278d8b28b46670549b4bcedfd2d350a9077975aff203c29193
+  checksum: 5f473385cc2c152b43487646803a213f0dc3fcf9f7755a051040e31b5f8e67486b8a80fff3bbe0752bdb0e41851ff965b587f122938b35acf5c5eba1d3d1b9e4
   languageName: node
   linkType: hard
 
