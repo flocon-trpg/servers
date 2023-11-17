@@ -146,7 +146,7 @@ jobs:
                 pnp: [true, false]
 
         runs-on: ubuntu-22.04
-        container: node:18-buster
+        container: node:20-buster
 
         services:
             mysql:
