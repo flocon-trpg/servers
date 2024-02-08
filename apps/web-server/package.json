@@ -133,7 +133,7 @@
         "@storybook/nextjs": "7.0.24",
         "@storybook/react": "7.0.24",
         "@storybook/testing-library": "0.2.0",
-        "@testing-library/jest-dom": "5.16.5",
+        "@testing-library/jest-dom": "6.4.2",
         "@testing-library/react": "14.0.0",
         "@types/color": "3.0.3",
         "@types/color-name": "1.1.1",
