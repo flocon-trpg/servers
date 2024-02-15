@@ -3743,7 +3743,7 @@ __metadata:
     "@kizahasi/option": ^1.1.0
     "@kizahasi/ot-string": 0.6.0
     "@kizahasi/result": ^1.1.0
-    "@mdx-js/react": 1.6.22
+    "@mdx-js/react": 3.0.1
     "@monaco-editor/react": ^4.2.2
     "@next/bundle-analyzer": ^12.0.0
     "@next/eslint-plugin-next": 12.3.4
@@ -5034,12 +5034,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mdx-js/react@npm:1.6.22":
-  version: 1.6.22
-  resolution: "@mdx-js/react@npm:1.6.22"
+"@mdx-js/react@npm:3.0.1":
+  version: 3.0.1
+  resolution: "@mdx-js/react@npm:3.0.1"
+  dependencies:
+    "@types/mdx": ^2.0.0
   peerDependencies:
-    react: ^16.13.1 || ^17.0.0
-  checksum: bc84bd514bc127f898819a0c6f1a6915d9541011bd8aefa1fcc1c9bea8939f31051409e546bdec92babfa5b56092a16d05ef6d318304ac029299df5181dc94c8
+    "@types/react": ">=16"
+    react: ">=16"
+  checksum: 1063a597264f6a8840aa13274a99beef8983a88dd45b0c5b8e48e6216bc23d33e247da8e2d95d6e1874483f8b4e0903b166ce5046874aa7ffa2b1333057dcddf
   languageName: node
   linkType: hard
 
