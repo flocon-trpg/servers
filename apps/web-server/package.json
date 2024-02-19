@@ -140,7 +140,7 @@
         "@types/jest": "29.5.2",
         "@types/sinonjs__fake-timers": "8.1.2",
         "babel-loader": "8.3.0",
-        "chromatic": "6.19.9",
+        "chromatic": "10.9.6",
         "color": "4.2.3",
         "color-name": "1.1.4",
         "eslint-import-resolver-typescript": "3.5.5",
