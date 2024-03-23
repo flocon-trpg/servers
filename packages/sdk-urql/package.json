@@ -42,7 +42,7 @@
         "prettier": "2.8.8",
         "rimraf": "5.0.1",
         "rollup": "3.26.0",
-        "typescript": "5.0.4"
+        "typescript": "5.4.3"
     },
     "engines": {
         "node": ">=16 <19"
