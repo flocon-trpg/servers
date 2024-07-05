@@ -4,13 +4,19 @@ export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = {
+    [_ in K]?: never;
+};
+export type Incremental<T> =
+    | T
+    | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-    ID: string;
-    String: string;
-    Boolean: boolean;
-    Int: number;
-    Float: number;
+    ID: { input: string; output: string };
+    String: { input: string; output: string };
+    Boolean: { input: boolean; output: boolean };
+    Int: { input: number; output: number };
+    Float: { input: number; output: number };
 };
 
 export enum AnswerRollCallFailureType {
@@ -27,9 +33,9 @@ export type AnswerRollCallResult = {
 
 export type AvailableGameSystem = {
     __typename?: 'AvailableGameSystem';
-    id: Scalars['String'];
-    name: Scalars['String'];
-    sortKey: Scalars['String'];
+    id: Scalars['String']['output'];
+    name: Scalars['String']['output'];
+    sortKey: Scalars['String']['output'];
 };
 
 export enum ChangeParticipantNameFailureType {
@@ -45,10 +51,10 @@ export type ChangeParticipantNameResult = {
 export type CharacterValueForMessage = {
     __typename?: 'CharacterValueForMessage';
     image?: Maybe<FilePath>;
-    isPrivate: Scalars['Boolean'];
-    name: Scalars['String'];
+    isPrivate: Scalars['Boolean']['output'];
+    name: Scalars['String']['output'];
     portraitImage?: Maybe<FilePath>;
-    stateId: Scalars['String'];
+    stateId: Scalars['String']['output'];
 };
 
 export enum CloseRollCallFailureType {
@@ -67,8 +73,8 @@ export type CloseRollCallResult = {
 export type CommandResult = {
     __typename?: 'CommandResult';
     /** 成功判定のないコマンドの場合はnullish。成功判定のあるコマンドの場合はその結果。 */
-    isSuccess?: Maybe<Scalars['Boolean']>;
-    text: Scalars['String'];
+    isSuccess?: Maybe<Scalars['Boolean']['output']>;
+    text: Scalars['String']['output'];
 };
 
 export type CreateRoomFailureResult = {
@@ -81,17 +87,17 @@ export enum CreateRoomFailureType {
 }
 
 export type CreateRoomInput = {
-    participantName: Scalars['String'];
-    playerPassword?: InputMaybe<Scalars['String']>;
-    roomName: Scalars['String'];
-    spectatorPassword?: InputMaybe<Scalars['String']>;
+    participantName: Scalars['String']['input'];
+    playerPassword?: InputMaybe<Scalars['String']['input']>;
+    roomName: Scalars['String']['input'];
+    spectatorPassword?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type CreateRoomResult = CreateRoomFailureResult | CreateRoomSuccessResult;
 
 export type CreateRoomSuccessResult = {
     __typename?: 'CreateRoomSuccessResult';
-    id: Scalars['String'];
+    id: Scalars['String']['output'];
     room: RoomGetState;
 };
 
@@ -124,9 +130,9 @@ export enum DeleteRoomFailureType {
 
 export type DeleteRoomOperation = {
     __typename?: 'DeleteRoomOperation';
-    deletedBy: Scalars['String'];
+    deletedBy: Scalars['String']['output'];
     /** since v0.7.2 */
-    deletedByAdmin: Scalars['Boolean'];
+    deletedByAdmin: Scalars['Boolean']['output'];
 };
 
 export type DeleteRoomResult = {
@@ -135,9 +141,9 @@ export type DeleteRoomResult = {
 };
 
 export type EditFileTagActionInput = {
-    add: Array<Scalars['String']>;
-    filename: Scalars['String'];
-    remove: Array<Scalars['String']>;
+    add: Array<Scalars['String']['input']>;
+    filename: Scalars['String']['input'];
+    remove: Array<Scalars['String']['input']>;
 };
 
 export type EditFileTagsInput = {
@@ -172,16 +178,16 @@ export enum EntryToServerResultType {
 
 export type FileItem = {
     __typename?: 'FileItem';
-    createdAt?: Maybe<Scalars['Float']>;
+    createdAt?: Maybe<Scalars['Float']['output']>;
     /** ファイルをアップロードしたユーザー。Firebase AuthenticationのUserUidで表現される。 */
-    createdBy: Scalars['String'];
+    createdBy: Scalars['String']['output'];
     /** サーバーで管理されているファイル名。axiosなどでファイルを取得する際はこれを用いる。ソートするとアップロードした時系列順になる。 */
-    filename: Scalars['ID'];
+    filename: Scalars['ID']['output'];
     listType: FileListType;
     /** ユーザーが名付けたファイル名。 */
-    screenname: Scalars['String'];
+    screenname: Scalars['String']['output'];
     /** サムネイル画像のファイル名。axiosなどを用いてファイルを取得する。 */
-    thumbFilename?: Maybe<Scalars['String']>;
+    thumbFilename?: Maybe<Scalars['String']['output']>;
 };
 
 export enum FileListType {
@@ -191,12 +197,12 @@ export enum FileListType {
 
 export type FilePath = {
     __typename?: 'FilePath';
-    path: Scalars['String'];
+    path: Scalars['String']['output'];
     sourceType: FileSourceType;
 };
 
 export type FilePathInput = {
-    path: Scalars['String'];
+    path: Scalars['String']['input'];
     sourceType: FileSourceType;
 };
 
@@ -208,8 +214,8 @@ export enum FileSourceType {
 
 export type FileTag = {
     __typename?: 'FileTag';
-    id: Scalars['String'];
-    name: Scalars['String'];
+    id: Scalars['String']['output'];
+    name: Scalars['String']['output'];
 };
 
 export type GetAvailableGameSystemsResult = {
@@ -219,7 +225,7 @@ export type GetAvailableGameSystemsResult = {
 
 export type GetFilesInput = {
     /** FileTagのidを指定することで、指定したタグが付いているファイルのみを抽出して表示する。例えばidがx,yの3つのタグが付いているファイルは、[]や[x]や[x,y]と指定した場合にマッチするが、[x,y,z]と指定された場合は除外される。 */
-    fileTagIds: Array<Scalars['String']>;
+    fileTagIds: Array<Scalars['String']['input']>;
 };
 
 export type GetFilesResult = {
@@ -269,8 +275,8 @@ export type GetRoomConnectionsResult =
 
 export type GetRoomConnectionsSuccessResult = {
     __typename?: 'GetRoomConnectionsSuccessResult';
-    connectedUserUids: Array<Scalars['String']>;
-    fetchedAt: Scalars['Float'];
+    connectedUserUids: Array<Scalars['String']['output']>;
+    fetchedAt: Scalars['Float']['output'];
 };
 
 export type GetRoomFailureResult = {
@@ -375,15 +381,15 @@ export type Mutation = {
     createFileTag?: Maybe<FileTag>;
     createRoom: CreateRoomResult;
     /** @deprecated Use screenname to group files by folders instead. */
-    deleteFileTag: Scalars['Boolean'];
+    deleteFileTag: Scalars['Boolean']['output'];
     /** since v0.7.8 */
-    deleteFiles: Array<Scalars['String']>;
+    deleteFiles: Array<Scalars['String']['output']>;
     deleteMessage: DeleteMessageResult;
     deleteRoom: DeleteRoomResult;
     /** since v0.7.2 */
     deleteRoomAsAdmin: DeleteRoomAsAdminResult;
     /** @deprecated Use screenname to group files by folders instead. */
-    editFileTags: Scalars['Boolean'];
+    editFileTags: Scalars['Boolean']['output'];
     editMessage: EditMessageResult;
     entryToServer: EntryToServerResult;
     joinRoomAsPlayer: JoinRoomResult;
@@ -397,34 +403,34 @@ export type Mutation = {
     /** GraphQL の動作テストに用いられます。3rd-party の Web サーバーを作成する際は利用しなくて構いません。 */
     ping: Pong;
     promoteToPlayer: PromoteResult;
-    renameFiles: Array<Scalars['String']>;
+    renameFiles: Array<Scalars['String']['output']>;
     resetMessages: ResetRoomMessagesResult;
     updateBookmark: UpdateBookmarkResult;
     /** この Mutation を直接実行することは非推奨です。代わりに @flocon-trpg/sdk を用いてください。 */
-    updateWritingMessageStatus: Scalars['Boolean'];
+    updateWritingMessageStatus: Scalars['Boolean']['output'];
     writePrivateMessage: WriteRoomPrivateMessageResult;
     writePublicMessage: WriteRoomPublicMessageResult;
     writeRoomSoundEffect: WriteRoomSoundEffectResult;
 };
 
 export type MutationAnswerRollCallArgs = {
-    answer: Scalars['Boolean'];
-    rollCallId: Scalars['String'];
-    roomId: Scalars['String'];
+    answer: Scalars['Boolean']['input'];
+    rollCallId: Scalars['String']['input'];
+    roomId: Scalars['String']['input'];
 };
 
 export type MutationChangeParticipantNameArgs = {
-    newName: Scalars['String'];
-    roomId: Scalars['String'];
+    newName: Scalars['String']['input'];
+    roomId: Scalars['String']['input'];
 };
 
 export type MutationCloseRollCallArgs = {
-    rollCallId: Scalars['String'];
-    roomId: Scalars['String'];
+    rollCallId: Scalars['String']['input'];
+    roomId: Scalars['String']['input'];
 };
 
 export type MutationCreateFileTagArgs = {
-    tagName: Scalars['String'];
+    tagName: Scalars['String']['input'];
 };
 
 export type MutationCreateRoomArgs = {
@@ -432,24 +438,24 @@ export type MutationCreateRoomArgs = {
 };
 
 export type MutationDeleteFileTagArgs = {
-    tagId: Scalars['String'];
+    tagId: Scalars['String']['input'];
 };
 
 export type MutationDeleteFilesArgs = {
-    filenames: Array<Scalars['String']>;
+    filenames: Array<Scalars['String']['input']>;
 };
 
 export type MutationDeleteMessageArgs = {
-    messageId: Scalars['String'];
-    roomId: Scalars['String'];
+    messageId: Scalars['String']['input'];
+    roomId: Scalars['String']['input'];
 };
 
 export type MutationDeleteRoomArgs = {
-    id: Scalars['String'];
+    id: Scalars['String']['input'];
 };
 
 export type MutationDeleteRoomAsAdminArgs = {
-    id: Scalars['String'];
+    id: Scalars['String']['input'];
 };
 
 export type MutationEditFileTagsArgs = {
@@ -457,41 +463,41 @@ export type MutationEditFileTagsArgs = {
 };
 
 export type MutationEditMessageArgs = {
-    messageId: Scalars['String'];
-    roomId: Scalars['String'];
-    text: Scalars['String'];
+    messageId: Scalars['String']['input'];
+    roomId: Scalars['String']['input'];
+    text: Scalars['String']['input'];
 };
 
 export type MutationEntryToServerArgs = {
-    password?: InputMaybe<Scalars['String']>;
+    password?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type MutationJoinRoomAsPlayerArgs = {
-    id: Scalars['String'];
-    name: Scalars['String'];
-    password?: InputMaybe<Scalars['String']>;
+    id: Scalars['String']['input'];
+    name: Scalars['String']['input'];
+    password?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type MutationJoinRoomAsSpectatorArgs = {
-    id: Scalars['String'];
-    name: Scalars['String'];
-    password?: InputMaybe<Scalars['String']>;
+    id: Scalars['String']['input'];
+    name: Scalars['String']['input'];
+    password?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type MutationLeaveRoomArgs = {
-    id: Scalars['String'];
+    id: Scalars['String']['input'];
 };
 
 export type MutationMakeMessageNotSecretArgs = {
-    messageId: Scalars['String'];
-    roomId: Scalars['String'];
+    messageId: Scalars['String']['input'];
+    roomId: Scalars['String']['input'];
 };
 
 export type MutationOperateArgs = {
-    id: Scalars['String'];
+    id: Scalars['String']['input'];
     operation: RoomOperationInput;
-    prevRevision: Scalars['Int'];
-    requestId: Scalars['String'];
+    prevRevision: Scalars['Int']['input'];
+    requestId: Scalars['String']['input'];
 };
 
 export type MutationPerformRollCallArgs = {
@@ -499,12 +505,12 @@ export type MutationPerformRollCallArgs = {
 };
 
 export type MutationPingArgs = {
-    value: Scalars['Float'];
+    value: Scalars['Float']['input'];
 };
 
 export type MutationPromoteToPlayerArgs = {
-    password?: InputMaybe<Scalars['String']>;
-    roomId: Scalars['String'];
+    password?: InputMaybe<Scalars['String']['input']>;
+    roomId: Scalars['String']['input'];
 };
 
 export type MutationRenameFilesArgs = {
@@ -512,43 +518,43 @@ export type MutationRenameFilesArgs = {
 };
 
 export type MutationResetMessagesArgs = {
-    roomId: Scalars['String'];
+    roomId: Scalars['String']['input'];
 };
 
 export type MutationUpdateBookmarkArgs = {
-    newValue: Scalars['Boolean'];
-    roomId: Scalars['String'];
+    newValue: Scalars['Boolean']['input'];
+    roomId: Scalars['String']['input'];
 };
 
 export type MutationUpdateWritingMessageStatusArgs = {
     newStatus: WritingMessageStatusInputType;
-    roomId: Scalars['String'];
+    roomId: Scalars['String']['input'];
 };
 
 export type MutationWritePrivateMessageArgs = {
-    characterId?: InputMaybe<Scalars['String']>;
-    customName?: InputMaybe<Scalars['String']>;
-    gameType?: InputMaybe<Scalars['String']>;
-    roomId: Scalars['String'];
-    text: Scalars['String'];
-    textColor?: InputMaybe<Scalars['String']>;
-    visibleTo: Array<Scalars['String']>;
+    characterId?: InputMaybe<Scalars['String']['input']>;
+    customName?: InputMaybe<Scalars['String']['input']>;
+    gameType?: InputMaybe<Scalars['String']['input']>;
+    roomId: Scalars['String']['input'];
+    text: Scalars['String']['input'];
+    textColor?: InputMaybe<Scalars['String']['input']>;
+    visibleTo: Array<Scalars['String']['input']>;
 };
 
 export type MutationWritePublicMessageArgs = {
-    channelKey: Scalars['String'];
-    characterId?: InputMaybe<Scalars['String']>;
-    customName?: InputMaybe<Scalars['String']>;
-    gameType?: InputMaybe<Scalars['String']>;
-    roomId: Scalars['String'];
-    text: Scalars['String'];
-    textColor?: InputMaybe<Scalars['String']>;
+    channelKey: Scalars['String']['input'];
+    characterId?: InputMaybe<Scalars['String']['input']>;
+    customName?: InputMaybe<Scalars['String']['input']>;
+    gameType?: InputMaybe<Scalars['String']['input']>;
+    roomId: Scalars['String']['input'];
+    text: Scalars['String']['input'];
+    textColor?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type MutationWriteRoomSoundEffectArgs = {
     file: FilePathInput;
-    roomId: Scalars['String'];
-    volume: Scalars['Float'];
+    roomId: Scalars['String']['input'];
+    volume: Scalars['Float']['input'];
 };
 
 export type OperateRoomFailureResult = {
@@ -562,7 +568,7 @@ export enum OperateRoomFailureType {
 
 export type OperateRoomIdResult = {
     __typename?: 'OperateRoomIdResult';
-    requestId: Scalars['String'];
+    requestId: Scalars['String']['output'];
 };
 
 export type OperateRoomNonJoinedResult = {
@@ -583,8 +589,8 @@ export type OperateRoomSuccessResult = {
 
 export type OperatedBy = {
     __typename?: 'OperatedBy';
-    clientId: Scalars['String'];
-    userUid: Scalars['String'];
+    clientId: Scalars['String']['output'];
+    userUid: Scalars['String']['output'];
 };
 
 export enum ParticipantRole {
@@ -601,11 +607,11 @@ export enum PerformRollCallFailureType {
 }
 
 export type PerformRollCallInput = {
-    roomId: Scalars['String'];
+    roomId: Scalars['String']['input'];
     /** SE を設定する場合、これと併せて soundEffectVolume もセットする必要があります。 */
     soundEffectFile?: InputMaybe<FilePathInput>;
     /** SE を設定する場合、これと併せて soundEffectFile もセットする必要があります。 */
-    soundEffectVolume?: InputMaybe<Scalars['Float']>;
+    soundEffectVolume?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type PerformRollCallResult = {
@@ -615,11 +621,11 @@ export type PerformRollCallResult = {
 
 export type PieceLog = {
     __typename?: 'PieceLog';
-    createdAt: Scalars['Float'];
+    createdAt: Scalars['Float']['output'];
     logType: PieceLogType;
-    messageId: Scalars['String'];
-    stateId: Scalars['String'];
-    valueJson: Scalars['String'];
+    messageId: Scalars['String']['output'];
+    stateId: Scalars['String']['output'];
+    valueJson: Scalars['String']['output'];
 };
 
 export enum PieceLogType {
@@ -629,14 +635,14 @@ export enum PieceLogType {
 
 export type Pong = {
     __typename?: 'Pong';
-    createdBy?: Maybe<Scalars['String']>;
-    value: Scalars['Float'];
+    createdBy?: Maybe<Scalars['String']['output']>;
+    value: Scalars['Float']['output'];
 };
 
 export type Prerelease = {
     __typename?: 'Prerelease';
     type: PrereleaseType;
-    version: Scalars['Float'];
+    version: Scalars['Float']['output'];
 };
 
 export enum PrereleaseType {
@@ -660,7 +666,7 @@ export type PromoteResult = {
 export type Query = {
     __typename?: 'Query';
     getAvailableGameSystems: GetAvailableGameSystemsResult;
-    getDiceHelpMessage?: Maybe<Scalars['String']>;
+    getDiceHelpMessage?: Maybe<Scalars['String']['output']>;
     getFiles: GetFilesResult;
     getLog: GetRoomLogResult;
     getMessages: GetRoomMessagesResult;
@@ -673,11 +679,11 @@ export type Query = {
     getRoomConnections: GetRoomConnectionsResult;
     getRoomsList: GetRoomsListResult;
     getServerInfo: ServerInfo;
-    isEntry: Scalars['Boolean'];
+    isEntry: Scalars['Boolean']['output'];
 };
 
 export type QueryGetDiceHelpMessageArgs = {
-    id: Scalars['String'];
+    id: Scalars['String']['input'];
 };
 
 export type QueryGetFilesArgs = {
@@ -685,28 +691,28 @@ export type QueryGetFilesArgs = {
 };
 
 export type QueryGetLogArgs = {
-    roomId: Scalars['String'];
+    roomId: Scalars['String']['input'];
 };
 
 export type QueryGetMessagesArgs = {
-    roomId: Scalars['String'];
+    roomId: Scalars['String']['input'];
 };
 
 export type QueryGetRoomArgs = {
-    id: Scalars['String'];
+    id: Scalars['String']['input'];
 };
 
 export type QueryGetRoomAsListItemArgs = {
-    roomId: Scalars['String'];
+    roomId: Scalars['String']['input'];
 };
 
 export type QueryGetRoomConnectionsArgs = {
-    roomId: Scalars['String'];
+    roomId: Scalars['String']['input'];
 };
 
 export type RenameFileInput = {
-    filename: Scalars['String'];
-    newScreenname: Scalars['String'];
+    filename: Scalars['String']['input'];
+    newScreenname: Scalars['String']['input'];
 };
 
 export enum ResetRoomMessagesFailureType {
@@ -722,41 +728,41 @@ export type ResetRoomMessagesResult = {
 
 export type Roles = {
     __typename?: 'Roles';
-    admin: Scalars['Boolean'];
+    admin: Scalars['Boolean']['output'];
 };
 
 export type RoomAsListItem = {
     __typename?: 'RoomAsListItem';
     /** since v0.7.2 */
-    createdAt?: Maybe<Scalars['Float']>;
+    createdAt?: Maybe<Scalars['Float']['output']>;
     /** この部屋の作成者。Firebase AuthenticationのUserUidで表現される。 */
-    createdBy: Scalars['String'];
-    id: Scalars['ID'];
+    createdBy: Scalars['String']['output'];
+    id: Scalars['ID']['output'];
     /** since v0.7.2 */
-    isBookmarked: Scalars['Boolean'];
-    name: Scalars['String'];
-    requiresPlayerPassword: Scalars['Boolean'];
-    requiresSpectatorPassword: Scalars['Boolean'];
+    isBookmarked: Scalars['Boolean']['output'];
+    name: Scalars['String']['output'];
+    requiresPlayerPassword: Scalars['Boolean']['output'];
+    requiresSpectatorPassword: Scalars['Boolean']['output'];
     /** since v0.7.2 */
     role?: Maybe<ParticipantRole>;
     /**
      * データベースのRoomエンティティが最後に更新された日時。Roomエンティティのみが対象であるため、例えばメッセージの投稿などは反映されないことに注意。
      * since v0.7.2
      */
-    updatedAt?: Maybe<Scalars['Float']>;
+    updatedAt?: Maybe<Scalars['Float']['output']>;
 };
 
 export type RoomConnectionEvent = {
     __typename?: 'RoomConnectionEvent';
-    isConnected: Scalars['Boolean'];
-    updatedAt: Scalars['Float'];
-    userUid: Scalars['String'];
+    isConnected: Scalars['Boolean']['output'];
+    updatedAt: Scalars['Float']['output'];
+    userUid: Scalars['String']['output'];
 };
 
 export type RoomEvent = {
     __typename?: 'RoomEvent';
     deleteRoomOperation?: Maybe<DeleteRoomOperation>;
-    isRoomMessagesResetEvent: Scalars['Boolean'];
+    isRoomMessagesResetEvent: Scalars['Boolean']['output'];
     roomConnectionEvent?: Maybe<RoomConnectionEvent>;
     roomMessageEvent?: Maybe<RoomMessageEvent>;
     roomOperation?: Maybe<RoomOperation>;
@@ -766,22 +772,22 @@ export type RoomEvent = {
 export type RoomGetState = {
     __typename?: 'RoomGetState';
     /** since v0.7.2 */
-    createdAt?: Maybe<Scalars['Float']>;
+    createdAt?: Maybe<Scalars['Float']['output']>;
     /** この部屋の作成者。Firebase AuthenticationのUserUidで表現される。 */
-    createdBy: Scalars['String'];
+    createdBy: Scalars['String']['output'];
     /** since v0.7.2 */
-    isBookmarked: Scalars['Boolean'];
+    isBookmarked: Scalars['Boolean']['output'];
     /** Current revision of Room. Whenever Room is updated, this value is incremented by 1. This value is required when you apply RoomOperation. / Roomの現在のリビジョン。Roomが更新されるたび、この値は1増加する。RoomOperationを適用する際に必要となる。 */
-    revision: Scalars['Float'];
+    revision: Scalars['Float']['output'];
     /** since v0.7.2 */
     role?: Maybe<ParticipantRole>;
     /** room.state をJSON化したもの */
-    stateJson: Scalars['String'];
+    stateJson: Scalars['String']['output'];
     /**
      * データベースのRoomエンティティが最後に更新された日時。Roomエンティティのみが対象であるため、例えばメッセージの投稿などは反映されないことに注意。
      * since v0.7.2
      */
-    updatedAt?: Maybe<Scalars['Float']>;
+    updatedAt?: Maybe<Scalars['Float']['output']>;
 };
 
 export type RoomMessageEvent =
@@ -797,7 +803,7 @@ export type RoomMessageEvent =
 
 export type RoomMessageSyntaxError = {
     __typename?: 'RoomMessageSyntaxError';
-    errorMessage: Scalars['String'];
+    errorMessage: Scalars['String']['output'];
 };
 
 export type RoomMessages = {
@@ -811,121 +817,121 @@ export type RoomMessages = {
 
 export type RoomMessagesReset = {
     __typename?: 'RoomMessagesReset';
-    publicMessagesDeleted: Scalars['Boolean'];
+    publicMessagesDeleted: Scalars['Boolean']['output'];
 };
 
 export type RoomOperation = {
     __typename?: 'RoomOperation';
     /** operateRoomを呼んだ人物。promoteなどの結果の場合はnullishになる。 */
     operatedBy?: Maybe<OperatedBy>;
-    revisionTo: Scalars['Float'];
+    revisionTo: Scalars['Float']['output'];
     /** room.upOperationをJSONにしたもの。idならばnullish。 */
-    valueJson: Scalars['String'];
+    valueJson: Scalars['String']['output'];
 };
 
 export type RoomOperationInput = {
     /** クライアントを識別するID。適当なIDをクライアント側で生成して渡す。Operationごとに変える必要はない */
-    clientId: Scalars['String'];
+    clientId: Scalars['String']['input'];
     /** room.upOperationをJSONにしたもの */
-    valueJson: Scalars['String'];
+    valueJson: Scalars['String']['input'];
 };
 
 export type RoomPrivateMessage = {
     __typename?: 'RoomPrivateMessage';
-    altTextToSecret?: Maybe<Scalars['String']>;
+    altTextToSecret?: Maybe<Scalars['String']['output']>;
     /** 発言がCharacterと紐付いているときはnon-nullish。PLとしての発言、もしくはcreatedByがnullishのときはnullish。後からCharacterの値が更新されても、この値が更新されることはない。 */
     character?: Maybe<CharacterValueForMessage>;
     commandResult?: Maybe<CommandResult>;
-    createdAt: Scalars['Float'];
-    createdBy?: Maybe<Scalars['String']>;
-    customName?: Maybe<Scalars['String']>;
-    initText?: Maybe<Scalars['String']>;
-    initTextSource?: Maybe<Scalars['String']>;
-    isSecret: Scalars['Boolean'];
-    messageId: Scalars['String'];
-    textColor?: Maybe<Scalars['String']>;
-    updatedAt?: Maybe<Scalars['Float']>;
+    createdAt: Scalars['Float']['output'];
+    createdBy?: Maybe<Scalars['String']['output']>;
+    customName?: Maybe<Scalars['String']['output']>;
+    initText?: Maybe<Scalars['String']['output']>;
+    initTextSource?: Maybe<Scalars['String']['output']>;
+    isSecret: Scalars['Boolean']['output'];
+    messageId: Scalars['String']['output'];
+    textColor?: Maybe<Scalars['String']['output']>;
+    updatedAt?: Maybe<Scalars['Float']['output']>;
     updatedText?: Maybe<UpdatedText>;
-    visibleTo: Array<Scalars['String']>;
+    visibleTo: Array<Scalars['String']['output']>;
 };
 
 export type RoomPrivateMessageUpdate = {
     __typename?: 'RoomPrivateMessageUpdate';
-    altTextToSecret?: Maybe<Scalars['String']>;
+    altTextToSecret?: Maybe<Scalars['String']['output']>;
     commandResult?: Maybe<CommandResult>;
-    initText?: Maybe<Scalars['String']>;
-    initTextSource?: Maybe<Scalars['String']>;
-    isSecret: Scalars['Boolean'];
-    messageId: Scalars['String'];
-    updatedAt?: Maybe<Scalars['Float']>;
+    initText?: Maybe<Scalars['String']['output']>;
+    initTextSource?: Maybe<Scalars['String']['output']>;
+    isSecret: Scalars['Boolean']['output'];
+    messageId: Scalars['String']['output'];
+    updatedAt?: Maybe<Scalars['Float']['output']>;
     updatedText?: Maybe<UpdatedText>;
 };
 
 export type RoomPublicChannel = {
     __typename?: 'RoomPublicChannel';
     /** 現在の仕様では、$system, $free, '1', … , '10' の12個のみをサポートしている。このうち、$systemはシステムメッセージ専用チャンネルであるため誰も書き込むことができない。'1', …, '10'はSpectatorが書き込むことはできないが、$freeはSpectatorも書き込むことができる。 */
-    key: Scalars['String'];
-    name?: Maybe<Scalars['String']>;
+    key: Scalars['String']['output'];
+    name?: Maybe<Scalars['String']['output']>;
 };
 
 export type RoomPublicChannelUpdate = {
     __typename?: 'RoomPublicChannelUpdate';
-    key: Scalars['String'];
-    name?: Maybe<Scalars['String']>;
+    key: Scalars['String']['output'];
+    name?: Maybe<Scalars['String']['output']>;
 };
 
 export type RoomPublicMessage = {
     __typename?: 'RoomPublicMessage';
-    altTextToSecret?: Maybe<Scalars['String']>;
-    channelKey: Scalars['String'];
+    altTextToSecret?: Maybe<Scalars['String']['output']>;
+    channelKey: Scalars['String']['output'];
     /** 発言がCharacterと紐付いているときはnon-nullish。PLとしての発言、もしくはcreatedByがnullishのときはnullish。 */
     character?: Maybe<CharacterValueForMessage>;
     commandResult?: Maybe<CommandResult>;
-    createdAt: Scalars['Float'];
+    createdAt: Scalars['Float']['output'];
     /** channelKeyが$system以外のときは、システムメッセージならばnullishで、そうでないならばnullishではない。$systemのとき、原則として全てシステムメッセージであるため常にnullishになる。 */
-    createdBy?: Maybe<Scalars['String']>;
-    customName?: Maybe<Scalars['String']>;
-    initText?: Maybe<Scalars['String']>;
-    initTextSource?: Maybe<Scalars['String']>;
-    isSecret: Scalars['Boolean'];
-    messageId: Scalars['String'];
-    textColor?: Maybe<Scalars['String']>;
-    updatedAt?: Maybe<Scalars['Float']>;
+    createdBy?: Maybe<Scalars['String']['output']>;
+    customName?: Maybe<Scalars['String']['output']>;
+    initText?: Maybe<Scalars['String']['output']>;
+    initTextSource?: Maybe<Scalars['String']['output']>;
+    isSecret: Scalars['Boolean']['output'];
+    messageId: Scalars['String']['output'];
+    textColor?: Maybe<Scalars['String']['output']>;
+    updatedAt?: Maybe<Scalars['Float']['output']>;
     updatedText?: Maybe<UpdatedText>;
 };
 
 export type RoomPublicMessageUpdate = {
     __typename?: 'RoomPublicMessageUpdate';
-    altTextToSecret?: Maybe<Scalars['String']>;
+    altTextToSecret?: Maybe<Scalars['String']['output']>;
     commandResult?: Maybe<CommandResult>;
-    initText?: Maybe<Scalars['String']>;
-    initTextSource?: Maybe<Scalars['String']>;
-    isSecret: Scalars['Boolean'];
-    messageId: Scalars['String'];
-    updatedAt?: Maybe<Scalars['Float']>;
+    initText?: Maybe<Scalars['String']['output']>;
+    initTextSource?: Maybe<Scalars['String']['output']>;
+    isSecret: Scalars['Boolean']['output'];
+    messageId: Scalars['String']['output'];
+    updatedAt?: Maybe<Scalars['Float']['output']>;
     updatedText?: Maybe<UpdatedText>;
 };
 
 export type RoomSoundEffect = {
     __typename?: 'RoomSoundEffect';
-    createdAt: Scalars['Float'];
-    createdBy?: Maybe<Scalars['String']>;
+    createdAt: Scalars['Float']['output'];
+    createdBy?: Maybe<Scalars['String']['output']>;
     file: FilePath;
-    messageId: Scalars['String'];
-    volume: Scalars['Float'];
+    messageId: Scalars['String']['output'];
+    volume: Scalars['Float']['output'];
 };
 
 export type SemVer = {
     __typename?: 'SemVer';
-    major: Scalars['Float'];
-    minor: Scalars['Float'];
-    patch: Scalars['Float'];
+    major: Scalars['Float']['output'];
+    minor: Scalars['Float']['output'];
+    patch: Scalars['Float']['output'];
     prerelease?: Maybe<Prerelease>;
 };
 
 export type ServerInfo = {
     __typename?: 'ServerInfo';
-    uploaderEnabled: Scalars['Boolean'];
+    uploaderEnabled: Scalars['Boolean']['output'];
     version: SemVer;
 };
 
@@ -938,7 +944,7 @@ export type Subscription = {
 };
 
 export type SubscriptionRoomEventArgs = {
-    id: Scalars['String'];
+    id: Scalars['String']['input'];
 };
 
 export type UpdateBookmarkFailureResult = {
@@ -954,14 +960,14 @@ export type UpdateBookmarkResult = UpdateBookmarkFailureResult | UpdateBookmarkS
 
 export type UpdateBookmarkSuccessResult = {
     __typename?: 'UpdateBookmarkSuccessResult';
-    currentValue: Scalars['Boolean'];
-    prevValue: Scalars['Boolean'];
+    currentValue: Scalars['Boolean']['output'];
+    prevValue: Scalars['Boolean']['output'];
 };
 
 export type UpdatedText = {
     __typename?: 'UpdatedText';
-    currentText?: Maybe<Scalars['String']>;
-    updatedAt: Scalars['Float'];
+    currentText?: Maybe<Scalars['String']['output']>;
+    updatedAt: Scalars['Float']['output'];
 };
 
 export type WriteRoomPrivateMessageFailureResult = {
@@ -1015,8 +1021,8 @@ export type WriteRoomSoundEffectResult = RoomSoundEffect | WriteRoomSoundEffectF
 export type WritingMessageStatus = {
     __typename?: 'WritingMessageStatus';
     status: WritingMessageStatusType;
-    updatedAt: Scalars['Float'];
-    userUid: Scalars['String'];
+    updatedAt: Scalars['Float']['output'];
+    userUid: Scalars['String']['output'];
 };
 
 export enum WritingMessageStatusInputType {
@@ -1494,7 +1500,7 @@ export type GetAvailableGameSystemsQuery = {
 };
 
 export type GetDiceHelpMessagesQueryVariables = Exact<{
-    id: Scalars['String'];
+    id: Scalars['String']['input'];
 }>;
 
 export type GetDiceHelpMessagesQuery = { __typename?: 'Query'; result?: string | null };
@@ -1520,7 +1526,7 @@ export type GetFilesQuery = {
 };
 
 export type GetRoomQueryVariables = Exact<{
-    id: Scalars['String'];
+    id: Scalars['String']['input'];
 }>;
 
 export type GetRoomQuery = {
@@ -1582,7 +1588,7 @@ export type GetRoomsListQuery = {
 };
 
 export type GetMessagesQueryVariables = Exact<{
-    roomId: Scalars['String'];
+    roomId: Scalars['String']['input'];
 }>;
 
 export type GetMessagesQuery = {
@@ -1696,7 +1702,7 @@ export type GetMessagesQuery = {
 };
 
 export type GetLogQueryVariables = Exact<{
-    roomId: Scalars['String'];
+    roomId: Scalars['String']['input'];
 }>;
 
 export type GetLogQuery = {
@@ -1817,7 +1823,7 @@ export type GetMyRolesQuery = {
 };
 
 export type GetRoomConnectionsQueryVariables = Exact<{
-    roomId: Scalars['String'];
+    roomId: Scalars['String']['input'];
 }>;
 
 export type GetRoomConnectionsQuery = {
@@ -1860,7 +1866,7 @@ export type IsEntryQueryVariables = Exact<{ [key: string]: never }>;
 export type IsEntryQuery = { __typename?: 'Query'; result: boolean };
 
 export type GetRoomAsListItemQueryVariables = Exact<{
-    roomId: Scalars['String'];
+    roomId: Scalars['String']['input'];
 }>;
 
 export type GetRoomAsListItemQuery = {
@@ -1885,9 +1891,9 @@ export type GetRoomAsListItemQuery = {
 };
 
 export type AnswerRollCallMutationVariables = Exact<{
-    roomId: Scalars['String'];
-    rollCallId: Scalars['String'];
-    answer: Scalars['Boolean'];
+    roomId: Scalars['String']['input'];
+    rollCallId: Scalars['String']['input'];
+    answer: Scalars['Boolean']['input'];
 }>;
 
 export type AnswerRollCallMutation = {
@@ -1896,7 +1902,7 @@ export type AnswerRollCallMutation = {
 };
 
 export type CreateFileTagMutationVariables = Exact<{
-    tagName: Scalars['String'];
+    tagName: Scalars['String']['input'];
 }>;
 
 export type CreateFileTagMutation = {
@@ -1905,8 +1911,8 @@ export type CreateFileTagMutation = {
 };
 
 export type ChangeParticipantNameMutationVariables = Exact<{
-    roomId: Scalars['String'];
-    newName: Scalars['String'];
+    roomId: Scalars['String']['input'];
+    newName: Scalars['String']['input'];
 }>;
 
 export type ChangeParticipantNameMutation = {
@@ -1918,8 +1924,8 @@ export type ChangeParticipantNameMutation = {
 };
 
 export type CloseRollCallMutationVariables = Exact<{
-    roomId: Scalars['String'];
-    rollCallId: Scalars['String'];
+    roomId: Scalars['String']['input'];
+    rollCallId: Scalars['String']['input'];
 }>;
 
 export type CloseRollCallMutation = {
@@ -1952,19 +1958,19 @@ export type CreateRoomMutation = {
 };
 
 export type DeleteFilesMutationVariables = Exact<{
-    filenames: Array<Scalars['String']> | Scalars['String'];
+    filenames: Array<Scalars['String']['input']> | Scalars['String']['input'];
 }>;
 
 export type DeleteFilesMutation = { __typename?: 'Mutation'; result: Array<string> };
 
 export type DeleteFileTagMutationVariables = Exact<{
-    tagId: Scalars['String'];
+    tagId: Scalars['String']['input'];
 }>;
 
 export type DeleteFileTagMutation = { __typename?: 'Mutation'; result: boolean };
 
 export type DeleteRoomMutationVariables = Exact<{
-    id: Scalars['String'];
+    id: Scalars['String']['input'];
 }>;
 
 export type DeleteRoomMutation = {
@@ -1973,7 +1979,7 @@ export type DeleteRoomMutation = {
 };
 
 export type DeleteRoomAsAdminMutationVariables = Exact<{
-    id: Scalars['String'];
+    id: Scalars['String']['input'];
 }>;
 
 export type DeleteRoomAsAdminMutation = {
@@ -1991,9 +1997,9 @@ export type EditFileTagsMutationVariables = Exact<{
 export type EditFileTagsMutation = { __typename?: 'Mutation'; result: boolean };
 
 export type JoinRoomAsPlayerMutationVariables = Exact<{
-    id: Scalars['String'];
-    name: Scalars['String'];
-    password?: InputMaybe<Scalars['String']>;
+    id: Scalars['String']['input'];
+    name: Scalars['String']['input'];
+    password?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 export type JoinRoomAsPlayerMutation = {
@@ -2016,9 +2022,9 @@ export type JoinRoomAsPlayerMutation = {
 };
 
 export type JoinRoomAsSpectatorMutationVariables = Exact<{
-    id: Scalars['String'];
-    name: Scalars['String'];
-    password?: InputMaybe<Scalars['String']>;
+    id: Scalars['String']['input'];
+    name: Scalars['String']['input'];
+    password?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 export type JoinRoomAsSpectatorMutation = {
@@ -2041,7 +2047,7 @@ export type JoinRoomAsSpectatorMutation = {
 };
 
 export type EntryToServerMutationVariables = Exact<{
-    password: Scalars['String'];
+    password: Scalars['String']['input'];
 }>;
 
 export type EntryToServerMutation = {
@@ -2050,7 +2056,7 @@ export type EntryToServerMutation = {
 };
 
 export type LeaveRoomMutationVariables = Exact<{
-    id: Scalars['String'];
+    id: Scalars['String']['input'];
 }>;
 
 export type LeaveRoomMutation = {
@@ -2059,10 +2065,10 @@ export type LeaveRoomMutation = {
 };
 
 export type OperateMutationVariables = Exact<{
-    id: Scalars['String'];
-    revisionFrom: Scalars['Int'];
+    id: Scalars['String']['input'];
+    revisionFrom: Scalars['Int']['input'];
     operation: RoomOperationInput;
-    requestId: Scalars['String'];
+    requestId: Scalars['String']['input'];
 }>;
 
 export type OperateMutation = {
@@ -2113,7 +2119,7 @@ export type PerformRollCallMutation = {
 };
 
 export type PingMutationVariables = Exact<{
-    value: Scalars['Float'];
+    value: Scalars['Float']['input'];
 }>;
 
 export type PingMutation = {
@@ -2122,8 +2128,8 @@ export type PingMutation = {
 };
 
 export type PromoteToPlayerMutationVariables = Exact<{
-    roomId: Scalars['String'];
-    password?: InputMaybe<Scalars['String']>;
+    roomId: Scalars['String']['input'];
+    password?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 export type PromoteToPlayerMutation = {
@@ -2138,7 +2144,7 @@ export type RenameFilesMutationVariables = Exact<{
 export type RenameFilesMutation = { __typename?: 'Mutation'; result: Array<string> };
 
 export type ResetMessagesMutationVariables = Exact<{
-    roomId: Scalars['String'];
+    roomId: Scalars['String']['input'];
 }>;
 
 export type ResetMessagesMutation = {
@@ -2150,8 +2156,8 @@ export type ResetMessagesMutation = {
 };
 
 export type UpdateBookmarkMutationVariables = Exact<{
-    roomId: Scalars['String'];
-    newValue: Scalars['Boolean'];
+    roomId: Scalars['String']['input'];
+    newValue: Scalars['Boolean']['input'];
 }>;
 
 export type UpdateBookmarkMutation = {
@@ -2162,13 +2168,13 @@ export type UpdateBookmarkMutation = {
 };
 
 export type WritePublicMessageMutationVariables = Exact<{
-    roomId: Scalars['String'];
-    text: Scalars['String'];
-    textColor?: InputMaybe<Scalars['String']>;
-    channelKey: Scalars['String'];
-    characterId?: InputMaybe<Scalars['String']>;
-    customName?: InputMaybe<Scalars['String']>;
-    gameType?: InputMaybe<Scalars['String']>;
+    roomId: Scalars['String']['input'];
+    text: Scalars['String']['input'];
+    textColor?: InputMaybe<Scalars['String']['input']>;
+    channelKey: Scalars['String']['input'];
+    characterId?: InputMaybe<Scalars['String']['input']>;
+    customName?: InputMaybe<Scalars['String']['input']>;
+    gameType?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 export type WritePublicMessageMutation = {
@@ -2222,13 +2228,13 @@ export type WritePublicMessageMutation = {
 };
 
 export type WritePrivateMessageMutationVariables = Exact<{
-    roomId: Scalars['String'];
-    visibleTo: Array<Scalars['String']> | Scalars['String'];
-    text: Scalars['String'];
-    textColor?: InputMaybe<Scalars['String']>;
-    characterId?: InputMaybe<Scalars['String']>;
-    customName?: InputMaybe<Scalars['String']>;
-    gameType?: InputMaybe<Scalars['String']>;
+    roomId: Scalars['String']['input'];
+    visibleTo: Array<Scalars['String']['input']> | Scalars['String']['input'];
+    text: Scalars['String']['input'];
+    textColor?: InputMaybe<Scalars['String']['input']>;
+    characterId?: InputMaybe<Scalars['String']['input']>;
+    customName?: InputMaybe<Scalars['String']['input']>;
+    gameType?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 export type WritePrivateMessageMutation = {
@@ -2282,9 +2288,9 @@ export type WritePrivateMessageMutation = {
 };
 
 export type WriteRoomSoundEffectMutationVariables = Exact<{
-    roomId: Scalars['String'];
+    roomId: Scalars['String']['input'];
     file: FilePathInput;
-    volume: Scalars['Float'];
+    volume: Scalars['Float']['input'];
 }>;
 
 export type WriteRoomSoundEffectMutation = {
@@ -2305,9 +2311,9 @@ export type WriteRoomSoundEffectMutation = {
 };
 
 export type EditMessageMutationVariables = Exact<{
-    roomId: Scalars['String'];
-    messageId: Scalars['String'];
-    text: Scalars['String'];
+    roomId: Scalars['String']['input'];
+    messageId: Scalars['String']['input'];
+    text: Scalars['String']['input'];
 }>;
 
 export type EditMessageMutation = {
@@ -2316,8 +2322,8 @@ export type EditMessageMutation = {
 };
 
 export type DeleteMessageMutationVariables = Exact<{
-    roomId: Scalars['String'];
-    messageId: Scalars['String'];
+    roomId: Scalars['String']['input'];
+    messageId: Scalars['String']['input'];
 }>;
 
 export type DeleteMessageMutation = {
@@ -2326,8 +2332,8 @@ export type DeleteMessageMutation = {
 };
 
 export type MakeMessageNotSecretMutationVariables = Exact<{
-    roomId: Scalars['String'];
-    messageId: Scalars['String'];
+    roomId: Scalars['String']['input'];
+    messageId: Scalars['String']['input'];
 }>;
 
 export type MakeMessageNotSecretMutation = {
@@ -2339,14 +2345,14 @@ export type MakeMessageNotSecretMutation = {
 };
 
 export type UpdateWritingMessageStatusMutationVariables = Exact<{
-    roomId: Scalars['String'];
+    roomId: Scalars['String']['input'];
     newStatus: WritingMessageStatusInputType;
 }>;
 
 export type UpdateWritingMessageStatusMutation = { __typename?: 'Mutation'; result: boolean };
 
 export type RoomEventSubscriptionVariables = Exact<{
-    id: Scalars['String'];
+    id: Scalars['String']['input'];
 }>;
 
 export type RoomEventSubscription = {
