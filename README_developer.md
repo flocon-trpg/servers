@@ -37,7 +37,7 @@ Flocon
 
 (Netlify や fly.io にデプロイする場合は必要ありません)
 
--   yarn のインストール
+-   yarn のインストール(corepack を有効化している場合は、corepack によって自動的にインストールされます)
 -   Node.js v14, v16, v18 のいずれかのインストール
 
 ## husky のインストール
@@ -52,6 +52,8 @@ Flocon リポジトリへの Pull Request の作成を考えていない場合�
 
 データベースとして PostgreSQL もしくは MySQL を使う場合は対応するデータベースサーバーを起動しておく必要があります。SQLite の場合は不要です。
 
+API サーバーを動かすには、次のコマンドを実行してください。
+
 ```console
 cd ./apps/api-server
 yarn run start
@@ -60,6 +62,8 @@ yarn run start
 ## ローカルでの Web サーバーの実行方法
 
 [環境変数のセット](https://flocon.app/docs/server/details/web-server/vars)が必須です。また、環境変数のセットにおいて、Firebase プロジェクトの準備も必要になります。
+
+Web サーバーを動かすには、次のコマンドを実行してください。
 
 開発用サーバーを動かす場合:
 
@@ -107,7 +111,7 @@ yarn run storybook
 
 ### クイックスタート
 
-Node.js v16 以降をインストールし、次のコマンドを実行することで、全てのパッケージをテストできます。
+Node.js v16 以降をインストールし、一例として、次のコマンドを実行することで、全てのパッケージをテストできます。
 
 #### Linux
 
