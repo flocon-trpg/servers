@@ -5,15 +5,15 @@ __metadata:
   version: 6
   cacheKey: 8
 
-"@0no-co/graphql.web@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "@0no-co/graphql.web@npm:1.0.1"
+"@0no-co/graphql.web@npm:^1.0.1, @0no-co/graphql.web@npm:^1.0.5":
+  version: 1.0.8
+  resolution: "@0no-co/graphql.web@npm:1.0.8"
   peerDependencies:
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
   peerDependenciesMeta:
     graphql:
       optional: true
-  checksum: e577a80a210e48e0b054dcf363efa2107ab67b931ec923b1540300350f55576fc5493b6d4ca7f35379748d20bc0280ee32bdc98c2c2380476c814a472bcf0757
+  checksum: 5bd3ac2a55401c6d47e8af479170e1ae3b38c80847203d5b445f281f36e68ac11e6a6400e43e90b382d38f704721dd46acaab1088239362b9290b536a9e7d707
   languageName: node
   linkType: hard
 
@@ -3302,7 +3302,7 @@ __metadata:
     "@types/yargs": ^17.0.3
     "@typescript-eslint/eslint-plugin": 5.60.1
     "@typescript-eslint/parser": 5.60.1
-    "@urql/core": 4.0.10
+    "@urql/core": 5.0.6
     apollo-server-express: ^3.3.0
     bcdice: ^4.0.0
     bcrypt: ^5.0.1
@@ -8087,7 +8087,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@urql/core@npm:4.0.10, @urql/core@npm:>=4.0.0, @urql/core@npm:^4.0.0":
+"@urql/core@npm:5.0.6, @urql/core@npm:>=4.0.0":
+  version: 5.0.6
+  resolution: "@urql/core@npm:5.0.6"
+  dependencies:
+    "@0no-co/graphql.web": ^1.0.5
+    wonka: ^6.3.2
+  checksum: cf94025ff58d6eee82da2eb51ec74126c2c83f5f797ef5f5a51376039cb3c342ddeac1ed050ce47d2da7f375b3e2c7b4c780dd00c3c684bfe6e7f825d859d322
+  languageName: node
+  linkType: hard
+
+"@urql/core@npm:^4.0.0":
   version: 4.0.10
   resolution: "@urql/core@npm:4.0.10"
   dependencies:
