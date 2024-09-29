@@ -4476,9 +4476,9 @@ const clientTransform = (params) => {
 
 /** 全てのStateに完全にアクセスできる。*/
 const admin = 'admin';
-/* userUidに基づき、一部のStateへのアクセスを制限する。*/
+/** userUidに基づき、一部のStateへのアクセスを制限する。*/
 const client = 'client';
-/* アクセス制限のあるStateへのアクセスを全て制限する。*/
+/** アクセス制限のあるStateへのアクセスを全て制限する。*/
 const restrict = 'restrict';
 const anyValue = { type: 'anyValue' };
 const none = { type: 'none' };

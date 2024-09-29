@@ -2,7 +2,9 @@ import * as Room from './flocon/room/types';
 import { State } from './generator/types';
 /** 全てのStateに完全にアクセスできる。*/
 export declare const admin = "admin";
+/** userUidに基づき、一部のStateへのアクセスを制限する。*/
 export declare const client = "client";
+/** アクセス制限のあるStateへのアクセスを全て制限する。*/
 export declare const restrict = "restrict";
 export type RequestedBy = {
     type: typeof admin;

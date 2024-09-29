@@ -4,10 +4,10 @@ import { State } from './generator/types';
 /** 全てのStateに完全にアクセスできる。*/
 export const admin = 'admin';
 
-/* userUidに基づき、一部のStateへのアクセスを制限する。*/
+/** userUidに基づき、一部のStateへのアクセスを制限する。*/
 export const client = 'client';
 
-/* アクセス制限のあるStateへのアクセスを全て制限する。*/
+/** アクセス制限のあるStateへのアクセスを全て制限する。*/
 export const restrict = 'restrict';
 
 export type RequestedBy =
