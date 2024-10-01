@@ -28,7 +28,7 @@ jobs:
         runs-on: ${{ matrix.os }}
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
             - name: Use Node ${{ matrix.node }}
               uses: actions/setup-node@v3
@@ -100,7 +100,7 @@ jobs:
 
         steps:
             - name: Checkout repo
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - run: node --version
 
@@ -179,7 +179,7 @@ jobs:
 
         steps:
             - name: Checkout repo
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - run: node --version
 
@@ -223,7 +223,7 @@ jobs:
         runs-on: ubuntu-22.04
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
             - name: Use Node 18.x
               uses: actions/setup-node@v3
@@ -251,7 +251,7 @@ jobs:
         runs-on: ubuntu-22.04
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
               with:
                   # Requires full git history: https://github.com/chromaui/action#getting-started
                   fetch-depth: 0
