@@ -38,7 +38,9 @@ jobs:
 
             - run: node --version
 
-            - run: yarn install
+            - run: yarn
+
+            - run: yarn build
 
             - name: Test
               run: yarn test --ci --coverage --runInBand
@@ -104,8 +106,9 @@ jobs:
 
             - run: node --version
 
-            - name: Install
-              run: yarn
+            - run: yarn
+
+            - run: yarn build
 
             - name: Migration-up MySQL
               run: yarn migration-up --db mysql
@@ -189,8 +192,9 @@ jobs:
 
             - run: cat ./.yarnrc.yml
 
-            - name: Install
-              run: yarn
+            - run: yarn
+
+            - run: yarn build
 
             - name: Try starting api-server with SQLite
               run: timeout -k 3 10 yarn start || if test $? -eq 124; then echo OK; else exit $?; fi
