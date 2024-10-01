@@ -7,8 +7,8 @@ on:
             - 'v3*.*.*'
 
 jobs:
-    git-diff-main:
-        name: git diff remotes/origin/main
+    git-diff-main-build:
+        name: git diff remotes/origin/main-build
 
         runs-on: ubuntu-22.04
 
@@ -22,9 +22,9 @@ jobs:
 
             - name: Fail if not all the files are OK
               run: |
-                  if [[ -n "$(git diff remotes/origin/main)" ]]; then
+                  if [[ -n "$(git diff remotes/origin/main-build)" ]]; then
                       echo "ERROR: The project is dirty!"
-                      git diff --stat remotes/origin/main
+                      git diff --stat remotes/origin/main-build
                     exit 1
                   else
                       echo "OK."

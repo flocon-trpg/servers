@@ -242,35 +242,6 @@ jobs:
             - name: sort-package-json(check)
               run: yarn sort-package-json --check
 
-    check-artifacts:
-        name: Check artifacts
-
-        runs-on: ubuntu-22.04
-
-        steps:
-            - name: List git config
-              run: git config -l
-
-            - uses: actions/checkout@v3
-
-            - name: Use Node 18.x
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 18.x
-                  cache: yarn
-
-            - run: yarn
-
-            # 必要のない web-server のビルドも行われる。web-server のみを除外するとその除外処理でミスが生じる余地があるため、web-server も含めてまとめてビルドしている。
-            - name: Generate dist
-              run: yarn build
-
-            - name: Clean CRLF
-              run: git config --local core.autocrlf input && git add . && git reset
-
-            - name: Fail if not all the artifacts are OK
-              uses: numtide/clean-git-action@v1
-
     publish-storybook:
         name: Publish Storybook to Chromatic
         if: ${{ !contains(github.event.head_commit.message, '[light ci]') && github.event_name == 'push' }}

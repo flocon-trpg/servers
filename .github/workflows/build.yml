@@ -1,0 +1,66 @@
+name: build
+
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    main:
+        name: Build artifacts and push to main-build branch
+
+        runs-on: ubuntu-latest
+
+        permissions:
+            # allows git push
+            contents: write
+
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v3
+              with:
+                  # without this, "git checkout main-build" will fail because the main-build branch is not present in the local repository.
+                  fetch-depth: 0
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18.x
+                  cache: yarn
+
+            - run: git config --local user.email "build.yml[bot]@example.com" # fake user email for pushing build
+            - run: git config --local user.name "build.yml[bot]" # fake user name for pushing build
+
+              # create a temporary "main-build-temp" branch here, so do not create "main-build-temp" branch in your repository and push it.
+            - run: git checkout -b main-build-temp
+
+            - run: cat ./.gitignore
+
+            - name: Comment out /dist from .gitignore
+              run: "sed -i 's/\\/dist/# \\dist/g' ./.gitignore"
+
+            - run: cat ./.gitignore
+
+            - run: yarn
+            - run: yarn build
+
+            - run: git add --all
+
+            - run: 'git commit -m "build: comment out /dist in .gitignore and build artifacts"'
+
+            - run: git checkout main-build
+
+            # main-build branch is the branch where the build artifacts are pushed. you need to create this branch in your repository.
+            - name: Merge main-build-temp into main-build
+              # we want to do "git merge -s theirs main-build-temp" but "git merge -s theirs" is not available in git. So, we use "git merge -s ours" then fast-forward the main-build branch.
+              # in default, the message of merge commit is "Merge branch 'main-build-temp' into main-build", so the message is changed not to include "main-build-temp".
+              run: |
+                  git switch main-build-temp
+                  git merge -s ours main-build
+                  git switch main-build
+                  git merge --ff --no-commit main-build-temp
+                  git commit -m "Merge branch"
+
+            - run: git remote set-url origin https://x-access-token:${{secrets.GITHUB_TOKEN}}@github.com/${{github.repository}}
+
+            - run: git push origin main-build
