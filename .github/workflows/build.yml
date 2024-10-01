@@ -48,18 +48,21 @@ jobs:
 
             - run: 'git commit -m "build: comment out dist/ in .gitignore and build artifacts"'
 
+            # main-build branch is the branch where the build artifacts are pushed. you need to create this branch in your repository.
             - run: git checkout main-build
 
-            # main-build branch is the branch where the build artifacts are pushed. you need to create this branch in your repository.
-            - name: Merge main-build-temp into main-build
-              # we want to do "git merge -s theirs main-build-temp" but "git merge -s theirs" is not available in git. So, we use "git merge -s ours" then fast-forward the main-build branch.
-              # in default, the message of merge commit is "Merge branch 'main-build-temp' into main-build", so the message is changed not to include "main-build-temp".
-              run: |
-                  git switch main-build-temp
-                  git merge -s ours main-build
-                  git switch main-build
-                  git merge --ff --no-commit main-build-temp
-                  git commit -m "Merge branch"
+            # we want to do "git merge -s theirs main-build-temp" but "git merge -s theirs" is not available in git. So, we use "git merge -s ours main-build" then fast-forward the main-build branch instead.
+
+            - run: git switch main-build-temp
+
+            - run: git merge -s ours --no-ff --no-commit main-build
+
+            # by default, the message of merge commit is "Merge branch 'main-build-temp' into main-build", so the message is changed not to include "main-build-temp".
+            - run: git commit -m "Merge branch"
+
+            - run: git switch main-build
+
+            - run: git merge --ff --no-commit main-build-temp
 
             - run: git remote set-url origin https://x-access-token:${{secrets.GITHUB_TOKEN}}@github.com/${{github.repository}}
 
