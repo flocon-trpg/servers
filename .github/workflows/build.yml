@@ -58,7 +58,8 @@ jobs:
             - run: git merge -s ours --no-ff --no-commit main-build
 
             # by default, the message of merge commit is "Merge branch 'main-build-temp' into main-build", so the message is changed not to include "main-build-temp".
-            - run: git commit -m "Merge branch"
+            # if this merge is first and no --allow-empty, this job fails because there is nothing to commit.
+            - run: git commit -m --allow-empty "Merge branch"
 
             - run: git switch main-build
 
