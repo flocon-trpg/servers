@@ -170,7 +170,7 @@ export class RoomStateManager<TGraphQLError> {
     #setState(
         action:
             | RoomState<TGraphQLError>
-            | ((prevState: RoomState<TGraphQLError>) => RoomState<TGraphQLError>)
+            | ((prevState: RoomState<TGraphQLError>) => RoomState<TGraphQLError>),
     ): void {
         const prevValue = this.stateStream.getValue();
         switch (prevValue.type) {
@@ -250,7 +250,7 @@ export class RoomStateManager<TGraphQLError> {
                                     operationResult,
                                     toPost,
                                     getRoomState: () => roomStateManager.uiState,
-                                }) as const
+                                }) as const,
                         )
                         .catch(
                             e =>
@@ -258,10 +258,10 @@ export class RoomStateManager<TGraphQLError> {
                                     type: 'catch',
                                     toPost,
                                     error: e,
-                                }) as const
+                                }) as const,
                         );
                 }),
-                mergeAll()
+                mergeAll(),
             )
             .subscribe({
                 next: result => {
@@ -292,7 +292,7 @@ export class RoomStateManager<TGraphQLError> {
                                 isId: false,
                                 revisionTo: operationResult.value.result.operation.revisionTo,
                                 result: Room.createGetOperation(
-                                    operationResult.value.result.operation
+                                    operationResult.value.result.operation,
                                 ),
                             });
                             this.#onRoomStateManagerUpdate();
@@ -349,7 +349,7 @@ export class RoomStateManager<TGraphQLError> {
                 case 'GetJoinedRoomResult': {
                     const newRoomStateManager = createStateManager(
                         Room.createState(result.room),
-                        result.room.revision
+                        result.room.revision,
                     );
                     this.#roomOperationCache.forEach((operation, revisionTo) => {
                         if (
@@ -358,7 +358,7 @@ export class RoomStateManager<TGraphQLError> {
                         ) {
                             newRoomStateManager.onOtherClientsGet(
                                 Room.createGetOperation(operation),
-                                revisionTo
+                                revisionTo,
                             );
                         }
                     });
@@ -374,7 +374,7 @@ export class RoomStateManager<TGraphQLError> {
                             | {
                                   type: 'state';
                                   state: State;
-                              }
+                              },
                     ) => {
                         const $stateManager = this.#roomStateManager;
                         if ($stateManager == null) {

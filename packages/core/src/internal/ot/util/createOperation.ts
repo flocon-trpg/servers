@@ -7,7 +7,7 @@ export const createOperation = <
 >(
     version: TVersion,
     revision: TRevision,
-    props: TProps
+    props: TProps,
 ) =>
     z
         .object(props)
@@ -16,5 +16,5 @@ export const createOperation = <
             z.object({
                 $v: z.literal(version),
                 $r: z.literal(revision),
-            })
+            }),
         );

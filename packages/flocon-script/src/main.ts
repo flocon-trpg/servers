@@ -51,7 +51,7 @@ function ofFCallExpression(
     expression: FSimpleCallExpression | FNewExpression,
     context: Context,
     isChain: boolean,
-    isNew?: 'new' | undefined
+    isNew?: 'new' | undefined,
 ): FValue {
     const callee = ofFExpression(expression.callee, context);
     const args = expression.arguments.map(arg => {
@@ -69,7 +69,7 @@ function ofFCallExpression(
 function ofFMemberExpressionAsGet(
     expression: FMemberExpression,
     context: Context,
-    isChain: boolean
+    isChain: boolean,
 ): FValue {
     const object = ofFExpression(expression.object, context);
     if (object == null) {
@@ -94,7 +94,7 @@ function ofFMemberExpressionAsGet(
 function ofFMemberExpressionAsAssign(
     expression: FMemberExpression,
     newValue: FValue,
-    context: Context
+    context: Context,
 ): FValue {
     const object = ofFExpression(expression.object, context);
     let property: FValue;
@@ -124,7 +124,7 @@ function ofFPattern(
 
     // let {a, ...b} = foo; のbのようにbにobjectが入る場面では'object'を、let [a, ...b] = bar; のbのようにbにArrayが入る場面では'array'を渡す。
     // function f(...p) { return p; } のpの場面ではArrayが入るため'array'を渡す。再帰以外でofFPatternが呼ばれてなおかつpatternがRestElementであるケースはそれしかないと思われるため、引数のデフォルト値は'array'としている。
-    setToRestElementAs: SetToRestElementAs = 'array'
+    setToRestElementAs: SetToRestElementAs = 'array',
 ): void {
     switch (pattern.type) {
         case 'Identifier':
@@ -143,7 +143,7 @@ function ofFPattern(
                 context,
                 kind,
                 value === undefined ? ofFExpression(pattern.right, context) : value,
-                setToRestElementAs
+                setToRestElementAs,
             );
             return;
         case 'MemberExpression':
@@ -170,7 +170,7 @@ function ofFPattern(
                         context,
                         kind,
                         FArray.create(getRestValues(valueIterator)),
-                        setToRestElementAs
+                        setToRestElementAs,
                     );
                     // RestElementはArrayPatternの最後にしか存在し得ないため、breakで抜けてしまって構わない。
                     break;
@@ -206,14 +206,14 @@ function ofFPattern(
                         context.assign(
                             objectPatternProperty.key.name,
                             nextValue.get({ property: key, astInfo: objectPatternProperty.key }),
-                            toRange(pattern)
+                            toRange(pattern),
                         );
                         break;
                     default:
                         context.declare(
                             objectPatternProperty.key.name,
                             nextValue.get({ property: key, astInfo: objectPatternProperty.key }),
-                            kind
+                            kind,
                         );
                         break;
                 }
@@ -248,7 +248,7 @@ for (let x of [1]) {} のようなコードではinitはnullishであるため�
 function ofFVariableDeclaration(
     statement: FVariableDeclaration,
     context: Context,
-    valueToSet?: FValue
+    valueToSet?: FValue,
 ): void {
     const kind = statement.kind;
     statement.declarations.forEach(d => {
@@ -257,7 +257,7 @@ function ofFVariableDeclaration(
             d.id,
             context,
             kind,
-            d.init == null ? valueToSet : ofFExpression(d.init, context)
+            d.init == null ? valueToSet : ofFExpression(d.init, context),
         );
     });
 }
@@ -279,7 +279,7 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                 if (argument == null || argument.iterate == null) {
                     throw new ScriptError(
                         `${argument?.toPrimitiveAsString()} is not iterable`,
-                        toRange(d.argument)
+                        toRange(d.argument),
                     );
                 }
                 for (const elem of argument.iterate()) {
@@ -293,7 +293,7 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                 if (isNew) {
                     throw new ScriptError(
                         'ArrowFunction is not a constructor',
-                        toRange(expression)
+                        toRange(expression),
                     );
                 }
                 context.scopeIn();
@@ -378,7 +378,7 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                 case '||=':
                     // 現時点では acorn は ecmaVersion=2020 として parse しているため、ここには来ないはず。
                     throw new Error(
-                        `"${expression.operator}" operator is not supported. This should not happen.`
+                        `"${expression.operator}" operator is not supported. This should not happen.`,
                     );
             }
             if (expression.left.type === 'Identifier') {
@@ -495,7 +495,7 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                     } else {
                         throw new ScriptError(
                             'Record is expected, but actually not.',
-                            toRange(d.argument)
+                            toRange(d.argument),
                         );
                     }
                     return;
@@ -590,7 +590,7 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                     oldValue,
                     new FNumber(expression.operator === '++' ? 1 : -1),
                     'number',
-                    (left, right) => left + right
+                    (left, right) => left + right,
                 );
                 context.assign(expression.argument.name, newValue, toRange(expression));
             } else {
@@ -599,7 +599,7 @@ function ofFExpression(expression: FExpression, context: Context): FValue {
                     oldValue,
                     new FNumber(expression.operator === '++' ? 1 : -1),
                     'number',
-                    (left, right) => left + right
+                    (left, right) => left + right,
                 );
                 ofFMemberExpressionAsAssign(expression.argument, newValue, context);
             }
@@ -680,7 +680,7 @@ function ofFStatement(statement: FStatement, context: Context): FStatementResult
                     default:
                         throw new ScriptError(
                             `${statement.left.type} is not supported yet.`,
-                            toRange(statement.left)
+                            toRange(statement.left),
                         );
                 }
                 ofFStatement(statement.body, context);

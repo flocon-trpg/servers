@@ -25,7 +25,7 @@ const createDefaultState = (): State<typeof StrParam.template> => ({
 export class FStrParams extends FObject {
     public constructor(
         private readonly strParams: NonNullable<State<typeof Character.template>['strParams']>,
-        private readonly room: State<typeof Room.template>
+        private readonly room: State<typeof Room.template>,
     ) {
         super();
     }
@@ -57,7 +57,7 @@ export class FStrParams extends FObject {
     private setIsValuePrivate(
         nameOrKeyValue: FValue,
         newValue: FValue,
-        astInfo: AstInfo | undefined
+        astInfo: AstInfo | undefined,
     ) {
         const $newValue = beginCast(newValue, astInfo).addBoolean().cast();
         const found = this.findByName(nameOrKeyValue, astInfo);

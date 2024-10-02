@@ -6,7 +6,7 @@ describe('Symbol', () => {
             `
 Symbol()
         `,
-            { Symbol: symbolClass }
+            { Symbol: symbolClass },
         );
         expect(typeof actual.result).toBe('symbol');
     });
@@ -16,7 +16,7 @@ Symbol()
             `
 Symbol('x')
         `,
-            { Symbol: symbolClass }
+            { Symbol: symbolClass },
         );
         expect(typeof actual.result).toBe('symbol');
     });

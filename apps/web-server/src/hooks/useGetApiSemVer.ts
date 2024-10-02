@@ -41,7 +41,7 @@ export const useGetApiSemVer = () => {
             new SemVer({
                 ...serverInfo.result.version,
                 prerelease,
-            })
+            }),
         );
     }, [error, serverInfo]);
 };

@@ -170,7 +170,7 @@ export const toCellRect = ({
 };
 
 export const pixelRectToCompositeRect = (
-    params: Parameters<typeof toCellRect>[0]
+    params: Parameters<typeof toCellRect>[0],
 ): CompositeRect => {
     return {
         ...toCellRect(params),
@@ -182,7 +182,7 @@ export const pixelRectToCompositeRect = (
 };
 
 export const cellRectToCompositeRect = (
-    params: Parameters<typeof toPixelRect>[0]
+    params: Parameters<typeof toPixelRect>[0],
 ): CompositeRect => {
     return {
         ...toPixelRect(params),

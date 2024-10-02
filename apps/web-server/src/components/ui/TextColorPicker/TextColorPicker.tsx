@@ -12,7 +12,7 @@ import { rgb } from '@/utils/rgb';
 type Props = {
     config: ChatPalettePanelConfig | MessagePanelConfig;
     onConfigUpdate: (
-        recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void
+        recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void,
     ) => void;
     descriptionStyle?: React.CSSProperties;
 };

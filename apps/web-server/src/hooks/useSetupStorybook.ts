@@ -75,7 +75,7 @@ export const useSetupStorybook = ({
 
     const testRoomClient = useMemoOne(
         () => createTestRoomClient<NotificationType<CombinedError>, CombinedError>({}),
-        []
+        [],
     );
 
     const room = useMemoOne(() => {
@@ -139,7 +139,7 @@ export const useSetupStorybook = ({
         testRoomClient.source.roomMessageClient.onQuery(
             createMockRoomMessages({
                 setGeneralMessages: roomMessagesConfigProp?.setGeneralMessages ?? true,
-            })
+            }),
         );
     }, [
         roomMessagesConfigProp?.setGeneralMessages,

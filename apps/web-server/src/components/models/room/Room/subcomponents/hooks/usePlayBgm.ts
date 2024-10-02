@@ -65,7 +65,7 @@ class PlaylistHowler {
             this.#howl = this.#createHowl(nextSrcAndFormat);
             loggerRef.debug(
                 { srcAndFormat: nextSrcAndFormat },
-                'Music ended. Starting the next music.'
+                'Music ended. Starting the next music.',
             );
         }
 

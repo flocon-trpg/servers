@@ -12,7 +12,7 @@ export namespace FileSourceTypeModule {
         source:
             | typeof FilePathModule.Default
             | typeof FilePathModule.FirebaseStorage
-            | typeof FilePathModule.Uploader
+            | typeof FilePathModule.Uploader,
     ) => {
         switch (source) {
             case FilePathModule.Default:
@@ -30,7 +30,7 @@ export namespace FileSourceTypeModule {
             | typeof FilePathModule.FirebaseStorage
             | typeof FilePathModule.Uploader
             | null
-            | undefined
+            | undefined,
     ) => {
         switch (source) {
             case null:

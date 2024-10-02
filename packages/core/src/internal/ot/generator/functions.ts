@@ -43,7 +43,7 @@ const warnNotFoundTemplate = ({
     objectType: 'state' | 'operation';
 }): void => {
     loggerRef.warn(
-        `"${key}" key was found at ${objectType} object, but template not found. It seems that the template is invalid or the ${objectType} object has keys which are not in the template.`
+        `"${key}" key was found at ${objectType} object, but template not found. It seems that the template is invalid or the ${objectType} object has keys which are not in the template.`,
     );
 };
 
@@ -79,7 +79,7 @@ export const toUpOperation =
             case paramRecord: {
                 return mapRecord(
                     twoWayOperation as Record<string, TwoWayOperation<AnyTemplate> | undefined>,
-                    x => toUpOperation(template.value)(x)
+                    x => toUpOperation(template.value)(x),
                 ) as any;
             }
             case object: {
@@ -95,7 +95,7 @@ export const toUpOperation =
                             return undefined;
                         }
                         return toUpOperation(templateElement)(operationElement);
-                    }
+                    },
                 ) as any;
             }
         }
@@ -133,7 +133,7 @@ export const toDownOperation =
             case paramRecord: {
                 return mapRecord(
                     twoWayOperation as Record<string, TwoWayOperation<AnyTemplate> | undefined>,
-                    x => toDownOperation(template.value)(x)
+                    x => toDownOperation(template.value)(x),
                 ) as any;
             }
             case object: {
@@ -149,7 +149,7 @@ export const toDownOperation =
                             return undefined;
                         }
                         return toDownOperation(templateElement)(operationElement);
-                    }
+                    },
                 ) as any;
             }
         }
@@ -201,7 +201,7 @@ export const apply =
             case object: {
                 const result = { ...state };
                 for (const { key, value } of recordToArray(
-                    operation as Record<string, UpOperation<AnyTemplate>>
+                    operation as Record<string, UpOperation<AnyTemplate>>,
                 )) {
                     if (isKeyToIgnore(key)) {
                         continue;
@@ -271,7 +271,7 @@ export const applyBack =
             case object: {
                 const result = { ...state };
                 for (const { key, value } of recordToArray(
-                    operation as Record<string, DownOperation<AnyTemplate>>
+                    operation as Record<string, DownOperation<AnyTemplate>>,
                 )) {
                     if (isKeyToIgnore(key)) {
                         continue;
@@ -443,7 +443,7 @@ export const restore =
                     [$r]: template.$r,
                 };
                 for (const { key, value } of recordToArray(
-                    downOperation as Record<string, DownOperation<AnyTemplate>>
+                    downOperation as Record<string, DownOperation<AnyTemplate>>,
                 )) {
                     if (isKeyToIgnore(key)) {
                         continue;
@@ -547,7 +547,7 @@ export const diff =
     };
 
 const requiresArrayTransformation = <TState, TOperation>(
-    operations: (RecordOperation.RecordUpOperation<TState, TOperation> | null | undefined)[]
+    operations: (RecordOperation.RecordUpOperation<TState, TOperation> | null | undefined)[],
 ): boolean => {
     for (const operation of operations) {
         if (operation == null) {
@@ -695,7 +695,7 @@ export const clientTransform =
                             const s = state[key];
                             if (s === undefined) {
                                 return Result.error(
-                                    `${key} is not found at object client transform.`
+                                    `${key} is not found at object client transform.`,
                                 );
                             }
                             const templateElement = template.value[key];

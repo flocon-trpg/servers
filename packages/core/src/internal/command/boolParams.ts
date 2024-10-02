@@ -25,7 +25,7 @@ const createDefaultState = (): State<typeof BoolParam.template> => ({
 export class FBoolParams extends FObject {
     public constructor(
         private readonly boolParams: NonNullable<State<typeof Character.template>['boolParams']>,
-        private readonly room: State<typeof Room.template>
+        private readonly room: State<typeof Room.template>,
     ) {
         super();
     }
@@ -65,7 +65,7 @@ export class FBoolParams extends FObject {
     private setIsValuePrivate(
         nameOrKeyValue: FValue,
         newValue: FValue,
-        astInfo: AstInfo | undefined
+        astInfo: AstInfo | undefined,
     ) {
         const $newValue = beginCast(newValue, astInfo).addBoolean().cast();
         const found = this.findByNameOrKey(nameOrKeyValue, astInfo);

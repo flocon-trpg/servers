@@ -40,7 +40,7 @@ export class DeleteRoomResolver {
     public async deleteRoom(
         @Args() args: DeleteRoomArgs,
         @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine
+        @PubSub() pubSub: PubSubEngine,
     ): Promise<DeleteRoomResult> {
         const em = context.em;
         const authorizedUserUid = ensureAuthorizedUser(context).userUid;

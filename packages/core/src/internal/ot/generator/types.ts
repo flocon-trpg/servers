@@ -58,7 +58,7 @@ export type RecordValueTemplate<TValue extends AnyTemplate> = {
 
 /** `Record<string, T>`を表すtemplateを作成します。*/
 export const createRecordValueTemplate = <TValue extends AnyTemplate>(
-    value: TValue
+    value: TValue,
 ): RecordValueTemplate<TValue> => {
     return {
         type: record,
@@ -75,7 +75,7 @@ export type ParamRecordValueTemplate<TValue extends AnyTemplate> = {
 /** `Record<string, T>`を表すtemplateを作成します。存在しない要素はdefaultStateがセットされているとみなされます。 */
 export const createParamRecordValueTemplate = <TValue extends AnyTemplate>(
     value: TValue,
-    defaultState: State<TValue>
+    defaultState: State<TValue>,
 ) => {
     return {
         type: paramRecord,
@@ -105,7 +105,7 @@ export const createObjectValueTemplate = <
 >(
     value: T,
     $v: V,
-    $r: R
+    $r: R,
 ) => {
     return {
         type: object,
@@ -230,7 +230,7 @@ export const upOperation = <T extends AnyTemplate>(source: T): z.ZodType<UpOpera
         }
         case record: {
             return zrecord(
-                recordUpOperationElementFactory(state(source.value), upOperation(source.value))
+                recordUpOperationElementFactory(state(source.value), upOperation(source.value)),
             ) as any;
         }
         case paramRecord:
@@ -242,7 +242,7 @@ export const upOperation = <T extends AnyTemplate>(source: T): z.ZodType<UpOpera
                     $r: source.$r == null ? z.undefined() : z.literal(source.$r),
                 })
                 .and(
-                    z.object(mapRecord(source.value, value => upOperation(value))).partial()
+                    z.object(mapRecord(source.value, value => upOperation(value))).partial(),
                 ) as any;
         }
     }
@@ -282,7 +282,7 @@ export const downOperation = <T extends AnyTemplate>(source: T): z.ZodType<DownO
         }
         case record: {
             return zrecord(
-                recordDownOperationElementFactory(state(source.value), downOperation(source.value))
+                recordDownOperationElementFactory(state(source.value), downOperation(source.value)),
             ) as any;
         }
         case paramRecord: {
@@ -295,7 +295,7 @@ export const downOperation = <T extends AnyTemplate>(source: T): z.ZodType<DownO
                     $r: source.$r == null ? z.undefined() : z.literal(source.$r),
                 })
                 .and(
-                    z.object(mapRecord(source.value, value => downOperation(value))).partial()
+                    z.object(mapRecord(source.value, value => downOperation(value))).partial(),
                 ) as any;
             return base;
         }

@@ -40,7 +40,7 @@ const formatJa = (parsed: Parsed, operator: '+' | '-') => {
 
 export const prettyElapsed = (
     value: Date | number,
-    opts?: { now?: Date | number; customizeMilliseconds: (source: number) => number }
+    opts?: { now?: Date | number; customizeMilliseconds: (source: number) => number },
 ) => {
     const now = opts?.now ?? new Date();
     const elapsedBySource = toMilliseconds(value) - toMilliseconds(now);

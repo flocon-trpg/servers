@@ -13,7 +13,7 @@ export const useAtomSelector = <T1, T2>(
     anAtom: Atom<T1>,
     mapping: (value: T1) => T2,
     additionalDeps?: React.DependencyList | null | undefined,
-    options?: Options
+    options?: Options,
 ) => {
     const mappingRef = useLatest(mapping);
     const mappedAtom = React.useMemo(() => {
@@ -22,7 +22,7 @@ export const useAtomSelector = <T1, T2>(
     }, [anAtom, mappingRef, ...(additionalDeps ?? [])]);
     const result = useAtomValue(
         mappedAtom,
-        options?.store == null ? undefined : { store: options.store }
+        options?.store == null ? undefined : { store: options.store },
     );
     return result;
 };

@@ -23,7 +23,7 @@ export const createMockUrqlClientForLayout = (): Client => {
                             operation: createDummyUrqlOperation(),
                             stale: false,
                             hasNext: false,
-                        })
+                        }),
                     );
                 }
                 default:

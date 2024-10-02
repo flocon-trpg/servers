@@ -7,7 +7,7 @@ const createErrorMessage = (res: RateLimiterRes): string => {
 export const consume = async (
     rateLimiter: RateLimiterAbstract | null,
     userUid: string,
-    consume: number
+    consume: number,
 ) => {
     if (rateLimiter == null) {
         return undefined;

@@ -158,7 +158,7 @@ describe('createORMOptions', () => {
             expect(actual.type).toBe('postgresql');
             expect(actual.clientUrl).toBe('postgresql://localhost');
             expect(actual.driverOptions).toBeFalsy();
-        }
+        },
     );
 
     it.each([undefined, 'https://invalid.example.com', 'mysql://username:passw0rd@localhost'])(
@@ -177,7 +177,7 @@ describe('createORMOptions', () => {
             expect(actual.type).toBe('mysql');
             expect(actual.clientUrl).toBe('mysql://localhost');
             expect(actual.driverOptions).toBeFalsy();
-        }
+        },
     );
 
     it.each([undefined, 'https://invalid.example.com', 'mysql://username:passw0rd@localhost'])(
@@ -196,6 +196,6 @@ describe('createORMOptions', () => {
             expect(actual.type).toBe('sqlite');
             expect(actual.dbName).toBe('./main.sqlite');
             expect(actual.driverOptions).toBeFalsy();
-        }
+        },
     );
 });

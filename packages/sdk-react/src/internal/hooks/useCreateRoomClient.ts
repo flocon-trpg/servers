@@ -18,13 +18,13 @@ type Params<TGraphQLError> = {
  * 引数の `client`, `roomId`, `userUid` は hooks の deps に用いられているため、いずれかが更新されるたびに RoomClient は再作成されます。再作成されると API サーバーとの間に通信が発生するため負荷がかかり、加えて RoomClient の一部のデータも失われるため、更新の必要がない場合は更新をなるべく避ける必要があります。特に `client` は object なので、use-memo-one パッケージの `useMemoOne` もしくは React の `useMemo` などを用いることを推奨します。
  */
 export function useCreateRoomClient<TCustomMessage, TGraphQLError>(
-    params: Params<TGraphQLError>
+    params: Params<TGraphQLError>,
 ): Result<TCustomMessage, TGraphQLError>;
 export function useCreateRoomClient<TCustomMessage, TGraphQLError>(
-    params: Params<TGraphQLError> | null | undefined
+    params: Params<TGraphQLError> | null | undefined,
 ): Result<TCustomMessage, TGraphQLError> | null;
 export function useCreateRoomClient<TCustomMessage, TGraphQLError>(
-    params: Params<TGraphQLError> | null | undefined
+    params: Params<TGraphQLError> | null | undefined,
 ): Result<TCustomMessage, TGraphQLError> | null {
     const client = params?.client;
     const roomId = params?.roomId;

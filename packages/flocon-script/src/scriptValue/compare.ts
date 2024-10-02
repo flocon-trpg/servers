@@ -9,7 +9,7 @@ const compare = <T>(
     left: FValue,
     right: FValue,
     hint: 'default' | 'string' | 'number' | 'JObject',
-    comparer: (left: unknown, right: unknown) => T
+    comparer: (left: unknown, right: unknown) => T,
 ): T => {
     if (hint === 'JObject') {
         return comparer(toJObject(left), toJObject(right));
@@ -21,7 +21,7 @@ export const compareToNumber = (
     left: FValue,
     right: FValue,
     hint: 'default' | 'string' | 'number',
-    comparer: (left: any, right: any) => number
+    comparer: (left: any, right: any) => number,
 ) => {
     return new FNumber(compare(left, right, hint, comparer));
 };
@@ -30,7 +30,7 @@ export const compareToBoolean = (
     left: FValue,
     right: FValue,
     hint: 'default' | 'string' | 'number' | 'JObject',
-    comparer: (left: any, right: any) => boolean
+    comparer: (left: any, right: any) => boolean,
 ) => {
     return new FBoolean(compare(left, right, hint, comparer));
 };
@@ -39,7 +39,7 @@ export const compareToNumberOrString = (
     left: FValue,
     right: FValue,
     hint: 'default',
-    comparer: (left: any, right: any) => number | string
+    comparer: (left: any, right: any) => number | string,
 ) => {
     const r = compare(left, right, hint, comparer);
     if (typeof r === 'number') {

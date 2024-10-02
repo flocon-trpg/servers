@@ -4,7 +4,7 @@ export class SortedArray<T> {
 
     public constructor(
         readonly createSortKey: (value: T) => number,
-        init?: readonly T[]
+        init?: readonly T[],
     ) {
         if (init == null) {
             this.#core = [];
@@ -70,7 +70,7 @@ export class SortedArray<T> {
     }
 
     public updateLast(
-        update: (oldValue: T) => T | undefined
+        update: (oldValue: T) => T | undefined,
     ): { oldValue: T; newValue: T } | undefined {
         let newValue: T | undefined = undefined;
         const found = this.#removeLast(elem => {
@@ -110,7 +110,7 @@ export class SortedArray<T> {
 export class FilteredSortedArray<T> {
     private constructor(
         private readonly filter: (value: T) => boolean,
-        private readonly base: SortedArray<{ value: T; exists: boolean }>
+        private readonly base: SortedArray<{ value: T; exists: boolean }>,
     ) {}
 
     public clone() {
@@ -121,11 +121,11 @@ export class FilteredSortedArray<T> {
     public static ofArray<T>(
         base: readonly T[],
         filter: (value: T) => boolean,
-        createSortKey: (value: T) => number
+        createSortKey: (value: T) => number,
     ) {
         const b = new SortedArray(
             x => createSortKey(x.value),
-            base.map(x => ({ value: x, exists: filter(x) }))
+            base.map(x => ({ value: x, exists: filter(x) })),
         );
         return new FilteredSortedArray<T>(filter, b);
     }
@@ -133,7 +133,7 @@ export class FilteredSortedArray<T> {
     public static ofSortedKey<T>(base: SortedArray<T>, filter: (value: T) => boolean) {
         const b = new SortedArray(
             x => base.createSortKey(x.value),
-            base.toArray(x => ({ value: x, exists: filter(x) }))
+            base.toArray(x => ({ value: x, exists: filter(x) })),
         );
         return new FilteredSortedArray<T>(filter, b);
     }
@@ -158,7 +158,7 @@ export class FilteredSortedArray<T> {
     }
 
     public updateLast(
-        update: (oldValue: T) => T | undefined
+        update: (oldValue: T) => T | undefined,
     ): { oldValue: T | undefined; newValue: T | undefined } | undefined {
         const found = this.base.updateLast(elem => {
             const newValue = update(elem.value);

@@ -164,7 +164,7 @@ const RollCallResult: React.FC<RollCallResultProps> = ({
             {
                 customizeMilliseconds: i => i - (i % 10_000),
                 now: mockDate ? mockDate() : new Date(),
-            }
+            },
         )})`;
     };
     const [elapesedText, setElapsedText] = React.useState<string>(getCreatedAtText());

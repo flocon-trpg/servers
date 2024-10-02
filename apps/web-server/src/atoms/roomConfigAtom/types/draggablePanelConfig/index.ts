@@ -22,7 +22,7 @@ export type SerializedDraggablePanelConfigBase = z.TypeOf<
 >;
 
 export const deserializeDraggablePanelConfigBase = (
-    source: SerializedDraggablePanelConfigBase
+    source: SerializedDraggablePanelConfigBase,
 ): DraggablePanelConfigBase => {
     return {
         x: source.x ?? 0,

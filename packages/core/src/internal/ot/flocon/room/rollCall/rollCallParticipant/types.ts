@@ -7,5 +7,5 @@ export const template = createObjectValueTemplate(
         answeredAt: createReplaceValueTemplate(z.number().optional()),
     },
     1,
-    1
+    1,
 );

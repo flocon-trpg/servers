@@ -3,7 +3,7 @@ import { DeletableTree, groupJoinArray, left, right } from '..';
 
 const sortByAbsolutePath = (
     x: { absolutePath: readonly string[] },
-    y: { absolutePath: readonly string[] }
+    y: { absolutePath: readonly string[] },
 ): number => {
     for (const elem of groupJoinArray(x.absolutePath, y.absolutePath)) {
         switch (elem.type) {
@@ -47,7 +47,7 @@ describe('DeletableTree', () => {
             expect(actual.get([])).toEqual(Option.some('root'));
             expect(actual.get(['a'])).toEqual(Option.none());
             expect([...actual.traverse()].sort(sortByAbsolutePath)).toEqual(
-                [{ absolutePath: [], value: 'root' }].sort(sortByAbsolutePath)
+                [{ absolutePath: [], value: 'root' }].sort(sortByAbsolutePath),
             );
         }
 
@@ -70,7 +70,7 @@ describe('DeletableTree', () => {
                     { absolutePath: [], value: 'root' },
                     { absolutePath: ['a'], value: 'init1' },
                     { absolutePath: ['a', 'b'], value: 'a/b' },
-                ].sort(sortByAbsolutePath)
+                ].sort(sortByAbsolutePath),
             );
         }
 
@@ -91,7 +91,7 @@ describe('DeletableTree', () => {
                     { absolutePath: [], value: 'root' },
                     { absolutePath: ['a'], value: 'a' },
                     { absolutePath: ['a', 'b'], value: 'a/b' },
-                ].sort(sortByAbsolutePath)
+                ].sort(sortByAbsolutePath),
             );
         }
 
@@ -115,7 +115,7 @@ describe('DeletableTree', () => {
                     { absolutePath: ['a'], value: 'a' },
                     { absolutePath: ['a', 'b'], value: 'a/b' },
                     { absolutePath: ['a2'], value: 'a2' },
-                ].sort(sortByAbsolutePath)
+                ].sort(sortByAbsolutePath),
             );
         }
 
@@ -144,7 +144,7 @@ describe('DeletableTree', () => {
                     { absolutePath: ['a', 'b', 'c', 'd'], value: 'init3' },
                     { absolutePath: ['a', 'b', 'c', 'd', 'e'], value: 'a/b/c/d/e' },
                     { absolutePath: ['a2'], value: 'a2' },
-                ].sort(sortByAbsolutePath)
+                ].sort(sortByAbsolutePath),
             );
         }
 
@@ -169,7 +169,7 @@ describe('DeletableTree', () => {
                     { absolutePath: ['a', 'b', 'c', 'd', 'e'], value: 'a/b/c/d/e' },
                     { absolutePath: ['a', 'b', 'c', 'd', 'e2'], value: 'a/b/c/d/e2' },
                     { absolutePath: ['a2'], value: 'a2' },
-                ].sort(sortByAbsolutePath)
+                ].sort(sortByAbsolutePath),
             );
         }
     });
@@ -180,17 +180,17 @@ describe('DeletableTree', () => {
         source.ensure(
             ['a'],
             () => 'a',
-            () => 'init'
+            () => 'init',
         );
         source.ensure(
             ['a', 'b'],
             () => 'a/b',
-            () => 'init'
+            () => 'init',
         );
         source.ensure(
             ['b'],
             () => 'b',
-            () => 'init'
+            () => 'init',
         );
 
         const children = source.getChildren();
@@ -199,10 +199,10 @@ describe('DeletableTree', () => {
             [
                 { absolutePath: ['a'], value: 'a' },
                 { absolutePath: ['a', 'b'], value: 'a/b' },
-            ].sort(sortByAbsolutePath)
+            ].sort(sortByAbsolutePath),
         );
         expect([...(children.get('b')?.traverse() ?? [])].sort(sortByAbsolutePath)).toEqual(
-            [{ absolutePath: ['b'], value: 'b' }].sort(sortByAbsolutePath)
+            [{ absolutePath: ['b'], value: 'b' }].sort(sortByAbsolutePath),
         );
     });
 
@@ -233,17 +233,17 @@ describe('DeletableTree', () => {
         source.ensure(
             ['1'],
             () => 1,
-            () => -1
+            () => -1,
         );
         source.ensure(
             ['1', '2'],
             () => 12,
-            () => -1
+            () => -1,
         );
         source.ensure(
             ['2'],
             () => 2,
-            () => -1
+            () => -1,
         );
         const cloned = source.map(i => {
             if (i.absolutePath.length === 0) {
@@ -260,7 +260,7 @@ describe('DeletableTree', () => {
                 { absolutePath: ['1'], value: '1' },
                 { absolutePath: ['1', '2'], value: '12' },
                 { absolutePath: ['2'], value: '2' },
-            ].sort(sortByAbsolutePath)
+            ].sort(sortByAbsolutePath),
         );
     });
 
@@ -269,17 +269,17 @@ describe('DeletableTree', () => {
         source.ensure(
             ['1'],
             () => 1,
-            () => -1
+            () => -1,
         );
         source.ensure(
             ['1', '2'],
             () => 12,
-            () => -1
+            () => -1,
         );
         source.ensure(
             ['2'],
             () => 2,
-            () => -1
+            () => -1,
         );
         source.delete(['1']);
 
@@ -287,7 +287,7 @@ describe('DeletableTree', () => {
             [
                 { absolutePath: [], value: 0 },
                 { absolutePath: ['2'], value: 2 },
-            ].sort(sortByAbsolutePath)
+            ].sort(sortByAbsolutePath),
         );
     });
 });

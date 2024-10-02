@@ -17,7 +17,7 @@ type Filter = {
  * 代わりに `useJoinParticipants` の使用も検討してください。
  */
 export const useParticipants = (
-    filter?: Filter
+    filter?: Filter,
 ): ReadonlyMap<string, ParticipantState> | undefined => {
     const includeMaster = filter?.[Master] ?? true;
     const includePlayer = filter?.[Player] ?? true;

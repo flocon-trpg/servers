@@ -18,7 +18,7 @@ const masterVolumeAtom = atom(
                 roomConfig.masterVolume = newValue;
             });
         });
-    }
+    },
 );
 const channelVolumesAtom = atom(
     get => get(roomConfigAtom)?.channelVolumes,
@@ -31,7 +31,7 @@ const channelVolumesAtom = atom(
                 roomConfig.channelVolumes[action.channelKey] = action.newVolume;
             });
         });
-    }
+    },
 );
 const seVolumeAtom = atom(
     get => get(roomConfigAtom)?.seVolume,
@@ -44,7 +44,7 @@ const seVolumeAtom = atom(
                 roomConfig.seVolume = newValue;
             });
         });
-    }
+    },
 );
 
 export const RoomVolumeBar: React.FC = () => {

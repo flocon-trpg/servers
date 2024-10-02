@@ -154,7 +154,7 @@ describe('useStateEditor', () => {
             // ただし、PiecePositionなど一部の値を変更したいこともあるので、その場合はupdateInitStateを使う。
             expect(result.current.state).toBe(setUpdateInitState ? 'updated-updated1' : 'updated1');
             expect(onCreate).not.toHaveBeenCalled();
-        }
+        },
     );
 
     it('tests updateMode', () => {
@@ -189,7 +189,7 @@ describe('useStateEditor', () => {
             result.current.updateState(prevState => {
                 expect(prevState).toBe('init');
                 return 'next';
-            })
+            }),
         );
         // onUpdateをトリガーとしてpropsを外部から変更するまでstateは変わらない
         expect(result.current.state).toBe('init');

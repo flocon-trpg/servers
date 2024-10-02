@@ -32,7 +32,7 @@ const WrapTabNode: React.FC<WrapTabNodeProps> = ({
                 onDnd({ from: index, to: draggedItemKey });
             },
         },
-        [dndType, index]
+        [dndType, index],
     );
     const [, drop] = useDrop({
         accept: dndType,
@@ -61,11 +61,11 @@ export const DraggableTabs: React.FC<Props> = (props: Props) => {
                 {node}
             </WrapTabNode>
         ),
-        [dndType, onDnd]
+        [dndType, onDnd],
     );
     const renderTabBar = React.useCallback<NonNullable<TabsProps['renderTabBar']>>(
         (props, DefaultTabBar) => <DefaultTabBar {...props}>{tabBarChildren}</DefaultTabBar>,
-        [tabBarChildren]
+        [tabBarChildren],
     );
 
     return <Tabs {...tabsProps} renderTabBar={renderTabBar} />;

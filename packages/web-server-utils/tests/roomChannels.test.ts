@@ -57,7 +57,7 @@ describe('RoomChannels', () => {
 
             expect(client.publicChannels).toEqual(expectedPublicChannels);
             expect(client.privateChannels.toArray().map(ch => ch.toStringArray())).toEqual(
-                expectedPrivateChannels
+                expectedPrivateChannels,
             );
         });
     });
@@ -90,7 +90,7 @@ describe('RoomChannels', () => {
 
         expect(client.publicChannels).toEqual(expectedPublicChannels);
         expect(client.privateChannels.toArray().map(ch => ch.toStringArray())).toEqual(
-            expectedPrivateChannels
+            expectedPrivateChannels,
         );
     });
 });

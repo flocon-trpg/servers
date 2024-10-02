@@ -22,7 +22,7 @@ describe('mergeStyles', () => {
                 minHeight: undefined,
                 paddingTop: 2,
                 paddingBottom: undefined,
-            }
+            },
         );
         expect(actual).toEqual({
             width: 2,

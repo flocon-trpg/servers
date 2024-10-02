@@ -9,5 +9,5 @@ export const template = createObjectValueTemplate(
         volume: createReplaceValueTemplate(z.number()),
     },
     1,
-    1
+    1,
 );

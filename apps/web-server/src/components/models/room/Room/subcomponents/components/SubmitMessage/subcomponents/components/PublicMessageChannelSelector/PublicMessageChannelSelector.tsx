@@ -12,7 +12,7 @@ import { flex, flexNone, flexRow, itemsCenter } from '@/styles/className';
 type Props = {
     config: ChatPalettePanelConfig | MessagePanelConfig;
     onConfigUpdate: (
-        recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void
+        recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void,
     ) => void;
     descriptionStyle?: React.CSSProperties;
     inputMaxWidth?: number;

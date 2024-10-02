@@ -202,7 +202,7 @@ const Balloon: React.FC<BalloonProps> = ({ message, x, y, width, onBalloonChange
     ];
 
     const [areAllTextsUndefined, setAreAllTextUndefined] = React.useState(
-        [text0, text1, text2, text3, text4].every(t => t === undefined)
+        [text0, text1, text2, text3, text4].every(t => t === undefined),
     );
     React.useEffect(() => {
         setAreAllTextUndefined([text0, text1, text2, text3, text4].every(t => t === undefined));
@@ -254,7 +254,7 @@ export const ImagePiece: React.FC<Props> = props => {
                 opacity: props.opacity,
             },
         }),
-        [props.opacity, props.filePath.path, props.filePath.sourceType]
+        [props.opacity, props.filePath.path, props.filePath.sourceType],
     );
     const imageElement = image.type === success ? image.image : undefined;
 

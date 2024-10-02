@@ -148,7 +148,7 @@ export const Layout: React.FC<PropsWithChildren<Props>> = ({
                     {},
                     {
                         requestPolicy: 'network-only',
-                    }
+                    },
                 )
                 .toPromise()
                 .then(queryResult => {

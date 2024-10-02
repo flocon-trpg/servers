@@ -30,19 +30,19 @@ describe('webConfigAtom (process.env does not exist)', () => {
         });
 
         expect(webConfigAtomResult.current[0]?.value?.http).toEqual(
-            fakeEnvTextSource.NEXT_PUBLIC_API_HTTP
+            fakeEnvTextSource.NEXT_PUBLIC_API_HTTP,
         );
         expect(webConfigAtomResult.current[0]?.value?.ws).toEqual(
-            fakeEnvTextSource.NEXT_PUBLIC_API_WS
+            fakeEnvTextSource.NEXT_PUBLIC_API_WS,
         );
         expect(webConfigAtomResult.current[0]?.value?.authProviders?.sort()).toEqual(
-            [...fakeEnvTextSource.NEXT_PUBLIC_AUTH_PROVIDERS].sort()
+            [...fakeEnvTextSource.NEXT_PUBLIC_AUTH_PROVIDERS].sort(),
         );
         expect(webConfigAtomResult.current[0]?.value?.firebaseConfig).toEqual(
-            fakeEnvTextSource.NEXT_PUBLIC_FIREBASE_CONFIG
+            fakeEnvTextSource.NEXT_PUBLIC_FIREBASE_CONFIG,
         );
         expect(webConfigAtomResult.current[0]?.value?.isUnlistedFirebaseStorageEnabled).toBe(
-            fakeEnvTextSource.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED
+            fakeEnvTextSource.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED,
         );
     });
 });

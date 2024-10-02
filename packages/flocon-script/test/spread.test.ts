@@ -8,7 +8,7 @@ let spreadSource = { b: 'B1', c: 'C1' };
 let spread = { a: 'A2', b: 'B2', ...spreadSource, c: 'C2', d: 'D2' };
 ({ spreadSource, spread })
     `,
-            {}
+            {},
         );
         expect(actual.result).toEqual({
             spreadSource: { b: 'B1', c: 'C1' },
@@ -23,7 +23,7 @@ let spreadSource = [20, 30];
 let spread = [10, ...spreadSource, 40];
 ({ spreadSource, spread })
     `,
-            {}
+            {},
         );
         expect(actual.result).toEqual({
             spreadSource: [20, 30],
@@ -38,7 +38,7 @@ let spreadSource = 'bar';
 let spread = [10, ...spreadSource, 20];
 ({ spreadSource, spread })
     `,
-            {}
+            {},
         );
         expect(actual.result).toEqual({
             spreadSource: 'bar',

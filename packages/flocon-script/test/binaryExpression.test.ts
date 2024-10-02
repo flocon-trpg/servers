@@ -52,7 +52,7 @@ let left = ${left};
 let right = ${right};
 left ${operator} right;
         `,
-        {}
+        {},
     );
     expect(actual.result).toBe(expected);
 });

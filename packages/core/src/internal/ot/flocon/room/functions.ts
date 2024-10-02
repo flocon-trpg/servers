@@ -82,7 +82,7 @@ export const toClientState =
                             ownerParticipantId: state.ownerParticipantId ?? anyValue,
                         }),
                         requestedBy,
-                        source
+                        source,
                     )(state),
             }),
             memos: RecordOperation.toClientState({
@@ -122,7 +122,7 @@ export const toClientState =
  */
 export const serverTransform =
     (
-        requestedBy: RequestedBy
+        requestedBy: RequestedBy,
     ): ServerTransform<
         State<typeof template>,
         TwoWayOperation<typeof template>,
@@ -219,7 +219,7 @@ export const serverTransform =
             innerTransform: ({ first, second, prevState, nextState }) =>
                 Board.serverTransform(
                     requestedBy,
-                    stateAfterServerOperation
+                    stateAfterServerOperation,
                 )({
                     stateBeforeServerOperation: prevState,
                     stateAfterServerOperation: nextState,
@@ -269,7 +269,7 @@ export const serverTransform =
                         ownerParticipantId: nextState.ownerParticipantId ?? anyValue,
                     }),
                     requestedBy,
-                    stateAfterServerOperation
+                    stateAfterServerOperation,
                 )({
                     stateBeforeServerOperation: prevState,
                     stateAfterServerOperation: nextState,

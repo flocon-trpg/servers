@@ -22,7 +22,7 @@ const template = createObjectValueTemplate(
         name: createReplaceValueTemplate(z.string()),
     },
     $v,
-    $r
+    $r,
 );
 
 type TemplateState = State<typeof template>;

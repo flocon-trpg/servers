@@ -27,7 +27,7 @@ const update = z
                 isValuePrivateChanged: z.object({ newValue: maybe(z.string()) }),
                 isValueChanged: z.boolean(),
             })
-            .partial()
+            .partial(),
     );
 
 export const type = z.union([
@@ -50,7 +50,7 @@ export type Type = z.TypeOf<typeof type>;
 
 export const ofOperation = (
     operation: TwoWayOperation<typeof StringPieceValueTypes.template>,
-    currentState: State<typeof StringPieceValueTypes.template>
+    currentState: State<typeof StringPieceValueTypes.template>,
 ): Type => {
     const result = {
         ...toUpOperation(StringPieceValueTypes.template)(operation),

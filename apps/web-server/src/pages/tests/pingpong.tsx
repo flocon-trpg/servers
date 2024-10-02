@@ -41,7 +41,7 @@ const PingPongCore: React.FC = () => {
                 if (pong.error != null) {
                     setPongObservableResult({ type: 'error', error: pong.error });
                 }
-            })
+            }),
         );
         return () => subscription.unsubscribe();
     }, [urqlClient]);

@@ -93,7 +93,7 @@ const wsClient = (wsUrl: string, testAuthorizationHeaderValue: string | undefine
 const createUrqlClient = (
     httpUrl: string,
     wsUrl: string,
-    testAuthorizationHeaderValue: string | undefined
+    testAuthorizationHeaderValue: string | undefined,
 ) => {
     const headers: Record<string, string> = {};
     if (testAuthorizationHeaderValue != null) {
@@ -114,7 +114,7 @@ const createUrqlClient = (
                         subscribe: sink => ({
                             unsubscribe: wsClient(wsUrl, testAuthorizationHeaderValue).subscribe(
                                 input,
-                                sink
+                                sink,
                             ),
                         }),
                     };
@@ -148,7 +148,7 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -160,7 +160,7 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -172,7 +172,7 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -184,7 +184,7 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -196,7 +196,7 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -208,7 +208,7 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -253,7 +253,7 @@ export class TestClient {
                 {},
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -309,7 +309,7 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -329,7 +329,7 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -349,7 +349,7 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -361,7 +361,7 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -373,7 +373,7 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -385,7 +385,7 @@ export class TestClient {
                 variables,
                 {
                     requestPolicy: 'network-only',
-                }
+                },
             )
             .toPromise();
     }
@@ -396,8 +396,8 @@ export class TestClient {
                 RoomEventDocument,
                 {
                     id: roomId,
-                }
-            )
+                },
+            ),
         );
     }
 }

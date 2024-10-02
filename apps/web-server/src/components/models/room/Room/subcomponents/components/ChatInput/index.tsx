@@ -36,7 +36,7 @@ export const ChatInput: React.FC<Props> = ({
 }: Props) => {
     const configAtom = React.useMemo(
         () => atom(get => get(roomConfigAtom)?.panels.messagePanels?.[panelId]),
-        [panelId]
+        [panelId],
     );
     const config = useAtomValue(configAtom);
     const [selectedChannelType, setSelectedChannelType] =

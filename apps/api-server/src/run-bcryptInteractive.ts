@@ -14,7 +14,7 @@ const filename = 'bcrypt-hash.txt';
 
 const startApp = async () => {
     console.info(
-        'To exit without saving to a file, press Ctrl+C. / ファイルに保存せず途中で終了する場合は Ctrl+C を押してください。'
+        'To exit without saving to a file, press Ctrl+C. / ファイルに保存せず途中で終了する場合は Ctrl+C を押してください。',
     );
 
     let lang: Lang;

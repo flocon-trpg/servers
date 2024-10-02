@@ -29,7 +29,7 @@ const pieceSize: PixelSize = { w: 50, h: 50 };
 const defaultStringPieceValue = (
     piecePosition: CompositeRect,
     isCellMode: boolean,
-    ownerCharacterId: string | undefined
+    ownerCharacterId: string | undefined,
 ): StringPieceState => ({
     ...piecePosition,
 

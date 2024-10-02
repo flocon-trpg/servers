@@ -20,7 +20,7 @@ export const serializedGameEffectPanelConfig = z
 export type SerializedGameEffectPanelConfig = z.TypeOf<typeof serializedGameEffectPanelConfig>;
 
 export const deserializeGameEffectPanelConfig = (
-    source: SerializedGameEffectPanelConfig
+    source: SerializedGameEffectPanelConfig,
 ): GameEffectPanelConfig => {
     return {
         ...deserializeDraggablePanelConfigBase(source),

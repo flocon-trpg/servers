@@ -74,7 +74,7 @@ export class WritePrivateMessageResolver {
     public async writePrivateMessage(
         @Args() args: WritePrivateMessageArgs,
         @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine
+        @PubSub() pubSub: PubSubEngine,
     ): Promise<typeof WriteRoomPrivateMessageResult> {
         // **** args guard ****
 
@@ -158,11 +158,11 @@ export class WritePrivateMessageResolver {
             entity.charaIsPrivate = chara.isPrivate;
             entity.charaImagePath = chara.image?.path;
             entity.charaImageSourceType = FileSourceTypeModule.ofNullishString(
-                chara.portraitImage?.sourceType
+                chara.portraitImage?.sourceType,
             );
             entity.charaPortraitImagePath = chara.portraitImage?.path;
             entity.charaPortraitImageSourceType = FileSourceTypeModule.ofNullishString(
-                chara.portraitImage?.sourceType
+                chara.portraitImage?.sourceType,
             );
         }
 

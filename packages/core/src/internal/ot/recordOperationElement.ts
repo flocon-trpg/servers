@@ -8,7 +8,7 @@ export const recordDownOperationElementFactory = <
     TOperation extends z.ZodTypeAny,
 >(
     state: TState,
-    operation: TOperation
+    operation: TOperation,
 ) =>
     z.union([
         z.object({
@@ -42,7 +42,7 @@ export const recordUpOperationElementFactory = <
     TOperation extends z.ZodTypeAny,
 >(
     state: TState,
-    operation: TOperation
+    operation: TOperation,
 ) =>
     z.union([
         z.object({

@@ -11,7 +11,7 @@ if (x) {
 }
 result;
         `,
-            {}
+            {},
         );
         expect(actual.result).toBe(bool ? 1 : 0);
     });
@@ -28,7 +28,7 @@ if (x) {
 }
 result;
         `,
-            {}
+            {},
         );
         expect(actual.result).toBe(bool ? 1 : 2);
     });

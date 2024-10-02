@@ -4,7 +4,7 @@ export class Migration20220502053137 extends Migration {
     async up(): Promise<void> {
         this.addSql('alter table `room` add `complete_updated_at` datetime null;');
         this.addSql(
-            'alter table `room` add index `room_complete_updated_at_index`(`complete_updated_at`);'
+            'alter table `room` add index `room_complete_updated_at_index`(`complete_updated_at`);',
         );
     }
 

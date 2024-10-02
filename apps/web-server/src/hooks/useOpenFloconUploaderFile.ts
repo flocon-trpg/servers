@@ -43,7 +43,7 @@ export const useOpenFloconUploaderFile = () => {
             // CONSIDER: 画像などであれば、ダウンロードするのではなく、新しいタブで開いたほうがいい
             fileDownload(blob, file.filename);
         },
-        [getIdToken, isFetching, notification, webConfig?.value]
+        [getIdToken, isFetching, notification, webConfig?.value],
     );
 
     return React.useMemo(
@@ -51,6 +51,6 @@ export const useOpenFloconUploaderFile = () => {
             open,
             isFetching,
         }),
-        [isFetching, open]
+        [isFetching, open],
     );
 };

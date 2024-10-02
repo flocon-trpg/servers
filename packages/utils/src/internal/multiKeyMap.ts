@@ -45,7 +45,7 @@ export class MultiKeyMap<TKey, TValue> {
 
     public replace<TReplaced extends TValue | undefined>(
         key: readonly TKey[],
-        replacer: (oldValue: TValue | undefined) => TReplaced
+        replacer: (oldValue: TValue | undefined) => TReplaced,
     ): TReplaced {
         const result = this.#source.ensure(
             key,
@@ -56,7 +56,7 @@ export class MultiKeyMap<TKey, TValue> {
                 }
                 return Option.some(newValue) as Some<TValue>;
             },
-            () => Option.none()
+            () => Option.none(),
         );
         return (result.isNone ? undefined : result.value) as TReplaced;
     }
@@ -90,7 +90,10 @@ export class MultiKeyMap<TKey, TValue> {
     }
 
     public map<TValue2>(
-        mapping: (oldValue: { value: TValue; absolutePath: readonly TKey[] }) => TValue2 | undefined
+        mapping: (oldValue: {
+            value: TValue;
+            absolutePath: readonly TKey[];
+        }) => TValue2 | undefined,
     ): MultiKeyMap<TKey, TValue2> {
         const newSource = this.#source.map(oldValue => {
             if (oldValue.value.isNone) {

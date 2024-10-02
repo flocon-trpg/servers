@@ -16,7 +16,7 @@ type RoomState = State<typeof Room.template>;
 class CommandError extends Error {
     constructor(
         message: string,
-        public readonly range?: readonly [number, number]
+        public readonly range?: readonly [number, number],
     ) {
         super(message);
         this.name = 'CommandError';

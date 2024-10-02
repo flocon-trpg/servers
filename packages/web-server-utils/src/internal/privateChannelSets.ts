@@ -42,7 +42,7 @@ export class PrivateChannelSets {
             .sort(([a], [b]) => a.localeCompare(b))
             .reduce(
                 (seed, [, elem], i) => (i === 0 ? elem.toString() : `${seed},${elem.toString()}`),
-                ''
+                '',
             );
     }
 }

@@ -53,7 +53,7 @@ const ChatPaletteList: React.FC<ChatPaletteListProps> = ({
             bufferedChatPaletteText == null
                 ? null
                 : bufferedChatPaletteText.replace(/(\r\n|\r)/g, '\n').split('\n'),
-        [bufferedChatPaletteText]
+        [bufferedChatPaletteText],
     );
 
     const baseStyle: React.CSSProperties = {
@@ -128,7 +128,7 @@ export const ChatPalettePanelContent: React.FC<ChatPalettePanelContentProps> = (
     const setPrivateMessageInput = useSetAtom(roomPrivateMessageInputAtom);
     const config = useAtomSelector(
         roomConfigAtom,
-        state => state?.panels.chatPalettePanels?.[panelId]
+        state => state?.panels.chatPalettePanels?.[panelId],
     );
     const setRoomConfig = useImmerSetAtom(roomConfigAtom);
     const subject = React.useMemo(() => new Subject<string>(), []);
@@ -166,7 +166,7 @@ export const ChatPalettePanelContent: React.FC<ChatPalettePanelContentProps> = (
                 recipe(chatPalettePanel);
             });
         },
-        [panelId, setRoomConfig]
+        [panelId, setRoomConfig],
     );
 
     if (config == null) {

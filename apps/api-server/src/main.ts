@@ -75,7 +75,7 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
     if (serverConfig.firebaseAdminSecret == null) {
         if (serverConfig.firebaseProjectId == null) {
             await onError(
-                `FirebaseのプロジェクトIDを取得できませんでした。${FIREBASE_PROJECT_ID} にプロジェクトIDをセットしてください。`
+                `FirebaseのプロジェクトIDを取得できませんでした。${FIREBASE_PROJECT_ID} にプロジェクトIDをセットしてください。`,
             );
             return;
         }
@@ -104,7 +104,7 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
     logEntryPasswordConfig(serverConfig);
 
     const getDecodedIdToken = async (
-        idToken: string
+        idToken: string,
     ): Promise<Result<admin.auth.DecodedIdToken & { type: BaasType.Firebase }, unknown>> => {
         const decodedIdToken = await admin
             .auth()
@@ -121,7 +121,7 @@ export const main = async (params: { debug: boolean }): Promise<void> => {
     };
 
     const getDecodedIdTokenFromBearer = async (
-        bearer: string | undefined
+        bearer: string | undefined,
     ): Promise<
         Result<admin.auth.DecodedIdToken & { type: BaasType.Firebase }, unknown> | undefined
     > => {

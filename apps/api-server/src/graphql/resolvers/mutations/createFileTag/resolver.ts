@@ -36,7 +36,7 @@ export class CreateFileTagResolver {
     @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async createFileTag(
         @Ctx() context: ResolverContext,
-        @Arg('tagName') tagName: string
+        @Arg('tagName') tagName: string,
     ): Promise<FileTag | null> {
         const maxTagsCount = 10;
 

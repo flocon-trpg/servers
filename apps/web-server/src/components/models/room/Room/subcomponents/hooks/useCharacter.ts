@@ -12,7 +12,7 @@ export const useCharacter = (characterId: string | undefined): CharacterState | 
                 }
                 return state.characters?.[characterId];
             },
-            [characterId]
+            [characterId],
         ) ?? undefined
     );
 };

@@ -28,7 +28,7 @@ const parseStringToBooleanCore = (source: string): Result<boolean, ParseError> =
 type ValueType<T> = Exclude<T, string> | (T extends string ? boolean : never);
 
 export const parseStringToBoolean = <T extends string | null | undefined>(
-    source: T
+    source: T,
 ): Result<ValueType<T>, ParseError> => {
     if (source == null) {
         return Result.ok(source as ValueType<T>);

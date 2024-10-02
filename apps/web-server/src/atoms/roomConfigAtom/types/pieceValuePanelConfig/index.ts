@@ -20,7 +20,7 @@ export const serializedPieceValuePanelConfig = z
 export type SerializedPieceValuePanelConfig = z.TypeOf<typeof serializedPieceValuePanelConfig>;
 
 export const deserializePieceValuePanelConfig = (
-    source: SerializedPieceValuePanelConfig
+    source: SerializedPieceValuePanelConfig,
 ): PieceValuePanelConfig => {
     return {
         ...deserializeDraggablePanelConfigBase(source),

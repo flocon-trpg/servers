@@ -5,7 +5,7 @@ import { AppConsole } from '../utils/appConsole';
 import { createORMOptions } from './createORMOptions';
 
 export const createORM = async (
-    options: ReturnType<typeof createORMOptions>
+    options: ReturnType<typeof createORMOptions>,
 ): Promise<Result<ORM>> => {
     if (options.isError) {
         return options;

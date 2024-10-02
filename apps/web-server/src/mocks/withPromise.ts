@@ -33,7 +33,7 @@ import { Sink, Source, filter, pipe, subscribe, take, toPromise } from 'wonka';
 // Urql の関数の戻り値が OperationResultSource<T> であるため OperationResultSource<T> を作成するための、https://github.com/urql-graphql/urql/blob/9cdb74b03e07d46e056ef023d1543f24a823ec55/packages/core/src/utils/streamUtils.ts を用いた関数。urql の関数をモックする際に用いる。
 // 参考: https://github.com/urql-graphql/urql/issues/3133
 export function withPromise<T extends OperationResult>(
-    _source$: Source<T>
+    _source$: Source<T>,
 ): OperationResultSource<T> {
     const source$ = ((sink: Sink<T>) => _source$(sink)) as OperationResultSource<T>;
     source$.toPromise = () =>
@@ -41,7 +41,7 @@ export function withPromise<T extends OperationResult>(
             source$,
             filter(result => !result.stale && !result.hasNext),
             take(1),
-            toPromise
+            toPromise,
         );
     source$.then = (onResolve, onReject) => source$.toPromise().then(onResolve, onReject);
     source$.subscribe = onResult => subscribe(onResult)(source$);

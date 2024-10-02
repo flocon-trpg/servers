@@ -54,7 +54,7 @@ export const useFirebaseStorageUrlQuery = (storage: StorageReference | null) => 
 
 export const fetchFirebaseStorageUrlQuery = (
     queryClient: QueryClient,
-    storage: StorageReference | null
+    storage: StorageReference | null,
 ) => {
     return queryClient.fetchQuery(queryKey(storage), () => queryFn(storage));
 };

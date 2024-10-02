@@ -119,7 +119,7 @@ const useAutoSaveUserConfig = () => {
             setDebouncedUserConfig(userConfig);
         },
         throttleTimespan,
-        [userConfig]
+        [userConfig],
     );
 
     useAsync(async () => {
@@ -144,7 +144,7 @@ const useAutoSaveRoomConfig = () => {
             setDebouncedRoomConfig(roomConfig);
         },
         throttleTimespan,
-        [roomConfig]
+        [roomConfig],
     );
 
     useAsync(async () => {
@@ -296,7 +296,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
                     authorization: true,
                     getUserIdTokenResult: getIdTokenResult,
                     exchanges: defaultExchanges => [devtoolsExchange, ...defaultExchanges],
-                })
+                }),
             );
         } else {
             setUrqlClient(
@@ -305,7 +305,7 @@ const App = ({ Component, pageProps }: AppProps): JSX.Element => {
                     wsUrl: wsUri,
                     authorization: false,
                     exchanges: defaultExchanges => [devtoolsExchange, ...defaultExchanges],
-                })
+                }),
             );
         }
     }, [

@@ -36,7 +36,7 @@ export class GetRoomMessagesResolver {
     @UseMiddleware(QueueMiddleware, RateLimitMiddleware(10))
     public async getMessages(
         @Args() args: GetMessagesArgs,
-        @Ctx() context: ResolverContext
+        @Ctx() context: ResolverContext,
     ): Promise<typeof GetRoomMessagesResult> {
         const em = context.em;
         const authorizedUserUid = ensureAuthorizedUser(context).userUid;

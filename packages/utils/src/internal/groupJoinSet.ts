@@ -4,7 +4,7 @@ type GroupJoinResultType = typeof left | typeof right | typeof both;
 
 export const groupJoinSet = <T>(
     left: ReadonlySet<T>,
-    right: ReadonlySet<T>
+    right: ReadonlySet<T>,
 ): Map<T, GroupJoinResultType> => {
     const result = new Map<T, GroupJoinResultType>();
     const rightClone = new Set(right);

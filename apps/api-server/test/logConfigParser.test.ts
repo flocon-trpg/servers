@@ -18,7 +18,7 @@ describe('logConfigParser', () => {
         LOG_FORMAT => {
             const actual = new LogConfigParser({ LOG_FORMAT });
             expect(actual.logConfig).toEqual(Result.ok({ ...defaultLogConfig, logFormat: 'json' }));
-        }
+        },
     );
 
     it('tests LOG_FORMAT to be error', () => {
@@ -31,9 +31,9 @@ describe('logConfigParser', () => {
         LOG_LEVEL => {
             const actual = new LogConfigParser({ LOG_LEVEL });
             expect(actual.logConfig).toEqual(
-                Result.ok({ ...defaultLogConfig, logLevel: LOG_LEVEL })
+                Result.ok({ ...defaultLogConfig, logLevel: LOG_LEVEL }),
             );
-        }
+        },
     );
 
     it('tests LOG_LEVEL to be trimmed and be lowercase', () => {

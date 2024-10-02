@@ -70,7 +70,7 @@ describe('moveElement', () => {
             {
                 from: 'nullish',
                 to: 'three',
-            }
+            },
         );
         expect(actual).toEqual([1, 3, nullish]);
     });

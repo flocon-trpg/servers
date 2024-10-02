@@ -5,7 +5,7 @@ import { GraphQLClientWithStatus } from './graphqlClient';
 const bufferTimeValue = 1500;
 
 export const updateWritingMessageStatus = <TGraphQLError>(
-    client: Pick<GraphQLClientWithStatus<TGraphQLError>, 'updateWritingMessagesStatusMutation'>
+    client: Pick<GraphQLClientWithStatus<TGraphQLError>, 'updateWritingMessagesStatusMutation'>,
 ) => {
     const subject = new Subject<WritingMessageStatusInputType>();
     const next = (inputType: WritingMessageStatusInputType) => {
@@ -20,7 +20,7 @@ export const updateWritingMessageStatus = <TGraphQLError>(
                     return [];
                 }
                 return client.updateWritingMessagesStatusMutation({ newStatus: lastElement });
-            })
+            }),
         )
         .subscribe();
     return { next, unsubscribe: () => subscription.unsubscribe() };

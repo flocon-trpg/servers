@@ -45,7 +45,7 @@ export const ParticipantsSelect: React.FC<Props> = ({
                     />
                     <div style={{ paddingLeft: 4 }}>{participant.name}</div>
                 </div>
-            </Select.Option>
+            </Select.Option>,
         );
     });
 

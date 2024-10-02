@@ -62,7 +62,7 @@ const Editor: React.FC<EditorProps> = ({ script, onChange, extraLib }: EditorPro
         switch (extraLib) {
             case 'characterCommand':
                 monaco.languages.typescript.typescriptDefaults.addExtraLib(
-                    characterCommandLibSource
+                    characterCommandLibSource,
                 );
                 break;
             default:
@@ -131,10 +131,10 @@ export const CommandEditorModal: React.FC = () => {
     const character = useCharacter(commandEditorModalType?.characterId);
     const characterRef = useLatest(character);
     const [privateCommands, setPrivateCommands] = React.useState<Map<string, CommandState>>(
-        new Map()
+        new Map(),
     );
     const privateCommandsAsArray = [...privateCommands].sort(([, x], [, y]) =>
-        x.name.localeCompare(y.name)
+        x.name.localeCompare(y.name),
     );
     const [selectedKeyState, setSelectedKeyState] = React.useState<string | undefined>();
     React.useEffect(() => {
@@ -247,7 +247,7 @@ export const CommandEditorModal: React.FC = () => {
                         $v: 2,
                         $r: 1,
                         privateCommands: d == null ? undefined : privateCommandsUpOperation(d),
-                    })
+                    }),
                 );
                 setCommandEditorModalType(null);
             }}

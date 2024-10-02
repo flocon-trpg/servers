@@ -25,7 +25,7 @@ export class FRoom extends FObject {
 
     public constructor(
         source: State<typeof Room.template>,
-        private readonly myUserUid: string
+        private readonly myUserUid: string,
     ) {
         super();
         this._room = cloneDeep(source);
@@ -132,7 +132,7 @@ export class FRoom extends FObject {
             default:
                 throw new ScriptError(
                     `${typeof key === 'symbol' ? 'symbol' : key}への値のセットは制限されています。`,
-                    astInfo?.range
+                    astInfo?.range,
                 );
         }
     }

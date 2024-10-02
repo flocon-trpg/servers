@@ -81,10 +81,10 @@ export const createGraphQLClientForRoomClient = (client: Client): GraphQLClient<
                                 return;
                             }
                             observer.next(Result.error(value.error!));
-                        })
+                        }),
                     );
                     return subscription;
-                }
+                },
             );
             return observable.pipe(share());
         },

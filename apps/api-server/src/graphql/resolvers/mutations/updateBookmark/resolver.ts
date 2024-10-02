@@ -63,7 +63,7 @@ export class UpdateBookmarkResolver {
     @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async updateBookmark(
         @Args() args: UpdateBookmarkArgs,
-        @Ctx() context: ResolverContext
+        @Ctx() context: ResolverContext,
     ): Promise<typeof UpdateBookmarkResult> {
         const em = context.em;
         const authorizedUser = ensureAuthorizedUser(context);

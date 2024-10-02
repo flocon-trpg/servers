@@ -31,5 +31,5 @@ export const template = createObjectValueTemplate(
         stringPieces: createRecordValueTemplate(StringPiece.template),
     },
     2,
-    1
+    1,
 );

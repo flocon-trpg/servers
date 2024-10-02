@@ -45,11 +45,11 @@ const update = z
                 dice: record(
                     recordUpOperationElementFactory(
                         state(DieValueTypes.template),
-                        dieValueUpOperation
-                    )
+                        dieValueUpOperation,
+                    ),
                 ),
             })
-            .partial()
+            .partial(),
     );
 
 export const type = z.union([
@@ -72,7 +72,7 @@ export type Type = z.TypeOf<typeof type>;
 
 export const ofOperation = (
     operation: TwoWayOperation<typeof DicePieceValueTypes.template>,
-    currentState: State<typeof DicePieceValueTypes.template>
+    currentState: State<typeof DicePieceValueTypes.template>,
 ): Type => {
     const result = {
         ...toUpOperation(DicePieceValueTypes.template)(operation),

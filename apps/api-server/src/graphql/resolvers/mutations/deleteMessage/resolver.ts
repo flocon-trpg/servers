@@ -46,7 +46,7 @@ export class DeleteMessageResolver {
     public async deleteMessage(
         @Args() args: MessageIdArgs,
         @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine
+        @PubSub() pubSub: PubSubEngine,
     ): Promise<DeleteMessageResult> {
         const em = context.em;
         const authorizedUserUid = ensureAuthorizedUser(context).userUid;

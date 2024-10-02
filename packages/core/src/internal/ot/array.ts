@@ -58,7 +58,7 @@ const dummyVersion = undefined;
 const indexObjectTemplate = createObjectValueTemplate(
     indexObjectTemplateValue,
     dummyVersion,
-    dummyVersion
+    dummyVersion,
 );
 
 type IndexObjectState = OmitVersion<State<typeof indexObjectTemplate>>;
@@ -74,10 +74,10 @@ type OtArray<T> = {
 type ReadonlyOtArray<T> = Readonly<OtArray<T>>;
 
 export const indexObjectsToArray = <T extends IndexObjectState>(
-    record: Record<string, T | undefined>
+    record: Record<string, T | undefined>,
 ): Result<OtArray<T>> => {
     const groupBy$index = recordToMap(
-        groupBy(recordToArray(record), ({ value }) => value[$index].toString())
+        groupBy(recordToArray(record), ({ value }) => value[$index].toString()),
     );
 
     const result: OtArray<T> = [];
@@ -88,7 +88,7 @@ export const indexObjectsToArray = <T extends IndexObjectState>(
             return Result.error(
                 `Just one element where index is ${i} should exist, but there are ${
                     groupValue?.length ?? 0
-                } elements.`
+                } elements.`,
             );
         }
         const element = groupValue[0]!;
@@ -148,7 +148,7 @@ const generateArrayDiff = <TOperation>({
                   // RecordOperation.compose で型エラーを起こさないためだけに行っている変換。
                   update: mapOperation(x.update),
               }
-            : undefined
+            : undefined,
     );
 };
 
@@ -173,7 +173,7 @@ export const serverTransform = <
     > & {
         /** Operation の型を変換して、TFirstOperation にします。通常は、単に `$v` と `$r` を付与するだけで構いません。 */
         mapOperation: (operation: IndexObjectTwoWayOperation) => TFirstOperation;
-    }
+    },
 ): Result<
     RecordOperation.RecordTwoWayOperation<TServerState, TFirstOperation> | undefined,
     string | TCustomError
@@ -204,7 +204,7 @@ export const serverTransform = <
         // ここに来るということは、クライアントから受け取った Operation が不正(存在しない State に対して update しようとしたなど)であることを示す。だが、その場合は上のRecordOperation.serverTransformですでに弾かれているので、ここには来ないはず。
         return Result.error(
             'Error at applying an array operation. This is probablly a bug. Message: ' +
-                toOtError(arrayObjectAfterSecond.error).message
+                toOtError(arrayObjectAfterSecond.error).message,
         );
     }
 
@@ -212,30 +212,30 @@ export const serverTransform = <
     if (arrayAfterSecond.isError) {
         return Result.error(
             'Cannot create a valid array from requested operation. This is probably a bug. Message: ' +
-                arrayAfterSecond.error
+                arrayAfterSecond.error,
         );
     }
 
     const arrayBeforeFirst = indexObjectsToArray(
-        mapRecord(params.stateBeforeFirst, ({ $index }) => ({ $index }))
+        mapRecord(params.stateBeforeFirst, ({ $index }) => ({ $index })),
     );
     const arrayAfterFirst = indexObjectsToArray(
-        mapRecord(params.stateAfterFirst, ({ $index }) => ({ $index }))
+        mapRecord(params.stateAfterFirst, ({ $index }) => ({ $index })),
     );
 
     let finalArray: ReadonlyOtArray<IndexObjectState>;
     if (arrayAfterFirst.isError) {
         loggerRef.error(
             '`stateAfterFirst` is invalid as an array. This is probablly a bug or caused by database issues. The order of this array will be rearranged automatically. Message: ' +
-                arrayAfterFirst.error
+                arrayAfterFirst.error,
         );
         finalArray = recordToArray(params.stateAfterFirst).sort((x, y) =>
-            x.key.localeCompare(y.key)
+            x.key.localeCompare(y.key),
         );
     } else if (arrayBeforeFirst.isError) {
         loggerRef.error(
             '`stateBeforeFirst` is invalid as an array. This is probablly a bug or caused by database issues. The operation to change the order of this array will be ignored. Message: ' +
-                arrayBeforeFirst.error
+                arrayBeforeFirst.error,
         );
         finalArray = arrayAfterFirst.value;
     } else {
@@ -243,13 +243,13 @@ export const serverTransform = <
             arrayBeforeFirst.value,
             arrayAfterFirst.value,
             arrayAfterSecond.value,
-            x => x.key
+            x => x.key,
         );
         if (finalArrayResult.isError) {
             // 配列のtransformでエラーが発生することは通常はない。
             return Result.error(
                 'Error at transforming an array operation. This is probablly a bug. Message: ' +
-                    finalArrayResult.error
+                    finalArrayResult.error,
             );
         }
         finalArray = finalArrayResult.value;
@@ -265,12 +265,12 @@ export const serverTransform = <
                         return;
                     }
                     prevState[$index] = operation[$index].newValue;
-                })
+                }),
             ),
     });
     if (finalStateBeforeIndexRearrangement.isError) {
         throw new Error(
-            'This should not happen. Message: ' + finalStateBeforeIndexRearrangement.error
+            'This should not happen. Message: ' + finalStateBeforeIndexRearrangement.error,
         );
     }
 
@@ -297,7 +297,7 @@ export const serverTransform = <
                         return;
                     }
                     first.newValue.$index = second.$index.newValue;
-                })
+                }),
             );
         },
         composeUpdateUpdate: ({ first, second }) => {
@@ -356,7 +356,7 @@ export const clientTransform = <
             prevState: TState;
             operation: TOperation;
         }) => Result<TState, string | TCustomError>;
-    }
+    },
 ): Result<
     {
         firstPrime?: RecordOperation.RecordUpOperation<TState, TOperation | IndexObjectUpOperation>;
@@ -392,7 +392,7 @@ export const clientTransform = <
         // ここに来るということは、クライアントから受け取った Operation が不正(存在しない State に対して update しようとしたなど)であることを示す。だが、その場合は上のRecordOperation.clientTransformですでに弾かれているので、ここには来ないはず。
         return Result.error(
             'Error at applying first as an array operation. This is probablly a bug. Message: ' +
-                toOtError(arrayObjectAfterFirst.error).message
+                toOtError(arrayObjectAfterFirst.error).message,
         );
     }
 
@@ -412,7 +412,7 @@ export const clientTransform = <
         // ここに来るということは、クライアントから受け取った Operation が不正(存在しない State に対して update しようとしたなど)であることを示す。だが、その場合は上のRecordOperation.clientTransformですでに弾かれているので、ここには来ないはず。
         return Result.error(
             'Error at applying second as an array operation. This is probablly a bug. Message: ' +
-                toOtError(arrayObjectAfterSecond.error).message
+                toOtError(arrayObjectAfterSecond.error).message,
         );
     }
 
@@ -421,19 +421,19 @@ export const clientTransform = <
         return Result.error('state is invalid as an array. Message: ' + baseArray.error);
     }
     const arrayAfterFirst = indexObjectsToArray(
-        mapRecord(arrayObjectAfterFirst.value ?? {}, ({ $index }) => ({ $index }))
+        mapRecord(arrayObjectAfterFirst.value ?? {}, ({ $index }) => ({ $index })),
     );
     if (arrayAfterFirst.isError) {
         return Result.error(
-            'state applied first is invalid as an array. Message: ' + arrayAfterFirst.error
+            'state applied first is invalid as an array. Message: ' + arrayAfterFirst.error,
         );
     }
     const arrayAfterSecond = indexObjectsToArray(
-        mapRecord(arrayObjectAfterSecond.value ?? {}, ({ $index }) => ({ $index }))
+        mapRecord(arrayObjectAfterSecond.value ?? {}, ({ $index }) => ({ $index })),
     );
     if (arrayAfterSecond.isError) {
         return Result.error(
-            'state applied second is invalid as an array. Message: ' + arrayAfterFirst.error
+            'state applied second is invalid as an array. Message: ' + arrayAfterFirst.error,
         );
     }
 
@@ -441,13 +441,13 @@ export const clientTransform = <
         baseArray.value,
         arrayAfterFirst.value,
         arrayAfterSecond.value,
-        x => x.key
+        x => x.key,
     );
     if (finalArrayResult.isError) {
         // 配列のtransformでエラーが発生することは通常はない。
         return Result.error(
             'Error at transforming an array operation. This is probablly a bug. Message: ' +
-                finalArrayResult.error
+                finalArrayResult.error,
         );
     }
 
@@ -468,7 +468,7 @@ export const clientTransform = <
     });
     if (finalStateBeforeIndexRearrangement.isError) {
         throw new Error(
-            'This should not happen. Message: ' + finalStateBeforeIndexRearrangement.error
+            'This should not happen. Message: ' + finalStateBeforeIndexRearrangement.error,
         );
     }
 
@@ -502,7 +502,7 @@ export const clientTransform = <
                             return;
                         }
                         first.newValue.$index = second.$index.newValue;
-                    })
+                    }),
                 );
             },
             composeUpdateUpdate: ({ first, second }) => {

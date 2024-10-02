@@ -7,7 +7,7 @@ import { Exchange, cacheExchange, createClient, fetchExchange, subscriptionExcha
 type GetUserIdTokenResult = (() => Promise<IdTokenResult | null>) | null;
 
 const execGetUserIdTokenResult = async (
-    source: GetUserIdTokenResult
+    source: GetUserIdTokenResult,
 ): Promise<IdTokenResult | null> => {
     if (source == null) {
         return null;
@@ -69,8 +69,8 @@ export const createUrqlClient = (params: Params) => {
                 return error.graphQLErrors.some(error =>
                     // auth error のとき、error.extensions.code は 'INTERNAL_SERVER_ERROR' であるため、error.extensions.code だけでは auth error かどうかを判定するのは困難。
                     error.message.includes(
-                        "Access denied! You don't have permission for this action!"
-                    )
+                        "Access denied! You don't have permission for this action!",
+                    ),
                 );
             },
             willAuthError: () => {
@@ -112,7 +112,7 @@ export const createUrqlClient = (params: Params) => {
                     subscribe: sink => {
                         const unsubscribe = wsClient(
                             params.wsUrl,
-                            params.authorization ? params.getUserIdTokenResult : null
+                            params.authorization ? params.getUserIdTokenResult : null,
                         ).subscribe(input, sink);
                         return { unsubscribe };
                     },

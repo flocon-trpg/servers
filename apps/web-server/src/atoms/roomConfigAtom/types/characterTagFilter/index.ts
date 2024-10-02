@@ -33,7 +33,7 @@ export const serializedCharacterTagFilter = z
 export type SerializedCharacterTagFilter = z.TypeOf<typeof serializedCharacterTagFilter>;
 
 export const deserializeCharacterTagFilter = (
-    source: SerializedCharacterTagFilter
+    source: SerializedCharacterTagFilter,
 ): CharacterTagFilter => {
     return {
         showNoTag: source.showNoTag ?? false,
