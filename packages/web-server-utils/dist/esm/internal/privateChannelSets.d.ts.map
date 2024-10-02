@@ -1,0 +1,1 @@
+{"version":3,"file":"privateChannelSets.d.ts","sourceRoot":"","sources":["../../../src/internal/privateChannelSets.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,iBAAiB,EAAE,MAAM,qBAAqB,CAAC;AAExD,qBAAa,kBAAkB;;gBAGR,MAAM,CAAC,EAAE,MAAM;IAY3B,GAAG,CAAC,SAAS,EAAE,aAAa,CAAC,MAAM,CAAC,GAAG,iBAAiB,GAAG,IAAI;IAU/D,KAAK,IAAI,kBAAkB;IAM3B,OAAO,IAAI,iBAAiB,EAAE;IAM9B,QAAQ,IAAI,MAAM;CAQ5B"}
