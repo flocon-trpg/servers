@@ -16,7 +16,7 @@ export const toClientState =
 
 export const serverTransform =
     (
-        isAuthorized: boolean
+        isAuthorized: boolean,
     ): ServerTransform<
         State<typeof template>,
         TwoWayOperation<typeof template>,

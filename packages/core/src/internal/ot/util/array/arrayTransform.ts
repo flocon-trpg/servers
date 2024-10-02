@@ -20,7 +20,7 @@ const apply = <T>(state: readonly T[], operation: ArrayOperation<T>) => {
             concatInsert: (first, second) => [...first, ...second] as ReadonlyNonEmptyArray<T>,
             concatDelete: (first, second) => [...first, ...second] as ReadonlyNonEmptyArray<T>,
         },
-        operation
+        operation,
     );
     const applied = applyCore({
         state,
@@ -52,14 +52,14 @@ export const transform = <T, TKey>(
     state: readonly T[],
     stateAppliedFirst: readonly T[],
     stateAppliedSecond: readonly T[],
-    getKey: (element: T) => TKey
+    getKey: (element: T) => TKey,
 ) => {
     const tagKey = '$tag';
     type Tagged<T> = { [tagKey]: 0 | 1 | 2; value: T };
 
-    const $state = state.map(value => ({ value, [tagKey]: 0 } as const));
-    const $stateAppliedFirst = stateAppliedFirst.map(value => ({ value, [tagKey]: 1 } as const));
-    const $stateAppliedSecond = stateAppliedSecond.map(value => ({ value, [tagKey]: 2 } as const));
+    const $state = state.map(value => ({ value, [tagKey]: 0 }) as const);
+    const $stateAppliedFirst = stateAppliedFirst.map(value => ({ value, [tagKey]: 1 }) as const);
+    const $stateAppliedSecond = stateAppliedSecond.map(value => ({ value, [tagKey]: 2 }) as const);
 
     const $getKey = (x: Tagged<T>) => getKey(x.value);
     const first = arrayDiff<Tagged<T>, TKey>({

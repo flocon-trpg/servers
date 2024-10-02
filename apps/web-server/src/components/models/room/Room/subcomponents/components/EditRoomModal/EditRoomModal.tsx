@@ -13,7 +13,7 @@ const modalProps: Partial<ModalProps> = {
 
 export const EditRoomModal: React.FC = () => {
     const [editRoomModalVisibility, setEditRoomModalVisibility] = useAtom(
-        editRoomModalVisibilityAtom
+        editRoomModalVisibilityAtom,
     );
     const operateAsStateWithImmer = useSetRoomStateWithImmer();
     const name = useRoomStateValueSelector(state => state.name);

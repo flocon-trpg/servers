@@ -70,7 +70,7 @@ const BgmSimpleModal: React.FC<BgmSimpleModalProps> = ({ channelKey, visible, on
     const currentBgmState = useRoomStateValueSelector(state => state.bgms?.[channelKey]);
     const currentBgmStateRef = useLatest(currentBgmState);
     const [newBgmState, setNewBgmStateCore] = React.useState<BgmState>(
-        currentBgmState ?? initBgmState
+        currentBgmState ?? initBgmState,
     );
     const setNewBgmState = setStateWithImmer(setNewBgmStateCore);
 
@@ -139,7 +139,7 @@ const BgmPlaylistModal: React.FC<BgmPlaylistModalProps> = ({ channelKey, visible
     const currentBgmState = useRoomStateValueSelector(state => state.bgms?.[channelKey]);
     const currentBgmStateRef = useLatest(currentBgmState);
     const [newBgmState, setNewBgmStateCore] = React.useState<BgmState>(
-        currentBgmState ?? initBgmState
+        currentBgmState ?? initBgmState,
     );
     const setNewBgmState = setStateWithImmer(setNewBgmStateCore);
 

@@ -41,7 +41,7 @@ export class GetFilesResolver {
     @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async getFiles(
         @Arg('input') input: GetFilesInput,
-        @Ctx() context: ResolverContext
+        @Ctx() context: ResolverContext,
     ): Promise<GetFilesResult> {
         const user = ensureAuthorizedUser(context);
         const fileTagsFilter = input.fileTagIds.map(
@@ -50,7 +50,7 @@ export class GetFilesResolver {
                     fileTags: {
                         id,
                     },
-                } as const)
+                }) as const,
         );
         const files = await context.em.find(File, {
             $and: [

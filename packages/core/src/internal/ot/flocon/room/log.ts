@@ -118,7 +118,7 @@ export const createLogs = ({
                             type: deleteType,
                             value: DicePiece.toClientState(
                                 { type: restrict },
-                                prevState
+                                prevState,
                             )(operation.replace.oldValue),
                         },
                     });
@@ -133,7 +133,7 @@ export const createLogs = ({
                             type: createType,
                             value: DicePiece.toClientState(
                                 { type: restrict },
-                                prevState
+                                prevState,
                             )(operation.replace.newValue),
                         },
                     });
@@ -165,7 +165,7 @@ export const createLogs = ({
                             type: deleteType,
                             value: StringPiece.toClientState(
                                 { type: restrict },
-                                prevState
+                                prevState,
                             )(operation.replace.oldValue),
                         },
                     });
@@ -180,7 +180,7 @@ export const createLogs = ({
                             type: createType,
                             value: StringPiece.toClientState(
                                 { type: restrict },
-                                prevState
+                                prevState,
                             )(operation.replace.newValue),
                         },
                     });

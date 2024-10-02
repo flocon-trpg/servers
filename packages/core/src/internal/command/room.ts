@@ -23,7 +23,10 @@ export class FRoom extends FObject {
     // FRoom内の State<typeof Room.template> は全てmutableとして扱う。FCharacter内のCharacter.Stateなども同様。
     private readonly _room: State<typeof Room.template>;
 
-    public constructor(source: State<typeof Room.template>, private readonly myUserUid: string) {
+    public constructor(
+        source: State<typeof Room.template>,
+        private readonly myUserUid: string,
+    ) {
         super();
         this._room = cloneDeep(source);
     }
@@ -129,7 +132,7 @@ export class FRoom extends FObject {
             default:
                 throw new ScriptError(
                     `${typeof key === 'symbol' ? 'symbol' : key}への値のセットは制限されています。`,
-                    astInfo?.range
+                    astInfo?.range,
                 );
         }
     }

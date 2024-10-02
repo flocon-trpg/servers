@@ -198,7 +198,7 @@ export const serverTransform = <
     TServerState,
     TFirstOperation,
     TSecondOperation,
-    TCustomError = string
+    TCustomError = string,
 >({
     first: unsafeFirst,
     second: unsafeSecond,
@@ -214,7 +214,7 @@ export const serverTransform = <
     innerTransform: (
         params: ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> & {
             key: string;
-        }
+        },
     ) => Result<TFirstOperation | undefined, string | TCustomError>;
     defaultState: TServerState;
 }): Result<StringKeyRecord<TFirstOperation> | undefined, string | TCustomError> => {

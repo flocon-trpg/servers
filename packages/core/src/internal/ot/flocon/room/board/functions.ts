@@ -79,7 +79,7 @@ export const toClientState =
 export const serverTransform =
     (
         requestedBy: RequestedBy,
-        currentRoomState: State<typeof Room.template>
+        currentRoomState: State<typeof Room.template>,
     ): ServerTransform<
         State<typeof template>,
         TwoWayOperation<typeof template>,
@@ -138,7 +138,7 @@ export const serverTransform =
             innerTransform: ({ first, second, prevState, nextState }) =>
                 DicePiece.serverTransform(
                     requestedBy,
-                    currentRoomState
+                    currentRoomState,
                 )({
                     stateBeforeServerOperation: prevState,
                     stateAfterServerOperation: nextState,
@@ -216,7 +216,7 @@ export const serverTransform =
             innerTransform: ({ first, second, prevState, nextState }) =>
                 StringPiece.serverTransform(
                     requestedBy,
-                    currentRoomState
+                    currentRoomState,
                 )({
                     stateBeforeServerOperation: prevState,
                     stateAfterServerOperation: nextState,

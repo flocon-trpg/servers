@@ -31,7 +31,7 @@ export const toClientState =
 export const serverTransform =
     (
         requestedBy: RequestedBy,
-        currentRoomState: State<typeof Room.template>
+        currentRoomState: State<typeof Room.template>,
     ): ServerTransform<
         State<typeof template>,
         TwoWayOperation<typeof template>,

@@ -18,7 +18,7 @@ export class EntryToServerResolver {
     @UseMiddleware(QueueMiddleware)
     public async entryToServer(
         @Arg('password', () => String, { nullable: true }) password: string | null | undefined,
-        @Ctx() context: ResolverContext
+        @Ctx() context: ResolverContext,
     ): Promise<EntryToServerResult> {
         const em = context.em;
 

@@ -35,7 +35,7 @@ describe('CollaborativeInput', () => {
                 bufferDuration={bufferDuration}
                 onChange={onChange}
                 onGetQuill={onGetQuill}
-            />
+            />,
         );
         if (quill == null) {
             throw new Error(quillNotFoundErrorMessage);
@@ -67,11 +67,11 @@ describe('CollaborativeInput', () => {
                     value='TEXT_VALUE1'
                     bufferDuration={bufferDuration}
                     onChange={onChange}
-                />
+                />,
             );
             await act(async () => await delay(delayTime));
             expect(onChangeHistory).toEqual([]);
-        }
+        },
     );
 
     test.each(['default', 'short', 1000] as const)(
@@ -91,7 +91,7 @@ describe('CollaborativeInput', () => {
                     bufferDuration={bufferDuration}
                     onChange={onChange}
                     onGetQuill={onGetQuill}
-                />
+                />,
             );
             if (quill == null) {
                 throw new Error(quillNotFoundErrorMessage);
@@ -102,7 +102,7 @@ describe('CollaborativeInput', () => {
             expect(onChangeHistory).toEqual([
                 { previousValue: 'TEXT_VALUE1', currentValue: 'TEXT_VALUE3' },
             ]);
-        }
+        },
     );
 
     test.each`
@@ -128,7 +128,7 @@ describe('CollaborativeInput', () => {
                 bufferDuration={bufferDuration}
                 onChange={onChange}
                 onGetQuill={onGetQuill}
-            />
+            />,
         );
         if (quill == null) {
             throw new Error(quillNotFoundErrorMessage);
@@ -139,7 +139,7 @@ describe('CollaborativeInput', () => {
                 value='TEXT_VALUE3'
                 bufferDuration={bufferDuration}
                 onChange={onChange}
-            />
+            />,
         );
         await act(async () => await delay(delayTime));
         expect(onChangeHistory).toEqual([]);
@@ -170,7 +170,7 @@ describe('CollaborativeInput', () => {
                     bufferDuration={bufferDuration}
                     onChange={onChange}
                     onGetQuill={onGetQuill}
-                />
+                />,
             );
             if (quill == null) {
                 throw new Error(quillNotFoundErrorMessage);
@@ -181,7 +181,7 @@ describe('CollaborativeInput', () => {
                     value='TEXT_VALUE3'
                     bufferDuration={bufferDuration}
                     onChange={onChange}
-                />
+                />,
             );
             quill.setText('TEXT_VALUE4');
             expect(onChangeHistory).toEqual([]);
@@ -189,6 +189,6 @@ describe('CollaborativeInput', () => {
             expect(onChangeHistory).toEqual([
                 { previousValue: 'TEXT_VALUE3', currentValue: 'TEXT_VALUE4' },
             ]);
-        }
+        },
     );
 });

@@ -21,7 +21,7 @@ export const toClientState = (source: State<typeof template>): State<typeof temp
 
 export const serverTransform =
     (
-        requestedBy: RequestedBy
+        requestedBy: RequestedBy,
     ): ServerTransform<
         State<typeof template>,
         TwoWayOperation<typeof template>,

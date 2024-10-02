@@ -45,14 +45,14 @@ describe('webConfigAtom (process.env exists)', () => {
         });
 
         expect(webConfigAtomResult.current[0]?.value?.http).toEqual(
-            fakeEnvFile[NEXT_PUBLIC_API_HTTP]
+            fakeEnvFile[NEXT_PUBLIC_API_HTTP],
         );
         expect(webConfigAtomResult.current[0]?.value?.ws).toEqual(fakeEnvFile[NEXT_PUBLIC_API_WS]);
         expect(webConfigAtomResult.current[0]?.value?.authProviders?.sort()).toEqual(
-            [email, google].sort()
+            [email, google].sort(),
         );
         expect(webConfigAtomResult.current[0]?.value?.firebaseConfig).toEqual(
-            fakeFirebaseConfig1[0]
+            fakeFirebaseConfig1[0],
         );
         expect(webConfigAtomResult.current[0]?.value?.isUnlistedFirebaseStorageEnabled).toBe(true);
 
@@ -71,14 +71,14 @@ describe('webConfigAtom (process.env exists)', () => {
         });
 
         expect(webConfigAtomResult.current[0]?.value?.http).toEqual(
-            fakeEnvFile[NEXT_PUBLIC_API_HTTP]
+            fakeEnvFile[NEXT_PUBLIC_API_HTTP],
         );
         expect(webConfigAtomResult.current[0]?.value?.ws).toEqual(fakeEnvFile[NEXT_PUBLIC_API_WS]);
         expect(webConfigAtomResult.current[0]?.value?.authProviders?.sort()).toEqual(
-            [email, google].sort()
+            [email, google].sort(),
         );
         expect(webConfigAtomResult.current[0]?.value?.firebaseConfig).toEqual(
-            fakeFirebaseConfig1[0]
+            fakeFirebaseConfig1[0],
         );
         expect(webConfigAtomResult.current[0]?.value?.isUnlistedFirebaseStorageEnabled).toBe(true);
 

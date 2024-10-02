@@ -99,17 +99,17 @@ export type SerializedPanelsConfig = z.TypeOf<typeof serializedPanelsConfig>;
 export const deserializePanelsConfig = (source: SerializedPanelsConfig): PanelsConfig => {
     return {
         activeBoardBackground: deserializeActiveBoardPanelConfig(
-            source.activeBoardBackground ?? {}
+            source.activeBoardBackground ?? {},
         ),
         activeBoardPanel: deserializeActiveBoardPanelConfig(source.activeBoardPanel ?? {}),
         boardEditorPanels: chooseRecord(
             source.boardEditorPanels ?? {},
-            deserializeBoardEditorPanelConfig
+            deserializeBoardEditorPanelConfig,
         ),
         characterPanel: deserializeCharactersPanelConfig(source.characterPanel ?? {}),
         chatPalettePanels: chooseRecord(
             source.chatPalettePanels ?? {},
-            deserializeChatPalettePanelConfig
+            deserializeChatPalettePanelConfig,
         ),
         gameEffectPanel: deserializeGameEffectPanelConfig(source.gameEffectPanel ?? {}),
         memoPanels: chooseRecord(source.memoPanels ?? {}, deserializeMemoPanelConfig),

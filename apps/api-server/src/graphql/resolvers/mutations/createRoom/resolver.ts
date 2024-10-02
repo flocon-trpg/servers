@@ -77,7 +77,7 @@ export class CreateRoomResolver {
     @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async createRoom(
         @Arg('input') input: CreateRoomInput,
-        @Ctx() context: ResolverContext
+        @Ctx() context: ResolverContext,
     ): Promise<typeof CreateRoomResult> {
         const em = context.em;
         const authorizedUser = ensureAuthorizedUser(context);

@@ -21,5 +21,5 @@ export const template = createObjectValueTemplate(
         valueInputType: createReplaceValueTemplate(maybe(valueInputType)),
     },
     2,
-    1
+    1,
 );

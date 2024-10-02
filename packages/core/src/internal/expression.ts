@@ -390,7 +390,7 @@ export const analyze = (text: string): Result<Expression[]> => {
         switch (expr.type) {
             case expr2:
                 return Result.error(
-                    '{{と}}で囲む構文は将来のために予約されているため、現在は使用することはできません。'
+                    '{{と}}で囲む構文は将来のために予約されているため、現在は使用することはできません。',
                 );
             case expr1:
                 result.push({ type: expr1, path: expr.path, raw: expr.raw });

@@ -66,7 +66,7 @@ export class Tree<TKey, TValue> {
     /** 指定したkeyにあるnodeを基準とした新しいTreeオブジェクトを返します。nodeへの参照は共有されます。absolutePathは引き継がれます。 */
     public createSubTree(
         key: readonly TKey[],
-        initValue: (absolutePath: readonly TKey[]) => TValue
+        initValue: (absolutePath: readonly TKey[]) => TValue,
     ) {
         const node = this.#ensureNode(key, initValue);
         return Tree.createTree(node);
@@ -101,7 +101,7 @@ export class Tree<TKey, TValue> {
     public ensure<TReplaced extends TValue>(
         key: readonly TKey[],
         replacer: (oldValue: TValue) => TReplaced,
-        initValue: (absolutePath: readonly TKey[]) => TValue
+        initValue: (absolutePath: readonly TKey[]) => TValue,
     ): TReplaced {
         const node = this.#ensureNode(key, initValue);
         const result = replacer(node.value);
@@ -129,7 +129,7 @@ export class Tree<TKey, TValue> {
     }
 
     public replaceAllValues(
-        replacer: (oldValue: { absolutePath: readonly TKey[]; value: TValue }) => TValue
+        replacer: (oldValue: { absolutePath: readonly TKey[]; value: TValue }) => TValue,
     ) {
         for (const elem of this.#traverseNodes()) {
             elem.value = replacer({ absolutePath: elem.absolutePath, value: elem.value });
@@ -142,7 +142,7 @@ export class Tree<TKey, TValue> {
 
     #mapNode<TValue2>(
         source: Node<TKey, TValue>,
-        mapping: (source: TValue, absolutePath: readonly TKey[]) => TValue2
+        mapping: (source: TValue, absolutePath: readonly TKey[]) => TValue2,
     ): Node<TKey, TValue2> {
         const childrenClone = new Map<TKey, Node<TKey, TValue2>>();
         for (const [sourceChildKey, sourceChild] of source.children) {
@@ -156,10 +156,10 @@ export class Tree<TKey, TValue> {
     }
 
     public map<TValue2>(
-        mapping: (oldValue: { absolutePath: readonly TKey[]; value: TValue }) => TValue2
+        mapping: (oldValue: { absolutePath: readonly TKey[]; value: TValue }) => TValue2,
     ): Tree<TKey, TValue2> {
         const newNode = this.#mapNode(this.#currentNode, (oldValue, absolutePath) =>
-            mapping({ value: oldValue, absolutePath })
+            mapping({ value: oldValue, absolutePath }),
         );
         return Tree.createTree(newNode);
     }

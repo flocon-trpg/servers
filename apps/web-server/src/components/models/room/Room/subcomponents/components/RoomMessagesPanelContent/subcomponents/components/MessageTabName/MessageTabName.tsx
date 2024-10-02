@@ -6,7 +6,7 @@ import { MessageTabConfig } from '@/atoms/roomConfigAtom/types/messageTabConfig'
 
 const generateTabName = (
     tabConfig: MessageTabConfig,
-    publicChannelNames: ReturnType<typeof usePublicChannelNames>
+    publicChannelNames: ReturnType<typeof usePublicChannelNames>,
 ): string => {
     if (tabConfig.tabName != null && tabConfig.tabName !== '') {
         return tabConfig.tabName;
@@ -32,7 +32,7 @@ const generateTabName = (
     strIndex10Array.forEach(index => {
         if (tabConfig[`showPublic${index}`]) {
             elements.push(
-                publicChannelNames?.[`publicChannel${index}Name`] ?? `(チャンネル${index})`
+                publicChannelNames?.[`publicChannel${index}Name`] ?? `(チャンネル${index})`,
             );
         }
     });

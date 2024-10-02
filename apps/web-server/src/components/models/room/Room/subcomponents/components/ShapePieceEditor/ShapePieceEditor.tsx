@@ -36,7 +36,7 @@ const defaultShape: Shape = {
 const defaultShapePiece = (
     piecePosition: CompositeRect,
     isCellMode: boolean,
-    ownerParticipantId: string | undefined
+    ownerParticipantId: string | undefined,
 ): ShapePieceState => ({
     ...piecePosition,
 

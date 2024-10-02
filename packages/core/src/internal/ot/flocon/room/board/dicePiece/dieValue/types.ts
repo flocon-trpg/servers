@@ -21,5 +21,5 @@ export const template = createObjectValueTemplate(
         value: createReplaceValueTemplate(maybe(z.number())),
     },
     1,
-    1
+    1,
 );

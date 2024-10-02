@@ -16,7 +16,7 @@ export const mapToRecord = <TValue>(source: Map<string, TValue>): Record<string,
 
 export const chooseRecord = <TSource, TResult>(
     source: Record<string, TSource | undefined>,
-    chooser: (element: TSource, key: string) => TResult | undefined
+    chooser: (element: TSource, key: string) => TResult | undefined,
 ): Record<string, TResult> => {
     const result = new Map<string, TResult>();
     for (const key in source) {
@@ -33,18 +33,18 @@ export const chooseRecord = <TSource, TResult>(
 
 export const chooseDualKeyRecord = <TSource, TResult>(
     source: Record<string, Record<string, TSource | undefined> | undefined>,
-    chooser: (element: TSource, key: DualKey<string, string>) => TResult | undefined
+    chooser: (element: TSource, key: DualKey<string, string>) => TResult | undefined,
 ): Record<string, Record<string, TResult>> => {
     return chooseRecord(source, (inner, key1) =>
         inner === undefined
             ? undefined
-            : chooseRecord(inner, (value, key2) => chooser(value, { first: key1, second: key2 }))
+            : chooseRecord(inner, (value, key2) => chooser(value, { first: key1, second: key2 })),
     );
 };
 
 export const mapRecord = <TSource, TResult>(
     source: Record<string, TSource | undefined>,
-    mapping: (element: TSource, key: string) => TResult
+    mapping: (element: TSource, key: string) => TResult,
 ): Record<string, TResult> => {
     const result = new Map<string, TResult>();
     for (const key in source) {
@@ -59,17 +59,17 @@ export const mapRecord = <TSource, TResult>(
 
 export const mapDualKeyRecord = <TSource, TResult>(
     source: Record<string, Record<string, TSource | undefined> | undefined>,
-    mapping: (element: TSource, key: DualKey<string, string>) => TResult
+    mapping: (element: TSource, key: DualKey<string, string>) => TResult,
 ): Record<string, Record<string, TResult>> => {
     return chooseRecord(source, (inner, key1) =>
         inner === undefined
             ? undefined
-            : mapRecord(inner, (value, key2) => mapping(value, { first: key1, second: key2 }))
+            : mapRecord(inner, (value, key2) => mapping(value, { first: key1, second: key2 })),
     );
 };
 
 export function* recordToIterator<T>(
-    source: Record<string, T | undefined>
+    source: Record<string, T | undefined>,
 ): IterableIterator<{ key: string; value: T }> {
     for (const key in source) {
         const value = source[key];
@@ -94,7 +94,7 @@ export const getExactlyOneKey = (record: Record<string, unknown>): string => {
 };
 
 export const recordToArray = <T>(
-    source: Record<string, T | undefined>
+    source: Record<string, T | undefined>,
 ): { key: string; value: T }[] => {
     return [...recordToIterator(source)];
 };
@@ -111,7 +111,7 @@ export const recordToMap = <T>(source: Record<string, T | undefined>): Map<strin
 };
 
 export const dualKeyRecordToDualKeyMap = <T>(
-    source: Record<string, Record<string, T | undefined> | undefined>
+    source: Record<string, Record<string, T | undefined> | undefined>,
 ): DualKeyMap<string, string, T> => {
     const result = new DualKeyMap<string, string, T>();
     for (const first in source) {
@@ -130,7 +130,7 @@ export const dualKeyRecordToDualKeyMap = <T>(
 
 export const recordForEach = <T>(
     source: Record<string, T | undefined>,
-    action: (value: T, key: string) => void
+    action: (value: T, key: string) => void,
 ): void => {
     for (const pair of recordToIterator(source)) {
         action(pair.value, pair.key);
@@ -139,7 +139,7 @@ export const recordForEach = <T>(
 
 export const recordForEachAsync = async <T>(
     source: Record<string, T | undefined>,
-    action: (value: T, key: string) => Promise<void>
+    action: (value: T, key: string) => Promise<void>,
 ): Promise<void> => {
     for (const pair of recordToIterator(source)) {
         await action(pair.value, pair.key);
@@ -158,7 +158,7 @@ export const isRecordEmpty = <T>(source: Record<string, T | undefined>) => {
 
 export const dualKeyRecordForEach = <T>(
     source: Record<string, Record<string, T | undefined> | undefined>,
-    action: (value: T, key: DualKey<string, string>) => void
+    action: (value: T, key: DualKey<string, string>) => void,
 ): void => {
     for (const first in source) {
         const inner = source[first];

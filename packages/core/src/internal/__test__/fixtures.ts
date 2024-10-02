@@ -40,7 +40,7 @@ export namespace Fixtures {
 
     export namespace Board {
         export const emptyState = (
-            ownerParticipantId: string | undefined
+            ownerParticipantId: string | undefined,
         ): State<typeof boardTemplate> => ({
             $v: 2,
             $r: 1,
@@ -63,7 +63,7 @@ export namespace Fixtures {
 
     export namespace Character {
         export const emptyState = (
-            ownerParticipantId: string | undefined
+            ownerParticipantId: string | undefined,
         ): State<typeof characterTemplate> => ({
             $v: 2,
             $r: 1,

@@ -57,5 +57,5 @@ export const template = createObjectValueTemplate(
         participants: createRecordValueTemplate(Participant.template),
     },
     2,
-    1
+    1,
 );

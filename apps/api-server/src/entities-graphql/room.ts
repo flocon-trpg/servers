@@ -56,7 +56,7 @@ type IsSequentialResult<T> =
 
 const isSequential = <T>(
     array: ReadonlyNonEmptyArray<T>,
-    getIndex: (elem: T) => number
+    getIndex: (elem: T) => number,
 ): IsSequentialResult<T> => {
     const sorted = array
         .map(value => ({ index: getIndex(value), value }))
@@ -147,7 +147,7 @@ export namespace GlobalRoom {
                         return Result.ok(undefined);
                     }
                     return Result.error(
-                        'Some operations are not found. Maybe your request is too old, or ROOMHIST_COUNT is too small?'
+                        'Some operations are not found. Maybe your request is too old, or ROOMHIST_COUNT is too small?',
                     );
                 }
                 if (revisionRange.expectedTo != null) {
@@ -155,29 +155,29 @@ export namespace GlobalRoom {
                         revisionRange.expectedTo - revisionRange.from;
                     if (expectedOperationEntitiesLength < operationEntities.length) {
                         return Result.error(
-                            'There are duplicate operations. Multiple apps tried to update same database simultaneously?'
+                            'There are duplicate operations. Multiple apps tried to update same database simultaneously?',
                         );
                     }
                     if (expectedOperationEntitiesLength > operationEntities.length) {
                         return Result.error(
-                            'Some operations are not found. Maybe your request is too old, or ROOMHIST_COUNT is too small?'
+                            'Some operations are not found. Maybe your request is too old, or ROOMHIST_COUNT is too small?',
                         );
                     }
                 }
                 const isSequentialResult = isSequential(operationEntities, o => o.prevRevision);
                 if (isSequentialResult.type === 'NotSequential') {
                     return Result.error(
-                        'There are missing operations. Multiple apps tried to update same database simultaneously?'
+                        'There are missing operations. Multiple apps tried to update same database simultaneously?',
                     );
                 }
                 if (isSequentialResult.type === 'DuplicateElement') {
                     return Result.error(
-                        'There are duplicate operations. Multiple apps tried to update same database simultaneously?'
+                        'There are duplicate operations. Multiple apps tried to update same database simultaneously?',
                     );
                 }
 
                 const sortedOperationEntities = operationEntities.sort(
-                    (x, y) => x.prevRevision - y.prevRevision
+                    (x, y) => x.prevRevision - y.prevRevision,
                 );
                 let operation: RoomDownOperation | undefined =
                     sortedOperationEntities.length === 0
@@ -250,7 +250,7 @@ export namespace GlobalRoom {
             public constructor(
                 private readonly em: EM,
                 private readonly room: Room,
-                private readonly participantKey: string
+                private readonly participantKey: string,
             ) {}
 
             public async get(): Promise<Participant> {
@@ -263,7 +263,7 @@ export namespace GlobalRoom {
                         const user = await this.em.findOne(User, { userUid: this.participantKey });
                         if (user == null) {
                             throw new Error(
-                                `Tried to apply a Participant entity, but User was not found. roomId: ${this.room.id}, participantKey:${this.participantKey}`
+                                `Tried to apply a Participant entity, but User was not found. roomId: ${this.room.id}, participantKey:${this.participantKey}`,
                             );
                         }
                         this.participantEntity = new Participant();
@@ -326,7 +326,7 @@ export namespace GlobalRoom {
                         if (participant.update.role != null) {
                             (await ensureEntity.get()).role =
                                 nullableStringToParticipantRoleType(
-                                    participant.update.role.newValue
+                                    participant.update.role.newValue,
                                 ) ?? undefined;
                         }
                         return;
@@ -340,7 +340,7 @@ export namespace GlobalRoom {
                     newParticipant.role =
                         nullableStringToParticipantRoleType(participant.replace.newValue.role) ??
                         undefined;
-                }
+                },
             );
 
             const op = new RoomOp({

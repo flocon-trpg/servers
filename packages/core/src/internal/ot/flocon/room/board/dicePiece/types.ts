@@ -17,5 +17,5 @@ export const template = createObjectValueTemplate(
         dice: createRecordValueTemplate(DieValueTypes.template),
     },
     2,
-    1
+    1,
 );

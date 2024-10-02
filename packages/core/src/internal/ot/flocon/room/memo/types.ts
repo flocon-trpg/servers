@@ -26,5 +26,5 @@ export const template = createObjectValueTemplate(
         textType: createReplaceValueTemplate(textType),
     },
     1,
-    1
+    1,
 );

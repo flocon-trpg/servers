@@ -6,5 +6,5 @@ export const template = createObjectValueTemplate(
         value: createTextValueTemplate(false),
     },
     1,
-    1
+    1,
 );

@@ -10,7 +10,7 @@ for (let x of [1, 2]) {
 }
 result;
         `,
-            {}
+            {},
         );
         expect(actual.result).toEqual([1, 2]);
     });
@@ -25,7 +25,7 @@ for (x of [1, 2]) {
 }
 result;
         `,
-            {}
+            {},
         );
         expect(actual.result).toEqual([1, 2]);
     });
@@ -40,7 +40,7 @@ for (obj.x of [1, 2]) {
 }
 result;
         `,
-            {}
+            {},
         );
         expect(actual.result).toEqual([1, 2]);
     });

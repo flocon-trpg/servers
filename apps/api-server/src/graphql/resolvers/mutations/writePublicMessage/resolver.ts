@@ -107,7 +107,7 @@ export class WritePublicMessageResolver {
     public async writePublicMessage(
         @Args() args: WritePublicMessageArgs,
         @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine
+        @PubSub() pubSub: PubSubEngine,
     ): Promise<typeof WriteRoomPublicMessageResult> {
         const channelKey = args.channelKey;
         const em = context.em;
@@ -179,11 +179,11 @@ export class WritePublicMessageResolver {
             entity.charaIsPrivate = chara.isPrivate;
             entity.charaImagePath = chara.image?.path;
             entity.charaImageSourceType = FileSourceTypeModule.ofNullishString(
-                chara.image?.sourceType
+                chara.image?.sourceType,
             );
             entity.charaPortraitImagePath = chara.portraitImage?.path;
             entity.charaPortraitImageSourceType = FileSourceTypeModule.ofNullishString(
-                chara.portraitImage?.sourceType
+                chara.portraitImage?.sourceType,
             );
         }
 

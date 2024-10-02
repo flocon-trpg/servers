@@ -13,7 +13,10 @@ export class FRecordRef<TValue> extends FObject {
     public constructor(
         public readonly source: Record<string, TValue>,
         protected readonly convertValue: (value: TValue) => FValue,
-        protected readonly convertValueBack: (value: FValue, astInfo: AstInfo | undefined) => TValue
+        protected readonly convertValueBack: (
+            value: FValue,
+            astInfo: AstInfo | undefined,
+        ) => TValue,
     ) {
         super();
     }

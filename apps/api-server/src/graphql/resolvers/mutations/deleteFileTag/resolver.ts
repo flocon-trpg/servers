@@ -15,7 +15,7 @@ export class DeleteFileTagResolver {
     @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async deleteFileTag(
         @Ctx() context: ResolverContext,
-        @Arg('tagId') tagId: string
+        @Arg('tagId') tagId: string,
     ): Promise<boolean> {
         const user = ensureAuthorizedUser(context);
         // 他人のFileTagならば、IDが一致していても取得していない

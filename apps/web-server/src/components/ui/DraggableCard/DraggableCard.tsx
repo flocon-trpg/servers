@@ -76,11 +76,11 @@ export const DraggableCard: React.FC<Props> = (props: Props) => {
     const bottomElementContainerHeight =
         props.bottomElement == null
             ? 0
-            : props.bottomElementContainerHeight ?? defaultBottomElementContainerHeight;
+            : (props.bottomElementContainerHeight ?? defaultBottomElementContainerHeight);
     const topElementContainerHeight =
         props.topElement == null
             ? 0
-            : props.topElementContainerHeight ?? defaultTopElementContainerHeight;
+            : (props.topElementContainerHeight ?? defaultTopElementContainerHeight);
 
     const rawPanelOpacity =
         useAtomSelector(roomConfigAtom, state => state?.panelOpacity) ?? defaultPanelOpacity;

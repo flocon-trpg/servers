@@ -15,7 +15,7 @@ import { Path } from '@/utils/file/firebaseStorage';
  */
 const listAllRecursive = async (
     storageRef: StorageReference,
-    next: (listResult: ListResult) => void
+    next: (listResult: ListResult) => void,
 ): Promise<void> => {
     const list = await listAll(storageRef);
     next(list);
@@ -109,7 +109,7 @@ export type FetchResult<T> =
 
 const toFetchResult = (
     data: FetchResultSourceData,
-    error: FirebaseError | null | undefined
+    error: FirebaseError | null | undefined,
 ): FetchResult<File[]> => {
     if (error != null) {
         return { type: fetchError, error };
@@ -122,7 +122,7 @@ const toFetchResult = (
 
 export const mapFetchResult = <T1, T2>(
     source: FetchResult<T1>,
-    mapping: (x: T1) => T2
+    mapping: (x: T1) => T2,
 ): FetchResult<T2> => {
     if (source.type === success) {
         return { type: success, value: mapping(source.value) };
@@ -164,7 +164,7 @@ export const useFirebaseStorageListAllQuery = () => {
                 }
             });
             return { type: success, value: result } as const;
-        }
+        },
     );
 
     const unlistedFiles = useQuery(
@@ -192,7 +192,7 @@ export const useFirebaseStorageListAllQuery = () => {
                 }
             });
             return { type: success, value: result } as const;
-        }
+        },
     );
 
     return React.useMemo(() => {
@@ -201,11 +201,11 @@ export const useFirebaseStorageListAllQuery = () => {
         return {
             public: toFetchResult(
                 publicFiles.data,
-                publicFiles.error as FirebaseError | null | undefined
+                publicFiles.error as FirebaseError | null | undefined,
             ),
             unlisted: toFetchResult(
                 unlistedFiles.data,
-                unlistedFiles.error as FirebaseError | null | undefined
+                unlistedFiles.error as FirebaseError | null | undefined,
             ),
 
             refetch: async () => {

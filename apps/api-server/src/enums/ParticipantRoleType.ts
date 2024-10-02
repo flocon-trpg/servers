@@ -7,7 +7,7 @@ export enum ParticipantRoleType {
 }
 
 export const stringToParticipantRoleType = (
-    source: typeof Master | typeof Player | typeof Spectator
+    source: typeof Master | typeof Player | typeof Spectator,
 ) => {
     switch (source) {
         case Master:
@@ -20,7 +20,7 @@ export const stringToParticipantRoleType = (
 };
 
 export const nullableStringToParticipantRoleType = (
-    source: typeof Master | typeof Player | typeof Spectator | null | undefined
+    source: typeof Master | typeof Player | typeof Spectator | null | undefined,
 ) => {
     switch (source) {
         case Master:

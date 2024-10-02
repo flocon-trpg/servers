@@ -11,9 +11,9 @@ it('tests PrivateChannelSets', () => {
                     userUids: fc.array(
                         fc
                             .string({ minLength: 5, maxLength: 15 })
-                            .filter(str => /^[a-zA-Z0-9-]+$/.test(str))
+                            .filter(str => /^[a-zA-Z0-9-]+$/.test(str)),
                     ),
-                })
+                }),
             ),
             source => {
                 const sets = new PrivateChannelSets();
@@ -32,7 +32,7 @@ it('tests PrivateChannelSets', () => {
                 expectPrivateChannels(sets.clone()).toEqual(userUidsArray);
                 const CloneByString = new PrivateChannelSets(sets.toString());
                 expectPrivateChannels(CloneByString).toEqual(userUidsArray);
-            }
-        )
+            },
+        ),
     );
 });

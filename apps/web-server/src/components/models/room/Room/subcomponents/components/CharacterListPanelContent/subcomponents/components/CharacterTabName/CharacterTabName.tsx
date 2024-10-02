@@ -5,7 +5,7 @@ import { CharacterTabConfig } from '@/atoms/roomConfigAtom/types/characterTabCon
 
 const generateTabName = (
     tabConfig: CharacterTabConfig,
-    characterTagNames: ReturnType<typeof useCharacterTagNames>
+    characterTagNames: ReturnType<typeof useCharacterTagNames>,
 ): string => {
     if (tabConfig.tabName != null && tabConfig.tabName !== '') {
         return tabConfig.tabName;

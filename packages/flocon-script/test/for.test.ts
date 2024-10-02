@@ -10,7 +10,7 @@ for (let i = 1; i < 3; i++) {
 }
 result;
         `,
-            {}
+            {},
         );
         expect(actual.result).toEqual([1, 2]);
     });
@@ -27,7 +27,7 @@ for (let i = 1; i < 100; i++) {
 }
 result;
         `,
-            {}
+            {},
         );
         expect(actual.result).toEqual([1, 2]);
     });
@@ -47,7 +47,7 @@ for (let i = 1; i < 6; i++) {
 }
 result;
         `,
-            {}
+            {},
         );
         expect(actual.result).toEqual([1, 2, 4, 5]);
     });

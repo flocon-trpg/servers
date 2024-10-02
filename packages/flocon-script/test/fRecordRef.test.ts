@@ -14,7 +14,7 @@ let z = this.recordRef.get('z');
 `,
             {
                 recordRef,
-            }
+            },
         );
         const expectedRecord = { x: 'foo', y: 'bar' };
         expect(record).toEqual(expectedRecord);
@@ -33,7 +33,7 @@ let z = this.recordRef.has('z');
 `,
             {
                 recordRef,
-            }
+            },
         );
         const expectedRecord = { x: 'foo', y: 'bar' };
         expect(record).toEqual(expectedRecord);
@@ -52,7 +52,7 @@ this.recordRef;
 `,
             {
                 recordRef,
-            }
+            },
         );
         const expectedRecord = { x: 'FOO', y: 'bar', z: 'BAZ' };
         expect(record).toEqual(expectedRecord);
@@ -71,7 +71,7 @@ this.recordRef;
 `,
             {
                 recordRef,
-            }
+            },
         );
         const expectedRecord = { y: 'bar' };
         expect(record).toEqual(expectedRecord);
@@ -92,7 +92,7 @@ result;
 `,
             {
                 recordRef,
-            }
+            },
         );
         const expectedRecord = { x: 'foo', y: 'bar' };
         expect(record).toEqual(expectedRecord);
@@ -106,7 +106,7 @@ result;
         const recordRef1 = new FRecordRef(record, toFValue, fValue => toJObject(fValue));
         const recordRef2 = new FRecordRef(record, toFValue, fValue => toJObject(fValue));
         const anotherRecordRef = new FRecordRef(anotherRecord, toFValue, fValue =>
-            toJObject(fValue)
+            toJObject(fValue),
         );
         const execResult = exec(
             `
@@ -120,7 +120,7 @@ result;
                 recordRef1,
                 recordRef2,
                 anotherRecordRef,
-            }
+            },
         );
         expect(execResult.result).toEqual([true, true, false, false]);
     });

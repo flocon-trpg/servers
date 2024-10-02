@@ -50,7 +50,7 @@ export class FParticipant extends FObject {
             default:
                 throw new ScriptError(
                     `'${typeof key === 'symbol' ? 'symbol' : key}' is not supported.`,
-                    astInfo?.range
+                    astInfo?.range,
                 );
         }
     }

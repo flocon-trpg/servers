@@ -70,7 +70,7 @@ const useLoginWithAuthProvider = (): ((provider: AuthProvider) => Promise<void>)
                     setError(error);
                 });
         },
-        [auth, router, setError]
+        [auth, router, setError],
     );
     if (isStorybook) {
         return () => {
@@ -181,7 +181,7 @@ const Email: React.FC = () => {
                                     const main = async () => {
                                         const signInMethods = await fetchSignInMethodsForEmail(
                                             auth,
-                                            email
+                                            email,
                                         ).catch((err: FirebaseError) => {
                                             setError(err);
                                             return null;
@@ -208,16 +208,16 @@ const Email: React.FC = () => {
                                                     signInMethods.every(
                                                         method =>
                                                             method !==
-                                                            EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD
+                                                            EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD,
                                                     )
                                                 ) {
                                                     if (
                                                         signInMethods.includes(
-                                                            GoogleAuthProvider.GOOGLE_SIGN_IN_METHOD
+                                                            GoogleAuthProvider.GOOGLE_SIGN_IN_METHOD,
                                                         )
                                                     ) {
                                                         setError(
-                                                            '指定されたメールアドレスは「メールアドレス・パスワード」でログインすることはできません。代わりに「Googleアカウント」でログインしてください。'
+                                                            '指定されたメールアドレスは「メールアドレス・パスワード」でログインすることはできません。代わりに「Googleアカウント」でログインしてください。',
                                                         );
                                                         setEmailMode(false);
                                                         return;
@@ -285,7 +285,7 @@ const SignInContent: React.FC = () => {
     const githubProvider = React.useMemo(() => new GithubAuthProvider(), []);
     const phoneProvider = React.useMemo(
         () => (auth == null ? undefined : new PhoneAuthProvider(auth)),
-        [auth]
+        [auth],
     );
     const twitterProvider = React.useMemo(() => new TwitterAuthProvider(), []);
 
@@ -406,7 +406,7 @@ const SignInContent: React.FC = () => {
     }
 
     const authErrorToAlertProps = (
-        error: FirebaseError | string
+        error: FirebaseError | string,
     ): {
         message: React.ReactNode;
         type: 'error' | 'warning' | 'info';

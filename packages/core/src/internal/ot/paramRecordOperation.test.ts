@@ -243,7 +243,7 @@ describe('paramRecordOperation.compose', () => {
                 oneThenTen: 11,
                 two: 2,
                 three: 3,
-            })
+            }),
         );
         expect(innerCompose).toHaveBeenCalledTimes(1);
         expect(innerCompose.mock.lastCall).toEqual([{ key: 'oneThenTen', first: 1, second: 10 }]);
@@ -442,7 +442,7 @@ describe('paramRecordOperation.serverTransform', () => {
         expect(actual).toEqual(
             Result.ok({
                 target: '0,1(xform)',
-            })
+            }),
         );
         expect(innerTransform).toBeCalledTimes(1);
         expect(innerTransform.mock.lastCall).toEqual([
@@ -521,7 +521,7 @@ describe('paramRecordOperation.clientTransform', () => {
             innerTransform,
         });
         expect(actual).toEqual(
-            Result.ok({ firstPrime: undefined, secondPrime: { target: '1,2' } })
+            Result.ok({ firstPrime: undefined, secondPrime: { target: '1,2' } }),
         );
         expect(innerTransform).not.toBeCalled();
     });
@@ -565,7 +565,7 @@ describe('paramRecordOperation.clientTransform', () => {
             innerTransform,
         });
         expect(actual).toEqual(
-            Result.ok({ firstPrime: { target: '1,2' }, secondPrime: undefined })
+            Result.ok({ firstPrime: { target: '1,2' }, secondPrime: undefined }),
         );
         expect(innerTransform).not.toBeCalled();
     });

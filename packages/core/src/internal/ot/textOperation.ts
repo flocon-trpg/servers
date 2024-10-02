@@ -101,7 +101,7 @@ export const applyBack = (state: string, action: DownOperation) => {
 
 export const composeUpOperation = (
     first: UpOperation | undefined,
-    second: UpOperation | undefined
+    second: UpOperation | undefined,
 ): Result<UpOperation | undefined, ComposeAndTransformError<NonEmptyString, PositiveInt>> => {
     const first$ = first == null ? undefined : deserializeUpOperation(first);
     const second$ = second == null ? undefined : deserializeUpOperation(second);
@@ -123,7 +123,7 @@ export const composeUpOperation = (
 
 export const composeDownOperation = (
     first: DownOperation | undefined,
-    second: DownOperation | undefined
+    second: DownOperation | undefined,
 ): Result<DownOperation | undefined, ComposeAndTransformError<PositiveInt, NonEmptyString>> => {
     const first$ = first == null ? undefined : deserializeDownOperation(first);
     const second$ = second == null ? undefined : deserializeDownOperation(second);
@@ -300,7 +300,7 @@ export const diff = ({
         diffCore({
             prevState: prev,
             nextState: next,
-        })
+        }),
     );
 };
 

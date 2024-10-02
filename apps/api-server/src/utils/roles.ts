@@ -79,7 +79,7 @@ const getRolesCore = ({
 export const getRoles = (
     params: Parameters<typeof getRolesCore>[0] & {
         isEntry: boolean;
-    }
+    },
 ): Roles | typeof NotSignIn => {
     const result = getRolesCore(params);
     if (result === NotSignIn) {

@@ -30,8 +30,8 @@ export class FNumber implements FObjectBase {
                     const radix = args[0];
                     return new FString(
                         this.raw.toString(
-                            beginCast(radix, astInfo).addNumber().addUndefined().cast()
-                        )
+                            beginCast(radix, astInfo).addNumber().addUndefined().cast(),
+                        ),
                     );
                 });
             default:

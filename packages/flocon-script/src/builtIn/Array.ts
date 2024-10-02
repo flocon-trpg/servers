@@ -27,7 +27,7 @@ class FArrayClass extends FFunction {
                         FArrayClass.prepareStaticMethod(isNew, astInfo);
                         const arg = args[0];
                         return new FBoolean(arg?.type === FType.Array);
-                    })
+                    }),
                 );
             }
             default:

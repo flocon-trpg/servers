@@ -14,6 +14,6 @@ export const useGetIdToken = () => {
     }, [getIdTokenResult]);
     return React.useMemo(
         () => ({ canGetIdToken: canGetIdTokenResult, getIdToken }),
-        [canGetIdTokenResult, getIdToken]
+        [canGetIdTokenResult, getIdToken],
     );
 };

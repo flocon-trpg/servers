@@ -89,7 +89,7 @@ export class StateManagerHistoryQueue<TState, TOperation> {
 
     public beginPost(
         stateManager: StateManager<TState, TOperation>,
-        value: Omit<PostResult<TState, TOperation>, 'onPosted'> | undefined
+        value: Omit<PostResult<TState, TOperation>, 'onPosted'> | undefined,
     ): void {
         this.add({
             type: 'posting',
@@ -100,7 +100,7 @@ export class StateManagerHistoryQueue<TState, TOperation> {
 
     public beforeEndPostAsId(
         stateManager: StateManager<TState, TOperation>,
-        requestId: string
+        requestId: string,
     ): void {
         this.add({
             type: 'beforeEndPostAsId',
@@ -119,7 +119,7 @@ export class StateManagerHistoryQueue<TState, TOperation> {
     public beforeEndPostAsSuccess(
         stateManager: StateManager<TState, TOperation>,
         operation: TOperation,
-        revisionTo: number
+        revisionTo: number,
     ): void {
         this.add({
             type: 'beforeEndPostAsSuccess',
@@ -139,7 +139,7 @@ export class StateManagerHistoryQueue<TState, TOperation> {
     public beforeOtherClientsGet(
         stateManager: StateManager<TState, TOperation>,
         operation: TOperation,
-        revisionTo: number
+        revisionTo: number,
     ): void {
         this.add({
             type: 'beforeOtherClientsGet',

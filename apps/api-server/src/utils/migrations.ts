@@ -12,12 +12,12 @@ export const alterColumnToText = ({
     self: Migration;
 }) => {
     self.addSql(
-        `alter table \`${tableName}\` add column \`${columnName}_temp\` text null default null;`
+        `alter table \`${tableName}\` add column \`${columnName}_temp\` text null default null;`,
     );
     self.addSql(`update \`${tableName}\` set \`${columnName}_temp\` = \`${columnName}\`;`);
     self.addSql(`alter table \`${tableName}\` drop column \`${columnName}\`;`);
     self.addSql(
-        `alter table \`${tableName}\` add column \`${columnName}\` text null default null;`
+        `alter table \`${tableName}\` add column \`${columnName}\` text null default null;`,
     );
     self.addSql(`update \`${tableName}\` set \`${columnName}\` = \`${columnName}_temp\`;`);
     self.addSql(`alter table \`${tableName}\` drop column \`${columnName}_temp\`;`);

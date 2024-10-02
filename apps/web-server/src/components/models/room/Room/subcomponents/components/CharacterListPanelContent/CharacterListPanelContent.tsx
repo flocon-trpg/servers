@@ -95,7 +95,7 @@ const createBooleanParameterColumn = ({
     }
     const booleanToNumber = (
         value: boolean | null | undefined,
-        sortOrder: SortOrder | undefined
+        sortOrder: SortOrder | undefined,
     ) => {
         if (value == null) {
             return sortOrder === 'ascend' ? 2 : -2;
@@ -125,7 +125,7 @@ const createBooleanParameterColumn = ({
                                         return;
                                     }
                                     boolParam.overriddenParameterName = newName;
-                                })
+                                }),
                             )
                         }
                     />
@@ -187,7 +187,7 @@ const createNumberParameterColumn = ({
                                         return;
                                     }
                                     numParam.overriddenParameterName = newName;
-                                })
+                                }),
                             )
                         }
                     />
@@ -248,7 +248,7 @@ const createStringParameterColumn = ({
                                         return;
                                     }
                                     strParam.overriddenParameterName = newName;
-                                })
+                                }),
                             )
                         }
                     />
@@ -302,7 +302,7 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
                     }
                     const newRowKeysOrder = keySorter.move(
                         roomConfig.panels.characterPanel.rowKeysOrder,
-                        { from: rowKey, to: draggedItemRowKey }
+                        { from: rowKey, to: draggedItemRowKey },
                     );
                     if (newRowKeysOrder != null) {
                         roomConfig.panels.characterPanel.rowKeysOrder = newRowKeysOrder;
@@ -310,7 +310,7 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
                 });
             },
         },
-        [setRoomConfig, rowKey]
+        [setRoomConfig, rowKey],
     );
     const [, drop] = useDrop({
         accept: type,
@@ -393,11 +393,11 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
 
     const rowKeysOrderSource = useAtomSelector(
         roomConfigAtom,
-        roomConfig => roomConfig?.panels.characterPanel.rowKeysOrder
+        roomConfig => roomConfig?.panels.characterPanel.rowKeysOrder,
     );
     const rowKeysOrder = React.useMemo(
         () => new KeySorter(RowKeys.all).generate(rowKeysOrderSource ?? []),
-        [rowKeysOrderSource]
+        [rowKeysOrderSource],
     );
     const columns: ColumnType<DataSource>[] | null = React.useMemo(() => {
         if (boolParamNames == null || numParamNames == null || strParamNames == null) {
@@ -524,7 +524,7 @@ const CharacterListTabPane: React.FC<CharacterListTabPaneProps> = ({
                 }
 
                 loggerRef.warn(
-                    `"${rowKey}" は使用可能なキーではありません。KeySorterの設定に誤りがある可能性があります。`
+                    `"${rowKey}" は使用可能なキーではありません。KeySorterの設定に誤りがある可能性があります。`,
                 );
                 return null;
             })
@@ -620,7 +620,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
                     <span>{tagName}</span>
                 </Checkbox>
                 <br />
-            </React.Fragment>
+            </React.Fragment>,
         );
     });
 
@@ -650,7 +650,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
                             })
                         }
                     />
-                    {config?.tabName ?? '' !== '' ? null : (
+                    {(config?.tabName ?? '' !== '') ? null : (
                         <>
                             <br />
                             <Alert
@@ -689,11 +689,11 @@ const CharacterListPanelWithPanelId: React.FC<{
     const { modal } = App.useApp();
     const tabs = useAtomSelector(
         roomConfigAtom,
-        roomConfig => roomConfig?.panels.characterPanel.tabs
+        roomConfig => roomConfig?.panels.characterPanel.tabs,
     );
     const setRoomConfig = useImmerSetAtom(roomConfigAtom);
     const setCharacterParameterNamesEditorVisibility = useSetAtom(
-        characterParameterNamesEditorVisibilityAtom
+        characterParameterNamesEditorVisibilityAtom,
     );
     const setCharacterTagNamesEditorVisibility = useSetAtom(characterTagNamesEditorVisibilityAtom);
     const setCharacterEditorModal = useSetAtom(characterEditorModalAtom);
@@ -744,7 +744,7 @@ const CharacterListPanelWithPanelId: React.FC<{
                                                                 }
                                                                 roomConfig.panels.characterPanel.tabs.splice(
                                                                     tabIndex,
-                                                                    1
+                                                                    1,
                                                                 );
                                                             });
                                                         },
@@ -806,7 +806,7 @@ const CharacterListPanelWithPanelId: React.FC<{
                                     return;
                                 }
                                 const targetTabConfig = roomConfig.panels.characterPanel.tabs.find(
-                                    tab => tab.key === editingTabConfigKey
+                                    tab => tab.key === editingTabConfigKey,
                                 );
                                 if (targetTabConfig == null) {
                                     return;
@@ -844,7 +844,7 @@ const CharacterListPanelWithPanelId: React.FC<{
                             moveElement(
                                 roomConfig.panels.characterPanel.tabs,
                                 tab => tab.key,
-                                action
+                                action,
                             );
                         });
                     }}
@@ -859,7 +859,7 @@ const CharacterListPanelWithPanelId: React.FC<{
                                 }
                                 const indexToSplice =
                                     roomConfig.panels.characterPanel.tabs.findIndex(
-                                        tab => tab.key === e
+                                        tab => tab.key === e,
                                     );
                                 if (indexToSplice >= 0) {
                                     roomConfig.panels.characterPanel.tabs.splice(indexToSplice, 1);
@@ -872,7 +872,7 @@ const CharacterListPanelWithPanelId: React.FC<{
                                 return;
                             }
                             roomConfig.panels.characterPanel.tabs.push(
-                                CharacterTabConfigUtils.createEmpty({})
+                                CharacterTabConfigUtils.createEmpty({}),
                             );
                         });
                     }}

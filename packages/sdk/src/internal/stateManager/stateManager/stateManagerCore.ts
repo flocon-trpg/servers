@@ -105,7 +105,7 @@ export class StateManagerCore<TState, TOperation> {
                         this.params.apply({
                             state: this._stateGetter.syncedState,
                             operation: xform.firstPrime,
-                        })
+                        }),
                     );
                 }
             }
@@ -149,7 +149,7 @@ export class StateManagerCore<TState, TOperation> {
                           state: this._stateGetter.syncedState,
                           operation: nextPostingOperation,
                       }),
-                this._stateGetter.postingState.metadata
+                this._stateGetter.postingState.metadata,
             );
         }
         const nextLocalOperation =
@@ -165,7 +165,7 @@ export class StateManagerCore<TState, TOperation> {
                 this.params.apply({
                     state: this._stateGetter.uiState,
                     operation: nextLocalOperation,
-                })
+                }),
             );
         } else {
             this._stateGetter.clearUiState();
@@ -183,13 +183,13 @@ export class StateManagerCore<TState, TOperation> {
         }
         if (revisionTo <= this._revision) {
             loggerRef.info(
-                `revisionTo of GetOperation is ${revisionTo}, but state revision is already ${this._revision}`
+                `revisionTo of GetOperation is ${revisionTo}, but state revision is already ${this._revision}`,
             );
             return;
         }
         if (this._pendingGetOperations.has(revisionTo)) {
             loggerRef.warn(
-                `stateManagerCore.__pendingGetOperations already contains ${revisionTo}`
+                `stateManagerCore.__pendingGetOperations already contains ${revisionTo}`,
             );
         }
         this._pendingGetOperations.set(revisionTo, {
@@ -246,7 +246,7 @@ export class StateManagerCore<TState, TOperation> {
             return false;
         }
         this._stateGetter.setUiState(
-            this._stateGetter.uiState ?? this._stateGetter.postingState.state
+            this._stateGetter.uiState ?? this._stateGetter.postingState.state,
         );
         this._stateGetter.clearPostingState();
         return true;

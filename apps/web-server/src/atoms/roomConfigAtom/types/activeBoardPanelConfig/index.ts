@@ -29,7 +29,7 @@ export const serializedActiveBoardPanelConfig = z
 export type SerializedActiveBoardPanelConfig = z.TypeOf<typeof serializedActiveBoardPanelConfig>;
 
 export const deserializeActiveBoardPanelConfig = (
-    source: SerializedActiveBoardPanelConfig
+    source: SerializedActiveBoardPanelConfig,
 ): ActiveBoardPanelConfig => {
     return {
         ...deserializeDraggablePanelConfigBase(source),

@@ -49,15 +49,15 @@ const debouncedWindowInnerHeightAtomCore = atom(0);
 export const debouncedWindowInnerWidthAtom = selectAtom(debouncedWindowInnerWidthAtomCore, x => x);
 export const debouncedWindowInnerHeightAtom = selectAtom(
     debouncedWindowInnerHeightAtomCore,
-    x => x
+    x => x,
 );
 
 const useOnResize = () => {
     const [windowInnerWidthState, setWindowInnerWidthState] = React.useState(
-        debouncedWindowInnerWidthAtomCore.init
+        debouncedWindowInnerWidthAtomCore.init,
     );
     const [windowInnerHeightState, setWindowInnerHeightState] = React.useState(
-        debouncedWindowInnerHeightAtomCore.init
+        debouncedWindowInnerHeightAtomCore.init,
     );
 
     const setWindowInnerWidthAtom = useSetAtom(debouncedWindowInnerWidthAtomCore);
@@ -84,14 +84,14 @@ const useOnResize = () => {
             setWindowInnerWidthAtom(windowInnerWidthState);
         },
         debounceTime,
-        [windowInnerWidthState]
+        [windowInnerWidthState],
     );
     useDebounce(
         () => {
             setWindowInnerHeightAtom(windowInnerHeightState);
         },
         debounceTime,
-        [windowInnerHeightState]
+        [windowInnerHeightState],
     );
 };
 
@@ -125,7 +125,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
     const [spectatorPassword, setSpectatorPassword] = React.useState<string>('');
     const [joinRoomAsPlayerResult, joinRoomAsPlayer] = useMutation(JoinRoomAsPlayerDocument);
     const [joinRoomAsSpectatorResult, joinRoomAsSpectator] = useMutation(
-        JoinRoomAsSpectatorDocument
+        JoinRoomAsSpectatorDocument,
     );
     const [errorMessage, setErrorMessage] = React.useState<string | undefined>(undefined);
 
@@ -134,7 +134,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
 
     const OnGetResult = (
         // Awaited<ReturnType<typeof joinRoomAsSpectator>> も同じ型であるためjoinRoomAsSpectatorも扱える
-        result: Awaited<ReturnType<typeof joinRoomAsPlayer>>
+        result: Awaited<ReturnType<typeof joinRoomAsPlayer>>,
     ) => {
         if (result.data == null) {
             setErrorMessage('Not authorized');
@@ -266,7 +266,7 @@ const useRoomConfig = (roomId: string): boolean => {
             }
             // immerを使わなくても問題ないが、コード変更があったときにエンバグする可能性を減らすことを狙ってimmerを使っている
             setRoomConfig(
-                produce(roomConfig, roomConfig => RoomConfigUtils.fixRoomConfig(roomConfig))
+                produce(roomConfig, roomConfig => RoomConfigUtils.fixRoomConfig(roomConfig)),
             );
             setResult(true);
         };
@@ -427,7 +427,7 @@ const useCreateRoomClientForContext = ({
     }, [urqlClient]);
     // canGetIdToken === false のときは失敗することが確定しているので RoomClient を作成しないようにしている
     const roomClientResult = useCreateRoomClient<NotificationType<CombinedError>, CombinedError>(
-        !canGetIdToken || userUid == null ? null : { client, roomId, userUid }
+        !canGetIdToken || userUid == null ? null : { client, roomId, userUid },
     );
     return useMemoOne(() => {
         return roomClientResult == null ? null : { ...roomClientResult, isMock: false, roomId };

@@ -2,7 +2,7 @@ import { GroupJoinResult } from './types';
 
 export function* groupJoinArray<TLeft, TRight>(
     left: readonly TLeft[],
-    right: readonly TRight[]
+    right: readonly TRight[],
 ): IterableIterator<GroupJoinResult<TLeft, TRight>> {
     for (let i = 0; ; i++) {
         const leftHasValue = i < left.length;

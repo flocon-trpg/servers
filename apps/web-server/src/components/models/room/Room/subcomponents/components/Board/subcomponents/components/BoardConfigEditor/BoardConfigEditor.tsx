@@ -35,7 +35,7 @@ export const BoardConfigEditor: React.FC<{
             | 'showImagePieceLabel'
             | 'showPortraitPieceLabel'
             | 'showShapePieceLabel'
-            | 'showStringPieceLabel'
+            | 'showStringPieceLabel',
     ) => {
         return (
             <TableRow label={label}>
@@ -52,7 +52,7 @@ export const BoardConfigEditor: React.FC<{
                                 boardType,
                                 boardConfig => {
                                     boardConfig[key] = e.target.checked;
-                                }
+                                },
                             );
                         });
                     }}
@@ -80,7 +80,7 @@ export const BoardConfigEditor: React.FC<{
                                 boardType,
                                 boardConfig => {
                                     boardConfig.showGrid = e.target.checked;
-                                }
+                                },
                             );
                         });
                     }}
@@ -105,7 +105,7 @@ export const BoardConfigEditor: React.FC<{
                                 boardType,
                                 boardConfig => {
                                     boardConfig.gridLineTension = e;
-                                }
+                                },
                             );
                         });
                     }}
@@ -131,7 +131,7 @@ export const BoardConfigEditor: React.FC<{
                                 boardType,
                                 boardConfig => {
                                     boardConfig.gridLineColor = rgba(e.rgb);
-                                }
+                                },
                             );
                         });
                     }}

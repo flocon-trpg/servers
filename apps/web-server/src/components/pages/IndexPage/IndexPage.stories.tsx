@@ -24,7 +24,7 @@ const createMockClient = (version: Version | 'error' | 'never'): Client => {
                             operation: createDummyUrqlOperation(),
                             stale: false,
                             hasNext: false,
-                        })
+                        }),
                     );
                 default:
                     break;
@@ -45,7 +45,7 @@ const createMockClient = (version: Version | 'error' | 'never'): Client => {
                             operation: createDummyUrqlOperation(),
                             stale: false,
                             hasNext: false,
-                        })
+                        }),
                     );
                 }
                 case Doc.GetMyRolesDocument: {
@@ -62,7 +62,7 @@ const createMockClient = (version: Version | 'error' | 'never'): Client => {
                             operation: createDummyUrqlOperation(),
                             stale: false,
                             hasNext: false,
-                        })
+                        }),
                     );
                 }
                 default:

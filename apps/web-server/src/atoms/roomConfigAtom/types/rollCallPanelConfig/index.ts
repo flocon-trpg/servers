@@ -20,7 +20,7 @@ export const serializedRollCallPanelConfig = z
 export type SerializedRollCallPanelConfig = z.TypeOf<typeof serializedRollCallPanelConfig>;
 
 export const deserializeRollCallPanelConfig = (
-    source: SerializedRollCallPanelConfig
+    source: SerializedRollCallPanelConfig,
 ): RollCallPanelConfig => {
     return {
         ...deserializeDraggablePanelConfigBase(source),

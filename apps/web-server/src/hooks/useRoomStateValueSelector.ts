@@ -7,7 +7,7 @@ type RoomState = State<typeof roomTemplate>;
 
 export const useRoomStateValueSelector = <T>(
     selector: (state: RoomState) => T,
-    deps?: React.DependencyList
+    deps?: React.DependencyList,
 ) => {
     const roomState = useRoomStateValue();
     const selectorRef = useLatest(selector);

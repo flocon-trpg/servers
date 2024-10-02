@@ -31,7 +31,7 @@ export class FBgm extends FObject {
                 return new FTypedArray(
                     this.bgm.files,
                     value => toFFilePath(value, undefined),
-                    (value, astInfo) => toFilePath(value, astInfo)
+                    (value, astInfo) => toFilePath(value, astInfo),
                 );
             case volume:
                 return new FNumber(this.bgm.volume * 100);

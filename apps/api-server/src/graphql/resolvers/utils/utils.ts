@@ -70,7 +70,7 @@ export const checkSignIn = (context: ResolverContext): DecodedIdToken | typeof N
 };
 
 export const checkSignInAndNotAnonymous = (
-    context: ResolverContext
+    context: ResolverContext,
 ): DecodedIdToken | typeof NotSignIn | typeof AnonymousAccount => {
     const decodedIdToken = checkSignIn(context);
     if (decodedIdToken == NotSignIn) {
@@ -102,7 +102,7 @@ class FindRoomAndMyParticipantResult {
     public constructor(
         public readonly room: Room$MikroORM.Room,
         public readonly roomState: RoomState,
-        public readonly me?: ParticipantState
+        public readonly me?: ParticipantState,
     ) {}
 
     public participantIds(): Set<string> {
@@ -143,7 +143,7 @@ export const ensureUserUid = (context: ResolverContext): string => {
 export const ensureAuthorizedUser = (context: ResolverContext): User => {
     if (context.authorizedUser == null) {
         throw new Error(
-            'authorizedUser was not found. "@Attribute(ENTRY or ADMIN)" might be missing.'
+            'authorizedUser was not found. "@Attribute(ENTRY or ADMIN)" might be missing.',
         );
     }
     return context.authorizedUser;
@@ -151,7 +151,7 @@ export const ensureAuthorizedUser = (context: ResolverContext): User => {
 
 export const comparePassword = async (
     plainPassword: string,
-    config: EntryPasswordConfig
+    config: EntryPasswordConfig,
 ): Promise<boolean> => {
     if (config.type === plain) {
         return safeCompare(plainPassword, config.value);
@@ -161,7 +161,7 @@ export const comparePassword = async (
 
 export const bcryptCompareNullable = async (
     plainPassword: string | undefined,
-    hash: string | undefined
+    hash: string | undefined,
 ) => {
     if (hash == null) {
         return true;
@@ -181,7 +181,7 @@ export const deleteSecretValues = (
         | RoomPublicMessage
         | RoomPrivateMessage
         | RoomPublicMessageUpdate
-        | RoomPrivateMessageUpdate
+        | RoomPrivateMessageUpdate,
 ) => {
     message.initText = undefined;
     message.initTextSource = undefined;
@@ -229,7 +229,7 @@ export const createRoomPublicMessage = ({
 };
 
 const toCharacterValueForMessage = (
-    message: RoomPubMsg | RoomPrvMsg
+    message: RoomPubMsg | RoomPrvMsg,
 ): CharacterValueForMessage | undefined => {
     if (
         message.charaStateId == null ||
@@ -334,7 +334,7 @@ export const createRoomPrivateMessageUpdate = (msg: RoomPrvMsg): RoomPrivateMess
 export async function getRoomMessagesFromDb(
     room: Room$MikroORM.Room,
     userUid: string,
-    mode: 'log' | 'default'
+    mode: 'log' | 'default',
 ): Promise<RoomMessages> {
     const publicMessages: RoomPublicMessage[] = [];
     const publicChannels: RoomPublicChannel[] = [];
@@ -417,7 +417,7 @@ const operateAsAdminAndFlushCore = async <TError>({
     roomHistCount,
 }: {
     operation: (
-        roomState: RoomState
+        roomState: RoomState,
     ) => PromiseOrValue<Result<RoomUpOperation | undefined, TError>>;
     em: EM;
     room: Room$MikroORM.Room;
@@ -486,14 +486,14 @@ type OperationChoice<TError> =
           operationType: 'operation';
           operation: (
               roomState: RoomState,
-              rest: OperationRestArg
+              rest: OperationRestArg,
           ) => PromiseOrValue<Result<RoomUpOperation | undefined, TError>>;
       }
     | {
           operationType: 'state';
           operation: (
               roomState: RoomState,
-              rest: OperationRestArg
+              rest: OperationRestArg,
           ) => PromiseOrValue<Result<RoomState, TError>>;
       };
 

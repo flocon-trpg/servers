@@ -13,7 +13,7 @@ export class PingResolver {
     public async ping(
         @Arg('value') value: number,
         @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine
+        @PubSub() pubSub: PubSubEngine,
     ): Promise<Pong> {
         const createdBy =
             context.decodedIdToken?.isError === false

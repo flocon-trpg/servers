@@ -32,7 +32,7 @@ export const useOpenFirebaseStorageFile = () => {
             }
             window.open(url, '_blank', 'noreferrer');
         },
-        [isFetching, notification, queryClient]
+        [isFetching, notification, queryClient],
     );
 
     return React.useMemo(
@@ -40,6 +40,6 @@ export const useOpenFirebaseStorageFile = () => {
             open,
             isFetching,
         }),
-        [isFetching, open]
+        [isFetching, open],
     );
 };

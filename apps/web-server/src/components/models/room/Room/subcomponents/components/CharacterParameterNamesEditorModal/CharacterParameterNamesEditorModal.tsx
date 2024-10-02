@@ -30,7 +30,7 @@ type VisibleParameterForm = {
 
 export const CharacterParameterNamesEditorModal: React.FC = () => {
     const [editorVisibility, setEditorVisibility] = useAtom(
-        characterParameterNamesEditorVisibilityAtom
+        characterParameterNamesEditorVisibilityAtom,
     );
     const operate = useSetRoomStateByApply();
     const setRoomState = useSetRoomStateWithImmer();
@@ -44,15 +44,15 @@ export const CharacterParameterNamesEditorModal: React.FC = () => {
 
     const boolParamNamesMap = React.useMemo(
         () => (boolParamNames == null ? undefined : recordToMap(boolParamNames)),
-        [boolParamNames]
+        [boolParamNames],
     );
     const numParamNamesMap = React.useMemo(
         () => (numParamNames == null ? undefined : recordToMap(numParamNames)),
-        [numParamNames]
+        [numParamNames],
     );
     const strParamNamesMap = React.useMemo(
         () => (strParamNames == null ? undefined : recordToMap(strParamNames)),
-        [strParamNames]
+        [strParamNames],
     );
 
     if (boolParamNamesMap == null || numParamNamesMap == null || strParamNamesMap == null) {

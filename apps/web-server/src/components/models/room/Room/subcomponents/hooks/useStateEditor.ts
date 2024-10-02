@@ -56,7 +56,7 @@ export function useStateEditor<T>({
                 return createMode.createInitState();
             }
             return emptySymbol;
-        })()
+        })(),
     );
     const stateRef = useLatest(state);
 
@@ -137,7 +137,7 @@ false → false
                 updateModeRef.current.onUpdate(produce(updateModeRef.current.state, recipe));
             }
         },
-        [createModeRef, stateRef, updateModeRef]
+        [createModeRef, stateRef, updateModeRef],
     );
 
     const ok = React.useCallback(() => {
@@ -172,6 +172,6 @@ false → false
             // create モード以外の場合は何も起こらない。
             ok,
         }),
-        [ok, state, updateState]
+        [ok, state, updateState],
     );
 }

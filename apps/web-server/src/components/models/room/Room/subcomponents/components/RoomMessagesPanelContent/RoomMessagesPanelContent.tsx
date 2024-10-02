@@ -168,7 +168,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
                         value={config?.tabName ?? ''}
                         onChange={e => onChange({ tabName: e.target.value })}
                     />
-                    {config?.tabName ?? '' !== '' ? null : (
+                    {(config?.tabName ?? '' !== '') ? null : (
                         <>
                             <br />
                             <Alert
@@ -315,7 +315,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
                                             checked={selectedParticipants.has(userUid)}
                                             onChange={newValue => {
                                                 const newSelectedParticipants = new Set(
-                                                    selectedParticipants
+                                                    selectedParticipants,
                                                 );
                                                 if (newValue.target.checked) {
                                                     newSelectedParticipants.add(userUid);
@@ -324,7 +324,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
                                                 }
                                                 onChange({
                                                     privateChannels: new PrivateChannelSet(
-                                                        newSelectedParticipants
+                                                        newSelectedParticipants,
                                                     ).toString(),
                                                 });
                                             }}
@@ -413,7 +413,7 @@ type RoomMessageComponentProps = {
 // https://virtuoso.dev/troubleshooting#list-does-not-scroll-to-the-bottom--items-jump-around
 // また、例えば「roomId == nullならばとりあえず適当に<div style={{minHeight: 20}} />を返す」といったアプローチだとスクロールが正常にできないといった問題点があるのでこれも避けるべき。おそらく、初めはroomId == nullなので20pxになるが、直後にroomId != nullになるためすぐにheightが代わり、メッセージの数が多いとそのheightのずれが積み重なっておかしくなる、というのが原因だと考えられる。
 const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
-    props: RoomMessageComponentProps
+    props: RoomMessageComponentProps,
 ) => {
     const participants = useParticipantsAsRecord();
 
@@ -431,7 +431,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
 
     const participantsMap = React.useMemo(
         () => (participants == null ? null : recordToMap(participants)),
-        [participants]
+        [participants],
     );
 
     const userMessage =
@@ -468,7 +468,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
             updatedInfo = (
                 <Tooltip
                     title={`${moment(new Date(userMessage.updatedAt)).format(
-                        'YYYY/MM/DD HH:mm:ss'
+                        'YYYY/MM/DD HH:mm:ss',
                     )}に削除されました`}
                 >
                     <span style={{ color: 'gray' }}>(削除済み)</span>
@@ -478,7 +478,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
             updatedInfo = (
                 <Tooltip
                     title={`${moment(new Date(userMessage.updatedAt)).format(
-                        'YYYY/MM/DD HH:mm:ss'
+                        'YYYY/MM/DD HH:mm:ss',
                     )}に編集されました`}
                 >
                     <span style={{ color: 'gray' }}>(編集済み)</span>
@@ -508,7 +508,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                     <div style={{ maxWidth: 100, textOverflow: 'ellipsis' }}>
                         {visibleTo.reduce(
                             (seed, elem, i) => (i === 0 ? elem : `${seed}, ${elem}`),
-                            ''
+                            '',
                         )}
                     </div>
                 </Popover>
@@ -593,12 +593,12 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                     {message.type !== privateMessage && message.type !== publicMessage
                         ? '(ログ)'
                         : publicChannelNames == null
-                        ? '?'
-                        : RoomMessageNameSpace.toChannelName(
-                              message,
-                              publicChannelNames,
-                              participantsMap ?? new Map()
-                          )}
+                          ? '?'
+                          : RoomMessageNameSpace.toChannelName(
+                                message,
+                                publicChannelNames,
+                                participantsMap ?? new Map(),
+                            )}
                 </div>
                 <div style={{ flex: '0 0 auto', color: 'gray' }}>{datetime}</div>
                 {privateMessageMembersInfo}
@@ -675,7 +675,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                     setValue('');
                 }}
                 onOpen={setValue => {
-                    setValue(userMessage == null ? '' : toText(userMessage) ?? '');
+                    setValue(userMessage == null ? '' : (toText(userMessage) ?? ''));
                 }}
             />
         </div>
@@ -710,15 +710,15 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
                         message.type === privateMessage || message.type === publicMessage
                             ? message.value.messageId
                             : message.type === pieceLog
-                            ? message.value.createdAt
-                            : message.createdAt
+                              ? message.value.createdAt
+                              : message.createdAt
                     }
                     publicChannelNames={publicChannelNames}
                     message={message}
                 />
             );
         },
-        [publicChannelNames]
+        [publicChannelNames],
     );
     const messages = useRoomMessages({ filter });
     const queryStatus = useRoomMessageQueryStatus();
@@ -737,7 +737,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
             )
                 .filter(
                     ([key, value]) =>
-                        key !== firebaseUser?.uid && value === WritingMessageStatusType.Writing
+                        key !== firebaseUser?.uid && value === WritingMessageStatusType.Writing,
                 )
                 .map(([key]) => key)
                 .map(userUid => participants?.get(userUid)?.name ?? '')
@@ -751,7 +751,7 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
                     <div css={statusBarCss}>
                         {writingUsers.reduce(
                             (seed, elem, i) => (i === 0 ? elem : `${seed}, ${elem}`),
-                            '' as string
+                            '' as string,
                         ) + ' が書き込み中…'}
                     </div>
                 );
@@ -833,7 +833,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                 recipe(messagePanel);
             });
         },
-        [panelId, setRoomConfig]
+        [panelId, setRoomConfig],
     );
 
     const chatInputDirection =
@@ -841,7 +841,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
     const spaceDiff = 60;
     const contentHeight = Math.max(
         0,
-        height - 280 - (chatInputDirection === column ? spaceDiff : 0)
+        height - 280 - (chatInputDirection === column ? spaceDiff : 0),
     );
     const tabsHeight = Math.max(0, height - 240 - (chatInputDirection === column ? spaceDiff : 0));
 
@@ -969,7 +969,7 @@ export const RoomMessagesPanelContent: React.FC<Props> = ({ height, panelId }: P
                                 return;
                             }
                             const indexToSplice = messagePanel.tabs.findIndex(
-                                tab => tab.key === editingTabConfigKey
+                                tab => tab.key === editingTabConfigKey,
                             );
                             if (indexToSplice >= 0) {
                                 messagePanel.tabs.splice(indexToSplice, 1);

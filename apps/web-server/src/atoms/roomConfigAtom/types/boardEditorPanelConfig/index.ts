@@ -28,7 +28,7 @@ export const serializedBoardEditorPanelConfig = z
 export type SerializedBoardEditorPanelConfig = z.TypeOf<typeof serializedBoardEditorPanelConfig>;
 
 export const deserializeBoardEditorPanelConfig = (
-    source: SerializedBoardEditorPanelConfig
+    source: SerializedBoardEditorPanelConfig,
 ): BoardEditorPanelConfig => {
     return {
         ...deserializeDraggablePanelConfigBase(source),

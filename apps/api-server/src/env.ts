@@ -13,7 +13,7 @@ export const loadDotenv = (): void => {
             expand(
                 config({
                     path: dotenvFile,
-                })
+                }),
             );
         }
     });

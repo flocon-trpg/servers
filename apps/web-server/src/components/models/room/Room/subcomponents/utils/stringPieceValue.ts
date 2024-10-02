@@ -6,7 +6,7 @@ export namespace StringPieceValue {
     export const toKonvaText = <T>(
         state: StringPieceState,
         createdByMe: boolean,
-        defaultValue: T
+        defaultValue: T,
     ): string | T => {
         if (state.isValuePrivate && !createdByMe) {
             return defaultValue;

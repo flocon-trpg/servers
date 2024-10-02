@@ -22,11 +22,11 @@ export class DeletableTree<TKey, TValue> {
     /** 指定したkeyにあるnodeを基準とした新しいTreeオブジェクトを返します。nodeへの参照は共有されます。absolutePathは引き継がれます。 */
     public createSubTree(
         key: readonly TKey[],
-        initValue: (absolutePath: readonly TKey[]) => TValue
+        initValue: (absolutePath: readonly TKey[]) => TValue,
     ) {
         const result = new DeletableTree<TKey, TValue>();
         const newTree = this.#source.createSubTree(key, absolutePath =>
-            Option.some(initValue(absolutePath))
+            Option.some(initValue(absolutePath)),
         );
         result.#source = newTree;
         return result;
@@ -52,7 +52,7 @@ export class DeletableTree<TKey, TValue> {
                 childKey,
                 this.createSubTree([childKey], () => {
                     throw new Error('This should not happen');
-                })
+                }),
             );
         }
         return result;
@@ -72,12 +72,12 @@ export class DeletableTree<TKey, TValue> {
     public ensure<TReplaced extends TValue>(
         key: readonly TKey[],
         replacer: (oldValue: Option<TValue>) => TReplaced,
-        initValue: (absolutePath: readonly TKey[]) => TValue
+        initValue: (absolutePath: readonly TKey[]) => TValue,
     ): TReplaced {
         const result = this.#source.ensure(
             key,
             oldValue => Option.some(replacer(oldValue)),
-            () => Option.none()
+            () => Option.none(),
         );
 
         const absolutePath: TKey[] = [];
@@ -90,7 +90,7 @@ export class DeletableTree<TKey, TValue> {
                     }
                     return oldValue;
                 },
-                () => Option.none()
+                () => Option.none(),
             );
         };
 
@@ -129,14 +129,14 @@ export class DeletableTree<TKey, TValue> {
     }
 
     public map<TValue2>(
-        mapping: (oldValue: { absolutePath: readonly TKey[]; value: TValue }) => TValue2
+        mapping: (oldValue: { absolutePath: readonly TKey[]; value: TValue }) => TValue2,
     ): DeletableTree<TKey, TValue2> {
         const newTree = this.#source.map(oldValue => {
             if (oldValue.value.isNone) {
                 return oldValue.value;
             }
             return Option.some(
-                mapping({ absolutePath: oldValue.absolutePath, value: oldValue.value.value })
+                mapping({ absolutePath: oldValue.absolutePath, value: oldValue.value.value }),
             );
         });
         const result = new DeletableTree<TKey, TValue2>();

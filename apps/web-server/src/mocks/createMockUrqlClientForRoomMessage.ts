@@ -36,7 +36,7 @@ export const createMockUrqlClientForRoomMessage = () => {
                             operation: createDummyUrqlOperation(),
                             stale: false,
                             hasNext: false,
-                        })
+                        }),
                     );
                 }
                 case Doc.GetDiceHelpMessagesDocument: {
@@ -50,7 +50,7 @@ export const createMockUrqlClientForRoomMessage = () => {
                             operation: createDummyUrqlOperation(),
                             stale: false,
                             hasNext: false,
-                        })
+                        }),
                     );
                 }
                 default:

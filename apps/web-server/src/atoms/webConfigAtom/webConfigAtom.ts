@@ -61,12 +61,12 @@ const parseConfig = (env: DotenvParseOutput | undefined): Result<Env> => {
     const isUnlistedFirebaseStorageEnabled = parseStringToBoolean(
         env == null
             ? process.env.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED
-            : env.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED
+            : env.NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED,
     );
     if (isUnlistedFirebaseStorageEnabled.error) {
         loggerRef.warn(
             `${NEXT_PUBLIC_FIREBASE_STORAGE_ENABLED} において次のエラーが発生したため、false とみなされます:` +
-                isUnlistedFirebaseStorageEnabled.error.ja
+                isUnlistedFirebaseStorageEnabled.error.ja,
         );
     }
     const result: Env = {
@@ -77,7 +77,7 @@ const parseConfig = (env: DotenvParseOutput | undefined): Result<Env> => {
             parseEnvListValue(
                 env == null
                     ? process.env.NEXT_PUBLIC_AUTH_PROVIDERS
-                    : env.NEXT_PUBLIC_AUTH_PROVIDERS
+                    : env.NEXT_PUBLIC_AUTH_PROVIDERS,
             ) ?? undefined,
         isUnlistedFirebaseStorageEnabled: isUnlistedFirebaseStorageEnabled.value,
     };

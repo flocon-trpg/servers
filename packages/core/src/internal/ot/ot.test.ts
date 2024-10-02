@@ -102,7 +102,7 @@ namespace Test {
                         throw toOtError(actualOperation.error);
                     }
                     expect(actualOperation.value).toEqual(
-                        expected === undefinedOrError ? undefined : expected
+                        expected === undefinedOrError ? undefined : expected,
                     );
                 });
             };
@@ -576,7 +576,7 @@ describe.each([[true], [false]])(
             requestedBy: { type: client, userUid: Fixtures.Participant.Player2.userUid },
             expected: isPrivate ? undefined : expected,
         });
-    }
+    },
 );
 
 describe.each([[true], [false]])(
@@ -659,5 +659,5 @@ describe.each([[true], [false]])(
             requestedBy: { type: client, userUid: Fixtures.Participant.Player2.userUid },
             expected: isPrivate ? undefined : expected,
         });
-    }
+    },
 );

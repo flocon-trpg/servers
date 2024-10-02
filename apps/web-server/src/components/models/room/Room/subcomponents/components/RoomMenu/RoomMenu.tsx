@@ -60,7 +60,7 @@ const panelOpacityAtom = atom(
                 roomConfig.panelOpacity = newValue;
             });
         });
-    }
+    },
 );
 
 const showBackgroundBoardViewerAtom = atom(
@@ -74,7 +74,7 @@ const showBackgroundBoardViewerAtom = atom(
                 roomConfig.showBackgroundBoardViewer = newValue;
             });
         });
-    }
+    },
 );
 
 const panelsOpacityModalVisibilityAtom = atom(false);
@@ -413,7 +413,7 @@ const PanelsOpacityModal: React.FC<{
         () => ({
             padding: '0 4px',
         }),
-        []
+        [],
     );
     return (
         <Modal
@@ -509,18 +509,18 @@ const usePanelsMenuItem = () => {
     const setRoomConfig = useImmerSetAtom(roomConfigAtom);
     const activeBoardPanel = useAtomSelector(
         roomConfigAtom,
-        state => state?.panels.activeBoardPanel
+        state => state?.panels.activeBoardPanel,
     );
     const boardPanels = useAtomSelector(roomConfigAtom, state => state?.panels.boardEditorPanels);
     const characterPanel = useAtomSelector(roomConfigAtom, state => state?.panels.characterPanel);
     const chatPalettePanels = useAtomSelector(
         roomConfigAtom,
-        state => state?.panels.chatPalettePanels
+        state => state?.panels.chatPalettePanels,
     );
     const gameEffectPanel = useAtomSelector(roomConfigAtom, state => state?.panels.gameEffectPanel);
     const participantPanel = useAtomSelector(
         roomConfigAtom,
-        state => state?.panels.participantPanel
+        state => state?.panels.participantPanel,
     );
     const memoPanels = useAtomSelector(roomConfigAtom, state => state?.panels.memoPanels);
     const messagePanels = useAtomSelector(roomConfigAtom, state => state?.panels.messagePanels);
@@ -1074,7 +1074,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
     const createdBy = useRoomStateValueSelector(state => state.createdBy);
 
     const [showBackgroundBoardViewer, setShowBackgroundBoardViewerAtom] = useAtom(
-        showBackgroundBoardViewerAtom
+        showBackgroundBoardViewerAtom,
     );
 
     const [, leaveRoomMutation] = useMutation(LeaveRoomDocument);
@@ -1083,7 +1083,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
         React.useState(false);
     const [isDeleteRoomModalVisible, setIsDeleteRoomModalVisible] = React.useState(false);
     const [isPanelsOpacityModalVisible, setIsPanelsOpacityModalVisible] = useAtom(
-        panelsOpacityModalVisibilityAtom
+        panelsOpacityModalVisibilityAtom,
     );
     const [isResetMessagesModalVisible, setIsResetMessagesModalVisible] = React.useState(false);
     const [isGenerateLogModalVisible, setIsGenerateSimpleLogModalVisible] = React.useState(false);

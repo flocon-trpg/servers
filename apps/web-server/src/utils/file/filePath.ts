@@ -36,7 +36,7 @@ export type FilePathLikeOrThumb =
 export namespace FilePathModule {
     export const equals = (
         x: FilePathLike | null | undefined,
-        y: FilePathLike | null | undefined
+        y: FilePathLike | null | undefined,
     ): boolean => {
         if (x == null) {
             return y == null;

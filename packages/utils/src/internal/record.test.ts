@@ -40,7 +40,7 @@ describe('chooseRecord', () => {
         expect(
             chooseRecord(source, () => {
                 throw new Error('this should not be called');
-            })
+            }),
         ).toEqual({});
     });
 
@@ -59,7 +59,7 @@ describe('chooseRecord', () => {
                     return undefined;
                 }
                 return key + element;
-            })
+            }),
         ).toEqual({ a: 'aA', c: null });
     });
 
@@ -75,7 +75,7 @@ describe('chooseDualKeyRecord', () => {
         expect(
             chooseDualKeyRecord(source, () => {
                 throw new Error('this should not be called');
-            })
+            }),
         ).toEqual({});
     });
 
@@ -89,8 +89,9 @@ describe('chooseDualKeyRecord', () => {
             },
             key3: undefined,
         };
-        const actual = chooseDualKeyRecord<number, [string, string, string]>(source, (value, key) =>
-            value === 0 ? undefined : [value.toString(), key.first, key.second]
+        const actual = chooseDualKeyRecord<number, [string, string, string]>(
+            source,
+            (value, key) => (value === 0 ? undefined : [value.toString(), key.first, key.second]),
         );
         expect(actual).toEqual({
             key1: {},
@@ -102,14 +103,14 @@ describe('chooseDualKeyRecord', () => {
 
     it('tests "__proto__" as a first key to fail', () => {
         const source: Record<string, Record<string, number | undefined>> = JSON.parse(
-            '{ "__proto__": { "a": 17 } }'
+            '{ "__proto__": { "a": 17 } }',
         );
         expect(() => chooseDualKeyRecord(source, x => x)).toThrow();
     });
 
     it('tests "__proto__" as a second key to fail', () => {
         const source: Record<string, Record<string, number | undefined>> = JSON.parse(
-            '{ "a": { "__proto__": 17 } }'
+            '{ "a": { "__proto__": 17 } }',
         );
         expect(() => chooseDualKeyRecord(source, x => x)).toThrow();
     });
@@ -121,7 +122,7 @@ describe('mapRecord', () => {
         expect(
             mapRecord(source, () => {
                 throw new Error('this should not be called');
-            })
+            }),
         ).toEqual({});
     });
 
@@ -140,7 +141,7 @@ describe('mapRecord', () => {
                     return undefined;
                 }
                 return key + element;
-            })
+            }),
         ).toEqual({ a: 'aA', b: undefined, c: null });
     });
 
@@ -156,7 +157,7 @@ describe('mapDualKeyRecord', () => {
         expect(
             mapDualKeyRecord(source, () => {
                 throw new Error('this should not be called');
-            })
+            }),
         ).toEqual({});
     });
 
@@ -171,7 +172,7 @@ describe('mapDualKeyRecord', () => {
         };
         const actual = mapDualKeyRecord<number, [string, string, string] | undefined>(
             source,
-            (value, key) => (value === 0 ? undefined : [value.toString(), key.first, key.second])
+            (value, key) => (value === 0 ? undefined : [value.toString(), key.first, key.second]),
         );
         expect(actual).toEqual({
             key1: {},
@@ -184,14 +185,14 @@ describe('mapDualKeyRecord', () => {
 
     it('tests "__proto__" as a first key to fail', () => {
         const source: Record<string, Record<string, number | undefined>> = JSON.parse(
-            '{ "__proto__": { "a": 17 } }'
+            '{ "__proto__": { "a": 17 } }',
         );
         expect(() => mapDualKeyRecord(source, x => x)).toThrow();
     });
 
     it('tests "__proto__" as a second key to fail', () => {
         const source: Record<string, Record<string, number | undefined>> = JSON.parse(
-            '{ "a": { "__proto__": 17 } }'
+            '{ "a": { "__proto__": 17 } }',
         );
         expect(() => mapDualKeyRecord(source, x => x)).toThrow();
     });
@@ -338,7 +339,7 @@ describe('dualKeyRecordForEach', () => {
             reduced.push(`${key.first}:${key.second}:${value}`);
         });
         expect(reduced.sort()).toEqual(
-            ['key2:key2_1:2_1', 'key2:key2_2:2_2', 'key4:key4_1:4_1'].sort()
+            ['key2:key2_1:2_1', 'key2:key2_2:2_2', 'key4:key4_1:4_1'].sort(),
         );
     });
 });

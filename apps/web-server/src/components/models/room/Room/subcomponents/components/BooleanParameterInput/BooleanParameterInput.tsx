@@ -156,7 +156,7 @@ export const BooleanParameterInput: React.FC<Props> = ({
             hideWhenDisabled={compact}
             showAsTextWhenDisabled={!compact}
             tooltip={
-                parameter?.isValuePrivate ?? false
+                (parameter?.isValuePrivate ?? false)
                     ? parameterIsPrivate({ isCharacterPrivate, isCreate })
                     : parameterIsNotPrivate({ isCharacterPrivate, isCreate })
             }

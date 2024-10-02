@@ -20,5 +20,5 @@ export const template = createObjectValueTemplate(
         role: createReplaceValueTemplate(maybe(participantRole)),
     },
     2,
-    1
+    1,
 );

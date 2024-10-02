@@ -54,7 +54,7 @@ export class WriteRoomSoundEffectResolver {
     public async writeRoomSoundEffect(
         @Args() args: WriteRoomSoundEffectArgs,
         @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine
+        @PubSub() pubSub: PubSubEngine,
     ): Promise<typeof WriteRoomSoundEffectResult> {
         const em = context.em;
         const authorizedUser = ensureAuthorizedUser(context);

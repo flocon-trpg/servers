@@ -48,11 +48,11 @@ describe('multiValueSet', () => {
         expect(
             _([...actual.toIterator()])
                 .sortBy(x => JSON.stringify(x))
-                .value()
+                .value(),
         ).toEqual(
             _([[], ['a'], ['a', 'b'], ['b']])
                 .sortBy(x => JSON.stringify(x))
-                .value()
+                .value(),
         );
     });
 
