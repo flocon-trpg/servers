@@ -59,7 +59,7 @@ jobs:
 
             # by default, the message of merge commit is "Merge branch 'main-build-temp' into main-build", so the message is changed not to include "main-build-temp".
             # if this merge is first and no --allow-empty, this job fails because there is nothing to commit.
-            - run: git commit -m --allow-empty "Merge branch"
+            - run: git commit --allow-empty -m "Merge branch"
 
             - run: git switch main-build
 
