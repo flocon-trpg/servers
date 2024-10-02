@@ -3488,7 +3488,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@flocon-trpg/prettier-config@workspace:packages/prettier-config"
   peerDependencies:
-    prettier: ^2.7.1 || ^3.0.0
+    prettier: ^3.0.0
   languageName: unknown
   linkType: soft
 
