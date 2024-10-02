@@ -18,8 +18,8 @@
         "test": "yarn workspaces foreach -pv run test"
     },
     "devDependencies": {
-        "@commitlint/cli": "17.6.6",
-        "@commitlint/config-conventional": "17.6.6",
+        "@commitlint/cli": "19.5.0",
+        "@commitlint/config-conventional": "19.5.0",
         "@flocon-trpg/prettier-config": "workspace:^",
         "husky": "8.0.3",
         "prettier": "2.8.8",
