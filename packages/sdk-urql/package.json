@@ -41,7 +41,7 @@
         "eslint-plugin-import": "2.27.5",
         "prettier": "2.8.8",
         "rimraf": "5.0.1",
-        "rollup": "3.26.0",
+        "rollup": "4.22.5",
         "typescript": "5.6.2"
     },
     "engines": {
