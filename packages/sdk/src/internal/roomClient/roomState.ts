@@ -316,8 +316,6 @@ export class RoomStateManager<TGraphQLError> {
                             this.#setState({
                                 type: error,
                                 state: getRoomState(),
-                                setState: undefined,
-                                setStateByApply: undefined,
                                 error: {
                                     type: OperateRoomFailure,
                                     error: operationResult.value.result.failureType,
@@ -412,8 +410,6 @@ export class RoomStateManager<TGraphQLError> {
                         this.#setState({
                             type: error,
                             state: newRoomStateManager.uiState,
-                            setStateByApply: undefined,
-                            setState: undefined,
                             error: {
                                 type: transformationError,
                             },
