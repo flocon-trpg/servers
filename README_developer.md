@@ -12,6 +12,7 @@ Flocon
 ┣ 📂 packages
 ┃ ┣ 📦 cache
 ┃ ┣ 📦 core
+┃ ┣ 📦 default-pino-transport
 ┃ ┣ 📦 eslint-config
 ┃ ┣ 📦 flocon-script
 ┃ ┣ 📦 prettier-config
@@ -20,9 +21,7 @@ Flocon
 ┃ ┣ 📦 sdk-react
 ┃ ┣ 📦 sdk-urql
 ┃ ┣ 📦 tsconfig
-┃ ┣ 📦 typed-document-node-v0.7.1
-┃ ┣ 📦 typed-document-node-v0.7.2
-┃ ┣ 📦 typed-document-node-v0.7.8
+┃ ┣ 📦 typed-document-node
 ┃ ┣ 📦 utils
 ┃ ┗ 📦 web-server-utils
 ┣ 📄 README_developer.md (このファイル)
@@ -38,7 +37,7 @@ Flocon
 (Netlify や fly.io にデプロイする場合は必要ありません)
 
 -   yarn のインストール(corepack を有効化している場合は、corepack によって自動的にインストールされます)
--   Node.js v14, v16, v18 のいずれかのインストール
+-   Node.js v18, v20 のいずれかのインストール
 
 ## husky のインストール
 
@@ -52,6 +51,13 @@ Flocon リポジトリへの Pull Request の作成を考えていない場合�
 
 データベースとして PostgreSQL もしくは MySQL を使う場合は対応するデータベースサーバーを起動しておく必要があります。SQLite の場合は不要です。
 
+`main` ブランチから checkout した場合は、次のコマンドを実行しておく必要があります。このコマンドでは TypeScript コードをコンパイルして JavaScript コードの生成が行われます。他のブランチ(`main-build`、`release` など)ではコンパイル済みの JavaScript コードが同梱しているためこのコマンドの実行は不要です。
+
+```console
+cd ./apps/api-server
+yarn run build
+```
+
 API サーバーを動かすには、次のコマンドを実行してください。
 
 ```console
@@ -62,6 +68,13 @@ yarn run start
 ## ローカルでの Web サーバーの実行方法
 
 [環境変数のセット](https://flocon.app/docs/server/details/web-server/vars)が必須です。また、環境変数のセットにおいて、Firebase プロジェクトの準備も必要になります。
+
+`main` ブランチから checkout した場合は、API サーバーと同様に TypeScript コードのコンパイルが必要なため、次のコマンドを実行しておく必要があります。
+
+```console
+cd ./apps/web-server
+yarn run build:deps
+```
 
 Web サーバーを動かすには、次のコマンドを実行してください。
 
@@ -111,7 +124,7 @@ yarn run storybook
 
 ### クイックスタート
 
-Node.js v16 以降をインストールし、一例として、次のコマンドを実行することで、全てのパッケージをテストできます。
+一例として、次のコマンドを実行することで、全てのパッケージをテストできます。
 
 #### Linux
 
@@ -146,10 +159,6 @@ Redis を使用したテストは`./packages/cache`パッケージにのみ存�
 
 リレーショナルデータベースを使用したテストは [api-server](./apps/api-server) パッケージにのみ存在します。このパッケージをテストしない場合は`MYSQL_TEST`、`POSTGRESQL_TEST`、`SQLITE_TEST`の値は利用されません。
 
-#### Node.js v14 における web-server パッケージのテスト
-
-`web-server` のコードには String.prototype.replaceAll メソッドが含まれています。このメソッドは多くのブラウザや Node.js v16 などでは実装されていますが、Node.js v14 では未実装です。このため、Node.js 14 では web-server パッケージの一部のテストに失敗します。なお、Node.js v14 で問題が生じるのはテストのみであり、`yarn run dev`、`yarn run build`、`yarn run export` などは正常に動作すると思われます。
-
 ## licenses-npm-package.txt の生成に関して
 
 [licenses-npm-package.txt](./apps/web-server/public/licenses-npm-package.txt) は `yarn run generate-disclaimer` で生成できます。
@@ -160,9 +169,10 @@ Redis を使用したテストは`./packages/cache`パッケージにのみ存�
 
 ※ 現在採用しているフローおよびブランチ名は暫定です。
 
--   `main`: 開発ブランチです。
--   `release`: リリース済みのコード置き場です。
--   `prerelease/v*.*.*`: 重要度の高いバグ修正を含んだリリースの前段階となるブランチです。\*には数値等が入ります。必ずしも存在するとは限りません。
+-   `main`: 開発ブランチです。Flocon の TypeScript ソースコードからコンパイルされた JavaScript コードは含まれていません(`.gitignore` に含まれている `dist/` によって git からは無視されます)。
+-   `main-build`: `main` ブランチと似ていますが、コンパイルされた JavaScript コードが含まれている点が異なります。`main` ブランチに push があった場合、GitHub Actions によって自動的にビルドされた後に `main-build` ブランチにも push されます。手動で `main-build` ブランチに直接 push することは通常はありません。
+-   `prerelease/v*.*.*`: 重要度の高いバグ修正を含んだリリースの前段階となるブランチです。\* には数値等が入ります。必ずしも存在するとは限りません。コンパイルされた JavaScript コードが含まれます。通常は `main-build` ブランチから pull request が作成され、merge されます。
+-   `release`: リリース済みのコード置き場です。コンパイルされた JavaScript コードが含まれます。通常は `prerelease/v*.*.*` もしくは `main-build` ブランチから pull request が作成され、merge されます。
 
 ### リリースまでの流れ
 
