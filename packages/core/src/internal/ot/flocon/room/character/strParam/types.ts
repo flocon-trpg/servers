@@ -12,5 +12,5 @@ export const template = createObjectValueTemplate(
         overriddenParameterName: createTextValueTemplate(true),
     },
     2,
-    1
+    1,
 );

@@ -60,5 +60,5 @@ export const template = createObjectValueTemplate(
         soundEffect: createReplaceValueTemplate(soundEffect.optional()),
     },
     1,
-    1
+    1,
 );

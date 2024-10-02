@@ -35,7 +35,7 @@ type DicePieceState = State<typeof dicePieceTemplate>;
 const defaultDicePieceValue = (
     piecePosition: CompositeRect,
     isCellMode: boolean,
-    ownerCharacterId: string | undefined
+    ownerCharacterId: string | undefined,
 ): DicePieceState => ({
     ...piecePosition,
 

@@ -12,5 +12,5 @@ export const template = createObjectValueTemplate(
         isPrivate: createReplaceValueTemplate(z.boolean()),
     },
     2,
-    1
+    1,
 );

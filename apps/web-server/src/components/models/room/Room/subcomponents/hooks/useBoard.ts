@@ -12,7 +12,7 @@ export const useBoard = (boardId: string | undefined): BoardState | undefined =>
                 }
                 return state.boards?.[boardId];
             },
-            [boardId]
+            [boardId],
         ) ?? undefined
     );
 };

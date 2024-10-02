@@ -11,7 +11,7 @@ export const RateLimitMiddleware =
         const decodedIdToken = checkSignIn(context);
         if (decodedIdToken === NotSignIn) {
             loggerRef.warn(
-                `RateLimitMiddlewareにおいて、decondedIdTokenが見つかりませんでした。RateLimitMiddlewareが@Authorizedとともに使われていることを確認してください。`
+                `RateLimitMiddlewareにおいて、decondedIdTokenが見つかりませんでした。RateLimitMiddlewareが@Authorizedとともに使われていることを確認してください。`,
             );
             return await next();
         }

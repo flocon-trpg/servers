@@ -52,7 +52,7 @@ export class GetRoomAsListItemResolver {
     @UseMiddleware(QueueMiddleware, RateLimitMiddleware(1))
     public async getRoomAsListItem(
         @Arg('roomId') roomId: string,
-        @Ctx() context: ResolverContext
+        @Ctx() context: ResolverContext,
     ): Promise<typeof GetRoomAsListItemResult> {
         const em = context.em;
         const authorizedUserUid = ensureAuthorizedUser(context).userUid;

@@ -8,7 +8,7 @@ let i = 10;
 let j = i++;
 [i, j]
         `,
-            {}
+            {},
         );
         expect(actual.result).toEqual([11, 10]);
     });
@@ -20,7 +20,7 @@ let i = 10;
 let j = ++i;
 [i, j]
         `,
-            {}
+            {},
         );
         expect(actual.result).toEqual([11, 11]);
     });
@@ -32,7 +32,7 @@ let i = 10;
 let j = i--;
 [i, j]
         `,
-            {}
+            {},
         );
         expect(actual.result).toEqual([9, 10]);
     });
@@ -44,7 +44,7 @@ let i = 10;
 let j = --i;
 [i, j]
         `,
-            {}
+            {},
         );
         expect(actual.result).toEqual([9, 9]);
     });

@@ -52,7 +52,7 @@ export class ChangeParticipantNameResolver {
     public async changeParticipantName(
         @Args() args: ChangeParticipantNameArgs,
         @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine
+        @PubSub() pubSub: PubSubEngine,
     ): Promise<ChangeParticipantNameResult> {
         const em = context.em;
         const authorizedUserUid = ensureAuthorizedUser(context).userUid;
@@ -88,7 +88,7 @@ export class ChangeParticipantNameResolver {
                 return { failureType: ChangeParticipantNameFailureType.NotFound };
             case IdOperation:
                 loggerRef.debug(
-                    'An operation in changeParticipantName is id. This should not happen.'
+                    'An operation in changeParticipantName is id. This should not happen.',
                 );
                 return { failureType: ChangeParticipantNameFailureType.NotParticipant };
             default:

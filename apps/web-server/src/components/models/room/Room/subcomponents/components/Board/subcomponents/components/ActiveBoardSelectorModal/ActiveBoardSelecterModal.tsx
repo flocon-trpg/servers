@@ -22,7 +22,7 @@ export const ActiveBoardSelectorModal: React.FC<Props> = ({ visible, onComplete 
     const myBoards = useMyBoards();
     const operate = useSetRoomStateByApply();
     const [selectedBoardKey, setSelectedBoardKey] = React.useState<SelectedBoardKey | undefined>(
-        undefined
+        undefined,
     );
     const options = React.useMemo(() => {
         if (myBoards == null) {

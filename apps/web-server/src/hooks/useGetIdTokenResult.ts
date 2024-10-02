@@ -25,6 +25,6 @@ export const useGetIdTokenResult = () => {
     }, [currentUserRef]);
     return React.useMemo(
         () => ({ canGetIdTokenResult, getIdTokenResult }),
-        [canGetIdTokenResult, getIdTokenResult]
+        [canGetIdTokenResult, getIdTokenResult],
     );
 };

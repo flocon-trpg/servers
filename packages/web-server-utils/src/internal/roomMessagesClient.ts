@@ -29,7 +29,7 @@ const createRoomMessage = (
         | RoomPrivateMessageFragment
         | RoomPublicMessageFragment
         | PieceLogFragment
-        | RoomSoundEffectFragment
+        | RoomSoundEffectFragment,
 ): RoomMessage | undefined => {
     switch (source.__typename) {
         case 'RoomPrivateMessage':
@@ -55,7 +55,7 @@ const createRoomMessage = (
         case undefined:
             loggerRef.warn(
                 { object: source },
-                'createRoomMessage 関数に渡されたオブジェクトの __typename が undefined だったため、処理はスキップされました。RoomPrivateMessageFragment | RoomPublicMessageFragment | PieceLogFragment | RoomSoundEffectFragment では __typename がないとメッセージを処理できません。GraphQL クライアントの設定を確認し、__typename を常にセットするようにしてください。'
+                'createRoomMessage 関数に渡されたオブジェクトの __typename が undefined だったため、処理はスキップされました。RoomPrivateMessageFragment | RoomPublicMessageFragment | PieceLogFragment | RoomSoundEffectFragment では __typename がないとメッセージを処理できません。GraphQL クライアントの設定を確認し、__typename を常にセットするようにしてください。',
             );
             return undefined;
     }
@@ -64,7 +64,7 @@ const createRoomMessage = (
 const compareUpdatedAt = (
     left: number | null | undefined,
     operator: '<',
-    right: number | null | undefined
+    right: number | null | undefined,
 ) => {
     if (left == null) {
         return right != null;
@@ -86,7 +86,7 @@ type AddCustomMessageEvent<TCustomMessage> = {
 // 引数のmessagesには変更は加えられない
 const reduceEvent = <
     TCustomMessage,
-    T extends SortedArray<Message<TCustomMessage>> | FilteredSortedArray<Message<TCustomMessage>>
+    T extends SortedArray<Message<TCustomMessage>> | FilteredSortedArray<Message<TCustomMessage>>,
 >({
     messages: messagesSource,
     event,
@@ -227,7 +227,7 @@ export type FilteredRoomMessages<TCustomMessage> = Readonly<{
 export type AllRoomMessages<TCustomMessage> = FilteredRoomMessages<TCustomMessage> &
     Readonly<{
         filter(
-            filter: (message: Message<TCustomMessage>) => boolean
+            filter: (message: Message<TCustomMessage>) => boolean,
         ): FilteredRoomMessages<TCustomMessage>;
     }>;
 
@@ -278,7 +278,7 @@ export class RoomMessagesClient<TCustomMessage> {
                                 current: changeEvent.current.toArray(x => x),
                             };
                     }
-                })
+                }),
             ),
             filter: filter => {
                 return {
@@ -449,7 +449,7 @@ export class RoomMessagesClient<TCustomMessage> {
                 case undefined:
                     loggerRef.warn(
                         { object: event },
-                        '#reduceOnQuery メソッドの引数で __typename が undefined のオブジェクトが見つかったため、このオブジェクトの処理はスキップされました。RoomMessageEventFragment では __typename がないとメッセージを処理できません。GraphQL クライアントの設定を確認し、__typename を常にセットするようにしてください。'
+                        '#reduceOnQuery メソッドの引数で __typename が undefined のオブジェクトが見つかったため、このオブジェクトの処理はスキップされました。RoomMessageEventFragment では __typename がないとメッセージを処理できません。GraphQL クライアントの設定を確認し、__typename を常にセットするようにしてください。',
                     );
                     break;
             }

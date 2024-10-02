@@ -13,7 +13,7 @@ import { State } from '../ot/generator/types';
 
 export const toFFilePath = (
     source: State<typeof FilePath.filePathTemplate>,
-    astInfo: AstInfo | undefined
+    astInfo: AstInfo | undefined,
 ): FObject => {
     const result = new FRecord();
     result.set({ property: new FString('path'), newValue: new FString(source.path), astInfo });
@@ -27,7 +27,7 @@ export const toFFilePath = (
 
 export const toFilePathOrUndefined = (
     source: FValue,
-    astInfo: AstInfo | undefined
+    astInfo: AstInfo | undefined,
 ): State<typeof FilePath.filePathTemplate> | undefined => {
     if (source === undefined) {
         return undefined;
@@ -40,14 +40,14 @@ export const toFilePathOrUndefined = (
         .cast();
     const sourceType = beginCast(
         source.get({ property: new FString('sourceType'), astInfo }),
-        astInfo
+        astInfo,
     )
         .addString()
         .cast();
     if (sourceType !== FilePath.Default && sourceType !== FilePath.FirebaseStorage) {
         throw new ScriptError(
             `File type must be '${FilePath.Default}' or '${FilePath.FirebaseStorage}'`,
-            astInfo?.range
+            astInfo?.range,
         );
     }
     return {
@@ -60,7 +60,7 @@ export const toFilePathOrUndefined = (
 
 export const toFilePath = (
     source: FValue,
-    astInfo: AstInfo | undefined
+    astInfo: AstInfo | undefined,
 ): State<typeof FilePath.filePathTemplate> => {
     const result = toFilePathOrUndefined(source, astInfo);
     if (result === undefined) {

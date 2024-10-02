@@ -91,7 +91,7 @@ const useFirebaseStorageFiles = (onSelect: OnSelect | null) => {
                     type === $public
                         ? uploaderTypeFolderName.publicFirebaseStorage
                         : uploaderTypeFolderName.unlistedFirebaseStorage,
-                    file.uploaderFilePath
+                    file.uploaderFilePath,
                 );
                 const onClick = isOnSelectNullish
                     ? undefined
@@ -161,7 +161,7 @@ const useFloconUploaderFiles = (onSelect: OnSelect | null, pause: boolean) => {
                 file.listType === FileListType.Public
                     ? uploaderTypeFolderName.publicApiServer
                     : uploaderTypeFolderName.unlistedApiServer,
-                file.screenname
+                file.screenname,
             );
             const onClick = isOnSelectNullish
                 ? undefined
@@ -271,7 +271,7 @@ const FirebaseStorageUploader: React.FC<UploaderProps> = ({
                     return ref(
                         storage,
                         Path.unlisted.file(myUserUid, joinPath(folderPath, options.file.name).array)
-                            .string
+                            .string,
                     );
                 })();
                 if (storageRef == null) {
@@ -335,14 +335,14 @@ const FloconUploader: React.FC<FloconUploaderProps> = ({ onUploaded, storageType
                     formData.append(
                         'file',
                         options.file,
-                        joinPath(folderPath, options.file.name).string
+                        joinPath(folderPath, options.file.name).string,
                     );
                     const result = await fetch(
                         urljoin(
                             getHttpUri(config.value),
                             'uploader',
                             'upload',
-                            storageType === $public ? 'public' : 'unlisted'
+                            storageType === $public ? 'public' : 'unlisted',
                         ),
                         {
                             method: 'POST',
@@ -350,7 +350,7 @@ const FloconUploader: React.FC<FloconUploaderProps> = ({ onUploaded, storageType
                                 Authorization: `Bearer ${idToken}`,
                             },
                             body: formData,
-                        }
+                        },
                     )
                         .then(() => true)
                         .catch(err => err);
@@ -399,7 +399,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
     const firebaseStorageFiles = useFirebaseStorageFiles(onSelect);
     const floconUploaderFiles = useFloconUploaderFiles(
         onSelect,
-        isEmbeddedUploaderEnabled !== true
+        isEmbeddedUploaderEnabled !== true,
     );
     const [firebaseStorageUploaderModalState, setFirebaseStorageUploaderModalState] =
         React.useState<{ storageType: StorageType; folderPath: readonly string[] }>();
@@ -500,7 +500,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                                 内蔵アップローダーが有効かどうかを確認しています…
                             </div>
                         ),
-                    }
+                    },
                 );
                 break;
             }
@@ -513,7 +513,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                     {
                         path: [uploaderTypeFolderName.unlistedApiServer],
                         element: <div style={style}>設定によって無効化されています。</div>,
-                    }
+                    },
                 );
                 break;
             }
@@ -527,7 +527,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                         {
                             path: [uploaderTypeFolderName.unlistedApiServer],
                             element: <div style={style}>読み込み中です…</div>,
-                        }
+                        },
                     );
                 }
             }
@@ -564,12 +564,12 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                     switch (currentDirectoryPath[0]) {
                         case undefined:
                             return Result.error(
-                                'このフォルダでは、フォルダの移動は無効化されています。'
+                                'このフォルダでは、フォルダの移動は無効化されています。',
                             );
                         case uploaderTypeFolderName.publicFirebaseStorage:
                         case uploaderTypeFolderName.unlistedFirebaseStorage:
                             return Result.error(
-                                'Firebase Storage版アップローダーでは、ファイルの移動はサポートされていません。'
+                                'Firebase Storage版アップローダーでは、ファイルの移動はサポートされていません。',
                             );
                         default:
                             break;
@@ -579,13 +579,13 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                     }
                     if (newDirectoryPath.length === 0) {
                         return Result.error(
-                            'このフォルダにファイル等を移動させることはできません。'
+                            'このフォルダにファイル等を移動させることはできません。',
                         );
                     }
                     if (currentDirectoryPath[0] !== newDirectoryPath[0]) {
                         // 内蔵アップローダーのpublic↔unlisted間の移動は技術的には可能。ただし問題が起こらないかどうかについてはまだ未検証。
                         return Result.error(
-                            '異なるアップローダー間の移動はサポートされていません。'
+                            '異なるアップローダー間の移動はサポートされていません。',
                         );
                     }
                     return Result.ok(undefined);
@@ -597,7 +597,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                         case uploaderTypeFolderName.publicFirebaseStorage:
                         case uploaderTypeFolderName.unlistedFirebaseStorage:
                             return Result.error(
-                                'Firebase Storage版アップローダーでは、ファイルやフォルダのリネームはサポートされていません。'
+                                'Firebase Storage版アップローダーでは、ファイルやフォルダのリネームはサポートされていません。',
                             );
                         default:
                             break;
@@ -611,13 +611,13 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                     if (nodeType === 'file') {
                         if (newName !== sanitizeFilename(newName)) {
                             return Result.error(
-                                '名前が長すぎるか、使用できない文字が含まれています。'
+                                '名前が長すぎるか、使用できない文字が含まれています。',
                             );
                         }
                     } else {
                         if (newName !== sanitizeFoldername(newName)) {
                             return Result.error(
-                                '名前が長すぎるか、使用できない文字が含まれています。'
+                                '名前が長すぎるか、使用できない文字が含まれています。',
                             );
                         }
                     }
@@ -678,7 +678,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                         deletedFiles.some(
                             file =>
                                 file.path[0] === uploaderTypeFolderName.publicFirebaseStorage ||
-                                file.path[0] === uploaderTypeFolderName.unlistedFirebaseStorage
+                                file.path[0] === uploaderTypeFolderName.unlistedFirebaseStorage,
                         )
                     ) {
                         refetchFirebaseStorage();
@@ -687,7 +687,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                         deletedFiles.some(
                             file =>
                                 file.path[0] === uploaderTypeFolderName.publicApiServer ||
-                                file.path[0] === uploaderTypeFolderName.unlistedApiServer
+                                file.path[0] === uploaderTypeFolderName.unlistedApiServer,
                         )
                     ) {
                         refetchFloconUploader({ requestPolicy: 'network-only' });
@@ -700,7 +700,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                                 file.currentPath[0] ===
                                     uploaderTypeFolderName.publicFirebaseStorage ||
                                 file.currentPath[0] ===
-                                    uploaderTypeFolderName.unlistedFirebaseStorage
+                                    uploaderTypeFolderName.unlistedFirebaseStorage,
                         )
                     ) {
                         refetchFirebaseStorage();
@@ -709,7 +709,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
                         renamedFiles.some(
                             file =>
                                 file.currentPath[0] === uploaderTypeFolderName.publicApiServer ||
-                                file.currentPath[0] === uploaderTypeFolderName.unlistedApiServer
+                                file.currentPath[0] === uploaderTypeFolderName.unlistedApiServer,
                         )
                     ) {
                         refetchFloconUploader({ requestPolicy: 'network-only' });

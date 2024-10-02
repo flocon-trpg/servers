@@ -206,7 +206,7 @@ export const NumberParameterInput: React.FC<Props> = ({
                 hideWhenDisabled={compact}
                 showAsTextWhenDisabled={!compact}
                 tooltip={
-                    numberParameter?.isValuePrivate ?? false
+                    (numberParameter?.isValuePrivate ?? false)
                         ? parameterIsPrivate({ isCharacterPrivate, isCreate })
                         : parameterIsNotPrivate({ isCharacterPrivate, isCreate })
                 }
@@ -299,7 +299,7 @@ export const NumberParameterInput: React.FC<Props> = ({
                 hideWhenDisabled={compact}
                 showAsTextWhenDisabled={!compact}
                 tooltip={
-                    numberMaxParameter?.isValuePrivate ?? false
+                    (numberMaxParameter?.isValuePrivate ?? false)
                         ? parameterIsPrivate({ isCharacterPrivate, isCreate })
                         : parameterIsNotPrivate({ isCharacterPrivate, isCreate })
                 }

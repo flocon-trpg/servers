@@ -25,7 +25,7 @@ export const InputModal: React.FC<Props> = ({
 }: Props) => {
     const [value, setValue] = React.useState('');
     const [disabledValue, setDisabledValue] = React.useState(
-        disabled == null ? false : disabled('')
+        disabled == null ? false : disabled(''),
     );
     const prevVisible = React.useRef(visible);
     const onOpenRef = React.useRef(onOpen);

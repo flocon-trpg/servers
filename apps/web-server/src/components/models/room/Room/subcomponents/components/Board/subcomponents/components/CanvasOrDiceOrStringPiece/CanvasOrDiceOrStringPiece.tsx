@@ -85,7 +85,7 @@ const StringPieceContent: React.FC<StringPieceContentProps> = props => {
                 });
             },
         }),
-        [text]
+        [text],
     );
     const [textSpringProps] = useSpring(
         () => ({
@@ -112,7 +112,7 @@ const StringPieceContent: React.FC<StringPieceContentProps> = props => {
                 });
             },
         }),
-        [text]
+        [text],
     );
 
     return (

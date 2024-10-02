@@ -66,7 +66,7 @@ export const firebaseAdminSecret = z
             .object({
                 project_id: z.string(),
             })
-            .partial()
+            .partial(),
     );
 
 export type FirebaseAdminSecretConfig = z.TypeOf<typeof firebaseAdminSecret>;

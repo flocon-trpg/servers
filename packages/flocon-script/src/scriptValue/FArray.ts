@@ -14,7 +14,7 @@ export class FArray implements FObjectBase {
     protected constructor(
         private readonly source: unknown[],
         private readonly convert: (value: unknown) => FValue,
-        private readonly convertBack: (value: FValue, astInfo: AstInfo | undefined) => unknown
+        private readonly convertBack: (value: FValue, astInfo: AstInfo | undefined) => unknown,
     ) {}
 
     private static prepareInstanceMethod(isNew: boolean, astInfo: AstInfo | undefined) {
@@ -27,7 +27,7 @@ export class FArray implements FObjectBase {
         return new FArray(
             source,
             x => x as FValue,
-            x => x
+            x => x,
         );
     }
 
@@ -66,7 +66,7 @@ export class FArray implements FObjectBase {
                     FArray.prepareInstanceMethod(isNew, astInfo);
                     const predicate = beginCast(args[0], astInfo).addFunction().cast()(false);
                     const raw = this.toJArray().filter((value, index) =>
-                        predicate([value, new FNumber(index)])?.toJObject()
+                        predicate([value, new FNumber(index)])?.toJObject(),
                     );
                     return FArray.create(raw);
                 });
@@ -75,7 +75,7 @@ export class FArray implements FObjectBase {
                     FArray.prepareInstanceMethod(isNew, astInfo);
                     const predicate = beginCast(args[0], astInfo).addFunction().cast()(false);
                     const raw = this.toJArray().find((value, index) =>
-                        predicate([value, new FNumber(index)])?.toJObject()
+                        predicate([value, new FNumber(index)])?.toJObject(),
                     );
                     return raw;
                 });
@@ -84,7 +84,7 @@ export class FArray implements FObjectBase {
                     FArray.prepareInstanceMethod(isNew, astInfo);
                     const callbackfn = beginCast(args[0], astInfo).addFunction().cast()(false);
                     this.toJArray().forEach((value, index) =>
-                        callbackfn([value, new FNumber(index)])
+                        callbackfn([value, new FNumber(index)]),
                     );
                     return undefined;
                 });
@@ -93,7 +93,7 @@ export class FArray implements FObjectBase {
                     FArray.prepareInstanceMethod(isNew, astInfo);
                     const mapping = beginCast(args[0], astInfo).addFunction().cast()(false);
                     const raw = this.toJArray().map((value, index) =>
-                        mapping([value, new FNumber(index)])
+                        mapping([value, new FNumber(index)]),
                     );
                     return FArray.create(raw);
                 });
@@ -147,7 +147,7 @@ export class FArray implements FObjectBase {
         }
         throw new ScriptError(
             `"${typeof index === 'symbol' ? 'symbol' : index}" is not supported`,
-            astInfo?.range
+            astInfo?.range,
         );
     }
 
@@ -171,7 +171,7 @@ export class FTypedArray<T> extends FArray {
     public constructor(
         source: T[],
         convert: (value: T) => FValue,
-        convertBack: (value: FValue, astInfo: AstInfo | undefined) => T
+        convertBack: (value: FValue, astInfo: AstInfo | undefined) => T,
     ) {
         super(source, value => convert(value as T), convertBack);
     }

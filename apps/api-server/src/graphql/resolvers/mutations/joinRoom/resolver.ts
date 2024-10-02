@@ -162,7 +162,7 @@ export class JoinRoomResolver {
     public async joinRoomAsPlayer(
         @Args() args: JoinRoomArgs,
         @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine
+        @PubSub() pubSub: PubSubEngine,
     ): Promise<typeof JoinRoomResult> {
         const { result, payload } = await joinRoomCore({
             args,
@@ -194,7 +194,7 @@ export class JoinRoomResolver {
     public async joinRoomAsSpectator(
         @Args() args: JoinRoomArgs,
         @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine
+        @PubSub() pubSub: PubSubEngine,
     ): Promise<typeof JoinRoomResult> {
         const { result, payload } = await joinRoomCore({
             args,

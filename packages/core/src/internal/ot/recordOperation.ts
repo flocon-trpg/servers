@@ -188,7 +188,7 @@ export const restore = <TState, TDownOperation, TTwoWayOperation, TCustomError =
                 const nextStateElement = nextState[key];
                 if (nextStateElement === undefined) {
                     return Result.error(
-                        `tried to update "${key}", but nextState does not have such a key`
+                        `tried to update "${key}", but nextState does not have such a key`,
                     );
                 }
                 const restored = innerRestore({
@@ -251,7 +251,7 @@ export const apply = <TState, TOperation, TCustomError = string>({
                 const prevStateElement = prevState[key];
                 if (prevStateElement === undefined) {
                     return Result.error(
-                        `tried to update "${key}", but prevState does not have such a key`
+                        `tried to update "${key}", but prevState does not have such a key`,
                     );
                 }
                 const newValue = innerApply({
@@ -305,7 +305,7 @@ export const applyBack = <TState, TDownOperation, TCustomError = string>({
                 const nextStateElement = nextState[key];
                 if (nextStateElement === undefined) {
                     return Result.error(
-                        `tried to update "${key}", but nextState does not have such a key`
+                        `tried to update "${key}", but nextState does not have such a key`,
                     );
                 }
                 const oldValue = innerApplyBack({
@@ -519,7 +519,7 @@ export const composeDownOperation = <TState, TDownOperation, TCustomError = stri
         composeUpdateReplace: params => {
             if (params.second.oldValue === undefined) {
                 return Result.error(
-                    `first is update, but second.oldValue is null. the key is "${params.key}".`
+                    `first is update, but second.oldValue is null. the key is "${params.key}".`,
                 );
             }
             const firstOldValue = innerApplyBack({
@@ -547,7 +547,7 @@ type ServerTransformCoreParams<
     TClientState,
     TFirstOperation,
     TSecondOperation,
-    TCustomError
+    TCustomError,
 > = {
     stateBeforeFirst: StringKeyRecord<TServerState>;
     stateAfterFirst: StringKeyRecord<TServerState>;
@@ -558,7 +558,7 @@ type ServerTransformCoreParams<
     innerTransform: (
         params: ProtectedTransformParameters<TServerState, TFirstOperation, TSecondOperation> & {
             key: string;
-        }
+        },
     ) => Result<TFirstOperation | undefined, string | TCustomError>;
     cancellationPolicy: CancellationPolicy<string, TServerState>;
 };
@@ -569,7 +569,7 @@ const serverTransformWithoutValidation = <
     TClientState,
     TFirstOperation,
     TSecondOperation,
-    TCustomError = string
+    TCustomError = string,
 >({
     first,
     second,
@@ -611,7 +611,7 @@ const serverTransformWithoutValidation = <
                 if (operation.replace.newValue === undefined) {
                     if (innerPrevState === undefined) {
                         return Result.error(
-                            `"${key}" was not found at requested revision. It is not allowed to try to remove non-existing element.`
+                            `"${key}" was not found at requested revision. It is not allowed to try to remove non-existing element.`,
                         );
                     }
                     if (innerNextState === undefined) {
@@ -644,7 +644,7 @@ const serverTransformWithoutValidation = <
 
                 if (innerPrevState !== undefined) {
                     return Result.error(
-                        `"${key}" was found at requested revision. When adding a state, old value must be empty.`
+                        `"${key}" was found at requested revision. When adding a state, old value must be empty.`,
                     );
                 }
 
@@ -723,7 +723,7 @@ export type ServerTransformParams<
     TClientState,
     TFirstOperation,
     TSecondOperation,
-    TCustomError
+    TCustomError,
 > = ServerTransformCoreParams<
     TServerState,
     TClientState,
@@ -747,7 +747,7 @@ export const serverTransform = <
     TClientState,
     TFirstOperation,
     TSecondOperation,
-    TCustomError = string
+    TCustomError = string,
 >(
     params: ServerTransformParams<
         TServerState,
@@ -755,7 +755,7 @@ export const serverTransform = <
         TFirstOperation,
         TSecondOperation,
         TCustomError
-    >
+    >,
 ): Result<
     RecordTwoWayOperation<TServerState, TFirstOperation> | undefined,
     string | TCustomError
@@ -786,7 +786,7 @@ export const serverTransform = <
             prevStateLength < nextStateLength
         ) {
             return Result.error(
-                `${params.validation.recordName} の要素の数が多すぎるため、これ以上追加することはできません。追加するには、不要な要素を削除してください。`
+                `${params.validation.recordName} の要素の数が多すぎるため、これ以上追加することはできません。追加するには、不要な要素を削除してください。`,
             );
         }
     }
@@ -872,7 +872,7 @@ const transformElement = <TState, TFirstOperation, TSecondOperation, TError = st
                 case replace: {
                     if (second.replace.newValue !== undefined) {
                         throw new Error(
-                            'Tried to add an element, but already exists another value.'
+                            'Tried to add an element, but already exists another value.',
                         );
                     }
 

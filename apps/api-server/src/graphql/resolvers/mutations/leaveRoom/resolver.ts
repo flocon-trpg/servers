@@ -41,7 +41,7 @@ export class LeaveRoomResolver {
     public async leaveRoom(
         @Arg('id') id: string,
         @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine
+        @PubSub() pubSub: PubSubEngine,
     ): Promise<LeaveRoomResult> {
         const em = context.em;
         const authorizedUserUid = ensureAuthorizedUser(context).userUid;

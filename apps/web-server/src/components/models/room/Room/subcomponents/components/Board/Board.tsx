@@ -146,7 +146,7 @@ const useGetStoppedCursor = () => {
             setStoppedCursor(null);
             subject.next(newCursor);
         },
-        [subject]
+        [subject],
     );
     React.useEffect(() => {
         subject.pipe(debounceTime(500)).subscribe(cursor => {
@@ -369,7 +369,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         }}
                     />
                 );
-            }
+            },
         );
 
         const portraitPositionElements = (portraitPositions ?? []).map(
@@ -454,7 +454,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                         }}
                     />
                 );
-            }
+            },
         );
 
         const imagePieceElements = [...(imagePieces ?? [])].map(([pieceId, piece]) => {
@@ -761,7 +761,7 @@ const BoardCore: React.FC<BoardCoreProps> = ({
                                 boardConfig => {
                                     boardConfig.offsetX -= e.evt.movementX / nonZeroScale;
                                     boardConfig.offsetY -= e.evt.movementY / nonZeroScale;
-                                }
+                                },
                             );
                         });
                     }}
@@ -901,7 +901,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
         if (board == null) {
             return (
                 <div>{`キーが ${keyNames(
-                    boardIdToShow
+                    boardIdToShow,
                 )} であるボードが見つかりませんでした。`}</div>
             );
         }
@@ -945,7 +945,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                             piece,
                                         };
                                     });
-                            }
+                            },
                         ),
                         portraitsOnCursor: [...characters].flatMap(([characterId, character]) => {
                             return recordToArray(character.portraitPieces ?? {})
@@ -1095,7 +1095,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                         <Button style={NonTransparentStyle}>
                             {boardIdToShow == null
                                 ? noActiveBoardText
-                                : boards.get(boardIdToShow)?.name ?? noActiveBoardText}{' '}
+                                : (boards.get(boardIdToShow)?.name ?? noActiveBoardText)}{' '}
                             <Icons.DownOutlined />
                         </Button>
                     </Dropdown>
@@ -1221,7 +1221,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                     boardType,
                                     () => {
                                         return defaultBoardConfig();
-                                    }
+                                    },
                                 );
                             });
                         }}

@@ -26,7 +26,7 @@ export class FGlobalRecord extends FRecord {
         if (keyAsString === self || keyAsString === globalThis) {
             throw new ScriptError(
                 `Assignment to '${keyAsString}' is not supported`,
-                astInfo?.range
+                astInfo?.range,
             );
         }
         super.setCore({ key, newValue, astInfo });

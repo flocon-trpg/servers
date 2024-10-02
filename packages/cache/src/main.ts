@@ -104,7 +104,10 @@ class NodeCache implements Cache {
 }
 
 class RedisCache implements Cache {
-    public constructor(private readonly redis: Redis, private readonly config: RedisConfig) {}
+    public constructor(
+        private readonly redis: Redis,
+        private readonly config: RedisConfig,
+    ) {}
 
     private key(keyArg: string) {
         return `${this.config.keyPrefix}:${keyArg}`;

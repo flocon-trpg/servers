@@ -65,7 +65,7 @@ export class GetLogResolver {
     public async getLog(
         @Args() args: GetLogArgs,
         @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine
+        @PubSub() pubSub: PubSubEngine,
     ): Promise<typeof GetRoomLogResult> {
         const em = context.em;
         const authorizedUserUid = ensureAuthorizedUser(context).userUid;

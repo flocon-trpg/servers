@@ -88,7 +88,7 @@ export class RoomEventResolver {
     public roomEvent(
         @Root() payload: RoomEventPayload | null | undefined,
         @Arg('id') id: string,
-        @Ctx() context: ResolverContext
+        @Ctx() context: ResolverContext,
     ): RoomEvent | undefined {
         if (payload == null) {
             return undefined;

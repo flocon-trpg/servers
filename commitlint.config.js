@@ -12,6 +12,7 @@ module.exports = {
                 'cache',
                 'core',
                 'flocon-script',
+                'rollup-config',
                 'sdk',
                 'sdk-react',
                 'sdk-urql',

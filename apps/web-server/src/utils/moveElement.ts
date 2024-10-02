@@ -1,7 +1,7 @@
 export const moveElement = <T>(
     source: T[],
     getKey: (elem: T) => string,
-    action: { from: string; to: string }
+    action: { from: string; to: string },
 ): T[] | null => {
     const fromIndex = source.findIndex(elem => getKey(elem) === action.from);
     if (fromIndex < 0) {

@@ -42,10 +42,10 @@ describe('dualKeyMap', () => {
             expect(
                 target.toStringRecord(
                     x => x,
-                    x => x
-                )
+                    x => x,
+                ),
             ).toEqual({});
-        }
+        },
     );
 
     it.each([true, false])('tests constructor with non-empty object', includeInnerEmptyMap => {
@@ -88,8 +88,8 @@ describe('dualKeyMap', () => {
         expect(
             target.toStringRecord(
                 x => x,
-                x => x
-            )
+                x => x,
+            ),
         ).toEqual({ key1: { key1_2: '1_2' } });
     });
 
@@ -104,8 +104,8 @@ describe('dualKeyMap', () => {
         expect(
             actual.toStringRecord(
                 x => x,
-                x => x
-            )
+                x => x,
+            ),
         ).toEqual(expected);
     });
 
@@ -115,8 +115,8 @@ describe('dualKeyMap', () => {
         expect(() =>
             source.toStringRecord(
                 x => x,
-                x => x
-            )
+                x => x,
+            ),
         ).toThrow();
     });
 
@@ -126,8 +126,8 @@ describe('dualKeyMap', () => {
         expect(() =>
             source.toStringRecord(
                 x => x,
-                x => x
-            )
+                x => x,
+            ),
         ).toThrow();
     });
 
@@ -137,8 +137,8 @@ describe('dualKeyMap', () => {
         expect(() =>
             source.toStringRecord(
                 x => x,
-                x => x
-            )
+                x => x,
+            ),
         ).toThrow();
     });
 
@@ -208,7 +208,7 @@ describe('dualKeyMap', () => {
             const expected = new DualKeyMap();
             expected.set(
                 { first: '1', second: '2' },
-                { type: both, left: '1_2_L', right: '1_2_R' }
+                { type: both, left: '1_2_L', right: '1_2_R' },
             );
             expected.set({ first: '1', second: '1' }, { type: left, left: '1_1_L' });
             expected.set({ first: '2', second: '1' }, { type: right, right: '2_1_R' });

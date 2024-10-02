@@ -99,7 +99,7 @@ function fAssignmentExpression(expression: AssignmentExpression): FAssignmentExp
         default:
             throw new ScriptError(
                 `'${expression.left.type}' is not supported`,
-                toRange(expression)
+                toRange(expression),
             );
     }
     return {
@@ -293,7 +293,7 @@ export function fProperty(property: Property): FProperty {
         case 'AssignmentPattern': {
             throw new ScriptError(
                 `'${property.value.type}' is not supported`,
-                toRange(property.value)
+                toRange(property.value),
             );
         }
         default:

@@ -126,7 +126,7 @@ export const applyBack = (state: string | undefined, action: DownOperation) => {
 // stateが必要ないため処理を高速化&簡略化できるが、その代わり戻り値のreplaceにおいて oldValue === undefined && newValue === undefined もしくは oldValue !== undefined && newValue !== undefinedになるケースがある。
 export const composeDownOperation = (
     first: DownOperation | undefined,
-    second: DownOperation | undefined
+    second: DownOperation | undefined,
 ): Result<DownOperation | undefined, string | ApplyError | ComposeAndTransformUpError> => {
     if (first == null) {
         return Result.ok(second);
@@ -142,7 +142,7 @@ export const composeDownOperation = (
                 case replace: {
                     if (second.replace.oldValue == null) {
                         return Result.error(
-                            'Because first is update, second.oldValue should not be undefined'
+                            'Because first is update, second.oldValue should not be undefined',
                         );
                     }
                     const oldValue = TextOperation.applyBack(second.replace.oldValue, first.update);
@@ -159,7 +159,7 @@ export const composeDownOperation = (
                 case 'update': {
                     const composed = TextOperation.composeDownOperation(
                         first.update,
-                        second.update
+                        second.update,
                     );
                     if (composed.isError) {
                         return composed;
@@ -360,7 +360,7 @@ export const clientTransform = ({
         if (second.type === update) {
             if (first.replace.newValue != null) {
                 throw new Error(
-                    'because second is update, first replace.newValue must not be undefined'
+                    'because second is update, first replace.newValue must not be undefined',
                 );
             }
             return Result.ok({

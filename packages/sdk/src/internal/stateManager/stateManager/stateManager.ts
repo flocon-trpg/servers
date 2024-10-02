@@ -124,7 +124,7 @@ export class StateManager<TState, TOperation> {
                     this._history?.beforeEndPostAsSuccess(
                         this,
                         onPosted.result,
-                        onPosted.revisionTo
+                        onPosted.revisionTo,
                     );
                     this.core.onGet(onPosted.result, onPosted.revisionTo, true);
                     this._history?.afterEndPostAsSuccess(this);
@@ -138,7 +138,7 @@ export class StateManager<TState, TOperation> {
                 case null:
                     loggerRef.debug(
                         { onPosted },
-                        'StateManager.post is completing as unknown result'
+                        'StateManager.post is completing as unknown result',
                     );
                     this._history?.endPostAsUnknown(this);
                     this._requiresReload = true;

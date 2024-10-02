@@ -94,7 +94,7 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
     }, [isPostingState.focus]);
     const roomMessagesFontSizeDelta = useAtomSelector(
         userConfigAtom,
-        state => state?.roomMessagesFontSizeDelta
+        state => state?.roomMessagesFontSizeDelta,
     );
     const fontSize = UserConfigUtils.getRoomMessagesFontSize(roomMessagesFontSizeDelta ?? 0);
     const participants = useParticipants();
@@ -111,11 +111,11 @@ const PrivateMessageElement: React.FC<PrivateMessageElementProps> = ({
                 .compact()
                 .sort(([, x], [, y]) => (x.name ?? '').localeCompare(y.name ?? ''))
                 .value(),
-        [participantIdsOfSendTo, participants]
+        [participantIdsOfSendTo, participants],
     );
     const selectedParticipants = React.useMemo(
         () => selectedParticipantsBase.map(([, participant]) => participant.name ?? ''),
-        [selectedParticipantsBase]
+        [selectedParticipantsBase],
     );
     const placeholder = `秘話 (${
         selectedParticipants.length === 0
@@ -261,7 +261,7 @@ const PublicMessageElement: React.FC<PublicMessageElementProps> = ({
     }, [isPostingState.focus]);
     const roomMessagesFontSizeDelta = useAtomSelector(
         userConfigAtom,
-        state => state?.roomMessagesFontSizeDelta
+        state => state?.roomMessagesFontSizeDelta,
     );
     const fontSize = UserConfigUtils.getRoomMessagesFontSize(roomMessagesFontSizeDelta ?? 0);
     const publicChannelNames = usePublicChannelNames();
@@ -409,7 +409,7 @@ type Props = {
     onSelectedChannelTypeChange: (newValue: SelectedChannelType) => void;
     config: ChatPalettePanelConfig | MessagePanelConfig;
     onConfigUpdate: (
-        recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void
+        recipe: (draft: Draft<ChatPalettePanelConfig> | Draft<MessagePanelConfig>) => void,
     ) => void;
     descriptionStyle?: React.CSSProperties;
 
@@ -432,7 +432,7 @@ export const SubmitMessage: React.FC<Props> = ({
     autoSubmitter,
 }: Props) => {
     const [participantIdsOfSendTo, setParticipantIdsOfSendTo] = React.useState<ReadonlySet<string>>(
-        new Set()
+        new Set(),
     );
 
     const privateMessageElement = (

@@ -80,7 +80,7 @@ export namespace RoomConfigUtils {
     // Redux側ではなくUI側にこの処理を任せるとReduxとUIの独立性が高まるので一見良さそうだが、localforageからデータを読み込むときも似たような処理をしているため、もしRedux外に任せても結局Configを読み込むときにこの処理を行わなければならず、トータルで見たときの独立性は高くなっていない。そのため、Redux側でこの処理を取り扱うことにしている。
     export const movePanel = (
         state: { x: number; y: number },
-        newPosition: { x: number; y: number }
+        newPosition: { x: number; y: number },
     ): void => {
         state.x = newPosition.x;
         state.y = newPosition.y;
@@ -192,7 +192,7 @@ export namespace RoomConfigUtils {
     export const resizePanel = (
         state: { x: number; y: number; width: number; height: number },
         actionDir: ResizeDirection,
-        actionDelta: { width: number; height: number }
+        actionDelta: { width: number; height: number },
     ): void => {
         state.width += actionDelta.width;
         state.height += actionDelta.height;
@@ -237,7 +237,7 @@ export namespace RoomConfigUtils {
         state: RoomConfig,
         boardId: string,
         boardType: BoardType,
-        action: (source: BoardConfig) => void
+        action: (source: BoardConfig) => void,
     ): void => {
         if (boardType.type === 'activeBoardViewer') {
             if (boardType.isBackground) {

@@ -67,7 +67,7 @@ const loggerFactory: Options['loggerFactory'] = () => {
         methodName: 'debug' | 'info' | 'warn' | 'error',
         namespace: LoggerNamespace,
         message: string,
-        context?: LogContext
+        context?: LogContext,
     ): void => {
         const text = message;
         if (context == null) {
@@ -82,7 +82,7 @@ const loggerFactory: Options['loggerFactory'] = () => {
                     },
                     namespace,
                 },
-                text
+                text,
             );
         }
     };
@@ -116,7 +116,7 @@ const loggerFactory: Options['loggerFactory'] = () => {
                     // pinoのlevelと重複して出力されるのを防ぐため、mikro-ormのログのlevelは取り除いている。
                     level: undefined,
                 },
-                'MikroORM logQuery'
+                'MikroORM logQuery',
             );
         },
         setDebugMode() {

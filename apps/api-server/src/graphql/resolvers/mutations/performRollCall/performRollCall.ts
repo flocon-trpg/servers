@@ -15,7 +15,7 @@ type RollCallState = NonNullable<RollCallsState[string]>;
 export const performRollCall = (
     source: RoomState,
     myUserUid: string,
-    soundEffect: RollCallState['soundEffect']
+    soundEffect: RollCallState['soundEffect'],
 ): Result<RoomState, PerformRollCallFailureType> => {
     const me = source.participants?.[myUserUid];
     switch (me?.role) {
@@ -31,7 +31,7 @@ export const performRollCall = (
     }
     const maxCreatedAt = maxBy(
         recordToArray(source.rollCalls ?? {}),
-        ({ value }) => value.createdAt
+        ({ value }) => value.createdAt,
     )?.value.createdAt;
     if (maxCreatedAt != null) {
         const elapsed = new Date().getTime() - maxCreatedAt;

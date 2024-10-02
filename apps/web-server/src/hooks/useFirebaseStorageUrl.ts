@@ -32,6 +32,6 @@ export const useFirebaseStorageUrl = ({ reference }: Props) => {
             fullPath: $reference?.fullPath,
             queryResult,
         }),
-        [$reference?.fullPath, queryResult]
+        [$reference?.fullPath, queryResult],
     );
 };

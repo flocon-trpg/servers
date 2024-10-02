@@ -17,7 +17,7 @@ export class FMap extends FObject {
     protected constructor(
         private readonly source: Map<Key, unknown>,
         private readonly convertValue: (value: unknown) => FValue,
-        private readonly convertValueBack: (value: FValue, astInfo: AstInfo | undefined) => unknown
+        private readonly convertValueBack: (value: FValue, astInfo: AstInfo | undefined) => unknown,
     ) {
         super();
     }
@@ -32,7 +32,7 @@ export class FMap extends FObject {
         return new FMap(
             source,
             x => x as FValue,
-            x => x
+            x => x,
         );
     }
 
@@ -72,7 +72,7 @@ export class FMap extends FObject {
                     FMap.prepareInstanceMethod(isNew, astInfo);
                     const callbackfn = beginCast(args[0], astInfo).addFunction().cast()(false);
                     this.source.forEach((value, key) =>
-                        callbackfn([this.convertValue(value), toFValue(key)])
+                        callbackfn([this.convertValue(value), toFValue(key)]),
                     );
                     return undefined;
                 });

@@ -17,7 +17,7 @@ export class DeleteFilesResolver {
     @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async deleteFiles(
         @Arg('filenames', () => [String]) filenames: string[],
-        @Ctx() context: ResolverContext
+        @Ctx() context: ResolverContext,
     ): Promise<string[]> {
         const directory = context.serverConfig.uploader?.directory;
         if (directory == null) {
@@ -50,7 +50,7 @@ export class DeleteFilesResolver {
             const statResult = await stat(filePath).catch((err: Error) => {
                 loggerRef.warn(
                     err,
-                    `stat(${filePath}) threw an error. Maybe the file was not found?`
+                    `stat(${filePath}) threw an error. Maybe the file was not found?`,
                 );
                 return false as const;
             });
@@ -69,7 +69,7 @@ export class DeleteFilesResolver {
             const statResult = await stat(filePath).catch((err: Error) => {
                 loggerRef.warn(
                     err,
-                    `stat(${filePath}) threw an error. Maybe the file was not found?`
+                    `stat(${filePath}) threw an error. Maybe the file was not found?`,
                 );
                 return false as const;
             });

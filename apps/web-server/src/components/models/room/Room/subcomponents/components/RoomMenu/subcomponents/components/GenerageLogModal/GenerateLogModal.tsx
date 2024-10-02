@@ -55,7 +55,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
     const [logMode, setLogMode] = React.useState<LogMode>(rich);
     const logModeRef = useLatest(logMode);
     const [channelsFilterOptions, setChannelsFilterOptions] = React.useState(
-        ChannelsFilterOptions.defaultValue
+        ChannelsFilterOptions.defaultValue,
     );
     const channelsFilterOptionsRef = useLatest(channelsFilterOptions);
 
@@ -98,7 +98,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                     },
                     {
                         fetchPolicy: 'network-only',
-                    }
+                    },
                 )
                 .toPromise();
             if (logData?.data?.result.__typename !== 'RoomMessages') {
@@ -110,7 +110,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                         }
                         default:
                             setErrorMessage(
-                                `エラーが発生しました: ${logData.data.result.failureType}`
+                                `エラーが発生しました: ${logData.data.result.failureType}`,
                             );
                             break;
                     }
@@ -132,7 +132,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                         showCreatedAt: showCreatedAtRef.current,
                         showUsernameAlways: showUsernameAlwaysRef.current,
                     }),
-                    `log_simple_${moment(new Date()).format('YYYY-MM-DD-HH-mm-ss')}.html`
+                    `log_simple_${moment(new Date()).format('YYYY-MM-DD-HH-mm-ss')}.html`,
                 );
                 setIsDownloading(false);
                 return;
@@ -159,7 +159,7 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
             setProgress(100);
             fileDownload(
                 zipBlob,
-                `log_rich_${moment(new Date()).format('YYYY-MM-DD-HH-mm-ss')}.zip`
+                `log_rich_${moment(new Date()).format('YYYY-MM-DD-HH-mm-ss')}.zip`,
             );
             setIsDownloading(false);
         };
@@ -251,8 +251,8 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                             progress === 100
                                 ? 'success'
                                 : errorMessage == null
-                                ? 'normal'
-                                : 'exception'
+                                  ? 'normal'
+                                  : 'exception'
                         }
                     />
                 )}

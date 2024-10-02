@@ -20,12 +20,12 @@ export const partialCharacterTabConfig = z
             .object({
                 tabName: z.string(),
             })
-            .partial()
+            .partial(),
     )
     .merge(serializedCharacterTagFilter);
 
 export const deserializeCharacterTabConfig = (
-    source: PartialCharacterTabConfig
+    source: PartialCharacterTabConfig,
 ): CharacterTabConfig => {
     return {
         ...deserializeCharacterTagFilter(source),

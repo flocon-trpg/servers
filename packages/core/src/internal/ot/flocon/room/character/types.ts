@@ -76,5 +76,5 @@ export const template = createObjectValueTemplate(
         portraitPieces: createRecordValueTemplate(PortraitPiece.template),
     },
     2,
-    1
+    1,
 );

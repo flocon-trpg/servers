@@ -360,7 +360,7 @@ const useHooks = () => {
             setImagePieceModal,
             setPopoverEditor,
             cloneImagePiece,
-        ]
+        ],
     );
 };
 
@@ -548,7 +548,7 @@ const selectedCharacterCommandsMenu = ({
                         onContextMenuClear();
                     },
                 };
-            }
+            },
         );
         if (privateCommands.length === 0) {
             return null;
@@ -639,7 +639,7 @@ const selectedDicePiecesMenu = ({
                             },
                         },
                     ],
-                })
+                }),
             ),
             { type: 'divider' },
         ],
@@ -703,7 +703,7 @@ const selectedShapePiecesMenu = ({
                             },
                         },
                     ],
-                })
+                }),
             ),
             { type: 'divider' },
         ],
@@ -775,7 +775,7 @@ const selectedStringPiecesMenu = ({
                             },
                         },
                     ],
-                })
+                }),
             ),
             { type: 'divider' },
         ],
@@ -858,7 +858,7 @@ const selectedImagePiecesMenu = ({
                             },
                         },
                     ],
-                })
+                }),
             ),
         ],
     };

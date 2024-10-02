@@ -32,7 +32,7 @@ export class RenameFilesResolver {
     @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async renameFiles(
         @Arg('input', () => [RenameFileInput]) input: RenameFileInput[],
-        @Ctx() context: ResolverContext
+        @Ctx() context: ResolverContext,
     ): Promise<string[]> {
         const result: string[] = [];
         const user = ensureAuthorizedUser(context);

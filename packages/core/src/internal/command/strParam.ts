@@ -42,7 +42,7 @@ export class FStrParam extends FObject {
                 return;
             default:
                 throw new ScriptError(
-                    `${typeof key === 'symbol' ? 'symbol' : key}への値のセットは制限されています。`
+                    `${typeof key === 'symbol' ? 'symbol' : key}への値のセットは制限されています。`,
                 );
         }
     }

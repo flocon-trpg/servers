@@ -25,7 +25,7 @@ type SrcArrayResult =
 // PathArrayがnullish ⇔ 戻り値がnullishArg
 // pathArray.length = queriesResult.length
 export function useSrcArrayFromFilePath(
-    pathArray: ReadonlyArray<FilePathLikeOrThumb> | null | undefined
+    pathArray: ReadonlyArray<FilePathLikeOrThumb> | null | undefined,
 ): SrcArrayResult {
     const config = useWebConfig();
     const storage = useAtomValue(firebaseStorageAtom);
@@ -59,8 +59,8 @@ export function useSrcArrayFromFilePath(
                       if (result === idTokenIsNull) {
                           return Promise.reject(
                               new Error(
-                                  'Firebase Authentication の IdToken を取得できませんでした。'
-                              )
+                                  'Firebase Authentication の IdToken を取得できませんでした。',
+                              ),
                           );
                       }
                       return result;
@@ -105,7 +105,7 @@ const toSrcResult = (srcArray: ReturnType<typeof useSrcArrayFromFilePath>): SrcR
     const result = srcArray.queriesResult[0];
     if (result == null) {
         throw new Error(
-            'This should not happen. pathArray.length might be 0, which is not expected.'
+            'This should not happen. pathArray.length might be 0, which is not expected.',
         );
     }
     return { type: loaded, value: result };
@@ -127,6 +127,6 @@ export function useSrcFromFilePath(path: FilePathLikeOrThumb | null | undefined)
             src,
             queryResult,
         }),
-        [queryResult, src]
+        [queryResult, src],
     );
 }

@@ -17,7 +17,7 @@ export const useRoomConnections = () => {
             .asObservable()
             .pipe(
                 skip(1),
-                map(x => x.diff)
+                map(x => x.diff),
             )
             .subscribe({
                 next: diff => {

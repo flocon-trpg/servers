@@ -17,7 +17,7 @@ import { State } from '../ot/generator/types';
 export class FParamNames extends FObject {
     public constructor(
         private readonly room: State<typeof Room.template>,
-        private readonly mode: 'Boolean' | 'Number' | 'String'
+        private readonly mode: 'Boolean' | 'Number' | 'String',
     ) {
         super();
     }

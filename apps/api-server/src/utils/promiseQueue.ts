@@ -59,13 +59,13 @@ export class PromiseQueue {
                             observer.next({
                                 id,
                                 result: { type: executed, value: result, isError: false },
-                            })
+                            }),
                         )
                         .catch(reason =>
                             observer.next({
                                 id,
                                 result: { type: executed, value: reason, isError: true },
-                            })
+                            }),
                         )
                         .finally(() => {
                             this._pendingPromises.delete(id);
@@ -87,11 +87,11 @@ export class PromiseQueue {
                                 this._pendingPromises.delete(id);
                                 return of(timeoutValue);
                             }),
-                    })
+                    }),
                 );
             }),
             Rx.concatAll(),
-            Rx.share()
+            Rx.share(),
         );
         this._result.subscribe({
             next: () => undefined,
@@ -106,7 +106,7 @@ export class PromiseQueue {
 
     private nextCore<T>(
         execute: () => Promise<T>,
-        timeout: number | null | undefined
+        timeout: number | null | undefined,
     ): Promise<PromiseQueueResultWithTimeout<T>> {
         if (this._queueLimit != null && this._queueLimit <= this._pendingPromises.size) {
             return Promise.resolve({ type: queueLimitReached });
@@ -135,12 +135,12 @@ export class PromiseQueue {
                 error: () =>
                     reject(
                         new Error(
-                            'PromiseQueue observable has thrown an error for an unknown reason.'
-                        )
+                            'PromiseQueue observable has thrown an error for an unknown reason.',
+                        ),
                     ),
                 complete: () =>
                     reject(
-                        new Error('PromiseQueue observable has completed for an unknown reason.')
+                        new Error('PromiseQueue observable has completed for an unknown reason.'),
                     ),
             });
         });
@@ -151,7 +151,7 @@ export class PromiseQueue {
     // timeoutは、executeの戻り値のPromiseの実行時間。nextWithTimeoutを呼んでからの時間ではない。
     public nextWithTimeout<T>(
         execute: () => Promise<T>,
-        timeout: number
+        timeout: number,
     ): Promise<PromiseQueueResultWithTimeout<T>> {
         return this.nextCore(execute, timeout);
     }

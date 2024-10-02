@@ -76,7 +76,7 @@ const Canvas = require("canvas");
 */
 const Board: React.ComponentType<BoardProps> = dynamic(
     () => import('./subcomponents/components/Board/Board').then(mod => mod.Board as any),
-    { ssr: false }
+    { ssr: false },
 );
 
 type ConfigProps<T> = {
@@ -113,7 +113,7 @@ const ActiveBoardPanel: React.FC = React.memo(function ActiveBoardPanel() {
                 RoomConfigUtils.movePanel(roomConfig.panels.activeBoardPanel, e);
             });
         },
-        [setRoomConfig]
+        [setRoomConfig],
     );
     const onResizeStop = React.useCallback(
         (dir: ResizeDirection, delta: NumberSize) => {
@@ -124,7 +124,7 @@ const ActiveBoardPanel: React.FC = React.memo(function ActiveBoardPanel() {
                 RoomConfigUtils.resizePanel(roomConfig.panels.activeBoardPanel, dir, delta);
             });
         },
-        [setRoomConfig]
+        [setRoomConfig],
     );
     const onMoveToFront = React.useCallback(() => {
         setRoomConfig(roomConfig => {
@@ -191,7 +191,7 @@ const BoardEditorPanel: React.FC<ConfigAndKeyProps<BoardEditorPanelConfig>> = Re
                     RoomConfigUtils.movePanel(boardEditorPanel, e);
                 });
             },
-            [keyName, setRoomConfig]
+            [keyName, setRoomConfig],
         );
         const onResizeStop = React.useCallback(
             (dir: ResizeDirection, delta: NumberSize) => {
@@ -206,7 +206,7 @@ const BoardEditorPanel: React.FC<ConfigAndKeyProps<BoardEditorPanelConfig>> = Re
                     RoomConfigUtils.resizePanel(boardEditorPanel, dir, delta);
                 });
             },
-            [keyName, setRoomConfig]
+            [keyName, setRoomConfig],
         );
         const onMoveToFront = React.useCallback(() => {
             setRoomConfig(roomConfig => {
@@ -261,7 +261,7 @@ const BoardEditorPanel: React.FC<ConfigAndKeyProps<BoardEditorPanelConfig>> = Re
                 />
             </DraggableCard>
         );
-    }
+    },
 );
 
 const BoardEditorPanels: React.FC = () => {
@@ -298,7 +298,7 @@ const ChatPalettePanel: React.FC<ConfigAndKeyProps<ChatPalettePanelConfig>> = Re
                     RoomConfigUtils.movePanel(chatPalettePanel, e);
                 });
             },
-            [keyName, setRoomConfig]
+            [keyName, setRoomConfig],
         );
         const onResizeStop = React.useCallback(
             (dir: ResizeDirection, delta: NumberSize) => {
@@ -313,7 +313,7 @@ const ChatPalettePanel: React.FC<ConfigAndKeyProps<ChatPalettePanelConfig>> = Re
                     RoomConfigUtils.resizePanel(chatPalettePanel, dir, delta);
                 });
             },
-            [keyName, setRoomConfig]
+            [keyName, setRoomConfig],
         );
         const onMoveToFront = React.useCallback(() => {
             setRoomConfig(roomConfig => {
@@ -361,7 +361,7 @@ const ChatPalettePanel: React.FC<ConfigAndKeyProps<ChatPalettePanelConfig>> = Re
                 <ChatPalettePanelContent roomId={roomId} panelId={keyName} />
             </DraggableCard>
         );
-    }
+    },
 );
 
 const ChatPalettePanels: React.FC = () => {
@@ -393,7 +393,7 @@ const CharacterPanel: React.FC = React.memo(function CharacterPanel() {
                 RoomConfigUtils.movePanel(roomConfig.panels.characterPanel, e);
             });
         },
-        [setRoomConfig]
+        [setRoomConfig],
     );
     const onResizeStop = React.useCallback(
         (dir: ResizeDirection, delta: NumberSize) => {
@@ -404,7 +404,7 @@ const CharacterPanel: React.FC = React.memo(function CharacterPanel() {
                 RoomConfigUtils.resizePanel(roomConfig.panels.characterPanel, dir, delta);
             });
         },
-        [setRoomConfig]
+        [setRoomConfig],
     );
     const onMoveToFront = React.useCallback(() => {
         setRoomConfig(roomConfig => {
@@ -461,7 +461,7 @@ const GameEffectPanel: React.FC = React.memo(function GameEffectPanel() {
                 RoomConfigUtils.movePanel(roomConfig.panels.gameEffectPanel, e);
             });
         },
-        [setRoomConfig]
+        [setRoomConfig],
     );
     const onResizeStop = React.useCallback(
         (dir: ResizeDirection, delta: NumberSize) => {
@@ -472,7 +472,7 @@ const GameEffectPanel: React.FC = React.memo(function GameEffectPanel() {
                 RoomConfigUtils.resizePanel(roomConfig.panels.gameEffectPanel, dir, delta);
             });
         },
-        [setRoomConfig]
+        [setRoomConfig],
     );
     const onMoveToFront = React.useCallback(() => {
         setRoomConfig(roomConfig => {
@@ -535,7 +535,7 @@ const MemoPanel: React.FC<ConfigAndKeyProps<MemoPanelConfig>> = React.memo(funct
                 RoomConfigUtils.movePanel(memoPanel, e);
             });
         },
-        [keyName, setRoomConfig]
+        [keyName, setRoomConfig],
     );
     const onResizeStop = React.useCallback(
         (dir: ResizeDirection, delta: NumberSize) => {
@@ -550,7 +550,7 @@ const MemoPanel: React.FC<ConfigAndKeyProps<MemoPanelConfig>> = React.memo(funct
                 RoomConfigUtils.resizePanel(memoPanel, dir, delta);
             });
         },
-        [keyName, setRoomConfig]
+        [keyName, setRoomConfig],
     );
     const onMoveToFront = React.useCallback(() => {
         setRoomConfig(roomConfig => {
@@ -588,7 +588,7 @@ const MemoPanel: React.FC<ConfigAndKeyProps<MemoPanelConfig>> = React.memo(funct
                 memoPanel.selectedMemoId = newId;
             });
         },
-        [keyName, setRoomConfig]
+        [keyName, setRoomConfig],
     );
 
     if (config.isMinimized) {
@@ -637,7 +637,7 @@ const MemoPanels: React.FC = () => {
 const ParticipantPanel: React.FC = () => {
     const participantPanel = useAtomSelector(
         roomConfigAtom,
-        state => state?.panels.participantPanel
+        state => state?.panels.participantPanel,
     );
     const setRoomConfig = useImmerSetAtom(roomConfigAtom);
 
@@ -650,7 +650,7 @@ const ParticipantPanel: React.FC = () => {
                 RoomConfigUtils.movePanel(roomConfig.panels.participantPanel, e);
             });
         },
-        [setRoomConfig]
+        [setRoomConfig],
     );
     const onResizeStop = React.useCallback(
         (dir: ResizeDirection, delta: NumberSize) => {
@@ -661,7 +661,7 @@ const ParticipantPanel: React.FC = () => {
                 RoomConfigUtils.resizePanel(roomConfig.panels.participantPanel, dir, delta);
             });
         },
-        [setRoomConfig]
+        [setRoomConfig],
     );
     const onMoveToFront = React.useCallback(() => {
         setRoomConfig(roomConfig => {
@@ -719,7 +719,7 @@ const PieceValuePanel: React.FC = () => {
                 RoomConfigUtils.movePanel(roomConfig.panels.pieceValuePanel, e);
             });
         },
-        [setRoomConfig]
+        [setRoomConfig],
     );
     const onResizeStop = React.useCallback(
         (dir: ResizeDirection, delta: NumberSize) => {
@@ -730,7 +730,7 @@ const PieceValuePanel: React.FC = () => {
                 RoomConfigUtils.resizePanel(roomConfig.panels.pieceValuePanel, dir, delta);
             });
         },
-        [setRoomConfig]
+        [setRoomConfig],
     );
     const onMoveToFront = React.useCallback(() => {
         setRoomConfig(roomConfig => {
@@ -792,7 +792,7 @@ const RollCallPanel: React.FC = () => {
                 RoomConfigUtils.movePanel(roomConfig.panels.rollCallPanel, e);
             });
         },
-        [setRoomConfig]
+        [setRoomConfig],
     );
     const onResizeStop = React.useCallback(
         (dir: ResizeDirection, delta: NumberSize) => {
@@ -803,7 +803,7 @@ const RollCallPanel: React.FC = () => {
                 RoomConfigUtils.resizePanel(roomConfig.panels.rollCallPanel, dir, delta);
             });
         },
-        [setRoomConfig]
+        [setRoomConfig],
     );
     const onMoveToFront = React.useCallback(() => {
         setRoomConfig(roomConfig => {
@@ -867,7 +867,7 @@ const RoomMessagePanel: React.FC<ConfigAndKeyProps<MessagePanelConfig>> = React.
                     RoomConfigUtils.movePanel(messagePanel, e);
                 });
             },
-            [keyName, setRoomConfig]
+            [keyName, setRoomConfig],
         );
         const onResizeStop = React.useCallback(
             (dir: ResizeDirection, delta: NumberSize) => {
@@ -882,7 +882,7 @@ const RoomMessagePanel: React.FC<ConfigAndKeyProps<MessagePanelConfig>> = React.
                     RoomConfigUtils.resizePanel(messagePanel, dir, delta);
                 });
             },
-            [keyName, setRoomConfig]
+            [keyName, setRoomConfig],
         );
         const onMoveToFront = React.useCallback(() => {
             setRoomConfig(roomConfig => {
@@ -940,7 +940,7 @@ const RoomMessagePanel: React.FC<ConfigAndKeyProps<MessagePanelConfig>> = React.
                 <RoomMessagesPanelContent panelId={keyName} height={config.height} />
             </DraggableCard>
         );
-    }
+    },
 );
 
 const RoomMessagePanels: React.FC = () => {
@@ -975,11 +975,11 @@ export const Room: React.FC<Props> = ({ debug }) => {
     const roomIdOfRoomConfig = useAtomSelector(roomConfigAtom, state => state?.roomId);
     const showBackgroundBoardViewer = useAtomSelector(
         roomConfigAtom,
-        state => state?.showBackgroundBoardViewer
+        state => state?.showBackgroundBoardViewer,
     );
     const activeBoardBackgroundConfig = useAtomSelector(
         roomConfigAtom,
-        state => state?.panels.activeBoardBackground
+        state => state?.panels.activeBoardBackground,
     );
 
     usePlayBgm();

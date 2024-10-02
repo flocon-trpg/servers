@@ -29,7 +29,7 @@ export class FStateRecord<TSource, TRef extends FValue> extends FRecordRef<TSour
         super(
             states,
             state => (state === undefined ? undefined : toRef(state)),
-            fValue => unRef(fValue)
+            fValue => unRef(fValue),
         );
         this.createNewState = createNewState;
         this.toRef = toRef;

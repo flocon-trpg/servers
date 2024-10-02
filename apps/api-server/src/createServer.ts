@@ -70,7 +70,7 @@ const loggingPlugin: PluginDefinition = {
                         response: requestContext.response,
                         errors: requestContext.errors,
                     },
-                    'GraphQL error encountered'
+                    'GraphQL error encountered',
                 );
             },
             async willSendResponse(requestContext) {
@@ -80,7 +80,7 @@ const loggingPlugin: PluginDefinition = {
                         response: requestContext.response,
                         errors: requestContext.errors,
                     },
-                    'GraphQL request completed'
+                    'GraphQL request completed',
                 );
             },
         };
@@ -93,7 +93,7 @@ export const createServerAsError = async ({ port }: { port: string | number }) =
 
     const server = app.listen(port, () => {
         loggerRef.warn(
-            `⚠️ Server ready at http://localhost:${port}, but API is not working. Please see error messages.`
+            `⚠️ Server ready at http://localhost:${port}, but API is not working. Please see error messages.`,
         );
     });
     return server;
@@ -119,10 +119,10 @@ export const createServer = async ({
     schema: GraphQLSchema;
     debug: boolean;
     getDecodedIdTokenFromExpressRequest: (
-        req: ExpressContext['req']
+        req: ExpressContext['req'],
     ) => Promise<Result<Readonly<DecodedIdToken>, unknown> | undefined>;
     getDecodedIdTokenFromWsContext: (
-        context: Context
+        context: Context,
     ) => Promise<Result<Readonly<DecodedIdToken>, unknown> | undefined>;
     port: string | number;
     quiet?: boolean;
@@ -166,7 +166,7 @@ export const createServer = async ({
     app.use(
         pinoHttp({
             logger: loggerRef.value,
-        })
+        }),
     );
 
     // 先に書くほど優先度が高いようなので、applyMiddlewareを先に書くと、/graphqlが上書きされない。
@@ -189,7 +189,7 @@ export const createServer = async ({
             res.header('Access-Control-Allow-Origin', accessControlAllowOrigin);
             res.header(
                 'Access-Control-Allow-Headers',
-                'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+                'Origin, X-Requested-With, Content-Type, Accept, Authorization',
             );
             next();
         });
@@ -344,7 +344,7 @@ export const createServer = async ({
                 });
                 await forkedEm.persistAndFlush(entity);
                 res.sendStatus(200);
-            }
+            },
         );
 
         app.get('/uploader/:type/:file_name', async (req, res) => {
@@ -486,7 +486,7 @@ export const createServer = async ({
                 }
             },
         },
-        wsServer
+        wsServer,
     );
     if (httpServerOptions?.keepAliveTimeout != null) {
         httpServer.keepAliveTimeout = httpServerOptions.keepAliveTimeout;
@@ -495,11 +495,11 @@ export const createServer = async ({
         // TODO: /graphqlが含まれているとAPI_HTTPなどの設定にも/graphqlの部分も入力してしまいそうなので、対処したほうがいいと思われる。また、createServerAsErrorとの統一性も取れていない
         !quiet &&
             loggerRef.infoAsNotice(
-                `🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`
+                `🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`,
             );
         !quiet &&
             loggerRef.infoAsNotice(
-                `🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`
+                `🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`,
             );
     });
     const close = async () => {

@@ -20,18 +20,18 @@ class PrivateChannelSetsTester {
                 .sort((a, b) => {
                     const a2 = a.reduce(
                         (seed, elem) => (seed === '' ? elem : `${seed};${elem}`),
-                        ''
+                        '',
                     );
                     const b2 = b.reduce(
                         (seed, elem) => (seed === '' ? elem : `${seed};${elem}`),
-                        ''
+                        '',
                     );
                     return a2.localeCompare(b2);
                 });
         };
 
         expect(distinctAndSort(this.actual.toArray().map(x => x.toStringArray()))).toEqual(
-            distinctAndSort(visibleToArray)
+            distinctAndSort(visibleToArray),
         );
     }
 }

@@ -36,7 +36,7 @@ export const toClientState =
     (
         isAuthorized: boolean,
         requestedBy: RequestedBy,
-        currentRoomState: State<typeof Room.template>
+        currentRoomState: State<typeof Room.template>,
     ) =>
     (source: State<typeof template>): State<typeof template> => {
         return {
@@ -107,7 +107,7 @@ export const serverTransform =
     (
         isAuthorized: boolean,
         requestedBy: RequestedBy,
-        currentRoomState: State<typeof Room.template>
+        currentRoomState: State<typeof Room.template>,
     ): ServerTransform<
         State<typeof template>,
         TwoWayOperation<typeof template>,

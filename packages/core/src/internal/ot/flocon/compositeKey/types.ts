@@ -5,5 +5,5 @@ export const compositeKey = createReplaceValueTemplate(
     z.object({
         createdBy: z.string(),
         id: z.string(),
-    })
+    }),
 );

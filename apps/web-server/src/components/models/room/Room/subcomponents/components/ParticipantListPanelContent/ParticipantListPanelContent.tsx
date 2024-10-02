@@ -37,12 +37,12 @@ export const ParticipantListPanelContent: React.FC = () => {
                             key === myUserUid
                                 ? ''
                                 : connection?.isConnected === true
-                                ? '接続'
-                                : '未接続',
+                                  ? '接続'
+                                  : '未接続',
                     },
                 };
             }),
-        [participants, roomConnections, myUserUid]
+        [participants, roomConnections, myUserUid],
     );
 
     const columns = React.useMemo(
@@ -96,7 +96,7 @@ export const ParticipantListPanelContent: React.FC = () => {
                 dataIndex: ['participant', 'isConnected'],
             },
         ],
-        []
+        [],
     );
 
     return (

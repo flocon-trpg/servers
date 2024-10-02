@@ -40,7 +40,7 @@ type MockSource<TCustomMessage, TGraphQLError> = ReturnType<
 export const createTestRoomClient = <TCustomMessage, TGraphQLError>(callback: {
     writingMessageStatus?: (
         inputType: WritingMessageStatusInputType,
-        source: MockSource<TCustomMessage, TGraphQLError>
+        source: MockSource<TCustomMessage, TGraphQLError>,
     ) => void;
     unsubscribe?: (source: MockSource<TCustomMessage, TGraphQLError>) => void;
 }) => {

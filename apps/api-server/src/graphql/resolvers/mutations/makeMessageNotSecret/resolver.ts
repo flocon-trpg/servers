@@ -42,7 +42,7 @@ export class MakeMessageNotSecretResolver {
     public async makeMessageNotSecret(
         @Args() args: MessageIdArgs,
         @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine
+        @PubSub() pubSub: PubSubEngine,
     ): Promise<MakeMessageNotSecretResult> {
         const em = context.em;
         const authorizedUserUid = ensureAuthorizedUser(context).userUid;

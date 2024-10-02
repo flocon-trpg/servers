@@ -104,13 +104,13 @@ describe('promiseQueue', () => {
             queue.next(async () => {
                 await delay(1000);
                 return 1;
-            })
+            }),
         );
         const actual2 = $expect(
             queue.next(async () => {
                 await delay(1000);
                 return 2;
-            })
+            }),
         );
 
         await delay(500);
@@ -132,13 +132,13 @@ describe('promiseQueue', () => {
             queue.nextWithTimeout(async () => {
                 await delay(1000);
                 return 1;
-            }, 2000)
+            }, 2000),
         );
         const actual2 = $expect(
             queue.nextWithTimeout(async () => {
                 await delay(1000);
                 return 2;
-            }, 2000)
+            }, 2000),
         );
 
         await delay(500);
@@ -160,13 +160,13 @@ describe('promiseQueue', () => {
             queue.nextWithTimeout(async () => {
                 await delay(2000);
                 return 1;
-            }, 1000)
+            }, 1000),
         );
         const actual2 = $expect(
             queue.nextWithTimeout(async () => {
                 await delay(1000);
                 return 2;
-            }, 2000)
+            }, 2000),
         );
 
         await delay(500);
@@ -188,7 +188,7 @@ describe('promiseQueue', () => {
             queue.next(async () => {
                 await delay(500);
                 return 1;
-            })
+            }),
         );
 
         await delay(1000);
@@ -199,7 +199,7 @@ describe('promiseQueue', () => {
             queue.next(async () => {
                 await delay(500);
                 return 2;
-            })
+            }),
         );
 
         actual2.expectNotResolved();
@@ -215,7 +215,7 @@ describe('promiseQueue', () => {
             queue.nextWithTimeout(async () => {
                 await delay(500);
                 return 1;
-            }, 1000)
+            }, 1000),
         );
 
         await delay(1000);
@@ -226,7 +226,7 @@ describe('promiseQueue', () => {
             queue.nextWithTimeout(async () => {
                 await delay(500);
                 return 2;
-            }, 1000)
+            }, 1000),
         );
 
         actual2.expectNotResolved();
@@ -242,7 +242,7 @@ describe('promiseQueue', () => {
             queue.nextWithTimeout(async () => {
                 await delay(1000);
                 return 1;
-            }, 500)
+            }, 500),
         );
 
         await delay(1000);
@@ -253,7 +253,7 @@ describe('promiseQueue', () => {
             queue.nextWithTimeout(async () => {
                 await delay(500);
                 return 2;
-            }, 1000)
+            }, 1000),
         );
 
         actual2.expectNotResolved();
@@ -273,13 +273,13 @@ describe('promiseQueue', () => {
             queue.next(async () => {
                 await delay(1500);
                 return 2;
-            })
+            }),
         );
         const actual3 = $expect(
             queue.next(async () => {
                 await delay(500);
                 return 3;
-            })
+            }),
         );
 
         await delay(100);
@@ -293,7 +293,7 @@ describe('promiseQueue', () => {
             queue.next(async () => {
                 await delay(500);
                 return 4;
-            })
+            }),
         );
 
         await delay(100);

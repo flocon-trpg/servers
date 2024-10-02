@@ -28,7 +28,7 @@ type ImagePieceState = State<typeof imagePieceTemplate>;
 const defaultImagePiece = (
     piecePosition: CompositeRect,
     isCellMode: boolean,
-    ownerParticipantId: string | undefined
+    ownerParticipantId: string | undefined,
 ): ImagePieceState => ({
     ...piecePosition,
 

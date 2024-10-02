@@ -45,7 +45,7 @@ export class EditFileTagsResolver {
     @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async editFileTags(
         @Arg('input') input: EditFileTagsInput,
-        @Ctx() context: ResolverContext
+        @Ctx() context: ResolverContext,
     ): Promise<boolean> {
         const user = ensureAuthorizedUser(context);
         const map = new DualKeyMap<string, string, number>();

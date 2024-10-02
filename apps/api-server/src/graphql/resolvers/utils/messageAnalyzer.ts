@@ -95,26 +95,26 @@ const getParameter = async ({
         }
 
         const matchedBoolParams = recordToArray(room.boolParamNames ?? {}).filter(
-            ({ value }) => value.name === parameter
+            ({ value }) => value.name === parameter,
         );
         const matchedNumParams = recordToArray(room.numParamNames ?? {}).filter(
-            ({ value }) => value.name === parameter
+            ({ value }) => value.name === parameter,
         );
         const matchedStrParams = recordToArray(room.strParamNames ?? {}).filter(
-            ({ value }) => value.name === parameter
+            ({ value }) => value.name === parameter,
         );
         const totalLength =
             matchedBoolParams.length + matchedNumParams.length + matchedStrParams.length;
         if (totalLength >= 2) {
             return Result.error(
-                `"${parameter}"という名前のパラメーターが複数存在します。パラメーターの名前を変えることを検討してください`
+                `"${parameter}"という名前のパラメーターが複数存在します。パラメーターの名前を変えることを検討してください`,
             );
         }
 
         const matchedBoolParams0 = matchedBoolParams[0];
         if (matchedBoolParams0 != null) {
             return Result.ok(
-                context.value.boolParams?.[matchedBoolParams0.key]?.value ?? undefined
+                context.value.boolParams?.[matchedBoolParams0.key]?.value ?? undefined,
             );
         }
         const matchedNumParams0 = matchedNumParams[0];

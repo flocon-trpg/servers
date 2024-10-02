@@ -18,7 +18,7 @@ export namespace AppConsole {
 
     const logCore = (
         consoleMethodName: 'info' | 'warn' | 'error' | 'fatal',
-        message: Message
+        message: Message,
     ): void => {
         const messageStr = messageToString(message);
         if (message.errorObject == null) {

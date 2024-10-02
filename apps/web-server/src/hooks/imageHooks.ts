@@ -71,7 +71,7 @@ type State = LoadingState | SuccessState | FailedState | ArgNullState;
 
 export function useImage(
     src: string | null,
-    options?: { skipAnalyzeUrl?: boolean; size?: Size; crossOrigin?: string }
+    options?: { skipAnalyzeUrl?: boolean; size?: Size; crossOrigin?: string },
 ): State {
     const [state, setState] = React.useState(null as State | null);
     const skipAnalyzeUrl = options?.skipAnalyzeUrl ?? false;
@@ -119,7 +119,7 @@ export function useImage(
                 setState(null);
             };
         },
-        [src, crossOrigin, size?.w, size?.h, skipAnalyzeUrl]
+        [src, crossOrigin, size?.w, size?.h, skipAnalyzeUrl],
     );
 
     return state ?? { type: loading };
@@ -129,7 +129,7 @@ export function useImageFromFilePath(
     filePath: FilePathLikeOrThumb | null | undefined,
     options?: {
         crossOrigin?: string;
-    }
+    },
 ): State {
     const { src, queryResult } = useSrcFromFilePath(filePath);
 

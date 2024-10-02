@@ -31,7 +31,7 @@ export class TestRoomEventSubscription {
                         this.#messagesClient.onEvent(result.data.roomEvent.roomMessageEvent);
                     }
                 }
-            })
+            }),
         );
     }
 
@@ -135,7 +135,7 @@ export class TestRoomEventSubscription {
 
 export class CompositeTestRoomEventSubscription<TUserUids extends ReadonlyArray<string>> {
     public constructor(
-        private readonly instances: { [_ in TUserUids[number]]: TestRoomEventSubscription }
+        private readonly instances: { [_ in TUserUids[number]]: TestRoomEventSubscription },
     ) {}
 
     public unsubscribe() {

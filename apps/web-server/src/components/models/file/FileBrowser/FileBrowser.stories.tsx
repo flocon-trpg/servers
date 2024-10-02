@@ -52,7 +52,7 @@ const toFilePath = (filesSourceRef: { current: FileSource[] }): FilePath[] => {
                 return Promise.reject(new Error('fake error'));
             }
             filesSourceRef.current = filesSourceRef.current.filter(elem =>
-                arrayEquals(elem.path, file.path)
+                arrayEquals(elem.path, file.path),
             );
         };
         const onOpen = () => loggerRef.info({ file }, 'open');

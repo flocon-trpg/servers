@@ -14,7 +14,7 @@ import { MessageFilter } from '@/atoms/roomConfigAtom/types/messageFilter';
 import { NotificationType } from '@/components/models/room/Room/subcomponents/components/Notification/Notification';
 
 export function useMessageFilter(
-    config: MessageFilter
+    config: MessageFilter,
 ): (message: Message<NotificationType<CombinedError>>) => boolean {
     const {
         showNotification,
@@ -119,6 +119,6 @@ export function useMessageFilter(
             showPublic10,
             privateChannelsAsString,
             showNotification,
-        ]
+        ],
     );
 }

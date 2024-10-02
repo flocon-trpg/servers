@@ -73,7 +73,7 @@ export const ColorPickerButton: React.FC<Props> = ({
                         flexRow,
                         itemsCenter,
                         justifyItemsCenter,
-                        justifyCenter
+                        justifyCenter,
                     )}
                     style={{ backgroundColor }}
                 >

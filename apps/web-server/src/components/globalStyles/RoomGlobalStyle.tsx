@@ -10,7 +10,7 @@ export const RoomGlobalStyle = () => {
     const { token } = theme.useToken();
     const globalStyles = React.useMemo(
         () => ({ body: { background: token.colorBgBase } }),
-        [token.colorBgBase]
+        [token.colorBgBase],
     );
     return <Global styles={globalStyles} />;
 };

@@ -42,7 +42,7 @@ function useMessageNotifications(): void {
     const masterVolume = useAtomSelector(roomConfigAtom, state => state?.masterVolume);
     const seVolume = useAtomSelector(roomConfigAtom, state => state?.seVolume);
     const volumeRef = React.useRef(
-        (masterVolume ?? defaultMasterVolume) * (seVolume ?? defaultSeVolume)
+        (masterVolume ?? defaultMasterVolume) * (seVolume ?? defaultSeVolume),
     );
     React.useEffect(() => {
         volumeRef.current = (masterVolume ?? defaultMasterVolume) * (seVolume ?? defaultSeVolume);
@@ -56,10 +56,10 @@ function useMessageNotifications(): void {
 
     const messageNotificationFilter = useAtomSelector(
         roomConfigAtom,
-        state => state?.messageNotificationFilter
+        state => state?.messageNotificationFilter,
     );
     const messageNotificationFilterRef = React.useRef(
-        messageNotificationFilter ?? MessageFilterUtils.createEmpty()
+        messageNotificationFilter ?? MessageFilterUtils.createEmpty(),
     );
     React.useEffect(() => {
         messageNotificationFilterRef.current =
@@ -135,7 +135,7 @@ function useMessageNotifications(): void {
                     {RoomMessage.toChannelName(
                         message,
                         publicChannelNameRef.current ?? emptyPublicChannelNames,
-                        participantsMapRef.current ?? new Map()
+                        participantsMapRef.current ?? new Map(),
                     )}
                 </div>
             ),

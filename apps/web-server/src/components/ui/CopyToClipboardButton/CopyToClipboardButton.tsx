@@ -10,7 +10,7 @@ type Props = Omit<ButtonProps, 'onClick'> & {
 const tooltipLifespan = 3000;
 
 export const CopyToClipboardButton: React.FC<React.PropsWithChildren<Props>> = (
-    props: PropsWithChildren<Props>
+    props: PropsWithChildren<Props>,
 ) => {
     const { clipboardText, ...restProps } = props;
 

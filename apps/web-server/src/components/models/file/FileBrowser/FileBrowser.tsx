@@ -189,7 +189,7 @@ export type Props = {
 
             /** cutの際はnullに、pasteの際はnon-nullになります。 */
             newDirectoryPath: readonly string[] | null;
-        }
+        },
     ) => Result<undefined>;
 
     canRename: (params: {
@@ -449,7 +449,7 @@ class PathState {
 
     renameFolderIfEmpty(
         currentPath: readonly string[],
-        newPath: readonly string[]
+        newPath: readonly string[],
     ): PathState | null {
         const subtree = this.members.rootFolder.createSubTreeIfExists(currentPath)?.traverse();
         if (subtree == null) {
@@ -469,7 +469,7 @@ class PathState {
                     }
                     return oldValue.value;
                 },
-                () => ({ files: new DualKeyMap() })
+                () => ({ files: new DualKeyMap() }),
             );
         }
         return new PathState({ ...this.members, rootFolder: newValue });
@@ -499,7 +499,7 @@ class PathState {
                     }
                     return oldValue.value;
                 },
-                () => ({ files: new DualKeyMap() })
+                () => ({ files: new DualKeyMap() }),
             );
             folderNode.files.set(
                 { first: filename, second: filePath.id },
@@ -513,7 +513,7 @@ class PathState {
                     name: filename,
                     folderPath,
                     path: undefined,
-                }
+                },
             );
         }
 
@@ -529,7 +529,7 @@ class PathState {
                     }
                     return oldValue.value;
                 },
-                () => ({ files: new DualKeyMap() })
+                () => ({ files: new DualKeyMap() }),
             );
         }
 
@@ -542,7 +542,7 @@ class PathState {
             newValue.ensure(
                 joinPath(path.path).array,
                 () => null,
-                () => null
+                () => null,
             );
         }
         return new PathState({ ...this.members, ensuredFolders: newValue });
@@ -554,7 +554,7 @@ class PathState {
             newValue.ensure(
                 joinPath(elem.path).array,
                 () => elem.element,
-                () => null
+                () => null,
             );
         }
         return new PathState({ ...this.members, overridingElements: newValue });
@@ -583,7 +583,7 @@ class PathState {
             ?.getChildren() ?? []) {
             const key = $folder.absolutePath.reduce(
                 (seed, elem) => `${seed}/${elem}`,
-                'FileBrowser@EnsuredFolder/'
+                'FileBrowser@EnsuredFolder/',
             );
 
             const folderPath = [...$folder.absolutePath];
@@ -690,7 +690,7 @@ class PathState {
                 }
                 return oldValue.value;
             },
-            () => ({ files: new DualKeyMap() })
+            () => ({ files: new DualKeyMap() }),
         );
         return new PathState({ ...this.members, rootFolder });
     }
@@ -933,7 +933,7 @@ class PathState {
 
     #requestDeleting(source: readonly FilePathNode[]): FileToDelete[] {
         return source
-            .map(file => ({ status: 'waiting', file } as const))
+            .map(file => ({ status: 'waiting', file }) as const)
             .sort((x, y) => {
                 for (const group of groupJoinArray(new Node(x.file).path, new Node(y.file).path)) {
                     switch (group.type) {
@@ -1128,7 +1128,7 @@ const useCreateFolderAction = () => {
             canExecute: isProtected ? Result.error(protectedErrorMessage) : Result.ok(undefined),
             showModal: () => setVisible(true),
         }),
-        [isProtected, setVisible]
+        [isProtected, setVisible],
     );
 };
 
@@ -1151,7 +1151,7 @@ const useTrySetDeleteStatusAsAsking = () => {
             setDeleteStatus(() => askingDeleteStatus);
             setIsModalVisible(true);
         },
-        [deleteStatus.type, notification, setDeleteStatus, setIsModalVisible]
+        [deleteStatus.type, notification, setDeleteStatus, setIsModalVisible],
     );
 };
 
@@ -1187,7 +1187,7 @@ const useRequestDeletingNodeAction = () => {
         (node: Node) => {
             return pathState.canRequestDeleting(props, node);
         },
-        [pathState, props]
+        [pathState, props],
     );
 
     const execute = React.useCallback(
@@ -1198,7 +1198,7 @@ const useRequestDeletingNodeAction = () => {
             }
             setAsAsking(newStatus);
         },
-        [pathState, props, setAsAsking]
+        [pathState, props, setAsAsking],
     );
 
     return React.useMemo(
@@ -1206,7 +1206,7 @@ const useRequestDeletingNodeAction = () => {
             execute,
             canExecute,
         }),
-        [execute, canExecute]
+        [execute, canExecute],
     );
 };
 
@@ -1229,7 +1229,7 @@ const useTrySetRenameStatusAsAsking = () => {
             setRenameStatus(() => askingRenameStatus);
             setIsModalVisible(true);
         },
-        [renameStatus.type, setRenameStatus, setIsModalVisible, notification]
+        [renameStatus.type, setRenameStatus, setIsModalVisible, notification],
     );
 };
 
@@ -1241,7 +1241,7 @@ const useRequestPastingAction = () => {
     const canExecute = React.useCallback(
         (
             /** 貼り付け先のフォルダを指定できます。指定せず、current directoryに貼り付ける場合はnullを渡します。 */
-            targetFolder: string | null
+            targetFolder: string | null,
         ) => {
             const destPath =
                 targetFolder == null
@@ -1249,13 +1249,13 @@ const useRequestPastingAction = () => {
                     : [...pathState.currentDirectory, targetFolder];
             return pathState.canRequestPasting(props, destPath);
         },
-        [pathState, props]
+        [pathState, props],
     );
 
     const execute = React.useCallback(
         (
             /** 貼り付け先のフォルダを指定できます。指定せず、current directoryに貼り付ける場合はnullを渡します。 */
-            targetFolder: string | null
+            targetFolder: string | null,
         ) => {
             const destPath =
                 targetFolder == null
@@ -1268,7 +1268,7 @@ const useRequestPastingAction = () => {
             }
             setAsAsking(newStatus);
         },
-        [pathState, props, setAsAsking, setPathState]
+        [pathState, props, setAsAsking, setPathState],
     );
 
     return React.useMemo(
@@ -1276,7 +1276,7 @@ const useRequestPastingAction = () => {
             execute,
             canExecute,
         }),
-        [execute, canExecute]
+        [execute, canExecute],
     );
 };
 
@@ -1289,7 +1289,7 @@ const useRequestRenamingAction = () => {
         (node: Node, newName: string | null) => {
             return pathState.canRequestRenaming(props, node, newName);
         },
-        [pathState, props]
+        [pathState, props],
     );
 
     const execute = React.useCallback(
@@ -1301,7 +1301,7 @@ const useRequestRenamingAction = () => {
             }
             setAsAsking(newStatus);
         },
-        [pathState, props, setAsAsking, setPathState]
+        [pathState, props, setAsAsking, setPathState],
     );
 
     return React.useMemo(
@@ -1309,7 +1309,7 @@ const useRequestRenamingAction = () => {
             execute,
             canExecute,
         }),
-        [execute, canExecute]
+        [execute, canExecute],
     );
 };
 
@@ -1356,7 +1356,7 @@ const ActionBar: React.FC = () => {
                 disabled={!pathState.canChangeMultipleSelectMode(props)}
                 onChange={e =>
                     setPathState(pathState =>
-                        pathState.changeIsMultipleSelectMode(e.target.checked)
+                        pathState.changeIsMultipleSelectMode(e.target.checked),
                     )
                 }
                 checked={pathState.isMultipleSelectMode}
@@ -1380,7 +1380,7 @@ const AddressBar: React.FC = () => {
     const searchPlaceholder = useAtomSelector(propsAtom, props => props.searchPlaceholder);
     const currentDirectory = React.useMemo(
         () => pathState.currentDirectory,
-        [pathState.currentDirectory]
+        [pathState.currentDirectory],
     );
     const [fileNameFilter, setFileNameFilter] = useAtom(fileNameFilterAtom);
 
@@ -1771,7 +1771,7 @@ const CreateFolderModal: React.FC = () => {
                 directoryPath: pathState.currentDirectory,
                 foldername,
             }).error,
-        [foldername, pathState.currentDirectory, props]
+        [foldername, pathState.currentDirectory, props],
     );
 
     const [visible, setVisible] = useAtom(isModalToCreateFolderVisibleAtom);
@@ -1787,7 +1787,7 @@ const CreateFolderModal: React.FC = () => {
             return;
         }
         setPathState(pathState =>
-            pathState.createFolder([...pathState.currentDirectory, foldername])
+            pathState.createFolder([...pathState.currentDirectory, foldername]),
         );
         setFoldername('');
         setVisible(false);
@@ -1855,7 +1855,7 @@ const CellFile: React.FC<{ children: React.ReactNode; opacity: number | undefine
                 justifySelfCenter,
                 flex,
                 itemsCenter,
-                justifyItemsCenter
+                justifyItemsCenter,
             )}
             style={{ ...cellFileStyle, opacity }}
         >
@@ -2252,7 +2252,7 @@ const useStartAutoDeleteFiles = () => {
     const deleteStatusValueRef = useLatest(deleteStatusValue);
     const setPathState = useSetAtom(pathStateAtom);
     const foldersDeletingOnNextRootFolderUpdate = useSetAtom(
-        foldersDeletingOnNextRootFolderUpdateAtom
+        foldersDeletingOnNextRootFolderUpdateAtom,
     );
     const { notification } = App.useApp();
 
@@ -2284,7 +2284,7 @@ const useStartAutoDeleteFiles = () => {
                     deleteStatusValueRef.current?.map(file => ({
                         path: new Node(file.file).path,
                         id: file.file.id,
-                    })) ?? []
+                    })) ?? [],
                 );
             foldersDeletingOnNextRootFolderUpdate(oldState => {
                 if (deleteStatusRef.current.type === 'none') {
@@ -2301,7 +2301,7 @@ const useStartAutoDeleteFiles = () => {
                     return oldValue;
                 }
                 const index = oldValue.files.findIndex(
-                    oldFile => oldFile.file.key === file.file.key
+                    oldFile => oldFile.file.key === file.file.key,
                 );
                 if (index < 0) {
                     return oldValue;
@@ -2361,7 +2361,7 @@ const useStartAutoRenameFiles = () => {
     const renameStatusValueRef = useLatest(renameStatusValue);
     const setPathState = useSetAtom(pathStateAtom);
     const setDeletingFoldersOnNextRootFolderUpdate = useSetAtom(
-        foldersDeletingOnNextRootFolderUpdateAtom
+        foldersDeletingOnNextRootFolderUpdateAtom,
     );
     const { notification } = App.useApp();
 
@@ -2395,7 +2395,7 @@ const useStartAutoRenameFiles = () => {
                         id: file.file.id,
                         oldPath: new Node(file.file).path,
                         currentPath: file.newPath,
-                    })) ?? []
+                    })) ?? [],
                 );
             setPathState(pathState => {
                 return pathState.resetCutState();
@@ -2418,7 +2418,7 @@ const useStartAutoRenameFiles = () => {
                     return oldValue;
                 }
                 const index = oldValue.files.findIndex(
-                    oldFile => oldFile.file.key === file.file.key
+                    oldFile => oldFile.file.key === file.file.key,
                 );
                 if (index < 0) {
                     return oldValue;
@@ -2475,7 +2475,7 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
     useStartAutoRenameFiles();
 
     const foldersDeletingOnNextRootFolderUpdate = useAtomValue(
-        foldersDeletingOnNextRootFolderUpdateAtom
+        foldersDeletingOnNextRootFolderUpdateAtom,
     );
 
     const setProps = useSetAtom(propsAtom);
@@ -2514,7 +2514,7 @@ const FileBrowserWithoutJotaiProvider: React.FC<Props> = props => {
             className={classNames(flex, flexColumn)}
             style={mergeStyles(
                 { gap: columnGap, height: props.height ?? defaultHeight },
-                props.style
+                props.style,
             )}
         >
             <ActionBar />

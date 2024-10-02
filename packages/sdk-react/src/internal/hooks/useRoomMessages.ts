@@ -9,7 +9,7 @@ import { useEffect, useMemo, useState } from 'react';
  */
 export const useRoomMessages = <TCustomMessage, TGraphQLError>(
     roomClient: Pick<RoomClient<TCustomMessage, TGraphQLError>, 'messages'>,
-    filter?: (message: Message<TCustomMessage>) => boolean
+    filter?: (message: Message<TCustomMessage>) => boolean,
 ) => {
     type MessagesType = {
         /** メッセージの配列です。作成日時によって昇順にソートされています。 */
@@ -42,7 +42,7 @@ export const useRoomMessages = <TCustomMessage, TGraphQLError>(
             next: e => {
                 setResult({
                     current: e.current,
-                    diff: e.type === 'event' ? e.diff ?? undefined : undefined,
+                    diff: e.type === 'event' ? (e.diff ?? undefined) : undefined,
                 });
             },
         });

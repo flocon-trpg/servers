@@ -26,7 +26,7 @@ type Type = {
 };
 
 export const createDefaultLogger = (args?: { logLevel?: PinoLogLevel; isBrowser?: boolean }) => {
-    return args?.isBrowser ?? isBrowser
+    return (args?.isBrowser ?? isBrowser)
         ? pino({ level: args?.logLevel ?? defaultLogLevel, browser: {} })
         : pino({
               level: args?.logLevel ?? defaultLogLevel,

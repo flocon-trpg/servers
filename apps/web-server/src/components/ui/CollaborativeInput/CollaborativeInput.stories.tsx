@@ -50,7 +50,7 @@ const Main: React.FC<{
                                   setBottomElement(
                                       <div className={classNames(flexInitial)}>
                                           {e.isSkipping ? 'skipping' : 'not skipping'}
-                                      </div>
+                                      </div>,
                                   )
                             : undefined
                     }

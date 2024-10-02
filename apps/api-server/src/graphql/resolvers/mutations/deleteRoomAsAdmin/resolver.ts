@@ -40,7 +40,7 @@ export class DeleteRoomAsAdminResolver {
     public async deleteRoomAsAdmin(
         @Args() args: DeleteRoomAsAdminInput,
         @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine
+        @PubSub() pubSub: PubSubEngine,
     ): Promise<DeleteRoomAsAdminResult> {
         const em = context.em;
         const authorizedUserUid = ensureAuthorizedUser(context).userUid;

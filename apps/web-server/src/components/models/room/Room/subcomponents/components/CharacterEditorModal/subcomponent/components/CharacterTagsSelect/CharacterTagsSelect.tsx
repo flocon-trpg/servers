@@ -25,7 +25,7 @@ export const CharacterTagsSelect: React.FC<Props> = ({ character, onChange }: Pr
         children.push(
             <Select.Option key={tagKey(i)} value={tagKey(i)}>
                 {tagName.trim() === '' ? '(空)' : tagName}
-            </Select.Option>
+            </Select.Option>,
         );
         const hasTagPropKey = `hasTag${i}` as const;
         const hasTag = character[hasTagPropKey];

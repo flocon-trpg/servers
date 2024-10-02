@@ -65,7 +65,7 @@ class PlaylistHowler {
             this.#howl = this.#createHowl(nextSrcAndFormat);
             loggerRef.debug(
                 { srcAndFormat: nextSrcAndFormat },
-                'Music ended. Starting the next music.'
+                'Music ended. Starting the next music.',
             );
         }
 
@@ -149,7 +149,7 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmCoreProps): void {
                 src,
                 format:
                     q.data.type === Uploader
-                        ? extname(q.data.filename).fileExtension ?? undefined
+                        ? (extname(q.data.filename).fileExtension ?? undefined)
                         : undefined,
             });
         }

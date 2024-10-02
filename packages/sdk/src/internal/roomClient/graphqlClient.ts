@@ -28,27 +28,27 @@ import { ReadonlyBehaviorEvent } from '../rxjs/readonlyBehaviorEvent';
  */
 export type GraphQLClient<TGraphQLError> = {
     getMessagesQuery: (
-        variables: GetMessagesQueryVariables
+        variables: GetMessagesQueryVariables,
     ) => Promise<Result<GetMessagesQuery, TGraphQLError>>;
 
     getRoomConnectionsQuery: (
-        variables: GetRoomConnectionsQueryVariables
+        variables: GetRoomConnectionsQueryVariables,
     ) => Promise<Result<GetRoomConnectionsQuery, TGraphQLError>>;
 
     getRoomQuery: (
-        variables: GetRoomQueryVariables
+        variables: GetRoomQueryVariables,
     ) => Promise<Result<GetRoomQuery, TGraphQLError>>;
 
     operateMutation: (
-        variables: OperateMutationVariables
+        variables: OperateMutationVariables,
     ) => Promise<Result<OperateMutation, TGraphQLError>>;
 
     roomEventSubscription: (
-        variables: RoomEventSubscriptionVariables
+        variables: RoomEventSubscriptionVariables,
     ) => Observable<Result<RoomEventSubscription, TGraphQLError>>;
 
     updateWritingMessagesStatusMutation: (
-        variables: UpdateWritingMessageStatusMutationVariables
+        variables: UpdateWritingMessageStatusMutationVariables,
     ) => Promise<Result<UpdateWritingMessageStatusMutation, TGraphQLError>>;
 };
 
@@ -133,7 +133,7 @@ export class GraphQLClientWithStatus<TGraphQLError> {
 
     constructor(
         private readonly source: GraphQLClient<TGraphQLError>,
-        private readonly roomId: string
+        private readonly roomId: string,
     ) {
         this.#roomEventSubscription = this.source.roomEventSubscription({ id: roomId }).pipe(
             catchError(e => {
@@ -159,14 +159,14 @@ export class GraphQLClientWithStatus<TGraphQLError> {
                 }
                 return of(e.value);
             }),
-            shareReplay({ windowTime: 10_000, refCount: true })
+            shareReplay({ windowTime: 10_000, refCount: true }),
         );
     }
 
     // ブラウザなどで Promise uncaught エラーが出ないようにすべて catch している。
     #catchPromiseError<T>(
         source: Promise<Result<T, TGraphQLError>>,
-        name: QueryPropKeys
+        name: QueryPropKeys,
     ): Promise<Result<T, PromiseError<TGraphQLError>>> {
         return source
             .then(result => {
@@ -207,14 +207,14 @@ export class GraphQLClientWithStatus<TGraphQLError> {
     getMessagesQuery() {
         return this.#catchPromiseError(
             this.source.getMessagesQuery({ roomId: this.roomId }),
-            GetMessagesQuery
+            GetMessagesQuery,
         );
     }
 
     getRoomConnectionsQuery() {
         return this.#catchPromiseError(
             this.source.getRoomConnectionsQuery({ roomId: this.roomId }),
-            GetRoomConnectionsQuery
+            GetRoomConnectionsQuery,
         );
     }
 

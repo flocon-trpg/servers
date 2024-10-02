@@ -57,7 +57,7 @@ export class EditMessageResolver {
     public async editMessage(
         @Args() args: EditMessageArgs,
         @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine
+        @PubSub() pubSub: PubSubEngine,
     ): Promise<EditMessageResult> {
         const em = context.em;
         const authorizedUserUid = ensureAuthorizedUser(context).userUid;

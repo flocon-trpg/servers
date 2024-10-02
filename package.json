@@ -7,7 +7,7 @@
     ],
     "scripts": {
         "build": "yarn workspace '@flocon-trpg/api-server' run build && yarn workspace '@flocon-trpg/web-server' run build:deps",
-        "format": "yarn lint --fix && yarn prettier && yarn build && yarn sort-package-json && yarn generate-disclaimer",
+        "format": "yarn lint --fix && yarn prettier && yarn sort-package-json && yarn generate-disclaimer",
         "generate-disclaimer": "yarn licenses generate-disclaimer --production --recursive --exclude='@types/*,husky,less,npm-run-all,sass,serve' > ./apps/web-server/public/licenses-npm-package.txt",
         "install-husky": "husky install",
         "lint": "yarn workspaces foreach -pv run lint",
@@ -18,11 +18,11 @@
         "test": "yarn workspaces foreach -pv run test"
     },
     "devDependencies": {
-        "@commitlint/cli": "17.6.6",
-        "@commitlint/config-conventional": "17.6.6",
+        "@commitlint/cli": "19.5.0",
+        "@commitlint/config-conventional": "19.5.0",
         "@flocon-trpg/prettier-config": "workspace:^",
         "husky": "8.0.3",
-        "prettier": "2.8.8",
+        "prettier": "3.3.3",
         "sort-package-json": "2.4.1"
     },
     "packageManager": "yarn@3.6.0"

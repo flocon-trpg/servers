@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.config = void 0;
+exports.config = config;
 const plugin_typescript_1 = __importDefault(require("@rollup/plugin-typescript"));
 /**
  * @example
@@ -47,5 +47,4 @@ function config({ external }) {
         }),
     ];
 }
-exports.config = config;
 //# sourceMappingURL=index.js.map

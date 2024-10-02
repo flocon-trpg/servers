@@ -44,6 +44,6 @@ export const useCloneImagePiece = () => {
                 });
             });
         },
-        [myUserUid, setRoomState]
+        [myUserUid, setRoomState],
     );
 };

@@ -49,7 +49,7 @@ const FloconUploaderLink: React.FC<{
         variables: { input: { fileTagIds: [] } },
     });
     const fileItem = getFilesQueryResult.data?.result.files.find(
-        file => file.filename === filename
+        file => file.filename === filename,
     );
     const { open } = useOpenFloconUploaderFile();
 

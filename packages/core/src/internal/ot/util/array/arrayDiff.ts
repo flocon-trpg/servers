@@ -11,7 +11,7 @@ class NodeAndEdges<T> {
     constructor(
         readonly node: T,
         /** この node が始点となる edge の全てのうち、それらの終点を表します。 */
-        readonly edgeTargetNodes: readonly NodeAndEdges<T>[]
+        readonly edgeTargetNodes: readonly NodeAndEdges<T>[],
     ) {}
 
     #longestPathsMemo: readonly { path: readonly T[] }[] | null = null;
@@ -177,7 +177,7 @@ const getBestFixedPoints = <T, TKey>({
             }
 
             return comparer(nextX, nextY);
-        }
+        },
     );
 
     let longestPath: readonly { index: number; value: T }[] = [];

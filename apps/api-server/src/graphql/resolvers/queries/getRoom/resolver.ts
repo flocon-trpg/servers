@@ -83,7 +83,7 @@ export class GetRoomResolver {
     @UseMiddleware(QueueMiddleware, RateLimitMiddleware(2))
     public async getRoom(
         @Args() args: GetRoomArgs,
-        @Ctx() context: ResolverContext
+        @Ctx() context: ResolverContext,
     ): Promise<typeof GetRoomResult> {
         const em = context.em;
         const authorizedUserUid = ensureAuthorizedUser(context).userUid;

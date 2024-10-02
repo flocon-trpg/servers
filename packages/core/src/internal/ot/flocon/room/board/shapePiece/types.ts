@@ -21,5 +21,5 @@ export const template = createObjectValueTemplate(
         shapes: createRecordValueTemplate(Shape.template),
     },
     1,
-    1
+    1,
 );

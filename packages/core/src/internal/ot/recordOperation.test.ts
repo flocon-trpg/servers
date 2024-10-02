@@ -416,7 +416,7 @@ describe('recordOperation.composeDownOperation', () => {
                 oneThenTen: { type: update, update: 11 },
                 two: { type: update, update: 2 },
                 three: { type: update, update: 3 },
-            })
+            }),
         );
         expect(innerApplyBack).not.toBeCalled();
         expect(innerCompose).toHaveBeenCalledTimes(1);
@@ -457,7 +457,7 @@ describe('recordOperation.composeDownOperation', () => {
                 oneThenTen: { type: replace, replace: { oldValue: 1 } },
                 two: { type: update, update: 2 },
                 three: { type: update, update: 3 },
-            })
+            }),
         );
         expect(innerApplyBack).not.toBeCalled();
         expect(innerCompose).not.toBeCalled();
@@ -482,7 +482,7 @@ describe('recordOperation.composeDownOperation', () => {
                 oneThenTen: { type: replace, replace: { oldValue: 1 } },
                 two: { type: update, update: 2 },
                 three: { type: update, update: 3 },
-            })
+            }),
         );
         expect(innerApplyBack).toHaveBeenCalledTimes(1);
         expect(innerApplyBack.mock.lastCall).toEqual([
@@ -525,7 +525,7 @@ describe('recordOperation.composeDownOperation', () => {
                 oneThenTen: { type: replace, replace: { oldValue: 1 } },
                 two: { type: update, update: 2 },
                 three: { type: update, update: 3 },
-            })
+            }),
         );
         expect(innerApplyBack).not.toBeCalled();
         expect(innerCompose).not.toBeCalled();
@@ -614,7 +614,7 @@ describe('recordOperation.serverTransform', () => {
         expect(actual).toEqual(
             Result.ok({
                 target: { type: update, update: 3 },
-            })
+            }),
         );
     });
 
@@ -648,7 +648,7 @@ describe('recordOperation.serverTransform', () => {
         expect(actual).toEqual(
             Result.ok({
                 target: { type: replace, replace: { newValue: 1 } },
-            })
+            }),
         );
     });
 
@@ -667,7 +667,7 @@ describe('recordOperation.serverTransform', () => {
         expect(actual).toEqual(
             Result.ok({
                 target: { type: replace, replace: { newValue: undefined } },
-            })
+            }),
         );
     });
 
@@ -689,7 +689,7 @@ describe('recordOperation.serverTransform', () => {
         expect(actual).toEqual(
             Result.ok({
                 target: { type: update, update: '2,3' },
-            })
+            }),
         );
     });
 
@@ -745,7 +745,7 @@ describe('recordOperation.serverTransform', () => {
         expect(actual).toEqual(
             Result.ok({
                 target: { type: replace, replace: { oldValue: 2, newValue: undefined } },
-            })
+            }),
         );
     });
 
@@ -872,7 +872,7 @@ describe('recordOperation.serverTransform', () => {
                         return false;
                     }
                     throw new Error(
-                        `${JSON.stringify({ key, newState })} is not expected. Check test code.`
+                        `${JSON.stringify({ key, newState })} is not expected. Check test code.`,
                     );
                 },
                 cancelRemove,
@@ -882,7 +882,7 @@ describe('recordOperation.serverTransform', () => {
         expect(actual).toEqual(
             Result.ok({
                 noCancel: { type: replace, replace: { newValue: 2 } },
-            })
+            }),
         );
         expect(cancelRemove).not.toBeCalled();
         expect(cancelUpdate).not.toBeCalled();
@@ -910,7 +910,7 @@ describe('recordOperation.serverTransform', () => {
                         return false;
                     }
                     throw new Error(
-                        `${JSON.stringify({ key, state })} is not expected. Check test code.`
+                        `${JSON.stringify({ key, state })} is not expected. Check test code.`,
                     );
                 },
                 cancelUpdate,
@@ -919,7 +919,7 @@ describe('recordOperation.serverTransform', () => {
         expect(actual).toEqual(
             Result.ok({
                 noCancel: { type: replace, replace: { oldValue: 2, newValue: undefined } },
-            })
+            }),
         );
         expect(cancelCreate).not.toBeCalled();
         expect(cancelUpdate).not.toBeCalled();
@@ -956,7 +956,7 @@ describe('recordOperation.serverTransform', () => {
                             key,
                             prevState,
                             nextState,
-                        })} is not expected. Check test code.`
+                        })} is not expected. Check test code.`,
                     );
                 },
             },
@@ -964,7 +964,7 @@ describe('recordOperation.serverTransform', () => {
         expect(actual).toEqual(
             Result.ok({
                 noCancel: { type: update, update: '2,200' },
-            })
+            }),
         );
         expect(cancelCreate).not.toBeCalled();
         expect(cancelRemove).not.toBeCalled();
@@ -1063,7 +1063,7 @@ describe('recordOperation.clientTransform', () => {
     it('tests callback on update', () => {
         const innerDiff = jest.fn();
         const innerTransform = jest.fn(() =>
-            Result.ok({ firstPrime: undefined, secondPrime: '2,3' })
+            Result.ok({ firstPrime: undefined, secondPrime: '2,3' }),
         );
         clientTransform({
             state: { target: '1' },

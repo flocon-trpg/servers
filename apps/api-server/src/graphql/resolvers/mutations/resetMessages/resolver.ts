@@ -30,7 +30,7 @@ export class ResetMessagesResolver {
     public async resetMessages(
         @Arg('roomId') roomId: string,
         @Ctx() context: ResolverContext,
-        @PubSub() pubSub: PubSubEngine
+        @PubSub() pubSub: PubSubEngine,
     ): Promise<ResetRoomMessagesResult> {
         const em = context.em;
         const authorizedUser = ensureAuthorizedUser(context);

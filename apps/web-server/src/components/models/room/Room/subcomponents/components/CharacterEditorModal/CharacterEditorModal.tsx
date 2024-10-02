@@ -112,7 +112,7 @@ export const characterEditorModalAtom = atom(
                 set(characterEditorModalPrimitiveAtom, newValue);
             }
         }
-    }
+    },
 );
 
 const pieceEditorTitle = 'コマの位置';

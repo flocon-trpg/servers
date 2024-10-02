@@ -11,5 +11,5 @@ export const template = createObjectValueTemplate(
         strokeWidth: createReplaceValueTemplate(maybe(z.number())),
     },
     1,
-    1
+    1,
 );

@@ -28,7 +28,7 @@ const array = [i];
 console.log(Array.isArray(array));
 array
 `,
-    globalThis
+    globalThis,
 );
 // console.log(Array.isArray(array)); が実行され、"[MY HEADER!] true"が出力される
 

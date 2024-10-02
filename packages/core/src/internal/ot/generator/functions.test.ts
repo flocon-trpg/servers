@@ -75,7 +75,7 @@ namespace ObjectValue {
                 value4: ReplaceValue.template,
             },
             undefined,
-            undefined
+            undefined,
         );
         export type State = StateType<typeof template>;
         export type UpOperation = UpOperationType<typeof template>;
@@ -91,8 +91,8 @@ namespace RecordValue {
                 value: ReplaceValue.template,
             },
             1,
-            2
-        )
+            2,
+        ),
     );
     export type State = StateType<typeof template>;
     export type DownOperation = DownOperationType<typeof template>;
@@ -108,8 +108,8 @@ namespace ArrayValue {
                 value: ReplaceValue.template,
             },
             1,
-            2
-        )
+            2,
+        ),
     );
     export type State = StateType<typeof template>;
     export type DownOperation = DownOperationType<typeof template>;
@@ -124,9 +124,9 @@ namespace ParamRecordValue {
                 value: ReplaceValue.template,
             },
             1,
-            2
+            2,
         ),
-        { $v: 1, $r: 2, value: 0 }
+        { $v: 1, $r: 2, value: 0 },
     );
     export type State = StateType<typeof template>;
     export type DownOperation = DownOperationType<typeof template>;
@@ -152,7 +152,7 @@ describe('state', () => {
         ({ source, expected }) => {
             const actual = state(ReplaceValue.template).safeParse(source);
             expect(toOption(actual)).toEqual(expected);
-        }
+        },
     );
 
     it.each`
@@ -177,7 +177,7 @@ describe('state', () => {
         ({ source, expected }) => {
             const actual = state(NullableOtString.template).safeParse(source);
             expect(toOption(actual)).toEqual(expected);
-        }
+        },
     );
 
     it.each`
@@ -206,7 +206,7 @@ describe('state', () => {
         ({ source, expected }) => {
             const actual = state(ParamRecordValue.template).safeParse(source);
             expect(toOption(actual)).toEqual(expected);
-        }
+        },
     );
 
     it.each`
@@ -220,7 +220,7 @@ describe('state', () => {
         ({ source, expected }) => {
             const actual = state(ObjectValue.NoVersion.template).safeParse(source);
             expect(toOption(actual)).toEqual(expected);
-        }
+        },
     );
 
     it.each`
@@ -253,7 +253,7 @@ describe('upOperation', () => {
         ({ source, expected }) => {
             const actual = upOperation(ReplaceValue.template).safeParse(source);
             expect(toOption(actual)).toEqual(expected);
-        }
+        },
     );
 
     it.each`
@@ -286,7 +286,7 @@ describe('upOperation', () => {
         ({ source, expected }) => {
             const actual = upOperation(NullableOtString.template).safeParse(source);
             expect(toOption(actual)).toEqual(expected);
-        }
+        },
     );
 
     const validRecordOperation = {
@@ -327,7 +327,7 @@ describe('upOperation', () => {
         ({ source, expected }) => {
             const actual = upOperation(ParamRecordValue.template).safeParse(source);
             expect(toOption(actual)).toEqual(expected);
-        }
+        },
     );
 
     it.each`
@@ -341,7 +341,7 @@ describe('upOperation', () => {
         ({ source, expected }) => {
             const actual = upOperation(ObjectValue.NoVersion.template).safeParse(source);
             expect(toOption(actual)).toEqual(expected);
-        }
+        },
     );
 
     it.each`
@@ -378,7 +378,7 @@ describe('downOperation', () => {
         ({ source, expected }) => {
             const actual = downOperation(ReplaceValue.template).safeParse(source);
             expect(toOption(actual)).toEqual(expected);
-        }
+        },
     );
 
     it.each`
@@ -411,7 +411,7 @@ describe('downOperation', () => {
         ({ source, expected }) => {
             const actual = downOperation(NullableOtString.template).safeParse(source);
             expect(toOption(actual)).toEqual(expected);
-        }
+        },
     );
 
     const validRecordOperation = {
@@ -452,7 +452,7 @@ describe('downOperation', () => {
         ({ source, expected }) => {
             const actual = downOperation(ParamRecordValue.template).safeParse(source);
             expect(toOption(actual)).toEqual(expected);
-        }
+        },
     );
 
     it.each`
@@ -466,7 +466,7 @@ describe('downOperation', () => {
         ({ source, expected }) => {
             const actual = downOperation(ObjectValue.NoVersion.template).safeParse(source);
             expect(toOption(actual)).toEqual(expected);
-        }
+        },
     );
 
     it.each`
@@ -510,7 +510,7 @@ describe('toUpOperation', () => {
             next: 'text2',
         })!;
         expect(toUpOperation(OtString.template)(source)).toEqual(
-            TextOperation.toUpOperation(source)
+            TextOperation.toUpOperation(source),
         );
     });
 
@@ -524,7 +524,7 @@ describe('toUpOperation', () => {
             next,
         })!;
         expect(toUpOperation(NullableOtString.template)(source)).toEqual(
-            NullableTextOperation.toUpOperation(source)
+            NullableTextOperation.toUpOperation(source),
         );
     });
 
@@ -670,7 +670,7 @@ describe('toDownOperation', () => {
             next: 'text2',
         })!;
         expect(toDownOperation(OtString.template)(source)).toEqual(
-            TextOperation.toDownOperation(source)
+            TextOperation.toDownOperation(source),
         );
     });
 
@@ -684,7 +684,7 @@ describe('toDownOperation', () => {
             next,
         })!;
         expect(toDownOperation(NullableOtString.template)(source)).toEqual(
-            NullableTextOperation.toDownOperation(source)
+            NullableTextOperation.toDownOperation(source),
         );
     });
 
@@ -833,7 +833,7 @@ describe('apply', () => {
             apply(OtString.template)({
                 state: prev,
                 operation: TextOperation.toUpOperation(operation),
-            })
+            }),
         ).toEqual(Result.ok(next));
     });
 
@@ -850,7 +850,7 @@ describe('apply', () => {
             apply(NullableOtString.template)({
                 state: prev,
                 operation: NullableTextOperation.toUpOperation(operation),
-            })
+            }),
         ).toEqual(Result.ok(next));
     });
 
@@ -884,7 +884,7 @@ describe('apply', () => {
                 value1: 12,
                 value2: 22,
                 value4: 41,
-            })
+            }),
         );
     });
 
@@ -944,7 +944,7 @@ describe('apply', () => {
                     $r: 2,
                     value: 32,
                 },
-            })
+            }),
         );
     });
 
@@ -969,7 +969,7 @@ describe('apply', () => {
                     $r: 2,
                     value: 12,
                 },
-            })
+            }),
         );
     });
 
@@ -1022,7 +1022,7 @@ describe('apply', () => {
                     $r: 2,
                     value: 32,
                 },
-            })
+            }),
         );
     });
 
@@ -1046,9 +1046,9 @@ describe('apply', () => {
                         $r: 2,
                         value: 12,
                     },
-                })
+                }),
             );
-        }
+        },
     );
 });
 
@@ -1076,7 +1076,7 @@ describe('applyBack', () => {
             applyBack(OtString.template)({
                 state: next,
                 operation: TextOperation.toDownOperation(operation),
-            })
+            }),
         ).toEqual(Result.ok(prev));
     });
 
@@ -1093,7 +1093,7 @@ describe('applyBack', () => {
             applyBack(NullableOtString.template)({
                 state: next,
                 operation: NullableTextOperation.toDownOperation(operation),
-            })
+            }),
         ).toEqual(Result.ok(prev));
     });
 
@@ -1127,7 +1127,7 @@ describe('applyBack', () => {
                 value1: 11,
                 value3: 31,
                 value4: 42,
-            })
+            }),
         );
     });
 
@@ -1187,7 +1187,7 @@ describe('applyBack', () => {
                     $r: 2,
                     value: 21,
                 },
-            })
+            }),
         );
     });
 
@@ -1212,7 +1212,7 @@ describe('applyBack', () => {
                     $r: 2,
                     value: 11,
                 },
-            })
+            }),
         );
     });
 
@@ -1265,7 +1265,7 @@ describe('applyBack', () => {
                     $r: 2,
                     value: 31,
                 },
-            })
+            }),
         );
     });
 
@@ -1289,9 +1289,9 @@ describe('applyBack', () => {
                         $r: 2,
                         value: 11,
                     },
-                })
+                }),
             );
-        }
+        },
     );
 });
 
@@ -1310,7 +1310,7 @@ describe('composeDownOperation', () => {
         expect(composeDownOperation(ReplaceValue.template)({ first, second })).toEqual(
             Result.ok({
                 oldValue: state1,
-            })
+            }),
         );
     });
 
@@ -1322,25 +1322,25 @@ describe('composeDownOperation', () => {
             TextOperation.diff({
                 prev: state1,
                 next: state2,
-            })!
+            })!,
         );
         const second: OtString.DownOperation = TextOperation.toDownOperation(
             TextOperation.diff({
                 prev: state2,
                 next: state3,
-            })!
+            })!,
         );
         const expected: OtString.DownOperation = TextOperation.toDownOperation(
             TextOperation.diff({
                 prev: state1,
                 next: state3,
-            })!
+            })!,
         );
         expect(
             composeDownOperation(OtString.template)({
                 first,
                 second,
-            })
+            }),
         ).toEqual(Result.ok(expected));
     });
 
@@ -1355,23 +1355,23 @@ describe('composeDownOperation', () => {
             NullableTextOperation.diff({
                 prev: state1,
                 next: state2,
-            })!
+            })!,
         );
         const second: NullableOtString.DownOperation = NullableTextOperation.toDownOperation(
             NullableTextOperation.diff({
                 prev: state2,
                 next: state3,
-            })!
+            })!,
         );
         const expected: NullableOtString.DownOperation = NullableTextOperation.composeDownOperation(
             first,
-            second
+            second,
         ).value!;
         expect(
             composeDownOperation(NullableOtString.template)({
                 first,
                 second,
-            })
+            }),
         ).toEqual(Result.ok(expected));
     });
 
@@ -1406,7 +1406,7 @@ describe('composeDownOperation', () => {
         };
 
         expect(composeDownOperation(ObjectValue.template)({ first, second })).toEqual(
-            Result.ok(first)
+            Result.ok(first),
         );
     });
 
@@ -1593,7 +1593,7 @@ describe('composeDownOperation', () => {
         };
 
         expect(composeDownOperation(RecordValue.template)({ first, second })).toEqual(
-            Result.ok(expected)
+            Result.ok(expected),
         );
     });
 
@@ -1657,7 +1657,7 @@ describe('composeDownOperation', () => {
         };
 
         expect(composeDownOperation(ParamRecordValue.template)({ first, second })).toEqual(
-            Result.ok(expected)
+            Result.ok(expected),
         );
     });
 });
@@ -1679,7 +1679,7 @@ describe('restore', () => {
                     oldValue,
                     newValue,
                 },
-            })
+            }),
         );
     });
 
@@ -1694,12 +1694,12 @@ describe('restore', () => {
             restore(OtString.template)({
                 nextState: next,
                 downOperation: TextOperation.toDownOperation(operation),
-            })
+            }),
         ).toEqual(
             Result.ok({
                 prevState: prev,
                 twoWayOperation: operation,
-            })
+            }),
         );
     });
 
@@ -1716,12 +1716,12 @@ describe('restore', () => {
             restore(NullableOtString.template)({
                 nextState: next,
                 downOperation: NullableTextOperation.toDownOperation(operation),
-            })
+            }),
         ).toEqual(
             Result.ok({
                 prevState: prev,
                 twoWayOperation: operation,
-            })
+            }),
         );
     });
 
@@ -1774,7 +1774,7 @@ describe('restore', () => {
                         newValue: undefined,
                     },
                 },
-            })
+            }),
         );
     });
 
@@ -1871,7 +1871,7 @@ describe('restore', () => {
                         },
                     },
                 },
-            })
+            }),
         );
     });
 
@@ -1911,7 +1911,7 @@ describe('restore', () => {
                         },
                     },
                 },
-            })
+            }),
         );
     });
 
@@ -1955,7 +1955,7 @@ describe('restore', () => {
                     },
                     key2: undefined,
                 },
-            })
+            }),
         );
     });
 
@@ -1985,7 +1985,7 @@ describe('diff', () => {
             diff(OtString.template)({
                 prevState: prev,
                 nextState: next,
-            })
+            }),
         ).toEqual(operation);
     });
 
@@ -2002,7 +2002,7 @@ describe('diff', () => {
             diff(NullableOtString.template)({
                 prevState: prev,
                 nextState: next,
-            })
+            }),
         ).toEqual(operation);
     });
 
@@ -2082,7 +2082,7 @@ describe('diff', () => {
         'tests RecordTemplate(id)',
         (prevState, nextState) => {
             expect(diff(RecordValue.template)({ prevState, nextState })).toBeUndefined();
-        }
+        },
     );
 
     it('tests RecordTemplate(not id)', () => {
@@ -2230,7 +2230,7 @@ describe('diff', () => {
         'tests ParamRecordTemplate(id)',
         (prevState, nextState) => {
             expect(diff(ParamRecordValue.template)({ prevState, nextState })).toBeUndefined();
-        }
+        },
     );
 });
 
@@ -2250,7 +2250,7 @@ describe('clientTransform', () => {
         expect(clientTransform(ReplaceValue.template)({ state: baseState, first, second })).toEqual(
             Result.ok({
                 firstPrime: first,
-            })
+            }),
         );
     });
 
@@ -2262,13 +2262,13 @@ describe('clientTransform', () => {
             TextOperation.diff({
                 prev: state1,
                 next: state2,
-            })!
+            })!,
         );
         const second: OtString.UpOperation = TextOperation.toUpOperation(
             TextOperation.diff({
                 prev: state1,
                 next: state3,
-            })!
+            })!,
         );
         const expected = TextOperation.clientTransform({ first, second });
         expect(
@@ -2276,7 +2276,7 @@ describe('clientTransform', () => {
                 state: state1,
                 first,
                 second,
-            })
+            }),
         ).toEqual(expected);
     });
 
@@ -2291,13 +2291,13 @@ describe('clientTransform', () => {
             NullableTextOperation.diff({
                 prev: state1,
                 next: state2,
-            })!
+            })!,
         );
         const second: NullableOtString.UpOperation = NullableTextOperation.toUpOperation(
             NullableTextOperation.diff({
                 prev: state1,
                 next: state3,
-            })!
+            })!,
         );
         const expected = NullableTextOperation.clientTransform({ first, second });
         expect(
@@ -2305,7 +2305,7 @@ describe('clientTransform', () => {
                 state: state1,
                 first,
                 second,
-            })
+            }),
         ).toEqual(expected);
     });
 
@@ -2362,7 +2362,7 @@ describe('clientTransform', () => {
                         newValue: 31,
                     },
                 },
-            })
+            }),
         );
     });
 
@@ -2549,7 +2549,7 @@ describe('clientTransform', () => {
         };
 
         expect(clientTransform(RecordValue.template)({ state: baseState, first, second })).toEqual(
-            Result.ok({ firstPrime: expectedFirstPrime, secondPrime: expectedSecondPrime })
+            Result.ok({ firstPrime: expectedFirstPrime, secondPrime: expectedSecondPrime }),
         );
     });
 
@@ -2751,7 +2751,7 @@ describe('clientTransform', () => {
         };
 
         expect(
-            clientTransform(ParamRecordValue.template)({ state: baseState, first, second })
+            clientTransform(ParamRecordValue.template)({ state: baseState, first, second }),
         ).toEqual(Result.ok({ firstPrime: expectedFirstPrime, secondPrime: expectedSecondPrime }));
     });
 });
