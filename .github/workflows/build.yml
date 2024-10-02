@@ -12,8 +12,8 @@ jobs:
         runs-on: ubuntu-latest
 
         permissions:
-            # allows git push
             contents: write
+            pull-requests: write
 
         steps:
             - name: Checkout repo
@@ -48,23 +48,30 @@ jobs:
 
             - run: 'git commit -m "build: comment out dist/ in .gitignore and build artifacts"'
 
-            # main-build branch is the branch where the build artifacts are pushed. you need to create this branch in your repository.
             - run: git checkout main-build
 
-            # we want to do "git merge -s theirs main-build-temp" but "git merge -s theirs" is not available in git. So, we use "git merge -s ours main-build" then fast-forward the main-build branch instead.
-
-            - run: git switch main-build-temp
-
-            - run: git merge -s ours --no-ff --no-commit main-build
+            # 当初は "git merge -s theirs main-build-temp" に相当することがしたかったため、main-build-temp ブランチで "git merge -s ours main-build" を実行して main-build ブランチを fast-forward merge することで再現しようとしたが、コミットグラフが複雑になるため、単純に -X theirs で merge することにした。
+            - run: git merge -X theirs --no-ff --no-commit main-build-temp
 
             # by default, the message of merge commit is "Merge branch 'main-build-temp' into main-build", so the message is changed not to include "main-build-temp".
             # if this merge is first and no --allow-empty, this job fails because there is nothing to commit.
-            - run: git commit --allow-empty -m "Merge branch"
+            - run: git commit --allow-empty -m "Merge"
 
-            - run: git switch main-build
+            # set "Allow GitHub Actions to create and approve pull requests" in the repository settings to enable pull request creation.
+            - name: Create Pull Request
+              uses: peter-evans/create-pull-request@v7
+              with:
+                  title: 'auto build (${{ github.sha }})'
+                  body: |
+                      main ブランチへの push を確認したため、自動的に build を実行して main-build ブランチへの PR を作成しました。
 
-            - run: git merge --ff --no-commit main-build-temp
+                      承認しない場合はこの PR を無視するか close してください。
 
-            - run: git remote set-url origin https://x-access-token:${{secrets.GITHUB_TOKEN}}@github.com/${{github.repository}}
-
-            - run: git push origin main-build
+                      # last commit information
+                      | Name | Value |
+                      |------|-------|
+                      | actor   | ${{ github.actor }}                     |
+                      | sha     | ${{ github.sha }}                       |
+                      | message | ${{ github.event.head_commit.message }} |
+                  labels: auto-build
+                  branch: create-pull-request/auto-build
