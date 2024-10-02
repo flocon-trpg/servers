@@ -168,7 +168,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
                         value={config?.tabName ?? ''}
                         onChange={e => onChange({ tabName: e.target.value })}
                     />
-                    {config?.tabName ?? '' !== '' ? null : (
+                    {(config?.tabName ?? '' !== '') ? null : (
                         <>
                             <br />
                             <Alert
@@ -593,12 +593,12 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                     {message.type !== privateMessage && message.type !== publicMessage
                         ? '(ログ)'
                         : publicChannelNames == null
-                        ? '?'
-                        : RoomMessageNameSpace.toChannelName(
-                              message,
-                              publicChannelNames,
-                              participantsMap ?? new Map()
-                          )}
+                          ? '?'
+                          : RoomMessageNameSpace.toChannelName(
+                                message,
+                                publicChannelNames,
+                                participantsMap ?? new Map()
+                            )}
                 </div>
                 <div style={{ flex: '0 0 auto', color: 'gray' }}>{datetime}</div>
                 {privateMessageMembersInfo}
@@ -675,7 +675,7 @@ const RoomMessageComponent: React.FC<RoomMessageComponentProps> = (
                     setValue('');
                 }}
                 onOpen={setValue => {
-                    setValue(userMessage == null ? '' : toText(userMessage) ?? '');
+                    setValue(userMessage == null ? '' : (toText(userMessage) ?? ''));
                 }}
             />
         </div>
@@ -710,8 +710,8 @@ const MessageTabPane: React.FC<MessageTabPaneProps> = (props: MessageTabPaneProp
                         message.type === privateMessage || message.type === publicMessage
                             ? message.value.messageId
                             : message.type === pieceLog
-                            ? message.value.createdAt
-                            : message.createdAt
+                              ? message.value.createdAt
+                              : message.createdAt
                     }
                     publicChannelNames={publicChannelNames}
                     message={message}

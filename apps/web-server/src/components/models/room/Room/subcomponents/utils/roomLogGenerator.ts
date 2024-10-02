@@ -746,7 +746,7 @@ ${escape(msg.value.commandResult)}`
             msg.value.commandResult == null ? '' : 'is-command'
         }">
     <img class="avatar" src="${
-        msg.value.commandResult == null ? avatar ?? './img/noname.png' : './img/dice.png'
+        msg.value.commandResult == null ? (avatar ?? './img/noname.png') : './img/dice.png'
     }">
     <div class="flex flex-column">
         <div class="flex-none flex flex-row">

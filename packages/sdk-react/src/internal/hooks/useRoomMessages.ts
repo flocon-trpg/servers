@@ -42,7 +42,7 @@ export const useRoomMessages = <TCustomMessage, TGraphQLError>(
             next: e => {
                 setResult({
                     current: e.current,
-                    diff: e.type === 'event' ? e.diff ?? undefined : undefined,
+                    diff: e.type === 'event' ? (e.diff ?? undefined) : undefined,
                 });
             },
         });

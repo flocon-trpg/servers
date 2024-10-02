@@ -5,7 +5,7 @@ export const replace = 'replace';
 
 export const recordDownOperationElementFactory = <
     TState extends z.ZodTypeAny,
-    TOperation extends z.ZodTypeAny
+    TOperation extends z.ZodTypeAny,
 >(
     state: TState,
     operation: TOperation
@@ -39,7 +39,7 @@ export type RecordDownOperationElement<TState, TOperation> =
 
 export const recordUpOperationElementFactory = <
     TState extends z.ZodTypeAny,
-    TOperation extends z.ZodTypeAny
+    TOperation extends z.ZodTypeAny,
 >(
     state: TState,
     operation: TOperation

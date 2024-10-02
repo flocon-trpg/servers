@@ -933,7 +933,7 @@ class PathState {
 
     #requestDeleting(source: readonly FilePathNode[]): FileToDelete[] {
         return source
-            .map(file => ({ status: 'waiting', file } as const))
+            .map(file => ({ status: 'waiting', file }) as const)
             .sort((x, y) => {
                 for (const group of groupJoinArray(new Node(x.file).path, new Node(y.file).path)) {
                     switch (group.type) {

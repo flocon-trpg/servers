@@ -2,7 +2,10 @@
 export class SortedArray<T> {
     #core: { value: T; sortKey: number }[];
 
-    public constructor(readonly createSortKey: (value: T) => number, init?: readonly T[]) {
+    public constructor(
+        readonly createSortKey: (value: T) => number,
+        init?: readonly T[]
+    ) {
         if (init == null) {
             this.#core = [];
             return;

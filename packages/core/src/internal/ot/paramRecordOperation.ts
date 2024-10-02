@@ -198,7 +198,7 @@ export const serverTransform = <
     TServerState,
     TFirstOperation,
     TSecondOperation,
-    TCustomError = string
+    TCustomError = string,
 >({
     first: unsafeFirst,
     second: unsafeSecond,

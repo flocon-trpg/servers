@@ -650,7 +650,7 @@ const TabEditorModal: React.FC<TabEditorModalProps> = (props: TabEditorModalProp
                             })
                         }
                     />
-                    {config?.tabName ?? '' !== '' ? null : (
+                    {(config?.tabName ?? '' !== '') ? null : (
                         <>
                             <br />
                             <Alert

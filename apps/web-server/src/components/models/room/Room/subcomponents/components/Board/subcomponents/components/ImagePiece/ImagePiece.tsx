@@ -283,12 +283,12 @@ export const ImagePiece: React.FC<Props> = props => {
                     props.message == null
                         ? undefined
                         : messageFilterRef.current(props.message)
-                        ? props.message
-                        : undefined
+                          ? props.message
+                          : undefined
                 }
                 onBalloonChange={balloonExists => {
                     setOpacitySpringProps.start({
-                        opacity: balloonExists ? 1 : props.opacity ?? 1,
+                        opacity: balloonExists ? 1 : (props.opacity ?? 1),
                     });
                 }}
             />

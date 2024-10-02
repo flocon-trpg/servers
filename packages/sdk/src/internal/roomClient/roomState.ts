@@ -250,7 +250,7 @@ export class RoomStateManager<TGraphQLError> {
                                     operationResult,
                                     toPost,
                                     getRoomState: () => roomStateManager.uiState,
-                                } as const)
+                                }) as const
                         )
                         .catch(
                             e =>
@@ -258,7 +258,7 @@ export class RoomStateManager<TGraphQLError> {
                                     type: 'catch',
                                     toPost,
                                     error: e,
-                                } as const)
+                                }) as const
                         );
                 }),
                 mergeAll()

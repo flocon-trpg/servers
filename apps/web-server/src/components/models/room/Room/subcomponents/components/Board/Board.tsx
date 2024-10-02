@@ -1095,7 +1095,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                         <Button style={NonTransparentStyle}>
                             {boardIdToShow == null
                                 ? noActiveBoardText
-                                : boards.get(boardIdToShow)?.name ?? noActiveBoardText}{' '}
+                                : (boards.get(boardIdToShow)?.name ?? noActiveBoardText)}{' '}
                             <Icons.DownOutlined />
                         </Button>
                     </Dropdown>

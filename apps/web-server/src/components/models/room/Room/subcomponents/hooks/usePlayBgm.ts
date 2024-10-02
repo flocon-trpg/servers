@@ -149,7 +149,7 @@ function usePlayBgmCore({ bgm, volumeConfig }: PlayBgmCoreProps): void {
                 src,
                 format:
                     q.data.type === Uploader
-                        ? extname(q.data.filename).fileExtension ?? undefined
+                        ? (extname(q.data.filename).fileExtension ?? undefined)
                         : undefined,
             });
         }

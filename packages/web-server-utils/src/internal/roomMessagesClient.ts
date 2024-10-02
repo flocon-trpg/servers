@@ -86,7 +86,7 @@ type AddCustomMessageEvent<TCustomMessage> = {
 // 引数のmessagesには変更は加えられない
 const reduceEvent = <
     TCustomMessage,
-    T extends SortedArray<Message<TCustomMessage>> | FilteredSortedArray<Message<TCustomMessage>>
+    T extends SortedArray<Message<TCustomMessage>> | FilteredSortedArray<Message<TCustomMessage>>,
 >({
     messages: messagesSource,
     event,

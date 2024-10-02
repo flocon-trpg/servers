@@ -89,8 +89,9 @@ describe('chooseDualKeyRecord', () => {
             },
             key3: undefined,
         };
-        const actual = chooseDualKeyRecord<number, [string, string, string]>(source, (value, key) =>
-            value === 0 ? undefined : [value.toString(), key.first, key.second]
+        const actual = chooseDualKeyRecord<number, [string, string, string]>(
+            source,
+            (value, key) => (value === 0 ? undefined : [value.toString(), key.first, key.second])
         );
         expect(actual).toEqual({
             key1: {},

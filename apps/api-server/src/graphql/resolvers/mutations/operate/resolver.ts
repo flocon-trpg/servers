@@ -300,7 +300,7 @@ async function operateCore({
                         createdBy: undefined,
                         visibleTo: undefined,
                         value: DicePieceLogNameSpace.MikroORM.ToGraphQL.state(log),
-                    } as const)
+                    }) as const
             ),
             ...stringPieceLogEntities.map(
                 log =>
@@ -310,7 +310,7 @@ async function operateCore({
                         createdBy: undefined,
                         visibleTo: undefined,
                         value: StringPieceLogNameSpace.MikroORM.ToGraphQL.state(log),
-                    } as const)
+                    }) as const
             ),
         ],
         result: {

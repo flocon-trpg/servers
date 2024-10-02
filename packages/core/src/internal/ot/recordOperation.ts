@@ -547,7 +547,7 @@ type ServerTransformCoreParams<
     TClientState,
     TFirstOperation,
     TSecondOperation,
-    TCustomError
+    TCustomError,
 > = {
     stateBeforeFirst: StringKeyRecord<TServerState>;
     stateAfterFirst: StringKeyRecord<TServerState>;
@@ -569,7 +569,7 @@ const serverTransformWithoutValidation = <
     TClientState,
     TFirstOperation,
     TSecondOperation,
-    TCustomError = string
+    TCustomError = string,
 >({
     first,
     second,
@@ -723,7 +723,7 @@ export type ServerTransformParams<
     TClientState,
     TFirstOperation,
     TSecondOperation,
-    TCustomError
+    TCustomError,
 > = ServerTransformCoreParams<
     TServerState,
     TClientState,
@@ -747,7 +747,7 @@ export const serverTransform = <
     TClientState,
     TFirstOperation,
     TSecondOperation,
-    TCustomError = string
+    TCustomError = string,
 >(
     params: ServerTransformParams<
         TServerState,

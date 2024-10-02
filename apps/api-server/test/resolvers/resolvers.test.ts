@@ -603,7 +603,7 @@ describe.each(cases)('tests of resolvers %o', (dbType, entryPasswordConfig) => {
 
     const setupUsersAndRoom = async <
         TUserUids extends ReadonlyArray<string>,
-        TRoomMaster extends TUserUids[number]
+        TRoomMaster extends TUserUids[number],
     >({
         userUids,
         roomMasterUserUid,

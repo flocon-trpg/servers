@@ -162,7 +162,7 @@ export const serverTransform = <
     TClientState extends IndexObjectState,
     TFirstOperation extends IndexObjectTwoWayOperation,
     TSecondOperation extends IndexObjectUpOperation,
-    TCustomError = string
+    TCustomError = string,
 >(
     params: RecordOperation.ServerTransformParams<
         TServerState,
@@ -347,7 +347,7 @@ export const serverTransform = <
 export const clientTransform = <
     TState extends IndexObjectState,
     TOperation extends IndexObjectUpOperation,
-    TCustomError = string
+    TCustomError = string,
 >(
     params: Parameters<
         typeof RecordOperation.clientTransform<TState, TOperation, TCustomError>

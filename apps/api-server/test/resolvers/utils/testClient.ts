@@ -215,11 +215,10 @@ export class TestClient {
 
     public entryToServerMutation({ password }: { password: string }) {
         return this.#core
-            .mutation<EntryToServerMutation, EntryToServerMutationVariables>(
-                EntryToServerDocument,
-                { password },
-                { requestPolicy: 'network-only' }
-            )
+            .mutation<
+                EntryToServerMutation,
+                EntryToServerMutationVariables
+            >(EntryToServerDocument, { password }, { requestPolicy: 'network-only' })
             .toPromise();
     }
 
@@ -269,41 +268,37 @@ export class TestClient {
 
     public createRoomMutation(variables: CreateRoomMutationVariables) {
         return this.#core
-            .mutation<CreateRoomMutation, CreateRoomMutationVariables>(
-                CreateRoomDocument,
-                variables,
-                { requestPolicy: 'network-only' }
-            )
+            .mutation<
+                CreateRoomMutation,
+                CreateRoomMutationVariables
+            >(CreateRoomDocument, variables, { requestPolicy: 'network-only' })
             .toPromise();
     }
 
     public deleteMessageMutation(variables: DeleteMessageMutationVariables) {
         return this.#core
-            .mutation<DeleteMessageMutation, DeleteMessageMutationVariables>(
-                DeleteMessageDocument,
-                variables,
-                { requestPolicy: 'network-only' }
-            )
+            .mutation<
+                DeleteMessageMutation,
+                DeleteMessageMutationVariables
+            >(DeleteMessageDocument, variables, { requestPolicy: 'network-only' })
             .toPromise();
     }
 
     public editMessageMutation(variables: EditMessageMutationVariables) {
         return this.#core
-            .mutation<EditMessageMutation, EditMessageMutationVariables>(
-                EditMessageDocument,
-                variables,
-                { requestPolicy: 'network-only' }
-            )
+            .mutation<
+                EditMessageMutation,
+                EditMessageMutationVariables
+            >(EditMessageDocument, variables, { requestPolicy: 'network-only' })
             .toPromise();
     }
 
     public joinRoomAsPlayerMutation(variables: JoinRoomAsPlayerMutationVariables) {
         return this.#core
-            .mutation<JoinRoomAsPlayerMutation, JoinRoomAsPlayerMutationVariables>(
-                JoinRoomAsPlayerDocument,
-                variables,
-                { requestPolicy: 'network-only' }
-            )
+            .mutation<
+                JoinRoomAsPlayerMutation,
+                JoinRoomAsPlayerMutationVariables
+            >(JoinRoomAsPlayerDocument, variables, { requestPolicy: 'network-only' })
             .toPromise();
     }
 

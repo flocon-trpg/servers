@@ -37,8 +37,8 @@ export const ParticipantListPanelContent: React.FC = () => {
                             key === myUserUid
                                 ? ''
                                 : connection?.isConnected === true
-                                ? '接続'
-                                : '未接続',
+                                  ? '接続'
+                                  : '未接続',
                     },
                 };
             }),

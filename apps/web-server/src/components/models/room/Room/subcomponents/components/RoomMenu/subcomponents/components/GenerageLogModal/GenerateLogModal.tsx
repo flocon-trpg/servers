@@ -251,8 +251,8 @@ export const GenerateLogModal: React.FC<Props> = ({ roomId, visible, onClose }: 
                             progress === 100
                                 ? 'success'
                                 : errorMessage == null
-                                ? 'normal'
-                                : 'exception'
+                                  ? 'normal'
+                                  : 'exception'
                         }
                     />
                 )}

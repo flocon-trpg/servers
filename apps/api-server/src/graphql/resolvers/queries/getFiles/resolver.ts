@@ -50,7 +50,7 @@ export class GetFilesResolver {
                     fileTags: {
                         id,
                     },
-                } as const)
+                }) as const
         );
         const files = await context.em.find(File, {
             $and: [

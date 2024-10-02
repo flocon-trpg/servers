@@ -49,7 +49,7 @@ export const createTextValueTemplate = <T extends boolean>(nullable: T) =>
         type: atomic,
         mode: ot,
         nullable,
-    } as const);
+    }) as const;
 
 export type RecordValueTemplate<TValue extends AnyTemplate> = {
     type: typeof record;
@@ -87,7 +87,7 @@ export const createParamRecordValueTemplate = <TValue extends AnyTemplate>(
 export type ObjectValueTemplate<
     T extends ReadonlyRecord<string, AnyTemplate>,
     V extends number | undefined,
-    R extends number | undefined
+    R extends number | undefined,
 > = {
     type: typeof object;
     $v: V;
@@ -101,7 +101,7 @@ export type ObjectValueTemplate<
 export const createObjectValueTemplate = <
     T extends ReadonlyRecord<string, AnyTemplate>,
     V extends number | undefined,
-    R extends number | undefined
+    R extends number | undefined,
 >(
     value: T,
     $v: V,
@@ -137,8 +137,8 @@ export type AnyTemplate =
 type If<T extends boolean, TTrue, TFalse> = T extends true
     ? TTrue
     : T extends false
-    ? TFalse
-    : TTrue | TFalse;
+      ? TFalse
+      : TTrue | TFalse;
 
 type ParamRecordValueTemplateBase<TValue extends AnyTemplate> = {
     type: typeof paramRecord;
@@ -154,19 +154,19 @@ recordやparamRecordは変換なしで後方互換性を持たせられるよう
 export type State<T extends AnyTemplate> = T extends OtValueTemplate
     ? If<T['nullable'], string | undefined, string>
     : T extends ReplaceValueTemplate<infer U1>
-    ? z.TypeOf<U1>
-    : T extends RecordValueTemplate<infer U2>
-    ? { [P in string]?: State<U2> | undefined } | undefined
-    : T extends ParamRecordValueTemplateBase<infer U3>
-    ? { [P in string]?: State<U3> | undefined } | undefined
-    : T extends ObjectValueTemplate<infer U4, infer UV, infer UR>
-    ? {
-          $v: UV;
-          $r: UR;
-      } & {
-          [P in keyof U4]: State<U4[P]>;
-      }
-    : unknown;
+      ? z.TypeOf<U1>
+      : T extends RecordValueTemplate<infer U2>
+        ? { [P in string]?: State<U2> | undefined } | undefined
+        : T extends ParamRecordValueTemplateBase<infer U3>
+          ? { [P in string]?: State<U3> | undefined } | undefined
+          : T extends ObjectValueTemplate<infer U4, infer UV, infer UR>
+            ? {
+                  $v: UV;
+                  $r: UR;
+              } & {
+                  [P in keyof U4]: State<U4[P]>;
+              }
+            : unknown;
 
 export const state = <T extends AnyTemplate>(source: T): z.ZodType<State<T>> => {
     switch (source.type) {
@@ -199,21 +199,21 @@ export const state = <T extends AnyTemplate>(source: T): z.ZodType<State<T>> => 
 export type UpOperation<T extends AnyTemplate> = T extends OtValueTemplate
     ? If<T['nullable'], NullableTextOperation.UpOperation, TextOperation.UpOperation>
     : T extends ReplaceValueTemplate<infer U1>
-    ? { newValue: z.TypeOf<U1> }
-    : T extends RecordValueTemplate<infer U2>
-    ? {
-          [P in string]?: RecordUpOperationElement<State<U2>, UpOperation<U2>> | undefined;
-      }
-    : T extends ParamRecordValueTemplate<infer U2>
-    ? {
-          [P in string]?: UpOperation<U2> | undefined;
-      }
-    : T extends ObjectValueTemplate<infer U3, infer UV, infer UR>
-    ? {
-          $v: UV;
-          $r: UR;
-      } & { [P in keyof U3]?: UpOperation<U3[P]> }
-    : unknown;
+      ? { newValue: z.TypeOf<U1> }
+      : T extends RecordValueTemplate<infer U2>
+        ? {
+              [P in string]?: RecordUpOperationElement<State<U2>, UpOperation<U2>> | undefined;
+          }
+        : T extends ParamRecordValueTemplate<infer U2>
+          ? {
+                [P in string]?: UpOperation<U2> | undefined;
+            }
+          : T extends ObjectValueTemplate<infer U3, infer UV, infer UR>
+            ? {
+                  $v: UV;
+                  $r: UR;
+              } & { [P in keyof U3]?: UpOperation<U3[P]> }
+            : unknown;
 
 export const upOperation = <T extends AnyTemplate>(source: T): z.ZodType<UpOperation<T>> => {
     switch (source.type) {
@@ -251,21 +251,21 @@ export const upOperation = <T extends AnyTemplate>(source: T): z.ZodType<UpOpera
 export type DownOperation<T extends AnyTemplate> = T extends OtValueTemplate
     ? If<T['nullable'], NullableTextOperation.DownOperation, TextOperation.DownOperation>
     : T extends ReplaceValueTemplate<infer U1>
-    ? { oldValue: z.TypeOf<U1> }
-    : T extends RecordValueTemplate<infer U2>
-    ? {
-          [P in string]?: RecordDownOperationElement<State<U2>, DownOperation<U2>> | undefined;
-      }
-    : T extends ParamRecordValueTemplate<infer U2>
-    ? {
-          [P in string]?: DownOperation<U2> | undefined;
-      }
-    : T extends ObjectValueTemplate<infer U3, infer UV, infer UR>
-    ? {
-          $v: UV;
-          $r: UR;
-      } & { [P in keyof U3]?: DownOperation<U3[P]> }
-    : unknown;
+      ? { oldValue: z.TypeOf<U1> }
+      : T extends RecordValueTemplate<infer U2>
+        ? {
+              [P in string]?: RecordDownOperationElement<State<U2>, DownOperation<U2>> | undefined;
+          }
+        : T extends ParamRecordValueTemplate<infer U2>
+          ? {
+                [P in string]?: DownOperation<U2> | undefined;
+            }
+          : T extends ObjectValueTemplate<infer U3, infer UV, infer UR>
+            ? {
+                  $v: UV;
+                  $r: UR;
+              } & { [P in keyof U3]?: DownOperation<U3[P]> }
+            : unknown;
 
 export const downOperation = <T extends AnyTemplate>(source: T): z.ZodType<DownOperation<T>> => {
     switch (source.type) {
@@ -305,21 +305,23 @@ export const downOperation = <T extends AnyTemplate>(source: T): z.ZodType<DownO
 export type TwoWayOperation<T extends AnyTemplate> = T extends OtValueTemplate
     ? If<T['nullable'], NullableTextOperation.TwoWayOperation, TextOperation.TwoWayOperation>
     : T extends ReplaceValueTemplate<infer U1>
-    ? {
-          oldValue: z.TypeOf<U1>;
-          newValue: z.TypeOf<U1>;
-      }
-    : T extends RecordValueTemplate<infer U2>
-    ? {
-          [P in string]?: RecordTwoWayOperationElement<State<U2>, TwoWayOperation<U2>> | undefined;
-      }
-    : T extends ParamRecordValueTemplate<infer U2>
-    ? {
-          [P in string]?: TwoWayOperation<U2> | undefined;
-      }
-    : T extends ObjectValueTemplate<infer U4, infer UV, infer UR>
-    ? {
-          $v: UV;
-          $r: UR;
-      } & { [P in keyof U4]?: TwoWayOperation<U4[P]> }
-    : unknown;
+      ? {
+            oldValue: z.TypeOf<U1>;
+            newValue: z.TypeOf<U1>;
+        }
+      : T extends RecordValueTemplate<infer U2>
+        ? {
+              [P in string]?:
+                  | RecordTwoWayOperationElement<State<U2>, TwoWayOperation<U2>>
+                  | undefined;
+          }
+        : T extends ParamRecordValueTemplate<infer U2>
+          ? {
+                [P in string]?: TwoWayOperation<U2> | undefined;
+            }
+          : T extends ObjectValueTemplate<infer U4, infer UV, infer UR>
+            ? {
+                  $v: UV;
+                  $r: UR;
+              } & { [P in keyof U4]?: TwoWayOperation<U4[P]> }
+            : unknown;
