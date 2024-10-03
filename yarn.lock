@@ -3886,7 +3886,7 @@ __metadata:
     "@urql/devtools": ^2.0.3
     antd: ^5.0.0
     babel-loader: 8.3.0
-    chromatic: 6.19.9
+    chromatic: 11.10.4
     classnames: ^2.3.1
     clipboard-copy: ^4.0.1
     color: 4.2.3
@@ -10430,14 +10430,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chromatic@npm:6.19.9":
-  version: 6.19.9
-  resolution: "chromatic@npm:6.19.9"
+"chromatic@npm:11.10.4":
+  version: 11.10.4
+  resolution: "chromatic@npm:11.10.4"
+  peerDependencies:
+    "@chromatic-com/cypress": ^0.*.* || ^1.0.0
+    "@chromatic-com/playwright": ^0.*.* || ^1.0.0
+  peerDependenciesMeta:
+    "@chromatic-com/cypress":
+      optional: true
+    "@chromatic-com/playwright":
+      optional: true
   bin:
     chroma: dist/bin.js
     chromatic: dist/bin.js
     chromatic-cli: dist/bin.js
-  checksum: 50552c3043d96e7badb0d16ddd1839c0601d0f5e0c2c573acda5d6b0d0fad96067f0c659ad0a2b278d8b28b46670549b4bcedfd2d350a9077975aff203c29193
+  checksum: d6c3034b1db636e2fc96f854364ff24956dbb3b5970e6ccfb23ad40d3e8ae486323e1ff0b88fb238d9986f9bbbb6101aa7d805f3ee867b7f6ec032958539038e
   languageName: node
   linkType: hard
 
