@@ -111,6 +111,9 @@ export const mockAuth: Auth = {
     beforeAuthStateChanged: function () {
         throw new Error('Function not implemented.');
     },
+    authStateReady: function (): Promise<void> {
+        throw new Error('Function not implemented.');
+    },
 };
 
 export const mockStorage: FirebaseStorage = {
