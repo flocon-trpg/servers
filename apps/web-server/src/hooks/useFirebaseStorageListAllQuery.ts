@@ -139,13 +139,13 @@ export const useFirebaseStorageListAllQuery = () => {
     const isUnlistedFirebaseStorageEnabled =
         webConfig?.value?.isUnlistedFirebaseStorageEnabled === true;
 
-    const publicFiles = useQuery(
-        queryKey({
+    const publicFiles = useQuery({
+        queryKey: queryKey({
             storage,
             myUserUid,
             isPublicFirebaseStorageEnabled,
         }),
-        async () => {
+        queryFn: async () => {
             if (storage == null) {
                 return { type: appError, error: storageIsNullish } as const;
             }
@@ -165,15 +165,15 @@ export const useFirebaseStorageListAllQuery = () => {
             });
             return { type: success, value: result } as const;
         },
-    );
+    });
 
-    const unlistedFiles = useQuery(
-        queryKey({
+    const unlistedFiles = useQuery({
+        queryKey: queryKey({
             storage,
             myUserUid,
             isUnlistedFirebaseStorageEnabled,
         }),
-        async () => {
+        queryFn: async () => {
             if (storage == null) {
                 return { type: appError, error: storageIsNullish } as const;
             }
@@ -193,7 +193,7 @@ export const useFirebaseStorageListAllQuery = () => {
             });
             return { type: success, value: result } as const;
         },
-    );
+    });
 
     return React.useMemo(() => {
         const refetchPublicFiles = publicFiles.refetch;
