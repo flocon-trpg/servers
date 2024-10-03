@@ -12,6 +12,7 @@ module.exports = {
                 'cache',
                 'core',
                 'flocon-script',
+                'prettier-config',
                 'rollup-config',
                 'sdk',
                 'sdk-react',

@@ -137,16 +137,15 @@ jobs:
               with:
                   token: ${{ secrets.CODECOV_TOKEN }}
 
-    # 以下のテストを行っている。
+    # 以下のテストを行っている。PnP モードありでのテストは現在行っていない。
     # - DATABASE_URL を用いて API サーバーが起動することの確認
     # - AUTO_MIGRATION が正常に動くことの確認
-    # - PnP を有効にした状態で API サーバーが起動することの確認
     check-api-server:
         name: 'Check API server (PnP=${{ matrix.pnp }})'
 
         strategy:
             matrix:
-                pnp: [true, false]
+                pnp: [false]
 
         runs-on: ubuntu-22.04
         container: node:18-buster

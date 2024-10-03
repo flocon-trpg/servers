@@ -4287,7 +4287,7 @@ const indexObjectsToArray = (record) => {
         const groupValue = groupBy$index.get(i.toString());
         groupBy$index.delete(i.toString());
         if (groupValue == null || groupValue.length !== 1) {
-            return result.Result.error(`Just one element where index is ${i} should exist, but there are ${groupValue?.length ?? 0} elements.`);
+            return result.Result.error(`Just one element where index is ${i} should exist, but there are ${groupValue?.length ?? 0} such elements.`);
         }
         const element = groupValue[0];
         result$1.push(element);

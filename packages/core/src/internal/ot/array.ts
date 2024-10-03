@@ -88,7 +88,7 @@ export const indexObjectsToArray = <T extends IndexObjectState>(
             return Result.error(
                 `Just one element where index is ${i} should exist, but there are ${
                     groupValue?.length ?? 0
-                } elements.`,
+                } such elements.`,
             );
         }
         const element = groupValue[0]!;
