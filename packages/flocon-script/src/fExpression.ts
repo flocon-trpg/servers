@@ -147,6 +147,12 @@ export type FBinaryExpression = Omit<BinaryExpression, 'operator' | 'left' | 'ri
     right: FExpression;
 };
 function fBinaryExpression(expression: BinaryExpression): FBinaryExpression {
+    if (expression.left.type === 'PrivateIdentifier') {
+        throw new ScriptError(
+            `'${expression.left.type}' in BinaryExpression is not supported`,
+            expression.left.range,
+        );
+    }
     return {
         ...expression,
         operator: fBinaryOperator(expression.operator, toRange(expression)),
