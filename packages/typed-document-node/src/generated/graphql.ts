@@ -2596,6 +2596,23 @@ export const CreateRoomResultFragmentDoc = {
                 ],
             },
         },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomGetState' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomGetState' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'revision' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'role' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isBookmarked' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'stateJson' } },
+                ],
+            },
+        },
     ],
 } as unknown as DocumentNode<CreateRoomResultFragment, unknown>;
 export const FileItemFragmentDoc = {
@@ -2715,6 +2732,25 @@ export const GetRoomListResultFragmentDoc = {
                 ],
             },
         },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomAsListItem' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomAsListItem' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'role' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isBookmarked' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'requiresPlayerPassword' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'requiresSpectatorPassword' } },
+                ],
+            },
+        },
     ],
 } as unknown as DocumentNode<GetRoomListResultFragment, unknown>;
 export const GetNonJoinedRoomResultFragmentDoc = {
@@ -2743,6 +2779,25 @@ export const GetNonJoinedRoomResultFragmentDoc = {
                             ],
                         },
                     },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomAsListItem' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomAsListItem' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'role' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isBookmarked' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'requiresPlayerPassword' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'requiresSpectatorPassword' } },
                 ],
             },
         },
@@ -2811,6 +2866,68 @@ export const GetRoomResultFragmentDoc = {
                             kind: 'SelectionSet',
                             selections: [
                                 { kind: 'Field', name: { kind: 'Name', value: 'failureType' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomAsListItem' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomAsListItem' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'role' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isBookmarked' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'requiresPlayerPassword' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'requiresSpectatorPassword' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomGetState' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomGetState' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'revision' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'role' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isBookmarked' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'stateJson' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'GetNonJoinedRoomResult' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'GetNonJoinedRoomResult' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'roomAsListItem' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'RoomAsListItem' },
+                                },
                             ],
                         },
                     },
@@ -2899,6 +3016,29 @@ export const JoinRoomResultFragmentDoc = {
                 ],
             },
         },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomOperation' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomOperation' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'revisionTo' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'operatedBy' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'userUid' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'clientId' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'valueJson' } },
+                ],
+            },
+        },
     ],
 } as unknown as DocumentNode<JoinRoomResultFragment, unknown>;
 export const FilePathFragmentDoc = {
@@ -2948,6 +3088,18 @@ export const RoomSoundEffectFragmentDoc = {
                 ],
             },
         },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'FilePath' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'FilePath' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'sourceType' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'path' } },
+                ],
+            },
+        },
     ],
 } as unknown as DocumentNode<RoomSoundEffectFragment, unknown>;
 export const CharacterValueForMessageFragmentDoc = {
@@ -2992,6 +3144,18 @@ export const CharacterValueForMessageFragmentDoc = {
                             ],
                         },
                     },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'FilePath' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'FilePath' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'sourceType' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'path' } },
                 ],
             },
         },
@@ -3056,6 +3220,60 @@ export const RoomPublicMessageFragmentDoc = {
                     { kind: 'Field', name: { kind: 'Name', value: 'customName' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'FilePath' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'FilePath' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'sourceType' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'path' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'CharacterValueForMessage' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'CharacterValueForMessage' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'stateId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isPrivate' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'image' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'portraitImage' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
                 ],
             },
         },
@@ -3140,6 +3358,60 @@ export const RoomPrivateMessageFragmentDoc = {
                     { kind: 'Field', name: { kind: 'Name', value: 'customName' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'FilePath' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'FilePath' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'sourceType' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'path' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'CharacterValueForMessage' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'CharacterValueForMessage' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'stateId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isPrivate' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'image' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'portraitImage' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
                 ],
             },
         },
@@ -3377,6 +3649,235 @@ export const RoomMessageEventFragmentDoc = {
                 ],
             },
         },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'FilePath' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'FilePath' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'sourceType' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'path' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'CharacterValueForMessage' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'CharacterValueForMessage' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'stateId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isPrivate' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'image' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'portraitImage' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomSoundEffect' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomSoundEffect' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'file' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'volume' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomPublicMessage' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'RoomPublicMessage' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'channelKey' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initText' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initTextSource' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'updatedText' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'currentText' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'textColor' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'commandResult' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'text' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'isSuccess' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'altTextToSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'character' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'CharacterValueForMessage' },
+                                },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'customName' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomPublicChannel' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'RoomPublicChannel' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'key' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomPrivateMessage' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'RoomPrivateMessage' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'visibleTo' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initText' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initTextSource' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'updatedText' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'currentText' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'textColor' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'commandResult' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'text' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'isSuccess' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'altTextToSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'character' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'CharacterValueForMessage' },
+                                },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'customName' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'PieceLog' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'PieceLog' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'stateId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'logType' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'valueJson' } },
+                ],
+            },
+        },
     ],
 } as unknown as DocumentNode<RoomMessageEventFragment, unknown>;
 export const SemVerFragmentDoc = {
@@ -3541,7 +4042,22 @@ export const GetFilesDocument = {
                 ],
             },
         },
-        ...FileItemFragmentDoc.definitions,
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'FileItem' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'FileItem' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'filename' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'thumbFilename' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'screenname' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'listType' } },
+                ],
+            },
+        },
     ],
 } as unknown as DocumentNode<GetFilesQuery, GetFilesQueryVariables>;
 export const GetRoomDocument = {
@@ -3661,8 +4177,42 @@ export const GetRoomDocument = {
                 ],
             },
         },
-        ...RoomGetStateFragmentDoc.definitions,
-        ...RoomAsListItemFragmentDoc.definitions,
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomGetState' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomGetState' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'revision' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'role' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isBookmarked' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'stateJson' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomAsListItem' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomAsListItem' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'role' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isBookmarked' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'requiresPlayerPassword' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'requiresSpectatorPassword' } },
+                ],
+            },
+        },
     ],
 } as unknown as DocumentNode<GetRoomQuery, GetRoomQueryVariables>;
 export const GetRoomsListDocument = {
@@ -3733,7 +4283,25 @@ export const GetRoomsListDocument = {
                 ],
             },
         },
-        ...RoomAsListItemFragmentDoc.definitions,
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomAsListItem' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomAsListItem' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'role' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isBookmarked' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'requiresPlayerPassword' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'requiresSpectatorPassword' } },
+                ],
+            },
+        },
     ],
 } as unknown as DocumentNode<GetRoomsListQuery, GetRoomsListQueryVariables>;
 export const GetMessagesDocument = {
@@ -3891,13 +4459,235 @@ export const GetMessagesDocument = {
                 ],
             },
         },
-        ...RoomPublicMessageFragmentDoc.definitions,
-        ...CharacterValueForMessageFragmentDoc.definitions,
-        ...FilePathFragmentDoc.definitions,
-        ...RoomPrivateMessageFragmentDoc.definitions,
-        ...PieceLogFragmentDoc.definitions,
-        ...RoomPublicChannelFragmentDoc.definitions,
-        ...RoomSoundEffectFragmentDoc.definitions,
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'FilePath' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'FilePath' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'sourceType' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'path' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'CharacterValueForMessage' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'CharacterValueForMessage' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'stateId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isPrivate' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'image' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'portraitImage' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomPublicMessage' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'RoomPublicMessage' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'channelKey' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initText' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initTextSource' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'updatedText' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'currentText' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'textColor' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'commandResult' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'text' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'isSuccess' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'altTextToSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'character' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'CharacterValueForMessage' },
+                                },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'customName' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomPrivateMessage' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'RoomPrivateMessage' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'visibleTo' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initText' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initTextSource' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'updatedText' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'currentText' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'textColor' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'commandResult' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'text' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'isSuccess' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'altTextToSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'character' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'CharacterValueForMessage' },
+                                },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'customName' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'PieceLog' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'PieceLog' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'stateId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'logType' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'valueJson' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomPublicChannel' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'RoomPublicChannel' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'key' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomSoundEffect' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomSoundEffect' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'file' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'volume' } },
+                ],
+            },
+        },
     ],
 } as unknown as DocumentNode<GetMessagesQuery, GetMessagesQueryVariables>;
 export const GetLogDocument = {
@@ -4052,13 +4842,235 @@ export const GetLogDocument = {
                 ],
             },
         },
-        ...RoomPublicMessageFragmentDoc.definitions,
-        ...CharacterValueForMessageFragmentDoc.definitions,
-        ...FilePathFragmentDoc.definitions,
-        ...RoomPrivateMessageFragmentDoc.definitions,
-        ...PieceLogFragmentDoc.definitions,
-        ...RoomPublicChannelFragmentDoc.definitions,
-        ...RoomSoundEffectFragmentDoc.definitions,
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'FilePath' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'FilePath' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'sourceType' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'path' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'CharacterValueForMessage' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'CharacterValueForMessage' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'stateId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isPrivate' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'image' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'portraitImage' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomPublicMessage' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'RoomPublicMessage' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'channelKey' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initText' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initTextSource' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'updatedText' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'currentText' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'textColor' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'commandResult' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'text' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'isSuccess' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'altTextToSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'character' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'CharacterValueForMessage' },
+                                },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'customName' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomPrivateMessage' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'RoomPrivateMessage' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'visibleTo' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initText' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initTextSource' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'updatedText' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'currentText' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'textColor' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'commandResult' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'text' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'isSuccess' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'altTextToSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'character' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'CharacterValueForMessage' },
+                                },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'customName' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'PieceLog' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'PieceLog' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'stateId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'logType' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'valueJson' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomPublicChannel' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'RoomPublicChannel' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'key' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomSoundEffect' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomSoundEffect' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'file' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'volume' } },
+                ],
+            },
+        },
     ],
 } as unknown as DocumentNode<GetLogQuery, GetLogQueryVariables>;
 export const GetMyRolesDocument = {
@@ -4210,7 +5222,30 @@ export const GetServerInfoDocument = {
                 ],
             },
         },
-        ...SemVerFragmentDoc.definitions,
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'SemVer' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'SemVer' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'major' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'minor' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'patch' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'prerelease' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'version' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
     ],
 } as unknown as DocumentNode<GetServerInfoQuery, GetServerInfoQueryVariables>;
 export const IsEntryDocument = {
@@ -4327,7 +5362,25 @@ export const GetRoomAsListItemDocument = {
                 ],
             },
         },
-        ...RoomAsListItemFragmentDoc.definitions,
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomAsListItem' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomAsListItem' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'role' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isBookmarked' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'requiresPlayerPassword' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'requiresSpectatorPassword' } },
+                ],
+            },
+        },
     ],
 } as unknown as DocumentNode<GetRoomAsListItemQuery, GetRoomAsListItemQueryVariables>;
 export const AnswerRollCallDocument = {
@@ -4455,7 +5508,18 @@ export const CreateFileTagDocument = {
                 ],
             },
         },
-        ...FileTagFragmentDoc.definitions,
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'FileTag' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'FileTag' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                ],
+            },
+        },
     ],
 } as unknown as DocumentNode<CreateFileTagMutation, CreateFileTagMutationVariables>;
 export const ChangeParticipantNameDocument = {
@@ -4658,8 +5722,73 @@ export const CreateRoomDocument = {
                 ],
             },
         },
-        ...CreateRoomResultFragmentDoc.definitions,
-        ...RoomGetStateFragmentDoc.definitions,
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomGetState' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomGetState' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'revision' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'role' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isBookmarked' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'stateJson' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'CreateRoomResult' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'CreateRoomResult' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'CreateRoomSuccessResult' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'room' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'FragmentSpread',
+                                                name: { kind: 'Name', value: 'RoomGetState' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'CreateRoomFailureResult' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'failureType' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
     ],
 } as unknown as DocumentNode<CreateRoomMutation, CreateRoomMutationVariables>;
 export const DeleteFilesDocument = {
@@ -4944,8 +6073,78 @@ export const JoinRoomAsPlayerDocument = {
                 ],
             },
         },
-        ...JoinRoomResultFragmentDoc.definitions,
-        ...RoomOperationFragmentDoc.definitions,
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomOperation' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomOperation' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'revisionTo' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'operatedBy' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'userUid' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'clientId' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'valueJson' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'JoinRoomResult' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'JoinRoomResult' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'JoinRoomSuccessResult' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'operation' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'FragmentSpread',
+                                                name: { kind: 'Name', value: 'RoomOperation' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'JoinRoomFailureResult' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'failureType' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
     ],
 } as unknown as DocumentNode<JoinRoomAsPlayerMutation, JoinRoomAsPlayerMutationVariables>;
 export const JoinRoomAsSpectatorDocument = {
@@ -5018,8 +6217,78 @@ export const JoinRoomAsSpectatorDocument = {
                 ],
             },
         },
-        ...JoinRoomResultFragmentDoc.definitions,
-        ...RoomOperationFragmentDoc.definitions,
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomOperation' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomOperation' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'revisionTo' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'operatedBy' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'userUid' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'clientId' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'valueJson' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'JoinRoomResult' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'JoinRoomResult' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'JoinRoomSuccessResult' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'operation' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'FragmentSpread',
+                                                name: { kind: 'Name', value: 'RoomOperation' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'JoinRoomFailureResult' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'failureType' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
     ],
 } as unknown as DocumentNode<JoinRoomAsSpectatorMutation, JoinRoomAsSpectatorMutationVariables>;
 export const EntryToServerDocument = {
@@ -5289,8 +6558,48 @@ export const OperateDocument = {
                 ],
             },
         },
-        ...RoomOperationFragmentDoc.definitions,
-        ...RoomAsListItemFragmentDoc.definitions,
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomOperation' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomOperation' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'revisionTo' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'operatedBy' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'userUid' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'clientId' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'valueJson' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomAsListItem' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomAsListItem' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'role' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isBookmarked' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'requiresPlayerPassword' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'requiresSpectatorPassword' } },
+                ],
+            },
+        },
     ],
 } as unknown as DocumentNode<OperateMutation, OperateMutationVariables>;
 export const PerformRollCallDocument = {
@@ -5814,9 +7123,119 @@ export const WritePublicMessageDocument = {
                 ],
             },
         },
-        ...RoomPublicMessageFragmentDoc.definitions,
-        ...CharacterValueForMessageFragmentDoc.definitions,
-        ...FilePathFragmentDoc.definitions,
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'FilePath' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'FilePath' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'sourceType' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'path' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'CharacterValueForMessage' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'CharacterValueForMessage' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'stateId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isPrivate' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'image' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'portraitImage' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomPublicMessage' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'RoomPublicMessage' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'channelKey' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initText' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initTextSource' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'updatedText' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'currentText' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'textColor' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'commandResult' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'text' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'isSuccess' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'altTextToSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'character' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'CharacterValueForMessage' },
+                                },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'customName' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                ],
+            },
+        },
     ],
 } as unknown as DocumentNode<WritePublicMessageMutation, WritePublicMessageMutationVariables>;
 export const WritePrivateMessageDocument = {
@@ -6004,9 +7423,119 @@ export const WritePrivateMessageDocument = {
                 ],
             },
         },
-        ...RoomPrivateMessageFragmentDoc.definitions,
-        ...CharacterValueForMessageFragmentDoc.definitions,
-        ...FilePathFragmentDoc.definitions,
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'FilePath' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'FilePath' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'sourceType' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'path' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'CharacterValueForMessage' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'CharacterValueForMessage' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'stateId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isPrivate' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'image' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'portraitImage' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomPrivateMessage' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'RoomPrivateMessage' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'visibleTo' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initText' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initTextSource' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'updatedText' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'currentText' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'textColor' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'commandResult' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'text' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'isSuccess' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'altTextToSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'character' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'CharacterValueForMessage' },
+                                },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'customName' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                ],
+            },
+        },
     ],
 } as unknown as DocumentNode<WritePrivateMessageMutation, WritePrivateMessageMutationVariables>;
 export const WriteRoomSoundEffectDocument = {
@@ -6117,8 +7646,45 @@ export const WriteRoomSoundEffectDocument = {
                 ],
             },
         },
-        ...RoomSoundEffectFragmentDoc.definitions,
-        ...FilePathFragmentDoc.definitions,
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'FilePath' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'FilePath' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'sourceType' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'path' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomSoundEffect' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomSoundEffect' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'file' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'volume' } },
+                ],
+            },
+        },
     ],
 } as unknown as DocumentNode<WriteRoomSoundEffectMutation, WriteRoomSoundEffectMutationVariables>;
 export const EditMessageDocument = {
@@ -6502,15 +8068,467 @@ export const RoomEventDocument = {
                 ],
             },
         },
-        ...RoomOperationFragmentDoc.definitions,
-        ...RoomMessageEventFragmentDoc.definitions,
-        ...RoomSoundEffectFragmentDoc.definitions,
-        ...FilePathFragmentDoc.definitions,
-        ...RoomPublicMessageFragmentDoc.definitions,
-        ...CharacterValueForMessageFragmentDoc.definitions,
-        ...RoomPublicChannelFragmentDoc.definitions,
-        ...RoomPrivateMessageFragmentDoc.definitions,
-        ...PieceLogFragmentDoc.definitions,
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'FilePath' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'FilePath' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'sourceType' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'path' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomSoundEffect' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomSoundEffect' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'file' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'volume' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'CharacterValueForMessage' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'CharacterValueForMessage' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'stateId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isPrivate' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'image' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'portraitImage' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'FilePath' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomPublicMessage' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'RoomPublicMessage' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'channelKey' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initText' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initTextSource' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'updatedText' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'currentText' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'textColor' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'commandResult' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'text' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'isSuccess' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'altTextToSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'character' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'CharacterValueForMessage' },
+                                },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'customName' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomPublicChannel' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'RoomPublicChannel' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'key' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomPrivateMessage' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'RoomPrivateMessage' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'visibleTo' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initText' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'initTextSource' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'updatedText' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'currentText' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'textColor' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'commandResult' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'text' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'isSuccess' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'altTextToSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isSecret' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdBy' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'character' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'CharacterValueForMessage' },
+                                },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'customName' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'PieceLog' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'PieceLog' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'stateId' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdAt' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'logType' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'valueJson' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomOperation' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomOperation' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'revisionTo' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'operatedBy' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'userUid' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'clientId' } },
+                            ],
+                        },
+                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'valueJson' } },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'RoomMessageEvent' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'RoomMessageEvent' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: '__typename' } },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'RoomSoundEffect' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'RoomSoundEffect' },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'RoomPublicMessage' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'RoomPublicMessage' },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'RoomPublicChannel' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'RoomPublicChannel' },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'RoomPrivateMessage' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'RoomPrivateMessage' },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'PieceLog' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'PieceLog' },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'RoomPublicChannelUpdate' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'key' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'RoomPublicMessageUpdate' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'initText' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'initTextSource' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'updatedText' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'currentText' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'updatedAt' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'commandResult' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'text' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'isSuccess' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'altTextToSecret' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'isSecret' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'InlineFragment',
+                        typeCondition: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'RoomPrivateMessageUpdate' },
+                        },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'messageId' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'initText' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'initTextSource' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'updatedText' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'currentText' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'updatedAt' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'commandResult' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'text' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'isSuccess' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'altTextToSecret' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'isSecret' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'updatedAt' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
     ],
 } as unknown as DocumentNode<RoomEventSubscription, RoomEventSubscriptionVariables>;
 export const PongDocument = {
