@@ -17,13 +17,11 @@ jobs:
 
         strategy:
             matrix:
-                node: ['18.x', '20.x']
+                node: ['18.x', '20.x', '22.x']
                 os: [ubuntu-22.04]
                 include:
                     - node: '18.x'
                       os: 'windows-2019'
-                    - node: '18.x'
-                      os: 'macOS-11'
 
         runs-on: ${{ matrix.os }}
 
@@ -59,7 +57,8 @@ jobs:
 
         strategy:
             matrix:
-                container: ['node:18-buster', 'node:20-buster']
+                container:
+                    ['node:18-bullseye-slim', 'node:20-bullseye-slim', 'node:22-bullseye-slim']
 
         runs-on: ubuntu-22.04
         container: ${{ matrix.container }}
@@ -132,7 +131,7 @@ jobs:
               run: yarn test --ci --coverage --runInBand
 
             - name: Upload coverages to Codecov
-              if: ${{ matrix.container == 'node:18-buster' }}
+              if: ${{ matrix.container == 'node:18-bullseye-slim' }}
               uses: codecov/codecov-action@v4
               with:
                   token: ${{ secrets.CODECOV_TOKEN }}
@@ -148,7 +147,7 @@ jobs:
                 pnp: [false]
 
         runs-on: ubuntu-22.04
-        container: node:18-buster
+        container: node:18-bullseye-slim
 
         services:
             mysql:
