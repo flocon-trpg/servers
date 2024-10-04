@@ -147,7 +147,7 @@ jobs:
                 pnp: [false]
 
         runs-on: ubuntu-22.04
-        container: node:18-bullseye-slim
+        container: node:20-bullseye-slim
 
         services:
             mysql:
