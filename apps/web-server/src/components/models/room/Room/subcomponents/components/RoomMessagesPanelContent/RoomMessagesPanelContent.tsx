@@ -33,7 +33,7 @@ import {
     Select,
     Tooltip,
 } from 'antd';
-import { ItemType } from 'antd/lib/menu/hooks/useItems';
+import { ItemType } from 'antd/lib/menu/interface';
 import classNames from 'classnames';
 import { Draft } from 'immer';
 import { useAtomValue } from 'jotai/react';

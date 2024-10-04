@@ -14,7 +14,7 @@ import {
 } from '@flocon-trpg/typed-document-node';
 import { recordToArray } from '@flocon-trpg/utils';
 import { Input, Menu, Modal, Popover, Tooltip } from 'antd';
-import { ItemType } from 'antd/lib/menu/hooks/useItems';
+import { ItemType } from 'antd/lib/menu/interface';
 import classNames from 'classnames';
 import { produce } from 'immer';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai/react';

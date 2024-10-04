@@ -6,7 +6,7 @@ import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { Message, publicMessage } from '@flocon-trpg/web-server-utils';
 import { useTransition } from '@react-spring/konva';
 import { Button, Dropdown, Menu, Popover } from 'antd';
-import { ItemType } from 'antd/lib/menu/hooks/useItems';
+import { ItemType } from 'antd/lib/menu/interface';
 import classNames from 'classnames';
 import { useSetAtom } from 'jotai/react';
 import { KonvaEventObject } from 'konva/lib/Node';

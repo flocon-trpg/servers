@@ -10,18 +10,18 @@
         "prettier:base": "prettier \"**/*.{ts,tsx,js,json,yml,md,graphql}\""
     },
     "dependencies": {
-        "@rollup/plugin-typescript": "11.1.2"
+        "@rollup/plugin-typescript": "11.1.6"
     },
     "devDependencies": {
         "@flocon-trpg/eslint-config": "workspace:^",
         "@flocon-trpg/prettier-config": "workspace:^",
         "@flocon-trpg/tsconfig": "workspace:^",
-        "@typescript-eslint/eslint-plugin": "5.60.1",
-        "@typescript-eslint/parser": "5.60.1",
-        "eslint": "8.43.0",
+        "@typescript-eslint/eslint-plugin": "5.62.0",
+        "@typescript-eslint/parser": "5.62.0",
+        "eslint": "8.57.1",
         "eslint-config-prettier": "9.1.0",
-        "eslint-import-resolver-typescript": "3.5.5",
-        "eslint-plugin-import": "2.27.5",
+        "eslint-import-resolver-typescript": "3.6.3",
+        "eslint-plugin-import": "2.30.0",
         "prettier": "3.3.3",
         "typescript": "5.6.2"
     },
