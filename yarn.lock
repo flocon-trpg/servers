@@ -5,15 +5,15 @@ __metadata:
   version: 6
   cacheKey: 8
 
-"@0no-co/graphql.web@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "@0no-co/graphql.web@npm:1.0.1"
+"@0no-co/graphql.web@npm:^1.0.5":
+  version: 1.0.8
+  resolution: "@0no-co/graphql.web@npm:1.0.8"
   peerDependencies:
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
   peerDependenciesMeta:
     graphql:
       optional: true
-  checksum: e577a80a210e48e0b054dcf363efa2107ab67b931ec923b1540300350f55576fc5493b6d4ca7f35379748d20bc0280ee32bdc98c2c2380476c814a472bcf0757
+  checksum: 5bd3ac2a55401c6d47e8af479170e1ae3b38c80847203d5b445f281f36e68ac11e6a6400e43e90b382d38f704721dd46acaab1088239362b9290b536a9e7d707
   languageName: node
   linkType: hard
 
@@ -3591,7 +3591,7 @@ __metadata:
     "@types/yargs": ^17.0.3
     "@typescript-eslint/eslint-plugin": 5.60.1
     "@typescript-eslint/parser": 5.60.1
-    "@urql/core": 4.0.10
+    "@urql/core": ^5.0.6
     apollo-server-express: ^3.3.0
     bcdice: ^4.0.0
     bcrypt: ^5.0.1
@@ -3860,7 +3860,7 @@ __metadata:
     "@kizahasi/result": ^1.1.0
     "@typescript-eslint/eslint-plugin": 5.60.1
     "@typescript-eslint/parser": 5.60.1
-    "@urql/exchange-auth": ^2.0.0
+    "@urql/exchange-auth": ^2.2.0
     eslint: 8.43.0
     eslint-config-prettier: 9.1.0
     eslint-import-resolver-typescript: 3.5.5
@@ -3871,7 +3871,7 @@ __metadata:
     rollup: 4.22.5
     rxjs: ^7.5.6
     typescript: 5.6.2
-    urql: ^4.0.0
+    urql: ^4.1.0
     wonka: ^6.0.0
   languageName: unknown
   linkType: soft
@@ -4121,7 +4121,7 @@ __metadata:
     tsconfig-paths-webpack-plugin: 4.0.1
     typescript: 5.6.2
     url-join: ^4.0.1
-    urql: ^4.0.0
+    urql: ^4.1.0
     use-constant: ^1.1.0
     use-image: 1.1.1
     use-memo-one: ^1.1.2
@@ -8539,13 +8539,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@urql/core@npm:4.0.10, @urql/core@npm:>=4.0.0, @urql/core@npm:^4.0.0":
-  version: 4.0.10
-  resolution: "@urql/core@npm:4.0.10"
+"@urql/core@npm:^5.0.0, @urql/core@npm:^5.0.6":
+  version: 5.0.6
+  resolution: "@urql/core@npm:5.0.6"
   dependencies:
-    "@0no-co/graphql.web": ^1.0.1
+    "@0no-co/graphql.web": ^1.0.5
     wonka: ^6.3.2
-  checksum: adeb666c632acbd85dbb6d48aab81b8ec26e839ff525b71a93e6d0cc1632bab49b4615585527ccc8b98fbf5c2e1a9f5c20bdd92d3f89d573803f069d97ea09eb
+  checksum: cf94025ff58d6eee82da2eb51ec74126c2c83f5f797ef5f5a51376039cb3c342ddeac1ed050ce47d2da7f375b3e2c7b4c780dd00c3c684bfe6e7f825d859d322
   languageName: node
   linkType: hard
 
@@ -8561,13 +8561,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@urql/exchange-auth@npm:^2.0.0":
-  version: 2.1.4
-  resolution: "@urql/exchange-auth@npm:2.1.4"
+"@urql/exchange-auth@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "@urql/exchange-auth@npm:2.2.0"
   dependencies:
-    "@urql/core": ">=4.0.0"
+    "@urql/core": ^5.0.0
     wonka: ^6.3.2
-  checksum: 5bf0790d8712bb24ed5fe802749e029df24f8515b5b9f0901a3fbd5f0f4c067b104672bf58bdba365eca21f7bc8c4f640ff3d78c36473538f3aba1d7a6cabafa
+  peerDependencies:
+    "@urql/core": ^5.0.0
+  checksum: 6c46937b4fcdabebd6dfee7694d7cac9e93ba73acb19cbaa6b8959601e3edfc20bba34c1729855fe153e9658b0ab1425ea578edbfb1163c55fdf65308791afb7
   languageName: node
   linkType: hard
 
@@ -24208,15 +24210,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"urql@npm:^4.0.0":
-  version: 4.0.4
-  resolution: "urql@npm:4.0.4"
+"urql@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "urql@npm:4.1.0"
   dependencies:
-    "@urql/core": ^4.0.0
+    "@urql/core": ^5.0.0
     wonka: ^6.3.2
   peerDependencies:
+    "@urql/core": ^5.0.0
     react: ">= 16.8.0"
-  checksum: 3fca8c38cb0ec87ec90e0c9ae0d7b237cf01917bfb62631839a990c75a349ba6aba9f2851f32c2958c4120b222dd46e42784ebbd125f4432a99ec806fabd061c
+  checksum: b946c32f534aa8f401ade75dbdec5ca60bbe5efd4086079929bb614dc9c4dd21bf338d88ad3c08806cad17a43773f8b0b4caa549d70c098eff8c0bcbdf70f786
   languageName: node
   linkType: hard
 
