@@ -58,7 +58,13 @@ jobs:
         strategy:
             matrix:
                 container:
-                    ['node:18-bullseye-slim', 'node:20-bullseye-slim', 'node:22-bullseye-slim']
+                    # bullseye-slim だと `gpg: not found` というエラーが出て Codecov にアップロードできない。別途 gpg をインストールする手もあるが、現状は Codecov にアップロードする際は bullseye を用いている。
+                    [
+                        'node:18-bullseye',
+                        'node:18-bullseye-slim',
+                        'node:20-bullseye-slim',
+                        'node:22-bullseye-slim',
+                    ]
 
         runs-on: ubuntu-22.04
         container: ${{ matrix.container }}
@@ -131,7 +137,7 @@ jobs:
               run: yarn test --ci --coverage --runInBand
 
             - name: Upload coverages to Codecov
-              if: ${{ matrix.container == 'node:18-bullseye-slim' }}
+              if: ${{ matrix.container == 'node:18-bullseye' }}
               uses: codecov/codecov-action@v4
               with:
                   token: ${{ secrets.CODECOV_TOKEN }}
@@ -265,6 +271,8 @@ jobs:
                   cache: yarn
 
             - run: yarn
+
+            - run: yarn build
 
             - name: Publish to Chromatic
               uses: chromaui/action@latest
