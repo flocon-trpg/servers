@@ -24,7 +24,7 @@ export const ImageView: React.FC<Props> = ({
 
     switch (queryResult.type) {
         case loaded: {
-            if (queryResult.value.status === 'loading') {
+            if (queryResult.value.status === 'pending') {
                 return loadingIcon;
             }
             if (queryResult.value.data?.src == null) {
