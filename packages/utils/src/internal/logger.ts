@@ -1,4 +1,4 @@
-import { notice } from '@flocon-trpg/default-pino-transport';
+import { notice } from '@flocon-trpg/logger-base';
 import { isBrowser } from 'browser-or-node';
 import pino, { Logger } from 'pino';
 import { PinoLogLevel } from './parsePinoLogLevel';

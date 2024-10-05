@@ -31,7 +31,7 @@
     "dependencies": {
         "@flocon-trpg/cache": "workspace:^",
         "@flocon-trpg/core": "workspace:^",
-        "@flocon-trpg/default-pino-transport": "workspace:^",
+        "@flocon-trpg/logger-base": "workspace:^",
         "@flocon-trpg/utils": "workspace:^",
         "@kizahasi/option": "^1.1.0",
         "@kizahasi/ot-string": "0.6.0",
