@@ -3243,8 +3243,8 @@ __metadata:
   dependencies:
     "@flocon-trpg/cache": "workspace:^"
     "@flocon-trpg/core": "workspace:^"
-    "@flocon-trpg/default-pino-transport": "workspace:^"
     "@flocon-trpg/eslint-config": "workspace:^"
+    "@flocon-trpg/logger-base": "workspace:^"
     "@flocon-trpg/prettier-config": "workspace:^"
     "@flocon-trpg/tsconfig": "workspace:^"
     "@flocon-trpg/typed-document-node": "workspace:*"
@@ -3469,6 +3469,27 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@flocon-trpg/logger-base@workspace:^, @flocon-trpg/logger-base@workspace:packages/logger-base":
+  version: 0.0.0-use.local
+  resolution: "@flocon-trpg/logger-base@workspace:packages/logger-base"
+  dependencies:
+    "@flocon-trpg/eslint-config": "workspace:^"
+    "@flocon-trpg/prettier-config": "workspace:^"
+    "@flocon-trpg/rollup-config": "workspace:^"
+    "@flocon-trpg/tsconfig": "workspace:^"
+    "@typescript-eslint/eslint-plugin": 5.62.0
+    "@typescript-eslint/parser": 5.62.0
+    eslint: 8.57.1
+    eslint-config-prettier: 9.1.0
+    eslint-import-resolver-typescript: 3.6.3
+    eslint-plugin-import: 2.30.0
+    prettier: 3.3.3
+    rimraf: 5.0.10
+    rollup: 4.23.0
+    typescript: 5.6.2
+  languageName: unknown
+  linkType: soft
+
 "@flocon-trpg/prettier-config@workspace:^, @flocon-trpg/prettier-config@workspace:packages/prettier-config":
   version: 0.0.0-use.local
   resolution: "@flocon-trpg/prettier-config@workspace:packages/prettier-config"
@@ -3645,6 +3666,7 @@ __metadata:
   dependencies:
     "@flocon-trpg/default-pino-transport": "workspace:^"
     "@flocon-trpg/eslint-config": "workspace:^"
+    "@flocon-trpg/logger-base": "workspace:^"
     "@flocon-trpg/prettier-config": "workspace:^"
     "@flocon-trpg/rollup-config": "workspace:^"
     "@flocon-trpg/tsconfig": "workspace:^"

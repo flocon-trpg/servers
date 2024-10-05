@@ -1,8 +1,10 @@
 /* eslint-disable no-console */
 import build from 'pino-abstract-transport';
 
-export const notice = 'notice';
-export const LOG_FORMAT = 'LOG_FORMAT';
+// これらの文字列を変更したら、@flocon-trpg/logger-base の文字列も変更すること！
+// 理由: @flocon-trpg/default-pino-transport は他から import されるのではく、pino で '@flocon-trpg/default-pino-transport' という文字列を渡すことでのみ参照されるという特殊性がある。そのためか、@flocon-trpg/logger-base から import するとビルドの際に警告が出る（実際に動くかどうかは確認していない）。不具合が起こる可能性を減らすため、import せずに @flocon-trpg/logger-base と同様の文字列を書いている。
+const LOG_FORMAT = 'LOG_FORMAT';
+const notice = 'notice';
 
 let notified = false;
 const notifyLogIsSkippedOnce = () => {
