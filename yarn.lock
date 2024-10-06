@@ -3164,7 +3164,7 @@ __metadata:
     "@graphql-codegen/typescript": 4.0.9
     "@graphql-codegen/typescript-operations": 4.2.3
     "@kizahasi/option": ^1.1.0
-    "@kizahasi/ot-string": 0.6.0
+    "@kizahasi/ot-string": 0.7.0
     "@kizahasi/result": ^1.1.0
     "@mikro-orm/core": ^6.3.12
     "@mikro-orm/migrations": ^6.3.12
@@ -3283,8 +3283,8 @@ __metadata:
     "@flocon-trpg/tsconfig": "workspace:^"
     "@flocon-trpg/utils": "workspace:^"
     "@kizahasi/option": ^1.1.0
-    "@kizahasi/ot-core": 0.1.0
-    "@kizahasi/ot-string": 0.6.0
+    "@kizahasi/ot-core": 0.7.0
+    "@kizahasi/ot-string": 0.7.0
     "@kizahasi/result": ^1.1.0
     "@ltd/j-toml": ^1.23.0
     "@types/estree": 1.0.6
@@ -3651,7 +3651,7 @@ __metadata:
     "@flocon-trpg/utils": "workspace:^"
     "@hello-pangea/color-picker": ^3.2.2
     "@kizahasi/option": ^1.1.0
-    "@kizahasi/ot-string": 0.6.0
+    "@kizahasi/ot-string": 0.7.0
     "@kizahasi/result": ^1.1.0
     "@mdx-js/react": 1.6.22
     "@monaco-editor/react": ^4.2.2
@@ -4922,24 +4922,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@kizahasi/ot-core@npm:0.1.0":
-  version: 0.1.0
-  resolution: "@kizahasi/ot-core@npm:0.1.0"
+"@kizahasi/ot-core@npm:0.7.0":
+  version: 0.7.0
+  resolution: "@kizahasi/ot-core@npm:0.7.0"
   dependencies:
     "@kizahasi/option": ^1.0.0
     "@kizahasi/result": ^1.0.0
-  checksum: 9e1bd7522ca1a049e3c408aae1f3595ef84df48b14af5b600ff21b80c2116e4bec07e31977dbd9f74be952438fc0ac4317fc6861c22e38d530b036509cebcfcc
+  checksum: 84fe3245dd11cec9bf083a57ec7ee1b6add05a69ec5eb2723dd65afdf0bc49eac46e9957fe5bf6e84484224f003180d2a0eee0090b1ba34991aa10ea5febd89d
   languageName: node
   linkType: hard
 
-"@kizahasi/ot-string@npm:0.6.0":
-  version: 0.6.0
-  resolution: "@kizahasi/ot-string@npm:0.6.0"
+"@kizahasi/ot-string@npm:0.7.0":
+  version: 0.7.0
+  resolution: "@kizahasi/ot-string@npm:0.7.0"
   dependencies:
-    "@kizahasi/ot-core": 0.1.0
+    "@kizahasi/ot-core": 0.7.0
     "@kizahasi/result": ^1.0.0
     diff-match-patch: ^1.0.5
-  checksum: 6d6123db747aab466867aafa48779dabb55663aa553c9ca8ce8c13ec1d7abd48c91e0ef4ef59f0a582a3dc9ef8bb946797c834d323bd07d9c52e5d55608bbe00
+  checksum: c142acbfd0ed685a4beed5ab3ebb6edafb9225eaa4623c5efa065e242f4d4c195e03bb3a8cd0838595edee544340e2de739df072acc15a26f41f15cbabe5539d
   languageName: node
   linkType: hard
 

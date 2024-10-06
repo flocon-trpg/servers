@@ -34,7 +34,7 @@
         "@flocon-trpg/logger-base": "workspace:^",
         "@flocon-trpg/utils": "workspace:^",
         "@kizahasi/option": "^1.1.0",
-        "@kizahasi/ot-string": "0.6.0",
+        "@kizahasi/ot-string": "0.7.0",
         "@kizahasi/result": "^1.1.0",
         "@mikro-orm/core": "^6.3.12",
         "@mikro-orm/migrations": "^6.3.12",
