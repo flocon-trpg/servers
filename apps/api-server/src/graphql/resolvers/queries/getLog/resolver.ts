@@ -1,5 +1,5 @@
 import { $system, Spectator } from '@flocon-trpg/core';
-import { Reference } from '@mikro-orm/core';
+import { Reference, ref } from '@mikro-orm/core';
 import {
     Args,
     ArgsType,
@@ -49,10 +49,10 @@ export const writeSystemMessage = async ({
     let ch = await em.findOne(RoomPubCh, { key: $system, room: room.id });
     if (ch == null) {
         ch = new RoomPubCh({ key: $system });
-        ch.room = Reference.create(room);
+        ch.room = ref(room);
         em.persist(ch);
     }
-    entity.roomPubCh = Reference.create(ch);
+    entity.roomPubCh = ref(ch);
     em.persist(entity);
     return entity;
 };
@@ -110,7 +110,7 @@ export class GetLogResolver {
             type: 'messageUpdatePayload',
             sendTo: findResult.participantIds(),
             roomId: room.id,
-            value: createRoomPublicMessage({
+            value: await createRoomPublicMessage({
                 msg: systemMessageEntity,
                 channelKey: $system,
             }),

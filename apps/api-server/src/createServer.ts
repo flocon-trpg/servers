@@ -332,10 +332,10 @@ export const createServer = async ({
                     req.params.permission === permission.public
                         ? FilePermissionType.Entry
                         : FilePermissionType.Private;
-                const entity = new File({
+                const entity = forkedEm.create(File, {
                     ...file,
                     screenname: file.originalname,
-                    createdBy: Reference.create<User, 'userUid'>(user),
+                    createdBy: user,
                     thumbFilename: thumbnailSaved ? thumbFileName : undefined,
                     filesize: file.size,
                     deletePermission: permissionType,

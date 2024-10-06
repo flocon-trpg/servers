@@ -41,8 +41,9 @@ export class RenameFilesResolver {
             if (file == null) {
                 continue;
             }
+            const createdByUserUid = await file.createdBy.loadProperty('userUid');
             if (
-                file.createdBy.userUid !== user.userUid &&
+                createdByUserUid !== user.userUid &&
                 file.renamePermission !== FilePermissionType.Entry
             ) {
                 continue;
