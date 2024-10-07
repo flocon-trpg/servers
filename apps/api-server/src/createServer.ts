@@ -2,7 +2,6 @@ import { createServer as createHttpServer } from 'http';
 import path from 'path';
 import { loggerRef } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
-import { Reference } from '@mikro-orm/core';
 import { PluginDefinition } from 'apollo-server-core';
 import { ApolloServer } from 'apollo-server-express';
 import { ExpressContext } from 'apollo-server-express/dist/ApolloServer';
