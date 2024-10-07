@@ -94,7 +94,8 @@ const createUpdatedText = (entity) => {
     }
     return { currentText: entity.updatedText, updatedAt: entity.textUpdatedAtValue };
 };
-const createRoomPublicMessage = ({ msg, channelKey, }) => {
+const createRoomPublicMessage = async ({ msg, channelKey, }) => {
+    const createdBy = await msg.createdBy?.loadProperty('userUid');
     return {
         __tstype: roomMessage.RoomPublicMessageType,
         channelKey,
@@ -111,7 +112,7 @@ const createRoomPublicMessage = ({ msg, channelKey, }) => {
             },
         altTextToSecret: msg.altTextToSecret ?? undefined,
         isSecret: msg.isSecret,
-        createdBy: msg.createdBy?.userUid,
+        createdBy,
         character: toCharacterValueForMessage(msg),
         customName: msg.customName,
         createdAt: msg.createdAt.getTime(),
@@ -142,12 +143,13 @@ const toCharacterValueForMessage = (message) => {
             },
     };
 };
-const createRoomPrivateMessage = ({ msg, visibleTo, }) => {
+const createRoomPrivateMessage = async ({ msg, visibleTo, }) => {
+    const createdBy = await msg.createdBy?.loadProperty('userUid');
     return {
         __tstype: roomMessage.RoomPrivateMessageType,
         messageId: msg.id,
         visibleTo: [...visibleTo].sort(),
-        createdBy: msg.createdBy?.userUid,
+        createdBy,
         character: toCharacterValueForMessage(msg),
         customName: msg.customName,
         createdAt: msg.createdAt.getTime(),
@@ -212,8 +214,8 @@ async function getRoomMessagesFromDb(room, userUid, mode) {
             name: ch.name,
         });
         for (const msg of await ch.roomPubMsgs.loadItems()) {
-            const createdBy = msg.createdBy?.userUid;
-            const graphqlMessage = createRoomPublicMessage({ msg, channelKey: ch.key });
+            const createdBy = await msg.createdBy?.loadProperty('userUid');
+            const graphqlMessage = await createRoomPublicMessage({ msg, channelKey: ch.key });
             if (mode === 'default' && msg.isSecret && createdBy !== userUid) {
                 deleteSecretValues(graphqlMessage);
             }
@@ -228,8 +230,8 @@ async function getRoomMessagesFromDb(room, userUid, mode) {
                 continue;
             }
         }
-        const createdBy = msg.createdBy?.userUid;
-        const graphqlMessage = createRoomPrivateMessage({
+        const createdBy = await msg.createdBy?.loadProperty('userUid');
+        const graphqlMessage = await createRoomPrivateMessage({
             msg,
             visibleTo: visibleTo.map(user => user.userUid),
         });
@@ -247,7 +249,7 @@ async function getRoomMessagesFromDb(room, userUid, mode) {
     }
     const soundEffects = [];
     for (const se of await room.roomSes.loadItems()) {
-        const createdBy = se.createdBy?.userUid;
+        const createdBy = await se.createdBy?.loadProperty('userUid');
         const graphQLValue = {
             __tstype: roomMessage.RoomSoundEffectType,
             messageId: se.id,
@@ -388,7 +390,7 @@ const analyzeTextAndSetToEntity = async (params) => {
             initTextSource: params.textSource,
             initText: analyzed.value.message,
         });
-    targetEntity.createdBy = core.Reference.create(params.createdBy);
+    targetEntity.createdBy = core.ref(params.createdBy);
     if (analyzed.value.diceResult != null) {
         if (analyzed.value.diceResult.isSecret) {
             targetEntity.isSecret = true;

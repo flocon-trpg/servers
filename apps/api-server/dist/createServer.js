@@ -3,7 +3,6 @@
 var http = require('http');
 var path = require('path');
 var utils = require('@flocon-trpg/utils');
-var core = require('@mikro-orm/core');
 var apolloServerExpress = require('apollo-server-express');
 var express = require('express');
 var fs = require('fs-extra');
@@ -238,6 +237,7 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
             const thumbsDirPath = path.join(path.dirname(file.path), thumbsDir.thumbsDir);
             await fs.ensureDir(thumbsDirPath);
             const thumbPath = path.join(thumbsDirPath, thumbFileName);
+            sharp.cache(false);
             const thumbnailSaved = await sharp(file.path)
                 .resize(80)
                 .webp()
@@ -250,10 +250,10 @@ const createServer = async ({ serverConfig, promiseQueue, connectionManager, em,
             const permissionType = req.params.permission === permission.public
                 ? FilePermissionType.FilePermissionType.Entry
                 : FilePermissionType.FilePermissionType.Private;
-            const entity$1 = new entity.File({
+            const entity$1 = forkedEm.create(entity.File, {
                 ...file,
                 screenname: file.originalname,
-                createdBy: core.Reference.create(user),
+                createdBy: user,
                 thumbFilename: thumbnailSaved ? thumbFileName : undefined,
                 filesize: file.size,
                 deletePermission: permissionType,

@@ -19,10 +19,7 @@ type Type = {
 export declare const createDefaultLogger: (args?: {
     logLevel?: PinoLogLevel;
     isBrowser?: boolean;
-}) => Logger<{
-    level: PinoLogLevel;
-    browser: {};
-}>;
+}) => Logger<never, boolean>;
 /** pino のロガーを取得もしくは変更できます。 */
 export declare const loggerRef: Type;
 export {};

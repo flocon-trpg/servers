@@ -1,7 +1,7 @@
 'use strict';
 
 var option = require('@kizahasi/option');
-var defaultPinoTransport = require('@flocon-trpg/default-pino-transport');
+var loggerBase = require('@flocon-trpg/logger-base');
 var browserOrNode = require('browser-or-node');
 var pino = require('pino');
 var result = require('@kizahasi/result');
@@ -790,7 +790,7 @@ const loggerRef = {
         return this.value.info.bind(this.value);
     },
     infoAsNotice(msg) {
-        return this.info({ [defaultPinoTransport.notice]: true }, msg);
+        return this.info({ [loggerBase.notice]: true }, msg);
     },
     get warn() {
         return this.value.warn.bind(this.value);

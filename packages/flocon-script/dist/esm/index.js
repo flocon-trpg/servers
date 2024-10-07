@@ -345,6 +345,9 @@ function fBinaryOperator(operator, range) {
     }
 }
 function fBinaryExpression(expression) {
+    if (expression.left.type === 'PrivateIdentifier') {
+        throw new ScriptError(`'${expression.left.type}' in BinaryExpression is not supported`, expression.left.range);
+    }
     return {
         ...expression,
         operator: fBinaryOperator(expression.operator, toRange(expression)),

@@ -74,7 +74,7 @@ tslib.__decorate([
     tslib.__metadata("design:type", String)
 ], exports.File.prototype, "deletePermission", void 0);
 tslib.__decorate([
-    core.ManyToOne(() => entity.User),
+    core.ManyToOne(() => entity.User, { ref: true }),
     tslib.__metadata("design:type", Object)
 ], exports.File.prototype, "createdBy", void 0);
 tslib.__decorate([

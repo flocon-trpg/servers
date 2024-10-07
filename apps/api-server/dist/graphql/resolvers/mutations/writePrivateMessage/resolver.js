@@ -125,11 +125,11 @@ exports.WritePrivateMessageResolver = class WritePrivateMessageResolver {
             entity$1.charaPortraitImagePath = chara.portraitImage?.path;
             entity$1.charaPortraitImageSourceType = FileSourceType.FileSourceTypeModule.ofNullishString(chara.portraitImage?.sourceType);
         }
-        entity$1.room = core.Reference.create(room);
+        entity$1.room = core.ref(room);
         room.completeUpdatedAt = new Date();
         await em.persistAndFlush(entity$1);
         const visibleToArray = [...visibleTo].sort();
-        const result = utils.createRoomPrivateMessage({
+        const result = await utils.createRoomPrivateMessage({
             msg: entity$1,
             visibleTo: visibleToArray,
         });

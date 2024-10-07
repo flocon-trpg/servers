@@ -1,5 +1,5 @@
 import { Option } from '@kizahasi/option';
-import { notice } from '@flocon-trpg/default-pino-transport';
+import { notice } from '@flocon-trpg/logger-base';
 import { isBrowser } from 'browser-or-node';
 import pino from 'pino';
 import { Result } from '@kizahasi/result';

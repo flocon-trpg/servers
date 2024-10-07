@@ -136,7 +136,7 @@ tslib.__decorate([
     tslib.__metadata("design:type", Object)
 ], exports.RoomOp.prototype, "value", void 0);
 tslib.__decorate([
-    core.ManyToOne(() => exports.Room, { wrappedReference: true }),
+    core.ManyToOne(() => exports.Room, { ref: true }),
     tslib.__metadata("design:type", Object)
 ], exports.RoomOp.prototype, "room", void 0);
 exports.RoomOp = tslib.__decorate([

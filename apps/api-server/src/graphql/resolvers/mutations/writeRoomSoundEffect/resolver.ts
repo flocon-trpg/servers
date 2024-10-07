@@ -1,5 +1,5 @@
 import { Spectator } from '@flocon-trpg/core';
-import { Reference } from '@mikro-orm/core';
+import { Reference, ref } from '@mikro-orm/core';
 import {
     Args,
     ArgsType,
@@ -88,8 +88,8 @@ export class WriteRoomSoundEffectResolver {
             fileSourceType: args.file.sourceType,
             volume: args.volume,
         });
-        entity.createdBy = Reference.create<User, 'userUid'>(authorizedUser);
-        entity.room = Reference.create(room);
+        entity.createdBy = ref(authorizedUser);
+        entity.room = ref(room);
         room.completeUpdatedAt = new Date();
         await em.persistAndFlush(entity);
 
