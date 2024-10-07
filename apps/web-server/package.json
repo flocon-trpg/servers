@@ -139,7 +139,7 @@
         "@types/color-name": "1.1.5",
         "@types/jest": "29.5.13",
         "@types/sinonjs__fake-timers": "8.1.5",
-        "babel-loader": "8.4.1",
+        "babel-loader": "9.2.1",
         "chromatic": "11.11.0",
         "color": "4.2.3",
         "color-name": "1.1.4",
