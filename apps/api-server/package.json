@@ -121,7 +121,7 @@
         "node-fetch": "2.7.0",
         "prettier": "3.3.3",
         "ts-jest": "29.2.5",
-        "url-join": "4.0.1"
+        "url-join": "5.0.0"
     },
     "engines": {
         "node": ">=18 <21"
