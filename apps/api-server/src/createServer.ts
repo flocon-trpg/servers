@@ -317,6 +317,9 @@ export const createServer = async ({
                 const thumbsDirPath = path.join(path.dirname(file.path), thumbsDir);
                 await ensureDir(thumbsDirPath);
                 const thumbPath = path.join(thumbsDirPath, thumbFileName);
+                // 画像がアップロードされた際にsharpでサムネイル画像を生成する処理があるが、Windowsだとsharpによって生成元の画像がロックされてしまい、その後に削除できないことがある(https://github.com/lovell/sharp/issues/415#issuecomment-212817987)。それを防ぐため、ここでsharpのcacheを無効化している。
+                // 現時点ではsharpのcacheを有効化するコードがないため、このコードを削除して代わりにどこかで一回だけ呼び出すようにしてもいい。
+                sharp.cache(false);
                 const thumbnailSaved = await sharp(file.path)
                     .resize(80)
                     .webp()
