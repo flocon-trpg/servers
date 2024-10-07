@@ -3671,7 +3671,7 @@ __metadata:
     "@testing-library/jest-dom": 5.17.0
     "@testing-library/react": 14.3.1
     "@types/color": 3.0.6
-    "@types/color-name": 1.1.5
+    "@types/color-name": 2.0.0
     "@types/howler": ^2.2.4
     "@types/html-escaper": ^3.0.0
     "@types/jest": 29.5.13
@@ -3689,7 +3689,7 @@ __metadata:
     classnames: ^2.3.1
     clipboard-copy: ^4.0.1
     color: 4.2.3
-    color-name: 1.1.4
+    color-name: 2.0.0
     dayjs: ^1.11.7
     dotenv: 16.4.5
     eslint-import-resolver-typescript: 3.6.3
@@ -7836,10 +7836,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/color-name@npm:*, @types/color-name@npm:1.1.5":
-  version: 1.1.5
-  resolution: "@types/color-name@npm:1.1.5"
-  checksum: ea889762fb0fbe1df5931d2b058316b2ad1209257dc8b9a3871c554fdf2f2ad28b610f5362d9dc449f699495e83206cd2889dfcbdc10bbf7fd84cc51c4b3c5be
+"@types/color-name@npm:*, @types/color-name@npm:2.0.0":
+  version: 2.0.0
+  resolution: "@types/color-name@npm:2.0.0"
+  checksum: a6f43f4d5a3fc7925707fcc6fe6e93143b66e90adad4a58ea40dfd1fd7423647f5815ac0c91b9a677f2f77660278f20ec935420866c20d0851e62972889bfa07
   languageName: node
   linkType: hard
 
@@ -11135,7 +11135,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"color-name@npm:1.1.4, color-name@npm:^1.0.0, color-name@npm:~1.1.4":
+"color-name@npm:2.0.0":
+  version: 2.0.0
+  resolution: "color-name@npm:2.0.0"
+  checksum: 10a1addae41de2987d6b90dbd3cfade266c2e6f680ce21749911df4493b4fae07654862c6b5358bdd13e155461acb4eedaa5e0ba172bf13542cdcca10866cf2b
+  languageName: node
+  linkType: hard
+
+"color-name@npm:^1.0.0, color-name@npm:~1.1.4":
   version: 1.1.4
   resolution: "color-name@npm:1.1.4"
   checksum: b0445859521eb4021cd0fb0cc1a75cecf67fceecae89b63f62b201cca8d345baf8b952c966862a9d9a2632987d4f6581f0ec8d957dfacece86f0a7919316f610
