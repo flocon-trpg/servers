@@ -3244,7 +3244,7 @@ __metadata:
     tslib: ^2.4.1
     type-fest: ^4.0.0
     type-graphql: ^1.1.1
-    typescript: 5.6.2
+    typescript: 5.6.3
     url-join: 4.0.1
     uuid: ^9.0.0
     ws: ^8.8.1
@@ -3276,7 +3276,7 @@ __metadata:
     rimraf: 5.0.10
     rollup: 4.23.0
     ts-jest: 29.2.5
-    typescript: 5.6.2
+    typescript: 5.6.3
   languageName: unknown
   linkType: soft
 
@@ -3315,7 +3315,7 @@ __metadata:
     sanitize-filename: ^1.6.3
     truncate-utf8-bytes: ^1.0.2
     ts-jest: 29.2.5
-    typescript: 5.6.2
+    typescript: 5.6.3
     zod: ^3.19.1
   languageName: unknown
   linkType: soft
@@ -3338,7 +3338,7 @@ __metadata:
     prettier: 3.3.3
     rimraf: 5.0.10
     rollup: 4.23.0
-    typescript: 5.6.2
+    typescript: 5.6.3
   languageName: unknown
   linkType: soft
 
@@ -3382,7 +3382,7 @@ __metadata:
     rimraf: 5.0.10
     rollup: 4.23.0
     ts-jest: 29.2.5
-    typescript: 5.6.2
+    typescript: 5.6.3
   languageName: unknown
   linkType: soft
 
@@ -3403,7 +3403,7 @@ __metadata:
     prettier: 3.3.3
     rimraf: 5.0.10
     rollup: 4.23.0
-    typescript: 5.6.2
+    typescript: 5.6.3
   languageName: unknown
   linkType: soft
 
@@ -3430,7 +3430,7 @@ __metadata:
     eslint-import-resolver-typescript: 3.6.3
     eslint-plugin-import: 2.30.0
     prettier: 3.3.3
-    typescript: 5.6.2
+    typescript: 5.6.3
   peerDependencies:
     "@typescript-eslint/eslint-plugin": ^5.39.0
     "@typescript-eslint/parser": ^5.39.0
@@ -3469,7 +3469,7 @@ __metadata:
     rimraf: 5.0.10
     rollup: 4.23.0
     ts-jest: 29.2.5
-    typescript: 5.6.2
+    typescript: 5.6.3
     use-memo-one: ^1.1.2
   languageName: unknown
   linkType: soft
@@ -3498,7 +3498,7 @@ __metadata:
     rimraf: 5.0.10
     rollup: 4.23.0
     rxjs: ^7.5.6
-    typescript: 5.6.2
+    typescript: 5.6.3
     urql: ^4.1.0
     wonka: ^6.0.0
   languageName: unknown
@@ -3531,7 +3531,7 @@ __metadata:
     rollup: 4.23.0
     rxjs: ^7.5.6
     ts-jest: 29.2.5
-    typescript: 5.6.2
+    typescript: 5.6.3
   languageName: unknown
   linkType: soft
 
@@ -3573,7 +3573,7 @@ __metadata:
     prettier: 3.3.3
     rimraf: 5.0.10
     rollup: 4.23.0
-    typescript: 5.6.2
+    typescript: 5.6.3
   languageName: unknown
   linkType: soft
 
@@ -3605,7 +3605,7 @@ __metadata:
     rimraf: 5.0.10
     rollup: 4.23.0
     ts-jest: 29.2.5
-    typescript: 5.6.2
+    typescript: 5.6.3
   languageName: unknown
   linkType: soft
 
@@ -3635,7 +3635,7 @@ __metadata:
     rollup: 4.23.0
     rxjs: ^7.5.6
     ts-jest: 29.2.5
-    typescript: 5.6.2
+    typescript: 5.6.3
   languageName: unknown
   linkType: soft
 
@@ -3748,7 +3748,7 @@ __metadata:
     storybook: 7.6.20
     sucrase: ^3.20.1
     tsconfig-paths-webpack-plugin: 4.1.0
-    typescript: 5.6.2
+    typescript: 5.6.3
     url-join: ^4.0.1
     urql: ^4.1.0
     use-constant: ^1.1.0
@@ -24236,23 +24236,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:5.6.2":
-  version: 5.6.2
-  resolution: "typescript@npm:5.6.2"
+"typescript@npm:5.6.3":
+  version: 5.6.3
+  resolution: "typescript@npm:5.6.3"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 48777e1dabd9044519f56cd012b0296e3b72bafe12b7e8e34222751d45c67e0eba5387ecdaa6c14a53871a29361127798df6dc8d1d35643a0a47cb0b1c65a33a
+  checksum: ba302f8822777ebefb28b554105f3e074466b671e7444ec6b75dadc008a62f46f373d9e57ceced1c433756d06c8b7dc569a7eefdf3a9573122a49205ff99021a
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@5.6.2#~builtin<compat/typescript>":
-  version: 5.6.2
-  resolution: "typescript@patch:typescript@npm%3A5.6.2#~builtin<compat/typescript>::version=5.6.2&hash=8c6c40"
+"typescript@patch:typescript@5.6.3#~builtin<compat/typescript>":
+  version: 5.6.3
+  resolution: "typescript@patch:typescript@npm%3A5.6.3#~builtin<compat/typescript>::version=5.6.3&hash=8c6c40"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: be6138b734b2d5f6aa9844b760d6a9e853d395e55ec4570ff1026cca195e5968849e38907c18f9c5b35f6a38e4e18ec29937f1c2ae03c6405e9874ad45d810b1
+  checksum: f6947c263dc67ea8429eefc3921683320f901a07d9ef29a1101a34f5b30108343b5a29aa77a581217a17f2616091ae7bd3043b304cf37f37d5e128e19296c08b
   languageName: node
   linkType: hard
 

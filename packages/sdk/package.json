@@ -44,7 +44,7 @@
         "rimraf": "5.0.10",
         "rollup": "4.23.0",
         "ts-jest": "29.2.5",
-        "typescript": "5.6.2"
+        "typescript": "5.6.3"
     },
     "engines": {
         "node": ">=18 <21"
