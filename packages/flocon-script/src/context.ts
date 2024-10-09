@@ -15,7 +15,7 @@ export class Context {
     
     のようなとき、let f の括弧の外では [{ x: 1 }]、let x = 2 のすぐ上では [{ x: 1 }, {}]、下から ) までは [{ x: 1 }, { x: 2 }] となる。
     */
-    private varTables: Map<string, Ref<FValue>>[] = [new Map()];
+    private varTables: Map<string, Ref<FValue>>[] = [new Map<string, Ref<FValue>>()];
 
     public constructor(public globalThis: FRecord) {}
 

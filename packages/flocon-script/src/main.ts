@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { parse } from 'acorn';
 import { Program } from 'estree';
 import { ScriptError } from './ScriptError';
@@ -51,7 +52,7 @@ function ofFCallExpression(
     expression: FSimpleCallExpression | FNewExpression,
     context: Context,
     isChain: boolean,
-    isNew?: 'new' | undefined,
+    isNew?: 'new'  ,
 ): FValue {
     const callee = ofFExpression(expression.callee, context);
     const args = expression.arguments.map(arg => {
@@ -698,7 +699,7 @@ function ofFStatement(statement: FStatement, context: Context): FStatementResult
                 }
             }
             let isFirstLoop = true;
-            // eslint-disable-next-line no-constant-condition
+             
             while (true) {
                 if (!isFirstLoop && statement.update != null) {
                     ofFExpression(statement.update, context);

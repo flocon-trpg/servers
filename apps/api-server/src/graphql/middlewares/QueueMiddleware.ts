@@ -18,5 +18,6 @@ export const QueueMiddleware: MiddlewareFn<ResolverContext> = async ({ context }
         default:
             break;
     }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return result.value;
 };

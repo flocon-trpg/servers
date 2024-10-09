@@ -22,6 +22,7 @@ export class FFunction implements FObjectBase {
         return this.func({ ...params });
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected onGetting(params: GetCoreParams): Option<FValue> {
         return Option.none();
     }
@@ -55,7 +56,7 @@ export class FFunction implements FObjectBase {
         });
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-types
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     public toJObject(): Function {
         return () => {
             throw new Error('Not supported');

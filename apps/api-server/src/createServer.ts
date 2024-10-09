@@ -7,8 +7,8 @@ import { ApolloServer } from 'apollo-server-express';
 import { ExpressContext } from 'apollo-server-express/dist/ApolloServer';
 import express from 'express';
 import { ensureDir } from 'fs-extra';
-import { GraphQLSchema, execute, subscribe } from 'graphql';
-import { parse } from 'graphql';
+import { GraphQLSchema, execute, parse , subscribe } from 'graphql';
+
 import { Context } from 'graphql-ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import multer from 'multer';
@@ -172,17 +172,19 @@ export const createServer = async ({
     apolloServer.applyMiddleware({ app });
 
     if (serverConfig.accessControlAllowOrigin == null) {
-        !quiet &&
+        if (!quiet) {
             AppConsole.infoAsNotice({
                 en: '"accessControlAllowOrigin" config was not found. "Access-Control-Allow-Origin" header will be empty.',
                 ja: '"accessControlAllowOrigin" のコンフィグが見つかりませんでした。"Access-Control-Allow-Origin" ヘッダーは空になります。',
             });
+        }
     } else {
-        !quiet &&
+        if (!quiet) {
             AppConsole.infoAsNotice({
                 en: `"accessControlAllowOrigin" config was found. "Access-Control-Allow-Origin" header will be "${serverConfig.accessControlAllowOrigin}".`,
                 ja: `"accessControlAllowOrigin" のコンフィグが見つかりました。"Access-Control-Allow-Origin" ヘッダーは "${serverConfig.accessControlAllowOrigin}" になります。`,
             });
+        }
         const accessControlAllowOrigin = serverConfig.accessControlAllowOrigin;
         app.use((req, res, next) => {
             res.header('Access-Control-Allow-Origin', accessControlAllowOrigin);
@@ -197,28 +199,31 @@ export const createServer = async ({
     const applyUploader = async () => {
         const uploaderConfig = serverConfig.uploader;
         if (uploaderConfig == null || !uploaderConfig.enabled) {
-            !quiet &&
+            if (!quiet) {
                 AppConsole.infoAsNotice({
                     en: `The uploader of API server is disabled.`,
                     ja: `APIサーバーのアップローダーは無効化されています。`,
                 });
+            }
             return;
         }
         const directory = uploaderConfig.directory;
         if (directory == null) {
-            !quiet &&
+            if (!quiet) {
                 AppConsole.warn({
                     en: `The uploader of API server is disabled because "${EMBUPLOADER_PATH}" is empty.`,
                     ja: `"${EMBUPLOADER_PATH}"の値が空なので、APIサーバーのアップローダーは無効化されています。`,
                 });
+            }
             return;
         }
 
-        !quiet &&
+        if (!quiet) {
             AppConsole.infoAsNotice({
                 en: `The uploader of API server is enabled.`,
                 ja: `APIサーバーのアップローダーは有効化されています。`,
             });
+        }
 
         await ensureDir(path.resolve(directory));
         const storage = multer.diskStorage({
@@ -236,6 +241,7 @@ export const createServer = async ({
         };
         app.post(
             '/uploader/upload/:permission',
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
             async (req, res, next) => {
                 switch (req.params.permission) {
                     case permission.unlisted:
@@ -304,8 +310,11 @@ export const createServer = async ({
 
                 upload.single('file')(req, res, next);
             },
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
             async (req, res) => {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 const forkedEm: EM = res.locals.forkedEm;
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 const user: User = res.locals.user;
 
                 const file = req.file;
@@ -349,7 +358,9 @@ export const createServer = async ({
             },
         );
 
-        app.get('/uploader/:type/:file_name', async (req, res) => {
+        app.get('/uploader/:type/:file_name', 
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            async (req, res) => {
             let typeParam: 'files' | 'thumbs';
             switch (req.params.type) {
                 case 'files':
@@ -453,7 +464,6 @@ export const createServer = async ({
             onSubscribe: async (ctx, message) => {
                 loggerRef.info({ message }, 'graphql-ws onSubscribe');
 
-                message.payload.query;
                 // Apollo Clientなどではmessage.payload.operationNameが使えるがurqlではnullishなので、queryを代わりに使っている
                 if (!isRoomEventSubscription(message.payload.query)) {
                     return;
@@ -495,14 +505,14 @@ export const createServer = async ({
     }
     const server = httpServer.listen(port, () => {
         // TODO: /graphqlが含まれているとAPI_HTTPなどの設定にも/graphqlの部分も入力してしまいそうなので、対処したほうがいいと思われる。また、createServerAsErrorとの統一性も取れていない
-        !quiet &&
+        if (!quiet) {
             loggerRef.infoAsNotice(
                 `🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`,
             );
-        !quiet &&
             loggerRef.infoAsNotice(
                 `🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`,
             );
+        }
     });
     const close = async () => {
         await new Promise((resolve, reject) => {

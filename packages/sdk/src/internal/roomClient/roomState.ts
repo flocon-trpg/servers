@@ -253,7 +253,7 @@ export class RoomStateManager<TGraphQLError> {
                                 }) as const,
                         )
                         .catch(
-                            e =>
+                            (e: unknown) =>
                                 ({
                                     type: 'catch',
                                     toPost,

@@ -265,7 +265,7 @@ describe('promiseQueue', () => {
 
     it('tests queueLimit', async () => {
         const queue = new PromiseQueue({ queueLimit: 2 });
-        queue.next(async () => {
+        void queue.next(async () => {
             await delay(500);
             return 1;
         });

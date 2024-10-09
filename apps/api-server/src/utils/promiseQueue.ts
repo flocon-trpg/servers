@@ -1,5 +1,5 @@
-import { Observable, Subject } from 'rxjs';
-import { defer, of } from 'rxjs';
+import { Observable, Subject , defer, of } from 'rxjs';
+
 import * as Rx from 'rxjs';
 import { v4 } from 'uuid';
 
@@ -58,12 +58,14 @@ export class PromiseQueue {
                         .then(result =>
                             observer.next({
                                 id,
+                                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                                 result: { type: executed, value: result, isError: false },
                             }),
                         )
                         .catch(reason =>
                             observer.next({
                                 id,
+                                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                                 result: { type: executed, value: reason, isError: true },
                             }),
                         )
@@ -119,9 +121,11 @@ export class PromiseQueue {
                     switch (r.result.type) {
                         case executed:
                             if (r.result.isError) {
+                                // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
                                 reject(r.result.value);
                                 return;
                             }
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                             resolver({ type: executed, value: r.result.value });
                             return;
                         case 'timeout':
