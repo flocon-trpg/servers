@@ -90,7 +90,7 @@ export const loggerRef: Type = {
         return toLogFn(this.value, 'info');
     },
     infoAsNotice(msg) {
-        return this.info({ obj: { [notice]: true } }, msg);
+        return this.info({ [notice]: true }, msg);
     },
     get warn() {
         return toLogFn(this.value, 'warn');
