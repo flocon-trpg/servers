@@ -1,12 +1,12 @@
 import {
     Collection,
     Entity,
-    IdentifiedReference,
     Index,
     ManyToMany,
     ManyToOne,
     PrimaryKey,
     Property,
+    Ref,
     TextType,
 } from '@mikro-orm/core';
 import { FilePermissionType } from '../../enums/FilePermissionType';
@@ -29,7 +29,7 @@ export class File {
         screenname,
         size,
     }: {
-        createdBy: IdentifiedReference<User, 'userUid'>;
+        createdBy: Ref<User>;
         deletePermission: FilePermissionType;
         encoding: string;
         filename: string;
@@ -100,8 +100,8 @@ export class File {
     @Index()
     public deletePermission: FilePermissionType;
 
-    @ManyToOne(() => User)
-    public createdBy!: IdentifiedReference<User, 'userUid'>;
+    @ManyToOne(() => User, { ref: true })
+    public createdBy!: Ref<User>;
 
     @ManyToMany(() => FileTag, x => x.files, { owner: true })
     public fileTags = new Collection<FileTag>(this);

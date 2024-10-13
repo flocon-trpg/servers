@@ -2,7 +2,7 @@ export { arrayEquals } from './internal/arrayEquals';
 export { compare, Operator } from './internal/compare';
 export { CompositeKey, stringToCompositeKey, compositeKeyToJsonString, compositeKeyEquals, } from './internal/compositeKey';
 export { delay } from './internal/delay';
-export { DualKey, DualKeyMap, ReadonlyDualKeyMap, DualKeyMapSource, toJsonString as dualKeyToJsonString, groupJoinDualKeyMap, groupJoin3DualKeyMap, groupJoin4DualKeyMap, } from './internal/dualKeyMap';
+export { DualKey, DualKeyMap, ReadonlyDualKeyMap, DualKeyMapSource, groupJoinDualKeyMap, groupJoin3DualKeyMap, groupJoin4DualKeyMap, } from './internal/dualKeyMap';
 export { DeletableTree } from './internal/deletableTree';
 export { filterInt } from './internal/filterInt';
 export { groupJoinArray } from './internal/groupJoinArray';

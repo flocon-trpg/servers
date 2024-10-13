@@ -14,7 +14,7 @@ import {
 import { FileSourceType, WriteRoomSoundEffectDocument } from '@flocon-trpg/typed-document-node';
 import { keyNames, recordToArray } from '@flocon-trpg/utils';
 import { Menu, Tooltip } from 'antd';
-import { ItemType } from 'antd/lib/menu/hooks/useItems';
+import { ItemType } from 'antd/lib/menu/interface';
 import classNames from 'classnames';
 import { useAtomValue, useSetAtom } from 'jotai/react';
 import React from 'react';

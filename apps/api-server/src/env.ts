@@ -1,5 +1,5 @@
 import { existsSync } from 'fs';
-import { LOG_FORMAT as $LOG_FORMAT } from '@flocon-trpg/default-pino-transport';
+import { LOG_FORMAT as $LOG_FORMAT } from '@flocon-trpg/logger-base';
 import { config } from 'dotenv';
 import { expand } from 'dotenv-expand';
 

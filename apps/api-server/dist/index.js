@@ -5,7 +5,7 @@ require('reflect-metadata');
 var main = require('./main.js');
 var commandLineArgs = require('./utils/commandLineArgs.js');
 
-commandLineArgs.loadAsMain().then(args => {
-    main.main(args).catch(err => utils.loggerRef.error(err));
+void commandLineArgs.loadAsMain().then(args => {
+    main.main(args).catch((err) => utils.loggerRef.error(err));
 });
 //# sourceMappingURL=index.js.map

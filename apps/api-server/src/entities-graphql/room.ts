@@ -25,7 +25,7 @@ import {
     recordForEachAsync,
 } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
-import { Reference } from '@mikro-orm/core';
+import { ref } from '@mikro-orm/core';
 import { Participant } from '../entities/participant/entity';
 import { Room, RoomOp } from '../entities/room/entity';
 import { User } from '../entities/user/entity';
@@ -101,7 +101,8 @@ export namespace GlobalRoom {
                 });
                 for (const participantEntity of participantEntities) {
                     const name = participantEntity?.name;
-                    participants[participantEntity.user.userUid] = {
+                    const userUid = await participantEntity.user.loadProperty('userUid');
+                    participants[userUid] = {
                         $v: 2,
                         $r: 1,
                         name: name == null ? undefined : convertToMaxLength100String(name),
@@ -347,7 +348,7 @@ export namespace GlobalRoom {
                 prevRevision,
                 value: toDownOperation(roomTemplate)(operation),
             });
-            op.room = Reference.create<Room>(target);
+            op.room = ref(target);
 
             em.persist(op);
             return nextState.value;

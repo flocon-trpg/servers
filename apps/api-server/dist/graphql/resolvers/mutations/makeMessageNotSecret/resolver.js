@@ -45,7 +45,8 @@ exports.MakeMessageNotSecretResolver = class MakeMessageNotSecretResolver {
         }
         const publicMsg = await em.findOne(entity.RoomPubMsg, { id: args.messageId });
         if (publicMsg != null) {
-            if (publicMsg.createdBy?.userUid !== authorizedUserUid) {
+            const createdBy = await publicMsg.createdBy?.loadProperty('userUid');
+            if (createdBy !== authorizedUserUid) {
                 return {
                     failureType: MakeMessageNotSecretFailureType.MakeMessageNotSecretFailureType.NotYourMessage,
                 };
@@ -64,14 +65,15 @@ exports.MakeMessageNotSecretResolver = class MakeMessageNotSecretResolver {
                 sendTo: findResult.participantIds(),
                 roomId: room.id,
                 visibleTo: undefined,
-                createdBy: publicMsg.createdBy?.userUid,
+                createdBy,
                 value: payloadValue,
             });
             return {};
         }
         const privateMsg = await em.findOne(entity.RoomPrvMsg, { id: args.messageId });
         if (privateMsg != null) {
-            if (privateMsg.createdBy?.userUid !== authorizedUserUid) {
+            const createdBy = await privateMsg.createdBy?.loadProperty('userUid');
+            if (createdBy !== authorizedUserUid) {
                 return {
                     failureType: MakeMessageNotSecretFailureType.MakeMessageNotSecretFailureType.NotYourMessage,
                 };
@@ -90,7 +92,7 @@ exports.MakeMessageNotSecretResolver = class MakeMessageNotSecretResolver {
                 sendTo: findResult.participantIds(),
                 roomId: room.id,
                 visibleTo: (await privateMsg.visibleTo.loadItems()).map(user => user.userUid),
-                createdBy: privateMsg.createdBy?.userUid,
+                createdBy,
                 value: payloadValue,
             });
             return {};

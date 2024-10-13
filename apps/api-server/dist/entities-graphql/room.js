@@ -54,7 +54,8 @@ exports.GlobalRoom = void 0;
                 });
                 for (const participantEntity of participantEntities) {
                     const name = participantEntity?.name;
-                    participants[participantEntity.user.userUid] = {
+                    const userUid = await participantEntity.user.loadProperty('userUid');
+                    participants[userUid] = {
                         $v: 2,
                         $r: 1,
                         name: name == null ? undefined : convertToMaxLength100String.convertToMaxLength100String(name),
@@ -225,7 +226,7 @@ exports.GlobalRoom = void 0;
                 prevRevision,
                 value: FilePathModule.toDownOperation(FilePathModule.roomTemplate)(operation),
             });
-            op.room = core.Reference.create(target);
+            op.room = core.ref(target);
             em.persist(op);
             return nextState.value;
         };

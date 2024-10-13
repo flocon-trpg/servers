@@ -12,7 +12,7 @@ import {
 } from '@flocon-trpg/core';
 import { recordToArray } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
-import { Reference } from '@mikro-orm/core';
+import { Loaded, Reference, ref } from '@mikro-orm/core';
 import bcrypt from 'bcrypt';
 import Color from 'color';
 import safeCompare from 'safe-compare';
@@ -73,7 +73,7 @@ export const checkSignInAndNotAnonymous = (
     context: ResolverContext,
 ): DecodedIdToken | typeof NotSignIn | typeof AnonymousAccount => {
     const decodedIdToken = checkSignIn(context);
-    if (decodedIdToken == NotSignIn) {
+    if (decodedIdToken === NotSignIn) {
         return NotSignIn;
     }
     if (decodedIdToken.firebase.sign_in_provider === anonymous) {
@@ -196,13 +196,14 @@ export const createUpdatedText = (entity: RoomPubMsg | RoomPrvMsg): UpdatedText 
     return { currentText: entity.updatedText, updatedAt: entity.textUpdatedAtValue };
 };
 
-export const createRoomPublicMessage = ({
+export const createRoomPublicMessage = async ({
     msg,
     channelKey,
 }: {
     msg: RoomPubMsg;
     channelKey: string;
-}): RoomPublicMessage => {
+}): Promise<RoomPublicMessage> => {
+    const createdBy = await msg.createdBy?.loadProperty('userUid');
     return {
         __tstype: RoomPublicMessageType,
         channelKey,
@@ -220,7 +221,7 @@ export const createRoomPublicMessage = ({
                   },
         altTextToSecret: msg.altTextToSecret ?? undefined,
         isSecret: msg.isSecret,
-        createdBy: msg.createdBy?.userUid,
+        createdBy,
         character: toCharacterValueForMessage(msg),
         customName: msg.customName,
         createdAt: msg.createdAt.getTime(),
@@ -259,18 +260,19 @@ const toCharacterValueForMessage = (
     };
 };
 
-export const createRoomPrivateMessage = ({
+export const createRoomPrivateMessage = async ({
     msg,
     visibleTo,
 }: {
     msg: RoomPrvMsg;
     visibleTo: string[];
-}): RoomPrivateMessage => {
+}): Promise<RoomPrivateMessage> => {
+    const createdBy = await msg.createdBy?.loadProperty('userUid');
     return {
         __tstype: RoomPrivateMessageType,
         messageId: msg.id,
         visibleTo: [...visibleTo].sort(),
-        createdBy: msg.createdBy?.userUid,
+        createdBy,
         character: toCharacterValueForMessage(msg),
         customName: msg.customName,
         createdAt: msg.createdAt.getTime(),
@@ -332,7 +334,7 @@ export const createRoomPrivateMessageUpdate = (msg: RoomPrvMsg): RoomPrivateMess
 };
 
 export async function getRoomMessagesFromDb(
-    room: Room$MikroORM.Room,
+    room: Loaded<Room$MikroORM.Room>,
     userUid: string,
     mode: 'log' | 'default',
 ): Promise<RoomMessages> {
@@ -345,8 +347,8 @@ export async function getRoomMessagesFromDb(
             name: ch.name,
         });
         for (const msg of await ch.roomPubMsgs.loadItems()) {
-            const createdBy = msg.createdBy?.userUid;
-            const graphqlMessage = createRoomPublicMessage({ msg, channelKey: ch.key });
+            const createdBy = await msg.createdBy?.loadProperty('userUid');
+            const graphqlMessage = await createRoomPublicMessage({ msg, channelKey: ch.key });
             if (mode === 'default' && msg.isSecret && createdBy !== userUid) {
                 deleteSecretValues(graphqlMessage);
             }
@@ -362,8 +364,8 @@ export async function getRoomMessagesFromDb(
                 continue;
             }
         }
-        const createdBy = msg.createdBy?.userUid;
-        const graphqlMessage = createRoomPrivateMessage({
+        const createdBy = await msg.createdBy?.loadProperty('userUid');
+        const graphqlMessage = await createRoomPrivateMessage({
             msg,
             visibleTo: visibleTo.map(user => user.userUid),
         });
@@ -383,7 +385,7 @@ export async function getRoomMessagesFromDb(
 
     const soundEffects: RoomSoundEffect[] = [];
     for (const se of await room.roomSes.loadItems()) {
-        const createdBy = se.createdBy?.userUid;
+        const createdBy = await se.createdBy?.loadProperty('userUid');
         const graphQLValue: RoomSoundEffect = {
             __tstype: RoomSoundEffectType,
             messageId: se.id,
@@ -587,7 +589,7 @@ export const analyzeTextAndSetToEntity = async (params: {
                   initTextSource: params.textSource,
                   initText: analyzed.value.message,
               });
-    targetEntity.createdBy = Reference.create<User, 'userUid'>(params.createdBy);
+    targetEntity.createdBy = ref(params.createdBy);
     if (analyzed.value.diceResult != null) {
         if (analyzed.value.diceResult.isSecret) {
             targetEntity.isSecret = true;

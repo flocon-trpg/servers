@@ -1,7 +1,6 @@
 'use strict';
 
 var tslib = require('tslib');
-var core = require('@mikro-orm/core');
 var typeGraphql = require('type-graphql');
 var entity = require('../../../../entities/fileTag/entity.js');
 var roles = require('../../../../utils/roles.js');
@@ -30,9 +29,7 @@ exports.CreateFileTagResolver = class CreateFileTagResolver {
         if (maxTagsCount <= tagsCount) {
             return null;
         }
-        const newFileTag = new entity.FileTag({ name: tagName });
-        newFileTag.name = tagName;
-        newFileTag.user = core.Reference.create(user);
+        const newFileTag = context.em.create(entity.FileTag, { name: tagName, user: user });
         await context.em.persistAndFlush(newFileTag);
         return {
             id: newFileTag.id,

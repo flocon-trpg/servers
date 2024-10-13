@@ -132,7 +132,7 @@ exports.WritePublicMessageResolver = class WritePublicMessageResolver {
         let ch = await em.findOne(entity.RoomPubCh, { key: channelKey, room: room.id });
         if (ch == null) {
             ch = new entity.RoomPubCh({ key: channelKey });
-            ch.room = core.Reference.create(room);
+            ch.room = core.ref(room);
             em.persist(ch);
         }
         entity$1.customName = args.customName;
@@ -145,10 +145,13 @@ exports.WritePublicMessageResolver = class WritePublicMessageResolver {
             entity$1.charaPortraitImagePath = chara.portraitImage?.path;
             entity$1.charaPortraitImageSourceType = FileSourceType.FileSourceTypeModule.ofNullishString(chara.portraitImage?.sourceType);
         }
-        entity$1.roomPubCh = core.Reference.create(ch);
+        entity$1.roomPubCh = core.ref(ch);
         room.completeUpdatedAt = new Date();
         await em.persistAndFlush(entity$1);
-        const result = utils.createRoomPublicMessage({ msg: entity$1, channelKey });
+        const result = await utils.createRoomPublicMessage({
+            msg: entity$1,
+            channelKey,
+        });
         const payload = {
             type: 'messageUpdatePayload',
             sendTo: findResult.participantIds(),

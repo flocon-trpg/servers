@@ -89,7 +89,7 @@ export const subscribeRoomConnections = ({
     });
 
     const executeQuery = () => {
-        client.getRoomConnectionsQuery().then(r => {
+        void client.getRoomConnectionsQuery().then(r => {
             const result = r.value?.result;
             if (result?.__typename !== 'GetRoomConnectionsSuccessResult') {
                 return;

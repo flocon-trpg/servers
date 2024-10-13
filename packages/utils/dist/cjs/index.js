@@ -1,7 +1,7 @@
 'use strict';
 
 var option = require('@kizahasi/option');
-var defaultPinoTransport = require('@flocon-trpg/default-pino-transport');
+var loggerBase = require('@flocon-trpg/logger-base');
 var browserOrNode = require('browser-or-node');
 var pino = require('pino');
 var result = require('@kizahasi/result');
@@ -209,9 +209,6 @@ const dualKeyRecordForEach = (source, action) => {
     }
 };
 
-const toJsonString = (source) => {
-    return `{ first: ${source.first}, second: ${source.second} }`;
-};
 class DualKeyMap {
     // Map<TKey2, TValue>は常に空でないMapとなる
     _core;
@@ -757,6 +754,21 @@ const keyNames = (...keys) => {
 };
 
 const defaultLogLevel = 'info';
+const toLogFn = (logger, pinoLevel) => {
+    function print(arg1, ...arg2) {
+        if (typeof arg1 === 'string') {
+            logger[pinoLevel](arg1, ...arg2);
+            return;
+        }
+        const [msg, ...args] = [...arg2];
+        if (typeof msg !== 'string') {
+            // TypeScript の型に従ってコードを書いている限り、ここには来ないはず。
+            throw new Error('When the first argument is an object, the second argument must be a string.');
+        }
+        logger[pinoLevel](arg1, msg, ...args);
+    }
+    return print;
+};
 const createDefaultLogger = (args) => {
     return (args?.isBrowser ?? browserOrNode.isBrowser)
         ? pino__default.default({ level: args?.logLevel ?? defaultLogLevel, browser: {} })
@@ -778,28 +790,28 @@ const loggerRef = {
         currentLogger = value;
     },
     get debug() {
-        return this.value.debug.bind(this.value);
+        return toLogFn(this.value, 'debug');
     },
     get error() {
-        return this.value.error.bind(this.value);
+        return toLogFn(this.value, 'error');
     },
     get fatal() {
-        return this.value.fatal.bind(this.value);
+        return toLogFn(this.value, 'fatal');
     },
     get info() {
-        return this.value.info.bind(this.value);
+        return toLogFn(this.value, 'info');
     },
     infoAsNotice(msg) {
-        return this.info({ [defaultPinoTransport.notice]: true }, msg);
+        return this.info({ [loggerBase.notice]: true }, msg);
     },
     get warn() {
-        return this.value.warn.bind(this.value);
+        return toLogFn(this.value, 'warn');
     },
     get silent() {
-        return this.value.silent.bind(this.value);
+        return toLogFn(this.value, 'silent');
     },
     get trace() {
-        return this.value.trace.bind(this.value);
+        return toLogFn(this.value, 'trace');
     },
 };
 
@@ -1090,7 +1102,6 @@ exports.createDefaultLogger = createDefaultLogger;
 exports.delay = delay;
 exports.dualKeyRecordForEach = dualKeyRecordForEach;
 exports.dualKeyRecordToDualKeyMap = dualKeyRecordToDualKeyMap;
-exports.dualKeyToJsonString = toJsonString;
 exports.filterInt = filterInt;
 exports.getExactlyOneKey = getExactlyOneKey;
 exports.groupJoin3DualKeyMap = groupJoin3DualKeyMap;

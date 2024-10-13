@@ -6,7 +6,7 @@ var commandLineArgs = require('./utils/commandLineArgs.js');
 
 const main = async () => {
     const commandLineArgs$1 = await commandLineArgs.loadMigrationCreate();
-    migrate.migrateByNpmScript(commandLineArgs$1.init ? 'create-initial' : 'create').catch(err => {
+    migrate.migrateByNpmScript(commandLineArgs$1.init ? 'create-initial' : 'create').catch((err) => {
         appConsole.AppConsole.fatal({
             en: 'migration failed. ',
             ja: 'マイグレーションに失敗しました。',
@@ -15,5 +15,5 @@ const main = async () => {
         process.exit(1);
     });
 };
-main();
+void main();
 //# sourceMappingURL=run-migrationCreate.js.map

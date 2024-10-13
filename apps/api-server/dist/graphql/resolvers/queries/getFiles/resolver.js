@@ -50,16 +50,17 @@ exports.GetFilesResolver = class GetFilesResolver {
                 },
             ],
         });
+        const filePromises = files.map(async (file) => ({
+            ...file,
+            screenname: file.screenname ?? 'null',
+            createdBy: await file.createdBy.loadProperty('userUid'),
+            createdAt: file.createdAt?.getTime(),
+            listType: file.listPermission === FilePermissionType.FilePermissionType.Private
+                ? FileListType.FileListType.Unlisted
+                : FileListType.FileListType.Public,
+        }));
         return {
-            files: files.map(file => ({
-                ...file,
-                screenname: file.screenname ?? 'null',
-                createdBy: file.createdBy.userUid,
-                createdAt: file.createdAt?.getTime(),
-                listType: file.listPermission === FilePermissionType.FilePermissionType.Private
-                    ? FileListType.FileListType.Unlisted
-                    : FileListType.FileListType.Public,
-            })),
+            files: await Promise.all(filePromises),
         };
     }
 };

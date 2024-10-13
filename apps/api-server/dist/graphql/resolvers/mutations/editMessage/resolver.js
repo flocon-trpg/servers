@@ -55,7 +55,7 @@ exports.EditMessageResolver = class EditMessageResolver {
         }
         const publicMsg = await em.findOne(entity.RoomPubMsg, { id: args.messageId });
         if (publicMsg != null) {
-            if (publicMsg.createdBy?.userUid !== authorizedUserUid) {
+            if ((await publicMsg.createdBy?.loadProperty('userUid')) !== authorizedUserUid) {
                 return {
                     failureType: EditMessageFailureType.EditMessageFailureType.NotYourMessage,
                 };
@@ -75,14 +75,14 @@ exports.EditMessageResolver = class EditMessageResolver {
                 sendTo: findResult.participantIds(),
                 roomId: room.id,
                 visibleTo: undefined,
-                createdBy: publicMsg.createdBy?.userUid,
+                createdBy: await publicMsg.createdBy?.loadProperty('userUid'),
                 value: payloadValue,
             });
             return {};
         }
         const privateMsg = await em.findOne(entity.RoomPrvMsg, { id: args.messageId });
         if (privateMsg != null) {
-            if (privateMsg.createdBy?.userUid !== authorizedUserUid) {
+            if ((await privateMsg.createdBy?.loadProperty('userUid')) !== authorizedUserUid) {
                 return {
                     failureType: EditMessageFailureType.EditMessageFailureType.NotYourMessage,
                 };
@@ -102,7 +102,7 @@ exports.EditMessageResolver = class EditMessageResolver {
                 sendTo: findResult.participantIds(),
                 roomId: room.id,
                 visibleTo: (await privateMsg.visibleTo.loadItems()).map(user => user.userUid),
-                createdBy: privateMsg.createdBy?.userUid,
+                createdBy: await privateMsg.createdBy?.loadProperty('userUid'),
                 value: payloadValue,
             });
             return {};

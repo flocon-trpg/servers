@@ -1,16 +1,46 @@
-import { notice } from '@flocon-trpg/default-pino-transport';
+import { notice } from '@flocon-trpg/logger-base';
 import { isBrowser } from 'browser-or-node';
 import pino, { Logger } from 'pino';
 import { PinoLogLevel } from './parsePinoLogLevel';
 
 const defaultLogLevel = 'info';
 
-// pino の関数は any や可変パラメーターが多く引数のミスが起こりやすいので、型を狭めている。
-// この型では printf-style placeholder が使えないが、使う場面は今のところないので問題なし。
+// pino の関数は any や可変パラメーターが多く引数のミスが起こりやすいので、型を変更したり制限をかけている。
 interface LogFn {
-    (obj: Error | Record<string, unknown>, msg: string): void;
-    (msg: string): void;
+    (msg: string, ...args: readonly unknown[]): void;
+    (obj: Error | Record<string, unknown>, msg?: string, ...args: readonly unknown[]): void;
 }
+
+const toLogFn = (
+    logger: Logger,
+    pinoLevel: 'debug' | 'error' | 'fatal' | 'info' | 'warn' | 'silent' | 'trace',
+): LogFn => {
+    function print(msg: string, ...args: readonly unknown[]): void;
+    function print(
+        obj: Error | Record<string, unknown>,
+        msg?: string,
+        ...args: readonly unknown[]
+    ): void;
+    function print(
+        arg1: string | Error | Record<string, unknown>,
+        ...arg2: readonly unknown[]
+    ): void {
+        if (typeof arg1 === 'string') {
+            logger[pinoLevel](arg1, ...arg2);
+            return;
+        }
+        const [msg, ...args] = [...arg2];
+        if (typeof msg !== 'string') {
+            // TypeScript の型に従ってコードを書いている限り、ここには来ないはず。
+            throw new Error(
+                'When the first argument is an object, the second argument must be a string.',
+            );
+        }
+        logger[pinoLevel](arg1, msg, ...args);
+    }
+
+    return print;
+};
 
 type Type = {
     /** pino のインスタンスを get もしくは set できます。 */
@@ -48,27 +78,27 @@ export const loggerRef: Type = {
         currentLogger = value;
     },
     get debug() {
-        return this.value.debug.bind(this.value);
+        return toLogFn(this.value, 'debug');
     },
     get error() {
-        return this.value.error.bind(this.value);
+        return toLogFn(this.value, 'error');
     },
     get fatal() {
-        return this.value.fatal.bind(this.value);
+        return toLogFn(this.value, 'fatal');
     },
     get info() {
-        return this.value.info.bind(this.value);
+        return toLogFn(this.value, 'info');
     },
     infoAsNotice(msg) {
         return this.info({ [notice]: true }, msg);
     },
     get warn() {
-        return this.value.warn.bind(this.value);
+        return toLogFn(this.value, 'warn');
     },
     get silent() {
-        return this.value.silent.bind(this.value);
+        return toLogFn(this.value, 'silent');
     },
     get trace() {
-        return this.value.trace.bind(this.value);
+        return toLogFn(this.value, 'trace');
     },
 };

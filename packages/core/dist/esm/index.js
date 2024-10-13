@@ -4,7 +4,7 @@ import { LocalDate, LocalDateTime, LocalTime, OffsetDateTime, parse as parse$2 }
 import { FObject, FBoolean, ScriptError, beginCast, FFunction, FRecord, FString, FType, FNumber, FRecordRef, test, arrayClass, createConsoleClass, exec } from '@flocon-trpg/flocon-script';
 import { recordToArray, mapRecord, keyNames, recordToMap, mapToRecord, groupJoinMap, both, right, left, recordForEach, chooseRecord, loggerRef, isReadonlyNonEmptyArray, groupJoinArray, pairwiseIterable, DualKeyMap } from '@flocon-trpg/utils';
 import { cloneDeep, groupBy, maxBy } from 'lodash';
-import { deserializeUpOperation, apply as apply$6, serializeTwoWayOperation, diff as diff$5, deserizalizeTwoWayOperation, toUpOperation as toUpOperation$3, serializeUpOperation, deserializeDownOperation, applyBack as applyBack$5, composeDownOperation as composeDownOperation$4, serializeDownOperation, applyBackAndRestore, transformUpOperation, toDownOperation as toDownOperation$3, applyAndRestore, transformTwoWayOperation } from '@kizahasi/ot-string';
+import { deserializeUpOperation, apply as apply$6, serializeTwoWayOperation, diff as diff$5, deserializeTwoWayOperation, toUpOperation as toUpOperation$3, serializeUpOperation, deserializeDownOperation, applyBack as applyBack$5, composeDownOperation as composeDownOperation$4, serializeDownOperation, applyBackAndRestore, transformUpOperation, toDownOperation as toDownOperation$3, applyAndRestore, transformTwoWayOperation } from '@kizahasi/ot-string';
 import truncate from 'truncate-utf8-bytes';
 import { produce } from 'immer';
 import { OperationBuilder, PositiveInt, transform as transform$1, delete$, apply as apply$7 } from '@kizahasi/ot-core';
@@ -950,7 +950,7 @@ const restore$4 = ({ nextState, downOperation, }) => {
 };
 // 元々はこの関数自身がserverTransformとしてexportされていたが、firstPrimeは必要ないためexportを外した。ただし将来使うことがあるかもしれないため一応残している。
 const serverTransformCore = ({ first, second, prevState, }) => {
-    const first$ = first == null ? undefined : deserizalizeTwoWayOperation(first);
+    const first$ = first == null ? undefined : deserializeTwoWayOperation(first);
     if (first$ === undefined) {
         const second$ = second == null ? undefined : deserializeUpOperation(second);
         if (second$ === undefined) {
@@ -1048,7 +1048,7 @@ const diff$4 = ({ prev, next, }) => {
     }));
 };
 const toUpOperation$2 = (source) => {
-    const twoWayOperation = deserizalizeTwoWayOperation(source);
+    const twoWayOperation = deserializeTwoWayOperation(source);
     if (twoWayOperation == null) {
         throw new Error('This should not happen');
     }
@@ -1056,7 +1056,7 @@ const toUpOperation$2 = (source) => {
     return serializeUpOperation(upOperation);
 };
 const toDownOperation$2 = (source) => {
-    const twoWayOperation = deserizalizeTwoWayOperation(source);
+    const twoWayOperation = deserializeTwoWayOperation(source);
     if (twoWayOperation == null) {
         throw new Error('This should not happen');
     }
@@ -4391,7 +4391,7 @@ const clientTransform = (params) => {
     if (finalArrayResult.isError) {
         // 配列のtransformでエラーが発生することは通常はない。
         return Result.error('Error at transforming an array operation. This is probablly a bug. Message: ' +
-            finalArrayResult.error);
+            JSON.stringify(finalArrayResult.error));
     }
     const stateAfterFirst = apply$2({
         prevState: params.state,

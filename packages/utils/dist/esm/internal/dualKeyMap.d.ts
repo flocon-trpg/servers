@@ -4,7 +4,6 @@ export type DualKey<T1, T2> = {
     readonly first: T1;
     readonly second: T2;
 };
-export declare const toJsonString: <T1, T2>(source: DualKey<T1, T2>) => string;
 export type DualKeyMapSource<TKey1, TKey2, TValue> = Map<TKey1, Map<TKey2, TValue>> | Map<TKey1, ReadonlyMap<TKey2, TValue>> | ReadonlyMap<TKey1, Map<TKey2, TValue>> | ReadonlyMap<TKey1, ReadonlyMap<TKey2, TValue>>;
 type RecordKey = string | number | symbol;
 export declare class DualKeyMap<TKey1, TKey2, TValue> {

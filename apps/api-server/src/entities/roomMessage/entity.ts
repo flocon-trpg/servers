@@ -6,16 +6,17 @@ import {
     Collection,
     DateType,
     Entity,
-    IdentifiedReference,
     JsonType,
     ManyToMany,
     ManyToOne,
     OneToMany,
     PrimaryKey,
     Property,
+    Ref,
     Reference,
     TextType,
     Unique,
+    ref,
 } from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { FileSourceType } from '../../enums/FileSourceType';
@@ -87,8 +88,8 @@ export class RoomPubCh {
     @OneToMany(() => RoomPubMsg, x => x.roomPubCh, { orphanRemoval: true })
     public roomPubMsgs = new Collection<RoomPubMsg>(this);
 
-    @ManyToOne(() => Room)
-    public room!: IdentifiedReference<Room>;
+    @ManyToOne(() => Room, { ref: true })
+    public room!: Ref<Room>;
 }
 
 // RoomPublicMessage
@@ -202,11 +203,11 @@ export class RoomPubMsg {
     @Property({ nullable: true })
     public customName?: string;
 
-    @ManyToOne(() => RoomPubCh, { wrappedReference: true })
-    public roomPubCh!: IdentifiedReference<RoomPubCh>;
+    @ManyToOne(() => RoomPubCh, { ref: true })
+    public roomPubCh!: Ref<RoomPubCh>;
 
-    @ManyToOne(() => User, { nullable: true, wrappedReference: true })
-    public createdBy?: IdentifiedReference<User, 'userUid'>;
+    @ManyToOne(() => User, { nullable: true, ref: true })
+    public createdBy?: Ref<User>;
 }
 
 // RoomPrivateMessage
@@ -320,15 +321,15 @@ export class RoomPrvMsg {
     @Property({ nullable: true })
     public customName?: string;
 
-    @ManyToOne(() => User, { wrappedReference: true, nullable: true })
-    public createdBy?: IdentifiedReference<User, 'userUid'>;
+    @ManyToOne(() => User, { ref: true, nullable: true })
+    public createdBy?: Ref<User>;
 
     // createdByと同じUserも含めなければならない。
     @ManyToMany(() => User, x => x.visibleRoomPrvMsgs)
     public visibleTo = new Collection<User>(this);
 
-    @ManyToOne(() => Room, { wrappedReference: true })
-    public room!: IdentifiedReference<Room>;
+    @ManyToOne(() => Room, { ref: true })
+    public room!: Ref<Room>;
 }
 
 @Entity()
@@ -342,7 +343,7 @@ export class DicePieceLog {
         stateId: string;
         value: DicePieceLogState;
     }) {
-        this.room = Reference.create(room);
+        this.room = ref(room);
         this.stateId = stateId;
         this.value = value;
     }
@@ -359,8 +360,8 @@ export class DicePieceLog {
     @Property({ type: JsonType, nullable: true })
     public value?: DicePieceLogState;
 
-    @ManyToOne(() => Room, { wrappedReference: true })
-    public room: IdentifiedReference<Room>;
+    @ManyToOne(() => Room, { ref: true })
+    public room: Ref<Room>;
 }
 
 @Entity()
@@ -374,7 +375,7 @@ export class StringPieceLog {
         stateId: string;
         value: StringPieceLogState;
     }) {
-        this.room = Reference.create(room);
+        this.room = ref(room);
         this.stateId = stateId;
         this.value = value;
     }
@@ -391,8 +392,8 @@ export class StringPieceLog {
     @Property({ type: JsonType, nullable: true })
     public value?: StringPieceLogState;
 
-    @ManyToOne(() => Room, { wrappedReference: true })
-    public room: IdentifiedReference<Room>;
+    @ManyToOne(() => Room, { ref: true })
+    public room: Ref<Room>;
 }
 
 // RoomSoundEffect
@@ -427,9 +428,9 @@ export class RoomSe {
     @Property()
     public volume: number;
 
-    @ManyToOne(() => User, { nullable: true, wrappedReference: true })
-    public createdBy?: IdentifiedReference<User, 'userUid'>;
+    @ManyToOne(() => User, { nullable: true, ref: true })
+    public createdBy?: Ref<User>;
 
-    @ManyToOne(() => Room, { wrappedReference: true })
-    public room!: IdentifiedReference<Room>;
+    @ManyToOne(() => Room, { ref: true })
+    public room!: Ref<Room>;
 }

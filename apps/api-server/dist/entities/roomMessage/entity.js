@@ -41,7 +41,7 @@ tslib.__decorate([
     tslib.__metadata("design:type", Object)
 ], exports.RoomPubCh.prototype, "roomPubMsgs", void 0);
 tslib.__decorate([
-    core.ManyToOne(() => entity.Room),
+    core.ManyToOne(() => entity.Room, { ref: true }),
     tslib.__metadata("design:type", Object)
 ], exports.RoomPubCh.prototype, "room", void 0);
 exports.RoomPubCh = tslib.__decorate([
@@ -166,11 +166,11 @@ tslib.__decorate([
     tslib.__metadata("design:type", String)
 ], exports.RoomPubMsg.prototype, "customName", void 0);
 tslib.__decorate([
-    core.ManyToOne(() => exports.RoomPubCh, { wrappedReference: true }),
+    core.ManyToOne(() => exports.RoomPubCh, { ref: true }),
     tslib.__metadata("design:type", Object)
 ], exports.RoomPubMsg.prototype, "roomPubCh", void 0);
 tslib.__decorate([
-    core.ManyToOne(() => entity$1.User, { nullable: true, wrappedReference: true }),
+    core.ManyToOne(() => entity$1.User, { nullable: true, ref: true }),
     tslib.__metadata("design:type", Object)
 ], exports.RoomPubMsg.prototype, "createdBy", void 0);
 exports.RoomPubMsg = tslib.__decorate([
@@ -295,7 +295,7 @@ tslib.__decorate([
     tslib.__metadata("design:type", String)
 ], exports.RoomPrvMsg.prototype, "customName", void 0);
 tslib.__decorate([
-    core.ManyToOne(() => entity$1.User, { wrappedReference: true, nullable: true }),
+    core.ManyToOne(() => entity$1.User, { ref: true, nullable: true }),
     tslib.__metadata("design:type", Object)
 ], exports.RoomPrvMsg.prototype, "createdBy", void 0);
 tslib.__decorate([
@@ -303,7 +303,7 @@ tslib.__decorate([
     tslib.__metadata("design:type", Object)
 ], exports.RoomPrvMsg.prototype, "visibleTo", void 0);
 tslib.__decorate([
-    core.ManyToOne(() => entity.Room, { wrappedReference: true }),
+    core.ManyToOne(() => entity.Room, { ref: true }),
     tslib.__metadata("design:type", Object)
 ], exports.RoomPrvMsg.prototype, "room", void 0);
 exports.RoomPrvMsg = tslib.__decorate([
@@ -314,7 +314,7 @@ exports.DicePieceLog = class DicePieceLog {
     constructor({ room, stateId, value, }) {
         this.id = easyFlake.easyFlake();
         this.createdAt = new Date();
-        this.room = core.Reference.create(room);
+        this.room = core.ref(room);
         this.stateId = stateId;
         this.value = value;
     }
@@ -336,7 +336,7 @@ tslib.__decorate([
     tslib.__metadata("design:type", Object)
 ], exports.DicePieceLog.prototype, "value", void 0);
 tslib.__decorate([
-    core.ManyToOne(() => entity.Room, { wrappedReference: true }),
+    core.ManyToOne(() => entity.Room, { ref: true }),
     tslib.__metadata("design:type", Object)
 ], exports.DicePieceLog.prototype, "room", void 0);
 exports.DicePieceLog = tslib.__decorate([
@@ -347,7 +347,7 @@ exports.StringPieceLog = class StringPieceLog {
     constructor({ room, stateId, value, }) {
         this.id = easyFlake.easyFlake();
         this.createdAt = new Date();
-        this.room = core.Reference.create(room);
+        this.room = core.ref(room);
         this.stateId = stateId;
         this.value = value;
     }
@@ -369,7 +369,7 @@ tslib.__decorate([
     tslib.__metadata("design:type", Object)
 ], exports.StringPieceLog.prototype, "value", void 0);
 tslib.__decorate([
-    core.ManyToOne(() => entity.Room, { wrappedReference: true }),
+    core.ManyToOne(() => entity.Room, { ref: true }),
     tslib.__metadata("design:type", Object)
 ], exports.StringPieceLog.prototype, "room", void 0);
 exports.StringPieceLog = tslib.__decorate([
@@ -406,11 +406,11 @@ tslib.__decorate([
     tslib.__metadata("design:type", Number)
 ], exports.RoomSe.prototype, "volume", void 0);
 tslib.__decorate([
-    core.ManyToOne(() => entity$1.User, { nullable: true, wrappedReference: true }),
+    core.ManyToOne(() => entity$1.User, { nullable: true, ref: true }),
     tslib.__metadata("design:type", Object)
 ], exports.RoomSe.prototype, "createdBy", void 0);
 tslib.__decorate([
-    core.ManyToOne(() => entity.Room, { wrappedReference: true }),
+    core.ManyToOne(() => entity.Room, { ref: true }),
     tslib.__metadata("design:type", Object)
 ], exports.RoomSe.prototype, "room", void 0);
 exports.RoomSe = tslib.__decorate([

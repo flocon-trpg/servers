@@ -22,7 +22,7 @@ tslib.__decorate([
     tslib.__metadata("design:type", String)
 ], exports.FileTag.prototype, "name", void 0);
 tslib.__decorate([
-    core.ManyToOne(() => entity.User),
+    core.ManyToOne(() => entity.User, { ref: true }),
     tslib.__metadata("design:type", Object)
 ], exports.FileTag.prototype, "user", void 0);
 tslib.__decorate([

@@ -63,8 +63,8 @@ exports.WriteRoomSoundEffectResolver = class WriteRoomSoundEffectResolver {
             fileSourceType: args.file.sourceType,
             volume: args.volume,
         });
-        entity$1.createdBy = core.Reference.create(authorizedUser);
-        entity$1.room = core.Reference.create(room);
+        entity$1.createdBy = core.ref(authorizedUser);
+        entity$1.room = core.ref(room);
         room.completeUpdatedAt = new Date();
         await em.persistAndFlush(entity$1);
         const result = {
