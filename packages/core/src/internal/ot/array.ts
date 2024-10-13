@@ -249,7 +249,7 @@ export const serverTransform = <
             // 配列のtransformでエラーが発生することは通常はない。
             return Result.error(
                 'Error at transforming an array operation. This is probablly a bug. Message: ' +
-                    finalArrayResult.error,
+                    JSON.stringify(finalArrayResult.error),
             );
         }
         finalArray = finalArrayResult.value;
@@ -447,7 +447,7 @@ export const clientTransform = <
         // 配列のtransformでエラーが発生することは通常はない。
         return Result.error(
             'Error at transforming an array operation. This is probablly a bug. Message: ' +
-                finalArrayResult.error,
+                JSON.stringify(finalArrayResult.error),
         );
     }
 

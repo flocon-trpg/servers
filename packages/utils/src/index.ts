@@ -12,7 +12,6 @@ export {
     DualKeyMap,
     ReadonlyDualKeyMap,
     DualKeyMapSource,
-    toJsonString as dualKeyToJsonString,
     groupJoinDualKeyMap,
     groupJoin3DualKeyMap,
     groupJoin4DualKeyMap,

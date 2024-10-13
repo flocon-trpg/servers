@@ -73,7 +73,7 @@ export const checkSignInAndNotAnonymous = (
     context: ResolverContext,
 ): DecodedIdToken | typeof NotSignIn | typeof AnonymousAccount => {
     const decodedIdToken = checkSignIn(context);
-    if (decodedIdToken == NotSignIn) {
+    if (decodedIdToken === NotSignIn) {
         return NotSignIn;
     }
     if (decodedIdToken.firebase.sign_in_provider === anonymous) {

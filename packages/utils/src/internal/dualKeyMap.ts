@@ -7,10 +7,6 @@ export type DualKey<T1, T2> = {
     readonly second: T2;
 };
 
-export const toJsonString = <T1, T2>(source: DualKey<T1, T2>): string => {
-    return `{ first: ${source.first}, second: ${source.second} }`;
-};
-
 export type DualKeyMapSource<TKey1, TKey2, TValue> =
     | Map<TKey1, Map<TKey2, TValue>>
     | Map<TKey1, ReadonlyMap<TKey2, TValue>>

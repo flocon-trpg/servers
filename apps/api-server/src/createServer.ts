@@ -7,8 +7,7 @@ import { ApolloServer } from 'apollo-server-express';
 import { ExpressContext } from 'apollo-server-express/dist/ApolloServer';
 import express from 'express';
 import { ensureDir } from 'fs-extra';
-import { GraphQLSchema, execute, subscribe } from 'graphql';
-import { parse } from 'graphql';
+import { GraphQLSchema, execute, parse, subscribe } from 'graphql';
 import { Context } from 'graphql-ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import multer from 'multer';
@@ -325,7 +324,7 @@ export const createServer = async ({
                     .webp()
                     .toFile(thumbPath)
                     .then(() => true)
-                    .catch(err => {
+                    .catch((err: Error) => {
                         // 画像かどうかに関わらず全てのファイルをsharpに渡すため、mp3などといった画像でないファイルの場合はほぼ確実にここに来る。そのため、warnなどではなくそれよりlevelの低いdebugを使っている。
                         loggerRef.debug(err);
                         return false;
@@ -453,7 +452,6 @@ export const createServer = async ({
             onSubscribe: async (ctx, message) => {
                 loggerRef.info({ message }, 'graphql-ws onSubscribe');
 
-                message.payload.query;
                 // Apollo Clientなどではmessage.payload.operationNameが使えるがurqlではnullishなので、queryを代わりに使っている
                 if (!isRoomEventSubscription(message.payload.query)) {
                     return;

@@ -202,7 +202,7 @@ export const migrateByNpmScript = async (
         }
     } finally {
         // これがないとターミナルなどで実行したときに自動で終わらない。
-        orm?.value?.close();
+        void orm?.value?.close();
     }
 };
 

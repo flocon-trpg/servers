@@ -121,8 +121,8 @@ export class CreateRoomResolver {
         });
 
         const newParticipant = new Participant$MikroORM.Participant();
-        (newParticipant.name = input.participantName),
-            (newParticipant.role = ParticipantRoleType.Master);
+        newParticipant.name = input.participantName;
+        newParticipant.role = ParticipantRoleType.Master;
         em.persist(newParticipant);
         newRoom.participants.add(newParticipant);
         authorizedUser.participants.add(newParticipant);

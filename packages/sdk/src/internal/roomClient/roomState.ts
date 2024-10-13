@@ -253,7 +253,7 @@ export class RoomStateManager<TGraphQLError> {
                                 }) as const,
                         )
                         .catch(
-                            e =>
+                            (e: unknown) =>
                                 ({
                                     type: 'catch',
                                     toPost,
@@ -336,7 +336,7 @@ export class RoomStateManager<TGraphQLError> {
         userUid: string;
         clientId: string;
     }): void {
-        client.getRoomQuery().then(q => {
+        void client.getRoomQuery().then(q => {
             if (q.isError) {
                 this.#setState({
                     type: error,

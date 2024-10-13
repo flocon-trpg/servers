@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { parse } from 'acorn';
 import { Program } from 'estree';
 import { ScriptError } from './ScriptError';
@@ -51,7 +52,7 @@ function ofFCallExpression(
     expression: FSimpleCallExpression | FNewExpression,
     context: Context,
     isChain: boolean,
-    isNew?: 'new' | undefined,
+    isNew?: 'new',
 ): FValue {
     const callee = ofFExpression(expression.callee, context);
     const args = expression.arguments.map(arg => {
@@ -61,7 +62,7 @@ function ofFCallExpression(
         return undefined;
     }
     if (callee?.type !== FType.Function) {
-        throw new Error(`${callee} is not a function`);
+        throw new Error(`${callee == null ? callee : callee.type} is not a function`);
     }
     return callee.exec({ args, isNew: isNew != null, astInfo: { range: toRange(expression) } });
 }
@@ -152,7 +153,7 @@ function ofFPattern(
         case 'ArrayPattern': {
             const valueAsFObjectBase: FObjectBase | null | undefined = value;
             if (valueAsFObjectBase?.iterate == null) {
-                throw new ScriptError(`${value} is not iterable`);
+                throw new ScriptError(`${value == null ? value : value.type} is not iterable`);
             }
 
             const valueIterator: IterableIterator<FValue> = valueAsFObjectBase.iterate();
@@ -231,7 +232,7 @@ function ofFPattern(
             if (setToRestElementAs === 'array') {
                 const valueAsFObjectBase: FObjectBase | null | undefined = value;
                 if (valueAsFObjectBase?.iterate == null) {
-                    throw new ScriptError(`${value} is not iterable`);
+                    throw new ScriptError(`${value == null ? value : value.type} is not iterable`);
                 }
                 ofFPattern(pattern.argument, context, kind, value, 'array');
                 return;

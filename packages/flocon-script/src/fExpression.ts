@@ -290,7 +290,7 @@ export function fProperty(property: Property): FProperty {
             key = fLiteral(property.key);
             break;
         default:
-            throw new ScriptError(`'${property.key}' is not supported`, toRange(property.key));
+            throw new ScriptError(`'${property.key.type}' is not supported`, toRange(property.key));
     }
     switch (property.value.type) {
         case 'ArrayPattern':
