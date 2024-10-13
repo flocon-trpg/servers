@@ -28,7 +28,6 @@
         "@flocon-trpg/tsconfig": "workspace:^",
         "eslint": "9.12.0",
         "eslint-config-prettier": "9.1.0",
-        "eslint-plugin-import": "2.31.0",
         "prettier": "3.3.3",
         "rimraf": "5.0.10",
         "rollup": "4.23.0",

@@ -3,24 +3,11 @@
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import eslintConfigPrettier from 'eslint-config-prettier'
-import {flatConfigs}  from 'eslint-plugin-import';
 
 export default [...tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
-    flatConfigs.recommended,
-  // { ignores: ['**/*.d.ts', '.eslintrc.js'] },
   { ignores: ['**/*.d.ts'] },
-  {
-    // https://typescript-eslint.io/troubleshooting/typed-linting/performance/#eslint-plugin-import
-    rules: {
-      'import/named': 'off',
-      'import/namespace': 'off',
-      'import/default': 'off',
-      'import/no-named-as-default-member': 'off',
-      'import/no-unresolved': 'off',
-    }
-  },
   {
     rules: {
         '@typescript-eslint/member-delimiter-style': ['error'],
@@ -37,17 +24,9 @@ export default [...tseslint.config(
         'sort-imports': [
             'error',
             {
-                // sort-importsはimportしたmemberのsortに利用している。
-                // declarationのsortはauto-fixできないため、その部分は代わりにimport/orderを使っている。 https://github.com/eslint/eslint/issues/11542#issuecomment-498215828
+                // memberのsortだけ行っている。
+                // declarationのsortは、sort-importsだとファイル名ではなくメンバー名でsortするのが微妙に感じたので当初はeslint-plugin-importを使っていたが、eslint v9かつflat configを使いeslint-import-resolver-typescriptなしでlintを実行した際にエラーが発生した。eslint-import-resolver-typescriptをflat configで使う方法（もしくはeslint-import-resolver-typescriptの必要性）も調べた感じではわからなかった。他のlintプラグインやprettierプラグインを使うことも検討したが、リソースを削ってまでdeclarationのソートを行う必要性があるかというと疑問に感じたため、declarationのsortはとりあえず現時点では無効にしている。
                 ignoreDeclarationSort: true,
-            },
-        ],
-        'import/order': [
-            'error',
-            {
-                alphabetize: {
-                    order: 'asc',
-                },
             },
         ],
         'no-console': 'warn',
