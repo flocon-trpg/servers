@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import '../beforeAllGlobal';
 import { readFileSync } from 'fs';
 import { $free, UpOperation as U, parseState, roomTemplate } from '@flocon-trpg/core';

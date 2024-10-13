@@ -160,7 +160,9 @@ const reduceEvent = <
             return {
                 messages,
                 diff: {
+                    // CONSIDER: updateResult.oldValue === undefined && updateResult.newValue === undefined のケースがあるのでは？その場合は diff は null を返すべき
                     prevValue: updateResult.oldValue,
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                     nextValue: updateResult.newValue as any,
                 },
             };

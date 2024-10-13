@@ -137,7 +137,9 @@ export class WritePrivateMessageResolver {
             };
         }
         const entity = entityResult.value as RoomPrvMsg;
-        args.textColor == null ? undefined : fixTextColor(args.textColor);
+        if (args.textColor != null) {
+            fixTextColor(args.textColor);
+        }
 
         for (const visibleToElement of visibleTo) {
             const user = await em.findOne(User, { userUid: visibleToElement });

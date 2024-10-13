@@ -51,7 +51,7 @@ export const createRoomMessagesClient = <TCustomMessage, TGraphQLError>({
             }
             writableQueryStatus.next(newValue);
         };
-        client.getMessagesQuery().then(result => {
+        void client.getMessagesQuery().then(result => {
             if (result.isError) {
                 setQueryStatus({
                     type: error,

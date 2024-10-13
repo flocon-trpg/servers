@@ -3,6 +3,6 @@ import 'reflect-metadata';
 import { main } from './main';
 import { loadAsMain } from './utils/commandLineArgs';
 
-loadAsMain().then(args => {
-    main(args).catch(err => loggerRef.error(err));
+void loadAsMain().then(args => {
+    main(args).catch((err: Error) => loggerRef.error(err));
 });
