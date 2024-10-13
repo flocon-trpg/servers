@@ -1,7 +1,7 @@
 'use strict';
 
 var fs = require('fs');
-var defaultPinoTransport = require('@flocon-trpg/default-pino-transport');
+var loggerBase = require('@flocon-trpg/logger-base');
 var dotenv = require('dotenv');
 var dotenvExpand = require('dotenv-expand');
 
@@ -30,7 +30,7 @@ const FIREBASE_ADMIN_SECRET = 'FIREBASE_ADMIN_SECRET';
 const FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL = 'FLOCON_API_DISABLE_RATE_LIMIT_EXPERIMENTAL';
 const FLOCON_ADMIN = 'FLOCON_ADMIN';
 const HEROKU = 'HEROKU';
-const LOG_FORMAT = defaultPinoTransport.LOG_FORMAT;
+const LOG_FORMAT = loggerBase.LOG_FORMAT;
 const LOG_LEVEL = 'LOG_LEVEL';
 const MYSQL = 'MYSQL';
 const POSTGRESQL = 'POSTGRESQL';

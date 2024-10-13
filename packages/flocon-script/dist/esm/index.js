@@ -345,6 +345,9 @@ function fBinaryOperator(operator, range) {
     }
 }
 function fBinaryExpression(expression) {
+    if (expression.left.type === 'PrivateIdentifier') {
+        throw new ScriptError(`'${expression.left.type}' in BinaryExpression is not supported`, expression.left.range);
+    }
     return {
         ...expression,
         operator: fBinaryOperator(expression.operator, toRange(expression)),
@@ -430,7 +433,7 @@ function fProperty(property) {
             key = fLiteral(property.key);
             break;
         default:
-            throw new ScriptError(`'${property.key}' is not supported`, toRange(property.key));
+            throw new ScriptError(`'${property.key.type}' is not supported`, toRange(property.key));
     }
     switch (property.value.type) {
         case 'ArrayPattern':
@@ -1474,6 +1477,7 @@ function toFGlobalRecord(source) {
     return new FGlobalRecord(toFRecord(source));
 }
 
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 function ofFLiteral(literal) {
     if (literal.value == null) {
         return null;
@@ -1499,7 +1503,7 @@ function ofFCallExpression(expression, context, isChain, isNew) {
         return undefined;
     }
     if (callee?.type !== FType.Function) {
-        throw new Error(`${callee} is not a function`);
+        throw new Error(`${callee == null ? callee : callee.type} is not a function`);
     }
     return callee.exec({ args, isNew: isNew != null, astInfo: { range: toRange(expression) } });
 }
@@ -1566,7 +1570,7 @@ setToRestElementAs = 'array') {
         case 'ArrayPattern': {
             const valueAsFObjectBase = value;
             if (valueAsFObjectBase?.iterate == null) {
-                throw new ScriptError(`${value} is not iterable`);
+                throw new ScriptError(`${value == null ? value : value.type} is not iterable`);
             }
             const valueIterator = valueAsFObjectBase.iterate();
             const valueIteratorNext = () => {
@@ -1630,7 +1634,7 @@ setToRestElementAs = 'array') {
             if (setToRestElementAs === 'array') {
                 const valueAsFObjectBase = value;
                 if (valueAsFObjectBase?.iterate == null) {
-                    throw new ScriptError(`${value} is not iterable`);
+                    throw new ScriptError(`${value == null ? value : value.type} is not iterable`);
                 }
                 ofFPattern(pattern.argument, context, kind, value, 'array');
                 return;

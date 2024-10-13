@@ -1,11 +1,4 @@
-import {
-    Entity,
-    IdentifiedReference,
-    ManyToOne,
-    PrimaryKey,
-    Property,
-    Unique,
-} from '@mikro-orm/core';
+import { Entity, ManyToOne, PrimaryKey, Property, Ref, Unique } from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { ParticipantRoleType } from '../../enums/ParticipantRoleType';
 import { Room } from '../room/entity';
@@ -25,9 +18,9 @@ export class Participant {
     @Property({ nullable: true })
     public name?: string;
 
-    @ManyToOne(() => Room)
-    public room!: IdentifiedReference<Room>;
+    @ManyToOne(() => Room, { ref: true })
+    public room!: Ref<Room>;
 
-    @ManyToOne(() => User)
-    public user!: IdentifiedReference<User, 'userUid'>;
+    @ManyToOne(() => User, { ref: true })
+    public user!: Ref<User>;
 }

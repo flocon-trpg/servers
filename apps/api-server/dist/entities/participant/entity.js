@@ -25,11 +25,11 @@ tslib.__decorate([
     tslib.__metadata("design:type", String)
 ], exports.Participant.prototype, "name", void 0);
 tslib.__decorate([
-    core.ManyToOne(() => entity.Room),
+    core.ManyToOne(() => entity.Room, { ref: true }),
     tslib.__metadata("design:type", Object)
 ], exports.Participant.prototype, "room", void 0);
 tslib.__decorate([
-    core.ManyToOne(() => entity$1.User),
+    core.ManyToOne(() => entity$1.User, { ref: true }),
     tslib.__metadata("design:type", Object)
 ], exports.Participant.prototype, "user", void 0);
 exports.Participant = tslib.__decorate([

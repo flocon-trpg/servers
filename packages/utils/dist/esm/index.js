@@ -1,5 +1,5 @@
 import { Option } from '@kizahasi/option';
-import { notice } from '@flocon-trpg/default-pino-transport';
+import { notice } from '@flocon-trpg/logger-base';
 import { isBrowser } from 'browser-or-node';
 import pino from 'pino';
 import { Result } from '@kizahasi/result';
@@ -203,9 +203,6 @@ const dualKeyRecordForEach = (source, action) => {
     }
 };
 
-const toJsonString = (source) => {
-    return `{ first: ${source.first}, second: ${source.second} }`;
-};
 class DualKeyMap {
     // Map<TKey2, TValue>は常に空でないMapとなる
     _core;
@@ -751,6 +748,21 @@ const keyNames = (...keys) => {
 };
 
 const defaultLogLevel = 'info';
+const toLogFn = (logger, pinoLevel) => {
+    function print(arg1, ...arg2) {
+        if (typeof arg1 === 'string') {
+            logger[pinoLevel](arg1, ...arg2);
+            return;
+        }
+        const [msg, ...args] = [...arg2];
+        if (typeof msg !== 'string') {
+            // TypeScript の型に従ってコードを書いている限り、ここには来ないはず。
+            throw new Error('When the first argument is an object, the second argument must be a string.');
+        }
+        logger[pinoLevel](arg1, msg, ...args);
+    }
+    return print;
+};
 const createDefaultLogger = (args) => {
     return (args?.isBrowser ?? isBrowser)
         ? pino({ level: args?.logLevel ?? defaultLogLevel, browser: {} })
@@ -772,28 +784,28 @@ const loggerRef = {
         currentLogger = value;
     },
     get debug() {
-        return this.value.debug.bind(this.value);
+        return toLogFn(this.value, 'debug');
     },
     get error() {
-        return this.value.error.bind(this.value);
+        return toLogFn(this.value, 'error');
     },
     get fatal() {
-        return this.value.fatal.bind(this.value);
+        return toLogFn(this.value, 'fatal');
     },
     get info() {
-        return this.value.info.bind(this.value);
+        return toLogFn(this.value, 'info');
     },
     infoAsNotice(msg) {
         return this.info({ [notice]: true }, msg);
     },
     get warn() {
-        return this.value.warn.bind(this.value);
+        return toLogFn(this.value, 'warn');
     },
     get silent() {
-        return this.value.silent.bind(this.value);
+        return toLogFn(this.value, 'silent');
     },
     get trace() {
-        return this.value.trace.bind(this.value);
+        return toLogFn(this.value, 'trace');
     },
 };
 
@@ -1064,5 +1076,5 @@ class SemVer {
     }
 }
 
-export { DeletableTree, DualKeyMap, MultiKeyMap, MultiValueSet, SemVer, Tree, alpha, arrayEquals, beta, both, chooseDualKeyRecord, chooseIterable, chooseRecord, compare, compositeKeyEquals, compositeKeyToJsonString, createDefaultLogger, delay, dualKeyRecordForEach, dualKeyRecordToDualKeyMap, toJsonString as dualKeyToJsonString, filterInt, getExactlyOneKey, groupJoin3DualKeyMap, groupJoin4DualKeyMap, groupJoinArray, groupJoinDualKeyMap, groupJoinMap, groupJoinSet, isReadonlyNonEmptyArray, isRecordEmpty, keyNames, left, loggerRef, mapDualKeyRecord, mapIterable, mapRecord, mapToRecord, pairwiseIterable, parseEnvListValue, parsePinoLogLevel, parseStringToBoolean, parseStringToBooleanError, rc, recordForEach, recordForEachAsync, recordToArray, recordToIterator, recordToMap, right, stringToCompositeKey };
+export { DeletableTree, DualKeyMap, MultiKeyMap, MultiValueSet, SemVer, Tree, alpha, arrayEquals, beta, both, chooseDualKeyRecord, chooseIterable, chooseRecord, compare, compositeKeyEquals, compositeKeyToJsonString, createDefaultLogger, delay, dualKeyRecordForEach, dualKeyRecordToDualKeyMap, filterInt, getExactlyOneKey, groupJoin3DualKeyMap, groupJoin4DualKeyMap, groupJoinArray, groupJoinDualKeyMap, groupJoinMap, groupJoinSet, isReadonlyNonEmptyArray, isRecordEmpty, keyNames, left, loggerRef, mapDualKeyRecord, mapIterable, mapRecord, mapToRecord, pairwiseIterable, parseEnvListValue, parsePinoLogLevel, parseStringToBoolean, parseStringToBooleanError, rc, recordForEach, recordForEachAsync, recordToArray, recordToIterator, recordToMap, right, stringToCompositeKey };
 //# sourceMappingURL=index.js.map

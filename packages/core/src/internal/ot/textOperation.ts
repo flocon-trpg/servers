@@ -8,8 +8,8 @@ import {
     composeDownOperation as composeDownOperationCore,
     composeUpOperation as composeUpOperationCore,
     deserializeDownOperation,
+    deserializeTwoWayOperation,
     deserializeUpOperation,
-    deserizalizeTwoWayOperation,
     diff as diffCore,
     serializeDownOperation,
     serializeTwoWayOperation,
@@ -181,7 +181,7 @@ const serverTransformCore = ({
     second?: UpOperation;
     prevState: string;
 }) => {
-    const first$ = first == null ? undefined : deserizalizeTwoWayOperation(first);
+    const first$ = first == null ? undefined : deserializeTwoWayOperation(first);
     if (first$ === undefined) {
         const second$ = second == null ? undefined : deserializeUpOperation(second);
         if (second$ === undefined) {
@@ -323,7 +323,7 @@ const diffToUpOperation = ({
 };
 
 export const toUpOperation = (source: TwoWayOperation): UpOperation => {
-    const twoWayOperation = deserizalizeTwoWayOperation(source);
+    const twoWayOperation = deserializeTwoWayOperation(source);
     if (twoWayOperation == null) {
         throw new Error('This should not happen');
     }
@@ -332,7 +332,7 @@ export const toUpOperation = (source: TwoWayOperation): UpOperation => {
 };
 
 export const toDownOperation = (source: TwoWayOperation): DownOperation => {
-    const twoWayOperation = deserizalizeTwoWayOperation(source);
+    const twoWayOperation = deserializeTwoWayOperation(source);
     if (twoWayOperation == null) {
         throw new Error('This should not happen');
     }

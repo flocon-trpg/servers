@@ -1,4 +1,3 @@
-export declare const notice = "notice";
-export declare const LOG_FORMAT = "LOG_FORMAT";
-export default function (): import("stream").Transform & import("pino-abstract-transport").OnUnknown;
+import build from 'pino-abstract-transport';
+export default function (): import("stream").Transform & build.OnUnknown;
 //# sourceMappingURL=index.d.ts.map

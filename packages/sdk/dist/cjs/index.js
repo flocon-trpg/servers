@@ -248,7 +248,7 @@ const subscribeRoomConnections = ({ client, subscription, }) => {
         },
     });
     const executeQuery = () => {
-        client.getRoomConnectionsQuery().then(r => {
+        void client.getRoomConnectionsQuery().then(r => {
             const result = r.value?.result;
             if (result?.__typename !== 'GetRoomConnectionsSuccessResult') {
                 return;
@@ -284,7 +284,7 @@ const createRoomMessagesClient = ({ client, roomEventSubscription, }) => {
             }
             writableQueryStatus.next(newValue);
         };
-        client.getMessagesQuery().then(result => {
+        void client.getMessagesQuery().then(result => {
             if (result.isError) {
                 setQueryStatus({
                     type: error$1,
@@ -990,7 +990,7 @@ class RoomStateManager {
                 toPost,
                 getRoomState: () => roomStateManager.uiState,
             }))
-                .catch(e => ({
+                .catch((e) => ({
                 type: 'catch',
                 toPost,
                 error: e,
@@ -1057,7 +1057,7 @@ class RoomStateManager {
         });
     }
     #executeGetRoomQuery({ client, userUid, clientId, }) {
-        client.getRoomQuery().then(q => {
+        void client.getRoomQuery().then(q => {
             if (q.isError) {
                 this.#setState({
                     type: error,

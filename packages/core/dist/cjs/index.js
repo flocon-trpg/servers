@@ -956,7 +956,7 @@ const restore$4 = ({ nextState, downOperation, }) => {
 };
 // 元々はこの関数自身がserverTransformとしてexportされていたが、firstPrimeは必要ないためexportを外した。ただし将来使うことがあるかもしれないため一応残している。
 const serverTransformCore = ({ first, second, prevState, }) => {
-    const first$ = first == null ? undefined : otString.deserizalizeTwoWayOperation(first);
+    const first$ = first == null ? undefined : otString.deserializeTwoWayOperation(first);
     if (first$ === undefined) {
         const second$ = second == null ? undefined : otString.deserializeUpOperation(second);
         if (second$ === undefined) {
@@ -1054,7 +1054,7 @@ const diff$4 = ({ prev, next, }) => {
     }));
 };
 const toUpOperation$2 = (source) => {
-    const twoWayOperation = otString.deserizalizeTwoWayOperation(source);
+    const twoWayOperation = otString.deserializeTwoWayOperation(source);
     if (twoWayOperation == null) {
         throw new Error('This should not happen');
     }
@@ -1062,7 +1062,7 @@ const toUpOperation$2 = (source) => {
     return otString.serializeUpOperation(upOperation);
 };
 const toDownOperation$2 = (source) => {
-    const twoWayOperation = otString.deserizalizeTwoWayOperation(source);
+    const twoWayOperation = otString.deserializeTwoWayOperation(source);
     if (twoWayOperation == null) {
         throw new Error('This should not happen');
     }
@@ -4397,7 +4397,7 @@ const clientTransform = (params) => {
     if (finalArrayResult.isError) {
         // 配列のtransformでエラーが発生することは通常はない。
         return result.Result.error('Error at transforming an array operation. This is probablly a bug. Message: ' +
-            finalArrayResult.error);
+            JSON.stringify(finalArrayResult.error));
     }
     const stateAfterFirst = apply$2({
         prevState: params.state,

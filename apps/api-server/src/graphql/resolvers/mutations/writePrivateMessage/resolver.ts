@@ -1,5 +1,5 @@
 import { State, characterTemplate, client, isCharacterOwner } from '@flocon-trpg/core';
-import { Reference } from '@mikro-orm/core';
+import { Reference, ref } from '@mikro-orm/core';
 import { MaxLength } from 'class-validator';
 import {
     Args,
@@ -137,7 +137,9 @@ export class WritePrivateMessageResolver {
             };
         }
         const entity = entityResult.value as RoomPrvMsg;
-        args.textColor == null ? undefined : fixTextColor(args.textColor);
+        if (args.textColor != null) {
+            fixTextColor(args.textColor);
+        }
 
         for (const visibleToElement of visibleTo) {
             const user = await em.findOne(User, { userUid: visibleToElement });
@@ -166,12 +168,12 @@ export class WritePrivateMessageResolver {
             );
         }
 
-        entity.room = Reference.create(room);
+        entity.room = ref(room);
         room.completeUpdatedAt = new Date();
         await em.persistAndFlush(entity);
 
         const visibleToArray = [...visibleTo].sort();
-        const result = createRoomPrivateMessage({
+        const result = await createRoomPrivateMessage({
             msg: entity,
             visibleTo: visibleToArray,
         });

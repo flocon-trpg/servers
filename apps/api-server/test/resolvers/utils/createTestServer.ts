@@ -121,7 +121,7 @@ export const createTestServer = async ({
             maxFileSize: 1000 * 1000,
             sizeQuota: 100 * 1000 * 1000,
             countQuota: 10,
-            directory: './uploader',
+            directory: './__uploader_for_tests__',
         },
         disableRateLimitExperimental: true,
     };

@@ -103,7 +103,9 @@ exports.WritePrivateMessageResolver = class WritePrivateMessageResolver {
             };
         }
         const entity$1 = entityResult.value;
-        args.textColor == null ? undefined : utils.fixTextColor(args.textColor);
+        if (args.textColor != null) {
+            utils.fixTextColor(args.textColor);
+        }
         for (const visibleToElement of visibleTo) {
             const user = await em.findOne(entity.User, { userUid: visibleToElement });
             if (user == null) {
@@ -125,11 +127,11 @@ exports.WritePrivateMessageResolver = class WritePrivateMessageResolver {
             entity$1.charaPortraitImagePath = chara.portraitImage?.path;
             entity$1.charaPortraitImageSourceType = FileSourceType.FileSourceTypeModule.ofNullishString(chara.portraitImage?.sourceType);
         }
-        entity$1.room = core.Reference.create(room);
+        entity$1.room = core.ref(room);
         room.completeUpdatedAt = new Date();
         await em.persistAndFlush(entity$1);
         const visibleToArray = [...visibleTo].sort();
-        const result = utils.createRoomPrivateMessage({
+        const result = await utils.createRoomPrivateMessage({
             msg: entity$1,
             visibleTo: visibleToArray,
         });

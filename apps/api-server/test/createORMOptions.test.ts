@@ -1,4 +1,7 @@
 import './beforeAllGlobal';
+import { MySqlDriver } from '@mikro-orm/mysql';
+import { PostgreSqlDriver } from '@mikro-orm/postgresql';
+import { SqliteDriver } from '@mikro-orm/sqlite';
 import { createORMOptions } from '../src/config/createORMOptions';
 import { ServerConfigForMigration, mysql, postgresql, sqlite } from '../src/config/types';
 
@@ -51,7 +54,7 @@ describe('createORMOptions', () => {
                 postgresql: { clientUrl: 'postgresql://localhost' },
             },
         });
-        expect(actual.type).toBe('postgresql');
+        expect(actual.driver).toBe(PostgreSqlDriver);
         expect(actual.clientUrl).toBe('postgresql://localhost');
         expect(actual.driverOptions).toBeFalsy();
     });
@@ -63,7 +66,7 @@ describe('createORMOptions', () => {
                 databaseUrl: 'postgresql://localhost',
             },
         });
-        expect(actual.type).toBe('postgresql');
+        expect(actual.driver).toBe(PostgreSqlDriver);
         expect(actual.clientUrl).toBe('postgresql://localhost');
         expect(actual.driverOptions).toBeFalsy();
     });
@@ -75,7 +78,7 @@ describe('createORMOptions', () => {
                 mysql: { clientUrl: 'mysql://localhost' },
             },
         });
-        expect(actual.type).toBe('mysql');
+        expect(actual.driver).toBe(MySqlDriver);
         expect(actual.clientUrl).toBe('mysql://localhost');
         expect(actual.driverOptions).toBeFalsy();
     });
@@ -87,7 +90,7 @@ describe('createORMOptions', () => {
                 databaseUrl: 'mysql://localhost',
             },
         });
-        expect(actual.type).toBe('mysql');
+        expect(actual.driver).toBe(MySqlDriver);
         expect(actual.clientUrl).toBe('mysql://localhost');
         expect(actual.driverOptions).toBeFalsy();
     });
@@ -99,7 +102,7 @@ describe('createORMOptions', () => {
                 sqlite: { dbName: './main.sqlite', clientUrl: undefined },
             },
         });
-        expect(actual.type).toBe('sqlite');
+        expect(actual.driver).toBe(SqliteDriver);
         expect(actual.dbName).toBe('./main.sqlite');
         expect(actual.clientUrl).toBeUndefined();
         expect(actual.driverOptions).toBeFalsy();
@@ -112,7 +115,7 @@ describe('createORMOptions', () => {
                 databaseUrl: 'file://./main.sqlite',
             },
         });
-        expect(actual.type).toBe('sqlite');
+        expect(actual.driver).toBe(SqliteDriver);
         expect(actual.dbName).toBe('./main.sqlite');
         expect(actual.clientUrl).toBeUndefined();
         expect(actual.driverOptions).toBeFalsy();
@@ -126,7 +129,7 @@ describe('createORMOptions', () => {
                 databaseUrl: 'postgresql://localhost',
             },
         });
-        expect(actual.type).toBe('postgresql');
+        expect(actual.driver).toBe(PostgreSqlDriver);
         expect(actual.clientUrl).toBe('postgresql://localhost');
         expect(actual.driverOptions).toEqual({
             connection: { ssl: { rejectUnauthorized: false } },
@@ -155,7 +158,7 @@ describe('createORMOptions', () => {
                 },
                 databaseArg: 'postgresql',
             });
-            expect(actual.type).toBe('postgresql');
+            expect(actual.driver).toBe(PostgreSqlDriver);
             expect(actual.clientUrl).toBe('postgresql://localhost');
             expect(actual.driverOptions).toBeFalsy();
         },
@@ -174,7 +177,7 @@ describe('createORMOptions', () => {
                 },
                 databaseArg: 'mysql',
             });
-            expect(actual.type).toBe('mysql');
+            expect(actual.driver).toBe(MySqlDriver);
             expect(actual.clientUrl).toBe('mysql://localhost');
             expect(actual.driverOptions).toBeFalsy();
         },
@@ -193,7 +196,7 @@ describe('createORMOptions', () => {
                 },
                 databaseArg: 'sqlite',
             });
-            expect(actual.type).toBe('sqlite');
+            expect(actual.driver).toBe(SqliteDriver);
             expect(actual.dbName).toBe('./main.sqlite');
             expect(actual.driverOptions).toBeFalsy();
         },

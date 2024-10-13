@@ -168,7 +168,7 @@ const migrateByNpmScript = async (type) => {
         }
     }
     finally {
-        orm?.value?.close();
+        void orm?.value?.close();
     }
 };
 const checkMigrationsBeforeStart = async (orm) => {

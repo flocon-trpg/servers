@@ -1,4 +1,4 @@
-name: build
+name: auto-build
 
 on:
     push:
@@ -28,10 +28,10 @@ jobs:
                   node-version: 18.x
                   cache: yarn
 
-            - run: git config --local user.email "build.yml[bot]@example.com" # fake user email for pushing build
-            - run: git config --local user.name "build.yml[bot]" # fake user name for pushing build
+            - run: git config --local user.email "auto-build.yml[bot]@example.com" # fake user email for pushing build
+            - run: git config --local user.name "auto-build.yml[bot]" # fake user name for pushing build
 
-              # create a temporary "main-build-temp" branch here, so do not create "main-build-temp" branch in your repository and push it.
+              # create a temporary "main-build-temp" branch here, so do not create "main-build-temp" branch in GitHub repository.
             - run: git checkout -b main-build-temp
 
             - run: cat ./.gitignore
@@ -48,6 +48,7 @@ jobs:
 
             - run: 'git commit -m "build: comment out dist/ in .gitignore and build artifacts"'
 
+            # you need to have "main-build" branch in GitHub repository before running this workflow.
             - run: git checkout main-build
 
             # 当初は "git merge -s theirs main-build-temp" に相当することがしたかったため、main-build-temp ブランチで "git merge -s ours main-build" を実行して main-build ブランチを fast-forward merge することで再現しようとしたが、コミットグラフが複雑になるため、単純に -X theirs で merge することにした。
@@ -55,7 +56,14 @@ jobs:
 
             # by default, the message of merge commit is "Merge branch 'main-build-temp' into main-build", so the message is changed not to include "main-build-temp".
             # if this merge is first and no --allow-empty, this job fails because there is nothing to commit.
-            - run: git commit --allow-empty -m "Merge"
+            - run: git commit --allow-empty -m "merge auto-build PR into main-build"
+
+            - name: set git diff to GITHUB_ENV
+              run: |
+                  git_diff=$(git diff --stat main-build-temp) 
+                  echo "git_diff<<EOF" >> $GITHUB_ENV
+                  echo "$git_diff" >> $GITHUB_ENV
+                  echo "EOF" >> $GITHUB_ENV
 
             # set "Allow GitHub Actions to create and approve pull requests" in the repository settings to enable pull request creation.
             - name: Create Pull Request
@@ -73,5 +81,20 @@ jobs:
                       | actor   | ${{ github.actor }}                     |
                       | sha     | ${{ github.sha }}                       |
                       | message | ${{ github.event.head_commit.message }} |
+
+                      # diff
+
+                      ${{ env.git_diff == '' && '✔ main ブランチとの差分は見つかりませんでした。' || '❌ main ブランチとの差分が見つかりました。この PR はこのまま accept しないほうがよさそうです。' }}
+
+                      <details>
+
+                      <summary>差分の内容</summary>
+
+                      ```
+                      ${{ env.git_diff }}
+                      ```
+
+                      </details>
+
                   labels: auto-build
                   branch: create-pull-request/auto-build

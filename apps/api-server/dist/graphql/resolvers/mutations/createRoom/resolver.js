@@ -114,8 +114,8 @@ exports.CreateRoomResolver = class CreateRoomResolver {
             },
         });
         const newParticipant = new entity$1.Participant();
-        (newParticipant.name = input.participantName),
-            (newParticipant.role = ParticipantRoleType.ParticipantRoleType.Master);
+        newParticipant.name = input.participantName;
+        newParticipant.role = ParticipantRoleType.ParticipantRoleType.Master;
         em.persist(newParticipant);
         newRoom.participants.add(newParticipant);
         authorizedUser.participants.add(newParticipant);

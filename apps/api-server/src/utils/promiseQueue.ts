@@ -1,5 +1,5 @@
-import { Observable, Subject } from 'rxjs';
-import { defer, of } from 'rxjs';
+import { Observable, Subject, defer, of } from 'rxjs';
+
 import * as Rx from 'rxjs';
 import { v4 } from 'uuid';
 

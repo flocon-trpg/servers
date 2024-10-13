@@ -27,10 +27,10 @@ const writeSystemMessage = async ({ em, text, room, }) => {
     let ch = await em.findOne(entity.RoomPubCh, { key: FilePathModule.$system, room: room.id });
     if (ch == null) {
         ch = new entity.RoomPubCh({ key: FilePathModule.$system });
-        ch.room = core.Reference.create(room);
+        ch.room = core.ref(room);
         em.persist(ch);
     }
-    entity$1.roomPubCh = core.Reference.create(ch);
+    entity$1.roomPubCh = core.ref(ch);
     em.persist(entity$1);
     return entity$1;
 };
@@ -74,7 +74,7 @@ exports.GetLogResolver = class GetLogResolver {
             type: 'messageUpdatePayload',
             sendTo: findResult.participantIds(),
             roomId: room.id,
-            value: utils.createRoomPublicMessage({
+            value: await utils.createRoomPublicMessage({
                 msg: systemMessageEntity,
                 channelKey: FilePathModule.$system,
             }),

@@ -2,14 +2,12 @@ import { createServer as createHttpServer } from 'http';
 import path from 'path';
 import { loggerRef } from '@flocon-trpg/utils';
 import { Result } from '@kizahasi/result';
-import { Reference } from '@mikro-orm/core';
 import { PluginDefinition } from 'apollo-server-core';
 import { ApolloServer } from 'apollo-server-express';
 import { ExpressContext } from 'apollo-server-express/dist/ApolloServer';
 import express from 'express';
 import { ensureDir } from 'fs-extra';
-import { GraphQLSchema, execute, subscribe } from 'graphql';
-import { parse } from 'graphql';
+import { GraphQLSchema, execute, parse, subscribe } from 'graphql';
 import { Context } from 'graphql-ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import multer from 'multer';
@@ -318,12 +316,15 @@ export const createServer = async ({
                 const thumbsDirPath = path.join(path.dirname(file.path), thumbsDir);
                 await ensureDir(thumbsDirPath);
                 const thumbPath = path.join(thumbsDirPath, thumbFileName);
+                // 画像がアップロードされた際にsharpでサムネイル画像を生成する処理があるが、Windowsだとsharpによって生成元の画像がロックされてしまい、その後に削除できないことがある(https://github.com/lovell/sharp/issues/415#issuecomment-212817987)。それを防ぐため、ここでsharpのcacheを無効化している。
+                // 現時点ではsharpのcacheを有効化するコードがないため、このコードを削除して代わりにどこかで一回だけ呼び出すようにしてもいい。
+                sharp.cache(false);
                 const thumbnailSaved = await sharp(file.path)
                     .resize(80)
                     .webp()
                     .toFile(thumbPath)
                     .then(() => true)
-                    .catch(err => {
+                    .catch((err: Error) => {
                         // 画像かどうかに関わらず全てのファイルをsharpに渡すため、mp3などといった画像でないファイルの場合はほぼ確実にここに来る。そのため、warnなどではなくそれよりlevelの低いdebugを使っている。
                         loggerRef.debug(err);
                         return false;
@@ -332,10 +333,10 @@ export const createServer = async ({
                     req.params.permission === permission.public
                         ? FilePermissionType.Entry
                         : FilePermissionType.Private;
-                const entity = new File({
+                const entity = forkedEm.create(File, {
                     ...file,
                     screenname: file.originalname,
-                    createdBy: Reference.create<User, 'userUid'>(user),
+                    createdBy: user,
                     thumbFilename: thumbnailSaved ? thumbFileName : undefined,
                     filesize: file.size,
                     deletePermission: permissionType,
@@ -451,7 +452,6 @@ export const createServer = async ({
             onSubscribe: async (ctx, message) => {
                 loggerRef.info({ message }, 'graphql-ws onSubscribe');
 
-                message.payload.query;
                 // Apollo Clientなどではmessage.payload.operationNameが使えるがurqlではnullishなので、queryを代わりに使っている
                 if (!isRoomEventSubscription(message.payload.query)) {
                     return;
