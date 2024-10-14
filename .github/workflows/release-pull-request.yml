@@ -9,7 +9,7 @@ jobs:
     check-artifacts:
         name: Check artifacts
 
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
 
         steps:
             - name: List git config
@@ -38,7 +38,7 @@ jobs:
     check-disclaimer:
         name: Check licenses-npm-package.txt
 
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
 
         steps:
             - name: List git config
