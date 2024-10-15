@@ -39,7 +39,7 @@ import { useGetIdToken } from '@/hooks/useGetIdToken';
 import { useMyUserUid } from '@/hooks/useMyUserUid';
 import { useRoomGraphQLStatus } from '@/hooks/useRoomGraphQLStatus';
 import { useRoomState } from '@/hooks/useRoomState';
-import { firebaseUserValueAtom } from '@/pages/_app';
+import { firebaseUserValueAtom } from '@/hooks/useSetupApp';
 import { flex, flexColumn, itemsCenter } from '@/styles/className';
 import { getRoomConfig } from '@/utils/localStorage/roomConfig';
 

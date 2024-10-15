@@ -2,9 +2,9 @@ import { UseQueryResult, useQueries } from '@tanstack/react-query';
 import { useAtomValue } from 'jotai/react';
 import React from 'react';
 import { useMemoOne } from 'use-memo-one';
-import { firebaseStorageAtom } from '../pages/_app';
 import { FilePathLikeOrThumb, FilePathModule } from '../utils/file/filePath';
 import { useGetIdToken } from './useGetIdToken';
+import { firebaseStorageAtom } from './useSetupApp';
 import { useWebConfig } from './useWebConfig';
 import { idTokenIsNull, thumbs } from '@/utils/file/getFloconUploaderFile';
 

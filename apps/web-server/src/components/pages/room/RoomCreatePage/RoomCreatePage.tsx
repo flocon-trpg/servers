@@ -7,7 +7,7 @@ import { useMutation } from 'urql';
 import { Center } from '@/components/ui/Center/Center';
 import { HelpMessageTooltip } from '@/components/ui/HelpMessageTooltip/HelpMessageTooltip';
 import { Layout, loginAndEntry } from '@/components/ui/Layout/Layout';
-import { firebaseUserValueAtom } from '@/pages/_app';
+import { firebaseUserValueAtom } from '@/hooks/useSetupApp';
 
 const labelCol = 10;
 const wrapperCol = 24 - labelCol;

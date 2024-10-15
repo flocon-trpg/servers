@@ -74,7 +74,7 @@ import { JumpToBottomVirtuoso } from '@/components/ui/JumpToBottomVirtuoso/JumpT
 import { Table, TableDivider, TableRow } from '@/components/ui/Table/Table';
 import { useImmerSetAtom } from '@/hooks/useImmerSetAtom';
 import { useRoomStateValueSelector } from '@/hooks/useRoomStateValueSelector';
-import { firebaseUserValueAtom } from '@/pages/_app';
+import { firebaseUserValueAtom } from '@/hooks/useSetupApp';
 import { Styles } from '@/styles';
 import { cancelRnd, flex, flexColumn, flexNone, flexRow, itemsCenter } from '@/styles/className';
 import { moveElement } from '@/utils/moveElement';
