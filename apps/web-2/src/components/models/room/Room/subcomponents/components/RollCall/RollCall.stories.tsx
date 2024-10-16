@@ -201,18 +201,20 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Closed: Story = ({
+export const Closed: Story = {
     args: {
         roomState: stateForClosedRollCall,
     },
-});
+};
 
-export const OpenAndAnswered: Story = ({
+export const OpenAndAnswered: Story = {
     args: {
         roomState: stateForOpenAndAnswered,
     },
-});
+};
 
-export const OpenAndNotAnswered: Story = ({args: {
-    roomState: stateForOpenAndNotAnswered,
-}});
+export const OpenAndNotAnswered: Story = {
+    args: {
+        roomState: stateForOpenAndNotAnswered,
+    },
+};

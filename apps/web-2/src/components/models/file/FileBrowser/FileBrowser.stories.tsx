@@ -120,8 +120,8 @@ const Practical: React.FC<PracticalProps> = ({
                 jotaiStore={jotaiStore}
                 height={null}
                 files={filesState}
-                fileCreateLabel='😀ファイルを作成🤖'
-                searchPlaceholder='😀検索🤖'
+                fileCreateLabel="😀ファイルを作成🤖"
+                searchPlaceholder="😀検索🤖"
                 onDelete={() => {
                     setFilesState(toFilePath(filesSourceRef));
                 }}
@@ -205,8 +205,8 @@ export const Default: React.FC<Props> = ({
             <FileBrowser
                 jotaiStore={jotaiStore}
                 height={null}
-                fileCreateLabel='😀ファイルを作成🤖'
-                searchPlaceholder='😀検索🤖'
+                fileCreateLabel="😀ファイルを作成🤖"
+                searchPlaceholder="😀検索🤖"
                 files={files}
                 isProtected={() => false}
                 onFileCreate={() => Promise.resolve(true)}
@@ -235,7 +235,7 @@ const meta = {
                 thumb: (
                     <img
                         style={{ maxWidth: '100%', maxHeight: '100%' }}
-                        src='https://dummyimage.com/100x100/fff/000'
+                        src="https://dummyimage.com/100x100/fff/000"
                     />
                 ),
             },
@@ -245,7 +245,7 @@ const meta = {
                 thumb: (
                     <img
                         style={{ maxWidth: '100%', maxHeight: '100%' }}
-                        src='https://dummyimage.com/200x100/fff/000'
+                        src="https://dummyimage.com/200x100/fff/000"
                     />
                 ),
             },
@@ -255,7 +255,7 @@ const meta = {
                 thumb: (
                     <img
                         style={{ maxWidth: '100%', maxHeight: '100%' }}
-                        src='https://dummyimage.com/100x200/fff/000'
+                        src="https://dummyimage.com/100x200/fff/000"
                     />
                 ),
             },
@@ -308,26 +308,26 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Filtered: Story = ({
+export const Filtered: Story = {
     args: {
-    defaultFileTypeFilter: others,
-    }
-});
+        defaultFileTypeFilter: others,
+    },
+};
 
-export const Empty: Story = ({
+export const Empty: Story = {
     args: {
-    filesSource: undefined,
-    files: [],
-    ensuredFolderPaths: [],
-    }
-});
+        filesSource: undefined,
+        files: [],
+        ensuredFolderPaths: [],
+    },
+};
 
-export const EmptyButEnsured: Story = ({
+export const EmptyButEnsured: Story = {
     args: {
-    filesSource: undefined,
-    files: [],
-    }
-});
+        filesSource: undefined,
+        files: [],
+    },
+};
 
 const success = async () => {
     await delay(1000);
@@ -338,19 +338,19 @@ const fail = async () => {
     return Promise.reject(new Error('(Fake error)'));
 };
 
-export const ManyFiles: Story = ({
+export const ManyFiles: Story = {
     args: {
-    filesSource: undefined,
-    files: [...Array(200)].map((_, i) => {
-        const filename = `file${(i + 1).toString().padStart(3, '0')}.dll`;
-        return {
-            key: filename,
-            type: others,
-            onDelete: i % 2 === 0 ? success : fail,
-            onMoveOrRename: i % 2 === 0 ? success : fail,
-            path: [filename],
-            id: undefined,
-        };
-    }),
-    }
-});
+        filesSource: undefined,
+        files: [...Array(200)].map((_, i) => {
+            const filename = `file${(i + 1).toString().padStart(3, '0')}.dll`;
+            return {
+                key: filename,
+                type: others,
+                onDelete: i % 2 === 0 ? success : fail,
+                onMoveOrRename: i % 2 === 0 ? success : fail,
+                path: [filename],
+                id: undefined,
+            };
+        }),
+    },
+};

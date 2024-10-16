@@ -24,8 +24,8 @@ const FirebaseStorageLink: React.FC<{
     if (fullPath == null) {
         return (
             <Alert
-                type='warning'
-                message='fullPathの値がundefinedです。Firebase Storage インスタンスがnullの可能性があります。'
+                type="warning"
+                message="fullPathの値がundefinedです。Firebase Storage インスタンスがnullの可能性があります。"
             />
         );
     }
@@ -35,7 +35,7 @@ const FirebaseStorageLink: React.FC<{
     }
 
     return (
-        <a href={queryResult.data} target='_blank' rel='noopener noreferrer'>
+        <a href={queryResult.data} target="_blank" rel="noopener noreferrer">
             {fileName(fullPath)}
         </a>
     );
@@ -113,8 +113,8 @@ export const FileView: React.FC<Props> = props => {
                 const a = (ellipsis: boolean) => (
                     <a
                         href={filePath.path}
-                        target='_blank'
-                        rel='noopener noreferrer'
+                        target="_blank"
+                        rel="noopener noreferrer"
                         style={
                             ellipsis
                                 ? {

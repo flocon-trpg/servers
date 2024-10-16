@@ -25,14 +25,14 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Player: Story = ({
+export const Player: Story = {
     args: {
-    myParticipantRole: 'Player',
-    }
-});
+        myParticipantRole: 'Player',
+    },
+};
 
-export const Spectator:Story = ({
+export const Spectator: Story = {
     args: {
-    myParticipantRole: 'Spectator',
-    }
-});
+        myParticipantRole: 'Spectator',
+    },
+};

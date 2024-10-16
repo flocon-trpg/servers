@@ -42,8 +42,8 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Spectator:Story = ({
+export const Spectator: Story = {
     args: {
-    myParticipantRole: 'Spectator',
-    }
-});
+        myParticipantRole: 'Spectator',
+    },
+};

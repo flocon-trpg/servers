@@ -9,11 +9,11 @@ import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { mockWebConfig } from '@/mocks';
 import { createMockUrqlClientForRoomMessage } from '@/mocks/createMockUrqlClientForRoomMessage';
 
-export const Player: React.FC<Pick<WebConfig, 'isUnlistedFirebaseStorageEnabled' | 'isPublicFirebaseStorageEnabled'> & { myParticipantRole: ParticipantRole }> = ({
-    isUnlistedFirebaseStorageEnabled,
-    isPublicFirebaseStorageEnabled,
-    myParticipantRole,
-}) => {
+export const Player: React.FC<
+    Pick<WebConfig, 'isUnlistedFirebaseStorageEnabled' | 'isPublicFirebaseStorageEnabled'> & {
+        myParticipantRole: ParticipantRole;
+    }
+> = ({ isUnlistedFirebaseStorageEnabled, isPublicFirebaseStorageEnabled, myParticipantRole }) => {
     const webConfig = React.useMemo(() => {
         return Result.ok({
             ...mockWebConfig,
@@ -45,10 +45,11 @@ export const Player: React.FC<Pick<WebConfig, 'isUnlistedFirebaseStorageEnabled'
 const meta = {
     title: 'models/room/Room',
     component: Player,
-    args: { myParticipantRole: 'Player',
-isPublicFirebaseStorageEnabled: false,
-isUnlistedFirebaseStorageEnabled: false,
-     },
+    args: {
+        myParticipantRole: 'Player',
+        isPublicFirebaseStorageEnabled: false,
+        isUnlistedFirebaseStorageEnabled: false,
+    },
     parameters: {
         chromatic: { delay: 1000 },
     },
@@ -59,17 +60,17 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Master: Story = {
-args:{
-    myParticipantRole: 'Master',
-isPublicFirebaseStorageEnabled: false,
-isUnlistedFirebaseStorageEnabled: false,
-}
-} 
+    args: {
+        myParticipantRole: 'Master',
+        isPublicFirebaseStorageEnabled: false,
+        isUnlistedFirebaseStorageEnabled: false,
+    },
+};
 
 export const Spectator: Story = {
     args: {
         myParticipantRole: 'Spectator',
-isPublicFirebaseStorageEnabled: false,
-isUnlistedFirebaseStorageEnabled: false,
-    }
-} 
+        isPublicFirebaseStorageEnabled: false,
+        isUnlistedFirebaseStorageEnabled: false,
+    },
+};

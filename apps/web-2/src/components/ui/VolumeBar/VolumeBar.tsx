@@ -48,7 +48,7 @@ export const VolumeBar: React.FC<Props> = ({
                 <Typography.Text style={textStyle}>{value}</Typography.Text>
             ) : (
                 <InputNumber
-                    size='small'
+                    size="small"
                     min={minValue ?? 0}
                     max={100}
                     step={1}

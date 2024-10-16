@@ -1141,7 +1141,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                     {boardIdToShow && (
                         <>
                             <Popover
-                                trigger='click'
+                                trigger="click"
                                 overlayClassName={cancelRnd}
                                 content={
                                     <BoardConfigEditor
@@ -1151,7 +1151,7 @@ export const Board: React.FC<Props> = ({ canvasWidth, canvasHeight, ...panel }: 
                                     />
                                 }
                                 // デフォルトではtopだが、このボタンがブラウザ画面の右端近くにあるとBoardConfigEditorが縦長になってしまい見づらい。ボタンは右下にあるため、縦長になったりはみ出したりすることが最も少ないであろうleftBottomとしている。
-                                placement='leftBottom'
+                                placement="leftBottom"
                             >
                                 <Button>表示設定</Button>
                             </Popover>

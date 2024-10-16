@@ -51,20 +51,20 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Readonly: Story = ({
+export const Readonly: Story = {
     args: {
-    readonly: true,
-    }
-});
+        readonly: true,
+    },
+};
 
-export const NotFound: Story = ({
+export const NotFound: Story = {
     args: {
-    characterIdMode: 'notFound',
-    }
-});
+        characterIdMode: 'notFound',
+    },
+};
 
-export const Undefined: Story = ({
+export const Undefined: Story = {
     args: {
-    characterIdMode: 'undefined',
-    }
-});
+        characterIdMode: 'undefined',
+    },
+};

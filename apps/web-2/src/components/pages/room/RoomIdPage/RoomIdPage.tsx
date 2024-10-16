@@ -97,7 +97,7 @@ const useOnResize = () => {
 
 const LinkToRoot: React.FC = () => {
     return (
-        <Link to='/' style={{ padding: 12 }}>
+        <Link to="/" style={{ padding: 12 }}>
             {'トップページに戻る'}
         </Link>
     );
@@ -182,7 +182,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
     };
     return (
         <Spin spinning={disableJoinActions}>
-            {errorMessage == null ? null : <Alert message={errorMessage} type='error' showIcon />}
+            {errorMessage == null ? null : <Alert message={errorMessage} type="error" showIcon />}
             <div
                 style={{
                     display: 'grid',
@@ -198,7 +198,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                     style={{ gridColumn: 2, gridRow: 1 }}
                     onChange={e => setName(e.target.value)}
                     value={name}
-                    placeholder='名前'
+                    placeholder="名前"
                 />
                 <div style={{ gridColumn: 1, gridRow: 3, marginRight: 8, justifySelf: 'right' }}>
                     参加者として入室
@@ -208,7 +208,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                         style={{ gridColumn: 2, gridRow: 3 }}
                         onChange={e => setPlayerPassword(e.target.value)}
                         value={playerPassword}
-                        placeholder='参加パスワード'
+                        placeholder="参加パスワード"
                     />
                 ) : (
                     <div style={{ gridColumn: 2, gridRow: 3, marginLeft: 4, fontSize: 'small' }}>
@@ -217,7 +217,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                 )}
                 <Button
                     style={{ gridColumn: 3, gridRow: 3 }}
-                    type='primary'
+                    type="primary"
                     onClick={onJoinAsPlayerButtonClick}
                 >
                     入室
@@ -230,7 +230,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                         style={{ gridColumn: 2, gridRow: 4 }}
                         onChange={e => setSpectatorPassword(e.target.value)}
                         value={spectatorPassword}
-                        placeholder='観戦パスワード'
+                        placeholder="観戦パスワード"
                     />
                 ) : (
                     <div style={{ gridColumn: 2, gridRow: 4, marginLeft: 4, fontSize: 'small' }}>
@@ -239,7 +239,7 @@ const JoinRoomForm: React.FC<JoinRoomFormProps> = ({ roomState, onJoin }: JoinRo
                 )}
                 <Button
                     style={{ gridColumn: 3, gridRow: 4 }}
-                    type='primary'
+                    type="primary"
                     onClick={onJoinAsSpectatorButtonClick}
                 >
                     入室
@@ -335,7 +335,7 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
         return (
             <ResultContainer>
                 <GraphQLErrorResult
-                    title='Subscription エラーが発生しました。ブラウザを更新してください。'
+                    title="Subscription エラーが発生しました。ブラウザを更新してください。"
                     error={graphQLStatus.RoomEventSubscription.error}
                 />
             </ResultContainer>
@@ -351,7 +351,7 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
         case 'nonJoined':
             return (
                 <Center setPaddingY>
-                    <Card title='入室'>
+                    <Card title="入室">
                         <JoinRoomForm
                             roomState={roomState.nonJoinedRoom}
                             onJoin={() => roomClient?.recreate()}
@@ -363,9 +363,9 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
             const notFoundResult = (
                 <ResultContainer>
                     <Result
-                        status='404'
-                        title='該当する部屋が見つかりませんでした。'
-                        subTitle='部屋が存在しているか、適切な権限があるかどうか確認してください。'
+                        status="404"
+                        title="該当する部屋が見つかりませんでした。"
+                        subTitle="部屋が存在しているか、適切な権限があるかどうか確認してください。"
                     />
                 </ResultContainer>
             );
@@ -382,7 +382,7 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
                     return (
                         <ResultContainer>
                             <GraphQLErrorResult
-                                title='GetRoomQuery でエラーが発生しました。ブラウザを更新してください。'
+                                title="GetRoomQuery でエラーが発生しました。ブラウザを更新してください。"
                                 error={roomState.error.error}
                             />
                         </ResultContainer>
@@ -398,7 +398,7 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
                 case 'transformationError':
                     return (
                         <ResultContainer>
-                            <Result title='transformationError が発生しました。ブラウザを更新してください。' />
+                            <Result title="transformationError が発生しました。ブラウザを更新してください。" />
                         </ResultContainer>
                     );
             }
@@ -407,7 +407,7 @@ const RoomBehavior: React.FC<{ roomId: string; children: JSX.Element }> = ({
         case 'deleted':
             return (
                 <ResultContainer>
-                    <Result status='warning' title='この部屋は削除されました。' />
+                    <Result status="warning" title="この部屋は削除されました。" />
                 </ResultContainer>
             );
     }
@@ -450,11 +450,11 @@ const RoomClientInitializer: React.FC<{ roomId: string }> = ({ roomId }) => {
     );
 };
 
-export const RoomId: React.FC<{id: string | null}> = ({id}) => {
+export const RoomId: React.FC<{ id: string | null }> = ({ id }) => {
     if (id == null) {
         return (
             <Layout>
-                <Result status='error' title='パラメーターが不正です。' />
+                <Result status="error" title="パラメーターが不正です。" />
             </Layout>
         );
     }

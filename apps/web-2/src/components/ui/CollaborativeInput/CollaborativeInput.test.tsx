@@ -31,7 +31,7 @@ describe('CollaborativeInput', () => {
         };
         const { unmount } = render(
             <CollaborativeInput
-                value='TEXT_VALUE1'
+                value="TEXT_VALUE1"
                 bufferDuration={bufferDuration}
                 onChange={onChange}
                 onGetQuill={onGetQuill}
@@ -64,7 +64,7 @@ describe('CollaborativeInput', () => {
             };
             render(
                 <CollaborativeInput
-                    value='TEXT_VALUE1'
+                    value="TEXT_VALUE1"
                     bufferDuration={bufferDuration}
                     onChange={onChange}
                 />,
@@ -87,7 +87,7 @@ describe('CollaborativeInput', () => {
             };
             render(
                 <CollaborativeInput
-                    value='TEXT_VALUE1'
+                    value="TEXT_VALUE1"
                     bufferDuration={bufferDuration}
                     onChange={onChange}
                     onGetQuill={onGetQuill}
@@ -124,7 +124,7 @@ describe('CollaborativeInput', () => {
         };
         const { rerender } = render(
             <CollaborativeInput
-                value='TEXT_VALUE1'
+                value="TEXT_VALUE1"
                 bufferDuration={bufferDuration}
                 onChange={onChange}
                 onGetQuill={onGetQuill}
@@ -136,7 +136,7 @@ describe('CollaborativeInput', () => {
         quill.setText(newValue);
         rerender(
             <CollaborativeInput
-                value='TEXT_VALUE3'
+                value="TEXT_VALUE3"
                 bufferDuration={bufferDuration}
                 onChange={onChange}
             />,
@@ -166,7 +166,7 @@ describe('CollaborativeInput', () => {
             };
             const { rerender } = render(
                 <CollaborativeInput
-                    value='TEXT_VALUE1'
+                    value="TEXT_VALUE1"
                     bufferDuration={bufferDuration}
                     onChange={onChange}
                     onGetQuill={onGetQuill}
@@ -178,7 +178,7 @@ describe('CollaborativeInput', () => {
             quill.setText(newValue);
             rerender(
                 <CollaborativeInput
-                    value='TEXT_VALUE3'
+                    value="TEXT_VALUE3"
                     bufferDuration={bufferDuration}
                     onChange={onChange}
                 />,

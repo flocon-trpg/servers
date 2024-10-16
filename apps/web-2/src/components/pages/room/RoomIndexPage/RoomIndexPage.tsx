@@ -27,7 +27,7 @@ const BookmarkButton: React.FC<{ data: Data }> = ({ data }) => {
         <ToggleButton
             unCheckedIcon={<Icons.StarOutlined />}
             checkedIcon={<Icons.StarFilled />}
-            defaultType='text'
+            defaultType="text"
             checked={checked}
             loading={loading}
             onChange={async checked => {
@@ -108,7 +108,10 @@ const RoomButton: React.FC<{ roomId: string }> = ({ roomId }) => {
             />
         );
     }, [getMyRolesQueryResult.data?.result.admin, modal, deleteRoomAsAdmin, roomId, getRooms]);
-    const join = React.useCallback(() => router({to: `/rooms/$id`, params: {id: roomId}}) , [roomId, router]);
+    const join = React.useCallback(
+        () => router({ to: `/rooms/$id`, params: { id: roomId } }),
+        [roomId, router],
+    );
 
     const joinText = '入室';
 
@@ -220,7 +223,7 @@ const columns = [
 ];
 
 const RoomsTable: React.FC<{ rooms: readonly Data[] }> = ({ rooms }) => {
-    return <Table rowKey='id' style={{ flex: 'auto' }} columns={columns} dataSource={rooms} />;
+    return <Table rowKey="id" style={{ flex: 'auto' }} columns={columns} dataSource={rooms} />;
 };
 
 type RoomsListComponentProps = {
@@ -241,7 +244,7 @@ const RoomsListComponent: React.FC<RoomsListComponentProps> = ({
                 <div className={classNames(flexNone)}>
                     <Button
                         icon={<Icons.PlusOutlined />}
-                        onClick={() => router({to: '/rooms/create' })}
+                        onClick={() => router({ to: '/rooms/create' })}
                     >
                         部屋を作成
                     </Button>

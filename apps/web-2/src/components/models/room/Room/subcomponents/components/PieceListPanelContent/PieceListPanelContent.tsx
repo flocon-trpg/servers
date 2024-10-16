@@ -51,10 +51,10 @@ export const PieceListPanelContent: React.FC<Props> = ({ boardId }: Props) => {
             // eslint-disable-next-line react/display-name
             render: (_: unknown, dataSource: DataSource) => {
                 return (
-                    <Tooltip title='編集'>
+                    <Tooltip title="編集">
                         <Button
                             style={{ alignSelf: 'center' }}
-                            size='small'
+                            size="small"
                             onClick={() => {
                                 if (dataSource.type === 'dice') {
                                     setDicePieceModal({
@@ -156,7 +156,7 @@ export const PieceListPanelContent: React.FC<Props> = ({ boardId }: Props) => {
     ];
     return (
         <div>
-            <Table columns={columns} dataSource={dataSource} size='small' pagination={false} />
+            <Table columns={columns} dataSource={dataSource} size="small" pagination={false} />
         </div>
     );
 };

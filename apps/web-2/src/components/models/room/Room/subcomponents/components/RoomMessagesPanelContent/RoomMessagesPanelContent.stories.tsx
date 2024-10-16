@@ -46,15 +46,13 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Fetching: Story = {
-args: {
-
-    fetchingMessages: true,
-}
-
-}; 
+    args: {
+        fetchingMessages: true,
+    },
+};
 
 export const Empty: Story = {
     args: {
-    setGeneralMessages: false,
-    }
-}
+        setGeneralMessages: false,
+    },
+};

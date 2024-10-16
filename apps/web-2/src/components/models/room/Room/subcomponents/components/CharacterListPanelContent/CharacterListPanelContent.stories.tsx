@@ -48,14 +48,14 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Empty: Story = ({
+export const Empty: Story = {
     args: {
-    stateType: 'none',
-    }
-});
+        stateType: 'none',
+    },
+};
 
-export const Spectator: Story = ({
+export const Spectator: Story = {
     args: {
-    myParticipantRole: 'Spectator',
-    }
-});
+        myParticipantRole: 'Spectator',
+    },
+};

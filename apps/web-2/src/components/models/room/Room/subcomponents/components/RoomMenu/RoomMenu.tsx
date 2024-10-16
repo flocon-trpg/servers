@@ -171,7 +171,7 @@ const BecomePlayerModal: React.FC<BecomePlayerModalProps> = ({
                 onCancel={() => onCancel()}
             >
                 <Input.Password
-                    placeholder='パスワード'
+                    placeholder="パスワード"
                     value={inputValue}
                     onChange={e => setInputValue(e.target.value)}
                 />
@@ -254,10 +254,10 @@ const DeleteRoomModal: React.FC<DeleteRoomModalProps> = ({
     return (
         <Modal
             open={visible}
-            title='部屋の削除'
+            title="部屋の削除"
             okButtonProps={{ disabled }}
-            okType='danger'
-            okText='削除する'
+            okType="danger"
+            okText="削除する"
             cancelText={disabled ? '閉じる' : 'キャンセル'}
             onOk={() => {
                 setIsPosting(true);
@@ -342,10 +342,10 @@ const ResetMessagesModal: React.FC<ResetMessagesModalProps> = ({
     return (
         <Modal
             open={visible}
-            title='ログの初期化'
+            title="ログの初期化"
             okButtonProps={{ disabled }}
-            okType='danger'
-            okText='削除する'
+            okType="danger"
+            okText="削除する"
             cancelText={disabled ? '閉じる' : 'キャンセル'}
             onOk={() => {
                 setIsPosting(true);
@@ -418,9 +418,9 @@ const PanelsOpacityModal: React.FC<{
         <Modal
             open={visible}
             closable
-            title='ウィンドウの透過度の設定'
+            title="ウィンドウの透過度の設定"
             okButtonProps={{ style: { display: 'none' } }}
-            cancelText='閉じる'
+            cancelText="閉じる"
             onCancel={() => onClose()}
         >
             <div className={classNames(flex, flexRow, itemsCenter)} style={opacityStyle}>
@@ -429,7 +429,7 @@ const PanelsOpacityModal: React.FC<{
                     value={panelOpacity ?? defaultPanelOpacity}
                     minValue={minPanelOpacity}
                     onChange={setPanelOpacity}
-                    inputNumberType='0-1'
+                    inputNumberType="0-1"
                     readonly={false}
                 />
             </div>
@@ -488,13 +488,13 @@ const ChangeMyParticipantNameModal: React.FC<ChangeMyParticipantNameModalProps> 
     return (
         <Modal
             open={visible}
-            title='名前を変更'
+            title="名前を変更"
             okButtonProps={{ disabled: isPosting }}
             onOk={() => onOk()}
             onCancel={() => onCancel()}
         >
             <Input
-                placeholder='新しい名前'
+                placeholder="新しい名前"
                 autoFocus
                 value={inputValue}
                 onChange={e => setInputValue(e.target.value)}
@@ -1100,13 +1100,13 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
                 key: 'logo@menu',
                 label: (
                     <img
-                        src='/assets/logo.png'
+                        src="/assets/logo.png"
                         width={24}
                         height={24}
                         style={{ verticalAlign: 'middle' }}
                     />
                 ),
-                onClick: () => router({to: '/'}),
+                onClick: () => router({ to: '/' }),
             },
             {
                 key: '部屋@menu',
@@ -1163,7 +1163,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
             {
                 key: 'ボリューム@menu',
                 label: (
-                    <Popover trigger='click' content={<RoomVolumeBar />}>
+                    <Popover trigger="click" content={<RoomVolumeBar />}>
                         ボリューム
                     </Popover>
                 ),
@@ -1196,7 +1196,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
                         label:
                             me.role === ParticipantRole.Player ||
                             me.role === ParticipantRole.Master ? (
-                                <Tooltip title='すでに昇格済みです。'>参加者に昇格</Tooltip>
+                                <Tooltip title="すでに昇格済みです。">参加者に昇格</Tooltip>
                             ) : (
                                 '参加者に昇格'
                             ),
@@ -1213,7 +1213,7 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
                                 if (result.data == null) {
                                     return;
                                 }
-                                router({to: '/rooms' });
+                                router({ to: '/rooms' });
                             });
                         },
                     },
@@ -1237,9 +1237,9 @@ export const RoomMenu: React.FC = React.memo(function RoomMenu() {
             <>
                 <Menu
                     items={menuItems}
-                    triggerSubMenuAction='click'
+                    triggerSubMenuAction="click"
                     selectable={false}
-                    mode='horizontal'
+                    mode="horizontal"
                 />
                 <FileSelectorModal
                     visible={fileSelectorModalVisible}

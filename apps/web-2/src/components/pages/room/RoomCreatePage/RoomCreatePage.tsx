@@ -29,7 +29,7 @@ export const RoomCreatePage: React.FC = () => {
     // TODO: 横幅などが足りないため、Formで表現するようなものではない気がする。Flocon の Table に置き換えたほうがよさそうか。
     const form = (
         <Form
-            name='createRoom'
+            name="createRoom"
             labelCol={{ span: labelCol }}
             wrapperCol={{ span: wrapperCol }}
             style={{ width: 600 }}
@@ -56,7 +56,7 @@ export const RoomCreatePage: React.FC = () => {
                 createRoom({ input }).then(r => {
                     switch (r.data?.result.__typename) {
                         case 'CreateRoomSuccessResult': {
-                            router({to: `/rooms/$id`, params: {id: r.data.result.id} });
+                            router({ to: `/rooms/$id`, params: { id: r.data.result.id } });
                             return;
                         }
                         case 'CreateRoomFailureResult': {
@@ -71,12 +71,12 @@ export const RoomCreatePage: React.FC = () => {
                 });
             }}
         >
-            <Form.Item label='部屋の名前' name={roomName}>
+            <Form.Item label="部屋の名前" name={roomName}>
                 <Input />
             </Form.Item>
             <Form.Item
                 label={
-                    <HelpMessageTooltip title='この部屋における自分の名前です。この名前は、入室したユーザー全員に公開されます。セッションに用いるキャラクターなどの名前と一致させる必要はありません。入室後も変更できます。'>
+                    <HelpMessageTooltip title="この部屋における自分の名前です。この名前は、入室したユーザー全員に公開されます。セッションに用いるキャラクターなどの名前と一致させる必要はありません。入室後も変更できます。">
                         {'自分の名前'}
                     </HelpMessageTooltip>
                 }
@@ -86,19 +86,19 @@ export const RoomCreatePage: React.FC = () => {
             </Form.Item>
             <Form.Item
                 label={
-                    <HelpMessageTooltip title='有効化すると、ユーザーが参加者として入室する際にパスワードが必要になります。'>
+                    <HelpMessageTooltip title="有効化すると、ユーザーが参加者として入室する際にパスワードが必要になります。">
                         {'参加パスワードを有効化'}
                     </HelpMessageTooltip>
                 }
             >
                 <Switch checked={isPlayerPasswordEnabled} onChange={setIsPlayerPasswordEnabled} />
             </Form.Item>
-            <Form.Item label='参加パスワード' name={playerPassword}>
+            <Form.Item label="参加パスワード" name={playerPassword}>
                 <Input.Password disabled={!isPlayerPasswordEnabled} />
             </Form.Item>
             <Form.Item
                 label={
-                    <HelpMessageTooltip title='有効化すると、ユーザーが観戦者として入室する際にパスワードが必要になります。'>
+                    <HelpMessageTooltip title="有効化すると、ユーザーが観戦者として入室する際にパスワードが必要になります。">
                         {'観戦パスワードを有効化'}
                     </HelpMessageTooltip>
                 }
@@ -108,17 +108,17 @@ export const RoomCreatePage: React.FC = () => {
                     onChange={setIsSpectatorPasswordEnabled}
                 />
             </Form.Item>
-            <Form.Item label='観戦パスワード' name={spectatorPassword}>
+            <Form.Item label="観戦パスワード" name={spectatorPassword}>
                 <Input.Password disabled={!isSpectatorPasswordEnabled} />
             </Form.Item>
 
             <Form.Item wrapperCol={{ offset: labelCol, span: wrapperCol }}>
-                <Button disabled={isSubmitting} type='primary' htmlType='submit'>
+                <Button disabled={isSubmitting} type="primary" htmlType="submit">
                     作成
                 </Button>
                 {isSubmitting ? <Spin /> : null}
                 {createRoomResult.error == null ? null : (
-                    <Alert message={createRoomResult.error.message} type='error' showIcon />
+                    <Alert message={createRoomResult.error.message} type="error" showIcon />
                 )}
             </Form.Item>
         </Form>
@@ -127,7 +127,7 @@ export const RoomCreatePage: React.FC = () => {
     return (
         <Layout requires={loginAndEntry}>
             <Center setPaddingY>
-                <Card title='部屋の新規作成'>{form}</Card>
+                <Card title="部屋の新規作成">{form}</Card>
             </Center>
         </Layout>
     );

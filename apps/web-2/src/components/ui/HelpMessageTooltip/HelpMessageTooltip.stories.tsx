@@ -26,30 +26,30 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = ({});
+export const Default: Story = {};
 
-export const Compact: Story = ({
-    args:{
-    compact: true,
-    }
-});
-
-export const NoTitle: Story = ({
+export const Compact: Story = {
     args: {
-    title: undefined,
-    children: 'No title',
-    }
-});
+        compact: true,
+    },
+};
 
-export const NoChildren: Story = ({
+export const NoTitle: Story = {
     args: {
-    children: undefined,
-    }
-});
+        title: undefined,
+        children: 'No title',
+    },
+};
 
-export const Empty: Story = ({
+export const NoChildren: Story = {
     args: {
-    title: undefined,
-    children: undefined,
-    }
-});
+        children: undefined,
+    },
+};
+
+export const Empty: Story = {
+    args: {
+        title: undefined,
+        children: undefined,
+    },
+};

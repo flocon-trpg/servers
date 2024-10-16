@@ -87,8 +87,8 @@ const MemoBrowserModal: React.FC<{
             <FileBrowser
                 jotaiStore={jotaiStore}
                 files={files}
-                fileCreateLabel='メモを作成'
-                searchPlaceholder='メモの名前で検索'
+                fileCreateLabel="メモを作成"
+                searchPlaceholder="メモの名前で検索"
                 height={null}
                 isProtected={() => false}
                 ensuredFolderPaths={[]}
@@ -155,10 +155,10 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
                 }}
             >
                 <CollaborativeInput
-                    bufferDuration='default'
+                    bufferDuration="default"
                     value={memo.name}
                     style={{ width: '100%' }}
-                    placeholder='名前'
+                    placeholder="名前"
                     onChange={e =>
                         setRoomState(prevState => {
                             const memo = prevState.memos?.[memoId];
@@ -173,9 +173,9 @@ const Memo: React.FC<MemoProps> = ({ memoId, memo }: MemoProps) => {
                 multiline
                 className={classNames(flexAuto)}
                 style={{ overflow: 'auto' }}
-                bufferDuration='default'
+                bufferDuration="default"
                 value={memo.text}
-                placeholder='本文'
+                placeholder="本文"
                 onChange={e => {
                     setRoomState(roomState => {
                         if (roomState.memos == null) {

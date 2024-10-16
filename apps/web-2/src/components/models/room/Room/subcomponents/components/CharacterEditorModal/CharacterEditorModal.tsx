@@ -379,7 +379,7 @@ export const CharacterEditorModal: React.FC = () => {
                             {atomValue?.type === update && (
                                 <>
                                     <TableHeader>作成者</TableHeader>
-                                    <TableRow label='作成者'>
+                                    <TableRow label="作成者">
                                         <>
                                             <span>{participantName}</span>
                                             {createdByMe && (
@@ -399,10 +399,10 @@ export const CharacterEditorModal: React.FC = () => {
                                     <TableHeader>アクション</TableHeader>
 
                                     <TableRow>
-                                        <Tooltip title='コマを除き、このキャラクターを複製します。'>
+                                        <Tooltip title="コマを除き、このキャラクターを複製します。">
                                             {/* TODO: 複製したことを何らかの形で通知したほうがいい */}
                                             <Button
-                                                size='small'
+                                                size="small"
                                                 onClick={() => {
                                                     const id = simpleId();
                                                     setRoomState(roomState => {
@@ -425,9 +425,9 @@ export const CharacterEditorModal: React.FC = () => {
 
                             <TableHeader>全体公開</TableHeader>
 
-                            <TableRow label='全体公開'>
+                            <TableRow label="全体公開">
                                 <ToggleButton
-                                    size='small'
+                                    size="small"
                                     disabled={
                                         createdByMe || atomValue?.type === create
                                             ? false
@@ -454,17 +454,17 @@ export const CharacterEditorModal: React.FC = () => {
                                             character.isPrivate = !newValue;
                                         })
                                     }
-                                    shape='circle'
-                                    defaultType='dashed'
+                                    shape="circle"
+                                    defaultType="dashed"
                                 />
                             </TableRow>
 
                             <TableHeader>共通パラメーター</TableHeader>
 
-                            <TableRow label='名前'>
+                            <TableRow label="名前">
                                 <CollaborativeInput
-                                    bufferDuration='default'
-                                    size='small'
+                                    bufferDuration="default"
+                                    size="small"
                                     value={character.name}
                                     onChange={e => {
                                         if (e.previousValue === e.currentValue) {
@@ -480,7 +480,7 @@ export const CharacterEditorModal: React.FC = () => {
                                 />
                             </TableRow>
 
-                            <TableRow label='アイコン画像'>
+                            <TableRow label="アイコン画像">
                                 <FileView
                                     filePath={character.image ?? undefined}
                                     onPathChange={path =>
@@ -501,7 +501,7 @@ export const CharacterEditorModal: React.FC = () => {
                                 />
                             </TableRow>
 
-                            <TableRow label='立ち絵画像'>
+                            <TableRow label="立ち絵画像">
                                 <FileView
                                     filePath={character.portraitImage ?? undefined}
                                     onPathChange={path =>
@@ -552,7 +552,7 @@ export const CharacterEditorModal: React.FC = () => {
                                         key={keyNames('CharacterEditorModal', `numParam${key}Row`)}
                                         label={
                                             <OverriddenParameterNameEditor
-                                                type='editor'
+                                                type="editor"
                                                 baseName={paramName.name}
                                                 overriddenParameterName={
                                                     value?.overriddenParameterName
@@ -607,7 +607,7 @@ export const CharacterEditorModal: React.FC = () => {
                                         key={keyNames('CharacterEditorModal', `boolParam${key}Row`)}
                                         label={
                                             <OverriddenParameterNameEditor
-                                                type='editor'
+                                                type="editor"
                                                 baseName={paramName.name}
                                                 overriddenParameterName={
                                                     value?.overriddenParameterName
@@ -663,7 +663,7 @@ export const CharacterEditorModal: React.FC = () => {
                                         key={keyNames('CharacterEditorModal', `strParam${key}Row`)}
                                         label={
                                             <OverriddenParameterNameEditor
-                                                type='editor'
+                                                type="editor"
                                                 baseName={paramName.name}
                                                 overriddenParameterName={
                                                     value?.overriddenParameterName
@@ -716,8 +716,8 @@ export const CharacterEditorModal: React.FC = () => {
                             <CollaborativeInput
                                 style={{ overflow: 'auto', flex: '1 0 auto', maxHeight: 300 }}
                                 multiline
-                                size='small'
-                                bufferDuration='default'
+                                size="small"
+                                bufferDuration="default"
                                 value={character.memo}
                                 onChange={e => {
                                     updateCharacter(character => {

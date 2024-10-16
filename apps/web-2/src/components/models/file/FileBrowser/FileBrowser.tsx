@@ -1393,7 +1393,7 @@ const AddressBar: React.FC = () => {
     return (
         <div className={classNames(flex, flexRow, itemsCenter)}>
             <Button
-                size='small'
+                size="small"
                 disabled={currentDirectory.length === 0}
                 onClick={() =>
                     setPathState(pathState => {
@@ -1482,7 +1482,7 @@ const DeleteConfirmModal: React.FC = () => {
         case 'none':
         case 'finished':
             button = (
-                <Button style={buttonStyle} type='primary' danger disabled>
+                <Button style={buttonStyle} type="primary" danger disabled>
                     削除
                 </Button>
             );
@@ -1492,7 +1492,7 @@ const DeleteConfirmModal: React.FC = () => {
             button = (
                 <Button
                     style={buttonStyle}
-                    type='primary'
+                    type="primary"
                     danger
                     onClick={() => {
                         if (deleteStatus.type === 'asking') {
@@ -1547,7 +1547,7 @@ const DeleteConfirmModal: React.FC = () => {
     return (
         <Modal
             open={isModalVisible}
-            title='削除の確認'
+            title="削除の確認"
             footer={
                 <DialogFooter
                     close={{ textType: 'close', onClick: onClose, disabled: !canClose }}
@@ -1630,7 +1630,7 @@ const RenameConfirmModal: React.FC = () => {
         case 'none':
         case 'finished':
             button = (
-                <Button style={buttonStyle} type='primary' danger disabled>
+                <Button style={buttonStyle} type="primary" danger disabled>
                     移動/リネーム
                 </Button>
             );
@@ -1640,7 +1640,7 @@ const RenameConfirmModal: React.FC = () => {
             button = (
                 <Button
                     style={buttonStyle}
-                    type='primary'
+                    type="primary"
                     onClick={() => {
                         if (renameStatus.type === 'asking') {
                             setPathState(pathState => {
@@ -1695,7 +1695,7 @@ const RenameConfirmModal: React.FC = () => {
     return (
         <Modal
             open={isModalVisible}
-            title='移動、リネームの確認'
+            title="移動、リネームの確認"
             footer={
                 <DialogFooter
                     close={{ textType: 'close', onClick: onClose, disabled: !canClose }}
@@ -1732,7 +1732,7 @@ const RenameInputModal: React.FC = () => {
     return (
         <Modal
             open={state != null}
-            title='リネーム'
+            title="リネーム"
             onCancel={onClose}
             footer={
                 <DialogFooter
@@ -1796,7 +1796,7 @@ const CreateFolderModal: React.FC = () => {
     return (
         <Modal
             open={visible}
-            title='新しいフォルダの作成'
+            title="新しいフォルダの作成"
             onCancel={() => setVisible(false)}
             footer={
                 <DialogFooter
@@ -1814,13 +1814,13 @@ const CreateFolderModal: React.FC = () => {
             <div className={classNames(flex, flexColumn)} style={{ gap: 4 }}>
                 <div>新しく作るフォルダの名前を入力してください。</div>
                 <Alert
-                    type='info'
+                    type="info"
                     showIcon
-                    message='ファイルが1つもない空のフォルダは、サーバーに保存されません。空のフォルダは、ファイル操作を行いやすくするためにブラウザの画面上でのみ存在する一時的なフォルダであり、ブラウザを閉じた際などに自動的に消去されます。'
+                    message="ファイルが1つもない空のフォルダは、サーバーに保存されません。空のフォルダは、ファイル操作を行いやすくするためにブラウザの画面上でのみ存在する一時的なフォルダであり、ブラウザを閉じた際などに自動的に消去されます。"
                 />
                 <Input
                     ref={inputRef}
-                    placeholder='フォルダ名'
+                    placeholder="フォルダ名"
                     value={foldername}
                     onChange={e => setFoldername(e.target.value)}
                     onKeyDown={e => {
@@ -1830,7 +1830,7 @@ const CreateFolderModal: React.FC = () => {
                     }}
                 />
                 {foldernameError != null && (
-                    <Alert type='error' showIcon message={foldernameError} />
+                    <Alert type="error" showIcon message={foldernameError} />
                 )}
             </div>
         </Modal>
@@ -2159,7 +2159,7 @@ const NodeView: React.FC<{
                         textOverflow: 'ellipsis',
                     }}
                 >
-                    <Tooltip title={node.name} placement='bottom'>
+                    <Tooltip title={node.name} placement="bottom">
                         {node.name}
                     </Tooltip>
                 </div>

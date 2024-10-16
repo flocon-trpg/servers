@@ -17,7 +17,7 @@ export const StorybookProvider: React.FC<{
     roomClientContextValue: RoomClientContextValue | null;
     compact: boolean;
 }> = ({ children, urqlClient, roomClientContextValue, compact }) => {
-    const routerRef = React.useRef(createRouter({routeTree}));
+    const routerRef = React.useRef(createRouter({ routeTree }));
     const routerContextRef = React.useRef(getRouterContext());
     const queryClientRef = React.useRef(new QueryClient());
     const childrenWithRoomClient =
@@ -32,16 +32,16 @@ export const StorybookProvider: React.FC<{
     let result = (
         // このように RouterContext に router を設定しないと useNavigate() があるコンポーネントで失敗する
         <routerContextRef.current.Provider value={routerRef.current}>
-        <QueryClientProvider client={queryClientRef.current}>
-            <DndProvider backend={HTML5Backend}>
-                <AntdThemeConfigProvider compact={compact}>
-                    <App>
-                        <RoomGlobalStyle />
-                        {childrenWithRoomClient}
-                    </App>
-                </AntdThemeConfigProvider>
-            </DndProvider>
-        </QueryClientProvider>
+            <QueryClientProvider client={queryClientRef.current}>
+                <DndProvider backend={HTML5Backend}>
+                    <AntdThemeConfigProvider compact={compact}>
+                        <App>
+                            <RoomGlobalStyle />
+                            {childrenWithRoomClient}
+                        </App>
+                    </AntdThemeConfigProvider>
+                </DndProvider>
+            </QueryClientProvider>
         </routerContextRef.current.Provider>
     );
     if (urqlClient != null) {

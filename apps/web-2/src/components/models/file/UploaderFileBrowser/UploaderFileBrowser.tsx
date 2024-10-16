@@ -549,8 +549,8 @@ export const UploaderFileBrowser: React.FC<Props> = ({
             <FileBrowser
                 jotaiStore={jotaiStore}
                 height={height}
-                fileCreateLabel='ファイルをアップロード'
-                searchPlaceholder='ファイル名で検索'
+                fileCreateLabel="ファイルをアップロード"
+                searchPlaceholder="ファイル名で検索"
                 files={files}
                 fileTypes={{
                     fileTypes: [
@@ -733,7 +733,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
             />
             {firebaseStorageUploaderModalState && (
                 <Modal
-                    title='ファイルのアップロード'
+                    title="ファイルのアップロード"
                     open
                     onCancel={() => setFirebaseStorageUploaderModalState(undefined)}
                     footer={
@@ -757,7 +757,7 @@ export const UploaderFileBrowser: React.FC<Props> = ({
             )}
             {floconUploaderModalState && (
                 <Modal
-                    title='ファイルのアップロード'
+                    title="ファイルのアップロード"
                     open
                     onCancel={() => setFloconUploaderModalState(undefined)}
                     footer={

@@ -603,7 +603,7 @@ const selectedDicePiecesMenu = ({
             ...dicePiecesOnCursor.map(
                 ({ pieceId, piece, boardId }): ItemType => ({
                     key: pieceId + '@selected',
-                    label: <DicePieceValue.images state={piece} size={22} padding='6px 0 0 0' />,
+                    label: <DicePieceValue.images state={piece} size={22} padding="6px 0 0 0" />,
                     children: [
                         isMyCharacter(piece.ownerCharacterId)
                             ? {
