@@ -1,6 +1,5 @@
 import * as Doc from '@flocon-trpg/typed-document-node';
 import { loggerRef } from '@flocon-trpg/utils';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 import { Client, CombinedError } from 'urql';
 import { fromValue, never } from 'wonka';
@@ -8,6 +7,7 @@ import { IndexPage } from './IndexPage';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { createDummyUrqlOperation, createMockUrqlClient } from '@/mocks';
 import { withPromise } from '@/mocks/withPromise';
+import { Meta, StoryObj } from '@storybook/react';
 
 type Version = Doc.GetServerInfoQuery['result']['version'];
 
@@ -82,41 +82,47 @@ export const Default: React.FC<{ version: Version | 'error' | 'never' }> = ({ ve
     );
 };
 
-export default {
+const meta = {
     title: 'Pages/Index',
     component: Default,
     args: {
         version: { major: 0, minor: 7, patch: 100 },
     },
-} as ComponentMeta<typeof Default>;
+} satisfies Meta<typeof Default>;
 
-const Template: ComponentStory<typeof Default> = args => <Default {...args} />;
+export default meta;
 
-export const Loading = Template.bind({});
-Loading.args = {
+type Story = StoryObj<typeof meta>;
+
+export const Loading: Story ={
+args: {
     version: 'never',
-};
+}
+}; 
 
-export const GraphQLError = Template.bind({});
-GraphQLError.args = {
+export const GraphQLError : Story ={
+args: {
     version: 'error',
-};
+}
+}; 
 
-export const Prerelease = Template.bind({});
-Prerelease.args = {
+export const Prerelease : Story ={
+args: {
     version: {
         major: 0,
         minor: 7,
         patch: 100,
         prerelease: { type: Doc.PrereleaseType.Alpha, version: 1 },
     },
-};
+}
+}; 
 
-export const OutOfRange = Template.bind({});
-OutOfRange.args = {
+export const OutOfRange: Story ={
+    args: {
     version: {
         major: 1000,
         minor: 0,
         patch: 0,
     },
+    }
 };

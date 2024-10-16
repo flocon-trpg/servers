@@ -1,7 +1,7 @@
-import { ComponentMeta } from '@storybook/react';
 import React from 'react';
 import { Table, TableCombinedRow, TableHeader, TableRow } from './Table';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
+import { Meta } from '@storybook/react';
 
 export const Default: React.FC = () => {
     return (
@@ -23,7 +23,9 @@ export const Default: React.FC = () => {
     );
 };
 
-export default {
+const meta = {
     title: 'UI/Table',
     component: Default,
-} as ComponentMeta<typeof Default>;
+} satisfies Meta<typeof Default>;
+
+export default meta;

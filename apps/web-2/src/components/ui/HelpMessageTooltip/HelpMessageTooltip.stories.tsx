@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import React, { PropsWithChildren } from 'react';
 import { HelpMessageTooltip, Props } from './HelpMessageTooltip';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
@@ -12,7 +12,7 @@ const Main: React.FC<Props & { compact: boolean } & PropsWithChildren> = props =
     );
 };
 
-export default {
+const meta = {
     title: 'UI/HelpMessageTooltip',
     component: Main,
     args: {
@@ -20,30 +20,36 @@ export default {
         children: 'Children',
         compact: false,
     },
-} as ComponentMeta<typeof Main>;
+} satisfies Meta<typeof Main>;
 
-const Template: ComponentStory<typeof Main> = args => <Main {...args} />;
+export default meta;
 
-export const Default = Template.bind({});
+type Story = StoryObj<typeof meta>;
 
-export const Compact = Template.bind({});
-Compact.args = {
+export const Default: Story = ({});
+
+export const Compact: Story = ({
+    args:{
     compact: true,
-};
+    }
+});
 
-export const NoTitle = Template.bind({});
-NoTitle.args = {
+export const NoTitle: Story = ({
+    args: {
     title: undefined,
     children: 'No title',
-};
+    }
+});
 
-export const NoChildren = Template.bind({});
-NoChildren.args = {
+export const NoChildren: Story = ({
+    args: {
     children: undefined,
-};
+    }
+});
 
-export const Empty = Template.bind({});
-Empty.args = {
+export const Empty: Story = ({
+    args: {
     title: undefined,
     children: undefined,
-};
+    }
+});

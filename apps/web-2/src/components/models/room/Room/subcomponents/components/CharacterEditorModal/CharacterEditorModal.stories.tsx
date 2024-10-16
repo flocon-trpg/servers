@@ -1,11 +1,11 @@
 import { ParticipantRole } from '@flocon-trpg/core';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { useSetAtom } from 'jotai/react';
 import React from 'react';
 import { CharacterEditorModal, characterEditorModalAtom } from './CharacterEditorModal';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { anotherPlayerCharacterId1, myRichCharacterId, mySimpleCharacterId } from '@/mocks';
+import { Meta, StoryObj } from '@storybook/react';
 
 export const Player: React.FC<{ myParticipantRole: ParticipantRole; characterStateId: string }> = ({
     myParticipantRole,
@@ -33,28 +33,33 @@ export const Player: React.FC<{ myParticipantRole: ParticipantRole; characterSta
     );
 };
 
-export default {
+const meta = {
     title: 'models/room/Room/CharacterEditorModal',
     component: Player,
     args: {
         myParticipantRole: 'Player',
         characterStateId: myRichCharacterId,
     },
-} as ComponentMeta<typeof Player>;
+} satisfies Meta<typeof Player>;
 
-const Template: ComponentStory<typeof Player> = args => <Player {...args} />;
+export default meta;
 
-export const Spectator = Template.bind({});
-Spectator.args = {
+type Story = StoryObj<typeof meta>;
+
+export const Spectator: Story = ({
+    args: {
     myParticipantRole: 'Spectator',
-};
+    }
+});
 
-export const SimpleCharacter = Template.bind({});
-SimpleCharacter.args = {
+export const SimpleCharacter: Story = ({
+    args: {
     characterStateId: mySimpleCharacterId,
-};
+    }
+});
 
-export const AnotherPlayerCharacter = Template.bind({});
-AnotherPlayerCharacter.args = {
+export const AnotherPlayerCharacter: Story = ({
+    args: {
     characterStateId: anotherPlayerCharacterId1,
-};
+    }
+});

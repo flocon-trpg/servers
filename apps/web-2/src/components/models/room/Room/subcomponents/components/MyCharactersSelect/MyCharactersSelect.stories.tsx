@@ -1,10 +1,10 @@
 import { loggerRef } from '@flocon-trpg/utils';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 import { MyCharactersSelect } from './MyCharactersSelect';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { myRichCharacterId } from '@/mocks';
+import { Meta, StoryObj } from '@storybook/react';
 
 export const Default: React.FC<{
     characterIdMode: 'found' | 'notFound' | 'undefined';
@@ -37,9 +37,7 @@ export const Default: React.FC<{
     );
 };
 
-const Template: ComponentStory<typeof Default> = args => <Default {...args} />;
-
-export default {
+const meta = {
     title: 'models/room/Room/MyCharactersSelect',
     component: Default,
     args: {
@@ -47,19 +45,26 @@ export default {
         readonly: false,
         showAlert: true,
     },
-} as ComponentMeta<typeof Default>;
+} satisfies Meta<typeof Default>;
 
-export const Readonly = Template.bind({});
-Readonly.args = {
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+export const Readonly: Story = ({
+    args: {
     readonly: true,
-};
+    }
+});
 
-export const NotFound = Template.bind({});
-NotFound.args = {
+export const NotFound: Story = ({
+    args: {
     characterIdMode: 'notFound',
-};
+    }
+});
 
-export const Undefined = Template.bind({});
-Undefined.args = {
+export const Undefined: Story = ({
+    args: {
     characterIdMode: 'undefined',
-};
+    }
+});

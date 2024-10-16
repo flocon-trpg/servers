@@ -1,9 +1,9 @@
-import { ComponentMeta } from '@storybook/react';
 import React from 'react';
 import { useStringPieceEditor } from './StringPieceEditor';
 import { StorybookProvider } from '@/components/behaviors/StorybookProvider';
 import { useSetupStorybook } from '@/hooks/useSetupStorybook';
 import { defaultBoardId, stringPieceKey1 } from '@/mocks';
+import { Meta } from '@storybook/react';
 
 const Core: React.FC = () => {
     const stringPieceEditor = useStringPieceEditor({
@@ -24,7 +24,9 @@ export const Update: React.FC = () => {
     );
 };
 
-export default {
+const meta = {
     title: 'models/room/Room/StringPieceEditor',
     component: Update,
-} as ComponentMeta<typeof Update>;
+} satisfies Meta<typeof Update>;
+
+export default meta;
