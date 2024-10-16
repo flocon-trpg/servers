@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./src/*"]
+        },
+
+    /* Linting */
+    "strict": true,
+    // TODO: ビルドを通すためにとりあえず無効化している。もしくは可能であれば eslint に任せてもいいかも
+    //"noUnusedLocals": true,
+    //"noUnusedParameters": true,
+    //"noFallthroughCasesInSwitch": true,
+    }
+}
